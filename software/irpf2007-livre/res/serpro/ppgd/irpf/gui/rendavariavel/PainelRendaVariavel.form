@@ -1,0 +1,1037 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.ButtonGroup" name="btnGroup">
+    </Component>
+  </NonVisualComponents>
+  <AuxValues>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="2"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Component id="jPanel1" alignment="0" pref="529" max="32767" attributes="0"/>
+          <Component id="jPanel2" alignment="0" pref="529" max="32767" attributes="0"/>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace pref="136" max="32767" attributes="0"/>
+              <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="91" max="-2" attributes="0"/>
+              <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="95" max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace pref="321" max="32767" attributes="0"/>
+              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="156" max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane1" pref="499" max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jPanel4" alignment="0" pref="519" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel29" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace pref="174" max="32767" attributes="0"/>
+                              <Component id="jEditValor42" min="-2" pref="122" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel28" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace pref="133" max="32767" attributes="0"/>
+                              <Component id="jEditValor41" min="-2" pref="122" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel26" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace pref="233" max="32767" attributes="0"/>
+                              <Component id="jEditValor39" min="-2" pref="122" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel27" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace pref="201" max="32767" attributes="0"/>
+                              <Component id="jEditValor40" min="-2" pref="122" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="jLabel30" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel31" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel32" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace pref="147" max="32767" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="jEditValor36" alignment="0" max="32767" attributes="1"/>
+                                  <Component id="jEditValor35" alignment="0" max="32767" attributes="1"/>
+                                  <Component id="jEditValor43" alignment="0" min="-2" pref="122" max="-2" attributes="1"/>
+                              </Group>
+                          </Group>
+                      </Group>
+                      <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel2" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                      <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane1" min="-2" pref="141" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel26" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor39" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel27" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor40" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel28" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor41" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel29" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor42" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel30" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor43" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jEditValor35" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel31" alignment="1" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jEditValor36" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel32" alignment="1" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Container class="javax.swing.JPanel" name="jPanel1">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+        <Property name="horizontalGap" type="int" value="0"/>
+        <Property name="verticalGap" type="int" value="1"/>
+      </Layout>
+      <SubComponents>
+        <Container class="javax.swing.JToolBar" name="jToolBar1">
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton1">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="JAN"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[51, 23]"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton1,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton2">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="FEV"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton2,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton3">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="MAR"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton3,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton4">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="ABR"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton4,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton5">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="MAI"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton5,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton6">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="JUN"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton6,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton7">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="JUL"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton7,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton8">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="AGO"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton8,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton9">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="SET"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton9,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton10">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="OUT"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton10,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton11">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="NOV"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton11,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="jToggleButton12">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="btnGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="DEZ"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
+                    <BevelBorder/>
+                  </Border>
+                </Property>
+                <Property name="iconTextGap" type="int" value="1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mouseClicked"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jToggleButton12,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+          </SubComponents>
+        </Container>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPanel" name="jPanel2">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JLabel" name="jLabel1">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="GANHOS L&#xcd;QUIDOS OU PERDAS -"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblMes">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="JANEIRO"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+          </AuxValues>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Tipo de Mercado/Ativo"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Opera&#xe7;&#xf5;es"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Comuns"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel5">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Day-Trade"/>
+      </Properties>
+    </Component>
+    <Container class="javax.swing.JPanel" name="jPanel4">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+      <SubComponents>
+        <Component class="javax.swing.JLabel" name="jLabel6">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="CONSOLIDA&#xc7;&#xc3;O DO M&#xca;S"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JScrollPane" name="jScrollPane1">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.BevelBorderInfo">
+            <BevelBorder bevelType="1"/>
+          </Border>
+        </Property>
+      </Properties>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Container class="javax.swing.JPanel" name="jPanel3">
+
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jLabel7" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel8" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel9" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel10" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel11" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel12" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel13" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel14" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel15" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel16" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel17" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel18" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel19" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel20" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel21" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel22" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel23" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel24" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel25" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace pref="27" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="jEditValor2" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor4" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor6" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor8" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor10" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor12" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor14" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor16" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor18" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor20" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor22" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor24" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor26" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor28" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor30" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor32" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor34" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor38" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jTextField2" min="-2" pref="102" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="jEditValor1" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor3" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor5" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor7" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor9" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor11" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor13" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor15" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor17" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor19" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor21" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor23" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor25" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor27" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor29" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor31" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor33" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                              <Component id="jEditValor37" alignment="1" min="-2" pref="122" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jTextField1" min="-2" pref="102" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor1" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor2" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel7" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor3" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor4" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel8" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor5" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor6" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel9" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor7" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor8" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel10" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor9" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor10" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel11" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor11" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor12" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel12" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor13" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor14" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel13" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor15" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor16" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel14" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor17" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor18" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel15" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor19" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor20" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel16" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor21" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor22" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel17" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jLabel18" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor24" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor23" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor26" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor25" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel19" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jLabel20" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor28" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor27" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor30" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor29" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel21" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor32" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor31" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel22" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor34" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor33" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel23" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Component id="jLabel24" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                              <Component id="jTextField2" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jTextField1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jEditValor38" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jEditValor37" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabel25" alignment="1" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace pref="13" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JLabel" name="jLabel7">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado &#xe0; vista - a&#xe7;&#xf5;es"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel8">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado &#xe0; vista - ouro"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel9">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado &#xe0; vista - ouro at. fin. fora bolsa"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel10">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado op&#xe7;&#xf5;es - a&#xe7;&#xf5;es"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel11">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado op&#xe7;&#xf5;es - ouro"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel12">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado op&#xe7;&#xf5;es - fora de bolsa"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel13">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado op&#xe7;&#xf5;es - outros"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel14">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado futuro - d&#xf3;lar dos EUA"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel15">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado futuro - &#xed;ndices"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel16">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado futuro - juros"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel17">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado futuro - outros"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel18">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado a termo - a&#xe7;&#xf5;es/ouro"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel19">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Mercado a termo - outros"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel20">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="RESULTADO L&#xcd;QUIDO DO M&#xca;S"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel21">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Resultado negativo at&#xe9; o m&#xea;s anterior"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel22">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="BASE DE C&#xc1;LCULO DO IMPOSTO"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel23">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Preju&#xed;zo a compensar"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel24">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Al&#xed;quota do imposto"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel25">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="IMPOSTO DEVIDO"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor1">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor2">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor3">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor4">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor5">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor6">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor7">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor8">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor9">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor10">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor11">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor12">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor13">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor14">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor15">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor16">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor17">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor18">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor19">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor20">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor21">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor22">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor23">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor24">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor25">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor26">
+              <Properties>
+                <Property name="aceitaNumerosNegativos" type="boolean" value="true"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor27">
+              <Properties>
+                <Property name="aceitaFoco" type="boolean" value="false"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor28">
+              <Properties>
+                <Property name="aceitaFoco" type="boolean" value="false"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor29">
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor30">
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor31">
+              <Properties>
+                <Property name="aceitaFoco" type="boolean" value="false"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor32">
+              <Properties>
+                <Property name="aceitaFoco" type="boolean" value="false"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor33">
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor34">
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor37">
+              <Properties>
+                <Property name="aceitaFoco" type="boolean" value="false"/>
+              </Properties>
+            </Component>
+            <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor38">
+              <Properties>
+                <Property name="aceitaFoco" type="boolean" value="false"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="jTextField1">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="horizontalAlignment" type="int" value="0"/>
+                <Property name="text" type="java.lang.String" value="20%"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.BevelBorderInfo">
+                    <BevelBorder bevelType="1"/>
+                  </Border>
+                </Property>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jTextField1,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JTextField" name="jTextField2">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="horizontalAlignment" type="int" value="0"/>
+                <Property name="text" type="java.lang.String" value="15%"/>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.BevelBorderInfo">
+                    <BevelBorder bevelType="1"/>
+                  </Border>
+                </Property>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="UtilitariosGUI.estiloFonte(jTextField2,java.awt.Font.BOLD);"/>
+              </AuxValues>
+            </Component>
+          </SubComponents>
+        </Container>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JLabel" name="jLabel26">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Total do imposto devido"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel27">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="IR fonte de Day-Trade no m&#xea;s"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel28">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="IR fonte de Day-Trade nos meses anteriores"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel29">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="IR fonte de Day-Trade a compensar"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel30">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Imp. renda na fonte (Lei n&#xba; 11.033/2004)"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor39">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="estiloFonte" type="int" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor40">
+      <Properties>
+        <Property name="estiloFonte" type="int" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor41">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="estiloFonte" type="int" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor42">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="estiloFonte" type="int" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor43">
+      <Properties>
+        <Property name="estiloFonte" type="int" value="0"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel31">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Imposto a pagar"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor35">
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel32">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Imposto pago"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor36">
+    </Component>
+  </SubComponents>
+</Form>

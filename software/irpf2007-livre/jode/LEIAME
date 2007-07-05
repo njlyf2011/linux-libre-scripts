@@ -1,0 +1,7 @@
+Aqui tem um patch pro jode, que usei pra descompilar as coisas,
+e uns scripts pra ajustar alguns fontes que o jode não descompilava
+com perfeição.
+
+Uma meia dúzia de arquivos tinha uns padrões de exceções mais
+complicados que geravam uns métodos que não compilavam direito e
+precisavam ser reestruturados.  Esses eu arrumei na mão.

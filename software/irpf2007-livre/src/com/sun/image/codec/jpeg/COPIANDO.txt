@@ -1,0 +1,7 @@
+Os stubs neste diretório foram escritos por Alexandre Oliva.
+
+Provavelmente são pequenos e triviais o suficiente para seu uso não
+caracterizar violação de direito autoral.
+
+De todo modo, deixo permissão explícita para fazer o que quiser com
+eles.

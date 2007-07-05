@@ -1,0 +1,555 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!DOCTYPE index PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Index Version 1.0//EN" "http://java.sun.com/products/javahelp/index_1_0.dtd">
+<index version="1.0">
+ <indexitem text="...agendar pagamento em débito automático" target="_agendar_pagamento_em_debito_automatico" />
+ <indexitem text="1.Rendimentos líquidos:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="1.Rendimentos líquidos:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="2.Outros rendimentos sujeitos à tributação exclusiva/definitiva não especificados anteriormente:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="2.Outros rendimentos sujeitos à tributação exclusiva/definitiva não especificados anteriormente:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Ações e:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Ações e:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Ações e outros:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Ações e outros:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Acordo ou decisão:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Acordo ou decisão:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Adquiridos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Adquiridos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Advogado:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Advogado:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Alienação:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Alienação:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Alienação:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Alienação:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Alienação:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Alienação:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Aluguel:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Aluguel:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="América:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="América:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="América fixado:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="América fixado:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Anual:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Anual:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Ao:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Ao:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Aplicações financeiras:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Aplicações financeiras:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Aplicações financeiras e os ganhos decorrentes:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Aplicações financeiras e os ganhos decorrentes:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Até o:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Até o:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Até o limite garantido pela legislação trabalh" target="IsentosDQ" />
+ <indexitem text="Até o limite garantido pela legislação trabalhista ou por dissídio coletivo e convenções trabalhistas homologadas pela Justiça" target="IsentosT" />
+ <indexitem text="Atenção:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Atenção:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Atenção:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Atenção:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Atenção:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Bem assim" target="RendexteriorD" />
+ <indexitem text="Bem como" target="Rendexterior" />
+ <indexitem text="Bolsas:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Bolsas:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Brasil para o último dia útil:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Brasil para o último dia útil:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Brasil quando o contribuinte faz:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Brasil quando o contribuinte faz:Rendimentos Recebidos do Exterior" target="Rendexterior" >
+  <indexitem text="opção pela declaração simplificada:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+  <indexitem text="opção pela declaração simplificada:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+  </indexitem>
+ <indexitem text="Caderneta:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Caderneta:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Capitalganhoscapital e Renda Variávelrendavariavel não devem ser informados neste campo:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Capitalganhoscapital e Renda Variávelrendavariavel não devem ser informados neste campo:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Carga e:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Carga e:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Cargas e:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Cargas e:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Carnê-leão e Imposto Complementar:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Carnê-leão e Imposto Complementar:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="Carnê-leão pago e o" target="carneleao" />
+ <indexitem text="Carnê-leão pago pelo" target="carneleaoD" />
+ <indexitem text="CarneLeaoDep" target="CarneLeaoDep" />
+ <indexitem text="codigosPagamentos" target="codigosPagamentos" />
+ <indexitem text="Comércio ou:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Comércio ou:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Como trabalho arquitetônico:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Como trabalho arquitetônico:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Comparativo" target="Comparativo" />
+ <indexitem text="Condomínio:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Condomínio:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Considera-se rendimento tributável:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Considera-se rendimento tributável:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Consulte:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Consulte:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Contador:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Contador:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Contribuição Patronal" target="contribuicao_patronal" />
+ <indexitem text="Contribuições efetuadas:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Contribuições efetuadas:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Correspondente à indenização paga por pessoa jurídica" target="IsentosDQ" >
+  <indexitem text="título:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+  <indexitem text="título:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+  </indexitem>
+ <indexitem text="Cujo:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Cujo:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Cujo ônus tenha sido:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Cujo ônus tenha sido:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Cumprimento:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Cumprimento:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="D:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="D:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Décimo-Terceiro Salário:Décimo-terceiro Salário Recebido pelo Titular" target="TresimoT" />
+ <indexitem text="Décimo-Terceiro Salário:Décimo-terceiro Salário Recebido pelos Dependentes" target="TresimoD" />
+ <indexitem text="Décimo-terceiro salário recebido" target="TresimoT" />
+ <indexitem text="Décimo terceiro salário recebidos pelos dependentes" target="TresimoD" />
+ <indexitem text="Declaração:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Declaração:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Declaração Completa:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Declaração Completa:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Declaração Completa:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Declaração Completa:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Declaração Simplificada:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Declaração Simplificada:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="Declaração Simplificada:Demais Rendimentos e Imposto Pago do Titular" target="demaisrendimentosT" />
+ <indexitem text="Declaração Simplificada:Demais Rendimentos e Imposto Pago dos Dependentes" target="demaisrendimentosD" />
+ <indexitem text="Declaração Simplificada:Rendimentos Tributáveis Recebidos de Pessoas Jurídicas" target="RendimentosPJS" >
+  <indexitem text="não poderá utilizar:Carnê-leão e imposto complementar" target="carneleao" />
+  <indexitem text="não poderá utilizar:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+  </indexitem>
+ <indexitem text="Declarante qu" target="RendimentopfD" />
+ <indexitem text="Declarante que não exerça habitu" target="Rendimentopf" />
+ <indexitem text="Declarante que não exerça habitualmente" target="RendimentopfD" >
+  <indexitem text="profissão:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+  <indexitem text="profissão:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+  </indexitem>
+ <indexitem text="Declarantes:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Declarantes:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Decorrente:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Decorrente:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Demais Rendimentos e Imposto Pago do Titular" target="demaisrendimentosT" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Demais Rendimentos e Imposto Pago dos Dependentes" target="demaisrendimentosD" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Décimo-terceiro Salário Recebido pelo Titular" target="TresimoT" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Décimo-terceiro Salário Recebido pelos Dependentes" target="TresimoD" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Rendimentos Sujeitos à Tributação Exclusiva/Definitiva dos Dependentes – Quadro Auxiliar" target="ExclusivaDQ" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Demais Rendimentos e Imposto Pago:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Demonstrativos:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Demonstrativos:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Dentista:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Dentista:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Dependente" target="carneleaoD" />
+ <indexitem text="Dependentes" target="demaisrendimentosD" />
+ <indexitem text="Despesas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Despesas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Didáticas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Didáticas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Dinheiro:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Dinheiro:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Direitos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Direitos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Doações a Campanhas Eleitorais" target="doacoes_campanhas" />
+ <indexitem text="Doença:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Doença:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Dólar:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Dólar:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="E:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="E:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="E informe o resultado nesta linha" target="carneleaoD" />
+ <indexitem text="E não devem ser informados neste campo" target="IsentosT" />
+ <indexitem text="E o" target="carneleaoD" />
+ <indexitem text="E rendimentos decorrentes:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="E rendimentos decorrentes:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Emolumentos e custas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Emolumentos e custas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Empréstimos concedidos:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Empréstimos concedidos:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Endereço - Exterior" target="Idendereco_Exterior" />
+ <indexitem text="Escritor:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Escritor:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Escultor:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Escultor:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Especificada:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Especificada:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Esta declaração é retificadora?" target="Esta_declaração_é_retificadora" />
+ <indexitem text="Estados Unidos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Estados Unidos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Exceto Décimo-Terceiro Salário:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Exceto Décimo-Terceiro Salário:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Exceto Décimo terceiro Salário" target="ExclusivaDQ" />
+ <indexitem text="Exceto o décimo terceiro salário" target="ExclusivaDQ" />
+ <indexitem text="Exterior:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Exterior:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="FGTS:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="FGTS:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Ficha:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Ficha:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Ficha Dependentes" target="IsentosDQ" />
+ <indexitem text="Ficha Rendimentos Tributáveis Recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Ficha Rendimentos Tributáveis Recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Ficha TransportesTransportes:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Ficha TransportesTransportes:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" >
+  <indexitem text="uma vez que são transportados automaticamente pelo programa para:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+  <indexitem text="uma vez que são transportados automaticamente pelo programa para:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+  <indexitem text="Para mais esclarecimentos consulte:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+  <indexitem text="Para mais esclarecimentos consulte:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+  <indexitem text="uma vez que são transportados automaticamente pelo programa para:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+  <indexitem text="uma vez que são transportados automaticamente pelo programa para:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+  </indexitem>
+ <indexitem text="FIF:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="FIF:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="FII" target="FII" />
+ <indexitem text="FII Alienação" target="FII_Alienação" />
+ <indexitem text="FII Conceito" target="FII_Conceito" />
+ <indexitem text="FII Ganhos Liquidos" target="FII_Ganhos_Liquidos" />
+ <indexitem text="FII Imposto Devido" target="FII_Imposto_Devido" />
+ <indexitem text="FII Instrucoes" target="FII_Instrucoes" />
+ <indexitem text="FII Isencao" target="FII_Isencao" />
+ <indexitem text="FII Liquido" target="FII_Liquido" />
+ <indexitem text="FII Lucros" target="FII_Lucros" />
+ <indexitem text="FII Negativo" target="FII_Negativo" />
+ <indexitem text="FII Procedimentos" target="FII_Procedimentos" />
+ <indexitem text="Fixado pela autoridade monetária:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Fixado pela autoridade monetária:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Fontes situadas:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Fontes situadas:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Fruição e exploração:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Fruição e exploração:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Fundo:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Fundo:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Futuros ou assemelhadas:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Futuros ou assemelhadas:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Ganho:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Ganho:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Ganho:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Ganhos:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Ganhos:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Igual ou:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Igual ou:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Imóveis e:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Imóveis e:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Imóvel:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Imóvel:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Imp. Renda na fonte Lei nº 11.033  de 2004" target="Imp_Renda_na_fonte_Lei_n_11_033_de_2004_" />
+ <indexitem text="Importâncias recebidas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Importâncias recebidas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Imposto:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Imposto:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Imposto complementar pago e informe o resultado nesta linha" target="carneleao" />
+ <indexitem text="Imposto complementar pago pelo" target="carneleaoD" />
+ <indexitem text="ImpRendaFonteLinha6Ttular" target="ImpRendaFonteLinha6Ttular" />
+ <indexitem text="Incentivo à adesão:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Incentivo à adesão:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" >
+  <indexitem text="Programas:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+  <indexitem text="Programas:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+  </indexitem>
+ <indexitem text="Indústria:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Indústria:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Informações sobre Acessibilidade" target="Informações_sobre_Acessibilidade" />
+ <indexitem text="Informe nesta linha o:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Informe nesta linha o:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Informe neste campo o somatório:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Informe neste campo o somatório:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Informe neste campo o somatório:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Informe neste campo o somatório:Rendimentos Sujeitos à Tributação Exclusiva/Definitiva dos Dependentes – Quadro Auxiliar" target="ExclusivaDQ" />
+ <indexitem text="Informe neste campo os rendimentos recebidos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Informe neste campo os rendimentos recebidos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Informe neste campo somente o" target="TresimoT" />
+ <indexitem text="Informe neste campo somente o somatório" target="TresimoD" />
+ <indexitem text="Informe também neste campo os lucros e dividendos distribuídos" target="Rendexterior" />
+ <indexitem text="Investimento financeiro:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Investimento financeiro:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Juros recebidos:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Juros recebidos:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Justiça:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Justiça:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Leiloeiro:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Leiloeiro:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Linh" target="IsentosT" />
+ <indexitem text="Linha 01:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Linha 01:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Linha 02:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Linha 02:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="Linha 04:Décimo-terceiro Salário Recebido pelo Titular" target="TresimoT" />
+ <indexitem text="Linha 04:Décimo-terceiro Salário Recebido pelos Dependentes" target="TresimoD" />
+ <indexitem text="Linha 05:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Linha 05:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Linha 05:Rendimentos Sujeitos à Tributação Exclusiva/Definitiva dos Dependentes – Quadro Auxiliar" target="ExclusivaDQ" />
+ <indexitem text="Liquidação ou resgate:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Liquidação ou resgate:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Líquido" target="TresimoT" />
+ <indexitem text="Lucro:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Lucro:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Lucro:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Lucro:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Máquina:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Máquina:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Mensalão:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Mensalão:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="Mês:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Mês:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Mesmo que o pagamento tenha sido feito por intermédio:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Mesmo que o pagamento tenha sido feito por intermédio:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Mínimo:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Mínimo:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Moeda estrangeira:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Moeda estrangeira:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Móveis:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Móveis:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Não devem ser informados neste campo" target="IsentosDQ" />
+ <indexitem text="Não especificados:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Não especificados:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Não inclua nesta coluna os rendimentos auferidos" target="RendexteriorD" />
+ <indexitem text="Não inclua os rendimentos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Não inclua os rendimentos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Não pode ser compensado:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Não pode ser compensado:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Não poderá utilizar:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Não poderá utilizar:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" >
+  <indexitem text="declaração simplificada:Carnê-leão e imposto complementar" target="carneleao" />
+  <indexitem text="declaração simplificada:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+  </indexitem>
+ <indexitem text="Nº do recibo da delcaração anterior do exercício de 2007" target="recibo_delcaração2007" />
+ <indexitem text="Nº DO RECIBO DA ÚLTIMA DECLARAÇÃO ENTREGUE DO EXERCÍCIO DE 2005" target="Recibo_ultima_declaracao_2005" />
+ <indexitem text="O:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="O:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="O contribuinte que desejar compensar imposto pago:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="O contribuinte que desejar compensar imposto pago:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="O endereço atual é diferente do constante na última delcaração?" target="endereço_atual_diferente" />
+ <indexitem text="O imposto devido:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="O imposto devido:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="O imposto pago:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="O imposto pago:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="O não deve ser informado neste campo:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="O não deve ser informado neste campo:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="O programa transporta o:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="O programa transporta o:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Obras artísticas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Obras artísticas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Observados os acordos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Observados os acordos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Ocupação:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Ocupação:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Ocupação e prestação:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Ocupação e prestação:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" >
+  <indexitem text="assim considerados:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+  <indexitem text="assim considerados:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+  </indexitem>
+ <indexitem text="Opção pela declaração simplificada:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Opção pela declaração simplificada:Rendimentos Recebidos do Exterior" target="Rendexterior" >
+  <indexitem text="Brasil quando o contribuinte faz:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+  <indexitem text="Brasil quando o contribuinte faz:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+  </indexitem>
+ <indexitem text="Origem:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Origem:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Os rendimentos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Os rendimentos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Os rendimentos sujeitos à tributação exclusiva/definitiva provenientes:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Os rendimentos sujeitos à tributação exclusiva/definitiva provenientes:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Ou:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Ou:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Ou:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Ou:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Ou direitos:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Ou direitos:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Ou direitos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Ou direitos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Ou direitos adquiridos:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Ou direitos adquiridos:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Ou reciprocidade:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Ou reciprocidade:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Outros ativos financeiros:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Outros ativos financeiros:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Para compra:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Para compra:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Para mais esclarecimentos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Para mais esclarecimentos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Para mais esclarecimentos consulte" target="IsentosDQ" />
+ <indexitem text="Para mais esclarecimentos consulte ficha:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Para mais esclarecimentos consulte ficha:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" >
+  <indexitem text="ficha:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+  <indexitem text="ficha:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+  </indexitem>
+ <indexitem text="Para o Resumo:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Para o Resumo:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Passageiros ou:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Passageiros ou:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Pelo Banco Central:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Pelo Banco Central:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Pelo seu:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Pelo seu:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Pequeno:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Pequeno:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Período:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Período:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Pessoa física e" target="RendimentopfD" >
+  <indexitem text="empréstimos concedidos:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+  <indexitem text="empréstimos concedidos:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+  </indexitem>
+ <indexitem text="Pessoa Física/Exterior:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Pessoa Física/Exterior:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Pessoas físicas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Pessoas físicas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Pessoas físicas:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Pessoas físicas:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Pessoas físicas e:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Pessoas físicas e:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Pessoas físicas relativos" target="RendimentopfD" />
+ <indexitem text="Pessoas Jurídicas" target="RendimentosPJS" />
+ <indexitem text="Pintor:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Pintor:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="PJ pelo Titular:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="PJ pelo Titular:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="PJ pelo Titular:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Pois é calculado pelo programa:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Pois é calculado pelo programa:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Por mês:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Por mês:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Prazo ou:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Prazo ou:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Preenchimento:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Preenchimento:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Prim" target="Rendexterior" />
+ <indexitem text="Primeira quinzena" target="RendexteriorD" />
+ <indexitem text="Problemas" target="Problemas" />
+ <indexitem text="Profissão:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Profissão:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" >
+  <indexitem text="declarante que não exerça habitualmente:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+  <indexitem text="declarante que não exerça habitualmente:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+  </indexitem>
+ <indexitem text="Programas" target="IsentosT" />
+ <indexitem text="Projetos técnicos:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Projetos técnicos:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Propriedade:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Propriedade:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Quadros de Abertura" target="Quadros_de_Abertura" />
+ <indexitem text="Qualquer outro mercado:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Qualquer outro mercado:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Quando:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Quando:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Quando o veículo ou:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Quando o veículo ou:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Que devem ser informados:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Que devem ser informados:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Que o contribuinte tenha completado 65 anos:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Que o contribuinte tenha completado 65 anos:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Reais:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Reais:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Reais mediante utilização:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Reais mediante utilização:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Recebidos:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Recebidos pelo próprio autor:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Recebidos pelo próprio autor:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Recebimento:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Recebimento:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Redução" target="IsentosDQ" />
+ <indexitem text="Reforma ou pensão:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Reforma ou pensão:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Renda:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Renda:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Renda fixa:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Renda fixa:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Rendimento:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Rendimento:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Rendimento:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Rendimento:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Rendimento decorrente:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Rendimento decorrente:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Rendimentos:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Rendimentos:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Rendimentos Isentos e Não-Tributáveis:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Rendimentos Isentos e Não-Tributáveis:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Rendimentos isentos e não-tributáveis recebidos pelos dependentes relacionados pelo contribuinte" target="IsentosDQ" />
+ <indexitem text="Rendimentos recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Rendimentos recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Rendimentos Sujeitos à Tributação Exclusiva/Definitiva:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Rendimentos Sujeitos à Tributação Exclusiva/Definitiva:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Rendimentos Sujeitos à Tributação Exclusiva/Definitiva Dos Dependentes" target="ExclusivaDQ" />
+ <indexitem text="Rendimentos Tributáveis Recebidos:Rendimentos Tributáveis Recebidos de Pessoas Jurídicas" target="RendimentosPJS" />
+ <indexitem text="Rendimentos Tributáveis Recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Rendimentos Tributáveis Recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Representações diplomáticas e organismos internacionais:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Representações diplomáticas e organismos internacionais:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="S" target="carneleaoD" />
+ <indexitem text="São rendimentos isentos ou não-tributáveis:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="São rendimentos isentos ou não-tributáveis:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Seguida:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Seguida:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Seguintes rendimentos:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Seguintes rendimentos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Seguintes rendimentos recebidos pelos dependentes" target="RendtributaveisD" />
+ <indexitem text="Seguintes rendimentos sujeitos à tributação exclusiva/definitiva:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Seguintes rendimentos sujeitos à tributação exclusiva/definitiva:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Serventuários:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Serventuários:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Serviço ou moléstia profissional" target="IsentosT" />
+ <indexitem text="Sua propriedade" target="IsentosT" />
+ <indexitem text="Sublocação:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Sublocação:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Tais como:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Tais como:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Tais como:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Tais como:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Terraplenagem:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Terraplenagem:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Terraplenagem e:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Terraplenagem e:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Titular:Carnê-leão e imposto complementar" target="carneleao" />
+ <indexitem text="Titular:Carnê-leão e imposto complementar dos dependentes" target="carneleaoD" />
+ <indexitem text="Titular:Demais Rendimentos e Imposto Pago do Titular" target="demaisrendimentosT" />
+ <indexitem text="Titular:Décimo-terceiro Salário Recebido pelo Titular" target="TresimoT" />
+ <indexitem text="Titular:Décimo-terceiro Salário Recebido pelos Dependentes" target="TresimoD" />
+ <indexitem text="Titular:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Titular:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Titular:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+ <indexitem text="Titular:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Titular:Rendimentos Sujeitos à Tributação Exclusiva/Definitiva dos Dependentes – Quadro Auxiliar" target="ExclusivaDQ" />
+ <indexitem text="Titular:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Titular:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Título:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Título:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Título:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Título:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Todos os r recebidos pelos dependentes" target="ExclusivaDQ" />
+ <indexitem text="Trabalho:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Trabalho:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Trabalho e:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Trabalho e:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" >
+  <indexitem text="indenização e/ou aviso prévio não trabalhado pagos por despedida ou rescisão:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+  <indexitem text="indenização e/ou aviso prévio não trabalhado pagos por despedida ou rescisão:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+  </indexitem>
+ <indexitem text="Trator:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Trator:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Uma vez que são transportados automaticamente pelo programa para:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+ <indexitem text="Uma vez que são transportados automaticamente pelo programa para:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" >
+  <indexitem text="ficha TransportesTransportes:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="ImpRendaFonteLinha6" />
+  <indexitem text="ficha TransportesTransportes:Rendimentos Sujeitos à Tributação Exclusiva do Titular" target="exclusivaT" />
+  </indexitem>
+ <indexitem text="Unitário" target="IsentosT" />
+ <indexitem text="Urbanísticas:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Urbanísticas:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Uso:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Uso:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+ <indexitem text="Valores:Rendimentos Recebidos do Exterior" target="RendexteriorD" />
+ <indexitem text="Valores:Rendimentos Recebidos do Exterior" target="Rendexterior" />
+ <indexitem text="Valores líquidos" target="TresimoD" />
+ <indexitem text="Valores recebidos:Rendimentos Isentos e Não-Tributáveis do Dependente – Quadro auxiliar" target="IsentosDQ" />
+ <indexitem text="Valores recebidos:Rendimentos Isentos e Não-Tributáveis do Titular" target="IsentosT" />
+ <indexitem text="Venda" target="IsentosT" />
+ <indexitem text="Veterinário:Rendimentos Recebidos de Pessoas Físicas" target="RendimentopfD" />
+ <indexitem text="Veterinário:Rendimentos Recebidos de Pessoas Físicas" target="Rendimentopf" />
+ <indexitem text="Vínculo empregatício" target="RendimentopfD" />
+ <indexitem text="Vínculo empregatício recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="RendtributaveisD" />
+ <indexitem text="Vínculo empregatício recebidos:Total dos Rendimentos Tributáveis Recebidos de Pessoa Física e do Exterior" target="Rendtributaveis" />
+</index>

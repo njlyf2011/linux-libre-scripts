@@ -1,0 +1,225 @@
+<!-- 
+	Esse XML define a árvore exibida na Treeview.   
+	Modifique os nodos de acordo com sua aplicação. 
+	
+	
+-->
+<arvore id="ppgdarvore" labelRaiz=""
+	treeSelectionListener="serpro.ppgd.infraestrutura.treeview.ArvoreSelectionListener"
+	cellRenderer="serpro.ppgd.irpf.treeview.IRPFTreeCellRenderer">
+	<nodo iconeExpandido="imagens/ico_indicador.gif"
+		iconeContraido="imagens/ico_indicador.gif" id="Dec"
+		label="&lt;HTML&gt;&lt;B&gt;Declaração&lt;/B&gt;&lt;/HTML&gt;"
+		action="" actionCommand="">
+		<nodo
+			label="&lt;HTML&gt;Identificação do Contribuinte&lt;/HTML&gt;"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.contribuinte.PainelContribuinte"  nodoInicial="true">
+		</nodo>
+		
+		<nodo
+			label="&lt;HTML&gt;Rend. Trib. Receb. de PJ&lt;/HTML&gt;">
+			<nodo label="&lt;html&gt;&lt;rendpj&gt;pelo Titular&lt;/rendpj&gt;&lt;/html&gt;"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.rendpj.PainelRendPJTitular">
+			</nodo>
+			<nodo label="&lt;html&gt;&lt;rendpj&gt;pelos Dependentes&lt;/rendpj&gt;&lt;/html&gt;"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.rendpj.PainelRendPJDependentes">
+			</nodo>
+		</nodo>
+		<nodo
+			label="&lt;HTML&gt;Rend. Trib Receb. de PF/Exterior&lt;/HTML&gt;">
+			<nodo label="&lt;html&gt;&lt;rendpf&gt;pelo Titular&lt;/rendpf&gt;&lt;/html&gt;"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.rendpf.PainelRendPFTitular">
+			</nodo>
+			<nodo label="&lt;html&gt;&lt;rendpf&gt;pelos Dependentes&lt;/rendpf&gt;&lt;/html&gt;"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.rendpf.PainelRendPFDependentes">
+			</nodo>
+		</nodo>
+		<nodo
+			label="&lt;HTML&gt;Rend. Isentos e não-tributáveis&lt;/HTML&gt;"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.rendIsentos.PainelRendIsentos">
+		</nodo>
+		<nodo
+			label="&lt;HTML&gt;Rend. Sujeitos à Trib. Exclusiva/Definitiva&lt;/HTML&gt;"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.rendTributacaoExclusiva.PainelRendTributacaoExclusiva">
+		</nodo>
+		<nodo label="Imposto Pago"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.impostopago.PainelImpostoPago">
+		</nodo>
+		<nodo label="Dependentes"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.dependentes.PainelDependentes">
+		</nodo>
+		<nodo label="Alimentandos"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.alimentandos.PainelAlimentandos">
+		</nodo>
+		<nodo
+			label="&lt;HTML&gt;Pagamentos e Doações Efetuados&lt;/HTML&gt;"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.pagamentos.PainelPagamentos">
+		</nodo>
+		<nodo label="Bens e Direitos"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.bens.PainelBens">
+		</nodo>
+		<nodo label="Dívidas e Ônus Reais"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.dividas.PainelDividas">
+		</nodo>
+		<nodo label="Informações do Cônjuge"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.conjuge.PainelConjuge">
+		</nodo>
+		<nodo label="Espólio"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.espolio.PainelEspolio">
+		</nodo>
+		<nodo label="Doações a Part. Políticos, Comitês Financ. e Candidatos"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.eleicoes.PainelDoacoesCampanhas">
+		</nodo>		
+	</nodo>
+	
+	<nodo label="Atividade Rural" iconeExpandido="imagens/ico_indicador.gif"
+		iconeContraido="imagens/ico_indicador.gif">
+			<nodo label="Brasil">
+				<nodo label="&lt;html&gt;&lt;brasil&gt;Dados e Identificação do Imóvel Explorado - Brasil&lt;/brasil&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelIdentificacaoImovelARBrasil">
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;brasil&gt;Receitas e Despesas - Brasil&lt;/brasil&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelReceitasDespesasBrasil">
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;brasil&gt;Apuração do Resultado - Brasil&lt;/brasil&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelApuracaoResultadoBrasil">
+				</nodo>
+				<nodo
+					label="&lt;HTML&gt;&lt;brasil&gt;Movimentação do Rebanho - Brasil&lt;/brasil&gt;&lt;/HTML&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelMovimentacaoRebanhoBrasil">
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;brasil&gt;Bens da Atividade Rural - Brasil&lt;/brasil&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelBensARBrasil">
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;brasil&gt;Dívidas Vinculadas à Atividade Rural - Brasil&lt;/brasil&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelDividasARBrasil">
+				</nodo>
+			</nodo>
+			<nodo label="Exterior">
+				<nodo label="&lt;html&gt;&lt;exterior&gt;Dados e Identificação do Imóvel Explorado - Exterior&lt;/exterior&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelIdentificacaoImovelARExterior">
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;exterior&gt;Receitas e Despesas - Exterior&lt;/exterior&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelReceitasDespesasExterior"></nodo>
+				<nodo label="&lt;html&gt;&lt;exterior&gt;Apuração do Resultado - Exterior&lt;/exterior&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelApuracaoResultadoExterior">
+				</nodo>
+				<nodo
+					label="&lt;HTML&gt;&lt;exterior&gt;Movimentação do Rebanho - Exterior&lt;/exterior&gt;&lt;/HTML&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelMovimentacaoRebanhoExterior">
+
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;exterior&gt;Bens da Atividade Rural - Exterior&lt;/exterior&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelBensARExterior">
+				</nodo>
+				<nodo label="&lt;html&gt;&lt;exterior&gt;Dívidas Vinculadas à Atividade Rural - Exterior&lt;/exterior&gt;&lt;/html&gt;"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelDividasARExterior"></nodo>
+
+			</nodo>
+<!-- 
+	<nodo iconeExpandido="imagens/ico_indicador.gif"
+		iconeContraido="imagens/ico_indicador.gif" id="demonstrativos"
+		label="&lt;HTML&gt;&lt;B&gt;Demonstrativos&lt;/B&gt;&lt;/HTML&gt;"
+		action="" actionCommand="">
+		
+		</nodo>
+		-->
+		
+<!--		<nodo label="Ganhos de Capital">
+			<nodo label="Bens Imóveis"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.ganhosdecapital.bensimoveis.PainelGCapBensImoveis" />
+			<nodo label="Bens Móveis"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.ganhosdecapital.bensmoveis.PainelGCapBensMoveis" />
+			<nodo label="Participações Societárias"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.ganhosdecapital.psocietarias.PainelGCapPSocietarias" />
+		</nodo>
+
+
+		<nodo label="Moeda Estrangeira">
+			<nodo label="Bens, Direitos ou Aplicações Financeiras">
+				<nodo label="Rend. Auferidos em Reais"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.moedaestrangeira.rendreais.PainelGCapMERendReais" />
+				<nodo label="Rend. Auferidos em Moeda Estrangeira"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.moedaestrangeira.rendme.PainelGCapMERendME" />
+				<nodo label="Rend. Auferidos em Reais e em Moeda Estrangeira"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.moedaestrangeira.rendreaisme.PainelGCapMERendReaisME" />
+
+
+			</nodo>
+			<nodo label="Espécie"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.moedaestrangeira.especie.PainelGCapMEEspecie" />
+		</nodo>
+		
+-->
+		
+	</nodo>
+	
+	<nodo label="Renda Variável" iconeExpandido="imagens/ico_indicador.gif"
+		iconeContraido="imagens/ico_indicador.gif">
+		
+		<nodo label="Operações Comuns/Day-Trade" 
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.rendavariavel.PainelRendaVariavel"/>
+		
+		<nodo label="Operações Fundos Invest. Imob." 
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.rendavariavel.PainelRendaVariavelFundosInvest"/>
+		
+	</nodo>
+
+	<nodo label="Resumo da declaração" iconeExpandido="imagens/ico_indicador.gif"
+		iconeContraido="imagens/ico_indicador.gif">
+			<nodo id="resumoRendTrib"
+				label="Rendimentos Tributáveis e Deduções"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.resumo.PainelRendimentosTributaveisDeducoes">
+			</nodo>
+			<nodo label="Cálculo do Imposto"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.resumo.PainelCalculoImposto">
+			</nodo>
+			<nodo label="Outras Informações"
+				action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				actionCommand="serpro.ppgd.irpf.gui.resumo.PainelResumoOutrasInformacoes">
+			</nodo>
+			<nodo label="Comparativo"
+			action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			actionCommand="serpro.ppgd.irpf.gui.comparativo.PainelComparativo">
+			</nodo>
+		</nodo>
+</arvore>

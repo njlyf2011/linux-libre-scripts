@@ -1,0 +1,1665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : MapeamentoTxt.xml
+    Created on : 03 de Maio de 2005, 14:42
+    Author     : Joselito Messias Lobo  
+    Description: Arquivo de mapeamento para geração de arquivos texto. 
+
+    A partir desse arquivo o componente de gravação / restauração Txt sabe quais registros 
+    o arquivo txt a ser gravado / restaurado vai ter e quais campos cada registro vai ter. 
+    A gravação desses arquivos pode ser "sincronizada" com alguma instância de objeto de negócio, 
+    ou seja, é possível indicar de qual atributo do objeto de negócio vem o conteudo do campo do registro.
+    Da mesma forma ocorre com a restauração.
+    
+-->
+
+<Mapeamento>
+
+    <DeclaracaoTXT TipoArquivo="ARQ_IRPF">
+        <Registro Nome="REG_HEADER" Identificador="IR" Descricao="01 HEADER - IDENTIFICAÇÃO DA DECLARAÇÂO">     
+            <Campo Nome="SISTEMA"      Descricao="Identificador do Sistema - IRPF – Pessoa Física, com 4 espaços em branco na frente."      Tipo="C"    Tamanho="8" />
+            <Campo Nome="EXERCICIO"      Descricao="Exercicio do PGD"      Tipo="N"    Tamanho="4" />
+            <Campo Nome="ANO_BASE"      Descricao="Ano calendario (2005)"      Tipo="N"    Tamanho="4" />
+            <Campo Nome="CODIGO_RECNET"      Descricao="Codigo interno da declaracao no sistema    Receitanet 1400"      Tipo="N"    Tamanho="4" />
+            <Campo Nome="IN_RETIFICADORA"      Descricao="Indicador se declaracao retificadora"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="NR_CPF"      Descricao="CPF do contribuinte"      Tipo="C"    Tamanho="11" />
+            <Campo Nome="FILLER1"      Descricao="Espaco reservado"      Tipo="A"    Tamanho="3" />
+            <Campo Nome="TIPO_NI"      Descricao="Indica o tipo de NI:   1 Pessoa Fisica (CPF)"      Tipo="N"    Tamanho="1" />
+            <Campo Nome="NR_VERSAO"      Descricao="Versao do Programa Gerador da declaracao: 100 (primeira versão)"      Tipo="N"    Tamanho="3" />
+            <Campo Nome="NM_NOME"      Descricao="Nome do contribuinte"      Tipo="A"    Tamanho="60" />
+            <Campo Nome="SG_UF"      Descricao="UF - Domicilio do Contribuinte"      Tipo="A"    Tamanho="2" />
+            <Campo Nome="NR_HASH"      Descricao="Hash calculado sobre todos os registros da declaracao,exceto o Header da declaracao e todos os registros do recibo(Nr. Controle SRF)"      Tipo="N"    Tamanho="10" />
+            <Campo Nome="IN_CERTIFICAVEL"      Descricao="Indicativo se declaracao eh certificavel"      Tipo="N"    Tamanho="1" />            
+            <Campo Nome="DT_NASCIM"      Descricao="Data de Nascimento (DDMMAAAA)"      Tipo="N"    Tamanho="8" />
+            <Campo Nome="IN_COMPLETA"      Descricao="Indicativo se declaracao completa"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="IN_RESULTADO_IMPOSTO"      Descricao="Indicativo de resultado do imposto"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="IN_GERADA"      Descricao="Indicativo se declaracao gerada"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="NR_RECIBO_ULTIMA_DEC_EX_2006"      Descricao="Número do recibo da declaração original ou retificadora do exercicio atual a ser retificada"      Tipo="C"    Tamanho="10" />
+			<Campo Nome="IN_PLATAFORMAPGD"      Descricao="Indicador do tipo d eplataforma"      Tipo="C"    Tamanho="1" />            
+            <Campo Nome="NOME_SO"      Descricao="Nome do Sistema Operacional"      Tipo="C"    Tamanho="20" />
+            <Campo Nome="VERSAO_SO"    Descricao="Numero da versao do Sistema Operacional(SO)"      Tipo="C"    Tamanho="10" />
+            <Campo Nome="NR_RECIBO_DECLARACAO_TRANSMITIDA"      Descricao="Numero do recibo da última declaracao transmitida"      Tipo="C"    Tamanho="10" />            
+            <Campo Nome="CD_MUNICIP"    Descricao="Codigo do municipio"  Tipo="C" Tamanho="4" />
+            <Campo Nome="NR_CONJ"       Descricao="CPF do cônjuge"                  Tipo="C"   Tamanho="11" />            
+            <Campo Nome="IN_OBRIGAT_ENTREGA"      Descricao="Indicador de Obrigatoriedade de Entrega"      Tipo="C"    Tamanho="1" />            
+            <Campo Nome="VR_IMPDEVIDO"   Descricao="Valor  do Carnê-leão e Imposto Complementar dos dependentes." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_RECIBO_ULTIMA_DEC_EX_ANTERIOR"      Descricao="Numero do recibo da última do ano anterior"      Tipo="C"    Tamanho="10" />            
+            <Campo Nome="NR_BASE_FONTE_MAIOR"      Descricao="CPF/CNPJ Base da Maior Fonte Pagadora"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_BASE_FONTE_DOIS"      Descricao="CPF/CNPJ Base da 2a Maior Fonte Pagadora"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_BASE_FONTE_TRES"      Descricao="CPF/CNPJ Base da 3a Maior Fonte Pagadora"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_CPF_DEPE_REND_MAIOR"      Descricao="CPF de Dependente com maior Rend. Tributavel de PJ"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="NR_CPF_DEPE_REND_DOIS"      Descricao="CPF de Dependente com 2a maior Rend. Tributavel de PJ"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="NR_CPF_DEPE_REND_TRES"      Descricao="CPF de Dependente com 3a maior Rend. Tributavel de PJ"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="NR_CPF_DEPE_REND_QUATRO"      Descricao="CPF de Dependente com 4a maior Rend. Tributavel de PJ"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="NR_BASE_BENEF_DESP_MED_MAIOR"      Descricao="CPF/CNPJ Base do maior beneficiário de Despesas Médicas"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_BASE_BENEF_DESP_MED_DOIS"      Descricao="CPF/CNPJ Base do 2o maior beneficiário de Despesas Médicas"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_CPF_DEST_PENSAO_ALIMENT_MAIOR"      Descricao="CPF de destinatário com maior pensão alimentícia"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="IN_SEGURANCA"      Descricao="Indicador de segurança da declaração"      Tipo="C"    Tamanho="1" />            
+            <Campo Nome="IN_IMPOSTO_PAGO"      Descricao="Indicador se teve imposto pago"      Tipo="N"    Tamanho="2" />            
+            <Campo Nome="NR_CPF_INVENTARIANTE"      Descricao="CPF do inventariante"      Tipo="C"    Tamanho="11" />            
+            
+            <Campo Nome="FILLER2"      Descricao="Espaco reservado"      Tipo="A"    Tamanho="9" />
+            <Campo Nome="VERSAOTESTEPGD"      Descricao="Numero da versao de desenvolvimento do PGD. Esse campo irá compor o campo FILLER2, quando da versão final."      Tipo="C"    Tamanho="3" />
+            
+            
+            <Campo Nome="NR_CONTROLE"      Descricao="Numero de controle"      Tipo="N"    Tamanho="10" />
+        </Registro>
+        
+       <Registro    Nome="REG_IDENTIFICACAO" Identificador="16" Descricao="Identificaçao do declarante">
+            <Campo Nome= "NR_REG"       Descricao="Tipo do registro"                          Tipo="N" Tamanho="2" />
+            <Campo Nome= "NR_CPF"       Descricao="CPF contribuinte"                          Tipo="C" Tamanho="11" />
+            <Campo Nome="NM_NOME"       Descricao="Nome do contribuinte"                Tipo="A" Tamanho="60" />
+            <Campo Nome="TIP_LOGRA"     Descricao="Tipo do Logradouro"   Tipo="C" Tamanho="15" />
+            <Campo Nome="NM_LOGRA"      Descricao="Endereco contribuinte: logradouro"   Tipo="C" Tamanho="40" />
+            <Campo Nome="NR_NUMERO"     Descricao="Endereco contribuinte: Numero"       Tipo="C" Tamanho="6" />
+            <Campo Nome="NM_COMPLEM"    Descricao="Endereco contribuinte: complemento"  Tipo="C" Tamanho="21" />
+            <Campo Nome="NM_BAIRRO"     Descricao="Endereco contribuinte: bairro"       Tipo="C" Tamanho="19" />
+            <Campo Nome="NR_CEP"        Descricao="Endereco contribuinte: CEP ou ZIP(Exterior)" Tipo="C" Tamanho="9" />
+            <Campo Nome="CD_MUNICIP"    Descricao="Endereco contribuinte: codigo do município"  Tipo="N" Tamanho="4" />
+            <Campo Nome="NM_MUNICIP"    Descricao="Endereco contribuinte: município"    Tipo="C" Tamanho="40" />
+            <Campo Nome="SG_UF"         Descricao="Endereco contribuinte: UF"           Tipo="A" Tamanho="2" />
+            <Campo Nome="CD_EX"         Descricao="Codigo do Exterior"                  Tipo="C" Tamanho="3" />
+            <Campo Nome="CD_PAIS"       Descricao= "Codigo do país"                     Tipo="C" Tamanho="3" />
+            <Campo Nome="FILLER3"       Descricao= "Espaços em branco (Endereço contribuinte: Email - Correio Eletrônico)"     Tipo="C" Tamanho="100" />
+            <Campo Nome="FILLER1"       Descricao= "Espaços em branco (Endereço contribuinte: Cod. área do FAX/DDI)"     Tipo="C" Tamanho="4" />
+            <Campo Nome="FILLER2"       Descricao= "Espaços em branco (Endereço contribuinte: FAX)"     Tipo="C" Tamanho="8" />
+            <Campo Nome="NR_DDD_TELEFONE" Descricao="Endereco contribuinte: Cod. área do telefone/DDI" Tipo="C" Tamanho="4" />
+            <Campo Nome="NR_TELEFONE"   Descricao="Endereco contribuinte: telefone"     Tipo="C" Tamanho="8" />
+            <Campo Nome="DT_NASCIM"     Descricao="Data nascimento do contribuinte (DD/MM/AAAA)" Tipo="C" Tamanho="8" />
+            <Campo Nome="NR_TITELEITOR" Descricao="Numero do título de eleitor"         Tipo="C" Tamanho="13" />
+            <Campo Nome="CD_OCUP"       Descricao="Codigo de ocupacao"                  Tipo="A" Tamanho="3" />
+            <Campo Nome="CD_NATUR"      Descricao="Codigo natureza ocupacao"            Tipo="A" Tamanho="2" />
+            <Campo Nome="NR_QUOTAS"     Descricao="Quantidades de quotas"               Tipo="N" Tamanho="1" />
+            <Campo Nome="IN_COMPLETA"   Descricao="Indicativo se declaracao Completa(S)Simplificada(N)" Tipo="C" Tamanho="1" />
+            <Campo Nome="IN_RETIFICADORA" Descricao="Indicativo se declaracao retificadora" Tipo="C" Tamanho="1" />
+            <Campo Nome="IN_GERADO"     Descricao="Indicativo se a declaracao foi gerada" Tipo="C" Tamanho="1" />
+            <Campo Nome="IN_ENDERECO"   Descricao="Indicativo se houve mudança de Endereco" Tipo="C" Tamanho="1" />
+            <Campo Nome="NR_CONTROLE_ORIGINAL" Descricao="Numero do recibo da declaracao original" Tipo="C" Tamanho="12" />
+            <Campo Nome="NR_BANCO"      Descricao="Codigo do Banco"                     Tipo="C" Tamanho="3" />
+            <Campo Nome="NR_AGENCIA"    Descricao="Numero da Agência Bancária"          Tipo="C" Tamanho="5" />
+            <Campo Nome="NR_DV_AGENCIA" Descricao="Numero do Digito Verificador  da Agência Bancária" Tipo="C" Tamanho="1" />
+            <Campo Nome="NR_CONTA"      Descricao="Numero da conta corrente para depósito de IAR" Tipo="C" Tamanho="13" />
+            <Campo Nome="NR_DV_CONTA"   Descricao="Numero do Digito Verificador da Conta Corrente" Tipo="C" Tamanho="2" />
+            <Campo Nome="IN_DEBITO_AUTOM"   Descricao="Indicado de débito automático" Tipo="A" Tamanho="1" />
+            <Campo Nome="NR_FONTE_PRINCIPAL"      Descricao="CPF/CNPJ principal fonte pagadora"      Tipo="C"    Tamanho="14" />
+            <Campo Nome="NR_RECIBO_ULTIMA_DEC_ANO_ANTERIOR"      Descricao="Número do recibo da última declaração transmitida no ano anterior"      Tipo="C"    Tamanho="10" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />          
+        </Registro>        
+        
+        <Registro Nome="REG_RESUMOSIMPLES" Identificador="17" Descricao="Demais Rendimentos e Imposto Pago - Simplificada">
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+            <Campo Nome="VR_RENDPFEXT"   Descricao="Valor dos rendimentos recebidos de Pessoas Físicas e do Exterior do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LEAO"   Descricao="Valor  do Carnê-leão e Imposto Complementar do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LUCROSTIT"   Descricao="Lucros e Dividendos recebidos pelo Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ISENTOS"   Descricao="Valor dos Rendimentos isentos e não-tributáveis do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_EXCLUSIVOS"   Descricao="Valor dos Rendimentos sujeitos à tributação exclusiva  (Exceto 13º salário) do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13"   Descricao="Valor do 13o. do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13DEPEND"   Descricao="Valor do 13o. do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LUCROSDEPEND"   Descricao="Lucros e Dividendos recebidos pelos Dependentes" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ISENTOSDEPEND"   Descricao="Valor dos Rendimentos isentos e não-tributáveis dos dependentes" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_EXCLUSIVOSDEPEND"   Descricao="Valor dos Rendimentos sujeitos à tributação exclusiva dos dependentes  (Exceto 13º salário)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDPFEXT_DEPEND"   Descricao="Valor dos rendimentos recebidos de Pessoas Físicas e do Exterior dos dependentes." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LEAO_DEPEND"   Descricao="Valor  do Carnê-leão e Imposto Complementar dos dependentes." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033_DEP"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N" Tamanho="10" /> 
+        </Registro>
+        
+        <Registro Nome="REG_RESUMOSIMPLES" Identificador="18" Descricao="Totais Calculados da Declaracao Simplificada">        
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />           
+            <Campo Nome="VR_RENDTRIB"   Descricao="Valor do Rendto+Rendto. Atividade Rural +PF+Exterior do  Titular + dependente." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DESCSIMP"   Descricao="Desconto Simplificado" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BASECALC"   Descricao="Base de cálculo do imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPDEVIDO"   Descricao="Imposto devido" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"   Descricao="Imposto retido na fonte-Titular  e dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LEAO"   Descricao="Carnê-leão, imposto complementar. e pago no exterior-Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)-Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPRESTIT"   Descricao="Saldo do imposto a restituir" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGAR"   Descricao="Saldo do Imposto a pagar" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_QUOTAS"   Descricao="Numero de quotas" Tipo="N" Tamanho="1" />
+            <Campo Nome="VR_QUOTA"   Descricao="Valor da quota" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTISENTO"   Descricao="Rendimento Isentos e não tributáveis - Titular e dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTEXCLUSIVO"   Descricao="Rendimento sujeitos a Tributação exclusiva -Titular e dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CONJUGE"   Descricao="Resultado de Informações do Cônjuge" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDTRIBDEPENDENTE"   Descricao="Valor do Rendimento PJ - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPOSTODEPENDENTE"   Descricao="Imposto retido na fonte - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGOESPECIE"   Descricao="Imposto a Pagar Ganhos de Capital – Moeda em Espécie" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDTRIBPJTITULAR"   Descricao="Total do rendimento Tributável PJ - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDTRIBARURAL"   Descricao="Total do rendimento AR-Brasil e Ext.(Linha 7 da ficha Apuração do Resultado" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTFONTETITULAR"   Descricao="Total do Imposto Retido na Fonte - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTBENSANOBASEANTERIOR"   Descricao="Total dos bens do ano anterior ao ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTBENSANOBASE"   Descricao="Total dos bens do ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDISENTOTITULAR"   Descricao="Total Rend. isentos/Não tributáveis – Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDISENTODEPENDENTES"   Descricao="Total Rend. isentos/Não tributáveis – Depend." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDEXCLUSTITULAR"   Descricao="Total Rend. Tributação Exclusiva – Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDEXCLUSDEPENDENTES"   Descricao="Total Rend. Tributação Exclusiva – Depend." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RESNAOTRIB_AR"   Descricao="Total Não Tributável(Linha 11 do Resultado da AR, se Brasil e Linha 10, se Exterior.)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTDIVIDAANOBASEANTERIOR"   Descricao="Total das dívidas do ano anterior ao ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTDIVIDAANOBASE"   Descricao="Total das dívidas do ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTIRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004) - Titular+Dependente+Renda Variável+Ganho de Capital em PS" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_SUBTOTALISENTOTRANSPORTE"   Descricao="Subtotal dos rendimentos isentos e não tributáveis" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_SUBTOTALEXCLUSIVOTRANSPORTE"   Descricao="Subtotal dos rendimentos sujeitos à tributação exclusiva" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_GANHOLIQUIDORVTRANSPORTE"   Descricao="Ganhos líquidos em renda variável" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDISENTOGCTRANSPORTE"   Descricao="Parcela isenta proveniente dos Ganhos de Capital" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDPFEXT"   Descricao="Total de Rendimentos Recebidos de PF/exterior pelo titular e dependentes" Tipo="N" Tamanho="13" Decimais="2" />            
+            <Campo Nome="VR_DOACOESCAMPANHA"   Descricao="Total de Doacoes a Campanha Eleitoral" Tipo="N" Tamanho="13" Decimais="2" />                        
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N" Tamanho="10" />
+        </Registro>       
+        
+        <Registro Nome="REG_COMPLETA" Identificador="19" Descricao="Declaracao Completa">        
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+            <Campo Nome="NR_FONTE"   Descricao="CNPJ/CPF  principal fonte pagadora" Tipo="C" Tamanho="14" />
+            <Campo Nome="VR_IMPEXT"   Descricao="Valor do imposto pago exterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPCOMP"   Descricao="Valor do imposto complementar pago" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RECEX_TIT"   Descricao="Rendimento recebidos do Exterior - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LIVCAIX_TIT"   Descricao="Livro caixa - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CARNELEAO_TIT"   Descricao="Carnê-Leão - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RECEX_DEP"   Descricao="Rendimento recebidos do Exterior - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LIVCAIX_DEP"   Descricao="Livro caixa - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CARNELEAO_DEP"   Descricao="Carnê-Leão - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVPRIV"   Descricao="Contribuição previdenciária  privada" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_FAPI"   Descricao="Contribuição FAPI" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVOFTITULAR"   Descricao="Total da contribuição previdenciária oficial do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVOFDEPENDENTE"   Descricao="Total da contribuição previdenciária oficial do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13SALARIOTITULAR"   Descricao="Total do décimo terceiro salário do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13SALARIODEPENDENTE"   Descricao="Total do décimo terceiro salário do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+
+            <Campo Nome="NR_DEPENDENTE_DESP_INSTRUCAO"   Descricao="Numero de Dependentes com despesa de instrução" Tipo="N" Tamanho="5"  />
+            <Campo Nome="NR_ALIMENTANDO_DESP_INSTRUCAO"   Descricao="Numero de Alimentandos com despesa de instrução" Tipo="N" Tamanho="5"  />            
+
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+        <Registro Nome="REG_RESUMOCOMPLETA" Identificador="20" Descricao="Totais da Declaracao Completa">
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro"                          Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte"                          Tipo="C" Tamanho="11" />
+            <Campo Nome="VR_RENDJUR"   Descricao="Rendimentos recebidos Pessoa Jurídica - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDFISIC_TIT"   Descricao="Rendimentos recebidos Pessoa Física - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDFISIC_DEP"   Descricao="Rendimentos recebidos Pessoa Física - Dependente" Tipo="N" Tamanho="13" Decimais="2" />            
+            <Campo Nome="VR_RECEX"   Descricao="Rendimento recebidos do Exterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RESAR"   Descricao="Resultado  da Atividade Rural" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTTRIB"   Descricao="Total de Rendimentos tributáveis" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVOF"   Descricao="Contribuição previdenciária oficial" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTPRIVADA"   Descricao="Previdência privada + FAPI limitada a 12% Rend.Trib." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DEPEN"   Descricao="Dedução com  dependentes" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DESPINST"   Descricao="Despesas com instrução" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DESPMEDIC"   Descricao="Despesas médicas" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PENSAO"   Descricao="Pensão Alimentícia" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LIVCAIX"   Descricao="Livro caixa" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DEDUC"   Descricao="Total das deduções" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BASECALC"   Descricao="Base de cálculo do imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"   Descricao="Valor do Imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DEDIMPOSTO"   Descricao="Dedução do imposto(dedução de incentivo) limitada a 6% do valor do imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPDEV"   Descricao="Imposto devido" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CONTPATRONAL"   Descricao="Contribuicao Patronal" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPDEV2"   Descricao="Imposto devido apos Contribuicao Patronal" Tipo="N" Tamanho="13" Decimais="2" />                        
+            <Campo Nome="VR_IMPFONTE"   Descricao="Imposto na fonte" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CARNELEAO"   Descricao="Carnê-Leão" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPCOMPL"   Descricao="Imposto complementar" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPEXT"   Descricao="Imposto pago no exterior(após cálculo do limite)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTIMPPAGO"   Descricao="Total do imposto pago" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPREST"   Descricao="Imposto a restituir" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGAR"   Descricao="Imposto a pagar" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_QUOTAS"   Descricao="Quantidade de quotas" Tipo="N" Tamanho="1" />
+            <Campo Nome="VR_QUOTA"   Descricao="Valor de cada quota" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BENSANT"   Descricao="Total de Bens e Direitos do ano anterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BENSATUAL"   Descricao="Total de Bens e Direitos do ano  atual" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DIVIDAANT"   Descricao="Total de Ônus e Dívidas do ano anterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DIVIDAATUAL"   Descricao="Total de Ônus e Dívidas do ano  atual" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CONJUGE"   Descricao="Informações de Cônjuge" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTISENTOS"   Descricao="Total dos Rendimentos isentos –Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTEXCLUS"   Descricao="Total dos Rendimentos exclusivos - Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPGC"   Descricao="Imposto sobre Ganhos de Capital" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTIRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004) - Titular+Dependente+Renda Variável+Ganho de Capital em PS" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPRV"   Descricao="Imposto sobre Renda Variável" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDJURDEPENDENTE"   Descricao="Rendimentos recebidos Pessoa Jurídica - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPFONTEDEPENDENTE"   Descricao="Imposto na fonte – Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGOVCBENS"   Descricao="Imposto Pago Moeda Estrangeira-Bens,Dir e Aplic.Fin." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGOVCESPECIE"   Descricao="Imposto a Pagar Ganhos de Capital – Moeda em Espécie" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDISENTOSTITULAR"   Descricao="Total de Rendimentos isentos do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDISENTOSDEPENDENTE"   Descricao="Total de Rendimentos isentos do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDEXCLTITULAR"   Descricao="Total de Rendimentos exclusivos do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDEXCLDEPENDENTE"   Descricao="Total de Rendimentos exclusivos do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DOACOESCAMPANHA"   Descricao="Total de Doacoes a Campanha Eleitoral" Tipo="N" Tamanho="13" Decimais="2" />            
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDPJ" Identificador="21" Descricao="Rendimentos Recebidos de PJ">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_PAGADOR"   Descricao="CNPJ fonte pagadora" Tipo="C" Tamanho="14" />
+		    <Campo Nome="NM_PAGADOR"   Descricao="Nome fonte pagadora" Tipo="C" Tamanho="60" />
+		    <Campo Nome="VR_RENDTO"   Descricao="Valor rendimento recebido" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_CONTRIB"   Descricao="Valor contribuição previdenciária oficial" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DECTERC"   Descricao="Valor décimo terceiro salário" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_IMPOSTO"   Descricao="Valor imposto retido na fonte" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDPF" Identificador="22" Descricao="Rendimentos Recebidos de PF e Exterior">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="E_DEPENDENTE"   Descricao="Indicativo se registro de dependente(S) ou Titular(N)" Tipo="I" Tamanho="1" />
+		    <Campo Nome="NR_MES"   Descricao="Mês de ocorrência" Tipo="N" Tamanho="2" />
+		    <Campo Nome="VR_RENDTO"   Descricao="Valor rendimentos recebidos" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_EXTER"   Descricao="Valor rendimento recebido no exterior" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_LIVCAIX"   Descricao="Valor dedução livro-caixa" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_ALIMENT"   Descricao="Valor dedução com pensão alimentícia" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DEDUC"   Descricao="Valor dedução com dependente" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_PREVID"   Descricao="Valor pago previdência" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_BASECALCULO"   Descricao="Valor Base de cálculo (rendimentos – deduções)" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_IMPOSTO"   Descricao="Valor imposto pago(Carnê-Leão)" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDISENTOS" Identificador="23" Descricao="Rendimentos Isentos e nao Tributaveis">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF" 	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+
+		    <Campo Nome="VR_BOLSA" 	Descricao="Linha 1 - Bolsa de Estudo e Pesquisa"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_PREVID" 	Descricao="Linha 2 - Pecúlio recebido de previdência privada"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_FGTS" 	Descricao="Linha 3 - Aviso prévio indenizado e assemelhados"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCISENTO" 	Descricao="Linha 4 - Ganho de Capital isento"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_LUCROS" 	Descricao="Linha 5 - Lucros e dividendos recebidos"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_RURAL" 	Descricao="Linha 6 - Atividade Rural isento"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_65ANOS" 	Descricao="Linha 7 - Contribuintes com  65 anos ou mais"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_INVALIDEZ" 	Descricao="Linha 8 - Pensão por invalidez"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_POUPANCA" 	Descricao="Linha 9 - Poupança e letras hipotecárias"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_SOCIO" 	Descricao="Linha 10 - Sócio ou Titular de Empresa"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_HERANCA" 	Descricao="Linha 11 - Transferências patrimoniais"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_OUTROS" 	Descricao="Linha 12 - Outros rendimentos isentos"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="TX_OUTROS" 	Descricao="Especificação de outros rendimentos"	      Tipo="C" Tamanho="60" />		    
+		    <Campo Nome="VR_ISENTOSDEPENDENTES" 	Descricao="Total dos rendimentos isentos dos dependentes"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_PEQUENO" 	Descricao="Alienação de bens pequeno valor -Informado p/ Cont"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_UNICO" 	Descricao="Alienação único imóvel - Informado p/  Contribuinte"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_REDUCAO" 	Descricao="Redução  Ganho  Capital - Informado p/  Contribuinte"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_PEQTRANSP" 	Descricao="Total de bens de pequeno valor - Transp. do GC"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_UNITRANSP" 	Descricao="Alienação único imóvel  - Transp. do GC"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_REDTRANSP" 	Descricao="Redução do Ganho de Capital - Transp. do GC"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCMOEDAEST" 	Descricao="Ganho de capital–Moeda Est.- isento -"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_GCMOEDAESTTRANSP" 	Descricao="Ganho de capital–Moeda Est.- isento - transportado"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    
+		    <Campo Nome="VR_GCTOTALINFORMADO" 	Descricao="Total informado pelo contribuinte(*)"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCTOTALTRANSPORTADO" 	Descricao="Total transportado pelo programa(*)"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    
+	        <Campo Nome="NR_CONTROLE" 	Descricao="Numero de Controle"	      Tipo="N" Tamanho="10" />
+		</Registro>
+
+		<Registro Nome="REG_RENDEXCLUSIVA" Identificador="24" Descricao="Dependentes">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF" 	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="VR_13SAL" 	Descricao="Linha 1 - Décimo terceiro salário"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GC" 	Descricao="Linha 2 - Ganho de Capital"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_RENDAVAR" 	Descricao="Linha 5 – Ganhos líquido em Renda Variável"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_FINANCEIRAS" 	Descricao="Linha 6 – Rendimentos de aplicações financeiras"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_OUTROS" 	Descricao="Linha 7 - Outros rendimentos exclusivos"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="TX_OUTROS" 	Descricao="Linha 7 - Especificação de Outros rend. exclusivos"	      Tipo="C" Tamanho="60" />
+		    <Campo Nome="VR_GCBENSMOEDAEST" 	Descricao="Linha 3 - Ganhos de Capital na alienação de bens,direitos e Aplicações financ. adquiridos em moeda estrangeira"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCALIENMOEDAEST" 	Descricao="Linha 4 - Ganhos de Capital na alienação de moeda estrangeira"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_13SALDEPENDENTES" 	Descricao="Linha 8 – 13o. salário recebido pelos Dependentes"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_EXCLUSIVAEXCETO13SALDEP" 	Descricao="Linha 9 – Rendimentos exclusivos dos Dependentes, exceto 13o. salário"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE" 	Descricao="Numero de Controle"	      Tipo="N" Tamanho="10" />
+        </Registro>
+
+
+		<Registro Nome="REG_DEPENDENTE" Identificador="25" Descricao="Dependentes">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF" 	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_CHAVE" 	Descricao="Numero de chave do dependente"	      Tipo="N" Tamanho="5" />
+		    <Campo Nome="CD_DEPEND" 	Descricao="Codigo da relação de dependência"	      Tipo="C" Tamanho="2" />
+		    <Campo Nome="NM_DEPEND" 	Descricao="Nome do dependente"	      Tipo="A" Tamanho="60" />
+		    <Campo Nome="DT_NASCIM" 	Descricao="Data de nascimento (DDMMAAAA)"	      Tipo="N" Tamanho="8" />
+		    <Campo Nome="NI_DEPEND" 	Descricao="CPF do dependente"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_CONTROLE" 	Descricao="Numero de Controle"	      Tipo="N" Tamanho="10" />
+		</Registro>
+
+
+        <Registro Nome="REG_PAGAMENTO" Identificador="26" Descricao="Relacao de pagamentos e doacoes efetuados">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="CD_PAGTO"	Descricao="Codigo de doacoes e pagamento" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CHAVE_DEPEND"	Descricao="Numero de chave do dependente"      Tipo="N" Tamanho="5" />
+		    <Campo Nome="NR_BENEF"	Descricao="CNPJ/CPF do beneficiário"       Tipo="C" Tamanho="14" />
+		    <Campo Nome="NM_BENEF"	Descricao="Nome do beneficiario"	      Tipo="A" Tamanho="60" />
+		    <Campo Nome="NR_NIT"	Descricao="Número do NIT"	      Tipo="A" Tamanho="11" />
+		    <Campo Nome="VR_PAGTO"	Descricao="Valor do pagamento ou doação"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_REDUC"	Descricao="Valor da parcela não dedutível ou reembolsada"       Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"	Descricao="Numero de Controle"      Tipo="N" Tamanho="10" />
+		</Registro>
+
+    
+        <Registro Nome="REG_BEM" Identificador="27" Descricao="declaracao de bens e direitos"> 
+            <Campo Nome="NR_REG"      Descricao="Tipo do registro"      Tipo="N"    Tamanho="2" />
+            <Campo Nome="NR_CPF"      Descricao="CPF contribuinte"      Tipo="C"    Tamanho="11" />
+            <Campo Nome="CD_BEM"      Descricao="Tipo do bem ou direito"  Tipo="N"  Tamanho="2" />
+            <Campo Nome="IN_EXTERIOR" Descricao="0 se imóvel no Brasil 1 se imóvel no Exterior"  Tipo="N" Tamanho="1" />
+            <Campo Nome="CD_PAIS"     Descricao="Codigo do País, se bem no Exterior"  Tipo="N" Tamanho="3" />
+            <Campo Nome="TX_BEM"      Descricao="Descrição do bem"      Tipo="C"    Tamanho="512" />
+            <Campo Nome="VR_ANTER"    Descricao="Valor em 31 de dezembro de 2004"  Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ATUAL"    Descricao="Valor em 31 de dezembro de 2005"  Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE" Descricao="Numero de Controle"    Tipo="N"    Tamanho="10" />
+        </Registro>
+       
+        <Registro Nome= "REG_DIVIDA"    Identificador="28"  Descricao="Dívidas e onus reais">
+            <Campo Nome="NR_REG"	Descricao="Tipo do registro"	Tipo="N"    Tamanho="2" />
+            <Campo Nome="NR_CPF"	Descricao="CPF contribuinte"	Tipo="C"	Tamanho="11" />
+            <Campo Nome="CD_DIV"	Descricao="Tipo da dívida"	Tipo="N"	Tamanho="2" />
+            <Campo Nome="TX_DIV"	Descricao="Descrição da dívida"	Tipo="C"	Tamanho="250" />
+            <Campo Nome="VR_ANTER"	Descricao="Valor em 31 de dezembro de 2004"	Tipo="N"	Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ATUAL"	Descricao="Valor em 31 de dezembro de 2005"	Tipo="N"	Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE"	Descricao="Numero de Controle"	Tipo="N"	Tamanho="10" />
+        </Registro>   
+        
+        <Registro Nome= "REG_CONJUGE"    Identificador="29"  Descricao="Informacoes do conjuge">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />
+            <Campo Nome="NR_CONJ"       Descricao="CPF do cônjuge"                  Tipo="C"   Tamanho="11" />
+            <Campo Nome="VR_BASE"       Descricao="Base de cálculo"                 Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_RETIDO_S"   Descricao="Imposto retido na fonte – Simplificada"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_LEAO_S"     Descricao="Carnê-Leão, imp. compl. e Exterior–Simplificada"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPOSTO_C"  Descricao="Total  do imposto - Completa"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_ISENTO_C"   Descricao="Rend. Isentos e não tributáveis – Completa/Simplif."  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_EXCLUSIVO_C" Descricao="Rend. Tribut. Exclusivo Fonte – Completa/Simplif."  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_TOTALCONJ"  Descricao="Resultado  total do cônjuge"         Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="IN_BENSCOMUNS" Descricao="indicativo se bens comuns do casal estão informados nessa declaracao.Em branco se essa pergunta não for respondida."  Tipo="C"   Tamanho="1" />
+            <Campo Nome="IN_TIPO"       Descricao="indicativo se declaracao do cônjuge Simplificada(S) ou Completa (N)" Tipo="C"   Tamanho="1" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />
+        </Registro>  
+        
+        <Registro Nome= "REG_INVENTARIANTE"    Identificador="30"  Descricao="Informacoes do Inventariante">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />             
+            <Campo Nome="NR_INVENT"        Descricao="CNPJ  da fonte pagadora"  Tipo="C"   Tamanho="11" />
+            <Campo Nome="NM_INVENT"        Descricao="Nome da fonte pagadora"  Tipo="A"   Tamanho="60" />
+            <Campo Nome="NM_END_INVENT"        Descricao="Valor do rendimento recebido"  Tipo="C"   Tamanho="70" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />
+        </Registro>          
+        
+        <Registro Nome= "REG_RENDPJSIMPLES"    Identificador="31"  Descricao="Rend. Trib Recebidos de PJ do Titular - Dec Simplificada">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />             
+            <Campo Nome="NR_PAGADOR"        Descricao="CNPJ  da fonte pagadora"  Tipo="C"   Tamanho="14" />
+            <Campo Nome="NM_PAGADOR"        Descricao="Nome da fonte pagadora"  Tipo="C"   Tamanho="60" />
+            <Campo Nome="VR_RENDTO"        Descricao="Valor do rendimento recebido"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"        Descricao="Valor do imposto retido na fonte"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />
+        </Registro>               
+
+        <Registro Nome= "REG_RENDPJDEPENDENTE"    Identificador="32"  Descricao="Rend. Trib Recebidos de PJ do Titular - Dec Simplificada">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />            
+            <Campo Nome="CPF_BENEF"   Descricao="CPF do Dependente"  Tipo="C"   Tamanho="11" />
+            <Campo Nome="NR_PAGADOR"   Descricao="CNPJ  da fonte pagadora"  Tipo="C"   Tamanho="14" />
+            <Campo Nome="NM_PAGADOR"   Descricao="Nome da fonte pagadora"  Tipo="C"   Tamanho="60" />
+            <Campo Nome="VR_RENDTO"   Descricao="Valor do rendimento recebido"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_CONTRIB"   Descricao="Valor contribuição previdenciária oficial"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_DECTERC"   Descricao="Valor décimo terceiro salário"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"   Descricao="Valor do imposto retido na fonte"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />            
+        </Registro>
+		
+		<Registro Nome="REG_LUCROSDIVIDENDOS" Identificador="33" Descricao="Relacao de lucros e dividendos">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_CHAVE"	Descricao="Número de chave"	      Tipo="N" Tamanho="5" />
+		    <Campo Nome="NR_TIPO"	Descricao="Titular/Dependente" Tipo="A" Tamanho="1" />
+		    <Campo Nome="NR_PAGADORA"	Descricao="CNPJ/CPF da fonte pagadora"       Tipo="C" Tamanho="14" />
+		    <Campo Nome="NM_PAGADORA"	Descricao="Nome da fonte pagadora"	      Tipo="A" Tamanho="60" />
+		    <Campo Nome="VR_LUCRO"	Descricao="Valor do lucro ou dividendo"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"	Descricao="Numero de Controle"      Tipo="N" Tamanho="10" />
+		</Registro>
+		
+		<Registro Nome="REG_DOACOESCAMPANHA" Identificador="34" Descricao="Relacao de doações a campanhas eleitorais">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_PARTIDO"	Descricao="CNPJ/CPF do partido"       Tipo="C" Tamanho="14" />
+		    <Campo Nome="NM_PARTIDO"	Descricao="Nome do partido"	      Tipo="A" Tamanho="60" />
+		    <Campo Nome="VR_DOACAO"	Descricao="Valor da doação"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"	Descricao="Numero de Controle"      Tipo="N" Tamanho="10" />
+		</Registro>
+        
+        <Registro Nome= "REG_ALIMENTANDO"    Identificador="35"  Descricao="Alimentando - Declaracao Completa">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />                    
+            <Campo Nome="NR_CHAVE"        Descricao="Identificador do alimentando"  Tipo="N"   Tamanho="5" />
+            <Campo Nome="NM_NOME"        Descricao="Nome do alimentando"  Tipo="C"   Tamanho="60" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />            
+        </Registro>   
+        
+        <Registro Nome= "REG_CPFDEPENDENTECOMRENDPF"    Identificador="36"  Descricao="Relacao dos CPFs dos dependentes com Rendimentos PF">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="RENDPF_DEP_CPF"   Descricao="CPF dos dependentes que tiveram Rend. PF ou do exterior"  Tipo="C"   Tamanho="11" />                           
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro>  
+
+		<Registro Nome="REG_RENDAVARMENSAL" Identificador="40" Descricao="Renda Variável Mensal">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_MES"   Descricao="Mês de ocorrência" Tipo="N" Tamanho="2" />
+		    <Campo Nome="VR_COMUM_MVISTA_ACOES"   Descricao="Valor Operações Comuns Mercado a Vista - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_COMUM_MVISTA_OURO"   Descricao="Valor Operações Comuns Mercado a Vista - Ouro" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MVISTA_OUROFORA"   Descricao="Valor Operações Comuns Mercado a Vista - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MOPC_ACOES"   Descricao="Valor Operações Comuns Mercado Opcoes - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MOPC_OURO"   Descricao="Valor Operações Comuns Mercado Opcoes - Ouro" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_COMUM_MOPC_OUROFORA"   Descricao="Valor Operações Comuns Mercado Opcoes - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_COMUM_MOPC_OUTROS"   Descricao="Valor Operações Comuns Mercado Opcoes - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MFUT_DOLAR"   Descricao="Valor Operações Comuns Mercado Futuro - Dolar" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MFUT_INDICES"   Descricao="Valor Operações Comuns Mercado Futuro - Indices" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MFUT_JUROS"   Descricao="Valor Operações Comuns Mercado Futuro - Juros" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_COMUM_MFUT_OUTROS"   Descricao="Valor Operações Comuns Mercado Futuro - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_COMUM_MTERMO_ACOESOURO"   Descricao="Valor Operações Comuns Mercado a Termo - Acoes e Ouro" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MTERMO_OUTROS"   Descricao="Valor Operações Comuns Mercado a Termo - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MVISTA_ACOES"   Descricao="Valor Operações DayTrade Mercado a Vista - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MVISTA_OURO"   Descricao="Valor Operações DayTrade Mercado a Vista - Ouro" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_DAYTR_MVISTA_OUROFORA"   Descricao="Valor Operações DayTrade Mercado a Vista - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_DAYTR_MOPC_ACOES"   Descricao="Valor Operações DayTrade Mercado Opcoes - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MOPC_OURO"   Descricao="Valor Operações DayTrade Mercado Opcoes - Ouro" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MOPC_OUROFORA"   Descricao="Valor Operações DayTrade Mercado Opcoes - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MOPC_OUTROS"   Descricao="Valor Operações DayTrade Mercado Opcoes - Outros" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_DAYTR_MFUT_DOLAR"   Descricao="Valor Operações DayTrade Mercado Futuro - Dolar" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_DAYTR_MFUT_INDICES"   Descricao="Valor Operações DayTrade Mercado Futuro - Indices" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MFUT_JUROS"   Descricao="Valor Operações DayTrade Mercado Futuro - Juros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MFUT_OUTROS"   Descricao="Valor Operações DayTrade Mercado Futuro - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MTERMO_ACOESOURO"   Descricao="Valor Operações DayTrade Mercado a Termo - Acoes e Ouro" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_DAYTR_MTERMO_OUTROS"   Descricao="Valor Operações DayTrade Mercado a Termo - Outros" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_FONTE_DAYTRADE"   Descricao="Valor Retido na Fonte - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_IMPOSTO_PAGO"   Descricao="Valor Imposto Pago" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IMPRENDAFONTE"   Descricao="Valor Retido na Fonte - (Lei 11033) " Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_RESULTNEG_MESANT_COMUM"   Descricao="Valor Resultado Negativo Mes Anterior - Comum" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_RESULTNEG_MESANT_DAYTR"   Descricao="Valor Resultado Negativo Mes Anterior - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_FONTE_DAYTRADE_ANTJAN"   Descricao="Valor Retido na Fonte Anterior Janeiro - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_RESULTLIQ_MES_COMUM"   Descricao="Valor Resultado Liquido Mes - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_RESULTLIQ_MES_DAYTR"   Descricao="Valor Resultado Liquido Mes - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_BASECALCULO_MES_COMUM"   Descricao="Valor Base Calculo Mes - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_BASECALCULO_MES_DAYTR"   Descricao="Valor Base Calculo Mes - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_PREJACOMPENS_MES_COMUM"   Descricao="Valor Prejuizo Compensar Mes Anterior - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_PREJACOMPENS_MES_DAYTR"   Descricao="Valor Prejuizo Compensar Mes Anterior - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_ALIQUOTA_IMPOSTO_COMUM"   Descricao="Valor Aliquota Imposto Comum" Tipo="N" Tamanho="3" />
+   		    <Campo Nome="VR_ALIQUOTA_IMPOSTO_DAYTRADE"   Descricao="Valor Aliquota Imposto Day-Trade" Tipo="N" Tamanho="3" />
+		    <Campo Nome="VR_IMPOSTODEVIDO_MES_COMUM"   Descricao="Valor Imposto Devido Mes - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IMPOSTODEVIDO_MES_DAYTR"   Descricao="Valor Imposto Devido Mes - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_TOTAL_IMPOSTODEVIDO"   Descricao="Valor Total Imposto Devido" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IRFONTE_MESESANT_DAYTR"   Descricao="Valor Retido na Fonte Mes Anterior - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IRFONTE_ACOMPENS_DAYTR"   Descricao="Valor Retido na Fonte A Compensar - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_TOTAL_IMPOSTOAPAGAR"   Descricao="Valor Total Imposto a Pagar" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDAVARANUAL" Identificador="41" Descricao="Renda Variável Anual">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="VR_RESULTLIQUIDO"   Descricao="Valor Anual Resultado Líquido Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_RESULTNEGMESANTERIOR"   Descricao="Valor Anual Resultado Negativo Meses Anteriores Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_BASECALCULO"   Descricao="Valor Anual Base Cálculo Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_PREJUIZOCOMPENSAR"   Descricao="Valor Anual Prezuízo a Compensar Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_IMPOSTODEVIDO"   Descricao="Valor Anual Imposto Devido Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_CONSOL_IMPOSTOIMPOSTODEVIDO"   Descricao="Valor Anual Imposto Devido da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_CONSOL_IRFONTEDAYTRMESANT"   Descricao="Valor Anual IR Fonte DayTrade Meses Anteriores da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_CONSOL_IRFONTEDAYTRCOMPENSAR"   Descricao="Valor Anual IR Fonte DayTrade a Compensar da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_TOTALANUALIRFONTELEI11033"   Descricao="Imposto retido na fonte Lei 11.033 nos mese de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_CONSOL_IMPOSTOAPAGAR"   Descricao="Valor Anual Imposto a Pagar da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+		
+		<Registro Nome="REG_RENDAVARINVESTMENSAL" Identificador="42" Descricao="Fundos de Investimento Imobiliário Mensal">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_MES"   Descricao="Mês da operação" Tipo="N" Tamanho="2" />		    		       		    
+		    <Campo Nome="VR_RESLIQUIDO_MES"   Descricao="Resultado Líquido do mês" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_RESULT_NEG_MESANT"   Descricao="Resultado negativo até o mês anterior" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_BASECALCULO_MES"   Descricao="Base de Cálculo do Imposto" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_PREJACOMPENSAR_MES_OPCOMUNS"   Descricao="Prejuízo a Compensar " Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_ALIQUOTA_IMPOSTO_OPCOMUNS"   Descricao="Valor da alíquota" Tipo="N" Tamanho="3" />		    		       		    		    
+		    <Campo Nome="VR_IMPOSTODEVIDO_MES_OPCOMUNS"   Descricao="Imposto Devido" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IMPOSTOPAGO"   Descricao="Valor do imposto pago" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+		
+		<Registro Nome="REG_RENDAVARTOTAISINVEST" Identificador="43" Descricao="Totais de Alguns Campos Renda Variável">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="VR_TOTALANUALRESULTADOLIQUIDOSRENDAVARIAVEL_FII"   Descricao="Resultado Líquido do mês,  para as operações FII nos meses de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_TOTALANUALRESULTADONEGATIVOMESANTERIOR_FII"   Descricao="Resultado negativo até o mês anterior, para as operações FII nos meses de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_TOTALANUALBASECALCULOIMPOSTO_FII"   Descricao="Base de Cálculo do Imposto, para as operações FII  nos meses de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_TOTALANUALPREJUIZOCOMPENSAR_FII"   Descricao="Prejuízo a Compensar, para as operações FII nos meses de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_TOTALANUALIMPOSTODEVIDO_FII"   Descricao="Imposto Devido, para as operações FII nos meses de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_TOTALANUALIMPOSTOPAGAR_FII"   Descricao="Imposto a Pagar para as operações FII nos meses de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+		
+		<Registro Nome="REG_ATIVIDADE_RURAL_ID_IMOVEL" Identificador="50" Descricao="Atividade Rural Identificação do Contribuinte">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            <Campo Nome="NR_INCRA"   Descricao="Número do Imóvel na SRF" Tipo="C" Tamanho="8" />
+            <Campo Nome="NM_IMOVEL"   Descricao="Nome do imóvel" Tipo="C" Tamanho="60" />
+            <Campo Nome="NM_LOCAL"   Descricao="Localização do imóvel" Tipo="C" Tamanho="55" />
+            <Campo Nome="QT_AREA"   Descricao="Área do imóvel (ha)" Tipo="N" Tamanho="10" Decimais="1" />		    		       		    
+            <Campo Nome="PC_PARTIC"   Descricao="Percentual de participação no imóvel" Tipo="N" Tamanho="5" Decimais="2" />		    		       		    
+            <Campo Nome="CD_EXPLOR"   Descricao="Código da condição de exploração" Tipo="C" Tamanho="1" />
+            <Campo Nome="CD_ATIV"   Descricao="Código atividade Rural (Agricultura, pecuária , etc)" Tipo="C" Tamanho="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_REC_DESP_BRASIL" Identificador="51" Descricao="Atividade Rural Receitas e Desp. Brasil">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            <Campo Nome="NR_MES"   Descricao="Mês de ocorrência" Tipo="N" Tamanho="2" />
+            <Campo Nome="VR_DESP"   Descricao="Valor das despesas" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+            <Campo Nome="VR_REC"   Descricao="Valor das receitas" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_APURACAO_RESULTADO" Identificador="52" Descricao="Atividade Rural - APURAÇÃO DO RESULTADO TRIBUTÁVEL  ">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            <Campo Nome="VR_RECTOTAL"   Descricao="Receita Bruta Total (L01-Ficha Apuração Resultado Tributável).Se imóvel no Exterior(1),será zerado." Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+            <Campo Nome="VR_DESPTOTAL"   Descricao="Despesas de custeio e investimento (L02). Se imóvel no Exterior(1),será zerado." Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+			<Campo Nome="VR_RES1REAL"   Descricao="Resultado 1 (L03 = L01 - L02)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_PREJEXERCANT"   Descricao="Prejuízo do exercício anterior (L04)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_RESAPOS"   Descricao="Resultado após compensação de prejuízo (L05) " Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_OPCAO"   Descricao="Opção pelo arbitramento sobre Rec.Bruta (L06)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_RESTRIB"   Descricao="Resultado Tributável  (L07)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+			<Campo Nome="VR_PREJUIZO"  Descricao="Prejuízo a compensar (L08)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+			<Campo Nome="VR_RECVENDAFUTURA"  Descricao="Receita recebida por conta de venda para entrega futura (L09)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+			<Campo Nome="VR_ADIANT"  
+			 Descricao="Valor do adiantamento até 2002 referentes aos produtos entregues em  2004 do quadro apuração do resultado (L10 do programa)"
+			 Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+
+			<Campo Nome="VR_RESNAOTRIBAR"  
+			 Descricao="Apuração do resultado da Ativ. Rural (L11 do programa e L10 do formulário)"
+			 Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+
+			<Campo Nome="VR_RES1DOLAR"  
+			 Descricao="Resultado I – US$-Linha 01 da ficha Apuração do Resultado da A.R. no Exterior.(Quando imóvel no Brasil, será zerado)."
+			 Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+						                        		    
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_MOV_REBANHO" Identificador="53" Descricao="Atividade Rural Movimentacao do Rebanho">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            
+            <Campo Nome="CD_ESPEC"   Descricao="Código da espécie (1 a 5, sendo 5 = outros)" Tipo="N" Tamanho="1" />
+
+            <Campo Nome="QT_INIC"   Descricao="Estoque Inicial" Tipo="N" Tamanho="10" Decimais="2" />		    		       		    
+            <Campo Nome="QT_COMPRA"   Descricao="Compras" Tipo="N" Tamanho="10" Decimais="2" />		    		       		                
+			<Campo Nome="QT_NASCIM"   Descricao="Nascimentos" Tipo="N" Tamanho="10" Decimais="2" />
+			<Campo Nome="QT_PERDA"   Descricao="Perdas e consumo" Tipo="N" Tamanho="10" Decimais="2" />
+			<Campo Nome="QT_VENDA"   Descricao="Vendas" Tipo="N" Tamanho="10" Decimais="2" />
+			<Campo Nome="QT_ESTFINAL"   Descricao="Estoque final" Tipo="N" Tamanho="10" Decimais="2" />
+            
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_BENS" Identificador="54" Descricao="ANEXO DA ATIVIDADE RURAL - BENS">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+
+            <Campo Nome="CD_PAIS"   Descricao="Código do País" Tipo="N" Tamanho="3" />            
+            <Campo Nome="CD_BEMAR"   Descricao="Tipo do bem ou direito" Tipo="N" Tamanho="2" />		    		       		                
+            <Campo Nome="TX_BEM"   Descricao="Descrição do bem" Tipo="C" Tamanho="512" />		    		       		                            
+		    <Campo Nome="VR_BEM"   Descricao="Valor do Bem" Tipo="N" Tamanho="13" Decimais="2" />      
+
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_DIVIDAS" Identificador="55" Descricao="ANEXO DA ATIVIDADE RURAL - Dividas">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+
+            <Campo Nome="TX_DIVIDA"   Descricao="Discriminação da dívida" Tipo="C" Tamanho="250" />		    		       		                            
+		    <Campo Nome="VR_DIVATE"   Descricao="Valor da dívida até o ano anterior" Tipo="N" Tamanho="13" Decimais="2" />                  
+		    <Campo Nome="VR_DIVATU"   Descricao="Valor da dívida do ano-calendário" Tipo="N" Tamanho="13" Decimais="2" />                  
+		    <Campo Nome="VR_DIVPAG"   Descricao="Valor da dívida paga" Tipo="N" Tamanho="13" Decimais="2" />                  
+		    		    
+		    
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_REC_DESP_EXT" Identificador="56" Descricao="ATIVIDADE RURAL – RECEITAS E DESPESAS -  EXTERIOR">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="CD_PAIS"   Descricao="Código do País" Tipo="N" Tamanho="3" />
+            <Campo Nome="RECBRUTA"   Descricao="Receita Bruta Anual – Moeda Original" Tipo="N" Tamanho="13" Decimais="2" />		    		       		        
+            <Campo Nome="DESPCUSTEIO"   Descricao="Despesas de Custeio/Investimento– Moeda Original" Tipo="N" Tamanho="13" Decimais="2" />		    		       		        
+            <Campo Nome="RESORIGINAL"   Descricao="Resultado I – Moeda original" Tipo="N" Tamanho="13" Decimais="2" />		    		       		        
+	        <Campo Nome="RESDOLAR"   Descricao="Resultado I – US$" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                                        
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+        <Registro Nome= "REG_TRAILLER"    Identificador="T9"  Descricao="Trailler">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />   
+            <Campo Nome="QT_TOTAL"   Descricao="Total de registros" Tipo="N"   Tamanho="6" />
+            <Campo Nome="QT_R16"   Descricao="Total de registros tipo 16" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R17"   Descricao="Total de registros tipo 17" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R18"   Descricao="Total de registros tipo 18" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R19"   Descricao="Total de registros tipo 19" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R20"   Descricao="Total de registros tipo 20" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R21"   Descricao="Total de registros tipo 21" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R22"   Descricao="Total de registros tipo 22" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R23"   Descricao="Total de registros tipo 23" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R24"   Descricao="Total de registros tipo 24" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R25"   Descricao="Total de registros tipo 25" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R26"   Descricao="Total de registros tipo 26" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R27"   Descricao="Total de registros tipo 27" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R28"   Descricao="Total de registros tipo 28" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R29"   Descricao="Total de registros tipo 29" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R30"   Descricao="Total de registros tipo 30" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R31"   Descricao="Total de registros tipo 31" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R32"   Descricao="Total de registros tipo 32" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R33"   Descricao="Total de registros tipo 33" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R34"   Descricao="Total de registros tipo 34" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R35"   Descricao="Total de registros tipo 35" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R36"   Descricao="Total de registros tipo 36" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R40"   Descricao="Total de registros tipo 40" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R41"   Descricao="Total de registros tipo 41" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R42"   Descricao="Total de registros tipo 42" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R43"   Descricao="Total de registros tipo 43" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R50"   Descricao="Total de registros tipo 50" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R51"   Descricao="Total de registros tipo 51" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R52"   Descricao="Total de registros tipo 52" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R53"   Descricao="Total de registros tipo 53" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R54"   Descricao="Total de registros tipo 54" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R55"   Descricao="Total de registros tipo 55" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R56"   Descricao="Total de registros tipo 56" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R60"   Descricao="Total de registros tipo 60" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R61"   Descricao="Total de registros tipo 61" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R62"   Descricao="Total de registros tipo 62" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R63"   Descricao="Total de registros tipo 63" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R64"   Descricao="Total de registros tipo 64" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R65"   Descricao="Total de registros tipo 65" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R66"   Descricao="Total de registros tipo 66" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R67"   Descricao="Total de registros tipo 67" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R68"   Descricao="Total de registros tipo 68" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R70"   Descricao="Total de registros tipo 70" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R71"   Descricao="Total de registros tipo 71" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R72"   Descricao="Total de registros tipo 72" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R73"   Descricao="Total de registros tipo 73" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R74"   Descricao="Total de registros tipo 74" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R75"   Descricao="Total de registros tipo 75" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R76"   Descricao="Total de registros tipo 76" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R77"   Descricao="Total de registros tipo 77" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R78"   Descricao="Total de registros tipo 78" Tipo="N"   Tamanho="5" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro> 
+        
+        <Registro Nome= "REG_RECIBOHEADER"    Identificador="HR"  Descricao="Header do Recibo">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="FILLER"   Descricao="Espaco reservado"  Tipo="C"   Tamanho="3" />                           
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro> 
+        
+        <Registro Nome= "REG_RECIBODETALHE"    Identificador="DR"  Descricao="Recibo de entrega da declaracao">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="FILLER"        Descricao="Espaco em branco" Tipo="C"   Tamanho="3" />
+            <Campo Nome="IN_COMPLETA"   Descricao="Indicativo dec. Completa(S)/simplificada(N)" Tipo="C"   Tamanho="1" />
+            <Campo Nome="NM_NOME"       Descricao="Nome do contribuinte" Tipo="A"   Tamanho="60" />
+            <Campo Nome="TIP_LOGRA"     Descricao="Tipo do Logradouro" Tipo="A"   Tamanho="15" />
+            <Campo Nome="NM_LOGRA"      Descricao="Endereco contribuinte: logradouro" Tipo="C"   Tamanho="40" />
+            <Campo Nome="NR_NUMERO"     Descricao="Endereco contribuinte: numero" Tipo="C"   Tamanho="6" />
+            <Campo Nome="NM_COMPLEM"    Descricao="Endereco contribuinte: complemento" Tipo="C"   Tamanho="21" />
+            <Campo Nome="NM_BAIRRO"     Descricao="Endereco contribuinte: bairro" Tipo="C"   Tamanho="19" />
+            <Campo Nome="NR_CEP"        Descricao="Endereco contribuinte: CEP/ZIP" Tipo="C"   Tamanho="9" />
+            <Campo Nome="CD_MUNICIP"    Descricao="Codigo municipio" Tipo="N"   Tamanho="4" />
+            <Campo Nome="NM_MUNICIP"    Descricao="Endereco contribuinte: municipio" Tipo="C"   Tamanho="40" />
+            <Campo Nome="SG_UF"         Descricao="Endereco contribuinte: UF" Tipo="A"   Tamanho="2" />
+            <Campo Nome="FILLER1"       Descricao="Espaços em branco (Endereço contribuinte: Email - Correio Eletrônico)"  Tipo="C"  Tamanho="100" />
+            <Campo Nome="FILLER2"       Descricao="Endereco contribuinte: DDD do FAX" Tipo="C"   Tamanho="4" />
+            <Campo Nome="FILLER3"        Descricao="Endereco contribuinte: FAX" Tipo="C"   Tamanho="8" />
+            <Campo Nome="NR_DDD_TELEFONE"  Descricao="Endereco contribuinte: DDD do telefone" Tipo="C"   Tamanho="4" />
+            <Campo Nome="NR_TELEFONE"    Descricao="Endereco contribuinte: telefone" Tipo="C"   Tamanho="8" />
+            <Campo Nome="IN_RETIFICADORA"  Descricao="Indicativo se declaracao retificadora" Tipo="C"   Tamanho="1" />
+            <Campo Nome="VR_TOTTRIB"     Descricao="Valor dos rendimentos tributaveis" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPDEV"      Descricao="Valor do imposto devido" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPREST"     Descricao="Valor do imposto a restituir" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPPAGAR"    Descricao="Valor do imposto a pagar" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_QUOTAS"      Descricao="Quantidades de quotas" Tipo="N"   Tamanho="1" />
+            <Campo Nome="VR_QUOTA"       Descricao="Valor da quota" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_BANCO"       Descricao="Codigo do Banco" Tipo="C"   Tamanho="3" />
+            <Campo Nome="NR_AGENCIA"     Descricao="Numero da Agencia Bancaria" Tipo="C"   Tamanho="5" />
+            <Campo Nome="NR_DV_AGENCIA"  Descricao="Numero do Digito Verificador  da Agencia Bancaria" Tipo="C"   Tamanho="1" />
+            <Campo Nome="VR_GCIMPOSTOPAGO"  Descricao="Valor do Imposto pago do Ganho de Capital" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_CONTA"       Descricao="Numero da conta corrente para deposito de IAR" Tipo="C"   Tamanho="13" />
+            <Campo Nome="NR_DV_CONTA"    Descricao="Numero do Digito Verificador da Conta Corrente" Tipo="C"   Tamanho="2" />
+            <Campo Nome="VR_VCMOEDAEST"  Descricao="Imposto sobre alienacao de ME em especie" Tipo="N"   Tamanho="13"    Decimais="2" />            
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro> 
+        
+        <Registro Nome= "REG_RECIBOTRAILLER"    Identificador="R9"  Descricao="Trailler do Recibo">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="FILLER"   Descricao="Espaco reservado"  Tipo="C"   Tamanho="3" /> 
+			<Campo Nome="NR_HASH"   Descricao="Hash calculado sobre todos os registros da dec.,exceto o Header e o Trailler do recibo"   Tipo="N" Tamanho="10" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro>                                    
+        
+    </DeclaracaoTXT>
+    
+    
+    <DeclaracaoTXT TipoArquivo="ARQ_IRPFANOANTERIOR">
+<Registro Nome="REG_HEADER" Identificador="IR" Descricao="01 HEADER - IDENTIFICAÇÃO DA DECLARAÇÂO">     
+            <Campo Nome="SISTEMA"      Descricao="Identificador do Sistema - IRPF – Pessoa Física, com 4 espaços em branco na frente."      Tipo="C"    Tamanho="8" />
+            <Campo Nome="EXERCICIO"      Descricao="Exercicio do PGD 2006"      Tipo="N"    Tamanho="4" />
+            <Campo Nome="ANO_BASE"      Descricao="Ano calendario (2005)"      Tipo="N"    Tamanho="4" />
+            <Campo Nome="CODIGO_RECNET"      Descricao="Codigo interno da declaracao no sistema    Receitanet 1400"      Tipo="N"    Tamanho="4" />
+            <Campo Nome="IN_RETIFICADORA"      Descricao="Indicador se declaracao retificadora"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="NR_CPF"      Descricao="CPF do contribuinte"      Tipo="C"    Tamanho="11" />
+            <Campo Nome="FILLER1"      Descricao="Espaco reservado"      Tipo="A"    Tamanho="3" />
+            <Campo Nome="TIPO_NI"      Descricao="Indica o tipo de NI:   1 Pessoa Fisica (CPF)"      Tipo="N"    Tamanho="1" />
+            <Campo Nome="NR_VERSAO"      Descricao="Versao do Programa Gerador da declaracao: 100 (primeira versão)"      Tipo="N"    Tamanho="3" />
+            <Campo Nome="NM_NOME"      Descricao="Nome do contribuinte"      Tipo="A"    Tamanho="60" />
+            <Campo Nome="SG_UF"      Descricao="UF - Domicilio do Contribuinte"      Tipo="A"    Tamanho="2" />
+            <Campo Nome="NR_HASH"      Descricao="Hash calculado sobre todos os registros da declaracao,exceto o Header da declaracao e todos os registros do recibo(Nr. Controle SRF)"      Tipo="N"    Tamanho="10" />
+            <Campo Nome="IN_CERTIFICAVEL"      Descricao="Indicativo se declaracao eh certificavel"      Tipo="N"    Tamanho="1" />            
+            <Campo Nome="DT_NASCIM"      Descricao="Data de Nascimento (DDMMAAAA)"      Tipo="N"    Tamanho="8" />
+            <Campo Nome="IN_COMPLETA"      Descricao="Indicativo se declaracao completa"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="IN_IAP"      Descricao="Indicativo de declaraco com imposto a pagar"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="IN_GERADA"      Descricao="Indicativo se declaracao gerada"      Tipo="C"    Tamanho="1" />
+            <Campo Nome="NR_RECIBO_ULTIMA_DEC_EX_2006"      Descricao="Número do recibo da declaração original ou retificadora do exercicio atual a ser retificada"      Tipo="C"    Tamanho="10" />
+			<Campo Nome="IN_PLATAFORMAPGD"      Descricao="Indicador do tipo d eplataforma"      Tipo="C"    Tamanho="1" />            
+            <Campo Nome="NOME_SO"      Descricao="Nome do Sistema Operacional"      Tipo="C"    Tamanho="20" />
+            <Campo Nome="VERSAO_SO"    Descricao="Numero da versao do Sistema Operacional(SO)"      Tipo="C"    Tamanho="10" />
+            <Campo Nome="NR_RECIBO_DECLARACAO_TRANSMITIDA"      Descricao="Numero do recibo da última declaracao transmitida"      Tipo="C"    Tamanho="10" />            
+            <Campo Nome="CD_MUNICIP"    Descricao="Codigo do municipio"  Tipo="C" Tamanho="4" />
+            <Campo Nome="NR_CONJ"       Descricao="CPF do cônjuge"                  Tipo="C"   Tamanho="11" />            
+            <Campo Nome="IN_OBRIGAT_ENTREGA"      Descricao="Indicador de Obrigatoriedade de Entrega"      Tipo="C"    Tamanho="1" />            
+            <Campo Nome="VR_IMPDEVIDO"   Descricao="Valor  do Carnê-leão e Imposto Complementar dos dependentes." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_RECIBO_ULTIMA_DEC_EX_2005"      Descricao="Numero do recibo da última do ano anterior"      Tipo="C"    Tamanho="10" />            
+            <Campo Nome="NR_BASE_FONTE_MAIOR"      Descricao="CPF/CNPJ Base da Maior Fonte Pagadora"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_BASE_FONTE_DOIS"      Descricao="CPF/CNPJ Base da 2a Maior Fonte Pagadora"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_CPF_DEPE_REND_MAIOR"      Descricao="CPF de Dependente com maior Rend. Tributavel de PJ"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="NR_CPF_DEPE_REND_DOIS"      Descricao="CPF de Dependente com 2a maior Rend. Tributavel de PJ"      Tipo="C"    Tamanho="11" />            
+            <Campo Nome="NR_BASE_BENEF_DESP_MED_MAIOR"      Descricao="CPF/CNPJ Base do maior beneficiário de Despesas Médicas"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="NR_BASE_BENEF_DESP_MED_DOIS"      Descricao="CPF/CNPJ Base do 2o maior beneficiário de Despesas Médicas"      Tipo="C"    Tamanho="14" />            
+            <Campo Nome="IN_SEGURANCA"      Descricao="Indicador de segurança da declaração"      Tipo="C"    Tamanho="1" />            
+            <Campo Nome="IN_IMPOSTO_PAGO"      Descricao="Indicador se teve imposto pago"      Tipo="N"    Tamanho="1" />            
+            
+            <Campo Nome="FILLER2"      Descricao="Espaco reservado"      Tipo="A"    Tamanho="68" />
+            <Campo Nome="VERSAOTESTEPGD"      Descricao="Numero da versao de desenvolvimento do PGD. Esse campo irá compor o campo FILLER2, quando da versão final."      Tipo="C"    Tamanho="3" />
+            
+            
+            <Campo Nome="NR_CONTROLE"      Descricao="Numero de controle"      Tipo="N"    Tamanho="10" />
+        </Registro>
+        
+       <Registro    Nome="REG_IDENTIFICACAO" Identificador="16" Descricao="Identificaçao do declarante">
+            <Campo Nome= "NR_REG"       Descricao="Tipo do registro"                          Tipo="N" Tamanho="2" />
+            <Campo Nome= "NR_CPF"       Descricao="CPF contribuinte"                          Tipo="C" Tamanho="11" />
+            <Campo Nome="NM_NOME"       Descricao="Nome do contribuinte"                Tipo="A" Tamanho="60" />
+            <Campo Nome="TIP_LOGRA"     Descricao="Tipo do Logradouro"   Tipo="C" Tamanho="15" />
+            <Campo Nome="NM_LOGRA"      Descricao="Endereco contribuinte: logradouro"   Tipo="C" Tamanho="40" />
+            <Campo Nome="NR_NUMERO"     Descricao="Endereco contribuinte: Numero"       Tipo="C" Tamanho="6" />
+            <Campo Nome="NM_COMPLEM"    Descricao="Endereco contribuinte: complemento"  Tipo="C" Tamanho="21" />
+            <Campo Nome="NM_BAIRRO"     Descricao="Endereco contribuinte: bairro"       Tipo="C" Tamanho="19" />
+            <Campo Nome="NR_CEP"        Descricao="Endereco contribuinte: CEP ou ZIP(Exterior)" Tipo="C" Tamanho="9" />
+            <Campo Nome="CD_MUNICIP"    Descricao="Endereco contribuinte: codigo do município"  Tipo="N" Tamanho="4" />
+            <Campo Nome="NM_MUNICIP"    Descricao="Endereco contribuinte: município"    Tipo="C" Tamanho="40" />
+            <Campo Nome="SG_UF"         Descricao="Endereco contribuinte: UF"           Tipo="A" Tamanho="2" />
+            <Campo Nome="CD_EX"         Descricao="Codigo do Exterior"                  Tipo="C" Tamanho="3" />
+            <Campo Nome="CD_PAIS"       Descricao= "Codigo do país"                     Tipo="C" Tamanho="3" />
+            <Campo Nome="FILLER3"       Descricao= "Espaços em branco (Endereço contribuinte: Email - Correio Eletrônico)"     Tipo="C" Tamanho="100" />
+            <Campo Nome="FILLER1"       Descricao= "Espaços em branco (Endereço contribuinte: Cod. área do FAX/DDI)"     Tipo="C" Tamanho="4" />
+            <Campo Nome="FILLER2"       Descricao= "Espaços em branco (Endereço contribuinte: FAX)"     Tipo="C" Tamanho="8" />
+            <Campo Nome="NR_DDD_TELEFONE" Descricao="Endereco contribuinte: Cod. área do telefone/DDI" Tipo="C" Tamanho="4" />
+            <Campo Nome="NR_TELEFONE"   Descricao="Endereco contribuinte: telefone"     Tipo="C" Tamanho="8" />
+            <Campo Nome="DT_NASCIM"     Descricao="Data nascimento do contribuinte (DD/MM/AAAA)" Tipo="C" Tamanho="8" />
+            <Campo Nome="NR_TITELEITOR" Descricao="Numero do título de eleitor"         Tipo="C" Tamanho="13" />
+            <Campo Nome="CD_OCUP"       Descricao="Codigo de ocupacao"                  Tipo="A" Tamanho="3" />
+            <Campo Nome="CD_NATUR"      Descricao="Codigo natureza ocupacao"            Tipo="A" Tamanho="2" />
+            <Campo Nome="NR_QUOTAS"     Descricao="Quantidades de quotas"               Tipo="N" Tamanho="1" />
+            <Campo Nome="IN_COMPLETA"   Descricao="Indicativo se declaracao Completa(S)Simplificada(N)" Tipo="C" Tamanho="1" />
+            <Campo Nome="IN_RETIFICADORA" Descricao="Indicativo se declaracao retificadora" Tipo="C" Tamanho="1" />
+            <Campo Nome="IN_GERADO"     Descricao="Indicativo se a declaracao foi gerada" Tipo="C" Tamanho="1" />
+            <Campo Nome="IN_ENDERECO"   Descricao="Indicativo se houve mudança de Endereco" Tipo="C" Tamanho="1" />
+            <Campo Nome="NR_CONTROLE_ORIGINAL" Descricao="Numero do recibo da declaracao original" Tipo="C" Tamanho="12" />
+            <Campo Nome="NR_BANCO"      Descricao="Codigo do Banco"                     Tipo="C" Tamanho="3" />
+            <Campo Nome="NR_AGENCIA"    Descricao="Numero da Agência Bancária"          Tipo="C" Tamanho="5" />
+            <Campo Nome="NR_DV_AGENCIA" Descricao="Numero do Digito Verificador  da Agência Bancária" Tipo="C" Tamanho="1" />
+            <Campo Nome="NR_CONTA"      Descricao="Numero da conta corrente para depósito de IAR" Tipo="C" Tamanho="13" />
+            <Campo Nome="NR_DV_CONTA"   Descricao="Numero do Digito Verificador da Conta Corrente" Tipo="C" Tamanho="2" />
+            <Campo Nome="FILLER4"   Descricao="Espaços em branco (Indicativo se o contribuinte deseja receber informações sobre o processamento da declaração via email)" Tipo="A" Tamanho="1" />
+            <Campo Nome="NR_FONTE_PRINCIPAL"      Descricao="CPF/CNPJ principal fonte pagadora"      Tipo="C"    Tamanho="14" />
+            <Campo Nome="NR_RECIBO_ULTIMA_DEC_ANO_ANTERIOR"      Descricao="Número do recibo da última declaração transmitida no ano anterior"      Tipo="C"    Tamanho="10" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />          
+        </Registro>        
+        
+        <Registro Nome="REG_RESUMOSIMPLES" Identificador="17" Descricao="Demais Rendimentos e Imposto Pago - Simplificada">
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+            <Campo Nome="VR_RENDPFEXT"   Descricao="Valor dos rendimentos recebidos de Pessoas Físicas e do Exterior do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LEAO"   Descricao="Valor  do Carnê-leão e Imposto Complementar do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ISENTOS"   Descricao="Valor dos Rendimentos isentos e não-tributáveis do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_EXCLUSIVOS"   Descricao="Valor dos Rendimentos sujeitos à tributação exclusiva  (Exceto 13º salário) do titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13"   Descricao="Valor do 13o. do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13DEPEND"   Descricao="Valor do 13o. do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ISENTOSDEPEND"   Descricao="Valor dos Rendimentos isentos e não-tributáveis dos dependentes" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_EXCLUSIVOSDEPEND"   Descricao="Valor dos Rendimentos sujeitos à tributação exclusiva dos dependentes  (Exceto 13º salário)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDPFEXT_DEPEND"   Descricao="Valor dos rendimentos recebidos de Pessoas Físicas e do Exterior dos dependentes." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LEAO_DEPEND"   Descricao="Valor  do Carnê-leão e Imposto Complementar dos dependentes." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033_DEP"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N" Tamanho="10" /> 
+        </Registro>
+        
+        <Registro Nome="REG_RESUMOSIMPLES" Identificador="18" Descricao="Totais Calculados da Declaracao Simplificada">        
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />           
+            <Campo Nome="VR_RENDTRIB"   Descricao="Valor do Rendto+Rendto. Atividade Rural +PF+Exterior do  Titular + dependente." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DESCSIMP"   Descricao="Desconto Simplificado" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BASECALC"   Descricao="Base de cálculo do imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPDEVIDO"   Descricao="Imposto devido" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"   Descricao="Imposto retido na fonte-Titular  e dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LEAO"   Descricao="Carnê-leão, imposto complementar. e pago no exterior-Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)-Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPRESTIT"   Descricao="Saldo do imposto a restituir" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGAR"   Descricao="Saldo do Imposto a pagar" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_QUOTAS"   Descricao="Numero de quotas" Tipo="N" Tamanho="1" />
+            <Campo Nome="VR_QUOTA"   Descricao="Valor da quota" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTISENTO"   Descricao="Rendimento Isentos e não tributáveis - Titular e dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTEXCLUSIVO"   Descricao="Rendimento sujeitos a Tributação exclusiva -Titular e dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CONJUGE"   Descricao="Resultado de Informações do Cônjuge" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDTRIBDEPENDENTE"   Descricao="Valor do Rendimento PJ - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPOSTODEPENDENTE"   Descricao="Imposto retido na fonte - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGOESPECIE"   Descricao="Imposto a Pagar Ganhos de Capital – Moeda em Espécie" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDTRIBPJTITULAR"   Descricao="Total do rendimento Tributável PJ - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDTRIBARURAL"   Descricao="Total do rendimento AR-Brasil e Ext.(Linha 7 da ficha Apuração do Resultado" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTFONTETITULAR"   Descricao="Total do Imposto Retido na Fonte - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTBENSANOBASEANTERIOR"   Descricao="Total dos bens do ano anterior ao ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTBENSANOBASE"   Descricao="Total dos bens do ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDISENTOTITULAR"   Descricao="Total Rend. isentos/Não tributáveis – Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDISENTODEPENDENTES"   Descricao="Total Rend. isentos/Não tributáveis – Depend." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDEXCLUSTITULAR"   Descricao="Total Rend. Tributação Exclusiva – Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDEXCLUSDEPENDENTES"   Descricao="Total Rend. Tributação Exclusiva – Depend." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RESNAOTRIB_AR"   Descricao="Total Não Tributável(Linha 11 do Resultado da AR, se Brasil e Linha 10, se Exterior.)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTDIVIDAANOBASEANTERIOR"   Descricao="Total das dívidas do ano anterior ao ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTDIVIDAANOBASE"   Descricao="Total das dívidas do ano base" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTIRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004) - Titular+Dependente+Renda Variável+Ganho de Capital em PS" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_SUBTOTALISENTOTRANSPORTE"   Descricao="Subtotal dos rendimentos isentos e não tributáveis" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_SUBTOTALEXCLUSIVOTRANSPORTE"   Descricao="Subtotal dos rendimentos sujeitos à tributação exclusiva" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_GANHOLIQUIDORVTRANSPORTE"   Descricao="Ganhos líquidos em renda variável" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDISENTOGCTRANSPORTE"   Descricao="Parcela isenta proveniente dos Ganhos de Capital" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDPFEXT"   Descricao="Total de Rendimentos Recebidos de PF/exterior pelo titular e dependentes" Tipo="N" Tamanho="13" Decimais="2" />            
+            
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N" Tamanho="10" />
+        </Registro>       
+        
+        <Registro Nome="REG_COMPLETA" Identificador="19" Descricao="Declaracao Completa">        
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+            <Campo Nome="NR_FONTE"   Descricao="CNPJ/CPF  principal fonte pagadora" Tipo="C" Tamanho="14" />
+            <Campo Nome="VR_IMPEXT"   Descricao="Valor do imposto pago exterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPCOMP"   Descricao="Valor do imposto complementar pago" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RECEX_TIT"   Descricao="Rendimento recebidos do Exterior - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LIVCAIX_TIT"   Descricao="Livro caixa - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CARNELEAO_TIT"   Descricao="Carnê-Leão - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RECEX_DEP"   Descricao="Rendimento recebidos do Exterior - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LIVCAIX_DEP"   Descricao="Livro caixa - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CARNELEAO_DEP"   Descricao="Carnê-Leão - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVPRIV"   Descricao="Contribuição previdenciária  privada" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_FAPI"   Descricao="Contribuição FAPI" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVOFTITULAR"   Descricao="Total da contribuição previdenciária oficial do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVOFDEPENDENTE"   Descricao="Total da contribuição previdenciária oficial do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13SALARIOTITULAR"   Descricao="Total do décimo terceiro salário do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTAL13SALARIODEPENDENTE"   Descricao="Total do décimo terceiro salário do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+
+            <Campo Nome="NR_DEPENDENTE_DESP_INSTRUCAO"   Descricao="Numero de Dependentes com despesa de instrução" Tipo="N" Tamanho="5"  />
+            <Campo Nome="NR_ALIMENTANDO_DESP_INSTRUCAO"   Descricao="Numero de Alimentandos com despesa de instrução" Tipo="N" Tamanho="5"  />            
+
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+        <Registro Nome="REG_RESUMOCOMPLETA" Identificador="20" Descricao="Totais da Declaracao Completa">
+            <Campo Nome="NR_REG"   Descricao="Tipo do registro"                          Tipo="N" Tamanho="2" />
+            <Campo Nome="NR_CPF"   Descricao="CPF contribuinte"                          Tipo="C" Tamanho="11" />
+            <Campo Nome="VR_RENDJUR"   Descricao="Rendimentos recebidos Pessoa Jurídica - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDFISIC_TIT"   Descricao="Rendimentos recebidos Pessoa Física - Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDFISIC_DEP"   Descricao="Rendimentos recebidos Pessoa Física - Dependente" Tipo="N" Tamanho="13" Decimais="2" />            
+            <Campo Nome="VR_RECEX"   Descricao="Rendimento recebidos do Exterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RESAR"   Descricao="Resultado  da Atividade Rural" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTTRIB"   Descricao="Total de Rendimentos tributáveis" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PREVOF"   Descricao="Contribuição previdenciária oficial" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTPRIVADA"   Descricao="Previdência privada + FAPI limitada a 12% Rend.Trib." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DEPEN"   Descricao="Dedução com  dependentes" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DESPINST"   Descricao="Despesas com instrução" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DESPMEDIC"   Descricao="Despesas médicas" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_PENSAO"   Descricao="Pensão Alimentícia" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_LIVCAIX"   Descricao="Livro caixa" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DEDUC"   Descricao="Total das deduções" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BASECALC"   Descricao="Base de cálculo do imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"   Descricao="Valor do Imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DEDIMPOSTO"   Descricao="Dedução do imposto(dedução de incentivo) limitada a 6% do valor do imposto" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPDEV"   Descricao="Imposto devido" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPFONTE"   Descricao="Imposto na fonte" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CARNELEAO"   Descricao="Carnê-Leão" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPCOMPL"   Descricao="Imposto complementar" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPEXT"   Descricao="Imposto pago no exterior(após cálculo do limite)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004)" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTIMPPAGO"   Descricao="Total do imposto pago" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPREST"   Descricao="Imposto a restituir" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGAR"   Descricao="Imposto a pagar" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_QUOTAS"   Descricao="Quantidade de quotas" Tipo="N" Tamanho="1" />
+            <Campo Nome="VR_QUOTA"   Descricao="Valor de cada quota" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BENSANT"   Descricao="Total de Bens e Direitos do ano anterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_BENSATUAL"   Descricao="Total de Bens e Direitos do ano  atual" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DIVIDAANT"   Descricao="Total de Ônus e Dívidas do ano anterior" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_DIVIDAATUAL"   Descricao="Total de Ônus e Dívidas do ano  atual" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_CONJUGE"   Descricao="Informações de Cônjuge" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTISENTOS"   Descricao="Total dos Rendimentos isentos –Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTEXCLUS"   Descricao="Total dos Rendimentos exclusivos - Titular e Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPGC"   Descricao="Imposto sobre Ganhos de Capital" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTIRFONTELEI11033"   Descricao="Valor Retido na Fonte (Lei Nº 11.033/2004) - Titular+Dependente+Renda Variável+Ganho de Capital em PS" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPRV"   Descricao="Imposto sobre Renda Variável" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_RENDJURDEPENDENTE"   Descricao="Rendimentos recebidos Pessoa Jurídica - Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPFONTEDEPENDENTE"   Descricao="Imposto na fonte – Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGOVCBENS"   Descricao="Imposto Pago Moeda Estrangeira-Bens,Dir e Aplic.Fin." Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_IMPPAGOVCESPECIE"   Descricao="Imposto a Pagar Ganhos de Capital – Moeda em Espécie" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDISENTOSTITULAR"   Descricao="Total de Rendimentos isentos do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDISENTOSDEPENDENTE"   Descricao="Total de Rendimentos isentos do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDEXCLTITULAR"   Descricao="Total de Rendimentos exclusivos do Titular" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_TOTRENDEXCLDEPENDENTE"   Descricao="Total de Rendimentos exclusivos do Dependente" Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDPJ" Identificador="21" Descricao="Rendimentos Recebidos de PJ">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_PAGADOR"   Descricao="CNPJ fonte pagadora" Tipo="C" Tamanho="14" />
+		    <Campo Nome="NM_PAGADOR"   Descricao="Nome fonte pagadora" Tipo="C" Tamanho="60" />
+		    <Campo Nome="VR_RENDTO"   Descricao="Valor rendimento recebido" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_CONTRIB"   Descricao="Valor contribuição previdenciária oficial" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DECTERC"   Descricao="Valor décimo terceiro salário" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_IMPOSTO"   Descricao="Valor imposto retido na fonte" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDPF" Identificador="22" Descricao="Rendimentos Recebidos de PF e Exterior">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="E_DEPENDENTE"   Descricao="Indicativo se registro de dependente(S) ou Titular(N)" Tipo="I" Tamanho="1" />
+		    <Campo Nome="NR_MES"   Descricao="Mês de ocorrência" Tipo="N" Tamanho="2" />
+		    <Campo Nome="VR_RENDTO"   Descricao="Valor rendimentos recebidos" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_EXTER"   Descricao="Valor rendimento recebido no exterior" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_LIVCAIX"   Descricao="Valor dedução livro-caixa" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_ALIMENT"   Descricao="Valor dedução com pensão alimentícia" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DEDUC"   Descricao="Valor dedução com dependente" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_PREVID"   Descricao="Valor pago previdência" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_BASECALCULO"   Descricao="Valor Base de cálculo (rendimentos – deduções)" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_IMPOSTO"   Descricao="Valor imposto pago(Carnê-Leão)" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDISENTOS" Identificador="23" Descricao="Rendimentos Isentos e nao Tributaveis">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF" 	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+
+		    <Campo Nome="VR_BOLSA" 	Descricao="Linha 1 - Bolsa de Estudo e Pesquisa"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_PREVID" 	Descricao="Linha 2 - Pecúlio recebido de previdência privada"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_FGTS" 	Descricao="Linha 3 - Aviso prévio indenizado e assemelhados"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCISENTO" 	Descricao="Linha 4 - Ganho de Capital isento"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_LUCROS" 	Descricao="Linha 5 - Lucros e dividendos recebidos"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_RURAL" 	Descricao="Linha 6 - Atividade Rural isento"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_65ANOS" 	Descricao="Linha 7 - Contribuintes com  65 anos ou mais"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_INVALIDEZ" 	Descricao="Linha 8 - Pensão por invalidez"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_POUPANCA" 	Descricao="Linha 9 - Poupança e letras hipotecárias"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_SOCIO" 	Descricao="Linha 10 - Sócio ou Titular de Empresa"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_HERANCA" 	Descricao="Linha 11 - Transferências patrimoniais"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_OUTROS" 	Descricao="Linha 12 - Outros rendimentos isentos"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="TX_OUTROS" 	Descricao="Especificação de outros rendimentos"	      Tipo="C" Tamanho="60" />		    
+		    <Campo Nome="VR_ISENTOSDEPENDENTES" 	Descricao="Total dos rendimentos isentos dos dependentes"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_PEQUENO" 	Descricao="Alienação de bens pequeno valor -Informado p/ Cont"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_UNICO" 	Descricao="Alienação único imóvel - Informado p/  Contribuinte"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_REDUCAO" 	Descricao="Redução  Ganho  Capital - Informado p/  Contribuinte"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_PEQTRANSP" 	Descricao="Total de bens de pequeno valor - Transp. do GC"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_UNITRANSP" 	Descricao="Alienação único imóvel  - Transp. do GC"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_REDTRANSP" 	Descricao="Redução do Ganho de Capital - Transp. do GC"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCMOEDAEST" 	Descricao="Ganho de capital–Moeda Est.- isento -"	      Tipo="N" Tamanho="13" Decimais="2" />		    
+		    <Campo Nome="VR_GCMOEDAESTTRANSP" 	Descricao="Ganho de capital–Moeda Est.- isento - transportado"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    
+		    <Campo Nome="VR_GCTOTALINFORMADO" 	Descricao="Total informado pelo contribuinte(*)"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCTOTALTRANSPORTADO" 	Descricao="Total transportado pelo programa(*)"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    
+	        <Campo Nome="NR_CONTROLE" 	Descricao="Numero de Controle"	      Tipo="N" Tamanho="10" />
+		</Registro>
+
+		<Registro Nome="REG_RENDEXCLUSIVA" Identificador="24" Descricao="Dependentes">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF" 	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="VR_13SAL" 	Descricao="Linha 1 - Décimo terceiro salário"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GC" 	Descricao="Linha 2 - Ganho de Capital"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_RENDAVAR" 	Descricao="Linha 5 – Ganhos líquido em Renda Variável"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_FINANCEIRAS" 	Descricao="Linha 6 – Rendimentos de aplicações financeiras"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_OUTROS" 	Descricao="Linha 7 - Outros rendimentos exclusivos"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="TX_OUTROS" 	Descricao="Linha 7 - Especificação de Outros rend. exclusivos"	      Tipo="C" Tamanho="60" />
+		    <Campo Nome="VR_GCBENSMOEDAEST" 	Descricao="Linha 3 - Ganhos de Capital na alienação de bens,direitos e Aplicações financ. adquiridos em moeda estrangeira"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_GCALIENMOEDAEST" 	Descricao="Linha 4 - Ganhos de Capital na alienação de moeda estrangeira"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_13SALDEPENDENTES" 	Descricao="Linha 8 – 13o. salário recebido pelos Dependentes"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_EXCLUSIVAEXCETO13SALDEP" 	Descricao="Linha 9 – Rendimentos exclusivos dos Dependentes, exceto 13o. salário"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE" 	Descricao="Numero de Controle"	      Tipo="N" Tamanho="10" />
+        </Registro>
+
+
+		<Registro Nome="REG_DEPENDENTE" Identificador="25" Descricao="Dependentes">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF" 	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_CHAVE" 	Descricao="Numero de chave do dependente"	      Tipo="N" Tamanho="5" />
+		    <Campo Nome="CD_DEPEND" 	Descricao="Codigo da relação de dependência"	      Tipo="C" Tamanho="2" />
+		    <Campo Nome="NM_DEPEND" 	Descricao="Nome do dependente"	      Tipo="A" Tamanho="60" />
+		    <Campo Nome="DT_NASCIM" 	Descricao="Data de nascimento (DDMMAAAA)"	      Tipo="N" Tamanho="8" />
+		    <Campo Nome="NI_DEPEND" 	Descricao="CPF do dependente"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_CONTROLE" 	Descricao="Numero de Controle"	      Tipo="N" Tamanho="10" />
+		</Registro>
+
+
+        <Registro Nome="REG_PAGAMENTO" Identificador="26" Descricao="Relacao de pagamentos e doacoes efetuados">
+		    <Campo Nome="NR_REG" 	Descricao="Tipo do registro"	      Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"	Descricao="CPF contribuinte"	      Tipo="C" Tamanho="11" />
+		    <Campo Nome="CD_PAGTO"	Descricao="Codigo de doacoes e pagamento" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CHAVE_DEPEND"	Descricao="Numero de chave do dependente"      Tipo="N" Tamanho="5" />
+		    <Campo Nome="NR_BENEF"	Descricao="CNPJ/CPF do beneficiário"       Tipo="C" Tamanho="14" />
+		    <Campo Nome="NM_BENEF"	Descricao="Nome do beneficiario"	      Tipo="A" Tamanho="60" />
+		    <Campo Nome="VR_PAGTO"	Descricao="Valor do pagamento ou doação"	      Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_REDUC"	Descricao="Valor da parcela não dedutível ou reembolsada"       Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="NR_CONTROLE"	Descricao="Numero de Controle"      Tipo="N" Tamanho="10" />
+		</Registro>
+
+    
+        <Registro Nome="REG_BEM" Identificador="27" Descricao="declaracao de bens e direitos"> 
+            <Campo Nome="NR_REG"      Descricao="Tipo do registro"      Tipo="N"    Tamanho="2" />
+            <Campo Nome="NR_CPF"      Descricao="CPF contribuinte"      Tipo="C"    Tamanho="11" />
+            <Campo Nome="CD_BEM"      Descricao="Tipo do bem ou direito"  Tipo="N"  Tamanho="2" />
+            <Campo Nome="IN_EXTERIOR" Descricao="0 se imóvel no Brasil 1 se imóvel no Exterior"  Tipo="N" Tamanho="1" />
+            <Campo Nome="CD_PAIS"     Descricao="Codigo do País, se bem no Exterior"  Tipo="N" Tamanho="3" />
+            <Campo Nome="TX_BEM"      Descricao="Descrição do bem"      Tipo="C"    Tamanho="512" />
+            <Campo Nome="VR_ANTER"    Descricao="Valor em 31 de dezembro de 2004"  Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ATUAL"    Descricao="Valor em 31 de dezembro de 2005"  Tipo="N" Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE" Descricao="Numero de Controle"    Tipo="N"    Tamanho="10" />
+        </Registro>
+       
+        <Registro Nome= "REG_DIVIDA"    Identificador="28"  Descricao="Dívidas e onus reais">
+            <Campo Nome="NR_REG"	Descricao="Tipo do registro"	Tipo="N"    Tamanho="2" />
+            <Campo Nome="NR_CPF"	Descricao="CPF contribuinte"	Tipo="C"	Tamanho="11" />
+            <Campo Nome="CD_DIV"	Descricao="Tipo da dívida"	Tipo="N"	Tamanho="2" />
+            <Campo Nome="TX_DIV"	Descricao="Descrição da dívida"	Tipo="C"	Tamanho="250" />
+            <Campo Nome="VR_ANTER"	Descricao="Valor em 31 de dezembro de 2004"	Tipo="N"	Tamanho="13" Decimais="2" />
+            <Campo Nome="VR_ATUAL"	Descricao="Valor em 31 de dezembro de 2005"	Tipo="N"	Tamanho="13" Decimais="2" />
+            <Campo Nome="NR_CONTROLE"	Descricao="Numero de Controle"	Tipo="N"	Tamanho="10" />
+        </Registro>   
+        
+        <Registro Nome= "REG_CONJUGE"    Identificador="29"  Descricao="Informacoes do conjuge">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />
+            <Campo Nome="NR_CONJ"       Descricao="CPF do cônjuge"                  Tipo="C"   Tamanho="11" />
+            <Campo Nome="VR_BASE"       Descricao="Base de cálculo"                 Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_RETIDO_S"   Descricao="Imposto retido na fonte – Simplificada"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_LEAO_S"     Descricao="Carnê-Leão, imp. compl. e Exterior–Simplificada"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPOSTO_C"  Descricao="Total  do imposto - Completa"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_ISENTO_C"   Descricao="Rend. Isentos e não tributáveis – Completa/Simplif."  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_EXCLUSIVO_C" Descricao="Rend. Tribut. Exclusivo Fonte – Completa/Simplif."  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_TOTALCONJ"  Descricao="Resultado  total do cônjuge"         Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="IN_BENSCOMUNS" Descricao="indicativo se bens comuns do casal estão informados nessa declaracao.Em branco se essa pergunta não for respondida."  Tipo="C"   Tamanho="1" />
+            <Campo Nome="IN_TIPO"       Descricao="indicativo se declaracao do cônjuge Simplificada(S) ou Completa (N)" Tipo="C"   Tamanho="1" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />
+        </Registro>  
+        
+        <Registro Nome= "REG_INVENTARIANTE"    Identificador="30"  Descricao="Informacoes do Inventariante">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />             
+            <Campo Nome="NR_INVENT"        Descricao="CNPJ  da fonte pagadora"  Tipo="C"   Tamanho="11" />
+            <Campo Nome="NM_INVENT"        Descricao="Nome da fonte pagadora"  Tipo="A"   Tamanho="60" />
+            <Campo Nome="NM_END_INVENT"        Descricao="Valor do rendimento recebido"  Tipo="C"   Tamanho="70" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />
+        </Registro>          
+        
+        <Registro Nome= "REG_RENDPJSIMPLES"    Identificador="31"  Descricao="Rend. Trib Recebidos de PJ do Titular - Dec Simplificada">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />             
+            <Campo Nome="NR_PAGADOR"        Descricao="CNPJ  da fonte pagadora"  Tipo="C"   Tamanho="14" />
+            <Campo Nome="NM_PAGADOR"        Descricao="Nome da fonte pagadora"  Tipo="C"   Tamanho="60" />
+            <Campo Nome="VR_RENDTO"        Descricao="Valor do rendimento recebido"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"        Descricao="Valor do imposto retido na fonte"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />
+        </Registro>               
+
+        <Registro Nome= "REG_RENDPJDEPENDENTE"    Identificador="32"  Descricao="Rend. Trib Recebidos de PJ do Titular - Dec Simplificada">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />            
+            <Campo Nome="CPF_BENEF"   Descricao="CPF do Dependente"  Tipo="C"   Tamanho="11" />
+            <Campo Nome="NR_PAGADOR"   Descricao="CNPJ  da fonte pagadora"  Tipo="C"   Tamanho="14" />
+            <Campo Nome="NM_PAGADOR"   Descricao="Nome da fonte pagadora"  Tipo="C"   Tamanho="60" />
+            <Campo Nome="VR_RENDTO"   Descricao="Valor do rendimento recebido"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_CONTRIB"   Descricao="Valor contribuição previdenciária oficial"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_DECTERC"   Descricao="Valor décimo terceiro salário"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPOSTO"   Descricao="Valor do imposto retido na fonte"  Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />            
+        </Registro>     
+        
+        <Registro Nome= "REG_ALIMENTANDO"    Identificador="35"  Descricao="Alimentando - Declaracao Completa">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro"                Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte"                Tipo="C"   Tamanho="11" />                    
+            <Campo Nome="NR_CHAVE"        Descricao="Identificador do alimentando"  Tipo="N"   Tamanho="5" />
+            <Campo Nome="NM_NOME"        Descricao="Nome do alimentando"  Tipo="C"   Tamanho="60" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle"                  Tipo="N"   Tamanho="10" />            
+        </Registro>   
+        
+        <Registro Nome= "REG_CPFDEPENDENTECOMRENDPF"    Identificador="36"  Descricao="Relacao dos CPFs dos dependentes com Rendimentos PF">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="N"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="RENDPF_DEP_CPF"   Descricao="CPF dos dependentes que tiveram Rend. PF ou do exterior"  Tipo="C"   Tamanho="11" />                           
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro>  
+
+		<Registro Nome="REG_RENDAVARMENSAL" Identificador="40" Descricao="Renda Variável Mensal">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="NR_MES"   Descricao="Mês de ocorrência" Tipo="N" Tamanho="2" />
+		    <Campo Nome="VR_COMUM_MVISTA_ACOES"   Descricao="Valor Operações Comuns Mercado a Vista - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_COMUM_MVISTA_OURO"   Descricao="Valor Operações Comuns Mercado a Vista - Ouro" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MVISTA_OUROFORA"   Descricao="Valor Operações Comuns Mercado a Vista - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MOPC_ACOES"   Descricao="Valor Operações Comuns Mercado Opcoes - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MOPC_OURO"   Descricao="Valor Operações Comuns Mercado Opcoes - Ouro" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_COMUM_MOPC_OUROFORA"   Descricao="Valor Operações Comuns Mercado Opcoes - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_COMUM_MOPC_OUTROS"   Descricao="Valor Operações Comuns Mercado Opcoes - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MFUT_DOLAR"   Descricao="Valor Operações Comuns Mercado Futuro - Dolar" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MFUT_INDICES"   Descricao="Valor Operações Comuns Mercado Futuro - Indices" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MFUT_JUROS"   Descricao="Valor Operações Comuns Mercado Futuro - Juros" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_COMUM_MFUT_OUTROS"   Descricao="Valor Operações Comuns Mercado Futuro - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_COMUM_MTERMO_ACOESOURO"   Descricao="Valor Operações Comuns Mercado a Termo - Acoes e Ouro" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_COMUM_MTERMO_OUTROS"   Descricao="Valor Operações Comuns Mercado a Termo - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MVISTA_ACOES"   Descricao="Valor Operações DayTrade Mercado a Vista - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MVISTA_OURO"   Descricao="Valor Operações DayTrade Mercado a Vista - Ouro" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_DAYTR_MVISTA_OUROFORA"   Descricao="Valor Operações DayTrade Mercado a Vista - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_DAYTR_MOPC_ACOES"   Descricao="Valor Operações DayTrade Mercado Opcoes - Acoes" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MOPC_OURO"   Descricao="Valor Operações DayTrade Mercado Opcoes - Ouro" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MOPC_OUROFORA"   Descricao="Valor Operações DayTrade Mercado Opcoes - Ouro Fora Bolsa" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MOPC_OUTROS"   Descricao="Valor Operações DayTrade Mercado Opcoes - Outros" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_DAYTR_MFUT_DOLAR"   Descricao="Valor Operações DayTrade Mercado Futuro - Dolar" Tipo="N" Tamanho="13" Decimais="2" />
+   		    <Campo Nome="VR_DAYTR_MFUT_INDICES"   Descricao="Valor Operações DayTrade Mercado Futuro - Indices" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MFUT_JUROS"   Descricao="Valor Operações DayTrade Mercado Futuro - Juros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MFUT_OUTROS"   Descricao="Valor Operações DayTrade Mercado Futuro - Outros" Tipo="N" Tamanho="13" Decimais="2" />
+		    <Campo Nome="VR_DAYTR_MTERMO_ACOESOURO"   Descricao="Valor Operações DayTrade Mercado a Termo - Acoes e Ouro" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_DAYTR_MTERMO_OUTROS"   Descricao="Valor Operações DayTrade Mercado a Termo - Outros" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_FONTE_DAYTRADE"   Descricao="Valor Retido na Fonte - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_IMPOSTO_PAGO"   Descricao="Valor Imposto Pago" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IMPRENDAFONTE"   Descricao="Valor Retido na Fonte - (Lei 11033) " Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_RESULTNEG_MESANT_COMUM"   Descricao="Valor Resultado Negativo Mes Anterior - Comum" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_RESULTNEG_MESANT_DAYTR"   Descricao="Valor Resultado Negativo Mes Anterior - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_FONTE_DAYTRADE_ANTJAN"   Descricao="Valor Retido na Fonte Anterior Janeiro - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_RESULTLIQ_MES_COMUM"   Descricao="Valor Resultado Liquido Mes - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_RESULTLIQ_MES_DAYTR"   Descricao="Valor Resultado Liquido Mes - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_BASECALCULO_MES_COMUM"   Descricao="Valor Base Calculo Mes - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_BASECALCULO_MES_DAYTR"   Descricao="Valor Base Calculo Mes - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_PREJACOMPENS_MES_COMUM"   Descricao="Valor Prejuizo Compensar Mes Anterior - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_PREJACOMPENS_MES_DAYTR"   Descricao="Valor Prejuizo Compensar Mes Anterior - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_ALIQUOTA_IMPOSTO_COMUM"   Descricao="Valor Aliquota Imposto Comum" Tipo="N" Tamanho="3" />
+   		    <Campo Nome="VR_ALIQUOTA_IMPOSTO_DAYTRADE"   Descricao="Valor Aliquota Imposto Day-Trade" Tipo="N" Tamanho="3" />
+		    <Campo Nome="VR_IMPOSTODEVIDO_MES_COMUM"   Descricao="Valor Imposto Devido Mes - Comuns" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IMPOSTODEVIDO_MES_DAYTR"   Descricao="Valor Imposto Devido Mes - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		    
+		    <Campo Nome="VR_TOTAL_IMPOSTODEVIDO"   Descricao="Valor Total Imposto Devido" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IRFONTE_MESESANT_DAYTR"   Descricao="Valor Retido na Fonte Mes Anterior - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_IRFONTE_ACOMPENS_DAYTR"   Descricao="Valor Retido na Fonte A Compensar - DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		 
+		    <Campo Nome="VR_TOTAL_IMPOSTOAPAGAR"   Descricao="Valor Total Imposto a Pagar" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_RENDAVARANUAL" Identificador="41" Descricao="Renda Variável Anual">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="VR_RESULTLIQUIDO"   Descricao="Valor Anual Resultado Líquido Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_RESULTNEGMESANTERIOR"   Descricao="Valor Anual Resultado Negativo Meses Anteriores Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_BASECALCULO"   Descricao="Valor Anual Base Cálculo Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_PREJUIZOCOMPENSAR"   Descricao="Valor Anual Prezuízo a Compensar Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_IMPOSTODEVIDO"   Descricao="Valor Anual Imposto Devido Comuns DayTrade" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_CONSOL_IMPOSTOIMPOSTODEVIDO"   Descricao="Valor Anual Imposto Devido da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_CONSOL_IRFONTEDAYTRMESANT"   Descricao="Valor Anual IR Fonte DayTrade Meses Anteriores da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="VR_CONSOL_IRFONTEDAYTRCOMPENSAR"   Descricao="Valor Anual IR Fonte DayTrade a Compensar da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_TOTALANUALIRFONTELEI11033"   Descricao="Imposto retido na fonte Lei 11.033 nos mese de jan a dez" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    		    
+		    <Campo Nome="VR_CONSOL_IMPOSTOAPAGAR"   Descricao="Valor Anual Imposto a Pagar da Consolidação" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+		    <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_ID_IMOVEL" Identificador="50" Descricao="Atividade Rural Identificação do Contribuinte">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            <Campo Nome="NR_INCRA"   Descricao="Número do Imóvel na SRF" Tipo="C" Tamanho="8" />
+            <Campo Nome="NM_IMOVEL"   Descricao="Nome do imóvel" Tipo="C" Tamanho="60" />
+            <Campo Nome="NM_LOCAL"   Descricao="Localização do imóvel" Tipo="C" Tamanho="55" />
+            <Campo Nome="QT_AREA"   Descricao="Área do imóvel (ha)" Tipo="N" Tamanho="10" Decimais="1" />		    		       		    
+            <Campo Nome="PC_PARTIC"   Descricao="Percentual de participação no imóvel" Tipo="N" Tamanho="5" Decimais="2" />		    		       		    
+            <Campo Nome="CD_EXPLOR"   Descricao="Código da condição de exploração" Tipo="C" Tamanho="1" />
+            <Campo Nome="CD_ATIV"   Descricao="Código atividade Rural (Agricultura, pecuária , etc)" Tipo="C" Tamanho="2" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_REC_DESP_BRASIL" Identificador="51" Descricao="Atividade Rural Receitas e Desp. Brasil">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            <Campo Nome="NR_MES"   Descricao="Mês de ocorrência" Tipo="N" Tamanho="2" />
+            <Campo Nome="VR_DESP"   Descricao="Valor das despesas" Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+            <Campo Nome="VR_REC"   Descricao="Valor das receitas" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_APURACAO_RESULTADO" Identificador="52" Descricao="Atividade Rural - APURAÇÃO DO RESULTADO TRIBUTÁVEL  ">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            <Campo Nome="VR_RECTOTAL"   Descricao="Receita Bruta Total (L01-Ficha Apuração Resultado Tributável).Se imóvel no Exterior(1),será zerado." Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+            <Campo Nome="VR_DESPTOTAL"   Descricao="Despesas de custeio e investimento (L02). Se imóvel no Exterior(1),será zerado." Tipo="N" Tamanho="13" Decimais="2" />		    		       		    
+			<Campo Nome="VR_RES1REAL"   Descricao="Resultado 1 (L03 = L01 - L02)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_PREJEXERCANT"   Descricao="Prejuízo do exercício anterior (L04)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_RESAPOS"   Descricao="Resultado após compensação de prejuízo (L05) " Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_OPCAO"   Descricao="Opção pelo arbitramento sobre Rec.Bruta (L06)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    
+			<Campo Nome="VR_RESTRIB"   Descricao="Resultado Tributável  (L07)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+			<Campo Nome="VR_PREJUIZO"  Descricao="Prejuízo a compensar (L08)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+			<Campo Nome="VR_RECVENDAFUTURA"  Descricao="Receita recebida por conta de venda para entrega futura (L09)" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+			<Campo Nome="VR_ADIANT"  
+			 Descricao="Valor do adiantamento até 2002 referentes aos produtos entregues em  2004 do quadro apuração do resultado (L10 do programa)"
+			 Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+
+			<Campo Nome="VR_RESNAOTRIBAR"  
+			 Descricao="Apuração do resultado da Ativ. Rural (L11 do programa e L10 do formulário)"
+			 Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+
+			<Campo Nome="VR_RES1DOLAR"  
+			 Descricao="Resultado I – US$-Linha 01 da ficha Apuração do Resultado da A.R. no Exterior.(Quando imóvel no Brasil, será zerado)."
+			 Tipo="N" Tamanho="13" Decimais="2" />		    		       		                            		    			
+						                        		    
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_MOV_REBANHO" Identificador="53" Descricao="Atividade Rural Movimentacao do Rebanho">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+            
+            <Campo Nome="CD_ESPEC"   Descricao="Código da espécie (1 a 5, sendo 5 = outros)" Tipo="N" Tamanho="1" />
+
+            <Campo Nome="QT_INIC"   Descricao="Estoque Inicial" Tipo="N" Tamanho="10" Decimais="2" />		    		       		    
+            <Campo Nome="QT_COMPRA"   Descricao="Compras" Tipo="N" Tamanho="10" Decimais="2" />		    		       		                
+			<Campo Nome="QT_NASCIM"   Descricao="Nascimentos" Tipo="N" Tamanho="10" Decimais="2" />
+			<Campo Nome="QT_PERDA"   Descricao="Perdas e consumo" Tipo="N" Tamanho="10" Decimais="2" />
+			<Campo Nome="QT_VENDA"   Descricao="Vendas" Tipo="N" Tamanho="10" Decimais="2" />
+			<Campo Nome="QT_ESTFINAL"   Descricao="Estoque final" Tipo="N" Tamanho="10" Decimais="2" />
+            
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_BENS" Identificador="54" Descricao="ANEXO DA ATIVIDADE RURAL - BENS">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+
+            <Campo Nome="CD_PAIS"   Descricao="Código do País" Tipo="N" Tamanho="3" />            
+            <Campo Nome="CD_BEMAR"   Descricao="Tipo do bem ou direito" Tipo="N" Tamanho="2" />		    		       		                
+            <Campo Nome="TX_BEM"   Descricao="Descrição do bem" Tipo="C" Tamanho="512" />		    		       		                            
+		    <Campo Nome="VR_BEM"   Descricao="Valor do Bem" Tipo="N" Tamanho="13" Decimais="2" />      
+
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_DIVIDAS" Identificador="55" Descricao="ANEXO DA ATIVIDADE RURAL - Dividas">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="IN_EXTERIOR"   Descricao="0 se imóvel no Brasil - 1 se imóvel no Exterior" Tipo="N" Tamanho="1" />
+
+            <Campo Nome="TX_DIVIDA"   Descricao="Discriminação da dívida" Tipo="C" Tamanho="250" />		    		       		                            
+		    <Campo Nome="VR_DIVATE"   Descricao="Valor da dívida até o ano anterior" Tipo="N" Tamanho="13" Decimais="2" />                  
+		    <Campo Nome="VR_DIVATU"   Descricao="Valor da dívida do ano-calendário" Tipo="N" Tamanho="13" Decimais="2" />                  
+		    <Campo Nome="VR_DIVPAG"   Descricao="Valor da dívida paga" Tipo="N" Tamanho="13" Decimais="2" />                  
+		    		    
+		    
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+		<Registro Nome="REG_ATIVIDADE_RURAL_REC_DESP_EXT" Identificador="56" Descricao="ATIVIDADE RURAL – RECEITAS E DESPESAS -  EXTERIOR">
+		    <Campo Nome="NR_REG"   Descricao="Tipo do registro" Tipo="N" Tamanho="2" />
+		    <Campo Nome="NR_CPF"   Descricao="CPF contribuinte" Tipo="C" Tamanho="11" />
+		    <Campo Nome="CD_PAIS"   Descricao="Código do País" Tipo="N" Tamanho="3" />
+            <Campo Nome="RECBRUTA"   Descricao="Receita Bruta Anual – Moeda Original" Tipo="N" Tamanho="13" Decimais="2" />		    		       		        
+            <Campo Nome="DESPCUSTEIO"   Descricao="Despesas de Custeio/Investimento– Moeda Original" Tipo="N" Tamanho="13" Decimais="2" />		    		       		        
+            <Campo Nome="RESORIGINAL"   Descricao="Resultado I – Moeda original" Tipo="N" Tamanho="13" Decimais="2" />		    		       		        
+	        <Campo Nome="RESDOLAR"   Descricao="Resultado I – US$" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                                        
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle" Tipo="N" Tamanho="10" />
+        </Registro>
+
+        <Registro Nome= "REG_TRAILLER"    Identificador="T9"  Descricao="Trailler">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />   
+            <Campo Nome="QT_TOTAL"   Descricao="Total de registros" Tipo="N"   Tamanho="6" />
+            <Campo Nome="QT_R16"   Descricao="Total de registros tipo 16" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R17"   Descricao="Total de registros tipo 17" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R18"   Descricao="Total de registros tipo 18" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R19"   Descricao="Total de registros tipo 19" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R20"   Descricao="Total de registros tipo 20" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R21"   Descricao="Total de registros tipo 21" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R22"   Descricao="Total de registros tipo 22" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R23"   Descricao="Total de registros tipo 23" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R24"   Descricao="Total de registros tipo 24" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R25"   Descricao="Total de registros tipo 25" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R26"   Descricao="Total de registros tipo 26" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R27"   Descricao="Total de registros tipo 27" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R28"   Descricao="Total de registros tipo 28" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R29"   Descricao="Total de registros tipo 29" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R30"   Descricao="Total de registros tipo 30" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R31"   Descricao="Total de registros tipo 31" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R32"   Descricao="Total de registros tipo 32" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R35"   Descricao="Total de registros tipo 35" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R36"   Descricao="Total de registros tipo 36" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R40"   Descricao="Total de registros tipo 40" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R41"   Descricao="Total de registros tipo 41" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R50"   Descricao="Total de registros tipo 50" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R51"   Descricao="Total de registros tipo 51" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R52"   Descricao="Total de registros tipo 52" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R53"   Descricao="Total de registros tipo 53" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R54"   Descricao="Total de registros tipo 54" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R55"   Descricao="Total de registros tipo 55" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R56"   Descricao="Total de registros tipo 56" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R60"   Descricao="Total de registros tipo 60" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R61"   Descricao="Total de registros tipo 61" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R62"   Descricao="Total de registros tipo 62" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R63"   Descricao="Total de registros tipo 63" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R64"   Descricao="Total de registros tipo 64" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R65"   Descricao="Total de registros tipo 65" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R66"   Descricao="Total de registros tipo 66" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R67"   Descricao="Total de registros tipo 67" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R68"   Descricao="Total de registros tipo 68" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R70"   Descricao="Total de registros tipo 70" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R71"   Descricao="Total de registros tipo 71" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R72"   Descricao="Total de registros tipo 72" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R73"   Descricao="Total de registros tipo 73" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R74"   Descricao="Total de registros tipo 74" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R75"   Descricao="Total de registros tipo 75" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R76"   Descricao="Total de registros tipo 76" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R77"   Descricao="Total de registros tipo 77" Tipo="N"   Tamanho="5" />
+            <Campo Nome="QT_R78"   Descricao="Total de registros tipo 78" Tipo="N"   Tamanho="5" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro> 
+        
+        <Registro Nome= "REG_RECIBOHEADER"    Identificador="HR"  Descricao="Header do Recibo">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="FILLER"   Descricao="Espaco reservado"  Tipo="C"   Tamanho="3" />                           
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro> 
+        
+        <Registro Nome= "REG_RECIBODETALHE"    Identificador="DR"  Descricao="Recibo de entrega da declaracao">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="FILLER"        Descricao="Espaco em branco" Tipo="C"   Tamanho="3" />
+            <Campo Nome="IN_COMPLETA"   Descricao="Indicativo dec. Completa(S)/simplificada(N)" Tipo="C"   Tamanho="1" />
+            <Campo Nome="NM_NOME"       Descricao="Nome do contribuinte" Tipo="A"   Tamanho="60" />
+            <Campo Nome="TIP_LOGRA"     Descricao="Tipo do Logradouro" Tipo="A"   Tamanho="15" />
+            <Campo Nome="NM_LOGRA"      Descricao="Endereco contribuinte: logradouro" Tipo="C"   Tamanho="40" />
+            <Campo Nome="NR_NUMERO"     Descricao="Endereco contribuinte: numero" Tipo="C"   Tamanho="6" />
+            <Campo Nome="NM_COMPLEM"    Descricao="Endereco contribuinte: complemento" Tipo="C"   Tamanho="21" />
+            <Campo Nome="NM_BAIRRO"     Descricao="Endereco contribuinte: bairro" Tipo="C"   Tamanho="19" />
+            <Campo Nome="NR_CEP"        Descricao="Endereco contribuinte: CEP/ZIP" Tipo="C"   Tamanho="9" />
+            <Campo Nome="CD_MUNICIP"    Descricao="Codigo municipio" Tipo="N"   Tamanho="4" />
+            <Campo Nome="NM_MUNICIP"    Descricao="Endereco contribuinte: municipio" Tipo="C"   Tamanho="40" />
+            <Campo Nome="SG_UF"         Descricao="Endereco contribuinte: UF" Tipo="A"   Tamanho="2" />
+            <Campo Nome="FILLER1"       Descricao="Espaços em branco (Endereço contribuinte: Email - Correio Eletrônico)"  Tipo="C"  Tamanho="100" />
+            <Campo Nome="FILLER2"       Descricao="Endereco contribuinte: DDD do FAX" Tipo="C"   Tamanho="4" />
+            <Campo Nome="FILLER3"        Descricao="Endereco contribuinte: FAX" Tipo="C"   Tamanho="8" />
+            <Campo Nome="NR_DDD_TELEFONE"  Descricao="Endereco contribuinte: DDD do telefone" Tipo="C"   Tamanho="4" />
+            <Campo Nome="NR_TELEFONE"    Descricao="Endereco contribuinte: telefone" Tipo="C"   Tamanho="8" />
+            <Campo Nome="IN_RETIFICADORA"  Descricao="Indicativo se declaracao retificadora" Tipo="C"   Tamanho="1" />
+            <Campo Nome="VR_TOTTRIB"     Descricao="Valor dos rendimentos tributaveis" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPDEV"      Descricao="Valor do imposto devido" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPREST"     Descricao="Valor do imposto a restituir" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="VR_IMPPAGAR"    Descricao="Valor do imposto a pagar" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_QUOTAS"      Descricao="Quantidades de quotas" Tipo="N"   Tamanho="1" />
+            <Campo Nome="VR_QUOTA"       Descricao="Valor da quota" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_BANCO"       Descricao="Codigo do Banco" Tipo="C"   Tamanho="3" />
+            <Campo Nome="NR_AGENCIA"     Descricao="Numero da Agencia Bancaria" Tipo="C"   Tamanho="5" />
+            <Campo Nome="NR_DV_AGENCIA"  Descricao="Numero do Digito Verificador  da Agencia Bancaria" Tipo="C"   Tamanho="1" />
+            <Campo Nome="VR_GCIMPOSTOPAGO"  Descricao="Valor do Imposto pago do Ganho de Capital" Tipo="N"   Tamanho="13"    Decimais="2" />
+            <Campo Nome="NR_CONTA"       Descricao="Numero da conta corrente para deposito de IAR" Tipo="C"   Tamanho="13" />
+            <Campo Nome="NR_DV_CONTA"    Descricao="Numero do Digito Verificador da Conta Corrente" Tipo="C"   Tamanho="2" />
+            <Campo Nome="VR_VCMOEDAEST"  Descricao="Imposto sobre alienacao de ME em especie" Tipo="N"   Tamanho="13"    Decimais="2" />            
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro> 
+        
+        <Registro Nome= "REG_RECIBOTRAILLER"    Identificador="R9"  Descricao="Trailler do Recibo">
+            <Campo Nome="NR_REG"        Descricao="Tipo do registro" Tipo="C"   Tamanho="2" />
+            <Campo Nome="NR_CPF"        Descricao="CPF contribuinte" Tipo="C"   Tamanho="11" />      
+            <Campo Nome="FILLER"   Descricao="Espaco reservado"  Tipo="C"   Tamanho="3" /> 
+			<Campo Nome="NR_HASH"   Descricao="Hash calculado sobre todos os registros da dec.,exceto o Header e o Trailler do recibo"   Tipo="N" Tamanho="10" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de Controle" Tipo="N"   Tamanho="10" />             
+        </Registro>                                    
+        
+    </DeclaracaoTXT>
+  
+    <DeclaracaoTXT TipoArquivo="ARQ_COMPLRECIBO">
+
+    	<Registro Nome= "REG_COMPLRECIBOHEADER"    Identificador="HC"  Descricao="Header do complemento do recibo">
+   			<Campo Nome="NR_REG"		Descricao="Tipo de registro"   	Tipo="A"   	Tamanho="2" />
+            <Campo Nome="NR_CPF"    	Descricao="CPF contribuinte"   	Tipo="C" 	Tamanho="11" />
+            <Campo Nome="FILLER"      	Descricao="Espaco reservado"    Tipo="C"    Tamanho="3" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N"    Tamanho="10" />
+    	</Registro>
+    	<Registro Nome= "REG_COMPLRECIBODETALHE"    Identificador="RC"  Descricao="Detalhes do complemento do recibo">
+   			<Campo Nome="NR_REG"		Descricao="Tipo de registro"   					Tipo="A"   	Tamanho="2" />
+            <Campo Nome="NR_CPF"    	Descricao="CPF contribuinte"   					Tipo="C" 	Tamanho="11" />
+            <Campo Nome="FILLER"      	Descricao="Espaco reservado"    				Tipo="C"    Tamanho="3" />
+            <Campo Nome="DIAREC"   		Descricao="Data de recepcao: dia"   			Tipo="N"    Tamanho="2" />
+            <Campo Nome="MESREC"   		Descricao="Data de recepcao: mes"   			Tipo="N"    Tamanho="2" />
+            <Campo Nome="ANOREC"   		Descricao="Data de recepcao: ano"   			Tipo="N"    Tamanho="4" />
+            <Campo Nome="HORAREC"   	Descricao="Horario : hora"						Tipo="N" 	Tamanho="2" />
+            <Campo Nome="MINREC"   		Descricao="Horario : minutos"					Tipo="N" 	Tamanho="2" />
+            <Campo Nome="SEGREC"   		Descricao="Horario : segundos"					Tipo="N" 	Tamanho="2" />
+            <Campo Nome="LOCALREC"   	Descricao="Local de recepcao"    				Tipo="C"    Tamanho="25" />
+            <Campo Nome="NR_REMESSA"   	Descricao="N. da remessa"  	 					Tipo="C"    Tamanho="4" />
+            <Campo Nome="ASSINATURA"    Descricao="Assinatura"   						Tipo="C"    Tamanho="10" />
+            <Campo Nome="IN_GATEWAY"    Descricao="Indicador gateway"       			Tipo="N"    Tamanho="1" />
+            <Campo Nome="FILLER2" 		Descricao="campo reservado"    	 				Tipo="C"    Tamanho="1" />
+            <Campo Nome="IN_APLIC_TRANSMISSAO" 	Descricao="Indica o aplicativo de transmissão: 1- Receitanet; 2-ReceitanetWEB"     
+              Tipo="N"    Tamanho="1" />
+            <Campo Nome="APLIC_TRANSMISSAO"   	Descricao="Indica a expressão associada ao aplicativo de transmissão :RW - se ReceitanetWEB; RN - se Receitanet"  	
+              Tipo="C"    Tamanho="2" />
+            <Campo Nome="COD_AG_TRANSMISSOR"   	Descricao="Agente transmissor"    	  	Tipo="C"    Tamanho="3" />
+            <Campo Nome="NI_ASSINATURA_DECL"   	Descricao="NI assinante"    	  	  	Tipo="C"    Tamanho="14" />
+            <Campo Nome="CONTROLE_SRF"   	Descricao="Número do controle SRF da declaração criptografado. OBS: Essa informação somente deve ser utilizada para a validação do recibo para os PGD versão Java." Tipo="C"    Tamanho="10" />
+            <Campo Nome="FILLER3"      	Descricao="Espaco reservado"    				Tipo="C"    Tamanho="20" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  				Tipo="N"    Tamanho="10" />
+    	</Registro>
+
+
+
+    	<Registro Nome= "REG_COMPLRECIBOMULTA"    Identificador="NC"  Descricao="NOTIFICACAO DE MULTA">
+
+   			<Campo Nome="NR_REG"		Descricao="Tipo de registro"   	Tipo="A"   	Tamanho="2" />
+   			<Campo Nome="IN_ACAO_FISCAL"		Descricao="Tipo de registro"   	Tipo="N"   	Tamanho="1" />
+            <Campo Nome="NM_DELEGADO" 	Descricao="Nome do Delegado da SRF"   	Tipo="C" 	Tamanho="60" />            
+            <Campo Nome="NR_MATRIC_DELEGADO"    Descricao="Numero da Matricula do Delegado"    Tipo="C"    Tamanho="8" />            
+            <Campo Nome="NR_CARGO"     	Descricao="Cargo do Delegado( 1 - AFRF  2 - TRF)"    	Tipo="N"    Tamanho="1" />                        
+            <Campo Nome="NR_UA" 	Descricao="Código da Unidade de Atendimento"   	Tipo="C" 	Tamanho="7" />   		            
+            <Campo Nome="NM_UA" 	Descricao="Nome da Unidade de Atendimento"   	Tipo="C" 	Tamanho="50" />   		            
+            <Campo Nome="DT_VENCIMENTO" 	Descricao="Data de Vencimento da Multa(Formato AAAAMMDD)"   	Tipo="N" 	Tamanho="8" />   		            
+            <Campo Nome="QT_MESES"   Descricao="Qtd. Meses de atraso "  Tipo="N"    Tamanho="2" />
+	        <Campo Nome="VR_MULTA"   Descricao="Valor da Multa" Tipo="N" Tamanho="13" Decimais="2" />		    		       		                                                                   			
+            <Campo Nome="NR_DISTRIBUICAO"   
+            Descricao="Código da Notificação - XHHHHHHHHHHY – DD onde: X - identificador do sistema que está cobrando a multa. Para o IRPF, X  =  5 HHHHHHHHHH - é o hashcode da declaração Y - é a primeira posição do dígito verificador do CPF DD - é o DV módulo 11 com 2 posições de DV  "  
+            Tipo="C"    Tamanho="14" />            	                                                                       			
+            <Campo Nome="IN_OBRIGATORIEDADE" 	Descricao="Indicador de obrigatoriedade de entrega   atualizado"   
+            	Tipo="C" 	Tamanho="1" />   		
+            <Campo Nome="TP_DELEGACIA" 	Descricao="Tipo da Delegacia"   	Tipo="C" 	Tamanho="31" />                        	
+            <Campo Nome="FILLER" 	Descricao="Espaco em branco"   	Tipo="C" 	Tamanho="54" />                        	
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N"    Tamanho="10" />
+
+    	</Registro>
+
+    	<Registro Nome= "REG_COMPLRECIBOTRAILLER"    Identificador="TC"  Descricao="Trailler do complemento do recibo">
+   			<Campo Nome="NR_REG"		Descricao="Tipo de registro"   	Tipo="A"   	Tamanho="2" />
+            <Campo Nome="NR_CPF"    	Descricao="CPF contribuinte"   	Tipo="C" 	Tamanho="11" />
+            <Campo Nome="FILLER"      	Descricao="Espaco reservado"    Tipo="C"    Tamanho="3" />
+            <Campo Nome="SIGNET"      	Descricao="Assinatura MD5"    	Tipo="C"    Tamanho="32" />
+            <Campo Nome="NR_CONTROLE"   Descricao="Numero de controle"  Tipo="N"    Tamanho="10" />
+    	</Registro>
+    </DeclaracaoTXT>
+
+
+
+    <DeclaracaoTXT TipoArquivo="ARQ_IMPORTACAO_CARNELEAO">
+        <Registro Nome="HEADER" Identificador="01" Descricao="01 - HEADER ">     
+             <Campo Nome= "IDENTIFICADOR"   Descricao="Marca de registro"    Tipo="C" Tamanho="2" Conteudo="01"/>
+            <Campo Nome= "SISTEMA"   Descricao="Identifica o sistema gerador" Tipo="C" Tamanho="14" Conteudo="CLEAO2006       "/>
+            <Campo Nome= "ANO"   Descricao="Ano de declaracao"  Tipo="N" Tamanho="4" Conteudo="2006"/>
+            <Campo  atributoObjetoNegocio="" Nome="NR_CPF"  Descricao="CPF do contribuinte"      Tipo="C"    Tamanho="11" />
+			<Campo  atributoObjetoNegocio="" Nome="NR_NOME" Descricao="Nome do contribuinte"     Tipo="C"    Tamanho="60" />
+        </Registro> 
+    
+        <Registro Colecao="" Nome="DADOS" Identificador="02" Descricao="02 - REGISTRO DE DADOS ">     
+            <Campo Nome= "IDENTIFICADOR"   Descricao="Marca de registro"    Tipo="C" Tamanho="2" Conteudo="02"/>
+            <Campo atributoObjetoNegocio="mes" Nome= "Mes"   Descricao="Mes apuracao"    Tipo="C" Tamanho="15" />
+            <Campo atributoObjetoNegocio="trabalhoNaoAssalariado" Nome= "Trabalho Nao Assalariado" 
+                  Descricao="Trabalho nao assalariado" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo atributoObjetoNegocio="alugueis" Nome= "Alugueis" 
+                  Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo atributoObjetoNegocio="outros" Nome= "Outros" 
+                  Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo atributoObjetoNegocio="exterior" Nome= "Exterior" 
+                  Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo atributoObjetoNegocio="previdenciaOficial" Nome= "previdenciaOficial" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="dependentes" Nome= "dependentes" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="pensaoAlimenticia" Nome= "pensaoAlimenticia" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="livroCaixa" Nome= "livroCaixa" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="impostoExteriorCompensar" Nome= "impostoExteriorCompensar" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="impostoAPagar" Nome= "impostoAPagar" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="impostoPago" Nome= "impostoPago" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="baseCalculo" Nome= "baseCalculo" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="deducoes" Nome= "deducoes" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_rendRecebidoExteriorTrabNaoAssalariado" Nome= "_rendRecebidoExteriorTrabNaoAssalariado" 
+               Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_rendRecebidosExteriorOutros" 
+            Nome= "_rendRecebidosExteriorOutros" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_deducoesLivroCaixaMes" 
+            Nome= "_deducoesLivroCaixaMes" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_excessoDeducaoMesAnterior" 
+            Nome= "_excessoDeducaoMesAnterior" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_totalDeducaoMes" 
+            Nome= "_totalDeducaoMes" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_rendPJTrabNaoAss" 
+            Nome= "_rendPJTrabNaoAss" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_limiteLegalLivroCaixa" 
+            Nome= "_limiteLegalLivroCaixa" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_valorDeducaoLivroCaixa" 
+            Nome= "_valorDeducaoLivroCaixa" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_excessoDeducaoMesSeguinte" 
+            Nome= "_excessoDeducaoMesSeguinte" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_clDevidoCOMRendExterior" 
+            Nome= "_clDevidoCOMRendExterior" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_clDevidoSEMRendExterior" 
+            Nome= "_clDevidoSEMRendExterior" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_limiteCompMensalExterior" 
+            Nome= "_limiteCompMensalExterior" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_impostoPagoExteriorNoMes" 
+            Nome= "_impostoPagoExteriorNoMes" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_impostoPagoExteriorExcedenteMesAnterior" 
+            Nome= "_impostoPagoExteriorExcedenteMesAnterior" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_impostoPagoExteriorMesMaisExcedente" 
+            Nome= "_impostoPagoExteriorMesMaisExcedente" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_impostoPagoExteriorAserCompensado" 
+            Nome= "_impostoPagoExteriorAserCompensado" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            <Campo atributoObjetoNegocio="_valorExcedenteProxMes" 
+            Nome= "_valorExcedenteProxMes" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>               
+            
+        </Registro>
+
+        <Registro Nome="HASH ACUMULADO" Identificador="99" Descricao="Hash(Crc32, presenta na serpro.jar) do arquivo inteiro até o registro 02" >
+              <Campo Nome="Identificador" Descricao="Marca de registro" Tipo="C" Tamanho="2" Conteudo="99"  />
+              <Campo Nome="HASHCODE" Descricao="Hash code acumulado" Tipo="C" Tamanho="10" />
+        </Registro> 
+        
+     </DeclaracaoTXT>
+
+
+    <DeclaracaoTXT TipoArquivo="ARQ_IMPORTACAO_ATIV_RURAL">
+    
+        <Registro Nome="CONTRIBUINTE"  Identificador="01" Descricao="01 - CONTRIBUINTE">     
+            <Campo Nome= "IDENTIFICADOR"   Descricao="Marca de registro"    Tipo="C" Tamanho="2" Conteudo="01"/>
+            <Campo atributoObjetoNegocio="cpf" ParticipaImportacao="false"  Nome="CPF"      Descricao="CPF do contribuinte"      Tipo="C"    Tamanho="11" />
+			<Campo ParticipaImportacao="false" Nome="NOME" Descricao="Nome do contribuinte"     Tipo="C"    Tamanho="60" />
+            <Campo Nome= "ANO"   Descricao="Ano de declaracao"  ParticipaImportacao="false" Tipo="N" Tamanho="4" Conteudo="2006" />
+            <Campo Nome= "NM_LOGRADOURO" Descricao="Logradouro" Tipo="C" Tamanho="40"/>
+            <Campo Nome= "NRNUM" Descricao="Numero do endereço" Tipo="C" Tamanho="6"/>
+            <Campo Nome= "NMCOMPL" Descricao="Complemento do endereço" Tipo="C" Tamanho="20"/>
+            <Campo Nome= "NMBAIRRO" Descricao="Bairro" Tipo="C" Tamanho="20"/>
+            <Campo Nome= "NMMUNICIPIO" Descricao="Municipio" Tipo="C" Tamanho="20"/>
+            <Campo Nome= "NRTELEFONE" Descricao="N. de Telefone" Tipo="C" Tamanho="14"/>
+            <Campo Nome= "SIGLAUF" Descricao="Sigla da UF" Tipo="C" Tamanho="2"/>
+            <Campo Nome= "CDCEP" Descricao="Cep" Tipo="C" Tamanho="8"/>
+        </Registro>
+
+        <Registro Nome="DECLARACOES"  Identificador="02" Descricao="02 - DECLARACOES DO CONTRIBUINTE">     
+            <Campo Nome= "IDENTIFICADOR"   Descricao="Marca de registro"    Tipo="C" Tamanho="2" Conteudo="02"/>
+            <Campo atributoObjetoNegocio="pais" Nome= "CD_PAIS"   Descricao="Código do país"  Tipo="N" Tamanho="3" />
+            <Campo atributoObjetoNegocio="nomeMoeda" Nome= "NM_MOEDA"   Descricao="Nome da Moeda"  Tipo="C" Tamanho="30" />
+        </Registro>
+
+        <Registro Nome="Consolidacao da AR" Identificador="04"  Descricao="Meses Consolidacao">     
+            <Campo Nome= "IDENTIFICADOR"   Descricao="Marca de registro" Tipo="C" Tamanho="2" Conteudo="04"/>
+            <Campo Nome= "Flag Mes"   Descricao="Flag q indica o mes ('A'... 'K','L')" Tipo="C" Tamanho="1" />
+            <Campo Nome= "receitas" Descricao="Rendimentos Recebidos do Atividade Rural" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo Nome= "despesas" Descricao="Despesas dedutíveis" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo Nome= "ProdutosEntregueAdiantamento" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo Nome= "AdiantamentoRecebido" Descricao="" Tipo="N" Tamanho="13" CasasDecimais="2"/>
+            <Campo Nome= "CD_PAIS"   Descricao="Código do país"  Tipo="N" Tamanho="3" />
+        </Registro>
+
+  <Registro Nome="HASH ACUMULADO" Identificador="99" Descricao="Hash(Crc32, presenta na serpro.jar) do arquivo inteiro até o registro 07" >
+              <Campo Nome="Identificador" Descricao="Marca de registro" Tipo="C" Tamanho="2" Conteudo="99"  />
+              <Campo Nome="HASHCODE" Descricao="Hash code acumulado" Tipo="C" Tamanho="10" />
+        </Registro>
+        
+    </DeclaracaoTXT>
+</Mapeamento>

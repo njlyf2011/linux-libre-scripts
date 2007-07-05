@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <AuxValues>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="2"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Component id="lblTit2" alignment="0" pref="518" max="32767" attributes="0"/>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="jLabel9" alignment="0" pref="329" max="32767" attributes="0"/>
+                              <Component id="jLabel2" alignment="0" pref="329" max="32767" attributes="0"/>
+                              <Component id="jLabel6" alignment="0" pref="329" max="32767" attributes="0"/>
+                              <Component id="jLabel4" alignment="0" pref="329" max="32767" attributes="0"/>
+                              <Component id="jLabel5" alignment="0" pref="329" max="32767" attributes="0"/>
+                              <Component id="jLabel8" alignment="0" pref="329" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace pref="38" max="32767" attributes="0"/>
+                      </Group>
+                      <Component id="jLabel12" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jEditValor3" alignment="1" pref="131" max="32767" attributes="1"/>
+                  <Component id="jEditValor2" alignment="1" pref="131" max="32767" attributes="1"/>
+                  <Component id="jEditValor1" alignment="1" pref="131" max="32767" attributes="1"/>
+                  <Component id="jEditValor7" alignment="1" pref="131" max="32767" attributes="1"/>
+                  <Component id="jEditValor6" alignment="1" pref="131" max="32767" attributes="1"/>
+                  <Component id="jEditValor4" alignment="0" pref="131" max="32767" attributes="1"/>
+                  <Component id="jEditValor10" alignment="1" pref="131" max="32767" attributes="0"/>
+                  <Component id="jEditValor12" alignment="1" pref="131" max="32767" attributes="1"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <Component id="lblTit2" min="-2" pref="29" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor6" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor7" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor1" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor2" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor4" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel12" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor10" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor12" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace pref="114" max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JLabel" name="lblTit2">
+      <Properties>
+        <Property name="horizontalAlignment" type="int" value="0"/>
+        <Property name="text" type="java.lang.String" value="OUTRAS INFORMA&#xc7;&#xd5;ES"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="lblTit2.setFont(lblTit2.getFont().deriveFont(lblTit2.getFont().getSize2D()+3));"/>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel8">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Rendimentos Isentos e N&#xe3;o-Tribut&#xe1;veis"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor6">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.rendIsentosNaoTributaveis"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor6.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel9">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Rendimentos sujeitos &#xe0; tributa&#xe7;&#xe3;o exclusiva/definitiva"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor7">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.rendIsentosTributacaoExclusiva"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor7.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Bens e Direitos em 31/12/2005"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor1">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.bensDireitosExercicioAnterior"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor1.getComponenteFoco().setBorder(BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="D&#xed;vidas e &#xd4;nus Reais  em 31/12/2005"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor3">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.dividasOnusReaisExercicioAnterior"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor3.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel5">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="D&#xed;vidas e &#xd4;nus Reais  em 31/12/2006"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor4">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.dividasOnusReaisExercicioAtual"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor4.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel6">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Bens e Direitos em 31/12/2006"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor2">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.bensDireitosExercicioAtual"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor2.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Doa&#xe7;&#xf5;es a Part. Pol&#xed;ticos, Comit&#xea;s Financ. e Candidatos"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor12">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.totalDoacoesCampanhasEleitorais"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor12.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel12">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;Total do imposto retido na fonte (Lei n&#xba; 11.033/ 2004), conforme&lt;BR&gt;dados informados pelo contribuinte&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor10">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="resumo.outrasInformacoes.totalImpostoRetidoNaFonte"/>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jEditValor10.getComponenteFoco().setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());"/>
+      </AuxValues>
+    </Component>
+  </SubComponents>
+</Form>

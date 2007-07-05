@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<frame id="mainframe" name="PPGD_JANELA_PRINCIPAL" size="800,600" title="titulo" iconImage="icone" bundle="aplicacao" include="ppgdmenubar.xml#menu"> 
+	<panel id="toolbarpanel" layout="borderlayout" include="ppgdtoolbar.xml#toolbar">
+	   <panel id="pnlPrincipal" layout="borderlayout" constraints="BorderLayout.CENTER" >
+    	  <splitpane id="splitPPGD" oneTouchExpandable="true" dividerLocation="170" >
+        	 <scrollpane id="ppgdAreaArvore">
+        	 	<arvore id="ppgdarvore" fonteDados="ppgdarvore.xml"/>
+        	 </scrollpane>
+        	 <scrollpane id="ppgdScrollPnlPPGD">        	 
+	    	     <panel id="pnlPPGD" layout="borderlayout" />
+        	 </scrollpane>    	     
+	      </splitpane>
+	   </panel>
+   	</panel>	   
+</frame>
+

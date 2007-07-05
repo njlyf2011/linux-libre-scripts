@@ -1,0 +1,201 @@
+# Este script baixa todas as dependências do irpf e as instala nos
+# locais apropriados em src/
+
+if test -d .svn; then
+  echo Não rode isso na sua árvore svn, vai detonar tudo! >&2
+  exit 1
+fi
+
+wget -q -c http://ftp.unicamp.br/pub/apache/jakarta/commons/collections/source/commons-collections-3.2-src.tar.gz
+rm -rf src/org/apache/commons/collections
+mkdir -p src/org/apache/commons
+tar -xzf commons-collections-3.2-src.tar.gz
+cp -Rp commons-collections-3.2-src/src/java/org/apache/commons/collections src/org/apache/commons/collections
+cp commons-collections-3.2-src/LICENSE.txt commons-collections-3.2-src/NOTICE.txt src/org/apache/commons/collections
+rm -rf commons-collections-3.2-src.tar.gz commons-collections-3.2-src
+
+wget -q -c http://ftp.unicamp.br/pub/apache/jakarta/commons/beanutils/source/commons-beanutils-1.7.0-src.tar.gz
+rm -rf src/org/apache/commons/beanutils
+mkdir -p src/org/apache/commons
+tar -xzf commons-beanutils-1.7.0-src.tar.gz
+cp -Rp commons-beanutils-1.7.0-src/src/java/org/apache/commons/beanutils src/org/apache/commons/beanutils
+cp commons-beanutils-1.7.0-src/LICENSE.txt commons-beanutils-1.7.0-src/NOTICE.txt src/org/apache/commons/beanutils
+rm -rf commons-beanutils-1.7.0-src.tar.gz commons-beanutils-1.7.0-src
+
+wget -q -c http://ftp.unicamp.br/pub/apache/jakarta/commons/logging/source/commons-logging-1.1-src.tar.gz
+rm -rf src/org/apache/commons/logging
+mkdir -p src/org/apache/commons
+tar -xzf commons-logging-1.1-src.tar.gz
+cp -Rp commons-logging-1.1-src/src/java/org/apache/commons/logging src/org/apache/commons/logging
+cp -p commons-logging-1.1-src/LICENSE.txt commons-logging-1.1-src/NOTICE.txt src/org/apache/commons/logging
+rm -rf commons-logging-1.1-src.tar.gz commons-logging-1.1-src
+
+wget -c -q http://ftp.unicamp.br/pub/apache/xml/xalan-j/xalan-j_2_7_0-src.tar.gz
+subdirs="xalan xml/dtm xml/res xml/serializer xml/utils xpath"
+for d in $subdirs; do rm -rf src/org/apache/$d; done
+mkdir -p src/org/apache src/org/apache/xml
+tar -xzf xalan-j_2_7_0-src.tar.gz
+for d in $subdirs; do
+  cp -Rp xalan-j_2_7_0/src/org/apache/$d src/org/apache/$d
+  cp -p xalan-j_2_7_0/licenses/*.txt src/org/apache/$d
+done
+rm -rf xalan-j_2_7_0-src.tar.gz xalan-j_2_7_0
+
+wget -c -q http://ftp.unicamp.br/pub/apache/xml/xerces-j/Xerces-J-src.2.9.0.tar.gz
+subdirs="html wml xml/serialize xerces"
+for d in $subdirs; do rm -rf src/org/apache/$d; done
+mkdir -p src/org/apache/xml
+tar -xzf Xerces-J-src.2.9.0.tar.gz
+for d in $subdirs; do
+  cp -Rp xerces-2_9_0/src/org/apache/$d src/org/apache/$d
+  cp -p xerces-2_9_0/LICENSE* xerces-2_9_0/NOTICE* src/org/apache/$d
+done
+rm -rf Xerces-J-src.2.9.0.tar.gz xerces-2_9_0
+sed -i 's,html\.HTMLDocument,html2\.HTMLDocument,g' src/org/apache/xml/serialize/OutputFormat.java
+
+wget -q -c http://ufpr.dl.sourceforge.net/sourceforge/hsqldb/hsqldb_1_8_0_7.zip
+rm -rf src/org/hsqldb
+mkdir -p src/org
+unzip -o -q -d hsqldb_1_8_0_7 hsqldb_1_8_0_7.zip
+cp -Rp hsqldb_1_8_0_7/hsqldb/src/org/hsqldb src/org/hsqldb
+cp -p hsqldb_1_8_0_7/hsqldb/readme.txt src/org/hsqldb
+cp -p hsqldb_1_8_0_7/hsqldb/doc/*_lic.txt src/org/hsqldb
+rm -rf hsqldb_1_8_0_7.zip hsqldb_1_8_0_7
+
+wget -q -c http://www.jdom.org/dist/binary/jdom-1.0.tar.gz
+rm -rf src/org/jdom
+mkdir -p src/org
+tar -xzf jdom-1.0.tar.gz
+cp -Rp jdom-1.0/src/java/org/jdom src/org/jdom
+cp -p jdom-1.0/*.txt src/org/jdom
+rm -rf jdom-1.0.tar.gz jdom-1.0
+
+wget -c -q http://ufpr.dl.sourceforge.net/sourceforge/foxtrot/foxtrot-2.0.tar.gz
+rm -rf src/foxtrot
+tar -xzf foxtrot-2.0.tar.gz
+unzip -o -q -d foxtrot-2.0-src foxtrot-2.0/lib/foxtrot-src.jar
+cp -Rp foxtrot-2.0-src/foxtrot src/foxtrot
+cp -p foxtrot-2.0/LICENSE src/foxtrot/LICENSE.txt
+rm -rf foxtrot-2.0.tar.gz foxtrot-2.0 foxtrot-2.0-src
+
+wget -c -q http://www.jgoodies.com/download/libraries/forms/forms-1_1_0.zip
+rm -rf src/com/jgoodies/forms
+mkdir -p src/com/jgoodies
+unzip -o -q forms-1_1_0.zip
+cp -Rp forms-1.1.0/src/core/com/jgoodies/forms src/com/jgoodies/forms
+cp -p forms-1.1.0/*.txt src/com/jgoodies/forms
+rm -rf forms-1_1_0.zip forms-1.1.0
+
+wget -c -q http://www.jgoodies.com/download/libraries/looks/looks-2_1_4.zip
+rm -rf src/com/jgoodies/looks
+mkdir -p src/com/jgoodies
+unzip -o -q looks-2_1_4.zip
+cp -Rp looks-2.1.4/src/core/com/jgoodies/looks src/com/jgoodies/looks
+cp -p looks-2.1.4/*.txt src/com/jgoodies/looks
+rm -rf looks-2_1_4.zip looks-2.1.4
+sed -i '/^import .*\.windows\./d' src/com/jgoodies/looks/Options.java
+
+wget -c -q http://ufpr.dl.sourceforge.net/sourceforge/itext/itext-src-2.0.2.tar.gz
+rm -rf src/com/lowagie
+mkdir -p src/com itext-src-2.0.2
+tar -C itext-src-2.0.2 -xzf itext-src-2.0.2.tar.gz
+cp -Rp itext-src-2.0.2/com/lowagie src/com/lowagie
+rm -rf itext-src-2.0.2.tar.gz itext-src-2.0.2
+
+wget -c -q http://ufpr.dl.sourceforge.net/sourceforge/jfreechart/jcommon-1.0.9.tar.gz
+subdirs="base date io layout text ui util"
+for d in $subdirs; do rm -rf src/org/jfree/$d; done
+rm -rf src/com/keypoint
+mkdir -p src/org/jfree src/com
+tar -xzf jcommon-1.0.9.tar.gz
+for d in $subdirs; do
+  cp -p jcommon-1.0.9/source/org/jfree/JCommon*.java src/org/jfree
+  cp -Rp jcommon-1.0.9/source/org/jfree/$d src/org/jfree/$d
+  cp -p jcommon-1.0.9/licence-LGPL.txt src/org/jfree/$d
+done
+cp -Rp jcommon-1.0.9/source/com/keypoint src/com/keypoint
+cp -p jcommon-1.0.9/licence-LGPL.txt src/com/keypoint
+rm -rf jcommon-1.0.9.tar.gz jcommon-1.0.9
+
+wget -c -q http://ufpr.dl.sourceforge.net/sourceforge/jfreechart/jfreechart-1.0.5.tar.gz
+subdirs="chart data"
+for d in $subdirs; do rm -rf src/org/jfree/$d; done
+rm -rf src/org/jfree/chart src/org/jfree/data src/org/jfree/experimental
+mkdir -p src/org/jfree
+tar -xzf jfreechart-1.0.5.tar.gz
+for d in $subdirs; do
+  cp -Rp jfreechart-1.0.5/source/org/jfree/$d src/org/jfree/$d
+  cp -p jfreechart-1.0.5/licence-LGPL.txt src/org/jfree/$d
+done
+rm -rf jfreechart-1.0.5.tar.gz jfreechart-1.0.5
+
+wget -c -q http://download.eclipse.org/eclipse/downloads/drops/M20070212-1330/ecjsrc.zip
+rm -rf src/org/eclipse/jdt
+mkdir -p src/org/eclipse
+unzip -o -q -d eclipse-jdt ecjsrc.zip
+cp -Rp eclipse-jdt/org/eclipse/jdt src/org/eclipse/jdt
+links -dump http://www.eclipse.org/legal/epl-v10.html > src/org/eclipse/jdt/epl-v10.txt
+rm -rf ecjsrc.zip eclipse-jdt
+
+wget -c -q http://ftp.unicamp.br/pub/apache/jakarta/commons/digester/source/commons-digester-1.8-src.tar.gz
+rm -rf src/org/apache/commons/digester
+mkdir -p src/org/apache/commons
+tar -xzf commons-digester-1.8-src.tar.gz
+cp -Rp commons-digester-1.8-src/src/java/org/apache/commons/digester src/org/apache/commons/digester
+cp commons-digester-1.8-src/*.txt src/org/apache/commons/digester
+rm -rf commons-digester-1.8-src.tar.gz commons-digester-1.8-src
+
+wget -c -q http://ufpr.dl.sourceforge.net/sourceforge/jasperreports/jasperreports-1.2.8-project.tar.gz
+rm -rf src/net/sf/jasperreports src/org/w3c/tools/codec
+mkdir -p src/net/sf src/org/w3c/tools
+tar -xzf jasperreports-1.2.8-project.tar.gz
+cp -Rp jasperreports-1.2.8/src/net/sf/jasperreports src/net/sf/jasperreports
+cp -p jasperreports-1.2.8/license.txt src/net/sf/jasperreports
+cp -Rp jasperreports-1.2.8/src/org/w3c/tools/codec src/org/w3c/tools/codec
+links -dump http://www.w3.org/Consortium/Legal/copyright-software > src/org/w3c/tools/codec/LICENSE.txt
+rm -rf jasperreports-1.2.8-project.tar.gz jasperreports-1.2.8
+
+wget -c -q http://swing-layout.dev.java.net/files/documents/2752/50110/swing-layout-1.0.2-src.zip
+rm -rf src/org/jdesktop/layout
+mkdir -p src/org/jdesktop
+unzip -q -o -d swing-layout-1.0.2 swing-layout-1.0.2-src.zip
+cp -Rp swing-layout-1.0.2/src/java/org/jdesktop/layout src/org/jdesktop/layout
+cp -p swing-layout-1.0.2/COPYING src/org/jdesktop/layout/COPYING.txt
+rm -rf swing-layout-1.0.2-src.zip swing-layout-1.0.2
+
+wget -c -q http://www.swixml.org/swixml_149.zip
+rm -rf src/org/swixml
+mkdir -p src/org
+unzip -o -q swixml_149.zip
+cp -Rp swixml_149/src/org/swixml src/org/swixml
+cp -p swixml_149/*.txt src/org/swixml
+rm -rf swixml_149.zip swixml_149
+sed -i 's,MacApp,// disabled by lxoliva: &,' src/org/swixml/Parser.java
+
+wget -c -q http://bouncycastle.org/download/bcmail-jdk14-136.tar.gz
+rm -rf src/org/bouncycastle/cms src/org/bouncycastle/LICENSE.html
+mkdir -p src/org/bouncycastle
+tar -xzf bcmail-jdk14-136.tar.gz
+unzip -o -q -d bcmail-src bcmail-jdk14-136/src.zip
+cp -Rp bcmail-src/org/bouncycastle/cms src/org/bouncycastle/cms
+cp -p bcmail-jdk14-136/LICENSE.html src/org/bouncycastle
+rm -rf bcmail-jdk14-136.tar.gz bcmail-jdk14-136 bcmail-src
+
+wget -c -q http://bouncycastle.org/download/bcprov-jdk14-136.tar.gz
+subdirs="asn1 crypto i18n jce math openssl util x509"
+for d in $subdirs; do rm -rf src/org/bouncycastle/$d; done
+mkdir -p src/org/bouncycastle
+tar -xzf bcprov-jdk14-136.tar.gz
+if cmp bcprov-jdk14-136/LICENSE.html src/org/bouncycastle/LICENSE.html; then
+  :
+else
+  echo Error, bouncycastle licenses differ
+  exit 1
+fi
+unzip -o -q -d bcprov-src bcprov-jdk14-136/src.zip
+for d in $subdirs; do
+  cp -Rp bcprov-src/org/bouncycastle/$d src/org/bouncycastle/$d
+done
+rm -rf bcprov-jdk14-136.tar.gz bcprov-jdk14-136 bcprov-src
+
+xargs rm -f < list/removed-sources

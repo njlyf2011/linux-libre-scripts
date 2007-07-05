@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <AuxValues>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel14" pref="252" max="32767" attributes="0"/>
+                      <EmptySpace min="299" pref="299" max="299" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel9" pref="246" max="32767" attributes="0"/>
+                      <EmptySpace min="305" pref="305" max="305" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jLabel15" pref="417" max="32767" attributes="0"/>
+                          <Component id="jLabel11" pref="417" max="32767" attributes="0"/>
+                          <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel3" max="32767" attributes="0"/>
+                              <EmptySpace min="111" pref="111" max="111" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel5" max="32767" attributes="0"/>
+                              <EmptySpace min="205" pref="205" max="205" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel6" max="32767" attributes="0"/>
+                              <EmptySpace min="137" pref="137" max="137" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel7" max="32767" attributes="0"/>
+                              <EmptySpace min="108" pref="108" max="108" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel8" max="32767" attributes="0"/>
+                              <EmptySpace min="255" pref="255" max="255" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel16" alignment="0" pref="417" max="32767" attributes="0"/>
+                          <Component id="jLabel10" alignment="0" pref="417" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="jEditValor10" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor9" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor8" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor7" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor6" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor5" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor11" alignment="1" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor4" alignment="1" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor2" alignment="0" pref="128" max="32767" attributes="1"/>
+                          <Component id="jEditValor1" alignment="0" pref="128" max="32767" attributes="1"/>
+                      </Group>
+                  </Group>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jEditValor1" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor2" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor4" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor5" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor6" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
+                  <Component id="jEditValor7" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="jLabel9" min="-2" pref="25" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabel10" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="jEditValor8" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jEditValor9" min="-2" max="-2" attributes="1"/>
+                  <Component id="jLabel11" min="-2" max="-2" attributes="1"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabel14" min="-2" pref="23" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jEditValor10" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel15" min="-2" pref="38" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jEditValor11" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel16" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace pref="23" max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;APURA&#xc7;&#xc3;O DO RESULTADO TRIBUT&#xc1;VEL&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;01. Resultado I - US$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor1">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.resultadoI_EmDolar"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;02. Resultado I - R$ (Linha 01 multiplicada por 2.3399)&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor2">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.resultadoI_EmReais"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel5">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;03. Preju&#xed;zo de exerc&#xed;cio anterior - R$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor4">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.prejuizoExercicioAnterior"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel6">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;04. Resultado ap&#xf3;s compensa&#xe7;&#xe3;o do preju&#xed;zo - R$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor5">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.resultadoAposCompensacaoPrejuizo"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel7">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;05. Op&#xe7;&#xe3;o pelo arbitramento sobre a receita bruta - R$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor6">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.opcaoArbitramento"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel8">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;06. &lt;U&gt;Resultado tribut&#xe1;vel - R$&lt;/U&gt;&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor7">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.resultadoTributavel"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel9">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;INFORMA&#xc7;&#xd5;ES PARA O EXERC&#xcd;CIO SEGUINTE&lt;/B&gt;&lt;/HTML&gt;"/>
+        <Property name="verticalAlignment" type="int" value="3"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel10">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;07. Preju&#xed;zo a compensar - R$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor8">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.prejuizoCompensar"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel11">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;08. Valor dos adiantamentos recebidos em 2006 por conta de venda para entrega futura - R$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor9">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.receitaRecebidaContaVenda"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel14">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;APURA&#xc7;&#xc3;O DO RESULTADO N&#xc3;O-TRIBUT&#xc1;VEL&lt;/B&gt;&lt;/HTML&gt;"/>
+        <Property name="verticalAlignment" type="int" value="3"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel15">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;09. Valor dos adiantamentos recebidos at&#xe9; 2005 referente a produtos entregues em 2006 - R$&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor10">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.valorAdiantamento"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel16">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;HTML&gt;&lt;B&gt;10. &lt;U&gt;Resultado n&#xe3;o-tribut&#xe1;vel - R$&lt;/U&gt;&lt;/B&gt;&lt;/HTML&gt;"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditValor" name="jEditValor11">
+      <Properties>
+        <Property name="aceitaFoco" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="atividadeRural.exterior.apuracaoResultado.resultadoNaoTributavel"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>

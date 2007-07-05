@@ -1,0 +1,235 @@
+Isso é um projeto em desenvolvimento que usa o código publicado pela
+Receita Federal para criar uma versão livre do IRPF2007.
+
+Com ele, você vai poder preparar sua declaração de imposto de renda em
+liberdade, podendo gravá-la em disquete para entrega em agências do
+Banco do Brasil ou da Caixa Econômica Federal.
+
+Agradeço à Receita Federal por publicar o código sob a GNU LGPL versão
+2 (licença mais visível no IRPF.jar), ainda que tenham "esquecido" de
+publicar os fontes correspondentes, inclusive das outras bibliotecas
+LGPL que usaram.  De toda forma, publicaram código Java não ofuscado e
+com informação de debugging, o que permitiu a descompilação quase que
+completa.
+
+== Como usar
+
+Infelizmente, a interface gráfica não tá rodando direito, pelo menos
+em máquinas virtuais Java livres.
+
+O jeito foi criar uma interface "linha de comando".  E sabe o quê?  Eu
+adorei!  Pude fazer tudo que sempre quis e o programa não permitia.
+
+Então...  Rodando algo tipo
+
+  gij -jar irpf2007-cl.jar
+
+(pode trocar gij pelo interpretador Java de sua preferência), você vai
+receber uma mensagem de ajuda que indica os comandos disponíveis.
+Como a gente vai usar bastante esse comando, sugiro criar uma função
+shell, um alias, um script, seja o que for:
+
+  irpf () { gij -jar irpf2007-cl.jar $1 @CPF@; }
+
+Por exemplo, o comando shell a seguir vai permitir a você rodar irpf
+comando, e ele já vai passar seu CPF implicitamente (supondo que você
+substituiu @CPF@ acima pelo seu CPF, né? :-)  Vou supor daqui pra
+frente que você fez algo assim.
+
+A idéia é usar comandos para criar uma declaração nova:
+
+  irpf nova
+
+ou importar uma declaração do ano passado:
+
+  irpf importa
+
+Nos dois casos, ele vai criar um arquivo que representa a declaração
+em aplicacao/dados/@CPF@/@CPF@.xml.  Naturalmente, pro segundo você
+vai precisar do arquivo de declaração (backup ou gravada para
+transmissão) e, se quiser, o recibo correspondente, ambos no diretório
+corrente.  Nada que um cp não resolva ;-)
+
+Atente para o fato de que aplicacao/dados/iddeclaracoes.xml contém
+informação de identificação (nome, cpf, etc).  Se você criar uma
+declaração do zero e depois resolver importar uma com o mesmo cpf,
+tenha a impressão de que ele não vai importar os dados de
+identificação corretamente.  Hmm...  Já não tenho mais certeza, talvez
+eu tenha resolvido esse bug.
+
+Antes de fazer qualquer coisa, sugiro fazer um backup dessa
+declaração, até pra poder acompanhar as alterações que você vá fazer:
+
+  irpf grava
+
+Aí, só de farra, tira uma cópia do arquivo xml e vê se o backup volta
+do mesmo jeito:
+
+  cp aplicacao/dados/@CPF@/@CPF@.xml copia.xml
+  irpf restaura
+  diff copia.xml aplicacao/dados/@CPF@/@CPF@.xml
+
+Tá ganhando confiança, né?  Então vamos em frente...
+
+
+=== Preenchendo a declaração
+
+Então, agora que você já tem um arquivo xml pronto pra preencher,
+talvez já com dados de uma declaração anterior, mãos à obra.  É um
+arquivinho texto.
+
+O chato é a linha longa: não tem quebra de linha alguma no xml gerado.
+Recomendo passar os arquivos xml através de um filtro pra deixá-los
+mais bonitinhos antes de sair editando.  Pro programa, não faz
+diferença nenhuma, mas pra nós, humanos, é a diferença entre sair
+correndo em desespero ou tudo fazer sentido.
+
+O que usei pra deixar o xml bonitinho foi xmllint, do libxml2.  Tipo
+assim:
+
+  xmllint --format aplicacao/dados/@CPF@/@CPF@.xml > decl.xml
+
+aí edita o CPF.xml.  Não precisa se preocupar em fazer as contas,
+basta ir preenchendo o que está lá.  Não ligue para os "0.,00" (ponto
+e vírgula um do lado do outro no lugar só da vírgula); não sei por que
+os dois pontos decimais estão aparecendo, mas eu deixei eles lá e tudo
+funcionou normal.  Melhor não mexer, né? :-)
+
+Quando você estiver editado um pouco e quiser ver no que dá:
+
+  cp decl.xml aplicacao/dados/@CPF@/@CPF@.xml
+  irpf grava
+  irpf restaura
+  mv decl.xml diff.xbk
+  xmllint --format aplicacao/dados/@CPF@/@CPF@.xml > decl.xml
+  diff -U0 decl.xbk decl.xml
+
+Viu só, ele já atualiza os valores calculados a partir de outros.
+Legal, né?  Pode também verificar que as coisas que você editou
+entraram no arquivo de declaração:
+
+  diff -U0 @CPF@-IRPF-2007-2006-ORIGI.{BAK,DBK}
+
+Se for declaração retificadora, substitua ORIGI por RETIF.
+
+
+==== Códigos e listas
+
+Então...  Editar o xml é relativamente fácil quando você sabe o que
+está fazendo.  O duro é quando você não sabe.  Tipo, no caso de campos
+em que entram códigos, ou listas cujos componentes você nem tem idéia.
+
+Sobre os códigos, a dica é procurar dentro do .jar (use o Emacs para
+abri-lo como zip, ou expanda o conteúdo) algum arquivo .xml
+relacionado.  São neles que as tabelas de códigos estão descritas.
+Pode haver descrições mais legíveis em help/html.  Veja help/index.xml
+(como arquivo texto) para uma lista dos tópicos e os respectivos
+arquivos html (target=), ou abuse do grep help/html.
+
+Sobre listas, não consegui sacar onde a estrutura do xml está
+descrita, se é que está em algum lugar.  Achei que talvez fosse
+mapeamentoTxt.xml, mas não, essa é só uma versão mais computeira da
+especificação do formato dos arquivos que a Receita publicou,
+antendendo aos nossos pedidos.
+
+De todo modo, sempre que houver alguma entrada do tipo:
+
+  <algumaCoisaQueInteresse ... tipoItens="serpro...."/>
+
+e você não souber direito como preencher, troque por:
+
+  <algumaCoisaQueInteresse ... tipoItens="serpro....">
+    <item/>
+  </algumaCoisaQueInteresse>
+
+(atente para o fato de que a barra antes do sinal de maior foi
+removida)
+
+Aí faça a dança do grava/restaura e você vai ver que ele expandiu o
+item pra você com todos os campos necessários.  Bacana, né? :-)
+
+
+=== Finalizando
+
+Então, depois de vários ciclos de edição, você acha que tá tudo
+pronto, né?  Não custa dar uma verificadinha:
+
+  irpf verifica
+
+Se houver pendências, fatais ou não, ele vai avisar.
+
+Feitas as correções (ou não), pode preparar a declaração para entrega:
+
+  irpf prepara
+
+Aí é só copiar o @CPF@-IRPF-2007-2006-ORIGI.DEC pra um disquete e
+levar pro Banco do Brasil ou pra Caixa Econômica Federal.
+
+Pois é, não tem versão livre do ReceitaNET ainda, fazer o quê? :-(
+
+Não sabe?  Assine a petição contra os Softwares Impostos!
+
+http://www.fsfla.org/?q=pt/node/152
+
+
+=== Imprimindo
+
+Em tese, tem código que poderia permitir a impressão da declaração e
+do recibo, mas não consegui fazer funcionar :-(
+
+Como a urgência era conseguir entregar a declaração, parei de debugar
+e preparei a minha, e agora vou correr atrás do prejuízo de minhas
+outras tarefas que ficaram de lado por causa disso.
+
+Se alguma boa alma se animar a arrumar isso (quem sabe eu mesmo),
+vamos poder imprimir as declarações e os recibos.  Se não, quando
+alguém pedir a declaração ou o recibo, a gente imprime o xml ou o par
+.DEC/.REC mesmo.  Certo?  Afinal, agora os formatos são públicos :-)
+
+Se você quiser ajudar, faça um
+
+  svn co https://www.fsfla.org/svn/fsfla/blogs/lxo/software/irpf2007-livre
+
+e mande patches, sugestões ou comentários para
+softwares-impostos@fsfla.org.  Consulte meu blog e/ou minha home page
+para outras notícias:
+
+  http://www.fsfla.org/svnwiki/blogs/lxo
+  http://www.lsd.ic.unicamp.br/~oliva/
+
+Pode haver versões mais novas em:
+
+  http://www.lsd.ic.unicamp.br/~oliva/snapshots/irpf2007-livre
+
+Faça bom uso!
+
+--
+Alexandre Oliva
+
+
+== Histórico
+
+Os números após o "r" abaixo são o identificador da versão dentro no
+nosso repositório Subversion.  Tipo, svn co -r952 vai baixar os fontes
+da versão r952.
+
+=== r952
+
+Primeira versão livre publicada empacotada, com binário que talvez
+rodasse com interface gráfica em máquinas virtuais Java proprietárias.
+Aparentemente, nem isso :-(
+
+=== r976
+
+Primeira versão com interface de linha de comando, ainda com muitas
+limitações.
+
+=== r987
+
+Todas as funcionalidades exceto impressão estão contempladas.
+
+=== r1003
+
+Corrige um erro na geração de declaração para envio.  A única
+diferença entre a versão que eu usei pra preparar minha declaração e
+esta que publiquei é que eu atualizei este arquivo com o histórico.

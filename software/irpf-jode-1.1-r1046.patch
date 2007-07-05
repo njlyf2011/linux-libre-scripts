@@ -1,0 +1,305 @@
+Index: jode/decompiler/Decompiler.java
+===================================================================
+--- jode/decompiler/Decompiler.java	(revision 1406)
++++ jode/decompiler/Decompiler.java	(working copy)
+@@ -32,7 +32,7 @@
+  * Please tell me about your project.<br>
+  *
+  * Note that the GNU GPL doesn't allow you to use this interface in
+- * commercial programs. 
++ * non-Free programs. 
+  * 
+  * @author <a href="mailto:jochen@gnu.org">Jochen Hoenicke</a>
+  * @version 1.0
+Index: jode/decompiler/Main.java
+===================================================================
+--- jode/decompiler/Main.java	(revision 1406)
++++ jode/decompiler/Main.java	(working copy)
+@@ -53,6 +53,7 @@
+ 	new LongOpt("debug", LongOpt.OPTIONAL_ARGUMENT, null, 'D'),
+ 	new LongOpt("import", LongOpt.REQUIRED_ARGUMENT, null, 'i'),
+ 	new LongOpt("style", LongOpt.REQUIRED_ARGUMENT, null, 's'),
++	new LongOpt("linewidth", LongOpt.REQUIRED_ARGUMENT, null, 'w'),
+ 	new LongOpt("lvt", LongOpt.OPTIONAL_ARGUMENT, null, 
+ 		    OPTION_START+0),
+ 	new LongOpt("inner", LongOpt.OPTIONAL_ARGUMENT, null, 
+@@ -103,6 +104,8 @@
+ 		    "and packages with more then pkglimit used classes.");
+ 	err.println("                       "+
+ 		    "Limit 0 means never import. Default is 0,1.");
++	err.println("  -w, --linewidth=...  "+
++		    "set the line width for source files.");
+ 	err.println("  -D, --debug=...      "+
+ 		    "use --debug=help for more information.");
+ 
+@@ -151,7 +154,8 @@
+     public static void decompileClass(String className, 
+ 				      ZipOutputStream destZip, String destDir, 
+ 				      TabbedPrintWriter writer,
+-				      ImportHandler imports) {
++				      ImportHandler imports,
++				      int linewidth) {
+ 	try {
+ 	    ClassInfo clazz;
+ 	    try {
+@@ -179,7 +183,7 @@
+ 		}
+ 		writer = new TabbedPrintWriter
+ 		    (new BufferedOutputStream(new FileOutputStream(file)),
+-		     imports, false);
++		     imports, false, linewidth);
+ 	    }
+ 
+ 	    GlobalOptions.err.println(className);
+@@ -217,7 +221,8 @@
+ 	} catch (Throwable ex) {
+ 	    ex.printStackTrace();
+ 	}
+-	printSummary();
++	if (failedClasses != null)
++	    printSummary();
+ 	/* When AWT applications are compiled with insufficient
+ 	 * classpath the type guessing by reflection code can
+ 	 * generate an awt thread that will prevent normal
+@@ -240,6 +245,8 @@
+     }
+ 
+     public static void decompile(String[] params) {
++	int linewidth = -1;
++
+ 	if (params.length == 0) {
+ 	    usage();
+ 	    return;
+@@ -263,7 +270,7 @@
+ 	GlobalOptions.err.println(GlobalOptions.copyright);
+ 
+ 	boolean errorInParams = false;
+-	Getopt g = new Getopt("jode.decompiler.Main", params, "hVvc:d:D:i:s:",
++	Getopt g = new Getopt("jode.decompiler.Main", params, "hVvc:d:D:i:s:w:",
+ 			      longOptions, true);
+ 	for (int opt = g.getopt(); opt != -1; opt = g.getopt()) {
+ 	    switch(opt) {
+@@ -345,6 +352,21 @@
+ 		}
+ 		break;
+ 	    }
++	    case 'w': {
++		try {
++		    linewidth = Integer.parseInt(g.getOptarg());
++		    if (linewidth < 0) {
++			GlobalOptions.err.println
++			    ("jode.decompiler.Main: argument for -l option must be non-negative.");
++			errorInParams = true;
++		    }
++		} catch (RuntimeException ex) {
++		    GlobalOptions.err.println
++			("jode.decompiler.Main: Invalid argument for -l option.");
++		    errorInParams = true;
++		}
++		break;
++	    }
+ 	    default:
+ 		if (opt >= OPTION_START && opt <= OPTION_END) {
+ 		    errorInParams |= !handleOption(opt-OPTION_START, 
+@@ -364,7 +386,8 @@
+ 	ZipOutputStream destZip = null;
+ 	TabbedPrintWriter writer = null;
+ 	if (destDir == null)
+-	    writer = new TabbedPrintWriter(System.out, imports);
++	    writer = new TabbedPrintWriter(System.out, imports, true,
++					   linewidth);
+ 	else if (destDir.toLowerCase().endsWith(".zip")
+ 		 || destDir.toLowerCase().endsWith(".jar")) {
+ 	    try {
+@@ -375,7 +398,7 @@
+ 		return;
+ 	    }
+ 	    writer = new TabbedPrintWriter(new BufferedOutputStream(destZip), 
+-					   imports, false);
++					   imports, false, linewidth);
+ 	}
+         for (int i= g.getOptind(); i< params.length; i++) {
+ 	    try {
+@@ -395,13 +418,13 @@
+ 			    entry = entry.substring(0, entry.length() - 6)
+ 				.replace('/', '.');
+ 			    decompileClass(entry, destZip, destDir, 
+-					   writer, imports);
++					   writer, imports, linewidth);
+ 			}
+ 		    }
+ 		    ClassInfo.setClassPath(classPath);
+ 		} else
+-		    decompileClass(params[i], destZip, destDir, 
+-				   writer, imports);
++		    decompileClass(params[i], destZip, destDir,
++				   writer, imports, linewidth);
+ 	    } catch (IOException ex) {
+ 		GlobalOptions.err.println
+ 		    ("Can't read zip file " + params[i] + ".");
+Index: jode/decompiler/TabbedPrintWriter.java
+===================================================================
+--- jode/decompiler/TabbedPrintWriter.java	(revision 1406)
++++ jode/decompiler/TabbedPrintWriter.java	(working copy)
+@@ -465,19 +465,29 @@
+     }
+ 
+     public TabbedPrintWriter (OutputStream os, ImportHandler imports,
+-			      boolean autoFlush) {
++			      boolean autoFlush, int linewidth) {
+ 	pw = new PrintWriter(os, autoFlush);
+ 	this.imports = imports;
+-	init();
++	init(linewidth);
+     }
+ 
+     public TabbedPrintWriter (Writer os, ImportHandler imports, 
+-			      boolean autoFlush) {
++			      boolean autoFlush, int linewidth) {
+ 	pw = new PrintWriter(os, autoFlush);
+ 	this.imports = imports;
+-	init();
++	init(linewidth);
+     }
+ 
++    public TabbedPrintWriter (OutputStream os, ImportHandler imports,
++			      boolean autoFlush) {
++	this(os, imports, autoFlush, -1);
++    }
++
++    public TabbedPrintWriter (Writer os, ImportHandler imports,
++			      boolean autoFlush) {
++	this(os, imports, autoFlush, -1);
++    }
++
+     public TabbedPrintWriter (OutputStream os, ImportHandler imports) {
+ 	this(os, imports, true);
+     }
+@@ -494,10 +504,15 @@
+ 	this(os, null);
+     }
+ 
+-    public void init() {
++    public void init(int linewidth) {
+ 	this.indentsize = (Options.outputStyle & Options.TAB_SIZE_MASK);
+ 	this.tabWidth = 8;
+-	this.lineWidth = 79;
++	if (linewidth == 0)
++	    this.lineWidth = Integer.MAX_VALUE;
++	else if (linewidth < 0)
++	    this.lineWidth = 79;
++	else
++	    this.lineWidth = linewidth;
+ 	currentLine = new StringBuffer();
+ 	currentBP = new BreakPoint(null, 0);
+ 	currentBP.startOp(DONT_BREAK, 1, 0);
+Index: jode/flow/CatchBlock.java.in
+===================================================================
+--- jode/flow/CatchBlock.java.in	(revision 1406)
++++ jode/flow/CatchBlock.java.in	(working copy)
+@@ -159,9 +159,9 @@
+ 		    (new LocalLoadOperator(dummyLocal.getType(), 
+ 					   null, dummyLocal));
+ 		InstructionBlock ib = new InstructionBlock(store);
++		ib.outer = outer;
+ 		ib.setFlowBlock(flowBlock);
+-		ib.appendBlock(catchBlock);
+-		catchBlock = ib;
++		catchBlock = ib.appendBlock(catchBlock);
+ 		exceptionLocal = dummyLocal;
+ 		String localName = dummyLocal.guessName();
+ 		Iterator doneIter = done.iterator();
+Index: jode/flow/TransformConstructors.java
+===================================================================
+--- jode/flow/TransformConstructors.java	(revision 1406)
++++ jode/flow/TransformConstructors.java	(working copy)
+@@ -321,6 +321,7 @@
+ 	}
+ 
+ 	if (minSuperOuter == 1
++	    && superAna != null
+ 	    && superAna.getParent() instanceof ClassAnalyzer) {
+ 	    /* Check if this is the implicit Outer Class */
+ 	    LocalLoadOperator llop = (LocalLoadOperator) subExpr[start];
+Index: jode/obfuscator/PackageIdentifier.java.in
+===================================================================
+--- jode/obfuscator/PackageIdentifier.java.in	(revision 1406)
++++ jode/obfuscator/PackageIdentifier.java.in	(working copy)
+@@ -131,7 +131,7 @@
+     public ClassIdentifier loadClass(String name) {
+ 	int index = name.indexOf('.');
+ 	if (index == -1) {
+-	    ClassIdentifier ident = (Identifier) loadedClasses.get(name);
++	    ClassIdentifier ident = (ClassIdentifier) loadedClasses.get(name);
+ 	    if (ident == null) {
+ 		String subFull = 
+ 		   (fullName.length() > 0) ? fullName + "."+ name : name;
+Index: jode/obfuscator/modules/LocalOptimizer.java.in
+===================================================================
+--- jode/obfuscator/modules/LocalOptimizer.java.in	(revision 1406)
++++ jode/obfuscator/modules/LocalOptimizer.java.in	(working copy)
+@@ -116,9 +116,9 @@
+ 		shadow.name = name;
+ 		shadow.type = type;
+ 	    }
+-	    Enumeration enum = usingInstrs.elements();
+-	    while (enum.hasMoreElements()) {
+-		InstrInfo instr = (InstrInfo) enum.nextElement();
++	    Enumeration en_m = usingInstrs.elements();
++	    while (en_m.hasMoreElements()) {
++		InstrInfo instr = (InstrInfo) en_m.nextElement();
+ 		instr.local = l;
+ 		l.usingInstrs.addElement(instr);
+ 	    }
+@@ -126,9 +126,9 @@
+ 
+ 	public int getFirstAddr() {
+ 	    int minAddr = Integer.MAX_VALUE;
+-	    Enumeration enum = usingInstrs.elements();
+-	    while (enum.hasMoreElements()) {
+-		InstrInfo info = (InstrInfo) enum.nextElement();
++	    Enumeration en_m = usingInstrs.elements();
++	    while (en_m.hasMoreElements()) {
++		InstrInfo info = (InstrInfo) en_m.nextElement();
+ 		if (info.instr.getAddr() < minAddr)
+ 		    minAddr = info.instr.getAddr();
+ 	    }
+@@ -243,9 +243,9 @@
+ 	if (v2 == null || v2.isEmpty())
+ 	    return v1;
+ 	Vector result = (Vector) v1.clone();
+-	Enumeration enum = v2.elements();
+-	while (enum.hasMoreElements()) {
+-	    Object elem = enum.nextElement();
++	Enumeration en_m = v2.elements();
++	while (en_m.hasMoreElements()) {
++	    Object elem = en_m.nextElement();
+ 	    if (!result.contains(elem))
+ 		result.addElement(elem);
+ 	}
+@@ -552,9 +552,9 @@
+ 	/* Find the local with the least conflicts. */
+ 	int min = Integer.MAX_VALUE;
+ 	LocalInfo bestLocal = null;
+-	Enumeration enum = locals.elements();
+-	while (enum.hasMoreElements()) {
+-	    LocalInfo li = (LocalInfo) enum.nextElement();
++	Enumeration en_m = locals.elements();
++	while (en_m.hasMoreElements()) {
++	    LocalInfo li = (LocalInfo) en_m.nextElement();
+ 	    int conflicts = 0;
+ 	    Enumeration conflenum = li.conflictingLocals.elements();
+ 	    while (conflenum.hasMoreElements()) {
+@@ -888,9 +888,9 @@
+ 	    if (info.local != null && !locals.contains(info.local))
+ 		locals.addElement(info.local);
+ 	}
+-	Enumeration enum = locals.elements();
+-	while (enum.hasMoreElements()) {
+-	    LocalInfo li = (LocalInfo) enum.nextElement();
++	Enumeration en_m = locals.elements();
++	while (en_m.hasMoreElements()) {
++	    LocalInfo li = (LocalInfo) en_m.nextElement();
+ 	    int slot = ((InstrInfo)li.usingInstrs.elementAt(0))
+ 		.instr.getLocalSlot();
+ 	    GlobalOptions.err.print("Slot: "+slot+" conflicts:");

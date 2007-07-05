@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- 
+Este Xml contem os ítems da Toolbar.
+customize de acordo com a sua aplicação.
+-->
+<include id="toolbar">
+   <panel constraints="BorderLayout.NORTH" layout="FlowLayout(FlowLayout.LEFT,0,0)"  >
+      <toolbar id="tbPPGD" floatable="false"  rollover="true">
+         <separator />
+	 	 <button id="btnNova" ToolTipText="Nova"  icon="icones/novo.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="nova" />
+         <button id="btnAbrir" ToolTipText="Abrir"  icon="icones/abrir.png" action="serpro.ppgd.app.acoes.Acoes"  ActionCommand="abrir" />
+         <button id="btnFechar"  ToolTipText="Fechar" icon="icones/fechar.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="fechar" />
+      </toolbar>
+      <toolbar id="tbPPGD2" floatable="false"  rollover="true">      
+         <separator />
+         <dropdownbutton id="btnFichaAnterior"  pontoDropDown="20,18" ToolTipText="Ficha anterior" icon="icones/ficha_ant.png" Action="serpro.ppgd.app.acoes.AcaoNavegacaoFicha" ActionCommand="ficha_anterior" />
+         <dropdownbutton id="btnFichaProxima" pontoDropDown="20,18"
+         	ToolTipText="Próxima Ficha" icon="icones/ficha_prox.png"
+         	Action="serpro.ppgd.app.acoes.AcaoNavegacaoFicha"
+         	ActionCommand="ficha_proxima"/>
+         <togglebutton id="btnExibeTree"  selected="true" ToolTipText="Mostrar relação de fichas" icon="icones/exibe_tree.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="exibe_tree" />              
+      </toolbar>
+      
+      <toolbar id="tbPPGD3" floatable="false"  rollover="true">      
+         <separator />
+         <dropdownbutton id="btnImpressao" ToolTipText="Imprimir" icon="icones/impressora.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="impressao" >      
+         	<popupmenu>
+         		<menuitem id="popUpImprimirDeclaracao" text="Declaração" mnemonic="VK_D"
+         			Action="serpro.ppgd.app.acoes.Acoes"
+         			ActionCommand="imprimir_dec" />
+         		<menuitem text="Recibo" mnemonic="VK_B"
+         			Action="serpro.ppgd.app.acoes.Acoes"
+         			ActionCommand="imprimir_recibo" />
+         		<menuitem id="popUpImprimirDARF" text="Darf" mnemonic="VK_F"
+         			Action="serpro.ppgd.app.acoes.Acoes"
+         			ActionCommand="imprimir_darf" />
+         		<menuitem text="Darf com Código de Barras"
+         			mnemonic="VK_A" Action="serpro.ppgd.app.acoes.Acoes"
+         			ActionCommand="imprimir_darf_codbarras" />
+         		<menuitem text="Darf de Multa por Entrega em Atraso"
+         			mnemonic="VK_R" Action="serpro.ppgd.app.acoes.Acoes"
+         			ActionCommand="imprimir_darf_maed" />
+         	</popupmenu>
+         </dropdownbutton>
+         <button id="btnVerPendencias" accelerator="F5"  ToolTipText="Verificar Pendências(F5)" icon="icones/pendencias.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="verificar_pendencias" />              
+      </toolbar>      
+      
+<!--      <toolbar id="tbPPGD4" floatable="false"  rollover="true">            
+         <separator />
+          <button id="btnCalculadora" ToolTipText="Calculadora" icon="icones/calculadora.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="calculadora" />                       
+			
+      </toolbar> -->
+      <toolbar id="tbPPGD5" floatable="false"  rollover="true">            
+         <separator />
+          <button id="btnGravarEntrega" ToolTipText="Gravar declaração para entrega à SRF" icon="icones/gravar_entrega.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="gravar_entrega" />                       
+          <button id="btnTransmitir" ToolTipText="Transmitir via Internet" icon="icones/transmitir.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="transmitir" />                                 
+      </toolbar>
+      <toolbar id="tbPPGD6" floatable="false"  rollover="true">            
+         <separator />
+          <button id="btnAjuda" ToolTipText="Ajuda" icon="icones/ajuda.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda" />                                          
+         </toolbar>
+      <toolbar id="tbPPGD8" floatable="false"  rollover="true">            
+         <separator />
+<!--          <button id="btnTutorial" ToolTipText="Tutorial" icon="icones/tutorial.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="tutorial" />   -->                                                
+          <button id="btnLeaozinho" ToolTipText="Leãozinho" icon="icones/leaozinho.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="leaozinho" />                                          
+          <button id="btnMemoria" ToolTipText="Memória da Receita Federal" icon="icones/memoria.png" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="memoria" />                                          
+         </toolbar>      
+         
+      </panel> 
+</include>

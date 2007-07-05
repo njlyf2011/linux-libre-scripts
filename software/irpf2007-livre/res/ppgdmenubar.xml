@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<include id="menu">
+	<menubar name="menubar">
+		<menu text="Declaração" mnemonic="VK_D">
+			<menuitem text="Nova" mnemonic="VK_N"
+				accelerator="control N" Action="serpro.ppgd.app.acoes.Acoes"
+				ActionCommand="nova"></menuitem>
+         <menuitem id="mnuAbrir" text="Abrir" mnemonic="VK_A" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="abrir"
+         	accelerator="control A">
+</menuitem>
+<separator ></separator>
+         <menuitem id="mnuFechar" text="Fechar" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="fechar" mnemonic="VK_F"/>
+
+<separator />
+         <menuitem text="Excluir" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="excluir" mnemonic="VK_E"/>
+
+<separator />
+         <menu text="Imprimir..." mnemonic="VK_I">
+	         <menuitem id="mnuImprimirDeclaracao" text="Declaração" mnemonic="VK_D" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="imprimir_dec"
+	         	accelerator="control P"/>
+         <menuitem text="Recibo" mnemonic="VK_B" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="imprimir_recibo" />
+         <menuitem id="mnuImprimirDarf" text="Darf" mnemonic="VK_F" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="imprimir_darf"/>
+         <menuitem text="Darf com Código de Barras" mnemonic="VK_A" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="imprimir_darf_codbarras"
+         	/>
+         <menuitem text="Darf de Multa por Entrega em Atraso" mnemonic="VK_R" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="imprimir_darf_maed"
+         	/>
+         	   
+         	</menu>
+
+<separator />
+         <menuitem text="Importar Dados da Declaração de 2006" mnemonic="VK_M" 
+         Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="importar_anoanterior"
+         	accelerator="control M"/>
+          <menuitem id="mnuVerPendencias" text="Verificar Pendências" mnemonic="VK_V"
+          Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="verificar_pendencias"/>
+         <menuitem id="mnuGravarEntrega" text="Gravar Declaração para Entrega à SRF" mnemonic="VK_G"
+         Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="gravar_entrega"  
+         	accelerator="control G"/>
+         <menuitem text="Transmitir via Internet" mnemonic="VK_T"
+          Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="transmitir"
+         	accelerator="control I"/>
+<separator />
+      	<menuitem id="menuDeclSair" text="Sair do Programa" mnemonic="VK_S" 
+         Accelerator="alt F4" Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="sair" ></menuitem>
+      </menu>
+
+      <menu id="mnuPreenchimento" text="Preenchimento" mnemonic="VK_P" >
+               <menuitem text="Identificação do Contribuinte" 
+                   Action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+			       ActionCommand="serpro.ppgd.irpf.gui.contribuinte.PainelContribuinte"               
+                 />
+      
+               <menuitem 
+				text="Resumo da Declaração"
+				Action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				ActionCommand="serpro.ppgd.irpf.gui.resumo.PainelRendimentosTributaveisDeducoes"               
+                 />
+               <menuitem 
+				text="Importar Dados de Carnê-Leão 2006"               
+				 Action="serpro.ppgd.app.acoes.Acoes"
+				 ActionCommand="importar_cl"
+                 />
+                 <separator/>
+
+                 <menu text="Atividade Rural" mnemonic="VK_R">
+                 	<menuitem text="Propriedades no Brasil" mnemonic="VK_B"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelIdentificacaoImovelARBrasil"                 	
+                 	/>
+                 	<menuitem 
+                 	  text="Propriedades no Exterior" mnemonic="VK_E"
+					action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+					actionCommand="serpro.ppgd.irpf.gui.atividaderural.PainelIdentificacaoImovelARExterior"                 	  
+                 	/>
+		               <menuitem 
+						text="Importar Dados do Livro Caixa de Atividade Rural 2006"               
+						 Action="serpro.ppgd.app.acoes.Acoes"
+						 ActionCommand="importar_ar"
+		                 />
+                 	
+                 </menu>
+<!--                 <separator/>                 
+               <menuitem 
+                 text="Importar Dados de Ganhos de Capital 2006" mnemonic="VK_I"
+                 />
+               <menuitem 
+                  text="Ganhos de Capital" mnemonic="VK_G"
+				Action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				ActionCommand="serpro.ppgd.irpf.gui.ganhosdecapital.bensimoveis.PainelGCapBensImoveis"                  
+                 />
+               <menuitem 
+                 text="Importar Dados de Ganhos de Capital Moeda Estrangeira 2006"
+                 mnemonic="VK_M"
+                 />
+               <menuitem 
+                 text="Ganhos de Capital - Moeda Estrangeira"
+				  Action="serpro.ppgd.app.acoes.AcaoMudaPainelIRPF"
+				  ActionCommand="serpro.ppgd.irpf.gui.moedaestrangeira.rendreais.PainelGCapMERendReais"                 
+                 /> -->
+			
+      </menu>     
+      <menu id="mnuFichas" text="Fichas" mnemonic="VK_F" >
+      </menu>      
+      
+      <menu  text="Ferramentas" mnemonic="VK_T">
+         <menuitem  id="mnuConverter" text="Converter Declaração para Simplificada" mnemonic="VK_V"
+            Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="converter_declaracao"         
+         	/>
+
+               <separator />            
+<!--         <menuitem text="Calculadora" mnemonic="VK_C"
+            Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="calculadora" enabled="false"        
+         	/>
+               <separator />      -->
+         <menu text="Cópia de Segurança" mnemonic="VK_P"
+         	>
+         <menuitem id="mnuGravarCopia" text="Gravar..." mnemonic="VK_G"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="copia_gravar"         
+         	accelerator="control B"/>
+         <menuitem text="Restaurar..." mnemonic="VK_R"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="copia_restaurar"         
+         	accelerator="control T"/>
+         	
+         	</menu>
+      
+      </menu>
+
+      <menu text="Ajuda"  mnemonic="VK_A">
+          <menuitem id="menuAjudaConteudo" text="Conteúdo" mnemonic="VK_C"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda_conteudo" 
+         	/>
+         <!-- <menuitem text="Tutorial" mnemonic="VK_T"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda_tutorial"  enabled="false"       
+         	/> --> 
+         <menuitem id="menuAjudaInstrucoes" text="Instruções de Preenchimento" mnemonic="VK_I"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda_instrucoes"         
+         	/>
+         <menuitem id="menuAjudaComo" text="Como Fazer para" mnemonic="VK_F"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda_comofazer"
+         	/>
+         <menuitem id="menuAjudaErros" text="Erros mais Frequentes no Preenchimento da Declaração" mnemonic="VK_E" 
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda_erros"         
+         	/>
+         <menuitem id="menuAjudaPerguntas" text="Perguntas mais Frequentes" mnemonic="VK_R"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="ajuda_perguntas"         
+         	/> 
+         <separator/>
+         <menuitem text="Leãozinho" mnemonic="VK_L"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="leaozinho"         
+         	/>
+         <menuitem text="Memória da Receita Federal" mnemonic="VK_M"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="memoria"         
+         	/>
+         <separator/>
+         <menuitem text="Sobre o IRPF 2007" mnemonic="VK_S"
+                 Action="serpro.ppgd.app.acoes.Acoes" ActionCommand="sobre"         
+         	/>
+         
+      </menu>
+   </menubar>
+</include>

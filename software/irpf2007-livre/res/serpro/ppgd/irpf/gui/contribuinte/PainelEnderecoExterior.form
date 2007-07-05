@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <AuxValues>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Component id="jLabel6" linkSize="1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jEditAlfa2" pref="506" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jLabel7" linkSize="1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="jEditAlfa3" min="-2" pref="97" max="-2" attributes="1"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="jEditAlfa4" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel9" min="-2" pref="76" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="jEditAlfa5" pref="136" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                          <Group type="102" alignment="0" attributes="1">
+                              <Component id="jLabel4" linkSize="1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="edtZip" min="-2" pref="111" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="jLabel13" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel1" linkSize="1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jEditColecao1" min="-2" pref="97" max="-2" attributes="1"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jLabel2" min="-2" pref="58" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="edtCodExterior" min="-2" pref="95" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jLabel3" min="-2" pref="42" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jEditAlfa1" pref="190" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="102" attributes="0">
+                              <Component id="jEditMascara2" min="-2" pref="64" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jLabel14" min="-2" pref="53" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jEditTelefone1" min="-2" pref="113" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                  </Group>
+              </Group>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jEditAlfa2" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel6" alignment="1" min="-2" pref="20" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel7" min="-2" pref="20" max="-2" attributes="1"/>
+                  <Component id="jEditAlfa3" min="-2" max="-2" attributes="2"/>
+                  <Component id="jLabel8" min="-2" pref="20" max="-2" attributes="0"/>
+                  <Component id="jEditAlfa4" min="-2" max="-2" attributes="1"/>
+                  <Component id="jLabel9" min="-2" pref="20" max="-2" attributes="0"/>
+                  <Component id="jEditAlfa5" min="-2" max="-2" attributes="1"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel1" linkSize="2" min="-2" pref="23" max="-2" attributes="1"/>
+                  <Component id="jEditColecao1" min="-2" max="-2" attributes="1"/>
+                  <Component id="jLabel2" linkSize="2" min="-2" pref="23" max="-2" attributes="1"/>
+                  <Component id="edtCodExterior" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel3" linkSize="2" min="-2" pref="23" max="-2" attributes="0"/>
+                  <Component id="jEditAlfa1" min="-2" pref="23" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="jLabel4" linkSize="2" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Component id="edtZip" alignment="1" min="-2" max="-2" attributes="1"/>
+                  <Component id="jLabel14" alignment="1" min="-2" pref="23" max="-2" attributes="1"/>
+                  <Component id="jEditTelefone1" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" alignment="1" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="jLabel13" alignment="1" max="32767" attributes="1"/>
+                      <Component id="jEditMascara2" alignment="1" max="32767" attributes="1"/>
+                  </Group>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="serpro.ppgd.gui.xbeans.JEditAlfa" name="jEditAlfa2">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.logradouroExt"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel6">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Logradouro"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel7">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="N&#xfa;mero"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditAlfa" name="jEditAlfa3">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.numeroExt"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel8">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Complemento"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditAlfa" name="jEditAlfa4">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.complementoExt"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel9">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Bairro/Distrito"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditAlfa" name="jEditAlfa5">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.bairroExt"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Pa&#xed;s"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditColecao" name="jEditColecao1">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.pais"/>
+        <Property name="caracteresValidosTxtCodigo" type="java.lang.String" value="0123456789 "/>
+        <Property name="lblTextoVisivel" type="boolean" value="false"/>
+        <Property name="mascaraTxtCodigo" type="java.lang.String" value="***&apos;"/>
+        <Property name="pesoLabel" type="double" value="0.1"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="C&#xf3;d. Ext."/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditColecao" name="edtCodExterior">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.codigoExterior"/>
+        <Property name="iconBtnPopup" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/icones/ico_ocup.png"/>
+        </Property>
+        <Property name="lblTextoVisivel" type="boolean" value="false"/>
+        <Property name="mascaraTxtCodigo" type="java.lang.String" value="***"/>
+        <Property name="pesoLabel" type="double" value="0.1"/>
+        <Property name="txtCodigoEditavel" type="boolean" value="false"/>
+        <Property name="txtCodigoHabilitado" type="boolean" value="false"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Cidade"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditAlfa" name="jEditAlfa1">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.cidade"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="ZIP"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditCEP" name="edtZip">
+      <Properties>
+        <Property name="brasileiro" type="boolean" value="false"/>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.cepExt"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel13">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="DDI"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditMascara" name="jEditMascara2">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.ddd"/>
+        <Property name="caracteresValidos" type="java.lang.String" value="0123456789 "/>
+        <Property name="mascara" type="java.lang.String" value="****&apos;"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel14">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Telefone"/>
+      </Properties>
+    </Component>
+    <Component class="serpro.ppgd.gui.xbeans.JEditTelefone" name="jEditTelefone1">
+      <Properties>
+        <Property name="informacaoAssociada" type="java.lang.String" value="contribuinte.telefone"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>
