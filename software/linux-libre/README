@@ -14,7 +14,7 @@ suspicious firmware blob.  It's under heavy development ATM.
 
 In http://www.fsfla.org/svn/fsfla/software/linux-libre/, you'll find:
 
-README: This file
+README: This file, possibly updated.
 deblob-2.6.24: Jeff Moe's script, with a patchfile moved inline.
 deblob-check: The script I wrote to locate and clean up blobs.
 
