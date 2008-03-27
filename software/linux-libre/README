@@ -1,0 +1,32 @@
+This is a project to release 100% Free Software kernels for Fedora.
+
+It follows the practice established by a number of 100% Free GNU/Linux
+distributions: removing non-Free bits from Linux kernels distributed
+by third parties.
+
+The removal has so far been accomplished with the script
+deblob-2.6.24, inspired in gNewSense's scripts but customized for
+BLAG's kernel by Jeff Moe.
+
+I've written deblob-check, a script that you can use to test whether a
+kernel source file, a patch or a tarball contains any remaining or
+suspicious firmware blob.  It's under heavy development ATM.
+
+In http://www.fsfla.org/svn/fsfla/software/linux-libre/, you'll find:
+
+README: This file
+deblob-2.6.24: Jeff Moe's script, with a patchfile moved inline.
+deblob-check: The script I wrote to locate and clean up blobs.
+
+In http://www.lsd.ic.unicamp.br/~oliva/snapshots/linux-libre/, you'll
+yum repositories with 100% Free kernel sources and binaries:
+
+F-8/: Free kernels based on Fedora updates/8 (stable releases).
+F-8-testing/: Free kernels based on updates/testing/8.
+F-8-detesting/: Free builds based on Fedora CVS.
+devel/: Free builds based on Fedora development (rawhide).
+
+Enjoy your freedom!
+
+--
+Alexandre Oliva  <lxoliva@fsfla.org>
