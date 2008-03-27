@@ -25,6 +25,7 @@ F-8/: Free kernels based on Fedora updates/8 (stable releases).
 F-8-testing/: Free kernels based on updates/testing/8.
 F-8-detesting/: Free builds based on Fedora CVS.
 devel/: Free builds based on Fedora development (rawhide).
+deltas/: CVS, patches and deltas to re-create the build trees.
 
 Enjoy your freedom!
 
