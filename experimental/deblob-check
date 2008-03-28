@@ -352,12 +352,6 @@ fi
 # false positives.
 
 set_except () {
-  if test -f $0.cache &&
-     test `ls -t $0.cache $0 | sed 1q` = $0.cache; then
-    . $0.cache
-    return
-  fi
-
   # Look for a multi-line definition starting with a line that matches
   # $1 (implicitly anchored to the beginning of the line), and ending
   # at the first ';'.
@@ -402,8 +396,8 @@ set_except () {
 	"b noblob;"
   }
 
-  # case /$1 in
-  # */linux*.tar* | */kernel*.tar* | */linux-*.*.*/*)
+  case /$1 in
+  */linux*.tar* | */kernel*.tar* | */linux-*.*.*/*)
     # false alarms, contain source
     # drivers/net/wan/wanxlfw.inc_shipped -> wanxlfw.S
     accept 'static u8 firmware\[\]={.*0x23,0xFC,0x00,0x00,0x00,0x01,0xFF,0xF9,0x00,0xD4,0x61,0x00,0x06,0x74,0x33,0xFC,[\n]'"$blobpat*"
@@ -919,8 +913,8 @@ set_except () {
     defnc '} sil_port\[\] ='
     defnc '} vsb_snr_tab\[\] ='
     defnc '} yss225_registers\[\] __devinitdata ='
-  #  ;;
-  #*/patch*2.6.25-rc*)
+    ;;
+  */patch*2.6.25-rc*)
     defnc ';[/][*]@@ -[0-9]*,[0-9]* +[0-9]*,[0-9]* @@ static uchar sbox\[8\]\[4\]\[16\] = {[*][/];'
     defnc '	\$3 = {{pge = '
     defnc 'static yyconst flex_int\(16\|32\)_t yy_[^[]*\[[0-9]*\] ='
@@ -966,22 +960,22 @@ set_except () {
     accept '	24 => \[[\n]\(.*[\n]\)*	\]\(, [0-9]\+ => \[\)\?'"$eol"
     accept '		'"'"'0x.*[\n]\(.*[\n]\)*	\]\(, [0-9]\+ => \[\)\?'"$eol"
     defnc 'const u\(8\|16\|32\) b43_ntab_\(\(adjustpower\|estimatepowerlt\|gainctl\|iqlt\|loftlt\|noisevar1\|tdi[24]0a\)[01]\|channelest\|frame\(lookup\|struct\)\|mcs\|pilot\|tdtrn\|tmap\)\[\] ='
-  #  ;;
-  #*/nouveau-drm.patch)
+    ;;
+  */nouveau-drm.patch)
     defnc '\(static uint32_t\|}\) nv04_graph_ctx_regs \[\] ='
     defnc 'static int nv10_graph_ctx_regs \[\] ='
     # this is highly suspicious, but it does not look like the
     # developers are trying to stop anyone from modifying it,
     # they just grabbed these numbers from mmio interactions.
     defnc 'static uint32_t nv\(4[013467ace]\|49_4b\|8[46]\)_ctx_voodoo\[\] ='
-  #  ;;
-  #*/linux-2.6-lirc.patch)
+    ;;
+  */linux-2.6-lirc.patch)
     defnc 'const unsigned char map_table\[\] ='
-  #  ;;
-  #*/linux-2.6-modsign-mpilib.patch)
+    ;;
+  */linux-2.6-modsign-mpilib.patch)
     defnc 'const unsigned char __clz_tab\[\] ='
-  #  ;;
-  #*/linux-2.6-wireless.patch)
+    ;;
+  */linux-2.6-wireless.patch)
     defnc 'const u\(8\|16\|32\) b43_ntab_\(\(adjustpower\|estimatepowerlt\|gainctl\|iqlt\|loftlt\|noisevar1\|tdi[24]0a\)[01]\|channelest\|frame\(lookup\|struct\)\|mcs\|pilot\|tdtrn\|tmap\)\[\] ='
     defnc 'static const u16 rtl8225bcd_rxgain\[\] ='
     defnc 'static const u8 rtl8225_agc\[\] ='
@@ -1000,8 +994,8 @@ set_except () {
     defnc 'static const struct ath5k_ini ar5212_ini\[\] ='
     defnc 'static const struct ath5k_ini_mode rf5413_ini_mode_end\[\] ='
     defnc '		} blinkrates\[\] ='
-  #  ;;
-  #*/linux-2.6-wireless-pending.patch)
+    ;;
+  */linux-2.6-wireless-pending.patch)
     oprepline '#define AR5K_RATES_11A '
     oprepline '#define AR5K_RATES_11B '
     oprepline '#define AR5K_RATES_11G '
@@ -1011,11 +1005,11 @@ set_except () {
     accept '   sudo modprobe ath5k debug=0x00000400[\n]'"$blobpat*"
     startmatch '     rates:[\n]' "$blobpat*"
     accept '	{ 1, MODULATION_XR, 3000, 1, 150, 3 },		\\[\n]\(.*\\[\n]\)*}'
-  #  ;;
-  #*/linux-2.6-drm-i915-modeset.patch)
+    ;;
+  */linux-2.6-drm-i915-modeset.patch)
     defnc 'static const u32 filter_table\[\] ='
-  #  ;;
-  #esac
+    ;;
+  esac
 
   # turn "/rx1/b notblob;\n/rx2/b notblob;..." into
   # "/rx1\|rx2\|.../b notblob;"
@@ -1037,17 +1031,6 @@ set_except () {
       }'`
     ;;
   esac
-
-  rm -f $0.cache
-  {
-    quote () {
-      sed 's,[\\$`"],\\&,g;1s,=,=",;$s,$,",'
-    }
-    echo "match_first=$match_first" | quote
-    echo "need_more=$need_more" | quote
-    echo "match_full=$match_full" | quote
-    echo "match_check=$match_check" | quote
-  } > $0.cache
 }  
 
 # Regular expression that matches a literal constant.
@@ -1079,6 +1062,28 @@ set_sedmain () {
     context=:
     ;;
   esac
+
+  unset match_first
+  unset need_more
+  unset match_full
+  unset match_check
+
+  # Add $1 to match_first, $2 to need_more, $3 to match_full, $4 to
+  # check action.  All 3 regexps are anchored to the beginning of the
+  # pattern.
+  addx () {
+    test -z "$1" || match_first="$match_first${match_first+\\|}$1"
+    test -z "$2" || need_more="$need_more${need_more+\\|}$2"
+
+    if test -n "$3"; then
+      match_full="$match_full${match_full+\\|}$3"
+      if test -n "$4"; then
+        match_check="$match_check
+/$bol$3/$4
+"
+      fi
+    fi
+  }
 
   # Concatenate lines as long as the end of the current line ends with
   # a literal constant or characters that generally precede bracketed
@@ -1185,39 +1190,17 @@ b noblobline
 "
 }
 
-setup () {
-  unset match_first
-  unset need_more
-  unset match_full
-  unset match_check
-
-  # Add $1 to match_first, $2 to need_more, $3 to match_full, $4 to
-  # check action.  All 3 regexps are anchored to the beginning of the
-  # pattern.
-  addx () {
-    test -z "$1" || match_first="$match_first${match_first+\\|}$1"
-    test -z "$2" || need_more="$need_more${need_more+\\|}$2"
-
-    if test -n "$3"; then
-      match_full="$match_full${match_full+\\|}$3"
-      if test -n "$4"; then
-        match_check="$match_check
-/$bol$3/$4
-"
-      fi
-    fi
-  }
-
-  set_except
-
-  set_sed_cmd
-}
-
 # Process an input file named in $1 and run it through the blob
 # recognizer.  Functions set_except and set_sed_cmd provide additional
 # arguments on a per-file and per-action basis.
 
 check () {
+  case "$#" in 1) ;; *) echo ICE >&2; exit 1;; esac
+
+  set_except "$1"
+
+  set_sed_cmd "$1"
+
   # Choose the input source...
   case $1 in
   -) in= ;;
@@ -1297,8 +1280,6 @@ esac
 
 #list: n=$#
 pass=:
-
-setup
 
 # Go through each of the input files in the command line.
 for file
