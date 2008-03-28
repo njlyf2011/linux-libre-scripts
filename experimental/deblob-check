@@ -22,7 +22,7 @@
 # USA
 
 
-# usage: deblob-check [-VV] [-s S] [-S L] [-lDdBbCcXxPpFft] \
+# usage: deblob-check [-VV] [-s S] [-lDdBbCcXxPpFft] \
 #        [*.tar* patch-* *.patch]
 
 # Look for too-long undocumented sequences of numbers (generally blobs
@@ -31,9 +31,6 @@
 # -s --sensitivity: must be followed by a blank and a number.
 #		Specifies the number of consecutive integral or
 #		character constants that trigger the blob detector.
-
-# -S --chunk-size: (performance) the number of input lines to be read
-#		before moving to the hold space.  Default is 127.
 
 # The default sensitivity is 32 constants.
 
@@ -149,21 +146,6 @@ case $1 in
   fi
 
   sens=`expr $sens - 1`
-  ;;
-esac
-
-chunk_size=127
-case $1 in
---chunk-size | -S)
-  chunk_size=$2
-  shift 2 || exit 1
-
-  if test "$sens" -gt 0 2>/dev/null; then
-    :
-  else
-    echo invalid chunk size: $chunk_size >&2
-    exit 1
-  fi
   ;;
 esac
 
@@ -1172,8 +1154,7 @@ g;
   h;
   n;
   : read_more
-  /$bol;[/][*]end [^\\n]*[*][/];$/! {
-    /^\\([^\\n]*[\\n]\\)\\{$chunk_size\\}/! { N; b read_more; }
+  /^;[/][*]end [^\\n]*[*][/];$/! {
     H;
     n;
     b read_more;
