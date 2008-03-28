@@ -1063,28 +1063,6 @@ set_sedmain () {
     ;;
   esac
 
-  unset match_first
-  unset need_more
-  unset match_full
-  unset match_check
-
-  # Add $1 to match_first, $2 to need_more, $3 to match_full, $4 to
-  # check action.  All 3 regexps are anchored to the beginning of the
-  # pattern.
-  addx () {
-    test -z "$1" || match_first="$match_first${match_first+\\|}$1"
-    test -z "$2" || need_more="$need_more${need_more+\\|}$2"
-
-    if test -n "$3"; then
-      match_full="$match_full${match_full+\\|}$3"
-      if test -n "$4"; then
-        match_check="$match_check
-/$bol$3/$4
-"
-      fi
-    fi
-  }
-
   # Concatenate lines as long as the end of the current line ends with
   # a literal constant or characters that generally precede bracketed
   # assignments, followed or not by separators.  This ensures that, if
@@ -1196,6 +1174,28 @@ b noblobline
 
 check () {
   case "$#" in 1) ;; *) echo ICE >&2; exit 1;; esac
+
+  unset match_first
+  unset need_more
+  unset match_full
+  unset match_check
+
+  # Add $1 to match_first, $2 to need_more, $3 to match_full, $4 to
+  # check action.  All 3 regexps are anchored to the beginning of the
+  # pattern.
+  addx () {
+    test -z "$1" || match_first="$match_first${match_first+\\|}$1"
+    test -z "$2" || need_more="$need_more${need_more+\\|}$2"
+
+    if test -n "$3"; then
+      match_full="$match_full${match_full+\\|}$3"
+      if test -n "$4"; then
+        match_check="$match_check
+/$bol$3/$4
+"
+      fi
+    fi
+  }
 
   set_except "$1"
 
