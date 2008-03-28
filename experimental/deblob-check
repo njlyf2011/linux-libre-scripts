@@ -1097,9 +1097,10 @@ set_sedmain () {
 	"\\\\$"
   fi
 
-  match_first="^\\($match_first\\)"
-  need_more="$need_more"
-  match_full="\\($match_full\\)"
+  match_first=`sed 's,^\\\|,^\\(,;s,$,\\),' < "$match_first_name"`
+  need_more=`sed 's,^\\\|,,' < "$need_more_name"`
+  match_full=`sed 's,^\\\|,^\\(,;s,$,\\),' < "$match_full_name"`
+  match_check=`cat < "$match_check_name"`
 
   sedmain="
 : restart
@@ -1175,24 +1176,23 @@ b noblobline
 check () {
   case "$#" in 1) ;; *) echo ICE >&2; exit 1;; esac
 
-  unset match_first
-  unset need_more
-  unset match_full
-  unset match_check
+  match_first_name=`mktemp -t deblob-check-match_first-XXXXXX`
+  need_more_name=`mktemp -t deblob-check-need_more-XXXXXX`
+  match_full_name=`mktemp -t deblob-check-match_full-XXXXXX`
+  match_check_name=`mktemp -t deblob-check-match_check-XXXXXX`
+  tempfiles="$match_first_name $need_more_name $match_full_name $match_check_name"
 
   # Add $1 to match_first, $2 to need_more, $3 to match_full, $4 to
   # check action.  All 3 regexps are anchored to the beginning of the
   # pattern.
   addx () {
-    test -z "$1" || match_first="$match_first${match_first+\\|}$1"
-    test -z "$2" || need_more="$need_more${need_more+\\|}$2"
+    test -z "$1" || echo -n "\\|$1" >> $match_first_name
+    test -z "$2" || echo -n "\\|$2" >> $need_more_name
 
     if test -n "$3"; then
-      match_full="$match_full${match_full+\\|}$3"
+      echo -n "\\|$3" >> $match_full_name
       if test -n "$4"; then
-        match_check="$match_check
-/$bol$3/$4
-"
+        echo "/$bol$3/$4" >> $match_check_name
       fi
     fi
   }
@@ -1237,9 +1237,10 @@ check () {
   if test `echo "$sedmain" | wc -c` -lt 1024; then
     cmd3='sed -n "$sedmain"'
   else
-    scriptname=`mktemp -t sed-deblob-tmp-XXXXXX`
+    scriptname=`mktemp -t deblob-check-sed-XXXXXX`
+    tempfiles="$tempfiles $scriptname"
     echo "$sedmain" > $scriptname
-    cmd3="{ sed -n -f \"$scriptname\" && rm -f \"$scriptname\" || echo preserving \"$scriptname\" >&2; }"
+    cmd3="{ sed -n -f \"$scriptname\"; }"
   fi
 
   # Optimize useless "cat"s away.
@@ -1263,6 +1264,9 @@ check () {
     eval "$in $pipe"
     ;;
   esac
+
+  rm -f $tempfiles
+  tempfiles=
 }
 
 # If no input given, use stdin.
@@ -1280,6 +1284,9 @@ esac
 
 #list: n=$#
 pass=:
+
+tempfiles=
+trap "status=$?; test -z \"$tempfiles\" || rm -f $tempfiles; (exit $status); exit" 0 1 2 15
 
 # Go through each of the input files in the command line.
 for file
