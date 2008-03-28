@@ -22,7 +22,8 @@
 # USA
 
 
-# usage: deblob-check [-VV] [-s S] [-lDdBbCcXxPpFft] [*.tar* patch-* *.patch]
+# usage: deblob-check [-VV] [-s S] [-S L] [-lDdBbCcXxPpFft] \
+#        [*.tar* patch-* *.patch]
 
 # Look for too-long undocumented sequences of numbers (generally blobs
 # in disguise) in source files.
@@ -30,6 +31,9 @@
 # -s --sensitivity: must be followed by a blank and a number.
 #		Specifies the number of consecutive integral or
 #		character constants that trigger the blob detector.
+
+# -S --chunk-size: (performance) the number of input lines to be read
+#		before moving to the hold space.  Default is 127.
 
 # The default sensitivity is 32 constants.
 
@@ -148,6 +152,21 @@ case $1 in
   ;;
 esac
 
+chunk_size=127
+case $1 in
+--chunk-size | -S)
+  chunk_size=$2
+  shift 2 || exit 1
+
+  if test "$sens" -gt 0 2>/dev/null; then
+    :
+  else
+    echo invalid chunk size: $chunk_size >&2
+    exit 1
+  fi
+  ;;
+esac
+
 test_mode=false
 
 name=deblob-check
@@ -177,14 +196,16 @@ case $1 in
 --mark-false-positives | -P)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "p;" "p;" "b deblob;" "" "p; d;"
+# rewrite
+    set_sedmain "p;" "p;" "b deblob;" "" "p; d;"
   }
   ;;
 
 --print-marked-false-positives | -F)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "" "" "b deblob;" "i\\
+# rewrite
+    set_sedmain "" "" "b deblob;" "i\\
 ::: $file :::
 p; d;" "d;"
   }
@@ -193,7 +214,8 @@ p; d;" "d;"
 --print-false-positives | -f)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "" "" "i\\
+# rewrite
+    set_sedmain "" "" "i\\
 ::: $file :::
 p;" "d;" "d;"
   }
@@ -202,21 +224,23 @@ p;" "d;" "d;"
 --deblob | --mark-blobs | -D)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "b deblob;" "p;" "p; d;"
+# rewrite
+    set_sedmain "b deblob;" "p;" "p; d;"
   }
   ;;
 
 --cat | -d)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "p; d;" "p;" "p; d;"
+    set_sedmain "p;" "p;" "p;"
   }
   ;;
 
 --print-marked-blobs | -B)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "b deblob;" "" "d;" "i\\
+# rewrite
+    set_sedmain "b deblob;" "" "d;" "i\\
 ::: $file :::
   p; d;"
   }
@@ -225,7 +249,8 @@ p;" "d;" "d;"
 --print-blobs | -b)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "i\\
+# rewrite
+    set_sedmain "i\\
 ::: $file :::
   p;"
   }
@@ -234,7 +259,8 @@ p;" "d;" "d;"
 --print-marked-blobs-with-context | -C)
   shift;
   set_sed_cmd () {
-    set_sedmain -c "b deblob;" "" "d;" "i\\
+# rewrite -c
+    set_sedmain "b deblob;" "" "d;" "i\\
 ::: $file :::
   p; d;"
   }
@@ -243,7 +269,8 @@ p;" "d;" "d;"
 --print-blobs-with-context | -c)
   shift;
   set_sed_cmd () {
-    set_sedmain -c "i\\
+# rewrite -c
+    set_sedmain "i\\
 ::: $file :::
   p;"
   }
@@ -252,7 +279,8 @@ p;" "d;" "d;"
 --list-false-positives | -p)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "" "" "i\\
+# rewrite
+    set_sedmain "" "" "i\\
 $file
   q" "d;" "d;"
   }
@@ -261,7 +289,8 @@ $file
 --list-all-matches | -x)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "i\\
+# rewrite
+    set_sedmain "i\\
 $file
   q;" "" "i\\
 $file
@@ -272,7 +301,8 @@ $file
 --print-all-matches | -X)
   shift;
   set_sed_cmd () {
-    set_sedmain -f "b deblob" "" "b deblob;" "i\\
+# rewrite
+    set_sedmain "b deblob" "" "b deblob;" "i\\
 ::: $file :::
 p; d;" "d;"
   }
@@ -283,7 +313,7 @@ p; d;" "d;"
   -- | -l | --list-blobs) shift;;
   esac
   set_sed_cmd () {
-    set_sedmain -f "i\\
+    set_sedmain "i\\
 $file
   q;"
   }
@@ -396,7 +426,7 @@ set_except () {
   ocomment () {
     addx \
 	"$1" \
-	"^$1\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*$" \
+	"$bol$1\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*$" \
 	"$1\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*[*][/]" \
 	"b noblob;"
   }
@@ -1061,6 +1091,7 @@ eol="\\([\\n]\\|\$\\)"
 
 # Set up the sed script that will go through the (processed) input,
 # looking for sequences of blobs and printing whatever was requested.
+# 
 
 set_sedmain () {
   context=:
@@ -1112,58 +1143,64 @@ set_sedmain () {
 
   match_first= # `sed 's,^\\\|,^\\(,;s,$,\\),' < "$match_first_name"`
   need_more= # `sed 's,^\\\|,,' < "$need_more_name"`
-  match_full=`sed 's,^\\\|,^\\(,;s,$,\\),' < "$match_full_name"`
+  match_full=`sed 's,^\\\|,,;s,^,\\\\(,;s,$,\\\\),' < "$match_full_name"`
   match_check= # `cat < "$match_check_name"`
+
+  if test -s "$match_full_name"; then
+    check_false_positives="$v:???match_full
+/$bol$match_full/!b blob;
+$v:+++match_full
+h;
+s/$bol$match_full/\1/g;
+# See if, after removing all matches, we end up without any blobs.
+$v:???blobseq
+/$blobseq/!{
+  g;
+  b falsepos;
+}
+g;
+"
+  else
+    match_full="$^"
+    check_false_positives=
+  fi
 
   sedmain="
 /^;[/][*]\\(end .*\\)\\?[*][/];$/d;
 /^;[/][*]begin /{
   $v:reading file in
+  h;
+  n;
   : read_more
-  N;
-  /;[/][*]end [^\\n]*[*][/];/! b read_more;
+  /$bol;[/][*]end [^\\n]*[*][/];$/! {
+    /^\\([^\\n]*[\\n]\\)\\{$chunk_size\\}/! { N; b read_more; }
+    H;
+    n;
+    b read_more;
+  }
+  H;
+  g;
   s/^\(;[/][*]begin [^\n]*[\n]\)*//;
   s/\\([\\n]\\?;[/][*]\\(end [^\n]*\\)[*][/];\\)*$//;
 }
 $v:???!blobseq
-/$blobseq/!b noblobline;
-$v:???match_full
-/$bol$match_full/{
-  $v:+++match_full
-  h;
-  s/$bol$match_full/\1/g;
-  $v:???blobseq
-  /$blobseq/{
-    $v:+++blobseq
-    g;
-    b blob;
-  }
-  g;
-  # If we got past the checks (including that for blobs), we know
-  # we're ok.
-  b notblob;
-}
-b blob;
-: noblob
-$v:noblob
-$5
-b notblob
-: deblobbed
-$v:deblobbed
-$4
-b noblobline
-: notblob
-$v:notblob
-$3
-d;
-: noblobline
-$v:noblobline
-$2
-d;
+/$blobseq/!b clean;
+$check_false_positives
+# Fall through.
 : blob
 $v:blob
 $1
 d;
+: clean
+$2
+d;
+: falsepos
+$v:falsepos
+$3
+d;
+"
+
+: "
 : deblob
 $v:deblob
 s/{[{ 	\n]*$constx\\($sepx$constx\\)\\{$sens,\\}}[ 	]*;/{\/*(DEBLOBBED)*\/};/g
