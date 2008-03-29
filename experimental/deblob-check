@@ -1,8 +1,11 @@
 #! /bin/sh
 
-# deblob-check version 2008-03-28.0
+# deblob-check version 2008-03-29.0
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
+
+# Check http://www.fsfla.org/svn/fsfla/software/linux-libre for newer
+# versions.
 
 # Copyright (C) 2008 Alexandre Oliva
 #
@@ -356,51 +359,37 @@ $string" >&2
 fi
 
 # Call addx as needed to set up more patterns to be recognized as
-# false positives.
+# false positives.  Takes the input filename in $1.
 
 set_except () {
   # Look for a multi-line definition starting with a line that matches
   # $1 (implicitly anchored to the beginning of the line), and ending
   # at the first ';'.
   defnc () {
-    addx \
-	"$1" \
-	"$bol$1[^;]*\$" \
-	"$1[^;]*;" \
-	"b notblob;"
+    addx "$1[^;]*;"
   }
 
   # Accept as a non-blob an expression $1 that would have otherwise
   # triggered blob detection.  The expression must end in a way that
   # would trigger the blob detection machinery.
   accept () {
-    addx "" "" "$1" "b notblob;"
+    addx "$1"
   }
 
   # After an initial line $1, accept also $2.  $2 must be enough to
   # get the normal blob detection going.
   startmatch () {
-    addx \
-	"$1" \
-	"$bol$1$" \
-	"$1[\\n]$2" \
-	"b noblob;"
+    addx "$1[\\n]$2"
   }
 
+  # Match a complete comment.
   ocomment () {
-    addx \
-	"$1" \
-	"$bol$1\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*$" \
-	"$1\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*[*][/]" \
-	"b noblob;"
+    addx "$1\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*[*][/]"
   }
 
+  # Match a complete preprocessor line.
   oprepline () {
-    addx \
-	"$1" \
-	"\\\\$" \
-	"$1\\([^\\n]*\\\\[\\n]\\)*[^\\n\\\\]*$eol" \
-	"b noblob;"
+    addx "$1\\([^\\n]*\\\\[\\n]\\)*[^\\n\\\\]*$eol"
   }
 
   case /$1 in
@@ -1016,27 +1005,6 @@ set_except () {
     defnc 'static const u32 filter_table\[\] ='
     ;;
   esac
-
-  # turn "/rx1/b notblob;\n/rx2/b notblob;..." into
-  # "/rx1\|rx2\|.../b notblob;"
-  case $match_check in
-  */*/"b notblob;"*/*/"b notblob;"*)
-    sedx=`{
-	echo;
-	echo "$match_check" | sed '/^[ 	]*\(#\|$\)/d'
-      } |
-      sed -n '
-      : top
-      $!{ N; b top; }
-      ${
-        : retry
-        s,\([\n][ 	]*/[^\n]*\)/b notblob;[\n][ 	]*/\([^\n]*/b notblob;\),\1\\\\|\2,g
-        t retry
-        p;
-	q;
-      }'`
-    ;;
-  esac
 }  
 
 # Regular expression that matches a literal constant.
@@ -1109,51 +1077,14 @@ lblobctx="\\($initblob\\|$defineblob\\|$asmblob\\|$sblobctx\\)"
 # $3 is the action in case false positives were located.
 
 set_sedmain () {
-  # Concatenate lines as long as the end of the current line ends with
-  # a literal constant or characters that generally precede bracketed
-  # assignments, followed or not by separators.  This ensures that, if
-  # there is a blob somewhere, it will be in a single line.  It's also
-  # the fastest mechanism, unlike the other collectors below, that, by
-  # trying to preserve more context, end up selecting too large
-  # expressions.  We only want them to recognize known false
-  # positives, or to find new blobs while getting their surrounding
-  # context.
-  : addx \
-      "[^\\n]*$constx\\($sepx\\)\\?\$" \
-      "$constx\\($sepx\\)\\?\$" \
-      ".*$blobseq.*" \
-      "b blob"
+  falsepos=`sed 's,^\\\|,,;s,^,\\\\(,;s,$,\\\\),' < "$falsepos_name"`
 
-  if $context; then    
-    # Concatenate as many lines as needed to get a complete /*C*/
-    # comment in.
-    : addx \
-	"[^\\n]*[/][*]\\([^*\\n]\\|[*][*]*[^*/\\n]\\)*[*]*$" \
-	"[/][*]\\([^*]\\|[*][*]*[^*/]\\|[*]*[\\n]\\)*[*]*$"
-
-    # Concatenate as many lines as needed to get to the end (;) of an
-    # initialized declaration.  We don't try to be too clever WRT
-    # semicolons in comments, strings, etc.
-    : addx \
-	"[^\\n]*=" \
-	"=\\([^;{\\n]\\|[/][*].*[*][/]\\|[/][/][^\\n]*\\)*\\([\\n][^;{]*{\\)\\([^;]\\|[/][*].*[*][/]\\|[/][/][^\\n]*\\)*$"
-
-    : addx \
-	"\\\\$" \
-	"\\\\$"
-  fi
-
-  match_first= # `sed 's,^\\\|,^\\(,;s,$,\\),' < "$match_first_name"`
-  need_more= # `sed 's,^\\\|,,' < "$need_more_name"`
-  match_full=`sed 's,^\\\|,,;s,^,\\\\(,;s,$,\\\\),' < "$match_full_name"`
-  match_check= # `cat < "$match_check_name"`
-
-  if test -s "$match_full_name"; then
-    check_false_positives="$v:???match_full
-/$bol$match_full/!b blob;
-$v:+++match_full
+  if test -s "$falsepos_name"; then
+    check_false_positives="$v:???falsepos
+/$bol$falsepos/!b blob;
+$v:+++falsepos
 h;
-s/$bol$match_full/\\1;\/**\/;/g;
+s/$bol$falsepos/\\1;\/**\/;/g;
 # See if, after removing all matches, we end up without any blobs.
 $v:???blobseq
 /$blobseq/!{
@@ -1163,7 +1094,7 @@ $v:???blobseq
 g;
 "
   else
-    match_full="$^"
+    falsepos="$^"
     check_false_positives=
   fi
 
@@ -1207,10 +1138,10 @@ d;
 
 : print_matches
 $v:print_matches
-/^$match_full/! {
+/^$falsepos/! {
   $v:delete unmatching lines
   h;
-  s/[\\n]$match_full.*//;
+  s/[\\n]$falsepos.*//;
   : print_matches_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1223,7 +1154,7 @@ $v:print_matches
   b print_matches_delete_to_eol;
 }
 h;
-s/^\\($match_full[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
+s/^\\($falsepos[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to match
 /$blobfseq/ {
   i\\
@@ -1231,7 +1162,7 @@ $v:narrowed to match
   p;
 }
 g;
-s/^\\($match_full[^\\n]*\\)//;
+s/^\\($falsepos[^\\n]*\\)//;
 : print_matches_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
@@ -1241,9 +1172,9 @@ b print_matches;
 
 : print_marked_matches
 $v:print_marked_matches
-/^$match_full/! {
+/^$falsepos/! {
   h;
-  s/[\\n]$match_full.*//;
+  s/[\\n]$falsepos.*//;
   : print_marked_matches_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1256,7 +1187,7 @@ $v:print_marked_matches
   b print_marked_matches_delete_to_eol;
 }
 h;
-s/^\\($match_full[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
+s/^\\($falsepos[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to match
 /$blobfseq/{
   i\\
@@ -1266,7 +1197,7 @@ $v:narrowed to match
   p;
 }
 g;
-s/^\\($match_full[^\\n]*\\)//;
+s/^\\($falsepos[^\\n]*\\)//;
 : print_marked_matches_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
@@ -1276,13 +1207,13 @@ b print_marked_matches;
 
 : print_blobs
 $v:print_blobs
-/^$match_full/ {
+/^$falsepos/ {
   $v:delete false positive
   # This is tricky.  We don't want to print the false positive.
-  /^$match_full[^\\n]*$blobseq/ {
+  /^$falsepos[^\\n]*$blobseq/ {
     $v:delete false positive immediately followed by blob
     h;
-    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    s/^\\($falsepos\\)[^\\n]*$blobseq.*/\\1/;
     : print_blobs_match_loop
     /[\\n]/ {
       s/^[^\\n]*[\\n]//;
@@ -1294,13 +1225,13 @@ $v:print_blobs
     G;
     b print_blobs_delete_to_eol;
   }
-  s/^$match_full//;
+  s/^$falsepos//;
   b print_blobs_delete_to_eol;
 }
 /^[^\\n]*$blobseq/! {
   $v:delete non-blob header
   h;
-  s/[\\n]\\($match_full\\|[^\\n]*$blobseq\\).*//;
+  s/[\\n]\\($falsepos\\|[^\\n]*$blobseq\\).*//;
   : print_blobs_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1329,13 +1260,13 @@ b print_blobs;
 
 : print_marked_blobs
 $v:print_marked_blobs
-/^$match_full/ {
+/^$falsepos/ {
   $v:delete false positive
   # This is tricky.  We don't want to print the false positive.
-  /^$match_full[^\\n]*$blobseq/ {
+  /^$falsepos[^\\n]*$blobseq/ {
     $v:delete false positive immediately followed by blob
     h;
-    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    s/^\\($falsepos\\)[^\\n]*$blobseq.*/\\1/;
     : print_marked_blobs_match_loop
     /[\\n]/ {
       s/^[^\\n]*[\\n]//;
@@ -1347,12 +1278,12 @@ $v:print_marked_blobs
     G;
     b print_marked_blobs_delete_to_eol;
   }
-  s/^match_full//;
+  s/^falsepos//;
   b print_marked_blobs_delete_to_eol;
 }
 /^[^\\n]*$blobseq/! {
   $v:delete non-blob header
-  s/[\\n]\\($match_full\\|[^\\n]*$blobseq\\).*//;
+  s/[\\n]\\($falsepos\\|[^\\n]*$blobseq\\).*//;
   : print_marked_blobs_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1383,13 +1314,13 @@ b print_marked_blobs;
 
 : print_cblobs
 $v:print_cblobs
-/^$match_full/ {
+/^$falsepos/ {
   $v:delete false positive
   # This is tricky.  We don't want to print the false positive.
-  /^$match_full[^\\n]*$blobseq/ {
+  /^$falsepos[^\\n]*$blobseq/ {
     $v:delete false positive immediately followed by blob
     h;
-    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    s/^\\($falsepos\\)[^\\n]*$blobseq.*/\\1/;
     : print_cblobs_match_loop
     /[\\n]/ {
       s/^[^\\n]*[\\n]//;
@@ -1401,13 +1332,13 @@ $v:print_cblobs
     G;
     b print_cblobs_delete_to_eol;
   }
-  s/^$match_full//;
+  s/^$falsepos//;
   b print_cblobs_delete_to_eol;
 }
 /^$lblobctx/! {
   $v:delete non-blob header
   h;
-  s/[\\n]\\($match_full\\|$lblobctx\\).*//;
+  s/[\\n]\\($falsepos\\|$lblobctx\\).*//;
   : print_cblobs_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1436,13 +1367,13 @@ b print_cblobs;
 
 : print_marked_cblobs
 $v:print_marked_cblobs
-/^$match_full/ {
+/^$falsepos/ {
   $v:delete false positive
   # This is tricky.  We don't want to print the false positive.
-  /^$match_full[^\\n]*$blobseq/ {
+  /^$falsepos[^\\n]*$blobseq/ {
     $v:delete false positive immediately followed by blob
     h;
-    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    s/^\\($falsepos\\)[^\\n]*$blobseq.*/\\1/;
     : print_marked_cblobs_match_loop
     /[\\n]/ {
       s/^[^\\n]*[\\n]//;
@@ -1454,13 +1385,13 @@ $v:print_marked_cblobs
     G;
     b print_marked_cblobs_delete_to_eol;
   }
-  s/^$match_full//;
+  s/^$falsepos//;
   b print_marked_cblobs_delete_to_eol;
 }
 /^$lblobctx/! {
   $v:delete non-blob header
   h;
-  s/[\\n]\\($match_full\\|$lblobctx\\).*//;
+  s/[\\n]\\($falsepos\\|$lblobctx\\).*//;
   : print_marked_cblobs_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1491,10 +1422,10 @@ b print_marked_cblobs;
 
 : print_both
 $v:print_both
-/^\\($match_full\\|[^\\n]*$blobseq\\)/! {
+/^\\($falsepos\\|[^\\n]*$blobseq\\)/! {
   $v:delete non-blob header
   h;
-  s/[\\n]\\($match_full\\|[^\\n]*$blobseq\\).*//;
+  s/[\\n]\\($falsepos\\|[^\\n]*$blobseq\\).*//;
   : print_both_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
@@ -1509,11 +1440,11 @@ $v:print_both
 h;
 i\\
 ::: $file :::
-s/^\\(\\($match_full[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
+s/^\\(\\($falsepos[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to blob
 p;
 g;
-s/^\\(\\($match_full[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)//;
+s/^\\(\\($falsepos[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)//;
 : print_both_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
@@ -1523,10 +1454,10 @@ b print_both;
 
 : list_matches
 $v:list_matches
-/^$match_full/! {
+/^$falsepos/! {
   $v:print unmatching lines
   h;
-  s/[\\n]$match_full.*//;
+  s/[\\n]$falsepos.*//;
   p;
   : list_matches_nomatch_loop
   /[\\n]/ {
@@ -1540,7 +1471,7 @@ $v:list_matches
   b list_matches_delete_to_eol;
 }
 h;
-s/^\\($match_full[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
+s/^\\($falsepos[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to match
 /$blobfseq/{
   s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
@@ -1548,7 +1479,7 @@ $v:narrowed to match
 }
 p;
 g;
-s/^\\($match_full[^\\n]*\\)//;
+s/^\\($falsepos[^\\n]*\\)//;
 : list_matches_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
@@ -1558,13 +1489,13 @@ b list_matches;
 
 : list_blobs
 $v:list_blobs
-/^$match_full/ {
+/^$falsepos/ {
   $v:print false positive
   # This is tricky.  We don't want to deblob the false positive.
-  /^$match_full[^\\n]*$blobseq/ {
+  /^$falsepos[^\\n]*$blobseq/ {
     $v:print false positive immediately followed by blob
     h;
-    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    s/^\\($falsepos\\)[^\\n]*$blobseq.*/\\1/;
     : list_blobs_match_loop
     /[\\n]/ {
       P;
@@ -1578,16 +1509,16 @@ $v:list_blobs
     b list_blobs_delete_to_eol;
   }
   h;
-  s/^\\($match_full[^\\n]*\\)[\\n].*/\\1/;
+  s/^\\($falsepos[^\\n]*\\)[\\n].*/\\1/;
   p;
   g;
-  s/^\\($match_full[^\\n]*\\)//;
+  s/^\\($falsepos[^\\n]*\\)//;
   b list_blobs_delete_to_eol;
 }
 /^[^\\n]*$blobseq/! {
   $v:print non-blob header
   h;
-  s/[\\n]\\($match_full\\|[^\\n]*$blobseq\\).*//;
+  s/[\\n]\\($falsepos\\|[^\\n]*$blobseq\\).*//;
   p;
   : list_blobs_nomatch_loop
   /[\\n]/ {
@@ -1617,10 +1548,10 @@ b list_blobs;
 
 : list_both
 $v:list_both
-/^\\($match_full\\|[^\\n]*$blobseq\\)/! {
+/^\\($falsepos\\|[^\\n]*$blobseq\\)/! {
   $v:print non-blob header
   h;
-  s/[\\n]\\($match_full\\|[^\\n]*$blobseq\\).*//;
+  s/[\\n]\\($falsepos\\|[^\\n]*$blobseq\\).*//;
   p;
   : list_both_nomatch_loop
   /[\\n]/ {
@@ -1634,13 +1565,13 @@ $v:list_both
   b list_both_delete_to_eol;
 }
 h;
-s/^\\(\\($match_full[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
+s/^\\(\\($falsepos[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to blob
 s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
 s/$blobfseq/\/*(DEBLOBBED)*\//g;
 p;
 g;
-s/^\\(\\($match_full[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)//;
+s/^\\(\\($falsepos[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)//;
 : list_both_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
@@ -1658,24 +1589,14 @@ b list_both;
 check () {
   case "$#" in 1) ;; *) echo ICE >&2; exit 1;; esac
 
-  match_first_name= # `mktemp -t deblob-check-match_first-XXXXXX`
-  need_more_name= # `mktemp -t deblob-check-need_more-XXXXXX`
-  match_full_name=`mktemp -t deblob-check-match_full-XXXXXX`
-  match_check_name= # `mktemp -t deblob-check-match_check-XXXXXX`
-  tempfiles="$match_first_name $need_more_name $match_full_name $match_check_name"
+  falsepos_name=`mktemp -t deblob-check-falsepos-XXXXXX`
+  tempfiles="$falsepos_name"
 
-  # Add $1 to match_first, $2 to need_more, $3 to match_full, $4 to
-  # check action.  All 3 regexps are anchored to the beginning of the
-  # pattern.
+  # Add $1 to falsepos.  Its usage makes it implicitly anchored to
+  # the beginning of the line.
   addx () {
-    # test -z "$1" || echo -n "\\|$1" >> $match_first_name
-    # test -z "$2" || echo -n "\\|$2" >> $need_more_name
-
-    if test -n "$3"; then
-      echo -n "\\|$3" >> $match_full_name
-      # if test -n "$4"; then
-      #   echo "/$bol$3/$4" >> $match_check_name
-      # fi
+    if test -n "$1"; then
+      echo -n "\\|$1" >> $falsepos_name
     fi
   }
 
