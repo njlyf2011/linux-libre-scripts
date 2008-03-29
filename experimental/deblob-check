@@ -181,21 +181,21 @@ case $1 in
 --mark-false-positives | -P)
   shift;
   set_sed_cmd () {
-    set_sedmain "b list_both;" "p;" "b list_match;"
+    set_sedmain "b list_both;" "p;" "b list_matches;"
   }
   ;;
 
 --print-marked-false-positives | -F)
   shift;
   set_sed_cmd () {
-    set_sedmain "b print_marked_match;" "" "b print_marked_match;"
+    set_sedmain "b print_marked_matches;" "" "b print_marked_matches;"
   }
   ;;
 
 --print-false-positives | -f)
   shift;
   set_sed_cmd () {
-    set_sedmain "b print_match;" "" "b print_match;"
+    set_sedmain "b print_matches;" "" "b print_matches;"
   }
   ;;
 
@@ -230,19 +230,14 @@ case $1 in
 --print-marked-blobs-with-context | -C)
   shift;
   set_sed_cmd () {
-    rewrite_set_sedmain -c "b deblob;" "" "d;" "i\\
-::: $file :::
-  p; d;"
+    set_sedmain "b print_marked_cblobs;"
   }
   ;;
 
 --print-blobs-with-context | -c)
   shift;
   set_sed_cmd () {
-    rewrite_set_sedmain -c "
-i\\
-::: $file :::
-p;"
+    set_sedmain "b print_cblobs;"
   }
   ;;
 
@@ -272,7 +267,7 @@ q;"
 --print-all-matches | -X)
   shift;
   set_sed_cmd () {
-    set_sedmain "b print_both;" "" "b print_match;"
+    set_sedmain "b print_both;" "" "b print_matches;"
   }
   ;;
 
@@ -1078,12 +1073,30 @@ bol="\\(^\\|[\\n]\\)"
 # patterns without being named.
 eol="\\([\\n]\\|\$\\)"
 
-rewrite_set_sedmain () {
-  # This is a placeholder for an old version of set_sedmain.
-  # Arguments were: blob noblobline falsepos deblobbed noblob
-  echo This option is currently unavailable, sorry. >&2
-  exit 1
-}
+# Regular expression that matches a C-style comment.
+comment="\\([/][*]\\([^*]*\\|[*]\\+[^/*]\\)*[*]\\+[/]\\|[/][/][^\\n]*[\\n]\\)"
+
+# Regular expression that matches comments typically used in assembly.
+asmcomment="\\($comment\\|[;#][^\\n]*[\\n]\\)"
+
+# Regular expression that matches a braced initializer containing at
+# least one blob.
+initblob="[^\\n]*=\\([ 	\\n\\\\]*\\|$comment\\)*{\\([^;]*\\|$comment\\)*$blobseq\\([^;]*\\|$comment\\)*}\\?\\([ 	\\n\\\\]*\\|$comment\\);\\?"
+
+# Regular expression that matches a C (possibly multi-line) #define
+# that contains a blob.
+defineblob='[ 	]*#[ 	]*define[ 	]\+\([^\n]*\\[\n]\)*[^\n]*'"$blobseq"'\([^\n]*\\[\n]\)*'
+
+# Regular expression that matches an assembly label followed by a blob
+# without any intervening label.
+asmblob="[a-zA-Z.][^\\n:;#/]*[ ]*:\\([^:]*\\|$asmcomment\\)*$blobseq\\([^:]*\\|$asmcomment\\)*"
+
+# Regular expression that matches one or more blobs without
+# intervening line breaks.
+sblobctx="\\([^\\n]*$blobfseq\\)\\+"
+
+# Regular expression that matches the context for a long blob match.
+lblobctx="\\($initblob\\|$defineblob\\|$asmblob\\|$sblobctx\\)"
 
 # Set up the sed script that will go through the (processed) input,
 # looking for sequences of blobs and printing whatever was requested.
@@ -1192,22 +1205,22 @@ $v:falsepos
 $3
 d;
 
-: print_match
-$v:print_match
+: print_matches
+$v:print_matches
 /^$match_full/! {
   $v:delete unmatching lines
   h;
   s/[\\n]$match_full.*//;
-  : print_match_nomatch_loop
+  : print_matches_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
     x;
     s/^[^\\n]*[\\n]//;
     x;
-    b print_match_nomatch_loop;
+    b print_matches_nomatch_loop;
   }
   x;
-  b print_match_delete_to_eol;
+  b print_matches_delete_to_eol;
 }
 h;
 s/^\\($match_full[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
@@ -1219,28 +1232,28 @@ $v:narrowed to match
 }
 g;
 s/^\\($match_full[^\\n]*\\)//;
-: print_match_delete_to_eol
+: print_matches_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
 /^$/d;
 s/^[\\n]//;
-b print_match;
+b print_matches;
 
-: print_marked_match
-$v:print_marked_match
+: print_marked_matches
+$v:print_marked_matches
 /^$match_full/! {
   h;
   s/[\\n]$match_full.*//;
-  : print_marked_match_nomatch_loop
+  : print_marked_matches_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
     x;
     s/^[^\\n]*[\\n]//;
     x;
-    b print_marked_match_nomatch_loop;
+    b print_marked_matches_nomatch_loop;
   }
   x;
-  b print_marked_match_delete_to_eol;
+  b print_marked_matches_delete_to_eol;
 }
 h;
 s/^\\($match_full[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
@@ -1248,18 +1261,18 @@ $v:narrowed to match
 /$blobfseq/{
   i\\
 ::: $file :::
-  s/{[{ 	\n]*$blobfseq}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
-  s/$constx\\($sepx$constx\\)\\{$sens,\\}/\/*(DEBLOBBED)*\//g;
+  s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
+  s/$blobfseq/\/*(DEBLOBBED)*\//g;
   p;
 }
 g;
 s/^\\($match_full[^\\n]*\\)//;
-: print_marked_match_delete_to_eol
+: print_marked_matches_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
 /^$/d;
 s/^[\\n]//;
-b print_marked_match;
+b print_marked_matches;
 
 : print_blobs
 $v:print_blobs
@@ -1356,8 +1369,8 @@ i\\
 ::: $file :::
 s/^\\([^\\n]*\\($blobfseq[^\\n]*\\)\\+\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to blob
-s/{[{ 	\n]*$blobfseq}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
-s/$constx\\($sepx$constx\\)\\{$sens,\\}/\/*(DEBLOBBED)*\//g;
+s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
+s/$blobfseq/\/*(DEBLOBBED)*\//g;
 p;
 g;
 s/^\\([^\\n]*\\($blobfseq[^\\n]*\\)\\+\\)//;
@@ -1367,6 +1380,114 @@ s/^[^\\n]*//;
 /^$/d;
 s/^[\\n]//;
 b print_marked_blobs;
+
+: print_cblobs
+$v:print_cblobs
+/^$match_full/ {
+  $v:delete false positive
+  # This is tricky.  We don't want to print the false positive.
+  /^$match_full[^\\n]*$blobseq/ {
+    $v:delete false positive immediately followed by blob
+    h;
+    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    : print_cblobs_match_loop
+    /[\\n]/ {
+      s/^[^\\n]*[\\n]//;
+      x;
+      s/^[^\\n]*[\\n]//;
+      x;
+      b print_cblobs_match_loop;
+    }
+    G;
+    b print_cblobs_delete_to_eol;
+  }
+  s/^$match_full//;
+  b print_cblobs_delete_to_eol;
+}
+/^$lblobctx/! {
+  $v:delete non-blob header
+  h;
+  s/[\\n]\\($match_full\\|$lblobctx\\).*//;
+  : print_cblobs_nomatch_loop
+  /[\\n]/ {
+    s/^[^\\n]*[\\n]//;
+    x;
+    s/^[^\\n]*[\\n]//;
+    x;
+    b print_cblobs_nomatch_loop;
+  }
+  x;
+  b print_cblobs_delete_to_eol;
+}
+h;
+i\\
+::: $file :::
+s/^\\($lblobctx[^\\n]*\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
+$v:narrowed to blob
+p;
+g;
+s/^\\($lblobctx[^\\n]*\\($blobfseq[^\\n]*\\)*\\)//;
+: print_cblobs_delete_to_eol
+$v:delete to eol
+s/^[^\\n]*//;
+/^$/d;
+s/^[\\n]//;
+b print_cblobs;
+
+: print_marked_cblobs
+$v:print_marked_cblobs
+/^$match_full/ {
+  $v:delete false positive
+  # This is tricky.  We don't want to print the false positive.
+  /^$match_full[^\\n]*$blobseq/ {
+    $v:delete false positive immediately followed by blob
+    h;
+    s/^\\($match_full\\)[^\\n]*$blobseq.*/\\1/;
+    : print_marked_cblobs_match_loop
+    /[\\n]/ {
+      s/^[^\\n]*[\\n]//;
+      x;
+      s/^[^\\n]*[\\n]//;
+      x;
+      b print_marked_cblobs_match_loop;
+    }
+    G;
+    b print_marked_cblobs_delete_to_eol;
+  }
+  s/^$match_full//;
+  b print_marked_cblobs_delete_to_eol;
+}
+/^$lblobctx/! {
+  $v:delete non-blob header
+  h;
+  s/[\\n]\\($match_full\\|$lblobctx\\).*//;
+  : print_marked_cblobs_nomatch_loop
+  /[\\n]/ {
+    s/^[^\\n]*[\\n]//;
+    x;
+    s/^[^\\n]*[\\n]//;
+    x;
+    b print_marked_cblobs_nomatch_loop;
+  }
+  x;
+  b print_marked_cblobs_delete_to_eol;
+}
+h;
+i\\
+::: $file :::
+s/^\\($lblobctx[^\\n]*\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
+$v:narrowed to blob
+s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
+s/$blobfseq/\/*(DEBLOBBED)*\//g;
+p;
+g;
+s/^\\($lblobctx[^\\n]*\\($blobfseq[^\\n]*\\)*\\)//;
+: print_marked_cblobs_delete_to_eol
+$v:delete to eol
+s/^[^\\n]*//;
+/^$/d;
+s/^[\\n]//;
+b print_marked_cblobs;
 
 : print_both
 $v:print_both
@@ -1400,40 +1521,40 @@ s/^[^\\n]*//;
 s/^[\\n]//;
 b print_both;
 
-: list_match
-$v:list_match
+: list_matches
+$v:list_matches
 /^$match_full/! {
   $v:print unmatching lines
   h;
   s/[\\n]$match_full.*//;
   p;
-  : list_match_nomatch_loop
+  : list_matches_nomatch_loop
   /[\\n]/ {
     s/^[^\\n]*[\\n]//;
     x;
     s/^[^\\n]*[\\n]//;
     x;
-    b list_match_nomatch_loop;
+    b list_matches_nomatch_loop;
   }
   x;
-  b list_match_delete_to_eol;
+  b list_matches_delete_to_eol;
 }
 h;
 s/^\\($match_full[^\\n]*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to match
 /$blobfseq/{
-  s/{[{ 	\n]*$blobfseq}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
-  s/$constx\\($sepx$constx\\)\\{$sens,\\}/\/*(DEBLOBBED)*\//g;
+  s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
+  s/$blobfseq/\/*(DEBLOBBED)*\//g;
 }
 p;
 g;
 s/^\\($match_full[^\\n]*\\)//;
-: list_match_delete_to_eol
+: list_matches_delete_to_eol
 $v:delete to eol
 s/^[^\\n]*//;
 /^$/d;
 s/^[\\n]//;
-b list_match;
+b list_matches;
 
 : list_blobs
 $v:list_blobs
@@ -1482,8 +1603,8 @@ $v:list_blobs
 h;
 s/^\\([^\\n]*\\($blobfseq[^\\n]*\\)\\+\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to blob
-s/{[{ 	\n]*$blobfseq}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
-s/$constx\\($sepx$constx\\)\\{$sens,\\}/\/*(DEBLOBBED)*\//g;
+s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
+s/$blobfseq/\/*(DEBLOBBED)*\//g;
 p;
 g;
 s/^\\([^\\n]*\\($blobfseq[^\\n]*\\)\\+\\)//;
@@ -1515,8 +1636,8 @@ $v:list_both
 h;
 s/^\\(\\($match_full[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)\\([\\n].*\\)\\?$/\\1/;
 $v:narrowed to blob
-s/{[{ 	\n]*$blobfseq}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
-s/$constx\\($sepx$constx\\)\\{$sens,\\}/\/*(DEBLOBBED)*\//g;
+s/{\\($sepx\\)\\?$blobfseq\\($sepx\\)\\?}[ 	]*;/{\/*(DEBLOBBED)*\/};/g;
+s/$blobfseq/\/*(DEBLOBBED)*\//g;
 p;
 g;
 s/^\\(\\($match_full[^\\n]*\\|[^\\n]*$blobfseq[^\\n]*\\)\\($blobfseq[^\\n]*\\)*\\)//;
