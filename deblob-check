@@ -104,9 +104,8 @@
 # -v --verbose: increase verbosity level, for internal debugging.  May
 #		be given at most twice.
 
-# The exit status in all cases is success if nothing was printed, and
-# failure if anything (except for the tester's success message) was
-# printed.
+# The exit status is only significant for the --list options: it will
+# be true if nothing was found, and false otherwise.
 
 rm="rm -f"
 case $1 in
@@ -253,7 +252,7 @@ case $1 in
     set_sedmain "" "" "
 i\\
 $file
-q;"
+q 1;"
   }
   ;;
 
@@ -263,10 +262,10 @@ q;"
     set_sedmain "
 i\\
 $file
-q;" "" "
+q 1;" "" "
 i\\
 $file
-q;"
+q 1;"
   }
   ;;
 
@@ -285,7 +284,7 @@ q;"
     set_sedmain "
 i\\
 $file
-q;"
+q 1;"
   }
   ;;
 
@@ -1112,7 +1111,7 @@ g;
   i\\
 Internal error at
   p;
-  q;
+  q 2;
 }
 $v:reading file in
 h;
@@ -1597,6 +1596,8 @@ b list_both;
 check () {
   case "$#" in 1) ;; *) echo ICE >&2; exit 1;; esac
 
+  input=$1
+
   falsepos_name=`mktemp -t deblob-check-falsepos-XXXXXX`
   tempfiles="$falsepos_name"
 
@@ -1608,27 +1609,35 @@ check () {
     fi
   }
 
-  set_except "$1"
+  set_except "$input"
 
-  set_sed_cmd "$1"
+  set_sed_cmd "$input"
+
+  rm -f "$falsepos_name"
+  tempfiles=
 
   # Choose the input source...
-  case $1 in
+  case $input in
   -) in= ;;
-  *) in='< "$1"' ;;
+  *) in='< "$input"' ;;
   esac
+
+  set fnord # shifted out below
 
   # Decompress as needed...
-  case $1 in
-  *.bz2) cmd1='bunzip2' ;;
-  *.gz) cmd1='gunzip' ;;
-  *) cmd1='cat' ;;
+  case $input in
+  *.bz2) cmd='bunzip2' ;;
+  *.gz) cmd='gunzip' ;;
+  *) cmd= ;;
   esac
+  if test -n "$cmd"; then
+    set "$@" "$cmd"
+  fi
 
   # Extract or otherwise munge...
-  case $1 in
+  case $input in
   *.tar*)
-    cmd2="tar -xf - --to-command='echo \";/*begin \$TAR_FILENAME*/;\"; cat; echo \";/**/;\"; echo \";/*end \$TAR_FILENAME*/;\"'";;
+    cmd="tar -xf - --to-command='echo \";/*begin \$TAR_FILENAME*/;\"; cat; echo \";/**/;\"; echo \";/*end \$TAR_FILENAME*/;\"'";;
   *patch* | *diff*)
     sedpatch='
       /^[-]/d;
@@ -1641,46 +1650,45 @@ check () {
 	s/$/*\/;/;
       };
       s/^[ +]//;'
-    cmd2='sed "$sedpatch"' ;;
+    cmd='sed "$sedpatch"' ;;
   *)
-    cmd2='cat' ;;
+    cmd='cat' ;;
   esac
-  cmd2="{ echo \";/*begin $1*/;\"; $cmd2; echo \";/*end $1*/;\"; }"
+  cmd="{ echo \";/*begin $input*/;\"; $cmd; echo \";/*end $input*/;\"; }"
+  set "$@" "$cmd"
 
   # Then run through the selected action.
   if test "$rm" != "rm -f" || test ! `echo "$sedmain" | wc -c` -lt 1024; then
     scriptname=`mktemp -t deblob-check-sedmain-XXXXXX`
     tempfiles="$tempfiles $scriptname"
     echo "$sedmain" > $scriptname
-    cmd3="sed -n -f \"$scriptname\""
+    cmd="sed -n -f \"$scriptname\""
   else
-    cmd3='sed -n "$sedmain"'
+    cmd='sed -n "$sedmain"'
   fi
+  set "$@" "$cmd"
 
-  # Optimize useless "cat"s away.
-  pipe="$cmd1 | $cmd2 | $cmd3"
-  while :; do
-    case "| $pipe |" in
-    *"| cat |"*)
-      pipe=`echo "| $pipe |" | sed 's,| cat |,|,g;s,^| ,,;s, |$,,;s,^|$,cat,'`
-      ;;
-    *)
-      break ;;
-    esac
+  test $# != 1 || set "$@" "cat"
+
+  shift # fnord goes out here
+
+  pipe=
+  for cmd
+  do
+    if test -z "$pipe"; then
+      pipe="$cmd $in"
+    else
+      pipe="$pipe | $cmd"
+    fi
   done
 
-  # Do it.
-  case $pipe in
-  "{"*)
-    eval "{ $pipe; } $in"
-    ;;
-  *)
-    eval "$in $pipe"
-    ;;
-  esac
+  eval "$pipe"
+  status=$?
 
   $rm $tempfiles
   tempfiles=
+
+  (exit $status)
 }
 
 # If no input given, use stdin.
@@ -1700,17 +1708,19 @@ esac
 pass=:
 
 tempfiles=
-trap "status=$?; test -z \"$tempfiles\" || $rm $tempfiles; (exit $status); exit" 0 1 2 15
+trap "status=$?; test -z \"$tempfiles\" || rm -f $tempfiles; (exit $status); exit" 0 1 2 15
 
 # Go through each of the input files in the command line.
 for file
 do
   # If we print anything whatsoever (even a blank line) while
   # processing it, we've failed.
-  if check "$file" | grep '.*'; then
-      pass=false
-      #list: set fnord "$@" "$file"
-      #list: shift
+  if check "$file"; then
+    :
+  else
+    pass=false
+    #list: set fnord "$@" "$file"
+    #list: shift
   fi
 done
 
