@@ -56,7 +56,9 @@
 #		/*(DEBLOBBED)*/.
 
 # -D --cat: print the processed input, as it would have been fed to
-#		the blob detector.
+#		the blob detector script.  Use -S to save the sed
+#		script used to process it, and search for `sedcat:' in
+#		comments to locate the relevant adaptation points.
 
 # -b --print-marked-blobs: like -d, but print only the matching
 #		sequences.
@@ -106,6 +108,92 @@
 
 # The exit status is only significant for the --list options: it will
 # be true if nothing was found, and false otherwise.
+
+: # Mark the end of the help message.
+
+# TODO:
+
+# - Improve handling of command-line arguments, so as to not make the
+# order relevant.
+
+# - Add an option for the user to feed their own false positive
+# patterns.
+
+# - Add support to recognize known blobs (or other non-Free
+# signatures, really), to speed up the scanning of files containing
+# blobs, and to avoid attempts to disguise blobs.
+
+# - Factor out the code in the various print_* and list_* parts of the
+# sed script, at least in the shell sources.  Make sure they're all
+# included and expanded in a saved --cat script though.
+
+# - Add support for file name tagging in patterns, such that blobs or
+# false positives are recognized only when handling the specific
+# filename, be it stand-alone, as part of a patch or a tarball.  This
+# should help avoid recognition of actual blobs as false positives
+# just because there's a symbol with a different name elsewhere.
+
+#   It is convenient that the patterns provided by the user to
+# recognize file names can be empty (for backward compatibility), but
+# this should ideally be phased out in favor of more precise matches.
+# It's important that files can be recognized with leading tarball or
+# patch names, that the filename used within the tarball contain
+# leading garbage, and even that a partial pathname be recognizable
+# (say recognize drivers/net/whatever.c when the input file is named
+# ../net/whatever.c).
+
+#   Rather than using regular expressions to recognize multiple files
+# it's convenient (but not quite essential) that filename patterns be
+# specifiable as regular expressions, rather than simple filenames,
+# but there are other ways around this.
+
+#   Maintaining begin/end markers in a stack-like fashion as part of
+# the processed stream, and using the names in them as (optional) part
+# of the recognition patterns, would enable us to do it.
+
+#   Introducing annotations next to the false positives (and recognized
+# blobs) as an early part of the process may speed things up and
+# enable fast processing, but how to introduce the annotations quickly
+# in the first place?  Given patterns such as
+
+#   \(\(file1\)\(.*\)\(pat1\)\|\(file2\)\(.*\)\(pat2\)\|...\)
+
+# how do we get sed to introduce a marker that contains file2 right
+# before or right after pat2, without turning a big efficient regexp
+# into a slowish sequence of s/// commands?
+
+# - Re-check and narrow false-positive patterns to make sure they
+# apply only to the relevant content.
+
+# - Scripting abilities, so as to be able to automate the removal of
+# source files or of blobs from source files in a tarball without
+# having to extract the entire tarball (as in tar --update/--delete)
+# would be nice.  Carrying over removed files automatically into
+# patches would also be great, and this sort of script would be
+# perfect to document what has been done to a tarball plus a set of
+# patches.  Something like deblob.script:
+#
+#   tarball linux-2.6.24.tar.bz2
+#   delete net/wireloss/freedom.c drivers/me/crazy.c
+#   deblob include/linux/slab-blob-kfree.h
+#   deconfig drivers/char/drm DRM_IS_BAD
+#
+#   patch patch-2.6.25-rc7.bz2
+#   delete arch/power/over/you.c
+
+# such that the deletes from an earlier file would carry over into the
+# subsequent ones, and new tarballs and patch files would be generated
+# with the libre- prefix in their basename, and the xdeltas between
+# the original files and the modified files would be minimal, and
+# redundant with this script and the input script while at that.
+
+# - Improve documentation of the code.
+
+# - Write a decent testsuite.
+
+# - Insert your idea here. :-)
+
+# Yeah, lots of stuff to do.  Want to help?
 
 rm="rm -f"
 case $1 in
@@ -214,7 +302,11 @@ case $1 in
 --cat | -D)
   shift;
   set_sed_cmd () {
-    set_sedmain "p;" "p;" "p;"
+    set_sedmain \
+      "# sedcat: Actual blob detected, but there may be false positives." \
+      "# sedcat: No blob whatsoever found." \
+      "# sedcat: False positives found." \
+      "p; d; # sedcat: Just print stuff, remove this line to run the actual script."
   }
   ;;
 
@@ -280,6 +372,16 @@ q 1;"
   case $1 in
   -- | -l | --list-blobs) shift;;
   esac
+  case $1 in
+  -*)
+    if test ! -f "$1"; then
+      echo "$name: \`$1' given too late or out of the proper sequence." >&2
+      echo "$name: The order of arguments is significant, see the usage." >&2
+      exit 1
+    fi
+    ;;
+  esac
+      
   set_sed_cmd () {
     set_sedmain "
 i\\
@@ -1082,6 +1184,8 @@ lblobctx="\\($initblob\\|$defineblob\\|$asmblob\\|$sblobctx\\)"
 
 # $3 is the action in case false positives were located.
 
+# $4 is the action for every complete input pattern.
+
 set_sedmain () {
   falsepos=`sed 's,^\\\|,,;s,^,\\\\(,;s,$,\\\\),' < "$falsepos_name"`
 
@@ -1105,7 +1209,10 @@ g;
   fi
 
   sedmain="
-/^;[/][*]\\(end .*\\)\\?[*][/];$/d;
+/^;[/][*]\\(end .*\\)\\?[*][/];$/{
+  $4;
+  d;
+}
 /^;[/][*]begin /!{
   : internal_error
   i\\
@@ -1124,6 +1231,7 @@ n;
 }
 H;
 g;
+$4
 s/^\(;[/][*]begin [^\n]*[\n]\)*//;
 s/\\($bol;[/][*]\\(end [^\n]*\\)\\?[*][/];\\)*$//;
 $v:???!blobseq
