@@ -25,7 +25,7 @@
 # USA
 
 
-# usage: deblob-check [-S] [-VV] [-s S] [-lDdBbCcXxPpFft] \
+# usage: deblob-check [-S] [-vv] [-s S] [-lDdBbCcXxPpFftVh?H] \
 #        [*.tar* patch-* *.patch]
 
 # Look for too-long undocumented sequences of numbers (generally blobs
@@ -50,28 +50,28 @@
 #		blob detector test and that are not known to be false
 #		positives.  This is the default option.
 
-# -D --deblob --mark-blobs: print the processed input, replacing
+# -d --deblob --mark-blobs: print the processed input, replacing
 #		sequences that match the blob detector test and that
 #		are NOT known to be false positives with
 #		/*(DEBLOBBED)*/.
 
-# -d --cat: print the processed input, as it would have been fed to
+# -D --cat: print the processed input, as it would have been fed to
 #		the blob detector.
 
-# -B --print-marked-blobs: like -d, but print only the matching
+# -b --print-marked-blobs: like -d, but print only the matching
 #		sequences.
 
-# -b --print-blobs: like -B, but do not deblob the sequences.
+# -B --print-blobs: like -b, but do not deblob the sequences.
 
-# -C --print-marked-blobs-with-context: like -B, but try to maximize
+# -c --print-marked-blobs-with-context: like -b, but try to maximize
 #		the context around the blobs.  This maximization will
 #		sometimes disregard known false positives, if they
 #		happen to be contained within the extended match.
 #		This is probably an indication that the false positive
 #		matching rule could be improved.
 
-# -c --print-blobs-with-context: like -b, but try to maximize the
-#		context around the blobs.  Also quite intensive.
+# -C --print-blobs-with-context: like -B, but try to maximize the
+#		context around the blobs.
 
 # -X --print-all-matches: print all blobs, be they known false
 #		positives or blobs.
@@ -79,29 +79,29 @@
 # -x --list-all-matches: list files that contain sequences that appear
 #		to be blobs, be they known false positives or not.
 
-# -P --mark-false-positives: print the processed input, replacing
+# -p --mark-false-positives: print the processed input, replacing
 #		sequences that match the blob detector test, but that
 #		are known to be false positives, with /*(DEBLOBBED)*/.
 
-# -p --list-false-positives: list files that contain false positives.
+# -P --list-false-positives: list files that contain false positives.
 
-# -F --print-marked-false-positives: like -P, but print only the
+# -f --print-marked-false-positives: like -p, but print only the
 #		matching sequences.
 
-# -f --print-false-positives: like -F, but do not deblob the sequences.
+# -F --print-false-positives: like -f, but do not deblob the sequences.
 
 # -t --test: run (very minimal) self-test.
 
-# -v --version: print a version number
+# -V --version: print a version number
 
-# -h -? --help: print short or long help message
+# -h -? -H --help: print short or long help message
 
 
 # debugging options:
 
 # -S --save-scripts: save scripts and temporary files.
 
-# -V --verbose: increase verbosity level, for internal debugging.  May
+# -v --verbose: increase verbosity level, for internal debugging.  May
 #		be given at most twice.
 
 # The exit status in all cases is success if nothing was printed, and
@@ -119,10 +119,10 @@ esac
 # Choose verbosity level for sed script debugging and performance
 # analysis.
 case $1 in
---verbose | -V)
+--verbose | -v)
   shift
   case $1 in
-  --verbose | -V)
+  --verbose | -v)
     shift
     v="i\\
 :
@@ -163,19 +163,19 @@ test_mode=false
 name=deblob-check
 
 case $1 in
---version | -v)
+--version | -V)
   sed '/^# '$name' version /,/^# Written by/ { s/^# //; p; }; d' < $0
   exit 0
   ;;
 
--\?|-h)
+-\? | -h)
   sed -n '/^# usage:/,/# -h/ { /^# -/,/^$/{s/^# \(-.*\):.*/\1/p; d; }; s/^\(# \?\)\?//p; }' < $0 &&
   echo
   echo "run \`$name --help | more' for full usage"
   exit 0
   ;;
 
---help)
+--help | -H)
   sed -n '/^# '$name' version /,/^[^#]/ s/^\(# \?\)\?//p' < $0
   exit 0
   ;;
@@ -184,70 +184,70 @@ case $1 in
   test_mode=:
   ;;
 
---mark-false-positives | -P)
+--mark-false-positives | -p)
   shift;
   set_sed_cmd () {
     set_sedmain "b list_both;" "p;" "b list_matches;"
   }
   ;;
 
---print-marked-false-positives | -F)
+--print-marked-false-positives | -f)
   shift;
   set_sed_cmd () {
     set_sedmain "b print_marked_matches;" "" "b print_marked_matches;"
   }
   ;;
 
---print-false-positives | -f)
+--print-false-positives | -F)
   shift;
   set_sed_cmd () {
     set_sedmain "b print_matches;" "" "b print_matches;"
   }
   ;;
 
---deblob | --mark-blobs | -D)
+--deblob | --mark-blobs | -d)
   shift;
   set_sed_cmd () {
     set_sedmain "b list_blobs;" "p;" "p;"
   }
   ;;
 
---cat | -d)
+--cat | -D)
   shift;
   set_sed_cmd () {
     set_sedmain "p;" "p;" "p;"
   }
   ;;
 
---print-marked-blobs | -B)
+--print-marked-blobs | -b)
   shift;
   set_sed_cmd () {
     set_sedmain "b print_marked_blobs;"
   }
   ;;
 
---print-blobs | -b)
+--print-blobs | -B)
   shift;
   set_sed_cmd () {
     set_sedmain "b print_blobs;"
   }
   ;;
 
---print-marked-blobs-with-context | -C)
+--print-marked-blobs-with-context | -c)
   shift;
   set_sed_cmd () {
     set_sedmain "b print_marked_cblobs;"
   }
   ;;
 
---print-blobs-with-context | -c)
+--print-blobs-with-context | -C)
   shift;
   set_sed_cmd () {
     set_sedmain "b print_cblobs;"
   }
   ;;
 
---list-false-positives | -p)
+--list-false-positives | -P)
   shift;
   set_sed_cmd () {
     set_sedmain "" "" "
