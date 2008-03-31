@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.559 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.560 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -629,6 +629,7 @@ Patch1515: linux-2.6-lirc.patch
 Patch1801: linux-2.6-drm-git-mm.patch
 Patch1803: nouveau-drm.patch
 Patch1806: linux-2.6-drm-i915-modeset.patch
+Patch1807: linux-2.6-drm-radeon-fix-oops.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1158,6 +1159,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-drm-git-mm.patch
 ApplyPatch nouveau-drm.patch
 ApplyPatch linux-2.6-drm-i915-modeset.patch
+ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
@@ -1767,6 +1769,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
+* Mon Mar 31 2008 Dave Airlie <airlied@redhat.com> 
+- add fix for radeon oops (#439656)
+
 * Sun Mar 30 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.175.rc7.git5
 - Deblobbed patch-2.6.25-rc7-git5, modifies removed files.
 
