@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.410 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.411 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -611,6 +611,7 @@ Patch131: linux-2.6-powerpc-generic-suspend-002-pmu-remove-dead-code.patch
 Patch132: linux-2.6-powerpc-generic-suspend-003-remove-adb-sleep-notifier.patch
 Patch133: linux-2.6-powerpc-generic-suspend-004-kill-pmu-sleep-notifier.patch
 Patch134: linux-2.6-powerpc-generic-suspend-005-proper-sleep-management.patch
+Patch135: linux-2.6-powerpc-fix-missed-hardware-breakpoints-across-multiple-threads.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
@@ -1150,6 +1151,8 @@ ApplyPatch linux-2.6-powerpc-generic-suspend-002-pmu-remove-dead-code.patch
 ApplyPatch linux-2.6-powerpc-generic-suspend-003-remove-adb-sleep-notifier.patch
 ApplyPatch linux-2.6-powerpc-generic-suspend-004-kill-pmu-sleep-notifier.patch
 ApplyPatch linux-2.6-powerpc-generic-suspend-005-proper-sleep-management.patch
+# ppc kernel hardware watchpoint support (bz 439619)
+ApplyPatch linux-2.6-powerpc-fix-missed-hardware-breakpoints-across-multiple-threads.patch
 ###  NOT (YET) UPSTREAM:
 # The EHCI ISO patch isn't yet upstream but is needed to fix reboot
 ApplyPatch linux-2.6-ps3-ehci-iso.patch
@@ -2012,6 +2015,9 @@ fi
 
 
 %changelog
+* Sat Mar 29 2008 Dave Jones <davej@redhat.com>
+- powerpc: Fix missed hardware breakpoints across multiple threads. (#439619)
+
 * Fri Mar 28 2008 John W. Linville <linville@redhat.com> 2.6.24.4-64
 - libertas: fix spinlock recursion bug
 - rt2x00: Ignore set_state(STATE_SLEEP) failure
