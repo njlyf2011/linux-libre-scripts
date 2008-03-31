@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.540 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.559 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -424,10 +424,11 @@ Summary: The Linux kernel (the core of the Linux operating system)
 #
 %define kernel_reqprovconf \
 Provides: kernel = %{rpmversion}-%{pkg_release}\
-Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1}\
+Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 10\
 Provides: kernel-modeset = 1\
+Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
@@ -567,6 +568,10 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # we always need nonintconfig, even for -vanilla kernels
 Patch06: linux-2.6-build-nonintconfig.patch
 
+# we also need compile fixes for -vanilla
+Patch07: linux-2.6-compile-fixes.patch
+Patch08: linux-2.6-compile-fix-gcc-43.patch
+
 %if !%{nopatches}
 
 Patch10: linux-2.6-hotfixes.patch
@@ -586,16 +591,15 @@ Patch144: linux-2.6-vio-modalias.patch
 Patch145: linux-2.6-windfarm-pm121.patch
 Patch146: linux-2.6-windfarm-pm121-fix.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
-
-Patch150: linux-2.6-sparc64-big-kernel.patch
+Patch148: linux-2.6-powerpc-zImage-32MiB.patch
 
 Patch160: linux-2.6-execshield.patch
-Patch240: linux-2.6-debug-resource-overflow.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch330: linux-2.6-debug-no-quiet.patch
+Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch350: linux-2.6-devmem.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
@@ -615,12 +619,8 @@ Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-wireless-fixups.patch
-Patch683: linux-2.6-iwlwifi-sband-registration.patch
 Patch690: linux-2.6-at76.patch
 
-Patch820: linux-2.6-compile-fixes.patch
-Patch821: linux-2.6-compile-fix-gcc-43.patch
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
@@ -658,7 +658,7 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 
 %endif
 
-BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root-%{_target_cpu}
+BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
 The kernel package contains the Linux kernel (vmlinuz), the core of any
@@ -703,7 +703,7 @@ files combining both kernel and initial ramdisk.
 %package debuginfo-common
 Summary: Kernel source files used by %{name}-debuginfo packages
 Group: Development/Debug
-Provides: %{name}-debuginfo-common-%{_target_cpu} = %{KVERREL}
+Provides: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 %description debuginfo-common
 This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
@@ -717,13 +717,13 @@ It provides the kernel source files common to all builds.
 %package %{?1:%{1}-}debuginfo\
 Summary: Debug information for package %{name}%{?1:-%{1}}\
 Group: Development/Debug\
-Requires: %{name}-debuginfo-common-%{_target_cpu} = %{KVERREL}\
-Provides: %{name}%{?1:-%{1}}-debuginfo-%{_target_cpu} = %{KVERREL}\
+Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}\
+Provides: %{name}%{?1:-%{1}}-debuginfo-%{_target_cpu} = %{version}-%{release}\
 AutoReqProv: no\
 %description -n %{name}%{?1:-%{1}}-debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:-?%{1}}(-%%{_target_cpu})?/.*|/.*%%{KVERREL}%{?1}(\.debug)?' -o debuginfo%{?1}.list}\
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{version}-%%{release}%{?1:-?%{1}}(-%%{_target_cpu})?/.*|/.*%%{version}-%%{release}%{?1}(\.debug)?' -o debuginfo%{?1}.list}\
 %{nil}
 
 #
@@ -734,9 +734,10 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 %package %{?1:%{1}-}devel\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
-Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{rpmversion}-%{release}\
-Provides: kernel-devel-%{_target_cpu} = %{rpmversion}-%{release}%{?1}\
-Provides: kernel-devel = %{rpmversion}-%{release}%{?1}\
+Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-devel = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 %description -n kernel%{?variant}%{?1:-%{1}}-devel\
@@ -998,6 +999,17 @@ make -f %{SOURCE20} VERSION=%{version} configs
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+#
+# misc small stuff to make things compile
+#
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-compile-fixes.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-compile-fixes.patch
+fi
+
+# build with gcc43
+ApplyPatch linux-2.6-compile-fix-gcc-43.patch
+
 %if !%{nopatches}
 
 ApplyPatch linux-2.6-hotfixes.patch
@@ -1039,12 +1051,8 @@ ApplyPatch linux-2.6-windfarm-pm121.patch
 ApplyPatch linux-2.6-windfarm-pm121-fix.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
-
-# 
-# SPARC64
-#
-# This patch should go upstream soon, its in DaveM's tree.
-#ApplyPatch linux-2.6-sparc64-big-kernel.patch
+# Link zImage at 32MiB (for POWER machines, Efika)
+ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
 
 #
 # Exec shield
@@ -1063,7 +1071,6 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 
 # Various low-impact patches to aid debugging.
-ApplyPatch linux-2.6-debug-resource-overflow.patch
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
@@ -1071,6 +1078,7 @@ ApplyPatch linux-2.6-debug-spinlock-taint.patch
 %if !%{debugbuildsenabled}
 ApplyPatch linux-2.6-debug-no-quiet.patch
 %endif
+ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 
 #
 # Make /dev/mem a need-to-know function
@@ -1130,26 +1138,12 @@ ApplyPatch linux-2.6-ata-quirk.patch
 ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
-ApplyPatch linux-2.6-wireless-fixups.patch
-ApplyPatch linux-2.6-iwlwifi-sband-registration.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
-
-#
-# misc small stuff to make things compile
-#
-
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-compile-fixes.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-compile-fixes.patch
-fi
-
-# build with gcc43
-ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1271,15 +1265,8 @@ BuildKernel() {
     InstallName=${4:-vmlinuz}
 
     # Pick the right config file for the kernel we're building
-    if [ -n "$Flavour" ] ; then
-      Config=kernel-%{version}-%{_target_cpu}-$Flavour.config
-      DevelDir=/usr/src/kernels/%{KVERREL}-$Flavour
-      DevelLink=/usr/src/kernels/%{KVERREL}$Flavour
-    else
-      Config=kernel-%{version}-%{_target_cpu}.config
-      DevelDir=/usr/src/kernels/%{KVERREL}
-      DevelLink=
-    fi
+    Config=kernel-%{version}-%{_target_cpu}${Flavour:+-${Flavour}}.config
+    DevelDir=/usr/src/kernels/%{KVERREL}${Flavour:+.${Flavour}}
 
     # When the bootable image is just the ELF kernel, strip it.
     # We already copy the unstripped file into the debuginfo package.
@@ -1289,11 +1276,11 @@ BuildKernel() {
       CopyKernel=cp
     fi
 
-    KernelVer=%{version}-libre.%{release}.%{_target_cpu}$Flavour
-    echo BUILDING A KERNEL FOR $Flavour %{_target_cpu}...
+    KernelVer=%{version}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}
+    echo BUILDING A KERNEL FOR ${Flavour} %{_target_cpu}...
 
     # make sure EXTRAVERSION says what we want it to say
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}.%{_target_cpu}$Flavour/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
 
     # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -1451,7 +1438,6 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT/usr/src/kernels
     mv $RPM_BUILD_ROOT/lib/modules/$KernelVer/build $RPM_BUILD_ROOT/$DevelDir
     ln -sf ../../..$DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
-    [ -z "$DevelLink" ] || ln -sf `basename $DevelDir` $RPM_BUILD_ROOT/$DevelLink
 }
 
 ###
@@ -1615,9 +1601,9 @@ then\
 fi\
 if [ "$HARDLINK" != "no" -a -x /usr/sbin/hardlink ]\
 then\
-    (cd /usr/src/kernels/%{KVERREL}%{?1:-%{1}} &&\
+    (cd /usr/src/kernels/%{KVERREL}%{?1:.%{1}} &&\
      /usr/bin/find . -type f | while read f; do\
-       hardlink -c /usr/src/kernels/*.fc*-*/$f $f\
+       hardlink -c /usr/src/kernels/*.fc*.*/$f $f\
      done)\
 fi\
 %{nil}
@@ -1628,7 +1614,7 @@ fi\
 #
 %define kernel_variant_posttrans(s:r:v:) \
 %{expand:%%posttrans %{?-v*}}\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --rpmposttrans %{?1} %{KVERREL}%{?-v*} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --rpmposttrans %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 %{nil}
 
 #
@@ -1645,7 +1631,7 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -i -e 's/^DEFAULTKERNEL=%{-s*}$/DEFAULTKERNEL=%{-r*}/' /etc/sysconfig/kernel || exit $?\
 fi}\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v*} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --add-kernel %{KVERREL}%{?-v*} || exit $?\
@@ -1727,30 +1713,30 @@ fi
 %if %{1}\
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
-/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2}\
-/boot/System.map-%{KVERREL}%{?2}\
-#/boot/symvers-%{KVERREL}%{?2}.gz\
-/boot/config-%{KVERREL}%{?2}\
+/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
+/boot/System.map-%{KVERREL}%{?2:.%{2}}\
+#/boot/symvers-%{KVERREL}%{?2:.%{2}}.gz\
+/boot/config-%{KVERREL}%{?2:.%{2}}\
 %{?-a:%{-a*}}\
-%dir /lib/modules/%{KVERREL}%{?2}\
-/lib/modules/%{KVERREL}%{?2}/kernel\
-/lib/modules/%{KVERREL}%{?2}/build\
-/lib/modules/%{KVERREL}%{?2}/source\
-/lib/modules/%{KVERREL}%{?2}/extra\
-/lib/modules/%{KVERREL}%{?2}/updates\
-/lib/modules/%{KVERREL}%{?2}/weak-updates\
+%dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/kernel\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/build\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/source\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/extra\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/updates\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/weak-updates\
 %ifarch %{vdso_arches}\
-/lib/modules/%{KVERREL}%{?2}/vdso\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
 %endif\
-/lib/modules/%{KVERREL}%{?2}/modules.block\
-/lib/modules/%{KVERREL}%{?2}/modules.networking\
-/lib/modules/%{KVERREL}%{?2}/modules.order\
-%ghost /boot/initrd-%{KVERREL}%{?2}.img\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.block\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.networking\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.order\
+%ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
 %{?-e:%{-e*}}\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
-%verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:-%{2}}\
-/usr/src/kernels/%{KVERREL}%{?2}\
+%verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
+/usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %if %{fancy_debuginfo}\
@@ -1761,10 +1747,10 @@ fi
 %defattr(-,root,root)\
 %if !%{fancy_debuginfo}\
 %if "%{elf_image_install_path}" != ""\
-%{debuginfodir}/%{elf_image_install_path}/*-%{KVERREL}%{?2}.debug\
+%{debuginfodir}/%{elf_image_install_path}/*-%{KVERREL}%{?2:.%{2}}.debug\
 %endif\
-%{debuginfodir}/lib/modules/%{KVERREL}%{?2}\
-%{debuginfodir}/usr/src/kernels/%{KVERREL}%{?2:-%{2}}\
+%{debuginfodir}/lib/modules/%{KVERREL}%{?2:.%{2}}\
+%{debuginfodir}/usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 %endif\
 %endif\
 %endif\
@@ -1781,6 +1767,124 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
+* Sun Mar 30 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.175.rc7.git5
+- Deblobbed patch-2.6.25-rc7-git5, modifies removed files.
+
+* Sat Mar 29 2008 Dave Jones <davej@redhat.com>
+- Add a 'would have oomkilled' sysctl for debugging.
+
+* Sat Mar 29 2008 Jarod Wilson <jwilson@redhat.com>
+- Add new virtual Provides to go with the new uname scheme to
+  make life easier for 3rd-party kernel module packaging.
+
+* Sat Mar 29 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc7-git5
+
+* Fri Mar 28 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc7-git4
+
+* Fri Mar 28 2008 John W. Linville <linville@redhat.com>
+- libertas: fix spinlock recursion bug
+- rt2x00: Ignore set_state(STATE_SLEEP) failure
+- iwlwifi: allow a default callback for ASYNC host commands
+- libertas: kill useless #define LBS_MONITOR_OFF 0
+- libertas: remove CMD_802_11_PWR_CFG
+- libertas: the compact flash driver is no longer experimental
+- libertas: reduce debug output
+- mac80211: reorder fields to make some structures smaller
+- iwlwifi: Add led support
+- mac80211: fix wrong Rx A-MPDU control via debugfs
+- mac80211: A-MPDU MLME use dynamic allocation
+- iwlwifi: rename iwl-4965-io.h to iwl-io.h
+- iwlwifi: improve NIC i/o debug prints information
+- iwlwifi: iwl_priv - clean up in types of members
+
+* Fri Mar 28 2008 Jarod Wilson <jwilson@redhat.com>
+- Fix up Requires/Provides for debuginfo bits
+
+* Fri Mar 28 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc7-git3
+
+* Fri Mar 28 2008 Dave Jones <davej@redhat.com>
+- Disable cyblafb (439400)
+
+* Thu Mar 27 2008 Dave Jones <davej@redhat.com>
+- Disable page allocation debugging.
+
+* Thu Mar 27 2008 Jarod Wilson <jwilson@redhat.com>
+- One more try at fixing scriptlets for flavoured kernels (#439036)
+
+* Thu Mar 27 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc7-git2
+
+* Thu Mar 27 2008 Dave Jones <davej@redhat.com>
+- Enable USB debug in debug kernels.
+
+* Thu Mar 27 2008 John W. Linville <linville@redhat.com>
+- cfg80211: don't export ieee80211_get_channel
+
+* Wed Mar 26 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc7-git1
+
+* Wed Mar 26 2008 John W. Linville <linville@redhat.com>
+- ipw2200 annotations and fixes
+- iwlwifi: Re-ordering probe flow (4965)
+- iwlwifi: Packing all 4965 parameters
+- iwlwifi: Probe Flow - Performing allocation in a separate function
+- iwlwifi: Probe Flow - Extracting hw and priv init
+- iwlwifi: rename iwl4965_get_channel_info to iwl_get_channel_info
+- iwlwifi: Completing the parameter packaging
+- iwlwifi-2.6: Cleans up set_key flow
+- iwlwifi-2.6: RX status translation to old scheme
+- mac80211: get a TKIP phase key from skb
+- mac80211: allows driver to request a Phase 1 RX key
+- iwlwifi-2.6: enables HW TKIP encryption
+- iwlwifi-2.6: enables RX TKIP decryption in HW
+- libertas: convert CMD_MAC_CONTROL to a direct command
+- libertas: rename packetfilter to mac_control
+- libertas: remove some unused commands
+- libertas: make a handy lbs_cmd_async() command
+- libertas: fix scheduling while atomic bug in CMD_MAC_CONTROL
+- libertas: convert GET_LOG to a direct command
+- libertas: misc power saving adjusts
+- libertas: remove lots of unused stuff
+- libertas: store rssi as an u32
+- rt2x00: Add dev_flags to rx descriptor
+- rt2x00: Fix rate detection for invalid signals
+- rt2x00: Fix in_atomic() usage
+- wireless: add wiphy channel freq to channel struct lookup helper
+- mac80211: use ieee80211_get_channel
+- mac80211: filter scan results on unusable channels
+- PS3: gelic: Add support for separate cipher selection
+- iwlwifi: Bug fix, CCMP with HW encryption with AGG
+- b43: Don't compile N-PHY code when N-PHY is disabled
+- mac80211: prevent tuning during scanning
+- iwlwifi: remove macros containing offsets from eeprom struct
+- mac80211: fixing delba debug print
+- mac80211: fixing debug prints for AddBA request
+- mac80211: tear down of block ack sessions
+- iwlwifi: rename iwl-4965-debug.h back to iwl-debug.h
+- iwlwifi: rename struct iwl4965_priv to struct iwl_priv
+- iwlwifi: Add TX/RX statistcs to driver
+- iwlwifi: Add debugfs to iwl core
+- iwlwifi: iwl3945 remove 4965 commands
+- iwlwifi: move host command sending functions to core module
+- mac80211: configure default wmm params correctly
+- mac80211: silently accept deletion of non-existant key
+- prism54: correct thinko in "prism54: Convert stats_sem in a mutex"
+
+* Wed Mar 26 2008 Jarod Wilson <jwilson@redhat.com>
+- Fix buglet in posttrans hooks (#439036)
+- Tweak arch-in-uname setup to use dot delimiter for flavoured
+  kernels, eliminates a needless symlink and reads cleaner.
+
+* Wed Mar 26 2008 Chuck Ebbert <cebbert@redhat.com>
+- Remove a now unnecessary gcc43 compile fix.
+- Apply compile fixes to vanilla kernels.
+
+* Wed Mar 26 2008 David Woodhouse <dwmw2@redhat.com>
+- Link PowerPC zImage at 32MiB (#239658 on POWER5, also fixes Efika)
+
 * Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.156.rc7
 - Deblob linux tarball.
 - Deblob patch-2.6.25-rc7.bz2.
