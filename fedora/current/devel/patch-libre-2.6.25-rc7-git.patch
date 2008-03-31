@@ -1,0 +1,51 @@
+--- /proc/self/fd/63	2008-03-31 15:43:24.508209474 -0300
++++ /proc/self/fd/62	2008-03-31 15:43:24.524209605 -0300
+@@ -1,3 +1,8 @@
++Deblobbed
++
++drivers/net/e100.c no longer exists
++drivers/net/tokenring/smctr.c no longer exists
++
+ diff --git a/Documentation/i386/IO-APIC.txt b/Documentation/i386/IO-APIC.txt
+ index f951666..30b4c71 100644
+ --- a/Documentation/i386/IO-APIC.txt
+@@ -4394,19 +4399,6 @@
+  	spin_unlock_irqrestore(&db->lock, flags);
+  }
+  
+-diff --git a/drivers/net/e100.c b/drivers/net/e100.c
+-index cdf3090..2d139ec 100644
+---- a/drivers/net/e100.c
+-+++ b/drivers/net/e100.c
+-@@ -960,7 +960,7 @@ static void e100_get_defaults(struct nic *nic)
+- 
+- 	/* Template for a freshly allocated RFD */
+- 	nic->blank_rfd.command = 0;
+--	nic->blank_rfd.rbd = 0xFFFFFFFF;
+-+	nic->blank_rfd.rbd = cpu_to_le32(0xFFFFFFFF);
+- 	nic->blank_rfd.size = cpu_to_le16(VLAN_ETH_FRAME_LEN);
+- 
+- 	/* MII setup */
+ diff --git a/drivers/net/ehea/ehea.h b/drivers/net/ehea/ehea.h
+ index 7c4ead3..93b7fb2 100644
+ --- a/drivers/net/ehea/ehea.h
+@@ -6073,19 +6065,6 @@
+  		addr[4] = __v; addr[5] = __v >> 8;		\
+  		if (*(u32 *)(&addr[0]) == 0xFFFFFFFF) {		\
+  			random_ether_addr(addr);		\
+-diff --git a/drivers/net/tokenring/smctr.c b/drivers/net/tokenring/smctr.c
+-index 8909050..5f1c507 100644
+---- a/drivers/net/tokenring/smctr.c
+-+++ b/drivers/net/tokenring/smctr.c
+-@@ -3413,7 +3413,7 @@ static int smctr_make_tx_status_code(struct net_device *dev,
+-         tsv->svi = TRANSMIT_STATUS_CODE;
+-         tsv->svl = S_TRANSMIT_STATUS_CODE;
+- 
+--        tsv->svv[0] = ((tx_fstatus & 0x0100 >> 6) || IBM_PASS_SOURCE_ADDR);
+-+	tsv->svv[0] = ((tx_fstatus & 0x0100 >> 6) | IBM_PASS_SOURCE_ADDR);
+- 
+-         /* Stripped frame status of Transmitted Frame */
+-         tsv->svv[1] = tx_fstatus & 0xff;
+ diff --git a/drivers/net/usb/dm9601.c b/drivers/net/usb/dm9601.c
+ index 4b131a6..0343b00 100644
+ --- a/drivers/net/usb/dm9601.c

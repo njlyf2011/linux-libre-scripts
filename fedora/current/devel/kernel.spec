@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.560 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.562 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 5
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -724,7 +724,7 @@ AutoReqProv: no\
 %description -n %{name}%{?1:-%{1}}-debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{version}-%%{release}%{?1:-?%{1}}(-%%{_target_cpu})?/.*|/.*%%{version}-%%{release}%{?1}(\.debug)?' -o debuginfo%{?1}.list}\
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:.?%{1}}?/.*|/.*%%{KVERREL}%{?1:.%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
 %{nil}
 
 #
@@ -1769,7 +1769,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
-* Mon Mar 31 2008 Dave Airlie <airlied@redhat.com> 
+* Mon Mar 31 2008 Jarod Wilson <jwilson@redhat.com>
+- Make split debuginfo packages build correctly again
+
+* Mon Mar 31 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.177
+- Deblobbed patch-2.6.25-rc7-git6, modifies removed files.
+
+* Mon Mar 31 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.25-rc7-git6
+
+* Mon Mar 31 2008 Dave Airlie <airlied@redhat.com>
 - add fix for radeon oops (#439656)
 
 * Sun Mar 30 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.175.rc7.git5
