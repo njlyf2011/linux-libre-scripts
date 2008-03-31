@@ -20,8 +20,8 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin 523
-%define fedora_build %(R="$Revision: 1.523 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin 384
+%define fedora_build %(R="$Revision: 1.540 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -43,9 +43,9 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
-%define gitrev 5
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -136,7 +136,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 %define xen_target vmlinuz
 %define xen_image vmlinuz
 
-%define KVERREL %{PACKAGE_VERSION}-libre.%{PACKAGE_RELEASE}
+%define KVERREL %{PACKAGE_VERSION}-libre.%{PACKAGE_RELEASE}.%{_target_cpu}
 %define hdrarch %_target_cpu
 
 %if 0%{!?nopatches:1}
@@ -463,6 +463,9 @@ Obsoletes: kernel-libre-smp
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
+%if %{with_doc}
+BuildRequires: xmlto
+%endif
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
 %endif
@@ -487,8 +490,7 @@ Source2: Config.mk
 
 # For documentation purposes only.
 Source3: deblob-%{knfversion}
-Source4: deblob-check-patches
-Source5: deblob-find-blob
+Source4: deblob-check
 
 Source10: COPYING.modules
 Source11: genkey
@@ -581,6 +583,11 @@ Patch141: linux-2.6-ps3-storage-alias.patch
 Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
+Patch145: linux-2.6-windfarm-pm121.patch
+Patch146: linux-2.6-windfarm-pm121-fix.patch
+Patch147: linux-2.6-imac-transparent-bridge.patch
+
+Patch150: linux-2.6-sparc64-big-kernel.patch
 
 Patch160: linux-2.6-execshield.patch
 Patch240: linux-2.6-debug-resource-overflow.patch
@@ -601,6 +608,7 @@ Patch451: linux-2.6-input-macbook-appletouch.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
+Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch660: linux-2.6-libata-ali-atapi-dma.patch
 Patch670: linux-2.6-ata-quirk.patch
@@ -876,7 +884,7 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1;
   fi
-  $RPM_SOURCE_DIR/deblob-check-patches $RPM_SOURCE_DIR/$patch || exit 1
+  $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
   *.gz) gunzip < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -995,7 +1003,6 @@ ApplyPatch linux-2.6-build-nonintconfig.patch
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
-# Main patch includes i386, x86_64, powerpc.
 ApplyPatch linux-2.6-utrace.patch
 
 # enable sysrq-c on all kernels, not only kexec
@@ -1027,6 +1034,17 @@ ApplyPatch linux-2.6-ps3-legacy-bootloader-hack.patch
 ApplyPatch linux-2.6-g5-therm-shutdown.patch
 # Provide modalias in sysfs for vio devices
 ApplyPatch linux-2.6-vio-modalias.patch
+# Fan support on iMac G5 iSight
+ApplyPatch linux-2.6-windfarm-pm121.patch
+ApplyPatch linux-2.6-windfarm-pm121-fix.patch
+# Work around PCIe bridge setup on iSight
+ApplyPatch linux-2.6-imac-transparent-bridge.patch
+
+# 
+# SPARC64
+#
+# This patch should go upstream soon, its in DaveM's tree.
+#ApplyPatch linux-2.6-sparc64-big-kernel.patch
 
 #
 # Exec shield
@@ -1096,6 +1114,8 @@ ApplyPatch linux-2.6-silence-noise.patch
 
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
+# Fix SELinux for sparc
+ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
@@ -1253,11 +1273,11 @@ BuildKernel() {
     # Pick the right config file for the kernel we're building
     if [ -n "$Flavour" ] ; then
       Config=kernel-%{version}-%{_target_cpu}-$Flavour.config
-      DevelDir=/usr/src/kernels/%{KVERREL}-$Flavour-%{_target_cpu}
-      DevelLink=/usr/src/kernels/%{KVERREL}$Flavour-%{_target_cpu}
+      DevelDir=/usr/src/kernels/%{KVERREL}-$Flavour
+      DevelLink=/usr/src/kernels/%{KVERREL}$Flavour
     else
       Config=kernel-%{version}-%{_target_cpu}.config
-      DevelDir=/usr/src/kernels/%{KVERREL}-%{_target_cpu}
+      DevelDir=/usr/src/kernels/%{KVERREL}
       DevelLink=
     fi
 
@@ -1269,11 +1289,11 @@ BuildKernel() {
       CopyKernel=cp
     fi
 
-    KernelVer=%{version}-libre.%{release}$Flavour
+    KernelVer=%{version}-libre.%{release}.%{_target_cpu}$Flavour
     echo BUILDING A KERNEL FOR $Flavour %{_target_cpu}...
 
     # make sure EXTRAVERSION says what we want it to say
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}$Flavour/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}.%{_target_cpu}$Flavour/" Makefile
 
     # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -1536,6 +1556,11 @@ mkdir -p $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}/Documentation
 chmod -R a+r *
 # copy the source over
 tar cf - Documentation | tar xf - -C $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}
+
+# Make man pages for the kernel API.
+make mandocs
+mkdir -p $RPM_BUILD_ROOT/usr/share/man/man9
+mv Documentation/DocBook/man/*.9.gz $RPM_BUILD_ROOT/usr/share/man/man9
 %endif
 
 %if %{with_headers}
@@ -1590,7 +1615,7 @@ then\
 fi\
 if [ "$HARDLINK" != "no" -a -x /usr/sbin/hardlink ]\
 then\
-    (cd /usr/src/kernels/%{KVERREL}-%{?1:%{1}-}%{_target_cpu} &&\
+    (cd /usr/src/kernels/%{KVERREL}%{?1:-%{1}} &&\
      /usr/bin/find . -type f | while read f; do\
        hardlink -c /usr/src/kernels/*.fc*-*/$f $f\
      done)\
@@ -1603,7 +1628,7 @@ fi\
 #
 %define kernel_variant_posttrans(s:r:v:) \
 %{expand:%%posttrans %{?-v*}}\
-/sbin/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --rpmposttrans %{?1} %{KVERREL}%{?-v*} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --rpmposttrans %{?1} %{KVERREL}%{?-v*} || exit $?\
 %{nil}
 
 #
@@ -1620,7 +1645,7 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -i -e 's/^DEFAULTKERNEL=%{-s*}$/DEFAULTKERNEL=%{-r*}/' /etc/sysconfig/kernel || exit $?\
 fi}\
-/sbin/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v*} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v*} || exit $?\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --add-kernel %{KVERREL}%{?-v*} || exit $?\
@@ -1686,6 +1711,7 @@ fi
 %{_datadir}/doc/kernel-doc-%{kversion}/Documentation/*
 %dir %{_datadir}/doc/kernel-doc-%{kversion}/Documentation
 %dir %{_datadir}/doc/kernel-doc-%{kversion}
+%{_datadir}/man/man9/*
 %endif
 
 # This is %{image_install_path} on an arch where that includes ELF files,
@@ -1723,8 +1749,8 @@ fi
 %{?-e:%{-e*}}\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
-%verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:-%{2}}-%{_target_cpu}\
-/usr/src/kernels/%{KVERREL}%{?2}-%{_target_cpu}\
+%verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:-%{2}}\
+/usr/src/kernels/%{KVERREL}%{?2}\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %if %{fancy_debuginfo}\
@@ -1738,7 +1764,7 @@ fi
 %{debuginfodir}/%{elf_image_install_path}/*-%{KVERREL}%{?2}.debug\
 %endif\
 %{debuginfodir}/lib/modules/%{KVERREL}%{?2}\
-%{debuginfodir}/usr/src/kernels/%{KVERREL}%{?2:-%{2}}-%{_target_cpu}\
+%{debuginfodir}/usr/src/kernels/%{KVERREL}%{?2:-%{2}}\
 %endif\
 %endif\
 %endif\
@@ -1755,8 +1781,68 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
-* Sat Mar 22 2008 Alexandre Oliva <lxoliva@fsfla.org>
-- Deblob.
+* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.156.rc7
+- Deblob linux tarball.
+- Deblob patch-2.6.25-rc7.bz2.
+- Adjust linux-2.6-netdev-atl2.patch for deblobbing.
+
+* Wed Mar 26 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc7
+
+* Tue Mar 25 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc6-git8
+
+* Tue Mar 25 2008 Jarod Wilson <jwilson@redhat.com>
+- Put %%{_target_cpu} into kernel uname, and tack it onto assorted
+  files and directories. Makes it possible to do parallel installs
+  of say both i686 and x86_64 kernels of the same version on x86_64
+  x86_64 hardware (#197065).
+- Plug DMA memory leak in firewire async receive handler
+
+* Tue Mar 25 2008 John W. Linville <linville@redhat.com>
+- wavelan_cs arm fix
+- arlan: fix warning when PROC_FS=n
+- rt2x00: Add id for Corega CG-WLUSB2GPX
+- b43: Fix DMA mapping leakage
+- b43: Remove irqs_disabled() sanity checks
+- iwlwifi: fix a typo in Kconfig message
+- MAINTAINERS: update iwlwifi git url
+- iwlwifi: fix __devexit_p points to __devexit functions
+- iwlwifi: mac start synchronization issue
+
+* Mon Mar 24 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
+* Mon Mar 24 2008 Tom "spot" Callaway <tcallawa@redhat.com>
+- Add linux-2.6-sparc64-big-kernel.patch, to support bigger sparc64 kernels (DaveM)
+
+* Mon Mar 24 2008 Dave Jones <davej@redhat.com>
+- Add man pages for kernel API to kernel-doc package.
+
+* Mon Mar 24 2008 Jeremy Katz <katzj@redhat.com> 
+- Update the kvm patch to a more final one
+
+* Mon Mar 24 2008 Jarod Wilson <jwilson@redhat.com>
+- firewire not totally merged yet, fix up patch accordingly
+
+* Mon Mar 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+- wireless & firewire were merged.
+
+* Mon Mar 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.25-rc6-git7
+
+* Mon Mar 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Add fix-kvm-2.6.25-rc6-leak.patch, requested by jkatz.
+
+* Sun Mar 23 2008 Tom "spot" Callaway <tcallawa@redhat.com>
+- fix selinux mprotect for sparc
+
+* Sun Mar 23 2008 Roland McGrath <roland@redhat.com>
+- utrace update with sparc64 support
+
+* Sun Mar 23 2008 David Woodhouse <dwmw2@redhat.com>
+- Support fan, fix PCIe bridge setup on iMac G5 (iSight)
+- Disable CONFIG_XMON_DEFAULT
 
 * Fri Mar 21 2008 Roland McGrath <roland@redhat.com>
 - reenable utrace
