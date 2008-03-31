@@ -22,8 +22,8 @@ Summary: The Linux kernel (the core of the Linux operating system)
 #
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
-%define fedora_cvs_origin 397
-%define fedora_build %(R="$Revision: 1.397 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin 346
+%define fedora_build %(R="$Revision: 1.396 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -494,8 +494,7 @@ Source2: Config.mk
 
 # For documentation purposes only.
 Source3: deblob-%{knfversion}
-Source4: deblob-check-patches
-Source5: deblob-find-blob
+Source4: deblob-check
 
 Source10: COPYING.modules
 Source11: genkey
@@ -714,10 +713,10 @@ Patch1520: linux-2.6-dcdbas-autoload.patch
 
 
 # nouveau + drm fixes
-# Patch1802: nouveau-drm.patch
+Patch1802: nouveau-drm.patch
 Patch1803: linux-2.6-ppc32-ucmpdi2.patch
-# Patch1804: linux-2.6-drm-radeon-update.patch
-# Patch1805: linux-2.6-git-initial-r500-drm.patch
+Patch1804: linux-2.6-drm-radeon-update.patch
+Patch1805: linux-2.6-git-initial-r500-drm.patch
 
 # Updated firewire stack from linux1394 git
 Patch1910: linux-2.6-firewire-git-update.patch
@@ -997,7 +996,7 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1;
   fi
-  $RPM_SOURCE_DIR/deblob-check-patches $RPM_SOURCE_DIR/$patch || exit 1
+  $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
   *.gz) gunzip < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1084,7 +1083,7 @@ ApplyPatch linux-2.6-alsa-hda-stac-add-delay.patch
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
 
 # Nouveau DRM + drm fixes
-# ApplyPatch nouveau-drm.patch
+ApplyPatch nouveau-drm.patch
 ApplyPatch linux-2.6-ppc32-ucmpdi2.patch
 # ApplyPatch linux-2.6-drm-radeon-update.patch
 # ApplyPatch linux-2.6-git-initial-r500-drm.patch
@@ -1841,7 +1840,7 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -i -e 's/^DEFAULTKERNEL=%{-s*}$/DEFAULTKERNEL=%{-r*}/' /etc/sysconfig/kernel || exit $?\
 fi}\
-/sbin/new-kernel-pkg --package kernel%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v*} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v*} || exit $?\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --add-kernel %{KVERREL}%{?-v*} || exit $?\
@@ -1969,14 +1968,15 @@ fi
 
 
 %changelog
-* Fri Mar 21 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.3-1
-- Deblob.
-- Disable nouveau-drm.patch, too much voodoo.
-- Disable linux-2.6-drm-radeon-update.patch.
-- Disable linux-2.6-git-initial-r500-drm.patch.
-
-* Fri Mar 21 2008 Dave Jones <davej@redhat.com>
-- Enable PIIX4 I2C driver on x86-64.
+* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.3-libre.50
+- Deblob linux tarball.
+- Disable linux-2.6-drm-radeon-update.patch, patches removed files.
+- Disable linux-2.6-git-initial-r500-drm.patch, patches removed files.
+- Disable CONFIG_TIGON3.
+- Disable CONFIG_VIDEO_CX23885.
+- Disable CONFIG_DVB_TUNER_MT2131.
+- Enable CONFIG_DVB_TDA10023.
+- Enable CONFIG_DVB_TUA6100.
 
 * Thu Mar 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.3-50
 - Reduce the severity of the PnP resource overflow message.
