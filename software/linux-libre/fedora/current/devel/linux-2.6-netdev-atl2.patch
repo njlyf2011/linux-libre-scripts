@@ -1,3 +1,7 @@
+Deblobbed
+
+Adjusted for removal of tehuti.
+
 diff -Nurp a/drivers/net/atl2/atl2_ethtool.c b/drivers/net/atl2/atl2_ethtool.c
 --- a/drivers/net/atl2/atl2_ethtool.c	1969-12-31 19:00:00.000000000 -0500
 +++ b/drivers/net/atl2/atl2_ethtool.c	2007-12-10 12:45:39.000000000 -0500
