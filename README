@@ -12,20 +12,93 @@ I've written deblob-check, a script that you can use to test whether a
 kernel source file, a patch or a tarball contains any remaining or
 suspicious firmware blob.  It's under heavy development ATM.
 
-In http://www.fsfla.org/svn/fsfla/software/linux-libre/, you'll find:
+In <URL:http://www.lsd.ic.unicamp.br/~oliva/snapshots/linux-libre/>,
+you'll yum repositories with 100% Free kernel sources and binaries:
 
-README: This file, possibly updated.
-deblob-2.6.24: Jeff Moe's script, with a patchfile moved inline.
-deblob-check: The script I wrote to locate and clean up blobs.
-
-In http://www.lsd.ic.unicamp.br/~oliva/snapshots/linux-libre/, you'll
-yum repositories with 100% Free kernel sources and binaries:
-
+README: This file, possibly out of date.
+src/: Cleaned-up tarballs and patches from kernel.org.
 F-8/: Free kernels based on Fedora updates/8 (stable releases).
 F-8-testing/: Free kernels based on updates/testing/8.
 F-8-detesting/: Free builds based on Fedora CVS.
 devel/: Free builds based on Fedora development (rawhide).
-deltas/: CVS, patches and deltas to re-create the build trees.
+
+In <URL:http://www.fsfla.org/svn/fsfla/software/linux-libre/>, you'll
+find:
+
+README: This file, possibly updated.
+scripts/deblob-2.6.24: Jeff Moe's script, with a patchfile moved inline.
+scripts/deblob-check: The script I wrote to locate and clean up blobs.
+fedora/current: CVS trees that track Fedora kernel CVS trees.
+fedora/tags: History of kernel-libre builds for Fedora.
+
+
+In the Subversion repository at fsfla.org, you'll only find files from
+the Fedora CVS tree that are modified in order to make the kernel 100%
+Free Software.  CVS files checked into SVN is definitely an odd
+arrangement, but it works just fine, it saves duplication of effort
+and it makes it very easy to track changes in Fedora CVS.  Here's how
+to use it:
+
+The first thing to do is to cvs -z9 update the checked-out tree.  This
+will fetch all removed files from the Fedora CVS server.  You don't
+need a Fedora login, it uses the anonymous CVS server.
+
+Second, you'll have to fetch the tarballs and patch files.  In theory,
+this is all you should have to do:
+
+  make download
+
+And then, you should be ready for Fedora local builds such as `make
+mock', `make x86_64', `make i686', etc.
+
+
+Just in case in the future I remove old Freed tarballs or patch files,
+and that by the time you read this, they're be gone, you can still get
+the freed sources.  In this case, you still have all you need to
+recover the Freed tarballs and patch files, but it takes a bit more
+work, and it will involve getting non-Free Software downloaded from
+kernel.org into your machine.
+
+First, revert the file named upstream to what's in Fedora CVS, then
+download the sources from kernel.org, and finally revert upstream to
+what's in SVN.
+
+  cvs diff -u upstream | patch -p0 -R
+  make download
+  svn revert upstream
+
+Then, you'll notice there are some .xdelta files that CVS knows
+nothing about (and is not configured to ignore) in the CVS tree.
+These are the ones you'll need to clean up the non-Free tarballs and
+patches into Free ones.  I use xdelta because it's unidirectional, so
+I don't redistribute the non-Free Software mysself, not even as a
+reversible patch meant to remove that non-Free Software.  I've also
+used xdeltas without compression, such that you can tell what's being
+added by the delta, rather than what's being removed.
+
+To recover say the linux-libre-2.6.24.tar.bz2 tarball out of
+linux-2.6.24.tar.bz2, the xdelta is between bunzip2ed tarballs, and
+it's bzip2ed itself, to make for a smaller xdelta.  To turn
+linux-2.6.24.tar.bz2 into linux-libre-2.6.24.tar.bz2, you do something
+like this:
+
+  bunzip2 < linux-libre-2.6.24.xdelta.bz2 > linux-libre-2.6.24.xdelta
+  bunzip2 < linux-2.6.24.tar.bz2 > linux-2.6.24.tar
+  xdelta patch linux-libre-2.6.24.xdelta linux-2.6.24.tar linux-libre-2.6.24.tar
+  bzip2 -9 linux-libre-2.6.24.tar.bz2
+  rm -f linux-2.6.24.tar linux-libre-2.6.24.xdelta
+  
+To turn patch-2.6.25-rc7.bz2 into say patch-libre-2.6.25-rc7.bz2, you
+do something like this:
+
+  bunzip2 < patch-2.6.25-rc7.bz2 > patch-2.6.25-rc7
+  xdelta patch patch-libre-2.6.25-rc7.xdelta patch-2.6.25-rc7 patch-libre-2.6.25-rc7
+  bzip2 -9 patch-libre-2.6.25-rc7
+  rm -f patch-2.6.25-rc7
+
+And voila, you've recovered all the Free tarballs and patch files,
+even if I were to remove them from under you.
+
 
 Enjoy your freedom!
 
