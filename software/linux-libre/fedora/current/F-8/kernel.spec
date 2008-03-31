@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.396 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.402 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -33,7 +33,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -541,7 +541,7 @@ Source92: config-sparc64-smp
 
 # For a stable release kernel
 %if 0%{?stable_update}
-Patch00: patch-2.6.%{base_sublevel}.%{stable_update}.bz2
+Patch00: patch-libre-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
@@ -593,7 +593,7 @@ Patch60: linux-2.6-x86-tune-generic.patch
 # Patch61: linux-2.6-x86-setup-add-near-jump.patch
 Patch70: linux-2.6-x86_64-silence-up-apic-errors.patch
 Patch75: linux-2.6-x86-debug-boot.patch
-Patch76: linux-2.6-x86-dont-use-p6-nops.patch
+# Patch76: linux-2.6-x86-dont-use-p6-nops.patch
 Patch77: linux-2.6-x86-clear-df-for-signals.patch
 
 Patch86: linux-2.6-alsa-support-sis7019.patch
@@ -658,14 +658,14 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch590: linux-2.6-unexport-symbols.patch
 Patch600: linux-2.6-vm-silence-atomic-alloc-failures.patch
 # Patch602: linux-2.6-mm-fix-ptrace-access-beyond-vma.patch
-Patch605: linux-2.6-futex-fix-fixups.patch
+# Patch605: linux-2.6-futex-fix-fixups.patch
 
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch620: linux-2.6-defaults-unicode-vt.patch
 Patch640: linux-2.6-defaults-nommconf.patch
 Patch660: linux-2.6-libata-ali-atapi-dma.patch
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-fix-hpt-svw-dma-masking.patch
+# Patch671: linux-2.6-libata-fix-hpt-svw-dma-masking.patch
 Patch672: linux-2.6-libata-it821x-improve-emulation-handling.patch
 
 Patch680: linux-2.6-wireless.patch
@@ -1011,7 +1011,7 @@ ApplyPatch()
 # Update to latest upstream.
 # released_kernel with stable_update available case
 %if 0%{?stable_update}
-ApplyPatch patch-2.6.%{base_sublevel}.%{stable_update}.bz2
+ApplyPatch patch-libre-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 %else
@@ -1100,9 +1100,8 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 #ApplyPatch linux-2.6-x86_64-silence-up-apic-errors.patch
 # debug early boot
 #ApplyPatch linux-2.6-x86-debug-boot.patch
-# allow i686 kernel to boot on non-mainstream processors
-ApplyPatch linux-2.6-x86-dont-use-p6-nops.patch
 # clear DF before calling signal handlers
+# applied on top of utrace
 ApplyPatch linux-2.6-x86-clear-df-for-signals.patch
 
 #
@@ -1244,12 +1243,6 @@ ApplyPatch linux-2.6-unexport-symbols.patch
 #
 # Silence GFP_ATOMIC failures.
 ApplyPatch linux-2.6-vm-silence-atomic-alloc-failures.patch
-# fix ptrace hang trying to access invalid memory location
-#ApplyPatch linux-2.6-mm-fix-ptrace-access-beyond-vma.patch
-# fix read after direct IO write returning stale data
-# restore /proc/slabinfo
-# fix oops with futex on uniprocessor machine
-ApplyPatch linux-2.6-futex-fix-fixups.patch
 
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
@@ -1264,8 +1257,6 @@ ApplyPatch linux-2.6-defaults-nommconf.patch
 ApplyPatch linux-2.6-libata-ali-atapi-dma.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# actually mask the intended DMA modes from the blacklist
-ApplyPatch linux-2.6-libata-fix-hpt-svw-dma-masking.patch
 # fix some broken it821x adapters that have broken emulation
 ApplyPatch linux-2.6-libata-it821x-improve-emulation-handling.patch
 
@@ -1968,8 +1959,9 @@ fi
 
 
 %changelog
-* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.3-libre.50
+* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.4-libre.56
 - Deblob linux tarball.
+- Deblob patch-2.6.24.4.bz2.
 - Disable linux-2.6-drm-radeon-update.patch, patches removed files.
 - Disable linux-2.6-git-initial-r500-drm.patch, patches removed files.
 - Disable CONFIG_TIGON3.
@@ -1977,6 +1969,30 @@ fi
 - Disable CONFIG_DVB_TUNER_MT2131.
 - Enable CONFIG_DVB_TDA10023.
 - Enable CONFIG_DVB_TUA6100.
+
+* Tue Mar 25 2008 Jarod Wilson <jwilson@redhat.com> 2.6.24.4-56
+- Plug DMA memory leak in firewire async receive handler
+
+* Tue Mar 25 2008 John W. Linville <linville@redhat.com> 2.6.24.4-55
+- wavelan_cs arm fix
+- arlan: fix warning when PROC_FS=n
+- rt2x00: Add id for Corega CG-WLUSB2GPX
+- b43: Fix DMA mapping leakage
+- b43: Remove irqs_disabled() sanity checks
+- iwlwifi: fix a typo in Kconfig message
+- MAINTAINERS: update iwlwifi git url
+- iwlwifi: fix __devexit_p points to __devexit functions
+- iwlwifi: mac start synchronization issue
+
+* Mon Mar 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-53
+- Linux 2.6.24.4
+
+* Mon Mar 24 2008 Jarod Wilson <jwilson@redhat.com> 2.6.24.3-52
+- firewire: make sure phy config packets get sent before initiating bus
+  reset. Fixes bugzilla.kernel.org #10128.
+
+* Fri Mar 21 2008 Dave Jones <davej@redhat.com> 2.6.24.3-51
+- Enable PIIX4 I2C driver on x86-64.
 
 * Thu Mar 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.3-50
 - Reduce the severity of the PnP resource overflow message.
