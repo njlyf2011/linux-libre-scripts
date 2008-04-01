@@ -7,7 +7,7 @@ D/scripts////
 /linux-libre-2.6.24.tar.bz2.sign/0/dummy timestamp//
 /patch-libre-2.6.25-rc7.bz2.sign/0/dummy timestamp//
 /patch-libre-2.6.25-rc7-git6.bz2.sign/0/dummy timestamp//
-/.cvsignore/1.796/dummy timestamp from new-entry+Mon Mar 31 18:37:58 2008//Tkernel-2_6_25-0_182_rc7_git6_fc9
+/.cvsignore/1.796/dummy timestamp from new-entry//Tkernel-2_6_25-0_182_rc7_git6_fc9
 /COPYING.modules/1.5/Sun Mar 30 09:02:51 2008/-ko/Tkernel-2_6_25-0_182_rc7_git6_fc9
 /Config.mk/1.4/Sun Mar 30 09:02:51 2008//Tkernel-2_6_25-0_182_rc7_git6_fc9
 /Makefile/1.68/Sun Mar 30 09:36:47 2008//Tkernel-2_6_25-0_182_rc7_git6_fc9
@@ -114,6 +114,6 @@ D/scripts////
 /merge.pl/1.9/Sun Mar 30 09:02:51 2008/-ko/Tkernel-2_6_25-0_182_rc7_git6_fc9
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_25-0_182_rc7_git6_fc9
 /nouveau-drm.patch/1.10/Sun Mar 30 09:02:51 2008/-kb/Tkernel-2_6_25-0_182_rc7_git6_fc9
-/sources/1.755/dummy timestamp from new-entry+Mon Mar 31 18:56:19 2008//Tkernel-2_6_25-0_182_rc7_git6_fc9
-/upstream/1.676/dummy timestamp from new-entry+Mon Mar 31 18:50:13 2008//Tkernel-2_6_25-0_182_rc7_git6_fc9
+/sources/1.755/dummy timestamp from new-entry//Tkernel-2_6_25-0_182_rc7_git6_fc9
+/upstream/1.676/dummy timestamp from new-entry//Tkernel-2_6_25-0_182_rc7_git6_fc9
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_25-0_182_rc7_git6_fc9
