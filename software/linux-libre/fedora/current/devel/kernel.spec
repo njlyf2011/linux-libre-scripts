@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.562 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.566 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -634,6 +634,9 @@ Patch1807: linux-2.6-drm-radeon-fix-oops.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
+# Make Eee disk faster.
+Patch2010: linux-2.6-sata-eeepc-faster.patch
+
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
 
@@ -724,7 +727,7 @@ AutoReqProv: no\
 %description -n %{name}%{?1:-%{1}}-debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:.?%{1}}?/.*|/.*%%{KVERREL}%{?1:.%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:\.%{1}}/.*|/.*%%{KVERREL}%{?1:\.%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
 %{nil}
 
 #
@@ -1153,6 +1156,9 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
+
+ApplyPatch linux-2.6-sata-eeepc-faster.patch
+
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
@@ -1769,6 +1775,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
+* Mon Mar 31 2008 Dave Jones <davej@redhat.com>
+- Support UDMA66 on Asus Eee. (experimental)
+
+* Mon Mar 31 2008 Chuck Ebbert <cebbert@redhat.com>
+- Disable HDA audio power save by default. (#433495)
+  (Users can still enable it manually.)
+
+* Mon Mar 31 2008 Chuck Ebbert <cebbert@redhat.com>
+- Re-enable CONFIG_PCI_LEGACY so some additional drivers get built.
+
 * Mon Mar 31 2008 Jarod Wilson <jwilson@redhat.com>
 - Make split debuginfo packages build correctly again
 
