@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.566 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.569 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -619,6 +619,7 @@ Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
+Patch682: linux-2.6-mac80211-gcc-bug.patch
 Patch690: linux-2.6-at76.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
@@ -659,6 +660,9 @@ Patch2350: linux-2.6-acpi-eeepc-hotkey.patch
 Patch2400: linux-2.6-uvcvideo.patch
 
 Patch2501: linux-2.6-ppc-use-libgcc.patch
+
+# get rid of imacfb and make efifb work everywhere it was used
+Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 %endif
 
@@ -1019,7 +1023,9 @@ ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
+%ifnarch ia64
 ApplyPatch linux-2.6-utrace.patch
+%endif
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1143,6 +1149,9 @@ ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
 
+# avoid endless loop while compiling on ia64 and some other arches
+ApplyPatch linux-2.6-mac80211-gcc-bug.patch
+
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
@@ -1181,6 +1190,9 @@ fi
 ApplyPatch linux-2.6-uvcvideo.patch
 
 ApplyPatch linux-2.6-ppc-use-libgcc.patch
+
+# get rid of imacfb and make efifb work everywhere it was used
+ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1775,6 +1787,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
+* Tue Apr 01 2008 John W. Linville <linville@redhat.com>
+- avoid endless loop while compiling on ia64 and some other arches
+
+* Tue Apr 01 2008 Peter Jones <pjones@redhat.com>
+- get rid of imacfb and make efifb work everywhere it was used
+
+* Tue Apr 01 2008 Jarod Wilson <jwilson@redhat.com>
+- Don't apply utrace bits on ia64, doesn't build there atm
+
 * Mon Mar 31 2008 Dave Jones <davej@redhat.com>
 - Support UDMA66 on Asus Eee. (experimental)
 
