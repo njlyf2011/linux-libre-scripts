@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.569 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.571 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -43,9 +43,9 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
-%define gitrev 6
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -619,7 +619,6 @@ Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-mac80211-gcc-bug.patch
 Patch690: linux-2.6-at76.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1149,9 +1148,6 @@ ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
 
-# avoid endless loop while compiling on ia64 and some other arches
-ApplyPatch linux-2.6-mac80211-gcc-bug.patch
-
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
@@ -1182,9 +1178,9 @@ ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-firewire-git-pending.patch
-fi
+#if [ "$C" -gt 10 ]; then
+#ApplyPatch linux-2.6-firewire-git-pending.patch
+#fi
 
 # usb video
 ApplyPatch linux-2.6-uvcvideo.patch
@@ -1787,6 +1783,44 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
 
 %changelog
+* Tue Apr 01 2008 John W. Linville <linville@redhat.com>
+- mac80211: trigger ieee80211_sta_work after opening interface
+- b43: Add DMA mapping failure messages
+- b43: Fix PCMCIA IRQ routing
+- mac80211: correct use_short_preamble handling
+- endianness annotations: drivers/net/wireless/rtl8180_dev.c
+- net/mac80211/debugfs_netdev.c: use of bool triggers a gcc bug
+- libertas: convert CMD_802_11_MAC_ADDRESS to a direct command
+- libertas: convert CMD_802_11_EEPROM_ACCESS to a direct command
+- libertas: convert sleep/wake config direct commands
+- libertas: don't depend on IEEE80211
+- rt2x00: Invert scheduled packet_filter check
+- rt2x00: TO_DS filter depends on intf_ap_count
+- rt2x00: Remove MAC80211_LEDS dependency
+- mac80211 ibss: flush only stations belonging to current interface
+- mac80211: fix sta_info_destroy(NULL)
+- mac80211: automatically free sta struct when insertion fails
+- mac80211: clean up sta_info_destroy() users wrt. RCU/locking
+- mac80211: sta_info_flush() fixes
+- mac80211: fix sparse complaint in ieee80211_sta_def_wmm_params
+- rt2x00: fixup some non-functional merge errors
+- wireless: fix various printk warnings on ia64 (and others)
+- mac80211: fix deadlocks in debugfs_netdev.c
+- mac80211: fix spinlock recursion on sta expiration
+- mac80211: use recent multicast table for all mesh multicast frames
+- mac80211: check for mesh_config length on incoming management frames
+- mac80211: use a struct for bss->mesh_config
+- iwlwifi: add notification infrastructure to iwlcore
+- iwlwifi: hook iwlwifi with Linux rfkill
+- iwlwifi: fix race condition during driver unload
+- iwlwifi: move rate registration to module load
+- iwlwifi: unregister to upper stack before releasing resources
+- iwlwifi: LED initialize before registering
+- iwlwifi: Fix synchronous host command
+
+* Tue Apr 01 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8
+
 * Tue Apr 01 2008 John W. Linville <linville@redhat.com>
 - avoid endless loop while compiling on ia64 and some other arches
 
