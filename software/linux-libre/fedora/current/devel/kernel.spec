@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.571 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.579 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -434,6 +434,7 @@ Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
 %{?1:%{expand:%%{?kernel_%{1}_conflicts:Conflicts: %%{kernel_%{1}_conflicts}}}}\
 %{?1:%{expand:%%{?kernel_%{1}_obsoletes:Obsoletes: %%{kernel_%{1}_obsoletes}}}}\
+%{?1:%{expand:%%{?kernel_%{1}_provides:Provides: %%{kernel_%{1}_provides}}}}\
 # We can't let RPM do the dependencies automatic because it'll then pick up\
 # a correct but undesirable perl dependency from the module headers which\
 # isn't required for the kernel proper to function\
@@ -546,7 +547,7 @@ Patch00: patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
 %define rcrevlibre -libre
 Patch00: patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-%define gitrevlibre -libre
+#define gitrevlibre -libre
 Patch01: patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
@@ -642,6 +643,10 @@ Patch2020: linux-2.6-netdev-atl2.patch
 
 # ext4 patches
 Patch2100: linux-2.6-ext4-stable-queue.patch
+
+# xfs patches
+Patch2150: linux-2.6-xfs-features2-fixup.patch
+Patch2151: linux-2.6-xfs-features2-fixup-fix.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1144,7 +1149,7 @@ ApplyPatch linux-2.6-libata-ali-atapi-dma.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 
 # wireless patches headed for 2.6.25
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1174,6 +1179,10 @@ ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
+
+# xfs bugfix
+ApplyPatch linux-2.6-xfs-features2-fixup.patch
+ApplyPatch linux-2.6-xfs-features2-fixup-fix.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1241,7 +1250,7 @@ cp %{SOURCE2} .
 if [ -d xen ]; then
   rm -rf xen
 fi
-%setup -D -T -q -n kernel-%{version} -a1
+%setup -D -T -q -n kernel-%{kversion} -a1
 cd xen
 # Any necessary hypervisor patches go here
 
@@ -1469,8 +1478,8 @@ mkdir -p $RPM_BUILD_ROOT/boot
   cd xen
   mkdir -p $RPM_BUILD_ROOT/%{image_install_path} $RPM_BUILD_ROOT/boot
   make %{?_smp_mflags} %{xen_flags}
-  install -m 644 xen.gz $RPM_BUILD_ROOT/%{image_install_path}/xen.gz-%{KVERREL}
-  install -m 755 xen-syms $RPM_BUILD_ROOT/boot/xen-syms-%{KVERREL}
+  install -m 644 xen.gz $RPM_BUILD_ROOT/%{image_install_path}/xen.gz-%{KVERREL}.xen
+  install -m 755 xen-syms $RPM_BUILD_ROOT/boot/xen-syms-%{KVERREL}.xen
   cd ..
 %endif
 %endif
@@ -1538,8 +1547,8 @@ cd linux-%{kversion}.%{_target_cpu}
 %if %{includexen}
 %if %{with_xen}
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
-rm -f $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf
-cat > $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf <<\EOF
+rm -f $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf
+cat > $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf <<\EOF
 # This directive teaches ldconfig to search in nosegneg subdirectories
 # and cache the DSOs there with extra bit 0 set in their hwcap match
 # fields.  In Xen guest kernels, the vDSO tells the dynamic linker to
@@ -1547,7 +1556,7 @@ cat > $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf <<\EOF
 # in the ld.so.cache file.
 hwcap 0 nosegneg
 EOF
-chmod 444 $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf
+chmod 444 $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf
 %endif
 %endif
 
@@ -1647,7 +1656,7 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -i -e 's/^DEFAULTKERNEL=%{-s*}$/DEFAULTKERNEL=%{-r*}/' /etc/sysconfig/kernel || exit $?\
 fi}\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{?1} %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{*} %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --add-kernel %{KVERREL}%{?-v*} || exit $?\
@@ -1683,7 +1692,7 @@ fi}\
 %kernel_variant_preun PAEdebug
 
 %kernel_variant_preun xen
-%kernel_variant_post xen -v xen -s kernel-xen[0U] -r kernel-xen -- `[ -d /proc/xen -a ! -e /proc/xen/xsd_kva ] || echo --multiboot=/%{image_install_path}/xen.gz-%{KVERREL}`
+%kernel_variant_post -v xen -s kernel-xen[0U] -r kernel-xen -- `[ -d /proc/xen -a ! -e /proc/xen/xsd_kva ] || echo --multiboot=/%{image_install_path}/xen.gz-%{KVERREL}.xen`
 if [ -x /sbin/ldconfig ]
 then
     /sbin/ldconfig -X || exit $?
@@ -1780,9 +1789,22 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
-%kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL} -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.conf %{with_xen} xen
+%kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Apr 02 2008 Eric Sandeen <sandeen@redhat.com>
+- Fix mis-read of xfs attr2 superblock flag which was causing
+  corruption in some cases. (#437968)
+
+* Wed Apr 02 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8-git1
+
+* Wed Apr 02 2008 Jarod Wilson <jwilson@redhat.com>
+- Resync FireWire patches with current linux1394 git tree
+
+* Wed Apr  2 2008 Mark McLoughlin <markmc@redhat.com>
+- Sync some spec file changes from kernel-xen
+
 * Tue Apr 01 2008 John W. Linville <linville@redhat.com>
 - mac80211: trigger ieee80211_sta_work after opening interface
 - b43: Add DMA mapping failure messages
