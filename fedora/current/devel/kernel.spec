@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.579 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.585 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 1
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -609,7 +609,6 @@ Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch451: linux-2.6-input-macbook-appletouch.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -1127,7 +1126,6 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
-ApplyPatch linux-2.6-input-macbook-appletouch.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1187,9 +1185,9 @@ ApplyPatch linux-2.6-xfs-features2-fixup-fix.patch
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
-#if [ "$C" -gt 10 ]; then
-#ApplyPatch linux-2.6-firewire-git-pending.patch
-#fi
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-firewire-git-pending.patch
+fi
 
 # usb video
 ApplyPatch linux-2.6-uvcvideo.patch
@@ -1792,6 +1790,29 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.201
+- Enable CONFIG_EEPRO100.
+
+* Sun Apr 06 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8-git4
+
+* Fri Apr 04 2008 Chuck Ebbert <cebbert@redhat.com>
+- Remove VIA VT6212 sleep time fix, already in mainline.
+
+* Fri Apr 04 2008 Dave Jones <davej@redhat.com>
+- USB: VIA VT6212 10us EHCI sleep time select. (#438599)
+
+* Fri Apr 04 2008 Jarod Wilson <jwilson@redhat.com>
+- firewire: add logging of register access failures to debug spew
+- firewire: don't append AT packets to halted contexts (because certain
+  crappy controllers lock up if you do).
+
+* Fri Apr 04 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8-git3
+
+* Thu Apr 03 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8-git2
+
 * Wed Apr 02 2008 Eric Sandeen <sandeen@redhat.com>
 - Fix mis-read of xfs attr2 superblock flag which was causing
   corruption in some cases. (#437968)
