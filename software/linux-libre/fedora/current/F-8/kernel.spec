@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.411 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.420 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -638,6 +638,9 @@ Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-pci-keep-SMBus-hidden-on-nx6110.patch
 Patch381: linux-2.6-pci-remove-default-pci-rom-allocation.patch
 Patch382: linux-2.6-pci-revert-remove-transparent-bridge-resizing.patch
+Patch383: linux-2.6-isapnp-fix-limits.patch
+Patch384: linux-2.6-pnp-extend-resource-limits.patch
+Patch385: linux-2.6-pnp-disable-overlapping-resources.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
@@ -647,6 +650,7 @@ Patch423: linux-2.6-gfs-locking-exports.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch431: linux-2.6-netfilter-really-fix-oops-in-nf_nat_move_storage.patch
+Patch432: linux-2.6-net-tun-fix-rtnl-locking.patch
 Patch440: linux-2.6-sha_alignment.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6-input-appletouch-macbook3-trackpad.patch
@@ -670,6 +674,7 @@ Patch660: linux-2.6-libata-ali-atapi-dma.patch
 Patch670: linux-2.6-ata-quirk.patch
 # Patch671: linux-2.6-libata-fix-hpt-svw-dma-masking.patch
 Patch672: linux-2.6-libata-it821x-improve-emulation-handling.patch
+Patch673: linux-2.6-libata-pata_ataiixp-clear-simplex-b4-probe.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -709,6 +714,8 @@ Patch1400: linux-2.6-smarter-relatime.patch
 Patch1504: linux-2.6-xfs-optimize-away-realtime-tests.patch
 Patch1509: linux-2.6-xfs-setfattr-32bit-compat.patch
 Patch1510: linux-2.6-xfs-xfs_mount-refactor.patch
+Patch1511: linux-2.6-xfs-features2-fixup.patch
+Patch1512: linux-2.6-xfs-features2-fixup-fix.patch
 
 Patch1515: linux-2.6-lirc.patch
 Patch1520: linux-2.6-dcdbas-autoload.patch
@@ -754,6 +761,8 @@ Patch3210: linux-x86-mtrr-31183ba8fd05b6ddc67ab4d726167cbc52e1b346.patch
 Patch3220: linux-x86-mtrr-aaf230424204864e2833dcc1da23e2cb0b9f39cd.patch
 Patch3230: linux-x86-mtrr-5dca6a1bb014875a17289fdaae8c31e0a3641c99.patch
 
+# Patch up paranoid iret
+Patch3240: linux-2.6-paranoid-iret-crash-fix.patch
 
 %endif
 
@@ -1217,6 +1226,12 @@ ApplyPatch linux-2.6-pci-keep-SMBus-hidden-on-nx6110.patch
 ApplyPatch linux-2.6-pci-revert-remove-transparent-bridge-resizing.patch
 # make "pci=rom" work as documented: don't assign addresses to every rom by default
 ApplyPatch linux-2.6-pci-remove-default-pci-rom-allocation.patch
+# fix resource limits for isapnp devices
+ApplyPatch linux-2.6-isapnp-fix-limits.patch
+# extend memory resource limit for pnp devices
+ApplyPatch linux-2.6-pnp-extend-resource-limits.patch
+# don't let pnp claim pci resources
+ApplyPatch linux-2.6-pnp-disable-overlapping-resources.patch
 
 #
 # SCSI Bits.
@@ -1238,10 +1253,10 @@ ApplyPatch linux-2.6-gfs-locking-exports.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# fix oops in netfilter
-# ApplyPatch linux-2.6-netfilter-fix-null-deref-nf_nat_move_storage.patch
 # fix oops in netfilter again
 ApplyPatch linux-2.6-netfilter-really-fix-oops-in-nf_nat_move_storage.patch
+# fix rtnl locking on tun/tap device address change
+ApplyPatch linux-2.6-net-tun-fix-rtnl-locking.patch
 
 # Misc fixes
 # Fix SHA1 alignment problem on ia64
@@ -1292,6 +1307,8 @@ ApplyPatch linux-2.6-libata-ali-atapi-dma.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # fix some broken it821x adapters that have broken emulation
 ApplyPatch linux-2.6-libata-it821x-improve-emulation-handling.patch
+# clear simplex DMA before probing
+ApplyPatch linux-2.6-libata-pata_ataiixp-clear-simplex-b4-probe.patch
 
 # wireless patches headed for 2.6.25
 ApplyPatch linux-2.6-wireless.patch
@@ -1364,6 +1381,8 @@ ApplyPatch linux-2.6-smarter-relatime.patch
 ApplyPatch linux-2.6-xfs-optimize-away-realtime-tests.patch
 ApplyPatch linux-2.6-xfs-setfattr-32bit-compat.patch
 ApplyPatch linux-2.6-xfs-xfs_mount-refactor.patch
+ApplyPatch linux-2.6-xfs-features2-fixup.patch
+ApplyPatch linux-2.6-xfs-features2-fixup-fix.patch
 
 #
 # misc small stuff to make things compile
@@ -1419,6 +1438,9 @@ ApplyPatch linux-x86-mtrr-c140df973c07ac328aafd19d4f4c413f2f8902df.patch
 ApplyPatch linux-x86-mtrr-31183ba8fd05b6ddc67ab4d726167cbc52e1b346.patch
 ApplyPatch linux-x86-mtrr-aaf230424204864e2833dcc1da23e2cb0b9f39cd.patch
 ApplyPatch linux-x86-mtrr-5dca6a1bb014875a17289fdaae8c31e0a3641c99.patch
+
+# Patch up paranoid iret (#431314)
+ApplyPatch linux-2.6-paranoid-iret-crash-fix.patch
 
 # SELinux perf patches
 
@@ -2015,7 +2037,72 @@ fi
 
 
 %changelog
-* Sat Mar 29 2008 Dave Jones <davej@redhat.com>
+* Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.74
+- Enable CONFIG_EEPRO100.
+
+* Wed Apr 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-74
+- Disable sound card debugging messages. (#439592)
+
+* Wed Apr 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-73
+- Fix locking in tun/tap driver when device address changes (#439715)
+
+* Wed Apr 02 2008 Eric Sandeen <sandeen@redhat.com> 2.6.24.4-72
+- Fix mis-read of xfs attr2 superblock flag which was causing
+  corruption in some cases. (#437968)
+
+* Wed Apr 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-71
+- Disable the VIA Padlock SHA crypto hardware driver
+  because it prevents module loading. (#438322)
+
+* Wed Apr 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-70
+- PNP: disable PNP motherboard resources that overlap PCI BARs (#439978)
+
+* Tue Apr 01 2008 John W. Linville <linville@redhat.com> 2.6.24.4-69
+- mac80211: trigger ieee80211_sta_work after opening interface
+- b43: Add DMA mapping failure messages
+- b43: Fix PCMCIA IRQ routing
+- mac80211: correct use_short_preamble handling
+- endianness annotations: drivers/net/wireless/rtl8180_dev.c
+- net/mac80211/debugfs_netdev.c: use of bool triggers a gcc bug
+- libertas: convert CMD_802_11_MAC_ADDRESS to a direct command
+- libertas: convert CMD_802_11_EEPROM_ACCESS to a direct command
+- libertas: convert sleep/wake config direct commands
+- libertas: don't depend on IEEE80211
+- rt2x00: Invert scheduled packet_filter check
+- rt2x00: TO_DS filter depends on intf_ap_count
+- rt2x00: Remove MAC80211_LEDS dependency
+- mac80211 ibss: flush only stations belonging to current interface
+- mac80211: fix sta_info_destroy(NULL)
+- mac80211: automatically free sta struct when insertion fails
+- mac80211: clean up sta_info_destroy() users wrt. RCU/locking
+- mac80211: sta_info_flush() fixes
+- mac80211: fix sparse complaint in ieee80211_sta_def_wmm_params
+- rt2x00: fixup some non-functional merge errors
+- wireless: fix various printk warnings on ia64 (and others)
+- mac80211: fix deadlocks in debugfs_netdev.c
+- mac80211: fix spinlock recursion on sta expiration
+- mac80211: use recent multicast table for all mesh multicast frames
+- mac80211: check for mesh_config length on incoming management frames
+- mac80211: use a struct for bss->mesh_config
+- iwlwifi: add notification infrastructure to iwlcore
+- iwlwifi: hook iwlwifi with Linux rfkill
+- iwlwifi: fix race condition during driver unload
+- iwlwifi: move rate registration to module load
+- iwlwifi: unregister to upper stack before releasing resources
+- iwlwifi: LED initialize before registering
+- iwlwifi: Fix synchronous host command
+
+* Tue Apr 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-68
+- libata: clear simplex DMA before probing pata_atiixp devices (#437163)
+
+* Tue Apr 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-67
+- Fix ISAPnP device resource limits so they match the spec.
+- Extend the PnP memory resource limit to 24.
+
+* Mon Mar 31 2008 Jarod Wilson <jwilson@redhat.com> 2.6.24.4-66
+- Patch up paranoid iret cs reg corruption crasher on x86_64 (#431314)
+
+* Sat Mar 29 2008 Dave Jones <davej@redhat.com> 2.6.24.4-65
 - powerpc: Fix missed hardware breakpoints across multiple threads. (#439619)
 
 * Fri Mar 28 2008 John W. Linville <linville@redhat.com> 2.6.24.4-64
