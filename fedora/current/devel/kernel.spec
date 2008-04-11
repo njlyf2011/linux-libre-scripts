@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.585 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.588 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -582,6 +582,7 @@ Patch21: linux-2.6-utrace.patch
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
+Patch80: linux-2.6-smp-boot-delay.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -1037,6 +1038,8 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # Compile 686 kernels tuned for Pentium4.
 ApplyPatch linux-2.6-x86-tune-generic.patch
+# Delay longer during boot on x86 while waiting for secondary processors
+ApplyPatch linux-2.6-smp-boot-delay.patch
 
 #
 # PowerPC
@@ -1790,6 +1793,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Apr 07 2008 Jarod Wilson <jwilson@redhat.com>
+- Turn off the usual extra rawhide debugging in preparation for F9 release
+
+* Mon Apr 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- Increase SMP boot delay, hopefully solving bug #431882.
+
+* Mon Apr 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- Enable the 1-wire drivers (except for the Matrox driver which conflicts
+  with the Matrox framebuffer driver.)
+
 * Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.201
 - Enable CONFIG_EEPRO100.
 
