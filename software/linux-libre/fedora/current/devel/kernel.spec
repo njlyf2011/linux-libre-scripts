@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.588 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.602 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 4
+%define gitrev 7
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -103,7 +103,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -547,7 +547,7 @@ Patch00: patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
 %define rcrevlibre -libre
 Patch00: patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-#define gitrevlibre -libre
+%define gitrevlibre -libre
 Patch01: patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
@@ -615,7 +615,6 @@ Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
-Patch660: linux-2.6-libata-ali-atapi-dma.patch
 Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-wireless.patch
@@ -1144,13 +1143,11 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # Use UTF-8 by default on VFAT.
 ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
-# Disable ATAPI DMA on ALI chipsets.
-ApplyPatch linux-2.6-libata-ali-atapi-dma.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
 # wireless patches headed for 2.6.25
-#ApplyPatch linux-2.6-wireless.patch
+ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1224,8 +1221,8 @@ for cfg in kernel-%{version}-*.config; do
   fi
 done
 
-%if !%{with_debug}
-rm -f kernel-%{version}-*-debug.config
+%if !%{debugbuildsenabled}
+rm -f kernel-%{version}-*debug.config
 %endif
 
 # now run oldconfig over all the config files
@@ -1793,6 +1790,51 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Apr 11 2008 Alexnadre Oliva <lxoliva@fsfla.org>
+- Deblobbed patch-2.6.25-rc8-git7, references removed config variables.
+- Deblobbed linux-2.6-drm-i915-modeset.patch, references removed files.
+
+* Wed Apr 09 2008 Chuck Ebbert <cebbert@redhat.com>
+- Bump version.
+
+* Wed Apr 09 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Update uvcvideo to svn rev200
+
+* Wed Apr 09 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.25-rc8-git7
+
+* Tue Apr 08 2008 Jarod Wilson <jwilson@redhat.com>
+- One more update to FireWire JMicron work-around patches
+
+* Tue Apr 08 2008 Jarod Wilson <jwilson@redhat.com>
+- Leave debug config files alone when building noarch
+
+* Tue Apr 08 2008 Dave Airlie <airlied@redhat.com>
+- maybe fix i686 PAEdebug build issue
+
+* Tue Apr 08 2008 Dave Airlie <airlied@redhat.com>
+- fix oops in radeon code caused by fixing the mappings
+
+* Tue Apr 08 2008 Dave Airlie <airlied@redhat.com>
+- drm fixes, should fix radeon mappings problem and nouveau crashes
+
+* Tue Apr 08 2008 Chuck Ebbert <cebbert@redhat.com>
+- Remove pata_ali ATAPI DMA disable patch, now upstream.
+- Fix build of pvrusb2 driver.
+
+* Mon Apr 07 2008 John W. Linville <linville@redhat.com>
+- iwlwifi: fix n-band association problem
+- ipw2200: set MAC address on radiotap interface
+- libertas: fix mode initialization problem
+- nl80211: fix STA AID bug
+- b43legacy: fix bcm4303 crash
+
+* Mon Apr 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- Fix CONFIG_USB_DEBUG so it's disabled properly with 'make release'.
+
+* Mon Apr 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.25-rc8-git6
+
 * Mon Apr 07 2008 Jarod Wilson <jwilson@redhat.com>
 - Turn off the usual extra rawhide debugging in preparation for F9 release
 
