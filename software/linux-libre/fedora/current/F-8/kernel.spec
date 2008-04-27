@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.420 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.431 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -33,7 +33,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -595,6 +595,7 @@ Patch70: linux-2.6-x86_64-silence-up-apic-errors.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 # Patch76: linux-2.6-x86-dont-use-p6-nops.patch
 Patch77: linux-2.6-x86-clear-df-for-signals.patch
+Patch78: linux-2.6-x86-asmlinkage_protect-sys_io_getevents.patch
 
 Patch86: linux-2.6-alsa-support-sis7019.patch
 Patch87: linux-2.6-alsa-hda-stac-dmic.patch
@@ -635,7 +636,6 @@ Patch330: linux-2.6-debug-no-quiet.patch
 Patch350: linux-2.6-devmem.patch
 Patch370: linux-2.6-crash-driver.patch
 
-Patch380: linux-2.6-pci-keep-SMBus-hidden-on-nx6110.patch
 Patch381: linux-2.6-pci-remove-default-pci-rom-allocation.patch
 Patch382: linux-2.6-pci-revert-remove-transparent-bridge-resizing.patch
 Patch383: linux-2.6-isapnp-fix-limits.patch
@@ -679,6 +679,7 @@ Patch673: linux-2.6-libata-pata_ataiixp-clear-simplex-b4-probe.patch
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 Patch682: linux-2.6-wireless-pending-fixups.patch
+Patch683: linux-2.6-rndis_host-fixes.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-rndis_wlan.patch
 Patch692: linux-2.6-ps3_gelic_wireless.patch
@@ -707,6 +708,7 @@ Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch1309: linux-2.6-usb-serial-fix-recursive-lock.patch
 Patch1310: linux-2.6-usb-serial-option-add-dell-modem-1.patch
 Patch1311: linux-2.6-usb-serial-option-add-dell-modem-2.patch
+
 Patch1320: linux-2.6-isdn-hisax-fix-request_irq-oops.patch
 Patch1330: linux-2.6-hwmon-coretemp-add-penryn-cpu.patch
 
@@ -1140,6 +1142,8 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 # clear DF before calling signal handlers
 # applied on top of utrace
 ApplyPatch linux-2.6-x86-clear-df-for-signals.patch
+# prevent clobber of esi on x86 by sys_io_getevents() syscall
+ApplyPatch linux-2.6-x86-asmlinkage_protect-sys_io_getevents.patch
 
 #
 # PowerPC
@@ -1220,8 +1224,6 @@ ApplyPatch linux-2.6-crash-driver.patch
 #
 # driver core
 #
-# unhiding this smbus breaks acpi thermal zones
-ApplyPatch linux-2.6-pci-keep-SMBus-hidden-on-nx6110.patch
 # fix pci resource allocation broken in 2.6.24
 ApplyPatch linux-2.6-pci-revert-remove-transparent-bridge-resizing.patch
 # make "pci=rom" work as documented: don't assign addresses to every rom by default
@@ -1321,6 +1323,9 @@ ApplyPatch linux-2.6-at76.patch
 ApplyPatch linux-2.6-rndis_wlan.patch
 ApplyPatch linux-2.6-ps3_gelic_wireless.patch
 
+# Some rndis_host fixes pertinent to wireless
+ApplyPatch linux-2.6-rndis_host-fixes.patch
+
 # Restore ability to add/remove virtual i/fs to mac80211 devices
 ApplyPatch linux-2.6-cfg80211-extras.patch
 
@@ -1406,7 +1411,7 @@ ApplyPatch linux-2.6-dcdbas-autoload.patch
 # FireWire updates and fixes
 # snap from http://me.in-berlin.de/~s5r6/linux1394/updates/
 ApplyPatch linux-2.6-firewire-git-update.patch
-ApplyPatch linux-2.6-firewire-git-pending.patch
+#ApplyPatch linux-2.6-firewire-git-pending.patch
 
 ApplyPatch linux-2.6-thinkpad-key-events.patch
 
@@ -1463,8 +1468,8 @@ for cfg in kernel-%{version}-*.config; do
   fi
 done
 
-%if !%{with_debug}
-rm -f kernel-%{version}-*-debug.config
+%if !%{debugbuildsenabled}
+rm -f kernel-%{version}-*debug.config
 %endif
 
 # now run oldconfig over all the config files
@@ -2037,6 +2042,161 @@ fi
 
 
 %changelog
+* Thu Apr 24 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.85
+- Deblob patch-2.6.24.5.bz2.
+
+* Sat Apr 19 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.24.5-85
+- Linux 2.6.24.5
+- linux-2.6-pci-keep-SMBus-hidden-on-nx6110.patch merged
+- linux-2.6-usb-serial-ti_usb-fix-endpoint-requirements.patch merged
+- linux-2.6-usb-serial-visor-fix-regression.patch merged
+
+* Wed Apr 16 2008 John W. Linville <linville@redhat.com> 2.6.24.4-84
+- iwlwifi: replace sprintf with scnprintf for debugfs output
+- proc: switch /proc/driver/ray_cs/ray_cs to seq_file interface
+- iwlwifi: add default WEP key host command
+- iwlwifi: default WEP HW encryption
+- iwlwifi: add 1X HW WEP support
+- iwlwifi: maintain uCode key table state
+- iwlwifi: moves security functions to iwl-sta.c
+- iwlwifi: remove the statistics work
+- iwlwifi: Fix TKIP update key and get_free_ucode_key
+- iwlwifi: Use HW acceleration decryption by default
+- libertas: convert libertas driver to use an event/cmdresp queue
+- libertas: un-garbage various command structs
+- rt2x00: Only free skb when beacon_update fails
+- mac80211: fix key hwaccel race
+- mac80211: further RCU fixes
+- mac80211: fix spinlock recursion
+- mac80211: fix key todo list order
+- mac80211: allow WDS mode
+- mac80211: rework scanning to account for probe response/beacon difference
+- mlme.c: fixup some merge damage
+- ssb-pcicore: Remove b44 TPS flag workaround
+- b43: Add fastpath to b43_mac_suspend()
+- iwlwifi: fix unload warning and error
+- ath5k: Add RF2425 initvals
+- ath5k: Misc fixes/cleanups
+- mac80211: no BSS changes to driver from beacons processed during scanning
+- iwl4965: make iwl4965_send_rxon_assoc asynchronous
+- iwlwifi: make Makefile more concise
+- iwlwifi: perform bss_info_changed post association work right away
+- iwlwifi: move HW device registration
+- iwlwifi: arrange max number of Tx queues
+- b43legacy: fix TBTT and PU timings
+- iwlwifi: generalize iwlwifi init flow
+- iwlwifi: Fix byte count table for fragmented packets
+- iwlwifi: move shared pointers to iwl_priv
+- iwlwifi: hw_setting cleanup
+- iwlwifi: support different num of tx and rx antennas
+- iwlwifi: move the creation of LQ host command to iwlcore
+- iwlwifi: introduce host commands callbacks
+- iwlwifi: move rxon associated command to hcmd
+
+* Wed Apr 16 2008 Jarod Wilson <jwilson@redhat.com> 2.6.24.4-83
+- Back out FireWire patch requiring successive selfID complete
+  events, needs more work to keep from causing sbp2 issues (#435550)
+
+* Tue Apr 15 2008 John W. Linville <linville@redhat.com> 2.6.24.4-82
+- rfkill: Fix device type check when toggling states
+- rtl8187: Add missing priv->vif assignments
+- Add rfkill to MAINTAINERS file
+- Update rt2x00 MAINTAINERS entry
+- mac80211: remove message on receiving unexpected unencrypted frames
+- PS3: gelic: fix the oops on the broken IE returned from the hypervisor
+- ssb: Fix usage of struct device used for DMAing
+- b43legacy: Fix usage of struct device used for DMAing
+- MAINTAINERS: move to generic repository for iwlwifi
+- b43legacy: fix initvals loading on bcm4303
+- b43legacy: fix DMA mapping leakage
+- rndis_host: fix transfer size negotiation
+- rndis_host: fix oops when query for OID_GEN_PHYSICAL_MEDIUM fails
+
+* Tue Apr 15 2008 Jarod Wilson <jwilson@redhat.com> 2.6.24.4-81
+- Resync FireWire drivers with latest upstream git tree:
+  * Fix dvgrab on buggy TI chipsets (#243081). May fix #435550 too.
+  * Work-around for buggy 1st-gen JMicron JMB38x controllers
+
+* Fri Apr 11 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-80
+- Prevent sys_io_getevents syscall from clobbering the esi register on x86.
+  (F9#427707)
+
+* Wed Apr 09 2008 John W. Linville <linville@redhat.com> 2.6.24.4-79
+- rt61pci: rt61pci_beacon_update do not free skb twice
+- ssb-pcicore: Fix IRQ TPS flag handling
+- ssb-mipscore: Fix interrupt vectors
+- mac80211: use short_preamble mode from capability if ERP IE not present
+- mac80211: add station aid into ieee80211_tx_control
+- p54: move to separate directory
+- drivers/net/wireless/p54/net2280.h: silence checkpatch.pl
+- wavelan_cs: stop inlining largish static functions
+- libertas: move association code from join.c into scan.c
+- libertas: move association code from scan.c into assoc.c
+- libertas: move lbs_update_channel out of assoc.c
+- libertas: remove lbs_get_fwversion()
+- rt2x00: Use lib->config_filter() during scheduled packet filter config
+- mac80211: fix defined but not used
+- iwlwifi: fix some warnings
+- mac80211: fix possible sta-debugfs work lockup
+- mac80211: clean up IEEE80211_FC use
+- iwlwifi: honour regulatory restrictions in scan code
+- mac80211: make debugfs files root-only
+- mac80211: fix ieee80211_ioctl_giwrate
+- mac80211: fix sta-info pinning
+- mac80211: fix key vs. sta locking problems
+- mac80211: rename files
+- mac80211: fix key debugfs default_key link
+- Revert "mac80211: use a struct for bss->mesh_config"
+- drivers/net/wireless/iwlwifi/iwl-debugfs.c: fix another '%llu' warning
+- iwlwifi/Kconfg: make IWLWIFI_LEDS invisible
+- drivers/net/wireless/iwlwifi/iwl-3945.h: correct CONFIG_IWL4965_LEDS typo
+- cfg80211: default to regulatory max power for channel
+- prism54: set carrier flags correctly
+- ssb-pcmcia: IRQ and DMA related fixes
+- b43: Add PIO support for PCMCIA devices
+- ssb: Turn suspend/resume upside down
+- ssb: Fix build for non-PCIhost
+- ssb: Add support for block-I/O
+- b43: Use SSB block-I/O to do PIO
+- b43: Add more N-PHY stuff
+- b43: Fix TBTT and PU timings
+- b43: Beaconing fixes
+- b43: Fix beacon BH update
+- b43: Fix PHY TX control words in SHM
+- b43: use b43_is_mode() call
+- iwlwifi: fix rfkill memory error
+- mac80211: notify mac from low level driver (iwlwifi)
+- adm8211: remove commented-out code
+- iwl4965: use IWLWIFI_LEDS config variable
+- iwlwifi: ensure led registration complete as part of initialization
+- mac80211: notify upper layers after lower
+- mac80211: BA session debug prints changes
+- mac80211: eliminate conf_ht
+- iwlwifi: eliminate conf_ht
+- mac80211: add association capabilty and timing info into bss_conf
+- iwlwifi: Eliminate association from beacon
+- iwlwifi: hw names cleanup
+- iwlwifi: move driver status inliners into iwl-core.h
+- iwlwifi: use ieee80211_frequency_to_channel
+
+* Tue Apr 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-78
+- [from F9] Leave debug config files alone when building noarch.
+
+* Mon Apr 07 2008 John W. Linville <linville@redhat.com> 2.6.24.4-77
+- iwlwifi: fix n-band association problem
+- ipw2200: set MAC address on radiotap interface
+- libertas: fix mode initialization problem
+- nl80211: fix STA AID bug
+- b43legacy: fix bcm4303 crash
+
+* Mon Apr 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-76
+- Fix Palm Treo/Visor devices not being recognized as serial ports. (#436950)
+- Fix ti_usb_3410_5052 serial driver. (#439134)
+
+* Mon Apr 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-75
+- Enable the 1-wire drivers (except for the Matrox driver which conflicts
+  with the Matrox framebuffer driver.) (#441047)
+
 * Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.74
 - Enable CONFIG_EEPRO100.
 
