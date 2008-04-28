@@ -7,7 +7,6 @@ D/scripts////
 /Makefile/1.70/Sun Apr 27 23:47:11 2008//Tkernel-2_6_25-3_fc9
 /Makefile.config/1.63/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_25-3_fc9
 /config-debug/1.10/Sun Apr 27 23:43:36 2008//Tkernel-2_6_25-3_fc9
-/config-generic/1.98/Result of merge//Tkernel-2_6_25-3_fc9
 /config-i586/1.5/Sun Apr 27 23:43:36 2008//Tkernel-2_6_25-3_fc9
 /config-i686/1.1/Sun Apr 27 23:43:36 2008//Tkernel-2_6_25-3_fc9
 /config-i686-PAE/1.1/Sun Apr 27 23:43:36 2008//Tkernel-2_6_25-3_fc9
@@ -118,3 +117,4 @@ D/scripts////
 /upstream/1.689/Sun Apr 27 23:50:22 2008//Tkernel-2_6_25-3_fc9
 /linux-2.6-drm-i915-modeset.patch/1.9/Mon Apr 28 00:11:08 2008/-kb/Tkernel-2_6_25-3_fc9
 /linux-2.6-netdev-atl2.patch/1.1/Mon Apr 28 00:11:08 2008/-kb/Tkernel-2_6_25-3_fc9
+/config-generic/1.98/Mon Apr 28 07:14:29 2008//Tkernel-2_6_25-3_fc9
