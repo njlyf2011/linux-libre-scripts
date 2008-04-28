@@ -783,6 +783,7 @@ blobs it includes by default.
 %package doc
 Summary: Various documentation bits found in the kernel source
 Group: Documentation
+Provides: kernel-doc = %{rpmversion}-%{pkgrelease}
 %description doc
 This package contains documentation files from the kernel
 source. Various bits of information about the Linux kernel and the
@@ -2047,6 +2048,7 @@ fi
 %changelog
 * Mon Apr 28 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.87
 - Provide kernel-headers from kernel-libre-headers.
+- Provide kernel-doc from kernel-libre-doc.
 - Deblobbed nouveau-drm.patch.
 
 * Thu Apr 24 2008 John W. Linville <linville@redhat.com> 2.6.24.5-87
