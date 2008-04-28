@@ -486,7 +486,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: linux-%{kversion}.tar.bz2
+Source0: libre-linux-%{kversion}.tar.bz2
 #Source1: xen-%{xen_hv_cset}.tar.bz2
 Source2: Config.mk
 
@@ -1153,9 +1153,9 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # wireless patches headed for 2.6.25
 #ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless-pending.patch
+#ApplyPatch linux-2.6-wireless-pending.patch
 # rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
-ApplyPatch linux-2.6-rt2x00-configure_filter.patch
+#ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1797,6 +1797,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Apr 28 2008 Alexandre Oliva <aoliva@redhat.com>
+- Updated deblob and deblob-check.
+- Deblobbed linux-2.6.25.
+
 * Fri Apr 18 2008 Kyle McMartin <kmcmartin@redhat.com>
 - Enable CONFIG_RT_GROUP_SCHED (#442959)
 
