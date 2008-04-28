@@ -692,6 +692,7 @@ blobs it includes by default.
 %package doc
 Summary: Various documentation bits found in the kernel source
 Group: Documentation
+Provides: kernel-doc = %{rpmversion}-%{pkgrelease}
 %description doc
 This package contains documentation files from the kernel
 source. Various bits of information about the Linux kernel and the
@@ -706,6 +707,7 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders
 Provides: glibc-kernheaders = 3.0-46
+Provides: kernel-headers = %{rpmversion}-%{pkgrelease}
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -1818,8 +1820,12 @@ fi
 
 %changelog
 * Mon Apr 28 2008 Alexandre Oliva <aoliva@redhat.com>
+- Provide kernel-headers from kernel-libre-headers.
+- Provide kernel-doc from kernel-libre-doc.
+
+* Mon Apr 28 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.25-libre.10
 - Updated deblob and deblob-check.
-- Deblobbed linux-2.6.25.
+- Deblobbed linux-2.6.25, nouveau-drm.patch and nouveau-drm-update.patch.
 
 * Thu Apr 24 2008 John W. Linville <linville@redhat.com> 2.6.25-10
 - mac80211: Fix n-band association problem

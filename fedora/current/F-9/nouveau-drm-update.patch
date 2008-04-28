@@ -1,3 +1,7 @@
+Deblobbed.
+
+Adjusted for replacement of voodoo blobs with /*(DEBLOBBED)*/.
+
 commit 2ab03489c6a63b4861736f1904566c95098119bf
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Mon Apr 14 13:38:40 2008 +1000
