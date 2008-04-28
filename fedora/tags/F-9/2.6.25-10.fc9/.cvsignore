@@ -1,0 +1,6 @@
+clog
+GNUmakefile
+kernel-2.6.*.config
+temp-*
+kernel-2.6.25
+libre-linux-2.6.25.tar.bz2
