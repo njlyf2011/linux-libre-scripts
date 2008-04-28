@@ -1153,9 +1153,9 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # wireless patches headed for 2.6.25
 #ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
-#ApplyPatch linux-2.6-wireless-pending.patch
+ApplyPatch linux-2.6-wireless-pending.patch
 # rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
-#ApplyPatch linux-2.6-rt2x00-configure_filter.patch
+ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
