@@ -491,7 +491,7 @@ Source0: libre-linux-%{kversion}.tar.bz2
 Source2: Config.mk
 
 # For documentation purposes only.
-Source3: deblob-%{knfversion}
+Source3: deblob
 Source4: deblob-check
 
 Source10: COPYING.modules
