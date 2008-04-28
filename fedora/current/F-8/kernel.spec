@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.431 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.433 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -679,7 +679,8 @@ Patch673: linux-2.6-libata-pata_ataiixp-clear-simplex-b4-probe.patch
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 Patch682: linux-2.6-wireless-pending-fixups.patch
-Patch683: linux-2.6-rndis_host-fixes.patch
+Patch683: linux-2.6-wireless-pending-too.patch
+Patch684: linux-2.6-rndis_host-fixes.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-rndis_wlan.patch
 Patch692: linux-2.6-ps3_gelic_wireless.patch
@@ -796,6 +797,7 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders
 Provides: glibc-kernheaders = 3.0-46
+Provides: kernel-headers = %{rpmversion}-%{pkgrelease}
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -1317,6 +1319,7 @@ ApplyPatch linux-2.6-wireless.patch
 # wireless patches staged for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
 ApplyPatch linux-2.6-wireless-pending-fixups.patch
+ApplyPatch linux-2.6-wireless-pending-too.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -2042,7 +2045,30 @@ fi
 
 
 %changelog
-* Thu Apr 24 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.85
+* Mon Apr 28 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.87
+- Provide kernel-headers from kernel-libre-headers.
+
+* Thu Apr 24 2008 John W. Linville <linville@redhat.com> 2.6.24.5-87
+- mac80211: Fix n-band association problem
+- net/mac80211/rx.c: fix off-by-one
+- mac80211: MAINTAINERS update
+- ssb: Fix all-ones boardflags
+- mac80211: update mesh EID values
+- b43: Workaround invalid bluetooth settings
+- b43: Fix HostFlags data types
+- b43: Add more btcoexist workarounds
+- b43: Workaround DMA quirks
+- ath5k: Fix radio identification on AR5424/2424
+- mac80211: Fix race between ieee80211_rx_bss_put and lookup routines.
+- prism54: prism54_get_encode() test below 0 on unsigned index
+- wireless: rndis_wlan: modparam_workaround_interval is never below 0.
+- iwlwifi: Don't unlock priv->mutex if it isn't locked
+- mac80211: fix use before check of Qdisc length
+
+* Tue Apr 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.5-86
+- Enable machine check exception handling on x86_64.
+
+* Tue Apr 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.85 on Apr 24
 - Deblob patch-2.6.24.5.bz2.
 
 * Sat Apr 19 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.24.5-85
