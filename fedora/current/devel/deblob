@@ -274,6 +274,7 @@ clean_mk CONFIG_CASSINI ./drivers/net/Makefile
 
 # E100 - Intel(R) PRO/100+
 clean_blob drivers/net/e100.c
+sed -i 's:\(\/\*(DEBLOBBED)\*\/\),:\1:' drivers/net/e100.c
 # clean_kconfig ./drivers/net/Kconfig 'E100'
 # clean_mk CONFIG_E100 ./drivers/net/Makefile
 
@@ -289,8 +290,8 @@ clean_mk CONFIG_TEHUTI ./drivers/net/Makefile
 
 # TIGON3 - Broadcom Tigon3
 patch --no-backup-if-mismatch -p0 <<\EOF # patches/linux-2.6-tg3-clean.patch
---- drivers/net/tg3.c	2008-01-24 15:58:37.000000000 -0700
-+++ drivers/net/tg3.c	2008-01-26 12:30:41.000000000 -0700
+--- drivers/net/tg3.c
++++ drivers/net/tg3.c
 @@ -5,14 +5,6 @@
   * Copyright (C) 2001, 2002, 2003 Jeff Garzik (jgarzik@pobox.com)
   * Copyright (C) 2004 Sun Microsystems Inc.
@@ -305,42 +306,8 @@ patch --no-backup-if-mismatch -p0 <<\EOF # patches/linux-2.6-tg3-clean.patch
 - *	notice is accompanying it.
   */
  
+clean_blob drivers/net/tg3.c
  
-@@ -5371,6 +5363,7 @@
- 	return 0;
- }
- 
-+#ifdef REMOVE_FW
- #define TG3_FW_RELEASE_MAJOR	0x0
- #define TG3_FW_RELASE_MINOR	0x0
- #define TG3_FW_RELEASE_FIX	0x0
-@@ -5494,6 +5487,7 @@
- 	0x00000000, 0x00000000, 0x00000000, 0x00000000
- };
- #endif
-+#endif /* REMOVE_FW */
- 
- #define RX_CPU_SCRATCH_BASE	0x30000
- #define RX_CPU_SCRATCH_SIZE	0x04000
-@@ -5673,6 +5667,7 @@
- }
- 
- 
-+#ifdef REMOVE_FW
- #define TG3_TSO_FW_RELEASE_MAJOR	0x1
- #define TG3_TSO_FW_RELASE_MINOR		0x6
- #define TG3_TSO_FW_RELEASE_FIX		0x0
-@@ -6175,6 +6170,7 @@
- 	0x00000000, 0x73746b6f, 0x66666c64, 0x5f76312e, 0x322e3000, 0x00000000,
- 	0x00000000, 0x00000000, 0x00000000,
- };
-+#endif /* REMOVE_FW */
- 
- /* tp->lock is held. */
- static int tg3_load_tso_firmware(struct tg3 *tp)
-EOF
-#sed -i -e '/^#ifdef REMOVE_FW/,/^#endif.*REMOVE_FW/d' drivers/net/tg3.c
-clean_ifdef drivers/net/tg3.c REMOVE_FW
 
 # TYPHOON - 3cr990 series Typhoon
 clean_blob drivers/net/typhoon-firmware.h
