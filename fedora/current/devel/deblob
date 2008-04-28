@@ -44,6 +44,16 @@ function clean_kconfig {
         perl -i -ne 'BEGIN{$p=1} if(/^config ('$2')$/){$p=0}elsif(/^(config|endmenu|source|endif)/){$p=1}; print if $p' $1
 }
 
+function deblob {
+	#$1 = filename
+	if test -f $0-check; then
+	    cp $1 $1.blob
+	    $0-check -d $1.blob > $1
+	    rm -f $1.blob
+	else
+	    rm -v $1
+	fi
+}
 
 #######################
 # Removed ATM Drivers #
@@ -187,11 +197,6 @@ sed -i '/(CONFIG_VIDEO_CPIA2)/d' ./drivers/media/video/Makefile
 rm -v drivers/media/video/dabfirmware.h
 clean_kconfig ./drivers/media/Kconfig 'USB_DABUSB'
 sed -i '/(CONFIG_USB_DABUSB)/d' ./drivers/media/video/Makefile
-
-# USB_SN9C102 - USB SN9C1xx PC Camera Controller support
-rm -v drivers/media/video/sn9c102/*
-sed -i '/source "drivers\/media\/video\/sn9c102\/Kconfig"/d' drivers/media/video/Kconfig
-sed -i '/(CONFIG_USB_SN9C102)/d' ./drivers/media/video/Makefile
 
 # video/usbvideo
 
