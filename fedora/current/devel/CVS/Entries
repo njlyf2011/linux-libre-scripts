@@ -1,6 +1,7 @@
 D/scripts////
-/deblob-2.6.24/0/dummy timestamp//
+/deblob/0/dummy timestamp//
 /deblob-check/0/dummy timestamp//
+/libre-linux-2.6.25.tar.bz2.sign/0/dummy timestamp//
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_25-3_fc9
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_25-3_fc9
 /Makefile/1.70/Sun Apr 27 23:47:11 2008//Tkernel-2_6_25-3_fc9
