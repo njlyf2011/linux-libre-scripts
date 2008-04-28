@@ -1064,13 +1064,18 @@ set_except () {
     accept '		'"'"'0x[^\n]*[\n]\([^\n]*[\n]\)*	\]\(, [0-9]\+ => \[\)\?'"$eol"
     initnc 'const u\(8\|16\|32\) b43_ntab_\(\(adjustpower\|estimatepowerlt\|gainctl\|iqlt\|loftlt\|noisevar1\|tdi[24]0a\)[01]\|channelest\|frame\(lookup\|struct\)\|mcs\|pilot\|tdtrn\|tmap\)\[\] ='
     ;;
-  */nouveau-drm.patch)
+  */nouveau-drm*.patch)
     initnc '\(static uint32_t\|}\) nv04_graph_ctx_regs \[\] ='
     initnc 'static int nv10_graph_ctx_regs \[\] ='
-    # this is highly suspicious, but it does not look like the
-    # developers are trying to stop anyone from modifying it,
-    # they just grabbed these numbers from mmio interactions.
-    initnc 'static uint32_t nv\(4[013467ace]\|49_4b\|8[46]\)_ctx_voodoo\[\] ='
+
+    # Although the developers of the drivers are not trying to stop
+    # anyone from modifying it or understanding it, they acknowledge
+    # these are bits of code, obtained through mmio interactions.
+    # This means these blobs are not source code, AND original authors
+    # of the blobs have power to stop others from modifying them.
+    # Non-Free software, for sure.
+
+    # initnc 'static uint32_t nv\(4[013467ace]\|49_4b\|8[46]\)_ctx_\(voodoo\|prog\)\[\] ='
     ;;
   */linux-2.6-lirc.patch)
     initnc 'const unsigned char map_table\[\] ='

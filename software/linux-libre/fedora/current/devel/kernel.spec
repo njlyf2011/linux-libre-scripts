@@ -3,7 +3,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 0
+%define released_kernel 1
 
 # Versions of various parts
 
@@ -20,13 +20,13 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin 384
-%define fedora_build %(R="$Revision: 1.602 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin 619
+%define fedora_build %(R="$Revision: 1.622 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 24
+%define base_sublevel 25
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -43,9 +43,9 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
-%define gitrev 7
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -127,7 +127,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 
 # The kernel tarball/base version
 %define knfversion 2.6.%{base_sublevel}
-%define kversion libre-%{knfversion}
+%define kversion %{knfversion}
 
 %define make_target bzImage
 
@@ -536,25 +536,25 @@ Source92: config-sparc64-smp
 
 # For a stable release kernel
 %if 0%{?stable_update}
-#define stablelibre -libre
-Patch00: patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
+#define stablelibre libre-
+Patch00: %{?stablelibre}patch-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-%define rcrevlibre -libre
-Patch00: patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+%define rcrevlibre libre-
+Patch00: %{?rcrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-%define gitrevlibre -libre
-Patch01: patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+%define gitrevlibre libre-
+Patch01: %{?gitrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-#define gitrevlibre -libre
-Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
+#define gitrevlibre libre-
+Patch00: %{?gitrevlibre}patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -594,6 +594,7 @@ Patch145: linux-2.6-windfarm-pm121.patch
 Patch146: linux-2.6-windfarm-pm121-fix.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch148: linux-2.6-powerpc-zImage-32MiB.patch
+Patch149: linux-2.6-efika-not-chrp.patch
 
 Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
@@ -619,7 +620,10 @@ Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
+Patch682: linux-2.6-rt2x00-configure_filter.patch
 Patch690: linux-2.6-at76.patch
+
+Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -628,8 +632,10 @@ Patch1515: linux-2.6-lirc.patch
 # nouveau + drm fixes
 Patch1801: linux-2.6-drm-git-mm.patch
 Patch1803: nouveau-drm.patch
+Patch1804: nouveau-drm-update.patch
 Patch1806: linux-2.6-drm-i915-modeset.patch
 Patch1807: linux-2.6-drm-radeon-fix-oops.patch
+Patch1808: linux-2.6-drm-radeon-fix-oops2.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -642,10 +648,6 @@ Patch2020: linux-2.6-netdev-atl2.patch
 
 # ext4 patches
 Patch2100: linux-2.6-ext4-stable-queue.patch
-
-# xfs patches
-Patch2150: linux-2.6-xfs-features2-fixup.patch
-Patch2151: linux-2.6-xfs-features2-fixup-fix.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -940,18 +942,18 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 # Update vanilla to the latest upstream.
 # released_kernel with stable_update available case
 %if 0%{?stable_update}
-ApplyPatch patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
+ApplyPatch %{?stablelibre}patch-2.6.%{base_sublevel}.%{stable_update}.bz2
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+ApplyPatch %{?rcrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+ApplyPatch %{?gitrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
+ApplyPatch %{?gitrevlibre}patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -1068,6 +1070,8 @@ ApplyPatch linux-2.6-windfarm-pm121-fix.patch
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # Link zImage at 32MiB (for POWER machines, Efika)
 ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
+# Don't show 'CHRP' in /proc/cpuinfo on Efika
+ApplyPatch linux-2.6-efika-not-chrp.patch
 
 #
 # Exec shield
@@ -1147,15 +1151,20 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 
 # wireless patches headed for 2.6.25
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
+# rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
+ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
+
+# NFS Client mounts hang when exported directory do not exist
+ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1172,15 +1181,13 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-drm-git-mm.patch
 ApplyPatch nouveau-drm.patch
+ApplyPatch nouveau-drm-update.patch
 ApplyPatch linux-2.6-drm-i915-modeset.patch
 ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
+ApplyPatch linux-2.6-drm-radeon-fix-oops2.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
-
-# xfs bugfix
-ApplyPatch linux-2.6-xfs-features2-fixup.patch
-ApplyPatch linux-2.6-xfs-features2-fixup-fix.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1667,7 +1674,7 @@ fi}\
 #
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1}}\
-/sbin/new-kernel-pkg --rminitrd --rmmoddep --remove %{KVERREL}%{?1} || exit $?\
+/sbin/new-kernel-pkg --rminitrd --rmmoddep --remove %{KVERREL}%{?1:.%{1}} || exit $?\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --remove-kernel %{KVERREL}%{?1} || exit $?\
@@ -1790,7 +1797,80 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Fri Apr 11 2008 Alexnadre Oliva <lxoliva@fsfla.org>
+* Fri Apr 18 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Enable CONFIG_RT_GROUP_SCHED (#442959)
+
+* Thu Apr 17 2008 Jarod Wilson <jwilson@redhat.com> 2.6.25-2
+- Back out FireWire patch requiring successive selfID complete
+  events, needs more work to keep from causing sbp2 issues (#435550)
+
+* Thu Apr 17 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25-1
+- Linux 2.6.25
+- linux-2.6-wireless.patch merged upstream
+
+* Wed Apr 16 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.25-rc9-git2
+
+* Tue Apr 15 2008 John W. Linville <linville@redhat.com>
+- rfkill: Fix device type check when toggling states
+- rtl8187: Add missing priv->vif assignments
+- Add rfkill to MAINTAINERS file
+- Update rt2x00 MAINTAINERS entry
+- mac80211: remove message on receiving unexpected unencrypted frames
+- PS3: gelic: fix the oops on the broken IE returned from the hypervisor
+- ssb: Fix usage of struct device used for DMAing
+- b43legacy: Fix usage of struct device used for DMAing
+- MAINTAINERS: move to generic repository for iwlwifi
+- b43legacy: fix initvals loading on bcm4303
+- b43legacy: fix DMA mapping leakage
+- rt2x00: Use lib->config_filter() during scheduled packet filter config
+
+* Tue Apr 15 2008 John W. Linville <linville@redhat.com>
+- Reenable wireless patches
+
+* Tue Apr 15 2008 Jarod Wilson <jwilson@redhat.com>
+- Fix kernel_variant_preun() to properly remove flavoured kernel
+  entries from bootloader config (Mark McLoughlin)
+
+* Tue Apr 15 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc9-git1
+
+* Tue Apr 15 2008 Dave Airlie <airlied@redhat.com>
+- fix oops on nouveau startup and make build again (#442122)
+- fix radeon oops seen on kerneloops (#442227)
+
+* Mon Apr 14 2008 Dave Airlie <airlied@redhat.com>
+- update to latest nouveau drm from git
+
+* Sun Apr 13 2008 David Woodhouse <dwmw2@redhat.com>
+- Remove 'CHRP' from /proc/cpuinfo on Efika, to fix platform detection 
+  in anaconda
+
+* Sat Apr 12 2008 Jarod Wilson <jwilson@redhat.com>
+- Resync with latest FireWire git tree
+- Add work-around patch for wrong generation in bus reset packets
+  with TI controllers (#243081). Might also help #435550...
+
+* Sat Apr 12 2008 Dave Jones <davej@redhat.com>
+- Silence some noisy printks caused by BIOS bugs.
+
+* Sat Apr 12 2008 Dave Jones <davej@redhat.com>
+- Fix NFS Client mounts hang when exported directory do not exist
+
+* Sat Apr 12 2008 Dave Jones <davej@redhat.com>
+- Enable framepointers for better backtraces.
+
+* Fri Apr 11 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.25-rc9
+- Temporarily disabled wireless patches.
+
+* Fri Apr 11 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8-git9
+
+* Thu Apr 10 2008 Dave Jones <davej@redhat.com>
+- 2.6.25-rc8-git8
+
+* Wed Apr 09 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.218 on Fri Apr 11
 - Deblobbed patch-2.6.25-rc8-git7, references removed config variables.
 - Deblobbed linux-2.6-drm-i915-modeset.patch, references removed files.
 
