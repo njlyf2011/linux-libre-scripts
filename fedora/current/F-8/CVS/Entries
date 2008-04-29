@@ -5,7 +5,7 @@ D/scripts////
 /patch-2.6.24.5.bz2.sign/-1.1/dummy timestamp//
 /linux-libre-2.6.24.tar.bz2.sign/0/dummy timestamp//
 /patch-libre-2.6.24.5.bz2.sign/0/dummy timestamp//
-/.cvsignore/1.719/dummy timestamp from new-entry+Fri Apr 25 02:58:01 2008//Tkernel-2_6_24_5-87_fc8
+/.cvsignore/1.719/Result of merge+Fri Apr 25 02:58:01 2008//Tkernel-2_6_24_5-87_fc8
 /COPYING.modules/1.5/Mon Apr  7 07:33:17 2008/-ko/Tkernel-2_6_24_5-87_fc8
 /Config.mk/1.4/Mon Apr  7 07:33:17 2008//Tkernel-2_6_24_5-87_fc8
 /Makefile/1.59/Mon Apr  7 07:33:17 2008//Tkernel-2_6_24_5-87_fc8
@@ -209,7 +209,7 @@ D/scripts////
 /linux-x86-mtrr-f5106d91f2bf9153d6420f9ebb8114f73f9ce66a.patch/1.1/Mon Apr  7 07:33:27 2008/-kb/Tkernel-2_6_24_5-87_fc8
 /merge.pl/1.9/Mon Apr  7 07:33:27 2008/-ko/Tkernel-2_6_24_5-87_fc8
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_24_5-87_fc8
-/sources/1.680/dummy timestamp from new-entry+Fri Apr 25 03:03:24 2008//Tkernel-2_6_24_5-87_fc8
-/upstream/1.601/dummy timestamp from new-entry+Fri Apr 25 03:03:25 2008//Tkernel-2_6_24_5-87_fc8
+/sources/1.680/Result of merge+Fri Apr 25 03:03:24 2008//Tkernel-2_6_24_5-87_fc8
+/upstream/1.601/Result of merge+Fri Apr 25 03:03:25 2008//Tkernel-2_6_24_5-87_fc8
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_24_5-87_fc8
 /nouveau-drm.patch/1.7/Sun Mar 30 09:02:51 2008/-kb/Tkernel-2_6_24_5-87_fc8
