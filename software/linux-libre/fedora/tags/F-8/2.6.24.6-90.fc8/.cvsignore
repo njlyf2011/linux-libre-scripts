@@ -1,0 +1,6 @@
+clog
+kernel-2.6.*.config
+temp-*
+kernel-2.6.24
+linux-libre-2.6.24.tar.bz2
+patch-libre-2.6.24.6.bz2
