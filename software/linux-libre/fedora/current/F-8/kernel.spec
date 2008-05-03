@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.433 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.436 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -33,7 +33,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -2046,6 +2046,26 @@ fi
 
 
 %changelog
+* Fri May 02 2008 John W. Linville <linville@redhat.com> 2.6.24.5-90
+- iwlwifi: fix debug messages during scanning
+- iwlwifi: fix current channel is not scanned
+- rt2x00: Don't enable short preamble for 1MBs
+- rt2x00: Fix quality/activity led handling
+- Make linux/wireless.h be able to compile
+- b43: Fix some TX/RX locking issues
+
+* Thu May 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.6-89
+- Linux 2.6.24.6
+
+* Thu May 01 2008 John W. Linville <linville@redhat.com> 2.6.24.5-88
+- mac80211: incorrect shift direction
+- libertas: fix use-before-check violation
+- mac80211: assign conf.beacon_control for mesh
+- mac80211: don't allow invalid WDS peer addresses
+- mac80211: insert WDS peer after adding interface
+- mac80211: use 4-byte mesh sequence number
+- b43: Fix dual-PHY devices
+
 * Mon Apr 28 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.87
 - Provide kernel-headers from kernel-libre-headers.
 - Provide kernel-doc from kernel-libre-doc.
