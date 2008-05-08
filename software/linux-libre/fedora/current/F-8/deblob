@@ -271,10 +271,6 @@ clean_blob drivers/net/bnx2_fw2.h
 clean_kconfig ./drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 ./drivers/net/Makefile
 
-clean_blob drivers/net/bnx2x_init_values.h
-clean_kconfig ./drivers/net/Kconfig 'BNX2X'
-clean_mk CONFIG_BNX2X ./divers/net/Makefile
-
 # CASSINI - Sun Cassini
 clean_blob drivers/net/cassini.h
 clean_kconfig ./drivers/net/Kconfig 'CASSINI'
