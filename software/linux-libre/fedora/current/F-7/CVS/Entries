@@ -1,9 +1,6 @@
 D/configs////
 D/scripts////
-/deblob/0/dummy timestamp//
-/deblob-check/0/dummy timestamp//
 /linux-2.6.23.tar.bz2.sign/-1.1/dummy timestamp//
-/libre-linux-2.6.23.tar.bz2.sign/0/dummy timestamp//
 /.cvsignore/1.645/Result of merge+Thu May  8 00:36:00 2008//Tkernel-2_6_23_15-80_fc7
 /COPYING.modules/1.5/Thu Sep  9 14:09:55 2004/-ko/Tkernel-2_6_23_15-80_fc7
 /Config.mk/1.4/Thu Aug  3 21:49:14 2006//Tkernel-2_6_23_15-80_fc7
