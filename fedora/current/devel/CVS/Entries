@@ -1,8 +1,5 @@
 D/scripts////
-/deblob/0/dummy timestamp//
-/deblob-check/0/dummy timestamp//
 /linux-2.6.25.tar.bz2.sign/-1.1/dummy timestamp//
-/libre-linux-2.6.25.tar.bz2.sign/0/dummy timestamp//
 /.cvsignore/1.811/Result of merge+Wed May  7 23:48:11 2008//Tkernel-2_6_25_2-5_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_25_2-5_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_25_2-5_fc10
@@ -126,5 +123,5 @@ D/scripts////
 /nouveau-drm.patch/1.12/dummy timestamp from new-entry/-kb/Tkernel-2_6_25_2-5_fc10
 /patch-2.6.25.2.bz2.sign/1.1/Wed May  7 04:56:20 2008//Tkernel-2_6_25_2-5_fc10
 /sources/1.772/Result of merge+Wed May  7 23:48:20 2008//Tkernel-2_6_25_2-5_fc10
-/upstream/1.691/Result of merge+Wed May  7 23:48:20 2008//Tkernel-2_6_25_2-5_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_25_2-5_fc10
+/upstream/1.691/Thu May  8 07:36:08 2008//Tkernel-2_6_25_2-5_fc10
