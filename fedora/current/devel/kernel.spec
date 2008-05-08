@@ -20,8 +20,8 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.622 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin 623
+%define fedora_build %(R="$Revision: 1.628 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -31,7 +31,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 0
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -475,7 +475,7 @@ BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
 %define fancy_debuginfo 0
 %if %{with_debuginfo}
-%if "%fedora" > "7"
+%if 0%{?fedora} >= 8
 %define fancy_debuginfo 1
 %endif
 %endif
@@ -596,6 +596,8 @@ Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch148: linux-2.6-powerpc-zImage-32MiB.patch
 Patch149: linux-2.6-efika-not-chrp.patch
 
+Patch150: linux-2.6.25-sparc64-semctl.patch
+
 Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
@@ -605,6 +607,7 @@ Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch350: linux-2.6-devmem.patch
 Patch370: linux-2.6-crash-driver.patch
+Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
@@ -617,13 +620,21 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch670: linux-2.6-ata-quirk.patch
+Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+Patch672: linux-2.6-libata-ata_piix-check-sidpr.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-rt2x00-configure_filter.patch
+Patch682: linux-2.6-wireless-pending-too.patch
+Patch683: linux-2.6-rt2x00-configure_filter.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
+
+Patch750: linux-2.6-md-fix-oops-in-rdev_attr_store.patch
+
+# SELinux patches, will go upstream in .26
+#
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -636,6 +647,8 @@ Patch1804: nouveau-drm-update.patch
 Patch1806: linux-2.6-drm-i915-modeset.patch
 Patch1807: linux-2.6-drm-radeon-fix-oops.patch
 Patch1808: linux-2.6-drm-radeon-fix-oops2.patch
+Patch1809: linux-2.6-drm-modesetting-oops-fixes.patch
+Patch1810: linux-2.6-drm-fix-master-perm.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -668,6 +681,8 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
+
+Patch3000: linux-2.6-25.3-queue.patch
 
 %endif
 
@@ -1047,7 +1062,7 @@ ApplyPatch linux-2.6-smp-boot-delay.patch
 #
 # PowerPC
 #
-###  UPSTREAM PATCHES FROM 2.6.25 (we think):
+###  UPSTREAM PATCHES FROM 2.6.26 (we think):
 # RTC class driver for ppc_md rtc functions
 ApplyPatch linux-2.6-ppc-rtc.patch
 ### NOT (YET) UPSTREAM:
@@ -1074,6 +1089,11 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
 # Don't show 'CHRP' in /proc/cpuinfo on Efika
 ApplyPatch linux-2.6-efika-not-chrp.patch
+
+#
+# SPARC64
+#
+ApplyPatch linux-2.6.25-sparc64-semctl.patch
 
 #
 # Exec shield
@@ -1110,6 +1130,12 @@ ApplyPatch linux-2.6-devmem.patch
 # /dev/crash driver for the crashdump analysis tool
 #
 ApplyPatch linux-2.6-crash-driver.patch
+
+#
+# PCI
+#
+# disable message signaled interrupts
+ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 
 #
 # SCSI Bits.
@@ -1151,11 +1177,16 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
+# wake up links that have been put to sleep by BIOS (#436099)
+ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+# fix broken drive detection on some macbooks (#439398)
+ApplyPatch linux-2.6-libata-ata_piix-check-sidpr.patch
 
 # wireless patches headed for 2.6.25
 #ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless-pending.patch
+ApplyPatch linux-2.6-wireless-pending-too.patch
 # rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
 ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
@@ -1167,6 +1198,9 @@ ApplyPatch linux-2.6-smarter-relatime.patch
 
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
+
+# fix oops in mdraid (#441765)
+ApplyPatch linux-2.6-md-fix-oops-in-rdev_attr_store.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1187,6 +1221,8 @@ ApplyPatch nouveau-drm-update.patch
 ApplyPatch linux-2.6-drm-i915-modeset.patch
 ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
 ApplyPatch linux-2.6-drm-radeon-fix-oops2.patch
+ApplyPatch linux-2.6-drm-modesetting-oops-fixes.patch
+ApplyPatch linux-2.6-drm-fix-master-perm.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
@@ -1205,6 +1241,9 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
+
+# 2.6.25.3 queue (minus one MD patch we already have)
+ApplyPatch linux-2.6-25.3-queue.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1799,11 +1838,74 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed May 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.2-5
+- Add the patches queued for 2.6.25.3
+
+* Wed May 07 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.2-3
+- Linux 2.6.25.2
+
+* Mon May  5 2008 Roland McGrath <roland@redhat.com> 2.6.25.1-3
+- Fix testing of %%fedora macro.
+
+* Fri May 02 2008 Jarod Wilson <jwilson@redhat.com> 2.6.25.1-1
+- Linux 2.6.25.1
+- Drop patches merged in 2.6.25.1:
+  * linux-2.6-netdev-tehuti-check-register-size.patch
+  * linux-2.6-netdev-tehuti-move-ioctl-perm-check-closer-to-function-start.patch
+  * linux-2.6-selinux-ssinitialized-bugon.patch
+  * bits of wireless patches
+
+* Thu May 01 2008 Dave Airlie <airlied@redhat.com> 2.6.25-14
+- fix radeon fast-user-switch oops + i915 breadcrumb oops
+
+* Wed Apr 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25-13
+- Fix drive detection on some Macbook models (#439398)
+- Fix oops in RAID code (#441765)
+
+* Tue Apr 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25-12
+- Fix CVE-2008-1675; patches taken from 2.6.25.1-rc1.
+
 * Mon Apr 28 2008 Alexandre Oliva <aoliva@redhat.com>
 - Provide kernel-headers from kernel-libre-headers.
 - Provide kernel-doc from kernel-libre-doc.
+
+* Fri Apr 25 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.25-11
+- add sparc64 semctl fix (David Miller)
+  (it will be in git shortly, and can be dropped on the next git merge)
+
+* Thu Apr 24 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.25-libre.10 Mon Apr 28 2008
 - Updated deblob and deblob-check.
 - Deblobbed linux-2.6.25, nouveau-drm.patch and nouveau-drm-update.patch.
+
+* Thu Apr 24 2008 John W. Linville <linville@redhat.com> 2.6.25-10
+- mac80211: Fix n-band association problem
+- net/mac80211/rx.c: fix off-by-one
+- mac80211: MAINTAINERS update
+- ssb: Fix all-ones boardflags
+- mac80211: update mesh EID values
+- b43: Workaround invalid bluetooth settings
+- b43: Fix HostFlags data types
+- b43: Add more btcoexist workarounds
+- mac80211: Fix race between ieee80211_rx_bss_put and lookup routines.
+- prism54: prism54_get_encode() test below 0 on unsigned index
+- wireless: rndis_wlan: modparam_workaround_interval is never below 0.
+- iwlwifi: Don't unlock priv->mutex if it isn't locked
+- mac80211: fix use before check of Qdisc length
+
+* Wed Apr 23 2008 Dave Airlie <airlied@redhat.com> 2.6.25-8
+- drm fixup oops in modesetting code and stable fixes for i915 code from upstream
+
+* Tue Apr 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25-7
+- Enable machine check exception handling on x86_64.
+
+* Tue Apr 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25-6
+- Force hard reset on sleeping SATA links during probe (#436099)
+
+* Tue Apr 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25-5
+- Disable PCI MSI interrupts by default again.
+
+* Mon Apr 21 2008 Eric Paris <eparis@redhat.com>
+- Don't BUG_ON() in selinux_clone_mnt_opts inside the installer because its init is wonky
 
 * Fri Apr 18 2008 Kyle McMartin <kmcmartin@redhat.com>
 - Enable CONFIG_RT_GROUP_SCHED (#442959)
@@ -1851,7 +1953,7 @@ fi
 - update to latest nouveau drm from git
 
 * Sun Apr 13 2008 David Woodhouse <dwmw2@redhat.com>
-- Remove 'CHRP' from /proc/cpuinfo on Efika, to fix platform detection 
+- Remove 'CHRP' from /proc/cpuinfo on Efika, to fix platform detection
   in anaconda
 
 * Sat Apr 12 2008 Jarod Wilson <jwilson@redhat.com>
@@ -2194,7 +2296,7 @@ fi
 * Mon Mar 24 2008 Dave Jones <davej@redhat.com>
 - Add man pages for kernel API to kernel-doc package.
 
-* Mon Mar 24 2008 Jeremy Katz <katzj@redhat.com> 
+* Mon Mar 24 2008 Jeremy Katz <katzj@redhat.com>
 - Update the kvm patch to a more final one
 
 * Mon Mar 24 2008 Jarod Wilson <jwilson@redhat.com>
