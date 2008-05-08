@@ -2,5 +2,6 @@ clog
 kernel-2.6.*.config
 temp-*
 kernel-2.6.24
-linux-libre-2.6.24.tar.bz2
-patch-libre-2.6.24.7.bz2
+libre-linux-2.6.24.xdelta.bz2
+libre-linux-2.6.24.tar.bz2
+patch-2.6.24.7.bz2

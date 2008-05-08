@@ -133,7 +133,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 
 # The kernel tarball/base version
 %define knfversion 2.6.%{base_sublevel}
-%define kversion libre-%{knfversion}
+%define kversion %{knfversion}
 
 %define make_target bzImage
 %define kernel_image x86
@@ -488,12 +488,12 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: linux-%{kversion}.tar.bz2
+Source0: libre-linux-%{kversion}.tar.bz2
 #Source1: xen-%{xen_hv_cset}.tar.bz2
 Source2: Config.mk
 
 # For documentation purposes only.
-Source3: deblob-%{knfversion}
+Source3: deblob
 Source4: deblob-check
 
 Source10: COPYING.modules
@@ -541,21 +541,25 @@ Source92: config-sparc64-smp
 
 # For a stable release kernel
 %if 0%{?stable_update}
-Patch00: patch-libre-2.6.%{base_sublevel}.%{stable_update}.bz2
+#define stablelibre libre-
+Patch00: %{?stablelibre}patch-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00: patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+#define rcrevlibre libre-
+Patch00: %{?rcrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-Patch01: patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+#define gitrevlibre libre-
+Patch01: %{?gitrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Patch00: patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
+#define gitrevlibre libre-
+Patch00: %{?gitrevlibre}patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -1055,19 +1059,19 @@ ApplyPatch()
 # Update to latest upstream.
 # released_kernel with stable_update available case
 %if 0%{?stable_update}
-ApplyPatch patch-libre-2.6.%{base_sublevel}.%{stable_update}.bz2
+ApplyPatch %{?stablelibre}patch-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-ApplyPatch patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+ApplyPatch %{?rcrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-ApplyPatch patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+ApplyPatch %{?gitrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-ApplyPatch patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
+ApplyPatch %{?gitrevlibre}patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -2049,6 +2053,10 @@ fi
 
 
 %changelog
+* Wed May  7 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.7-libre.92
+- Update deblobbing infrastructure to not remove GPLed files just
+because of non-Free firmwares, but rather just the firmwares.
+
 * Wed May 07 2008 Neil Horman <nhorman@redhat.com> 
 - Return kcore access policy to upstream behavior (bz 241362)
 
