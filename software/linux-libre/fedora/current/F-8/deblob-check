@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2008-03-29 $Rev: 3465 $
+# deblob-check version 2008-03-29 $Rev: 3470 $
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -194,6 +194,11 @@
 # - Insert your idea here. :-)
 
 # Yeah, lots of stuff to do.  Want to help?
+
+# This makes it much faster, and mostly immune to non-ASCII stuff, as
+# long as a 8-bit-safe sed is used.  Probably a safe assumption these
+# days.
+case ${LANG+set} in set) LANG=C; export LANG;; esac
 
 rm="rm -f"
 case $1 in
@@ -598,6 +603,10 @@ set_except () {
     initnc '	static const unsigned char invert5\[\] ='
     initnc 'static unsigned char alpa2target\[\] ='
     initnc 'static unsigned char target2alpa\[\] ='
+    oprepline '#define INIT_THREAD [{0},]\+[ 	]*\\[ 	]*[{0},]\+'
+    initnc 'static uint tas300\(1c\|4\)_\(master\|mixer\|treble\|bass\)_tab\[\]='
+    initnc 'static short dmasound_[au]law2dma16\[\] ='
+    initnc 'static const unsigned short DACVolTable\[101\] ='
 
     # new in 2.6.25
     accept "%canned_values = ([\\n]	\\([0-9]\\+ => \\[[ 	\\n]\\+\\(\\([0-9]\\+\\|'0x[0-9a-f]\\+'\\),[ 	\\n]*\\)*\\]\\(, \\|[\\n]\\)\\)*);"
@@ -637,7 +646,7 @@ set_except () {
 
     # too lax?
     initnc 'static yyconst flex_int\(16\|32\)_t yy_[^[]*\[[][0-9]*\] ='
-    initnc 'static const yytype_u\?int\(8\|16\) yy[^[]*\[\] ='
+    initnc 'static const \(yytype_u\?int\(8\|16\)\|unsigned \(short\( int\)\?\|char\)\) yy[^[]*\[\] ='
     initnc '\(\|	\)static \(const \|\)\(unsigned \(short\|char\)\|struct SiS_[^ ]*\) SiS[^[]*\(\[[] [*0-9]*\]\)\+ *='
 
     initnc 'static const a3d_Hrtf_t A3dHrirZeros = {'
@@ -841,13 +850,13 @@ set_except () {
     initnc 'static const unsigned char blue\[256\] ='
     initnc 'static const unsigned char chktab[hl]\[256\] ='
     initnc 'static const unsigned char comet_miireg2offset\[32\] ='
-    initnc 'static const unsigned char euc2sjisibm_g3upper_map\[\]\[2\] ='
+    initnc 'static \(const \)\?unsigned char euc2sjisibm_g3upper_map\[\]\[2\] ='
     initnc 'static const unsigned char green\[256\] ='
     initnc 'static const unsigned char hash_table_ops\[64\*4\] ='
     initnc 'static const unsigned char hid_keyboard\[256\] ='
     initnc 'static const unsigned char mts_direction\[256\/8\] ='
     initnc 'static const unsigned char red\[256\] ='
-    initnc 'static const unsigned char sjisibm2euc_map\[\]\[2\] ='
+    initnc 'static \(const \)\?unsigned char sjisibm2euc_map\[\]\[2\] ='
     initnc 'static const unsigned char vol_cvt_datt\[128\] ='
     initnc 'static const unsigned char wm_vol\[256\] ='
     initnc 'static const unsigned int MulIdx\[16\]\[16\] ='
@@ -944,6 +953,9 @@ set_except () {
     initnc 'static u8 w1_crc8_table\[\] ='
     initnc 'static u_char const data_sizes_32\[32\] ='
     initnc 'static u_long ident_map\[32\] ='
+    initnc 'static u_short alt_map\[NR_KEYS\] ='
+    initnc 'static u_short altgr_map\[NR_KEYS\] ='
+    initnc 'static u_short ctrl_alt_map\[NR_KEYS\] ='
     initnc 'static u_short ctrl_map\[NR_KEYS\] *='
     initnc 'static u_short shift_ctrl_map\[NR_KEYS\] ='
     initnc 'static u_short shift_map\[NR_KEYS\] *='
