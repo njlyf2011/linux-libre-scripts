@@ -965,6 +965,8 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
   mv linux-%{kversion} vanilla-%{vanillaversion}
   cd vanilla-%{vanillaversion}
 
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
+
 # Update vanilla to the latest upstream.
 # released_kernel with stable_update available case
 %if 0%{?stable_update}

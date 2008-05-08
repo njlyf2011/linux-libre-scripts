@@ -1064,6 +1064,8 @@ ApplyPatch()
 ### BRANCH APPLY ###
 %else
 
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
+
 # Update to latest upstream.
 # released_kernel with stable_update available case
 %if 0%{?stable_update}
