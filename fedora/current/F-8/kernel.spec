@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 346
-%define fedora_build %(R="$Revision: 1.436 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.438 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -33,7 +33,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -766,6 +766,8 @@ Patch3230: linux-x86-mtrr-5dca6a1bb014875a17289fdaae8c31e0a3641c99.patch
 
 # Patch up paranoid iret
 Patch3240: linux-2.6-paranoid-iret-crash-fix.patch
+# Return kcore access policy to upstream behavior (bz 241362)
+Patch3300: linux-2.6-upstream-kcore-access.patch
 
 %endif
 
@@ -1450,6 +1452,7 @@ ApplyPatch linux-x86-mtrr-5dca6a1bb014875a17289fdaae8c31e0a3641c99.patch
 
 # Patch up paranoid iret (#431314)
 ApplyPatch linux-2.6-paranoid-iret-crash-fix.patch
+ApplyPatch linux-2.6-upstream-kcore-access.patch
 
 # SELinux perf patches
 
@@ -2046,6 +2049,12 @@ fi
 
 
 %changelog
+* Wed May 07 2008 Neil Horman <nhorman@redhat.com> 
+- Return kcore access policy to upstream behavior (bz 241362)
+
+* Tue May 06 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.24.7-90
+- Linux 2.6.24.7
+
 * Fri May 02 2008 John W. Linville <linville@redhat.com> 2.6.24.5-90
 - iwlwifi: fix debug messages during scanning
 - iwlwifi: fix current channel is not scanned
