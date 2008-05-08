@@ -1,4 +1,4 @@
-Summary: The Linux kernel (the core of the Linux operating system)
+Summary: The Linux kernel (the core of the GNU/Linux operating system)
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
@@ -29,6 +29,20 @@ Summary: The Linux kernel (the core of the Linux operating system)
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
 %define base_sublevel 24
+
+# librev starts empty, then 1, etc, as the linux-libre tarball
+# changes.  This is only used to determine which tarball to use.
+#define librev
+
+# To be inserted between "patch" and "-2.6.".
+#define stablelibre -libre
+#define rcrevlibre -libre
+#define gitrevlibre -libre
+
+# libres (s for suffix) may be bumped for rebuilds in which patches
+# change but fedora_build doesn't.  Make sure it starts with a dot.
+# It is appended after dist.
+#define libres
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -117,7 +131,7 @@ Summary: The Linux kernel (the core of the Linux operating system)
 
 # pkg_release is what we'll fill in for the rpm Release: field
 %if 0%{?released_kernel}
-%define pkg_release %{fedora_build}%{?buildid}%{?dist}
+%define pkg_release %{fedora_build}%{?buildid}%{?dist}%{?libres}
 %else
 %if 0%{?rcrev}
 %define rctag .rc%rcrev
@@ -128,12 +142,11 @@ Summary: The Linux kernel (the core of the Linux operating system)
 %define rctag .rc0
 %endif
 %endif
-%define pkg_release 0.%{fedora_build}%{?rctag}%{?gittag}%{?buildid}%{?dist}
+%define pkg_release 0.%{fedora_build}%{?rctag}%{?gittag}%{?buildid}%{?dist}%{?libres}
 %endif
 
 # The kernel tarball/base version
-%define knfversion 2.6.%{base_sublevel}
-%define kversion %{knfversion}
+%define kversion 2.6.%{base_sublevel}
 
 %define make_target bzImage
 %define kernel_image x86
@@ -456,9 +469,6 @@ ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390x alpha
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
-%ifarch x86_64
-Obsoletes: kernel-libre-smp
-%endif
 
 
 #
@@ -488,13 +498,14 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: libre-linux-%{kversion}.tar.bz2
+Source0: linux-%{kversion}-libre%{?librev}.tar.bz2
 #Source1: xen-%{xen_hv_cset}.tar.bz2
 Source2: Config.mk
 
 # For documentation purposes only.
-Source3: deblob
-Source4: deblob-check
+Source3: deblob-main
+Source4: deblob-%{kversion}
+Source5: deblob-check
 
 Source10: COPYING.modules
 Source11: genkey
@@ -541,25 +552,21 @@ Source92: config-sparc64-smp
 
 # For a stable release kernel
 %if 0%{?stable_update}
-#define stablelibre libre-
-Patch00: %{?stablelibre}patch-2.6.%{base_sublevel}.%{stable_update}.bz2
+Patch00: patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-#define rcrevlibre libre-
-Patch00: %{?rcrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+Patch00: patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-#define gitrevlibre libre-
-Patch01: %{?gitrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+Patch01: patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-#define gitrevlibre libre-
-Patch00: %{?gitrevlibre}patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
+Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -779,7 +786,7 @@ BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root-%{_target_cpu}
 
 %description
 The kernel package contains the Linux kernel (vmlinuz), the core of any
-Linux operating system.  The kernel handles the basic functions
+GNU/Linux operating system.  The kernel handles the basic functions
 of the operating system: memory allocation, process allocation, device
 input and output, etc.
 
@@ -889,7 +896,8 @@ hyperthreading technology.
 The kernel-libre-smp package is the upstream kernel without the
 non-Free blobs it includes by default.
 
-Install the kernel-smp package if your machine uses two or more CPUs.
+Install the kernel-libre-smp package if your machine uses two or more
+CPUs.
 
 
 %define variant_summary The Linux kernel compiled for PAE capable machines
@@ -925,7 +933,7 @@ non-Free blobs it includes by default.
 %kernel_variant_package debug
 %description debug
 The kernel package contains the Linux kernel (vmlinuz), the core of any
-Linux operating system.  The kernel handles the basic functions
+GNU/Linux operating system.  The kernel handles the basic functions
 of the operating system:  memory allocation, process allocation, device
 input and output, etc.
 
@@ -1059,19 +1067,19 @@ ApplyPatch()
 # Update to latest upstream.
 # released_kernel with stable_update available case
 %if 0%{?stable_update}
-ApplyPatch %{?stablelibre}patch-2.6.%{base_sublevel}.%{stable_update}.bz2
+ApplyPatch patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
 
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-ApplyPatch %{?rcrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-ApplyPatch %{?gitrevlibre}patch-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-ApplyPatch %{?gitrevlibre}patch-2.6.%{base_sublevel}-git%{gitrev}.bz2
+ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -2053,9 +2061,8 @@ fi
 
 
 %changelog
-* Wed May  7 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.7-libre.92
-- Update deblobbing infrastructure to not remove GPLed files just
-because of non-Free firmwares, but rather just the firmwares.
+* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.7-libre.92
+- Rebase to linux-2.6.25-libre.tar.bz2.
 
 * Wed May 07 2008 Neil Horman <nhorman@redhat.com> 
 - Return kcore access policy to upstream behavior (bz 241362)
