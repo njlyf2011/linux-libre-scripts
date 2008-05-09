@@ -1,7 +1,6 @@
 D/configs////
 D/scripts////
 /linux-2.6.23.tar.bz2.sign/-1.1/dummy timestamp//
-/patch-2.6.23.17.bz2.sign/-1.1/dummy timestamp//
 /.cvsignore/1.646/Result of merge+Fri May  9 12:17:53 2008//Tkernel-2_6_23_17-85_fc7
 /COPYING.modules/1.5/Thu Sep  9 14:09:55 2004/-ko/Tkernel-2_6_23_17-85_fc7
 /Config.mk/1.4/Thu Aug  3 21:49:14 2006//Tkernel-2_6_23_17-85_fc7
@@ -151,3 +150,4 @@ D/scripts////
 /upstream/1.533/Result of merge+Fri May  9 12:17:53 2008//Tkernel-2_6_23_17-85_fc7
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_23_17-85_fc7
 /kernel-2.6.spec/1.3436/Fri May  9 12:22:03 2008//Tkernel-2_6_23_17-85_fc7
+/patch-2.6.23.17.bz2.sign/1.1/Thu Feb 28 20:23:37 2008//Tkernel-2_6_23_17-85_fc7
