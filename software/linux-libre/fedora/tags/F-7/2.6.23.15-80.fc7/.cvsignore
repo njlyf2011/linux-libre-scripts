@@ -1,0 +1,11 @@
+clog
+kernel-2.6.*.config
+temp-*
+kernel-2.6.23
+deblob-main
+deblob-2.6.23
+deblob-check
+linux-2.6.23-libre.xdelta
+linux-2.6.23-libre.tar.bz2.sign
+linux-2.6.23-libre.tar.bz2
+patch-2.6.23.15.bz2
