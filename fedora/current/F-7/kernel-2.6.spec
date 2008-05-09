@@ -20,7 +20,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 %define fedora_cvs_origin 3351
-%define fedora_build %(R="$Revision: 1.3431 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.3436 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -44,7 +44,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.x.y update to apply?
-%define stable_update 15
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -521,9 +521,6 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 
 %if !%{nopatches}
 
-# security CVE 2008-0600 - vmsplice fixage.
-Patch04: linux-2.6-cve-2008-0600.patch
-
 # Revert -stable pieces we get from elsewhere here
 Patch05: linux-2.6-upstream-reverts.patch
 
@@ -626,7 +623,7 @@ Patch667: linux-2.6-libata-correct-iordy-handling.patch
 Patch671: linux-2.6-libata-tape-max-sectors.patch
 Patch672: linux-2.6-libata-work-around-drq-1-err-1-for-tapes.patch
 Patch673: linux-2.6-libata-use-stuck-err-for-tapes.patch
-Patch674: linux-2.6-libata-scsi-allow-short-commands.patch
+# Patch674: linux-2.6-libata-scsi-allow-short-commands.patch
 Patch675: linux-2.6-libata-ahci-enable-ahci-mode-before-reset.patch
 Patch676: linux-2.6-libata-fix-bogus-lba48-disks.patch
 
@@ -662,15 +659,17 @@ Patch750: linux-2.6-firewire-git-update.patch
 Patch760: linux-2.6-acpi-button-send-initial-state.patch
 Patch761: linux-2.6-acpi-video-backlight-rationalize.patch
 Patch762: linux-2.6-acpi-video-brightness-bigger-buffer.patch
-Patch763: linux-2.6-acpi-video-fix-multiple-busses.patch
+# Patch763: linux-2.6-acpi-video-fix-multiple-busses.patch
 Patch764: linux-2.6-acpi-git-ec-init-fixes.patch
 Patch765: linux-2.6-acpi-dont-init-ec-early-with-no-ini.patch
-Patch766: linux-2.6-acpi_ec_early_init_fix.patch
+# Patch766: linux-2.6-acpi_ec_early_init_fix.patch
 
 Patch780: linux-2.6-usb-storage-initialize-huawei-e220-properly.patch
 Patch781: linux-2.6-usb-autosuspend-default-disable.patch
 Patch782: linux-2.6-usb-storage-always-set-the-allow_restart-flag.patch
 Patch783: linux-2.6-usb-huawei-fix-init-in-modem-mode.patch
+
+Patch790: linux-2.6-nfs-close-to-open.patch
 
 Patch800: linux-2.6-wakeups-hdaps.patch
 Patch801: linux-2.6-wakeups.patch
@@ -1161,8 +1160,6 @@ ApplyPatch linux-2.6-build-nonintconfig.patch
 # Revert -stable pieces we get from elsewhere here
 ApplyPatch linux-2.6-upstream-reverts.patch -R
 
-ApplyPatch linux-2.6-cve-2008-0600.patch
-
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace-tracehook.patch -F2
 ApplyPatch linux-2.6-utrace-tracehook-ia64.patch
@@ -1433,11 +1430,12 @@ ApplyPatch linux-2.6-acpi-button-send-initial-state.patch
 # fix multiple ACPI brightness problems (F8#427518)
 ApplyPatch linux-2.6-acpi-video-backlight-rationalize.patch
 ApplyPatch linux-2.6-acpi-video-brightness-bigger-buffer.patch
-ApplyPatch linux-2.6-acpi-video-fix-multiple-busses.patch
 # copy EC fixes from F8
 ApplyPatch linux-2.6-acpi-git-ec-init-fixes.patch
 ApplyPatch linux-2.6-acpi-dont-init-ec-early-with-no-ini.patch
-ApplyPatch linux-2.6-acpi_ec_early_init_fix.patch
+
+# NFSv4: Ensure that we wait for the CLOSE request to complete
+ApplyPatch linux-2.6-nfs-close-to-open.patch
 
 # Fix excessive wakeups
 # Make hdaps timer only tick when in use.
@@ -2386,13 +2384,25 @@ fi
 %endif
 
 %changelog
-* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.23.15-libre.80
+* Thu Mar 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-85
+- Revert ACPI EC init patch that has been reverted in F8.
+
+* Wed Mar 26 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-84
+- Revert ACPI video change that was reverted in 2.6.25.
+
+* Wed Mar 26 2008 Dave Jones <davej@redhat.com>
+- NFSv4: Ensure that we wait for the CLOSE request to complete (#439095)
+
+* Thu Feb 28 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.23.17-81
+- Linux 2.6.23.17
+
+* Sun Feb 10 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.23.15-libre.80 Thu May  8 2008
 - Deblob linux tarball.
 - Provide kernel-headers from kernel-libre-headers.
 - Provide kernel-doc from kernel-libre-doc.
 
 * Sun Feb 10 2008 Dave Airlie <airlied@redhat.com> 2.6.23.15-80
-- CVE-2008-0600 - remote root vulnerability in vmsplice
+- CVE-2008-0600 - local root vulnerability in vmsplice
 
 * Fri Feb 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.15-79
 - Linux 2.6.23.15
