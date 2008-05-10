@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.628 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.630 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -632,7 +632,6 @@ Patch672: linux-2.6-libata-ata_piix-check-sidpr.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-wireless-pending-too.patch
 Patch683: linux-2.6-rt2x00-configure_filter.patch
 Patch690: linux-2.6-at76.patch
 
@@ -640,7 +639,8 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch750: linux-2.6-md-fix-oops-in-rdev_attr_store.patch
 
-# SELinux patches, will go upstream in .26
+# SELinux patches, will go upstream in .27
+Patch800: linux-2.6-selinux-deffered-context-mapping.patch
 #
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1192,11 +1192,13 @@ ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 # fix broken drive detection on some macbooks (#439398)
 ApplyPatch linux-2.6-libata-ata_piix-check-sidpr.patch
 
-# wireless patches headed for 2.6.25
-#ApplyPatch linux-2.6-wireless.patch
+# Allow selinux to defer validation of contexts, aka: rpm can write illegal labels
+ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
+
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless-pending.patch
-ApplyPatch linux-2.6-wireless-pending-too.patch
+ApplyPatch linux-2.6-wireless.patch
+# wireless patches headed for 2.6.27
+#ApplyPatch linux-2.6-wireless-pending.patch
 # rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
 ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
@@ -1848,6 +1850,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri May 09 2008 John W. Linville <linville@redhat.com> 2.6.25.2-7
+- Regroup wireless patches as prep for 2.6.26 and F10 cycles
+
+* Fri May 09 2008 Eric Paris <eparis@redhat.com>
+- support deffered context validation in selinux.  aka rpm can lay down illegal labels. (won't upstream until .27 opens)
+
 * Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.2-libre.5
 - Rebase to linux-2.6.25-libre.tar.bz2.
 
