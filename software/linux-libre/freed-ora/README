@@ -14,14 +14,13 @@ src/: Cleaned-up tarballs and patches from kernel.org as required for
 kernel builds for Fedora.
 
 
-In <URL:http://www.fsfla.org/svn/fsfla/software/linux-libre/fedora>,
+In
+<URL:http://www.fsfla.org/svn/fsfla/software/linux-libre/freed-ora>,
 you'll find:
 
 README: This file, possibly updated.
 current/: CVS trees that track Fedora kernel CVS trees.
 tags/: History of kernel-libre builds for Fedora.
-
-WARNING: fedora will be renamed to freed-ora in the SVN repository
 
 In the Subversion repository at fsfla.org, you'll only find files from
 the Fedora CVS tree that are modified in order to make the kernel 100%

@@ -30,14 +30,11 @@ find:
 scripts/deblob-main: A script that cleans up a linux tarball.
 scripts/deblob-<kver>: Heavily modified version of Jeff Moe's script.
 scripts/deblob-check: A script that locates and cleans up blobs.
-fedora/: see fedora/README.
-
-WARNING: fedora will be renamed to freed-ora in the SVN repository at
-some point.  This will be announced in advance at
-linux-libre@fsfla.org.
+freed-ora/: see freed-ora/README.
 
 
-In http://www.fsfla.org/~lxoliva/snapshots/linux-libre, you'll find:
+In <URL:http://www.fsfla.org/~lxoliva/snapshots/linux-libre>, you'll
+find:
 
 README: This file, possibly out of date.
 releases/: deblobbed sources.  Each sub-directory contains files
