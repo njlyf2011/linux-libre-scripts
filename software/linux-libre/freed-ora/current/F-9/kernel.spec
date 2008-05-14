@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.633 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.637 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 0
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -573,6 +573,8 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # stable release candidate
 # Patch03: patch-2.6.24.1-rc1.bz2
 
+Patch10: linux-2.6-upstream-reverts.patch
+
 # we always need nonintconfig, even for -vanilla kernels
 Patch06: linux-2.6-build-nonintconfig.patch
 
@@ -618,6 +620,7 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
+Patch415: linux-2.6-cifs-fix-unc-path-prefix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -637,11 +640,6 @@ Patch683: linux-2.6-rt2x00-configure_filter.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
-
-Patch750: linux-2.6-md-fix-oops-in-rdev_attr_store.patch
-
-# SELinux patches, will go upstream in .26
-Patch800: linux-2.6-selinux-ssinitialized-bugon.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -665,9 +663,6 @@ Patch2010: linux-2.6-sata-eeepc-faster.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
-# CVE-2008-1675
-Patch2021: linux-2.6-netdev-tehuti-check-register-size.patch
-Patch2022: linux-2.6-netdev-tehuti-move-ioctl-perm-check-closer-to-function-start.patch
 
 # ext4 patches
 Patch2100: linux-2.6-ext4-stable-queue.patch
@@ -1040,6 +1035,8 @@ make -f %{SOURCE20} VERSION=%{version} configs
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+ApplyPatch linux-2.6-upstream-reverts.patch -R
+
 #
 # misc small stuff to make things compile
 #
@@ -1161,6 +1158,9 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
 
 # Filesystem patches.
+# cifs
+ApplyPatch linux-2.6-cifs-fix-unc-path-prefix.patch
+
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
 
@@ -1210,9 +1210,6 @@ ApplyPatch linux-2.6-smarter-relatime.patch
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
-# fix oops in mdraid (#441765)
-ApplyPatch linux-2.6-md-fix-oops-in-rdev_attr_store.patch
-
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
@@ -1224,8 +1221,6 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
-ApplyPatch linux-2.6-netdev-tehuti-check-register-size.patch
-ApplyPatch linux-2.6-netdev-tehuti-move-ioctl-perm-check-closer-to-function-start.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-drm-git-mm.patch
@@ -1254,9 +1249,6 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
-
-# I better appear in .26 and I was sent to stable....
-ApplyPatch linux-2.6-selinux-ssinitialized-bugon.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1851,7 +1843,22 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.14.1
+* Mon May 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.3-18
+- CIFS: fix UNC path prefix to have the correct slash (#443681)
+
+* Mon May 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.3-17
+- Linux 2.6.25.3
+  Drop patches merged in 2.6.25.3:
+   linux-2.6.25-sparc64-mmap_check_fix.patch
+   linux-2.6-md-fix-oops-in-rdev_attr_store.patch
+
+* Wed May 07 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.25.2-16
+- Fix sparc64 kernel crash in mmap_check (Dave Miller)
+
+* Wed May 07 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.2-15
+- Linux 2.6.25.2
+
+* Wed May  7 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.14.1 Thu May  8 2008
 - Rebase to linux-2.6.25-libre.tar.bz2.
 
 * Thu May 01 2008 Dave Airlie <airlied@redhat.com> 2.6.25-14
