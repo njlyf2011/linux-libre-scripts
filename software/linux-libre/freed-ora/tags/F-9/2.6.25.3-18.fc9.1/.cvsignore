@@ -1,0 +1,12 @@
+clog
+GNUmakefile
+kernel-2.6.*.config
+temp-*
+kernel-2.6.25
+deblob-main
+deblob-2.6.25
+deblob-check
+linux-2.6.25-libre.xdelta
+linux-2.6.25-libre.tar.bz2.sign
+linux-2.6.25-libre.tar.bz2
+patch-2.6.25.3.bz2
