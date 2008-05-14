@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.630 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.631 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -637,8 +637,6 @@ Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
-Patch750: linux-2.6-md-fix-oops-in-rdev_attr_store.patch
-
 # SELinux patches, will go upstream in .27
 Patch800: linux-2.6-selinux-deffered-context-mapping.patch
 #
@@ -688,8 +686,6 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
-
-Patch3000: linux-2.6-25.3-queue.patch
 
 %endif
 
@@ -1211,9 +1207,6 @@ ApplyPatch linux-2.6-smarter-relatime.patch
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
-# fix oops in mdraid (#441765)
-ApplyPatch linux-2.6-md-fix-oops-in-rdev_attr_store.patch
-
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
@@ -1253,9 +1246,6 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
-
-# 2.6.25.3 queue (minus one MD patch we already have)
-ApplyPatch linux-2.6-25.3-queue.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1850,6 +1840,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon May 12 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.25.3
+
 * Fri May 09 2008 John W. Linville <linville@redhat.com> 2.6.25.2-7
 - Regroup wireless patches as prep for 2.6.26 and F10 cycles
 
