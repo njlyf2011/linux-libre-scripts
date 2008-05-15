@@ -20,7 +20,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 %define fedora_cvs_origin 3351
-%define fedora_build %(R="$Revision: 1.3436 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.3438 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -516,8 +516,10 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 
 %endif
 
-# -stable RC
-#Patch02: patch-2.6.23.9-rc1.bz2
+# these apply even to -vanilla kernels
+Patch02: linux-2.6-build-nonintconfig.patch
+# CVE-2008-1669
+Patch03: linux-2.6.25.2-incremental.patch
 
 %if !%{nopatches}
 
@@ -552,7 +554,6 @@ Patch120: linux-2.6-ppc32-ucmpdi2.patch
 Patch130: linux-2.6-ibmvscsi-schizo.patch
 Patch140: linux-2.6-pmac-zilog.patch
 
-Patch150: linux-2.6-build-nonintconfig.patch
 Patch160: linux-2.6-execshield.patch
 Patch170: linux-2.6-modsign-mpilib.patch
 Patch180: linux-2.6-modsign-crypto.patch
@@ -687,6 +688,9 @@ Patch1320: linux-2.6-ps3-storage-alias.patch
 Patch1500: linux-2.6-pmtrace-time-fix.patch
 
 Patch1520: linux-2.6-dcdbas-autoload.patch
+
+# Patch up paranoid iret (#431314)
+Patch1530: linux-2.6-paranoid-iret-crash-fix.patch
 
 # Patch2300: linux-2.6-freezer-fix-apm-emulation-breakage.patch
 
@@ -1155,6 +1159,10 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+# fixes applied to -vanilla
+# CVE-2008-1669
+ApplyPatch linux-2.6.25.2-incremental.patch
+
 %if !%{nopatches}
 
 # Revert -stable pieces we get from elsewhere here
@@ -1453,6 +1461,9 @@ ApplyPatch linux-2.6-pmtrace-time-fix.patch
 
 # autload the Dell dcdbas driver via DMI
 ApplyPatch linux-2.6-dcdbas-autoload.patch
+
+# Patch up paranoid iret (#431314)
+ApplyPatch linux-2.6-paranoid-iret-crash-fix.patch
 
 #
 # misc small stuff to make things compile
@@ -2384,6 +2395,12 @@ fi
 %endif
 
 %changelog
+* Wed May 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-87
+- Security fix: CVE-2008-1669 (taken from 2.6.25.2)
+
+* Mon Mar 31 2008 Jarod Wilson <jwilson@redhat.com> 2.6.23.17-86
+- Patch up paranoid iret cs reg corruption crasher on x86_64 (F8 #431314)
+
 * Thu Mar 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-85
 - Revert ACPI EC init patch that has been reverted in F8.
 
