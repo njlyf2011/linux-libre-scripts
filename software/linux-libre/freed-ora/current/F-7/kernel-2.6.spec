@@ -20,7 +20,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 %define fedora_cvs_origin 3351
-%define fedora_build %(R="$Revision: 1.3438 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.3439 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2395,6 +2395,9 @@ fi
 %endif
 
 %changelog
+* Wed May 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-88
+- Increment version.
+
 * Wed May 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-87
 - Security fix: CVE-2008-1669 (taken from 2.6.25.2)
 
