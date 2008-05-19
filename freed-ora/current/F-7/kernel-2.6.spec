@@ -29,7 +29,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -39,7 +39,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -2395,6 +2395,9 @@ fi
 %endif
 
 %changelog
+* Mon May 19 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.23.17-libre.88.fc7.1
+- Rebase to libre1.
+
 * Wed May 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-88
 - Increment version.
 
