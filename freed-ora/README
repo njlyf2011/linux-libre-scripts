@@ -1,7 +1,7 @@
 This is a project to release 100% Free Software kernel binaries for
 Fedora.
 
-In http://www.fsfla.org/~lxoliva/snapshots/linux-libre/freed-ora
+In <URL:http://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/>
 you'll find yum repositories with 100% Free kernel sources and
 binaries:
 
@@ -12,6 +12,15 @@ F-$releasever-detesting/: Free kernels based on Fedora CVS.
 devel/: Free builds based on Fedora development (rawhide) tree.
 src/: Cleaned-up tarballs and patches from kernel.org as required for
 kernel builds for Fedora.
+
+The above is mirrored at the following URLs:
+
+http://www.lsd.ic.unicamp.br/~oliva/fsfla/linux-libre/freed-ora/
+http://www.blagblagblag.org/pub/mirrors/lxoliva/fsfla/linux-libre/freed-ora/
+ftp://ftp.blagblagblag.org/pub/mirrors/lxoliva/fsfla/linux-libre/freed-ora/
+rsync://rsync.blagblagblag.org/mirrors/lxoliva/fsfla/linux-libre/freed-ora/
+
+Thanks BLAG for offering the build machines!
 
 
 In
