@@ -3,7 +3,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 1
+%define released_kernel 0
 
 # Versions of various parts
 
@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.631 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.636 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -30,11 +30,11 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-#define rcrevlibre -libre
+%define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -57,9 +57,9 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 2
 # The git snapshot level
-%define gitrev 0
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -117,7 +117,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -578,7 +578,7 @@ Patch06: linux-2.6-build-nonintconfig.patch
 
 # we also need compile fixes for -vanilla
 Patch07: linux-2.6-compile-fixes.patch
-Patch08: linux-2.6-compile-fix-gcc-43.patch
+#Patch08: linux-2.6-compile-fix-gcc-43.patch
 
 %if !%{nopatches}
 
@@ -589,7 +589,6 @@ Patch21: linux-2.6-utrace.patch
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
-Patch80: linux-2.6-smp-boot-delay.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -597,13 +596,9 @@ Patch141: linux-2.6-ps3-storage-alias.patch
 Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
-Patch145: linux-2.6-windfarm-pm121.patch
-Patch146: linux-2.6-windfarm-pm121-fix.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch148: linux-2.6-powerpc-zImage-32MiB.patch
 Patch149: linux-2.6-efika-not-chrp.patch
-
-Patch150: linux-2.6.25-sparc64-semctl.patch
 
 Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
@@ -612,7 +607,6 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
-Patch350: linux-2.6-devmem.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
@@ -628,17 +622,17 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
-Patch672: linux-2.6-libata-ata_piix-check-sidpr.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch683: linux-2.6-rt2x00-configure_filter.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 # SELinux patches, will go upstream in .27
 Patch800: linux-2.6-selinux-deffered-context-mapping.patch
+Patch801: linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
+Patch802: linux-2.6-selinux-generic-ioctl.patch
 #
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
@@ -663,13 +657,6 @@ Patch2010: linux-2.6-sata-eeepc-faster.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
-
-# ext4 patches
-Patch2100: linux-2.6-ext4-stable-queue.patch
-
-# linux1394 git patches
-Patch2200: linux-2.6-firewire-git-update.patch
-Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1044,7 +1031,7 @@ ApplyPatch linux-2.6-compile-fixes.patch
 fi
 
 # build with gcc43
-ApplyPatch linux-2.6-compile-fix-gcc-43.patch
+#ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 %if !%{nopatches}
 
@@ -1052,7 +1039,7 @@ ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
 %ifnarch ia64
-ApplyPatch linux-2.6-utrace.patch
+#ApplyPatch linux-2.6-utrace.patch
 %endif
 
 # enable sysrq-c on all kernels, not only kexec
@@ -1062,44 +1049,37 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # Compile 686 kernels tuned for Pentium4.
 ApplyPatch linux-2.6-x86-tune-generic.patch
-# Delay longer during boot on x86 while waiting for secondary processors
-ApplyPatch linux-2.6-smp-boot-delay.patch
 
 #
 # PowerPC
 #
-###  UPSTREAM PATCHES FROM 2.6.26 (we think):
 # RTC class driver for ppc_md rtc functions
 ApplyPatch linux-2.6-ppc-rtc.patch
 ### NOT (YET) UPSTREAM:
 # The EHCI ISO patch isn't yet upstream but is needed to fix reboot
-ApplyPatch linux-2.6-ps3-ehci-iso.patch
+#ApplyPatch linux-2.6-ps3-ehci-iso.patch
 # Fixes some wireless optical mice
-ApplyPatch linux-2.6-ms-wireless-receiver.patch
+#ApplyPatch linux-2.6-ms-wireless-receiver.patch
 # The storage alias patch is Fedora-local, and allows the old 'ps3_storage'
 # module name to work on upgrades. Otherwise, I believe mkinitrd will fail
 # to pull the module in,
 ApplyPatch linux-2.6-ps3-storage-alias.patch
 # Support booting from Sony's original released 2.6.16-based kboot
-ApplyPatch linux-2.6-ps3-legacy-bootloader-hack.patch
+#ApplyPatch linux-2.6-ps3-legacy-bootloader-hack.patch
 # Alleviate G5 thermal shutdown problems
 ApplyPatch linux-2.6-g5-therm-shutdown.patch
 # Provide modalias in sysfs for vio devices
 ApplyPatch linux-2.6-vio-modalias.patch
-# Fan support on iMac G5 iSight
-ApplyPatch linux-2.6-windfarm-pm121.patch
-ApplyPatch linux-2.6-windfarm-pm121-fix.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # Link zImage at 32MiB (for POWER machines, Efika)
 ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
 # Don't show 'CHRP' in /proc/cpuinfo on Efika
-ApplyPatch linux-2.6-efika-not-chrp.patch
+#ApplyPatch linux-2.6-efika-not-chrp.patch
 
 #
 # SPARC64
 #
-ApplyPatch linux-2.6.25-sparc64-semctl.patch
 
 #
 # Exec shield
@@ -1126,11 +1106,6 @@ ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-no-quiet.patch
 %endif
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
-
-#
-# Make /dev/mem a need-to-know function
-#
-ApplyPatch linux-2.6-devmem.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1185,24 +1160,22 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # wake up links that have been put to sleep by BIOS (#436099)
 ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
-# fix broken drive detection on some macbooks (#439398)
-ApplyPatch linux-2.6-libata-ata_piix-check-sidpr.patch
 
 # Allow selinux to defer validation of contexts, aka: rpm can write illegal labels
-ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
+#ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
+#ApplyPatch linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
+#ApplyPatch linux-2.6-selinux-generic-ioctl.patch
 
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 #ApplyPatch linux-2.6-wireless-pending.patch
-# rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
-ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
 # Add misc wireless bits from upstream wireless tree
-ApplyPatch linux-2.6-at76.patch
+#ApplyPatch linux-2.6-at76.patch
 
 # implement smarter atime updates support.
-ApplyPatch linux-2.6-smarter-relatime.patch
+#ApplyPatch linux-2.6-smarter-relatime.patch
 
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
@@ -1211,41 +1184,40 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
-ApplyPatch linux-2.6-lirc.patch
+#ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
-ApplyPatch linux-2.6-netdev-atl2.patch
+#ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch linux-2.6-drm-git-mm.patch
-ApplyPatch nouveau-drm.patch
-ApplyPatch nouveau-drm-update.patch
-ApplyPatch linux-2.6-drm-i915-modeset.patch
-ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
-ApplyPatch linux-2.6-drm-radeon-fix-oops2.patch
-ApplyPatch linux-2.6-drm-modesetting-oops-fixes.patch
-ApplyPatch linux-2.6-drm-fix-master-perm.patch
+#ApplyPatch linux-2.6-drm-git-mm.patch
+#ApplyPatch nouveau-drm.patch
+#ApplyPatch nouveau-drm-update.patch
+#ApplyPatch linux-2.6-drm-i915-modeset.patch
+#ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
+#ApplyPatch linux-2.6-drm-radeon-fix-oops2.patch
+#ApplyPatch linux-2.6-drm-modesetting-oops-fixes.patch
+#ApplyPatch linux-2.6-drm-fix-master-perm.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
 
 # linux1394 git patches
-ApplyPatch linux-2.6-firewire-git-update.patch
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-firewire-git-pending.patch
-fi
+#C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
+#if [ "$C" -gt 10 ]; then
+#ApplyPatch linux-2.6-firewire-git-pending.patch
+#fi
 
 # usb video
-ApplyPatch linux-2.6-uvcvideo.patch
+#ApplyPatch linux-2.6-uvcvideo.patch
 
 ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
-ApplyPatch linux-2.6-merge-efifb-imacfb.patch
+#ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1840,6 +1812,23 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-0.13.c2.git5.fc10
+- Rebase to libre1.
+- Deblob patch-2.6.26-rc2.
+
+* Fri May 16 2008 Dave Jones <davej@redhat.com>
+- Enable CONFIG_SND_SERIAL_U16550
+
+* Fri May 16 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc2-git5
+
+* Thu May 15 2008 Eric Sandeen <esandeen@redhat.com>
+- ext3/4: fix uninitialized bs in ext3/4_xattr_set_handle()
+
+* Wed May 14 2008 Eric Paris <eparis@redhat.com>
+- fix may sleep in allocation for previous deffered context patch
+- replace selinux specific knowledge of ioctls with a generic ioctl implementation
+
 * Mon May 12 2008 Kyle McMartin <kmcmartin@redhat.com>
 - Linux 2.6.25.3
 
