@@ -1812,7 +1812,7 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-0.13.c2.git5.fc10
+* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.13.c2.git5.fc10
 - Rebase to libre1.
 - Deblob patch-2.6.26-rc2.
 
