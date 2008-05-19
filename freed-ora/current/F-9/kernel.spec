@@ -1843,7 +1843,7 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-18.fc9.2
+* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.18.fc9.2
 - Rebase to libre1.
 
 * Mon May 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.3-18
