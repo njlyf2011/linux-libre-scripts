@@ -1,11 +1,9 @@
+deblob-main
+deblob-2.6.24
+deblob-check
 clog
 kernel-2.6.*.config
 temp-*
 kernel-2.6.24
-deblob-main
-deblob-2.6.24
-deblob-check
-linux-2.6.24-libre.xdelta
-linux-2.6.24-libre.tar.bz2.sign
-linux-2.6.24-libre.tar.bz2
+linux-2.6.24-libre1.*
 patch-2.6.24.7.bz2
