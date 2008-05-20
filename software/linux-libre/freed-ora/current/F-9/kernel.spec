@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.637 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.642 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -40,12 +40,12 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .2
+#define libres
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -605,8 +605,6 @@ Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch148: linux-2.6-powerpc-zImage-32MiB.patch
 Patch149: linux-2.6-efika-not-chrp.patch
 
-Patch150: linux-2.6.25-sparc64-semctl.patch
-
 Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
@@ -620,9 +618,13 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
+Patch411: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
+Patch411: linux-2.6-alsa-hda-codec-add-AD1884A.patch
+Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 Patch415: linux-2.6-cifs-fix-unc-path-prefix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch431: linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -631,7 +633,6 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
-Patch672: linux-2.6-libata-ata_piix-check-sidpr.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -664,8 +665,9 @@ Patch2010: linux-2.6-sata-eeepc-faster.patch
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
 
-# ext4 patches
-Patch2100: linux-2.6-ext4-stable-queue.patch
+# filesystem patches
+Patch2100: linux-2.6-ext34-xattr-fix.patch
+Patch2101: linux-2.6-xfs-small-buffer-reads.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1101,7 +1103,6 @@ ApplyPatch linux-2.6-efika-not-chrp.patch
 #
 # SPARC64
 #
-ApplyPatch linux-2.6.25-sparc64-semctl.patch
 
 #
 # Exec shield
@@ -1156,6 +1157,9 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 # ALSA
 #
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
+ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
+ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
+ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 
 # Filesystem patches.
 # cifs
@@ -1167,6 +1171,8 @@ ApplyPatch linux-2.6-squashfs.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
+# fix firewall scripts using iprange (#446827)
+ApplyPatch linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1190,8 +1196,6 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # wake up links that have been put to sleep by BIOS (#436099)
 ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
-# fix broken drive detection on some macbooks (#439398)
-ApplyPatch linux-2.6-libata-ata_piix-check-sidpr.patch
 
 # wireless patches headed for 2.6.25
 #ApplyPatch linux-2.6-wireless.patch
@@ -1221,6 +1225,10 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
+
+# filesystem patches
+ApplyPatch linux-2.6-ext34-xattr-fix.patch
+ApplyPatch linux-2.6-xfs-small-buffer-reads.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-drm-git-mm.patch
@@ -1843,8 +1851,27 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.18.fc9.2
+* Sun May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.23.fc9
 - Rebase to libre1.
+
+* Fri May 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-23
+- ALSA: add support for AD1883/1884A/1984A/1984B codecs and Thinkpad X300 (#445954)
+
+* Fri May 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-22
+- iptables: make firewall scripts using iprange work again (#446827)
+- Enable the snd-serial-u16550 audio driver (#446783)
+
+* Fri May 16 2008 Eric Sandeen <esandeen@redhat.com> 2.6.25.4-21
+- xfs: Fix memory corruption with small buffer reads (kernel.org #10421)
+
+* Thu May 15 2008 Eric Sandeen <esandeen@redhat.com> 2.6.25.4-20
+- ext3/4: fix uninitialized bs in ext3/4_xattr_set_handle()
+
+* Thu May 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-19
+- Linux 2.6.25.4
+   Dropped patches:
+   - linux-2.6.25-sparc64-semctl.patch
+   - linux-2.6-libata-ata_piix-check-sidpr.patch
 
 * Mon May 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.3-18
 - CIFS: fix UNC path prefix to have the correct slash (#443681)
