@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.636 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.640 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 2
+%define rcrev 3
 # The git snapshot level
-%define gitrev 5
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -633,6 +633,7 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 Patch800: linux-2.6-selinux-deffered-context-mapping.patch
 Patch801: linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
 Patch802: linux-2.6-selinux-generic-ioctl.patch
+Patch803: linux-2.6-selinux-new-proc-checks.patch
 #
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1162,9 +1163,10 @@ ApplyPatch linux-2.6-ata-quirk.patch
 ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 # Allow selinux to defer validation of contexts, aka: rpm can write illegal labels
-#ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
-#ApplyPatch linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
-#ApplyPatch linux-2.6-selinux-generic-ioctl.patch
+ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
+ApplyPatch linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
+ApplyPatch linux-2.6-selinux-generic-ioctl.patch
+ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 
 # wireless patches headed for 2.6.26
 #ApplyPatch linux-2.6-wireless.patch
@@ -1812,7 +1814,25 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Sun May 18 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.13.c2.git5.fc10
+* Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.17.rc3.fc10
+- Deblobb 2.6.26-rc3.
+
+* Sun May 18 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc3
+
+* Sat May 17 2008 Eric Paris <eparis@redhat.com>
+- SELinux: enable deffered context validation
+- SELinux: don't sleep while holding locks in above patch
+- SELinux: replace ioctl specific knowlege in the selinux code and follow generic permissions
+- SELinux: not all reading in /proc needs ptrace, so make those things just use 'read' perms
+
+* Sat May 17 2008 Dave Jones <davej@redhat.com>
+- Enable PAGEALLOC debugging for a while. (Some things might get slow).
+
+* Sat May 17 2008 Dave Jones <davej@redhat.com>
+- Disable CONFIG_SND_PCSP (#447039)
+
+* Sat May 17 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.13.rc2.git5.fc10 Sun May 18 2008
 - Rebase to libre1.
 - Deblob patch-2.6.26-rc2.
 
