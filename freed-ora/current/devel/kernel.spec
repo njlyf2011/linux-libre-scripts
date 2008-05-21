@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.640 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.642 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1169,12 +1169,12 @@ ApplyPatch linux-2.6-selinux-generic-ioctl.patch
 ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 
 # wireless patches headed for 2.6.26
-#ApplyPatch linux-2.6-wireless.patch
+ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
-#ApplyPatch linux-2.6-wireless-pending.patch
+ApplyPatch linux-2.6-wireless-pending.patch
 
 # Add misc wireless bits from upstream wireless tree
-#ApplyPatch linux-2.6-at76.patch
+ApplyPatch linux-2.6-at76.patch
 
 # implement smarter atime updates support.
 #ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1814,6 +1814,141 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon May 19 2008 John W. Linville <linville@redhat.com>
+- mac80211 : Association with 11n hidden ssid ap.
+- libertas: fix command timeout after firmware failure
+- mac80211: Add RTNL version of ieee80211_iterate_active_interfaces
+- wireless: Create 'device' symlink in sysfs
+- hostap: fix "registers" registration in procfs
+- wireless, airo: waitbusy() won't delay
+- iwlwifi : Set monitor mode for 4965
+- iwlwifi : Set monitor mode for 3945
+- make sta_rx_agg_session_timer_expired() static
+- remove ieee80211_tx_frame()
+- remove ieee80211_wx_{get,set}_auth()
+- wireless: fix "iwlwifi: unify init driver flow"
+- iwl3945: do not delay hardware scan if it is a direct scan
+- ath5k: Fix loop variable initializations
+- zd1211rw: initial IBSS support
+- mac80211: use hardware flags for signal/noise units
+- mac80211: make rx radiotap header more flexible
+- iwlwifi: HW dependent run time calibration
+- iwlwifi: HW crypto acceleration fixes
+- iwlwifi: remove uneeded callback
+- iwlwifi: CT-Kill configuration fix
+- iwlwifi: HT IE in probe request clean up
+- iwlwifi: clean up register names and defines
+- iwlwifi: move Flow Handlers define to iwl-fh.h
+- iwlwifi: move verify_ucode functions to iwl-core
+- iwlwifi: move hw_rx_handler_setup to iwl-4965.c
+- iwlwifi-5000: update the CT-Kill value for 5000 series
+- iwlwifi-5000: add run time calibrations for 5000
+- iwlwifi-5000: update the byte count in SCD
+- iwlwifi: move iwl4965_init_alive_start to iwl-4965.c
+- wireless: Add missing locking to cfg80211_dev_rename
+- mac80211: correct skb allocation
+- iwlwifi: move per driverdebug_level to per device
+- iwlwifi: move debug_level to sysfs/bus/pci/devices
+- iwlwifi: update levels of debug prints
+- iwlwifi: adding parameter of fw_restart
+- iwlwifi: remove support for Narrow Channel (10Mhz)
+- iwlwifi: HT antenna/chains overhaul
+- iwlwifi: TLC modifications
+- iwlwifi: rate scale module cleanups
+- iwlwifi: rate scale restructure toggle_antenna functions
+- iwlwifi: rs fix wrong parenthesizing in rs_get_lower_rate function
+- iwlwifi: rate sacaling fixes
+- iwlwifi: more RS improvements
+- mac80211: remove unnecessary byteshifts in frame control testing
+- wireless: use get/put_unaligned_* helpers
+- mac80211: tkip.c use kernel-provided infrastructure
+- b43: replace limit_value macro with clamp_val
+- b43legacy: replace limit_value macro with clamp_val
+- b43: use the bitrev helpers rather than rolling a private one
+- libertas: debug output tweaks for lbs_thread
+- libertas: make some functions void
+- libertas: allow removal of card at any time
+- libertas: remove lbs_get_data_rate()
+- b43: nphy.c remove duplicated include
+- mac80211: Replace ieee80211_tx_control->key_idx with ieee80211_key_conf
+- mac80211: Add IEEE80211_KEY_FLAG_PAIRWISE
+- rt2x00: Support hardware RTS and CTS-to-self frames
+- rt2x00: Remove DRIVER_SUPPORT_MIXED_INTERFACES
+- rt2x00: Use rt2x00 queue numbering
+- rt2x00: Add helper macros
+- rt2x00: Fix kernel-doc
+- rt2x00: Release rt2x00 2.1.5
+- rt2x00: Clarify supported chipsets in Kconfig
+- mac80211: Set IEEE80211_TXPD_REQ_TX_STATUS for all TX frames
+- mac80211: a few code cleanups
+- mac80211: clean up get_tx_stats callback
+- mac80211: remove queue info from ieee80211_tx_status
+- mac80211: QoS related cleanups
+- mac80211: fix wme code
+- mac80211: require four hardware queues for QoS/HT
+- mac80211: proper STA info locking
+- mac80211: fix queue constant confusion
+- wireless: fix warning introduced by "mac80211: QoS related cleanups"
+- ssb: Allow reading of 440-byte SPROM that is not rev 4
+- b43: Rewrite LO calibration algorithm
+- b43: Remove some dead code
+- b43: Don't disable IRQs in mac_suspend
+- iwlwifi: Add power level support
+- airo: use netstats in net_device structure
+- arlan: use netstats in net_device structure
+- atmel: use netstats in net_device structure
+- iwlwifi: arranging aggregation actions
+- iwlwifi: expanding HW parameters control
+- iwlwifi: support 64 bit DMA masks
+- iwlwifi: handle shared memory
+- iwlwifi: unify init driver flow
+- iwlwifi: iwl-sta redundant includes clean up
+- iwlwifi-5000: add iwl 5000 shared memory handlers
+- iwlwifi: map A-MPDU HW queue to mac80211 A-MPDU SW queue
+- iwlwifi-5000: rename iwl5000_init_nic to iwl5000_init_config
+- iwlwifi: create disable SCD Tx FIFOs handler
+- iwlwifi: move NIC init and Tx queues init to iwlcore
+- iwlwifi: handle shared memory Rx index access
+- iwlwifi: remove 4965 prefix from iwl4965_kw and iwl4965_tx_queue
+- iwlwifi: fix spinlock used before initialized
+- iwlwifi: move find station to iwl-sta.c
+- iwlwifi: cleanup set_pwr_src
+- iwlwifi: define ANA_PLL values in iwl-csr.h
+- iwlwifi: export int iwl4965_set_pwr_src
+- iwlwifi: changing EEPROM layout handling
+- iwlwifi: remove includes to net/ieee80211.h
+- iwlwifi: add apm init handler
+- iwlwifi: add iwl_hw_detect function to iwl core
+- iwlwifi: check eeprom version in pci probe time
+- iwlwifi: reorganize TX RX constatns
+- iwlwifi: 3945 remove unused SCD definitions
+- iwlwifi: remove 49 prefix from general CSR values
+- iwlwifi: remove unnecessary apmg settings
+- iwlwifi: wrapping nic configuration in iwl core handler
+- iwlwifi-5000: adding initial recognition for the 5000 family
+- iwlwifi-5000: add ops infrastructure for 5000
+- iwlwifi-5000: add apm_init handler for 5000 HW family
+- iwlwifi-5000: use iwl4965_set_pwr_src in 5000
+- iwlwifi-5000: EEPROM settings for 5000
+- iwlwifi-5000: adding iwl5000 HW parameters
+- iwlwifi-5000: adjust antennas names in 5000 HW family
+- iwlwifi-5000: Add HW REV of 5000 HW family
+- iwlwifi-5000: add eeprom check version handler
+- iwlwifi-5000: add nic config handler for 5000 HW
+- iwlwifi: rename iwl-4965-commands to iwl-commands.h
+- iwlwifi: rename iwl-4965.h to iwl-dev.h
+- iwlwifi: move RX code to iwl-rx.c
+- iwlwifi: don't override association channel with control channel
+- iwlwifi: remove 4965 from station_entry
+- iwlwifi: debugfs EEPROM dump
+- iwlwifi: remove 4965 from rx_packet
+- iwlwifi: generalize iwl4965_send_add_station function
+- iwlwifi-5000: add build_addsta_hcmd handler for 5000 HW
+- iwlwifi: move iwl4965_set_rxon_ht into iwlcore
+- iwlwifi: compile iwl-sta into iwlcore
+- iwlwifi: add device sysfs version entry
+- at76: use hardware flags for signal/noise units
+
 * Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.17.rc3.fc10
 - Deblobb 2.6.26-rc3.
 
