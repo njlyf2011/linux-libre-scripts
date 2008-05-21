@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.642 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.648 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -592,6 +592,11 @@ Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch80: linux-2.6-smp-boot-delay.patch
+Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
+Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
+Patch87: linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
+Patch88: linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
+Patch89: linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -636,8 +641,7 @@ Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-wireless-pending-too.patch
-Patch683: linux-2.6-rt2x00-configure_filter.patch
+Patch682: linux-2.6-wireless-fixups.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -645,6 +649,8 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
+
+Patch1600: linux-2.6-virtio_net-free-transmit-skbs-in-a-timer.patch
 
 # nouveau + drm fixes
 Patch1801: linux-2.6-drm-git-mm.patch
@@ -1068,6 +1074,15 @@ ApplyPatch linux-2.6-sysrq-c.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # Delay longer during boot on x86 while waiting for secondary processors
 ApplyPatch linux-2.6-smp-boot-delay.patch
+# don't map or use disabled x86 vdso
+ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
+ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
+# ecx is clobbered during IRQs (!)
+ApplyPatch linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
+# allocate PCI ROM by default again
+ApplyPatch linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
+# don't read the apic if it's not mapped (#447183)
+ApplyPatch linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
 
 #
 # PowerPC
@@ -1197,16 +1212,16 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # wake up links that have been put to sleep by BIOS (#436099)
 ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
-# wireless patches headed for 2.6.25
-#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.26
+ApplyPatch linux-2.6-wireless.patch
+# wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
-ApplyPatch linux-2.6-wireless-pending-too.patch
-# rt2x00 configure_filter fix to avoid endless loop on insert for USB devices
-ApplyPatch linux-2.6-rt2x00-configure_filter.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
+
+# fixups to make current wireless patches build on this kernel
+ApplyPatch linux-2.6-wireless-fixups.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1219,6 +1234,9 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6-lirc.patch
+
+# virtio: dont hang on shutdown
+ApplyPatch linux-2.6-virtio_net-free-transmit-skbs-in-a-timer.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1851,6 +1869,24 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue May 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-29
+- virtio_net: free transmit skbs in a timer (#444765)
+
+* Tue May 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-28
+- Disable the group scheduler (CONFIG_GROUP_SCHED) (#446192)
+- x86: don't read the APIC if it's not mapped (#447183)
+
+* Tue May 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-27
+- x86: don't map VDSO into userspace when it's disabled (#229304)
+- x86: fix ASM constraint in do_IRQ()
+- x86: map PCI ROM by default again (F8 #440644)
+
+* Mon May 19 2008 John W. Linville <linville@redhat.com> 2.6.25.4-26
+- Re-sync wireless bits w/ current upstream
+
+* Mon May 19 2008 Dave Jones <davej@redhat.com> 2.6.25.4-24
+- Disable PATA_ISAPNP (it's busted).
+
 * Sun May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.23.fc9
 - Rebase to libre1.
 
