@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.642 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.646 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The rc snapshot level
 %define rcrev 3
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1814,6 +1814,23 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed May 21 2008 John W. Linville <linville@redhat.com>
+- libertas: Fix ethtool statistics
+- mac80211: fix NULL pointer dereference in ieee80211_compatible_rates
+- mac80211: don't claim iwspy support
+- rtl8187: resource leak in error case
+- hostap_cs: add ID for Conceptronic CON11CPro
+- orinoco_cs: add ID for SpeedStream wireless adapters
+
+* Wed May 21 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc3-git3
+
+* Tue May 20 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc3-git1
+
+* Mon May 19 2008 Dave Jones <davej@redhat.com>
+- Disable PATA_ISAPNP (it's busted).
+
 * Mon May 19 2008 John W. Linville <linville@redhat.com>
 - mac80211 : Association with 11n hidden ssid ap.
 - libertas: fix command timeout after firmware failure
