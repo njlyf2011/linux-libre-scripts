@@ -3,18 +3,18 @@ Deblobbed.
 Mark as depending on NONFREE in Kconfig.
 Replace all voodoo blobs with /*(DEBLOBBED)*/.
 
-From f4e9f548d49b0bc9fbbfbee635f96e79a2f472ae Mon Sep 17 00:00:00 2001
-From: Dave Airlie <airlied@voynix.(none)>
-Date: Thu, 6 Sep 2007 00:10:19 +1000
-Subject: [PATCH] drm: add nouveau latest code
+From cbdc72a3e2b6c9ea95900beb7d42165b1b15365b Mon Sep 17 00:00:00 2001
+From: Dave Airlie <airlied@linux.ie>
+Date: Thu, 22 May 2008 11:50:25 +1000
+Subject: [PATCH] F8 nouveau rebase onto 2.6.25
 
 ---
- drivers/char/drm/Kconfig            |    5 +
+ drivers/char/drm/Kconfig            |    7 +
  drivers/char/drm/Makefile           |   12 +
  drivers/char/drm/drmP.h             |    4 +-
  drivers/char/drm/drm_bufs.c         |    6 +-
  drivers/char/drm/drm_irq.c          |    3 +-
- drivers/char/drm/drm_pciids.h       |  262 ++++
+ drivers/char/drm/drm_pciids.h       |  264 ++++
  drivers/char/drm/nouveau_dma.c      |  177 +++
  drivers/char/drm/nouveau_dma.h      |   98 ++
  drivers/char/drm/nouveau_drm.h      |  166 ++
@@ -48,7 +48,7 @@ Subject: [PATCH] drm: add nouveau latest code
  drivers/char/drm/nv50_graph.c       |  316 ++++
  drivers/char/drm/nv50_instmem.c     |  320 ++++
  drivers/char/drm/nv50_mc.c          |   43 +
- 39 files changed, 13957 insertions(+), 4 deletions(-)
+ 39 files changed, 13961 insertions(+), 4 deletions(-)
  create mode 100644 drivers/char/drm/nouveau_dma.c
  create mode 100644 drivers/char/drm/nouveau_dma.h
  create mode 100644 drivers/char/drm/nouveau_drm.h
@@ -84,21 +84,23 @@ Subject: [PATCH] drm: add nouveau latest code
  create mode 100644 drivers/char/drm/nv50_mc.c
 
 diff --git a/drivers/char/drm/Kconfig b/drivers/char/drm/Kconfig
-index 0b7ffa5..0220619 100644
+index 610d6fd..6f55e75 100644
 --- a/drivers/char/drm/Kconfig
 +++ b/drivers/char/drm/Kconfig
-@@ -106,3 +106,9 @@ config DRM_SAVAGE
+@@ -105,3 +105,11 @@ config DRM_SAVAGE
+ 	help
  	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
  	  chipset. If M is selected the module will be called savage.
- 
++
 +config DRM_NOUVEAU
 +depends on NONFREE
 +	tristate "Nvidia video cards"
 +	depends on DRM
 +	help
 +		Choose this for nvidia open source 3d driver
++
 diff --git a/drivers/char/drm/Makefile b/drivers/char/drm/Makefile
-index 6915a05..f798916 100644
+index 1283ded..7b372eb 100644
 --- a/drivers/char/drm/Makefile
 +++ b/drivers/char/drm/Makefile
 @@ -14,6 +14,16 @@ mga-objs    := mga_drv.o mga_dma.o mga_state.o mga_warp.o mga_irq.o
@@ -135,10 +137,10 @@ index 6915a05..f798916 100644
  obj-$(CONFIG_DRM_SAVAGE)+= savage.o
  obj-$(CONFIG_DRM_VIA)	+=via.o
 diff --git a/drivers/char/drm/drmP.h b/drivers/char/drm/drmP.h
-index 9dd0760..d539c96 100644
+index 8ea9dd1..49ee12e 100644
 --- a/drivers/char/drm/drmP.h
 +++ b/drivers/char/drm/drmP.h
-@@ -967,7 +967,8 @@ extern unsigned long drm_get_resource_start(struct drm_device *dev,
+@@ -973,7 +973,8 @@ extern unsigned long drm_get_resource_start(struct drm_device *dev,
  					    unsigned int resource);
  extern unsigned long drm_get_resource_len(struct drm_device *dev,
  					  unsigned int resource);
@@ -148,7 +150,7 @@ index 9dd0760..d539c96 100644
  				/* DMA support (drm_dma.h) */
  extern int drm_dma_setup(struct drm_device *dev);
  extern void drm_dma_takedown(struct drm_device *dev);
-@@ -979,6 +980,7 @@ extern void drm_core_reclaim_buffers(struct drm_device *dev,
+@@ -985,6 +986,7 @@ extern void drm_core_reclaim_buffers(struct drm_device *dev,
  extern int drm_control(struct drm_device *dev, void *data,
  		       struct drm_file *file_priv);
  extern irqreturn_t drm_irq_handler(DRM_IRQ_ARGS);
@@ -157,7 +159,7 @@ index 9dd0760..d539c96 100644
  extern void drm_driver_irq_preinstall(struct drm_device *dev);
  extern void drm_driver_irq_postinstall(struct drm_device *dev);
 diff --git a/drivers/char/drm/drm_bufs.c b/drivers/char/drm/drm_bufs.c
-index 856774f..7890e08 100644
+index bde64b8..3a0545c 100644
 --- a/drivers/char/drm/drm_bufs.c
 +++ b/drivers/char/drm/drm_bufs.c
 @@ -49,8 +49,8 @@ unsigned long drm_get_resource_len(struct drm_device *dev, unsigned int resource
@@ -179,16 +181,8 @@ index 856774f..7890e08 100644
  
  static int drm_map_handle(struct drm_device *dev, struct drm_hash_item *hash,
  			  unsigned long user_token, int hashed_handle)
-@@ -429,6 +430,7 @@ int drm_rmmap(struct drm_device *dev, drm_local_map_t *map)
- 
- 	return ret;
- }
-+EXPORT_SYMBOL(drm_rmmap);
- 
- /* The rmmap ioctl appears to be unnecessary.  All mappings are torn down on
-  * the last close of the device, and this is necessary for cleanup when things
 diff --git a/drivers/char/drm/drm_irq.c b/drivers/char/drm/drm_irq.c
-index 05eae63..c091729 100644
+index 089c015..29206c7 100644
 --- a/drivers/char/drm/drm_irq.c
 +++ b/drivers/char/drm/drm_irq.c
 @@ -81,7 +81,7 @@ int drm_irq_by_busid(struct drm_device *dev, void *data,
@@ -209,13 +203,15 @@ index 05eae63..c091729 100644
  /**
   * Uninstall the IRQ handler.
 diff --git a/drivers/char/drm/drm_pciids.h b/drivers/char/drm/drm_pciids.h
-index 30b200b..a59f999 100644
+index a6a499f..4f253ab 100644
 --- a/drivers/char/drm/drm_pciids.h
 +++ b/drivers/char/drm/drm_pciids.h
-@@ -314,3 +314,265 @@
+@@ -412,3 +412,267 @@
  	{0x8086, 0x2a12, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
+ 	{0x8086, 0x2a42, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
  	{0, 0, 0}
- 
++
++
 +#define nouveau_PCI_IDS \
 +	{0x10de, 0x0008, PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_03}, \
 +	{0x10de, 0x0009, PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_03}, \
@@ -14064,5 +14060,5 @@ index 0000000..b111826
 +{
 +}
 -- 
-1.5.2.5
+1.5.3.3
 
