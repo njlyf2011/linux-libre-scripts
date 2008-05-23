@@ -1,9 +1,9 @@
 deblob-main
-deblob-2.6.24
+deblob-2.6.25
 deblob-check
 clog
 kernel-2.6.*.config
 temp-*
-kernel-2.6.24
-linux-2.6.24-libre1.*
-patch-2.6.24.7.bz2
+kernel-2.6.25
+linux-2.6.25-libre1.*
+patch-2.6.25.4.bz2

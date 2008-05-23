@@ -32,7 +32,7 @@
 # Thanks to Brian Brazil @ gnewsense
 #
 
-# This version, suited for 2.6.24, avoids removing Free Software for
+# This version, suited for 2.6.25, avoids removing Free Software for
 # the sake of removing non-Free Software.  Drivers that currently
 # require non-Free firmware are retained, but firmware included in
 # GPLed sources is replaced with /*(DEBLOBBED)*/ if the deblob-check
@@ -40,7 +40,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.24 extra=1
+kver=2.6.25 extra=1
 
 sed -i "s,^EXTRAVERSION.*,EXTRAVERSION = -libre$extra," Makefile
 
@@ -299,6 +299,10 @@ clean_blob drivers/net/bnx2_fw.h
 clean_blob drivers/net/bnx2_fw2.h
 clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
+
+clean_blob drivers/net/bnx2x_init_values.h
+clean_kconfig drivers/net/Kconfig 'BNX2X'
+clean_mk CONFIG_BNX2X drivers/net/Makefile
 
 # CASSINI - Sun Cassini
 clean_blob drivers/net/cassini.h
