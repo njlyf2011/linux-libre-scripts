@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.648 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.649 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1869,6 +1869,14 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed May 21 2008 John W. Linville <linville@redhat.com> 2.6.25.4-30
+- libertas: Fix ethtool statistics
+- mac80211: fix NULL pointer dereference in ieee80211_compatible_rates
+- mac80211: don't claim iwspy support
+- rtl8187: resource leak in error case
+- hostap_cs: add ID for Conceptronic CON11CPro
+- orinoco_cs: add ID for SpeedStream wireless adapters
+
 * Tue May 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-29
 - virtio_net: free transmit skbs in a timer (#444765)
 
