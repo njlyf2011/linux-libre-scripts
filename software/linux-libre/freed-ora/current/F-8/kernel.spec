@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.447 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.450 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -659,7 +659,8 @@ Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 Patch682: linux-2.6-wireless-fixups.patch
 Patch690: linux-2.6-at76.patch
-Patch693: linux-2.6-zd1211rw-module-alias.patch
+Patch691: linux-2.6-zd1211rw-module-alias.patch
+Patch692: linux-2.6-cfg80211-extras.patch
 
 Patch720: linux-2.6-e1000-corrupt-eeprom-checksum.patch
 Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
@@ -1201,6 +1202,8 @@ ApplyPatch linux-2.6-at76.patch
 ApplyPatch linux-2.6-wireless-fixups.patch
 # module alias for zd1211rw module
 ApplyPatch linux-2.6-zd1211rw-module-alias.patch
+# Restore ability to add/remove virtual i/fs to mac80211 devices
+ApplyPatch linux-2.6-cfg80211-extras.patch
 
 # Workaround for flaky e1000 EEPROMs
 ApplyPatch linux-2.6-e1000-corrupt-eeprom-checksum.patch
@@ -1861,6 +1864,15 @@ fi
 
 
 %changelog
+* Thu May 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-10
+- Revert to the "old" RTC driver for F8.
+
+* Thu May 22 2008 Dave Jones <davej@redhat.com> 2.6.25.4-9
+- Disable CONFIG_DMAR. This is terminally broken in the presence of a broken BIOS
+
+* Thu May 22 2008 John W. Linville <linville@redhat.com> 2.6.25.4-8
+- Restore ability to add/remove virtual i/fs to mac80211 devices via sysfs
+
 * Wed May 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-7
 - Disable CONFIG_PADLOCK_SHA on i686.
 - Package the file modules.order.
