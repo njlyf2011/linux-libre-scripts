@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.648 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.653 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The rc snapshot level
 %define rcrev 3
 # The git snapshot level
-%define gitrev 4
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -605,7 +605,6 @@ Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
-Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
@@ -1103,9 +1102,6 @@ ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
-%if !%{debugbuildsenabled}
-ApplyPatch linux-2.6-debug-no-quiet.patch
-%endif
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 
 #
@@ -1169,7 +1165,7 @@ ApplyPatch linux-2.6-selinux-generic-ioctl.patch
 ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1814,6 +1810,24 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri May 23 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc3-git6
+
+* Fri May 23 2008 Kristian Høgsberg <krh@redhat.com>
+- Drop linux-2.6-debug-no-quiet.patch.  As discussed with Jeremy and
+  Dave, it's time to drop this patch.  Verbose output can still be
+  enabled by specifying 'noisy' on the kernel command line instead of
+  'quiet'.
+
+* Fri May 23 2008 Dave Jones <davej@redhat.com>
+- Experiment: Disable CONFIG_PCIEASPM. It might be the reason for #447231
+
+* Fri May 23 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc3-git5
+
+* Thu May 22 2008 Dave Jones <davej@redhat.com>
+- Disable CONFIG_DMAR. This is terminally broken in the presence of a broken BIOS
+
 * Thu May 22 2008 Dave Jones <davej@redhat.com>
 - Fix gianfar build.
 
