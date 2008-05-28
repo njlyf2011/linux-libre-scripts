@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.649 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.653 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -626,8 +626,13 @@ Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-Patch415: linux-2.6-cifs-fix-unc-path-prefix.patch
-Patch420: linux-2.6-squashfs.patch
+
+# filesystem patches
+Patch420: linux-2.6-cifs-fix-unc-path-prefix.patch
+Patch421: linux-2.6-squashfs.patch
+Patch422: linux-2.6-ext34-xattr-fix.patch
+Patch423: linux-2.6-xfs-small-buffer-reads.patch
+
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch431: linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -636,8 +641,13 @@ Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
+
+# libata
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
+Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
+Patch674: linux-2.6-sata-eeepc-faster.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -665,15 +675,8 @@ Patch1810: linux-2.6-drm-fix-master-perm.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
-# Make Eee disk faster.
-Patch2010: linux-2.6-sata-eeepc-faster.patch
-
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
-
-# filesystem patches
-Patch2100: linux-2.6-ext34-xattr-fix.patch
-Patch2101: linux-2.6-xfs-small-buffer-reads.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1087,10 +1090,10 @@ ApplyPatch linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
 #
 # PowerPC
 #
-###  UPSTREAM PATCHES FROM 2.6.25 (we think):
+###  UPSTREAM PATCHES:
+### NOT (YET) UPSTREAM:
 # RTC class driver for ppc_md rtc functions
 ApplyPatch linux-2.6-ppc-rtc.patch
-### NOT (YET) UPSTREAM:
 # The EHCI ISO patch isn't yet upstream but is needed to fix reboot
 ApplyPatch linux-2.6-ps3-ehci-iso.patch
 # Fixes some wireless optical mice
@@ -1179,9 +1182,11 @@ ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 # Filesystem patches.
 # cifs
 ApplyPatch linux-2.6-cifs-fix-unc-path-prefix.patch
-
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
+# more filesystem patches
+ApplyPatch linux-2.6-ext34-xattr-fix.patch
+ApplyPatch linux-2.6-xfs-small-buffer-reads.patch
 
 # Networking
 # Disable easy to trigger printk's.
@@ -1207,10 +1212,17 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # Use UTF-8 by default on VFAT.
 ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
+# libata
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 # wake up links that have been put to sleep by BIOS (#436099)
 ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+# fix hangs on undock (#439197)
+ApplyPatch linux-2.6-libata-acpi-hotplug-fixups.patch
+# fix problems with some old/broken CF hardware (F8 #224005)
+ApplyPatch linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
+# Make Eee disk faster.
+ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless.patch
@@ -1240,13 +1252,7 @@ ApplyPatch linux-2.6-virtio_net-free-transmit-skbs-in-a-timer.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
-ApplyPatch linux-2.6-sata-eeepc-faster.patch
-
 ApplyPatch linux-2.6-netdev-atl2.patch
-
-# filesystem patches
-ApplyPatch linux-2.6-ext34-xattr-fix.patch
-ApplyPatch linux-2.6-xfs-small-buffer-reads.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-drm-git-mm.patch
@@ -1869,6 +1875,20 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue May 27 2008 John W. Linville <linville@redhat.com> 2.6.25.4-34
+- Upstream wireless updates from 2008-05-22
+  (http://marc.info/?l=linux-wireless&m=121146112404515&w=2)
+
+* Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-33
+- libata: fix hangs on undock (#439197)
+- libata: fix problems with some old/broken CF hardware (F8 #224005)
+
+* Thu May 22 2008 Dave Jones <davej@redhat.com> 2.6.25.4-32
+- Disable CONFIG_DMAR. This is terminally broken in the presence of a broken BIOS
+
+* Wed May 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-31
+- Clean up specfile a bit.
+
 * Wed May 21 2008 John W. Linville <linville@redhat.com> 2.6.25.4-30
 - libertas: Fix ethtool statistics
 - mac80211: fix NULL pointer dereference in ieee80211_compatible_rates
