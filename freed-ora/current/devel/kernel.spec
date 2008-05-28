@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.656 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.660 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -611,6 +611,7 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
+Patch411: linux-2.6-hda-intel-fix-dma-position-inaccuracy.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -1126,6 +1127,10 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 # ALSA
 #
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
+# In upstream alsa. Resolves issues with glitch-free pulseaudio on hda-intel.
+# See: https://tango.0pointer.de/pipermail/pulseaudio-discuss/2008-May/001837.html
+#      http://mailman.alsa-project.org/pipermail/alsa-devel/2008-May/007856.html
+ApplyPatch linux-2.6-hda-intel-fix-dma-position-inaccuracy.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1810,6 +1815,19 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue May 27 2008 John W. Linville <linville@redhat.com>
+- Missed some at76 bits from 2008-05-22...
+
+* Tue May 27 2008 Tom "spot" Callaway <tcallawa@redhat.com>
+- Apply patch to Resolve issues with glitch-free pulseaudio on hda-intel
+
+* Tue May 27 2008 Kristian Høgsberg <krh@redhat.com>
+- Drop a couple of stray references to CONFIG_DEBUG_IGNORE_QUIET.
+
+* Tue May 27 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless updates from 2008-05-22
+  (http://marc.info/?l=linux-wireless&m=121146112404515&w=2)
+
 * Mon May 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.3.rc4.fc10
 - Deblob 2.6.26-rc4.
 
