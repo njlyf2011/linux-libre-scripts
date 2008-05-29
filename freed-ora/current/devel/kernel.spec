@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.660 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.666 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The rc snapshot level
 %define rcrev 4
 # The git snapshot level
-%define gitrev 0
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -614,6 +614,8 @@ Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch411: linux-2.6-hda-intel-fix-dma-position-inaccuracy.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch440: linux-2.6-net-8139-pio-modparam.patch
+Patch441: linux-2.6-net-8139-pio-oqo2.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -663,9 +665,6 @@ Patch2020: linux-2.6-netdev-atl2.patch
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # Fix HID usage descriptor on MS wireless desktop receiver
 Patch2301: linux-2.6-ms-wireless-receiver.patch
-
-# acpi hotkey driver for asus eeepc
-Patch2350: linux-2.6-acpi-eeepc-hotkey.patch
 
 # usb video
 Patch2400: linux-2.6-uvcvideo.patch
@@ -1095,8 +1094,6 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
 # ACPI
-# eeepc hotkey support
-ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1139,6 +1136,10 @@ ApplyPatch linux-2.6-squashfs.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
+# Make 8139too PIO/MMIO a module parameter
+ApplyPatch linux-2.6-net-8139-pio-modparam.patch
+# OQO2 needs PIO
+ApplyPatch linux-2.6-net-8139-pio-oqo2.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1815,6 +1816,24 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed May 28 2008 Dave Jones <davej@redhat.com>
+- Make the OQO2 use polled IO for its ethernet.
+
+* Wed May 28 2008 Chuck Ebbert <cebbert@redhat.com>
+- Remove eeepc driver, now upstream as eeepc-laptop.
+
+* Wed May 28 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc4-git2
+
+* Wed May 28 2008 Dave Jones <davej@redhat.com>
+- Make 8139too PIO/MMIO a module parameter
+
+* Wed May 28 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc4-git1
+
+* Wed May 28 2008 Dave Jones <davej@redhat.com>
+- PPC gets sad with debug alloc (bz 448598)
+
 * Tue May 27 2008 John W. Linville <linville@redhat.com>
 - Missed some at76 bits from 2008-05-22...
 
