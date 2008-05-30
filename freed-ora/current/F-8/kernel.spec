@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.450 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.454 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -649,10 +649,12 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch600: linux-2.6-vm-silence-atomic-alloc-failures.patch
 
 Patch610: linux-2.6-defaults-fat-utf8.patch
-Patch620: linux-2.6-defaults-unicode-vt.patch
 Patch640: linux-2.6-defaults-pci_no_msi.patch
-Patch660: linux-2.6-libata-ali-atapi-dma.patch
+
 Patch670: linux-2.6-ata-quirk.patch
+Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
+Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 
 Patch680: linux-2.6-wireless.patch
@@ -1176,17 +1178,19 @@ ApplyPatch linux-2.6-vm-silence-atomic-alloc-failures.patch
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
 ApplyPatch linux-2.6-defaults-fat-utf8.patch
-# Use unicode VT's by default.
-# ApplyPatch linux-2.6-defaults-unicode-vt.patch
 # Disable PCI MMCONFIG by default.
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 
 # libata
 #
-# Disable ATAPI DMA on ALI chipsets.
-ApplyPatch linux-2.6-libata-ali-atapi-dma.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
+# force hard reset when ahci links are asleep at init time
+ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+# fix hangs on undock (#439197)
+ApplyPatch linux-2.6-libata-acpi-hotplug-fixups.patch
+# fix problems with some old/broken CF hardware (F8 #224005)
+ApplyPatch linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 # make eeepc ata go faster
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
@@ -1864,6 +1868,23 @@ fi
 
 
 %changelog
+* Thu May 29 2008 John W. Linville <linville@redhat.com> 2.6.25.4-14
+- Upstream wireless updates from 2008-05-22
+  (http://marc.info/?l=linux-wireless&m=121146112404515&w=2)
+- Upstream wireless fixes from 2008-05-28
+  (http://marc.info/?l=linux-wireless&m=121201250110162&w=2)
+
+* Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-13
+- Remove obsolete unicode patch.
+
+* Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-12
+- libata: fix hangs on undock (#439197)
+- libata: fix problems with some old/broken CF hardware (F8 #224005)
+
+* Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-11
+- Remove already-merged libata pata_ali DMA disable patch.
+- Add missing libata patch from the F9 kernel.
+
 * Thu May 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-10
 - Revert to the "old" RTC driver for F8.
 
