@@ -1,6 +1,7 @@
 D/scripts////
 /linux-2.6.25.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.26-rc4.bz2.sign/-1.1/dummy timestamp//
+/patch-2.6.25.3.bz2.sign/-1.1/dummy timestamp//Tkernel-2_6_26-0_44_rc4_git2_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_26-0_44_rc4_git2_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_26-0_44_rc4_git2_fc10
 /Makefile/1.73/Wed May 28 00:34:25 2008//Tkernel-2_6_26-0_44_rc4_git2_fc10
@@ -119,4 +120,3 @@ D/scripts////
 /.cvsignore/1.825/Fri May 30 06:31:31 2008//Tkernel-2_6_26-0_44_rc4_git2_fc10
 /sources/1.786/Fri May 30 06:31:32 2008//Tkernel-2_6_26-0_44_rc4_git2_fc10
 /upstream/1.705/Fri May 30 06:31:33 2008//Tkernel-2_6_26-0_44_rc4_git2_fc10
-/patch-2.6.25.3.bz2.sign/1.1/Mon May 12 15:11:04 2008//Tkernel-2_6_26-0_44_rc4_git2_fc10
