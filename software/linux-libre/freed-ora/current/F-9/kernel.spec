@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.653 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.657 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -597,6 +597,8 @@ Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 Patch87: linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
 Patch88: linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
 Patch89: linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
+Patch90: linux-2.6-x86-fix-setup-of-cyc2ns-in-tsc_64.patch
+Patch91: linux-2.6-x86-prevent-pge-flush-from-interruption.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -635,7 +637,10 @@ Patch423: linux-2.6-xfs-small-buffer-reads.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch431: linux-2.6-net-iptables-add-xt_iprange-aliases.patch
+Patch432: linux-2.6-netlink-fix-parse-of-nested-attributes.patch
+
 Patch450: linux-2.6-input-kill-stupid-messages.patch
+Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -671,6 +676,7 @@ Patch1807: linux-2.6-drm-radeon-fix-oops.patch
 Patch1808: linux-2.6-drm-radeon-fix-oops2.patch
 Patch1809: linux-2.6-drm-modesetting-oops-fixes.patch
 Patch1810: linux-2.6-drm-fix-master-perm.patch
+Patch1811: drm-radeon-update.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1086,6 +1092,11 @@ ApplyPatch linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
 ApplyPatch linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
 # don't read the apic if it's not mapped (#447183)
 ApplyPatch linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
+# fix sched_clock when calibrated against PIT
+ApplyPatch linux-2.6-x86-fix-setup-of-cyc2ns-in-tsc_64.patch
+# dont allow flush_tlb_all to be interrupted
+ApplyPatch linux-2.6-x86-prevent-pge-flush-from-interruption.patch
+
 
 #
 # PowerPC
@@ -1193,10 +1204,14 @@ ApplyPatch linux-2.6-xfs-small-buffer-reads.patch
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 # fix firewall scripts using iprange (#446827)
 ApplyPatch linux-2.6-net-iptables-add-xt_iprange-aliases.patch
+# fix parse of netlink messages
+ApplyPatch linux-2.6-netlink-fix-parse-of-nested-attributes.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+# add support for macbook pro 4,1 and macbook air keyboards
+ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1263,6 +1278,7 @@ ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
 ApplyPatch linux-2.6-drm-radeon-fix-oops2.patch
 ApplyPatch linux-2.6-drm-modesetting-oops-fixes.patch
 ApplyPatch linux-2.6-drm-fix-master-perm.patch
+ApplyPatch drm-radeon-update.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
@@ -1875,6 +1891,23 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu May 29 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.38
+- Deblob microcodes in drm-radeon-update.patch.
+
+* Wed May 28 2008 Dave Airlie <airlied@redhat.com> 2.6.25.4-38
+- drm-radeon-update.patch - Add R500 support along with updated radeon driver
+
+* Tue May 28 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-37
+- Fix parsing of netlink messages (#447812)
+
+* Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-36
+- Fix two hard-to-reproduce x86 bugs:
+  x86: fix sched_clock when calibrated against PIT
+  x86: don't allow flush_tlb_all to be interrupted 
+
+* Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-35
+- input: fix function keys on macbook pro 4,1 and air (#445761)
+
 * Tue May 27 2008 John W. Linville <linville@redhat.com> 2.6.25.4-34
 - Upstream wireless updates from 2008-05-22
   (http://marc.info/?l=linux-wireless&m=121146112404515&w=2)
