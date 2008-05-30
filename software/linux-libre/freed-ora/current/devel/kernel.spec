@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.666 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.667 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -619,6 +619,7 @@ Patch441: linux-2.6-net-8139-pio-oqo2.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
+Patch620: linux-2.6-silence-x86-decompressor.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
@@ -1149,6 +1150,9 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6-serial-460800.patch
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
+
+# Make the real mode boot decompressor understand and honor 'quiet'
+ApplyPatch linux-2.6-silence-x86-decompressor.patch
 
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
@@ -1816,6 +1820,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu May 29 2008 Kristian Høgsberg <krh@redhat.com>
+- Add linux-2.6-silence-x86-decompressor.patch to silence the
+  decompressor spew when 'quiet' is passed.
+
 * Wed May 28 2008 Dave Jones <davej@redhat.com>
 - Make the OQO2 use polled IO for its ethernet.
 
