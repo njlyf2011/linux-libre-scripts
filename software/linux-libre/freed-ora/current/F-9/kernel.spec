@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.657 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.658 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1891,6 +1891,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu May 29 2008 John W. Linville <linville@redhat.com> 2.6.25.4-39
+- Upstream wireless fixes from 2008-05-28
+  (http://marc.info/?l=linux-wireless&m=121201250110162&w=2)
+
 * Thu May 29 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.38
 - Deblob microcodes in drm-radeon-update.patch.
 
