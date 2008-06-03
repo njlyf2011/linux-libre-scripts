@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.668 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.669 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -628,6 +628,7 @@ Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
+Patch682: linux-2.6-wireless-revert-22182283.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -1178,6 +1179,8 @@ ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
+# revert misguided commit 2218228392080f0ca2fc2974604e79f57b12c436
+ApplyPatch linux-2.6-wireless-revert-22182283.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1820,6 +1823,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jun 02 2008 John W. Linville <linville@redhat.com>
+- Revert misguided wireless.h "fix" from upstream
+
 * Thu May 29 2008 John W. Linville <linville@redhat.com>
 - Upstream wireless fixes from 2008-05-28
   (http://marc.info/?l=linux-wireless&m=121201250110162&w=2)
