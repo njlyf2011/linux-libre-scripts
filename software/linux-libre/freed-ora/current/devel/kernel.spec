@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.669 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.677 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The rc snapshot level
 %define rcrev 4
 # The git snapshot level
-%define gitrev 2
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -475,6 +475,7 @@ ExclusiveOS: Linux
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
+BuildRequires: net-tools
 %if %{with_doc}
 BuildRequires: xmlto
 %endif
@@ -628,7 +629,6 @@ Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-wireless-revert-22182283.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -1179,8 +1179,6 @@ ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
-# revert misguided commit 2218228392080f0ca2fc2974604e79f57b12c436
-ApplyPatch linux-2.6-wireless-revert-22182283.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1195,7 +1193,7 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
-#ApplyPatch linux-2.6-lirc.patch
+ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1354,9 +1352,9 @@ BuildKernel() {
     echo USING ARCH=$Arch
 
     make -s ARCH=$Arch %{oldconfig_target} > /dev/null
-    make -s ARCH=$Arch %{?_smp_mflags} $MakeTarget %{?sparse_mflags} \
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} \
     	 ${idhack+"$idhack"}
-    make -s ARCH=$Arch %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
 %if %{with_debuginfo}
@@ -1823,6 +1821,21 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jun 03 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc4-git5
+
+* Tue Jun 03 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless fixes from 2008-06-03
+  (http://marc.info/?l=linux-wireless&m=121252137324941&w=2)
+- Upstream wireless updates from 2008-06-03
+  (http://marc.info/?l=linux-wireless&m=121252503832192&w=2)
+
+* Mon Jun 02 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc4-git4
+
+* Mon Jun 02 2008 Jarod Wilson <jwilson@redhat.com>
+- Updated lirc patch with latest upstream changes and 2.6.26 compat
+
 * Mon Jun 02 2008 John W. Linville <linville@redhat.com>
 - Revert misguided wireless.h "fix" from upstream
 
