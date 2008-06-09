@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.661 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.668 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -624,10 +624,12 @@ Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
+
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
+Patch414: linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # filesystem patches
 Patch420: linux-2.6-cifs-fix-unc-path-prefix.patch
@@ -639,8 +641,11 @@ Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch431: linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 Patch432: linux-2.6-netlink-fix-parse-of-nested-attributes.patch
 
+Patch440: linux-2.6-caps-remain-source-compatible-with-32-bit.patch
+
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
+Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -653,6 +658,8 @@ Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
 Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
+Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
+Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1186,9 +1193,12 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 # ALSA
 #
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
+# thinkpad x300 support
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
+# fix SB audigy2 ZS
+ApplyPatch linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # Filesystem patches.
 # cifs
@@ -1208,10 +1218,14 @@ ApplyPatch linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 ApplyPatch linux-2.6-netlink-fix-parse-of-nested-attributes.patch
 
 # Misc fixes
+# make 64-bit capabilities backwards compatible
+ApplyPatch linux-2.6-caps-remain-source-compatible-with-32-bit.patch
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # add support for macbook pro 4,1 and macbook air keyboards
 ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
+# kill annoying applesmc debug messages
+ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1238,6 +1252,10 @@ ApplyPatch linux-2.6-libata-acpi-hotplug-fixups.patch
 ApplyPatch linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 # Make Eee disk faster.
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
+# fix dock/undock on docking stations that have a bay
+ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
+# fix DMA disable on atiixp
+ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
 
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless.patch
@@ -1891,6 +1909,27 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.5-49
+- Fix the specfile to match the kernel version.
+
+* Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.5-48
+- Linux 2.6.25.5
+
+* Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-47
+- Make 64-bit capabilities backwards-compatible with old user programs (#447518)
+
+* Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-46
+- Fix Audigy2 ZS audio adapter hang (#242208)
+
+* Thu Jun 05 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-45
+- Kill spurious applesmc debug messages (#448056)
+
+* Thu Jun 05 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-44
+- Make DMA work again on atiixp PATA devices (#450191)
+
+* Thu Jun 05 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-43
+- Fix docking when docking station has a bay device (bug reported on IRC.)
+
 * Tue Jun 03 2008 John W. Linville <linville@redhat.com> 2.6.25.4-42
 - Upstream wireless fixes from 2008-06-03
   (http://marc.info/?l=linux-wireless&m=121252137324941&w=2)
