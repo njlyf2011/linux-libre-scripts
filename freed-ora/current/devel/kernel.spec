@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.677 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.679 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 4
+%define rcrev 5
 # The git snapshot level
-%define gitrev 5
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -591,7 +591,6 @@ Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 
-Patch123: linux-2.6-ppc-rtc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
@@ -1055,8 +1054,6 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 #
 # PowerPC
 #
-# RTC class driver for ppc_md rtc functions
-ApplyPatch linux-2.6-ppc-rtc.patch
 ### NOT (YET) UPSTREAM:
 # The EHCI ISO patch isn't yet upstream but is needed to fix reboot
 #ApplyPatch linux-2.6-ps3-ehci-iso.patch
@@ -1176,7 +1173,7 @@ ApplyPatch linux-2.6-selinux-generic-ioctl.patch
 ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1821,6 +1818,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.26-rc5-git2
+
+* Thu Jun 05 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc5
+
 * Tue Jun 03 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc4-git5
 
