@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.459 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.464 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -582,20 +582,19 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 Patch05: linux-2.6-upstream-reverts.patch
 
 Patch21: linux-2.6-utrace.patch
+Patch22: linux-2.6.25-utrace-bugon.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch60: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
 Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
-Patch87: linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
-Patch88: linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
-Patch89: linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
 
 Patch90: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch91: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 Patch92: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch93: linux-2.6-alsa-kill-annoying-messages.patch
+Patch94: linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch130: linux-2.6-ppc-use-libgcc.patch
@@ -628,21 +627,22 @@ Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch350: linux-2.6-devmem.patch
 Patch370: linux-2.6-crash-driver.patch
 
-
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
 # filesystem patches
-Patch420: linux-2.6-cifs-fix-unc-path-prefix.patch
 Patch421: linux-2.6-squashfs.patch
-Patch422: linux-2.6-ext34-xattr-fix.patch
-Patch423: linux-2.6-xfs-small-buffer-reads.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
 Patch425: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch431: linux-2.6-netlink-fix-parse-of-nested-attributes.patch
+Patch432: linux-2.6-af_key-fix-selector-family-initialization.patch
+
 Patch440: linux-2.6-sha_alignment.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
+# fix oops in wbsd mmc driver
+Patch453: linux-2.6-mmc-wbsd-fix-request_irq.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -652,7 +652,6 @@ Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch640: linux-2.6-defaults-pci_no_msi.patch
 
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
 Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
@@ -670,8 +669,6 @@ Patch720: linux-2.6-e1000-corrupt-eeprom-checksum.patch
 Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
 Patch725: linux-2.6-netdev-atl2.patch
 Patch727: linux-2.6-e1000-ich9.patch
-
-Patch750: linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 
 Patch768: linux-2.6-acpi-fix-sizeof.patch
 Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
@@ -1020,6 +1017,7 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6.25-utrace-bugon.patch
 
 # ALSA Thinkpad X300 support
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
@@ -1027,6 +1025,8 @@ ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 # kill annoying messages
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
+# fix hang with audigy2
+ApplyPatch linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1044,12 +1044,6 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 # don't map or use disabled x86 vdso
 ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
 ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
-# ecx is clobbered during IRQs (!)
-ApplyPatch linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
-# allocate PCI ROM by default again
-ApplyPatch linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
-# don't read the apic if it's not mapped (#447183)
-ApplyPatch linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
 
 #
 # PowerPC
@@ -1138,13 +1132,8 @@ ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 # fin initio driver
 
 # Filesystem patches.
-# cifs
-ApplyPatch linux-2.6-cifs-fix-unc-path-prefix.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
-# more filesystem patches
-ApplyPatch linux-2.6-ext34-xattr-fix.patch
-ApplyPatch linux-2.6-xfs-small-buffer-reads.patch
 # export symbols for gfs2 locking modules
 ApplyPatch linux-2.6-gfs-locking-exports.patch
 # fix nfs mount hang
@@ -1153,14 +1142,18 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# add alias for netfilter iprange matches
-ApplyPatch linux-2.6-net-iptables-add-xt_iprange-aliases.patch
+# fix netlink message parsing
+ApplyPatch linux-2.6-netlink-fix-parse-of-nested-attributes.patch
+# fix af_key socket init
+ApplyPatch linux-2.6-af_key-fix-selector-family-initialization.patch
 
 # Misc fixes
 # Fix SHA1 alignment problem on ia64
 ApplyPatch linux-2.6-sha_alignment.patch
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+# fix oops in wbsd driver
+ApplyPatch linux-2.6-mmc-wbsd-fix-request_irq.patch
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
 # add ids for new wacom tablets
@@ -1187,8 +1180,6 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 #
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# force hard reset when ahci links are asleep at init time
-ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 # fix hangs on undock (#439197)
 ApplyPatch linux-2.6-libata-acpi-hotplug-fixups.patch
 # fix problems with some old/broken CF hardware (F8 #224005)
@@ -1874,6 +1865,30 @@ fi
 
 
 %changelog
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-24
+- Copy utrace and mmc driver bug fixes from F-9.
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-23
+- Fix init of af_key sockets (#450499)
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-22
+- Copy netlink message parsing bug fix from Fedora 9.
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-21
+- Fix hang with audigy2 sound card (#326411)
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-20
+- Linux 2.6.25.6
+- Dropped patches:
+    linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
+    linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
+    linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
+    linux-2.6-cifs-fix-unc-path-prefix.patch
+    linux-2.6-ext34-xattr-fix.patch
+    linux-2.6-xfs-small-buffer-reads.patch
+    linux-2.6-net-iptables-add-xt_iprange-aliases.patch
+    linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+    
 * Sat Jun 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.5-19
 - Linux 2.6.25.5
 
