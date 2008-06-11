@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.668 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.676 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -571,7 +571,7 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 
 # stable release candidate
-# Patch03: patch-2.6.24.1-rc1.bz2
+# Patch03: patch-2.6.25.6-rc1.bz2
 
 Patch10: linux-2.6-upstream-reverts.patch
 
@@ -587,6 +587,7 @@ Patch08: linux-2.6-compile-fix-gcc-43.patch
 Patch10: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
+Patch22: linux-2.6.25-utrace-bugon.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
@@ -594,12 +595,8 @@ Patch75: linux-2.6-x86-debug-boot.patch
 Patch80: linux-2.6-smp-boot-delay.patch
 Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
 Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
-Patch87: linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
-Patch88: linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
-Patch89: linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
-Patch90: linux-2.6-x86-fix-setup-of-cyc2ns-in-tsc_64.patch
-Patch91: linux-2.6-x86-prevent-pge-flush-from-interruption.patch
 
+# ppc
 Patch123: linux-2.6-ppc-rtc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -632,20 +629,17 @@ Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 Patch414: linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # filesystem patches
-Patch420: linux-2.6-cifs-fix-unc-path-prefix.patch
 Patch421: linux-2.6-squashfs.patch
-Patch422: linux-2.6-ext34-xattr-fix.patch
-Patch423: linux-2.6-xfs-small-buffer-reads.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch431: linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 Patch432: linux-2.6-netlink-fix-parse-of-nested-attributes.patch
-
-Patch440: linux-2.6-caps-remain-source-compatible-with-32-bit.patch
+Patch433: linux-2.6-af_key-fix-selector-family-initialization.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+# fix oops in wbsd mmc driver
+Patch453: linux-2.6-mmc-wbsd-fix-request_irq.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -654,7 +648,6 @@ Patch610: linux-2.6-defaults-fat-utf8.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
 Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
@@ -667,6 +660,11 @@ Patch682: linux-2.6-wireless-fixups.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
+
+Patch768: linux-2.6-acpi-fix-sizeof.patch
+Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
+# acpi hotkey driver for asus eeepc
+Patch784: linux-2.6-acpi-eeepc-hotkey.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -699,9 +697,6 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # Fix HID usage descriptor on MS wireless desktop receiver
 Patch2301: linux-2.6-ms-wireless-receiver.patch
-
-# acpi hotkey driver for asus eeepc
-Patch2350: linux-2.6-acpi-eeepc-hotkey.patch
 
 # usb video
 Patch2400: linux-2.6-uvcvideo.patch
@@ -1052,7 +1047,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
 %endif
 
 # stable release candidate
-# ApplyPatch patch-2.6.24.1-rc1.bz2
+# ApplyPatch patch-2.6.25.6-rc1.bz2
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1079,6 +1074,7 @@ ApplyPatch linux-2.6-hotfixes.patch
 # Roland's utrace ptrace replacement.
 %ifnarch ia64
 ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6.25-utrace-bugon.patch
 %endif
 
 # enable sysrq-c on all kernels, not only kexec
@@ -1093,17 +1089,6 @@ ApplyPatch linux-2.6-smp-boot-delay.patch
 # don't map or use disabled x86 vdso
 ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
 ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
-# ecx is clobbered during IRQs (!)
-ApplyPatch linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
-# allocate PCI ROM by default again
-ApplyPatch linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
-# don't read the apic if it's not mapped (#447183)
-ApplyPatch linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
-# fix sched_clock when calibrated against PIT
-ApplyPatch linux-2.6-x86-fix-setup-of-cyc2ns-in-tsc_64.patch
-# dont allow flush_tlb_all to be interrupted
-ApplyPatch linux-2.6-x86-prevent-pge-flush-from-interruption.patch
-
 
 #
 # PowerPC
@@ -1153,6 +1138,9 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
 # ACPI
+# acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
+ApplyPatch linux-2.6-acpi-fix-sizeof.patch
+ApplyPatch linux-2.6-acpi-fix-error-with-external-methods.patch
 # eeepc hotkey support
 ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 
@@ -1202,30 +1190,26 @@ ApplyPatch linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # Filesystem patches.
 # cifs
-ApplyPatch linux-2.6-cifs-fix-unc-path-prefix.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
-# more filesystem patches
-ApplyPatch linux-2.6-ext34-xattr-fix.patch
-ApplyPatch linux-2.6-xfs-small-buffer-reads.patch
 
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# fix firewall scripts using iprange (#446827)
-ApplyPatch linux-2.6-net-iptables-add-xt_iprange-aliases.patch
 # fix parse of netlink messages
 ApplyPatch linux-2.6-netlink-fix-parse-of-nested-attributes.patch
+# fix initialization of af_key sockets
+ApplyPatch linux-2.6-af_key-fix-selector-family-initialization.patch
 
 # Misc fixes
-# make 64-bit capabilities backwards compatible
-ApplyPatch linux-2.6-caps-remain-source-compatible-with-32-bit.patch
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # add support for macbook pro 4,1 and macbook air keyboards
 ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+# fix oops when mmc card is present during boot
+ApplyPatch linux-2.6-mmc-wbsd-fix-request_irq.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1244,8 +1228,6 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 # libata
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# wake up links that have been put to sleep by BIOS (#436099)
-ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 # fix hangs on undock (#439197)
 ApplyPatch linux-2.6-libata-acpi-hotplug-fixups.patch
 # fix problems with some old/broken CF hardware (F8 #224005)
@@ -1909,6 +1891,41 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jun 10 2008 John W. Linville <linville@redhat.com> 2.6.25.6-57
+- Upstream wireless fixes from 2008-06-09
+  (http://marc.info/?l=linux-kernel&m=121304710726632&w=2)
+- Upstream wireless updates from 2008-06-09
+  (http://marc.info/?l=linux-netdev&m=121304710526613&w=2)
+
+* Tue Jun 10 2008 Roland McGrath <roland@redhat.com> - 2.6.25.6-54
+- Fix spurious BUG_ON in tracehook_release_task. (#443552)
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-53
+- Fix oops in wbsd MMC driver when card is present during boot (#449817)
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-52
+- Fix init if af_key sockets (F8#450499)
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-51
+- Sync ACPI patches with F-8 kernel.
+
+* Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-50
+- Linux 2.6.25.6
+- Dropped patches:
+    linux-2.6-x86-fix-asm-constraint-in-do_IRQ.patch
+    linux-2.6-x86-pci-revert-remove-default-rom-allocation.patch
+    linux-2.6-x86-dont-read-maxlvt-if-apic-unmapped.patch
+    linux-2.6-x86-fix-setup-of-cyc2ns-in-tsc_64.patch
+    linux-2.6-x86-prevent-pge-flush-from-interruption.patch
+    linux-2.6-cifs-fix-unc-path-prefix.patch
+    linux-2.6-ext34-xattr-fix.patch
+    linux-2.6-xfs-small-buffer-reads.patch
+    linux-2.6-net-iptables-add-xt_iprange-aliases.patch
+    linux-2.6-caps-remain-source-compatible-with-32-bit.patch
+    linux-2.6-libata-force-hardreset-in-sleep-mode.patch
+- Updated patches:
+    linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
+
 * Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.5-49
 - Fix the specfile to match the kernel version.
 
@@ -1954,7 +1971,7 @@ fi
 * Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-36
 - Fix two hard-to-reproduce x86 bugs:
   x86: fix sched_clock when calibrated against PIT
-  x86: don't allow flush_tlb_all to be interrupted 
+  x86: don't allow flush_tlb_all to be interrupted
 
 * Tue May 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-35
 - input: fix function keys on macbook pro 4,1 and air (#445761)
@@ -2137,7 +2154,7 @@ fi
 - update to latest nouveau drm from git
 
 * Sun Apr 13 2008 David Woodhouse <dwmw2@redhat.com>
-- Remove 'CHRP' from /proc/cpuinfo on Efika, to fix platform detection 
+- Remove 'CHRP' from /proc/cpuinfo on Efika, to fix platform detection
   in anaconda
 
 * Sat Apr 12 2008 Jarod Wilson <jwilson@redhat.com>
@@ -2480,7 +2497,7 @@ fi
 * Mon Mar 24 2008 Dave Jones <davej@redhat.com>
 - Add man pages for kernel API to kernel-doc package.
 
-* Mon Mar 24 2008 Jeremy Katz <katzj@redhat.com> 
+* Mon Mar 24 2008 Jeremy Katz <katzj@redhat.com>
 - Update the kvm patch to a more final one
 
 * Mon Mar 24 2008 Jarod Wilson <jwilson@redhat.com>
