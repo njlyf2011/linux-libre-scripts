@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.679 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.682 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The rc snapshot level
 %define rcrev 5
 # The git snapshot level
-%define gitrev 2
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1173,7 +1173,7 @@ ApplyPatch linux-2.6-selinux-generic-ioctl.patch
 ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 
 # wireless patches headed for 2.6.26
-#ApplyPatch linux-2.6-wireless.patch
+ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1818,6 +1818,17 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jun 10 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless fixes from 2008-06-09
+  (http://marc.info/?l=linux-kernel&m=121304710726632&w=2)
+
+* Tue Jun 10 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc5-git4
+
+* Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.26-rc5-git3
+- Re-enable CONFIG_PCIEASPM (#447231)
+
 * Fri Jun 06 2008 Chuck Ebbert <cebbert@redhat.com>
 - 2.6.26-rc5-git2
 
