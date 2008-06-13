@@ -16,9 +16,10 @@ kernel builds for Fedora.
 The above is mirrored at the following URLs:
 
 http://www.lsd.ic.unicamp.br/~oliva/fsfla/linux-libre/freed-ora/
-http://www.blagblagblag.org/pub/mirrors/lxoliva/fsfla/linux-libre/freed-ora/
-ftp://ftp.blagblagblag.org/pub/mirrors/lxoliva/fsfla/linux-libre/freed-ora/
-rsync://rsync.blagblagblag.org/mirrors/lxoliva/fsfla/linux-libre/freed-ora/
+http://www.blagblagblag.org/pub/mirrors/fsfla/linux-libre/freed-ora/
+ftp://ftp.blagblagblag.org/pub/mirrors/fsfla/linux-libre/freed-ora/
+rsync://rsync.blagblagblag.org/mirrors/fsfla/linux-libre/freed-ora/
+rsync://fsfla.org/linux-libre/freed-ora/
 
 Thanks BLAG for offering the build machines!
 
