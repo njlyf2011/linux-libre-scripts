@@ -47,6 +47,7 @@ freed-ora/: source and binary packages of 100% Free kernels for Fedora.
 The above is also available at the following mirrors:
 
 http://www.lsd.ic.unicamp.br/~oliva/fsfla/linux-libre/
-http://www.blagblagblag.org/pub/mirrors/lxoliva/fsfla/linux-libre/
-ftp://ftp.blagblagblag.org/pub/mirrors/lxoliva/fsfla/linux-libre/
-rsync://rsync.blagblagblag.org/mirrors/lxoliva/fsfla/linux-libre/
+http://www.blagblagblag.org/pub/mirrors/fsfla/linux-libre/
+ftp://ftp.blagblagblag.org/pub/mirrors/fsfla/linux-libre/
+rsync://rsync.blagblagblag.org/mirrors/fsfla/linux-libre/
+rsync://fsfla.org/linux-libre/
