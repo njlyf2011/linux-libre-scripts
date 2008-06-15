@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.676 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.679 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -85,15 +85,15 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel-kdump
 %define with_kdump     %{?_without_kdump:     0} %{?!_without_kdump:     1}
 # kernel-debug
-%define with_debug     %{?_without_debug:     0} %{!?_without_debug:     1}
+%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-debuginfo
-%define with_debuginfo %{?_without_debuginfo: 0} %{!?_without_debuginfo: 1}
+%define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
-%define with_bootwrapper %{?_without_bootwrapper: 0} %{!?_without_bootwrapper: 1}
+%define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -588,6 +588,7 @@ Patch10: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6.25-utrace-bugon.patch
+Patch23: linux-2.6.25-utrace-i386-syscall-trace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
@@ -1075,6 +1076,7 @@ ApplyPatch linux-2.6-hotfixes.patch
 %ifnarch ia64
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6.25-utrace-bugon.patch
+ApplyPatch linux-2.6.25-utrace-i386-syscall-trace.patch -b -z .syscall
 %endif
 
 # enable sysrq-c on all kernels, not only kexec
@@ -1891,6 +1893,13 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jun 13 2008 John W. Linville <linville@redhat.com> 2.6.25.6-60
+- Upstream wireless fixes from 2008-06-13
+  (http://marc.info/?l=linux-wireless&m=121339101523260&w=2)
+
+* Tue Jun 10 2008 Roland McGrath <roland@redhat.com> - 2.6.25.6-58
+- Fix i386 syscall tracing and PTRACE_SYSEMU, had broken UML. (#449909)
+
 * Tue Jun 10 2008 John W. Linville <linville@redhat.com> 2.6.25.6-57
 - Upstream wireless fixes from 2008-06-09
   (http://marc.info/?l=linux-kernel&m=121304710726632&w=2)
