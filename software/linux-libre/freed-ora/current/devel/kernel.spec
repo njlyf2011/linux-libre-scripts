@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.687 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.692 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 5
+%define rcrev 6
 # The git snapshot level
-%define gitrev 7
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -85,15 +85,15 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel-kdump
 %define with_kdump     %{?_without_kdump:     0} %{?!_without_kdump:     1}
 # kernel-debug
-%define with_debug     %{?_without_debug:     0} %{!?_without_debug:     1}
+%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-debuginfo
-%define with_debuginfo %{?_without_debuginfo: 0} %{!?_without_debuginfo: 1}
+%define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
-%define with_bootwrapper %{?_without_bootwrapper: 0} %{!?_without_bootwrapper: 1}
+%define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -1179,7 +1179,7 @@ ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 ApplyPatch linux-2.6-selinux-get-invalid-xattrs.patch
 
 # wireless patches headed for 2.6.26
-#ApplyPatch linux-2.6-wireless.patch
+ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1824,6 +1824,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jun 13 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless fixes from 2008-06-13
+  (http://marc.info/?l=linux-wireless&m=121339101523260&w=2)
+
+* Fri Jun 13 2008 Chuck Ebbert <cebbert@redhat.com>
+- Build in the KGDB serial interface so early kernel init can be debugged.
+
+* Fri Jun 13 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc6-git1
+
 * Thu Jun 12 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc5-git7
 
