@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.464 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.468 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -87,13 +87,13 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel-kdump
 %define with_kdump     %{?_without_kdump:     0} %{?!_without_kdump:     1}
 # kernel-debug
-%define with_debug     %{?_without_debug:     0} %{!?_without_debug:     1}
+%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-debuginfo
-%define with_debuginfo %{?_without_debuginfo: 0} %{!?_without_debuginfo: 1}
+%define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -583,6 +583,7 @@ Patch05: linux-2.6-upstream-reverts.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6.25-utrace-bugon.patch
+Patch23: linux-2.6.25-utrace-i386-syscall-trace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch60: linux-2.6-x86-tune-generic.patch
@@ -1018,6 +1019,7 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6.25-utrace-bugon.patch
+ApplyPatch linux-2.6.25-utrace-i386-syscall-trace.patch
 
 # ALSA Thinkpad X300 support
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
@@ -1865,6 +1867,19 @@ fi
 
 
 %changelog
+* Fri Jun 13 2008 John W. Linville <linville@redhat.com> 2.6.25.6-28
+- Upstream wireless fixes from 2008-06-13
+  (http://marc.info/?l=linux-wireless&m=121339101523260&w=2)
+
+* Thu Jun 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-26
+- Fix UML breakage (#450501)
+
+* Tue Jun 10 2008 John W. Linville <linville@redhat.com> 2.6.25.6-25
+- Upstream wireless fixes from 2008-06-09
+  (http://marc.info/?l=linux-kernel&m=121304710726632&w=2)
+- Upstream wireless updates from 2008-06-09
+  (http://marc.info/?l=linux-netdev&m=121304710526613&w=2)
+
 * Mon Jun 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-24
 - Copy utrace and mmc driver bug fixes from F-9.
 
