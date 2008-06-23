@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.674 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.687 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -85,15 +85,15 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # kernel-kdump
 %define with_kdump     %{?_without_kdump:     0} %{?!_without_kdump:     1}
 # kernel-debug
-%define with_debug     %{?_without_debug:     0} %{!?_without_debug:     1}
+%define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-doc
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-debuginfo
-%define with_debuginfo %{?_without_debuginfo: 0} %{!?_without_debuginfo: 1}
+%define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
-%define with_bootwrapper %{?_without_bootwrapper: 0} %{!?_without_bootwrapper: 1}
+%define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -573,8 +573,6 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # stable release candidate
 # Patch03: patch-2.6.25.6-rc1.bz2
 
-Patch10: linux-2.6-upstream-reverts.patch
-
 # we always need nonintconfig, even for -vanilla kernels
 Patch06: linux-2.6-build-nonintconfig.patch
 
@@ -584,10 +582,13 @@ Patch08: linux-2.6-compile-fix-gcc-43.patch
 
 %if !%{nopatches}
 
+# revert upstream patches we get via other methods
+Patch09: linux-2.6-upstream-reverts.patch
 Patch10: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6.25-utrace-bugon.patch
+Patch23: linux-2.6.25-utrace-i386-syscall-trace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
@@ -626,20 +627,18 @@ Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-Patch414: linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
+Patch422: linux-2.6-fs-fat-cleanup-code.patch
+Patch423: linux-2.6-fs-fat-fix-setattr.patch
+Patch424: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch432: linux-2.6-netlink-fix-parse-of-nested-attributes.patch
-Patch433: linux-2.6-af_key-fix-selector-family-initialization.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
-# fix oops in wbsd mmc driver
-Patch453: linux-2.6-mmc-wbsd-fix-request_irq.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -663,8 +662,12 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch768: linux-2.6-acpi-fix-sizeof.patch
 Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
-# acpi hotkey driver for asus eeepc
-Patch784: linux-2.6-acpi-eeepc-hotkey.patch
+# eeepc-laptop driver from 2.6.26
+Patch784: linux-2.6-eeepc-laptop-base.patch
+Patch785: linux-2.6-eeepc-laptop-backlight.patch
+Patch786: linux-2.6-eeepc-laptop-fan.patch
+
+Patch800: linux-2.6-hpwdt-assembly-fix.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -1054,7 +1057,6 @@ make -f %{SOURCE20} VERSION=%{version} configs
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
-ApplyPatch linux-2.6-upstream-reverts.patch -R
 
 #
 # misc small stuff to make things compile
@@ -1069,12 +1071,14 @@ ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 %if !%{nopatches}
 
+ApplyPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
 %ifnarch ia64
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6.25-utrace-bugon.patch
+ApplyPatch linux-2.6.25-utrace-i386-syscall-trace.patch -b -z .syscall
 %endif
 
 # enable sysrq-c on all kernels, not only kexec
@@ -1141,8 +1145,13 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
 ApplyPatch linux-2.6-acpi-fix-sizeof.patch
 ApplyPatch linux-2.6-acpi-fix-error-with-external-methods.patch
-# eeepc hotkey support
-ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
+# eeepc-laptop driver from 2.6.26
+ApplyPatch linux-2.6-eeepc-laptop-base.patch
+ApplyPatch linux-2.6-eeepc-laptop-backlight.patch
+ApplyPatch linux-2.6-eeepc-laptop-fan.patch
+
+# Fix hpwdt driver to not oops on init.
+ApplyPatch linux-2.6-hpwdt-assembly-fix.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1185,21 +1194,19 @@ ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-# fix SB audigy2 ZS
-ApplyPatch linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # Filesystem patches.
 # cifs
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
+# fix rsync inability to write to vfat partitions
+ApplyPatch linux-2.6-fs-fat-cleanup-code.patch
+ApplyPatch linux-2.6-fs-fat-fix-setattr.patch
+ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# fix parse of netlink messages
-ApplyPatch linux-2.6-netlink-fix-parse-of-nested-attributes.patch
-# fix initialization of af_key sockets
-ApplyPatch linux-2.6-af_key-fix-selector-family-initialization.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1208,8 +1215,6 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
-# fix oops when mmc card is present during boot
-ApplyPatch linux-2.6-mmc-wbsd-fix-request_irq.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1891,6 +1896,57 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.7-libre.68
+- Deblob microcodes in new drm-radeon-update.patch.
+
+* Sun Jun 22 2008 Dave Airlie <airlied@redhat.com> 2.6.25.7-68
+- update drm update to fix a bug.
+
+* Fri Jun 20 2008 Dave Jones <davej@redhat.com> 2.6.25.7-67
+- Fix hpwdt driver to not oops on init. (452183)
+
+* Fri Jun 20 2008 Jarod Wilson <jwilson@redhat.com> 2.6.25.7-66
+- firewire: add phy config packet send timeout, prevents deadlock
+  with flaky ALi controllers (#446763, #444694)
+
+* Thu Jun 19 2008 Dave Airlie <airlied@redhat.com> 2.6.25.7-65
+- update radeon patches to newer upstream
+
+* Mon Jun 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.7-64
+- Linux 2.6.25.7
+- Don't apply upstream-reverts patch to -vanilla kernels.
+- Dropped patches:
+    linux-2.6-alsa-emu10k1-fix-audigy2.patch
+    linux-2.6-netlink-fix-parse-of-nested-attributes.patch
+    linux-2.6-af_key-fix-selector-family-initialization.patch
+    linux-2.6-mmc-wbsd-fix-request_irq.patch
+- Reverted wireless patches from 2.6.25.7, already in Fedora:
+    b43-fix-controller-restart-crash.patch
+    mac80211-send-association-event-on-ibss-create.patch
+    ssb-fix-context-assertion-in-ssb_pcicore_dev_irqvecs_enable.patch
+
+* Sun Jun 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-63
+- Make rsync able to write to VFAT partitions again. (#449080)
+
+* Sat Jun 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-62
+- Replace eeepc driver with upstream eeepc_laptop driver.
+
+* Sat Jun 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-61
+- Enable Controller Area Networking (F8#451179)
+
+* Fri Jun 13 2008 John W. Linville <linville@redhat.com> 2.6.25.6-60
+- Upstream wireless fixes from 2008-06-13
+  (http://marc.info/?l=linux-wireless&m=121339101523260&w=2)
+
+* Tue Jun 10 2008 Roland McGrath <roland@redhat.com> - 2.6.25.6-58
+- Fix i386 syscall tracing and PTRACE_SYSEMU, had broken UML. (#449909)
+
+* Tue Jun 10 2008 John W. Linville <linville@redhat.com> 2.6.25.6-57
+- Upstream wireless fixes from 2008-06-09
+  (http://marc.info/?l=linux-kernel&m=121304710726632&w=2)
+- Upstream wireless updates from 2008-06-09
+  (http://marc.info/?l=linux-netdev&m=121304710526613&w=2)
+
 * Tue Jun 10 2008 Roland McGrath <roland@redhat.com> - 2.6.25.6-54
 - Fix spurious BUG_ON in tracehook_release_task. (#443552)
 
