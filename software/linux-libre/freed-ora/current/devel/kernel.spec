@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.704 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.708 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -606,6 +606,7 @@ Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
+Patch350: linux-2.6-debug-list_debug_rcu.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
@@ -1104,6 +1105,7 @@ ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
+ApplyPatch linux-2.6-debug-list_debug_rcu.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1829,6 +1831,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jun 23 2008 Dave Jones <davej@redhat.com>
+- Add debug variants of the RCU linked list routines.
+
+* Mon Jun 23 2008 Dave Jones <davej@redhat.com>
+- Build LIBATA & the SCSI bits non-modular.
+
+* Mon Jun 23 2008 Dave Jones <davej@redhat.com>
+- Change ACPI button driver to non-modular.
+
+* Sun Jun 22 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc7-git1
+
 * Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.81.rc7.fc10
 - Deblobbed 2.6.26-rc7
 
