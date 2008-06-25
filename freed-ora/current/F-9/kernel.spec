@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.687 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.689 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -652,6 +652,7 @@ Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
+Patch677: linux-2.6-libata-retry-enabling-ahci.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1243,6 +1244,8 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 # fix DMA disable on atiixp
 ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
+# retry enabling AHCI mode before reporting error
+ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
 
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless.patch
@@ -1896,6 +1899,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jun 23 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.8-70
+- libata: retry enable of AHCI mode before reporting an error (#452595)
+
+* Mon Jun 23 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.8-69
+- Linux 2.6.25.8
+- Patches reverted from 2.6.25.8, already in Fedora:
+    b43-fix-noise-calculation-warn_on.patch
+    b43-fix-possible-null-pointer-dereference-in-dma-code.patch
+
 * Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.7-libre.68
 - Deblob microcodes in new drm-radeon-update.patch.
 
