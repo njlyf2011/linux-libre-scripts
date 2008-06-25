@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.467 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.475 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 6
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -576,6 +576,10 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # -stable RC
 # Patch02: patch-2.6.23.15-rc1.bz2
 
+# we also need compile fixes for -vanilla
+Patch07: linux-2.6-compile-fixes.patch
+Patch08: linux-2.6-compile-fix-gcc-43.patch
+
 %if !%{nopatches}
 
 # revert upstream changes we get from elsewhere
@@ -595,7 +599,6 @@ Patch90: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch91: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 Patch92: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch93: linux-2.6-alsa-kill-annoying-messages.patch
-Patch94: linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch130: linux-2.6-ppc-use-libgcc.patch
@@ -635,15 +638,14 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch421: linux-2.6-squashfs.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
 Patch425: linux-2.6-nfs-client-mounts-hang.patch
+Patch426: linux-2.6-fs-fat-cleanup-code.patch
+Patch427: linux-2.6-fs-fat-fix-setattr.patch
+Patch428: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch431: linux-2.6-netlink-fix-parse-of-nested-attributes.patch
-Patch432: linux-2.6-af_key-fix-selector-family-initialization.patch
 
 Patch440: linux-2.6-sha_alignment.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-# fix oops in wbsd mmc driver
-Patch453: linux-2.6-mmc-wbsd-fix-request_irq.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -658,6 +660,7 @@ Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
+Patch677: linux-2.6-libata-retry-enabling-ahci.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -675,8 +678,8 @@ Patch768: linux-2.6-acpi-fix-sizeof.patch
 Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
 Patch784: linux-2.6-acpi-eeepc-hotkey.patch
 
-Patch820: linux-2.6-compile-fixes.patch
-Patch821: linux-2.6-compile-fix-gcc-43.patch
+Patch800: linux-2.6-hpwdt-assembly-fix.patch
+
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1011,6 +1014,15 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+#
+# misc small stuff to make things compile
+#
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-compile-fixes.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-compile-fixes.patch
+fi
+ApplyPatch linux-2.6-compile-fix-gcc-43.patch
+
 %if !%{nopatches}
 
 # Revert -stable pieces we get from elsewhere here
@@ -1027,8 +1039,6 @@ ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 # kill annoying messages
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
-# fix hang with audigy2
-ApplyPatch linux-2.6-alsa-emu10k1-fix-audigy2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1140,22 +1150,20 @@ ApplyPatch linux-2.6-squashfs.patch
 ApplyPatch linux-2.6-gfs-locking-exports.patch
 # fix nfs mount hang
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
+# fix rsync inability to write to vfat partitions
+ApplyPatch linux-2.6-fs-fat-cleanup-code.patch
+ApplyPatch linux-2.6-fs-fat-fix-setattr.patch
+ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# fix netlink message parsing
-ApplyPatch linux-2.6-netlink-fix-parse-of-nested-attributes.patch
-# fix af_key socket init
-ApplyPatch linux-2.6-af_key-fix-selector-family-initialization.patch
 
 # Misc fixes
 # Fix SHA1 alignment problem on ia64
 ApplyPatch linux-2.6-sha_alignment.patch
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
-# fix oops in wbsd driver
-ApplyPatch linux-2.6-mmc-wbsd-fix-request_irq.patch
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
 # add ids for new wacom tablets
@@ -1192,6 +1200,8 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 # fix DMA disable on atiixp
 ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
+# retry enabling AHCI mode before reporting error
+ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
 
 # wireless
 #
@@ -1227,8 +1237,8 @@ ApplyPatch linux-2.6-acpi-fix-error-with-external-methods.patch
 # Eeepc hotkey driver
 ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 
-# Fix excessive wakeups
-# Make hdaps timer only tick when in use.
+# Fix hpwdt driver to not oops on init.
+ApplyPatch linux-2.6-hpwdt-assembly-fix.patch
 
 # dm / md
 
@@ -1244,16 +1254,6 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
-
-#
-# misc small stuff to make things compile
-#
-
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-compile-fixes.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-compile-fixes.patch
-fi
-ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1867,6 +1867,45 @@ fi
 
 
 %changelog
+* Mon Jun 23 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.8-35
+- libata: retry enable of AHCI mode before reporting an error (F9#452595)
+
+* Mon Jun 23 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.8-34
+- Linux 2.6.25.8
+- Patches reverted from 2.6.25.8, already in Fedora:
+    b43-fix-noise-calculation-warn_on.patch
+    b43-fix-possible-null-pointer-dereference-in-dma-code.patch
+
+* Fri Jun 20 2008 Dave Jones <davej@redhat.com>
+- Fix hpwdt driver to not oops on init. (452183)
+
+* Fri Jun 20 2008 Jarod Wilson <jwilson@redhat.com> 2.6.25.7-32
+- firewire: add phy config packet send timeout, prevents deadlock
+  with flaky ALi controllers (#446763, #444694)
+
+* Mon Jun 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.7-31
+- Linux 2.6.25.7
+- Apply compile-fixes patches to -vanilla kernels.
+- Dropped patches:
+    linux-2.6-alsa-emu10k1-fix-audigy2.patch
+    linux-2.6-netlink-fix-parse-of-nested-attributes.patch
+    linux-2.6-af_key-fix-selector-family-initialization.patch
+    linux-2.6-mmc-wbsd-fix-request_irq.patch
+- Reverted wireless patches from 2.6.25.7, already in Fedora:
+    b43-fix-controller-restart-crash.patch
+    mac80211-send-association-event-on-ibss-create.patch
+    ssb-fix-context-assertion-in-ssb_pcicore_dev_irqvecs_enable.patch
+
+* Sun Jun 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-30
+- Make rsync able to write to VFAT partitions again. (#450493)
+
+* Sat Jun 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-29
+- Enable Controller Area Networking (#451179)
+
+* Fri Jun 13 2008 John W. Linville <linville@redhat.com> 2.6.25.6-28
+- Upstream wireless fixes from 2008-06-13
+  (http://marc.info/?l=linux-wireless&m=121339101523260&w=2)
+
 * Thu Jun 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.6-26
 - Fix UML breakage (#450501)
 
