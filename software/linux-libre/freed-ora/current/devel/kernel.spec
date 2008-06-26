@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.710 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.713 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1185,10 +1185,10 @@ ApplyPatch linux-2.6-selinux-ecryptfs-support.patch
 # wireless patches headed for 2.6.26
 #ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
-#ApplyPatch linux-2.6-wireless-pending.patch
+ApplyPatch linux-2.6-wireless-pending.patch
 
 # Add misc wireless bits from upstream wireless tree
-#ApplyPatch linux-2.6-at76.patch
+ApplyPatch linux-2.6-at76.patch
 
 # implement smarter atime updates support.
 #ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1828,6 +1828,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jun 24 2008 Dave Jones <davej@redhat.com>
+- Disable a bunch of modules in the ppc32 kernel.
+
+* Tue Jun 24 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless updates from 2008-06-14
+  (http://marc.info/?l=linux-netdev&m=121346686508160&w=2)
+
+* Tue Jun 24 2008 John W. Linville <linville@redhat.com>
+- Restore wireless patches disabled during recent updates
+
 * Tue Jun 24 2008 Dave Jones <davej@redhat.com>
 - Disable the RCU linked list debug routines for now.
 
