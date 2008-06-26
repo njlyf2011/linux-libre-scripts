@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.689 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.691 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -635,6 +635,7 @@ Patch423: linux-2.6-fs-fat-fix-setattr.patch
 Patch424: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
@@ -667,8 +668,6 @@ Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
 Patch784: linux-2.6-eeepc-laptop-base.patch
 Patch785: linux-2.6-eeepc-laptop-backlight.patch
 Patch786: linux-2.6-eeepc-laptop-fan.patch
-
-Patch800: linux-2.6-hpwdt-assembly-fix.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -1151,9 +1150,6 @@ ApplyPatch linux-2.6-eeepc-laptop-base.patch
 ApplyPatch linux-2.6-eeepc-laptop-backlight.patch
 ApplyPatch linux-2.6-eeepc-laptop-fan.patch
 
-# Fix hpwdt driver to not oops on init.
-ApplyPatch linux-2.6-hpwdt-assembly-fix.patch
-
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
@@ -1208,6 +1204,8 @@ ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
+# CVE-2008-2750: l2tp heap overflow
+ApplyPatch linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1899,6 +1897,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jun 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-72
+- Linux 2.6.25.9
+
+* Tue Jun 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.8-71
+- pppolt2p: fix heap overflow (CVE-2008-2750) (#452111)
+
 * Mon Jun 23 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.8-70
 - libata: retry enable of AHCI mode before reporting an error (#452595)
 
