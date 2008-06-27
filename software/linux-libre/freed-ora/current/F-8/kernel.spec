@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.477 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.478 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1865,6 +1865,12 @@ fi
 
 
 %changelog
+* Wed Jun 25 2008 John W. Linville <linville@redhat.com> 2.6.25.9-38
+- Upstream wireless fixes from 2008-06-25
+  (http://marc.info/?l=linux-wireless&m=121440912502527&w=2)
+- Upstream wireless updates from 2008-06-14
+  (http://marc.info/?l=linux-netdev&m=121346686508160&w=2)
+
 * Tue Jun 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-37
 - Linux 2.6.25.9
 
