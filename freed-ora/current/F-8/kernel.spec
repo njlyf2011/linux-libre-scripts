@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.478 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.480 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -674,6 +674,7 @@ Patch720: linux-2.6-e1000-corrupt-eeprom-checksum.patch
 Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
 Patch725: linux-2.6-netdev-atl2.patch
 Patch727: linux-2.6-e1000-ich9.patch
+Patch728: linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
 Patch768: linux-2.6-acpi-fix-sizeof.patch
 Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
@@ -1227,6 +1228,8 @@ ApplyPatch linux-2.6-netdev-e1000-disable-alpm.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 # add atl2 network driver for eeepc
 ApplyPatch linux-2.6-netdev-atl2.patch
+# fix bluetooth kbd disconnect
+ApplyPatch linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
 # ACPI/PM patches
 # acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
@@ -1865,6 +1868,13 @@ fi
 
 
 %changelog
+* Fri Jun 27 2008 John W. Linville <linville@redhat.com> 2.6.25.9-39
+- Upstream wireless fixes from 2008-06-27
+  (http://marc.info/?l=linux-wireless&m=121459423021061&w=2)
+
+* Fri Jun 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-39
+- Fix bluetooth keyboard disconnect (F9#449872)
+
 * Wed Jun 25 2008 John W. Linville <linville@redhat.com> 2.6.25.9-38
 - Upstream wireless fixes from 2008-06-25
   (http://marc.info/?l=linux-wireless&m=121440912502527&w=2)
