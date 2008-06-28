@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.693 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.695 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -689,6 +689,8 @@ Patch1811: drm-radeon-update.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
+Patch2010: linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
+
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
 
@@ -1274,6 +1276,9 @@ ApplyPatch linux-2.6-virtio_net-free-transmit-skbs-in-a-timer.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
+
+# fix bluetooth kbd disconnect
+ApplyPatch linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-drm-git-mm.patch
@@ -1897,6 +1902,13 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jun 27 2008 John W. Linville <linville@redhat.com> 2.6.25.9-76
+- Upstream wireless fixes from 2008-06-27
+  (http://marc.info/?l=linux-wireless&m=121459423021061&w=2)
+
+* Fri Jun 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-75
+- Fix bluetooth keyboard disconnect (#449872)
+
 * Wed Jun 25 2008 John W. Linville <linville@redhat.com> 2.6.25.9-74
 - Upstream wireless fixes from 2008-06-25
   (http://marc.info/?l=linux-wireless&m=121440912502527&w=2)
