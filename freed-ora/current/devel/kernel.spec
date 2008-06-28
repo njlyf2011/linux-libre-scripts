@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.716 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.719 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -607,8 +607,10 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch350: linux-2.6-debug-list_debug_rcu.patch
+Patch360: linux-2.6-debug-softlockup-modules-list.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+Patch390: linux-2.6-defaults-acpi-video.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
@@ -1105,6 +1107,7 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 #ApplyPatch linux-2.6-debug-list_debug_rcu.patch
+ApplyPatch linux-2.6-debug-softlockup-modules-list.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1828,8 +1831,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jun 27 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless updates from 2008-06-27
+  (http://marc.info/?l=linux-wireless&m=121458164930953&w=2)
+
+* Thu Jun 26 2008 Dave Jones <davej@redhat.com>
+- Print out modules list when we hit soft lockup.
+
 * Wed Jun 25 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.93.rc8.fc10
-- Deblobbed 2.6.26-rc7
+- Deblobbed 2.6.26-rc8
 
 * Wed Jun 25 2008 John W. Linville <linville@redhat.com>
 - Upstream wireless fixes from 2008-06-25
