@@ -2,7 +2,6 @@ D/scripts////
 /linux-2.6.25.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.26-rc7.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.26-rc8.bz2.sign/-1.1/dummy timestamp//
-/.cvsignore/1.846/dummy timestamp from new-entry+Fri Jun 27 23:34:02 2008//Tkernel-2_6_26-0_97_rc8_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_26-0_97_rc8_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_26-0_97_rc8_fc10
 /Makefile/1.74/Mon Jun 16 16:37:50 2008//Tkernel-2_6_26-0_97_rc8_fc10
@@ -121,6 +120,7 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_26-0_97_rc8_fc10
 /nouveau-drm-update.patch/1.2/dummy timestamp from new-entry/-kb/Tkernel-2_6_26-0_97_rc8_fc10
 /nouveau-drm.patch/1.12/dummy timestamp from new-entry/-kb/Tkernel-2_6_26-0_97_rc8_fc10
-/sources/1.807/dummy timestamp from new-entry+Fri Jun 27 23:34:17 2008//Tkernel-2_6_26-0_97_rc8_fc10
-/upstream/1.725/dummy timestamp from new-entry+Fri Jun 27 23:33:58 2008//Tkernel-2_6_26-0_97_rc8_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_26-0_97_rc8_fc10
+/.cvsignore/1.846/Sun Jun 29 17:18:22 2008//Tkernel-2_6_26-0_97_rc8_fc10
+/sources/1.807/Sun Jun 29 17:18:23 2008//Tkernel-2_6_26-0_97_rc8_fc10
+/upstream/1.725/Sun Jun 29 17:18:24 2008//Tkernel-2_6_26-0_97_rc8_fc10
