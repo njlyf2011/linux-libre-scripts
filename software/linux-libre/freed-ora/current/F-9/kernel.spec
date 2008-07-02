@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.695 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.698 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -625,8 +625,9 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
 Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
-Patch411: linux-2.6-alsa-hda-codec-add-AD1884A.patch
+Patch412: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
+Patch414: linux-2.6-alsa-trident-spdif.patch
 
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
@@ -1193,6 +1194,8 @@ ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
+# ALSA: trident - pause s/pdif output
+ApplyPatch linux-2.6-alsa-trident-spdif.patch
 
 # Filesystem patches.
 # cifs
@@ -1902,6 +1905,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jun 30 2008 John W. Linville <linville@redhat.com> 2.6.25.9-79
+- Upstream wireless fixes from 2008-06-30
+  (http://marc.info/?l=linux-wireless&m=121485709702728&w=2)
+- Upstream wireless updates from 2008-06-27
+  (http://marc.info/?l=linux-wireless&m=121458164930953&w=2)
+
+* Mon Jun 30 2008 Dave Jones <davej@redhat.com>
+- Disable rio500 driver (bz 451567)
+
+* Mon Jun 30 2008 Dave Jones <davej@redhat.com>
+- ALSA: trident - pause s/pdif output (#453464)
+
 * Fri Jun 27 2008 John W. Linville <linville@redhat.com> 2.6.25.9-76
 - Upstream wireless fixes from 2008-06-27
   (http://marc.info/?l=linux-wireless&m=121459423021061&w=2)
