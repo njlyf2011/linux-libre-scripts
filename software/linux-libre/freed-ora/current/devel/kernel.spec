@@ -1,4 +1,4 @@
-Summary: The Linux kernel (the core of the GNU/Linux operating system)
+Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
@@ -21,7 +21,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.726 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.730 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -680,6 +680,9 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
+Patch2610: linux-2.6-x86-efi-fix-low-mappings.patch
+
+Patch2700: linux-2.6-ia64-export-account_system_vtime.patch
 
 %endif
 
@@ -1238,6 +1241,11 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
+# fix efi boot
+ApplyPatch linux-2.6-x86-efi-fix-low-mappings.patch
+
+# export account_system_vtime() on IA64
+ApplyPatch linux-2.6-ia64-export-account_system_vtime.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1832,11 +1840,25 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com>
+- Fix EFI boot.
+- Export account_system_vtime on IA64.
+
+* Thu Jul  3 2008 Jeremy Katz <katzj@redhat.com>
+- Disable the garmin_gps driver; programs are using libusb for this now
+- Make padlock warnings quieter
+
+* Wed Jul 02 2008 Chuck Ebbert <cebbert@redhat.com>
+- Re-enable the snd-pcsp driver (#452748)
+
 * Tue Jul 01 2008 John W. Linville <linville@redhat.com>
 - Upstream wireless fixes from 2008-06-30
   (http://marc.info/?l=linux-wireless&m=121485709702728&w=2)
 - Upstream wireless updates from 2008-06-30
   (http://marc.info/?l=linux-wireless&m=121486432315033&w=2)
+
+* Tue Jul 01 2008 Dave Jones <davej@redhat.com>
+- Shorten summary in specfile.
 
 * Tue Jul 01 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc8-git2
