@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.700 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.702 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -703,6 +703,8 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # Fix HID usage descriptor on MS wireless desktop receiver
 Patch2301: linux-2.6-ms-wireless-receiver.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=454028
+Patch2302: linux-2.6-usb-storage-nikond80-quirk.patch
 
 # usb video
 Patch2400: linux-2.6-uvcvideo.patch
@@ -1143,6 +1145,7 @@ ApplyPatch linux-2.6-execshield.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+ApplyPatch linux-2.6-usb-storage-nikond80-quirk.patch
 
 # ACPI
 # acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
@@ -1905,6 +1908,17 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Jul 03 2008 Dave Jones <davej@redhat.com>
+- Add USB Storage quirk for Nikon D40 with new firmware.
+
+* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-82
+- Linux 2.6.25.10
+- Reverted stable patch, not needed with utrace:
+	x86_64-ptrace-fix-sys32_ptrace-task_struct-leak.patch
+- Reverted part of this stable patch against drivers/net/wireless/strip.c
+  (the driver eventually gets removed as part of the wireless updates):
+	tty-fix-for-tty-operations-bugs.patch
+
 * Wed Jul 02 2008 John W. Linville <linville@redhat.com> 2.6.25.9-81
 - Upstream wireless updates from 2008-06-30
   (http://marc.info/?l=linux-wireless&m=121486432315033&w=2)
