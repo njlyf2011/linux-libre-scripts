@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.730 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.733 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 2
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -650,6 +650,7 @@ Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
+Patch1800: linux-2.6-export-shmem-bits-for-gem.patch
 Patch1801: linux-2.6-drm-git-mm.patch
 Patch1803: nouveau-drm.patch
 Patch1804: nouveau-drm-update.patch
@@ -681,8 +682,6 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 Patch2610: linux-2.6-x86-efi-fix-low-mappings.patch
-
-Patch2700: linux-2.6-ia64-export-account_system_vtime.patch
 
 %endif
 
@@ -1216,6 +1215,8 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 #ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
+ApplyPatch linux-2.6-export-shmem-bits-for-gem.patch
+
 #ApplyPatch linux-2.6-drm-git-mm.patch
 #ApplyPatch nouveau-drm.patch
 #ApplyPatch nouveau-drm-update.patch
@@ -1243,9 +1244,6 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 # fix efi boot
 ApplyPatch linux-2.6-x86-efi-fix-low-mappings.patch
-
-# export account_system_vtime() on IA64
-ApplyPatch linux-2.6-ia64-export-account_system_vtime.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1840,6 +1838,20 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Jul  3 2008 Kristian Høgsberg <krh@redhat.com>
+- Add linux-2.6-export-shmem-bits-for-gem.patch to export
+  shmmem_getpage and shmem_file_setup for GEM.  For now this will let
+  use GEM from the drm tree against the system kernel, but eventually
+  we'll pull in the GEM patches here.
+- Drop account_system_vtime export patch, now upstream.
+
+* Thu Jul 03 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless fixes from 2008-07-02
+  (http://marc.info/?l=linux-netdev&m=121503163124089&w=2)
+
+* Thu Jul 03 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc8-git3
+
 * Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com>
 - Fix EFI boot.
 - Export account_system_vtime on IA64.
