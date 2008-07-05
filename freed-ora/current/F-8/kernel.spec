@@ -1,4 +1,4 @@
-Summary: The Linux kernel (the core of the GNU/Linux operating system)
+Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
@@ -23,7 +23,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.480 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.483 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -1868,6 +1868,23 @@ fi
 
 
 %changelog
+* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-42
+- Linux 2.6.25.10
+- Reverted stable patch, not needed with utrace:
+	x86_64-ptrace-fix-sys32_ptrace-task_struct-leak.patch
+- Reverted part of this stable patch against drivers/net/wireless/strip.c
+  (the driver eventually gets removed as part of the wireless updates):
+	tty-fix-for-tty-operations-bugs.patch
+
+* Wed Jul 02 2008 John W. Linville <linville@redhat.com> 2.6.25.9-41
+- Upstream wireless fixes from 2008-06-30
+  (http://marc.info/?l=linux-wireless&m=121485709702728&w=2)
+- Upstream wireless updates from 2008-06-27
+  (http://marc.info/?l=linux-wireless&m=121458164930953&w=2)
+
+* Tue Jul 01 2008 Dave Jones <davej@redhat.com>
+- Shorten summary in specfile.
+
 * Fri Jun 27 2008 John W. Linville <linville@redhat.com> 2.6.25.9-39
 - Upstream wireless fixes from 2008-06-27
   (http://marc.info/?l=linux-wireless&m=121459423021061&w=2)
