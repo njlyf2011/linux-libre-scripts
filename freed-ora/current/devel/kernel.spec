@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.734 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.738 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 9
 # The git snapshot level
-%define gitrev 4
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -94,6 +94,9 @@ Summary: The Linux kernel
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
+
+# don't build the kernel-doc package
+%define with_doc 0
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -607,7 +610,6 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch350: linux-2.6-debug-list_debug_rcu.patch
-Patch360: linux-2.6-debug-softlockup-modules-list.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
@@ -681,7 +683,6 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
-Patch2610: linux-2.6-x86-efi-fix-low-mappings.patch
 
 %endif
 
@@ -1109,7 +1110,6 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 #ApplyPatch linux-2.6-debug-list_debug_rcu.patch
-ApplyPatch linux-2.6-debug-softlockup-modules-list.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1166,9 +1166,9 @@ ApplyPatch linux-2.6-silence-x86-decompressor.patch
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
 # Fix the SELinux mprotect checks on executable mappings
-ApplyPatch linux-2.6-selinux-mprotect-checks.patch
+#eApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
-ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
+#ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
@@ -1183,13 +1183,13 @@ ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
 ApplyPatch linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
 ApplyPatch linux-2.6-selinux-generic-ioctl.patch
-ApplyPatch linux-2.6-selinux-new-proc-checks.patch
+#ApplyPatch linux-2.6-selinux-new-proc-checks.patch
 ApplyPatch linux-2.6-selinux-get-invalid-xattrs.patch
 # Broken, see BZ 452438
 #ApplyPatch linux-2.6-selinux-ecryptfs-support.patch
 
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1242,8 +1242,6 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
-# fix efi boot
-ApplyPatch linux-2.6-x86-efi-fix-low-mappings.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1838,6 +1836,24 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jul 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- Skip building the kernel-doc package due to breakage somewhere in rawhide XML land.
+
+* Mon Jul 07 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git2
+
+* Mon Jul 07 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git1
+
+* Sun Jul 06 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.113.rc9.fc10
+- Deblobbed 2.6.26-rc9
+
+* Sun Jul 06 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9
+
+* Sat Jul 05 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc8-git5
+
 * Fri Jul 04 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc8-git4
 
