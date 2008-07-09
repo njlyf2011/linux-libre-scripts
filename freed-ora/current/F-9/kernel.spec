@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.704 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.705 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -705,6 +705,8 @@ Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2301: linux-2.6-ms-wireless-receiver.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=454028
 Patch2302: linux-2.6-usb-storage-nikond80-quirk.patch
+# fix interrupt handling
+Patch2303: linux-2.6-usb-fix-interrupt-disabling.patch
 
 # usb video
 Patch2400: linux-2.6-uvcvideo.patch
@@ -1146,6 +1148,7 @@ ApplyPatch linux-2.6-execshield.patch
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-storage-nikond80-quirk.patch
+ApplyPatch linux-2.6-usb-fix-interrupt-disabling.patch
 
 # ACPI
 # acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
@@ -1908,6 +1911,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jul 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-86
+- Fix USB interrupt handling with shared interrupts.
+
 * Fri Jul 04 2008 John W. Linville <linville@redhat.com> 2.6.25.9-85
 - Upstream wireless fixes from 2008-07-02
   (http://marc.info/?l=linux-netdev&m=121503163124089&w=2)
