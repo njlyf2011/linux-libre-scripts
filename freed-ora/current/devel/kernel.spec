@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.738 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.747 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 9
 # The git snapshot level
-%define gitrev 2
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -588,7 +588,9 @@ Patch07: linux-2.6-compile-fixes.patch
 
 Patch10: linux-2.6-hotfixes.patch
 
-Patch21: linux-2.6-utrace.patch
+Patch21: linux-2.6-ptrace-cleanup.patch
+Patch22: linux-2.6-tracehook.patch
+Patch23: linux-2.6-utrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
@@ -675,9 +677,6 @@ Patch2020: linux-2.6-netdev-atl2.patch
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # Fix HID usage descriptor on MS wireless desktop receiver
 Patch2301: linux-2.6-ms-wireless-receiver.patch
-
-# usb video
-Patch2400: linux-2.6-uvcvideo.patch
 
 Patch2501: linux-2.6-ppc-use-libgcc.patch
 
@@ -1048,9 +1047,9 @@ fi
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
-%ifnarch ia64
-#ApplyPatch linux-2.6-utrace.patch
-%endif
+ApplyPatch linux-2.6-ptrace-cleanup.patch
+ApplyPatch linux-2.6-tracehook.patch
+ApplyPatch linux-2.6-utrace.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1189,7 +1188,7 @@ ApplyPatch linux-2.6-selinux-get-invalid-xattrs.patch
 #ApplyPatch linux-2.6-selinux-ecryptfs-support.patch
 
 # wireless patches headed for 2.6.26
-#ApplyPatch linux-2.6-wireless.patch
+ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 
@@ -1234,9 +1233,6 @@ ApplyPatch linux-2.6-export-shmem-bits-for-gem.patch
 #if [ "$C" -gt 10 ]; then
 #ApplyPatch linux-2.6-firewire-git-pending.patch
 #fi
-
-# usb video
-#ApplyPatch linux-2.6-uvcvideo.patch
 
 ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
@@ -1836,6 +1832,38 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Jul 09 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.26-0.124.rc9.git5.fc10
+- Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
+
+* Wed Jul 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git5
+
+* Wed Jul 09 2008 Dave Jones <davej@redhat.com>
+- Reenable paravirt on x86-64.
+
+* Tue Jul  8 2008 Roland McGrath <roland@redhat.com>
+- new bleeding-edge utrace code
+
+* Tue Jul 08 2008 Eric Sandeen <sandeen@redhat.com>
+- Fix reiserfs list corruption (#453699)
+
+* Tue Jul 08 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless updates from 2008-07-08
+  (http://marc.info/?l=linux-wireless&m=121554411325041&w=2)
+
+* Tue Jul 08 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git4
+
+* Tue Jul 08 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless fixes from 2008-07-07
+  (http://marc.info/?l=linux-wireless&m=121546143025524&w=2)
+
+* Tue Jul 08 2008 Kyle McMartin <kmcmartin@redhat.com>
+- nuke linux-2.6-uvcvideo.patch, merged upstream
+
+* Tue Jul 08 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git3
+
 * Mon Jul 07 2008 Chuck Ebbert <cebbert@redhat.com>
 - Skip building the kernel-doc package due to breakage somewhere in rawhide XML land.
 
