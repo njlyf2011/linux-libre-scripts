@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.705 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.710 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -641,11 +641,13 @@ Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+Patch453: linux-2.6-hwmon-hdaps-add-new-models.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
+Patch611: linux-2.6-reiserfs-discard-prealloc.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
@@ -655,6 +657,7 @@ Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
 Patch677: linux-2.6-libata-retry-enabling-ahci.patch
+Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1225,6 +1228,8 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+# add new models to hdaps
+ApplyPatch linux-2.6-hwmon-hdaps-add-new-models.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1239,6 +1244,9 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
 ApplyPatch linux-2.6-defaults-fat-utf8.patch
+
+# Fix reiserfs list corruption
+ApplyPatch linux-2.6-reiserfs-discard-prealloc.patch
 
 # libata
 # ia64 ata quirk
@@ -1255,6 +1263,8 @@ ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
 # retry enabling AHCI mode before reporting error
 ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
+# fix ahci / ich6m conflict
+ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless.patch
@@ -1911,22 +1921,44 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Mon Jul 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-86
+* Thu Jul 10 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.25.10-libre.91.fc9
+- Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
+
+* Thu Jul 10 2008 John W. Linville <linville@redhat.com>  2.6.25.9-91
+- Upstream wireless fixes from 2008-07-09
+  (http://marc.info/?l=linux-netdev&m=121563769208664&w=2)
+- Upstream wireless updates from 2008-07-08
+  (http://marc.info/?l=linux-wireless&m=121554411325041&w=2)
+
+* Thu Jul 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-90
+- libata: don't let ata_piix driver attach to ICH6M in ahci mode (#430916)
+
+* Wed Jul 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-89
+- hdaps: support new Lenovo notebook models (#449888)
+
+* Tue Jul 08 2008 Eric Sandeen <sandeen@redhat.com> 2.6.25.10-88
+- Fix reiserfs list corruption (#453699)
+
+* Tue Jul 08 2008 John W. Linville <linville@redhat.com> 2.6.25.10-87
+- Upstream wireless fixes from 2008-07-07
+  (http://marc.info/?l=linux-wireless&m=121546143025524&w=2)
+
+* Mon Jul 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-86
 - Fix USB interrupt handling with shared interrupts.
 
-* Fri Jul 04 2008 John W. Linville <linville@redhat.com> 2.6.25.9-85
+* Fri Jul 04 2008 John W. Linville <linville@redhat.com> 2.6.25.10-85
 - Upstream wireless fixes from 2008-07-02
   (http://marc.info/?l=linux-netdev&m=121503163124089&w=2)
 - Apply Stefan Becker's fix for bad hunk of wireless build fixups for 2.6.25
   (https://bugzilla.redhat.com/show_bug.cgi?id=453390#c36)
 
-* Fri Jul 04 2008 Dave Jones <davej@redhat.com>
+* Fri Jul 04 2008 Dave Jones <davej@redhat.com> 2.6.25.10-84
 - Better fix for the Nikon D80 usb-storage quirk.
 
-* Thu Jul 03 2008 Dave Jones <davej@redhat.com>
+* Thu Jul 03 2008 Dave Jones <davej@redhat.com> 2.6.25.10-83
 - Add USB Storage quirk for Nikon D40 with new firmware.
 
-* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-82
+* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-82
 - Linux 2.6.25.10
 - Reverted stable patch, not needed with utrace:
 	x86_64-ptrace-fix-sys32_ptrace-task_struct-leak.patch
