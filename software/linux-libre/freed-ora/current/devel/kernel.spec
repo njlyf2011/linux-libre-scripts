@@ -3,7 +3,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 0
+%define released_kernel 1
 
 # Versions of various parts
 
@@ -21,16 +21,16 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.757 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.759 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 25
+%define base_sublevel 26
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+#define librev 
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 3
+%define stable_update 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -1832,6 +1832,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.136.fc10
+- Deblobbed 2.6.26
+
+* Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.26
+
+* Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Enable CONFIG_NETDEVICES_MULTIQUEUE (and CONFIG_MAC80211_QOS.)
+
 * Sun Jul 13 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc9-git12
 
@@ -1863,7 +1872,7 @@ fi
 * Wed Jul 09 2008 Chuck Ebbert <cebbert@redhat.com>
 - Enable the i2c-tiny-usb driver. (#451451)
 
-* Wed Jul 09 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.26-libre.0.124.rc9.git5.fc10
+* Wed Jul 09 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.124.rc9.git5.fc10
 - Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
 
 * Wed Jul 09 2008 Dave Jones <davej@redhat.com>

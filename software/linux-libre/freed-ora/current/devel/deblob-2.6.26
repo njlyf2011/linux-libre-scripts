@@ -32,7 +32,7 @@
 # Thanks to Brian Brazil @ gnewsense
 #
 
-# This version, suited for 2.6.25, avoids removing Free Software for
+# This version, suited for 2.6.26, avoids removing Free Software for
 # the sake of removing non-Free Software.  Drivers that currently
 # require non-Free firmware are retained, but firmware included in
 # GPLed sources is replaced with /*(DEBLOBBED)*/ if the deblob-check
@@ -40,7 +40,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.25 extra=1
+kver=2.6.26 extra=
 
 sed -i "s,^EXTRAVERSION.*,EXTRAVERSION = -libre$extra," Makefile
 
@@ -53,23 +53,41 @@ sed -i "s,^EXTRAVERSION.*,EXTRAVERSION = -libre$extra," Makefile
 
 if [ ! -f `which unifdef` ] ; then echo "requires unifdef" ; exit ; fi
 
+check=`echo $0 | sed 's,/[^/]*$,,'`/deblob-check
+if [ ! -f $check ] ; then
+  echo "optional deblob-check missing, will remove entire files"
+  have_check=false
+else
+  have_check=:
+fi
+
 function clean_file {
 	#$1 = filename
+	if test ! -f $1; then
+		echo $1 does not exist, something is wrong >&2
+		exit 1
+	fi
 	rm -v $1
 }
 
 function check_changed {
-	if cmp $1.deblob $1 > /dev/null; then
+	if test ! -f $1; then
+		echo $1 does not exist, something is wrong >&2
+		exit 1
+	elif cmp $1.deblob $1 > /dev/null; then
 		echo $1 did not change, something is wrong >&2
 		exit 1
 	fi
 	mv $1.deblob $1
 }
 
-check=`echo $0 | sed 's,/[^/]*$,,'`/deblob-check
 function clean_blob {
 	#$1 = filename
-	if test -f $check; then
+	if $have_check; then
+	    if test ! -f $1; then
+		echo $1 does not exist, something is wrong >&2
+		exit 1
+	    fi
 	    name=$1
 	    echo Removing blobs from $name
 	    set fnord "$@" -d
@@ -165,7 +183,7 @@ clean_kconfig drivers/char/drm/Kconfig 'DRM_R128'
 clean_mk CONFIG_DRM_R128 drivers/char/drm/Makefile
 
 # DRM_RADEON - ATI Radeon
-clean_blob drivers/char/drm/radeon_cp.c
+clean_blob drivers/char/drm/radeon_microcode.h
 clean_kconfig drivers/char/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/char/drm/Makefile
 
@@ -268,19 +286,10 @@ clean_blob drivers/media/video/usbvideo/vicam.c
 clean_kconfig drivers/media/video/usbvideo/Kconfig 'USB_VICAM'
 clean_mk CONFIG_USB_VICAM drivers/media/video/usbvideo/Makefile
 
-# other...
-
-# disable -- appears to neeed other DVB bits
-clean_mk CONFIG_DVB_CORE drivers/media/Makefile
-clean_mk CONFIG_VIDEOBUF_DVB drivers/media/video/Makefile
-clean_mk CONFIG_VIDEO_SAA7134 drivers/media/video/Makefile
-clean_mk CONFIG_VIDEO_CX88 drivers/media/video/Makefile
-clean_kconfig drivers/media/Kconfig 'VIDEOBUF_DVB'
 
 #######################
 # Removed net Drivers #
 #######################
-
 
 # ACENIC - Alteon AceNIC/3Com 3C985/NetGear GA620 Gigabit
 clean_blob drivers/net/acenic_firmware.h
@@ -311,9 +320,12 @@ clean_mk CONFIG_CASSINI drivers/net/Makefile
 
 # E100 - Intel(R) PRO/100+
 clean_blob drivers/net/e100.c
-sed -i 's:\(\/\*(DEBLOBBED)\*\/\),:\1:' drivers/net/e100.c
-# clean_kconfig drivers/net/Kconfig 'E100'
-# clean_mk CONFIG_E100 drivers/net/Makefile
+if $have_check; then
+  sed -i 's:\(\/\*(DEBLOBBED)\*\/\),:\1:' drivers/net/e100.c
+else
+  clean_kconfig drivers/net/Kconfig 'E100'
+  clean_mk CONFIG_E100 drivers/net/Makefile
+fi
 
 # MYRI_SBUS - MyriCOM Gigabit Ethernet
 clean_blob drivers/net/myri_code.h
@@ -346,7 +358,12 @@ patch --no-backup-if-mismatch -p0 <<\EOF # patches/linux-2.6-tg3-clean.patch
  
 EOF
 clean_blob drivers/net/tg3.c -s 9
-sed -i 's:\(\/\*(DEBLOBBED)\*\/\),:\1:' drivers/net/tg3.c 
+if $have_check; then
+  sed -i 's:\(\/\*(DEBLOBBED)\*\/\),:\1:' drivers/net/tg3.c 
+else
+  clean_kconfig drivers/net/Kconfig 'TIGON3'
+  clean_mk CONFIG_TIGON3 drivers/net/Makefile
+fi
 
 # TYPHOON - 3cr990 series Typhoon
 clean_blob drivers/net/typhoon-firmware.h
@@ -412,7 +429,7 @@ clean_mk CONFIG_USB_KAWETH drivers/net/usb/Makefile
 ########################
 
 # QETH - Gigabit Ethernet device support
-clean_blob drivers/s390/net/qeth_mpc.c
+clean_blob drivers/s390/net/qeth_core_mpc.c
 clean_kconfig drivers/s390/net/Kconfig 'QETH'
 clean_mk CONFIG_QETH drivers/s390/net/Makefile
 
@@ -561,7 +578,7 @@ clean_kconfig sound/pci/Kconfig 'SND_CS46XX'
 # sed -i '/cs46xx\/ \\/d' sound/pci/Makefile
 
 # SND_KORG1212 - Korg 1212 IO
-clean_ifdef sound/pci/korg1212/korg1212.c CONFIG_SND_KORG1212_FIRMWARE_IN_KERNEL
+# clean_ifdef sound/pci/korg1212/korg1212.c CONFIG_SND_KORG1212_FIRMWARE_IN_KERNEL
 clean_blob sound/pci/korg1212/korg1212-firmware.h
 
 # SND_MAESTRO3 - ESS Allegro/Maestro3
