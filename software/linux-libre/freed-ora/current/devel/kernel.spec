@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.754 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.757 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 9
 # The git snapshot level
-%define gitrev 9
+%define gitrev 12
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1832,6 +1832,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sun Jul 13 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git12
+
+* Sun Jul 13 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git11
+
+* Sat Jul 12 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-rc9-git10
+
 * Fri Jul 11 2008 Roland McGrath <roland@redhat.com>
 - utrace update
 
