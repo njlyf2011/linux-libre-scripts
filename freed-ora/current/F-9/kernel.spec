@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.710 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.711 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -30,7 +30,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -1921,7 +1921,13 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Thu Jul 10 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.25.10-libre.91.fc9
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.92.fc9
+- Updated deblobbing to -libre2.
+
+* Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.11-92
+- Linux 2.6.25.11
+
+* Thu Jul 10 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.10-libre.91.fc9
 - Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
 
 * Thu Jul 10 2008 John W. Linville <linville@redhat.com>  2.6.25.9-91
