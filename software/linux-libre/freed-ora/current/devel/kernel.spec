@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.759 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.761 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1832,6 +1832,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jul 14 2008 Dave Jones <davej@redhat.com>
+- Improve 8139too PIO patch with jgarziks comments.
+
+* Mon Jul 14 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
 * Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.136.fc10
 - Deblobbed 2.6.26
 
