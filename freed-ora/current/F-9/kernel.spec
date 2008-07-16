@@ -30,7 +30,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 2
+%define librev 3
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -1921,13 +1921,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.92.fc9
+* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.92.1
+- Updated deblobbing to -libre3.
+
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.92
 - Updated deblobbing to -libre2.
 
 * Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.11-92
 - Linux 2.6.25.11
 
-* Thu Jul 10 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.10-libre.91.fc9
+* Thu Jul 10 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.10-libre.91
 - Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
 
 * Thu Jul 10 2008 John W. Linville <linville@redhat.com>  2.6.25.9-91
@@ -2191,7 +2194,7 @@ fi
 * Mon May 19 2008 Dave Jones <davej@redhat.com> 2.6.25.4-24
 - Disable PATA_ISAPNP (it's busted).
 
-* Sun May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.23.fc9
+* Sun May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.23
 - Rebase to libre1.
 
 * Fri May 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-23
