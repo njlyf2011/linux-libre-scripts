@@ -1880,16 +1880,16 @@ fi
 
 
 %changelog
-* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.54.1
+* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.54.1
 - Updated deblobbing to -libre3.
 
-* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.54
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.54
 - Updated deblobbing to -libre2.
 
 * Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.11-54
 - Linux 2.6.25.11
 
-* Fri Jul 11 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.10-libre.53
+* Fri Jul 11 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.53
 - Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
 
 * Thu Jul 10 2008 John W. Linville <linville@redhat.com>  2.6.25.10-53
@@ -2106,7 +2106,7 @@ fi
 * Mon May 19 2008 Dave Jones <davej@redhat.com>
 - Disable PATA_ISAPNP (it's busted).
 
-* Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.7-libre.93.1
+* Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.93.1
 - Rebase to libre1.
 
 * Fri May 09 2008 John W. Linville <linville@redhat.com> 2.6.24.7-93
@@ -2191,7 +2191,7 @@ fi
 - iwlwifi: rename iwl-4965-commands to iwl-commands.h
 - iwlwifi: rename iwl-4965.h to iwl-dev.h
 
-* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.7-libre.92
+* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.92
 - Rebase to linux-2.6.25-libre.tar.bz2.
 
 * Wed May 07 2008 Neil Horman <nhorman@redhat.com> 2.6.24.7-92
@@ -2220,7 +2220,7 @@ fi
 - mac80211: use 4-byte mesh sequence number
 - b43: Fix dual-PHY devices
 
-* Mon Apr 28 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.87
+* Mon Apr 28 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.87
 - Provide kernel-headers from kernel-libre-headers.
 - Provide kernel-doc from kernel-libre-doc.
 - Deblobbed nouveau-drm.patch.
@@ -2245,7 +2245,7 @@ fi
 * Tue Apr 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.5-86
 - Enable machine check exception handling on x86_64.
 
-* Tue Apr 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.5-libre.85 on Apr 24
+* Tue Apr 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.85 Apr 24
 - Deblob patch-2.6.24.5.bz2.
 
 * Sat Apr 19 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.24.5-85
@@ -2400,7 +2400,7 @@ fi
 - Enable the 1-wire drivers (except for the Matrox driver which conflicts
   with the Matrox framebuffer driver.) (#441047)
 
-* Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.74
+* Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.74
 - Enable CONFIG_EEPRO100.
 
 * Wed Apr 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-74
@@ -2550,7 +2550,7 @@ fi
 * Wed Mar 26 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.24.4-57
 - Fix spurious thermal trips on Compaq notebook. (#437466)
 
-* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.24.4-libre.56
+* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.56
 - Deblob linux tarball.
 - Deblob patch-2.6.24.4.bz2.
 - Disable linux-2.6-drm-radeon-update.patch, patches removed files.
