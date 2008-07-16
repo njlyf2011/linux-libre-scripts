@@ -1921,16 +1921,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.92.1
+* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.92.1
 - Updated deblobbing to -libre3.
 
-* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.11-libre.92
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.92
 - Updated deblobbing to -libre2.
 
 * Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.11-92
 - Linux 2.6.25.11
 
-* Thu Jul 10 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.10-libre.91
+* Thu Jul 10 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.91
 - Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
 
 * Thu Jul 10 2008 John W. Linville <linville@redhat.com>  2.6.25.9-91
@@ -2024,7 +2024,7 @@ fi
     b43-fix-noise-calculation-warn_on.patch
     b43-fix-possible-null-pointer-dereference-in-dma-code.patch
 
-* Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.7-libre.68
+* Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.68
 - Deblob microcodes in new drm-radeon-update.patch.
 
 * Sun Jun 22 2008 Dave Airlie <airlied@redhat.com> 2.6.25.7-68
@@ -2137,7 +2137,7 @@ fi
 - Upstream wireless fixes from 2008-05-28
   (http://marc.info/?l=linux-wireless&m=121201250110162&w=2)
 
-* Thu May 29 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.38
+* Thu May 29 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.38
 - Deblob microcodes in drm-radeon-update.patch.
 
 * Wed May 28 2008 Dave Airlie <airlied@redhat.com> 2.6.25.4-38
@@ -2194,7 +2194,7 @@ fi
 * Mon May 19 2008 Dave Jones <davej@redhat.com> 2.6.25.4-24
 - Disable PATA_ISAPNP (it's busted).
 
-* Sun May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.4-libre.23
+* Sun May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.23
 - Rebase to libre1.
 
 * Fri May 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.4-23
@@ -2231,7 +2231,7 @@ fi
 * Wed May 07 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.2-15
 - Linux 2.6.25.2
 
-* Wed May  7 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.14.1 Thu May  8 2008
+* Wed May  7 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.14.1 May  8
 - Rebase to linux-2.6.25-libre.tar.bz2.
 
 * Thu May 01 2008 Dave Airlie <airlied@redhat.com> 2.6.25-14
@@ -2244,7 +2244,7 @@ fi
 * Tue Apr 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25-12
 - Fix CVE-2008-1675; patches taken from 2.6.25.1-rc1.
 
-* Mon Apr 28 2008 Alexandre Oliva <aoliva@redhat.com>
+* Mon Apr 28 2008 Alexandre Oliva <lxoliva@fsfla.org>
 - Provide kernel-headers from kernel-libre-headers.
 - Provide kernel-doc from kernel-libre-doc.
 
@@ -2252,7 +2252,7 @@ fi
 - add sparc64 semctl fix (David Miller)
   (it will be in git shortly, and can be dropped on the next git merge)
 
-* Thu Apr 24 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.25-libre.10 Mon Apr 28 2008
+* Thu Apr 24 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.10 Apr 28
 - Updated deblob and deblob-check.
 - Deblobbed linux-2.6.25, nouveau-drm.patch and nouveau-drm-update.patch.
 
@@ -2359,7 +2359,7 @@ fi
 * Thu Apr 10 2008 Dave Jones <davej@redhat.com>
 - 2.6.25-rc8-git8
 
-* Wed Apr 09 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.218 on Fri Apr 11
+* Wed Apr 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.218 Apr 11
 - Deblobbed patch-2.6.25-rc8-git7, references removed config variables.
 - Deblobbed linux-2.6-drm-i915-modeset.patch, references removed files.
 
@@ -2414,7 +2414,7 @@ fi
 - Enable the 1-wire drivers (except for the Matrox driver which conflicts
   with the Matrox framebuffer driver.)
 
-* Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.201
+* Mon Apr 07 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.201
 - Enable CONFIG_EEPRO100.
 
 * Sun Apr 06 2008 Dave Jones <davej@redhat.com>
@@ -2510,7 +2510,7 @@ fi
 * Mon Mar 31 2008 Jarod Wilson <jwilson@redhat.com>
 - Make split debuginfo packages build correctly again
 
-* Mon Mar 31 2008 Alexandre Oliva <lxoliva@fsfla.org> libre.0.177
+* Mon Mar 31 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.177
 - Deblobbed patch-2.6.25-rc7-git6, modifies removed files.
 
 * Mon Mar 31 2008 Kyle McMartin <kmcmartin@redhat.com>
@@ -2519,7 +2519,7 @@ fi
 * Mon Mar 31 2008 Dave Airlie <airlied@redhat.com>
 - add fix for radeon oops (#439656)
 
-* Sun Mar 30 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.175.rc7.git5
+* Sun Mar 30 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.175.rc7.git5
 - Deblobbed patch-2.6.25-rc7-git5, modifies removed files.
 
 * Sat Mar 29 2008 Dave Jones <davej@redhat.com>
@@ -2637,7 +2637,7 @@ fi
 * Wed Mar 26 2008 David Woodhouse <dwmw2@redhat.com>
 - Link PowerPC zImage at 32MiB (#239658 on POWER5, also fixes Efika)
 
-* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25-libre.0.156.rc7
+* Wed Mar 26 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.156.rc7
 - Deblob linux tarball.
 - Deblob patch-2.6.25-rc7.bz2.
 - Adjust linux-2.6-netdev-atl2.patch for deblobbing.
