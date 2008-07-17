@@ -5,5 +5,5 @@ clog
 kernel-2.6.*.config
 temp-*
 kernel-2.6.23
-linux-2.6.23-libre1.*
+linux-2.6.23-libre3.*
 patch-2.6.23.17.bz2

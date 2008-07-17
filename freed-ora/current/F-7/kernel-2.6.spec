@@ -29,7 +29,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 3
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -39,7 +39,7 @@ Summary: The Linux kernel (the core of the GNU/Linux operating system)
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+%define libres .3
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -2395,7 +2395,10 @@ fi
 %endif
 
 %changelog
-* Mon May 19 2008 Alexandre Oliva <aoliva@redhat.com> 2.6.23.17-libre.88.fc7.1
+* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.88.3
+- Rebased to 2.6.23-libre3.
+
+* Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.88.1
 - Rebase to libre1.
 
 * Wed May 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.23.17-88
@@ -2419,7 +2422,7 @@ fi
 * Thu Feb 28 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.23.17-81
 - Linux 2.6.23.17
 
-* Sun Feb 10 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.23.15-libre.80 Thu May  8 2008
+* Sun Feb 10 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.80 Thu May  8 2008
 - Deblob linux tarball.
 - Provide kernel-headers from kernel-libre-headers.
 - Provide kernel-doc from kernel-libre-doc.
