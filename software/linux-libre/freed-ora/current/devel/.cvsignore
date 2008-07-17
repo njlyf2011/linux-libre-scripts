@@ -6,4 +6,4 @@ GNUmakefile
 kernel-2.6.*.config
 temp-*
 kernel-2.6.26
-linux-2.6.26-libre*
+linux-2.6.26-libre1.*
