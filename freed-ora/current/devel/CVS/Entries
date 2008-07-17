@@ -1,5 +1,6 @@
 D/scripts////
 /linux-2.6.26.tar.bz2.sign/-1.1/dummy timestamp//
+/patch-2.6.26-git2.bz2.sign/-1.1/dummy timestamp//
 /.cvsignore/1.867/Result of merge+Wed Jul 16 12:20:11 2008//Tkernel-2_6_27-0_148_rc0_git2_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_148_rc0_git2_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_148_rc0_git2_fc10
