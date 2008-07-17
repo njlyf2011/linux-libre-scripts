@@ -3,7 +3,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 1
+%define released_kernel 0
 
 # Versions of various parts
 
@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.761 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.771 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -35,12 +35,12 @@ Summary: The Linux kernel
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
 %define rcrevlibre -libre
-#define gitrevlibre -libre
+%define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 9
+%define rcrev 0
 # The git snapshot level
-%define gitrev 12
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -90,6 +90,8 @@ Summary: The Linux kernel
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
+# kernel-firmware
+%define with_firmware  %{?_without_firmware:  0} %{?!_without_firmware:  1}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
@@ -262,6 +264,7 @@ Summary: The Linux kernel
 # only package docs noarch
 %ifnarch noarch
 %define with_doc 0
+%define with_firmware 0
 %endif
 
 # no need to build headers again for these arches,
@@ -431,6 +434,9 @@ Summary: The Linux kernel
 # scripts use them.
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1
+# , kernel-firmware >= %{rpmversion}-%{pkg_release}
+# temporarily disabled
+%define with_firmware 0
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -574,8 +580,7 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 ### BRANCH PATCH ###
 %endif
 
-# stable release candidate
-# Patch03: patch-2.6.24.1-rc1.bz2
+Patch02: git-linus.diff
 
 # we always need nonintconfig, even for -vanilla kernels
 Patch06: linux-2.6-build-nonintconfig.patch
@@ -602,7 +607,6 @@ Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
-Patch148: linux-2.6-powerpc-zImage-32MiB.patch
 Patch149: linux-2.6-efika-not-chrp.patch
 
 Patch160: linux-2.6-execshield.patch
@@ -617,16 +621,14 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
-Patch410: linux-2.6-alsa-kill-annoying-messages.patch
-Patch411: linux-2.6-hda-intel-fix-dma-position-inaccuracy.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch440: linux-2.6-net-8139-pio-modparam.patch
 Patch441: linux-2.6-net-8139-pio-oqo2.patch
+Patch442: linux-2.6-net-8139-pio-mmio-fallback.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
-Patch520: linux-2.6-silence-x86-decompressor.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
@@ -640,18 +642,11 @@ Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
-# SELinux patches, will go upstream in .27
-Patch800: linux-2.6-selinux-deffered-context-mapping.patch
-Patch801: linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
-Patch802: linux-2.6-selinux-generic-ioctl.patch
-Patch803: linux-2.6-selinux-new-proc-checks.patch
-Patch804: linux-2.6-selinux-get-invalid-xattrs.patch
-Patch805: linux-2.6-selinux-ecryptfs-support.patch
-#
-
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
+
+Patch1600: linux-2.6-lockdep-uvc.patch
 
 # nouveau + drm fixes
 Patch1800: linux-2.6-export-shmem-bits-for-gem.patch
@@ -677,8 +672,6 @@ Patch2020: linux-2.6-netdev-atl2.patch
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # Fix HID usage descriptor on MS wireless desktop receiver
 Patch2301: linux-2.6-ms-wireless-receiver.patch
-
-Patch2501: linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
@@ -721,6 +714,14 @@ between the Linux kernel and userspace libraries and programs.  The
 header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 glibc package.
+
+%package firmware
+Summary: Firmware files used by the Linux kernel
+Group: Development/System
+License: Redistributable
+%description firmware
+Kernel-firmware includes firmware files required for some devices to
+operate.
 
 %package bootwrapper
 Summary: Boot wrapper files for generating combined kernel + initrd images
@@ -1023,8 +1024,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-# stable release candidate
-# ApplyPatch patch-2.6.24.1-rc1.bz2
+ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1047,9 +1047,9 @@ fi
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
-ApplyPatch linux-2.6-ptrace-cleanup.patch
-ApplyPatch linux-2.6-tracehook.patch
-ApplyPatch linux-2.6-utrace.patch
+#ApplyPatch linux-2.6-ptrace-cleanup.patch
+#ApplyPatch linux-2.6-tracehook.patch
+#ApplyPatch linux-2.6-utrace.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1079,8 +1079,6 @@ ApplyPatch linux-2.6-g5-therm-shutdown.patch
 ApplyPatch linux-2.6-vio-modalias.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
-# Link zImage at 32MiB (for POWER machines, Efika)
-ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
 # Don't show 'CHRP' in /proc/cpuinfo on Efika
 #ApplyPatch linux-2.6-efika-not-chrp.patch
 
@@ -1130,12 +1128,6 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 #ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 
 # ALSA
-#
-ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
-# In upstream alsa. Resolves issues with glitch-free pulseaudio on hda-intel.
-# See: https://tango.0pointer.de/pipermail/pulseaudio-discuss/2008-May/001837.html
-#      http://mailman.alsa-project.org/pipermail/alsa-devel/2008-May/007856.html
-ApplyPatch linux-2.6-hda-intel-fix-dma-position-inaccuracy.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1148,6 +1140,8 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 ApplyPatch linux-2.6-net-8139-pio-modparam.patch
 # OQO2 needs PIO
 ApplyPatch linux-2.6-net-8139-pio-oqo2.patch
+# PIO fallback
+ApplyPatch linux-2.6-net-8139-pio-mmio-fallback.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1158,14 +1152,11 @@ ApplyPatch linux-2.6-serial-460800.patch
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
 
-# Make the real mode boot decompressor understand and honor 'quiet'
-ApplyPatch linux-2.6-silence-x86-decompressor.patch
-
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
 # Fix the SELinux mprotect checks on executable mappings
-#eApplyPatch linux-2.6-selinux-mprotect-checks.patch
+#ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
 #ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
@@ -1177,15 +1168,6 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # wake up links that have been put to sleep by BIOS (#436099)
 ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
-
-# Allow selinux to defer validation of contexts, aka: rpm can write illegal labels
-ApplyPatch linux-2.6-selinux-deffered-context-mapping.patch
-ApplyPatch linux-2.6-selinux-deffered-context-mapping-no-sleep.patch
-ApplyPatch linux-2.6-selinux-generic-ioctl.patch
-#ApplyPatch linux-2.6-selinux-new-proc-checks.patch
-ApplyPatch linux-2.6-selinux-get-invalid-xattrs.patch
-# Broken, see BZ 452438
-#ApplyPatch linux-2.6-selinux-ecryptfs-support.patch
 
 # wireless patches headed for 2.6.26
 #ApplyPatch linux-2.6-wireless.patch
@@ -1213,6 +1195,8 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
 #ApplyPatch linux-2.6-netdev-atl2.patch
 
+ApplyPatch linux-2.6-lockdep-uvc.patch
+
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-export-shmem-bits-for-gem.patch
 
@@ -1225,16 +1209,11 @@ ApplyPatch linux-2.6-export-shmem-bits-for-gem.patch
 #ApplyPatch linux-2.6-drm-modesetting-oops-fixes.patch
 #ApplyPatch linux-2.6-drm-fix-master-perm.patch
 
-# ext4dev stable patch queue, slated for 2.6.25
-#ApplyPatch linux-2.6-ext4-stable-queue.patch
-
 # linux1394 git patches
 #C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
 #if [ "$C" -gt 10 ]; then
 #ApplyPatch linux-2.6-firewire-git-pending.patch
 #fi
-
-ApplyPatch linux-2.6-ppc-use-libgcc.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
@@ -1384,7 +1363,9 @@ BuildKernel() {
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
 
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
-    make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer
+    # Override $(mod-fw) because we don't want it to install any firmware
+    # We'll do that ourselves with 'make firmware_install'
+    make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 %ifarch %{vdso_arches}
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
 %endif
@@ -1639,6 +1620,10 @@ rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
 %endif
 
+%if %{with_firmware}
+make INSTALL_FW_PATH=$RPM_BUILD_ROOT/lib/firmware firmware_install
+%endif
+
 %if %{with_bootwrapper}
 make DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
 %endif
@@ -1748,6 +1733,13 @@ fi
 /usr/include/*
 %endif
 
+%if %{with_firmware}
+%files firmware
+%defattr(-,root,root)
+/lib/firmware/*
+%doc linux-%{kversion}.%{_target_cpu}/firmware/WHENCE
+%endif
+
 %if %{with_bootwrapper}
 %files bootwrapper
 %defattr(-,root,root)
@@ -1832,8 +1824,38 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.138.1
+* Thu Jul 17 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.148.rc0.git2
 - Rebased to 2.6.26-libre1.
+- Deblobbed 2.6.26-git2.
+- Temporarily disabled the kernel-firmware package, until I can figure
+  out how to deblob this stuff in a way that it builds and doesn't require
+  too much maintenance.  This may break the few devices that require Free
+  firmware.
+
+* Tue Jul 15 2008 Dave Jones <davej@redhat.com>
+- Merge Linux-2.6 up to commit 45158894d4d6704afbb4cefe55e5f6ca279fe12a
+
+* Tue Jul 15 2008 Dave Jones <davej@redhat.com>
+- Further improvements to 8139 patchset.
+
+* Tue Jul 15 2008 John W. Linville <linville@redhat.com>
+- Upstream wireless updates from 2008-07-14
+  (http://marc.info/?l=linux-wireless&m=121606436000705&w=2)
+
+* Tue Jul 15 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git2
+
+* Tue Jul 15 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git1
+
+* Mon Jul 14 2008 David Woodhouse <David.Woodhouse@intel.com>
+- Add kernel-firmware subpackage
+
+* Mon Jul 14 2008 Eric Sandeen <sandeen@redhat.com>
+- Add pending ext4 patch queue; adds fiemap interface
+
+* Mon Jul 14 2008 Roland McGrath <roland@redhat.com>
+- Fix ia64 build nit, properly disable utrace for ia64.
 
 * Mon Jul 14 2008 Dave Jones <davej@redhat.com>
 - Improve 8139too PIO patch with jgarziks comments.
