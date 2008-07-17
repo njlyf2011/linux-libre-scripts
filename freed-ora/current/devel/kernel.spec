@@ -30,7 +30,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev 
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -1832,13 +1832,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.138.1
+- Rebased to 2.6.26-libre1.
+
 * Mon Jul 14 2008 Dave Jones <davej@redhat.com>
 - Improve 8139too PIO patch with jgarziks comments.
 
 * Mon Jul 14 2008 Roland McGrath <roland@redhat.com>
 - utrace update
 
-* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.136.fc10
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.136
 - Deblobbed 2.6.26
 
 * Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com>
@@ -1878,7 +1881,7 @@ fi
 * Wed Jul 09 2008 Chuck Ebbert <cebbert@redhat.com>
 - Enable the i2c-tiny-usb driver. (#451451)
 
-* Wed Jul 09 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.124.rc9.git5.fc10
+* Wed Jul 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.124.rc9.git5
 - Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
 
 * Wed Jul 09 2008 Dave Jones <davej@redhat.com>
@@ -1919,7 +1922,7 @@ fi
 * Mon Jul 07 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc9-git1
 
-* Sun Jul 06 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.113.rc9.fc10
+* Sun Jul 06 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.113.rc9
 - Deblobbed 2.6.26-rc9
 
 * Sun Jul 06 2008 Dave Jones <davej@redhat.com>
@@ -1988,7 +1991,7 @@ fi
 * Thu Jun 26 2008 Dave Jones <davej@redhat.com>
 - Print out modules list when we hit soft lockup.
 
-* Wed Jun 25 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.93.rc8.fc10
+* Wed Jun 25 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.93.rc8
 - Deblobbed 2.6.26-rc8
 
 * Wed Jun 25 2008 John W. Linville <linville@redhat.com>
@@ -2029,7 +2032,7 @@ fi
 * Sun Jun 22 2008 Dave Jones <davej@redhat.com>
 - 2.6.26-rc7-git1
 
-* Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.81.rc7.fc10
+* Sun Jun 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.81.rc7
 - Deblobbed 2.6.26-rc7
 
 * Fri Jun 20 2008 Dave Jones <davej@redhat.com>
@@ -2155,7 +2158,7 @@ fi
 - Upstream wireless updates from 2008-05-22
   (http://marc.info/?l=linux-wireless&m=121146112404515&w=2)
 
-* Mon May 26 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.3.rc4.fc10
+* Mon May 26 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.3.rc4
 - Deblob 2.6.26-rc4.
 
 * Mon May 26 2008 Dave Jones <davej@redhat.com>
@@ -2343,7 +2346,7 @@ fi
 - iwlwifi: add device sysfs version entry
 - at76: use hardware flags for signal/noise units
 
-* Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.17.rc3.fc10
+* Mon May 19 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.17.rc3
 - Deblob 2.6.26-rc3.
 
 * Sun May 18 2008 Dave Jones <davej@redhat.com>
@@ -2361,7 +2364,7 @@ fi
 * Sat May 17 2008 Dave Jones <davej@redhat.com>
 - Disable CONFIG_SND_PCSP (#447039)
 
-* Sat May 17 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.26-libre.0.13.rc2.git5.fc10 Sun May 18 2008
+* Sat May 17 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.13.rc2.git5 May 18
 - Rebase to libre1.
 - Deblob patch-2.6.26-rc2.
 
@@ -2387,7 +2390,7 @@ fi
 * Fri May 09 2008 Eric Paris <eparis@redhat.com>
 - support deffered context validation in selinux.  aka rpm can lay down illegal labels. (won't upstream until .27 opens)
 
-* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> 2.6.25.2-libre.5
+* Thu May  8 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.5
 - Rebase to linux-2.6.25-libre.tar.bz2.
 
 * Wed May 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.2-5
