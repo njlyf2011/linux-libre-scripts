@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.771 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.779 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 2
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -433,10 +433,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1
-# , kernel-firmware >= %{rpmversion}-%{pkg_release}
-# temporarily disabled
-%define with_firmware 0
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1, kernel-firmware >= %{rpmversion}-%{pkg_release}
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -550,8 +547,7 @@ Source62: config-xen-ia64
 Source70: config-s390x
 
 Source90: config-sparc64-generic
-Source91: config-sparc64
-Source92: config-sparc64-smp
+Source91: config-sparc64-smp
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
@@ -1024,7 +1020,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-ApplyPatch git-linus.diff
+#ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1408,7 +1404,7 @@ BuildKernel() {
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
-    cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video asm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+    cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     # While arch/powerpc/include/asm is still a symlink to the old
     # include/asm-ppc{64,} directory, include that in kernel-devel too.
@@ -1824,7 +1820,29 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Thu Jul 17 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.148.rc0.git2
+* Thu Jul 17 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.156.rc0.git4
+- Deblobbed 2.6.26-git4.
+- Re-enabled kernel-firmware.
+
+* Wed Jul 16 2008 Dave Jones <davej@redhat.com>
+- Merge Linux-2.6 up to commit 8a0ca91e1db5de5eb5b18cfa919d52ff8be375af
+
+* Wed Jul 16 2008 Kristian Høgsberg <krh@redhat.com>
+- Also copy new include/drm directory.
+
+* Wed Jul 16 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git4
+
+* Wed Jul 16 2008 Dave Jones <davej@redhat.com>
+- Remove extraneous sparc64 config file.
+
+* Wed Jul 16 2008 Dave Jones <davej@redhat.com>
+- Remove sparc32 config files.
+
+* Wed Jul 16 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git3
+
+* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.148.rc0.git2 Jul 17
 - Rebased to 2.6.26-libre1.
 - Deblobbed 2.6.26-git2.
 - Temporarily disabled the kernel-firmware package, until I can figure
