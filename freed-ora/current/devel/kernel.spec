@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.779 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.782 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 4
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -428,6 +428,10 @@ Summary: The Linux kernel
 # now that the smp kernel offers this capability, obsolete the old kernel
 %define kernel_smp_obsoletes kernel-enterprise < 2.4.10
 %define kernel_PAE_obsoletes kernel-smp < 2.6.17
+
+# We moved the drm include files into kernel-headers, make sure there's
+# a recent enough libdrm-devel on the system that doesn't have those.
+%define kernel_headers_conflicts libdrm-devel < 2.4.0-0.15
 
 #
 # Packages that need to be installed before the kernel is, because the %post
@@ -1820,6 +1824,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jul 18 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6
+- Deblobbed 2.6.26-git6.
+
+* Thu Jul 17 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git6
+
+* Thu Jul 17 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git5
+
+* Thu Jul 17 2008 Kristian Høgsberg <krh@redhat.com>
+- Add conflicts for older libdrm-devel to kernel-headers.
+
 * Thu Jul 17 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.156.rc0.git4
 - Deblobbed 2.6.26-git4.
 - Re-enabled kernel-firmware.
