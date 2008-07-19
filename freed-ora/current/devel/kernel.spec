@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -437,7 +437,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1, kernel-firmware >= %{rpmversion}-%{pkg_release}
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -718,7 +718,8 @@ glibc package.
 %package firmware
 Summary: Firmware files used by the Linux kernel
 Group: Development/System
-License: Redistributable
+Provides: kernel-firwmare = %{rpmversion}-%{pkgrelease}
+License: GPLv2
 %description firmware
 Kernel-firmware includes firmware files required for some devices to
 operate.
@@ -1824,6 +1825,11 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Jul 18 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6.1
+- Depend on kernel-libre-firmware.
+- Provide kernel-firmware in kernel-libre-firmware.  Change its
+license to GPLv2.
+
 * Fri Jul 18 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6
 - Deblobbed 2.6.26-git6.
 
