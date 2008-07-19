@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.487 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.495 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -42,12 +42,12 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -641,6 +641,7 @@ Patch425: linux-2.6-nfs-client-mounts-hang.patch
 Patch426: linux-2.6-fs-fat-cleanup-code.patch
 Patch427: linux-2.6-fs-fat-fix-setattr.patch
 Patch428: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
+Patch429: linux-2.6-fs-reiserfs-discard-prealloc-in-delete_inode.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
@@ -662,6 +663,7 @@ Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
 Patch677: linux-2.6-libata-retry-enabling-ahci.patch
+Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -684,6 +686,8 @@ Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch1310: linux-2.6-usb-fix-interrupt-disabling.patch
+
+Patch1350: linux-2.6-hwmon-hdaps-add-new-models.patch
 
 Patch1400: linux-2.6-smarter-relatime.patch
 
@@ -1155,6 +1159,8 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-fs-fat-cleanup-code.patch
 ApplyPatch linux-2.6-fs-fat-fix-setattr.patch
 ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
+# fix reiserfs hang (from F9)
+ApplyPatch linux-2.6-fs-reiserfs-discard-prealloc-in-delete_inode.patch
 
 # Networking
 # Disable easy to trigger printk's.
@@ -1205,6 +1211,8 @@ ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
 # retry enabling AHCI mode before reporting error
 ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
+# fix ahci / ICH6 conflict
+ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 
 # wireless
 #
@@ -1255,6 +1263,7 @@ ApplyPatch linux-2.6-usb-fix-interrupt-disabling.patch
 # ISDN
 
 # hwmon
+ApplyPatch linux-2.6-hwmon-hdaps-add-new-models.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1871,8 +1880,43 @@ fi
 
 
 %changelog
-* Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.47.1
+* Mon Jul 14 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Disable CONFIG_ACPI_SYSFS_POWER, which still seems to be confusing hal.
+
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.54.1 Jul 16
 - Updated deblobbing to -libre3.
+
+* Mon Jul 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.54
+- Updated deblobbing to -libre2.
+
+* Sun Jul 13 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.11-54
+- Linux 2.6.25.11
+
+* Fri Jul 11 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.53
+- Deblobbed rtl8187b_reg_table in linux-2.6-wireless-pending.patch.
+
+* Thu Jul 10 2008 John W. Linville <linville@redhat.com>  2.6.25.10-53
+- Upstream wireless fixes from 2008-07-09
+  (http://marc.info/?l=linux-netdev&m=121563769208664&w=2)
+- Upstream wireless updates from 2008-07-08
+  (http://marc.info/?l=linux-wireless&m=121554411325041&w=2)
+
+* Wed Jul 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-52
+- libata: don't let ata_piix driver attach to ICH6M in ahci mode (F9#430916)
+
+* Wed Jul 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-51
+- Fix reiserfs list corruption (F9#453699)
+
+* Wed Jul 09 2008 Jarod Wilson <jwilson@redhat.com> 2.6.25.10-50
+- Actually fix lirc_i2c oops and add new MCE receiver support this
+  time, never actually made it in here... (#453348)
+
+* Wed Jul 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-49
+- hdaps: support new Lenovo notebook models (F9#449888)
+
+* Tue Jul 08 2008 John W. Linville <linville@redhat.com> 2.6.25.10-48
+- Upstream wireless fixes from 2008-07-07
+  (http://marc.info/?l=linux-wireless&m=121546143025524&w=2)
 
 * Mon Jul 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-47
 - Disable file capabilities.
@@ -1886,7 +1930,7 @@ fi
 - Apply Stefan Becker's fix for bad hunk of wireless build fixups for 2.6.25
   (https://bugzilla.redhat.com/show_bug.cgi?id=453390#c36)
 
-* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.9-42
+* Thu Jul 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.10-42
 - Linux 2.6.25.10
 - Reverted stable patch, not needed with utrace:
 	x86_64-ptrace-fix-sys32_ptrace-task_struct-leak.patch
