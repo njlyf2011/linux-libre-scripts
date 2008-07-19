@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+%define libres .2
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -692,7 +692,7 @@ blobs it includes by default.
 %package doc
 Summary: Various documentation bits found in the kernel source
 Group: Documentation
-Provides: kernel-doc = %{rpmversion}-%{pkgrelease}
+Provides: kernel-doc = %{rpmversion}-%{pkg_release}
 %description doc
 This package contains documentation files from the kernel
 source. Various bits of information about the Linux kernel and the
@@ -707,7 +707,7 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders
 Provides: glibc-kernheaders = 3.0-46
-Provides: kernel-headers = %{rpmversion}-%{pkgrelease}
+Provides: kernel-headers = %{rpmversion}-%{pkg_release}
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -718,7 +718,7 @@ glibc package.
 %package firmware
 Summary: Firmware files used by the Linux kernel
 Group: Development/System
-Provides: kernel-firwmare = %{rpmversion}-%{pkgrelease}
+Provides: kernel-firwmare = %{rpmversion}-%{pkg_release}
 License: GPLv2
 %description firmware
 Kernel-firmware includes firmware files required for some devices to
@@ -1825,6 +1825,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sat Jul 19 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6.2
+- Update provides from pkgrelease to pkg_release.
+
 * Fri Jul 18 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6.1
 - Depend on kernel-libre-firmware.
 - Provide kernel-firmware in kernel-libre-firmware.  Change its
