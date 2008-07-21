@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.712 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.716 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -596,6 +596,7 @@ Patch75: linux-2.6-x86-debug-boot.patch
 Patch80: linux-2.6-smp-boot-delay.patch
 Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
 Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
+Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
 
 # ppc
 Patch123: linux-2.6-ppc-rtc.patch
@@ -646,6 +647,7 @@ Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
+Patch590: linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch611: linux-2.6-reiserfs-discard-prealloc.patch
 
@@ -697,6 +699,9 @@ Patch2010: linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+Patch2021: linux-2.6-netdev-atl1e.patch
+
+Patch2030: linux-2.6-net-tulip-interrupt.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -710,6 +715,8 @@ Patch2301: linux-2.6-ms-wireless-receiver.patch
 Patch2302: linux-2.6-usb-storage-nikond80-quirk.patch
 # fix interrupt handling
 Patch2303: linux-2.6-usb-fix-interrupt-disabling.patch
+# fix timer regression (queued for 2.6.25.12)
+Patch2304: linux-2.6-usb-ehci-fix-timer-regression.patch
 
 # usb video
 Patch2400: linux-2.6-uvcvideo.patch
@@ -735,7 +742,7 @@ blobs it includes by default.
 %package doc
 Summary: Various documentation bits found in the kernel source
 Group: Documentation
-Provides: kernel-doc = %{rpmversion}-%{pkgrelease}
+Provides: kernel-doc = %{rpmversion}-%{pkg_release}
 %description doc
 This package contains documentation files from the kernel
 source. Various bits of information about the Linux kernel and the
@@ -750,7 +757,7 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders
 Provides: glibc-kernheaders = 3.0-46
-Provides: kernel-headers = %{rpmversion}-%{pkgrelease}
+Provides: kernel-headers = %{rpmversion}-%{pkg_release}
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -1103,6 +1110,8 @@ ApplyPatch linux-2.6-smp-boot-delay.patch
 # don't map or use disabled x86 vdso
 ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
 ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
+# dump *PIC state at boot with apic=debug
+ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
 
 #
 # PowerPC
@@ -1152,6 +1161,7 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-storage-nikond80-quirk.patch
 ApplyPatch linux-2.6-usb-fix-interrupt-disabling.patch
+ApplyPatch linux-2.6-usb-ehci-fix-timer-regression.patch
 
 # ACPI
 # acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
@@ -1241,6 +1251,9 @@ ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
+# add sysrq-l (show all cpus backtrace)
+ApplyPatch linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
+
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
 ApplyPatch linux-2.6-defaults-fat-utf8.patch
@@ -1295,6 +1308,9 @@ ApplyPatch linux-2.6-virtio_net-free-transmit-skbs-in-a-timer.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
+ApplyPatch linux-2.6-netdev-atl1e.patch
+
+ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 # fix bluetooth kbd disconnect
 ApplyPatch linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
@@ -1921,7 +1937,23 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Tue Jul 15 2008 John W. Linville <linville@redhat.com>
+* Mon Jul 21 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.97
+- Fix provides from pkgrelease to pkg_release.
+
+* Sun Jul 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.11-97
+- USB: fix timer regression
+- x86: dump APIC/IOAPIC/PIC state at boot time
+
+* Sun Jul 20 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Add atl1e network driver for eee 901.
+
+* Fri Jul 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.11-95
+- Add sysrq-l to show backtraces on all CPUs.
+
+* Thu Jul 17 2008 Dave Jones <davej@redhat.com> 2.6.25.11-94
+- Fix SHIRQ debug trace in tulip driver. (#454575)
+
+* Tue Jul 15 2008 John W. Linville <linville@redhat.com> 2.6.25.11-93
 - Upstream wireless updates from 2008-07-14
   (http://marc.info/?l=linux-wireless&m=121606436000705&w=2)
 
