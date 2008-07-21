@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.495 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.500 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -594,11 +594,13 @@ Patch60: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
 Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
+Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
 
 Patch90: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch91: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 Patch92: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch93: linux-2.6-alsa-kill-annoying-messages.patch
+Patch94: linux-2.6-alsa-trident-spdif.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch130: linux-2.6-ppc-use-libgcc.patch
@@ -651,6 +653,7 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
+Patch580: linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
 Patch600: linux-2.6-vm-silence-atomic-alloc-failures.patch
 
 Patch610: linux-2.6-defaults-fat-utf8.patch
@@ -675,6 +678,7 @@ Patch692: linux-2.6-cfg80211-extras.patch
 Patch720: linux-2.6-e1000-corrupt-eeprom-checksum.patch
 Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
 Patch725: linux-2.6-netdev-atl2.patch
+Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
 Patch728: linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
@@ -686,6 +690,8 @@ Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch1310: linux-2.6-usb-fix-interrupt-disabling.patch
+# fix timer regression (queued for 2.6.25.12)
+Patch1314: linux-2.6-usb-ehci-fix-timer-regression.patch
 
 Patch1350: linux-2.6-hwmon-hdaps-add-new-models.patch
 
@@ -719,7 +725,7 @@ blobs it includes by default.
 %package doc
 Summary: Various documentation bits found in the kernel source
 Group: Documentation
-Provides: kernel-doc = %{rpmversion}-%{pkgrelease}
+Provides: kernel-doc = %{rpmversion}-%{pkg_release}
 %description doc
 This package contains documentation files from the kernel
 source. Various bits of information about the Linux kernel and the
@@ -734,7 +740,7 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders
 Provides: glibc-kernheaders = 3.0-46
-Provides: kernel-headers = %{rpmversion}-%{pkgrelease}
+Provides: kernel-headers = %{rpmversion}-%{pkg_release}
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -1044,6 +1050,8 @@ ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 # kill annoying messages
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
+# trident fix from F9
+ApplyPatch linux-2.6-alsa-trident-spdif.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1061,6 +1069,8 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 # don't map or use disabled x86 vdso
 ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
 ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
+# dump *PIC state at boot with apic=debug
+ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
 
 #
 # PowerPC
@@ -1183,6 +1193,9 @@ ApplyPatch linux-2.6-silence-noise.patch
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 
+# add "show backtrace on all cpus" (sysrq-l)
+ApplyPatch linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
+
 #
 # VM related fixes.
 #
@@ -1237,6 +1250,8 @@ ApplyPatch linux-2.6-netdev-e1000-disable-alpm.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 # add atl2 network driver for eeepc
 ApplyPatch linux-2.6-netdev-atl2.patch
+# add atl1e network driver for eeepc 901
+ApplyPatch linux-2.6-netdev-atl1e.patch
 # fix bluetooth kbd disconnect
 ApplyPatch linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
@@ -1259,6 +1274,8 @@ ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # make USB work with shared interrupts
 ApplyPatch linux-2.6-usb-fix-interrupt-disabling.patch
+
+ApplyPatch linux-2.6-usb-ehci-fix-timer-regression.patch
 
 # ISDN
 
@@ -1880,6 +1897,24 @@ fi
 
 
 %changelog
+* Mon Jul 21 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.60
+- Fix provides from pkgrelease to pkg_release.
+
+* Sun Jul 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.11-60
+- x86: dump APIC/IOAPIC/PIC state at boot time
+
+* Sun Jul 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.11-59
+- USB: fix timer regression
+
+* Sun Jul 20 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Add atl1e driver for eee 901.
+
+* Fri Jul 18 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.11-57
+- Add ALSA Trident driver fix from F9 kernel. (F9#453464)
+
+* Fri Jul 18 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.11-56
+- Add "show backtrace on all CPUs" (SysRq-l).
+
 * Mon Jul 14 2008 Kyle McMartin <kmcmartin@redhat.com>
 - Disable CONFIG_ACPI_SYSFS_POWER, which still seems to be confusing hal.
 
