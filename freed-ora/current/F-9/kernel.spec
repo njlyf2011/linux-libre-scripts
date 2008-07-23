@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.716 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.718 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -660,6 +660,7 @@ Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
 Patch677: linux-2.6-libata-retry-enabling-ahci.patch
 Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
+Patch679: linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1278,6 +1279,8 @@ ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
 ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
 # fix ahci / ich6m conflict
 ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
+# fix calling sleeping function in irq context (#451896, #454954)
+ApplyPatch linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
 # wireless patches headed for 2.6.26
 ApplyPatch linux-2.6-wireless.patch
@@ -1937,6 +1940,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com>
+- libata-acpi: fix calling sleeping function in irq context (#451896, #454954)
+
+* Mon Jul 21 2008 Dave Jones <davej@redhat.com>
+- Change yenta to modular instead of built-in. (#456173)
+
 * Mon Jul 21 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.97
 - Fix provides from pkgrelease to pkg_release.
 
