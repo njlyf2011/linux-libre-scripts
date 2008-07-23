@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.782 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.789 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .2
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 6
+%define gitrev 8
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 
 # don't build the kernel-doc package
-%define with_doc 0
+#% define with_doc 0
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -646,8 +646,6 @@ Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
 
-Patch1600: linux-2.6-lockdep-uvc.patch
-
 # nouveau + drm fixes
 Patch1800: linux-2.6-export-shmem-bits-for-gem.patch
 Patch1801: linux-2.6-drm-git-mm.patch
@@ -667,6 +665,8 @@ Patch2010: linux-2.6-sata-eeepc-faster.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+# atl1e network driver
+Patch2021: linux-2.6-netdev-atl1e.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1173,7 +1173,7 @@ ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 # wireless patches headed for 2.6.26
 #ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
-ApplyPatch linux-2.6-wireless-pending.patch
+#ApplyPatch linux-2.6-wireless-pending.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1194,9 +1194,9 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
-#ApplyPatch linux-2.6-netdev-atl2.patch
-
-ApplyPatch linux-2.6-lockdep-uvc.patch
+# atl1e & atl2 network drivers
+ApplyPatch linux-2.6-netdev-atl1e.patch
+ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch linux-2.6-export-shmem-bits-for-gem.patch
@@ -1825,8 +1825,29 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jul 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.166.rc0.git8
+- Deblobbed patch-2.6.26-git8.
+
+* Mon Jul 21 2008 Dave Jones <davej@redhat.com>
+- Merge Linux-2.6 up to commit 93ded9b8fd42abe2c3607097963d8de6ad9117eb
+
+* Mon Jul 21 2008 Dave Jones <davej@redhat.com>
+- Change yenta to modular instead of built-in. (#456173)
+
+* Mon Jul 21 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git8
+
+* Mon Jul 21 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git7
+
+* Sun Jul 20 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Re-enable atl2, and add atl1e driver (found in eee901.)
+
+* Sat Jul 19 2008 Chuck Ebbert <cebbert@redhat.com>
+- Start building the kernel-doc package again.
+
 * Sat Jul 19 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6.2
-- Update provides from pkgrelease to pkg_release.
+- Fix provides from pkgrelease to pkg_release.
 
 * Fri Jul 18 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.159.rc0.git6.1
 - Depend on kernel-libre-firmware.
