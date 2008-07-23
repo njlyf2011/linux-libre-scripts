@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.500 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.501 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -667,6 +667,7 @@ Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
 Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
 Patch677: linux-2.6-libata-retry-enabling-ahci.patch
 Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
+Patch679: linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1226,6 +1227,8 @@ ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
 ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
 # fix ahci / ICH6 conflict
 ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
+# fix invalid irq context in libata-acpi (#451896)
+ApplyPatch linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
 # wireless
 #
@@ -1897,6 +1900,9 @@ fi
 
 
 %changelog
+* Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com>
+- libata-acpi: fix calling sleeping function in irq context (#451896, #454954)
+
 * Mon Jul 21 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.60
 - Fix provides from pkgrelease to pkg_release.
 
