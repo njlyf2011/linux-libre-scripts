@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.789 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.803 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 8
+%define gitrev 11
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -80,8 +80,6 @@ Summary: The Linux kernel
 %define with_smp       %{?_without_smp:       0} %{?!_without_smp:       1}
 # kernel-PAE (only valid for i686)
 %define with_pae       %{?_without_pae:       0} %{?!_without_pae:       1}
-# kernel-xen
-%define with_xen       %{?_without_xen:       0} %{?!_without_xen:       1}
 # kernel-kdump
 %define with_kdump     %{?_without_kdump:     0} %{?!_without_kdump:     1}
 # kernel-debug
@@ -98,7 +96,7 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 
 # don't build the kernel-doc package
-#% define with_doc 0
+%define with_doc 0
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -108,16 +106,9 @@ Summary: The Linux kernel
 %define with_smponly   %{?_with_smponly:      1} %{?!_with_smponly:      0}
 # Only build the pae kernel (--with paeonly):
 %define with_paeonly   %{?_with_paeonly:      1} %{?!_with_paeonly:      0}
-# Only build the xen kernel (--with xenonly):
-%define with_xenonly   %{?_with_xenonly:      1} %{?!_with_xenonly:      0}
 
 # should we do C=1 builds with sparse
 %define with_sparse	%{?_with_sparse:      1} %{?!_with_sparse:      0}
-
-# Whether or not to apply the Xen patches -- leave this enabled
-%define includexen 0
-# Xen doesn't work with current upstream kernel, shut it off
-%define with_xen 0
 
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
@@ -149,11 +140,6 @@ Summary: The Linux kernel
 
 %define make_target bzImage
 
-%define xen_hv_cset 11633
-%define xen_flags verbose=y crash_debug=y
-%define xen_target vmlinuz
-%define xen_image vmlinuz
-
 %define KVERREL %{PACKAGE_VERSION}-libre.%{PACKAGE_RELEASE}.%{_target_cpu}
 %define hdrarch %_target_cpu
 
@@ -166,8 +152,6 @@ Summary: The Linux kernel
 %endif
 
 %if %{nopatches}
-%define includexen 0
-%define with_xen 0
 %define with_bootwrapper 0
 %define variant -vanilla
 %else
@@ -196,7 +180,6 @@ Summary: The Linux kernel
 %if %{with_baseonly}
 %define with_smp 0
 %define with_pae 0
-%define with_xen 0
 %define with_kdump 0
 %define with_debug 0
 %endif
@@ -205,7 +188,6 @@ Summary: The Linux kernel
 %if %{with_smponly}
 %define with_up 0
 %define with_pae 0
-%define with_xen 0
 %define with_kdump 0
 %define with_debug 0
 %endif
@@ -214,16 +196,6 @@ Summary: The Linux kernel
 %if %{with_paeonly}
 %define with_up 0
 %define with_smp 0
-%define with_xen 0
-%define with_kdump 0
-%define with_debug 0
-%endif
-
-# if requested, only build xen kernel
-%if %{with_xenonly}
-%define with_up 0
-%define with_smp 0
-%define with_pae 0
 %define with_kdump 0
 %define with_debug 0
 %endif
@@ -243,11 +215,6 @@ Summary: The Linux kernel
 # pae is only valid on i686
 %ifnarch i686
 %define with_pae 0
-%endif
-
-# xen only builds on i686, x86_64 and ia64
-%ifnarch i686 x86_64 ia64
-%define with_xen 0
 %endif
 
 # only build kernel-kdump on ppc64
@@ -296,8 +263,6 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-i?86*.config
 %define image_install_path boot
 %define hdrarch i386
-# we build always xen i686 HV with pae
-%define xen_flags verbose=y crash_debug=y pae=y
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
@@ -349,10 +314,6 @@ Summary: The Linux kernel
 %define image_install_path boot/efi/EFI/redhat
 %define make_target compressed
 %define kernel_image vmlinux.gz
-# ia64 xen HV doesn't building with debug=y at the moment
-%define xen_flags verbose=y crash_debug=y
-%define xen_target compressed
-%define xen_image vmlinux.gz
 %endif
 
 %ifarch alpha alphaev56
@@ -389,7 +350,6 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_smp 0
 %define with_pae 0
-%define with_xen 0
 %define with_kdump 0
 %define with_debuginfo 0
 %define _enable_debug_packages 0
@@ -427,7 +387,13 @@ Summary: The Linux kernel
 # upto and including kernel 2.4.9 rpms, the 4Gb+ kernel was called kernel-enterprise
 # now that the smp kernel offers this capability, obsolete the old kernel
 %define kernel_smp_obsoletes kernel-enterprise < 2.4.10
-%define kernel_PAE_obsoletes kernel-smp < 2.6.17
+%define kernel_PAE_obsoletes kernel-smp < 2.6.17, kernel-xen <= 2.6.27-0.2.rc0.git6.fc10
+%define kernel_PAE_provides kernel-xen = %{rpmversion}-%{pkg_release}
+
+%ifarch x86_64
+%define kernel_obsoletes kernel-xen <= 2.6.27-0.2.rc0.git6.fc10
+%define kernel_provides kernel-xen = %{rpmversion}-%{pkg_release}
+%endif
 
 # We moved the drm include files into kernel-headers, make sure there's
 # a recent enough libdrm-devel on the system that doesn't have those.
@@ -455,9 +421,9 @@ Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
-%{?1:%{expand:%%{?kernel_%{1}_conflicts:Conflicts: %%{kernel_%{1}_conflicts}}}}\
-%{?1:%{expand:%%{?kernel_%{1}_obsoletes:Obsoletes: %%{kernel_%{1}_obsoletes}}}}\
-%{?1:%{expand:%%{?kernel_%{1}_provides:Provides: %%{kernel_%{1}_provides}}}}\
+%{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
+%{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
+%{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
 # We can't let RPM do the dependencies automatic because it'll then pick up\
 # a correct but undesirable perl dependency from the module headers which\
 # isn't required for the kernel proper to function\
@@ -507,9 +473,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: linux-%{kversion}-libre%{?librev}.tar.bz2
-#Source1: xen-%{xen_hv_cset}.tar.bz2
-Source2: Config.mk
+Source0: http://fsfla.org/selibre/linux-libre/download/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -525,18 +489,15 @@ Source20: Makefile.config
 Source21: config-debug
 Source22: config-nodebug
 Source23: config-generic
-Source24: config-xen-generic
-Source25: config-rhel-generic
-Source26: config-rhel-x86-generic
+Source24: config-rhel-generic
+Source25: config-rhel-x86-generic
 
 Source30: config-x86-generic
 Source31: config-i586
 Source32: config-i686
 Source33: config-i686-PAE
-Source34: config-xen-x86
 
 Source40: config-x86_64-generic
-Source41: config-xen-x86_64
 
 Source50: config-powerpc-generic
 Source51: config-powerpc32-generic
@@ -546,7 +507,6 @@ Source54: config-powerpc64-kdump
 
 Source60: config-ia64-generic
 Source61: config-ia64
-Source62: config-xen-ia64
 
 Source70: config-s390x
 
@@ -593,9 +553,11 @@ Patch07: linux-2.6-compile-fixes.patch
 
 Patch10: linux-2.6-hotfixes.patch
 
-Patch21: linux-2.6-ptrace-cleanup.patch
-Patch22: linux-2.6-tracehook.patch
-Patch23: linux-2.6-utrace.patch
+Patch20: linux-2.6-tracehook.patch
+Patch21: linux-2.6-utrace.patch
+Patch22: linux-2.6-x86-tracehook.patch
+Patch23: linux-2.6-powerpc-tracehook.patch
+Patch24: linux-2.6-sparc64-tracehook.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
@@ -610,6 +572,9 @@ Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch149: linux-2.6-efika-not-chrp.patch
 
 Patch160: linux-2.6-execshield.patch
+Patch161: linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
+Patch162: linux-2.6-xen-execshield-fix-endless-gpf-fault-loop.patch
+Patch163: linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
@@ -623,9 +588,6 @@ Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch440: linux-2.6-net-8139-pio-modparam.patch
-Patch441: linux-2.6-net-8139-pio-oqo2.patch
-Patch442: linux-2.6-net-8139-pio-mmio-fallback.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -665,8 +627,6 @@ Patch2010: linux-2.6-sata-eeepc-faster.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
-# atl1e network driver
-Patch2021: linux-2.6-netdev-atl1e.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -858,16 +818,6 @@ The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
 
-%define variant_summary The Linux kernel compiled for Xen VM operations
-%kernel_variant_package -n Xen xen
-%description xen
-This package includes a version of the Linux kernel which
-runs in a Xen VM. It works for both privileged and unprivileged guests.
-
-The kernel-libre-xen package is the upstream kernel without the
-non-Free blobs it includes by default.
-
-
 %define variant_summary A minimal Linux kernel compiled for crash dumps
 %kernel_variant_package kdump
 %description kdump
@@ -898,13 +848,6 @@ exit 1
 %if %{with_paeonly}
 %if !%{with_pae}
 echo "Cannot build --with paeonly, pae build is disabled"
-exit 1
-%endif
-%endif
-
-%if %{with_xenonly}
-%if !%{with_xen}
-echo "Cannot build --with xenonly, xen build is disabled"
 exit 1
 %endif
 %endif
@@ -952,10 +895,19 @@ ApplyPatch()
 %endif
 
 if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
-  # Ok, first time we do a make prep.
-  rm -f pax_global_header
+
+  if [ -d kernel-%{kversion}/vanilla-%{kversion} ]; then
+    cd kernel-%{kversion}
+  else
+    # Ok, first time we do a make prep.
+    rm -f pax_global_header
 %setup -q -n kernel-%{kversion} -c
-  mv linux-%{kversion} vanilla-%{vanillaversion}
+    mv linux-%{kversion} vanilla-%{kversion}
+  fi
+
+%if "%{kversion}" != "%{vanillaversion}"
+  cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
+%endif
   cd vanilla-%{vanillaversion}
 
 perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
@@ -984,13 +936,14 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 else
   # We already have a vanilla dir.
   cd kernel-%{kversion}
-  if [ -d linux-%{kversion}.%{_target_cpu} ]; then
-     # Just in case we ctrl-c'd a prep already
-     rm -rf deleteme.%{_target_cpu}
-     # Move away the stale away, and delete in background.
-     mv linux-%{kversion}.%{_target_cpu} deleteme.%{_target_cpu}
-     rm -rf deleteme.%{_target_cpu} &
-  fi
+fi
+
+if [ -d linux-%{kversion}.%{_target_cpu} ]; then
+  # Just in case we ctrl-c'd a prep already
+  rm -rf deleteme.%{_target_cpu}
+  # Move away the stale away, and delete in background.
+  mv linux-%{kversion}.%{_target_cpu} deleteme.%{_target_cpu}
+  rm -rf deleteme.%{_target_cpu} &
 fi
 
 cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
@@ -1048,9 +1001,11 @@ fi
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
-#ApplyPatch linux-2.6-ptrace-cleanup.patch
-#ApplyPatch linux-2.6-tracehook.patch
-#ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6-tracehook.patch
+ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6-x86-tracehook.patch
+ApplyPatch linux-2.6-powerpc-tracehook.patch
+ApplyPatch linux-2.6-sparc64-tracehook.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1091,6 +1046,9 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # Exec shield
 #
 ApplyPatch linux-2.6-execshield.patch
+ApplyPatch linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
+ApplyPatch linux-2.6-xen-execshield-fix-endless-gpf-fault-loop.patch
+ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1137,12 +1095,6 @@ ApplyPatch linux-2.6-squashfs.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# Make 8139too PIO/MMIO a module parameter
-ApplyPatch linux-2.6-net-8139-pio-modparam.patch
-# OQO2 needs PIO
-ApplyPatch linux-2.6-net-8139-pio-oqo2.patch
-# PIO fallback
-ApplyPatch linux-2.6-net-8139-pio-mmio-fallback.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1195,7 +1147,6 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 
 # atl1e & atl2 network drivers
-ApplyPatch linux-2.6-netdev-atl1e.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
@@ -1263,19 +1214,6 @@ done
 find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
 
 cd ..
-
-# Unpack the Xen tarball.
-%if %{includexen}
-cp %{SOURCE2} .
-if [ -d xen ]; then
-  rm -rf xen
-fi
-%setup -D -T -q -n kernel-%{kversion} -a1
-cd xen
-# Any necessary hypervisor patches go here
-
-%endif
-
 
 ###
 ### build
@@ -1369,6 +1307,21 @@ BuildKernel() {
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 %ifarch %{vdso_arches}
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
+    if grep '^CONFIG_XEN=y$' .config >/dev/null; then
+      echo > ldconfig-kernel.conf "\
+# This directive teaches ldconfig to search in nosegneg subdirectories
+# and cache the DSOs there with extra bit 0 set in their hwcap match
+# fields.  In Xen guest kernels, the vDSO tells the dynamic linker to
+# search in nosegneg subdirectories and to match this extra hwcap bit
+# in the ld.so.cache file.
+hwcap 0 nosegneg"
+    fi
+    if [ ! -s ldconfig-kernel.conf ]; then
+      echo > ldconfig-kernel.conf "\
+# Placeholder file, no vDSO hwcap entries used in this kernel."
+    fi
+    %{__install} -D -m 444 ldconfig-kernel.conf \
+        $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-$KernelVer.conf
 %endif
 
     # And save the headers/makefiles etc for building modules against
@@ -1420,9 +1373,6 @@ BuildKernel() {
       ln -sf ../../../include/asm-ppc* asm
       popd
     fi
-%if %{includexen}
-    cp -a xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-%endif
 
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
@@ -1495,17 +1445,6 @@ BuildKernel() {
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/boot
 
-%if %{includexen}
-%if %{with_xen}
-  cd xen
-  mkdir -p $RPM_BUILD_ROOT/%{image_install_path} $RPM_BUILD_ROOT/boot
-  make %{?_smp_mflags} %{xen_flags}
-  install -m 644 xen.gz $RPM_BUILD_ROOT/%{image_install_path}/xen.gz-%{KVERREL}.xen
-  install -m 755 xen-syms $RPM_BUILD_ROOT/boot/xen-syms-%{KVERREL}.xen
-  cd ..
-%endif
-%endif
-
 cd linux-%{kversion}.%{_target_cpu}
 
 %if %{with_debug}
@@ -1525,12 +1464,6 @@ BuildKernel %make_target %kernel_image
 
 %if %{with_smp}
 BuildKernel %make_target %kernel_image smp
-%endif
-
-%if %{includexen}
-%if %{with_xen}
-BuildKernel %xen_target %xen_image xen
-%endif
 %endif
 
 %if %{with_kdump}
@@ -1565,22 +1498,6 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 %install
 
 cd linux-%{kversion}.%{_target_cpu}
-
-%if %{includexen}
-%if %{with_xen}
-mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
-rm -f $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf
-cat > $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf <<\EOF
-# This directive teaches ldconfig to search in nosegneg subdirectories
-# and cache the DSOs there with extra bit 0 set in their hwcap match
-# fields.  In Xen guest kernels, the vDSO tells the dynamic linker to
-# search in nosegneg subdirectories and to match this extra hwcap bit
-# in the ld.so.cache file.
-hwcap 0 nosegneg
-EOF
-chmod 444 $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf
-%endif
-%endif
 
 %if %{with_doc}
 mkdir -p $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}/Documentation
@@ -1660,7 +1577,7 @@ fi\
 %{nil}
 
 # This macro defines a %%posttrans script for a kernel package.
-#	%%kernel_variant_posttrans [-v <subpackage>] [-s <s> -r <r>] <mkinitrd-args>
+#	%%kernel_variant_posttrans [-v <subpackage>] [-s <s> -r <r>]
 # More text can follow to go at the end of this variant's %%post.
 #
 %define kernel_variant_posttrans(s:r:v:) \
@@ -1670,7 +1587,7 @@ fi\
 
 #
 # This macro defines a %%post script for a kernel package and its devel package.
-#	%%kernel_variant_post [-v <subpackage>] [-s <s> -r <r>] <mkinitrd-args>
+#	%%kernel_variant_post [-v <subpackage>] [-s <s> -r <r>]
 # More text can follow to go at the end of this variant's %%post.
 #
 %define kernel_variant_post(s:r:v:) \
@@ -1682,7 +1599,7 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
   /bin/sed -i -e 's/^DEFAULTKERNEL=%{-s*}$/DEFAULTKERNEL=%{-r*}/' /etc/sysconfig/kernel || exit $?\
 fi}\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{*} %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --add-kernel %{KVERREL}%{?-v*} || exit $?\
@@ -1717,8 +1634,6 @@ fi}\
 %kernel_variant_post -v PAEdebug -s kernel-smp -r kernel-PAEdebug
 %kernel_variant_preun PAEdebug
 
-%kernel_variant_preun xen
-%kernel_variant_post -v xen -s kernel-xen[0U] -r kernel-xen -- `[ -d /proc/xen -a ! -e /proc/xen/xsd_kva ] || echo --multiboot=/%{image_install_path}/xen.gz-%{KVERREL}.xen`
 if [ -x /sbin/ldconfig ]
 then
     /sbin/ldconfig -X || exit $?
@@ -1765,9 +1680,9 @@ fi
 #
 # This macro defines the %%files sections for a kernel package
 # and its devel and debuginfo packages.
-#	%%kernel_variant_files [-k vmlinux] [-a <extra-files-glob>] [-e <extra-nonbinary>] <condition> <subpackage>
+#	%%kernel_variant_files [-k vmlinux] <condition> <subpackage>
 #
-%define kernel_variant_files(a:e:k:) \
+%define kernel_variant_files(k:) \
 %if %{1}\
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
@@ -1775,7 +1690,6 @@ fi
 /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 #/boot/symvers-%{KVERREL}%{?2:.%{2}}.gz\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
-%{?-a:%{-a*}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/kernel\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/build\
@@ -1785,12 +1699,12 @@ fi
 /lib/modules/%{KVERREL}%{?2:.%{2}}/weak-updates\
 %ifarch %{vdso_arches}\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
+/etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:.%{2}}.conf\
 %endif\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.block\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.networking\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.order\
 %ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
-%{?-e:%{-e*}}\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
 %verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
@@ -1822,9 +1736,31 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
-%kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Jul 24 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.180.rc0.git11
+- Deblobbed patch-2.6.26-git8.
+
+* Thu Jul 24 2008 Mark McLoughlin <markmc@redhat.com>
+- Enable Xen guest support in kernel-PAE.i686 and kernel.x86_64
+- Obsolete kernel-xen
+- Remove the hypervisor (xen.gz) - moved to xen-hypervisor package
+
+* Thu Jul 24 2008 Roland McGrath <roland@redhat.com>
+- Disable sfc module, not compiling.
+- Disable kernel-doc package.
+
+* Thu Jul 24 2008 Roland McGrath <roland@redhat.com>
+- 2.6.26-git11
+- kconfig updates for 2.6.26-git11
+- utrace update
+
+* Wed Jul 23 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git10
+
+* Tue Jul 22 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git9
+
 * Tue Jul 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.166.rc0.git8
 - Deblobbed patch-2.6.26-git8.
 
