@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.718 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.719 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -642,14 +642,12 @@ Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
-Patch453: linux-2.6-hwmon-hdaps-add-new-models.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
-Patch611: linux-2.6-reiserfs-discard-prealloc.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
@@ -714,10 +712,6 @@ Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2301: linux-2.6-ms-wireless-receiver.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=454028
 Patch2302: linux-2.6-usb-storage-nikond80-quirk.patch
-# fix interrupt handling
-Patch2303: linux-2.6-usb-fix-interrupt-disabling.patch
-# fix timer regression (queued for 2.6.25.12)
-Patch2304: linux-2.6-usb-ehci-fix-timer-regression.patch
 
 # usb video
 Patch2400: linux-2.6-uvcvideo.patch
@@ -1161,8 +1155,6 @@ ApplyPatch linux-2.6-execshield.patch
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-storage-nikond80-quirk.patch
-ApplyPatch linux-2.6-usb-fix-interrupt-disabling.patch
-ApplyPatch linux-2.6-usb-ehci-fix-timer-regression.patch
 
 # ACPI
 # acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
@@ -1239,8 +1231,6 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
-# add new models to hdaps
-ApplyPatch linux-2.6-hwmon-hdaps-add-new-models.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1258,9 +1248,6 @@ ApplyPatch linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
 ApplyPatch linux-2.6-defaults-fat-utf8.patch
-
-# Fix reiserfs list corruption
-ApplyPatch linux-2.6-reiserfs-discard-prealloc.patch
 
 # libata
 # ia64 ata quirk
@@ -1940,6 +1927,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Jul 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.25.12
+
 * Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com>
 - libata-acpi: fix calling sleeping function in irq context (#451896, #454954)
 
