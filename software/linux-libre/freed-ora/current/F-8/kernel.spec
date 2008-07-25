@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.501 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.502 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -643,7 +643,6 @@ Patch425: linux-2.6-nfs-client-mounts-hang.patch
 Patch426: linux-2.6-fs-fat-cleanup-code.patch
 Patch427: linux-2.6-fs-fat-fix-setattr.patch
 Patch428: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
-Patch429: linux-2.6-fs-reiserfs-discard-prealloc-in-delete_inode.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
@@ -690,11 +689,6 @@ Patch784: linux-2.6-acpi-eeepc-hotkey.patch
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-Patch1310: linux-2.6-usb-fix-interrupt-disabling.patch
-# fix timer regression (queued for 2.6.25.12)
-Patch1314: linux-2.6-usb-ehci-fix-timer-regression.patch
-
-Patch1350: linux-2.6-hwmon-hdaps-add-new-models.patch
 
 Patch1400: linux-2.6-smarter-relatime.patch
 
@@ -1170,8 +1164,6 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-fs-fat-cleanup-code.patch
 ApplyPatch linux-2.6-fs-fat-fix-setattr.patch
 ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
-# fix reiserfs hang (from F9)
-ApplyPatch linux-2.6-fs-reiserfs-discard-prealloc-in-delete_inode.patch
 
 # Networking
 # Disable easy to trigger printk's.
@@ -1275,15 +1267,8 @@ ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 # USB
 # respect the 'nousb' boot option
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# make USB work with shared interrupts
-ApplyPatch linux-2.6-usb-fix-interrupt-disabling.patch
-
-ApplyPatch linux-2.6-usb-ehci-fix-timer-regression.patch
 
 # ISDN
-
-# hwmon
-ApplyPatch linux-2.6-hwmon-hdaps-add-new-models.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1900,6 +1885,9 @@ fi
 
 
 %changelog
+* Thu Jul 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.25.12
+
 * Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com>
 - libata-acpi: fix calling sleeping function in irq context (#451896, #454954)
 
