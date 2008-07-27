@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.803 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.806 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 11
+%define gitrev 14
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1140,7 +1140,7 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
-ApplyPatch linux-2.6-lirc.patch
+#ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1738,8 +1738,25 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Jul 26 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.183.rc0.git14
+- Deblobbed patch-2.6.26-git14.
+
+* Sat Jul 26 2008 Roland McGrath <roland@redhat.com>
+- 2.6.26-git14
+- Disable lirc patch, not building.
+
+* Fri Jul 25 2008 Roland McGrath <roland@redhat.com>
+- 2.6.26-git13
+- utrace update
+
+* Fri Jul 25 2008 unknown <roland@fedoraproject.org>
+- 2.6.26-git13
+
+* Fri Jul 25 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git12
+
 * Thu Jul 24 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.180.rc0.git11
-- Deblobbed patch-2.6.26-git8.
+- Deblobbed patch-2.6.26-git11.
 
 * Thu Jul 24 2008 Mark McLoughlin <markmc@redhat.com>
 - Enable Xen guest support in kernel-PAE.i686 and kernel.x86_64
