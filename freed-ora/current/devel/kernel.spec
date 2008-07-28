@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.813 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.814 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1736,14 +1736,13 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Sun Jul 27 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.190.rc0.git16
+* Sun Jul 27 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.191.rc0.git16
 - Deblobbed patch-2.6.26-git16.
 
 * Sun Jul 27 2008 Roland McGrath <roland@redhat.com>
 - 2.6.26-git16
 - Fix up linux-2.6-build-nonintconfig.patch after kconfig changes.
 - Fix up .spec for headers check.
-- Reenable sfc module.
 
 * Sun Jul 27 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.186.rc0.git15
 - Deblobbed patch-2.6.26-git15.
