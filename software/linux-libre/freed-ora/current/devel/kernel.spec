@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.809 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.813 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 15
+%define gitrev 16
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -142,6 +142,7 @@ Summary: The Linux kernel
 
 %define KVERREL %{PACKAGE_VERSION}-libre.%{PACKAGE_RELEASE}.%{_target_cpu}
 %define hdrarch %_target_cpu
+%define asmarch %_target_cpu
 
 %if 0%{!?nopatches:1}
 %define nopatches 0
@@ -263,10 +264,12 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-i?86*.config
 %define image_install_path boot
 %define hdrarch i386
+%define asmarch x86
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
 %ifarch x86_64
+%define asmarch x86
 %define all_arch_configs kernel-%{version}-x86_64*.config
 %define image_install_path boot
 %define kernel_image arch/x86/boot/bzImage
@@ -1513,19 +1516,18 @@ mv Documentation/DocBook/man/*.9.gz $RPM_BUILD_ROOT/usr/share/man/man9
 # Install kernel headers
 make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_install
 
-# Manually go through the 'headers_check' process for every file, but
-# don't die if it fails
-chmod +x scripts/hdrcheck.sh
-echo -e '*****\n*****\nHEADER EXPORT WARNINGS:\n*****' > hdrwarnings.txt
-for FILE in `find $RPM_BUILD_ROOT/usr/include` ; do
-    scripts/hdrcheck.sh $RPM_BUILD_ROOT/usr/include $FILE /dev/null >> hdrwarnings.txt || :
-done
-echo -e '*****\n*****' >> hdrwarnings.txt
+# Do headers_check but don't die if it fails.
+make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_check \
+     > hdrwarnings.txt || :
 if grep -q exist hdrwarnings.txt; then
    sed s:^$RPM_BUILD_ROOT/usr/include/:: hdrwarnings.txt
    # Temporarily cause a build failure if header inconsistencies.
    # exit 1
 fi
+
+find $RPM_BUILD_ROOT/usr/include \
+     \( -name .install -o -name .check -o \
+     	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
 
 # glibc provides scsi headers for itself, for now
 rm -rf $RPM_BUILD_ROOT/usr/include/scsi
@@ -1734,6 +1736,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sun Jul 27 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.190.rc0.git16
+- Deblobbed patch-2.6.26-git16.
+
+* Sun Jul 27 2008 Roland McGrath <roland@redhat.com>
+- 2.6.26-git16
+- Fix up linux-2.6-build-nonintconfig.patch after kconfig changes.
+- Fix up .spec for headers check.
+- Reenable sfc module.
+
 * Sun Jul 27 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.186.rc0.git15
 - Deblobbed patch-2.6.26-git15.
 
@@ -1755,7 +1766,7 @@ fi
 - 2.6.26-git13
 - utrace update
 
-* Fri Jul 25 2008 unknown <roland@fedoraproject.org>
+* Fri Jul 25 2008 Roland McGrath <roland@redhat.com>
 - 2.6.26-git13
 
 * Fri Jul 25 2008 Dave Jones <davej@redhat.com>
