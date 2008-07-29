@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.719 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.722 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -597,6 +597,7 @@ Patch80: linux-2.6-smp-boot-delay.patch
 Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
 Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
+Patch88: linux-2.6-x86-mm-ioremap-64-bit-resource-on-32-bit-kernel.patch
 
 # ppc
 Patch123: linux-2.6-ppc-rtc.patch
@@ -637,7 +638,6 @@ Patch423: linux-2.6-fs-fat-fix-setattr.patch
 Patch424: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
@@ -1107,6 +1107,8 @@ ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
 ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
+# fix 64-bit resource on 32-bit kernels
+ApplyPatch linux-2.6-x86-mm-ioremap-64-bit-resource-on-32-bit-kernel.patch
 
 #
 # PowerPC
@@ -1221,8 +1223,6 @@ ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# CVE-2008-2750: l2tp heap overflow
-ApplyPatch linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1927,7 +1927,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Thu Jul 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+* Mon Jul 28 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.13-103
+- Linux 2.6.25.13
+
+* Fri Jul 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.12-102
+- Fix 64-bit resource checking on 32-bit kernels. (#447143)
+
+* Fri Jul 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.12-101
+- Set default powersave timeout to 0 for the AC97 driver. (#450395)
+
+* Thu Jul 24 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.12-100
 - Linux 2.6.25.12
 
 * Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com>
