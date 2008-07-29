@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.502 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.505 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -595,6 +595,7 @@ Patch75: linux-2.6-x86-debug-boot.patch
 Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
 Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
+Patch88: linux-2.6-x86-mm-ioremap-64-bit-resource-on-32-bit-kernel.patch
 
 Patch90: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch91: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
@@ -645,7 +646,6 @@ Patch427: linux-2.6-fs-fat-fix-setattr.patch
 Patch428: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch431: linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
 
 Patch440: linux-2.6-sha_alignment.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -1066,6 +1066,8 @@ ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
 ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
+# fix 64-bit resource on 32-bit kernels
+ApplyPatch linux-2.6-x86-mm-ioremap-64-bit-resource-on-32-bit-kernel.patch
 
 #
 # PowerPC
@@ -1168,8 +1170,6 @@ ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# CVE-2008-2750: l2tp heap overflow
-ApplyPatch linux-2.6-net-l2tp-fix-potential-memory-corruption-in-pppol2tp_recvmsg.patch
 
 # Misc fixes
 # Fix SHA1 alignment problem on ia64
@@ -1885,10 +1885,19 @@ fi
 
 
 %changelog
-* Thu Jul 24 2008 Kyle McMartin <kmcmartin@redhat.com>
+* Sun Jul 28 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.13-65
+- Linux 2.6.25.13
+
+* Fri Jul 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.12-64
+- Fix 64-bit resource checking on 32-bit kernels. (F9#447143)
+
+* Fri Jul 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.12-63
+- Set default powersave timeout to 0 for the AC97 driver. (F9#450395)
+
+* Thu Jul 24 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.12-62
 - Linux 2.6.25.12
 
-* Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com>
+* Tue Jul 22 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.11-61
 - libata-acpi: fix calling sleeping function in irq context (#451896, #454954)
 
 * Mon Jul 21 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.60
