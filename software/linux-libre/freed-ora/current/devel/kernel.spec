@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.815 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.824 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 1
 # The git snapshot level
-%define gitrev 16
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -558,7 +558,6 @@ Patch10: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
-Patch23: linux-2.6-powerpc-tracehook.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
@@ -688,6 +687,7 @@ operate.
 %package bootwrapper
 Summary: Boot wrapper files for generating combined kernel + initrd images
 Group: Development/System
+Requires: gzip
 %description bootwrapper
 Kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
 files combining both kernel and initial ramdisk.
@@ -898,12 +898,25 @@ ApplyPatch()
 if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
   if [ -d kernel-%{kversion}/vanilla-%{kversion} ]; then
+
     cd kernel-%{kversion}
+    # any vanilla-* directories other than the base one are stale
+    oldvanilla=$(ls -d vanilla-* | grep -v "^vanilla-%{kversion}$")
+    # Just in case we ctrl-c'd a prep already
+    rm -rf deleteme.vanilla-*
+    for staledir in $oldvanilla ; do
+      # Move away the stale away, and delete in background.
+      mv $staledir deleteme.$staledir
+      rm -rf deleteme.$staledir &
+    done
+
   else
+
     # Ok, first time we do a make prep.
     rm -f pax_global_header
 %setup -q -n kernel-%{kversion} -c
     mv linux-%{kversion} vanilla-%{kversion}
+
   fi
 
 %if "%{kversion}" != "%{vanillaversion}"
@@ -932,7 +945,7 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 
- cd ..
+  cd ..
 
 else
   # We already have a vanilla dir.
@@ -1004,7 +1017,6 @@ ApplyPatch linux-2.6-hotfixes.patch
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
-ApplyPatch linux-2.6-powerpc-tracehook.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1557,7 +1569,7 @@ rm -rf $RPM_BUILD_ROOT
 
 #
 # This macro defines a %%post script for a kernel*-devel package.
-#	%%kernel_devel_post <subpackage>
+#	%%kernel_devel_post [<subpackage>]
 #
 %define kernel_devel_post() \
 %{expand:%%post %{?1:%{1}-}devel}\
@@ -1575,27 +1587,27 @@ fi\
 %{nil}
 
 # This macro defines a %%posttrans script for a kernel package.
-#	%%kernel_variant_posttrans [-v <subpackage>] [-s <s> -r <r>]
+#	%%kernel_variant_posttrans [<subpackage>]
 # More text can follow to go at the end of this variant's %%post.
 #
-%define kernel_variant_posttrans(s:r:v:) \
-%{expand:%%posttrans %{?-v*}}\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --rpmposttrans %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+%define kernel_variant_posttrans() \
+%{expand:%%posttrans %{?1}}\
+/sbin/new-kernel-pkg --package kernel-libre%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
 %{nil}
 
 #
 # This macro defines a %%post script for a kernel package and its devel package.
-#	%%kernel_variant_post [-v <subpackage>] [-s <s> -r <r>]
+#	%%kernel_variant_post [-v <subpackage>] [-r <replace>]
 # More text can follow to go at the end of this variant's %%post.
 #
-%define kernel_variant_post(s:r:v:) \
+%define kernel_variant_post(v:r:) \
 %{expand:%%kernel_devel_post %{?-v*}}\
 %{expand:%%kernel_variant_posttrans %{?-v*}}\
 %{expand:%%post %{?-v*}}\
-%{-s:\
+%{-r:\
 if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
-  /bin/sed -i -e 's/^DEFAULTKERNEL=%{-s*}$/DEFAULTKERNEL=%{-r*}/' /etc/sysconfig/kernel || exit $?\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
 /sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 #if [ -x /sbin/weak-modules ]\
@@ -1618,18 +1630,22 @@ fi}\
 %{nil}
 
 %kernel_variant_preun
-%kernel_variant_post -s kernel-smp -r kernel
+%ifarch x86_64
+%kernel_variant_post -r (kernel-smp|kernel-xen)
+%else
+%kernel_variant_post -r kernel-smp
+%endif
 
 %kernel_variant_preun smp
 %kernel_variant_post -v smp
 
 %kernel_variant_preun PAE
-%kernel_variant_post -v PAE -s kernel-smp -r kernel-PAE
+%kernel_variant_post -v PAE -r (kernel-smp|kernel-xen)
 
 %kernel_variant_preun debug
 %kernel_variant_post -v debug
 
-%kernel_variant_post -v PAEdebug -s kernel-smp -r kernel-PAEdebug
+%kernel_variant_post -v PAEdebug -r (kernel-smp|kernel-xen)
 %kernel_variant_preun PAEdebug
 
 if [ -x /sbin/ldconfig ]
@@ -1736,8 +1752,27 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Jul 30 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.201.rc1
+- Deblobbed patch-2.6.27-rc1.
+
+* Wed Jul 30 2008 Mark McLoughlin <markmc@redhat.com>
+- Replace kernel-xen in DEFAULTKERNEL (#456558)
+
+* Tue Jul 29 2008 Dave Jones <davej@redhat.com>
+- Disable CONFIG_VIDEO_ADV_DEBUG (#456751)
+
+* Tue Jul 29 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc1
+
+* Mon Jul 28 2008 Josh Boyer <jwboyer@gmail.com>
+- Add gzip requires for kernel-bootwrapper (#456947)
+
+* Mon Jul 28 2008 Dave Jones <davej@redhat.com>
+- 2.6.26-git18
+
 * Mon Jul 28 2008 Roland McGrath <roland@redhat.com>
 - Disable hfcmulti driver on big-endian.
+- 2.6.26-git17
 
 * Sun Jul 27 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.191.rc0.git16
 - Deblobbed patch-2.6.26-git16.
