@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.828 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.830 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -618,6 +618,7 @@ Patch1807: linux-2.6-drm-radeon-fix-oops.patch
 Patch1808: linux-2.6-drm-radeon-fix-oops2.patch
 Patch1809: linux-2.6-drm-modesetting-oops-fixes.patch
 Patch1810: linux-2.6-drm-fix-master-perm.patch
+Patch1811: drm-modesetting-radeon.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1161,7 +1162,7 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch linux-2.6-export-shmem-bits-for-gem.patch
+ApplyPatch drm-modesetting-radeon.patch
 
 #ApplyPatch linux-2.6-drm-git-mm.patch
 #ApplyPatch nouveau-drm.patch
@@ -1752,6 +1753,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Aug 01 2008 Dave Airlie <airlied@redhat.com>
+- Fix ppc build with drm changes
+
+* Fri Aug 01 2008 Dave Airlie <airlied@redhat.com>
+- Add initial radeon kernel modesetting jumbo patch
+
 * Thu Jul 31 2008 Dave Jones <davej@redhat.com>
 - Fix PPC64 build.
 
