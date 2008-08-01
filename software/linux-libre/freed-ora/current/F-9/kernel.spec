@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.723 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.724 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1927,6 +1927,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Aug 01 2008 John W. Linville <linville@redhat.com> 2.6.25.13-105
+- Revert at76_usb to version from before attempted mac80211 port
+
 * Wed Jul 30 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.104
 - Deblob linux-2.6-wireless-pending.patch.
 
