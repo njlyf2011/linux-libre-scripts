@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.505 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.506 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1885,6 +1885,16 @@ fi
 
 
 %changelog
+* Fri Aug 01 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.66.fc8
+- Deblob linux-2.6-wireless-pending.patch.
+
+* Fri Aug 01 2008 John W. Linville <linville@redhat.com> 2.6.25.13-66
+- Upstream wireless updates from 2008-07-14
+  (http://marc.info/?l=linux-wireless&m=121606436000705&w=2)
+- Upstream wireless fixes from 2008-07-29
+  (http://marc.info/?l=linux-wireless&m=121737750023195&w=2)
+- Revert at76_usb to version from before attempted mac80211 port
+
 * Sun Jul 28 2008 Kyle McMartin <kmcmartin@redhat.com> 2.6.25.13-65
 - Linux 2.6.25.13
 
