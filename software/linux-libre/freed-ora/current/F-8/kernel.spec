@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.506 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.507 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -601,7 +601,6 @@ Patch90: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch91: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 Patch92: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch93: linux-2.6-alsa-kill-annoying-messages.patch
-Patch94: linux-2.6-alsa-trident-spdif.patch
 
 Patch123: linux-2.6-ppc-rtc.patch
 Patch130: linux-2.6-ppc-use-libgcc.patch
@@ -663,8 +662,6 @@ Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
 Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
-Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
-Patch677: linux-2.6-libata-retry-enabling-ahci.patch
 Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 Patch679: linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
@@ -1045,8 +1042,6 @@ ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
 # kill annoying messages
 ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
-# trident fix from F9
-ApplyPatch linux-2.6-alsa-trident-spdif.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1213,10 +1208,6 @@ ApplyPatch linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # fix docking on stations that have a bay device
 ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
-# fix DMA disable on atiixp
-ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
-# retry enabling AHCI mode before reporting error
-ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
 # fix ahci / ICH6 conflict
 ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 # fix invalid irq context in libata-acpi (#451896)
@@ -1885,6 +1876,16 @@ fi
 
 
 %changelog
+* Fri Aug 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.14-67
+- Linux 2.6.25.14
+  Dropped patches:
+    linux-2.6-alsa-trident-spdif.patch
+    linux-2.6-libata-retry-enabling-ahci.patch
+    linux-2.6-libata-pata_atiixp-dont-disable.patch
+  Reverted from 2.6.25.14:
+    ath5k-don-t-enable-msi-we-cannot-handle-it-yet.patch
+    b43legacy-release-mutex-in-error-handling-code.patch
+
 * Fri Aug 01 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.66.fc8
 - Deblob linux-2.6-wireless-pending.patch.
 
