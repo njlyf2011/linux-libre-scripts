@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.724 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.725 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -629,7 +629,6 @@ Patch410: linux-2.6-alsa-kill-annoying-messages.patch
 Patch411: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 Patch412: linux-2.6-alsa-hda-codec-add-AD1884A.patch
 Patch413: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-Patch414: linux-2.6-alsa-trident-spdif.patch
 
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
@@ -655,8 +654,6 @@ Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
 Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
-Patch676: linux-2.6-libata-pata_atiixp-dont-disable.patch
-Patch677: linux-2.6-libata-retry-enabling-ahci.patch
 Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 Patch679: linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
@@ -1208,8 +1205,6 @@ ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
 ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-# ALSA: trident - pause s/pdif output
-ApplyPatch linux-2.6-alsa-trident-spdif.patch
 
 # Filesystem patches.
 # cifs
@@ -1260,10 +1255,6 @@ ApplyPatch linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # fix dock/undock on docking stations that have a bay
 ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
-# fix DMA disable on atiixp
-ApplyPatch linux-2.6-libata-pata_atiixp-dont-disable.patch
-# retry enabling AHCI mode before reporting error
-ApplyPatch linux-2.6-libata-retry-enabling-ahci.patch
 # fix ahci / ich6m conflict
 ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
 # fix calling sleeping function in irq context (#451896, #454954)
@@ -1927,6 +1918,16 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Aug 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.14-106
+- Linux 2.6.25.14
+  Dropped patches:
+    linux-2.6-alsa-trident-spdif.patch
+    linux-2.6-libata-retry-enabling-ahci.patch
+    linux-2.6-libata-pata_atiixp-dont-disable.patch
+  Reverted from 2.6.25.14:
+    ath5k-don-t-enable-msi-we-cannot-handle-it-yet.patch
+    b43legacy-release-mutex-in-error-handling-code.patch
+
 * Fri Aug 01 2008 John W. Linville <linville@redhat.com> 2.6.25.13-105
 - Revert at76_usb to version from before attempted mac80211 port
 
