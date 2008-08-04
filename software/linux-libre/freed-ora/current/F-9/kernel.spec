@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 619
-%define fedora_build %(R="$Revision: 1.725 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.726 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -411,7 +411,7 @@ Summary: The Linux kernel
 # problems with the newer kernel or lack certain things that make
 # integration in the distro harder than needed.
 #
-%define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, selinux-policy-targeted < 1.25.3-14
+%define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, iwl4965-firmware < 228.57.2, selinux-policy-targeted < 1.25.3-14
 
 #
 # The ld.so.conf.d file we install uses syntax older ldconfig's don't grok.
@@ -585,6 +585,8 @@ Patch08: linux-2.6-compile-fix-gcc-43.patch
 # revert upstream patches we get via other methods
 Patch09: linux-2.6-upstream-reverts.patch
 Patch10: linux-2.6-hotfixes.patch
+# patches queued for the next -stable release
+Patch11: linux-2.6-stable-queue.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6.25-utrace-bugon.patch
@@ -1082,6 +1084,7 @@ ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 ApplyPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch linux-2.6-hotfixes.patch
+ApplyPatch linux-2.6-stable-queue.patch
 
 # Roland's utrace ptrace replacement.
 %ifnarch ia64
@@ -1918,6 +1921,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sun Aug 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.14-107
+- Add patches queued for 2.6.25.15.
+- Add conflict against older iwl4965 firmware.
+
 * Fri Aug 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.14-106
 - Linux 2.6.25.14
   Dropped patches:
