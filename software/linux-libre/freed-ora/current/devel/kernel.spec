@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.834 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.838 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 1
 # The git snapshot level
-%define gitrev 3
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -380,7 +380,7 @@ Summary: The Linux kernel
 # problems with the newer kernel or lack certain things that make
 # integration in the distro harder than needed.
 #
-%define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, selinux-policy-targeted < 1.25.3-14
+%define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, iwl4965-firmware < 228.57.2, selinux-policy-targeted < 1.25.3-14
 
 #
 # The ld.so.conf.d file we install uses syntax older ldconfig's don't grok.
@@ -1753,11 +1753,23 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Aug 04 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.215.rc1.git4
+- Deblobbed patch-2.6.27-rc1-git4.
+
+* Mon Aug 04 2008 Dave Airlie <airlied@redhat.com> 
+- rebase modesetting patch + fixes
+
+* Sat Aug 02 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc1-git4
+
 * Sat Aug 02 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.211.rc1.git3
 - Deblobbed patch-2.6.27-rc1-git3.
 
 * Sat Aug 02 2008 Dave Airlie <airlied@redhat.com>
 - Fix locking in drm patches
+
+* Fri Aug 01 2008 Roland McGrath <roland@redhat.com>
+- utrace update
 
 * Fri Aug 01 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc1-git3
