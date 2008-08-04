@@ -1,0 +1,10 @@
+deblob-main
+deblob-2.6.25
+deblob-check
+clog
+GNUmakefile
+kernel-2.6.*.config
+temp-*
+kernel-2.6.25
+linux-2.6.25-libre3.*
+patch-2.6.25.14.bz2
