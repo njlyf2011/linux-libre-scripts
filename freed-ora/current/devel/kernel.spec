@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.838 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.849 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 1
 # The git snapshot level
-%define gitrev 4
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -584,6 +584,7 @@ Patch350: linux-2.6-debug-list_debug_rcu.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
+#Patch391: linux-2.6-defaults-acpi-video-dos.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
@@ -626,8 +627,14 @@ Patch2000: linux-2.6-e1000-ich9.patch
 # Make Eee disk faster.
 Patch2010: linux-2.6-sata-eeepc-faster.patch
 
+# Make Eee laptop driver suck less
+Patch2011: linux-2.6-eeepc-laptop-update.patch
+
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+
+# linux1394 git patches
+Patch2300: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -636,6 +643,9 @@ Patch2301: linux-2.6-ms-wireless-receiver.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
+
+# temporary (I hope, reported upstream) fix userspace use of videodev2.h
+Patch2700: linux-2.6-videodev2-userspace-usage.patch
 
 %endif
 
@@ -993,7 +1003,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-#ApplyPatch git-linus.diff
+ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1070,6 +1080,9 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
 # ACPI
+
+ApplyPatch linux-2.6-defaults-acpi-video.patch 
+#ApplyPatch linux-2.6-acpi-video-dos.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1152,11 +1165,12 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
-#ApplyPatch linux-2.6-lirc.patch
+ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
+ApplyPatch linux-2.6-eeepc-laptop-update.patch
 
 # atl1e & atl2 network drivers
 ApplyPatch linux-2.6-netdev-atl2.patch
@@ -1174,6 +1188,7 @@ ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch linux-2.6-drm-fix-master-perm.patch
 
 # linux1394 git patches
+ApplyPatch linux-2.6-firewire-git-update.patch
 #C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
 #if [ "$C" -gt 10 ]; then
 #ApplyPatch linux-2.6-firewire-git-pending.patch
@@ -1181,6 +1196,9 @@ ApplyPatch drm-modesetting-radeon.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
+
+# temporary (I hope, reported upstream) fix userspace use of videodev2.h
+ApplyPatch linux-2.6-videodev2-userspace-usage.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1374,16 +1392,9 @@ hwcap 0 nosegneg"
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
-    cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    # While arch/powerpc/include/asm is still a symlink to the old
-    # include/asm-ppc{64,} directory, include that in kernel-devel too.
-    if [ "$Arch" = "powerpc" -a -r ../arch/powerpc/include/asm ]; then
-      cp -a `readlink ../arch/powerpc/include/asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-      mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/$Arch/include
-      pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/$Arch/include
-      ln -sf ../../../include/asm-ppc* asm
-      popd
+    cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+    if [ -f asm ]; then
+      cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     fi
 
     # Make sure the Makefile and version.h have a matching timestamp so that
@@ -1753,10 +1764,43 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Aug 05 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.226.rc1.git5
+- Deblobbed patch-2.6.27-rc1-git5.
+
+* Tue Aug 05 2008 Dave Airlie <airlied@redhat.com> 
+- more drm regressions squashed
+
+* Mon Aug 04 2008 Dave Jones <davej@redhat.com>
+- Fix bogus printk in execshield noticed by Brendan Lynch.
+
+* Mon Aug 04 2008 Dave Jones <davej@redhat.com>
+- Merge Linux-2.6 up to commit 2e1e9212ed8c532c6b324de77d3cafef5d2bc846
+
+* Mon Aug 04 2008 Matthew Garrett <mjg@redhat.com>
+- disable ACPI video display switching by default
+
+* Mon Aug 04 2008 Jarod Wilson <jwilson@redhat.com>
+- add latest firewire goodies: actual iso timestamps ftw
+
+* Mon Aug 04 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc1-git5
+
+* Mon Aug 04 2008 Hans de Goede <j.w.r.degoede@hhs.nl>
+- fix broken /usr/include/linux/videodev2.h (bz 457688)
+
+* Mon Aug 04 2008 Matthew Garrett <mjg@redhat.com>
+- update eeepc-laptop driver (#441454)
+
+* Mon Aug 04 2008 Jarod Wilson <jwilson@redhat.com>
+- lirc updates:
+  * make it build again
+  * add philips omaura transceiver support to mceusb2 driver
+  * add lcd-based device support to imon driver
+
 * Mon Aug 04 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.215.rc1.git4
 - Deblobbed patch-2.6.27-rc1-git4.
 
-* Mon Aug 04 2008 Dave Airlie <airlied@redhat.com> 
+* Mon Aug 04 2008 Dave Airlie <airlied@redhat.com>
 - rebase modesetting patch + fixes
 
 * Sat Aug 02 2008 Dave Jones <davej@redhat.com>
