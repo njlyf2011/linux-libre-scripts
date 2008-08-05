@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.508 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.509 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -670,6 +670,7 @@ Patch679: linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 Patch682: linux-2.6-wireless-fixups.patch
+Patch683: linux-2.6-rt2500usb-fix.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-zd1211rw-module-alias.patch
 Patch692: linux-2.6-cfg80211-extras.patch
@@ -1226,6 +1227,8 @@ ApplyPatch linux-2.6-wireless-pending.patch
 ApplyPatch linux-2.6-at76.patch
 # fixups to make current wireless patches build on this kernel
 ApplyPatch linux-2.6-wireless-fixups.patch
+# fix for long-standing rt2500usb issues
+ApplyPatch linux-2.6-rt2500usb-fix.patch
 # module alias for zd1211rw module
 ApplyPatch linux-2.6-zd1211rw-module-alias.patch
 # Restore ability to add/remove virtual i/fs to mac80211 devices
@@ -1879,6 +1882,9 @@ fi
 
 
 %changelog
+* Mon Aug 04 2008 John W. Linville <linville@redhat.com> 2.6.25.14-69
+- fix for long-standing rt2500usb issues (#411481)
+
 * Sun Aug 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.25.14-68
 - Add patches queued for 2.6.25.15.
 - Add conflict against older iwl4965 firmware.
