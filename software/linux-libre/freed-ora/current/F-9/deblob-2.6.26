@@ -44,7 +44,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.25 extra=3
+kver=2.6.26 extra=1
 
 if unifdef /dev/null; then :; else
     echo unifdef is required >&2
@@ -217,7 +217,7 @@ clean_kconfig drivers/char/drm/Kconfig 'DRM_R128'
 clean_mk CONFIG_DRM_R128 drivers/char/drm/Makefile
 
 # DRM_RADEON - ATI Radeon
-clean_blob drivers/char/drm/radeon_cp.c
+clean_blob drivers/char/drm/radeon_microcode.h
 clean_kconfig drivers/char/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/char/drm/Makefile
 
@@ -463,7 +463,7 @@ clean_mk CONFIG_USB_KAWETH drivers/net/usb/Makefile
 ########################
 
 # QETH - Gigabit Ethernet device support
-clean_blob drivers/s390/net/qeth_mpc.c
+clean_blob drivers/s390/net/qeth_core_mpc.c
 clean_kconfig drivers/s390/net/Kconfig 'QETH'
 clean_mk CONFIG_QETH drivers/s390/net/Makefile
 
