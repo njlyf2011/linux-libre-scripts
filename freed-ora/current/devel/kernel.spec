@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.849 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.854 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 1
 # The git snapshot level
-%define gitrev 5
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -89,11 +89,13 @@ Summary: The Linux kernel
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-firmware
-%define with_firmware  %{?_without_firmware:  0} %{?!_without_firmware:  1}
+%define with_firmware  %{?_with_firmware:  1} %{?!_with_firmware:  0}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
+# Want to build a the vsdo directories installed
+%define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
 
 # don't build the kernel-doc package
 %define with_doc 0
@@ -203,8 +205,10 @@ Summary: The Linux kernel
 
 %define all_x86 i386 i586 i686
 
+%if %{with_vdso_install}
 # These arches install vdso/ directories.
 %define vdso_arches %{all_x86} x86_64 ppc ppc64
+%endif
 
 # Overrides for generic default options
 
@@ -232,7 +236,6 @@ Summary: The Linux kernel
 # only package docs noarch
 %ifnarch noarch
 %define with_doc 0
-%define with_firmware 0
 %endif
 
 # no need to build headers again for these arches,
@@ -246,6 +249,7 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_headers 0
 %define all_arch_configs kernel-%{version}-*.config
+%define with_firmware  %{?_without_firmware:  0} %{?!_without_firmware:  1}
 %endif
 
 # bootwrapper is only on ppc
@@ -584,7 +588,7 @@ Patch350: linux-2.6-debug-list_debug_rcu.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
-#Patch391: linux-2.6-defaults-acpi-video-dos.patch
+Patch391: linux-2.6-acpi-video-dos.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
@@ -690,7 +694,7 @@ glibc package.
 Summary: Firmware files used by the Linux kernel
 Group: Development/System
 Provides: kernel-firwmare = %{rpmversion}-%{pkg_release}
-License: GPLv2
+License: GPLv2+
 %description firmware
 Kernel-firmware includes firmware files required for some devices to
 operate.
@@ -1003,7 +1007,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-ApplyPatch git-linus.diff
+#ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1082,7 +1086,7 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # ACPI
 
 ApplyPatch linux-2.6-defaults-acpi-video.patch 
-#ApplyPatch linux-2.6-acpi-video-dos.patch
+ApplyPatch linux-2.6-acpi-video-dos.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1764,6 +1768,21 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Aug 06 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.231.rc1.git6
+- Deblobbed patch-2.6.27-rc1-git6.
+
+* Wed Aug 06 2008 Dave Airlie <airlied@redhat.com>
+- fix modesetting introduced bugs on PCI radeon cards
+
+* Tue Aug 05 2008 Chuck Ebbert <cebbert@redhat.com>
+- Allow building firmware during arch build (--with firmware).
+
+* Tue Aug 05 2008 Tom "spot" Callaway <tcallawa@redhat.com>
+- fix license tag of kernel-firmware
+
+* Tue Aug 05 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc1-git6
+
 * Tue Aug 05 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.226.rc1.git5
 - Deblobbed patch-2.6.27-rc1-git5.
 
