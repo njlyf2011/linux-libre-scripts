@@ -1,10 +1,10 @@
 deblob-main
-deblob-2.6.25
+deblob-2.6.26
 deblob-check
 clog
 GNUmakefile
 kernel-2.6.*.config
 temp-*
-kernel-2.6.25
-linux-2.6.25-libre3.*
-patch-2.6.25.14.bz2
+kernel-2.6.26
+linux-2.6.26-libre1.*
+patch-2.6.26.1.bz2
