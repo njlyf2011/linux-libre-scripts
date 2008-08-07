@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.860 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.861 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -916,14 +916,10 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
   if [ -d kernel-%{kversion}/vanilla-%{kversion} ]; then
 
     cd kernel-%{kversion}
-    # any vanilla-* directories other than the base one are stale
-    oldvanilla=$(ls -d vanilla-* | grep -v "^vanilla-%{kversion}$")
-    # Just in case we ctrl-c'd a prep already
-    rm -rf deleteme.vanilla-*
-    for staledir in $oldvanilla ; do
-      # Move away the stale away, and delete in background.
-      mv $staledir deleteme.$staledir
-      rm -rf deleteme.$staledir &
+
+    # Any vanilla-* directories other than the base one are stale.
+    for dir in vanilla-*; do
+      [ "$dir" = vanilla-%{kversion} ] || rm -rf $dir &
     done
 
   else
@@ -1086,7 +1082,7 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
 # ACPI
 
-ApplyPatch linux-2.6-defaults-acpi-video.patch 
+ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-clear-wake-status.patch
 
@@ -1768,6 +1764,10 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Aug  7 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+- Clean up %%prep old vanilla-* source purging.
+
 * Thu Aug 07 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.237.rc2
 - Deblobbed patch-2.6.27-rc2.
 
@@ -1807,7 +1807,7 @@ fi
 * Tue Aug 05 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.226.rc1.git5
 - Deblobbed patch-2.6.27-rc1-git5.
 
-* Tue Aug 05 2008 Dave Airlie <airlied@redhat.com> 
+* Tue Aug 05 2008 Dave Airlie <airlied@redhat.com>
 - more drm regressions squashed
 
 * Mon Aug 04 2008 Dave Jones <davej@redhat.com>
