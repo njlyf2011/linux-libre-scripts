@@ -7,5 +7,4 @@ kernel-2.6.*.config
 temp-*
 kernel-2.6.26
 linux-2.6.26-libre1.*
-patch-libre-2.6.27-rc1.*
-patch-libre-2.6.27-rc1-git6.*
+patch-libre-2.6.27-rc2.*
