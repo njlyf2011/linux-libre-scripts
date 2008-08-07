@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.854 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.860 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 1
+%define rcrev 2
 # The git snapshot level
-%define gitrev 6
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -589,6 +589,7 @@ Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
+Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
@@ -693,8 +694,8 @@ glibc package.
 %package firmware
 Summary: Firmware files used by the Linux kernel
 Group: Development/System
-Provides: kernel-firwmare = %{rpmversion}-%{pkg_release}
 License: GPLv2+
+Provides: kernel-firmware = %{rpmversion}-%{pkg_release}
 %description firmware
 Kernel-firmware includes firmware files required for some devices to
 operate.
@@ -1087,6 +1088,7 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
 ApplyPatch linux-2.6-defaults-acpi-video.patch 
 ApplyPatch linux-2.6-acpi-video-dos.patch
+ApplyPatch linux-2.6-acpi-clear-wake-status.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1397,7 +1399,7 @@ hwcap 0 nosegneg"
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    if [ -f asm ]; then
+    if [ -s asm ]; then
       cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     fi
 
@@ -1731,9 +1733,7 @@ fi
 /lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
 /etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:.%{2}}.conf\
 %endif\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.block\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.networking\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.order\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
 %ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
@@ -1768,6 +1768,27 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Aug 07 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.237.rc2
+- Deblobbed patch-2.6.27-rc2.
+
+* Wed Aug 06 2008 Dave Jones <davej@redhat.com>
+- Enable USB_PERSIST
+
+* Wed Aug 06 2008 Dave Jones <davej@redhat.com>
+- If include/asm exists, it's a symlink. Fix test. (#458201)
+
+* Wed Aug 06 2008 Dave Jones <davej@redhat.com>
+- Own all the modules.* files in /lib/modules. (#456857)
+
+* Wed Aug 06 2008 Matthew Garrett <mjg@redhat.com>
+- Fix reboot after resume on various AMI-bios machines
+
+* Wed Aug 06 2008 Jarod Wilson <jwilson@redhat.com>
+- Have kernel-%%{variant}-firmware Provides: kernel-firmware
+
+* Wed Aug 06 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc2
+
 * Wed Aug 06 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.231.rc1.git6
 - Deblobbed patch-2.6.27-rc1-git6.
 
