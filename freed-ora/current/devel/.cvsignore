@@ -8,3 +8,4 @@ temp-*
 kernel-2.6.26
 linux-2.6.26-libre1.*
 patch-libre-2.6.27-rc2.*
+patch-2.6.27-rc2-git1.bz2

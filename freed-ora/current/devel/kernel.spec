@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.861 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.864 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -35,7 +35,7 @@ Summary: The Linux kernel
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
 %define rcrevlibre -libre
-%define gitrevlibre -libre
+#define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 2
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1190,7 +1190,7 @@ ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch linux-2.6-drm-fix-master-perm.patch
 
 # linux1394 git patches
-ApplyPatch linux-2.6-firewire-git-update.patch
+#ApplyPatch linux-2.6-firewire-git-update.patch
 #C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
 #if [ "$C" -gt 10 ]; then
 #ApplyPatch linux-2.6-firewire-git-pending.patch
@@ -1396,7 +1396,7 @@ hwcap 0 nosegneg"
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     if [ -s asm ]; then
-      cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+      cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/asm
     fi
 
     # Make sure the Makefile and version.h have a matching timestamp so that
@@ -1764,6 +1764,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Aug 08 2008 Dave Airlie <airlied@redhat.com>
+- attempt to fix oops in drm_open
+
+* Thu Aug 07 2008 Dave Jones <davej@redhat.com>
+- include/asm needs to be called such, not asm-x86.
+
+* Thu Aug 07 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc2-git1
+
 * Thu Aug  7 2008 Roland McGrath <roland@redhat.com>
 - utrace update
 - Clean up %%prep old vanilla-* source purging.
