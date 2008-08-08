@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.864 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.867 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -624,7 +624,9 @@ Patch1807: linux-2.6-drm-radeon-fix-oops.patch
 Patch1808: linux-2.6-drm-radeon-fix-oops2.patch
 Patch1809: linux-2.6-drm-modesetting-oops-fixes.patch
 Patch1810: linux-2.6-drm-fix-master-perm.patch
+
 Patch1811: drm-modesetting-radeon.patch
+Patch1812: linux-2.6-drm-radeon-module-device-table.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -639,7 +641,9 @@ Patch2011: linux-2.6-eeepc-laptop-update.patch
 Patch2020: linux-2.6-netdev-atl2.patch
 
 # linux1394 git patches
-Patch2300: linux-2.6-firewire-git-update.patch
+# This is currently not applied and the numbering clashes with the USB
+# patch below.
+# Patch2300: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -651,6 +655,9 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 # temporary (I hope, reported upstream) fix userspace use of videodev2.h
 Patch2700: linux-2.6-videodev2-userspace-usage.patch
+
+# silence piix3 in quiet boot (ie, qemu)
+Patch2800: linux-2.6-piix3-silence-quirk.patch
 
 %endif
 
@@ -1179,6 +1186,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
+ApplyPatch linux-2.6-drm-radeon-module-device-table.patch
 
 #ApplyPatch linux-2.6-drm-git-mm.patch
 #ApplyPatch nouveau-drm.patch
@@ -1201,6 +1209,9 @@ ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 # temporary (I hope, reported upstream) fix userspace use of videodev2.h
 ApplyPatch linux-2.6-videodev2-userspace-usage.patch
+
+# silence piix3 in quiet boot (ie, qemu)
+ApplyPatch linux-2.6-piix3-silence-quirk.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1764,6 +1775,13 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Aug  8 2008 Kristian Høgsberg <krh@redhat.com>
+- Export module device table for radeon DRM driver.
+- Comment out firewire patch 2300 for now, numbering conflict.
+
+* Fri Aug 08 2008 Adam Jackson <ajax@redhat.com>
+- Silence the PIIX3 PCI quirk message in quiet boot.
+
 * Fri Aug 08 2008 Dave Airlie <airlied@redhat.com>
 - attempt to fix oops in drm_open
 
