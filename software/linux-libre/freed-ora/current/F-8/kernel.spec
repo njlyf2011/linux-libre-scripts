@@ -22,17 +22,17 @@ Summary: The Linux kernel
 #
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
-%define fedora_cvs_origin 440
-%define fedora_build %(R="$Revision: 1.509 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin 510
+%define fedora_build %(R="$Revision: 1.512 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 25
+%define base_sublevel 26
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 3
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 14
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -585,37 +585,27 @@ Patch08: linux-2.6-compile-fix-gcc-43.patch
 # revert upstream changes we get from elsewhere
 Patch05: linux-2.6-upstream-reverts.patch
 # patches queued for the next -stable release
-Patch11: linux-2.6-stable-queue.patch
+#Patch11: linux-2.6-stable-queue.patch
 
-Patch21: linux-2.6-utrace.patch
-Patch22: linux-2.6.25-utrace-bugon.patch
-Patch23: linux-2.6.25-utrace-i386-syscall-trace.patch
+Patch20: linux-2.6-ptrace-cleanup.patch
+Patch21: linux-2.6-tracehook.patch
+Patch22: linux-2.6-utrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch60: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
-Patch85: linux-2.6-x86-dont-map-vdso-when-disabled.patch
-Patch86: linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
-Patch88: linux-2.6-x86-mm-ioremap-64-bit-resource-on-32-bit-kernel.patch
 
-Patch90: linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
-Patch91: linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-Patch92: linux-2.6-alsa-hda-codec-add-AD1884A.patch
-Patch93: linux-2.6-alsa-kill-annoying-messages.patch
+#ALSA
 
-Patch123: linux-2.6-ppc-rtc.patch
 Patch130: linux-2.6-ppc-use-libgcc.patch
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
-Patch145: linux-2.6-windfarm-pm121.patch
-Patch146: linux-2.6-windfarm-pm121-fix.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch148: linux-2.6-powerpc-zImage-32MiB.patch
-Patch149: linux-2.6-efika-not-chrp.patch
 
 Patch150: linux-2.6-build-nonintconfig.patch
 Patch160: linux-2.6-execshield.patch
@@ -632,7 +622,6 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
-Patch350: linux-2.6-devmem.patch
 Patch370: linux-2.6-crash-driver.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
@@ -642,9 +631,6 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch421: linux-2.6-squashfs.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
 Patch425: linux-2.6-nfs-client-mounts-hang.patch
-Patch426: linux-2.6-fs-fat-cleanup-code.patch
-Patch427: linux-2.6-fs-fat-fix-setattr.patch
-Patch428: linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 
@@ -653,23 +639,17 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
-Patch580: linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
 Patch600: linux-2.6-vm-silence-atomic-alloc-failures.patch
 
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch640: linux-2.6-defaults-pci_no_msi.patch
 
 Patch670: linux-2.6-ata-quirk.patch
-Patch672: linux-2.6-libata-acpi-hotplug-fixups.patch
-Patch673: linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
-Patch675: linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
-Patch678: linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
-Patch679: linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-wireless-fixups.patch
+#Patch682: linux-2.6-wireless-fixups.patch
 Patch683: linux-2.6-rt2500usb-fix.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-zd1211rw-module-alias.patch
@@ -680,11 +660,8 @@ Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
 Patch725: linux-2.6-netdev-atl2.patch
 Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
-Patch728: linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
-Patch768: linux-2.6-acpi-fix-sizeof.patch
-Patch769: linux-2.6-acpi-fix-error-with-external-methods.patch
-Patch784: linux-2.6-acpi-eeepc-hotkey.patch
+#ACPI
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
@@ -699,10 +676,7 @@ Patch1802: nouveau-drm.patch
 
 # Updated firewire stack from linux1394 git
 Patch1910: linux-2.6-firewire-git-update.patch
-Patch1911: linux-2.6-firewire-git-pending.patch
-
-# usb video
-Patch2400: linux-2.6-uvcvideo.patch
+#Patch1911: linux-2.6-firewire-git-pending.patch
 
 %endif
 
@@ -1033,19 +1007,14 @@ ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 # Revert -stable pieces we get from elsewhere here
 ApplyPatch linux-2.6-upstream-reverts.patch -R
-ApplyPatch linux-2.6-stable-queue.patch
+#ApplyPatch linux-2.6-stable-queue.patch
 
 # Roland's utrace ptrace replacement.
+ApplyPatch linux-2.6-ptrace-cleanup.patch
+ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
-ApplyPatch linux-2.6.25-utrace-bugon.patch
-ApplyPatch linux-2.6.25-utrace-i386-syscall-trace.patch
 
-# ALSA Thinkpad X300 support
-ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A.patch
-ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-mobile.patch
-ApplyPatch linux-2.6-alsa-hda-codec-add-AD1884A-x300.patch
-# kill annoying messages
-ApplyPatch linux-2.6-alsa-kill-annoying-messages.patch
+#ALSA
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1060,25 +1029,19 @@ ApplyPatch linux-2.6-sysrq-c.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # debug early boot
 #ApplyPatch linux-2.6-x86-debug-boot.patch
-# don't map or use disabled x86 vdso
-ApplyPatch linux-2.6-x86-dont-map-vdso-when-disabled.patch
-ApplyPatch linux-2.6-x86-dont-use-disabled-vdso-for-signals.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
-# fix 64-bit resource on 32-bit kernels
-ApplyPatch linux-2.6-x86-mm-ioremap-64-bit-resource-on-32-bit-kernel.patch
 
 #
 # PowerPC
 #
 ###  UPSTREAM PATCHES:
 ###  NOT (YET) UPSTREAM:
-# RTC class driver for ppc_md rtc functions
-ApplyPatch linux-2.6-ppc-rtc.patch
 # use libgcc
 ApplyPatch linux-2.6-ppc-use-libgcc.patch
 # The EHCI ISO patch isn't yet upstream but is needed to fix reboot
-ApplyPatch linux-2.6-ps3-ehci-iso.patch
+# FIXME: needs rework
+#ApplyPatch linux-2.6-ps3-ehci-iso.patch
 # The storage alias patch is Fedora-local, and allows the old 'ps3_storage'
 # module name to work on upgrades. Otherwise, I believe mkinitrd will fail
 # to pull the module in,
@@ -1089,15 +1052,10 @@ ApplyPatch linux-2.6-ps3-legacy-bootloader-hack.patch
 ApplyPatch linux-2.6-g5-therm-shutdown.patch
 # Provide modalias in sysfs for vio devices
 ApplyPatch linux-2.6-vio-modalias.patch
-# Fan support on iMac G5 iSight
-ApplyPatch linux-2.6-windfarm-pm121.patch
-ApplyPatch linux-2.6-windfarm-pm121-fix.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # Link zImage at 32MiB (for POWER machines, Efika)
 ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
-# Don't show 'CHRP' in /proc/cpuinfo on Efika
-ApplyPatch linux-2.6-efika-not-chrp.patch
 
 #
 # Exec shield
@@ -1131,11 +1089,6 @@ ApplyPatch linux-2.6-debug-no-quiet.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 
 #
-# Make /dev/mem a need-to-know function
-#
-ApplyPatch linux-2.6-devmem.patch
-
-#
 # /dev/crash driver for the crashdump analysis tool
 #
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1161,10 +1114,6 @@ ApplyPatch linux-2.6-squashfs.patch
 ApplyPatch linux-2.6-gfs-locking-exports.patch
 # fix nfs mount hang
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
-# fix rsync inability to write to vfat partitions
-ApplyPatch linux-2.6-fs-fat-cleanup-code.patch
-ApplyPatch linux-2.6-fs-fat-fix-setattr.patch
-ApplyPatch linux-2.6-fs-fat-relax-permission-check-of-fat_setattr.patch
 
 # Networking
 # Disable easy to trigger printk's.
@@ -1185,9 +1134,6 @@ ApplyPatch linux-2.6-silence-noise.patch
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 
-# add "show backtrace on all cpus" (sysrq-l)
-ApplyPatch linux-2.6-sysrq-add-show-backtrace-on-all-cpus-function.patch
-
 #
 # VM related fixes.
 #
@@ -1204,29 +1150,19 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 #
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# fix hangs on undock (#439197)
-ApplyPatch linux-2.6-libata-acpi-hotplug-fixups.patch
-# fix problems with some old/broken CF hardware (F8 #224005)
-ApplyPatch linux-2.6-libata-be-a-bit-more-slack-about-early-devices.patch
-# make eeepc ata go faster
+# eepc short cable quirk
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
-# fix docking on stations that have a bay device
-ApplyPatch linux-2.6-libata-acpi-handle-bay-devices-in-dock-stations.patch
-# fix ahci / ICH6 conflict
-ApplyPatch linux-2.6-libata-ata_piix-dont-attach-to-ich6m-in-ahci-mode.patch
-# fix invalid irq context in libata-acpi (#451896)
-ApplyPatch linux-2.6-libata-acpi-fix-invalid-context-acpi.patch
 
 # wireless
 #
 # wireless patches headed for 2.6.26
-ApplyPatch linux-2.6-wireless.patch
+#ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.27
 ApplyPatch linux-2.6-wireless-pending.patch
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 # fixups to make current wireless patches build on this kernel
-ApplyPatch linux-2.6-wireless-fixups.patch
+#ApplyPatch linux-2.6-wireless-fixups.patch
 # fix for long-standing rt2500usb issues
 ApplyPatch linux-2.6-rt2500usb-fix.patch
 # module alias for zd1211rw module
@@ -1244,18 +1180,8 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 # add atl1e network driver for eeepc 901
 ApplyPatch linux-2.6-netdev-atl1e.patch
-# fix bluetooth kbd disconnect
-ApplyPatch linux-2.6-bluetooth-signal-userspace-for-socket-errors.patch
 
 # ACPI/PM patches
-# acpi has a bug in the sizeof function causing thermal panics (from 2.6.26)
-ApplyPatch linux-2.6-acpi-fix-sizeof.patch
-ApplyPatch linux-2.6-acpi-fix-error-with-external-methods.patch
-# properly disable stray interrupts in acpi (??? in 2.6.25)
-#ApplyPatch linux-2.6-acpi-disable-stray-interrupt-1.patch
-#ApplyPatch linux-2.6-acpi-disable-stray-interrupt-2.patch
-# Eeepc hotkey driver
-ApplyPatch linux-2.6-acpi-eeepc-hotkey.patch
 
 # dm / md
 
@@ -1279,10 +1205,7 @@ ApplyPatch linux-2.6-lirc.patch
 # FireWire updates and fixes
 # snap from http://me.in-berlin.de/~s5r6/linux1394/updates/
 ApplyPatch linux-2.6-firewire-git-update.patch
-ApplyPatch linux-2.6-firewire-git-pending.patch
-
-# usb video
-ApplyPatch linux-2.6-uvcvideo.patch
+#ApplyPatch linux-2.6-firewire-git-pending.patch
 
 # ---------- below all scheduled for 2.6.25 -----------------
 
@@ -1882,6 +1805,18 @@ fi
 
 
 %changelog
+* Sat Aug 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.2
+- Deblobbed 2.6.26.
+
+* Sat Aug 09 2008 Dave Airlie <airlied@redhat.com>
+- make nouveau drm apply again
+
+* Fri Aug 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-1
+- Linux 2.6.26.2
+
+* Mon Aug 04 2008 Dave Jones <davej@redhat.com>
+- Fix bogus printk in execshield noticed by Brendan Lynch.
+
 * Mon Aug 04 2008 John W. Linville <linville@redhat.com> 2.6.25.14-69
 - fix for long-standing rt2500usb issues (#411481)
 
