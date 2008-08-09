@@ -13,7 +13,6 @@ D/scripts////
 /config-ia64/1.2/Sat Aug  9 07:39:04 2008//Tkernel-2_6_26_2-2_fc8
 /config-ia64-generic/1.8/Sat Aug  9 07:39:04 2008//Tkernel-2_6_26_2-2_fc8
 /config-nodebug/1.12/Sat Aug  9 07:39:04 2008//Tkernel-2_6_26_2-2_fc8
-/config-powerpc-generic/1.15/Sat Aug  9 07:39:04 2008//Tkernel-2_6_26_2-2_fc8
 /config-powerpc32-generic/1.6/Sat Aug  9 07:39:04 2008//Tkernel-2_6_26_2-2_fc8
 /config-powerpc32-smp/1.2/Mon Aug  4 21:46:30 2008//Tkernel-2_6_26_2-2_fc8
 /config-powerpc64/1.10/Sat Aug  9 07:39:04 2008//Tkernel-2_6_26_2-2_fc8
@@ -113,3 +112,4 @@ D/scripts////
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_26_2-2_fc8
 /linux-2.6-wireless-pending.patch/1.55/Sat Aug  9 07:39:08 2008/-kb/Tkernel-2_6_26_2-2_fc8
 /nouveau-drm.patch/1.12/Sat Aug  9 07:39:09 2008/-kb/Tkernel-2_6_26_2-2_fc8
+/config-powerpc-generic/1.16/Sat Aug  9 17:32:22 2008//Tkernel-2_6_26_2-2_fc8
