@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2008-08-05
+# deblob-check version 2008-08-12
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -1152,6 +1152,9 @@ set_except () {
     initnc ';[/][*]@@ -[0-9]*,[0-9]* +[0-9]*,[0-9]* @@ static const \(yytype_u\?int\(8\|16\)\|\(unsigned \)\?\(short\( int\)\?\|char\)\) yy[^[]*\[\] =[*][/];' scripts/genksyms/parse.c_shipped
     accept 'irq_prio_\([hdl]\|l[cd]\):'"$sepx$blobpat*" arch/arm/inlcude/asm/hardware/entry-macro-iomd.S
     defsnc '	static const int desc_idx_table\[\] =' arch/arm/include/asm/hardware/iop3xx-adma.h
+    defsnc ';[/][*]@@ -[0-9]*,[0-9]* +[0-9]*,[0-9]* @@ static const __u8 \(hv7131r\|mi0360\|mo4000\|ov76\(60\|48\)\)_sensor_init\[\]\[8\] = {[*][/];' drivers/media/video/gspca/sonixj.c
+    defsnc 'static const struct ath_hal ar5416hal =' drivers/net/wireless/ath9k/hw.c
+    defsnc 'static \(const \)\?u32 ar\(5416\|9280\)\(Modes\(_fast_clock\)\?\|Common\|BB_RfGain\|Bank6\(TPC\)\?\|Addac\)\(_91[06]0\(1_1\)\?\|_9280\(_2\)\?\)\?\[\]\[[236]\] =' drivers/net/wireless/ath9k/initvals.h
 
     ;;
     
@@ -1238,9 +1241,12 @@ set_except () {
     accept '		'"'"'0x[^\n]*[\n]\([^\n]*[\n]\)*	\]\(, [0-9]\+ => \[\)\?'"$eol"
     initnc 'const u\(8\|16\|32\) b43_ntab_\(\(adjustpower\|estimatepowerlt\|gainctl\|iqlt\|loftlt\|noisevar1\|tdi[24]0a\)[01]\|channelest\|frame\(lookup\|struct\)\|mcs\|pilot\|tdtrn\|tmap\)\[\] ='
     ;;
-  */nouveau-drm*.patch)
-    initnc '\(static uint32_t\|}\) nv04_graph_ctx_regs \[\] ='
-    initnc 'static int nv10_graph_ctx_regs \[\] ='
+  */*drm*.patch)
+    # linux-2.6-drm-i915-modeset.patch, nouveau-drm*.patch,
+    # drm-fedora9-rollup.patch
+    initnc 'static const u32 filter_table\[\] =' drivers/char/drm/intel_tv.c
+    initnc '\(static uint32_t\|}\) nv04_graph_ctx_regs \[\] =' drivers/char/drm/nv04_graph.c
+    initnc 'static int nv10_graph_ctx_regs \[\] =' drivers/char/drm/nv10_graph.c
 
     # Although the developers of the drivers are not trying to stop
     # anyone from modifying it or understanding it, they acknowledge
@@ -1249,7 +1255,7 @@ set_except () {
     # of the blobs have power to stop others from modifying them.
     # Non-Free software, for sure.
 
-    # initnc 'static uint32_t nv\(4[013467ace]\|49_4b\|8[46]\)_ctx_\(voodoo\|prog\)\[\] ='
+    # initnc 'static uint32_t nv\(4[013467ace]\|49_4b\|8[46]\)_ctx_\(voodoo\|prog\)\[\] =' 'drivers/char/drm/nv40_graph.c|.*'
     ;;
   */linux-2.6-lirc.patch)
     initnc 'const unsigned char map_table\[\] ='
@@ -1301,9 +1307,6 @@ set_except () {
     # git logs
     accept '   sudo modprobe ath5k debug=0x00000400[\n][ 	]*[\n]\([ 	]*Band[^\n]*[\n]\([ 	]*\(\(channels\|rates\):\|[- 	0-9a-f]*\|\[\.\.\. etc \]\)[\n]\)\+\)\+       540 000c 0000 0000'
     oprepline '	{ 1, MODULATION_XR, 3000, 1, 150, 3 },'
-    ;;
-  */linux-2.6-drm-i915-modeset.patch)
-    initnc 'static const u32 filter_table\[\] ='
     ;;
   */linux-2.6-netdev-e1000e*.patch)
     # drivers/net/e1000e/phy.c
