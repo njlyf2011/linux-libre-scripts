@@ -1,18 +1,19 @@
-Debblobbed:
+Deblobbed.
 
-* drivers/char/drm/nv40_graph.c: Deblobbed *_ctx_prog.
-* drivers/char/drm/nv50_graph.c: Deblobbed *_ctx_voodoo.
+Mark nouveau as depending on NONFREE in Kconfig.
+Replace all nouveau voodoo and ctx_prog blobs with /*(DEBLOBBED)*/.
 
 diff --git a/drivers/char/drm/Kconfig b/drivers/char/drm/Kconfig
 index 610d6fd..6b98529 100644
 --- a/drivers/char/drm/Kconfig
 +++ b/drivers/char/drm/Kconfig
-@@ -105,3 +105,10 @@ config DRM_SAVAGE
+@@ -105,3 +105,11 @@ config DRM_SAVAGE
  	help
  	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
  	  chipset. If M is selected the module will be called savage.
 +
 +config DRM_NOUVEAU
++depends on NONFREE
 +	tristate "Nvidia video cards"
 +	depends on DRM
 +	help
@@ -6089,7 +6090,7 @@ index 0000000..2d8a49b
 + * LOCKING:
 + * Caller must hold mode config lock.
 + */
-+static void drm_pick_crtcs (struct drm_device *dev)
++void drm_pick_crtcs (struct drm_device *dev)
 +{
 +	int c, o, assigned;
 +	struct drm_output *output, *output_equal;
@@ -35029,7 +35030,7 @@ new file mode 100644
 index 0000000..2540fc5
 --- /dev/null
 +++ b/drivers/char/drm/nv40_graph.c
-@@ -0,0 +1,1918 @@
+@@ -0,0 +1,1917 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -36655,48 +36656,47 @@ index 0000000..2540fc5
 + * in mmio-traces of the binary driver.
 + */
 +static uint32_t nv40_ctx_prog[] = {
-+	/*(DEBLOBBED)*/
++	/*(DEBLOBBED)*/,
 +	~0
 +};
 +
 +static uint32_t nv41_ctx_prog[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +static uint32_t nv43_ctx_prog[] = {
-+	/*(DEBLOBBED)*/
++	/*(DEBLOBBED)*/,
 +	~0
 +};
 +
 +static uint32_t nv44_ctx_prog[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +static uint32_t nv46_ctx_prog[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +static uint32_t nv47_ctx_prog[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +//this is used for nv49 and nv4b
 +static uint32_t nv49_4b_ctx_prog[] ={
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +
 +static uint32_t nv4a_ctx_prog[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +static uint32_t nv4c_ctx_prog[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +static uint32_t nv4e_ctx_prog[] = {
-+	/*(DEBLOBBED)*/
-+	~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +/*
@@ -37429,11 +37429,11 @@ index 0000000..55df5fc
 +}
 +
 +static uint32_t nv84_ctx_voodoo[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 + 
 +static uint32_t nv86_ctx_voodoo[] = {
-+	/*(DEBLOBBED)*/ ~0
++	/*(DEBLOBBED)*/, ~0
 +};
 +
 +static int
