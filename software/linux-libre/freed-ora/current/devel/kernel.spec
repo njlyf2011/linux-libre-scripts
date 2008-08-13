@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.867 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.875 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 2
 # The git snapshot level
-%define gitrev 1
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -410,7 +410,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.61-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -641,9 +641,7 @@ Patch2011: linux-2.6-eeepc-laptop-update.patch
 Patch2020: linux-2.6-netdev-atl2.patch
 
 # linux1394 git patches
-# This is currently not applied and the numbering clashes with the USB
-# patch below.
-# Patch2300: linux-2.6-firewire-git-update.patch
+Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -656,8 +654,13 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 # temporary (I hope, reported upstream) fix userspace use of videodev2.h
 Patch2700: linux-2.6-videodev2-userspace-usage.patch
 
+# Quiet boot fixes
 # silence piix3 in quiet boot (ie, qemu)
 Patch2800: linux-2.6-piix3-silence-quirk.patch
+# silence "PCI: Not using MMCONFIG"
+Patch2801: linux-2.6-mmconfig-stfu.patch
+# silence the ACPI blacklist code
+Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
 %endif
 
@@ -1198,7 +1201,7 @@ ApplyPatch linux-2.6-drm-radeon-module-device-table.patch
 #ApplyPatch linux-2.6-drm-fix-master-perm.patch
 
 # linux1394 git patches
-#ApplyPatch linux-2.6-firewire-git-update.patch
+ApplyPatch linux-2.6-firewire-git-update.patch
 #C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
 #if [ "$C" -gt 10 ]; then
 #ApplyPatch linux-2.6-firewire-git-pending.patch
@@ -1212,6 +1215,10 @@ ApplyPatch linux-2.6-videodev2-userspace-usage.patch
 
 # silence piix3 in quiet boot (ie, qemu)
 ApplyPatch linux-2.6-piix3-silence-quirk.patch
+# silence "PCI: Not using MMCONFIG"
+ApplyPatch linux-2.6-mmconfig-stfu.patch
+# silence the ACPI blacklist code
+ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # ---------- below all scheduled for 2.6.24 -----------------
 
@@ -1775,9 +1782,33 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Aug 12 2008 Adam Jackson <ajax@redhat.com>
+- Silence some more useless bootup spew in quiet mode.
+
+* Mon Aug 11 2008 Adam Jackson <ajax@redhat.com>
+- Require a mkinitrd that can handle built-in USB and requires plymouth.
+
+* Mon Aug 11 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc2-git5
+
+* Mon Aug 11 2008 Dave Jones <davej@redhat.com>
+- Change USB controllers to be built-in instead of modular.
+
+* Mon Aug 11 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
+* Sat Aug 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc2-git4
+- Temporarily disable utrace.
+
+* Fri Aug 08 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc2-git3
+
+* Fri Aug 08 2008 Jarod Wilson <jwilson@redhat.com>
+- Rebase and re-enable firewire git tree patch
+
 * Fri Aug  8 2008 Kristian Høgsberg <krh@redhat.com>
 - Export module device table for radeon DRM driver.
-- Comment out firewire patch 2300 for now, numbering conflict.
 
 * Fri Aug 08 2008 Adam Jackson <ajax@redhat.com>
 - Silence the PIIX3 PCI quirk message in quiet boot.
