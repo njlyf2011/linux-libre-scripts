@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.736 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.741 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -586,7 +586,7 @@ Patch08: linux-2.6-compile-fix-gcc-43.patch
 Patch09: linux-2.6-upstream-reverts.patch
 Patch10: linux-2.6-hotfixes.patch
 # patches queued for the next -stable release
-Patch11: linux-2.6-stable-queue.patch
+#Patch11: linux-2.6-stable-queue.patch
 
 Patch20: linux-2.6-ptrace-cleanup.patch
 Patch21: linux-2.6-tracehook.patch
@@ -646,6 +646,8 @@ Patch683: linux-2.6-rt2500usb-fix.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
+
+Patch800: linux-2.6-acpi-processor-use-signed-int.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -1036,7 +1038,7 @@ ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 %if !%{nopatches}
 
 ApplyPatch linux-2.6-hotfixes.patch
-ApplyPatch linux-2.6-stable-queue.patch
+#ApplyPatch linux-2.6-stable-queue.patch
 
 # revert patches from upstream that conflict or that we get via other means
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
@@ -1103,6 +1105,8 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-storage-nikond80-quirk.patch
 
 # ACPI
+# obvious bug in processor driver
+ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1780,9 +1784,7 @@ fi
 %ifarch %{vdso_arches}\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
 %endif\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.block\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.networking\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.order\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
 %ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
 %{?-e:%{-e*}}\
 %{expand:%%files %{?2:%{2}-}devel}\
@@ -1819,7 +1821,25 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Tue Aug 05 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.9.fc9
+* Wed Aug 13 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.14
+- Updated deblobbing of drm-fedora9-rollup.patch.
+
+* Sat Aug 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-14
+- Fix obvious bug in ACPI processor driver.
+
+* Sat Aug 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-13
+- Disable VIA Padlock driver for now; it can cause oopses.
+
+* Wed Aug 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-12
+- Linux 2.6.26.2
+
+* Wed Aug 06 2008 Dave Jones <davej@redhat.com>
+- Own all the modules.* files in /lib/modules. (#456857)
+
+* Wed Aug 06 2008 Dave Airlie <airlied@redhat.com> 2.6.26.1-10
+- fix drm patch to not export a static.
+
+* Tue Aug 05 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.9
 - Deblobbed 2.6.26.
 - Update deblobbing of linux-2.6-wireless-pending.patch.
 - Deblob drm-fedora9-rollup.patch
