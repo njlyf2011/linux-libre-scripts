@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.512 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.513 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -662,6 +662,7 @@ Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
 
 #ACPI
+Patch800: linux-2.6-acpi-processor-use-signed-int.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
@@ -1182,6 +1183,8 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-netdev-atl1e.patch
 
 # ACPI/PM patches
+# fix obvious thinko
+ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
 
 # dm / md
 
@@ -1805,6 +1808,9 @@ fi
 
 
 %changelog
+* Tue Aug 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-3
+- Fix obvious bug in ACPI processor driver.
+
 * Sat Aug 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.2
 - Deblobbed 2.6.26.
 
