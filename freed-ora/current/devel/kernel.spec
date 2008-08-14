@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.879 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.885 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -97,8 +97,14 @@ Summary: The Linux kernel
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
 
-# don't build the kernel-doc package
-%define with_doc 0
+# Build the kernel-doc package, but don't fail the build if it botches.
+# Here "true" means "continue" and "false" means "fail the build".
+#% define with_doc 0
+%if 0%{?released_kernel}
+%define doc_build_fail false
+%else
+%define doc_build_fail true
+%endif
 
 # Additional options for user-friendly one-off kernel building:
 #
@@ -615,18 +621,8 @@ Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
-Patch1800: linux-2.6-export-shmem-bits-for-gem.patch
-Patch1801: linux-2.6-drm-git-mm.patch
-Patch1803: nouveau-drm.patch
-Patch1804: nouveau-drm-update.patch
-Patch1806: linux-2.6-drm-i915-modeset.patch
-Patch1807: linux-2.6-drm-radeon-fix-oops.patch
-Patch1808: linux-2.6-drm-radeon-fix-oops2.patch
-Patch1809: linux-2.6-drm-modesetting-oops-fixes.patch
-Patch1810: linux-2.6-drm-fix-master-perm.patch
-
 Patch1811: drm-modesetting-radeon.patch
-Patch1812: linux-2.6-drm-radeon-module-device-table.patch
+Patch1812: drm-radeon-pre-r300-no-kms.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1189,16 +1185,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
-ApplyPatch linux-2.6-drm-radeon-module-device-table.patch
-
-#ApplyPatch linux-2.6-drm-git-mm.patch
-#ApplyPatch nouveau-drm.patch
-#ApplyPatch nouveau-drm-update.patch
-#ApplyPatch linux-2.6-drm-i915-modeset.patch
-#ApplyPatch linux-2.6-drm-radeon-fix-oops.patch
-#ApplyPatch linux-2.6-drm-radeon-fix-oops2.patch
-#ApplyPatch linux-2.6-drm-modesetting-oops-fixes.patch
-#ApplyPatch linux-2.6-drm-fix-master-perm.patch
+ApplyPatch drm-radeon-pre-r300-no-kms.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1513,6 +1500,15 @@ BuildKernel %make_target %kernel_image smp
 BuildKernel vmlinux vmlinux kdump vmlinux
 %endif
 
+%if %{with_doc}
+# Make the HTML and man pages.
+make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+
+# sometimes non-world-readable files sneak into the kernel source tree
+chmod -R a=rX Documentation
+find Documentation -type d | xargs chmod u+w
+%endif
+
 ###
 ### Special hacks for debuginfo subpackages.
 ###
@@ -1543,17 +1539,18 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 cd linux-%{kversion}.%{_target_cpu}
 
 %if %{with_doc}
-mkdir -p $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}/Documentation
+docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
+man9dir=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
-# sometimes non-world-readable files sneak into the kernel source tree
-chmod -R a+r *
 # copy the source over
-tar cf - Documentation | tar xf - -C $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}
+mkdir -p $docdir
+tar -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
-# Make man pages for the kernel API.
-make mandocs
-mkdir -p $RPM_BUILD_ROOT/usr/share/man/man9
-mv Documentation/DocBook/man/*.9.gz $RPM_BUILD_ROOT/usr/share/man/man9
+# Install man pages for the kernel API.
+mkdir -p $man9dir
+find Documentation/DocBook/man -name '*.9.gz' -print0 |
+xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
+ls $man9dir | grep -q '' || > $man9dir/BROKEN
 %endif
 
 %if %{with_headers}
@@ -1713,9 +1710,9 @@ fi
 %if %{with_doc}
 %files doc
 %defattr(-,root,root)
-%{_datadir}/doc/kernel-doc-%{kversion}/Documentation/*
-%dir %{_datadir}/doc/kernel-doc-%{kversion}/Documentation
-%dir %{_datadir}/doc/kernel-doc-%{kversion}
+%{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation/*
+%dir %{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation
+%dir %{_datadir}/doc/kernel-doc-%{rpmversion}
 %{_datadir}/man/man9/*
 %endif
 
@@ -1782,6 +1779,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Aug 14 2008 Dave Airlie <airlied@redhat.com>
+- Update radeon modesetting code - include text cli option
+- support r300 cards and up - could in theory support r100/r200
+- reserve some memory for text mode on radeons
+
+* Wed Aug 13 2008 Roland McGrath <roland@redhat.com>
+- enable kernel-doc, include htmldocs
+- utrace kerneldoc typo fixes
+
 * Wed Aug 13 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc3-git1
 
