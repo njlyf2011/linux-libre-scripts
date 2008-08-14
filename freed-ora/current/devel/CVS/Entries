@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.26.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.27-rc3.bz2.sign/-1.1/Wed Aug 13 03:17:46 2008//Tkernel-2_6_27-0_254_rc3_fc10
-/.cvsignore/1.897/dummy timestamp from new-entry+Thu Aug 14 02:38:20 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_262_rc3_git1_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
 /Makefile/1.77/Thu Aug 14 02:16:39 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
@@ -109,6 +108,7 @@ D/scripts////
 /nouveau-drm-update.patch/1.2/dummy timestamp from new-entry/-kb/Tkernel-2_6_27-0_262_rc3_git1_fc10
 /nouveau-drm.patch/1.12/dummy timestamp from new-entry/-kb/Tkernel-2_6_27-0_262_rc3_git1_fc10
 /patch-2.6.27-rc3-git1.bz2.sign/1.1/Thu Aug 14 00:39:43 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
-/sources/1.859/dummy timestamp from new-entry+Thu Aug 14 02:38:16 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
-/upstream/1.775/dummy timestamp from new-entry+Thu Aug 14 02:38:12 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27-0_262_rc3_git1_fc10
+/.cvsignore/1.897/Thu Aug 14 21:00:16 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
+/sources/1.859/Thu Aug 14 21:00:17 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
+/upstream/1.775/Thu Aug 14 21:00:18 2008//Tkernel-2_6_27-0_262_rc3_git1_fc10
