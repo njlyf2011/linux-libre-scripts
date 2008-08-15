@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.885 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.889 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -35,7 +35,7 @@ Summary: The Linux kernel
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
 %define rcrevlibre -libre
-#define gitrevlibre -libre
+%define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 3
 # The git snapshot level
-%define gitrev 1
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -601,6 +601,7 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
+Patch451: linux-2.6-input-dell-keyboard-keyup.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -1132,6 +1133,8 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+# Dell can't make keyboards
+ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1779,6 +1782,21 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Aug 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.266.rc3.git2
+- Deblobbed patch-2.6.27-rc3-git2.
+
+* Thu Aug 14 2008 Dave Jones <davej@redhat.com>
+- Bump max cpus supported on x86-64 to 4096. Just to see what happens.
+
+* Thu Aug 14 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc3-git2
+
+* Thu Aug 14 2008 Matthew Garrett <mjg@redhat.com>
+- Force keyup events on broken Dell hotkeys
+
+* Thu Aug 14 2008 Dave Airlie <airlied@redhat.com>
+- Update intel headers so DDX can build
+
 * Thu Aug 14 2008 Dave Airlie <airlied@redhat.com>
 - Update radeon modesetting code - include text cli option
 - support r300 cards and up - could in theory support r100/r200
