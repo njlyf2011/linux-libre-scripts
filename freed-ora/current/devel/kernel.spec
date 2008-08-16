@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.889 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.890 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -624,6 +624,7 @@ Patch1515: linux-2.6-lirc.patch
 # nouveau + drm fixes
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-radeon-pre-r300-no-kms.patch
+Patch1813: drm-fix-i915-sarea.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1189,6 +1190,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-radeon-pre-r300-no-kms.patch
+ApplyPatch drm-fix-i915-sarea.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1782,6 +1784,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Aug 15 2008 Dave Airlie <airlied@redhat.com>
+- Add i915 sarea fixups
+
 * Thu Aug 14 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.266.rc3.git2
 - Deblobbed patch-2.6.27-rc3-git2.
 
