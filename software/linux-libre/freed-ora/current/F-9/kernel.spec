@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.741 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.754 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -596,6 +596,11 @@ Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
+Patch88: linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
+Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
+Patch90: linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
+Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
+Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -620,6 +625,10 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
+Patch410: linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
+Patch411: linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
+Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
+
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
 
@@ -642,12 +651,18 @@ Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 #Patch682: linux-2.6-wireless-fixups.patch
-Patch683: linux-2.6-rt2500usb-fix.patch
+Patch683: linux-2.6-wireless-stable-backports.patch
+Patch685: linux-2.6-rt2500usb-fix.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch800: linux-2.6-acpi-processor-use-signed-int.patch
+Patch810: linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
+Patch820: linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
+Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
+
+Patch900: linux-2.6-mm-dirty-page-tracking-race-fix.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -670,8 +685,7 @@ Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# https://bugzilla.redhat.com/show_bug.cgi?id=454028
-Patch2302: linux-2.6-usb-storage-nikond80-quirk.patch
+Patch2301: linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 Patch2501: linux-2.6-ppc-use-libgcc.patch
 
@@ -925,10 +939,6 @@ ApplyPatch()
 # Update to latest upstream.
 %if 0%{?released_kernel}
 %define vanillaversion 2.6.%{base_sublevel}
-# released_kernel with stable_update available case
-%if 0%{?stable_update}
-%define vanillaversion 2.6.%{base_sublevel}.%{stable_update}
-%endif
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
@@ -954,11 +964,7 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
 
 # Update vanilla to the latest upstream.
-# released_kernel with stable_update available case
-%if 0%{?stable_update}
-ApplyPatch patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
-# non-released_kernel case
-%else
+# (non-released_kernel case only)
 %if 0%{?rcrev}
 ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
@@ -968,7 +974,6 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
 ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
-%endif
 %endif
 %endif
 
@@ -989,6 +994,11 @@ fi
 cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
 
 cd linux-%{kversion}.%{_target_cpu}
+
+# released_kernel with stable_update available case
+%if 0%{?stable_update}
+ApplyPatch patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
+%endif
 
 %if %{using_upstream_branch}
 ### BRANCH APPLY ###
@@ -1060,6 +1070,16 @@ ApplyPatch linux-2.6-sysrq-c.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
+#
+ApplyPatch linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
+# x86 f00f bug not handled properly (#197455)
+ApplyPatch linux-2.6-x86-fdiv-bug-detection-fix.patch
+# another machine needing io_delay=0xed
+ApplyPatch linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
+# oprofile / hibernation fix
+ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
+#
+ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 
 #
 # PowerPC
@@ -1101,12 +1121,22 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # USB
+# actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-ApplyPatch linux-2.6-usb-storage-nikond80-quirk.patch
+# fix USB on the PS3
+ApplyPatch linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 # ACPI
 # obvious bug in processor driver
 ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
+# fix cpuidle misbehavior
+ApplyPatch linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
+ApplyPatch linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
+ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
+
+# mm
+# possible data corruption, esp. on ppc
+ApplyPatch linux-2.6-mm-dirty-page-tracking-race-fix.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1139,6 +1169,14 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
 #
+
+# block/bio
+#
+# bio patches queued for -stable
+ApplyPatch linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
+ApplyPatch linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
+# don't discard barrier flags
+ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # Filesystem patches.
 # cifs
@@ -1189,6 +1227,13 @@ ApplyPatch linux-2.6-at76.patch
 
 # fixups to make current wireless patches build on this kernel
 #ApplyPatch linux-2.6-wireless-fixups.patch
+
+# backports of upstream -stable wireless patches that we need
+# (reverted in -upstream-reverts)
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-wireless-stable-backports.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-wireless-stable-backports.patch
+fi
 
 # fix for long-standing rt2500usb issues
 ApplyPatch linux-2.6-rt2500usb-fix.patch
@@ -1821,6 +1866,53 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-27
+- x86-32: amd c1e force timer broadcast late
+  (fixes failure to disable local apic timer)
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-26
+- mm: dirty page tracking race fix
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-25
+- block: submit_bh() inadvertently discards barrier flag on a sync write
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-24
+- Fix cpuidle misbehavior. (#459214)
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-23
+- Add two bio patches scheduled for -stable.
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-22
+- specfile: don't use the latest stable update as the vanilla directory.
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-21
+- x86: fix oprofile + hibernation badness (#459413)
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-20
+- x86: add Presario F700 to io_delay quirk list. (#459546)
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-19
+- USB: fix hcd interrupt disabling (#457165)
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-18
+- x86-64: fix overlap of modules and fixmap areas
+- x86: fdiv bug detection fix (#197455)
+
+* Fri Aug 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-17
+- Linux 2.6.26.3
+  Dropped patches:
+    linux-2.6-usb-storage-nikond80-quirk.patch
+  Upstream revert:
+    rtl8187-fix-lockups-due-to-concurrent-access-to-config-routine.patch
+  New wireless patch:
+    linux-2.6-wireless-stable-backports.patch
+
+* Fri Aug 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-16
+- Disable the snd_pcsp driver. (#459477)
+
+* Thu Aug 14 2008 Dave Jones <davej@redhat.com> 2.6.26.2-15
+- Silence MMCONFIG printk during boot.
+
 * Wed Aug 13 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.14
 - Updated deblobbing of drm-fedora9-rollup.patch.
 
