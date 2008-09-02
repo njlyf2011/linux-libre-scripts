@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.513 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.522 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -595,6 +595,10 @@ Patch41: linux-2.6-sysrq-c.patch
 Patch60: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
+Patch88: linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
+Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
+Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
+Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 
 #ALSA
 
@@ -627,6 +631,10 @@ Patch370: linux-2.6-crash-driver.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
+Patch410: linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
+Patch411: linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
+Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
+
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
@@ -650,7 +658,8 @@ Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 #Patch682: linux-2.6-wireless-fixups.patch
-Patch683: linux-2.6-rt2500usb-fix.patch
+Patch683: linux-2.6-wireless-stable-backports.patch
+Patch685: linux-2.6-rt2500usb-fix.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-zd1211rw-module-alias.patch
 Patch692: linux-2.6-cfg80211-extras.patch
@@ -663,10 +672,16 @@ Patch727: linux-2.6-e1000-ich9.patch
 
 #ACPI
 Patch800: linux-2.6-acpi-processor-use-signed-int.patch
+Patch810: linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
+Patch820: linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
+Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
+
+Patch900: linux-2.6-mm-dirty-page-tracking-race-fix.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+Patch1309: linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 Patch1400: linux-2.6-smarter-relatime.patch
 
@@ -1015,7 +1030,15 @@ ApplyPatch linux-2.6-ptrace-cleanup.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 
-#ALSA
+# ALSA
+
+# block/bio
+#
+# bio patches queued for -stable
+ApplyPatch linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
+ApplyPatch linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
+# don't discard barrier flags
+ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1032,6 +1055,14 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 #ApplyPatch linux-2.6-x86-debug-boot.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
+#
+ApplyPatch linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
+# x86 f00f bug not handled properly (#197455)
+ApplyPatch linux-2.6-x86-fdiv-bug-detection-fix.patch
+# oprofile / hibernation fix
+ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
+# fix failure to disable local apic on AMD c1e-enabled machines
+ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 
 #
 # PowerPC
@@ -1164,6 +1195,14 @@ ApplyPatch linux-2.6-wireless-pending.patch
 ApplyPatch linux-2.6-at76.patch
 # fixups to make current wireless patches build on this kernel
 #ApplyPatch linux-2.6-wireless-fixups.patch
+
+# backports of upstream -stable wireless patches that we need
+# (reverted in -upstream-reverts)
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-wireless-stable-backports.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-wireless-stable-backports.patch
+fi
+
 # fix for long-standing rt2500usb issues
 ApplyPatch linux-2.6-rt2500usb-fix.patch
 # module alias for zd1211rw module
@@ -1185,6 +1224,14 @@ ApplyPatch linux-2.6-netdev-atl1e.patch
 # ACPI/PM patches
 # fix obvious thinko
 ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
+# fix cpuidle misbehavior
+ApplyPatch linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
+ApplyPatch linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
+ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
+
+# mm
+# possible data corruption, esp. on ppc
+ApplyPatch linux-2.6-mm-dirty-page-tracking-race-fix.patch
 
 # dm / md
 
@@ -1193,6 +1240,8 @@ ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
 # USB
 # respect the 'nousb' boot option
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# fix USB on the PS3
+ApplyPatch linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 # ISDN
 
@@ -1808,6 +1857,39 @@ fi
 
 
 %changelog
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-12
+- x86-32: amd c1e force timer broadcast late
+  (fixes failure to disable local apic timer)
+- mm: dirty page tracking race fix
+- block: submit_bh() inadvertently discards barrier flag on a sync write
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-11
+- Fix cpuidle misbehavior. (F9#459214)
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-10
+- Add two bio patches scheduled for -stable.
+
+* Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-9
+- x86: fix oprofile + hibernation badness (F9#459413)
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-8
+- USB: fix hcd interrupt disabling (F9#457165)
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-7
+- x86-64: fix overlap of modules and fixmap areas
+- x86: fdiv bug detection fix (F9#197455)
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-6
+- Silence MMCONFIG printk during boot.
+
+* Fri Aug 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-5
+- Linux 2.6.26.3
+  Upstream revert:
+    rtl8187-fix-lockups-due-to-concurrent-access-to-config-routine.patch
+  New wireless patch:
+    linux-2.6-wireless-stable-backports.patch
+- Disable the snd_pcsp driver. (F9#459477)
+
 * Tue Aug 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.2-3
 - Fix obvious bug in ACPI processor driver.
 
