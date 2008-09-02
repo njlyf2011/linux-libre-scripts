@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.890 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.919 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -35,7 +35,7 @@ Summary: The Linux kernel
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
 %define rcrevlibre -libre
-%define gitrevlibre -libre
+#define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 3
+%define rcrev 5
 # The git snapshot level
 %define gitrev 2
 # Set rpm version accordingly
@@ -428,7 +428,7 @@ Summary: The Linux kernel
 Provides: kernel = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
-Provides: kernel-drm-nouveau = 10\
+Provides: kernel-drm-nouveau = 11\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
@@ -572,6 +572,7 @@ Patch22: linux-2.6-x86-tracehook.patch
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
+Patch80: linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -590,7 +591,7 @@ Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
-Patch350: linux-2.6-debug-list_debug_rcu.patch
+Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
@@ -623,8 +624,8 @@ Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
 Patch1811: drm-modesetting-radeon.patch
-Patch1812: drm-radeon-pre-r300-no-kms.patch
-Patch1813: drm-fix-i915-sarea.patch
+Patch1812: fixup-dri2-kms-merge.patch
+Patch1813: drm-nouveau.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -649,14 +650,11 @@ Patch2301: linux-2.6-ms-wireless-receiver.patch
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
-# temporary (I hope, reported upstream) fix userspace use of videodev2.h
-Patch2700: linux-2.6-videodev2-userspace-usage.patch
-
 # Quiet boot fixes
 # silence piix3 in quiet boot (ie, qemu)
 Patch2800: linux-2.6-piix3-silence-quirk.patch
-# silence "PCI: Not using MMCONFIG"
-Patch2801: linux-2.6-mmconfig-stfu.patch
+# Hush IOMMU warnings, you typically can't fix them anyway
+Patch2801: linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
@@ -1045,6 +1043,8 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # Compile 686 kernels tuned for Pentium4.
 ApplyPatch linux-2.6-x86-tune-generic.patch
+# add io delay quirk for presario f700
+ApplyPatch linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 
 #
 # PowerPC
@@ -1100,7 +1100,7 @@ ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
-#ApplyPatch linux-2.6-debug-list_debug_rcu.patch
+ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1189,8 +1189,8 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
-ApplyPatch drm-radeon-pre-r300-no-kms.patch
-ApplyPatch drm-fix-i915-sarea.patch
+ApplyPatch fixup-dri2-kms-merge.patch
+ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1202,13 +1202,10 @@ ApplyPatch linux-2.6-firewire-git-update.patch
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
-# temporary (I hope, reported upstream) fix userspace use of videodev2.h
-ApplyPatch linux-2.6-videodev2-userspace-usage.patch
-
 # silence piix3 in quiet boot (ie, qemu)
 ApplyPatch linux-2.6-piix3-silence-quirk.patch
-# silence "PCI: Not using MMCONFIG"
-ApplyPatch linux-2.6-mmconfig-stfu.patch
+# Hush IOMMU warnings, you typically can't fix them anyway
+ApplyPatch linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
@@ -1405,9 +1402,11 @@ hwcap 0 nosegneg"
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    if [ -s asm ]; then
-      cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/asm
-    fi
+    asmdir=$(readlink asm)
+    cp -a $asmdir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/
+    pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+    ln -s $asmdir asm
+    popd
 
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
@@ -1784,6 +1783,108 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Sep 02 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.296.rc5.git2
+- Deblobbed patch-2.6.27-rc5.
+- Deblobbed drm-nouveau.patch.
+
+* Tue Sep 02 2008 Dave Airlie <airlied@redhat.com>
+- bring back nouveau yet again
+
+* Mon Sep 01 2008 Dave Jones <davej@redhat.com>
+- Always inline kzalloc.  And drop busted rcu debug patch
+
+* Sat Aug 30 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc5-git2
+
+* Fri Aug 29 2008 Chuck Ebbert <cebbert@redhat.com>
+- x86: add Presario F700 to io_delay quirk list. (F9#459546)
+
+* Fri Aug 29 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc5-git1
+
+* Fri Aug 29 2008 Kristian Høgsberg <krh@redhat.com>
+- Fix a couple of merge bugs between DRI2 and KMS.
+
+* Thu Aug 28 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc5
+
+* Thu Aug 28 2008 Dave Airlie <airlied@redhat.com>
+- change boot option from text to nomodeset and make drivers debuggable later
+
+* Thu Aug 28 2008 Dave Airlie <airlied@redhat.com>
+- rebase i915 GEM support to avoid oopsing.
+
+* Thu Aug 28 2008 Dave Airlie <airlied@redhat.com>
+- hopefully fix r300 lvds
+
+* Thu Aug 28 2008 Dave Airlie <airlied@redhat.com>
+- rebase modesetting patches - add DRI2 for intel patches from krh
+- no intel modesetting yet didn't have time
+
+* Wed Aug 27 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4-git7
+
+* Wed Aug 27 2008 Dave Airlie <airlied@redhat.com>
+- drm update - add opregion support - fix some bugs in radeon modesetting
+
+* Tue Aug 26 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4-git6
+
+* Tue Aug 26 2008 Adam Jackson <ajax@redhat.com>
+- Silence the IOMMU warnings, since pretty much no BIOS has the options to
+  fix them anyway.
+
+* Tue Aug 26 2008 Jarod Wilson <jarod@redhat.com>
+- Temporarily turn on CONFIG_SYSFS_DEPRECATED{,_V2} for ia64
+
+* Tue Aug 26 2008 Dave Airlie <airlied@redhat.com>
+- radeon improved memory manager/modesetting fixups
+
+* Mon Aug 25 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
+* Mon Aug 25 2008 Dave Jones <davej@redhat.com>
+- Merge Linux-2.6 up to commit b8e6c91c74e9f0279b7c51048779b3d62da60b88
+
+* Mon Aug 25 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4-git4 (Drop NR_CPUS on x86-64 to 512)
+
+* Sun Aug 24 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4-git3
+
+* Sat Aug 23 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4-git2
+
+* Sat Aug 23 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
+* Fri Aug 22 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4-git1
+
+* Thu Aug 21 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc4
+
+* Wed Aug 20 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc3-git7
+
+* Wed Aug 20 2008 Roland McGrath <roland@redhat.com>
+- utrace update, fix irqs-disabled lockdep warning on i386
+
+* Wed Aug 20 2008 Dave Jones <davej@redhat.com>
+- include/asm needs to be a symlink, not a dir.
+
+* Tue Aug 19 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc3-git6
+
+* Mon Aug 18 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc3-git5
+
+* Sun Aug 17 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc3-git4
+
+* Fri Aug 15 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc3-git3
+
 * Fri Aug 15 2008 Dave Airlie <airlied@redhat.com>
 - Add i915 sarea fixups
 
