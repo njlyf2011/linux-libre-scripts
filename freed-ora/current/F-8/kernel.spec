@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.522 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.524 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -599,6 +599,7 @@ Patch88: linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
 Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
 Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
+Patch93: linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
 
 #ALSA
 
@@ -636,6 +637,7 @@ Patch411: linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
 Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # filesystem patches
+Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
 Patch425: linux-2.6-nfs-client-mounts-hang.patch
@@ -669,6 +671,7 @@ Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
 Patch725: linux-2.6-netdev-atl2.patch
 Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
+Patch728: linux-2.6-netdev-atl1-disable-tso-by-default.patch
 
 #ACPI
 Patch800: linux-2.6-acpi-processor-use-signed-int.patch
@@ -1063,6 +1066,8 @@ ApplyPatch linux-2.6-x86-fdiv-bug-detection-fix.patch
 ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 # fix failure to disable local apic on AMD c1e-enabled machines
 ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
+#
+ApplyPatch linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
 
 #
 # PowerPC
@@ -1140,6 +1145,8 @@ ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 # fin initio driver
 
 # Filesystem patches.
+#
+ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
 # export symbols for gfs2 locking modules
@@ -1220,6 +1227,8 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 # add atl1e network driver for eeepc 901
 ApplyPatch linux-2.6-netdev-atl1e.patch
+#
+ApplyPatch linux-2.6-netdev-atl1-disable-tso-by-default.patch
 
 # ACPI/PM patches
 # fix obvious thinko
@@ -1857,6 +1866,14 @@ fi
 
 
 %changelog
+* Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-14
+- [CIFS] Turn off Unicode during session establishment for plaintext authentication
+- atl1: disable TSO by default
+- x86: PAT proper tracking of set_memory_uc and friends
+
+* Tue Sep 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-13
+- Restore most of the drivers dropped in the 2.6.26 update. (#460853)
+
 * Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-12
 - x86-32: amd c1e force timer broadcast late
   (fixes failure to disable local apic timer)
