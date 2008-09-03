@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.754 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.756 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -601,6 +601,7 @@ Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
 Patch90: linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
+Patch93: linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -630,6 +631,7 @@ Patch411: linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
 Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # filesystem patches
+Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
@@ -677,6 +679,7 @@ Patch2000: linux-2.6-e1000-ich9.patch
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
 Patch2021: linux-2.6-netdev-atl1e.patch
+Patch2022: linux-2.6-netdev-atl1-disable-tso-by-default.patch
 
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
@@ -1080,6 +1083,8 @@ ApplyPatch linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 #
 ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
+#
+ApplyPatch linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
 
 #
 # PowerPC
@@ -1180,6 +1185,7 @@ ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # Filesystem patches.
 # cifs
+ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
 
@@ -1254,6 +1260,7 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-netdev-atl1e.patch
+ApplyPatch linux-2.6-netdev-atl1-disable-tso-by-default.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1866,6 +1873,14 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-29
+- [CIFS] Turn off Unicode during session establishment for plaintext authentication
+- atl1: disable TSO by default
+- x86: PAT proper tracking of set_memory_uc and friends
+
+* Tue Sep 02 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-28
+- Restore most of the drivers dropped in the 2.6.26 update. (F8#460853)
+
 * Sat Aug 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-27
 - x86-32: amd c1e force timer broadcast late
   (fixes failure to disable local apic timer)
