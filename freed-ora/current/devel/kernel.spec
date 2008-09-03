@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.919 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.920 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -614,6 +614,7 @@ Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
+Patch682: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -1163,6 +1164,9 @@ ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 #ApplyPatch linux-2.6-wireless.patch
 # wireless patches headed for 2.6.28
 #ApplyPatch linux-2.6-wireless-pending.patch
+
+# fix spot's iwlwifi, hopefully...
+ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1783,6 +1787,11 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Sep 02 2008 Kyle McMartin <kyle@redhat.com>
+- hopefully fix the iwlwifi issues.
+- add an include <linux/pagemap.h> to drm-nouveau to hopefully fix
+  the build on powerpc64.
+
 * Tue Sep 02 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.296.rc5.git2
 - Deblobbed patch-2.6.27-rc5.
 - Deblobbed drm-nouveau.patch.
