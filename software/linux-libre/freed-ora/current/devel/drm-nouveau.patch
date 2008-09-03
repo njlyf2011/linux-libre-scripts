@@ -5611,9 +5611,10 @@ new file mode 100644
 index 0000000..b35bfb7
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
-@@ -0,0 +1,341 @@
+@@ -0,0 +1,342 @@
 +#include "drmP.h"
 +#include "nouveau_drv.h"
++#include <linux/pagemap.h>
 +
 +#define NV_CTXDMA_PAGE_SHIFT 12
 +#define NV_CTXDMA_PAGE_SIZE  (1 << NV_CTXDMA_PAGE_SHIFT)
