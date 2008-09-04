@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.920 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.926 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 5
 # The git snapshot level
-%define gitrev 2
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -659,6 +659,9 @@ Patch2801: linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
+# fix selinux memory leak, patch headed upstream
+Patch3000:  linux-2.6-selinux-memory-leak-in-security-context-to-sid-core.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1213,7 +1216,7 @@ ApplyPatch linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
-# ---------- below all scheduled for 2.6.24 -----------------
+ApplyPatch  linux-2.6-selinux-memory-leak-in-security-context-to-sid-core.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1787,6 +1790,26 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Sep  3 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
+* Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.27-rc5-git5
+
+* Wed Sep 03 2008 Jarod Wilson <jarod@redhat.com>
+- Another series of checkpatch cleanups to lirc code,
+  courtesy of Janne Grunau. This stuff might actually
+  finally get upstream soon...
+
+* Tue Sep 02 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc5-git3
+
+* Tue Sep 02 2008 Chuck Ebbert <cebbert@redhat.com>
+- Fix selinux memory leak (#460848)
+
+* Tue Sep 02 2008 Jarod Wilson <jarod@redhat.com>
+- Rename lirc_pvr150 to more appropriate lirc_zilog
+
 * Tue Sep 02 2008 Kyle McMartin <kyle@redhat.com>
 - hopefully fix the iwlwifi issues.
 - add an include <linux/pagemap.h> to drm-nouveau to hopefully fix
