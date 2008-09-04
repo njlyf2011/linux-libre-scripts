@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.26.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.27-rc5.bz2.sign/-1.1/Fri Aug 29 01:19:00 2008//Tkernel-2_6_27-0_296_rc5_git2_fc10
-/.cvsignore/1.914/Result of merge+Thu Sep  4 04:29:55 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_303_rc5_git5_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
 /Makefile/1.79/Tue Sep  2 13:11:05 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
@@ -27,7 +26,6 @@ D/scripts////
 /config-x86-generic/1.47/Sun Jul 27 21:44:33 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
 /config-x86_64-generic/1.48/Tue Sep  2 13:11:05 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
 /drm-modesetting-radeon.patch/1.19/Tue Sep  2 13:11:07 2008/-kb/Tkernel-2_6_27-0_303_rc5_git5_fc10
-/drm-nouveau.patch/1.3/dummy timestamp from new-entry+Tue Sep  2 22:49:15 2008/-kb/Tkernel-2_6_27-0_303_rc5_git5_fc10
 /find-provides/1.18/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_303_rc5_git5_fc10
 /fixup-dri2-kms-merge.patch/1.2/Fri Aug 29 20:07:05 2008/-kb/Tkernel-2_6_27-0_303_rc5_git5_fc10
 /gen-patches/1.5/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
@@ -111,6 +109,8 @@ D/scripts////
 /merge.pl/1.9/Sun Apr 27 23:43:40 2008/-ko/Tkernel-2_6_27-0_303_rc5_git5_fc10
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27-0_303_rc5_git5_fc10
 /patch-2.6.27-rc5-git5.bz2.sign/1.1/Thu Sep  4 03:11:17 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
-/sources/1.877/Result of merge+Thu Sep  4 04:29:56 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
-/upstream/1.790/Result of merge+Thu Sep  4 04:29:56 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27-0_303_rc5_git5_fc10
+/.cvsignore/1.914/Thu Sep  4 06:27:33 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
+/sources/1.877/Thu Sep  4 06:27:34 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
+/upstream/1.790/Thu Sep  4 06:27:35 2008//Tkernel-2_6_27-0_303_rc5_git5_fc10
+/drm-nouveau.patch/1.3/Thu Sep  4 06:27:37 2008/-kb/Tkernel-2_6_27-0_303_rc5_git5_fc10
