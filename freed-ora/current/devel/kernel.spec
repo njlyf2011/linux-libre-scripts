@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.927 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.931 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -625,7 +625,6 @@ Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
 Patch1811: drm-modesetting-radeon.patch
-Patch1812: fixup-dri2-kms-merge.patch
 Patch1813: drm-nouveau.patch
 
 # kludge to make ich9 e1000 work
@@ -1193,7 +1192,6 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
-ApplyPatch fixup-dri2-kms-merge.patch
 ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
@@ -1786,6 +1784,23 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Sep 05 2008 Dave Airlie <airlied@redhat.com>
+- introduce radeon suspend/resume + change pin api
+
+* Fri Sep 05 2008 Chuck Ebbert <cebbert@redhat.com>
+- Restore most of the dropped powerpc32 drivers.
+
+* Fri Sep 05 2008 Jarod Wilson <jarod@redhat.com>
+- More lirc updates:
+  * convert single-holder semaphores to mutexes
+  * actually build lirc_sasem driver
+  * assorted compile-time warning cleanups
+  * add lirc_ite8709 driver
+  * sync with latest lirc cvs
+
+* Fri Sep 05 2008 Dave Airlie <airlied@redhat.com>
+- modesetting updates - fix AMD rs690 - roll in krh dri2 patch
+
 * Thu Sep  4 2008 David Woodhouse <David.Woodhouse@intel.com>
 - 2.6.27-rc5-git6
 
