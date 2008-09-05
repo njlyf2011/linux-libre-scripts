@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.926 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.927 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 5
 # The git snapshot level
-%define gitrev 5
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -659,9 +659,6 @@ Patch2801: linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
-# fix selinux memory leak, patch headed upstream
-Patch3000:  linux-2.6-selinux-memory-leak-in-security-context-to-sid-core.patch
-
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1216,7 +1213,6 @@ ApplyPatch linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
-ApplyPatch  linux-2.6-selinux-memory-leak-in-security-context-to-sid-core.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1790,6 +1786,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Sep  4 2008 David Woodhouse <David.Woodhouse@intel.com>
+- 2.6.27-rc5-git6
+
 * Wed Sep  3 2008 Roland McGrath <roland@redhat.com>
 - utrace update
 
