@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.935 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.937 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 5
 # The git snapshot level
-%define gitrev 7
+%define gitrev 9
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -572,7 +572,6 @@ Patch22: linux-2.6-x86-tracehook.patch
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
-Patch80: linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -1044,8 +1043,6 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # Compile 686 kernels tuned for Pentium4.
 ApplyPatch linux-2.6-x86-tune-generic.patch
-# add io delay quirk for presario f700
-ApplyPatch linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 
 #
 # PowerPC
@@ -1786,6 +1783,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Sep 08 2008 Dave Airlie <airlied@redhat.com>
+- disable VGA bashing in radeon - make text reserve larger.
+
+* Sun Sep 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.27-rc5-git9
+
 * Sun Sep 07 2008 Dave Airlie <airlied@redhat.com>
 - disable radeon verbose debugging. doh.
 
