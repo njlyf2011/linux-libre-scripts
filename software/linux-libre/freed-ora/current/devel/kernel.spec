@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.937 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.939 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 5
 # The git snapshot level
-%define gitrev 9
+%define gitrev 10
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -621,7 +621,6 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
-Patch1516: linux-2.6-fix-lirc-ppc64.patch
 
 # nouveau + drm fixes
 Patch1811: drm-modesetting-radeon.patch
@@ -1179,7 +1178,6 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6-lirc.patch
-ApplyPatch linux-2.6-fix-lirc-ppc64.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1783,6 +1781,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Sep 08 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc5-git10
+
+* Mon Sep 08 2008 Jarod Wilson <jarod@redhat.com>
+- Dave's lirc patch merged for upstream submission
+
 * Mon Sep 08 2008 Dave Airlie <airlied@redhat.com>
 - disable VGA bashing in radeon - make text reserve larger.
 
