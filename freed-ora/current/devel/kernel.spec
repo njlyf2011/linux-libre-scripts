@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.939 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.940 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -624,6 +624,7 @@ Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
 Patch1811: drm-modesetting-radeon.patch
+Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
 
 # kludge to make ich9 e1000 work
@@ -1189,6 +1190,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
+ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
@@ -1781,6 +1783,13 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Sep 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.317.rc5.git10
+- Adjusted i915 Kconfig patch to compensate for deblobbing elsewhere.
+
+* Tue Sep 09 2008 Dave Airlie <airlied@redhat.com>
+- radeon - update modesetting bits - should fix r400
+- add i915 modesetting bits - don't enable these by default yet
+
 * Mon Sep 08 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc5-git10
 
