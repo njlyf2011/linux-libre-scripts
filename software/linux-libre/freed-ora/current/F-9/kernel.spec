@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.756 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.759 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -45,7 +45,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 3
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -571,7 +571,7 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 
 # stable release candidate
-# Patch03: patch-2.6.25.6-rc1.bz2
+#Patch03: patch-2.6.26.4-rc1
 
 # we always need nonintconfig, even for -vanilla kernels
 Patch06: linux-2.6-build-nonintconfig.patch
@@ -602,6 +602,11 @@ Patch90: linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
 Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 Patch93: linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
+Patch94: linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
+Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
+Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
+Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
+
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -626,8 +631,6 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-Patch410: linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
-Patch411: linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
 Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # filesystem patches
@@ -679,7 +682,6 @@ Patch2000: linux-2.6-e1000-ich9.patch
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
 Patch2021: linux-2.6-netdev-atl1e.patch
-Patch2022: linux-2.6-netdev-atl1-disable-tso-by-default.patch
 
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
@@ -1032,7 +1034,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
 %endif
 
 # stable release candidate
-# ApplyPatch patch-2.6.25.6-rc1.bz2
+#ApplyPatch patch-2.6.26.4-rc1
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1085,6 +1087,11 @@ ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 #
 ApplyPatch linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
+# hpet fixes from 2.6.27
+ApplyPatch linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
+ApplyPatch linux-2.6-x86-hpet-02-read-back-compare-register.patch
+ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
+ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 
 #
 # PowerPC
@@ -1177,9 +1184,6 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # block/bio
 #
-# bio patches queued for -stable
-ApplyPatch linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
-ApplyPatch linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
 # don't discard barrier flags
 ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
@@ -1260,7 +1264,6 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-netdev-atl1e.patch
-ApplyPatch linux-2.6-netdev-atl1-disable-tso-by-default.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1873,6 +1876,19 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Sep 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-32
+- HPET fixes from 2.6.27
+
+* Mon Sep 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-31
+- Linux 2.6.26.5
+
+* Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-30
+- Linux 2.6.26.4-rc1
+  Dropped patches:
+    linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
+    linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
+    linux-2.6-netdev-atl1-disable-tso-by-default.patch
+
 * Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-29
 - [CIFS] Turn off Unicode during session establishment for plaintext authentication
 - atl1: disable TSO by default
