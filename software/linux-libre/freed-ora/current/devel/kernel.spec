@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.940 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.943 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 5
+%define rcrev 6
 # The git snapshot level
-%define gitrev 10
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1783,6 +1783,18 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Sep 10 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.320.rc6
+- Deblobbed 2.6.27-rc6.
+
+* Tue Sep 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc6
+
+* Tue Sep 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc5-git11
+
+* Tue Sep 09 2008 Jarod Wilson <jarod@redhat.com>
+- turn ibmveth back on for ppc64, it builds now (#461637)
+
 * Tue Sep 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.317.rc5.git10
 - Adjusted i915 Kconfig patch to compensate for deblobbing elsewhere.
 
