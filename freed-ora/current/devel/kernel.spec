@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.944 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.945 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -630,6 +630,11 @@ Patch1813: drm-nouveau.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
+# new e1000e hardware support from net-next-2.6 (e.g. ich10)
+Patch2001: linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
+Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
+Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
+
 # Make Eee disk faster.
 Patch2010: linux-2.6-sata-eeepc-faster.patch
 
@@ -1181,6 +1186,10 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
+
+ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
+ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
+ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
@@ -1783,6 +1792,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Sep 10 2008 Mark McLoughlin <markmc@redhat.com>
+- Pull in new e1000e hardware support (e.g. ich10) from net-next-2.6
+
 * Tue Sep 09 2008 Dave Airlie <airlied@redhat.com>
 - Update radeon modesetting - memory setup + ref count fail
 
