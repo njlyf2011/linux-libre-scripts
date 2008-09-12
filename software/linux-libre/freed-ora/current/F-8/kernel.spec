@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.524 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.529 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 3
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -574,7 +574,7 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 
 # -stable RC
-# Patch02: patch-2.6.23.15-rc1.bz2
+#Patch02: patch-2.6.26.4-rc1
 
 # we also need compile fixes for -vanilla
 Patch07: linux-2.6-compile-fixes.patch
@@ -600,6 +600,10 @@ Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
 Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 Patch93: linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
+Patch94: linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
+Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
+Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
+Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 
 #ALSA
 
@@ -632,8 +636,6 @@ Patch370: linux-2.6-crash-driver.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-Patch410: linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
-Patch411: linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
 Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # filesystem patches
@@ -656,6 +658,7 @@ Patch640: linux-2.6-defaults-pci_no_msi.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
+Patch675: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -671,7 +674,7 @@ Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
 Patch725: linux-2.6-netdev-atl2.patch
 Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
-Patch728: linux-2.6-netdev-atl1-disable-tso-by-default.patch
+Patch728: linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
 
 #ACPI
 Patch800: linux-2.6-acpi-processor-use-signed-int.patch
@@ -1006,7 +1009,7 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 
 # -stable RC
-# ApplyPatch patch-2.6.23.15-rc1.bz2
+#ApplyPatch patch-2.6.26.4-rc1
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1037,9 +1040,6 @@ ApplyPatch linux-2.6-utrace.patch
 
 # block/bio
 #
-# bio patches queued for -stable
-ApplyPatch linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
-ApplyPatch linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
 # don't discard barrier flags
 ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
@@ -1068,6 +1068,11 @@ ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
 ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
 #
 ApplyPatch linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
+# hpet fixes from 2.6.27
+ApplyPatch linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
+ApplyPatch linux-2.6-x86-hpet-02-read-back-compare-register.patch
+ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
+ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 
 #
 # PowerPC
@@ -1191,6 +1196,8 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # eepc short cable quirk
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
+# don't use ahci for pata_marvell adapters
+ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 
 # wireless
 #
@@ -1227,8 +1234,8 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 # add atl1e network driver for eeepc 901
 ApplyPatch linux-2.6-netdev-atl1e.patch
-#
-ApplyPatch linux-2.6-netdev-atl1-disable-tso-by-default.patch
+# add new mac/phy already supported in the driver
+ApplyPatch linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
 
 # ACPI/PM patches
 # fix obvious thinko
@@ -1866,6 +1873,25 @@ fi
 
 
 %changelog
+* Thu Sep 11 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-19
+- Don't use ahci driver for marvell controllers. (F9#455833)
+
+* Wed Sep 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-18
+- Add support for 82567LM-4 to the e1000e driver (F9#461438)
+
+* Mon Sep 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-17
+- HPET fixes from 2.6.27
+
+* Mon Sep 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-16
+- Linux 2.6.26.5
+
+* Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-15
+- Linux 2.6.26.4-rc1
+  Dropped patches:
+    linux-2.6-bio-fix-__bio_copy_iov-handling-of-bv_len.patch
+    linux-2.6-bio-fix-bio_copy_kern-handling-of-bv_len.patch
+    linux-2.6-netdev-atl1-disable-tso-by-default.patch
+
 * Wed Sep 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.3-14
 - [CIFS] Turn off Unicode during session establishment for plaintext authentication
 - atl1: disable TSO by default
