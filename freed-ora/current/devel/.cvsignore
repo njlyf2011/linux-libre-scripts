@@ -2,10 +2,10 @@ clog
 GNUmakefile
 kernel-2.6.*.config
 temp-*
-kernel-2.6.26
 deblob-main
 deblob-2.6.26
 deblob-check
+kernel-2.6.26
 linux-2.6.26-libre1.*
 patch-libre-2.6.27-rc6.*
-patch-2.6.27-rc6-git1.bz2
+patch-2.6.27-rc6-git2.bz2
