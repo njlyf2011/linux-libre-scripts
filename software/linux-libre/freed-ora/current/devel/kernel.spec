@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.948 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.950 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -626,6 +626,7 @@ Patch1515: linux-2.6-lirc.patch
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
+Patch1814: drm-intel-fix-irqs.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -651,6 +652,8 @@ Patch2200: linux-2.6-firewire-git-update.patch
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # Fix HID usage descriptor on MS wireless desktop receiver
 Patch2301: linux-2.6-ms-wireless-receiver.patch
+# fix hang on boot on PS3
+Patch2302: linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
@@ -1090,6 +1093,7 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+ApplyPatch linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 # ACPI
 
@@ -1201,6 +1205,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
+ApplyPatch drm-intel-fix-irqs.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1792,6 +1797,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Sep 16 2008 Dave Airlie <airlied@redhat.com>
+- fix from Intel for irqs hopefully
+
+* Sat Sep 13 2008 Chuck Ebbert <cebbert@redhat.com>
+- Fix hang in installer on PS3. (#458910)
+
 * Fri Sep 12 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc6-git2
 
