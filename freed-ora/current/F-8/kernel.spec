@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.531 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.532 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1895,6 +1895,11 @@ fi
 
 
 %changelog
+* Sun Sep 14 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.5-22
+- Turn off CONFIG_ACPI_SYSFS_POWER again, got enabled by mistake when
+  the (unaffected, since hal is newer) Fedora 9 config files were copied
+  for Fedora 8. (F8#452356,F8#373041)
+
 * Sat Sep 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-21
 - Copy F9 patches into F8:
     libata: fix DMA mode mismatches
