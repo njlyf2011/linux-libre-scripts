@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.529 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.531 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -592,6 +592,9 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
+Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
+Patch43: linux-2.6-sched-fix-process-time-monotonicity.patch
+
 Patch60: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
@@ -604,6 +607,7 @@ Patch94: linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
 Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
 Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
+Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 
 #ALSA
 
@@ -641,6 +645,7 @@ Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 # filesystem patches
 Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
+Patch422: linux-2.6-fs-cifs-fix-plaintext-authentication.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
 Patch425: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -659,6 +664,8 @@ Patch640: linux-2.6-defaults-pci_no_msi.patch
 Patch670: linux-2.6-ata-quirk.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
+Patch676: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
+Patch677: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -675,6 +682,7 @@ Patch725: linux-2.6-netdev-atl2.patch
 Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
 Patch728: linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
+Patch729: linux-2.6-netdev-e1000e-fix-drv-load-issues-amt.patch
 
 #ACPI
 Patch800: linux-2.6-acpi-processor-use-signed-int.patch
@@ -683,6 +691,7 @@ Patch820: linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
 Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
 
 Patch900: linux-2.6-mm-dirty-page-tracking-race-fix.patch
+Patch901: linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
@@ -1048,6 +1057,9 @@ ApplyPatch nouveau-drm.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
+# fix sched clock monotonicity bugs
+ApplyPatch linux-2.6-sched-clock-fix-nohz-interaction.patch
+ApplyPatch linux-2.6-sched-fix-process-time-monotonicity.patch
 
 # Architecture patches
 # IA64
@@ -1073,6 +1085,8 @@ ApplyPatch linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
 ApplyPatch linux-2.6-x86-hpet-02-read-back-compare-register.patch
 ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
+# fix memmap=exactmap, so kdump kernels work
+ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 
 #
 # PowerPC
@@ -1154,6 +1168,8 @@ ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
+# fix CIFS plaintext passwords
+ApplyPatch linux-2.6-fs-cifs-fix-plaintext-authentication.patch
 # export symbols for gfs2 locking modules
 ApplyPatch linux-2.6-gfs-locking-exports.patch
 # fix nfs mount hang
@@ -1198,6 +1214,10 @@ ApplyPatch linux-2.6-ata-quirk.patch
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # don't use ahci for pata_marvell adapters
 ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
+# fix drivers making wrong assumptions about what dma values mean
+ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
+# libata breaks lba28 rules
+ApplyPatch linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
 
 # wireless
 #
@@ -1248,6 +1268,8 @@ ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.p
 # mm
 # possible data corruption, esp. on ppc
 ApplyPatch linux-2.6-mm-dirty-page-tracking-race-fix.patch
+# mm zone scan patch scheduled for -stable
+ApplyPatch linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
 
 # dm / md
 
@@ -1873,6 +1895,19 @@ fi
 
 
 %changelog
+* Sat Sep 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-21
+- Copy F9 patches into F8:
+    libata: fix DMA mode mismatches
+    libata: interpret the LBA28 spec properly
+    Add two patches scheduled for 2.6.26-stable:
+      cifs: fix plaintext authentication
+      mm:   mark correct zone full when scanning zonelists
+    Fix problems with scheduler clock going backwards (F9#453257)
+    x86: fix memmap=exactmap argument, fixing kdump in some cases (F9#459103)
+
+* Sat Sep 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-20
+- Fix problems with AMT on e1000e (F9#453023)
+
 * Thu Sep 11 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-19
 - Don't use ahci driver for marvell controllers. (F9#455833)
 
