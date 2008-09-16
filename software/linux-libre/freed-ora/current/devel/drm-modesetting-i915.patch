@@ -1,5 +1,70 @@
 * drivers/gpu/drm/Kconfig: Adjusted for deblobbed DRM_MGA.
 
+commit 30ff7e1eb97ba42a7e71890a77345a495f022eb5
+Author: Dave Airlie <airlied@linux.ie>
+Date:   Tue Sep 16 08:46:41 2008 +1000
+
+    drm/i915: fixup irqs and make i915 ints work again
+
+commit df3fafd56d88d44b7f691bc275406f19ac555869
+Author: Dave Airlie <airlied@linux.ie>
+Date:   Tue Sep 16 06:59:58 2008 +1000
+
+    enable msi interrupts
+
+commit 6fbaf1dee397b1f2240b3026dc89d0d39b789641
+Author: Dave Airlie <airlied@linux.ie>
+Date:   Tue Sep 16 05:10:56 2008 +1000
+
+    i915: fix issues with interrupts
+
+commit f0f6b59a6ab4f6a54780a4b7a8807659b3b9799a
+Author: Dave Airlie <airlied@panoply-rh.(none)>
+Date:   Tue Sep 9 16:03:12 2008 +1000
+
+    i915: fixup hws page
+
+commit dae9cc44a08b0d5e79dec6b3cccc7f8f70cbe542
+Author: Dave Airlie <airlied@linux.ie>
+Date:   Mon Sep 8 17:08:29 2008 +1000
+
+    drm/i915: add modeset default config option support
+
+commit e4143dd833eec57e7f3ad9d54dc2e4d2315b10c0
+Author: Dave Airlie <airlied@linux.ie>
+Date:   Mon Sep 8 17:08:04 2008 +1000
+
+    drm: export drm_mm_takedown
+
+commit 54608765a84591ecc16fe4fb468db12f8b603124
+Author: Dave Airlie <airlied@linux.ie>
+Date:   Mon Sep 8 17:07:30 2008 +1000
+
+    i915: fix master priv accesses
+
+commit 948a856992c8ebd2615c1c9b6d74a757d4e34e64
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Sep 8 13:45:34 2008 +1000
+
+    intel: make build
+
+commit b8f2747a954a95e426baac1da0bb4cfee4dd534e
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Sep 8 13:28:52 2008 +1000
+
+    jbarnes: add gtt map code
+
+commit 661f42dd5878bbea4f1c785bbe8b290bb2495437
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Sep 8 13:27:53 2008 +1000
+
+    jbarnes: add mmap_io_region
+
+commit d8dfa0ecb3fd079dbc7d0c709692ff417b86a6c7
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Sep 8 13:25:58 2008 +1000
+
+    i915: add initial modesetting files
 diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
 index 649757f..a1ed52b 100644
 --- a/drivers/gpu/drm/Kconfig
@@ -20,6 +85,34 @@ index 649757f..a1ed52b 100644
  config DRM_MGA
  depends on NONFREE
  	tristate "Matrox g200/g400"
+diff --git a/drivers/gpu/drm/drm_irq.c b/drivers/gpu/drm/drm_irq.c
+index a1c7b38..634e387 100644
+--- a/drivers/gpu/drm/drm_irq.c
++++ b/drivers/gpu/drm/drm_irq.c
+@@ -63,8 +63,6 @@ int drm_irq_by_busid(struct drm_device *dev, void *data,
+ 	    p->devnum != PCI_SLOT(dev->pdev->devfn) || p->funcnum != PCI_FUNC(dev->pdev->devfn))
+ 		return -EINVAL;
+ 
+-	p->irq = dev->pdev->irq;
+-
+ 	DRM_DEBUG("%d:%d:%d => IRQ %d\n", p->busnum, p->devnum, p->funcnum,
+ 		  p->irq);
+ 
+@@ -127,12 +125,9 @@ int drm_irq_install(struct drm_device *dev)
+ 	if (drm_core_check_feature(dev, DRIVER_IRQ_SHARED))
+ 		sh_flags = IRQF_SHARED;
+ 
+-	ret = request_irq(dev->pdev->irq, dev->driver->irq_handler,
++	ret = request_irq(drm_dev_to_irq(dev), dev->driver->irq_handler,
+ 			  sh_flags, dev->devname, dev);
+-	/* Expose the device irq number to drivers that want to export it for
+-	 * whatever reason.
+-	 */
+-	dev->irq = dev->pdev->irq;
++
+ 	if (ret < 0) {
+ 		mutex_lock(&dev->struct_mutex);
+ 		dev->irq_enabled = 0;
 diff --git a/drivers/gpu/drm/drm_mm.c b/drivers/gpu/drm/drm_mm.c
 index 217ad7d..367c590 100644
 --- a/drivers/gpu/drm/drm_mm.c
@@ -29,6 +122,18 @@ index 217ad7d..367c590 100644
  	drm_free(entry, sizeof(*entry), DRM_MEM_MM);
  }
 +EXPORT_SYMBOL(drm_mm_takedown);
+diff --git a/drivers/gpu/drm/drm_stub.c b/drivers/gpu/drm/drm_stub.c
+index 1dc2965..47c1c4e 100644
+--- a/drivers/gpu/drm/drm_stub.c
++++ b/drivers/gpu/drm/drm_stub.c
+@@ -214,7 +214,6 @@ static int drm_fill_in_dev(struct drm_device * dev, struct pci_dev *pdev,
+ #ifdef __alpha__
+ 	dev->hose = pdev->sysdata;
+ #endif
+-	dev->irq = pdev->irq;
+ 
+ 	if (drm_ht_create(&dev->map_hash, DRM_MAP_HASH_ORDER)) {
+ 		return -ENOMEM;
 diff --git a/drivers/gpu/drm/i915/Makefile b/drivers/gpu/drm/i915/Makefile
 index 362d419..57aa9da 100644
 --- a/drivers/gpu/drm/i915/Makefile
@@ -3270,10 +3375,10 @@ index 440659e..ee112ae 100644
  	ret = i915_gem_idle(dev);
  	if (ret == 0)
 diff --git a/drivers/gpu/drm/i915/i915_init.c b/drivers/gpu/drm/i915/i915_init.c
-index 06f2ecb..b67dd3a 100644
+index 06f2ecb..605565a 100644
 --- a/drivers/gpu/drm/i915/i915_init.c
 +++ b/drivers/gpu/drm/i915/i915_init.c
-@@ -7,6 +7,367 @@
+@@ -7,6 +7,373 @@
  #include "i915_drm.h"
  #include "i915_drv.h"
  #include "drm_sarea.h"
@@ -3533,6 +3638,9 @@ index 06f2ecb..b67dd3a 100644
 +
 +	i915_gem_load(dev);
 +
++	if (!IS_I945G(dev) && !IS_I945GM(dev))
++		pci_enable_msi(dev->pdev);
++
 +	intel_opregion_init(dev);
 +
 +	tmp = I915_READ(PIPEASTAT);
@@ -3620,6 +3728,9 @@ index 06f2ecb..b67dd3a 100644
 +		destroy_workqueue(dev_priv->wq);
 +	}
 +
++	if (dev->pdev->msi_enabled)
++		pci_disable_msi(dev->pdev);
++
 +	i915_free_hws(dev);
 +	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
 +		mutex_lock(&dev->struct_mutex);
@@ -3641,7 +3752,7 @@ index 06f2ecb..b67dd3a 100644
  
  int i915_master_create(struct drm_device *dev, struct drm_master *master)
  {
-@@ -33,3 +394,58 @@ void i915_master_destroy(struct drm_device *dev, struct drm_master *master)
+@@ -33,3 +400,58 @@ void i915_master_destroy(struct drm_device *dev, struct drm_master *master)
  
  	master->driver_priv = NULL;
  }
@@ -3701,10 +3812,10 @@ index 06f2ecb..b67dd3a 100644
 +	return 0;
 +}
 diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
-index 965ec74..a0be952 100644
+index 965ec74..3c2fc12 100644
 --- a/drivers/gpu/drm/i915/i915_irq.c
 +++ b/drivers/gpu/drm/i915/i915_irq.c
-@@ -30,6 +30,7 @@
+@@ -30,16 +30,27 @@
  #include "drm.h"
  #include "i915_drm.h"
  #include "i915_drv.h"
@@ -3712,16 +3823,44 @@ index 965ec74..a0be952 100644
  
  #define MAX_NOPID ((u32)~0)
  
-@@ -257,7 +258,7 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
++static void i915_vblank_configure(struct drm_device *dev, int pipe);
++
+ /** These are the interrupts used by the driver */
+ #define I915_INTERRUPT_ENABLE_MASK (I915_USER_INTERRUPT |		\
+-				    I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT | \
+-				    I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT | \
+ 				    I915_ASLE_INTERRUPT |		\
++				    I915_DISPLAY_PIPE_A_EVENT_INTERRUPT | \
+ 				    I915_DISPLAY_PIPE_B_EVENT_INTERRUPT)
+ 
++#define I915_PIPE_VBLANK_STATUS	(PIPE_START_VBLANK_INTERRUPT_STATUS |\
++				 PIPE_VBLANK_INTERRUPT_STATUS)
++
++#define I915_PIPE_VBLANK_ENABLE	(PIPE_START_VBLANK_INTERRUPT_ENABLE |\
++				 PIPE_VBLANK_INTERRUPT_ENABLE)
++
++#define DRM_I915_VBLANK_PIPE_ALL	(DRM_I915_VBLANK_PIPE_A | \
++					 DRM_I915_VBLANK_PIPE_B)
++
+ void
+ i915_enable_irq(drm_i915_private_t *dev_priv, u32 mask)
+ {
+@@ -257,19 +268,16 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
  {
  	struct drm_device *dev = (struct drm_device *) arg;
  	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 -	struct drm_i915_master_private *master_priv = dev->primary->master->driver_priv;
+-	u32 pipea_stats, pipeb_stats;
 +	struct drm_i915_master_private *master_priv;
- 	u32 pipea_stats, pipeb_stats;
++	u32 pipea_stats = 0, pipeb_stats = 0;
  	u32 iir;
+-
+-	pipea_stats = I915_READ(PIPEASTAT);
+-	pipeb_stats = I915_READ(PIPEBSTAT);
++	int vblank_pipe = dev_priv->vblank_pipe;
  
-@@ -269,7 +270,6 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
+ 	if (dev->pdev->msi_enabled)
+ 		I915_WRITE(IMR, ~0);
  	iir = I915_READ(IIR);
  
  	DRM_DEBUG("iir=%08x\n", iir);
@@ -3729,7 +3868,25 @@ index 965ec74..a0be952 100644
  	if (iir == 0) {
  		if (dev->pdev->msi_enabled) {
  			I915_WRITE(IMR, dev_priv->irq_mask_reg);
-@@ -286,8 +286,11 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
+@@ -278,38 +286,47 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
+ 		return IRQ_NONE;
+ 	}
+ 
+-	I915_WRITE(PIPEASTAT, pipea_stats);
+-	I915_WRITE(PIPEBSTAT, pipeb_stats);
++	if (iir & I915_DISPLAY_PIPE_A_EVENT_INTERRUPT) {
++		pipea_stats = I915_READ(PIPEASTAT);
++		I915_WRITE(PIPEASTAT, pipea_stats);
++	}
++	if (iir & I915_DISPLAY_PIPE_B_EVENT_INTERRUPT) {
++		pipeb_stats = I915_READ(PIPEBSTAT);
++ 		if ((vblank_pipe & DRM_I915_VBLANK_PIPE_B) == 0)
++ 			pipeb_stats &= ~(I915_VBLANK_INTERRUPT_ENABLE);
++		I915_WRITE(PIPEBSTAT, pipeb_stats);
++	}
+ 
+ 	I915_WRITE(IIR, iir);
+ 	if (dev->pdev->msi_enabled)
  		I915_WRITE(IMR, dev_priv->irq_mask_reg);
  	(void) I915_READ(IIR); /* Flush posted writes */
  
@@ -3743,7 +3900,41 @@ index 965ec74..a0be952 100644
  
  	if (iir & I915_USER_INTERRUPT) {
  		dev_priv->mm.irq_gem_seqno = i915_get_gem_seqno(dev);
-@@ -485,6 +488,78 @@ int i915_irq_wait(struct drm_device *dev, void *data,
+ 		DRM_WAKEUP(&dev_priv->irq_queue);
+ 	}
+ 
+-	if (iir & (I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT |
+-		   I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT)) {
+-		int vblank_pipe = dev_priv->vblank_pipe;
+-
+-		if ((vblank_pipe &
+-		     (DRM_I915_VBLANK_PIPE_A | DRM_I915_VBLANK_PIPE_B))
+-		    == (DRM_I915_VBLANK_PIPE_A | DRM_I915_VBLANK_PIPE_B)) {
+-			if (iir & I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT)
++	if ((pipeb_stats|pipea_stats) & I915_PIPE_VBLANK_STATUS) {
++ 		/* When tracking both pipes, split the counts */
++ 		if ((vblank_pipe & DRM_I915_VBLANK_PIPE_ALL) ==
++ 		    DRM_I915_VBLANK_PIPE_ALL) {
++ 			if (pipea_stats & I915_PIPE_VBLANK_STATUS)
+ 				atomic_inc(&dev->vbl_received);
+-			if (iir & I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT)
++ 			if (pipeb_stats & I915_PIPE_VBLANK_STATUS)
+ 				atomic_inc(&dev->vbl_received2);
+-		} else if (((iir & I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT) &&
+-			    (vblank_pipe & DRM_I915_VBLANK_PIPE_A)) ||
+-			   ((iir & I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT) &&
+-			    (vblank_pipe & DRM_I915_VBLANK_PIPE_B)))
+-			atomic_inc(&dev->vbl_received);
++
++		} else if (((pipea_stats & I915_PIPE_VBLANK_STATUS) &&
++  			    (vblank_pipe & DRM_I915_VBLANK_PIPE_A)) ||
++			   ((pipeb_stats & I915_PIPE_VBLANK_STATUS) &&
++  			    (vblank_pipe & DRM_I915_VBLANK_PIPE_B)))
++  			atomic_inc(&dev->vbl_received);
+ 
+ 		DRM_WAKEUP(&dev->vbl_queue);
+ 		drm_vbl_send_signals(dev);
+@@ -485,6 +502,120 @@ int i915_irq_wait(struct drm_device *dev, void *data,
  	return i915_wait_irq(dev, irqwait->irq_seq);
  }
  
@@ -3751,10 +3942,9 @@ index 965ec74..a0be952 100644
 +void i915_enable_interrupt (struct drm_device *dev)
 +{
 +	struct drm_i915_private *dev_priv = (struct drm_i915_private *) dev->dev_private;
++#if 0
 +	struct drm_connector *o;
 +	
-+	dev_priv->irq_mask_reg &= ~0;
-+
 +	if (IS_I9XX(dev) && !IS_I915G(dev) && !IS_I915GM(dev)) {
 +		if (dev->mode_config.num_connector)
 +			dev_priv->irq_mask_reg &= ~I915_DISPLAY_PORT_INTERRUPT;
@@ -3814,15 +4004,121 @@ index 965ec74..a0be952 100644
 +			I915_WRITE(PORT_HOTPLUG_STAT, I915_READ(PORT_HOTPLUG_STAT));
 +		}
 +	}
-+
++#endif
++ 	i915_vblank_configure(dev, dev_priv->vblank_pipe);
 +	opregion_enable_asle(dev);
 +	dev_priv->irq_enabled = 1;
++}
++
++static void i915_vblank_configure(struct drm_device *dev, int pipe)
++{
++	drm_i915_private_t *dev_priv = dev->dev_private;
++	u32 enable_a_mask = 0, disable_a_mask = 0;
++	u32 enable_b_mask = 0, disable_b_mask = 0;
++	u32 mask;
++	u32 pipe_a_stat, pipe_b_stat;
++
++	/*
++	 * For newer chips, use START_VBLANK_INTERRUPT_ENABLE
++	 * as the VBLANK_INTERRUPT_ENABLE signal occurs much
++	 * later
++	 */
++	if (IS_I965G(dev))
++		mask = PIPE_START_VBLANK_INTERRUPT_ENABLE;
++	else
++		mask = PIPE_VBLANK_INTERRUPT_ENABLE;
++	
++	if (pipe & DRM_I915_VBLANK_PIPE_A)
++		enable_a_mask |= mask;
++	else
++		disable_a_mask |= mask;
++
++	if (pipe & DRM_I915_VBLANK_PIPE_B)
++		enable_b_mask |= mask;
++	else
++		disable_b_mask |= mask;
++
++	pipe_a_stat = I915_READ (PIPEASTAT);
++	pipe_a_stat |= enable_a_mask;
++	pipe_a_stat &= ~disable_a_mask;
++	I915_WRITE (PIPEASTAT, pipe_a_stat);
++	
++	pipe_b_stat = I915_READ (PIPEBSTAT);
++	pipe_b_stat |= enable_b_mask;
++	pipe_b_stat &= ~disable_b_mask;
++	I915_WRITE (PIPEBSTAT, pipe_b_stat);
++
++	/* post writes */
++	(void) I915_READ(PIPEBSTAT);
 +}
 +
  /* Set the vblank monitor pipe
   */
  int i915_vblank_pipe_set(struct drm_device *dev, void *data,
-@@ -670,24 +745,10 @@ void i915_driver_irq_postinstall(struct drm_device * dev)
+@@ -492,7 +623,6 @@ int i915_vblank_pipe_set(struct drm_device *dev, void *data,
+ {
+ 	drm_i915_private_t *dev_priv = dev->dev_private;
+ 	drm_i915_vblank_pipe_t *pipe = data;
+-	u32 enable_mask = 0, disable_mask = 0;
+ 
+ 	if (!dev_priv) {
+ 		DRM_ERROR("called with no initialization\n");
+@@ -504,18 +634,10 @@ int i915_vblank_pipe_set(struct drm_device *dev, void *data,
+ 		return -EINVAL;
+ 	}
+ 
+-	if (pipe->pipe & DRM_I915_VBLANK_PIPE_A)
+-		enable_mask |= I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT;
+-	else
+-		disable_mask |= I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT;
++	i915_vblank_configure(dev, pipe->pipe);
+ 
+-	if (pipe->pipe & DRM_I915_VBLANK_PIPE_B)
+-		enable_mask |= I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT;
+-	else
+-		disable_mask |= I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT;
+-
+-	i915_enable_irq(dev_priv, enable_mask);
+-	i915_disable_irq(dev_priv, disable_mask);
++	i915_enable_irq(dev_priv, I915_DISPLAY_PIPE_A_EVENT_INTERRUPT);
++	i915_enable_irq(dev_priv, I915_DISPLAY_PIPE_B_EVENT_INTERRUPT);
+ 
+ 	dev_priv->vblank_pipe = pipe->pipe;
+ 
+@@ -527,18 +649,19 @@ int i915_vblank_pipe_get(struct drm_device *dev, void *data,
+ {
+ 	drm_i915_private_t *dev_priv = dev->dev_private;
+ 	drm_i915_vblank_pipe_t *pipe = data;
+-	u16 flag;
++	u32 pipe_a_stat, pipe_b_stat;
+ 
+ 	if (!dev_priv) {
+ 		DRM_ERROR("called with no initialization\n");
+ 		return -EINVAL;
+ 	}
+ 
+-	flag = I915_READ(IMR);
++	pipe_a_stat = I915_READ(PIPEASTAT);
++	pipe_b_stat = I915_READ(PIPEBSTAT);
+ 	pipe->pipe = 0;
+-	if (flag & I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT)
++	if (pipe_a_stat & I915_PIPE_VBLANK_ENABLE)
+ 		pipe->pipe |= DRM_I915_VBLANK_PIPE_A;
+-	if (flag & I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT)
++	if (pipe_b_stat & I915_PIPE_VBLANK_ENABLE)
+ 		pipe->pipe |= DRM_I915_VBLANK_PIPE_B;
+ 
+ 	return 0;
+@@ -657,7 +780,7 @@ void i915_driver_irq_preinstall(struct drm_device * dev)
+ {
+ 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
+ 
+-	I915_WRITE(HWSTAM, 0xfffe);
++	I915_WRITE(HWSTAM, 0xeffe);
+ 	I915_WRITE(IMR, 0x0);
+ 	I915_WRITE(IER, 0x0);
+ }
+@@ -670,24 +793,11 @@ void i915_driver_irq_postinstall(struct drm_device * dev)
  	INIT_LIST_HEAD(&dev_priv->vbl_swaps.head);
  	dev_priv->swaps_pending = 0;
  
@@ -3830,7 +4126,7 @@ index 965ec74..a0be952 100644
 -		dev_priv->vblank_pipe = DRM_I915_VBLANK_PIPE_A;
  
  	/* Set initial unmasked IRQs to just the selected vblank pipes. */
- 	dev_priv->irq_mask_reg = ~0;
+-	dev_priv->irq_mask_reg = ~0;
 -	if (dev_priv->vblank_pipe & DRM_I915_VBLANK_PIPE_A)
 -		dev_priv->irq_mask_reg &= ~I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT;
 -	if (dev_priv->vblank_pipe & DRM_I915_VBLANK_PIPE_B)
@@ -3839,7 +4135,8 @@ index 965ec74..a0be952 100644
 -	dev_priv->irq_mask_reg &= I915_INTERRUPT_ENABLE_MASK;
 -
 -	I915_WRITE(IMR, dev_priv->irq_mask_reg);
--	I915_WRITE(IER, I915_INTERRUPT_ENABLE_MASK);
++ 	dev_priv->irq_mask_reg = I915_INTERRUPT_ENABLE_MASK;
+ 	I915_WRITE(IER, I915_INTERRUPT_ENABLE_MASK);
 -	(void) I915_READ(IER);
 -
 -	opregion_enable_asle(dev);
@@ -12406,6 +12703,97 @@ index 0000000..cb1255e
 +out:
 +	drm_sysfs_connector_add(connector);
 +}
+diff --git a/drivers/gpu/drm/mga/mga_state.c b/drivers/gpu/drm/mga/mga_state.c
+index d3f8aad..b710fab 100644
+--- a/drivers/gpu/drm/mga/mga_state.c
++++ b/drivers/gpu/drm/mga/mga_state.c
+@@ -1022,7 +1022,7 @@ static int mga_getparam(struct drm_device *dev, void *data, struct drm_file *fil
+ 
+ 	switch (param->param) {
+ 	case MGA_PARAM_IRQ_NR:
+-		value = dev->irq;
++		value = drm_dev_to_irq(dev);
+ 		break;
+ 	case MGA_PARAM_CARD_TYPE:
+ 		value = dev_priv->chipset;
+diff --git a/drivers/gpu/drm/r128/r128_state.c b/drivers/gpu/drm/r128/r128_state.c
+index 51a9afc..f7a5b57 100644
+--- a/drivers/gpu/drm/r128/r128_state.c
++++ b/drivers/gpu/drm/r128/r128_state.c
+@@ -1629,7 +1629,7 @@ static int r128_getparam(struct drm_device *dev, void *data, struct drm_file *fi
+ 
+ 	switch (param->param) {
+ 	case R128_PARAM_IRQ_NR:
+-		value = dev->irq;
++		value = drm_dev_to_irq(dev);
+ 		break;
+ 	default:
+ 		return -EINVAL;
+diff --git a/drivers/gpu/drm/radeon/radeon_state.c b/drivers/gpu/drm/radeon/radeon_state.c
+index dcf5922..399471f 100644
+--- a/drivers/gpu/drm/radeon/radeon_state.c
++++ b/drivers/gpu/drm/radeon/radeon_state.c
+@@ -3029,7 +3029,7 @@ static int radeon_cp_getparam(struct drm_device *dev, void *data, struct drm_fil
+ 		value = GET_SCRATCH(2);
+ 		break;
+ 	case RADEON_PARAM_IRQ_NR:
+-		value = dev->irq;
++		value = drm_dev_to_irq(dev);
+ 		break;
+ 	case RADEON_PARAM_GART_BASE:
+ 		value = dev_priv->gart_vm_start;
+diff --git a/drivers/gpu/drm/via/via_irq.c b/drivers/gpu/drm/via/via_irq.c
+index c6bb978..53d90b3 100644
+--- a/drivers/gpu/drm/via/via_irq.c
++++ b/drivers/gpu/drm/via/via_irq.c
+@@ -339,9 +339,6 @@ int via_wait_irq(struct drm_device *dev, void *data, struct drm_file *file_priv)
+ 	drm_via_irq_t *cur_irq = dev_priv->via_irqs;
+ 	int force_sequence;
+ 
+-	if (!dev->irq)
+-		return -EINVAL;
+-
+ 	if (irqwait->request.irq >= dev_priv->num_irqs) {
+ 		DRM_ERROR("Trying to wait on unknown irq %d\n",
+ 			  irqwait->request.irq);
+diff --git a/drivers/gpu/drm/via/via_mm.c b/drivers/gpu/drm/via/via_mm.c
+index e640949..f694cb5 100644
+--- a/drivers/gpu/drm/via/via_mm.c
++++ b/drivers/gpu/drm/via/via_mm.c
+@@ -93,8 +93,7 @@ int via_final_context(struct drm_device *dev, int context)
+ 	/* Last context, perform cleanup */
+ 	if (dev->ctx_count == 1 && dev->dev_private) {
+ 		DRM_DEBUG("Last Context\n");
+-		if (dev->irq)
+-			drm_irq_uninstall(dev);
++		drm_irq_uninstall(dev);
+ 		via_cleanup_futex(dev_priv);
+ 		via_do_cleanup_map(dev);
+ 	}
+diff --git a/include/drm/drmP.h b/include/drm/drmP.h
+index 31e2f17..a67618a 100644
+--- a/include/drm/drmP.h
++++ b/include/drm/drmP.h
+@@ -842,7 +842,6 @@ struct drm_device {
+ 
+ 	/** \name Context support */
+ 	/*@{ */
+-	int irq;			/**< Interrupt used by board */
+ 	int irq_enabled;		/**< True if irq handler is enabled */
+ 	__volatile__ long context_flag;	/**< Context swapping flag */
+ 	__volatile__ long interrupt_flag; /**< Interruption handler flag */
+@@ -944,6 +943,11 @@ struct ati_pcigart_ttm_backend {
+ };
+ extern struct drm_ttm_backend *ati_pcigart_init_ttm(struct drm_device *dev, struct drm_ati_pcigart_info *info, void (*gart_flush_fn)(struct drm_device *dev));
+ 
++static inline int drm_dev_to_irq(struct drm_device *dev)
++{
++	return dev->pdev->irq;
++}
++
+ static __inline__ int drm_core_check_feature(struct drm_device *dev,
+ 					     int feature)
+ {
 diff --git a/include/drm/i915_drm.h b/include/drm/i915_drm.h
 index 7d88a21..5525c91 100644
 --- a/include/drm/i915_drm.h
