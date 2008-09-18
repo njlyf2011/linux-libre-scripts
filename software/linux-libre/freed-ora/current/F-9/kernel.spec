@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.768 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.769 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -709,6 +709,7 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
+Patch2700: linux-2.6-intel-msr-backport.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1319,6 +1320,7 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
+ApplyPatch linux-2.6-intel-msr-backport.patch
 # ---------- below all scheduled for 2.6.24 -----------------
 
 # END OF PATCH APPLICATIONS
@@ -1910,6 +1912,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Sep 17 2008 Kyle McMartin <kyle@redhat.com> - 2.6.26.5-42
+- From Chris Lalancette <clalance@redhat.com>:
+   Backport KVM Intel MSR fix (efa67e0d1f51842393606034051d805ab9948abd)
+
 * Mon Sep 15 2008 Roland McGrath <roland@redhat.com> - 2.6.26.5-41
 - utrace: Fix common oops in ptrace EPERM case.
 
