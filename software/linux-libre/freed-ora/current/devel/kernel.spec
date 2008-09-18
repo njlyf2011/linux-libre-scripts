@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.952 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.955 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 6
 # The git snapshot level
-%define gitrev 2
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1795,14 +1795,26 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Tue Sep 16 2008 Dave Airlie <airlied@redhat.com>
+* Thu Sep 18 2008 Dave Airlie <airlied@redhat.com>
+- update radeon LVDS bits from AMD
+
+* Wed Sep 17 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc6-git5
+
+* Mon Sep 15 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc6-git4
+
+* Mon Sep 15 2008 Dave Airlie <airlied@redhat.com>
 - removed previous attempted fix
 
-* Tue Sep 16 2008 Dave Airlie <airlied@redhat.com>
+* Mon Sep 15 2008 Dave Airlie <airlied@redhat.com>
 - properly fix issues with Intel interrupts
 
-* Tue Sep 16 2008 Dave Airlie <airlied@redhat.com>
+* Mon Sep 15 2008 Dave Airlie <airlied@redhat.com>
 - fix from Intel for irqs hopefully
+
+* Sat Sep 13 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc6-git3
 
 * Sat Sep 13 2008 Chuck Ebbert <cebbert@redhat.com>
 - Fix hang in installer on PS3. (#458910)
