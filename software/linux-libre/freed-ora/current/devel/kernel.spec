@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.955 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.960 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1795,6 +1795,17 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Sep 19 2008 Dave Airlie <airlied@redhat.com>
+- more fixes from AMD upstream for LVDS
+
+* Thu Sep 18 2008 Dave Airlie <airlied@redhat.com>
+- Merge krh's patches + new patches from AMD
+
+* Thu Sep 18 2008 Kristian Høgsberg <krh@redhat.com>
+- Fix precedence in PLL value computation.
+- Allow R300_DST_PIPE_CONFIG register write use by X.
+- Add DRM_ERROR() for EINVAL returns from DRM_RADEON_CS that will crash X.
+
 * Thu Sep 18 2008 Dave Airlie <airlied@redhat.com>
 - update radeon LVDS bits from AMD
 
