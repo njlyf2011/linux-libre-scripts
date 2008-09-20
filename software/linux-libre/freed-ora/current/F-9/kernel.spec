@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.769 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.770 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -710,6 +710,7 @@ Patch2501: linux-2.6-ppc-use-libgcc.patch
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 Patch2700: linux-2.6-intel-msr-backport.patch
+Patch2701: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1321,6 +1322,7 @@ ApplyPatch linux-2.6-ppc-use-libgcc.patch
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 ApplyPatch linux-2.6-intel-msr-backport.patch
+ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 # ---------- below all scheduled for 2.6.24 -----------------
 
 # END OF PATCH APPLICATIONS
@@ -1912,6 +1914,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Sep 19 2008 Kyle McMartin <kyle@redhat.com> - 2.6.26.5-43
+- libata-sff: kill spurious WARN_ON() in ata_hsm_move()
+   Pointed-out-by: Arjan van de Ven (9c2676b61a5a4b6d99e65fb2f438fb3914302eda)
+
 * Wed Sep 17 2008 Kyle McMartin <kyle@redhat.com> - 2.6.26.5-42
 - From Chris Lalancette <clalance@redhat.com>:
    Backport KVM Intel MSR fix (efa67e0d1f51842393606034051d805ab9948abd)
