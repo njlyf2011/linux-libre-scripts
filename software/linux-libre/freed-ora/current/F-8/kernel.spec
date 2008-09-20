@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.537 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.538 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -611,6 +611,10 @@ Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 Patch99: linux-2.6-x86-intel-msr-backport.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 
+Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
+Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
+Patch122: linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
+
 #ALSA
 
 Patch130: linux-2.6-ppc-use-libgcc.patch
@@ -1095,6 +1099,11 @@ ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 ApplyPatch linux-2.6-x86-intel-msr-backport.patch
 # fix e820 reservation checking
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
+
+# disable ASPM on devices that don't support it
+ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
+ApplyPatch linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
+ApplyPatch linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
 
 #
 # PowerPC
@@ -1908,6 +1917,9 @@ fi
 
 
 %changelog
+* Sat Sep 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-28
+- pci: three patches to disable PCIe ASPM on old devices/systems (F9#462210)
+
 * Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-27
 - libata-sff: kill spurious WARN_ON() in ata_hsm_move()
    Pointed-out-by: Arjan van de Ven (9c2676b61a5a4b6d99e65fb2f438fb3914302eda)
