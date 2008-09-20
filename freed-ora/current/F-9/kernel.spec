@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.771 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.772 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -612,6 +612,10 @@ Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 
+Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
+Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
+Patch122: linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
+
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -1115,6 +1119,11 @@ ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 # fix e820 reservation checking
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
+
+# disable ASPM on devices that don't support it
+ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
+ApplyPatch linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
+ApplyPatch linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
 
 #
 # PowerPC
@@ -1917,6 +1926,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-45
+- pci: three patches to disable PCIe ASPM on old devices/systems (#462210)
+
 * Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-44
 - x86: pci: detect end_bus_number according to acpi/e820 reserved, v2 (#462210)
 
