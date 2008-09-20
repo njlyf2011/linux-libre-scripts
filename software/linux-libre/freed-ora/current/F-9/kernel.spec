@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.770 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.771 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -610,6 +610,7 @@ Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
 Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
+Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -1112,6 +1113,8 @@ ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 # fix memmap=exactmap, so kdump kernels work
 ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
+# fix e820 reservation checking
+ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 
 #
 # PowerPC
@@ -1914,6 +1917,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-44
+- x86: pci: detect end_bus_number according to acpi/e820 reserved, v2 (#462210)
+
 * Fri Sep 19 2008 Kyle McMartin <kyle@redhat.com> - 2.6.26.5-43
 - libata-sff: kill spurious WARN_ON() in ata_hsm_move()
    Pointed-out-by: Arjan van de Ven (9c2676b61a5a4b6d99e65fb2f438fb3914302eda)
