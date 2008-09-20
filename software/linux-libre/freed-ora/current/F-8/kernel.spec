@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.532 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.537 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -608,6 +608,8 @@ Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
 Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
+Patch99: linux-2.6-x86-intel-msr-backport.patch
+Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 
 #ALSA
 
@@ -666,12 +668,14 @@ Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 Patch676: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
 Patch677: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+Patch678: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 #Patch682: linux-2.6-wireless-fixups.patch
 Patch683: linux-2.6-wireless-stable-backports.patch
 Patch685: linux-2.6-rt2500usb-fix.patch
+Patch686: linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-zd1211rw-module-alias.patch
 Patch692: linux-2.6-cfg80211-extras.patch
@@ -1087,6 +1091,10 @@ ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 # fix memmap=exactmap, so kdump kernels work
 ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
+# backport MSR patch
+ApplyPatch linux-2.6-x86-intel-msr-backport.patch
+# fix e820 reservation checking
+ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 
 #
 # PowerPC
@@ -1218,6 +1226,8 @@ ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
 # libata breaks lba28 rules
 ApplyPatch linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+# kill warn_on reported by kerneloops
+ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 
 # wireless
 #
@@ -1239,6 +1249,9 @@ fi
 
 # fix for long-standing rt2500usb issues
 ApplyPatch linux-2.6-rt2500usb-fix.patch
+# bf4634afd8bb72936d2d56425ec792ca1bfa92a2
+ApplyPatch linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
+
 # module alias for zd1211rw module
 ApplyPatch linux-2.6-zd1211rw-module-alias.patch
 # Restore ability to add/remove virtual i/fs to mac80211 devices
@@ -1895,6 +1908,22 @@ fi
 
 
 %changelog
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-27
+- libata-sff: kill spurious WARN_ON() in ata_hsm_move()
+   Pointed-out-by: Arjan van de Ven (9c2676b61a5a4b6d99e65fb2f438fb3914302eda)
+
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-26
+- wireless: rt2500pci: restoring missing line (from F9)
+
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-25
+- x86: pci: detect end_bus_number according to acpi/e820 reserved, v2 (F9#462210)
+
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-24
+- utrace: Fix common oops in ptrace EPERM case (from F9)
+
+* Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-23
+- Backport KVM Intel MSR fix (efa67e0d1f51842393606034051d805ab9948abd)
+
 * Sun Sep 14 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.5-22
 - Turn off CONFIG_ACPI_SYSFS_POWER again, got enabled by mistake when
   the (unaffected, since hal is newer) Fedora 9 config files were copied
