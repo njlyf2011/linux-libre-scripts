@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.772 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.774 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -669,9 +669,12 @@ Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 #Patch682: linux-2.6-wireless-fixups.patch
 Patch683: linux-2.6-wireless-stable-backports.patch
-Patch685: linux-2.6-rt2500usb-fix.patch
-Patch686: linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
-Patch690: linux-2.6-at76.patch
+Patch685: linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
+Patch686: linux-2.6-wireless-p54-fix-regression-due-to-delete-NETDEVICES_MULTIQUEUE-option.patch
+Patch687: linux-2.6-wireless-revert-b43-add-RFKILL_STATE_HARD_BLOCKED-support.patch
+
+Patch698: linux-2.6-rt2500usb-fix.patch
+Patch699: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -716,6 +719,7 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 Patch2700: linux-2.6-intel-msr-backport.patch
 Patch2701: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
+Patch2703: linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1292,6 +1296,10 @@ ApplyPatch linux-2.6-rt2500usb-fix.patch
 
 # bf4634afd8bb72936d2d56425ec792ca1bfa92a2
 ApplyPatch linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
+# e95926d05d028a6bf0ab60b21b484c3d622fdcd1
+ApplyPatch linux-2.6-wireless-revert-b43-add-RFKILL_STATE_HARD_BLOCKED-support.patch
+# aaa1553512b9105699113ea7e2ea726f3d9d4de2
+ApplyPatch linux-2.6-wireless-p54-fix-regression-due-to-delete-NETDEVICES_MULTIQUEUE-option.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1335,6 +1343,8 @@ ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 ApplyPatch linux-2.6-intel-msr-backport.patch
 ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
+# fix subtle but annoying PCMCIA bug
+ApplyPatch linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 # ---------- below all scheduled for 2.6.24 -----------------
 
 # END OF PATCH APPLICATIONS
@@ -1926,6 +1936,14 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Sep 23 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.5-47
+- two more wireless fixes from John
+   p54: Fix regression due to "net: Delete NETDEVICES_MULTIQUEUE kconfig option
+   Revert "b43/b43legacy: add RFKILL_STATE_HARD_BLOCKED support"
+  
+* Mon Sep 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-46
+- pcmcia: Fix broken abuse of dev->driver_data (#462178)
+
 * Fri Sep 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-45
 - pci: three patches to disable PCIe ASPM on old devices/systems (#462210)
 
