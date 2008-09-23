@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.960 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.967 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
-%define gitrev 5
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -626,6 +626,8 @@ Patch1515: linux-2.6-lirc.patch
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
+Patch1814: drm-create-handle-for-fb.patch
+Patch1815: drm-modesetting-intel-mm-private.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1204,6 +1206,8 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
+ApplyPatch drm-create-handle-for-fb.patch
+ApplyPatch drm-modesetting-intel-mm-private.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1795,6 +1799,29 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Sep 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.344.rc7
+- Deblobbed 2.6.27-rc7.
+
+* Mon Sep 22 2008 Roland McGrath <roland@redhat.com>
+- utrace update
+
+* Mon Sep 22 2008 Dave Jones <davej@redhat.com>
+- Readd CONFIG_IWLCORE that disappeared for no apparent reason.
+
+* Mon Sep 22 2008 Dave Jones <davej@redhat.com>
+- Commit Bills demodularisation patch.
+
+* Mon Sep 22 2008 Kristian Høgsberg <krh@redhat.com>
+- Add patch to allow userspace to get a handle for the buffer object
+  backing the drm fbdev buffer.
+- Update intel modesetting for the buffer object change.
+
+* Mon Sep 22 2008 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.27-rc7
+
+* Fri Sep 19 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc6-git6
+
 * Fri Sep 19 2008 Dave Airlie <airlied@redhat.com>
 - more fixes from AMD upstream for LVDS
 
