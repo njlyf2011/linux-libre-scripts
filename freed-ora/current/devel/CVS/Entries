@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.26.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.27-rc7.bz2.sign/-1.1/Mon Sep 22 14:07:05 2008//Tkernel-2_6_27-0_343_rc7_fc10
-/.cvsignore/1.928/dummy timestamp from new-entry+Mon Sep 22 20:33:29 2008//Tkernel-2_6_27-0_344_rc7_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_344_rc7_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_344_rc7_fc10
 /Makefile/1.79/Tue Sep  2 13:11:05 2008//Tkernel-2_6_27-0_344_rc7_fc10
@@ -115,6 +114,7 @@ D/scripts////
 /linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch/1.1/Thu Jul 24 16:40:21 2008/-kb/Tkernel-2_6_27-0_344_rc7_fc10
 /merge.pl/1.9/Sun Apr 27 23:43:40 2008/-ko/Tkernel-2_6_27-0_344_rc7_fc10
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27-0_344_rc7_fc10
-/sources/1.890/dummy timestamp from new-entry+Mon Sep 22 20:37:50 2008//Tkernel-2_6_27-0_344_rc7_fc10
-/upstream/1.802/dummy timestamp from new-entry+Mon Sep 22 20:37:27 2008//Tkernel-2_6_27-0_344_rc7_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27-0_344_rc7_fc10
+/.cvsignore/1.928/Tue Sep 23 01:08:32 2008//Tkernel-2_6_27-0_344_rc7_fc10
+/sources/1.890/Tue Sep 23 01:08:33 2008//Tkernel-2_6_27-0_344_rc7_fc10
+/upstream/1.802/Tue Sep 23 01:08:34 2008//Tkernel-2_6_27-0_344_rc7_fc10
