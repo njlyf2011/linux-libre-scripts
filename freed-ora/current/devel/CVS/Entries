@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.26.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.27-rc7.bz2.sign/-1.1/Mon Sep 22 14:07:05 2008//Tkernel-2_6_27-0_343_rc7_fc10
-/.cvsignore/1.929/dummy timestamp from new-entry+Tue Sep 23 01:27:46 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_347_rc7_git1_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
 /Makefile/1.79/Tue Sep  2 13:11:05 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
@@ -117,6 +116,7 @@ D/scripts////
 /merge.pl/1.9/Sun Apr 27 23:43:40 2008/-ko/Tkernel-2_6_27-0_347_rc7_git1_fc10
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27-0_347_rc7_git1_fc10
 /patch-2.6.27-rc7-git1.bz2.sign/1.1/Tue Sep 23 00:39:53 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
-/sources/1.891/dummy timestamp from new-entry+Tue Sep 23 01:27:51 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
-/upstream/1.803/dummy timestamp from new-entry+Tue Sep 23 01:27:57 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27-0_347_rc7_git1_fc10
+/.cvsignore/1.929/Tue Sep 23 20:21:42 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
+/sources/1.891/Tue Sep 23 20:21:43 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
+/upstream/1.803/Tue Sep 23 20:21:44 2008//Tkernel-2_6_27-0_347_rc7_git1_fc10
