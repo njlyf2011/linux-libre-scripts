@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.967 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.969 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -628,6 +628,7 @@ Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
 Patch1814: drm-create-handle-for-fb.patch
 Patch1815: drm-modesetting-intel-mm-private.patch
+Patch1816: drm-modesetting-fix-external-tmds-check.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1208,6 +1209,7 @@ ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-create-handle-for-fb.patch
 ApplyPatch drm-modesetting-intel-mm-private.patch
+ApplyPatch drm-modesetting-fix-external-tmds-check.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1801,6 +1803,12 @@ fi
 %changelog
 * Mon Sep 22 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.344.rc7
 - Deblobbed 2.6.27-rc7.
+
+* Mon Sep 22 2008 Roland McGrath <roland@redhat.com>
+- 2.6.27-rc7-git1
+
+* Mon Sep 22 2008 Kristian Høgsberg <krh@redhat.com>
+- Fix check for radeon external TMDS.
 
 * Mon Sep 22 2008 Roland McGrath <roland@redhat.com>
 - utrace update
