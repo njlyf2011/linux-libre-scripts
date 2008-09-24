@@ -1,66 +1,72 @@
 * drivers/gpu/drm/Kconfig: Adjusted for deblobbed DRM_MGA.
 
-commit 30ff7e1eb97ba42a7e71890a77345a495f022eb5
+commit 2b391e551baddf9dabb06bee61023797ca810791
+Author: Kristian Høgsberg <krh@redhat.com>
+Date:   Mon Sep 22 16:43:04 2008 -0400
+
+    Update intel modesetting to use mm_private instead of mm_handle.
+
+commit 0e6b3649ab58deafd5fb531264ce89718cd31344
 Author: Dave Airlie <airlied@linux.ie>
 Date:   Tue Sep 16 08:46:41 2008 +1000
 
     drm/i915: fixup irqs and make i915 ints work again
 
-commit df3fafd56d88d44b7f691bc275406f19ac555869
+commit 033f754b3d4b903e79d314d072a1f6ffd89e0851
 Author: Dave Airlie <airlied@linux.ie>
 Date:   Tue Sep 16 06:59:58 2008 +1000
 
     enable msi interrupts
 
-commit 6fbaf1dee397b1f2240b3026dc89d0d39b789641
+commit af5c14da9b93227aa417ca08c53537772cb7cb04
 Author: Dave Airlie <airlied@linux.ie>
 Date:   Tue Sep 16 05:10:56 2008 +1000
 
     i915: fix issues with interrupts
 
-commit f0f6b59a6ab4f6a54780a4b7a8807659b3b9799a
+commit 9fcee2a986584c3bc9b743f53d6d9bebbd407161
 Author: Dave Airlie <airlied@panoply-rh.(none)>
 Date:   Tue Sep 9 16:03:12 2008 +1000
 
     i915: fixup hws page
 
-commit dae9cc44a08b0d5e79dec6b3cccc7f8f70cbe542
+commit d6964afe2fbb73b8d5d83d463bc9b122116099b0
 Author: Dave Airlie <airlied@linux.ie>
 Date:   Mon Sep 8 17:08:29 2008 +1000
 
     drm/i915: add modeset default config option support
 
-commit e4143dd833eec57e7f3ad9d54dc2e4d2315b10c0
+commit 065db6e5171231de0970540553d3845ea8b3ce63
 Author: Dave Airlie <airlied@linux.ie>
 Date:   Mon Sep 8 17:08:04 2008 +1000
 
     drm: export drm_mm_takedown
 
-commit 54608765a84591ecc16fe4fb468db12f8b603124
+commit bd0b4b01f6831f7e8f3ae4d743dfe7b4f1e710ae
 Author: Dave Airlie <airlied@linux.ie>
 Date:   Mon Sep 8 17:07:30 2008 +1000
 
     i915: fix master priv accesses
 
-commit 948a856992c8ebd2615c1c9b6d74a757d4e34e64
+commit 2284c4e99382fee59c07c61ae744a48100739463
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Mon Sep 8 13:45:34 2008 +1000
 
     intel: make build
 
-commit b8f2747a954a95e426baac1da0bb4cfee4dd534e
+commit 457d906e8c391e11326031a873c2daf7cee60411
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Mon Sep 8 13:28:52 2008 +1000
 
     jbarnes: add gtt map code
 
-commit 661f42dd5878bbea4f1c785bbe8b290bb2495437
+commit 922f29104a8fdcb54c73c426be413ea988231b79
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Mon Sep 8 13:27:53 2008 +1000
 
     jbarnes: add mmap_io_region
 
-commit d8dfa0ecb3fd079dbc7d0c709692ff417b86a6c7
+commit 7cfa2f3f752aa4353f81f93eb87cbd15fa7ff4d2
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Mon Sep 8 13:25:58 2008 +1000
 
@@ -2252,7 +2258,7 @@ index 0000000..207fda8
 +	.destroy = tfp410_destroy,
 +};
 diff --git a/drivers/gpu/drm/i915/i915_dma.c b/drivers/gpu/drm/i915/i915_dma.c
-index bad0144..07b02d0 100644
+index 66e4b8e..0fd7f9d 100644
 --- a/drivers/gpu/drm/i915/i915_dma.c
 +++ b/drivers/gpu/drm/i915/i915_dma.c
 @@ -122,9 +122,19 @@ void i915_free_hws(struct drm_device *dev)
@@ -2285,7 +2291,7 @@ index bad0144..07b02d0 100644
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	/* Make sure interrupts are disabled here because the uninstall ioctl
-@@ -760,6 +770,9 @@ static int i915_set_status_page(struct drm_device *dev, void *data,
+@@ -776,6 +786,9 @@ static int i915_set_status_page(struct drm_device *dev, void *data,
  		return -EINVAL;
  	}
  
@@ -2295,7 +2301,7 @@ index bad0144..07b02d0 100644
  	printk(KERN_DEBUG "set status page addr 0x%08x\n", (u32)hws->addr);
  
  	dev_priv->status_gfx_addr = hws->addr & (0x1ffff<<12);
-@@ -788,129 +801,6 @@ static int i915_set_status_page(struct drm_device *dev, void *data,
+@@ -804,129 +817,6 @@ static int i915_set_status_page(struct drm_device *dev, void *data,
  	return 0;
  }
  
@@ -2425,7 +2431,7 @@ index bad0144..07b02d0 100644
  struct drm_ioctl_desc i915_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_I915_INIT, i915_dma_init, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
  	DRM_IOCTL_DEF(DRM_I915_FLUSH, i915_flush_ioctl, DRM_AUTH),
-@@ -941,6 +831,7 @@ struct drm_ioctl_desc i915_ioctls[] = {
+@@ -957,6 +847,7 @@ struct drm_ioctl_desc i915_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_I915_GEM_PREAD, i915_gem_pread_ioctl, 0),
  	DRM_IOCTL_DEF(DRM_I915_GEM_PWRITE, i915_gem_pwrite_ioctl, 0),
  	DRM_IOCTL_DEF(DRM_I915_GEM_MMAP, i915_gem_mmap_ioctl, 0),
@@ -2956,7 +2962,7 @@ index ce20981..4112bed 100644
  }
  
 diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
-index 22b6925..52a16ed 100644
+index 5811601..19bbf6e 100644
 --- a/drivers/gpu/drm/i915/i915_drv.h
 +++ b/drivers/gpu/drm/i915/i915_drv.h
 @@ -32,6 +32,7 @@
@@ -3043,7 +3049,7 @@ index 22b6925..52a16ed 100644
  	/* Register state */
  	u8 saveLBB;
  	u32 saveDSPACNTR;
-@@ -404,8 +438,16 @@ struct drm_i915_file_private {
+@@ -407,8 +441,16 @@ struct drm_i915_file_private {
  	} mm;
  };
  
@@ -3060,7 +3066,7 @@ index 22b6925..52a16ed 100644
  
  extern int i915_master_create(struct drm_device *dev, struct drm_master *master);
  extern void i915_master_destroy(struct drm_device *dev, struct drm_master *master);
-@@ -426,6 +468,9 @@ extern long i915_compat_ioctl(struct file *filp, unsigned int cmd,
+@@ -429,6 +471,9 @@ extern long i915_compat_ioctl(struct file *filp, unsigned int cmd,
  extern int i915_emit_box(struct drm_device *dev,
  			 struct drm_clip_rect __user *boxes,
  			 int i, int DR1, int DR4);
@@ -3070,7 +3076,7 @@ index 22b6925..52a16ed 100644
  
  /* i915_irq.c */
  extern int i915_irq_emit(struct drm_device *dev, void *data,
-@@ -448,6 +493,7 @@ extern int i915_vblank_pipe_get(struct drm_device *dev, void *data,
+@@ -452,6 +497,7 @@ extern int i915_vblank_pipe_get(struct drm_device *dev, void *data,
  extern int i915_vblank_swap(struct drm_device *dev, void *data,
  			    struct drm_file *file_priv);
  extern void i915_enable_irq(drm_i915_private_t *dev_priv, u32 mask);
@@ -3078,7 +3084,7 @@ index 22b6925..52a16ed 100644
  
  /* i915_mem.c */
  extern int i915_mem_alloc(struct drm_device *dev, void *data,
-@@ -461,6 +507,11 @@ extern int i915_mem_destroy_heap(struct drm_device *dev, void *data,
+@@ -465,6 +511,11 @@ extern int i915_mem_destroy_heap(struct drm_device *dev, void *data,
  extern void i915_mem_takedown(struct mem_block **heap);
  extern void i915_mem_release(struct drm_device * dev,
  			     struct drm_file *file_priv, struct mem_block *heap);
@@ -3090,7 +3096,7 @@ index 22b6925..52a16ed 100644
  /* i915_gem.c */
  int i915_gem_init_ioctl(struct drm_device *dev, void *data,
  			struct drm_file *file_priv);
-@@ -472,6 +523,8 @@ int i915_gem_pwrite_ioctl(struct drm_device *dev, void *data,
+@@ -476,6 +527,8 @@ int i915_gem_pwrite_ioctl(struct drm_device *dev, void *data,
  			  struct drm_file *file_priv);
  int i915_gem_mmap_ioctl(struct drm_device *dev, void *data,
  			struct drm_file *file_priv);
@@ -3099,7 +3105,7 @@ index 22b6925..52a16ed 100644
  int i915_gem_set_domain_ioctl(struct drm_device *dev, void *data,
  			      struct drm_file *file_priv);
  int i915_gem_sw_finish_ioctl(struct drm_device *dev, void *data,
-@@ -506,6 +559,13 @@ uint32_t i915_get_gem_seqno(struct drm_device *dev);
+@@ -510,6 +563,13 @@ uint32_t i915_get_gem_seqno(struct drm_device *dev);
  void i915_gem_retire_requests(struct drm_device *dev);
  void i915_gem_retire_work_handler(struct work_struct *work);
  void i915_gem_clflush_object(struct drm_gem_object *obj);
@@ -3113,9 +3119,9 @@ index 22b6925..52a16ed 100644
  
  /* i915_gem_tiling.c */
  void i915_gem_detect_bit_6_swizzle(struct drm_device *dev);
-@@ -529,10 +589,16 @@ extern void intel_opregion_free(struct drm_device *dev);
- extern void opregion_asle_intr(struct drm_device *dev);
- extern void opregion_enable_asle(struct drm_device *dev);
+@@ -544,10 +604,16 @@ extern void opregion_enable_asle(struct drm_device *dev);
+ 		LOCK_TEST_WITH_RETURN(dev, file_priv);			\
+ } while (0)
  
 +/* modesetting */
 +extern void intel_modeset_init(struct drm_device *dev);
@@ -3130,7 +3136,7 @@ index 22b6925..52a16ed 100644
  
  #define I915_VERBOSE 0
  
-@@ -608,7 +674,7 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
+@@ -623,7 +689,7 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
  
  #define IS_I965GM(dev) ((dev)->pci_device == 0x2A02)
  
@@ -3139,7 +3145,7 @@ index 22b6925..52a16ed 100644
  
  #define IS_G4X(dev) ((dev)->pci_device == 0x2E02 || \
  		     (dev)->pci_device == 0x2E12 || \
-@@ -622,9 +688,9 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
+@@ -637,9 +703,9 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
  		      IS_I945GM(dev) || IS_I965G(dev) || IS_G33(dev))
  
  #define IS_MOBILE(dev) (IS_I830(dev) || IS_I85X(dev) || IS_I915GM(dev) || \
@@ -3152,7 +3158,7 @@ index 22b6925..52a16ed 100644
  #define PRIMARY_RINGBUFFER_SIZE         (128*1024)
  
 diff --git a/drivers/gpu/drm/i915/i915_gem.c b/drivers/gpu/drm/i915/i915_gem.c
-index 440659e..ee112ae 100644
+index 64dff87..c295621 100644
 --- a/drivers/gpu/drm/i915/i915_gem.c
 +++ b/drivers/gpu/drm/i915/i915_gem.c
 @@ -30,11 +30,9 @@
@@ -3318,7 +3324,7 @@ index 440659e..ee112ae 100644
  i915_gem_object_set_domain(struct drm_gem_object *obj,
  			    uint32_t read_domains,
  			    uint32_t write_domain)
-@@ -1736,6 +1803,7 @@ i915_gem_ring_throttle(struct drm_device *dev, struct drm_file *file_priv)
+@@ -1738,6 +1805,7 @@ i915_gem_ring_throttle(struct drm_device *dev, struct drm_file *file_priv)
  	seqno = i915_file_priv->mm.last_gem_throttle_seqno;
  	i915_file_priv->mm.last_gem_throttle_seqno =
  		i915_file_priv->mm.last_gem_seqno;
@@ -3326,7 +3332,7 @@ index 440659e..ee112ae 100644
  	if (seqno)
  		ret = i915_wait_request(dev, seqno);
  	mutex_unlock(&dev->struct_mutex);
-@@ -2324,7 +2392,8 @@ i915_gem_init_hws(struct drm_device *dev)
+@@ -2316,7 +2384,8 @@ i915_gem_init_hws(struct drm_device *dev)
  	int ret;
  
  	/* If we need a physical address for the status page, it's already
@@ -3336,7 +3342,7 @@ index 440659e..ee112ae 100644
  	 */
  	if (!I915_NEED_GFX_HWS(dev))
  		return 0;
-@@ -2365,7 +2434,7 @@ i915_gem_init_hws(struct drm_device *dev)
+@@ -2357,7 +2426,7 @@ i915_gem_init_hws(struct drm_device *dev)
  	return 0;
  }
  
@@ -3345,7 +3351,7 @@ index 440659e..ee112ae 100644
  i915_gem_init_ringbuffer(struct drm_device *dev)
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
-@@ -2429,7 +2498,7 @@ i915_gem_init_ringbuffer(struct drm_device *dev)
+@@ -2421,7 +2490,7 @@ i915_gem_init_ringbuffer(struct drm_device *dev)
  	return 0;
  }
  
@@ -3354,7 +3360,7 @@ index 440659e..ee112ae 100644
  i915_gem_cleanup_ringbuffer(struct drm_device *dev)
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
-@@ -2462,6 +2531,9 @@ i915_gem_entervt_ioctl(struct drm_device *dev, void *data,
+@@ -2454,6 +2523,9 @@ i915_gem_entervt_ioctl(struct drm_device *dev, void *data,
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	int ret;
  
@@ -3364,7 +3370,7 @@ index 440659e..ee112ae 100644
  	if (dev_priv->mm.wedged) {
  		DRM_ERROR("Reenabling wedged hardware, good luck\n");
  		dev_priv->mm.wedged = 0;
-@@ -2490,6 +2562,9 @@ i915_gem_leavevt_ioctl(struct drm_device *dev, void *data,
+@@ -2482,6 +2554,9 @@ i915_gem_leavevt_ioctl(struct drm_device *dev, void *data,
  {
  	int ret;
  
@@ -3812,7 +3818,7 @@ index 06f2ecb..605565a 100644
 +	return 0;
 +}
 diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
-index 965ec74..3c2fc12 100644
+index 53db0cc..17c5621 100644
 --- a/drivers/gpu/drm/i915/i915_irq.c
 +++ b/drivers/gpu/drm/i915/i915_irq.c
 @@ -30,16 +30,27 @@
@@ -3845,7 +3851,7 @@ index 965ec74..3c2fc12 100644
  void
  i915_enable_irq(drm_i915_private_t *dev_priv, u32 mask)
  {
-@@ -257,19 +268,16 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
+@@ -272,19 +283,16 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
  {
  	struct drm_device *dev = (struct drm_device *) arg;
  	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
@@ -3868,7 +3874,7 @@ index 965ec74..3c2fc12 100644
  	if (iir == 0) {
  		if (dev->pdev->msi_enabled) {
  			I915_WRITE(IMR, dev_priv->irq_mask_reg);
-@@ -278,38 +286,47 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
+@@ -293,38 +301,47 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
  		return IRQ_NONE;
  	}
  
@@ -3934,7 +3940,7 @@ index 965ec74..3c2fc12 100644
  
  		DRM_WAKEUP(&dev->vbl_queue);
  		drm_vbl_send_signals(dev);
-@@ -485,6 +502,120 @@ int i915_irq_wait(struct drm_device *dev, void *data,
+@@ -503,6 +520,120 @@ int i915_irq_wait(struct drm_device *dev, void *data,
  	return i915_wait_irq(dev, irqwait->irq_seq);
  }
  
@@ -4055,7 +4061,7 @@ index 965ec74..3c2fc12 100644
  /* Set the vblank monitor pipe
   */
  int i915_vblank_pipe_set(struct drm_device *dev, void *data,
-@@ -492,7 +623,6 @@ int i915_vblank_pipe_set(struct drm_device *dev, void *data,
+@@ -510,7 +641,6 @@ int i915_vblank_pipe_set(struct drm_device *dev, void *data,
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	drm_i915_vblank_pipe_t *pipe = data;
@@ -4063,7 +4069,7 @@ index 965ec74..3c2fc12 100644
  
  	if (!dev_priv) {
  		DRM_ERROR("called with no initialization\n");
-@@ -504,18 +634,10 @@ int i915_vblank_pipe_set(struct drm_device *dev, void *data,
+@@ -522,18 +652,10 @@ int i915_vblank_pipe_set(struct drm_device *dev, void *data,
  		return -EINVAL;
  	}
  
@@ -4085,7 +4091,7 @@ index 965ec74..3c2fc12 100644
  
  	dev_priv->vblank_pipe = pipe->pipe;
  
-@@ -527,18 +649,19 @@ int i915_vblank_pipe_get(struct drm_device *dev, void *data,
+@@ -545,18 +667,19 @@ int i915_vblank_pipe_get(struct drm_device *dev, void *data,
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	drm_i915_vblank_pipe_t *pipe = data;
@@ -4109,7 +4115,7 @@ index 965ec74..3c2fc12 100644
  		pipe->pipe |= DRM_I915_VBLANK_PIPE_B;
  
  	return 0;
-@@ -657,7 +780,7 @@ void i915_driver_irq_preinstall(struct drm_device * dev)
+@@ -675,7 +798,7 @@ void i915_driver_irq_preinstall(struct drm_device * dev)
  {
  	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
  
@@ -4118,7 +4124,7 @@ index 965ec74..3c2fc12 100644
  	I915_WRITE(IMR, 0x0);
  	I915_WRITE(IER, 0x0);
  }
-@@ -670,24 +793,11 @@ void i915_driver_irq_postinstall(struct drm_device * dev)
+@@ -688,24 +811,11 @@ void i915_driver_irq_postinstall(struct drm_device * dev)
  	INIT_LIST_HEAD(&dev_priv->vbl_swaps.head);
  	dev_priv->swaps_pending = 0;
  
@@ -5585,10 +5591,10 @@ index 0000000..2505d98
 +}
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
 new file mode 100644
-index 0000000..d7e02a2
+index 0000000..10d120a
 --- /dev/null
 +++ b/drivers/gpu/drm/i915/intel_display.c
-@@ -0,0 +1,1602 @@
+@@ -0,0 +1,1619 @@
 +/*
 + * Copyright © 2006-2007 Intel Corporation
 + *
@@ -5961,6 +5967,7 @@ index 0000000..d7e02a2
 +	struct intel_crtc *intel_crtc = to_intel_crtc(crtc);
 +	struct intel_framebuffer *intel_fb;
 +	struct drm_i915_gem_object *obj_priv;
++	struct drm_gem_object *obj;
 +	int pipe = intel_crtc->pipe;
 +	unsigned long Start, Offset;
 +	int dspbase = (pipe == 0 ? DSPAADDR : DSPBADDR);
@@ -5977,7 +5984,8 @@ index 0000000..d7e02a2
 +
 +	intel_fb = to_intel_framebuffer(crtc->fb);
 +
-+	obj_priv = intel_fb->obj->driver_private;
++	obj = intel_fb->base.mm_private;
++	obj_priv = obj->driver_private;
 +
 +	Start = obj_priv->gtt_offset;
 +	Offset = y * crtc->fb->pitch + x * (crtc->fb->bits_per_pixel / 8);
@@ -7055,21 +7063,34 @@ index 0000000..d7e02a2
 +{
 +	struct intel_framebuffer *intel_fb = to_intel_framebuffer(fb);
 +	struct drm_device *dev = fb->dev;
++
 +	if (fb->fbdev)
 +		intelfb_remove(dev, fb);
 +
 +	drm_framebuffer_cleanup(fb);
++	drm_gem_object_unreference(fb->mm_private);
 +
 +	kfree(intel_fb);
++}
++
++static int intel_user_framebuffer_create_handle(struct drm_framebuffer *fb,
++						struct drm_file *file_priv,
++						unsigned int *handle)
++{
++	struct drm_gem_object *object = fb->mm_private;
++
++	return drm_gem_handle_create(file_priv, object, handle);
 +}
 +      
 +static const struct drm_framebuffer_funcs intel_fb_funcs = {
 +	.destroy = intel_user_framebuffer_destroy,
++	.create_handle = intel_user_framebuffer_create_handle,
 +};
 +
-+struct drm_framebuffer *intel_user_framebuffer_create(struct drm_device *dev,
-+						      struct drm_file *filp,
-+						      struct drm_mode_fb_cmd *mode_cmd)
++struct drm_framebuffer *
++intel_framebuffer_create(struct drm_device *dev,
++			 struct drm_mode_fb_cmd *mode_cmd,
++			 void *mm_private)
 +{
 +	struct intel_framebuffer *intel_fb;
 +
@@ -7080,18 +7101,24 @@ index 0000000..d7e02a2
 +	if (!drm_framebuffer_init(dev, &intel_fb->base, &intel_fb_funcs))
 +		return NULL;
 +
-+	drm_helper_mode_fill_fb_struct(&intel_fb->base, mode_cmd);
++	drm_helper_mode_fill_fb_struct(&intel_fb->base, mode_cmd, mm_private);
 +
-+	if (filp) {
-+		intel_fb->obj = drm_gem_object_lookup(dev, filp,
-+						      mode_cmd->handle);
-+		if (!intel_fb->obj) {
-+			kfree(intel_fb);
-+			return NULL;
-+		}
-+	}
-+	drm_gem_object_unreference(intel_fb->obj);
 +	return &intel_fb->base;
++}
++
++
++static struct drm_framebuffer *
++intel_user_framebuffer_create(struct drm_device *dev,
++			      struct drm_file *filp,
++			      struct drm_mode_fb_cmd *mode_cmd)
++{
++	struct drm_gem_object *obj;
++
++	obj = drm_gem_object_lookup(dev, filp, mode_cmd->handle);
++	if (!obj)
++		return NULL;
++
++	return intel_framebuffer_create(dev, mode_cmd, obj);
 +}
 +
 +static int intel_insert_new_fb(struct drm_device *dev, struct drm_file *file_priv,
@@ -7110,13 +7137,9 @@ index 0000000..d7e02a2
 +		mutex_unlock(&dev->struct_mutex);
 +		return -EINVAL;
 +	}
-+	drm_helper_mode_fill_fb_struct(fb, mode_cmd);
-+
-+	drm_gem_object_unreference(intel_fb->obj);
-+	drm_gem_object_unreference(obj);
++	drm_gem_object_unreference(intel_fb->base.mm_private);
++	drm_helper_mode_fill_fb_struct(fb, mode_cmd, obj);
 +	mutex_unlock(&dev->struct_mutex);
-+
-+	intel_fb->obj = obj;
 +
 +	list_for_each_entry(crtc, &dev->mode_config.crtc_list, head) {
 +		if (crtc->fb == fb) {
@@ -7193,7 +7216,7 @@ index 0000000..d7e02a2
 +}
 diff --git a/drivers/gpu/drm/i915/intel_drv.h b/drivers/gpu/drm/i915/intel_drv.h
 new file mode 100644
-index 0000000..bffbeef
+index 0000000..256deac
 --- /dev/null
 +++ b/drivers/gpu/drm/i915/intel_drv.h
 @@ -0,0 +1,125 @@
@@ -7249,7 +7272,6 @@ index 0000000..bffbeef
 +
 +struct intel_framebuffer {
 +	struct drm_framebuffer base;
-+	struct drm_gem_object *obj;
 +};
 +
 +
@@ -7318,9 +7340,10 @@ index 0000000..bffbeef
 +extern void intel_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
 +				    u16 blue, int regno);
 +
-+extern struct drm_framebuffer *intel_user_framebuffer_create(struct drm_device *dev,
-+							     struct drm_file *file_priv,
-+							     struct drm_mode_fb_cmd *mode_cmd);
++extern struct drm_framebuffer *
++intel_framebuffer_create(struct drm_device *dev,
++			 struct drm_mode_fb_cmd *mode_cmd,
++			 void *mm_private);
 +#endif /* __INTEL_DRV_H__ */
 diff --git a/drivers/gpu/drm/i915/intel_dvo.c b/drivers/gpu/drm/i915/intel_dvo.c
 new file mode 100644
@@ -7829,10 +7852,10 @@ index 0000000..18bab3a
 +}
 diff --git a/drivers/gpu/drm/i915/intel_fb.c b/drivers/gpu/drm/i915/intel_fb.c
 new file mode 100644
-index 0000000..fea083b
+index 0000000..8ec8e73
 --- /dev/null
 +++ b/drivers/gpu/drm/i915/intel_fb.c
-@@ -0,0 +1,910 @@
+@@ -0,0 +1,908 @@
 +/*
 + * Copyright © 2007 David Airlie
 + *
@@ -8323,7 +8346,7 @@ index 0000000..fea083b
 +
 +	i915_gem_clflush_object(fbo);
 +
-+	fb = intel_user_framebuffer_create(dev, NULL, &mode_cmd);
++	fb = intel_framebuffer_create(dev, &mode_cmd, fbo);
 +	if (!fb) {
 +		DRM_ERROR("failed to allocate fb.\n");
 +		ret = -ENOMEM;
@@ -8334,8 +8357,6 @@ index 0000000..fea083b
 +
 +	intel_fb = to_intel_framebuffer(fb);
 +	*intel_fb_p = intel_fb;
-+
-+	intel_fb->obj = fbo;
 +
 +	info = framebuffer_alloc(sizeof(struct intelfb_par), device);
 +	if (!info) {
@@ -8732,7 +8753,7 @@ index 0000000..fea083b
 +		unregister_framebuffer(info);
 +		iounmap(info->screen_base);
 +		mutex_lock(&dev->struct_mutex);
-+		drm_gem_object_unreference(intel_fb->obj);
++		drm_gem_object_unreference(intel_fb->base.mm_private);
 +		mutex_unlock(&dev->struct_mutex);
 +		framebuffer_release(info);
 +	}
@@ -12839,10 +12860,10 @@ index 7d88a21..5525c91 100644
  	/** Handle for the object */
  	uint32_t handle;
 diff --git a/mm/mmap.c b/mm/mmap.c
-index 339cf5c..62f54fe 100644
+index e7a5a68..d689d36 100644
 --- a/mm/mmap.c
 +++ b/mm/mmap.c
-@@ -1244,6 +1244,171 @@ unacct_error:
+@@ -1248,6 +1248,171 @@ unacct_error:
  	return error;
  }
  
