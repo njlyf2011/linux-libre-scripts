@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.975 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.977 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 1
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1015,7 +1015,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-ApplyPatch git-linus.diff
+#ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1792,6 +1792,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Sep 24 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc7-git3
+
+* Wed Sep 24 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc7-git2
+
 * Tue Sep 23 2008 Dave Jones <davej@redhat.com>
 - x86 compile fix.
 
