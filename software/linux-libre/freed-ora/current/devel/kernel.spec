@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.977 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.990 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 3
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -230,9 +230,10 @@ Summary: The Linux kernel
 
 # only build kernel-kdump on ppc64
 # (no relocatable kernel support upstream yet)
-%ifnarch ppc64
+#FIXME: Temporarily disabled to speed up builds.
+#ifnarch ppc64
 %define with_kdump 0
-%endif
+#endif
 
 # don't do debug builds on anything but i686 and x86_64
 %ifnarch i686 x86_64
@@ -560,7 +561,6 @@ Patch06: linux-2.6-build-nonintconfig.patch
 
 # we also need compile fixes for -vanilla
 Patch07: linux-2.6-compile-fixes.patch
-#Patch08: linux-2.6-compile-fix-gcc-43.patch
 
 %if !%{nopatches}
 
@@ -568,10 +568,10 @@ Patch10: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
+Patch23: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
-Patch75: linux-2.6-x86-debug-boot.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -597,7 +597,6 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
-Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -609,7 +608,6 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -619,7 +617,6 @@ Patch690: linux-2.6-at76.patch
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
-Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
@@ -635,9 +632,6 @@ Patch2001: linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-# Make Eee disk faster.
-Patch2010: linux-2.6-sata-eeepc-faster.patch
-
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
 
@@ -649,8 +643,6 @@ Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# Fix HID usage descriptor on MS wireless desktop receiver
-Patch2301: linux-2.6-ms-wireless-receiver.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
@@ -662,6 +654,8 @@ Patch2800: linux-2.6-piix3-silence-quirk.patch
 Patch2801: linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
+# it's... it's ALIVE!
+Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 
 %endif
 
@@ -1030,9 +1024,6 @@ if [ "$C" -gt 10 ]; then
 ApplyPatch linux-2.6-compile-fixes.patch
 fi
 
-# build with gcc43
-#ApplyPatch linux-2.6-compile-fix-gcc-43.patch
-
 %if !%{nopatches}
 
 ApplyPatch linux-2.6-hotfixes.patch
@@ -1040,6 +1031,8 @@ ApplyPatch linux-2.6-hotfixes.patch
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
+
+ApplyPatch linux-2.6-x86-xen-add-dependencies.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1055,8 +1048,6 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 ### NOT (YET) UPSTREAM:
 # The EHCI ISO patch isn't yet upstream but is needed to fix reboot
 #ApplyPatch linux-2.6-ps3-ehci-iso.patch
-# Fixes some wireless optical mice
-#ApplyPatch linux-2.6-ms-wireless-receiver.patch
 # The storage alias patch is Fedora-local, and allows the old 'ps3_storage'
 # module name to work on upgrades. Otherwise, I believe mkinitrd will fail
 # to pull the module in,
@@ -1121,8 +1112,6 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 #
 # fix cpqarray pci enable
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
-# fix vmware emulated scsi controller
-#ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 
 # ALSA
 
@@ -1149,9 +1138,9 @@ ApplyPatch linux-2.6-silence-noise.patch
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
 # Fix the SELinux mprotect checks on executable mappings
-#ApplyPatch linux-2.6-selinux-mprotect-checks.patch
+ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
-#ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
+ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
 # Use UTF-8 by default on VFAT.
@@ -1159,8 +1148,6 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# wake up links that have been put to sleep by BIOS (#436099)
-ApplyPatch linux-2.6-libata-force-hardreset-in-sleep-mode.patch
 
 # wireless patches headed for 2.6.27
 #ApplyPatch linux-2.6-wireless.patch
@@ -1172,9 +1159,6 @@ ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
-
-# implement smarter atime updates support.
-#ApplyPatch linux-2.6-smarter-relatime.patch
 
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
@@ -1191,7 +1175,6 @@ ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-ApplyPatch linux-2.6-sata-eeepc-faster.patch
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 
 # atl1e & atl2 network drivers
@@ -1218,6 +1201,8 @@ ApplyPatch linux-2.6-piix3-silence-quirk.patch
 ApplyPatch linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
+# it's... it's ALIVE!
+ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -1792,6 +1777,41 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Sep 29 2008 Adam Jackson <ajax@redhat.com>
+- Kill the useless "Kernel alive" early_printk()'s
+
+* Sun Sep 28 2008 Chuck Ebbert <cebbert@redhat.com>
+- make XEN__SAVE_RESTORE denpend on XEN
+
+* Fri Sep 26 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc7-git5
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc7-git4
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- Disable the BT_HCIUSB driver.
+  It sucks more power than BT_HCIBTUSB which has the same functionality.
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- Change some more netfilter bits we always load to be built-ins.
+
+* Thu Sep 25 2008 Peter Jones <pjones@redhat.com>
+- Remove i8042 "No controller found." noise.
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- Disable noisy ALSA debug spew.
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- Disable building kdump kernels for ppc64 for now.
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- Drop a bunch of unused/old patches.
+  Rediff & Reapply PPC32/Sparc SELinux mprotect patches.
+
+* Thu Sep 25 2008 Dave Jones <davej@redhat.com>
+- Drop duplicated eeepc sata patch.
+
 * Wed Sep 24 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc7-git3
 
