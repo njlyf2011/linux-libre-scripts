@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.990 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.993 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
-%define gitrev 5
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -520,7 +520,6 @@ Source53: config-powerpc64
 Source54: config-powerpc64-kdump
 
 Source60: config-ia64-generic
-Source61: config-ia64
 
 Source70: config-s390x
 
@@ -1777,6 +1776,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Sep 29 2008 Roland McGrath <roland@redhat.com>
+- 2.6.27-rc8
+
+* Mon Sep 29 2008 Dave Jones <davej@redhat.com>
+- Turn off CONFIG_USB_DEBUG. It's noisy, and of no real value right now.
+
+* Mon Sep 29 2008 Dave Jones <davej@redhat.com>
+- Kill of config-ia64. for real this time.
+
 * Mon Sep 29 2008 Adam Jackson <ajax@redhat.com>
 - Kill the useless "Kernel alive" early_printk()'s
 
