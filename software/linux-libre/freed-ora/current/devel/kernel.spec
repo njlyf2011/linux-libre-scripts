@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.993 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.995 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1778,6 +1778,9 @@ fi
 %changelog
 * Mon Sep 29 2008 Roland McGrath <roland@redhat.com>
 - 2.6.27-rc8
+- utrace update
+  - fix CLONE_PTRACE (#461552)
+  - fix PTRACE_O_TRACEVFORK (#464520)
 
 * Mon Sep 29 2008 Dave Jones <davej@redhat.com>
 - Turn off CONFIG_USB_DEBUG. It's noisy, and of no real value right now.
