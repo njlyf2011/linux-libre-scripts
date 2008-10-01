@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.995 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.999 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -121,7 +121,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -1776,6 +1776,21 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Sep 30 2008 Dave Jones <davej@redhat.com>
+- Disable debugging options in default builds. Enable kernel-debug.
+
+* Tue Sep 30 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc8-git1
+
+* Tue Sep 30 2008 Dave Airlie <airlied@redhat.com>
+- drm modesetting - radeon add some fixes
+
+* Tue Sep 30 2008 Jeremy Katz <katzj@redhat.com>
+- update to squashfs 3.4
+
+* Mon Sep 29 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.370.rc8
+- Deblobbed 2.6.27-rc8.
+
 * Mon Sep 29 2008 Roland McGrath <roland@redhat.com>
 - 2.6.27-rc8
 - utrace update
