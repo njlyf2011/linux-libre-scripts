@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.1003 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1005 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 3
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -644,6 +644,9 @@ Patch2200: linux-2.6-firewire-git-update.patch
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
+# Add fips_enable flag
+Patch2400: linux-2.6-crypto-fips_enable.patch
+
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
@@ -1081,6 +1084,9 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+
+# Add the ability to turn FIPS-compliant mode on or off at boot
+ApplyPatch linux-2.6-crypto-fips_enable.patch
 
 # ACPI
 
@@ -1778,6 +1784,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Oct 02 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc8-git4
+
+* Thu Oct 02 2008 Dave Jones <davej@redhat.com>
+- Add the ability to turn FIPS-compliant mode on or off at boot.
+
 * Thu Oct 02 2008 Kyle McMartin <kyle@redhat.com>
 - Linux 2.6.27-rc8-git3
 - Re-enable e1000e driver, corruption prevention fix is upstream
