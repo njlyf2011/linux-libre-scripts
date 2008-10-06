@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.1005 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1014 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -44,11 +44,19 @@ Summary: The Linux kernel
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
-# Do we have a 2.6.21.y update to apply?
+
+# Do we have a -stable update to apply?
 %define stable_update 0
+# Is it a -stable RC?
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
+%define stable_base %{stable_update}
+%if 0%{?stable_rc}
+# stable RCs are incremental patches, so we need the previous stable patch
+%define stable_base %(expr %{stable_base} - 1)
+%endif
 %endif
 %define rpmversion 2.6.%{base_sublevel}%{?stablerev}
 
@@ -59,7 +67,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 4
+%define gitrev 7
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -129,8 +137,15 @@ Summary: The Linux kernel
 
 # pkg_release is what we'll fill in for the rpm Release: field
 %if 0%{?released_kernel}
-%define pkg_release %{fedora_build}%{?buildid}%{?dist}%{?libres}
+
+%if 0%{?stable_rc}
+%define stable_rctag .rc%{stable_rc}
+%endif
+%define pkg_release %{fedora_build}%{?stable_rctag}%{?buildid}%{?dist}%{?libres}
+
 %else
+
+# non-released_kernel
 %if 0%{?rcrev}
 %define rctag .rc%rcrev
 %endif
@@ -141,6 +156,7 @@ Summary: The Linux kernel
 %endif
 %endif
 %define pkg_release 0.%{fedora_build}%{?rctag}%{?gittag}%{?buildid}%{?dist}%{?libres}
+
 %endif
 
 # The kernel tarball/base version
@@ -530,7 +546,14 @@ Source91: config-sparc64-smp
 
 # For a stable release kernel
 %if 0%{?stable_update}
-Patch00: patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
+%if 0%{?stable_base}
+%define    stable_patch_00  patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_base}.bz2
+Patch00: %{stable_patch_00}
+%endif
+%if 0%{?stable_rc}
+%define    stable_patch_01  patch%{?rcrevlibre}-2.6.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
+Patch01: %{stable_patch_01}
+%endif
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
@@ -600,6 +623,7 @@ Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-dell-keyboard-keyup.patch
+Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -900,10 +924,6 @@ ApplyPatch()
 # Update to latest upstream.
 %if 0%{?released_kernel}
 %define vanillaversion 2.6.%{base_sublevel}
-# released_kernel with stable_update available case
-%if 0%{?stable_update}
-%define vanillaversion 2.6.%{base_sublevel}.%{stable_update}
-%endif
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
@@ -947,11 +967,7 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
 
 # Update vanilla to the latest upstream.
-# released_kernel with stable_update available case
-%if 0%{?stable_update}
-ApplyPatch patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
-# non-released_kernel case
-%else
+# (non-released_kernel case only)
 %if 0%{?rcrev}
 ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
@@ -961,7 +977,6 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
 ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
-%endif
 %endif
 %endif
 
@@ -983,6 +998,14 @@ fi
 cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
 
 cd linux-%{kversion}.%{_target_cpu}
+
+# released_kernel with possible stable updates
+%if 0%{?stable_base}
+ApplyPatch %{stable_patch_00}
+%endif
+%if 0%{?stable_rc}
+ApplyPatch %{stable_patch_01}
+%endif
 
 %if %{using_upstream_branch}
 ### BRANCH APPLY ###
@@ -1012,7 +1035,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-#ApplyPatch git-linus.diff
+ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1134,6 +1157,8 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # Dell can't make keyboards
 ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
+# kill annoying applesmc debug messages
+ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1400,6 +1425,9 @@ hwcap 0 nosegneg"
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
+%ifarch ppc
+    cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%endif
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
@@ -1408,7 +1436,9 @@ hwcap 0 nosegneg"
     pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     ln -s $asmdir asm
     popd
-
+    if [ -d arch/%{_arch}/include ]; then
+      cp -a --parents arch/%{_arch}/include  $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
@@ -1784,6 +1814,34 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Oct 04 2008 Chuck Ebbert <cebbert@redhat.com>
+- Update to the latest git (2 patches.)
+
+* Sat Oct 04 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.27-rc8-git7
+
+* Sat Oct 04 2008 Chuck Ebbert <cebbert@redhat.com>
+- Make applesmc driver stop spewing messages. (#463756)
+
+* Sat Oct 04 2008 Chuck Ebbert <cebbert@redhat.com>
+- Support building -stable RC kernels.
+
+* Sat Oct 04 2008 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.27-rc8-git6
+
+* Fri Oct 03 2008 Dave Jones <davej@redhat.com>
+- Demodularise some of the devicemapper modules that always get loaded.
+
+* Fri Oct 03 2008 David Woodhouse <David.Woodhouse@intel.com>
+- Include arch/$ARCH/include/ directories in kernel-devel (#465486)
+- Include arch/powerpc/lib/crtsavres.[So] too (#464613)
+
+* Fri Oct 03 2008 Chuck Ebbert <cebbert@redhat.com>
+- specfile: don't use the latest stable update for the vanilla directory.
+
+* Fri Oct 03 2008 Kyle McMartin <kyle@redhat.com>
+- 2.6.27-rc8-git5
+
 * Thu Oct 02 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc8-git4
 
