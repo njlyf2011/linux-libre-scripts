@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.1016 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1021 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -65,9 +65,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 9
 # The git snapshot level
-%define gitrev 7
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -579,14 +579,18 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 Patch02: git-linus.diff
 
 # we always need nonintconfig, even for -vanilla kernels
-Patch06: linux-2.6-build-nonintconfig.patch
+Patch03: linux-2.6-build-nonintconfig.patch
 
 # we also need compile fixes for -vanilla
-Patch07: linux-2.6-compile-fixes.patch
+Patch04: linux-2.6-compile-fixes.patch
 
 %if !%{nopatches}
 
-Patch10: linux-2.6-hotfixes.patch
+# Git trees.
+Patch5: git-cpufreq.patch
+
+# Standalone patches
+Patch20: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
@@ -635,12 +639,14 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
 Patch682: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
+Patch683: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6-lirc.patch
+Patch1520: linux-2.6-hdpvr.patch
 
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
@@ -1035,7 +1041,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-ApplyPatch git-linus.diff
+#ApplyPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1051,6 +1057,8 @@ ApplyPatch linux-2.6-compile-fixes.patch
 fi
 
 %if !%{nopatches}
+
+ApplyPatch git-cpufreq.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1187,6 +1195,8 @@ ApplyPatch linux-2.6-ata-quirk.patch
 
 # fix spot's iwlwifi, hopefully...
 ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
+# make jarod's iwl4965 not panic near N APs, hopefully
+ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1199,6 +1209,8 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6-lirc.patch
+# http://hg.jannau.net/hdpvr/
+ApplyPatch linux-2.6-hdpvr.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1814,6 +1826,23 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Oct 06 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc9
+
+* Mon Oct 06 2008 Dave Jones <davej@redhat.com>
+- Add cpufreq.git bits queued for 2.6.28.
+
+* Mon Oct 06 2008 Jarod Wilson <jarod@redhat.com>
+- Add driver for Hauppauge HD PVR
+
+* Mon Oct 06 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc8-git8
+
+* Mon Oct 06 2008 Jarod Wilson <jarod@redhat.com>
+- Don't BUG_ON when iwl4695 gets packets in the wrong queue,
+  just WARN. Slight leak w/kerneloops report is better than
+  simply panicking, Intel working on root-cause (#457154).
+
 * Mon Oct 06 2008 Dave Airlie <airlied@redhat.com>
 - drm-modesetting-radeon.patch - fix drm mode header + Xv alignment issue
 
