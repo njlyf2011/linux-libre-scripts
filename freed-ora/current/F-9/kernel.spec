@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.774 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.781 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -44,11 +44,19 @@ Summary: The Linux kernel
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
-# Do we have a 2.6.21.y update to apply?
+
+# Do we have a -stable update to apply?
 %define stable_update 5
+# Is it a -stable RC?
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
+%define stable_base %{stable_update}
+%if 0%{?stable_rc}
+# stable RCs are incremental patches, so we need the previous stable patch
+%define stable_base %(expr %{stable_base} - 1)
+%endif
 %endif
 %define rpmversion 2.6.%{base_sublevel}%{?stablerev}
 
@@ -125,8 +133,15 @@ Summary: The Linux kernel
 
 # pkg_release is what we'll fill in for the rpm Release: field
 %if 0%{?released_kernel}
-%define pkg_release %{fedora_build}%{?buildid}%{?dist}%{?libres}
+
+%if 0%{?stable_rc}
+%define stable_rctag .rc%{stable_rc}
+%endif
+%define pkg_release %{fedora_build}%{?stable_rctag}%{?buildid}%{?dist}%{?libres}
+
 %else
+
+# non-released_kernel
 %if 0%{?rcrev}
 %define rctag .rc%rcrev
 %endif
@@ -137,6 +152,7 @@ Summary: The Linux kernel
 %endif
 %endif
 %define pkg_release 0.%{fedora_build}%{?rctag}%{?gittag}%{?buildid}%{?dist}%{?libres}
+
 %endif
 
 # The kernel tarball/base version
@@ -547,7 +563,14 @@ Source92: config-sparc64-smp
 
 # For a stable release kernel
 %if 0%{?stable_update}
-Patch00: patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
+%if 0%{?stable_base}
+%define    stable_patch_00  patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_base}.bz2
+Patch00: %{stable_patch_00}
+%endif
+%if 0%{?stable_rc}
+%define    stable_patch_01  patch%{?rcrevlibre}-2.6.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
+Patch01: %{stable_patch_01}
+%endif
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
@@ -569,9 +592,6 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 %if %{using_upstream_branch}
 ### BRANCH PATCH ###
 %endif
-
-# stable release candidate
-#Patch03: patch-2.6.26.4-rc1
 
 # we always need nonintconfig, even for -vanilla kernels
 Patch06: linux-2.6-build-nonintconfig.patch
@@ -611,6 +631,8 @@ Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
+Patch101: linux-2.6-x86-check-for-null-irq-context.patch
+Patch102: linux-2.6-x86-cpu-hotplug-allow-setting-additional-cpus.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
@@ -720,6 +742,11 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 Patch2700: linux-2.6-intel-msr-backport.patch
 Patch2701: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 Patch2703: linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
+
+# for kerneloops reports
+Patch2800: linux-2.6-net-print-module-name-as-part-of-the-message.patch
+Patch2801: linux-2.6-warn-add-WARN-macro.patch
+Patch2802: linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1023,9 +1050,12 @@ cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
 
 cd linux-%{kversion}.%{_target_cpu}
 
-# released_kernel with stable_update available case
-%if 0%{?stable_update}
-ApplyPatch patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_update}.bz2
+# released_kernel with possible stable updates
+%if 0%{?stable_base}
+ApplyPatch %{stable_patch_00}
+%endif
+%if 0%{?stable_rc}
+ApplyPatch %{stable_patch_01}
 %endif
 
 %if %{using_upstream_branch}
@@ -1055,9 +1085,6 @@ make -f %{SOURCE20} VERSION=%{version} configs
     rm $i.tmp
   done
 %endif
-
-# stable release candidate
-#ApplyPatch patch-2.6.26.4-rc1
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1123,6 +1150,10 @@ ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 # fix e820 reservation checking
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
+# don't oops if there's no IRQ stack available
+ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
+# add config option to disable adding CPUs after boot
+ApplyPatch linux-2.6-x86-cpu-hotplug-allow-setting-additional-cpus.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
@@ -1345,7 +1376,11 @@ ApplyPatch linux-2.6-intel-msr-backport.patch
 ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 # fix subtle but annoying PCMCIA bug
 ApplyPatch linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
-# ---------- below all scheduled for 2.6.24 -----------------
+
+# for kerneloops reports
+ApplyPatch linux-2.6-net-print-module-name-as-part-of-the-message.patch
+ApplyPatch linux-2.6-warn-add-WARN-macro.patch
+ApplyPatch linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1936,6 +1971,29 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Oct 06 2008 John W. Linville <linville@redhat.com> 2.6.26.5-54
+- Re-revert at76_usb to version from before attempted mac80211 port
+
+* Mon Oct 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-53
+- Add missing WARN() macro.
+
+* Fri Oct 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-52
+- Disable the snd-aw2 module: it conflicts with video drivers. (#462919)
+
+* Fri Oct 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-51
+- Support building -stable RC kernels.
+  Kernel versioning example: 2.6.26.6-52.rc1.fc9
+
+* Wed Oct 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-50
+- Add config option to disallow adding CPUs after booting.
+
+* Mon Sep 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-49
+- Don't oops if no IRQ stack is available (#461846)
+
+* Mon Sep 29 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-48
+- Two patches to help make kerneloops bug reports more useful.
+  (requested by Arjan)
+
 * Tue Sep 23 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.5-47
 - two more wireless fixes from John
    p54: Fix regression due to "net: Delete NETDEVICES_MULTIQUEUE kconfig option
