@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.538 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.541 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -668,6 +668,7 @@ Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch640: linux-2.6-defaults-pci_no_msi.patch
 
 Patch670: linux-2.6-ata-quirk.patch
+Patch671: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
 Patch674: linux-2.6-sata-eeepc-faster.patch
 Patch675: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 Patch676: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
@@ -716,6 +717,8 @@ Patch1802: nouveau-drm.patch
 # Updated firewire stack from linux1394 git
 Patch1910: linux-2.6-firewire-git-update.patch
 #Patch1911: linux-2.6-firewire-git-pending.patch
+
+Patch2703: linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 
 %endif
 
@@ -1229,6 +1232,8 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # eepc short cable quirk
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
+# fix it821x
+ApplyPatch linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
 # don't use ahci for pata_marvell adapters
 ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 # fix drivers making wrong assumptions about what dma values mean
@@ -1319,9 +1324,8 @@ ApplyPatch linux-2.6-lirc.patch
 ApplyPatch linux-2.6-firewire-git-update.patch
 #ApplyPatch linux-2.6-firewire-git-pending.patch
 
-# ---------- below all scheduled for 2.6.25 -----------------
-
-# SELinux perf patches
+# fix subtle but annoying PCMCIA bug
+ApplyPatch linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1917,6 +1921,15 @@ fi
 
 
 %changelog
+* Mon Oct 06 2008 John W. Linville <linville@redhat.com> 2.6.26.5-31
+- Re-revert at76_usb to version from before attempted mac80211 port
+
+* Mon Sep 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-30
+- pcmcia: Fix broken abuse of dev->driver_data (F9#462178)
+
+* Mon Sep 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-29
+- Copy forgotten libata patch from F9.
+
 * Sat Sep 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-28
 - pci: three patches to disable PCIe ASPM on old devices/systems (F9#462210)
 
