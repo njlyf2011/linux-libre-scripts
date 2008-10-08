@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.1021 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1029 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -67,7 +67,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 9
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -584,10 +584,13 @@ Patch03: linux-2.6-build-nonintconfig.patch
 # we also need compile fixes for -vanilla
 Patch04: linux-2.6-compile-fixes.patch
 
+# build tweak for build ID magic, even for -vanilla
+Patch05: linux-2.6-makefile-after_link.patch
+
 %if !%{nopatches}
 
 # Git trees.
-Patch5: git-cpufreq.patch
+Patch10: git-cpufreq.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -623,6 +626,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
+Patch410: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -667,6 +671,9 @@ Patch2011: linux-2.6-eeepc-laptop-update.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+
+# Fix DEBUG_SHIRQ problem in tulip driver.  (454575)
+Patch2030: linux-2.6-net-tulip-interrupt.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1048,6 +1055,8 @@ make -f %{SOURCE20} VERSION=%{version} configs
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+ApplyPatch linux-2.6-makefile-after_link.patch
+
 #
 # misc small stuff to make things compile
 #
@@ -1149,6 +1158,8 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 #
 # fix cpqarray pci enable
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
+# Work around VMWares busted mptfusion emulation again.
+ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 
 # ALSA
 
@@ -1222,6 +1233,8 @@ ApplyPatch linux-2.6-eeepc-laptop-update.patch
 
 # atl1e & atl2 network drivers
 ApplyPatch linux-2.6-netdev-atl2.patch
+
+ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
@@ -1308,9 +1321,8 @@ cd ..
 # in the stripped object, but repeating debugedit is a no-op.  We do it
 # beforehand to get the proper final build ID bits into the embedded image.
 # This affects the vDSO images in vmlinux, and the vmlinux image in bzImage.
-idhack='cmd_objcopy=$(if $(filter -S,$(OBJCOPYFLAGS)),'\
-'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug -i $<";)'\
-'$(OBJCOPY) $(OBJCOPYFLAGS) $(OBJCOPYFLAGS_$(@F)) $< $@'
+export AFTER_LINK=\
+'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug -i $@"'
 %endif
 
 cp_vmlinux()
@@ -1358,8 +1370,7 @@ BuildKernel() {
     echo USING ARCH=$Arch
 
     make -s ARCH=$Arch %{oldconfig_target} > /dev/null
-    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} \
-    	 ${idhack+"$idhack"}
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
     make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
@@ -1826,6 +1837,30 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Oct 08 2008 Dave Jones <davej@redhat.com>
+- Reenable a bunch of PPC config options that broke earlier.
+
+* Wed Oct 08 2008 Dave Jones <davej@redhat.com>
+- Fix DEBUG_SHIRQ problem in tulip driver.  (#454575)
+
+* Wed Oct 08 2008 Dave Jones <davej@redhat.com>
+- Work around VMWares busted mptfusion emulation again. (#466071)
+
+* Wed Oct 08 2008 Dave Airlie <airlied@redhat.com>
+- radeon - hopefully fix suspend/resume - reenable HW migration
+
+* Tue Oct 07 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc9-git1
+
+* Tue Oct  7 2008 Roland McGrath <roland@redhat.com>
+- Fix build ID fiddling magic. (#465873)
+
+* Mon Oct 06 2008 Eric Sandeen <sandeen@redhat.com>
+- Turn stack overflow debugging back on for x86
+
+* Mon Oct 06 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.398.rc9
+- Deblobbed 2.6.27-rc9.
+
 * Mon Oct 06 2008 Dave Jones <davej@redhat.com>
 - 2.6.27-rc9
 
