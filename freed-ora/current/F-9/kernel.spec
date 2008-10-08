@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.781 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.784 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -46,16 +46,16 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
 %define stable_base %{stable_update}
 %if 0%{?stable_rc}
 # stable RCs are incremental patches, so we need the previous stable patch
-%define stable_base %(expr %{stable_base} - 1)
+%define stable_base %(expr %{stable_update} - 1)
 %endif
 %endif
 %define rpmversion 2.6.%{base_sublevel}%{?stablerev}
@@ -600,6 +600,9 @@ Patch06: linux-2.6-build-nonintconfig.patch
 Patch07: linux-2.6-compile-fixes.patch
 Patch08: linux-2.6-compile-fix-gcc-43.patch
 
+# build tweak for build ID magic, even for -vanilla
+Patch05: linux-2.6-makefile-after_link.patch
+
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
@@ -614,22 +617,11 @@ Patch22: linux-2.6-utrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
-Patch43: linux-2.6-sched-fix-process-time-monotonicity.patch
 
 Patch70: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
-Patch88: linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
-Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
-Patch90: linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
-Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
-Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
-Patch93: linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
-Patch94: linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
-Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
-Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
-Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
 Patch102: linux-2.6-x86-cpu-hotplug-allow-setting-additional-cpus.patch
@@ -661,7 +653,6 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # filesystem patches
 Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
@@ -700,13 +691,11 @@ Patch699: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
-Patch800: linux-2.6-acpi-processor-use-signed-int.patch
 Patch810: linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
 Patch820: linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
 Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
 
-Patch900: linux-2.6-mm-dirty-page-tracking-race-fix.patch
-Patch901: linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
+#mm
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
@@ -732,7 +721,6 @@ Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-Patch2301: linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 Patch2501: linux-2.6-ppc-use-libgcc.patch
 
@@ -741,12 +729,12 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 Patch2700: linux-2.6-intel-msr-backport.patch
 Patch2701: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
-Patch2703: linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 
 # for kerneloops reports
 Patch2800: linux-2.6-net-print-module-name-as-part-of-the-message.patch
 Patch2801: linux-2.6-warn-add-WARN-macro.patch
 Patch2802: linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
+Patch2803: linux-2.6-warn-rename-WARN-to-WARNING.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1091,6 +1079,8 @@ make -f %{SOURCE20} VERSION=%{version} configs
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+ApplyPatch linux-2.6-makefile-after_link.patch
+
 #
 # misc small stuff to make things compile
 #
@@ -1121,7 +1111,6 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # fix sched clock monotonicity bugs
 ApplyPatch linux-2.6-sched-clock-fix-nohz-interaction.patch
-ApplyPatch linux-2.6-sched-fix-process-time-monotonicity.patch
 
 # Architecture patches
 # x86(-64)
@@ -1129,25 +1118,8 @@ ApplyPatch linux-2.6-sched-fix-process-time-monotonicity.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
-#
-ApplyPatch linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
-# x86 f00f bug not handled properly (#197455)
-ApplyPatch linux-2.6-x86-fdiv-bug-detection-fix.patch
-# another machine needing io_delay=0xed
-ApplyPatch linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
-# oprofile / hibernation fix
-ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
-#
-ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
-#
-ApplyPatch linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
 # hpet fixes from 2.6.27
-ApplyPatch linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
-ApplyPatch linux-2.6-x86-hpet-02-read-back-compare-register.patch
-ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
-# fix memmap=exactmap, so kdump kernels work
-ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 # fix e820 reservation checking
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 # don't oops if there's no IRQ stack available
@@ -1202,22 +1174,14 @@ ApplyPatch linux-2.6-execshield.patch
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# fix USB on the PS3
-ApplyPatch linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 # ACPI
-# obvious bug in processor driver
-ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
 # fix cpuidle misbehavior
 ApplyPatch linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
 ApplyPatch linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
 ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
 
 # mm
-# possible data corruption, esp. on ppc
-ApplyPatch linux-2.6-mm-dirty-page-tracking-race-fix.patch
-# mm zone scan patch scheduled for -stable
-ApplyPatch linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1253,8 +1217,6 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # block/bio
 #
-# don't discard barrier flags
-ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # Filesystem patches.
 # cifs
@@ -1374,13 +1336,12 @@ ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 ApplyPatch linux-2.6-intel-msr-backport.patch
 ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
-# fix subtle but annoying PCMCIA bug
-ApplyPatch linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 
 # for kerneloops reports
 ApplyPatch linux-2.6-net-print-module-name-as-part-of-the-message.patch
 ApplyPatch linux-2.6-warn-add-WARN-macro.patch
 ApplyPatch linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
+ApplyPatch linux-2.6-warn-rename-WARN-to-WARNING.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1454,9 +1415,8 @@ cd xen
 # in the stripped object, but repeating debugedit is a no-op.  We do it
 # beforehand to get the proper final build ID bits into the embedded image.
 # This affects the vDSO images in vmlinux, and the vmlinux image in bzImage.
-idhack='cmd_objcopy=$(if $(filter -S,$(OBJCOPYFLAGS)),'\
-'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug -i $<";)'\
-'$(OBJCOPY) $(OBJCOPYFLAGS) $(OBJCOPYFLAGS_$(@F)) $< $@'
+export AFTER_LINK=\
+'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug -i $@"'
 %endif
 
 cp_vmlinux()
@@ -1504,8 +1464,7 @@ BuildKernel() {
     echo USING ARCH=$Arch
 
     make -s ARCH=$Arch %{oldconfig_target} > /dev/null
-    make -s ARCH=$Arch %{?_smp_mflags} $MakeTarget %{?sparse_mflags} \
-    	 ${idhack+"$idhack"}
+    make -s ARCH=$Arch %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
     make -s ARCH=$Arch %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
@@ -1971,6 +1930,33 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Oct  7 2008 Roland McGrath <roland@redhat.com> 2.6.26.6-57.rc1
+- Fix build ID fiddling magic. (#465873)
+
+* Tue Oct 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-56.rc1
+- 2.6.26.6-rc1
+  Dropped patches:
+    linux-2.6-sched-fix-process-time-monotonicity.patch
+    linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
+    linux-2.6-x86-fdiv-bug-detection-fix.patch
+    linux-2.6-x86-io-delay-add-hp-f700-quirk.patch
+    linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
+    linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
+    linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
+    linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
+    linux-2.6-x86-hpet-02-read-back-compare-register.patch
+    linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
+    linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
+    linux-2.6-usb-fix-hcd-interrupt-disabling.patch
+    linux-2.6-acpi-processor-use-signed-int.patch
+    linux-2.6-mm-dirty-page-tracking-race-fix.patch
+    linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
+    linux-2.6-block-submit_bh-discards-barrier-flag.patch
+    linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
+
+* Mon Oct 06 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-55
+- Fix more fallout from the WARN() macro.
+
 * Mon Oct 06 2008 John W. Linville <linville@redhat.com> 2.6.26.5-54
 - Re-revert at76_usb to version from before attempted mac80211 port
 
