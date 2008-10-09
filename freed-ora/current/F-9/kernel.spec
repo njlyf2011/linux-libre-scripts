@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.784 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.788 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -30,7 +30,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 6
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -624,7 +624,7 @@ Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
-Patch102: linux-2.6-x86-cpu-hotplug-allow-setting-additional-cpus.patch
+Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
@@ -707,6 +707,9 @@ Patch1801: drm-fedora9-rollup.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 Patch2001: linux-2.6-netdev-e1000e-fix-drv-load-issues-amt.patch
+
+# write protect e1000e nvm
+Patch2002: linux-2.6-e1000e-write-protect-nvm.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -1125,7 +1128,7 @@ ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
 # add config option to disable adding CPUs after boot
-ApplyPatch linux-2.6-x86-cpu-hotplug-allow-setting-additional-cpus.patch
+ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
@@ -1308,6 +1311,7 @@ ApplyPatch linux-2.6-lirc.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-netdev-e1000e-fix-drv-load-issues-amt.patch
+ApplyPatch linux-2.6-e1000e-write-protect-nvm.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-netdev-atl1e.patch
@@ -1525,6 +1529,9 @@ BuildKernel() {
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
+%ifarch ppc
+    cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%endif
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video asm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
@@ -1542,6 +1549,9 @@ BuildKernel() {
     cp -a xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
 %endif
 
+    if [ -d arch/%{_arch}/include ]; then
+      cp -a --parents arch/%{_arch}/include  $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
@@ -1930,6 +1940,20 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Oct 09 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.6-61
+- add e1000e: write protect nvram to prevent corruption patch from upstream
+
+* Thu Oct 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-60
+- x86: switch to UP mode when only one CPU is present at boot time
+
+* Thu Oct 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-59
+- 2.6.26.6
+
+* Wed Oct 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-58.rc1
+- Copy dwmw2's build fixes from rawhide:
+    Include arch/$ARCH/include/ directories in kernel-devel (F10#465486)
+    Include arch/powerpc/lib/crtsavres.[So] too (#464613)
+
 * Tue Oct  7 2008 Roland McGrath <roland@redhat.com> 2.6.26.6-57.rc1
 - Fix build ID fiddling magic. (#465873)
 
