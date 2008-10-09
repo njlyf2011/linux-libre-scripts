@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.26.tar.bz2.sign/-1.1/dummy timestamp//
 /patch-2.6.27-rc9.bz2.sign/-1.1/Tue Oct  7 01:06:31 2008//Tkernel-2_6_27-0_398_rc9_fc10
-/.cvsignore/1.944/dummy timestamp from new-entry+Wed Oct  8 10:19:41 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-0_406_rc9_git1_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /Makefile/1.82/Tue Sep 30 04:04:12 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
@@ -15,7 +14,6 @@ D/scripts////
 /config-ia64-generic/1.18/Mon Sep 29 17:20:47 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /config-nodebug/1.22/Wed Oct  1 08:48:18 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /config-powerpc-generic/1.26/Wed Oct  8 20:20:26 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
-/config-powerpc32-generic/1.23/Wed Oct  8 20:20:26 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /config-powerpc32-smp/1.2/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /config-powerpc64/1.23/Wed Oct  8 20:20:26 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /config-powerpc64-kdump/1.1/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
@@ -110,6 +108,8 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /nvidia-agp.patch/1.1/Wed Oct  1 08:55:37 2008/-kb/Tkernel-2_6_27-0_406_rc9_git1_fc10
 /patch-2.6.27-rc9-git1.bz2.sign/1.1/Wed Oct  8 00:39:43 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
-/sources/1.906/dummy timestamp from new-entry+Wed Oct  8 10:19:37 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
-/upstream/1.818/dummy timestamp from new-entry+Wed Oct  8 10:19:33 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27-0_406_rc9_git1_fc10
+/.cvsignore/1.944/Thu Oct  9 05:12:00 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
+/sources/1.906/Thu Oct  9 05:12:01 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
+/upstream/1.818/Thu Oct  9 05:12:02 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
+/config-powerpc32-generic/1.25/Thu Oct  9 05:12:09 2008//Tkernel-2_6_27-0_406_rc9_git1_fc10
