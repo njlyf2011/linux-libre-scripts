@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.547 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.549 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -607,6 +607,7 @@ Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch99: linux-2.6-x86-intel-msr-backport.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+Patch103: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
@@ -698,6 +699,10 @@ Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.pa
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# uvc video buffer overflow
+Patch1310: linux-2.6-uvcvideo-return-sensible-min-max-values.patch
+Patch1311: linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
+Patch1312: linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
 
 Patch1400: linux-2.6-smarter-relatime.patch
 
@@ -1079,6 +1084,8 @@ ApplyPatch linux-2.6-x86-intel-msr-backport.patch
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 # switch to UP mode with only 1 CPU present at boot
 ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+# fix oops in get_wchan()
+ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
@@ -1278,6 +1285,10 @@ ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.p
 # USB
 # respect the 'nousb' boot option
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# uvcvideo buffer overflow
+ApplyPatch linux-2.6-uvcvideo-return-sensible-min-max-values.patch
+ApplyPatch linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
+ApplyPatch linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
 
 # ISDN
 
@@ -1895,6 +1906,12 @@ fi
 
 
 %changelog
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-39
+- Fix buffer overflow in uvcvideo driver.
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-38
+- Fix possible oops in get_wchan()
+
 * Thu Oct 09 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.6-37
 - add e1000e: write protect nvram to prevent corruption patch from upstream
 
