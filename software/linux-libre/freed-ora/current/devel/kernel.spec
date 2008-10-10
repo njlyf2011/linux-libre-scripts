@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1037 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1039 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -602,6 +602,7 @@ Patch23: linux-2.6-x86-xen-add-dependencies.patch
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
 Patch43: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -658,6 +659,7 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
+Patch1810: drm-next.patch
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
@@ -1097,6 +1099,8 @@ ApplyPatch linux-2.6-sysrq-c.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # detect single CPU present at boot properly
 ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+# don't oops in get_wchan()
+ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 #
 # PowerPC
@@ -1259,6 +1263,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 # Nouveau DRM + drm fixes
+ApplyPatch drm-next.patch
 ApplyPatch nvidia-agp.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-modesetting-i915.patch
@@ -1859,6 +1864,16 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Oct 10 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.3
+- Adjusted intel modesetting patch for deblobbed kernel.
+
+* Fri Oct 10 2008 Dave Airlie <airlied@redhat.com>
+- rebase drm patches onto drm-next.patch which is going upstream
+- intel modesetting make not work properly due to rebase
+
+* Thu Oct 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27-2
+- Fix possible oops in get_wchan()
+
 * Thu Oct 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
 - Deblobbed 2.6.27.
 
