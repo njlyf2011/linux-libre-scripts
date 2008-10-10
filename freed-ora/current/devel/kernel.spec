@@ -3,7 +3,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 0
+%define released_kernel 1
 
 # Versions of various parts
 
@@ -20,21 +20,21 @@ Summary: The Linux kernel
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.1031 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin 1036
+%define fedora_build %(R="$Revision: 1.1037 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 26
+%define base_sublevel 27
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 2
+#define librev
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre2
+%define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -65,9 +65,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 9
+%define rcrev 0
 # The git snapshot level
-%define gitrev 1
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -601,6 +601,7 @@ Patch23: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-x86-tune-generic.patch
+Patch43: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -626,7 +627,6 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
-Patch410: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -651,6 +651,10 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
+
+# Fix the return code CD accesses when the CDROM drive door is closed
+# but the drive isn't yet ready.
+Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
@@ -700,6 +704,9 @@ Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 # ext4 fun - new & improved, now with less dev!
 Patch2900: percpu_counter_sum_cleanup.patch
 Patch2901: ext4-patch-queue.patch
+
+# Fix for xfs wrongly disabling barriers
+Patch2902: xfs-barrier-fix.patch
 
 %endif
 
@@ -1088,6 +1095,8 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # Compile 686 kernels tuned for Pentium4.
 ApplyPatch linux-2.6-x86-tune-generic.patch
+# detect single CPU present at boot properly
+ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 
 #
 # PowerPC
@@ -1130,6 +1139,8 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 ApplyPatch percpu_counter_sum_cleanup.patch
 # Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
 ApplyPatch ext4-patch-queue.patch
+# xfs
+ApplyPatch xfs-barrier-fix.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1167,8 +1178,6 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 #
 # fix cpqarray pci enable
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
-# Work around VMWares busted mptfusion emulation again.
-ApplyPatch linux-2.6-scsi-mpt-vmware-fix.patch
 
 # ALSA
 
@@ -1231,6 +1240,10 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 ApplyPatch linux-2.6-lirc.patch
 # http://hg.jannau.net/hdpvr/
 ApplyPatch linux-2.6-hdpvr.patch
+
+# Fix the return code CD accesses when the CDROM drive door is closed
+# but the drive isn't yet ready.
+ApplyPatch linux-2.6-cdrom-door-status.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1846,7 +1859,29 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Thu Oct 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.408.rc9.git1
+* Thu Oct 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+- Deblobbed 2.6.27.
+
+* Thu Oct 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.27
+
+* Thu Oct 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.27-rc9-git2
+
+* Thu Oct 09 2008 Chuck Ebbert <cebbert@redhat.com>
+- x86: switch to UP mode when only one CPU is present at boot time
+
+* Thu Oct 09 2008 Peter Jones <pjones@redhat.com>
+- Fix the return code CD accesses when the CDROM drive door is closed
+  but the drive isn't yet ready.
+
+* Thu Oct 09 2008 Eric Sandeen <sandeen@redhat.com>
+- Fix for xfs wrongly disabling barriers while running.
+
+* Wed Oct 08 2008 Dave Jones <davej@redhat.com>
+- The mptfusion/vmware patch isn't needed after all. (#466071)
+
+* Wed Oct 08 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.408.rc9.git1 Oct 09
 - Updated to 2.6.26-libre2 baseline, and 2.6.27-rc9 patch to match.
 
 * Wed Oct 08 2008 Eric Sandeen <sandeen@redhat.com>
