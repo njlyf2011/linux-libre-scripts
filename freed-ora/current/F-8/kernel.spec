@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.541 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.547 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -576,6 +576,12 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # -stable RC
 #Patch02: patch-2.6.26.4-rc1
 
+# build tweak for build ID magic, even for -vanilla
+Patch05: linux-2.6-makefile-after_link.patch
+
+# we always need nonintconfig, even for -vanilla kernels
+Patch06: linux-2.6-build-nonintconfig.patch
+
 # we also need compile fixes for -vanilla
 Patch07: linux-2.6-compile-fixes.patch
 Patch08: linux-2.6-compile-fix-gcc-43.patch
@@ -583,7 +589,7 @@ Patch08: linux-2.6-compile-fix-gcc-43.patch
 %if !%{nopatches}
 
 # revert upstream changes we get from elsewhere
-Patch05: linux-2.6-upstream-reverts.patch
+Patch09: linux-2.6-upstream-reverts.patch
 # patches queued for the next -stable release
 #Patch11: linux-2.6-stable-queue.patch
 
@@ -593,23 +599,14 @@ Patch22: linux-2.6-utrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
-Patch43: linux-2.6-sched-fix-process-time-monotonicity.patch
 
 Patch60: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
-Patch88: linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
-Patch89: linux-2.6-x86-fdiv-bug-detection-fix.patch
-Patch91: linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
-Patch92: linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
-Patch93: linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
-Patch94: linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
-Patch95: linux-2.6-x86-hpet-02-read-back-compare-register.patch
-Patch96: linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
-Patch98: linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 Patch99: linux-2.6-x86-intel-msr-backport.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
+Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
@@ -626,7 +623,6 @@ Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch148: linux-2.6-powerpc-zImage-32MiB.patch
 
-Patch150: linux-2.6-build-nonintconfig.patch
 Patch160: linux-2.6-execshield.patch
 Patch170: linux-2.6-modsign-mpilib.patch
 Patch180: linux-2.6-modsign-crypto.patch
@@ -646,7 +642,6 @@ Patch370: linux-2.6-crash-driver.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-Patch412: linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # filesystem patches
 Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
@@ -687,6 +682,7 @@ Patch692: linux-2.6-cfg80211-extras.patch
 
 Patch720: linux-2.6-e1000-corrupt-eeprom-checksum.patch
 Patch721: linux-2.6-netdev-e1000-disable-alpm.patch
+Patch722: linux-2.6-e1000e-write-protect-nvm.patch
 Patch725: linux-2.6-netdev-atl2.patch
 Patch726: linux-2.6-netdev-atl1e.patch
 Patch727: linux-2.6-e1000-ich9.patch
@@ -694,18 +690,14 @@ Patch728: linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
 Patch729: linux-2.6-netdev-e1000e-fix-drv-load-issues-amt.patch
 
 #ACPI
-Patch800: linux-2.6-acpi-processor-use-signed-int.patch
 Patch810: linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
 Patch820: linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
 Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
 
-Patch900: linux-2.6-mm-dirty-page-tracking-race-fix.patch
-Patch901: linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 
 Patch1308: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-Patch1309: linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 Patch1400: linux-2.6-smarter-relatime.patch
 
@@ -718,7 +710,6 @@ Patch1802: nouveau-drm.patch
 Patch1910: linux-2.6-firewire-git-update.patch
 #Patch1911: linux-2.6-firewire-git-pending.patch
 
-Patch2703: linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 
 %endif
 
@@ -1036,6 +1027,8 @@ ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 # builds (as used in the buildsystem).
 ApplyPatch linux-2.6-build-nonintconfig.patch
 
+ApplyPatch linux-2.6-makefile-after_link.patch
+
 #
 # misc small stuff to make things compile
 #
@@ -1060,8 +1053,6 @@ ApplyPatch linux-2.6-utrace.patch
 
 # block/bio
 #
-# don't discard barrier flags
-ApplyPatch linux-2.6-block-submit_bh-discards-barrier-flag.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
@@ -1070,7 +1061,6 @@ ApplyPatch nouveau-drm.patch
 ApplyPatch linux-2.6-sysrq-c.patch
 # fix sched clock monotonicity bugs
 ApplyPatch linux-2.6-sched-clock-fix-nohz-interaction.patch
-ApplyPatch linux-2.6-sched-fix-process-time-monotonicity.patch
 
 # Architecture patches
 # IA64
@@ -1081,27 +1071,14 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 #ApplyPatch linux-2.6-x86-debug-boot.patch
 # dump *PIC state at boot with apic=debug
 ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
-#
-ApplyPatch linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
-# x86 f00f bug not handled properly (#197455)
-ApplyPatch linux-2.6-x86-fdiv-bug-detection-fix.patch
-# oprofile / hibernation fix
-ApplyPatch linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
-# fix failure to disable local apic on AMD c1e-enabled machines
-ApplyPatch linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
-#
-ApplyPatch linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
 # hpet fixes from 2.6.27
-ApplyPatch linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
-ApplyPatch linux-2.6-x86-hpet-02-read-back-compare-register.patch
-ApplyPatch linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
 ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
-# fix memmap=exactmap, so kdump kernels work
-ApplyPatch linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
 # backport MSR patch
 ApplyPatch linux-2.6-x86-intel-msr-backport.patch
 # fix e820 reservation checking
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
+# switch to UP mode with only 1 CPU present at boot
+ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
@@ -1275,6 +1252,8 @@ ApplyPatch linux-2.6-cfg80211-extras.patch
 ApplyPatch linux-2.6-e1000-corrupt-eeprom-checksum.patch
 # disable link power savings, should fix bad eeprom checksum too
 ApplyPatch linux-2.6-netdev-e1000-disable-alpm.patch
+# e1000e: write protect nvram to avoid corruption
+ApplyPatch linux-2.6-e1000e-write-protect-nvm.patch
 # make new ich9 e1000 work
 ApplyPatch linux-2.6-e1000-ich9.patch
 # add atl2 network driver for eeepc
@@ -1285,18 +1264,12 @@ ApplyPatch linux-2.6-netdev-atl1e.patch
 ApplyPatch linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
 
 # ACPI/PM patches
-# fix obvious thinko
-ApplyPatch linux-2.6-acpi-processor-use-signed-int.patch
 # fix cpuidle misbehavior
 ApplyPatch linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
 ApplyPatch linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
 ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
 
 # mm
-# possible data corruption, esp. on ppc
-ApplyPatch linux-2.6-mm-dirty-page-tracking-race-fix.patch
-# mm zone scan patch scheduled for -stable
-ApplyPatch linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
 
 # dm / md
 
@@ -1305,8 +1278,6 @@ ApplyPatch linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
 # USB
 # respect the 'nousb' boot option
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# fix USB on the PS3
-ApplyPatch linux-2.6-usb-fix-hcd-interrupt-disabling.patch
 
 # ISDN
 
@@ -1323,9 +1294,6 @@ ApplyPatch linux-2.6-lirc.patch
 # snap from http://me.in-berlin.de/~s5r6/linux1394/updates/
 ApplyPatch linux-2.6-firewire-git-update.patch
 #ApplyPatch linux-2.6-firewire-git-pending.patch
-
-# fix subtle but annoying PCMCIA bug
-ApplyPatch linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1517,6 +1485,9 @@ BuildKernel() {
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
+%ifarch ppc
+    cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%endif
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video asm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
@@ -1534,6 +1505,9 @@ BuildKernel() {
     cp -a xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
 %endif
 
+    if [ -d arch/%{_arch}/include ]; then
+      cp -a --parents arch/%{_arch}/include  $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
@@ -1921,6 +1895,46 @@ fi
 
 
 %changelog
+* Thu Oct 09 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.6-37
+- add e1000e: write protect nvram to prevent corruption patch from upstream
+
+* Thu Oct 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-36
+- x86: switch to UP mode when only one CPU is present at boot time
+
+* Thu Oct 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-35
+- 2.6.26.6
+  Dropped patches:
+    linux-2.6-sched-fix-process-time-monotonicity.patch
+    linux-2.6-x86-64-fix-overlap-of-modules-and-fixmap-areas.patch
+    linux-2.6-x86-fdiv-bug-detection-fix.patch
+    linux-2.6-x86-fix-oprofile-and-hibernation-issues.patch
+    linux-2.6-x86-32-amd-c1e-force-timer-broadcast-late.patch
+    linux-2.6-x86-pat-proper-tracking-of-set_memory_uc.patch
+    linux-2.6-x86-hpet-01-fix-moronic-32-64-bit-thinko.patch
+    linux-2.6-x86-hpet-02-read-back-compare-register.patch
+    linux-2.6-x86-hpet-03-make-minimum-reprogramming-delta-useful.patch
+    linux-2.6-x86-fix-memmap-exactmap-boot-argument.patch
+    linux-2.6-usb-fix-hcd-interrupt-disabling.patch
+    linux-2.6-acpi-processor-use-signed-int.patch
+    linux-2.6-mm-dirty-page-tracking-race-fix.patch
+    linux-2.6-mm-mark-correct-zone-full-when-scanning-zonelists.patch
+    linux-2.6-block-submit_bh-discards-barrier-flag.patch
+    linux-2.6-pcmcia-fix-broken-abuse-of-dev-driver_data.patch
+  Reverted from upstream:
+    rt2x00-use-ieee80211_hw-workqueue-again.patch
+
+* Wed Oct 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-34
+- Disable the snd-aw2 module: it conflicts with video drivers. (F9#462919)
+
+* Wed Oct 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-33
+- Copy dwmw2's build fixes from rawhide:
+    Include arch/$ARCH/include/ directories in kernel-devel (F10#465486)
+    Include arch/powerpc/lib/crtsavres.[So] too (F9#464613)
+
+* Wed Oct 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.5-32
+- Fix build ID fiddling magic. (F9#465873)
+- Move build-nonintconfig patch so it gets included in -vanilla.
+
 * Mon Oct 06 2008 John W. Linville <linville@redhat.com> 2.6.26.5-31
 - Re-revert at76_usb to version from before attempted mac80211 port
 
