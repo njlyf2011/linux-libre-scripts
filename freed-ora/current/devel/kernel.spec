@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 623
-%define fedora_build %(R="$Revision: 1.1029 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1031 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -30,11 +30,11 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre
+%define rcrevlibre -libre2
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -55,7 +55,7 @@ Summary: The Linux kernel
 %define stable_base %{stable_update}
 %if 0%{?stable_rc}
 # stable RCs are incremental patches, so we need the previous stable patch
-%define stable_base %(expr %{stable_base} - 1)
+%define stable_base %(expr %{stable_update} - 1)
 %endif
 %endif
 %define rpmversion 2.6.%{base_sublevel}%{?stablerev}
@@ -697,6 +697,10 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 # it's... it's ALIVE!
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 
+# ext4 fun - new & improved, now with less dev!
+Patch2900: percpu_counter_sum_cleanup.patch
+Patch2901: ext4-patch-queue.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1121,6 +1125,11 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 #
 # bugfixes to drivers and filesystems
 #
+
+# This is in -mm, acked by peterz, needed by ext4
+ApplyPatch percpu_counter_sum_cleanup.patch
+# Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
+ApplyPatch ext4-patch-queue.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1837,6 +1846,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Oct 09 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.408.rc9.git1
+- Updated to 2.6.26-libre2 baseline, and 2.6.27-rc9 patch to match.
+
+* Wed Oct 08 2008 Eric Sandeen <sandeen@redhat.com>
+- Add in latest ext4 patch queue - rename to ext4 as well.
+
 * Wed Oct 08 2008 Dave Jones <davej@redhat.com>
 - Reenable a bunch of PPC config options that broke earlier.
 
@@ -1856,7 +1871,7 @@ fi
 - Fix build ID fiddling magic. (#465873)
 
 * Mon Oct 06 2008 Eric Sandeen <sandeen@redhat.com>
-- Turn stack overflow debugging back on for x86
+- Turn stack overflow debugging back on for x86.
 
 * Mon Oct 06 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.398.rc9
 - Deblobbed 2.6.27-rc9.
