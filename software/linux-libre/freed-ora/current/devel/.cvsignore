@@ -7,5 +7,5 @@ deblob-2.6.26
 deblob-check
 kernel-2.6.26
 linux-2.6.26-libre2.*
-patch-libre-2.6.27-rc9.*
+patch-libre2-2.6.27-rc9.*
 patch-2.6.27-rc9-git1.bz2
