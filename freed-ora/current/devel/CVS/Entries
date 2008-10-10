@@ -1,6 +1,5 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Fri Oct 10 00:26:03 2008//Tkernel-2_6_27-1_fc10
-/.cvsignore/1.946/dummy timestamp from new-entry+Fri Oct 10 01:47:24 2008//Tkernel-2_6_27-3_fc10
 /COPYING.modules/1.5/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_27-3_fc10
 /Config.mk/1.4/Sun Apr 27 23:43:36 2008//Tkernel-2_6_27-3_fc10
 /Makefile/1.83/Fri Oct 10 01:45:58 2008//Tkernel-2_6_27-3_fc10
@@ -113,7 +112,8 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27-3_fc10
 /nvidia-agp.patch/1.1/Wed Oct  1 08:55:37 2008/-kb/Tkernel-2_6_27-3_fc10
 /percpu_counter_sum_cleanup.patch/1.1/Wed Oct  8 22:27:33 2008/-kb/Tkernel-2_6_27-3_fc10
-/sources/1.908/dummy timestamp from new-entry//Tkernel-2_6_27-3_fc10
-/upstream/1.820/dummy timestamp from new-entry+Fri Oct 10 01:46:45 2008//Tkernel-2_6_27-3_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27-3_fc10
 /xfs-barrier-fix.patch/1.1/Thu Oct  9 15:44:21 2008/-kb/Tkernel-2_6_27-3_fc10
+/.cvsignore/1.946/Fri Oct 10 13:03:15 2008//Tkernel-2_6_27-3_fc10
+/sources/1.908/Fri Oct 10 13:03:16 2008//Tkernel-2_6_27-3_fc10
+/upstream/1.820/Fri Oct 10 13:03:17 2008//Tkernel-2_6_27-3_fc10
