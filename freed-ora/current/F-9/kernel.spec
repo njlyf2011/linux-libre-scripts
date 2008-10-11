@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.788 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.794 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -625,10 +625,13 @@ Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
 Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+Patch103: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+Patch104: linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
 Patch122: linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
+Patch123: linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -658,6 +661,7 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
 Patch422: linux-2.6-fs-cifs-fix-plaintext-authentication.patch
+Patch423: linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 
@@ -724,6 +728,10 @@ Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# uvc video buffer overflow
+Patch2301: linux-2.6-uvcvideo-return-sensible-min-max-values.patch
+Patch2302: linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
+Patch2303: linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
 
 Patch2501: linux-2.6-ppc-use-libgcc.patch
 
@@ -1129,11 +1137,17 @@ ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
 # add config option to disable adding CPUs after boot
 ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+# fix oops in get_wchan()
+ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+# reserve first device vector on x86-32
+ApplyPatch linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 ApplyPatch linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
 ApplyPatch linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
+# check range on pci mmap
+ApplyPatch linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
 
 #
 # PowerPC
@@ -1177,6 +1191,10 @@ ApplyPatch linux-2.6-execshield.patch
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# uvcvideo buffer overflow
+ApplyPatch linux-2.6-uvcvideo-return-sensible-min-max-values.patch
+ApplyPatch linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
+ApplyPatch linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
 
 # ACPI
 # fix cpuidle misbehavior
@@ -1228,6 +1246,8 @@ ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 ApplyPatch linux-2.6-squashfs.patch
 # fix CIFS plaintext passwords
 ApplyPatch linux-2.6-fs-cifs-fix-plaintext-authentication.patch
+# don't allow splice to files opened with O_APPEND
+ApplyPatch linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
 
 # Networking
 # Disable easy to trigger printk's.
@@ -1940,6 +1960,24 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-67
+- libata: pata_marvell: use the upstream patch for playing nice with ahci
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-66
+- x86: Reserve FIRST_DEVICE_VECTOR in used_vectors bitmap.
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-65
+- pci: check range on sysfs mmapped resources
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-64
+- Don't allow splice to files opened with O_APPEND.
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-63
+- Fix buffer overflow in uvcvideo driver.
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-62
+- Fix possible oops in get_wchan()
+
 * Thu Oct 09 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.6-61
 - add e1000e: write protect nvram to prevent corruption patch from upstream
 
