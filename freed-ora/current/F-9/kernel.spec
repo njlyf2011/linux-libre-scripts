@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.794 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.795 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -746,6 +746,10 @@ Patch2800: linux-2.6-net-print-module-name-as-part-of-the-message.patch
 Patch2801: linux-2.6-warn-add-WARN-macro.patch
 Patch2802: linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
 Patch2803: linux-2.6-warn-rename-WARN-to-WARNING.patch
+
+# backported version of http://git.kernel.org/?p=linux/kernel/git/davem/sparc-2.6.git;a=commitdiff;h=73ccefab8a6590bb3d5b44c046010139108ab7ca
+# needed to build sparc64 kernel
+Patch2900: linux-sparc-tracehook-syscall.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1367,6 +1371,8 @@ ApplyPatch linux-2.6-warn-add-WARN-macro.patch
 ApplyPatch linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
 ApplyPatch linux-2.6-warn-rename-WARN-to-WARNING.patch
 
+# backport syscall tracing to use the new tracehook.h entry points.
+ApplyPatch linux-sparc-tracehook-syscall.patch
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1960,6 +1966,11 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sat Oct 11 2008 Dennis Gilmore <dennis@ausil.us> 2.6.26.6-68
+- disable atl1e on sparc64
+- backport syscall tracing to use the new tracehook.h entry points on sparc64
+- syscall tracing patch is already upstream in 2.6.27
+
 * Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-67
 - libata: pata_marvell: use the upstream patch for playing nice with ahci
 
