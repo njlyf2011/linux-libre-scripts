@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.795 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.798 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -627,6 +627,8 @@ Patch101: linux-2.6-x86-check-for-null-irq-context.patch
 Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 Patch103: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 Patch104: linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
+Patch105: linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
+Patch106: linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
@@ -677,10 +679,13 @@ Patch610: linux-2.6-defaults-fat-utf8.patch
 # libata
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
-Patch674: linux-2.6-sata-eeepc-faster.patch
-Patch675: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
-Patch676: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
-Patch677: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+Patch672: linux-2.6-sata-eeepc-faster.patch
+Patch673: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
+Patch674: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
+Patch675: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+Patch676: linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
+Patch677: linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
+Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1145,6 +1150,10 @@ ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 # reserve first device vector on x86-32
 ApplyPatch linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
+#
+ApplyPatch linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
+# fix boot on some broken HP notebooks (nx6...)
+ApplyPatch linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
@@ -1292,6 +1301,11 @@ ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
 # libata breaks lba28 rules
 ApplyPatch linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+# fix libata error handling
+ApplyPatch linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
+ApplyPatch linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
+# disable swncq on sata_nv
+ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 
 # wireless patches headed for 2.6.26
 #ApplyPatch linux-2.6-wireless.patch
@@ -1966,6 +1980,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Oct 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-71
+- Fix namespace clash in ATI timer patch.
+
+* Mon Oct 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-70
+- x86, early_ioremap: fix fencepost error
+- x86: SB450: skip IRQ0 override if it is not routed to INT2 of IOAPIC
+
+* Mon Oct 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-69
+- libata: always do follow-up SRST if hardreset returned -EAGAIN
+- libata: fix EH action overwriting in ata_eh_reset()
+- libata: sata_nv: SWNCQ should be disabled by default (#463034)
+
 * Sat Oct 11 2008 Dennis Gilmore <dennis@ausil.us> 2.6.26.6-68
 - disable atl1e on sparc64
 - backport syscall tracing to use the new tracehook.h entry points on sparc64
