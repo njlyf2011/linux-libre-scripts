@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1039 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1047 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -510,7 +510,6 @@ Source3: deblob-main
 Source4: deblob-%{kversion}
 Source5: deblob-check
 
-Source10: COPYING.modules
 Source11: genkey
 Source14: find-provides
 Source15: merge.pl
@@ -520,7 +519,6 @@ Source21: config-debug
 Source22: config-nodebug
 Source23: config-generic
 Source24: config-rhel-generic
-Source25: config-rhel-x86-generic
 
 Source30: config-x86-generic
 Source31: config-i586
@@ -600,7 +598,6 @@ Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
-Patch42: linux-2.6-x86-tune-generic.patch
 Patch43: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
@@ -614,7 +611,6 @@ Patch149: linux-2.6-efika-not-chrp.patch
 
 Patch160: linux-2.6-execshield.patch
 Patch161: linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
-Patch162: linux-2.6-xen-execshield-fix-endless-gpf-fault-loop.patch
 Patch163: linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
@@ -641,10 +637,9 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
 Patch670: linux-2.6-ata-quirk.patch
 
-Patch680: linux-2.6-wireless.patch
-Patch681: linux-2.6-wireless-pending.patch
-Patch682: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
-Patch683: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+#Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
+Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+Patch682: linux-2.6-mac80211-debugfs-stable-fix.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -659,6 +654,7 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
+Patch1801: linux-2.6-agp-intel-cantiga-fix.patch
 Patch1810: drm-next.patch
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-modesetting-i915.patch
@@ -704,11 +700,12 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 
 # ext4 fun - new & improved, now with less dev!
-Patch2900: percpu_counter_sum_cleanup.patch
-Patch2901: ext4-patch-queue.patch
+Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
+Patch2901: linux-2.6.27-fs-disable-fiemap.patch
 
-# Fix for xfs wrongly disabling barriers
-Patch2902: xfs-barrier-fix.patch
+# Fix for xfs wrongly disabling barriers and remount problems
+Patch2902: linux-2.6.27-xfs-barrier-fix.patch
+Patch2903: linux-2.6.27-xfs-remount-fix.patch
 
 %endif
 
@@ -1052,13 +1049,6 @@ make -f %{SOURCE20} VERSION=%{version} configs
     ./merge.pl config-rhel-generic $i.tmp > $i
     rm $i.tmp
   done
-  for i in kernel-%{version}-{i586,i686,i686-PAE,x86_64}*.config
-  do
-    echo i is this file  $i
-    mv $i $i.tmp
-    ./merge.pl config-rhel-x86-generic $i.tmp > $i
-    rm $i.tmp
-  done
 %endif
 
 #ApplyPatch git-linus.diff
@@ -1095,8 +1085,6 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
-# Compile 686 kernels tuned for Pentium4.
-ApplyPatch linux-2.6-x86-tune-generic.patch
 # detect single CPU present at boot properly
 ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 # don't oops in get_wchan()
@@ -1132,19 +1120,21 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 #
 ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
-ApplyPatch linux-2.6-xen-execshield-fix-endless-gpf-fault-loop.patch
+
 ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 
 #
 # bugfixes to drivers and filesystems
 #
 
-# This is in -mm, acked by peterz, needed by ext4
-ApplyPatch percpu_counter_sum_cleanup.patch
 # Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
-ApplyPatch ext4-patch-queue.patch
+ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
+# Disable fiemap until it is really truly upstream & released
+ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
+
 # xfs
-ApplyPatch xfs-barrier-fix.patch
+ApplyPatch linux-2.6.27-xfs-barrier-fix.patch
+ApplyPatch linux-2.6.27-xfs-remount-fix.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1221,15 +1211,12 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# wireless patches headed for 2.6.27
-#ApplyPatch linux-2.6-wireless.patch
-# wireless patches headed for 2.6.28
-#ApplyPatch linux-2.6-wireless-pending.patch
-
 # fix spot's iwlwifi, hopefully...
-ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
+#ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 # make jarod's iwl4965 not panic near N APs, hopefully
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+# -stable fix for mac80211 debugf-related panics
+ApplyPatch linux-2.6-mac80211-debugfs-stable-fix.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1263,8 +1250,9 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next.patch
 ApplyPatch nvidia-agp.patch
+ApplyPatch linux-2.6-agp-intel-cantiga-fix.patch
+ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
@@ -1296,8 +1284,6 @@ ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 # Any further pre-build tree manipulations happen here.
 
 chmod +x scripts/checkpatch.pl
-
-cp %{SOURCE10} Documentation/
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -1864,6 +1850,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Oct 15 2008 Dave Airlie <airlied@redhat.com>
+- fix cantiga hopefully.
+
+* Tue Oct 14 2008 Kyle McMartin <kyle@redhat.com>
+- nuke iwlwifi-use-dma_alloc_coherent.patch, should be fixed properly now.
+
+* Mon Oct 13 2008 John W. Linville <linville@redhat.com>
+- -stable fix for mac80211 debugf-related panics
+
+* Mon Oct 13 2008 Eric Sandeen <sandeen@redhat.com>
+- Add fix for xfs root mount failure when some options are used.
+- Update to upstream ext4 code destined for 2.6.28.
+
 * Fri Oct 10 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.3
 - Adjusted intel modesetting patch for deblobbed kernel.
 
