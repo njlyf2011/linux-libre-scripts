@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.798 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.801 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -614,6 +614,7 @@ Patch10: linux-2.6-hotfixes.patch
 Patch20: linux-2.6-ptrace-cleanup.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
+Patch23: linux-2.6-kernel-doc-structs-private.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
@@ -1125,6 +1126,7 @@ fi
 ApplyPatch linux-2.6-ptrace-cleanup.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6-kernel-doc-structs-private.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1980,6 +1982,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Oct 14 2008 Roland McGrath <roland@redhat.com> 2.6.26.6-74
+- utrace update
+
 * Mon Oct 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-71
 - Fix namespace clash in ATI timer patch.
 
