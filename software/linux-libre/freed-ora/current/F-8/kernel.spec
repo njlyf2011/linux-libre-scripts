@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.549 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.556 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -608,10 +608,14 @@ Patch99: linux-2.6-x86-intel-msr-backport.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 Patch103: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+Patch104: linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
+Patch105: linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
+Patch106: linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
 
 Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
 Patch122: linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
+Patch123: linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
 
 #ALSA
 
@@ -648,6 +652,7 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
 Patch422: linux-2.6-fs-cifs-fix-plaintext-authentication.patch
+Patch423: linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
 Patch424: linux-2.6-gfs-locking-exports.patch
 Patch425: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -665,11 +670,14 @@ Patch640: linux-2.6-defaults-pci_no_msi.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
-Patch674: linux-2.6-sata-eeepc-faster.patch
-Patch675: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
-Patch676: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
-Patch677: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
-Patch678: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
+Patch672: linux-2.6-sata-eeepc-faster.patch
+Patch673: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
+Patch674: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
+Patch675: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+Patch676: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
+Patch677: linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
+Patch678: linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
+Patch679: linux-2.6-libata-sata_nv-disable-swncq.patch
 
 Patch680: linux-2.6-wireless.patch
 Patch681: linux-2.6-wireless-pending.patch
@@ -1086,11 +1094,19 @@ ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 # fix oops in get_wchan()
 ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+# reserve first device vector on x86-32
+ApplyPatch linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
+#
+ApplyPatch linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
+# fix boot on some broken HP notebooks (nx6...)
+ApplyPatch linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
 
 # disable ASPM on devices that don't support it
 ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
 ApplyPatch linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
 ApplyPatch linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
+# check range on pci mmap
+ApplyPatch linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
 
 #
 # PowerPC
@@ -1174,6 +1190,8 @@ ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 ApplyPatch linux-2.6-squashfs.patch
 # fix CIFS plaintext passwords
 ApplyPatch linux-2.6-fs-cifs-fix-plaintext-authentication.patch
+# don't allow splice to files opened with O_APPEND
+ApplyPatch linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
 # export symbols for gfs2 locking modules
 ApplyPatch linux-2.6-gfs-locking-exports.patch
 # fix nfs mount hang
@@ -1226,6 +1244,11 @@ ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
 ApplyPatch linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
 # kill warn_on reported by kerneloops
 ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
+# fix libata error handling
+ApplyPatch linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
+ApplyPatch linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
+# disable swncq on sata_nv
+ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 
 # wireless
 #
@@ -1906,6 +1929,32 @@ fi
 
 
 %changelog
+* Tue Oct 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-46
+- Fix pci mmap range checking to work without the WARN() macro.
+
+* Tue Oct 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-45
+- Two x86 fixes from F9:
+  x86, early_ioremap: fix fencepost error
+  x86: SB450: skip IRQ0 override if it is not routed to INT2 of IOAPIC
+
+* Tue Oct 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-44
+- Three libata fixes from F9:
+  libata: always do follow-up SRST if hardreset returned -EAGAIN
+  libata: fix EH action overwriting in ata_eh_reset()
+  libata: sata_nv: SWNCQ should be disabled by default (#463034)
+
+* Mon Oct 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-43
+- x86: Reserve FIRST_DEVICE_VECTOR in used_vectors bitmap.
+
+* Mon Oct 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-42
+- libata: pata_marvell: use the upstream patch for playing nice with ahci
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-41
+- pci: check range on sysfs mmapped resources
+
+* Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-40
+- Don't allow splice to files opened with O_APPEND.
+
 * Fri Oct 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-39
 - Fix buffer overflow in uvcvideo driver.
 
