@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1047 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1049 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1851,7 +1851,13 @@ fi
 
 %changelog
 * Wed Oct 15 2008 Dave Airlie <airlied@redhat.com>
+- radeon modesetting agp support
+
+* Wed Oct 15 2008 Dave Airlie <airlied@redhat.com>
 - fix cantiga hopefully.
+
+* Tue Oct 14 2008 Roland McGrath <roland@redhat.com>
+- utrace update
 
 * Tue Oct 14 2008 Kyle McMartin <kyle@redhat.com>
 - nuke iwlwifi-use-dma_alloc_coherent.patch, should be fixed properly now.
