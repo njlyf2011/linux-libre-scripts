@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1052 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1055 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -46,7 +46,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -1859,6 +1859,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Oct 16 2008 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.27.1
+
+* Thu Oct 16 2008 Eric Sandeen <sandeen@redhat.com>
+- ext4 updates from stable patch queue
+
+* Wed Oct 15 2008 Dave Airlie <airlied@redhat.com>
+- radeon-modesetting - fix rs48x
+
 * Wed Oct 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27-16
 - Disable FTRACE; DYNAMIC_FTRACE will be marked broken in 2.6.27.1
   (without dynamic ftrace the overhead is noticeable.)
