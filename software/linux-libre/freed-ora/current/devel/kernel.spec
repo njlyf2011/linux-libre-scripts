@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1049 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1052 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -595,7 +595,9 @@ Patch20: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
-Patch23: linux-2.6-x86-xen-add-dependencies.patch
+Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+
+Patch30: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch43: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
@@ -706,6 +708,9 @@ Patch2901: linux-2.6.27-fs-disable-fiemap.patch
 # Fix for xfs wrongly disabling barriers and remount problems
 Patch2902: linux-2.6.27-xfs-barrier-fix.patch
 Patch2903: linux-2.6.27-xfs-remount-fix.patch
+
+# cciss sysfs links are broken
+Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
 %endif
 
@@ -1077,6 +1082,7 @@ ApplyPatch linux-2.6-hotfixes.patch
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
+ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 ApplyPatch linux-2.6-x86-xen-add-dependencies.patch
 
@@ -1235,6 +1241,9 @@ ApplyPatch linux-2.6-hdpvr.patch
 # Fix the return code CD accesses when the CDROM drive door is closed
 # but the drive isn't yet ready.
 ApplyPatch linux-2.6-cdrom-door-status.patch
+
+# fix sysfs links for the cciss driver
+ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1850,6 +1859,16 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Oct 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27-16
+- Disable FTRACE; DYNAMIC_FTRACE will be marked broken in 2.6.27.1
+  (without dynamic ftrace the overhead is noticeable.)
+
+* Wed Oct 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27-15
+- Fix cciss sysfs links. (#466181)
+
+* Wed Oct 15 2008 Roland McGrath <roland@redhat.com> 2.6.27-14
+- fix x86 syscall_get_arguments() order
+
 * Wed Oct 15 2008 Dave Airlie <airlied@redhat.com>
 - radeon modesetting agp support
 
