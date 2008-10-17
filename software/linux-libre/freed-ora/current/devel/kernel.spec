@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1055 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1057 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -700,6 +700,8 @@ Patch2801: linux-2.6-quiet-iommu.patch
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 # it's... it's ALIVE!
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
+# hush pci bar allocation failures
+Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
 
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
@@ -711,6 +713,10 @@ Patch2903: linux-2.6.27-xfs-remount-fix.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
+
+# RTC fixes for systems that don't expose the device via PnP
+Patch3010: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+Patch3020: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 %endif
 
@@ -1245,6 +1251,10 @@ ApplyPatch linux-2.6-cdrom-door-status.patch
 # fix sysfs links for the cciss driver
 ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
+# fix RTC on systems with broken PnP
+ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
@@ -1284,7 +1294,8 @@ ApplyPatch linux-2.6-quiet-iommu.patch
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 # it's... it's ALIVE!
 ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
-
+# hush pci bar allocation failures
+ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1859,13 +1870,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Thu Oct 16 2008 Kyle McMartin <kyle@redhat.com>
+* Thu Oct 16 2008 Adam Jackson <ajax@redhat.com> 2.6.27.1-21
+- Don't carp about PCI BAR allocation failures in quiet boot
+
+* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.1-20
+- Fix RTC on systems that don't expose it via PnP (F9#451188)
+
+* Thu Oct 16 2008 Kyle McMartin <kyle@redhat.com> 2.6.27.1-19
 - Linux 2.6.27.1
 
-* Thu Oct 16 2008 Eric Sandeen <sandeen@redhat.com>
+* Thu Oct 16 2008 Eric Sandeen <sandeen@redhat.com> 2.6.27-18
 - ext4 updates from stable patch queue
 
-* Wed Oct 15 2008 Dave Airlie <airlied@redhat.com>
+* Wed Oct 15 2008 Dave Airlie <airlied@redhat.com> 2.6.27-17
 - radeon-modesetting - fix rs48x
 
 * Wed Oct 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27-16
