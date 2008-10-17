@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1057 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1060 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -34,7 +34,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -46,9 +46,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -600,7 +600,6 @@ Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 Patch30: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
-Patch43: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -641,7 +640,6 @@ Patch670: linux-2.6-ata-quirk.patch
 
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
-Patch682: linux-2.6-mac80211-debugfs-stable-fix.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -707,8 +705,7 @@ Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
 Patch2901: linux-2.6.27-fs-disable-fiemap.patch
 
-# Fix for xfs wrongly disabling barriers and remount problems
-Patch2902: linux-2.6.27-xfs-barrier-fix.patch
+# Fix for xfs remount problems
 Patch2903: linux-2.6.27-xfs-remount-fix.patch
 
 # cciss sysfs links are broken
@@ -717,6 +714,9 @@ Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 # RTC fixes for systems that don't expose the device via PnP
 Patch3010: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
 Patch3020: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+
+# Sony Vaio suspend fix
+Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
 
 %endif
 
@@ -1097,8 +1097,6 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
-# detect single CPU present at boot properly
-ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
 # don't oops in get_wchan()
 ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
@@ -1145,7 +1143,6 @@ ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
 ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
 
 # xfs
-ApplyPatch linux-2.6.27-xfs-barrier-fix.patch
 ApplyPatch linux-2.6.27-xfs-remount-fix.patch
 
 # USB
@@ -1227,8 +1224,6 @@ ApplyPatch linux-2.6-ata-quirk.patch
 #ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 # make jarod's iwl4965 not panic near N APs, hopefully
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
-# -stable fix for mac80211 debugf-related panics
-ApplyPatch linux-2.6-mac80211-debugfs-stable-fix.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1285,6 +1280,9 @@ ApplyPatch linux-2.6-firewire-git-update.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
+
+# Sony Vaio suspend fix
+ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
 
 # silence piix3 in quiet boot (ie, qemu)
 ApplyPatch linux-2.6-piix3-silence-quirk.patch
@@ -1870,6 +1868,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Oct 17 2008 Adam Jackson <ajax@redhat.com> 2.6.27.2-23.rc1
+- Fix suspend on newer Vaios
+
+* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.2-22.rc1
+- Linux 2.6.27.2-rc1
+  Dropped patches:
+    linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+    linux-2.6.27-xfs-barrier-fix.patch
+    linux-2.6-mac80211-debugfs-stable-fix.patch
+
+* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.1-22
+- Fix the cciss sysfs links fix.
+
 * Thu Oct 16 2008 Adam Jackson <ajax@redhat.com> 2.6.27.1-21
 - Don't carp about PCI BAR allocation failures in quiet boot
 
