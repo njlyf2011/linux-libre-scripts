@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.556 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.559 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -596,6 +596,8 @@ Patch09: linux-2.6-upstream-reverts.patch
 Patch20: linux-2.6-ptrace-cleanup.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
+Patch23: linux-2.6-kernel-doc-structs-private.patch
+Patch24: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
@@ -718,11 +720,18 @@ Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
 Patch1802: nouveau-drm.patch
+Patch1803: linux-2.6-drm-i915-fix-ioctl-security.patch
 
 # Updated firewire stack from linux1394 git
 Patch1910: linux-2.6-firewire-git-update.patch
 #Patch1911: linux-2.6-firewire-git-pending.patch
 
+# fix RTC
+Patch2900: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+Patch2910: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+
+# fix IOCTL security in sbni driver
+Patch3100: linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
 
 %endif
 
@@ -1061,6 +1070,8 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch linux-2.6-ptrace-cleanup.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6-kernel-doc-structs-private.patch
+ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 # ALSA
 
@@ -1069,6 +1080,7 @@ ApplyPatch linux-2.6-utrace.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nouveau-drm.patch
+ApplyPatch linux-2.6-drm-i915-fix-ioctl-security.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1328,6 +1340,13 @@ ApplyPatch linux-2.6-lirc.patch
 # snap from http://me.in-berlin.de/~s5r6/linux1394/updates/
 ApplyPatch linux-2.6-firewire-git-update.patch
 #ApplyPatch linux-2.6-firewire-git-pending.patch
+
+# fix RTC
+ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+
+# CVE-2008-3525
+ApplyPatch linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1929,6 +1948,17 @@ fi
 
 
 %changelog
+* Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-49
+- Two security patches from F9:
+    Fix IOCTL permission checking in sbni WAN adapter (CVE-2008-3525).
+    DRM: fix ioctl security issue (CVE-2008-3831).
+
+* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-48
+- Fix RTC on systems that don't describe it in PnP (F9#451188)
+
+* Wed Oct 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-47
+- Copy utrace updates from F-9.
+
 * Tue Oct 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-46
 - Fix pci mmap range checking to work without the WARN() macro.
 
