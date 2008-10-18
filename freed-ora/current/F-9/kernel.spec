@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.802 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.806 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -615,6 +615,7 @@ Patch20: linux-2.6-ptrace-cleanup.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-kernel-doc-structs-private.patch
+Patch24: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
@@ -713,6 +714,7 @@ Patch1515: linux-2.6-lirc.patch
 
 # nouveau + drm fixes
 Patch1801: drm-fedora9-rollup.patch
+Patch1802: linux-2.6-drm-i915-fix-ioctl-security.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -753,9 +755,17 @@ Patch2801: linux-2.6-warn-add-WARN-macro.patch
 Patch2802: linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
 Patch2803: linux-2.6-warn-rename-WARN-to-WARNING.patch
 
+# fix RTC
+Patch2900: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+Patch2910: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+
 # backported version of http://git.kernel.org/?p=linux/kernel/git/davem/sparc-2.6.git;a=commitdiff;h=73ccefab8a6590bb3d5b44c046010139108ab7ca
 # needed to build sparc64 kernel
-Patch2900: linux-sparc-tracehook-syscall.patch
+Patch3000: linux-sparc-tracehook-syscall.patch
+
+# fix IOCTL security in sbni driver
+Patch3100: linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1127,6 +1137,7 @@ ApplyPatch linux-2.6-ptrace-cleanup.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-kernel-doc-structs-private.patch
+ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1362,6 +1373,7 @@ ApplyPatch linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-fedora9-rollup.patch
+ApplyPatch linux-2.6-drm-i915-fix-ioctl-security.patch
 
 # ext4dev stable patch queue, slated for 2.6.25
 #ApplyPatch linux-2.6-ext4-stable-queue.patch
@@ -1387,8 +1399,16 @@ ApplyPatch linux-2.6-warn-add-WARN-macro.patch
 ApplyPatch linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
 ApplyPatch linux-2.6-warn-rename-WARN-to-WARNING.patch
 
+# fix RTC
+ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+
 # backport syscall tracing to use the new tracehook.h entry points.
 ApplyPatch linux-sparc-tracehook-syscall.patch
+
+# CVE-2008-3525
+ApplyPatch linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1982,6 +2002,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-79
+- Fix IOCTL permission checking in sbni WAN adapter (CVE-2008-3525).
+
+* Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-78
+- DRM: fix ioctl security issue (CVE-2008-3831).
+
+* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-77
+- Fix RTC on systems that don't describe it in PnP (#451188)
+
+* Wed Oct 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-76
+- Actually apply the syscall_get_arguments() fix.
+
 * Wed Oct 15 2008 Roland McGrath <roland@redhat.com> 2.6.26.6-75
 - fix x86 syscall_get_arguments() order
 
