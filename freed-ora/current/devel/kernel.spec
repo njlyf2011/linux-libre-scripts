@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1060 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1063 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -46,7 +46,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 1
 # Set rpm version accordingly
@@ -587,6 +587,8 @@ Patch05: linux-2.6-makefile-after_link.patch
 
 %if !%{nopatches}
 
+# revert upstream patches we get via other methods
+Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
 
@@ -601,6 +603,7 @@ Patch30: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+Patch45: linux-2.6-x86-acpi-fix-resume-on-64-bit-UP-systems.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -659,6 +662,7 @@ Patch1810: drm-next.patch
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
+Patch1814: linux-2.6.27-drm-i915-fix-ioctl-security.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -704,9 +708,6 @@ Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
 Patch2901: linux-2.6.27-fs-disable-fiemap.patch
-
-# Fix for xfs remount problems
-Patch2903: linux-2.6.27-xfs-remount-fix.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1081,6 +1082,12 @@ fi
 
 %if !%{nopatches}
 
+# revert patches from upstream that conflict or that we get via other means
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-upstream-reverts.patch -R
+fi
+
 ApplyPatch git-cpufreq.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
@@ -1099,6 +1106,8 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # don't oops in get_wchan()
 ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+# fix resume on UP systems with SMP kernel
+ApplyPatch linux-2.6-x86-acpi-fix-resume-on-64-bit-UP-systems.patch
 
 #
 # PowerPC
@@ -1143,7 +1152,6 @@ ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
 ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
 
 # xfs
-ApplyPatch linux-2.6.27-xfs-remount-fix.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1270,6 +1278,7 @@ ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
+ApplyPatch linux-2.6.27-drm-i915-fix-ioctl-security.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1868,10 +1877,21 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Fri Oct 17 2008 Adam Jackson <ajax@redhat.com> 2.6.27.2-23.rc1
+* Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.3-27.rc1
+- Linux 2.6.27.3-rc1
+  Dropped patches:
+    linux-2.6.27-xfs-remount-fix.patch
+
+* Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.2-26.rc1
+- Fix resume on x86_64 UP systems with SMP kernel.
+
+* Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.2-25.rc1
+- DRM: fix ioctl security issue (CVE-2008-3831).
+
+* Fri Oct 17 2008 Adam Jackson <ajax@redhat.com> 2.6.27.2-24.rc1
 - Fix suspend on newer Vaios
 
-* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.2-22.rc1
+* Thu Oct 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.2-23.rc1
 - Linux 2.6.27.2-rc1
   Dropped patches:
     linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
