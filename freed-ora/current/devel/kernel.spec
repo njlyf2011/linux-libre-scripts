@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1063 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1066 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1877,6 +1877,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Oct 20 2008 Dave Airlie <airlied@redhat.com> 
+- radeon: fix VRAM sizing issue
+
+* Mon Oct 20 2008 Dave Airlie <airlied@redhat.com> 
+- radeon: fix writeback + some warning fixes
+
+* Sun Oct 19 2008 Dave Jones <davej@redhat.com>
+- Disable debug printks in the memstick drivers.
+
 * Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.3-27.rc1
 - Linux 2.6.27.3-rc1
   Dropped patches:
