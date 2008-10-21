@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1066 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.1070 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -632,7 +632,7 @@ Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-dell-keyboard-keyup.patch
-Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -662,7 +662,6 @@ Patch1810: drm-next.patch
 Patch1811: drm-modesetting-radeon.patch
 Patch1812: drm-modesetting-i915.patch
 Patch1813: drm-nouveau.patch
-Patch1814: linux-2.6.27-drm-i915-fix-ioctl-security.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -677,6 +676,8 @@ Patch2011: linux-2.6-eeepc-laptop-update.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+# latest upstream r8169 driver
+Patch2021: linux-2.6.27-net-r8169-2.6.28.patch
 
 # Fix DEBUG_SHIRQ problem in tulip driver.  (454575)
 Patch2030: linux-2.6-net-tulip-interrupt.patch
@@ -1206,7 +1207,7 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # Dell can't make keyboards
 ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 # kill annoying applesmc debug messages
-ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1266,8 +1267,10 @@ ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 
-# atl1e & atl2 network drivers
+# atl2 network driver
 ApplyPatch linux-2.6-netdev-atl2.patch
+# update r8169 to latest upstream
+ApplyPatch linux-2.6.27-net-r8169-2.6.28.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1276,9 +1279,8 @@ ApplyPatch nvidia-agp.patch
 ApplyPatch linux-2.6-agp-intel-cantiga-fix.patch
 ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
-ApplyPatch drm-modesetting-i915.patch
+#ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
-ApplyPatch linux-2.6.27-drm-i915-fix-ioctl-security.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1480,17 +1482,20 @@ hwcap 0 nosegneg"
     rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cp .config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
-    if [ -d arch/%{_arch}/scripts ]; then
-      cp -a arch/%{_arch}/scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch} || :
+    if [ -d arch/$Arch/scripts ]; then
+      cp -a arch/$Arch/scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch} || :
     fi
-    if [ -f arch/%{_arch}/*lds ]; then
-      cp -a arch/%{_arch}/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
+    if [ -f arch/$Arch/*lds ]; then
+      cp -a arch/$Arch/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
 %ifarch ppc
     cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
+    if [ -d arch/$Arch/include ]; then
+      cp -a --parents arch/$Arch/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
     cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
@@ -1499,9 +1504,6 @@ hwcap 0 nosegneg"
     pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     ln -s $asmdir asm
     popd
-    if [ -d arch/%{_arch}/include ]; then
-      cp -a --parents arch/%{_arch}/include  $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    fi
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
@@ -1877,6 +1879,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Oct 21 2008 Dave Airlie <airlied@redhat.com>
+- rebase to drm-next from upstream for GEM fixes.
+- drop intel modesetting for now - broken by rebase
+
+* Mon Oct 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.3-33.rc1
+- Update applesmc hwmon driver to what is upstream for 2.6.28.
+
+* Mon Oct 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.3-32.rc1
+- Update r8169 network driver to what is upstream for 2.6.28.
+
+* Mon Oct 20 2008 David Woodhouse <David.Woodhouse@intel.com>
+- Fix %%{_arch} vs. $Arch confusion in fix for #465486
+
 * Mon Oct 20 2008 Dave Airlie <airlied@redhat.com> 
 - radeon: fix VRAM sizing issue
 
