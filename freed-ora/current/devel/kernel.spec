@@ -20,8 +20,12 @@ Summary: The Linux kernel
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin 1036
-%define fedora_build %(R="$Revision: 1.1070 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin   1036
+%define fedora_build_string %(R="$Revision: 1.1079 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
+%define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
+%define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
+%define fedora_build        %{fedora_build_prefix}%{?fedora_build_suffix}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -48,7 +52,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 3
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -648,7 +652,7 @@ Patch690: linux-2.6-at76.patch
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
-Patch1515: linux-2.6-lirc.patch
+Patch1515: linux-2.6.27-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
 
 # Fix the return code CD accesses when the CDROM drive door is closed
@@ -705,10 +709,13 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
+# EC storms aren't anything you can fix, shut up already
+Patch2805: linux-2.6.27-acpi-ec-drizzle.patch
 
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
 Patch2901: linux-2.6.27-fs-disable-fiemap.patch
+Patch2902: linux-2.6.27-ext-dir-corruption-fix.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1151,6 +1158,8 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
 # Disable fiemap until it is really truly upstream & released
 ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
+# CVE-2008-3528, ext-fs dir corruption
+ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
 
 # xfs
 
@@ -1244,7 +1253,7 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
-ApplyPatch linux-2.6-lirc.patch
+ApplyPatch linux-2.6.27-lirc.patch
 # http://hg.jannau.net/hdpvr/
 ApplyPatch linux-2.6-hdpvr.patch
 
@@ -1270,7 +1279,7 @@ ApplyPatch linux-2.6-eeepc-laptop-update.patch
 # atl2 network driver
 ApplyPatch linux-2.6-netdev-atl2.patch
 # update r8169 to latest upstream
-ApplyPatch linux-2.6.27-net-r8169-2.6.28.patch
+#ApplyPatch linux-2.6.27-net-r8169-2.6.28.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1305,6 +1314,8 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
+# EC storms aren't anything you can fix, shut up already
+ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1879,7 +1890,35 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Tue Oct 21 2008 Dave Airlie <airlied@redhat.com>
+* Thu Oct 23 2008 Adam Jackson <ajax@redhat.com> 2.6.27.3-43
+- Hush more PCI BAR allocation failures
+
+* Thu Oct 23 2008 Jarod Wilson <jarod@redhat.com> 2.6.27.3-42
+- Disable r8169 2.6.28 update patch, causes much bustification
+
+* Thu Oct 23 2008 Hans de Goede <hdegoede.redhat.com> 2.6.27.3-39
+- Disable the obsolete zc0301 driver (superseeded by gspca_zc3xx)
+
+* Wed Oct 22 2008 Kyle McMartin <kyle@redhat.com> 2.6.27.3-38
+- Linux 2.6.27.3
+
+* Wed Oct 22 2008 Eric Sandeen <sandeen@redhat.com>
+- Patch for CVE-2008-3528, ext-fs dir corruption.
+
+* Tue Oct 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.3-37.rc1
+- Support building from CVS branches.
+
+* Tue Oct 21 2008 Adam Jackson <ajax@redhat.com> 2.6.27.3-36.rc1
+- Quieten the EC storm printk
+
+* Tue Oct 21 2008 Jarod Wilson <jarod@redhat.com> 2.6.27.3-35.rc1
+- improved lirc support for iMon LCD/IR devices
+- lirc support for additional MCE transceivers
+- nuke lirc commandir kernel drivers, lirc 0.8.4 talks to the via userspace
+- nuke lirc atiusb kernel drivers, conflicts with ati_remote (#462212), and
+  one can keep using lirc w/these via the atilibusb userspace driver
+
+* Tue Oct 21 2008 Dave Airlie <airlied@redhat.com> 2.6.27.3-34.rc1
 - rebase to drm-next from upstream for GEM fixes.
 - drop intel modesetting for now - broken by rebase
 
@@ -1892,10 +1931,10 @@ fi
 * Mon Oct 20 2008 David Woodhouse <David.Woodhouse@intel.com>
 - Fix %%{_arch} vs. $Arch confusion in fix for #465486
 
-* Mon Oct 20 2008 Dave Airlie <airlied@redhat.com> 
+* Mon Oct 20 2008 Dave Airlie <airlied@redhat.com>
 - radeon: fix VRAM sizing issue
 
-* Mon Oct 20 2008 Dave Airlie <airlied@redhat.com> 
+* Mon Oct 20 2008 Dave Airlie <airlied@redhat.com>
 - radeon: fix writeback + some warning fixes
 
 * Sun Oct 19 2008 Dave Jones <davej@redhat.com>
