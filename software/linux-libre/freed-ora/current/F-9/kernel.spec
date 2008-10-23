@@ -20,8 +20,12 @@ Summary: The Linux kernel
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin 727
-%define fedora_build %(R="$Revision: 1.806 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_cvs_origin   727
+%define fedora_build_string %(R="$Revision: 1.813 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
+%define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
+%define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
+%define fedora_build        %{fedora_build_prefix}%{?fedora_build_suffix}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -46,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -626,16 +630,7 @@ Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
 Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
-Patch102: linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
-Patch103: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
-Patch104: linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
-Patch105: linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
 Patch106: linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
-
-Patch120: linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
-Patch121: linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
-Patch122: linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
-Patch123: linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -665,7 +660,6 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
 Patch422: linux-2.6-fs-cifs-fix-plaintext-authentication.patch
-Patch423: linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 
@@ -680,13 +674,11 @@ Patch610: linux-2.6-defaults-fat-utf8.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
 Patch672: linux-2.6-sata-eeepc-faster.patch
 Patch673: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 Patch674: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
-Patch675: linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
-Patch676: linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
-Patch677: linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
+Patch675: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
+Patch676: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
 
 Patch680: linux-2.6-wireless.patch
@@ -736,10 +728,6 @@ Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# uvc video buffer overflow
-Patch2301: linux-2.6-uvcvideo-return-sensible-min-max-values.patch
-Patch2302: linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
-Patch2303: linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
 
 Patch2501: linux-2.6-ppc-use-libgcc.patch
 
@@ -765,6 +753,9 @@ Patch3000: linux-sparc-tracehook-syscall.patch
 
 # fix IOCTL security in sbni driver
 Patch3100: linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
+
+# CVE-2008-3528
+Patch3200: linux-2.6.26-ext-dir-corruption-fix.patch
 
 %endif
 
@@ -1157,23 +1148,8 @@ ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
 ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
-# add config option to disable adding CPUs after boot
-ApplyPatch linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
-# fix oops in get_wchan()
-ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
-# reserve first device vector on x86-32
-ApplyPatch linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
-#
-ApplyPatch linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
 # fix boot on some broken HP notebooks (nx6...)
 ApplyPatch linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
-
-# disable ASPM on devices that don't support it
-ApplyPatch linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
-ApplyPatch linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
-ApplyPatch linux-2.6-pci-add-an-option-to-allow-aspm-enabled-forcibly.patch
-# check range on pci mmap
-ApplyPatch linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
 
 #
 # PowerPC
@@ -1217,10 +1193,6 @@ ApplyPatch linux-2.6-execshield.patch
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# uvcvideo buffer overflow
-ApplyPatch linux-2.6-uvcvideo-return-sensible-min-max-values.patch
-ApplyPatch linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
-ApplyPatch linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
 
 # ACPI
 # fix cpuidle misbehavior
@@ -1272,8 +1244,6 @@ ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 ApplyPatch linux-2.6-squashfs.patch
 # fix CIFS plaintext passwords
 ApplyPatch linux-2.6-fs-cifs-fix-plaintext-authentication.patch
-# don't allow splice to files opened with O_APPEND
-ApplyPatch linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
 
 # Networking
 # Disable easy to trigger printk's.
@@ -1306,17 +1276,13 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # fix it821x
 ApplyPatch linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
+ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 # Make Eee disk faster.
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # don't use ahci for pata_marvell adapters
 ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 # fix drivers making wrong assumptions about what dma values mean
 ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
-# libata breaks lba28 rules
-ApplyPatch linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
-# fix libata error handling
-ApplyPatch linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
-ApplyPatch linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 
@@ -1375,8 +1341,8 @@ ApplyPatch linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
 ApplyPatch drm-fedora9-rollup.patch
 ApplyPatch linux-2.6-drm-i915-fix-ioctl-security.patch
 
-# ext4dev stable patch queue, slated for 2.6.25
-#ApplyPatch linux-2.6-ext4-stable-queue.patch
+# Filesystem patches
+ApplyPatch linux-2.6.26-ext-dir-corruption-fix.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2002,6 +1968,44 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Oct 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-86
+- Support building from CVS branches.
+
+* Wed Oct 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-85
+- Drop the broken patch to allow forcing PCIE ASPM.
+
+* Wed Oct 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-84
+- Fix LBA48 on pata_it821x RAID volumes.
+
+* Wed Oct 22 2008 Kyle McMartin <kyle@redhat.com> 2.6.26.7-83
+- Linux 2.6.26.7
+
+* Wed Oct 22 2008 Eric Sandeen <sandeen@redhat.com> 2.6.26.7-82.rc1
+- Patch for CVE-2008-3528, ext-fs dir corruption.
+
+* Tue Oct 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-81.rc1
+- 2.6.26.7-rc1
+  Dropped patches:
+    linux-2.6-x86-improve-up-kernel-when-cpu-hotplug-and-smp.patch
+    linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+    linux-2.6-x86-Reserve-FIRST_DEVICE_VECTOR-in-used_vectors-bit.patch
+    linux-2.6-x86-early_ioremap-fix-fencepost-error.patch
+    linux-2.6-pci-disable-aspm-per-acpi-fadt-setting.patch
+    linux-2.6-pci-disable-aspm-on-pre-1.1-devices.patch
+    linux-2.6-pci-check-mapped-ranges-on-sysfs-resource-files.patch
+    linux-2.6-uvcvideo-return-sensible-min-max-values.patch
+    linux-2.6-uvcvideo-dont-use-stack-based-buffers.patch
+    linux-2.6-uvcvideo-fix-another-buffer-overflow.patch
+    linux-2.6-dont-allow-splice-to-files-opened-with-o_append.patch
+    linux-2.6-libata-lba-28-48-off-by-one-in-ata.h.patch
+    linux-2.6-libata-always-do-follow-up-SRST-if-requested.patch
+    linux-2.6-libata-fix-EH-action-overwriting-in-ata_eh_reset.patch
+  Upstream reverts:
+    drm-i915-fix-ioremap-of-a-user-address-for-non-root.patch
+
+* Mon Oct 20 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-80
+- Disable debug printks in the memstick drivers.
+
 * Fri Oct 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.6-79
 - Fix IOCTL permission checking in sbni WAN adapter (CVE-2008-3525).
 
