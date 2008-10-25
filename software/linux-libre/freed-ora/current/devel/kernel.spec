@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1080 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1083 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,9 +50,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -607,7 +607,6 @@ Patch30: linux-2.6-x86-xen-add-dependencies.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
-Patch45: linux-2.6-x86-acpi-fix-resume-on-64-bit-UP-systems.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -643,7 +642,9 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch610: linux-2.6-defaults-fat-utf8.patch
+
 Patch670: linux-2.6-ata-quirk.patch
+Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
@@ -691,6 +692,7 @@ Patch2200: linux-2.6-firewire-git-update.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+Patch2301: linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -1114,8 +1116,6 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # x86(-64)
 # don't oops in get_wchan()
 ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
-# fix resume on UP systems with SMP kernel
-ApplyPatch linux-2.6-x86-acpi-fix-resume-on-64-bit-UP-systems.patch
 
 #
 # PowerPC
@@ -1165,6 +1165,8 @@ ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# fix I/O errors on jmicron usb-ata bridge
+ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
@@ -1237,6 +1239,8 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
+# fix it821x raid volumes
+ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 
 # fix spot's iwlwifi, hopefully...
 #ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
@@ -1890,6 +1894,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Oct 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-47.rc3
+- Fix LBA48 on pata_it821x RAID volumes.
+
+* Fri Oct 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-46.rc3
+- Fix I/O errors on jmicron USB/ATA bridges (#465539)
+
+* Fri Oct 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-45.rc3
+- 2.6.27.4-rc3
+  Dropped patches:
+    linux-2.6-x86-acpi-fix-resume-on-64-bit-UP-systems.patch
+  Upstream reverts:
+    ext-avoid-printk-floods-in-the-face-of-directory-corruption.patch
+
 * Thu Oct 23 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.3-44
 - Disable the snd-aw2 driver until upstream comes up with a fix.
 
