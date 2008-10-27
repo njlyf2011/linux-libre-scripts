@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1083 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1087 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -52,7 +52,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 4
 # Is it a -stable RC?
-%define stable_rc 3
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -608,6 +608,9 @@ Patch30: linux-2.6-x86-xen-add-dependencies.patch
 Patch41: linux-2.6-sysrq-c.patch
 Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
+Patch60: linux-2.6-sched-features-disable-hrtick.patch
+Patch61: linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
@@ -633,6 +636,7 @@ Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch440: linux-2.6-net-tcp-option-ordering.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-dell-keyboard-keyup.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
@@ -676,13 +680,15 @@ Patch2001: linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
+# r8169 fixes
+Patch2005: linux-2.6-r8169-fix-RxMissed-register-access.patch
+Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
-# latest upstream r8169 driver
-Patch2021: linux-2.6.27-net-r8169-2.6.28.patch
 
 # Fix DEBUG_SHIRQ problem in tulip driver.  (454575)
 Patch2030: linux-2.6-net-tulip-interrupt.patch
@@ -1112,6 +1118,10 @@ ApplyPatch linux-2.6-x86-xen-add-dependencies.patch
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
+# scheduler
+ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
+ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+
 # Architecture patches
 # x86(-64)
 # don't oops in get_wchan()
@@ -1211,6 +1221,8 @@ ApplyPatch linux-2.6-squashfs.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
+# Fix tcp option ordering.
+ApplyPatch linux-2.6-net-tcp-option-ordering.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1278,12 +1290,13 @@ ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
+ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
+ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 
 # atl2 network driver
 ApplyPatch linux-2.6-netdev-atl2.patch
-# update r8169 to latest upstream
-#ApplyPatch linux-2.6.27-net-r8169-2.6.28.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1894,6 +1907,20 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sun Oct 26 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-51
+- Linux 2.6.27.4
+
+* Sat Oct 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-50.rc3
+- Two patches for the r8169 network driver that should fix bug #460747
+
+* Sat Oct 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-49.rc3
+- Scheduler fixes from 2.6.28, fixing performance problems:
+    Disable HRTICK scheduler feature.
+    Keep the scheduler clock from going backwards.
+
+* Sat Oct 25 2008 Dave Jones <davej@redhat.com> 2.6.27.4-48.rc3
+- tcp: Restore ordering of TCP options for the sake of inter-operability
+
 * Fri Oct 24 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-47.rc3
 - Fix LBA48 on pata_it821x RAID volumes.
 
