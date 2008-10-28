@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1088 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1094 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -633,6 +633,7 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-clear-wake-status.patch
+Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
@@ -724,6 +725,7 @@ Patch2805: linux-2.6.27-acpi-ec-drizzle.patch
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
 Patch2901: linux-2.6.27-fs-disable-fiemap.patch
 Patch2902: linux-2.6.27-ext-dir-corruption-fix.patch
+Patch2903: linux-2.6.27-delay-ext4-free-block-cap-check.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1170,6 +1172,8 @@ ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
 ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
 # CVE-2008-3528, ext-fs dir corruption
 ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
+# Delay capability() checks 'til last in ext4
+ApplyPatch linux-2.6.27-delay-ext4-free-block-cap-check.patch
 
 # xfs
 
@@ -1186,6 +1190,7 @@ ApplyPatch linux-2.6-crypto-fips_enable.patch
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-clear-wake-status.patch
+ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1907,6 +1912,21 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
+- add support for wait rendering API
+
+* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
+- fix rs4xx bus mastering.
+
+* Mon Oct 27 2008 Jeremy Katz <katzj@redhat.com>
+- Make olpc-battery built in so that its usable (#467759)
+
+* Mon Oct 27 2008 Eric Sandeen <sandeen@redhat.com>
+- Delay capable() checks in ext4 until necessary. (#467216)
+
+* Mon Oct 27 2008 Dave Jones <davej@redhat.com>
+- ACPI: Ignore the RESET_REG_SUP bit when using ACPI reset mechanism. (461228)
+
 * Mon Oct 27 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-52
 - drm-modesetting-radeon.patch - fix some kms issues + add better CS scheme
 
