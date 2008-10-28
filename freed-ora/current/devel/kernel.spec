@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1094 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1097 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -653,6 +653,7 @@ Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -693,6 +694,9 @@ Patch2020: linux-2.6-netdev-atl2.patch
 
 # Fix DEBUG_SHIRQ problem in tulip driver.  (454575)
 Patch2030: linux-2.6-net-tulip-interrupt.patch
+
+# olpc fixes
+Patch2040: linux-2.6-olpc-speaker-out.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1263,6 +1267,8 @@ ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 #ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 # make jarod's iwl4965 not panic near N APs, hopefully
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+# iwl3945 fix for stable ad-hoc mode connections (#459401)
+ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1304,6 +1310,8 @@ ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
+
+ApplyPatch linux-2.6-olpc-speaker-out.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
@@ -1912,6 +1920,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
+- modesetting add some debugging in /proc and pad ring writes
+
+* Tue Oct 28 2008 Jeremy Katz <katzj@redhat.com>
+- add fix for speaker output on OLPC (#466038)
+
+* Tue Oct 28 2008 John W. Linville <linville@redhat.com>
+- iwl3945 fix for stable ad-hoc mode connections (#459401)
+
 * Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
 - add support for wait rendering API
 
