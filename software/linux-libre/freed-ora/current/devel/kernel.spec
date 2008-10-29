@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1097 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1101 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -646,7 +646,6 @@ Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
-Patch610: linux-2.6-defaults-fat-utf8.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
@@ -654,6 +653,7 @@ Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
+Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -1255,8 +1255,6 @@ ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
-# Use UTF-8 by default on VFAT.
-ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
@@ -1269,6 +1267,8 @@ ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
+# hostap hack to still work w/ quetionable skb->cb usage
+ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1920,28 +1920,37 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
+* Wed Oct 29 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-65
+- radeon modesetting : misc fixes - rs690, agp unload, module unload warning
+
+* Tue Oct 28 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-64
+- Drop Fedora patch that changed the default FAT charset to UTF-8 (F9#454013)
+
+* Tue Oct 28 2008 John W. Linville <linville@redhat.com> 2.6.27.4-63
+- hostap hack to still work w/ quetionable skb->cb usage (#468613)
+
+* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-61
 - modesetting add some debugging in /proc and pad ring writes
 
-* Tue Oct 28 2008 Jeremy Katz <katzj@redhat.com>
+* Tue Oct 28 2008 Jeremy Katz <katzj@redhat.com> 2.6.27.4-60
 - add fix for speaker output on OLPC (#466038)
 
-* Tue Oct 28 2008 John W. Linville <linville@redhat.com>
+* Tue Oct 28 2008 John W. Linville <linville@redhat.com> 2.6.27.4-59
 - iwl3945 fix for stable ad-hoc mode connections (#459401)
 
-* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
+* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-58
 - add support for wait rendering API
 
-* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>
+* Tue Oct 28 2008 Dave Airlie <airlied@redhat.com>  2.6.27.4-57
 - fix rs4xx bus mastering.
 
-* Mon Oct 27 2008 Jeremy Katz <katzj@redhat.com>
+* Mon Oct 27 2008 Jeremy Katz <katzj@redhat.com>  2.6.27.4-56
 - Make olpc-battery built in so that its usable (#467759)
 
-* Mon Oct 27 2008 Eric Sandeen <sandeen@redhat.com>
+* Mon Oct 27 2008 Eric Sandeen <sandeen@redhat.com> 2.6.27.4-55
 - Delay capable() checks in ext4 until necessary. (#467216)
 
-* Mon Oct 27 2008 Dave Jones <davej@redhat.com>
+* Mon Oct 27 2008 Dave Jones <davej@redhat.com>  2.6.27.4-54
 - ACPI: Ignore the RESET_REG_SUP bit when using ACPI reset mechanism. (461228)
 
 * Mon Oct 27 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-52
