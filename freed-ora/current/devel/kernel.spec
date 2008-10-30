@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1101 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1104 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -700,6 +700,7 @@ Patch2040: linux-2.6-olpc-speaker-out.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
+Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
@@ -1323,10 +1324,10 @@ ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
-#C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
-#if [ "$C" -gt 10 ]; then
-#ApplyPatch linux-2.6-firewire-git-pending.patch
-#fi
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-firewire-git-pending.patch
+fi
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
@@ -1920,6 +1921,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Oct 30 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-67
+- radeon: try and workaround AGP badness with kms + enable VRAM mtrr
+
+* Wed Oct 29 2008 Dave Jones <davej@redhat.com>
+- Reduce maximum supported CPUs on x86-64 to 64.
+
+* Wed Oct 29 2008 Jarod Wilson <jarod@redhat.com> 2.6.27.4-66
+- Update to latest firewire git code:
+  * Resolve spb2/ohci module load race causing delayed sbp2 logins (#466679)
+  * Prevent >256 bus resets from crashing the system (improves #244576)
+  * Fix assorted memory leaks
+  * Include timestamps in iso packet headers
+
 * Wed Oct 29 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-65
 - radeon modesetting : misc fixes - rs690, agp unload, module unload warning
 
