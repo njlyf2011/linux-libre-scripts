@@ -3,10 +3,10 @@ Deblobbed.
 Mark nouveau as depending on NONFREE in Kconfig.
 Replace all nouveau voodoo and ctx_prog blobs with /*(DEBLOBBED)*/.
 
-diff --git a/drivers/char/drm/Kconfig b/drivers/char/drm/Kconfig
+diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
 index 610d6fd..6b98529 100644
---- a/drivers/char/drm/Kconfig
-+++ b/drivers/char/drm/Kconfig
+--- a/drivers/gpu/drm/Kconfig
++++ b/drivers/gpu/drm/Kconfig
 @@ -105,3 +105,11 @@ config DRM_SAVAGE
  	help
  	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
@@ -19,11 +19,11 @@ index 610d6fd..6b98529 100644
 +	help
 +	  Choose this for nvidia open source 3d driver
 +
-diff --git a/drivers/char/drm/Makefile b/drivers/char/drm/Makefile
+diff --git a/drivers/gpu/drm/Makefile b/drivers/gpu/drm/Makefile
 index 1283ded..2c652ba 100644
---- a/drivers/char/drm/Makefile
-+++ b/drivers/char/drm/Makefile
-@@ -6,14 +6,26 @@ drm-objs    :=	drm_auth.o drm_bufs.o drm_context.o drm_dma.o drm_drawable.o \
+--- a/drivers/gpu/drm/Makefile
++++ b/drivers/gpu/drm/Makefile
+@@ -6,7 +6,9 @@
  		drm_drv.o drm_fops.o drm_ioctl.o drm_irq.o \
  		drm_lock.o drm_memory.o drm_proc.o drm_stub.o drm_vm.o \
  		drm_agpsupport.o drm_scatter.o ati_pcigart.o drm_pci.o \
@@ -32,14 +32,35 @@ index 1283ded..2c652ba 100644
 +		drm_fence.o drm_ttm.o drm_bo.o drm_bo_move.o drm_bo_lock.o \
 +		drm_modes.o drm_crtc.o drm_edid.o
  
- tdfx-objs   := tdfx_drv.o
- r128-objs   := r128_drv.o r128_cce.o r128_state.o r128_irq.o
- mga-objs    := mga_drv.o mga_dma.o mga_state.o mga_warp.o mga_irq.o
- i810-objs   := i810_drv.o i810_dma.o
- i830-objs   := i830_drv.o i830_dma.o i830_irq.o
--i915-objs   := i915_drv.o i915_dma.o i915_irq.o i915_mem.o
-+i915-objs   := i915_drv.o i915_dma.o i915_irq.o i915_mem.o i915_fence.o i915_buffer.o i915_init.o intel_display.o intel_lvds.o intel_crt.o intel_i2c.o intel_modes.o intel_sdvo.o intel_tv.o intel_fb.o
-+nouveau-objs := nouveau_drv.o nouveau_state.o nouveau_fifo.o nouveau_mem.o \
+ drm-$(CONFIG_COMPAT) += drm_ioc32.o
+ 
+@@ -20,6 +22,7 @@
+ obj-$(CONFIG_DRM_I810)	+= i810/
+ obj-$(CONFIG_DRM_I830)	+= i830/
+ obj-$(CONFIG_DRM_I915)  += i915/
++obj-$(CONFIG_DRM_NOUVEAU)   += nouveau/
+ obj-$(CONFIG_DRM_SIS)   += sis/
+ obj-$(CONFIG_DRM_SAVAGE)+= savage/
+ obj-$(CONFIG_DRM_VIA)	+=via/
+diff a/drivers/gpu/drm/i915/Makefile b/drivers/gpu/drm/i915/Makefile
+--- a/drivers/gpu/drm/i915/Makefile
++++ b/drivers/gpu/drm/i915/Makefile
+@@ -3,7 +3,7 @@
+ # Direct Rendering Infrastructure (DRI) in XFree86 4.1.0 and higher.
+ 
+ ccflags-y := -Iinclude/drm
+-i915-y := i915_drv.o i915_dma.o i915_irq.o i915_mem.o
++i915-y := i915_drv.o i915_dma.o i915_irq.o i915_mem.o i915_fence.o i915_buffer.o i915_init.o intel_display.o intel_lvds.o intel_crt.o intel_i2c.o intel_modes.o intel_sdvo.o intel_tv.o intel_fb.o
+ 
+ i915-$(CONFIG_COMPAT)   += i915_ioc32.o
+ 
+diff a/drivers/gpu/drm/nouveau/Makefile b/drivers/gpu/drm/nouveau/Makefile
+--- /dev/null
++++ b/drivers/gpu/drm/nouveau/Makefile
+@@ -0,0 +1,16 @@
++
++ccflags-y := -Iinclude/drm
++nouveau-y := nouveau_drv.o nouveau_state.o nouveau_fifo.o nouveau_mem.o \
 +		nouveau_object.o nouveau_irq.o nouveau_notifier.o nouveau_swmthd.o \
 +		nouveau_sgdma.o nouveau_dma.o nouveau_bo.o nouveau_fence.o \
 +		nv04_timer.o \
@@ -49,29 +70,14 @@ index 1283ded..2c652ba 100644
 +		nv04_graph.o nv10_graph.o nv20_graph.o \
 +		nv40_graph.o nv50_graph.o \
 +		nv04_instmem.o nv50_instmem.o
- radeon-objs := radeon_drv.o radeon_cp.o radeon_state.o radeon_mem.o radeon_irq.o r300_cmdbuf.o
- sis-objs    := sis_drv.o sis_mm.o
- savage-objs := savage_drv.o savage_bci.o savage_state.o
-@@ -25,6 +37,7 @@ radeon-objs += radeon_ioc32.o
- mga-objs    += mga_ioc32.o
- r128-objs   += r128_ioc32.o
- i915-objs   += i915_ioc32.o
-+nouveau-objs   += nouveau_ioc32.o
- endif
- 
- obj-$(CONFIG_DRM)	+= drm.o
-@@ -35,6 +48,7 @@ obj-$(CONFIG_DRM_MGA)	+= mga.o
- obj-$(CONFIG_DRM_I810)	+= i810.o
- obj-$(CONFIG_DRM_I830)	+= i830.o
- obj-$(CONFIG_DRM_I915)  += i915.o
-+obj-$(CONFIG_DRM_NOUVEAU)   += nouveau.o
- obj-$(CONFIG_DRM_SIS)   += sis.o
- obj-$(CONFIG_DRM_SAVAGE)+= savage.o
- obj-$(CONFIG_DRM_VIA)	+=via.o
-diff --git a/drivers/char/drm/ati_pcigart.c b/drivers/char/drm/ati_pcigart.c
++
++nouveau-$(CONFIG_COMPAT)   += nouveau_ioc32.o
++
++obj-$(CONFIG_DRM_NOUVEAU)	+= nouveau.o
+diff --git a/drivers/gpu/drm/ati_pcigart.c b/drivers/gpu/drm/ati_pcigart.c
 index c533d0c..f27f791 100644
---- a/drivers/char/drm/ati_pcigart.c
-+++ b/drivers/char/drm/ati_pcigart.c
+--- a/drivers/gpu/drm/ati_pcigart.c
++++ b/drivers/gpu/drm/ati_pcigart.c
 @@ -43,7 +43,6 @@ static int drm_ati_alloc_pcigart_table(struct drm_device *dev,
  						gart_info->table_mask);
  	if (gart_info->table_handle == NULL)
@@ -98,10 +104,10 @@ index c533d0c..f27f791 100644
  	gart_info->addr = address;
  	gart_info->bus_addr = bus_address;
  	return ret;
-diff --git a/drivers/char/drm/drm.h b/drivers/char/drm/drm.h
+diff --git a/drivers/gpu/drm/drm.h b/drivers/gpu/drm/drm.h
 index 38d3c6b..4d1b6b6 100644
---- a/drivers/char/drm/drm.h
-+++ b/drivers/char/drm/drm.h
+--- a/include/drm/drm.h
++++ b/include/drm/drm.h
 @@ -190,6 +190,7 @@ enum drm_map_type {
  	_DRM_AGP = 3,		  /**< AGP/GART */
  	_DRM_SCATTER_GATHER = 4,  /**< Scatter/gather memory for PCI DMA */
@@ -664,10 +670,10 @@ index 38d3c6b..4d1b6b6 100644
  /**
   * Device specific ioctls should only be in their respective headers
   * The device specific ioctl range is from 0x40 to 0x99.
-diff --git a/drivers/char/drm/drmP.h b/drivers/char/drm/drmP.h
+diff --git a/drivers/gpu/drm/drmP.h b/drivers/gpu/drm/drmP.h
 index 0764b66..58f89fa 100644
---- a/drivers/char/drm/drmP.h
-+++ b/drivers/char/drm/drmP.h
+--- a/include/drm/drmP.h
++++ b/include/drm/drmP.h
 @@ -56,6 +56,7 @@
  #include <linux/smp_lock.h>	/* For (un)lock_kernel */
  #include <linux/dma-mapping.h>
@@ -1048,10 +1054,10 @@ index 0764b66..58f89fa 100644
  /*@}*/
  
  #endif				/* __KERNEL__ */
-diff --git a/drivers/char/drm/drm_agpsupport.c b/drivers/char/drm/drm_agpsupport.c
+diff --git a/drivers/gpu/drm/drm_agpsupport.c b/drivers/gpu/drm/drm_agpsupport.c
 index aefa5ac..3e1358d 100644
---- a/drivers/char/drm/drm_agpsupport.c
-+++ b/drivers/char/drm/drm_agpsupport.c
+--- a/drivers/gpu/drm/drm_agpsupport.c
++++ b/drivers/gpu/drm/drm_agpsupport.c
 @@ -68,7 +68,6 @@ int drm_agp_info(struct drm_device *dev, struct drm_agp_info *info)
  
  	return 0;
@@ -1328,10 +1334,10 @@ index aefa5ac..3e1358d 100644
 +EXPORT_SYMBOL(drm_agp_chipset_flush);
 +
  #endif				/* __OS_HAS_AGP */
-diff --git a/drivers/char/drm/drm_auth.c b/drivers/char/drm/drm_auth.c
+diff --git a/drivers/gpu/drm/drm_auth.c b/drivers/gpu/drm/drm_auth.c
 index a734627..20c8a63 100644
---- a/drivers/char/drm/drm_auth.c
-+++ b/drivers/char/drm/drm_auth.c
+--- a/drivers/gpu/drm/drm_auth.c
++++ b/drivers/gpu/drm/drm_auth.c
 @@ -45,14 +45,15 @@
   * the one with matching magic number, while holding the drm_device::struct_mutex
   * lock.
@@ -1427,11 +1433,11 @@ index a734627..20c8a63 100644
  		return 0;
  	}
  	return -EINVAL;
-diff --git a/drivers/char/drm/drm_bo.c b/drivers/char/drm/drm_bo.c
+diff --git a/drivers/gpu/drm/drm_bo.c b/drivers/gpu/drm/drm_bo.c
 new file mode 100644
 index 0000000..185aa32
 --- /dev/null
-+++ b/drivers/char/drm/drm_bo.c
++++ b/drivers/gpu/drm/drm_bo.c
 @@ -0,0 +1,2725 @@
 +/**************************************************************************
 + *
@@ -4158,11 +4164,11 @@ index 0000000..185aa32
 +
 +	return 0;
 +}
-diff --git a/drivers/char/drm/drm_bo_lock.c b/drivers/char/drm/drm_bo_lock.c
+diff --git a/drivers/gpu/drm/drm_bo_lock.c b/drivers/gpu/drm/drm_bo_lock.c
 new file mode 100644
 index 0000000..186db12
 --- /dev/null
-+++ b/drivers/char/drm/drm_bo_lock.c
++++ b/drivers/gpu/drm/drm_bo_lock.c
 @@ -0,0 +1,175 @@
 +/**************************************************************************
 + *
@@ -4339,11 +4345,11 @@ index 0000000..186db12
 +	mutex_unlock(&dev->struct_mutex);
 +	return 0;
 +}
-diff --git a/drivers/char/drm/drm_bo_move.c b/drivers/char/drm/drm_bo_move.c
+diff --git a/drivers/gpu/drm/drm_bo_move.c b/drivers/gpu/drm/drm_bo_move.c
 new file mode 100644
 index 0000000..9c6ca95
 --- /dev/null
-+++ b/drivers/char/drm/drm_bo_move.c
++++ b/drivers/gpu/drm/drm_bo_move.c
 @@ -0,0 +1,610 @@
 +/**************************************************************************
 + *
@@ -4955,10 +4961,10 @@ index 0000000..9c6ca95
 +}
 +EXPORT_SYMBOL(drm_bo_pfn_prot);
 +
-diff --git a/drivers/char/drm/drm_bufs.c b/drivers/char/drm/drm_bufs.c
+diff --git a/drivers/gpu/drm/drm_bufs.c b/drivers/gpu/drm/drm_bufs.c
 index bde64b8..b8e1dd6 100644
---- a/drivers/char/drm/drm_bufs.c
-+++ b/drivers/char/drm/drm_bufs.c
+--- a/drivers/gpu/drm/drm_bufs.c
++++ b/drivers/gpu/drm/drm_bufs.c
 @@ -46,23 +46,33 @@ unsigned long drm_get_resource_len(struct drm_device *dev, unsigned int resource
  {
  	return pci_resource_len(dev->pdev, resource);
@@ -5178,10 +5184,10 @@ index bde64b8..b8e1dd6 100644
  	request->count = dma->buf_count;
  	DRM_DEBUG("%d buffers, retcode = %d\n", request->count, retcode);
  
-diff --git a/drivers/char/drm/drm_context.c b/drivers/char/drm/drm_context.c
+diff --git a/drivers/gpu/drm/drm_context.c b/drivers/gpu/drm/drm_context.c
 index d505f69..bfd0adc 100644
---- a/drivers/char/drm/drm_context.c
-+++ b/drivers/char/drm/drm_context.c
+--- a/drivers/gpu/drm/drm_context.c
++++ b/drivers/gpu/drm/drm_context.c
 @@ -195,11 +195,11 @@ int drm_setsareactx(struct drm_device *dev, void *data,
  		    && r_list->user_token == (unsigned long) request->handle)
  			goto found;
@@ -5221,11 +5227,11 @@ index d505f69..bfd0adc 100644
  
  	return 0;
  }
-diff --git a/drivers/char/drm/drm_crtc.c b/drivers/char/drm/drm_crtc.c
+diff --git a/drivers/gpu/drm/drm_crtc.c b/drivers/gpu/drm/drm_crtc.c
 new file mode 100644
 index 0000000..2d8a49b
 --- /dev/null
-+++ b/drivers/char/drm/drm_crtc.c
++++ b/drivers/gpu/drm/drm_crtc.c
 @@ -0,0 +1,2451 @@
 +/*
 + * Copyright (c) 2006-2007 Intel Corporation
@@ -7678,11 +7684,11 @@ index 0000000..2d8a49b
 +	return ret;
 +}
 +
-diff --git a/drivers/char/drm/drm_crtc.h b/drivers/char/drm/drm_crtc.h
+diff --git a/include/drm/drm_crtc.h b/include/drm/drm_crtc.h
 new file mode 100644
 index 0000000..bbeab60
 --- /dev/null
-+++ b/drivers/char/drm/drm_crtc.h
++++ b/include/drm/drm_crtc.h
 @@ -0,0 +1,666 @@
 +/*
 + * Copyright © 2006 Keith Packard
@@ -8350,10 +8356,10 @@ index 0000000..bbeab60
 +
 +#endif /* __DRM_CRTC_H__ */
 +
-diff --git a/drivers/char/drm/drm_drv.c b/drivers/char/drm/drm_drv.c
+diff --git a/drivers/gpu/drm/drm_drv.c b/drivers/gpu/drm/drm_drv.c
 index 5641387..be84bd6 100644
---- a/drivers/char/drm/drm_drv.c
-+++ b/drivers/char/drm/drm_drv.c
+--- a/drivers/gpu/drm/drm_drv.c
++++ b/drivers/gpu/drm/drm_drv.c
 @@ -117,6 +117,52 @@ static struct drm_ioctl_desc drm_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_IOCTL_WAIT_VBLANK, drm_wait_vblank, 0),
  
@@ -8611,11 +8617,11 @@ index 5641387..be84bd6 100644
  EXPORT_SYMBOL(drm_ioctl);
  
  drm_local_map_t *drm_getsarea(struct drm_device *dev)
-diff --git a/drivers/char/drm/drm_edid.c b/drivers/char/drm/drm_edid.c
+diff --git a/drivers/gpu/drm/drm_edid.c b/drivers/gpu/drm/drm_edid.c
 new file mode 100644
 index 0000000..338a5f5
 --- /dev/null
-+++ b/drivers/char/drm/drm_edid.c
++++ b/drivers/gpu/drm/drm_edid.c
 @@ -0,0 +1,491 @@
 +/*
 + * Copyright (c) 2007 Intel Corporation
@@ -9108,11 +9114,11 @@ index 0000000..338a5f5
 +	return num_modes;
 +}
 +EXPORT_SYMBOL(drm_add_edid_modes);
-diff --git a/drivers/char/drm/drm_edid.h b/drivers/char/drm/drm_edid.h
+diff --git a/include/drm/drm_edid.h b/include/drm/drm_edid.h
 new file mode 100644
 index 0000000..0d2eeaa
 --- /dev/null
-+++ b/drivers/char/drm/drm_edid.h
++++ b/include/drm/drm_edid.h
 @@ -0,0 +1,176 @@
 +#ifndef __DRM_EDID_H__
 +#define __DRM_EDID_H__
@@ -9290,11 +9296,11 @@ index 0000000..0d2eeaa
 +} __attribute__((packed));
 +
 +#endif /* __DRM_EDID_H__ */
-diff --git a/drivers/char/drm/drm_fence.c b/drivers/char/drm/drm_fence.c
+diff --git a/drivers/gpu/drm/drm_fence.c b/drivers/gpu/drm/drm_fence.c
 new file mode 100644
 index 0000000..4ed4865
 --- /dev/null
-+++ b/drivers/char/drm/drm_fence.c
++++ b/drivers/gpu/drm/drm_fence.c
 @@ -0,0 +1,824 @@
 +/**************************************************************************
 + *
@@ -10120,10 +10126,10 @@ index 0000000..4ed4865
 +
 +	return ret;
 +}
-diff --git a/drivers/char/drm/drm_fops.c b/drivers/char/drm/drm_fops.c
+diff --git a/drivers/gpu/drm/drm_fops.c b/drivers/gpu/drm/drm_fops.c
 index d2e6da8..5dae9fb 100644
---- a/drivers/char/drm/drm_fops.c
-+++ b/drivers/char/drm/drm_fops.c
+--- a/drivers/gpu/drm/drm_fops.c
++++ b/drivers/gpu/drm/drm_fops.c
 @@ -43,10 +43,8 @@ static int drm_open_helper(struct inode *inode, struct file *filp,
  
  static int drm_setup(struct drm_device * dev)
@@ -10438,10 +10444,10 @@ index d2e6da8..5dae9fb 100644
  			spin_unlock(&dev->count_lock);
  			unlock_kernel();
  			return -EBUSY;
-diff --git a/drivers/char/drm/drm_hashtab.c b/drivers/char/drm/drm_hashtab.c
+diff --git a/drivers/gpu/drm/drm_hashtab.c b/drivers/gpu/drm/drm_hashtab.c
 index 3316067..72a783e 100644
---- a/drivers/char/drm/drm_hashtab.c
-+++ b/drivers/char/drm/drm_hashtab.c
+--- a/drivers/gpu/drm/drm_hashtab.c
++++ b/drivers/gpu/drm/drm_hashtab.c
 @@ -57,7 +57,7 @@ int drm_ht_create(struct drm_open_hash *ht, unsigned int order)
  		DRM_ERROR("Out of memory for hash table\n");
  		return -ENOMEM;
@@ -10460,10 +10466,10 @@ index 3316067..72a783e 100644
  
  	if (ret) {
  		DRM_ERROR("Available key bit space exhausted\n");
-diff --git a/drivers/char/drm/drm_ioctl.c b/drivers/char/drm/drm_ioctl.c
+diff --git a/drivers/gpu/drm/drm_ioctl.c b/drivers/gpu/drm/drm_ioctl.c
 index 16829fb..3b69b74 100644
---- a/drivers/char/drm/drm_ioctl.c
-+++ b/drivers/char/drm/drm_ioctl.c
+--- a/drivers/gpu/drm/drm_ioctl.c
++++ b/drivers/gpu/drm/drm_ioctl.c
 @@ -53,12 +53,13 @@ int drm_getunique(struct drm_device *dev, void *data,
  		  struct drm_file *file_priv)
  {
@@ -10605,10 +10611,10 @@ index 16829fb..3b69b74 100644
  		}
  	}
  
-diff --git a/drivers/char/drm/drm_irq.c b/drivers/char/drm/drm_irq.c
+diff --git a/drivers/gpu/drm/drm_irq.c b/drivers/gpu/drm/drm_irq.c
 index 089c015..01bed65 100644
---- a/drivers/char/drm/drm_irq.c
-+++ b/drivers/char/drm/drm_irq.c
+--- a/drivers/gpu/drm/drm_irq.c
++++ b/drivers/gpu/drm/drm_irq.c
 @@ -81,7 +81,7 @@ int drm_irq_by_busid(struct drm_device *dev, void *data,
   * \c drm_driver_irq_preinstall() and \c drm_driver_irq_postinstall() functions
   * before and after the installation.
@@ -10653,14 +10659,13 @@ index 089c015..01bed65 100644
  	return ret;
  }
  
-@@ -404,18 +409,18 @@ static void drm_locked_tasklet_func(unsigned long data)
- 	spin_lock_irqsave(&dev->tasklet_lock, irqflags);
+@@ -412,12 +412,12 @@ static void drm_locked_tasklet_func(unsi
+ 	spin_unlock_irqrestore(&dev->tasklet_lock, irqflags);
  
- 	if (!dev->locked_tasklet_func ||
+ 	if (!tasklet_func ||
 -	    !drm_lock_take(&dev->lock,
 +	    !drm_lock_take(&dev->primary->master->lock,
  			   DRM_KERNEL_CONTEXT)) {
- 		spin_unlock_irqrestore(&dev->tasklet_lock, irqflags);
  		return;
  	}
  
@@ -10668,17 +10673,20 @@ index 089c015..01bed65 100644
 +	dev->primary->master->lock.lock_time = jiffies;
  	atomic_inc(&dev->counts[_DRM_STAT_LOCKS]);
  
- 	dev->locked_tasklet_func(dev);
+ 	spin_lock_irqsave(&dev->tasklet_lock, irqflags);
+@@ -428,7 +428,7 @@ static void drm_locked_tasklet_func(unsi
+ 	if (tasklet_func != NULL)
+ 		tasklet_func(dev);
  
 -	drm_lock_free(&dev->lock,
 +	drm_lock_free(&dev->primary->master->lock,
  		      DRM_KERNEL_CONTEXT);
+ }
  
- 	dev->locked_tasklet_func = NULL;
-diff --git a/drivers/char/drm/drm_lock.c b/drivers/char/drm/drm_lock.c
+diff --git a/drivers/gpu/drm/drm_lock.c b/drivers/gpu/drm/drm_lock.c
 index 0998723..b9629eb 100644
---- a/drivers/char/drm/drm_lock.c
-+++ b/drivers/char/drm/drm_lock.c
+--- a/drivers/gpu/drm/drm_lock.c
++++ b/drivers/gpu/drm/drm_lock.c
 @@ -52,6 +52,7 @@ int drm_lock(struct drm_device *dev, void *data, struct drm_file *file_priv)
  {
  	DECLARE_WAITQUEUE(entry, current);
@@ -10743,22 +10751,22 @@ index 0998723..b9629eb 100644
  	DRM_DEBUG("%d %s\n", lock->context,
  		  ret ? "interrupted" : "has lock");
 @@ -111,7 +113,7 @@ int drm_lock(struct drm_device *dev, void *data, struct drm_file *file_priv)
- 	sigaddset(&dev->sigmask, SIGTTIN);
- 	sigaddset(&dev->sigmask, SIGTTOU);
- 	dev->sigdata.context = lock->context;
--	dev->sigdata.lock = dev->lock.hw_lock;
-+	dev->sigdata.lock = master->lock.hw_lock;
- 	block_all_signals(drm_notifier, &dev->sigdata, &dev->sigmask);
+ 		sigaddset(&dev->sigmask, SIGTTIN);
+ 		sigaddset(&dev->sigmask, SIGTTOU);
+ 		dev->sigdata.context = lock->context;
+-		dev->sigdata.lock = dev->lock.hw_lock;
++		dev->sigdata.lock = master->lock.hw_lock;
+ 		block_all_signals(drm_notifier, &dev->sigdata, &dev->sigmask);
+ 	}
  
- 	if (dev->driver->dma_ready && (lock->flags & _DRM_LOCK_READY))
 @@ -149,6 +151,7 @@ int drm_lock(struct drm_device *dev, void *data, struct drm_file *file_priv)
  int drm_unlock(struct drm_device *dev, void *data, struct drm_file *file_priv)
  {
  	struct drm_lock *lock = data;
 +	struct drm_master *master = file_priv->master;
  	unsigned long irqflags;
+ 	void (*tasklet_func)(struct drm_device *);
  
- 	if (lock->context == DRM_KERNEL_CONTEXT) {
 @@ -175,7 +178,7 @@ int drm_unlock(struct drm_device *dev, void *data, struct drm_file *file_priv)
  	if (dev->driver->kernel_context_switch_unlock)
  		dev->driver->kernel_context_switch_unlock(dev);
@@ -10782,10 +10790,10 @@ index 0998723..b9629eb 100644
  }
  
  EXPORT_SYMBOL(drm_i_have_hw_lock);
-diff --git a/drivers/char/drm/drm_memory.c b/drivers/char/drm/drm_memory.c
+diff --git a/drivers/gpu/drm/drm_memory.c b/drivers/gpu/drm/drm_memory.c
 index 845081b..9a01a91 100644
---- a/drivers/char/drm/drm_memory.c
-+++ b/drivers/char/drm/drm_memory.c
+--- a/drivers/gpu/drm/drm_memory.c
++++ b/drivers/gpu/drm/drm_memory.c
 @@ -36,6 +36,75 @@
  #include <linux/highmem.h>
  #include "drmP.h"
@@ -10862,10 +10870,10 @@ index 845081b..9a01a91 100644
  #ifdef DEBUG_MEMORY
  #include "drm_memory_debug.h"
  #else
-diff --git a/drivers/char/drm/drm_mm.c b/drivers/char/drm/drm_mm.c
+diff --git a/drivers/gpu/drm/drm_mm.c b/drivers/gpu/drm/drm_mm.c
 index dcff9e9..7d8b670 100644
---- a/drivers/char/drm/drm_mm.c
-+++ b/drivers/char/drm/drm_mm.c
+--- a/drivers/gpu/drm/drm_mm.c
++++ b/drivers/gpu/drm/drm_mm.c
 @@ -82,7 +82,7 @@ static int drm_mm_create_tail_node(struct drm_mm *mm,
  	struct drm_mm_node *child;
  
@@ -10914,11 +10922,11 @@ index dcff9e9..7d8b670 100644
 -	drm_free(entry, sizeof(*entry), DRM_MEM_MM);
 +	drm_ctl_free(entry, sizeof(*entry), DRM_MEM_MM);
  }
-diff --git a/drivers/char/drm/drm_modes.c b/drivers/char/drm/drm_modes.c
+diff --git a/drivers/gpu/drm/drm_modes.c b/drivers/gpu/drm/drm_modes.c
 new file mode 100644
 index 0000000..8009cae
 --- /dev/null
-+++ b/drivers/char/drm/drm_modes.c
++++ b/drivers/gpu/drm/drm_modes.c
 @@ -0,0 +1,560 @@
 +/*
 + * Copyright © 1997-2003 by The XFree86 Project, Inc.
@@ -11480,11 +11488,11 @@ index 0000000..8009cae
 +		}
 +	}
 +}
-diff --git a/drivers/char/drm/drm_object.c b/drivers/char/drm/drm_object.c
+diff --git a/drivers/gpu/drm/drm_object.c b/drivers/gpu/drm/drm_object.c
 new file mode 100644
 index 0000000..1acf527
 --- /dev/null
-+++ b/drivers/char/drm/drm_object.c
++++ b/drivers/gpu/drm/drm_object.c
 @@ -0,0 +1,293 @@
 +/**************************************************************************
 + *
@@ -11779,11 +11787,11 @@ index 0000000..1acf527
 +	mutex_unlock(&dev->struct_mutex);
 +	return ret;
 +}
-diff --git a/drivers/char/drm/drm_objects.h b/drivers/char/drm/drm_objects.h
+diff --git a/drivers/gpu/drm/drm_objects.h b/drivers/gpu/drm/drm_objects.h
 new file mode 100644
 index 0000000..45f6dbb
 --- /dev/null
-+++ b/drivers/char/drm/drm_objects.h
++++ b/include/drm/drm_objects.h
 @@ -0,0 +1,768 @@
 +/**************************************************************************
 + *
@@ -12553,10 +12561,10 @@ index 0000000..45f6dbb
 +#define DRM_ASSERT_LOCKED(_mutex)
 +#endif
 +#endif
-diff --git a/drivers/char/drm/drm_pciids.h b/drivers/char/drm/drm_pciids.h
+diff --git a/drivers/gpu/drm/drm_pciids.h b/drivers/gpu/drm/drm_pciids.h
 index 135bd19..8c19f4c 100644
---- a/drivers/char/drm/drm_pciids.h
-+++ b/drivers/char/drm/drm_pciids.h
+--- a/include/drm/drm_pciids.h
++++ b/include/drm/drm_pciids.h
 @@ -413,3 +413,265 @@
  	{0x8086, 0x2e12, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
  	{0x8086, 0x2e22, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
@@ -12823,10 +12831,10 @@ index 135bd19..8c19f4c 100644
 +	{0x12d2, 0x002c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_04}, \
 +	{0x12d2, 0x00a0, PCI_ANY_ID, PCI_ANY_ID, 0, 0, NV_04}, \
 +	{0, 0, 0}
-diff --git a/drivers/char/drm/drm_proc.c b/drivers/char/drm/drm_proc.c
+diff --git a/drivers/gpu/drm/drm_proc.c b/drivers/gpu/drm/drm_proc.c
 index 93b1e04..2995198 100644
---- a/drivers/char/drm/drm_proc.c
-+++ b/drivers/char/drm/drm_proc.c
+--- a/drivers/gpu/drm/drm_proc.c
++++ b/drivers/gpu/drm/drm_proc.c
 @@ -49,6 +49,8 @@ static int drm_queues_info(char *buf, char **start, off_t offset,
  			   int request, int *eof, void *data);
  static int drm_bufs_info(char *buf, char **start, off_t offset,
@@ -12988,10 +12996,10 @@ index 93b1e04..2995198 100644
   * Called when "/proc/dri/.../clients" is read.
   *
   * \param buf output buffer.
-diff --git a/drivers/char/drm/drm_scatter.c b/drivers/char/drm/drm_scatter.c
+diff --git a/drivers/gpu/drm/drm_scatter.c b/drivers/gpu/drm/drm_scatter.c
 index b2b0f3d..3b31040 100644
---- a/drivers/char/drm/drm_scatter.c
-+++ b/drivers/char/drm/drm_scatter.c
+--- a/drivers/gpu/drm/drm_scatter.c
++++ b/drivers/gpu/drm/drm_scatter.c
 @@ -188,7 +188,7 @@ int drm_sg_alloc(struct drm_device *dev, struct drm_scatter_gather * request)
  
  	return 0;
@@ -13001,10 +13009,10 @@ index b2b0f3d..3b31040 100644
  	drm_sg_cleanup(entry);
  	return -ENOMEM;
  }
-diff --git a/drivers/char/drm/drm_stub.c b/drivers/char/drm/drm_stub.c
+diff --git a/drivers/gpu/drm/drm_stub.c b/drivers/gpu/drm/drm_stub.c
 index c2f584f..9b6ae82 100644
---- a/drivers/char/drm/drm_stub.c
-+++ b/drivers/char/drm/drm_stub.c
+--- a/drivers/gpu/drm/drm_stub.c
++++ b/drivers/gpu/drm/drm_stub.c
 @@ -36,7 +36,7 @@
  #include "drmP.h"
  #include "drm_core.h"
@@ -13242,10 +13250,10 @@ index c2f584f..9b6ae82 100644
  	if (dev->devname) {
  		drm_free(dev->devname, strlen(dev->devname) + 1,
  			 DRM_MEM_DRIVER);
-diff --git a/drivers/char/drm/drm_sysfs.c b/drivers/char/drm/drm_sysfs.c
+diff --git a/drivers/gpu/drm/drm_sysfs.c b/drivers/gpu/drm/drm_sysfs.c
 index af211a0..6f430f7 100644
---- a/drivers/char/drm/drm_sysfs.c
-+++ b/drivers/char/drm/drm_sysfs.c
+--- a/drivers/gpu/drm/drm_sysfs.c
++++ b/drivers/gpu/drm/drm_sysfs.c
 @@ -34,8 +34,11 @@ static int drm_sysfs_suspend(struct device *dev, pm_message_t state)
  	struct drm_minor *drm_minor = to_drm_minor(dev);
  	struct drm_device *drm_dev = drm_minor->dev;
@@ -13288,11 +13296,11 @@ index af211a0..6f430f7 100644
  	snprintf(minor->kdev.bus_id, BUS_ID_SIZE, minor_str, minor->index);
  
  	err = device_register(&minor->kdev);
-diff --git a/drivers/char/drm/drm_ttm.c b/drivers/char/drm/drm_ttm.c
+diff --git a/drivers/gpu/drm/drm_ttm.c b/drivers/gpu/drm/drm_ttm.c
 new file mode 100644
 index 0000000..ab4e8e5
 --- /dev/null
-+++ b/drivers/char/drm/drm_ttm.c
++++ b/drivers/gpu/drm/drm_ttm.c
 @@ -0,0 +1,464 @@
 +/**************************************************************************
 + *
@@ -13333,7 +13341,7 @@ index 0000000..ab4e8e5
 +
 +void drm_ttm_cache_flush(void)
 +{
-+	if (on_each_cpu(drm_ttm_ipi_handler, NULL, 1, 1) != 0)
++	if (on_each_cpu(drm_ttm_ipi_handler, NULL, 1) != 0)
 +		DRM_ERROR("Timed out waiting for drm cache flush.\n");
 +}
 +EXPORT_SYMBOL(drm_ttm_cache_flush);
@@ -13758,10 +13766,10 @@ index 0000000..ab4e8e5
 +	return 0;
 +}
 +EXPORT_SYMBOL(drm_ttm_bind);
-diff --git a/drivers/char/drm/drm_vm.c b/drivers/char/drm/drm_vm.c
+diff --git a/drivers/gpu/drm/drm_vm.c b/drivers/gpu/drm/drm_vm.c
 index c234c6f..94803ed 100644
---- a/drivers/char/drm/drm_vm.c
-+++ b/drivers/char/drm/drm_vm.c
+--- a/drivers/gpu/drm/drm_vm.c
++++ b/drivers/gpu/drm/drm_vm.c
 @@ -40,6 +40,10 @@
  
  static void drm_vm_open(struct vm_area_struct *vma);
@@ -14009,11 +14017,11 @@ index c234c6f..94803ed 100644
 +	drm_bo_vm_open_locked(vma);
 +	return 0;
 +}
-diff --git a/drivers/char/drm/i915_buffer.c b/drivers/char/drm/i915_buffer.c
+diff --git a/drivers/gpu/drm/i915_buffer.c b/drivers/gpu/drm/i915_buffer.c
 new file mode 100644
 index 0000000..4c9168c
 --- /dev/null
-+++ b/drivers/char/drm/i915_buffer.c
++++ b/drivers/gpu/drm/i915/i915_buffer.c
 @@ -0,0 +1,198 @@
 +/**************************************************************************
 + *
@@ -14213,10 +14221,10 @@ index 0000000..4c9168c
 +
 +	DRM_MEMORYBARRIER();
 +}
-diff --git a/drivers/char/drm/i915_dma.c b/drivers/char/drm/i915_dma.c
+diff --git a/drivers/gpu/drm/i915_dma.c b/drivers/gpu/drm/i915_dma.c
 index 8897434..e3fbb9a 100644
---- a/drivers/char/drm/i915_dma.c
-+++ b/drivers/char/drm/i915_dma.c
+--- a/drivers/gpu/drm/i915/i915_dma.c
++++ b/drivers/gpu/drm/i915/i915_dma.c
 @@ -36,10 +36,10 @@
   * the head pointer changes, so that EBUSY only happens if the ring
   * actually stalls for (eg) 3 seconds.
@@ -15566,10 +15574,10 @@ index 8897434..e3fbb9a 100644
  	return 1;
  }
 +
-diff --git a/drivers/char/drm/i915_drm.h b/drivers/char/drm/i915_drm.h
+diff --git a/include/drm/i915_drm.h b/include/drm/i915_drm.h
 index 05c66cf..1c45711 100644
---- a/drivers/char/drm/i915_drm.h
-+++ b/drivers/char/drm/i915_drm.h
+--- a/include/drm/i915_drm.h
++++ b/include/drm/i915_drm.h
 @@ -43,7 +43,12 @@ typedef struct _drm_i915_init {
  	enum {
  		I915_INIT_DMA = 0x01,
@@ -15779,10 +15787,10 @@ index 05c66cf..1c45711 100644
 +};
 +
  #endif				/* _I915_DRM_H_ */
-diff --git a/drivers/char/drm/i915_drv.c b/drivers/char/drm/i915_drv.c
+diff --git a/drivers/gpu/drm/i915_drv.c b/drivers/gpu/drm/i915_drv.c
 index 93aed1c..98f7b25 100644
---- a/drivers/char/drm/i915_drv.c
-+++ b/drivers/char/drm/i915_drv.c
+--- a/drivers/gpu/drm/i915/i915_drv.c
++++ b/drivers/gpu/drm/i915/i915_drv.c
 @@ -34,9 +34,33 @@
  
  #include "drm_pciids.h"
@@ -15856,10 +15864,10 @@ index 93aed1c..98f7b25 100644
  	return drm_init(&driver);
  }
  
-diff --git a/drivers/char/drm/i915_drv.h b/drivers/char/drm/i915_drv.h
+diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
 index d7326d9..a33b78c 100644
---- a/drivers/char/drm/i915_drv.h
-+++ b/drivers/char/drm/i915_drv.h
+--- a/drivers/gpu/drm/i915/i915_drv.h
++++ b/drivers/gpu/drm/i915/i915_drv.h
 @@ -37,7 +37,7 @@
  
  #define DRIVER_NAME		"i915"
@@ -16896,11 +16904,11 @@ index d7326d9..a33b78c 100644
  #define IS_I965G(dev) ((dev)->pci_device == 0x2972 || \
  		       (dev)->pci_device == 0x2982 || \
  		       (dev)->pci_device == 0x2992 || \
-diff --git a/drivers/char/drm/i915_fence.c b/drivers/char/drm/i915_fence.c
+diff --git a/drivers/gpu/drm/i915_fence.c b/drivers/gpu/drm/i915_fence.c
 new file mode 100644
 index 0000000..803cfe8
 --- /dev/null
-+++ b/drivers/char/drm/i915_fence.c
++++ b/drivers/gpu/drm/i915/i915_fence.c
 @@ -0,0 +1,269 @@
 +/**************************************************************************
 + *
@@ -17171,11 +17179,11 @@ index 0000000..803cfe8
 +	.needed_flush = i915_fence_needed_flush,
 +	.wait = i915_fence_wait,
 +};
-diff --git a/drivers/char/drm/i915_init.c b/drivers/char/drm/i915_init.c
+diff --git a/drivers/gpu/drm/i915_init.c b/drivers/gpu/drm/i915_init.c
 new file mode 100644
 index 0000000..4a53fc8
 --- /dev/null
-+++ b/drivers/char/drm/i915_init.c
++++ b/drivers/gpu/drm/i915/i915_init.c
 @@ -0,0 +1,411 @@
 +/*
 + * Copyright (c) 2007 Intel Corporation
@@ -17588,10 +17596,10 @@ index 0000000..4a53fc8
 +	drm_bo_driver_init(dev);
 +	return 0;
 +}
-diff --git a/drivers/char/drm/i915_ioc32.c b/drivers/char/drm/i915_ioc32.c
+diff --git a/drivers/gpu/drm/i915_ioc32.c b/drivers/gpu/drm/i915_ioc32.c
 index 1fe68a2..725fad2 100644
---- a/drivers/char/drm/i915_ioc32.c
-+++ b/drivers/char/drm/i915_ioc32.c
+--- a/drivers/gpu/drm/i915/i915_ioc32.c
++++ b/drivers/gpu/drm/i915/i915_ioc32.c
 @@ -182,12 +182,70 @@ static int compat_i915_alloc(struct file *file, unsigned int cmd,
  			 DRM_IOCTL_I915_ALLOC, (unsigned long)request);
  }
@@ -17664,10 +17672,10 @@ index 1fe68a2..725fad2 100644
  };
  
  /**
-diff --git a/drivers/char/drm/i915_irq.c b/drivers/char/drm/i915_irq.c
+diff --git a/drivers/gpu/drm/i915_irq.c b/drivers/gpu/drm/i915_irq.c
 index df03611..1e12d62 100644
---- a/drivers/char/drm/i915_irq.c
-+++ b/drivers/char/drm/i915_irq.c
+--- a/drivers/gpu/drm/i915/i915_irq.c
++++ b/drivers/gpu/drm/i915/i915_irq.c
 @@ -38,53 +38,113 @@
  #define MAX_NOPID ((u32)~0)
  
@@ -18336,10 +18344,10 @@ index df03611..1e12d62 100644
  	I915_WRITE16(I915REG_HWSTAM, 0xffff);
  	I915_WRITE16(I915REG_INT_MASK_R, 0xffff);
  	I915_WRITE16(I915REG_INT_ENABLE_R, 0x0);
-diff --git a/drivers/char/drm/i915_mem.c b/drivers/char/drm/i915_mem.c
+diff --git a/drivers/gpu/drm/i915_mem.c b/drivers/gpu/drm/i915_mem.c
 index 6126a60..15d63de 100644
---- a/drivers/char/drm/i915_mem.c
-+++ b/drivers/char/drm/i915_mem.c
+--- a/drivers/gpu/drm/i915/i915_mem.c
++++ b/drivers/gpu/drm/i915/i915_mem.c
 @@ -45,8 +45,9 @@
   */
  static void mark_block(struct drm_device * dev, struct mem_block *p, int in_use)
@@ -18405,11 +18413,11 @@ index 6126a60..15d63de 100644
  	struct mem_block **heap;
  
  	if ( !dev_priv ) {
-diff --git a/drivers/char/drm/intel_crt.c b/drivers/char/drm/intel_crt.c
+diff --git a/drivers/gpu/drm/intel_crt.c b/drivers/gpu/drm/intel_crt.c
 new file mode 100644
 index 0000000..a9fb50a
 --- /dev/null
-+++ b/drivers/char/drm/intel_crt.c
++++ b/drivers/gpu/drm/i915/intel_crt.c
 @@ -0,0 +1,274 @@
 +/*
 + * Copyright © 2006-2007 Intel Corporation
@@ -18685,11 +18693,11 @@ index 0000000..a9fb50a
 +
 +	drm_output_attach_property(output, dev->mode_config.connector_type_property, ConnectorVGA);
 +}
-diff --git a/drivers/char/drm/intel_display.c b/drivers/char/drm/intel_display.c
+diff --git a/drivers/gpu/drm/intel_display.c b/drivers/gpu/drm/intel_display.c
 new file mode 100644
 index 0000000..2e566d9
 --- /dev/null
-+++ b/drivers/char/drm/intel_display.c
++++ b/drivers/gpu/drm/i915/intel_display.c
 @@ -0,0 +1,1370 @@
 +/*
 + * Copyright © 2006-2007 Intel Corporation
@@ -20061,11 +20069,11 @@ index 0000000..2e566d9
 +{
 +	drm_mode_config_cleanup(dev);
 +}
-diff --git a/drivers/char/drm/intel_drv.h b/drivers/char/drm/intel_drv.h
+diff --git a/drivers/gpu/drm/intel_drv.h b/drivers/gpu/drm/intel_drv.h
 new file mode 100644
 index 0000000..a36fd3f
 --- /dev/null
-+++ b/drivers/char/drm/intel_drv.h
++++ b/include/drm/intel_drv.h
 @@ -0,0 +1,89 @@
 +/*
 + * Copyright (c) 2006 Dave Airlie <airlied@linux.ie>
@@ -20156,11 +20164,11 @@ index 0000000..a36fd3f
 +extern int intelfb_resize(struct drm_device *dev, struct drm_crtc *crtc);
 +
 +#endif /* __INTEL_DRV_H__ */
-diff --git a/drivers/char/drm/intel_fb.c b/drivers/char/drm/intel_fb.c
+diff --git a/drivers/gpu/drm/intel_fb.c b/drivers/gpu/drm/intel_fb.c
 new file mode 100644
 index 0000000..28cc324
 --- /dev/null
-+++ b/drivers/char/drm/intel_fb.c
++++ b/drivers/gpu/drm/i915/intel_fb.c
 @@ -0,0 +1,776 @@
 +/*
 + * Copyright © 2007 David Airlie
@@ -20938,11 +20946,11 @@ index 0000000..28cc324
 +}
 +EXPORT_SYMBOL(intelfb_remove);
 +MODULE_LICENSE("GPL");
-diff --git a/drivers/char/drm/intel_i2c.c b/drivers/char/drm/intel_i2c.c
+diff --git a/drivers/gpu/drm/intel_i2c.c b/drivers/gpu/drm/intel_i2c.c
 new file mode 100644
 index 0000000..efcbf65
 --- /dev/null
-+++ b/drivers/char/drm/intel_i2c.c
++++ b/drivers/gpu/drm/i915/intel_i2c.c
 @@ -0,0 +1,190 @@
 +/*
 + * Copyright © 2006-2007 Intel Corporation
@@ -21134,11 +21142,11 @@ index 0000000..efcbf65
 +
 +	
 +	
-diff --git a/drivers/char/drm/intel_lvds.c b/drivers/char/drm/intel_lvds.c
+diff --git a/drivers/gpu/drm/intel_lvds.c b/drivers/gpu/drm/intel_lvds.c
 new file mode 100644
 index 0000000..81d624f
 --- /dev/null
-+++ b/drivers/char/drm/intel_lvds.c
++++ b/drivers/gpu/drm/i915/intel_lvds.c
 @@ -0,0 +1,509 @@
 +/*
 + * Copyright © 2006-2007 Intel Corporation
@@ -21649,11 +21657,11 @@ index 0000000..81d624f
 +        DRM_DEBUG("No LVDS modes found, disabling.\n");
 +	drm_output_destroy(output); /* calls intel_lvds_destroy above */
 +}
-diff --git a/drivers/char/drm/intel_modes.c b/drivers/char/drm/intel_modes.c
+diff --git a/drivers/gpu/drm/intel_modes.c b/drivers/gpu/drm/intel_modes.c
 new file mode 100644
 index 0000000..f8bf496
 --- /dev/null
-+++ b/drivers/char/drm/intel_modes.c
++++ b/drivers/gpu/drm/i915/intel_modes.c
 @@ -0,0 +1,63 @@
 +/*
 + * Copyright (c) 2007 Dave Airlie <airlied@linux.ie>
@@ -21718,11 +21726,11 @@ index 0000000..f8bf496
 +	}
 +	return ret;
 +}
-diff --git a/drivers/char/drm/intel_sdvo.c b/drivers/char/drm/intel_sdvo.c
+diff --git a/drivers/gpu/drm/intel_sdvo.c b/drivers/gpu/drm/intel_sdvo.c
 new file mode 100644
 index 0000000..3887df0
 --- /dev/null
-+++ b/drivers/char/drm/intel_sdvo.c
++++ b/drivers/gpu/drm/i915/intel_sdvo.c
 @@ -0,0 +1,1168 @@
 +/*
 + * Copyright © 2006-2007 Intel Corporation
@@ -22892,11 +22900,11 @@ index 0000000..3887df0
 +
 +	drm_output_attach_property(output, dev->mode_config.connector_type_property, connector_type);
 +}
-diff --git a/drivers/char/drm/intel_sdvo_regs.h b/drivers/char/drm/intel_sdvo_regs.h
+diff --git a/drivers/gpu/drm/i915/intel_sdvo_regs.h b/drivers/gpu/drm/i915/intel_sdvo_regs.h
 new file mode 100644
 index 0000000..a9d1671
 --- /dev/null
-+++ b/drivers/char/drm/intel_sdvo_regs.h
++++ b/drivers/gpu/drm/i915/intel_sdvo_regs.h
 @@ -0,0 +1,328 @@
 +/*
 + * Copyright � 2006-2007 Intel Corporation
@@ -23226,11 +23234,11 @@ index 0000000..a9d1671
 +# define SDVO_CONTROL_BUS_DDC2				0x2
 +# define SDVO_CONTROL_BUS_DDC3				0x3
 +
-diff --git a/drivers/char/drm/intel_tv.c b/drivers/char/drm/intel_tv.c
+diff --git a/drivers/gpu/drm/i915/intel_tv.c b/drivers/gpu/drm/i915/intel_tv.c
 new file mode 100644
 index 0000000..82c186e
 --- /dev/null
-+++ b/drivers/char/drm/intel_tv.c
++++ b/drivers/gpu/drm/i915/intel_tv.c
 @@ -0,0 +1,1763 @@
 +/*
 + * Copyright © 2006 Intel Corporation
@@ -24995,11 +25003,11 @@ index 0000000..82c186e
 +	output->interlace_allowed = false;
 +	output->doublescan_allowed = false;
 +}
-diff --git a/drivers/char/drm/nouveau_bo.c b/drivers/char/drm/nouveau_bo.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_bo.c b/drivers/gpu/drm/nouveau/nouveau_bo.c
 new file mode 100644
 index 0000000..ab3b23a
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_bo.c
++++ b/drivers/gpu/drm/nouveau/nouveau_bo.c
 @@ -0,0 +1,296 @@
 +/*
 + * Copyright 2007 Dave Airlied
@@ -25297,11 +25305,11 @@ index 0000000..ab3b23a
 +	.ttm_cache_flush= nouveau_bo_flush_ttm,
 +	.command_stream_barrier = NULL
 +};
-diff --git a/drivers/char/drm/nouveau_dma.c b/drivers/char/drm/nouveau_dma.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_dma.c b/drivers/gpu/drm/nouveau/nouveau_dma.c
 new file mode 100644
 index 0000000..e519dc4
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_dma.c
++++ b/drivers/gpu/drm/nouveau/nouveau_dma.c
 @@ -0,0 +1,172 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -25475,11 +25483,11 @@ index 0000000..e519dc4
 +
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nouveau_dma.h b/drivers/char/drm/nouveau_dma.h
+diff --git a/drivers/gpu/drm/nouveau/nouveau_dma.h b/drivers/gpu/drm/nouveau/nouveau_dma.h
 new file mode 100644
 index 0000000..ce3c58c
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_dma.h
++++ b/drivers/gpu/drm/nouveau/nouveau_dma.h
 @@ -0,0 +1,96 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -25577,11 +25585,11 @@ index 0000000..ce3c58c
 +} while(0)
 +
 +#endif
-diff --git a/drivers/char/drm/nouveau_drm.h b/drivers/char/drm/nouveau_drm.h
+diff --git a/drivers/gpu/drm/nouveau/nouveau_drm.h b/drivers/gpu/drm/nouveau/nouveau_drm.h
 new file mode 100644
 index 0000000..cf76205
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_drm.h
++++ b/drivers/gpu/drm/nouveau/nouveau_drm.h
 @@ -0,0 +1,170 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
@@ -25753,11 +25761,11 @@ index 0000000..cf76205
 +#define DRM_NOUVEAU_MEM_FREE           0x09
 +
 +#endif /* __NOUVEAU_DRM_H__ */
-diff --git a/drivers/char/drm/nouveau_drv.c b/drivers/char/drm/nouveau_drv.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.c b/drivers/gpu/drm/nouveau/nouveau_drv.c
 new file mode 100644
 index 0000000..d26cde4
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_drv.c
++++ b/drivers/gpu/drm/nouveau/nouveau_drv.c
 @@ -0,0 +1,108 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
@@ -25867,11 +25875,11 @@ index 0000000..d26cde4
 +MODULE_AUTHOR(DRIVER_AUTHOR);
 +MODULE_DESCRIPTION(DRIVER_DESC);
 +MODULE_LICENSE("GPL and additional rights");
-diff --git a/drivers/char/drm/nouveau_drv.h b/drivers/char/drm/nouveau_drv.h
+diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.h b/drivers/gpu/drm/nouveau/nouveau_drv.h
 new file mode 100644
 index 0000000..a51e552
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_drv.h
++++ b/drivers/gpu/drm/nouveau/nouveau_drv.h
 @@ -0,0 +1,606 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
@@ -26479,11 +26487,11 @@ index 0000000..a51e552
 +#define INSTANCE_WR(o,i,v) NV_WI32((o)->im_pramin->start + ((i)<<2), (v))
 +
 +#endif /* __NOUVEAU_DRV_H__ */
-diff --git a/drivers/char/drm/nouveau_fence.c b/drivers/char/drm/nouveau_fence.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_fence.c b/drivers/gpu/drm/nouveau/nouveau_fence.c
 new file mode 100644
 index 0000000..4ad51ae
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_fence.c
++++ b/drivers/gpu/drm/nouveau/nouveau_fence.c
 @@ -0,0 +1,119 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -26604,11 +26612,11 @@ index 0000000..4ad51ae
 +	.needed_flush   = NULL,
 +	.wait           = NULL
 +};
-diff --git a/drivers/char/drm/nouveau_fifo.c b/drivers/char/drm/nouveau_fifo.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_fifo.c b/drivers/gpu/drm/nouveau/nouveau_fifo.c
 new file mode 100644
 index 0000000..d8fda27
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_fifo.c
++++ b/drivers/gpu/drm/nouveau/nouveau_fifo.c
 @@ -0,0 +1,598 @@
 +/*
 + * Copyright 2005-2006 Stephane Marchesin
@@ -27208,11 +27216,11 @@ index 0000000..d8fda27
 +};
 +
 +int nouveau_max_ioctl = DRM_ARRAY_SIZE(nouveau_ioctls);
-diff --git a/drivers/char/drm/nouveau_ioc32.c b/drivers/char/drm/nouveau_ioc32.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_ioc32.c b/drivers/gpu/drm/nouveau/nouveau_ioc32.c
 new file mode 100644
 index 0000000..4f53a50
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_ioc32.c
++++ b/drivers/gpu/drm/nouveau/nouveau_ioc32.c
 @@ -0,0 +1,68 @@
 +/**
 + * \file mga_ioc32.c
@@ -27282,11 +27290,11 @@ index 0000000..4f53a50
 +
 +	return ret;
 +}
-diff --git a/drivers/char/drm/nouveau_irq.c b/drivers/char/drm/nouveau_irq.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_irq.c b/drivers/gpu/drm/nouveau/nouveau_irq.c
 new file mode 100644
 index 0000000..ec158d8
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_irq.c
++++ b/drivers/gpu/drm/nouveau/nouveau_irq.c
 @@ -0,0 +1,511 @@
 +/*
 + * Copyright (C) 2006 Ben Skeggs.
@@ -27799,11 +27807,11 @@ index 0000000..ec158d8
 +
 +	return IRQ_HANDLED;
 +}
-diff --git a/drivers/char/drm/nouveau_mem.c b/drivers/char/drm/nouveau_mem.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_mem.c b/drivers/gpu/drm/nouveau/nouveau_mem.c
 new file mode 100644
 index 0000000..c861267
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_mem.c
++++ b/drivers/gpu/drm/nouveau/nouveau_mem.c
 @@ -0,0 +1,780 @@
 +/*
 + * Copyright (C) The Weather Channel, Inc.  2002.  All Rights Reserved.
@@ -28585,11 +28593,11 @@ index 0000000..c861267
 +	nouveau_mem_free(dev, block);
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nouveau_notifier.c b/drivers/char/drm/nouveau_notifier.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_notifier.c b/drivers/gpu/drm/nouveau/nouveau_notifier.c
 new file mode 100644
 index 0000000..82c8ab7
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_notifier.c
++++ b/drivers/gpu/drm/nouveau/nouveau_notifier.c
 @@ -0,0 +1,165 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -28756,11 +28764,11 @@ index 0000000..82c8ab7
 +
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nouveau_object.c b/drivers/char/drm/nouveau_object.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_object.c b/drivers/gpu/drm/nouveau/nouveau_object.c
 new file mode 100644
 index 0000000..df534bd
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_object.c
++++ b/drivers/gpu/drm/nouveau/nouveau_object.c
 @@ -0,0 +1,1172 @@
 +/*
 + * Copyright (C) 2006 Ben Skeggs.
@@ -29503,7 +29511,7 @@ index 0000000..df534bd
 +							     PAGE_SIZE,
 +							     DMA_BIDIRECTIONAL);
 +
-+					if (dma_mapping_error(dev->sg->busaddr[idx])) {
++					if (dma_mapping_error(NULL, dev->sg->busaddr[idx])) {
 +						return -ENOMEM;
 +					}
 +				}
@@ -29934,11 +29942,11 @@ index 0000000..df534bd
 +	return 0;
 +}
 +
-diff --git a/drivers/char/drm/nouveau_reg.h b/drivers/char/drm/nouveau_reg.h
+diff --git a/include/drm/nouveau_reg.h b/include/drm/nouveau_reg.h
 new file mode 100644
 index 0000000..1ae0177
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_reg.h
++++ b/include/drm/nouveau_reg.h
 @@ -0,0 +1,593 @@
 +
 +
@@ -30533,11 +30541,11 @@ index 0000000..1ae0177
 +#define NV40_RAMFC_UNK_48                                        0x48
 +#define NV40_RAMFC_UNK_4C                                        0x4C
 +#define NV40_RAMFC_UNK_50                                        0x50
-diff --git a/drivers/char/drm/nouveau_sgdma.c b/drivers/char/drm/nouveau_sgdma.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_sgdma.c b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
 new file mode 100644
 index 0000000..cc4d5a9
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_sgdma.c
++++ b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
 @@ -0,0 +1,341 @@
 +#include "drmP.h"
 +#include "nouveau_drv.h"
@@ -30589,7 +30597,7 @@ index 0000000..cc4d5a9
 +							 page, o,
 +							 NV_CTXDMA_PAGE_SIZE,
 +							 PCI_DMA_BIDIRECTIONAL);
-+			if (pci_dma_mapping_error(nvbe->pagelist[d])) {
++			if (pci_dma_mapping_error(nvbe->dev->pdev, nvbe->pagelist[d])) {
 +				be->func->clear(be);
 +				DRM_ERROR("pci_map_page failed\n");
 +				return -EINVAL;
@@ -30764,7 +30772,7 @@ index 0000000..cc4d5a9
 +
 +	dev_priv->gart_info.sg_dummy_page =
 +		alloc_page(GFP_KERNEL|__GFP_DMA32);
-+	SetPageLocked(dev_priv->gart_info.sg_dummy_page);
++	set_page_locked(dev_priv->gart_info.sg_dummy_page);
 +	dev_priv->gart_info.sg_dummy_bus =
 +		pci_map_page(dev->pdev, dev_priv->gart_info.sg_dummy_page, 0,
 +			     PAGE_SIZE, PCI_DMA_BIDIRECTIONAL);
@@ -30880,11 +30888,11 @@ index 0000000..cc4d5a9
 +	DRM_ERROR("Unimplemented on NV50\n");
 +	return -EINVAL;
 +}
-diff --git a/drivers/char/drm/nouveau_state.c b/drivers/char/drm/nouveau_state.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_state.c b/drivers/gpu/drm/nouveau/nouveau_state.c
 new file mode 100644
 index 0000000..d273d4b
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_state.c
++++ b/drivers/gpu/drm/nouveau/nouveau_state.c
 @@ -0,0 +1,705 @@
 +/*
 + * Copyright 2005 Stephane Marchesin
@@ -31591,11 +31599,11 @@ index 0000000..d273d4b
 +	}
 +	}
 +}
-diff --git a/drivers/char/drm/nouveau_swmthd.c b/drivers/char/drm/nouveau_swmthd.c
+diff --git a/drivers/gpu/drm/nouveau/nouveau_swmthd.c b/drivers/gpu/drm/nouveau/nouveau_swmthd.c
 new file mode 100644
 index 0000000..c3666bf
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_swmthd.c
++++ b/drivers/gpu/drm/nouveau/nouveau_swmthd.c
 @@ -0,0 +1,191 @@
 +/*
 + * Copyright (C) 2007 Arthur Huillet.
@@ -31788,11 +31796,11 @@ index 0000000..c3666bf
 +
 +	 return 1;
 + }
-diff --git a/drivers/char/drm/nouveau_swmthd.h b/drivers/char/drm/nouveau_swmthd.h
+diff --git a/drivers/gpu/drm/nouveau/nouveau_swmthd.h b/drivers/gpu/drm/nouveau/nouveau_swmthd.h
 new file mode 100644
 index 0000000..5b9409f
 --- /dev/null
-+++ b/drivers/char/drm/nouveau_swmthd.h
++++ b/drivers/gpu/drm/nouveau/nouveau_swmthd.h
 @@ -0,0 +1,33 @@
 +/*
 + * Copyright (C) 2007 Arthur Huillet.
@@ -31827,11 +31835,11 @@ index 0000000..5b9409f
 + */
 +
 +int nouveau_sw_method_execute(struct drm_device *dev, uint32_t oclass, uint32_t method); /* execute the given software method, returns 0 on success */
-diff --git a/drivers/char/drm/nv04_fb.c b/drivers/char/drm/nv04_fb.c
+diff --git a/drivers/gpu/drm/nouveau/nv04_fb.c b/drivers/gpu/drm/nouveau/nv04_fb.c
 new file mode 100644
 index 0000000..58a9247
 --- /dev/null
-+++ b/drivers/char/drm/nv04_fb.c
++++ b/drivers/gpu/drm/nouveau/nv04_fb.c
 @@ -0,0 +1,23 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -31856,11 +31864,11 @@ index 0000000..58a9247
 +nv04_fb_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv04_fifo.c b/drivers/char/drm/nv04_fifo.c
+diff --git a/drivers/gpu/drm/nouveau/nv04_fifo.c b/drivers/gpu/drm/nouveau/nv04_fifo.c
 new file mode 100644
 index 0000000..230c8e7
 --- /dev/null
-+++ b/drivers/char/drm/nv04_fifo.c
++++ b/drivers/gpu/drm/nouveau/nv04_fifo.c
 @@ -0,0 +1,138 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -32000,11 +32008,11 @@ index 0000000..230c8e7
 +
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv04_graph.c b/drivers/char/drm/nv04_graph.c
+diff --git a/drivers/gpu/drm/nouveau/nv04_graph.c b/drivers/gpu/drm/nouveau/nv04_graph.c
 new file mode 100644
 index 0000000..6caae25
 --- /dev/null
-+++ b/drivers/char/drm/nv04_graph.c
++++ b/drivers/gpu/drm/nouveau/nv04_graph.c
 @@ -0,0 +1,516 @@
 +/*
 + * Copyright 2007 Stephane Marchesin
@@ -32522,11 +32530,11 @@ index 0000000..6caae25
 +void nv04_graph_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv04_instmem.c b/drivers/char/drm/nv04_instmem.c
+diff --git a/drivers/gpu/drm/nouveau/nv04_instmem.c b/drivers/gpu/drm/nouveau/nv04_instmem.c
 new file mode 100644
 index 0000000..804f9a7
 --- /dev/null
-+++ b/drivers/char/drm/nv04_instmem.c
++++ b/drivers/gpu/drm/nouveau/nv04_instmem.c
 @@ -0,0 +1,159 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -32687,11 +32695,11 @@ index 0000000..804f9a7
 +	gpuobj->im_bound = 0;
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv04_mc.c b/drivers/char/drm/nv04_mc.c
+diff --git a/drivers/gpu/drm/nouveau/nv04_mc.c b/drivers/gpu/drm/nouveau/nv04_mc.c
 new file mode 100644
 index 0000000..24c1f7b
 --- /dev/null
-+++ b/drivers/char/drm/nv04_mc.c
++++ b/drivers/gpu/drm/nouveau/nv04_mc.c
 @@ -0,0 +1,22 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -32715,11 +32723,11 @@ index 0000000..24c1f7b
 +nv04_mc_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv04_timer.c b/drivers/char/drm/nv04_timer.c
+diff --git a/drivers/gpu/drm/nouveau/nv04_timer.c b/drivers/gpu/drm/nouveau/nv04_timer.c
 new file mode 100644
 index 0000000..616f197
 --- /dev/null
-+++ b/drivers/char/drm/nv04_timer.c
++++ b/drivers/gpu/drm/nouveau/nv04_timer.c
 @@ -0,0 +1,53 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -32774,11 +32782,11 @@ index 0000000..616f197
 +nv04_timer_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv10_fb.c b/drivers/char/drm/nv10_fb.c
+diff --git a/drivers/gpu/drm/nouveau/nv10_fb.c b/drivers/gpu/drm/nouveau/nv10_fb.c
 new file mode 100644
 index 0000000..6e0773a
 --- /dev/null
-+++ b/drivers/char/drm/nv10_fb.c
++++ b/drivers/gpu/drm/nouveau/nv10_fb.c
 @@ -0,0 +1,25 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -32805,11 +32813,11 @@ index 0000000..6e0773a
 +nv10_fb_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv10_fifo.c b/drivers/char/drm/nv10_fifo.c
+diff --git a/drivers/gpu/drm/nouveau/nv10_fifo.c b/drivers/gpu/drm/nouveau/nv10_fifo.c
 new file mode 100644
 index 0000000..6d50b6c
 --- /dev/null
-+++ b/drivers/char/drm/nv10_fifo.c
++++ b/drivers/gpu/drm/nouveau/nv10_fifo.c
 @@ -0,0 +1,169 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -32980,11 +32988,11 @@ index 0000000..6d50b6c
 +
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv10_graph.c b/drivers/char/drm/nv10_graph.c
+diff --git a/drivers/gpu/drm/nouveau/nv10_graph.c b/drivers/gpu/drm/nouveau/nv10_graph.c
 new file mode 100644
 index 0000000..9bf6c7e
 --- /dev/null
-+++ b/drivers/char/drm/nv10_graph.c
++++ b/drivers/gpu/drm/nouveau/nv10_graph.c
 @@ -0,0 +1,871 @@
 +/*
 + * Copyright 2007 Matthieu CASTET <castet.matthieu@free.fr>
@@ -33857,11 +33865,11 @@ index 0000000..9bf6c7e
 +void nv10_graph_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv20_graph.c b/drivers/char/drm/nv20_graph.c
+diff --git a/drivers/gpu/drm/nouveau/nv20_graph.c b/drivers/gpu/drm/nouveau/nv20_graph.c
 new file mode 100644
 index 0000000..d171113
 --- /dev/null
-+++ b/drivers/char/drm/nv20_graph.c
++++ b/drivers/gpu/drm/nouveau/nv20_graph.c
 @@ -0,0 +1,889 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -34752,11 +34760,11 @@ index 0000000..d171113
 +
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv40_fb.c b/drivers/char/drm/nv40_fb.c
+diff --git a/drivers/gpu/drm/nouveau/nv40_fb.c b/drivers/gpu/drm/nouveau/nv40_fb.c
 new file mode 100644
 index 0000000..ae784cb
 --- /dev/null
-+++ b/drivers/char/drm/nv40_fb.c
++++ b/drivers/gpu/drm/nouveau/nv40_fb.c
 @@ -0,0 +1,62 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -34820,11 +34828,11 @@ index 0000000..ae784cb
 +nv40_fb_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv40_fifo.c b/drivers/char/drm/nv40_fifo.c
+diff --git a/drivers/gpu/drm/nouveau/nv40_fifo.c b/drivers/gpu/drm/nouveau/nv40_fifo.c
 new file mode 100644
 index 0000000..fc38bb9
 --- /dev/null
-+++ b/drivers/char/drm/nv40_fifo.c
++++ b/drivers/gpu/drm/nouveau/nv40_fifo.c
 @@ -0,0 +1,199 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -35025,11 +35033,11 @@ index 0000000..fc38bb9
 +	NV_WRITE(NV04_PFIFO_DMA_TIMESLICE, 0x2101ffff);
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv40_graph.c b/drivers/char/drm/nv40_graph.c
+diff --git a/drivers/gpu/drm/nouveau/nv40_graph.c b/drivers/gpu/drm/nouveau/nv40_graph.c
 new file mode 100644
 index 0000000..2540fc5
 --- /dev/null
-+++ b/drivers/char/drm/nv40_graph.c
++++ b/drivers/gpu/drm/nouveau/nv40_graph.c
 @@ -0,0 +1,1917 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -36948,11 +36956,11 @@ index 0000000..2540fc5
 +void nv40_graph_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv40_mc.c b/drivers/char/drm/nv40_mc.c
+diff --git a/drivers/gpu/drm/nouveau/nv40_mc.c b/drivers/gpu/drm/nouveau/nv40_mc.c
 new file mode 100644
 index 0000000..ead6f87
 --- /dev/null
-+++ b/drivers/char/drm/nv40_mc.c
++++ b/drivers/gpu/drm/nouveau/nv40_mc.c
 @@ -0,0 +1,38 @@
 +#include "drmP.h"
 +#include "drm.h"
@@ -36992,11 +37000,11 @@ index 0000000..ead6f87
 +nv40_mc_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/nv50_fifo.c b/drivers/char/drm/nv50_fifo.c
+diff --git a/drivers/gpu/drm/nouveau/nv50_fifo.c b/drivers/gpu/drm/nouveau/nv50_fifo.c
 new file mode 100644
 index 0000000..edf4edb
 --- /dev/null
-+++ b/drivers/char/drm/nv50_fifo.c
++++ b/drivers/gpu/drm/nouveau/nv50_fifo.c
 @@ -0,0 +1,339 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -37337,11 +37345,11 @@ index 0000000..edf4edb
 +	DRM_ERROR("stub!\n");
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv50_graph.c b/drivers/char/drm/nv50_graph.c
+diff --git a/drivers/gpu/drm/nouveau/nv50_graph.c b/drivers/gpu/drm/nouveau/nv50_graph.c
 new file mode 100644
 index 0000000..55df5fc
 --- /dev/null
-+++ b/drivers/char/drm/nv50_graph.c
++++ b/drivers/gpu/drm/nouveau/nv50_graph.c
 @@ -0,0 +1,960 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -38303,11 +38311,11 @@ index 0000000..55df5fc
 +
 +	return nv50_graph_transfer_context(dev, inst, 1);
 +}
-diff --git a/drivers/char/drm/nv50_instmem.c b/drivers/char/drm/nv50_instmem.c
+diff --git a/drivers/gpu/drm/nouveau/nv50_instmem.c b/drivers/gpu/drm/nouveau/nv50_instmem.c
 new file mode 100644
 index 0000000..b7a51f0
 --- /dev/null
-+++ b/drivers/char/drm/nv50_instmem.c
++++ b/drivers/gpu/drm/nouveau/nv50_instmem.c
 @@ -0,0 +1,324 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -38633,11 +38641,11 @@ index 0000000..b7a51f0
 +	gpuobj->im_bound = 0;
 +	return 0;
 +}
-diff --git a/drivers/char/drm/nv50_mc.c b/drivers/char/drm/nv50_mc.c
+diff --git a/drivers/gpu/drm/nouveau/nv50_mc.c b/drivers/gpu/drm/nouveau/nv50_mc.c
 new file mode 100644
 index 0000000..b111826
 --- /dev/null
-+++ b/drivers/char/drm/nv50_mc.c
++++ b/drivers/gpu/drm/nouveau/nv50_mc.c
 @@ -0,0 +1,43 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
@@ -38682,10 +38690,10 @@ index 0000000..b111826
 +void nv50_mc_takedown(struct drm_device *dev)
 +{
 +}
-diff --git a/drivers/char/drm/radeon_cp.c b/drivers/char/drm/radeon_cp.c
+diff --git a/drivers/gpu/drm/radeon/radeon_cp.c b/drivers/gpu/drm/radeon/radeon_cp.c
 index e53158f..6ec5d98 100644
---- a/drivers/char/drm/radeon_cp.c
-+++ b/drivers/char/drm/radeon_cp.c
+--- a/drivers/gpu/drm/radeon/radeon_cp.c
++++ b/drivers/gpu/drm/radeon/radeon_cp.c
 @@ -651,15 +651,17 @@ static void radeon_cp_init_ring_buffer(struct drm_device * dev,
  	tmp = RADEON_READ(RADEON_BUS_CNTL) & ~RADEON_BUS_MASTER_DIS;
  	RADEON_WRITE(RADEON_BUS_CNTL, tmp);
@@ -38784,10 +38792,10 @@ index e53158f..6ec5d98 100644
  	drm_free(dev_priv, sizeof(*dev_priv), DRM_MEM_DRIVER);
  
  	dev->dev_private = NULL;
-diff --git a/drivers/char/drm/radeon_drv.c b/drivers/char/drm/radeon_drv.c
+diff --git a/drivers/gpu/drm/radeon/radeon_drv.c b/drivers/gpu/drm/radeon/radeon_drv.c
 index 349ac3d..52b7c46 100644
---- a/drivers/char/drm/radeon_drv.c
-+++ b/drivers/char/drm/radeon_drv.c
+--- a/drivers/gpu/drm/radeon/radeon_drv.c
++++ b/drivers/gpu/drm/radeon/radeon_drv.c
 @@ -81,6 +81,8 @@ static struct drm_driver driver = {
  	.get_reg_ofs = drm_core_get_reg_ofs,
  	.ioctls = radeon_ioctls,
@@ -38797,10 +38805,10 @@ index 349ac3d..52b7c46 100644
  	.fops = {
  		 .owner = THIS_MODULE,
  		 .open = drm_open,
-diff --git a/drivers/char/drm/radeon_drv.h b/drivers/char/drm/radeon_drv.h
+diff --git a/drivers/gpu/drm/radeon/radeon_drv.h b/drivers/gpu/drm/radeon/radeon_drv.h
 index 3f0eca9..2e5ffb7 100644
---- a/drivers/char/drm/radeon_drv.h
-+++ b/drivers/char/drm/radeon_drv.h
+--- a/drivers/gpu/drm/radeon/radeon_drv.h
++++ b/drivers/gpu/drm/radeon/radeon_drv.h
 @@ -280,8 +280,6 @@ typedef struct drm_radeon_private {
  	unsigned long buffers_offset;
  	unsigned long gart_textures_offset;
@@ -38811,9 +38819,9 @@ index 3f0eca9..2e5ffb7 100644
  	drm_local_map_t *ring_rptr;
  	drm_local_map_t *gart_textures;
 @@ -311,8 +309,13 @@ typedef struct drm_radeon_private {
- 	unsigned long fb_aper_offset;
  
  	int num_gb_pipes;
+ 	int track_flush;
 +	drm_local_map_t *mmio;
  } drm_radeon_private_t;
  
@@ -38834,10 +38842,10 @@ index 3f0eca9..2e5ffb7 100644
  /* r300_cmdbuf.c */
  extern void r300_init_reg_flags(struct drm_device *dev);
  
-diff --git a/drivers/char/drm/radeon_state.c b/drivers/char/drm/radeon_state.c
+diff --git a/drivers/gpu/drm/radeon/radeon_state.c b/drivers/gpu/drm/radeon/radeon_state.c
 index 11c146b..822a858 100644
---- a/drivers/char/drm/radeon_state.c
-+++ b/drivers/char/drm/radeon_state.c
+--- a/drivers/gpu/drm/radeon/radeon_state.c
++++ b/drivers/gpu/drm/radeon/radeon_state.c
 @@ -1415,10 +1415,11 @@ static void radeon_cp_dispatch_swap(struct drm_device * dev)
  	ADVANCE_RING();
  }

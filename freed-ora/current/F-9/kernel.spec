@@ -20,8 +20,8 @@ Summary: The Linux kernel
 # kernel spec when the kernel is rebased, so fedora_build automatically
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
-%define fedora_cvs_origin   727
-%define fedora_build_string %(R="$Revision: 1.813 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_cvs_origin   813
+%define fedora_build_string %(R="$Revision: 1.832 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -30,11 +30,11 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 26
+%define base_sublevel 27
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 2
+#define librev
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -102,6 +102,8 @@ Summary: The Linux kernel
 %define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
+# kernel-firmware
+%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
@@ -171,6 +173,7 @@ Summary: The Linux kernel
 
 %define KVERREL %{PACKAGE_VERSION}-libre.%{PACKAGE_RELEASE}.%{_target_cpu}
 %define hdrarch %_target_cpu
+%define asmarch %_target_cpu
 
 %if 0%{!?nopatches:1}
 %define nopatches 0
@@ -288,10 +291,12 @@ Summary: The Linux kernel
 %endif
 
 # don't build noarch kernels or headers (duh)
+# build firmware noarch unless overridden
 %ifarch noarch
 %define with_up 0
 %define with_headers 0
 %define all_arch_configs kernel-%{version}-*.config
+%define with_firmware  %{?_without_firmware:  0} %{?!_without_firmware:  1}
 %endif
 
 # bootwrapper is only on ppc
@@ -310,12 +315,14 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-i?86*.config
 %define image_install_path boot
 %define hdrarch i386
+%define asmarch x86
 # we build always xen i686 HV with pae
 %define xen_flags verbose=y crash_debug=y pae=y
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
 %ifarch x86_64
+%define asmarch x86
 %define all_arch_configs kernel-%{version}-x86_64*.config
 %define image_install_path boot
 %define kernel_image arch/x86/boot/bzImage
@@ -447,7 +454,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.39-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -516,7 +523,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: linux-%{kversion}-libre%{?librev}.tar.bz2
+Source0: http://fsfla.org/selibre/linux-libre/download/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
 #Source1: xen-%{xen_hv_cset}.tar.bz2
 Source2: Config.mk
 
@@ -534,18 +541,14 @@ Source20: Makefile.config
 Source21: config-debug
 Source22: config-nodebug
 Source23: config-generic
-Source24: config-xen-generic
 Source25: config-rhel-generic
-Source26: config-rhel-x86-generic
 
 Source30: config-x86-generic
 Source31: config-i586
 Source32: config-i686
 Source33: config-i686-PAE
-Source34: config-xen-x86
 
 Source40: config-x86_64-generic
-Source41: config-xen-x86_64
 
 Source50: config-powerpc-generic
 Source51: config-powerpc32-generic
@@ -554,13 +557,10 @@ Source53: config-powerpc64
 Source54: config-powerpc64-kdump
 
 Source60: config-ia64-generic
-Source61: config-ia64
-Source62: config-xen-ia64
 
 Source70: config-s390x
 
 Source90: config-sparc64-generic
-Source91: config-sparc64
 Source92: config-sparc64-smp
 
 # Here should be only the patches up to the upstream canonical Linus tree.
@@ -602,7 +602,6 @@ Patch06: linux-2.6-build-nonintconfig.patch
 
 # we also need compile fixes for -vanilla
 Patch07: linux-2.6-compile-fixes.patch
-Patch08: linux-2.6-compile-fix-gcc-43.patch
 
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
@@ -615,22 +614,19 @@ Patch10: linux-2.6-hotfixes.patch
 # patches queued for the next -stable release
 #Patch11: linux-2.6-stable-queue.patch
 
-Patch20: linux-2.6-ptrace-cleanup.patch
-Patch21: linux-2.6-tracehook.patch
-Patch22: linux-2.6-utrace.patch
-Patch23: linux-2.6-kernel-doc-structs-private.patch
-Patch24: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+Patch21: linux-2.6-utrace.patch
+Patch22: linux-2.6-x86-tracehook.patch
+Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch41: linux-2.6-sysrq-c.patch
-Patch42: linux-2.6-sched-clock-fix-nohz-interaction.patch
+Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+
+Patch60: linux-2.6-sched-features-disable-hrtick.patch
+Patch61: linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 Patch70: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
-Patch87: linux-2.6-x86-apic-dump-all-regs-v3.patch
-Patch97: linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
-Patch100: linux-2.6-x86-pci-detect-end_bus_number.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
-Patch106: linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -639,9 +635,6 @@ Patch142: linux-2.6-ps3-legacy-bootloader-hack.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
-Patch148: linux-2.6-powerpc-zImage-32MiB.patch
-Patch150: linux-2.6-fbdev-teach-offb-about-palette-on-radeon-r500-r600.patch
-Patch151: linux-2.6-powerpc-fix-OF-parsing-of-64-bits-pci-addresses.patch
 
 Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
@@ -652,110 +645,103 @@ Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+
+Patch392: linux-2.6-acpi-clear-wake-status.patch
+Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
+
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-
 # filesystem patches
-Patch420: linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 Patch421: linux-2.6-squashfs.patch
-Patch422: linux-2.6-fs-cifs-fix-plaintext-authentication.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch440: linux-2.6-net-tcp-option-ordering.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch451: linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
-Patch452: linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+Patch451: linux-2.6-input-dell-keyboard-keyup.patch
+Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
+# hush pci bar allocation failures
+Patch520: linux-2.6.27-pci-hush-allocation-failures.patch
+# EC storms aren't anything you can fix, shut up already
+Patch530: linux-2.6.27-acpi-ec-drizzle.patch
+
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
-Patch610: linux-2.6-defaults-fat-utf8.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
 Patch672: linux-2.6-sata-eeepc-faster.patch
-Patch673: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
-Patch674: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
-Patch675: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
 Patch676: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
 
-Patch680: linux-2.6-wireless.patch
-Patch681: linux-2.6-wireless-pending.patch
-#Patch682: linux-2.6-wireless-fixups.patch
-Patch683: linux-2.6-wireless-stable-backports.patch
-Patch685: linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
-Patch686: linux-2.6-wireless-p54-fix-regression-due-to-delete-NETDEVICES_MULTIQUEUE-option.patch
-Patch687: linux-2.6-wireless-revert-b43-add-RFKILL_STATE_HARD_BLOCKED-support.patch
-
-Patch698: linux-2.6-rt2500usb-fix.patch
-Patch699: linux-2.6-at76.patch
+# wireless
+Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
+Patch683: linux-2.6-hostap-skb-cb-hack.patch
+Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
-
-Patch810: linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
-Patch820: linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
-Patch830: linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
 
 #mm
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
-Patch1515: linux-2.6-lirc.patch
+Patch1515: linux-2.6.27-lirc.patch
+Patch1520: linux-2.6-hdpvr.patch
 
 # nouveau + drm fixes
 Patch1801: drm-fedora9-rollup.patch
-Patch1802: linux-2.6-drm-i915-fix-ioctl-security.patch
+Patch1802: drm-mm-readd-nopfn.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
-Patch2001: linux-2.6-netdev-e1000e-fix-drv-load-issues-amt.patch
 
-# write protect e1000e nvm
-Patch2002: linux-2.6-e1000e-write-protect-nvm.patch
+# new e1000e hardware support from net-next-2.6 (e.g. ich10)
+Patch2001: linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
+Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
+Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
+
+# r8169 fixes
+Patch2005: linux-2.6-r8169-fix-RxMissed-register-access.patch
+Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
-Patch2021: linux-2.6-netdev-atl1e.patch
 
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
-Patch2040: linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
-
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
+Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-
-Patch2501: linux-2.6-ppc-use-libgcc.patch
+# fix jmicron usb/sata bridge
+Patch2310: linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
-Patch2700: linux-2.6-intel-msr-backport.patch
-Patch2701: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
-
-# for kerneloops reports
-Patch2800: linux-2.6-net-print-module-name-as-part-of-the-message.patch
-Patch2801: linux-2.6-warn-add-WARN-macro.patch
-Patch2802: linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
-Patch2803: linux-2.6-warn-rename-WARN-to-WARNING.patch
-
 # fix RTC
-Patch2900: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-Patch2910: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+Patch2800: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+Patch2810: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
-# backported version of http://git.kernel.org/?p=linux/kernel/git/davem/sparc-2.6.git;a=commitdiff;h=73ccefab8a6590bb3d5b44c046010139108ab7ca
-# needed to build sparc64 kernel
-Patch3000: linux-sparc-tracehook-syscall.patch
-
-# fix IOCTL security in sbni driver
-Patch3100: linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
-
+# ext4 fun - new & improved, now with less dev!
+Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
+Patch2901: linux-2.6.27-fs-disable-fiemap.patch
 # CVE-2008-3528
-Patch3200: linux-2.6.26-ext-dir-corruption-fix.patch
+Patch2902: linux-2.6.27-ext-dir-corruption-fix.patch
+Patch2903: linux-2.6.27-delay-ext4-free-block-cap-check.patch
+
+# cciss sysfs links are broken
+Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
+
+# Sony Vaio suspend fix
+Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
+
 
 %endif
 
@@ -796,9 +782,21 @@ header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 glibc package.
 
+%package firmware
+Summary: Firmware files used by the Linux kernel
+Group: Development/System
+License: GPLv2+
+%if "x%{?variant}" != "x"
+Provides: kernel-firmware = %{rpmversion}-%{pkg_release}
+%endif
+%description firmware
+Kernel-firmware includes firmware files required for some devices to
+operate.
+
 %package bootwrapper
 Summary: Boot wrapper files for generating combined kernel + initrd images
 Group: Development/System
+Requires: gzip
 %description bootwrapper
 Kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
 files combining both kernel and initial ramdisk.
@@ -1110,7 +1108,6 @@ C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-compile-fixes.patch | awk '{print $1}')
 if [ "$C" -gt 10 ]; then
 ApplyPatch linux-2.6-compile-fixes.patch
 fi
-ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 
 %if !%{nopatches}
 
@@ -1124,32 +1121,25 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
 # Roland's utrace ptrace replacement.
-ApplyPatch linux-2.6-ptrace-cleanup.patch
-ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
-ApplyPatch linux-2.6-kernel-doc-structs-private.patch
+ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
-# fix sched clock monotonicity bugs
-ApplyPatch linux-2.6-sched-clock-fix-nohz-interaction.patch
+# scheduler patches approved for -stable
+ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
+ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 # Architecture patches
 # x86(-64)
 # Compile 686 kernels tuned for Pentium4.
 ApplyPatch linux-2.6-x86-tune-generic.patch
-# dump *PIC state at boot with apic=debug
-ApplyPatch linux-2.6-x86-apic-dump-all-regs-v3.patch
-# hpet fixes from 2.6.27
-ApplyPatch linux-2.6-x86-hpet-04-workaround-sb700-bios.patch
-# fix e820 reservation checking
-ApplyPatch linux-2.6-x86-pci-detect-end_bus_number.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
-# fix boot on some broken HP notebooks (nx6...)
-ApplyPatch linux-2.6-x86-sb450-skip-irq0-override-if-not-routed-to-INT2.patch
+# don't try to read memory beyond end-of-stack
+ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 #
 # PowerPC
@@ -1171,11 +1161,6 @@ ApplyPatch linux-2.6-g5-therm-shutdown.patch
 ApplyPatch linux-2.6-vio-modalias.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
-# Link zImage at 32MiB (for POWER machines, Efika)
-ApplyPatch linux-2.6-powerpc-zImage-32MiB.patch
-# fixes for quad PPC 970 powerstation (#457467)
-ApplyPatch linux-2.6-fbdev-teach-offb-about-palette-on-radeon-r500-r600.patch
-ApplyPatch linux-2.6-powerpc-fix-OF-parsing-of-64-bits-pci-addresses.patch
 
 #
 # SPARC64
@@ -1189,16 +1174,19 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
+# Sony Vaio suspend fix
+ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
 
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# fix jmicron usb/sata bridge
+ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # ACPI
-# fix cpuidle misbehavior
-ApplyPatch linux-2.6-cpuidle-1-do-not-use-poll_idle-unless-user-asks-for-it.patch
-ApplyPatch linux-2.6-cpuidle-2-menu-governor-fix-wrong-usage-of-measured_us.patch
-ApplyPatch linux-2.6-cpuidle-3-make-ladder-governor-honor-latency-requirements.patch
+# reboot / resume fixes from F10
+ApplyPatch linux-2.6-acpi-clear-wake-status.patch
+ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
 
 # mm
 
@@ -1239,28 +1227,31 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # Filesystem patches.
 # cifs
-ApplyPatch linux-2.6-fs-cifs-turn-off-unicode-during-session-establishment.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
-# fix CIFS plaintext passwords
-ApplyPatch linux-2.6-fs-cifs-fix-plaintext-authentication.patch
 
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
+# fix tcp option ordering broken in .27
+ApplyPatch linux-2.6-net-tcp-option-ordering.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
-# add support for macbook pro 4,1 and macbook air keyboards
-ApplyPatch linux-2.6-input-fix_fn_key_on_macbookpro_4_1_and_mb_air.patch
+# dell can't make keyboards
+ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 # kill annoying applesmc debug messages
-ApplyPatch linux-2.6-hwmon-applesmc-remove-debugging-messages.patch
+ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
+# hush pci bar allocation failures
+ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
+# EC storms aren't anything you can fix, shut up already
+ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
 
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
@@ -1268,51 +1259,29 @@ ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
-# Use UTF-8 by default on VFAT.
-ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
 # libata
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 # fix it821x
-ApplyPatch linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
 ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 # Make Eee disk faster.
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
-# don't use ahci for pata_marvell adapters
-ApplyPatch linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
-# fix drivers making wrong assumptions about what dma values mean
-ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 
-# wireless patches headed for 2.6.26
-#ApplyPatch linux-2.6-wireless.patch
-# wireless patches headed for 2.6.27
-ApplyPatch linux-2.6-wireless-pending.patch
+# cciss sysfs links are broken
+ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
+
+# make jarod's iwl4965 not panic near N APs, hopefully
+ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+# iwl3945 fix for stable ad-hoc mode connections (#459401)
+ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
+# hostap hack to still work w/ quetionable skb->cb usage
+ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
-
-# fixups to make current wireless patches build on this kernel
-#ApplyPatch linux-2.6-wireless-fixups.patch
-
-# backports of upstream -stable wireless patches that we need
-# (reverted in -upstream-reverts)
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-wireless-stable-backports.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-wireless-stable-backports.patch
-fi
-
-# fix for long-standing rt2500usb issues
-ApplyPatch linux-2.6-rt2500usb-fix.patch
-
-# bf4634afd8bb72936d2d56425ec792ca1bfa92a2
-ApplyPatch linux-2.6-wireless-rt2500pci-restoring-missing-line.patch
-# e95926d05d028a6bf0ab60b21b484c3d622fdcd1
-ApplyPatch linux-2.6-wireless-revert-b43-add-RFKILL_STATE_HARD_BLOCKED-support.patch
-# aaa1553512b9105699113ea7e2ea726f3d9d4de2
-ApplyPatch linux-2.6-wireless-p54-fix-regression-due-to-delete-NETDEVICES_MULTIQUEUE-option.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1324,56 +1293,52 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
 # http://www.lirc.org/
-ApplyPatch linux-2.6-lirc.patch
+ApplyPatch linux-2.6.27-lirc.patch
+ApplyPatch linux-2.6-hdpvr.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
-ApplyPatch linux-2.6-netdev-e1000e-fix-drv-load-issues-amt.patch
-ApplyPatch linux-2.6-e1000e-write-protect-nvm.patch
+
+ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
+ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
+ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
+
+ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
+ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
-ApplyPatch linux-2.6-netdev-atl1e.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
-ApplyPatch linux-2.6-netdev-e1000e-add-support-for-82567lm-4.patch
-
 # Nouveau DRM + drm fixes
 ApplyPatch drm-fedora9-rollup.patch
-ApplyPatch linux-2.6-drm-i915-fix-ioctl-security.patch
+ApplyPatch drm-mm-readd-nopfn.patch
 
 # Filesystem patches
-ApplyPatch linux-2.6.26-ext-dir-corruption-fix.patch
+
+# Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
+ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
+# Disable fiemap until it is really truly upstream & released
+ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
+# CVE-2008-3528, ext-fs dir corruption
+ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
+# Delay capability() checks 'til last in ext4
+ApplyPatch linux-2.6.27-delay-ext4-free-block-cap-check.patch
+
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
-#C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
-#if [ "$C" -gt 10 ]; then
-#ApplyPatch linux-2.6-firewire-git-pending.patch
-#fi
 
-ApplyPatch linux-2.6-ppc-use-libgcc.patch
+C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
+if [ "$C" -gt 10 ]; then
+ApplyPatch linux-2.6-firewire-git-pending.patch
+fi
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
-ApplyPatch linux-2.6-intel-msr-backport.patch
-ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
-
-# for kerneloops reports
-ApplyPatch linux-2.6-net-print-module-name-as-part-of-the-message.patch
-ApplyPatch linux-2.6-warn-add-WARN-macro.patch
-ApplyPatch linux-2.6-warn-Turn-the-netdev-timeout-WARN_ON-into-WARN.patch
-ApplyPatch linux-2.6-warn-rename-WARN-to-WARNING.patch
-
 # fix RTC
 ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
 ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
-
-# backport syscall tracing to use the new tracehook.h entry points.
-ApplyPatch linux-sparc-tracehook-syscall.patch
-
-# CVE-2008-3525
-ApplyPatch linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1516,7 +1481,9 @@ BuildKernel() {
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
 
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
-    make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer
+    # Override $(mod-fw) because we don't want it to install any firmware
+    # We'll do that ourselves with 'make firmware_install'
+    make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 %ifarch %{vdso_arches}
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
 %endif
@@ -1549,37 +1516,32 @@ BuildKernel() {
     rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cp .config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
-    if [ -d arch/%{_arch}/scripts ]; then
-      cp -a arch/%{_arch}/scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch} || :
+    if [ -d arch/$Arch/scripts ]; then
+      cp -a arch/$Arch/scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch} || :
     fi
-    if [ -f arch/%{_arch}/*lds ]; then
-      cp -a arch/%{_arch}/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
+    if [ -f arch/$Arch/*lds ]; then
+      cp -a arch/$Arch/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
 %ifarch ppc
     cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
+    if [ -d arch/$Arch/include ]; then
+      cp -a --parents arch/$Arch/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cd include
-    cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video asm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    cp -a `readlink asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    # While arch/powerpc/include/asm is still a symlink to the old
-    # include/asm-ppc{64,} directory, include that in kernel-devel too.
-    if [ "$Arch" = "powerpc" -a -r ../arch/powerpc/include/asm ]; then
-      cp -a `readlink ../arch/powerpc/include/asm` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-      mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/$Arch/include
-      pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/$Arch/include
-      ln -sf ../../../include/asm-ppc* asm
-      popd
-    fi
+    cp -a acpi config keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+    asmdir=$(readlink asm)
+    cp -a $asmdir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/
+    pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+    ln -s $asmdir asm
+    popd
 %if %{includexen}
     cp -a xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
 %endif
 
-    if [ -d arch/%{_arch}/include ]; then
-      cp -a --parents arch/%{_arch}/include  $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    fi
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
@@ -1739,42 +1701,46 @@ chmod 444 $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf
 %endif
 
 %if %{with_doc}
-mkdir -p $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}/Documentation
+docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
+man9dir=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
-# sometimes non-world-readable files sneak into the kernel source tree
-chmod -R a+r *
 # copy the source over
-tar cf - Documentation | tar xf - -C $RPM_BUILD_ROOT/usr/share/doc/kernel-doc-%{kversion}
+mkdir -p $docdir
+tar -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
-# Make man pages for the kernel API.
-make mandocs
-mkdir -p $RPM_BUILD_ROOT/usr/share/man/man9
-mv Documentation/DocBook/man/*.9.gz $RPM_BUILD_ROOT/usr/share/man/man9
+# Install man pages for the kernel API.
+mkdir -p $man9dir
+find Documentation/DocBook/man -name '*.9.gz' -print0 |
+xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
+ls $man9dir | grep -q '' || > $man9dir/BROKEN
 %endif
 
 %if %{with_headers}
 # Install kernel headers
 make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_install
 
-# Manually go through the 'headers_check' process for every file, but
-# don't die if it fails
-chmod +x scripts/hdrcheck.sh
-echo -e '*****\n*****\nHEADER EXPORT WARNINGS:\n*****' > hdrwarnings.txt
-for FILE in `find $RPM_BUILD_ROOT/usr/include` ; do
-    scripts/hdrcheck.sh $RPM_BUILD_ROOT/usr/include $FILE /dev/null >> hdrwarnings.txt || :
-done
-echo -e '*****\n*****' >> hdrwarnings.txt
+# Do headers_check but don't die if it fails.
+make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_check \
+     > hdrwarnings.txt || :
 if grep -q exist hdrwarnings.txt; then
    sed s:^$RPM_BUILD_ROOT/usr/include/:: hdrwarnings.txt
    # Temporarily cause a build failure if header inconsistencies.
    # exit 1
 fi
 
+find $RPM_BUILD_ROOT/usr/include \
+     \( -name .install -o -name .check -o \
+     	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+
 # glibc provides scsi headers for itself, for now
 rm -rf $RPM_BUILD_ROOT/usr/include/scsi
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/atomic.h
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
+%endif
+
+%if %{with_firmware}
+make INSTALL_FW_PATH=$RPM_BUILD_ROOT/lib/firmware firmware_install
 %endif
 
 %if %{with_bootwrapper}
@@ -1886,6 +1852,13 @@ fi
 /usr/include/*
 %endif
 
+%if %{with_firmware}
+%files firmware
+%defattr(-,root,root)
+/lib/firmware/*
+%doc linux-%{kversion}.%{_target_cpu}/firmware/WHENCE
+%endif
+
 %if %{with_bootwrapper}
 %files bootwrapper
 %defattr(-,root,root)
@@ -1897,9 +1870,9 @@ fi
 %if %{with_doc}
 %files doc
 %defattr(-,root,root)
-%{_datadir}/doc/kernel-doc-%{kversion}/Documentation/*
-%dir %{_datadir}/doc/kernel-doc-%{kversion}/Documentation
-%dir %{_datadir}/doc/kernel-doc-%{kversion}
+%{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation/*
+%dir %{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation
+%dir %{_datadir}/doc/kernel-doc-%{rpmversion}
 %{_datadir}/man/man9/*
 %endif
 
@@ -1968,6 +1941,65 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Oct 31 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.19
+- Deblobbed 2.6.27.
+- Updated deblobbing in drm-fedora9-rollup.patch.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-17
+- Three wireless fixes from F10.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-16
+- Two more fixes from F10:
+  Fix missing key-up events on Dell notebook keyboards.
+  x86: don't dereference memory beyond end-of-stack.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-15
+- Two ACPI reboot / resume fixes from F10.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-14
+- Drop the defaults-fat-utf8 patch: upstream says it's wrong.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-13
+- Add the kernel-firmware package.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-11
+- Copy header install script and final fix for bug 465486 from rawhide.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-10
+- Fix the DRM patch enough that the code compiles.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-9
+- Fix TCP option ordering that broke connectivity for some people.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-8
+- Two patches for storage devices:
+    Fix Jmicron USB/SATA bridge.
+    Fix sysfs symlinks in cciss driver.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-7
+- Add scheduler patches approved for -stable.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-6
+- Add hdpvr driver.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-5
+- Fix up the F9 DRM patch.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-4
+- Compile fixes from rawhide, drop gcc43 compile fix.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-3
+- e1000e and r8169 network driver patches from rawhide.
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-2
+- Copy 3 patches from rawhide:
+  linux-2.6.27-acpi-ec-drizzle.patch
+  linux-2.6.27-pci-hush-allocation-failures
+  linux-2.6.27-sony-laptop-suspend-fix
+
+* Thu Oct 30 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-1
+- Linux 2.6.27.4
+
 * Wed Oct 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-86
 - Support building from CVS branches.
 
