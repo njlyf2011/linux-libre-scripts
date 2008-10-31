@@ -1,0 +1,23 @@
+/bumpspecfile.py/1.4/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/configcommon.pl/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/configdiff.pl/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-amd64.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-i586.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-i686.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-ia64.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-iseries.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-ppc.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-ppc64.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-ppc8260.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-ppc8560.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-pseries.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-s390.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/cross-s390x.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/newpatch.sh/1.2/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/pull-upstreams.sh/1.5/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/rebase-xen-hv.sh/1.1/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/rebase-xen-kernel.sh/1.5/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/rebase.sh/1.14/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/reconfig.sh/1.8/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+/rediffall.pl/1.4/Mon Aug  4 21:46:35 2008//Tkernel-2_6_27_4-19_fc9
+D
