@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1105 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1108 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -603,7 +603,7 @@ Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
-Patch30: linux-2.6-x86-xen-add-dependencies.patch
+Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
@@ -649,6 +649,7 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
+Patch672: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
@@ -670,9 +671,10 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 Patch1800: nvidia-agp.patch
 Patch1801: linux-2.6-agp-intel-cantiga-fix.patch
 Patch1810: drm-next.patch
-Patch1811: drm-modesetting-radeon.patch
-Patch1812: drm-modesetting-i915.patch
-Patch1813: drm-nouveau.patch
+Patch1811: drm-intel-gem-x86-64-faster.patch
+Patch1812: drm-modesetting-radeon.patch
+Patch1813: drm-modesetting-i915.patch
+Patch1814: drm-nouveau.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1120,7 +1122,7 @@ ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
-ApplyPatch linux-2.6-x86-xen-add-dependencies.patch
+ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1261,6 +1263,8 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 ApplyPatch linux-2.6-ata-quirk.patch
 # fix it821x raid volumes
 ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
+# fix overlow with large disk
+ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 # fix spot's iwlwifi, hopefully...
 #ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
@@ -1318,6 +1322,7 @@ ApplyPatch linux-2.6-olpc-speaker-out.patch
 ApplyPatch nvidia-agp.patch
 ApplyPatch linux-2.6-agp-intel-cantiga-fix.patch
 ApplyPatch drm-next.patch
+ApplyPatch drm-intel-gem-x86-64-faster.patch
 ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
@@ -1921,6 +1926,16 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Nov 03 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-72
+- backport upstream fixes to make 64-bit Intel GEM useable (#469584)
+
+* Fri Oct 31 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-71
+- Fix overflow in libata when using large disks.
+
+* Fri Oct 31 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-70
+- Silence bogus MTRR warning when running in vmware (#468845)
+- Remove xen dependencies patch, now upstream and not needed in Fedora.
+
 * Fri Oct 31 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-69
 - radeon: fix out of bounds VRAM access - hopefully fixes the corruption
 
