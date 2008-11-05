@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.832 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.837 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -612,7 +612,8 @@ Patch05: linux-2.6-makefile-after_link.patch
 Patch09: linux-2.6-upstream-reverts.patch
 Patch10: linux-2.6-hotfixes.patch
 # patches queued for the next -stable release
-#Patch11: linux-2.6-stable-queue.patch
+Patch11: linux-2.6.27.5-stable-queue.patch
+Patch12: linux-2.6.27.5-stable-queue-reverts.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
@@ -645,6 +646,8 @@ Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+Patch381: linux-2.6-pciehp-update.patch
+Patch382: linux-2.6-defaults-pciehp.patch
 
 Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
@@ -676,6 +679,7 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch672: linux-2.6-sata-eeepc-faster.patch
 Patch676: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
+Patch679: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 # wireless
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
@@ -741,6 +745,9 @@ Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
 # Sony Vaio suspend fix
 Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
+
+# Add better support for DMI-based autoloading
+Patch3110: linux-2.6-dmi-autoload.patch
 
 
 %endif
@@ -1112,7 +1119,8 @@ fi
 %if !%{nopatches}
 
 ApplyPatch linux-2.6-hotfixes.patch
-#ApplyPatch linux-2.6-stable-queue.patch
+ApplyPatch linux-2.6.27.5-stable-queue.patch
+ApplyPatch linux-2.6.27.5-stable-queue-reverts.patch -R
 
 # revert patches from upstream that conflict or that we get via other means
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
@@ -1129,8 +1137,8 @@ ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 ApplyPatch linux-2.6-sysrq-c.patch
 
 # scheduler patches approved for -stable
-ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
-ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+#ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
+#ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 # Architecture patches
 # x86(-64)
@@ -1139,7 +1147,7 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
 # don't try to read memory beyond end-of-stack
-ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+#ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 #
 # PowerPC
@@ -1177,16 +1185,18 @@ ApplyPatch linux-2.6-execshield.patch
 # Sony Vaio suspend fix
 ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
 
+ApplyPatch linux-2.6-dmi-autoload.patch
+
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # fix jmicron usb/sata bridge
-ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
+#ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # ACPI
 # reboot / resume fixes from F10
-ApplyPatch linux-2.6-acpi-clear-wake-status.patch
-ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
+#ApplyPatch linux-2.6-acpi-clear-wake-status.patch
+#ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
 
 # mm
 
@@ -1210,6 +1220,10 @@ ApplyPatch linux-2.6-crash-driver.patch
 #
 # disable message signaled interrupts
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
+# add pcie passive mode
+ApplyPatch linux-2.6-pciehp-update.patch
+# enable pcie hotplug passive mode by default
+ApplyPatch linux-2.6-defaults-pciehp.patch
 
 #
 # SCSI Bits.
@@ -1234,13 +1248,13 @@ ApplyPatch linux-2.6-squashfs.patch
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 # fix tcp option ordering broken in .27
-ApplyPatch linux-2.6-net-tcp-option-ordering.patch
+#ApplyPatch linux-2.6-net-tcp-option-ordering.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # dell can't make keyboards
-ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
+#ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 
@@ -1251,7 +1265,7 @@ ApplyPatch linux-2.6-silence-noise.patch
 # hush pci bar allocation failures
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
 # EC storms aren't anything you can fix, shut up already
-ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
+#ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
 
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
@@ -1264,11 +1278,13 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 # fix it821x
-ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
+#ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 # Make Eee disk faster.
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
+# Fix libata on 1.5GB disks
+ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 # cciss sysfs links are broken
 ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1337,8 +1353,8 @@ fi
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 # fix RTC
-ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+#ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+#ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1734,6 +1750,8 @@ find $RPM_BUILD_ROOT/usr/include \
 
 # glibc provides scsi headers for itself, for now
 rm -rf $RPM_BUILD_ROOT/usr/include/scsi
+# drm-devel in F9 provides its own headers
+rm -rf $RPM_BUILD_ROOT/usr/include/drm
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/atomic.h
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
@@ -1941,6 +1959,24 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Nov 04 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-24
+- 2.6.27.5-stable queue (57 patches)
+
+* Tue Nov 04 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-23
+- linux-2.6-dmi-autoload.patch: backport DMI autoloading from 2.6.28
+  fixes autoloading of Macbook Pro Nvidia backlight driver (F10#462409)
+
+* Mon Nov 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-22
+- Build in acpiphp (ACPI hotplug support.)
+- Add pcie hotplug passive mode support.
+- Enable passive mode by default.
+
+* Sat Nov 01 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-21
+- Fix overflow in libata when using large disks (>=1.5TB)
+
+* Fri Oct 31 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-20
+- Remove DRM headers from kernel-headers: they conflict with F9 drm-devel.
+
 * Fri Oct 31 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.19
 - Deblobbed 2.6.27.
 - Updated deblobbing in drm-fedora9-rollup.patch.
