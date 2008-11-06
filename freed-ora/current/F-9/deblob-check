@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2008-10-28
+# deblob-check version 2008-11-05
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -1336,6 +1336,7 @@ set_except () {
   */linux-2.6-modsign-mpilib.patch)
     initnc 'const unsigned char __clz_tab\[\] ='
     ;;
+  */linux-2.6-netdev*.patch | \
   */linux-2.6.27-net-r8169-2.6.28.patch)
     defsnc '		*struct phy_reg phy_reg_init_[01]\[\] =' drivers/net/r8169.c
     ;;
