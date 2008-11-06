@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1109 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1115 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -630,6 +630,8 @@ Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+Patch381: linux-2.6-pciehp-update.patch
+Patch382: linux-2.6-defaults-pciehp.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-clear-wake-status.patch
@@ -691,6 +693,9 @@ Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
 
+# Backport Toshiba updates so Bluetooth can be enabled (#437091)
+Patch2012: linux-2.6-toshiba-acpi-update.patch
+
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
 
@@ -743,6 +748,16 @@ Patch3020: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 # Sony Vaio suspend fix
 Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
+
+# Add better support for DMI-based autoloading
+Patch3110: linux-2.6-dmi-autoload.patch
+
+# SELinux: Fix handling of empty tty_files. 37dd0bd04a3240d2922786d501e2f12cec858fbf BZ469079
+Patch3120: linux-2.6-selinux-empty-tty-files.patch
+
+# Provide P4 clock modulation in-kernel for thermal reasons, but don't expose
+# ui
+Patch3130: disable-p4-cpufreq-ui.patch
 
 %endif
 
@@ -1218,6 +1233,12 @@ ApplyPatch linux-2.6-crash-driver.patch
 # disable message signaled interrupts
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 
+# update the pciehp driver
+ApplyPatch linux-2.6-pciehp-update.patch
+
+# default to enabling passively listening for hotplug events
+ApplyPatch linux-2.6-defaults-pciehp.patch
+
 #
 # SCSI Bits.
 #
@@ -1310,6 +1331,7 @@ ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
 ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
+ApplyPatch linux-2.6-toshiba-acpi-update.patch
 
 # atl2 network driver
 ApplyPatch linux-2.6-netdev-atl2.patch
@@ -1340,6 +1362,8 @@ ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 # Sony Vaio suspend fix
 ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
 
+ApplyPatch linux-2.6-dmi-autoload.patch
+
 # silence piix3 in quiet boot (ie, qemu)
 ApplyPatch linux-2.6-piix3-silence-quirk.patch
 # Hush IOMMU warnings, you typically can't fix them anyway
@@ -1352,6 +1376,11 @@ ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
 # EC storms aren't anything you can fix, shut up already
 ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
+
+# SELinux on ppc64 without plymouth can't boot
+ApplyPatch linux-2.6-selinux-empty-tty-files.patch
+
+ApplyPatch disable-p4-cpufreq-ui.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1926,6 +1955,24 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Nov 03 2008 Matthew Garrett <mjg@redhat.com> 2.6.27.4-79
+- linux-2.6-toshiba-acpi-update.patch: backport from 2.6.28
+  * Adds support for rfkill control of Bluetooth (#437091)
+- linux-2.6-dmi-autoload.patch: backport DMI autoloading from 2.6.28
+  * Fixes autoloading of Macbook Pro Nvidia backlight driver (#462409)
+
+* Mon Nov 03 2008 Eric Paris <eparis@redhat.com> 2.6.27.4-76
+- Fix selinux oops on ppc64 due to empty tty_files list (#469079)
+
+* Mon Nov 03 2008 Matthew Garrett <mjg@redhat.com> 2.6.27.4-75
+- linux-2.6-pciehp-update.patch
+  * Update pciehp driver to support autoloading and listening for events
+- linux-2.6-defaults-pciehp.patch
+  * Enable passive mode by default
+- Build acpiphp in statically
+- disable-p4-cpufreq-ui.patch
+  * Remove the UI from the p4-clockmod code, but allow it to be used in-kernel
+
 * Mon Nov 03 2008 Dave Airlie <airlied@redhat.com> 2.6.27.4-73
 - drm-modesetting-radeon.patch: fix modeset reporting for pm-utils
 
