@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.837 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.839 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -651,6 +651,7 @@ Patch382: linux-2.6-defaults-pciehp.patch
 
 Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
+Patch394: linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
@@ -711,6 +712,7 @@ Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 # r8169 fixes
 Patch2005: linux-2.6-r8169-fix-RxMissed-register-access.patch
 Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+Patch2007: linux-2.6-netdev-r8169-2.6.28.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -1197,6 +1199,8 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # reboot / resume fixes from F10
 #ApplyPatch linux-2.6-acpi-clear-wake-status.patch
 #ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
+# fix cpu detection (f10#435653)
+ApplyPatch linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
 
 # mm
 
@@ -1318,8 +1322,9 @@ ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
-ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+#ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
+#ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 
 ApplyPatch linux-2.6-netdev-atl2.patch
 
@@ -1959,6 +1964,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Nov 05 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-26
+- Update the r8169 network driver to the latest upstream version.
+
+* Tue Nov 05 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-25
+- Fix CPU detection on some Acer systems (f10#435653)
+
 * Tue Nov 04 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-24
 - 2.6.27.5-stable queue (57 patches)
 
