@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1115 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1120 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -627,6 +627,7 @@ Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
+Patch341: linux-2.6-mm-pagefault-enable-ints.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
@@ -636,6 +637,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-clear-wake-status.patch
 Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
+Patch394: linux-2.6-acpi-handle-ec-init-failure.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
@@ -660,6 +662,9 @@ Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
+
+Patch800: linux-2.6-alsa-ac97-whitelist.patch
+Patch801: linux-2.6-alsa-ac97-whitelist-AD1981B.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6.27-lirc.patch
@@ -704,6 +709,7 @@ Patch2030: linux-2.6-net-tulip-interrupt.patch
 
 # olpc fixes
 Patch2040: linux-2.6-olpc-speaker-out.patch
+Patch2041: linux-2.6-olpc-touchpad.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1213,6 +1219,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-clear-wake-status.patch
 ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
+ApplyPatch linux-2.6-acpi-handle-ec-init-failure.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1220,6 +1227,7 @@ ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
+ApplyPatch linux-2.6-mm-pagefault-enable-ints.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 #
@@ -1302,6 +1310,10 @@ ApplyPatch linux-2.6-at76.patch
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
+# implement whitelist for ac97
+ApplyPatch linux-2.6-alsa-ac97-whitelist.patch
+ApplyPatch linux-2.6-alsa-ac97-whitelist-AD1981B.patch
+
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 
@@ -1339,6 +1351,7 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 ApplyPatch linux-2.6-olpc-speaker-out.patch
+ApplyPatch linux-2.6-olpc-touchpad.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
@@ -1955,6 +1968,22 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Nov 06 2008 Dave Jones <davej@redhat.com>
+- alsa: implement ac97_clock whitelist (#441087)
+
+* Wed Nov 05 2008 John W. Linville <linville@redhat.com> 2.6.27.4-83
+- Re-modularize mac80211 component (#470143)
+
+* Wed Nov 05 2008 Dave Jones <davej@redhat.com> 2.6.27.4-82
+- x86/mm: do not trigger a kernel warning if user-space disables interrupts and generates a page fault
+
+* Wed Nov 05 2008 Dave Jones <davej@redhat.com> 2.6.27.4-81
+- ACPI: Ignore AE_NOT_FOUND error of EC _REG method and continue to initialize EC (#435653)
+
+* Wed Nov  5 2008 Jeremy Katz <katzj@redhat.com> 2.6.27.4-80
+- linux-2.6-olpc-touchpad.patch: backport from 2.6.28
+  * Adds support for quirks of the OLPC touchpad
+
 * Mon Nov 03 2008 Matthew Garrett <mjg@redhat.com> 2.6.27.4-79
 - linux-2.6-toshiba-acpi-update.patch: backport from 2.6.28
   * Adds support for rfkill control of Bluetooth (#437091)
