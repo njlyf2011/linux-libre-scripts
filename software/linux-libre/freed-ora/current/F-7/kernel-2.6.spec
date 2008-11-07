@@ -884,7 +884,7 @@ against the kernel package.
 %package doc
 Summary: Various documentation bits found in the kernel source.
 Group: Documentation
-Provides: kernel-doc = %{rpmversion}-%{pkgrelease}
+Provides: kernel-doc = %{rpmversion}-%{pkg_release}
 %description doc
 This package contains documentation files from the kernel
 source. Various bits of information about the Linux kernel and the
@@ -899,7 +899,7 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders
 Provides: glibc-kernheaders = 3.0-46
-Provides: kernel-headers = %{rpmversion}-%{pkgrelease}
+Provides: kernel-headers = %{rpmversion}-%{pkg_release}
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -2395,6 +2395,8 @@ fi
 %endif
 
 %changelog
+- Fix provides from pkgrelease to pkg_release.
+
 * Wed Jul 16 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.88.3
 - Rebased to 2.6.23-libre3.
 
