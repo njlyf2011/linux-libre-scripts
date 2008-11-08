@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1120 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1124 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -606,10 +606,6 @@ Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
 Patch41: linux-2.6-sysrq-c.patch
-Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
-
-Patch60: linux-2.6-sched-features-disable-hrtick.patch
-Patch61: linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -635,15 +631,11 @@ Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
-Patch392: linux-2.6-acpi-clear-wake-status.patch
-Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
 Patch394: linux-2.6-acpi-handle-ec-init-failure.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch440: linux-2.6-net-tcp-option-ordering.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch451: linux-2.6-input-dell-keyboard-keyup.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -652,7 +644,6 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 Patch672: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
@@ -676,7 +667,6 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
-Patch1801: linux-2.6-agp-intel-cantiga-fix.patch
 Patch1810: drm-next.patch
 Patch1811: drm-intel-gem-x86-64-faster.patch
 Patch1812: drm-modesetting-radeon.patch
@@ -692,8 +682,7 @@ Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts
 Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 # r8169 fixes
-Patch2005: linux-2.6-r8169-fix-RxMissed-register-access.patch
-Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+Patch2005: linux-2.6-netdev-r8169-2.6.28.patch
 
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
@@ -717,7 +706,6 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-Patch2301: linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -736,8 +724,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
-# EC storms aren't anything you can fix, shut up already
-Patch2805: linux-2.6.27-acpi-ec-drizzle.patch
 
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
@@ -747,10 +733,6 @@ Patch2903: linux-2.6.27-delay-ext4-free-block-cap-check.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
-
-# RTC fixes for systems that don't expose the device via PnP
-Patch3010: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-Patch3020: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 # Sony Vaio suspend fix
 Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
@@ -1149,13 +1131,9 @@ ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
 ApplyPatch linux-2.6-sysrq-c.patch
 
 # scheduler
-ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
-ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 # Architecture patches
 # x86(-64)
-# don't oops in get_wchan()
-ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 #
 # PowerPC
@@ -1207,18 +1185,13 @@ ApplyPatch linux-2.6.27-delay-ext4-free-block-cap-check.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# fix I/O errors on jmicron usb-ata bridge
-ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
 
 # ACPI
-
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch linux-2.6-acpi-clear-wake-status.patch
-ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
 ApplyPatch linux-2.6-acpi-handle-ec-init-failure.patch
 
 # Various low-impact patches to aid debugging.
@@ -1262,14 +1235,10 @@ ApplyPatch linux-2.6-squashfs.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# Fix tcp option ordering.
-ApplyPatch linux-2.6-net-tcp-option-ordering.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
-# Dell can't make keyboards
-ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 
@@ -1290,8 +1259,6 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# fix it821x raid volumes
-ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 # fix overlow with large disk
 ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
@@ -1329,18 +1296,13 @@ ApplyPatch linux-2.6-cdrom-door-status.patch
 # fix sysfs links for the cciss driver
 ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
-# fix RTC on systems with broken PnP
-ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
-
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
-ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-toshiba-acpi-update.patch
@@ -1355,7 +1317,6 @@ ApplyPatch linux-2.6-olpc-touchpad.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
-ApplyPatch linux-2.6-agp-intel-cantiga-fix.patch
 ApplyPatch drm-next.patch
 ApplyPatch drm-intel-gem-x86-64-faster.patch
 ApplyPatch drm-modesetting-radeon.patch
@@ -1387,8 +1348,6 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
-# EC storms aren't anything you can fix, shut up already
-ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
 
 # SELinux on ppc64 without plymouth can't boot
 ApplyPatch linux-2.6-selinux-empty-tty-files.patch
@@ -1968,6 +1927,40 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Nov 08 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-88
+- radeon modesetting - fix mouse on second head and 3 second hangs hopefully
+
+* Fri Nov 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-87
+- Linux 2.6.27.5
+  Dropped Patches:
+    linux-2.6-sched-features-disable-hrtick.patch
+    linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+    linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+    linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
+    linux-2.6-acpi-clear-wake-status.patch
+    linux-2.6-acpi-ignore-reset_reg_sup.patch
+    linux-2.6-net-tcp-option-ordering.patch
+    linux-2.6-input-dell-keyboard-keyup.patch
+    linux-2.6.27-acpi-ec-drizzle.patch
+    linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
+    linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+    linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+    linux-2.6-agp-intel-cantiga-fix.patch
+  Reverted from upstream:
+    firewire-fix-ioctl-return-code.patch
+    firewire-fix-setting-tag-and-sy-in-iso-transmission.patch
+    firewire-fix-struct-fw_node-memory-leak.patch
+    firewire-fw-sbp2-delay-first-login-to-avoid-retries.patch
+    firewire-fw-sbp2-fix-races.patch
+    firewire-survive-more-than-256-bus-resets.patch
+
+* Fri Nov 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-86
+- Update the r8169 network driver to the 2.6.28 version.
+
+* Fri Nov 07 2008 John W. Linville <linville@redhat.com> 2.6.27.4-85
+- Re-modularize ieee80211 component
+- Cleanup ieee80211-related config stuff
+
 * Thu Nov 06 2008 Dave Jones <davej@redhat.com>
 - alsa: implement ac97_clock whitelist (#441087)
 
