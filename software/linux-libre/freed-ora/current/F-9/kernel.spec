@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.839 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.843 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -612,18 +612,14 @@ Patch05: linux-2.6-makefile-after_link.patch
 Patch09: linux-2.6-upstream-reverts.patch
 Patch10: linux-2.6-hotfixes.patch
 # patches queued for the next -stable release
-Patch11: linux-2.6.27.5-stable-queue.patch
-Patch12: linux-2.6.27.5-stable-queue-reverts.patch
+#Patch11: linux-2.6.27.5-stable-queue.patch
+#Patch12: linux-2.6.27.5-stable-queue-reverts.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch41: linux-2.6-sysrq-c.patch
-Patch44: linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
-
-Patch60: linux-2.6-sched-features-disable-hrtick.patch
-Patch61: linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 Patch70: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
@@ -645,13 +641,15 @@ Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch370: linux-2.6-crash-driver.patch
+
+Patch379: linux-2.6-defaults-fat-utf8.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
 
-Patch392: linux-2.6-acpi-clear-wake-status.patch
-Patch393: linux-2.6-acpi-ignore-reset_reg_sup.patch
-Patch394: linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
+Patch390: linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
+Patch391: linux-2.6-acpi-dock-avoid-check-sta-method.patch
+Patch392: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
@@ -660,17 +658,13 @@ Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 Patch421: linux-2.6-squashfs.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
-Patch440: linux-2.6-net-tcp-option-ordering.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch451: linux-2.6-input-dell-keyboard-keyup.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 # hush pci bar allocation failures
 Patch520: linux-2.6.27-pci-hush-allocation-failures.patch
-# EC storms aren't anything you can fix, shut up already
-Patch530: linux-2.6.27-acpi-ec-drizzle.patch
 
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
@@ -678,7 +672,6 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 # libata
 Patch670: linux-2.6-ata-quirk.patch
 Patch672: linux-2.6-sata-eeepc-faster.patch
-Patch676: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
 Patch679: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
@@ -710,8 +703,6 @@ Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts
 Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 # r8169 fixes
-Patch2005: linux-2.6-r8169-fix-RxMissed-register-access.patch
-Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
 Patch2007: linux-2.6-netdev-r8169-2.6.28.patch
 
 # atl2 network driver
@@ -725,15 +716,9 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# fix jmicron usb/sata bridge
-Patch2310: linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
-
-# fix RTC
-Patch2800: linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-Patch2810: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
@@ -741,6 +726,10 @@ Patch2901: linux-2.6.27-fs-disable-fiemap.patch
 # CVE-2008-3528
 Patch2902: linux-2.6.27-ext-dir-corruption-fix.patch
 Patch2903: linux-2.6.27-delay-ext4-free-block-cap-check.patch
+
+Patch2905: linux-2.6.27-ext4-calculate-journal-credits-correctly.patch
+Patch2906: linux-2.6.28-ext4-wait-on-all-pending-commits-in-ext4_sync_fs.patch
+Patch2907: linux-2.6.28-jbd2-dont-give-up-looking-for-space-so-easily.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1121,8 +1110,10 @@ fi
 %if !%{nopatches}
 
 ApplyPatch linux-2.6-hotfixes.patch
-ApplyPatch linux-2.6.27.5-stable-queue.patch
-ApplyPatch linux-2.6.27.5-stable-queue-reverts.patch -R
+
+# -stable patch queue
+#ApplyPatch linux-2.6.27.5-stable-queue.patch
+#ApplyPatch linux-2.6.27.5-stable-queue-reverts.patch -R
 
 # revert patches from upstream that conflict or that we get via other means
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
@@ -1138,9 +1129,7 @@ ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
-# scheduler patches approved for -stable
-#ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
-#ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+# scheduler patches
 
 # Architecture patches
 # x86(-64)
@@ -1149,7 +1138,6 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
 # don't try to read memory beyond end-of-stack
-#ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 #
 # PowerPC
@@ -1193,14 +1181,13 @@ ApplyPatch linux-2.6-dmi-autoload.patch
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # fix jmicron usb/sata bridge
-#ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # ACPI
-# reboot / resume fixes from F10
-#ApplyPatch linux-2.6-acpi-clear-wake-status.patch
-#ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
 # fix cpu detection (f10#435653)
 ApplyPatch linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
+# fix dock bugs
+ApplyPatch linux-2.6-acpi-dock-avoid-check-sta-method.patch
+ApplyPatch linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 # mm
 
@@ -1245,20 +1232,18 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # Filesystem patches.
 # cifs
+# fat
+ApplyPatch linux-2.6-defaults-fat-utf8.patch
 # Squashfs
 ApplyPatch linux-2.6-squashfs.patch
 
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
-# fix tcp option ordering broken in .27
-#ApplyPatch linux-2.6-net-tcp-option-ordering.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
-# dell can't make keyboards
-#ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 
@@ -1268,8 +1253,6 @@ ApplyPatch linux-2.6-serial-460800.patch
 ApplyPatch linux-2.6-silence-noise.patch
 # hush pci bar allocation failures
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
-# EC storms aren't anything you can fix, shut up already
-#ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
 
 # Fix the SELinux mprotect checks on executable mappings
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
@@ -1281,8 +1264,6 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # libata
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# fix it821x
-#ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 # Make Eee disk faster.
 ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # disable swncq on sata_nv
@@ -1322,10 +1303,7 @@ ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-#ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
-#ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
 ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
-
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
@@ -1345,6 +1323,10 @@ ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
 # Delay capability() checks 'til last in ext4
 ApplyPatch linux-2.6.27-delay-ext4-free-block-cap-check.patch
 
+# minimal set of ext4 fixes from upstream
+ApplyPatch linux-2.6.27-ext4-calculate-journal-credits-correctly.patch
+ApplyPatch linux-2.6.28-ext4-wait-on-all-pending-commits-in-ext4_sync_fs.patch
+ApplyPatch linux-2.6.28-jbd2-dont-give-up-looking-for-space-so-easily.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1356,10 +1338,6 @@ fi
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
-
-# fix RTC
-#ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-#ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1964,6 +1942,38 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sat Nov 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-30
+- Fix last-minute ext4 / jbd2 bugs (#469582)
+
+* Sat Nov 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-29
+- Fix some more of the docking bugs in 2.6.27 (#451399)
+
+* Fri Nov 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-28
+- Linux 2.6.27.5
+  Dropped Patches:
+    linux-2.6-sched-features-disable-hrtick.patch
+    linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+    linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+    linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
+    linux-2.6-acpi-clear-wake-status.patch
+    linux-2.6-acpi-ignore-reset_reg_sup.patch
+    linux-2.6-net-tcp-option-ordering.patch
+    linux-2.6-input-dell-keyboard-keyup.patch
+    linux-2.6.27-acpi-ec-drizzle.patch
+    linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
+    linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+    linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+  Reverted from upstream:
+    firewire-fix-ioctl-return-code.patch
+    firewire-fix-setting-tag-and-sy-in-iso-transmission.patch
+    firewire-fix-struct-fw_node-memory-leak.patch
+    firewire-fw-sbp2-delay-first-login-to-avoid-retries.patch
+    firewire-fw-sbp2-fix-races.patch
+    firewire-survive-more-than-256-bus-resets.patch
+
+* Fri Nov 07 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-27
+- Make UTF-8 the default for FAT/VFAT filesystems again.
+
 * Wed Nov 05 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.4-26
 - Update the r8169 network driver to the latest upstream version.
 
