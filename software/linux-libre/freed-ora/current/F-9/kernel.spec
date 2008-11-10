@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.843 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.845 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -721,15 +721,8 @@ Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 # ext4 fun - new & improved, now with less dev!
-Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
-Patch2901: linux-2.6.27-fs-disable-fiemap.patch
-# CVE-2008-3528
-Patch2902: linux-2.6.27-ext-dir-corruption-fix.patch
-Patch2903: linux-2.6.27-delay-ext4-free-block-cap-check.patch
-
-Patch2905: linux-2.6.27-ext4-calculate-journal-credits-correctly.patch
-Patch2906: linux-2.6.28-ext4-wait-on-all-pending-commits-in-ext4_sync_fs.patch
-Patch2907: linux-2.6.28-jbd2-dont-give-up-looking-for-space-so-easily.patch
+Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
+Patch2901: linux-2.6.27-ext4-2.6.28-backport-fixups.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1315,18 +1308,10 @@ ApplyPatch drm-mm-readd-nopfn.patch
 # Filesystem patches
 
 # Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
-ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
-# Disable fiemap until it is really truly upstream & released
-ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
-# CVE-2008-3528, ext-fs dir corruption
-ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
-# Delay capability() checks 'til last in ext4
-ApplyPatch linux-2.6.27-delay-ext4-free-block-cap-check.patch
-
-# minimal set of ext4 fixes from upstream
-ApplyPatch linux-2.6.27-ext4-calculate-journal-credits-correctly.patch
-ApplyPatch linux-2.6.28-ext4-wait-on-all-pending-commits-in-ext4_sync_fs.patch
-ApplyPatch linux-2.6.28-jbd2-dont-give-up-looking-for-space-so-easily.patch
+# ext4/jbd changes up to 2.6.28-rc3-git6
+ApplyPatch linux-2.6.27-ext4-2.6.28-rc3-git6.patch
+# Fixups for the upstream ext4 code to build cleanly in 2.6.27.
+ApplyPatch linux-2.6.27-ext4-2.6.28-backport-fixups.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1942,6 +1927,12 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sun Nov 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-32
+- Fix up the CVE-2008-3528 patch so we get it from -stable.
+
+* Sun Nov 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-31
+- ext4 updates to 2.6.28-rc3
+
 * Sat Nov 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-30
 - Fix last-minute ext4 / jbd2 bugs (#469582)
 
