@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1128 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1130 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -629,6 +629,7 @@ Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
+Patch383: linux-2.6-defaults-fat-utf8.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -703,6 +704,7 @@ Patch2030: linux-2.6-net-tulip-interrupt.patch
 # olpc fixes
 Patch2040: linux-2.6-olpc-speaker-out.patch
 Patch2041: linux-2.6-olpc-touchpad.patch
+Patch2042: linux-2.6-quieter-mmc.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1221,6 +1223,8 @@ ApplyPatch linux-2.6-pciehp-update.patch
 
 # default to enabling passively listening for hotplug events
 ApplyPatch linux-2.6-defaults-pciehp.patch
+# UTF8 by default in FAT
+ApplyPatch linux-2.6-defaults-fat-utf8.patch
 
 #
 # SCSI Bits.
@@ -1316,6 +1320,7 @@ ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 ApplyPatch linux-2.6-olpc-speaker-out.patch
 ApplyPatch linux-2.6-olpc-touchpad.patch
+ApplyPatch linux-2.6-quieter-mmc.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
@@ -1929,6 +1934,13 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Nov 10 2008 Jeremy Katz <katzj@redhat.com> 2.6.27.5-94
+- Fix up bogons in OLPC touchpad patch
+- Reduce error level of an mmc warning on boot for XO (#469159)
+
+* Mon Nov 10 2008 Dave Jones <davej@redhat.com> 2.6.27.5-93
+- Make UTF-8 the default for FAT/VFAT filesystems again.
+
 * Mon Nov 10 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-92
 - radeon modesetting - fix oops on powerpc + ring sizing bug
 
