@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.564 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.566 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -47,7 +47,7 @@ Summary: The Linux kernel
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 # Do we have a 2.6.21.y update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -666,6 +666,7 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch672: linux-2.6-sata-eeepc-faster.patch
 Patch673: linux-2.6-libata-pata_marvell-play-nice-with-ahci.patch
 Patch674: linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
+Patch675: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 Patch676: linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 Patch677: linux-2.6-libata-pata_it821x-driver-updates-and-reworking.patch
 Patch678: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
@@ -717,9 +718,6 @@ Patch2910: linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 # fix IOCTL security in sbni driver
 Patch3100: linux-2.6-wan-missing-capability-checks-in-sbni_ioctl.patch
-
-# CVE-2008-3528
-Patch3200: linux-2.6.26-ext-dir-corruption-fix.patch
 
 %endif
 
@@ -1180,8 +1178,6 @@ ApplyPatch linux-2.6-fs-cifs-fix-plaintext-authentication.patch
 ApplyPatch linux-2.6-gfs-locking-exports.patch
 # fix nfs mount hang
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
-# CVE-2008-3528
-ApplyPatch linux-2.6.26-ext-dir-corruption-fix.patch
 
 
 # Networking
@@ -1232,6 +1228,8 @@ ApplyPatch linux-2.6-libata-fix-a-large-collection-of-DMA-mode-mismatches.patch
 ApplyPatch linux-2.6-libata-sff-kill-spurious-WARN_ON-in-ata_hsm_move.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
+# fix overflow with 1.5TB disks
+ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 # wireless
 #
@@ -1915,6 +1913,14 @@ fi
 
 
 %changelog
+* Mon Nov 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.8-56
+- Linux 2.6.26.8
+  Dropped patches:
+    linux-2.6.26-ext-dir-corruption-fix.patch
+
+* Tue Nov 04 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-55
+- Fix overflow in libata code when using large (1.5TB) disks.
+
 * Wed Oct 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.7-54
 - Fix LBA48 on pata_it821x RAID volumes.
 
