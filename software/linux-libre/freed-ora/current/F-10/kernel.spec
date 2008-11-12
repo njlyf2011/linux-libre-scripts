@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1130 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1136 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -604,6 +604,7 @@ Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
+Patch31: linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -656,11 +657,13 @@ Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
+Patch691: linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch800: linux-2.6-alsa-ac97-whitelist.patch
 Patch801: linux-2.6-alsa-ac97-whitelist-AD1981B.patch
+Patch802: linux-2.6-alsa-revo51-headphone.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6.27-lirc.patch
@@ -673,10 +676,9 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
 Patch1810: drm-next.patch
-Patch1811: drm-intel-gem-x86-64-faster.patch
-Patch1812: drm-modesetting-radeon.patch
-Patch1813: drm-modesetting-i915.patch
-Patch1814: drm-nouveau.patch
+Patch1813: drm-modesetting-radeon.patch
+Patch1814: drm-modesetting-i915.patch
+Patch1815: drm-nouveau.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -700,6 +702,8 @@ Patch2020: linux-2.6-netdev-atl2.patch
 
 # Fix DEBUG_SHIRQ problem in tulip driver.  (454575)
 Patch2030: linux-2.6-net-tulip-interrupt.patch
+
+Patch2031: linux-2.6-net-qla-silence-debug-printks.patch
 
 # olpc fixes
 Patch2040: linux-2.6-olpc-speaker-out.patch
@@ -1130,6 +1134,8 @@ ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
+# check for more ATI timer bugs
+ApplyPatch linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1280,12 +1286,17 @@ ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
+# fix sleep-in-softirq that caused 'scheduling from idle thread'
+ApplyPatch linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
+
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
 # implement whitelist for ac97
 ApplyPatch linux-2.6-alsa-ac97-whitelist.patch
 ApplyPatch linux-2.6-alsa-ac97-whitelist-AD1981B.patch
+
+ApplyPatch linux-2.6-alsa-revo51-headphone.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1318,6 +1329,8 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
+ApplyPatch linux-2.6-net-qla-silence-debug-printks.patch
+
 ApplyPatch linux-2.6-olpc-speaker-out.patch
 ApplyPatch linux-2.6-olpc-touchpad.patch
 ApplyPatch linux-2.6-quieter-mmc.patch
@@ -1325,7 +1338,6 @@ ApplyPatch linux-2.6-quieter-mmc.patch
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
 ApplyPatch drm-next.patch
-ApplyPatch drm-intel-gem-x86-64-faster.patch
 ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
@@ -1595,6 +1607,8 @@ hwcap 0 nosegneg"
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans'
+    collect_modules_list modesetting \
+    			 'drm_crtc_init'
 
     # detect missing or incorrect license tags
     rm -f modinfo
@@ -1934,6 +1948,25 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Nov 11 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-100
+- Check for additional ATI chipset timer bugs (#470939, #470723)
+
+* Tue Nov 11 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-99
+- drm rebase patches against latest upstream tree.
+
+* Tue Nov 11 2008 Dave Jones <davej@redhat.com> 2.6.27.5-98
+- qla3xxx: Cleanup: Fix link print statements. (#461623)
+
+* Tue Nov 11 2008 Dave Jones <davej@redhat.com> 2.6.27.5-97
+- ALSA: revo51: add headphone output. (#470813)
+
+* Mon Nov 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-96
+- Fix "scheduling from idle thread" bug (#468896)
+
+* Mon Nov 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-95
+- Build a list of modules that do kernel modesetting
+  (modules.modesetting) (#470907)
+
 * Mon Nov 10 2008 Jeremy Katz <katzj@redhat.com> 2.6.27.5-94
 - Fix up bogons in OLPC touchpad patch
 - Reduce error level of an mmc warning on boot for XO (#469159)
