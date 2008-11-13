@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.845 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.850 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -624,6 +624,7 @@ Patch41: linux-2.6-sysrq-c.patch
 Patch70: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
+Patch102: linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -646,6 +647,9 @@ Patch379: linux-2.6-defaults-fat-utf8.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
+Patch383: linux-2.6-pci-fix-pciehp.patch
+# Don't attempt to assign IRQ 0
+Patch384: linux-2.6-pci-fix-pciehp-irq0.patch
 
 Patch390: linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
 Patch391: linux-2.6-acpi-dock-avoid-check-sta-method.patch
@@ -680,6 +684,7 @@ Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
+Patch691: linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -1130,7 +1135,8 @@ ApplyPatch linux-2.6-sysrq-c.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
-# don't try to read memory beyond end-of-stack
+# check for more ATI timer bugs
+ApplyPatch linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
 
 #
 # PowerPC
@@ -1208,6 +1214,10 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-pciehp-update.patch
 # enable pcie hotplug passive mode by default
 ApplyPatch linux-2.6-defaults-pciehp.patch
+# fix backtrace
+ApplyPatch linux-2.6-pci-fix-pciehp.patch
+# don't try to use irq0
+ApplyPatch linux-2.6-pci-fix-pciehp-irq0.patch
 
 #
 # SCSI Bits.
@@ -1276,6 +1286,9 @@ ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
+
+# fix sleep-in-softirq that caused 'scheduling from idle thread'
+ApplyPatch linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1927,6 +1940,21 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Nov 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-37
+- Ensure that the pciehp driver doesn't attempt to claim IRQ 0 (from f10)
+
+* Wed Nov 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-36
+- Fix backtrace in pciehp driver. (from F10)
+
+* Wed Nov 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-35
+- Fix "scheduling from idle thread" bug (F10#468896)
+
+* Wed Nov 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-34
+- applesmc: add support for iMac 5/8, MacBook 5, MacBook Pro 5
+
+* Tue Nov 11 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-33
+- Check for more ATI timer routing bugs (#470587)
+
 * Sun Nov 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-32
 - Fix up the CVE-2008-3528 patch so we get it from -stable.
 
