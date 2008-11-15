@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.850 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.854 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -1940,6 +1940,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Nov 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-41
+- Disable the ath9k wireless driver until a fix for bug #471329 is found.
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-40
+- Change CONFIG_SECURITY_DEFAULT_MMAP_MIN_ADDR to 4096 on PPC64. (#471478)
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-39
+- Disable CONFIG_PM_TEST_SUSPEND
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-38
+- Increase CONFIG_FORCE_MAX_ZONEORDER to 13 on ppc64. (#468982)
+
 * Wed Nov 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-37
 - Ensure that the pciehp driver doesn't attempt to claim IRQ 0 (from f10)
 
