@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1137 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1145 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -679,6 +679,7 @@ Patch1810: drm-next.patch
 Patch1813: drm-modesetting-radeon.patch
 Patch1814: drm-modesetting-i915.patch
 Patch1815: drm-nouveau.patch
+Patch1816: drm-intel-8xx-pae-no-gem.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -734,6 +735,10 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
+# Fix backtrace
+Patch2805: linux-2.6-pci-fix-pciehp.patch
+# Don't attempt to assign IRQ 0
+Patch2806: linux-2.6-pci-fix-pciehp-irq0.patch
 
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
@@ -1341,6 +1346,7 @@ ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
+ApplyPatch drm-intel-8xx-pae-no-gem.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1367,6 +1373,10 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
+# fix backtrace in pciehp
+ApplyPatch linux-2.6-pci-fix-pciehp.patch
+# don't allocate IRQ 0 in pciehp
+ApplyPatch linux-2.6-pci-fix-pciehp-irq0.patch
 
 # SELinux on ppc64 without plymouth can't boot
 ApplyPatch linux-2.6-selinux-empty-tty-files.patch
@@ -1671,7 +1681,7 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+make htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -1948,6 +1958,27 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com>
+- Change CONFIG_SECURITY_DEFAULT_MMAP_MIN_ADDR to 4096 on PPC64. (#471478)
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-107
+- Disable CONFIG_PM_TEST_SUSPEND
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-106
+- Increase CONFIG_FORCE_MAX_ZONEORDER to 13 on ppc64. (#468982)
+
+* Wed Nov 12 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-105
+- drm-intel-8xx-pae-no-gem.patch - initial disable GEM on 8xx and PAE (#461205)
+
+* Wed Nov 12 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-104
+- radeon - fix issues with nomodeset + newest intel irq patches
+
+* Wed Nov 12 2008 Matthew Garrett <mjg@redhat.com> 2.6.27.5-103
+- Ensure that the pciehp driver doesn't attempt to claim IRQ 0
+
+* Wed Nov 12 2008 Dave Jones <davej@redhat.com> 2.6.27.5-102
+- Fix backtrace in pciehp driver.
+
 * Wed Nov 12 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-101
 - drm/intel: further interrupt fixes
 
