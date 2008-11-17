@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.854 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.856 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -652,7 +652,6 @@ Patch383: linux-2.6-pci-fix-pciehp.patch
 Patch384: linux-2.6-pci-fix-pciehp-irq0.patch
 
 Patch390: linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
-Patch391: linux-2.6-acpi-dock-avoid-check-sta-method.patch
 Patch392: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
@@ -728,9 +727,6 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
 Patch2901: linux-2.6.27-ext4-2.6.28-backport-fixups.patch
-
-# cciss sysfs links are broken
-Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
 # Sony Vaio suspend fix
 Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
@@ -1185,7 +1181,6 @@ ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # fix cpu detection (f10#435653)
 ApplyPatch linux-2.6-acpi-ignore-ae_not_found-error-of-ec-reg-method.patch
 # fix dock bugs
-ApplyPatch linux-2.6-acpi-dock-avoid-check-sta-method.patch
 ApplyPatch linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 # mm
@@ -1273,9 +1268,6 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 # Fix libata on 1.5GB disks
 ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
-
-# cciss sysfs links are broken
-ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
 # make jarod's iwl4965 not panic near N APs, hopefully
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
@@ -1940,7 +1932,20 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Wed Nov 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-41
+* Mon Nov 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.6-43
+- Linux 2.6.27.6
+  Dropped patches:
+    linux-2.6-acpi-dock-avoid-check-sta-method.patch
+    linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
+  Updated patch:
+    linux-2.6-netdev-r8169-2.6.28.patch
+  New config variable:
+    CONFIG_X86_RESERVE_LOW_64K=y
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-42
+- Revert recent CONFIG_SECURITY_DEFAULT_MMAP_MIN_ADDR change.
+
+* Thu Nov 13 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-41
 - Disable the ath9k wireless driver until a fix for bug #471329 is found.
 
 * Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-40
