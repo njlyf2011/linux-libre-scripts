@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1145 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1149 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -1958,7 +1958,19 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Thu Nov 13 2008 Dave Jones <davej@redhat.com>
+* Mon Nov 17 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-113
+- drm - intel rebase from upstream - radeon fix memory sizing and zeroing
+
+* Fri Nov 14 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-112
+- radeon - backout patch is over zealous in error handling
+
+* Fri Nov 14 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-111
+- radeon - fix low memory issues and locking oops causer
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-110
+- Revert previous change.
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-108
 - Change CONFIG_SECURITY_DEFAULT_MMAP_MIN_ADDR to 4096 on PPC64. (#471478)
 
 * Thu Nov 13 2008 Dave Jones <davej@redhat.com> 2.6.27.5-107
