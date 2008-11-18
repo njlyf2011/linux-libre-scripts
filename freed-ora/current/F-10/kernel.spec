@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1149 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1153 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -658,6 +658,7 @@ Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
 Patch691: linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
+Patch692: linux-2.6-wireless-ath9k-check-broken-iommu.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -676,6 +677,7 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
 Patch1810: drm-next.patch
+Patch1811: drm-next-intel-irq-test.patch
 Patch1813: drm-modesetting-radeon.patch
 Patch1814: drm-modesetting-i915.patch
 Patch1815: drm-nouveau.patch
@@ -1294,6 +1296,9 @@ ApplyPatch linux-2.6-at76.patch
 # fix sleep-in-softirq that caused 'scheduling from idle thread'
 ApplyPatch linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
 
+# disable ath9k when swiotlb is in use
+ApplyPatch linux-2.6-wireless-ath9k-check-broken-iommu.patch
+
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
@@ -1343,6 +1348,7 @@ ApplyPatch linux-2.6-quieter-mmc.patch
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
 ApplyPatch drm-next.patch
+ApplyPatch drm-next-intel-irq-test.patch
 ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
@@ -1958,6 +1964,18 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Nov 18 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-117
+- Disable ath9k when swiotlb is in use (#471329)
+
+* Tue Nov 18 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-116
+- rebase to intel proper set of patches + test patch fix.
+
+* Mon Nov 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-115
+- Fix missing parens in the cdrom-door-status patch.
+
+* Mon Nov 17 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-114
+- make pci_slot modular by default to avoid boot spew when acpiphp has bound
+
 * Mon Nov 17 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-113
 - drm - intel rebase from upstream - radeon fix memory sizing and zeroing
 
