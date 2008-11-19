@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1153 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1156 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -682,6 +682,7 @@ Patch1813: drm-modesetting-radeon.patch
 Patch1814: drm-modesetting-i915.patch
 Patch1815: drm-nouveau.patch
 Patch1816: drm-intel-8xx-pae-no-gem.patch
+Patch1817: drm-intel-fix-vt-switch-hang.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1353,6 +1354,7 @@ ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-intel-8xx-pae-no-gem.patch
+ApplyPatch drm-intel-fix-vt-switch-hang.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1964,6 +1966,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Nov 18 2008 Dave Jones <davej@redhat.com> 2.6.27.5-120
+- Only build the x86-64 optimised versions of aes/salsa/Twofish on 64bit.
+
+* Tue Nov 18 2008 Jarod Wilson <jarod@redhat.com> 2.6.27.5-119
+- Fix hang on VT switch w/compiz on intel graphics (#467332)
+
+* Tue Nov 18 2008 Dave Jones <davej@redhat.com> 2.6.27.5-118
+- Disable autofs v3. (obsoleted by v4 some time ago.)
+
 * Tue Nov 18 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.5-117
 - Disable ath9k when swiotlb is in use (#471329)
 
