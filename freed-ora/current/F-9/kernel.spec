@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.856 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.863 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -671,6 +671,7 @@ Patch520: linux-2.6.27-pci-hush-allocation-failures.patch
 
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
+Patch590: linux-2.6-selinux-recognise-addrlabel.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
@@ -681,9 +682,8 @@ Patch679: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 # wireless
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
-Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
-Patch691: linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
+Patch692: linux-2.6-wireless-ath9k-check-broken-iommu.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -721,15 +721,17 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 
+# fix hang on older sb700
+Patch2301: linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
+# fix usbmon reads
+Patch2302: linux-2.6-usb-usbmon-fix-read.patch
+
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
 Patch2901: linux-2.6.27-ext4-2.6.28-backport-fixups.patch
-
-# Sony Vaio suspend fix
-Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1167,15 +1169,15 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
-# Sony Vaio suspend fix
-ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
-
 ApplyPatch linux-2.6-dmi-autoload.patch
 
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# fix jmicron usb/sata bridge
+# scheduled for 2.6.27.8
+ApplyPatch linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
+ApplyPatch linux-2.6-usb-usbmon-fix-read.patch
+
 
 # ACPI
 # fix cpu detection (f10#435653)
@@ -1256,6 +1258,8 @@ ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
+# selinux: recognize netlink messages for 'ip addrlabel'
+ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
 
 # Changes to upstream defaults.
 
@@ -1273,14 +1277,12 @@ ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
-# hostap hack to still work w/ quetionable skb->cb usage
-ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
-# fix sleep-in-softirq that caused 'scheduling from idle thread'
-ApplyPatch linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
+# disable ath9k when swiotlb is in use
+ApplyPatch linux-2.6-wireless-ath9k-check-broken-iommu.patch
 
 # implement smarter atime updates support.
 ApplyPatch linux-2.6-smarter-relatime.patch
@@ -1932,6 +1934,31 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Fri Nov 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-50
+- Two USB patches scheduled for the next -stable release.
+
+* Fri Nov 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-49
+- make pci_slot modular by default (same as Fedora 10)
+
+* Fri Nov 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-48
+- Linux 2.6.27.7
+  Dropped patches:
+    linux-2.6.27-sony-laptop-suspend-fix.patch
+    linux-2.6-hostap-skb-cb-hack.patch
+    linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
+
+* Wed Nov 19 2008 Dave Jones <davej@redhat.com> 2.6.27.6-47
+- selinux: recognize netlink messages for 'ip addrlabel' (#469423)
+
+* Wed Nov 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.6-46
+- Change loop driver back to modular. (#472056)
+
+* Wed Nov 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.6-45
+- Only build the x86-64 optimized versions of aes/salsa/Twofish on 64bit. (F10#471764)
+
+* Tue Nov 18 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.6-44
+- Disable ath9k when swiotlb is in use, re-enable driver (#471329)
+
 * Mon Nov 17 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.6-43
 - Linux 2.6.27.6
   Dropped patches:
