@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1156 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1159 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -648,6 +648,7 @@ Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
+Patch590: linux-2.6-selinux-recognise-addrlabel.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch672: linux-2.6-libata-avoid-overflow-with-large-disks.patch
@@ -665,6 +666,9 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 Patch800: linux-2.6-alsa-ac97-whitelist.patch
 Patch801: linux-2.6-alsa-ac97-whitelist-AD1981B.patch
 Patch802: linux-2.6-alsa-revo51-headphone.patch
+
+Patch900: linux-2.6-uvc-hg.patch
+Patch901: linux-2.6-uvc-spca525.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6.27-lirc.patch
@@ -1274,6 +1278,8 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
+# selinux: recognize netlink messages for 'ip addrlabel'
+ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
 
 # Changes to upstream defaults.
 
@@ -1308,6 +1314,9 @@ ApplyPatch linux-2.6-alsa-ac97-whitelist.patch
 ApplyPatch linux-2.6-alsa-ac97-whitelist-AD1981B.patch
 
 ApplyPatch linux-2.6-alsa-revo51-headphone.patch
+
+ApplyPatch linux-2.6-uvc-hg.patch
+ApplyPatch linux-2.6-uvc-spca525.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1966,6 +1975,16 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Nov 24 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-123
+- radeon: hopefully fix rs690 and rs480 GART invalidation
+
+* Wed Nov 19 2008 Dave Jones <davej@redhat.com> 2.6.27.5-122
+- selinux: recognize netlink messages for 'ip addrlabel' (#469423)
+
+* Wed Nov 19 2008 Hans de Goede <hdegoede@redhat.com> 2.6.27.5-121
+- Update uvcvideo to latest git
+- Patch uvcvideo to not make older logitech cams crash (bz 472217)
+
 * Tue Nov 18 2008 Dave Jones <davej@redhat.com> 2.6.27.5-120
 - Only build the x86-64 optimised versions of aes/salsa/Twofish on 64bit.
 
