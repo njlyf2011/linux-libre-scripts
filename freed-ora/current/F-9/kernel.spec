@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.863 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.866 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -625,6 +625,8 @@ Patch70: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
 Patch102: linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
+Patch103: linux-2.6-x86-more-general-id-for-phoenix-bios.patch
+Patch104: linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -664,6 +666,11 @@ Patch430: linux-2.6-net-silence-noisy-printks.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
+# 460237
+Patch453: linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
+# 448656
+Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 # hush pci bar allocation failures
@@ -1135,6 +1142,9 @@ ApplyPatch linux-2.6-x86-tune-generic.patch
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
 # check for more ATI timer bugs
 ApplyPatch linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
+# additional fixes for lowmem 64k reservation (scheduled for -stable)
+ApplyPatch linux-2.6-x86-more-general-id-for-phoenix-bios.patch
+ApplyPatch linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
 
 #
 # PowerPC
@@ -1246,6 +1256,10 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
+# 460237
+ApplyPatch linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
+# 448656
+ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1934,6 +1948,18 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Nov 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-53
+- Additional fixes for 64K lowmem reservation:
+  - More general matching for Phoenix BIOS
+  - Fix Xen when low 64K is reserved
+
+* Wed Nov 26 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-52
+- applesmc: add support for Macbook 4 / iMac 6 / generic MacPro
+
+* Tue Nov 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-51
+- Fix Zepto notebook multimedia keys (#460237)
+- Fix Dell XPS 1530 trackpad (#448656)
+
 * Fri Nov 21 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-50
 - Two USB patches scheduled for the next -stable release.
 
