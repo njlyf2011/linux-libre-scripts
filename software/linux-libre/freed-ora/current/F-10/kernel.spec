@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1159 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1166 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -605,6 +605,8 @@ Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
 Patch31: linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
+Patch32: linux-2.6-x86-more-general-id-for-phoenix-bios.patch
+Patch33: linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -635,7 +637,6 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-handle-ec-init-failure.patch
-Patch395: linux-2.6-acpi-dock-avoid-check-sta-method.patch
 Patch396: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
@@ -643,6 +644,11 @@ Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
+# 460237
+Patch453: linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
+# 448656
+Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -656,9 +662,7 @@ Patch672: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 #Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
-Patch683: linux-2.6-hostap-skb-cb-hack.patch
 Patch690: linux-2.6-at76.patch
-Patch691: linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
 Patch692: linux-2.6-wireless-ath9k-check-broken-iommu.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -681,12 +685,9 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
 Patch1810: drm-next.patch
-Patch1811: drm-next-intel-irq-test.patch
 Patch1813: drm-modesetting-radeon.patch
-Patch1814: drm-modesetting-i915.patch
 Patch1815: drm-nouveau.patch
 Patch1816: drm-intel-8xx-pae-no-gem.patch
-Patch1817: drm-intel-fix-vt-switch-hang.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -724,6 +725,10 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# fix hang on older sb700
+Patch2301: linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
+# fix usbmon reads
+Patch2302: linux-2.6-usb-usbmon-fix-read.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -750,12 +755,6 @@ Patch2806: linux-2.6-pci-fix-pciehp-irq0.patch
 # ext4 fun - new & improved, now with less dev!
 Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
 Patch2901: linux-2.6.27-ext4-2.6.28-backport-fixups.patch
-
-# cciss sysfs links are broken
-Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
-
-# Sony Vaio suspend fix
-Patch3100: linux-2.6.27-sony-laptop-suspend-fix.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1148,6 +1147,9 @@ ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
 # check for more ATI timer bugs
 ApplyPatch linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
+# additional fixes for lowmem 64k reservation (scheduled for -stable)
+ApplyPatch linux-2.6-x86-more-general-id-for-phoenix-bios.patch
+ApplyPatch linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1204,6 +1206,9 @@ ApplyPatch linux-2.6.27-ext4-2.6.28-backport-fixups.patch
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+# scheduled for 2.6.27.8
+ApplyPatch linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
+ApplyPatch linux-2.6-usb-usbmon-fix-read.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
@@ -1213,7 +1218,6 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-handle-ec-init-failure.patch
 # fix dock bugs
-ApplyPatch linux-2.6-acpi-dock-avoid-check-sta-method.patch
 ApplyPatch linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 # Various low-impact patches to aid debugging.
@@ -1265,6 +1269,10 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
+# 460237
+ApplyPatch linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
+# 448656
+ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1294,14 +1302,9 @@ ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
-# hostap hack to still work w/ quetionable skb->cb usage
-ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
-
-# fix sleep-in-softirq that caused 'scheduling from idle thread'
-ApplyPatch linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
 
 # disable ath9k when swiotlb is in use
 ApplyPatch linux-2.6-wireless-ath9k-check-broken-iommu.patch
@@ -1330,9 +1333,6 @@ ApplyPatch linux-2.6-hdpvr.patch
 # but the drive isn't yet ready.
 ApplyPatch linux-2.6-cdrom-door-status.patch
 
-# fix sysfs links for the cciss driver
-ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
-
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
@@ -1358,12 +1358,9 @@ ApplyPatch linux-2.6-quieter-mmc.patch
 # Nouveau DRM + drm fixes
 ApplyPatch nvidia-agp.patch
 ApplyPatch drm-next.patch
-ApplyPatch drm-next-intel-irq-test.patch
 ApplyPatch drm-modesetting-radeon.patch
-#ApplyPatch drm-modesetting-i915.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-intel-8xx-pae-no-gem.patch
-ApplyPatch drm-intel-fix-vt-switch-hang.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1374,9 +1371,6 @@ fi
 
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
-
-# Sony Vaio suspend fix
-ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
 
 ApplyPatch linux-2.6-dmi-autoload.patch
 
@@ -1975,6 +1969,42 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Nov 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-130
+- Additional fixes for 64K lowmem reservation:
+  - More general matching for Phoenix BIOS
+  - Fix Xen when low 64K is reserved
+
+* Thu Nov 27 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-129
+- Update applesmc driver to 2.6.28-rc6-git1
+  Adds: iMac 5/6/8, Macbook 4/5, Macbook Pro 5, generic MacPro
+
+* Thu Nov 27 2008 Dave Airlie <airlied@redhat.com> 2.6.27.7-128
+- drm: intel rebase with upstream fixes - radeon add larger GART size
+
+* Tue Nov 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-127
+- Two USB patches scheduled for the next -stable release.
+
+* Tue Nov 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-126
+- Fix Zepto notebook multimedia keys (F9#460237)
+- Fix Dell XPS 1530 trackpad (F9#448656)
+
+* Tue Nov 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-125
+- Linux 2.6.27.7
+  Dropped patches:
+    linux-2.6.27-sony-laptop-suspend-fix.patch
+    linux-2.6-hostap-skb-cb-hack.patch
+    linux-2.6-wireless-iwlagn-avoid-sleep-in-softirq.patch
+
+* Tue Nov 25 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.6-124
+- Linux 2.6.27.6
+  Dropped patches:
+    linux-2.6-acpi-dock-avoid-check-sta-method.patch
+    linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
+  Updated patch:
+    linux-2.6-netdev-r8169-2.6.28.patch
+  New config variable:
+    CONFIG_X86_RESERVE_LOW_64K=y
+
 * Mon Nov 24 2008 Dave Airlie <airlied@redhat.com> 2.6.27.5-123
 - radeon: hopefully fix rs690 and rs480 GART invalidation
 
