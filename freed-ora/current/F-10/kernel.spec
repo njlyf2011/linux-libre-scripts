@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1168 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1170 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -1969,6 +1969,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Dec 02 2008 Dave Airlie <airlied@redhat.com> 2.6.27.7-134
+- radeon: fix IGP aperture sizing (#473895)
+
+* Mon Dec 01 2008 Dave Airlie <airlied@redhat.com> 2.6.27.7-133
+- drm-next.patch: drm/intel: fix VT switch issue harder.
+
 * Sun Nov 30 2008 Dave Airlie <airlied@redhat.com> 2.6.27.7-132
 - radeon: another AGP fix for r500 cards falling back to PCIE
 
