@@ -3,7 +3,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 1
+%define released_kernel 0
 
 # Versions of various parts
 
@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1120 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1142 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -38,7 +38,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-#define rcrevlibre -libre
+%define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 0
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -69,9 +69,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 6
 # The git snapshot level
-%define gitrev 0
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -600,8 +600,6 @@ Patch10: git-cpufreq.patch
 Patch20: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-utrace.patch
-Patch22: linux-2.6-x86-tracehook.patch
-Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
@@ -666,7 +664,6 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 Patch800: linux-2.6-alsa-ac97-whitelist.patch
 Patch801: linux-2.6-alsa-ac97-whitelist-AD1981B.patch
 
-Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6.27-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
 
@@ -691,9 +688,8 @@ Patch2001: linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-# r8169 fixes
-Patch2005: linux-2.6-r8169-fix-RxMissed-register-access.patch
-Patch2006: linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+# r8169 fixes: merge 2.6.28 updates
+Patch2005: linux-2.6-netdev-r8169-2.6.28.patch
 
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
@@ -740,10 +736,9 @@ Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
 Patch2805: linux-2.6.27-acpi-ec-drizzle.patch
 
 # ext4 fun - new & improved, now with less dev!
-Patch2900: linux-2.6.27-ext4-stable-patch-queue.patch
-Patch2901: linux-2.6.27-fs-disable-fiemap.patch
+Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
+Patch2901: linux-2.6.27-ext4-2.6.28-backport-fixups.patch
 Patch2902: linux-2.6.27-ext-dir-corruption-fix.patch
-Patch2903: linux-2.6.27-delay-ext4-free-block-cap-check.patch
 
 # cciss sysfs links are broken
 Patch3000: linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
@@ -1134,14 +1129,12 @@ if [ "$C" -gt 10 ]; then
 ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
-ApplyPatch git-cpufreq.patch
+#ApplyPatch git-cpufreq.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
-ApplyPatch linux-2.6-x86-tracehook.patch
-ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
@@ -1149,13 +1142,13 @@ ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
 ApplyPatch linux-2.6-sysrq-c.patch
 
 # scheduler
-ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
-ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
+#ApplyPatch linux-2.6-sched-features-disable-hrtick.patch
+#ApplyPatch linux-2.6-sched_clock-prevent-scd-clock-from-moving-backwards
 
 # Architecture patches
 # x86(-64)
 # don't oops in get_wchan()
-ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
+#ApplyPatch linux-2.6-x86-avoid-dereferencing-beyond-stack-THREAD_SIZE.patch
 
 #
 # PowerPC
@@ -1185,67 +1178,64 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 #
 # Exec shield
 #
-ApplyPatch linux-2.6-execshield.patch
-ApplyPatch linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
-
-ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
+#ApplyPatch linux-2.6-execshield.patch
+#ApplyPatch linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
+#ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 
 #
 # bugfixes to drivers and filesystems
 #
 
-# Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
-ApplyPatch linux-2.6.27-ext4-stable-patch-queue.patch
-# Disable fiemap until it is really truly upstream & released
-ApplyPatch linux-2.6.27-fs-disable-fiemap.patch
+# ext4/jbd changes up to 2.6.28-rc3-git6
+#ApplyPatch linux-2.6.27-ext4-2.6.28-rc3-git6.patch
+# Fixups for the upstream ext4 code to build cleanly in 2.6.27.
+#ApplyPatch linux-2.6.27-ext4-2.6.28-backport-fixups.patch
 # CVE-2008-3528, ext-fs dir corruption
-ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
-# Delay capability() checks 'til last in ext4
-ApplyPatch linux-2.6.27-delay-ext4-free-block-cap-check.patch
+#ApplyPatch linux-2.6.27-ext-dir-corruption-fix.patch
 
 # xfs
 
 # USB
-ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+#ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 # fix I/O errors on jmicron usb-ata bridge
-ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
+#ApplyPatch linux-2.6-usb-storage-unusual-devs-jmicron-ata-bridge.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
-ApplyPatch linux-2.6-crypto-fips_enable.patch
+#ApplyPatch linux-2.6-crypto-fips_enable.patch
 
 # ACPI
 
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch linux-2.6-acpi-clear-wake-status.patch
-ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
-ApplyPatch linux-2.6-acpi-handle-ec-init-failure.patch
+#ApplyPatch linux-2.6-acpi-clear-wake-status.patch
+#ApplyPatch linux-2.6-acpi-ignore-reset_reg_sup.patch
+#ApplyPatch linux-2.6-acpi-handle-ec-init-failure.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
-ApplyPatch linux-2.6-debug-taint-vm.patch
+#ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
-ApplyPatch linux-2.6-mm-pagefault-enable-ints.patch
+#ApplyPatch linux-2.6-mm-pagefault-enable-ints.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
 #
-ApplyPatch linux-2.6-crash-driver.patch
+#ApplyPatch linux-2.6-crash-driver.patch
 
 #
 # PCI
 #
 # disable message signaled interrupts
-ApplyPatch linux-2.6-defaults-pci_no_msi.patch
+#ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 
 # update the pciehp driver
-ApplyPatch linux-2.6-pciehp-update.patch
+#ApplyPatch linux-2.6-pciehp-update.patch
 
 # default to enabling passively listening for hotplug events
-ApplyPatch linux-2.6-defaults-pciehp.patch
+#ApplyPatch linux-2.6-defaults-pciehp.patch
 
 #
 # SCSI Bits.
@@ -1257,21 +1247,21 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # Filesystem patches.
 # Squashfs
-ApplyPatch linux-2.6-squashfs.patch
+#ApplyPatch linux-2.6-squashfs.patch
 
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 # Fix tcp option ordering.
-ApplyPatch linux-2.6-net-tcp-option-ordering.patch
+#ApplyPatch linux-2.6-net-tcp-option-ordering.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # Dell can't make keyboards
-ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
+#ApplyPatch linux-2.6-input-dell-keyboard-keyup.patch
 # kill annoying applesmc debug messages
-ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
+#ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1291,107 +1281,103 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 # fix it821x raid volumes
-ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
+#ApplyPatch linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
 # fix overlow with large disk
-ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
+#ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 # fix spot's iwlwifi, hopefully...
 #ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
 # make jarod's iwl4965 not panic near N APs, hopefully
-ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+#ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
-ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
+#ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 # hostap hack to still work w/ quetionable skb->cb usage
-ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
+#ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
 # NFS Client mounts hang when exported directory do not exist
-ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
+#ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
 # implement whitelist for ac97
-ApplyPatch linux-2.6-alsa-ac97-whitelist.patch
-ApplyPatch linux-2.6-alsa-ac97-whitelist-AD1981B.patch
-
-# build id related enhancements
-ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
+#ApplyPatch linux-2.6-alsa-ac97-whitelist.patch
+#ApplyPatch linux-2.6-alsa-ac97-whitelist-AD1981B.patch
 
 # http://www.lirc.org/
-ApplyPatch linux-2.6.27-lirc.patch
+#ApplyPatch linux-2.6.27-lirc.patch
 # http://hg.jannau.net/hdpvr/
-ApplyPatch linux-2.6-hdpvr.patch
+#ApplyPatch linux-2.6-hdpvr.patch
 
 # Fix the return code CD accesses when the CDROM drive door is closed
 # but the drive isn't yet ready.
 ApplyPatch linux-2.6-cdrom-door-status.patch
 
 # fix sysfs links for the cciss driver
-ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
+#ApplyPatch linux-2.6-blk-cciss-fix-regression-sysfs-symlink-missing.patch
 
 # fix RTC on systems with broken PnP
-ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
-ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
+#ApplyPatch linux-2.6-rtc-cmos-look-for-pnp-rtc-first.patch
+#ApplyPatch linux-2.6-x86-register-platform-rtc-if-pnp-doesnt-describe-it.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
-ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
-ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
-ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
+#ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
+#ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
+#ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
-ApplyPatch linux-2.6-r8169-fix-RxMissed-register-access.patch
-ApplyPatch linux-2.6-r8169-wake-up-the-phy-of-the-8168.patch
+#ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 
-ApplyPatch linux-2.6-eeepc-laptop-update.patch
-ApplyPatch linux-2.6-toshiba-acpi-update.patch
+#ApplyPatch linux-2.6-eeepc-laptop-update.patch
+#ApplyPatch linux-2.6-toshiba-acpi-update.patch
 
 # atl2 network driver
-ApplyPatch linux-2.6-netdev-atl2.patch
+#ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 ApplyPatch linux-2.6-olpc-speaker-out.patch
-ApplyPatch linux-2.6-olpc-touchpad.patch
+#ApplyPatch linux-2.6-olpc-touchpad.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch nvidia-agp.patch
-ApplyPatch linux-2.6-agp-intel-cantiga-fix.patch
-ApplyPatch drm-next.patch
-ApplyPatch drm-intel-gem-x86-64-faster.patch
-ApplyPatch drm-modesetting-radeon.patch
+#ApplyPatch nvidia-agp.patch
+#ApplyPatch linux-2.6-agp-intel-cantiga-fix.patch
+#ApplyPatch drm-next.patch
+#ApplyPatch drm-intel-gem-x86-64-faster.patch
+#ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
-ApplyPatch drm-nouveau.patch
+#ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
-ApplyPatch linux-2.6-firewire-git-update.patch
+#ApplyPatch linux-2.6-firewire-git-update.patch
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
 if [ "$C" -gt 10 ]; then
 ApplyPatch linux-2.6-firewire-git-pending.patch
 fi
 
 # get rid of imacfb and make efifb work everywhere it was used
-ApplyPatch linux-2.6-merge-efifb-imacfb.patch
+#ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 # Sony Vaio suspend fix
-ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
+#ApplyPatch linux-2.6.27-sony-laptop-suspend-fix.patch
 
-ApplyPatch linux-2.6-dmi-autoload.patch
+#ApplyPatch linux-2.6-dmi-autoload.patch
 
 # silence piix3 in quiet boot (ie, qemu)
 ApplyPatch linux-2.6-piix3-silence-quirk.patch
 # Hush IOMMU warnings, you typically can't fix them anyway
-ApplyPatch linux-2.6-quiet-iommu.patch
+#ApplyPatch linux-2.6-quiet-iommu.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 # it's... it's ALIVE!
-ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
+#ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
-ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
+#ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
 # EC storms aren't anything you can fix, shut up already
-ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
+#ApplyPatch linux-2.6.27-acpi-ec-drizzle.patch
 
 # SELinux on ppc64 without plymouth can't boot
-ApplyPatch linux-2.6-selinux-empty-tty-files.patch
+#ApplyPatch linux-2.6-selinux-empty-tty-files.patch
 
 ApplyPatch disable-p4-cpufreq-ui.patch
 
@@ -1629,6 +1615,8 @@ hwcap 0 nosegneg"
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans'
+    collect_modules_list drm \
+    			 'drm_open|drm_init'
 
     # detect missing or incorrect license tags
     rm -f modinfo
@@ -1968,6 +1956,66 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Dec 03 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.106.rc6.git4
+- Deblobbed 2.6.28-rc6.
+
+* Mon Dec 01 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc6-git4
+
+* Sun Nov 30 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc6-git2
+
+* Mon Nov 24 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc6-git1
+
+* Mon Nov 24 2008 Jeremy Katz <katzj@redhat.com>
+- Add modules.drm file so that we can determine the DRM modules to pull into 
+  initrds
+
+* Wed Nov 19 2008 Neil Horman <nhorman@redhat.com>
+- Enable Garmin gps serial module build (#471824)
+
+* Tue Nov 18 2008 Dave Jones <davej@redhat.com>
+- Reenable debugging config options.
+
+* Tue Nov 18 2008 Dave Jones <davej@redhat.com>
+- Only build the x86-64 optimised versions of aes/salsa/Twofish on 64bit.
+
+* Tue Nov 18 2008 Dave Jones <davej@redhat.com>
+- Disable autofs v3. (obsoleted by v4 some time ago.)
+
+* Mon Nov 17 2008 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.28-rc5
+
+* Fri Nov 14 2008 Roland McGrath <roland@redhat.com>
+- x86 tracehook merged upstream
+- utrace update (merge conflict only)
+
+* Fri Nov 14 2008 Roland McGrath <roland@redhat.com>
+- CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y replaces patch.
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com>
+- Revert last change.
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com>
+- Change CONFIG_SECURITY_DEFAULT_MMAP_MIN_ADDR to 4096 on PPC64. (#471478)
+
+* Thu Nov 13 2008 Dave Jones <davej@redhat.com>
+- Increase CONFIG_FORCE_MAX_ZONEORDER to 13 on ppc64. (#468982)
+
+* Wed Nov 12 2008 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.28-rc4
+
+* Sun Nov 09 2008 Eric Sandeen <sandeen@redhat.com>
+- Pull back ext4 updates from 2.6.28-rc3-git6
+
+* Fri Nov 07 2008 Chuck Ebbert <cebbert@redhat.com>
+- Update the r8169 network driver to the 2.6.28 version.
+
+* Fri Nov 07 2008 John W. Linville <linville@redhat.com>
+- Re-modularize ieee80211 component
+- Cleanup ieee80211-related config stuff
+
 * Thu Nov 06 2008 Dave Jones <davej@redhat.com>
 - alsa: implement ac97_clock whitelist (#441087)
 
