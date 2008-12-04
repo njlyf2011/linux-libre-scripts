@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1142 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1146 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -69,9 +69,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
-%define gitrev 4
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1956,7 +1956,22 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Mon Dec 03 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.106.rc6.git4
+* Thu Dec 04 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.110.rc7.git3
+- Deblobbed 2.6.28-rc7.
+
+* Thu Dec 04 2008 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-utrace.patch updates
+
+* Thu Dec 04 2008 Kyle McMartin <kyle@redhat.com>
+- 2.6.28-rc7-git3
+
+* Tue Dec 02 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7-git1
+
+* Mon Dec 01 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7
+
+* Mon Dec 01 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.106.rc6.git4 Dec 03
 - Deblobbed 2.6.28-rc6.
 
 * Mon Dec 01 2008 Dave Jones <davej@redhat.com>
