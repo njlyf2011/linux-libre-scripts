@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1146 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1149 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -71,7 +71,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 3
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -648,6 +648,7 @@ Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
+Patch590: linux-2.6-selinux-move-open-perms-check.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-libata-pata_it821x-fix-lba48-on-raid-volumes.patch
@@ -1275,6 +1276,8 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
+# SELinux: check open perms in dentry_open not inode_permission
+ApplyPatch linux-2.6-selinux-move-open-perms-check.patch
 
 # Changes to upstream defaults.
 
@@ -1956,6 +1959,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Dec 05 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7-git5
+
+* Fri Dec 05 2008 Dave Jones <davej@redhat.com>
+- SELinux: check open perms in dentry_open not inode_permission
+
+* Fri Dec 05 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7-git4
+
 * Thu Dec 04 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.110.rc7.git3
 - Deblobbed 2.6.28-rc7.
 
