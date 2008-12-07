@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1171 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1173 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -1966,6 +1966,13 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Dec 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-137
+- Update applesmc driver to 2.6.28-rc7-git1
+  Adds: module autoloading
+
+* Tue Dec 03 2008 Dave Airlie <airlied@redhat.com> 2.6.27.7-136
+- radeon: fix AGP harder than the last time.
+
 * Tue Dec 02 2008 John W. Linville <linville@redhat.com> 2.6.27.7-135
 - Backported ath9k DMA fixes from pre-2.6.28
 - Drop patch to disable ath9k when swiotlb is in use
