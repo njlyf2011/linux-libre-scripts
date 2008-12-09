@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Fri Oct 10 00:26:03 2008//Tkernel-2_6_27-1_fc10
 /patch-2.6.28-rc7.bz2.sign/-1.1/Tue Dec  2 04:42:20 2008//Tkernel-2_6_28-0_110_rc7_git3_fc11
-/.cvsignore/1.961/dummy timestamp from new-entry+Sat Dec  6 01:55:32 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
 /Makefile/1.92/Mon Nov 24 18:21:34 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
 /Makefile.config/1.68/Thu Oct 23 19:01:55 2008/-ko/Tkernel-2_6_28-0_121_rc7_git5_fc11
 /TODO/1.46/Mon Nov 24 18:21:34 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
@@ -97,6 +96,7 @@ D/scripts////
 /merge.pl/1.9/Sun Apr 27 23:43:40 2008/-ko/Tkernel-2_6_28-0_121_rc7_git5_fc11
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_28-0_121_rc7_git5_fc11
 /patch-2.6.28-rc7-git5.bz2.sign/1.1/Sat Dec  6 01:40:28 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
-/sources/1.923/dummy timestamp from new-entry+Sat Dec  6 01:55:19 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
-/upstream/1.835/dummy timestamp from new-entry+Sat Dec  6 01:55:16 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/.cvsignore/1.961/Tue Dec  9 13:17:53 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/sources/1.923/Tue Dec  9 13:17:54 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/upstream/1.835/Tue Dec  9 13:17:55 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
