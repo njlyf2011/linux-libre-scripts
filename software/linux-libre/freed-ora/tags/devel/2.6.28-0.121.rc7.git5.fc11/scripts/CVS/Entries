@@ -1,0 +1,22 @@
+/bumpspecfile.py/1.4/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/configcommon.pl/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/configdiff.pl/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-amd64.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-i586.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-i686.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-ia64.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-iseries.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-ppc.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-ppc64.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-ppc8260.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-ppc8560.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-pseries.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-s390.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/cross-s390x.sh/1.1/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/get-snapshot.sh/1.8/Wed Jul 30 17:13:11 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/newpatch.sh/1.2/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/pull-upstreams.sh/1.5/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/rebase.sh/1.23/Fri Oct 10 01:45:58 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/reconfig.sh/1.8/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+/rediffall.pl/1.4/Sun Apr 27 23:43:41 2008//Tkernel-2_6_28-0_121_rc7_git5_fc11
+D
