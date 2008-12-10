@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1173 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1180 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -592,6 +592,8 @@ Patch05: linux-2.6-makefile-after_link.patch
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
+# revert 2.6.27.8 idr patch that breaks DRM
+Patch08: linux-2.6-lib-idr.c-fix-rcu-related-race-with-idr_find.patch
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
@@ -604,11 +606,13 @@ Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
-Patch31: linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
-Patch32: linux-2.6-x86-more-general-id-for-phoenix-bios.patch
-Patch33: linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
+Patch34: linux-2.6-x86-pci-amd-config-space.patch
 
 Patch41: linux-2.6-sysrq-c.patch
+
+Patch60: linux-2.6-sched-fine-tune-SD_MC_INIT.patch
+Patch61: linux-2.6-sched-fine-tune-SD_SIBLING_INIT.patch
+Patch62: linux-2.6-sched-wakeup-preempt-when-small-overlap.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -640,12 +644,14 @@ Patch394: linux-2.6-acpi-handle-ec-init-failure.patch
 Patch396: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
+
+Patch410: linux-2.6.27.7-alsa-driver-1.0.18a.patch
+Patch411: linux-2.6.27.7-alsa-driver-fixups.patch
+
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
-# 460237
-Patch453: linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
 # 448656
 Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 
@@ -657,7 +663,6 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
 
 Patch670: linux-2.6-ata-quirk.patch
-Patch672: linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 Patch680: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch681: linux-2.6-iwl3945-ibss-tsf-fix.patch
@@ -665,10 +670,6 @@ Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
-
-Patch800: linux-2.6-alsa-ac97-whitelist.patch
-Patch801: linux-2.6-alsa-ac97-whitelist-AD1981B.patch
-Patch802: linux-2.6-alsa-revo51-headphone.patch
 
 Patch900: linux-2.6-uvc-hg.patch
 Patch901: linux-2.6-uvc-spca525.patch
@@ -698,6 +699,8 @@ Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 # r8169 fixes
 Patch2005: linux-2.6-netdev-r8169-2.6.28.patch
+# ATM security fix
+Patch2006: linux-2.6-net-atm-CVE-2008-5079.patch
 
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
@@ -714,7 +717,6 @@ Patch2030: linux-2.6-net-tulip-interrupt.patch
 Patch2031: linux-2.6-net-qla-silence-debug-printks.patch
 
 # olpc fixes
-Patch2040: linux-2.6-olpc-speaker-out.patch
 Patch2041: linux-2.6-olpc-touchpad.patch
 Patch2042: linux-2.6-quieter-mmc.patch
 
@@ -724,10 +726,6 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# fix hang on older sb700
-Patch2301: linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
-# fix usbmon reads
-Patch2302: linux-2.6-usb-usbmon-fix-read.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -746,14 +744,12 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2803: linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 Patch2804: linux-2.6.27-pci-hush-allocation-failures.patch
-# Fix backtrace
-Patch2805: linux-2.6-pci-fix-pciehp.patch
 # Don't attempt to assign IRQ 0
 Patch2806: linux-2.6-pci-fix-pciehp-irq0.patch
+# stop filling the log with messages
+Patch2807: linux-2.6-pciehp-kill-annoying-messages.patch
 
-# ext4 fun - new & improved, now with less dev!
-Patch2900: linux-2.6.27-ext4-2.6.28-rc3-git6.patch
-Patch2901: linux-2.6.27-ext4-2.6.28-backport-fixups.patch
+Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1128,6 +1124,9 @@ fi
 
 %if !%{nopatches}
 
+# revert IDR patch from 2.6.27.8
+ApplyPatch linux-2.6-lib-idr.c-fix-rcu-related-race-with-idr_find.patch -R
+
 # revert patches from upstream that conflict or that we get via other means
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
 if [ "$C" -gt 10 ]; then
@@ -1144,16 +1143,17 @@ ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
 ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
-# check for more ATI timer bugs
-ApplyPatch linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
-# additional fixes for lowmem 64k reservation (scheduled for -stable)
-ApplyPatch linux-2.6-x86-more-general-id-for-phoenix-bios.patch
-ApplyPatch linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
+# fix Barcelona config space size
+ApplyPatch linux-2.6-x86-pci-amd-config-space.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
-# scheduler
+# scheduler patches
+# performance fixes from 2.6.28
+ApplyPatch linux-2.6-sched-fine-tune-SD_MC_INIT.patch
+ApplyPatch linux-2.6-sched-fine-tune-SD_SIBLING_INIT.patch
+ApplyPatch linux-2.6-sched-wakeup-preempt-when-small-overlap.patch
 
 # Architecture patches
 # x86(-64)
@@ -1196,18 +1196,12 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 #
 
 # Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
-# ext4/jbd changes up to 2.6.28-rc3-git6
-ApplyPatch linux-2.6.27-ext4-2.6.28-rc3-git6.patch
-# Fixups for the upstream ext4 code to build cleanly in 2.6.27.
-ApplyPatch linux-2.6.27-ext4-2.6.28-backport-fixups.patch
+ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 
 # xfs
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-# scheduled for 2.6.27.8
-ApplyPatch linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
-ApplyPatch linux-2.6-usb-usbmon-fix-read.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
@@ -1254,6 +1248,8 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
+ApplyPatch linux-2.6.27.7-alsa-driver-1.0.18a.patch
+ApplyPatch linux-2.6.27.7-alsa-driver-fixups.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1268,8 +1264,6 @@ ApplyPatch linux-2.6-net-silence-noisy-printks.patch
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # kill annoying applesmc debug messages
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
-# 460237
-ApplyPatch linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
 # 448656
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 
@@ -1292,8 +1286,6 @@ ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# fix overlow with large disk
-ApplyPatch linux-2.6-libata-avoid-overflow-with-large-disks.patch
 
 # make jarod's iwl4965 not panic near N APs, hopefully
 ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
@@ -1308,12 +1300,6 @@ ApplyPatch linux-2.6-at76.patch
 
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
-
-# implement whitelist for ac97
-ApplyPatch linux-2.6-alsa-ac97-whitelist.patch
-ApplyPatch linux-2.6-alsa-ac97-whitelist-AD1981B.patch
-
-ApplyPatch linux-2.6-alsa-revo51-headphone.patch
 
 ApplyPatch linux-2.6-uvc-hg.patch
 ApplyPatch linux-2.6-uvc-spca525.patch
@@ -1338,6 +1324,8 @@ ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 
+ApplyPatch linux-2.6-net-atm-CVE-2008-5079.patch
+
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-toshiba-acpi-update.patch
 
@@ -1348,7 +1336,6 @@ ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 ApplyPatch linux-2.6-net-qla-silence-debug-printks.patch
 
-ApplyPatch linux-2.6-olpc-speaker-out.patch
 ApplyPatch linux-2.6-olpc-touchpad.patch
 ApplyPatch linux-2.6-quieter-mmc.patch
 
@@ -1381,10 +1368,10 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-amd64-yes-i-know-you-live.patch
 # hush pci bar allocation failures
 ApplyPatch linux-2.6.27-pci-hush-allocation-failures.patch
-# fix backtrace in pciehp
-ApplyPatch linux-2.6-pci-fix-pciehp.patch
 # don't allocate IRQ 0 in pciehp
 ApplyPatch linux-2.6-pci-fix-pciehp-irq0.patch
+#
+ApplyPatch linux-2.6-pciehp-kill-annoying-messages.patch
 
 # SELinux on ppc64 without plymouth can't boot
 ApplyPatch linux-2.6-selinux-empty-tty-files.patch
@@ -1966,6 +1953,45 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Dec 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-144
+- Revert idr patch from 2.6.27.8 that caused DRM breakage.
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-143
+- ATM security fix (CVE-2008-5079)
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-142
+- Scheduler fixes from 2.6.28
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-141
+- Stop the pciehp driver from filling the log with status messages.
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-140
+- Linux 2.6.27.8
+  Dropped patches:
+    linux-2.6-x86-sb600-skip-acpi-irq0-override-if-not-routed-to-int2.patch
+    linux-2.6-x86-more-general-id-for-phoenix-bios.patch
+    linux-2.6-xen-dont-reserve-2-pages-of-padding.patch
+    linux-2.6-usb-ehci-fix-sb700-subsystem-hang.patch
+    linux-2.6-usb-usbmon-fix-read.patch
+    linux-2.6-libata-avoid-overflow-with-large-disks.patch
+    linux-2.6-pci-fix-pciehp.patch
+    linux-2.6-input.git-atkbd-add-quirk-for-inventec.patch
+    linux-2.6.27-ext4-2.6.28-backport-fixups.patch
+    linux-2.6.27-ext4-2.6.28-rc3-git6.patch
+  Added patches:
+    linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-139
+- ALSA 1.0.18a
+  Dropped patches:
+    linux-2.6-alsa-ac97-whitelist.patch
+    linux-2.6-alsa-ac97-whitelist-AD1981B.patch
+    linux-2.6-alsa-revo51-headphone.patch
+    linux-2.6-olpc-speaker-out.patch
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-138
+- Fix PCI config space size on AMD Barcelona.
+
 * Wed Dec 03 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.7-137
 - Update applesmc driver to 2.6.28-rc7-git1
   Adds: module autoloading
