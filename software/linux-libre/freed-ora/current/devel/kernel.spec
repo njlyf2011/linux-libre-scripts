@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1157 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1160 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -69,9 +69,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
-%define gitrev 5
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1210,7 +1210,7 @@ ApplyPatch linux-2.6-olpc-speaker-out.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-modesetting-radeon.patch
 #ApplyPatch drm-modesetting-i915.patch
-#ApplyPatch drm-nouveau.patch
+ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1803,6 +1803,25 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Dec 11 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.124.rc8
+- Deblobbed 2.6.28-rc8.
+
+* Wed Dec 10 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8
+
+* Wed Dec 10 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7-git8
+
+* Wed Dec 10 2008 Kyle McMartin <kyle@redhat.com>
+- 2.6.28-rc7-git8
+- re-enable drm-nouveau...
+
+* Tue Dec 09 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7-git7
+
+* Mon Dec 08 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc7-git6
+
 * Mon Dec 08 2008 Kyle McMartin <kyle@redhat.com>
 - properly fix headers in kernel-devel if headers are in arch/$arch/include,
   sadly was not able to kill off %hdrarch since $Arch is undefined at the
