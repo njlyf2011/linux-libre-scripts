@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1160 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1163 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -71,7 +71,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -650,6 +650,9 @@ Patch683: linux-2.6-hostap-skb-cb-hack.patch
 
 Patch690: linux-2.6-at76.patch
 
+# webcam fixes
+Patch900: linux-2.6-gspca-git.patch
+
 Patch1515: linux-2.6.27-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
 
@@ -1188,6 +1191,9 @@ ApplyPatch linux-2.6-ata-quirk.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
+
+# Webcam patches
+ApplyPatch linux-2.6-gspca-git.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6.27-lirc.patch
@@ -1803,6 +1809,17 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Dec 11 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8-git1
+
+* Thu Dec 11 2008 Dave Jones <davej@redhat.com>
+- Remove noisy message from can network protocol.
+
+* Thu Dec 11 2008 Hans de Goede <hdegoede@redhat.com>
+- Add a patch updating the gspca driver to the latest "git" (mercurial
+  actually) adding support for ov534 based cams, fixing support for
+  spca501, finepix and vc0321 cams + many more bugfixes
+
 * Thu Dec 11 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.124.rc8
 - Deblobbed 2.6.28-rc8.
 
