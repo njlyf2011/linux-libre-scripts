@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1180 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1188 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,9 +50,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -592,11 +592,14 @@ Patch05: linux-2.6-makefile-after_link.patch
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
-# revert 2.6.27.8 idr patch that breaks DRM
-Patch08: linux-2.6-lib-idr.c-fix-rcu-related-race-with-idr_find.patch
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
+
+# fix idr bug in 27.8
+Patch12: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+# fix VMI crash in 27.7
+Patch13: linux-2.6.27.7-vmi-fix-crash-on-boot.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -645,8 +648,11 @@ Patch396: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 
-Patch410: linux-2.6.27.7-alsa-driver-1.0.18a.patch
+Patch410: linux-2.6.27.9-alsa-driver-1.0.18a.patch
 Patch411: linux-2.6.27.7-alsa-driver-fixups.patch
+Patch412: linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
+Patch413: linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
+Patch414: linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
@@ -673,6 +679,7 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch900: linux-2.6-uvc-hg.patch
 Patch901: linux-2.6-uvc-spca525.patch
+Patch902: linux-2.6-gspca-vc0321-fix-frame-overflow.patch
 
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6.27-lirc.patch
@@ -699,8 +706,6 @@ Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 # r8169 fixes
 Patch2005: linux-2.6-netdev-r8169-2.6.28.patch
-# ATM security fix
-Patch2006: linux-2.6-net-atm-CVE-2008-5079.patch
 
 # Make Eee laptop driver suck less
 Patch2011: linux-2.6-eeepc-laptop-update.patch
@@ -1124,9 +1129,6 @@ fi
 
 %if !%{nopatches}
 
-# revert IDR patch from 2.6.27.8
-ApplyPatch linux-2.6-lib-idr.c-fix-rcu-related-race-with-idr_find.patch -R
-
 # revert patches from upstream that conflict or that we get via other means
 C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
 if [ "$C" -gt 10 ]; then
@@ -1134,6 +1136,9 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
 ApplyPatch git-cpufreq.patch
+
+ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+ApplyPatch linux-2.6.27.7-vmi-fix-crash-on-boot.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1248,8 +1253,11 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
-ApplyPatch linux-2.6.27.7-alsa-driver-1.0.18a.patch
+ApplyPatch linux-2.6.27.9-alsa-driver-1.0.18a.patch
 ApplyPatch linux-2.6.27.7-alsa-driver-fixups.patch
+ApplyPatch linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
+ApplyPatch linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
+ApplyPatch linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1303,6 +1311,7 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
 ApplyPatch linux-2.6-uvc-hg.patch
 ApplyPatch linux-2.6-uvc-spca525.patch
+ApplyPatch linux-2.6-gspca-vc0321-fix-frame-overflow.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1323,8 +1332,6 @@ ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
-
-ApplyPatch linux-2.6-net-atm-CVE-2008-5079.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-toshiba-acpi-update.patch
@@ -1953,6 +1960,32 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-152.rc2
+- Enable input beep feature in Intel HDA sound driver.
+
+* Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-151.rc2
+- Linux 2.6.27.9-rc2
+
+* Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-150.rc1
+- Fix VMI crash on boot introduced in 2.6.27.7 (#476062)
+
+* Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-149.rc1
+- Linux 2.6.27.9-rc1
+  Dropped patches:
+    linux-2.6-net-atm-CVE-2008-5079.patch
+
+* Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-148
+- Fix IDR allocator bug introduced in 2.6.27.8
+
+* Fri Dec 12 2008 Dave Airlie <airlied@redhat.com> 2.6.27.8-147
+- modeset - fix AGP without kms + fix endian parser/pll programming
+
+* Wed Dec 10 2008 Jarod Wilson <jarod@redhat.com> 2.6.27.8-146
+- Plug DMA memory leak in firewire drivers (#475156)
+
+* Wed Dec 10 2008 Hans de Goede <hdegoede@redhat.com> 2.6.27.8-145
+- Fix vc0321 based webcams (rh 474990)
+
 * Tue Dec 09 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-144
 - Revert idr patch from 2.6.27.8 that caused DRM breakage.
 
