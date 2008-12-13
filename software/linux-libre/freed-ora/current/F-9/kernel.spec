@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.874 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.879 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -604,7 +604,7 @@ Patch06: linux-2.6-build-nonintconfig.patch
 Patch07: linux-2.6-compile-fixes.patch
 
 # build tweak for build ID magic, even for -vanilla
-Patch05: linux-2.6-makefile-after_link.patch
+Patch08: linux-2.6-makefile-after_link.patch
 
 %if !%{nopatches}
 
@@ -614,6 +614,9 @@ Patch10: linux-2.6-hotfixes.patch
 # patches queued for the next -stable release
 #Patch11: linux-2.6.27.5-stable-queue.patch
 #Patch12: linux-2.6.27.5-stable-queue-reverts.patch
+
+# fix idr bug in 27.8
+Patch15: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
@@ -698,6 +701,7 @@ Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
 Patch900: linux-2.6-uvc-hg.patch
 Patch901: linux-2.6-uvc-spca525.patch
+Patch902: linux-2.6-gspca-vc0321-fix-frame-overflow.patch
 
 #mm
 
@@ -720,6 +724,9 @@ Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 # r8169 fixes
 Patch2007: linux-2.6-netdev-r8169-2.6.28.patch
+
+# ATM security fix
+Patch2006: linux-2.6-net-atm-CVE-2008-5079.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -1122,6 +1129,8 @@ if [ "$C" -gt 10 ]; then
 ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
+ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
@@ -1300,6 +1309,7 @@ ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 # update uvc to upstream, fix spca525
 ApplyPatch linux-2.6-uvc-hg.patch
 ApplyPatch linux-2.6-uvc-spca525.patch
+ApplyPatch linux-2.6-gspca-vc0321-fix-frame-overflow.patch
 
 # build id related enhancements
 ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
@@ -1318,6 +1328,9 @@ ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
+
+# ATM security fix
+ApplyPatch linux-2.6-net-atm-CVE-2008-5079.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-fedora9-rollup.patch
@@ -1574,7 +1587,7 @@ BuildKernel() {
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans'
+    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register'
 
     # detect missing or incorrect license tags
     rm -f modinfo
@@ -1940,6 +1953,22 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sat Dec 13 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.27.8-66
+- Add "scsi_esp_register" to the search terms for modules.block so we pick up sun_esp.ko
+
+* Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-65
+- Fix IDR allocator bug introduced in 2.6.27.8
+
+* Thu Dec 11 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-64
+- Fix vc0321 based webcams (F10#474990)
+
+* Wed Dec 10 2008 Jarod Wilson <jarod@redhat.com> 2.6.27.8-63
+- Plug DMA memory leak in firewire drivers (F10#475156)
+
+* Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-62
+- ATM security fix (CVE-2008-5079)
+- Update ALSA fixups so the snd-pcsp driver can be built.
+
 * Mon Dec 08 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.8-61
 - Drop check for SWIOTLB in the ath9k driver.
 - Add ath9k patch to fail gracefully when iommu is full.
