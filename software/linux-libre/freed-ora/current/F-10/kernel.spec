@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1188 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1189 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -1618,7 +1618,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans'
+    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register'
     collect_modules_list modesetting \
     			 'drm_crtc_init'
 
@@ -1960,6 +1960,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Dec 13 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.27.9-153.rc2
+- Add "scsi_esp_register" to the search terms for modules.block so we pick up sun_esp.ko
+
 * Fri Dec 12 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-152.rc2
 - Enable input beep feature in Intel HDA sound driver.
 
