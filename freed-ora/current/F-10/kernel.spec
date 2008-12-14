@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1189 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1190 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -667,6 +667,8 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
+# fix for ebus_dma.h
+Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -1187,6 +1189,7 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 #
 # SPARC64
 #
+ApplyPatch sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 
 #
 # Exec shield
@@ -1960,6 +1963,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Dec 13 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.27.9-154.rc2
+- pull patch from davem sparc-2.6 git branch to add ebus_dma.h
+
 * Sat Dec 13 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.27.9-153.rc2
 - Add "scsi_esp_register" to the search terms for modules.block so we pick up sun_esp.ko
 
