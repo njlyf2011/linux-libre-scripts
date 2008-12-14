@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1190 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1191 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -52,7 +52,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 9
 # Is it a -stable RC?
-%define stable_rc 2
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -1963,6 +1963,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sun Dec 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-155
+- Linux 2.6.27.9
+
 * Sat Dec 13 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.27.9-154.rc2
 - pull patch from davem sparc-2.6 git branch to add ebus_dma.h
 
