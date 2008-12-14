@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.880 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.882 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -617,6 +617,8 @@ Patch10: linux-2.6-hotfixes.patch
 
 # fix idr bug in 27.8
 Patch15: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+# fix VMI crash in 27.7
+Patch16: linux-2.6.27.7-vmi-fix-crash-on-boot.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
@@ -664,8 +666,11 @@ Patch392: linux-2.6-acpi-dock-fix-eject-request-process.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-Patch410: linux-2.6.27.7-alsa-driver-1.0.18a.patch
+Patch410: linux-2.6.27.9-alsa-driver-1.0.18a.patch
 Patch411: linux-2.6.27.7-alsa-driver-fixups.patch
+Patch412: linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
+Patch413: linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
+Patch414: linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
@@ -726,9 +731,6 @@ Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 
 # r8169 fixes
 Patch2007: linux-2.6-netdev-r8169-2.6.28.patch
-
-# ATM security fix
-Patch2006: linux-2.6-net-atm-CVE-2008-5079.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -1132,6 +1134,7 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
 ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+ApplyPatch linux-2.6.27.7-vmi-fix-crash-on-boot.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
@@ -1243,8 +1246,11 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
 #
-ApplyPatch linux-2.6.27.7-alsa-driver-1.0.18a.patch
+ApplyPatch linux-2.6.27.9-alsa-driver-1.0.18a.patch
 ApplyPatch linux-2.6.27.7-alsa-driver-fixups.patch
+ApplyPatch linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
+ApplyPatch linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
+ApplyPatch linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 
 # block/bio
 #
@@ -1331,9 +1337,6 @@ ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
-
-# ATM security fix
-ApplyPatch linux-2.6-net-atm-CVE-2008-5079.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-fedora9-rollup.patch
@@ -1956,6 +1959,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Sun Dec 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-69
+- Enable input beep feature in Intel HDA sound driver.
+- Fix VMI crash on boot introduced in 2.6.27.7 (F10#476062)
+
+* Sun Dec 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-68
+- Linux 2.6.27.9
+  Dropped patches:
+    linux-2.6-net-atm-CVE-2008-5079.patch
+
 * Sat Dec 13 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2.6.27.8-67
 - pull patch from davem sparc-2.6 git branch to add ebus_dma.h
 
