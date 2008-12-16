@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1191 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1193 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -600,6 +600,8 @@ Patch10: git-cpufreq.patch
 Patch12: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
 # fix VMI crash in 27.7
 Patch13: linux-2.6.27.7-vmi-fix-crash-on-boot.patch
+# revert 2.6.27.5 patch that causes suspend/resume failures
+Patch14: linux-2.6.27.5-sched_clock-prevent-scd-clock-from-moving-backwards.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -675,6 +677,7 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch680: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch681: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
+Patch683: linux-2.6-iwlagn-fix-rx-skb-alignment.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -1141,6 +1144,7 @@ ApplyPatch git-cpufreq.patch
 
 ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
 ApplyPatch linux-2.6.27.7-vmi-fix-crash-on-boot.patch
+ApplyPatch linux-2.6.27.5-sched_clock-prevent-scd-clock-from-moving-backwards.patch -R
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1305,6 +1309,9 @@ ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 
 # Backported ath9k DMA fixes from pre-2.6.28
 ApplyPatch linux-2.6-wireless-ath9k-dma-fixes.patch
+
+# iwlagn: fix RX skb alignment
+ApplyPatch linux-2.6-iwlagn-fix-rx-skb-alignment.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1963,6 +1970,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Dec 15 2008 John W. Linville <linville@redhat.com> 2.6.27.9-157
+- iwlagn: fix RX skb alignment
+
+* Mon Dec 15 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-156
+- Revert -stable patch that causes suspend problems (L-K BZ 12149, 12155)
+
 * Sun Dec 14 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-155
 - Linux 2.6.27.9
 
