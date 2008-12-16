@@ -1,6 +1,5 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Fri Oct 10 00:26:03 2008//Tkernel-2_6_27-1_fc10
-/.cvsignore/1.959/dummy timestamp from new-entry+Sun Dec 14 15:27:30 2008//Tkernel-2_6_27_9-157_fc10
 /Makefile/1.90/Fri Nov  7 08:26:31 2008//Tkernel-2_6_27_9-157_fc10
 /Makefile.config/1.68/Fri Nov  7 08:26:31 2008/-ko/Tkernel-2_6_27_9-157_fc10
 /TODO/1.46/Mon Nov 24 18:20:26 2008//Tkernel-2_6_27_9-157_fc10
@@ -143,7 +142,8 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_9-157_fc10
 /nvidia-agp.patch/1.1/Fri Nov  7 08:26:31 2008/-kb/Tkernel-2_6_27_9-157_fc10
 /patch-2.6.27.9.bz2.sign/1.1/Sun Dec 14 07:47:41 2008//Tkernel-2_6_27_9-157_fc10
-/sources/1.921/dummy timestamp from new-entry+Sun Dec 14 15:27:39 2008//Tkernel-2_6_27_9-157_fc10
 /sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch/1.1/Sat Dec 13 17:42:41 2008/-kb/Tkernel-2_6_27_9-157_fc10
-/upstream/1.833/dummy timestamp from new-entry+Sun Dec 14 15:27:34 2008//Tkernel-2_6_27_9-157_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27_9-157_fc10
+/.cvsignore/1.959/Tue Dec 16 01:55:45 2008//Tkernel-2_6_27_9-157_fc10
+/sources/1.921/Tue Dec 16 01:55:46 2008//Tkernel-2_6_27_9-157_fc10
+/upstream/1.833/Tue Dec 16 01:55:47 2008//Tkernel-2_6_27_9-157_fc10
