@@ -1,6 +1,5 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Thu Oct 30 04:41:21 2008//Tkernel-2_6_27_4-19_fc9
-/.cvsignore/1.836/dummy timestamp from new-entry+Sun Dec 14 15:21:59 2008//Tkernel-2_6_27_9-70_fc9
 /COPYING.modules/1.5/Mon Aug  4 21:46:27 2008/-ko/Tkernel-2_6_27_9-70_fc9
 /Config.mk/1.4/Mon Aug  4 21:46:27 2008//Tkernel-2_6_27_9-70_fc9
 /Makefile/1.71/Fri Oct 31 05:07:05 2008//Tkernel-2_6_27_9-70_fc9
@@ -124,7 +123,8 @@ D/scripts////
 /merge.pl/1.9/Mon Aug  4 21:46:35 2008/-ko/Tkernel-2_6_27_9-70_fc9
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_9-70_fc9
 /patch-2.6.27.9.bz2.sign/1.1/Sun Dec 14 08:10:48 2008//Tkernel-2_6_27_9-70_fc9
-/sources/1.797/dummy timestamp from new-entry+Sun Dec 14 15:22:07 2008//Tkernel-2_6_27_9-70_fc9
 /sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch/1.1/Sat Dec 13 17:42:41 2008/-kb/Tkernel-2_6_27_9-70_fc9
-/upstream/1.716/dummy timestamp from new-entry+Sun Dec 14 15:22:03 2008//Tkernel-2_6_27_9-70_fc9
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27_9-70_fc9
+/.cvsignore/1.836/Tue Dec 16 19:19:31 2008//Tkernel-2_6_27_9-70_fc9
+/sources/1.797/Tue Dec 16 19:19:33 2008//Tkernel-2_6_27_9-70_fc9
+/upstream/1.716/Tue Dec 16 19:19:34 2008//Tkernel-2_6_27_9-70_fc9
