@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1195 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1198 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -655,6 +655,8 @@ Patch411: linux-2.6.27.7-alsa-driver-fixups.patch
 Patch412: linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
 Patch413: linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
 Patch414: linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
+Patch415: linux-2.6-alsa-backport-beep-switch.patch
+Patch416: linux-2.6-defaults-alsa-hda-beep-off.patch
 
 Patch420: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
@@ -678,6 +680,7 @@ Patch680: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch681: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
 Patch683: linux-2.6-iwlagn-fix-rx-skb-alignment.patch
+Patch684: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -1265,6 +1268,8 @@ ApplyPatch linux-2.6.27.7-alsa-driver-fixups.patch
 ApplyPatch linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
 ApplyPatch linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
 ApplyPatch linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
+ApplyPatch linux-2.6-alsa-backport-beep-switch.patch
+ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1312,6 +1317,9 @@ ApplyPatch linux-2.6-wireless-ath9k-dma-fixes.patch
 
 # iwlagn: fix RX skb alignment
 ApplyPatch linux-2.6-iwlagn-fix-rx-skb-alignment.patch
+
+# iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
+ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1970,6 +1978,18 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Dec 17 2008 John W. Linville <linville@redhat.com> 2.6.27.9-162
+- iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
+
+* Tue Dec 16 2008 Kyle McMartin <kyle@redhat.com> 2.6.27.9-161
+- Re-enable input beep code, but disable it by default.
+  Added:
+   linux-2.6-alsa-backport-beep-switch.patch
+   linux-2.6-defaults-alsa-hda-beep-off.patch
+
+* Tue Dec 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-160
+- Disable AC97 audio driver power savings by default.
+
 * Tue Dec 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-159
 - Disable input beep feature in Intel HDA sound driver.
 
