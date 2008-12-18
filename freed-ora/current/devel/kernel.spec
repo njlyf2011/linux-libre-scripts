@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1165 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1167 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -71,7 +71,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 2
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -643,10 +643,7 @@ Patch590: linux-2.6-selinux-move-open-perms-check.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
-#Patch680: linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
-Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
-Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
-Patch683: linux-2.6-hostap-skb-cb-hack.patch
+Patch680: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 
 Patch690: linux-2.6-at76.patch
 
@@ -1180,14 +1177,8 @@ ApplyPatch linux-2.6-selinux-move-open-perms-check.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# fix spot's iwlwifi, hopefully...
-#ApplyPatch linux-2.6-iwlwifi-use-dma_alloc_coherent.patch
-# make jarod's iwl4965 not panic near N APs, hopefully
-#ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
-# iwl3945 fix for stable ad-hoc mode connections (#459401)
-#ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
-# hostap hack to still work w/ quetionable skb->cb usage
-#ApplyPatch linux-2.6-hostap-skb-cb-hack.patch
+# iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
+ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1809,6 +1800,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Dec 17 2008 John W. Linville <linville@redhat.com>
+- iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
+
+* Tue Dec 16 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8-git4
+
+* Mon Dec 15 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8-git3
+
 * Sat Dec 13 2008 Kyle McMartin <kyle@redhat.com>
 - 2.6.28-rc8-git2 
 
