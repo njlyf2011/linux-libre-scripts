@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.886 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.887 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -704,8 +704,9 @@ Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
 Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch683: linux-2.6-iwlagn-fix-rx-skb-alignment.patch
+Patch684: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
+Patch685: linux-2.6-wireless-ath9k-dma-fixes.patch
 Patch690: linux-2.6-at76.patch
-Patch692: linux-2.6-wireless-ath9k-dma-fixes.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -1312,6 +1313,8 @@ ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 # iwlagn: fix RX skb alignment
 ApplyPatch linux-2.6-iwlagn-fix-rx-skb-alignment.patch
+# iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
+ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1973,6 +1976,9 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Dec 17 2008 John W. Linville <linville@redhat.com> 2.6.27.9-74
+- iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
+
 * Tue Dec 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-73
 - Disable input beep feature in Intel HDA sound driver.
 
