@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.883 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.886 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -619,6 +619,8 @@ Patch10: linux-2.6-hotfixes.patch
 Patch15: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
 # fix VMI crash in 27.7
 Patch16: linux-2.6.27.7-vmi-fix-crash-on-boot.patch
+# fix 2.6.27.5 suspend regression
+Patch17: linux-2.6.27.5-revert-sched-clock-prevent-scd-clock-from-moving-back.patch
 
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
@@ -717,6 +719,10 @@ Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1400: linux-2.6-smarter-relatime.patch
 Patch1515: linux-2.6.27-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
+
+# Fix the return code CD accesses when the CDROM drive door is closed
+# but the drive isn't yet ready.
+Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
 Patch1801: drm-fedora9-rollup.patch
@@ -1136,6 +1142,7 @@ fi
 
 ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
 ApplyPatch linux-2.6.27.7-vmi-fix-crash-on-boot.patch
+ApplyPatch linux-2.6.27.5-revert-sched-clock-prevent-scd-clock-from-moving-back.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
@@ -1329,6 +1336,10 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 # http://www.lirc.org/
 ApplyPatch linux-2.6.27-lirc.patch
 ApplyPatch linux-2.6-hdpvr.patch
+
+# Fix the return code CD accesses when the CDROM drive door is closed
+# but the drive isn't yet ready.
+ApplyPatch linux-2.6-cdrom-door-status.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1962,6 +1973,15 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Dec 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-73
+- Disable input beep feature in Intel HDA sound driver.
+
+* Tue Dec 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-72
+- Revert -stable patch that causes suspend problems (L-K BZ 12149, 12155)
+
+* Tue Dec 16 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-71
+- Fix the CDROM door status (from rawhide)
+
 * Mon Dec 15 2008 John W. Linville <linville@redhat.com> 2.6.27.9-70
 - iwlagn: fix RX skb alignment
 
