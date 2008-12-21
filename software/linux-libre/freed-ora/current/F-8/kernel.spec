@@ -23,7 +23,7 @@ Summary: The Linux kernel
 # Bah. Have to set this to a negative for the moment to fix rpm ordering after
 # moving the spec file. cvs sucks. Should be sure to fix this once 2.6.23 is out.
 %define fedora_cvs_origin 510
-%define fedora_build %(R="$Revision: 1.566 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
+%define fedora_build %(R="$Revision: 1.567 $"; R="${R%% \$}"; R="${R##: 1.}"; expr $R - %{fedora_cvs_origin})
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -593,6 +593,17 @@ Patch09: linux-2.6-upstream-reverts.patch
 # patches queued for the next -stable release
 #Patch11: linux-2.6-stable-queue.patch
 
+# Security patches from 2.6.27-stable
+Patch11: linux-2.6-applicom-fix-an-unchecked-user-ioctl-range-and-an-error-return.patch
+Patch12: linux-2.6-atm-cve-2008-5079-duplicate-listen-on-socket-corrupts-the-vcc-table.patch
+Patch13: linux-2.6-enforce-a-minimum-sg_io-timeout.patch
+Patch14: linux-2.6-fix-inotify-watch-removal-umount-races.patch
+Patch15: linux-2.6-net-fix-soft-lockups-oom-issues-w-unix-garbage-collector.patch
+Patch16: linux-2.6-v4l-dvb-avoid-writing-outside-shadow.bytes-array.patch
+Patch17: linux-2.6-hfs-fix-namelength-memory-corruption.patch
+Patch18: linux-2.6-hfsplus-check-read_mapping_page-return-value.patch
+Patch19: linux-2.6-hfsplus-fix-buffer-overflow-with-a-corrupted-image.patch
+
 Patch20: linux-2.6-ptrace-cleanup.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
@@ -1051,6 +1062,17 @@ ApplyPatch linux-2.6-compile-fix-gcc-43.patch
 # Revert -stable pieces we get from elsewhere here
 ApplyPatch linux-2.6-upstream-reverts.patch -R
 #ApplyPatch linux-2.6-stable-queue.patch
+
+# Security fixes from 2.6.27-stable
+ApplyPatch linux-2.6-applicom-fix-an-unchecked-user-ioctl-range-and-an-error-return.patch
+ApplyPatch linux-2.6-atm-cve-2008-5079-duplicate-listen-on-socket-corrupts-the-vcc-table.patch
+ApplyPatch linux-2.6-enforce-a-minimum-sg_io-timeout.patch
+ApplyPatch linux-2.6-fix-inotify-watch-removal-umount-races.patch
+ApplyPatch linux-2.6-net-fix-soft-lockups-oom-issues-w-unix-garbage-collector.patch
+ApplyPatch linux-2.6-v4l-dvb-avoid-writing-outside-shadow.bytes-array.patch
+ApplyPatch linux-2.6-hfs-fix-namelength-memory-corruption.patch
+ApplyPatch linux-2.6-hfsplus-check-read_mapping_page-return-value.patch
+ApplyPatch linux-2.6-hfsplus-fix-buffer-overflow-with-a-corrupted-image.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-ptrace-cleanup.patch
@@ -1913,6 +1935,18 @@ fi
 
 
 %changelog
+* Thu Dec 18 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.8-57
+- Fixes from 2.6.27-stable:
+                 linux-2.6-applicom-fix-an-unchecked-user-ioctl-range-and-an-error-return.patch
+  CVE-2008-5079: linux-2.6-atm-cve-2008-5079-duplicate-listen-on-socket-corrupts-the-vcc-table.patch
+                 linux-2.6-enforce-a-minimum-sg_io-timeout.patch
+  CVE-2008-5182: linux-2.6-fix-inotify-watch-removal-umount-races.patch
+  CVE-2008-5300: linux-2.6-net-fix-soft-lockups-oom-issues-w-unix-garbage-collector.patch
+                 linux-2.6-v4l-dvb-avoid-writing-outside-shadow.bytes-array.patch
+  CVE-2008-4933: linux-2.6-hfs-fix-namelength-memory-corruption.patch
+                 linux-2.6-hfsplus-check-read_mapping_page-return-value.patch
+  CVE-2008-5025: linux-2.6-hfsplus-fix-buffer-overflow-with-a-corrupted-image.patch
+
 * Mon Nov 10 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.26.8-56
 - Linux 2.6.26.8
   Dropped patches:
