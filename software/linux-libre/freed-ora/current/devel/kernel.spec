@@ -1,3 +1,4 @@
+
 Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
@@ -21,7 +22,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1167 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1176 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -69,9 +70,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(expr %{base_sublevel} + 1)
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 9
 # The git snapshot level
-%define gitrev 4
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -441,7 +442,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.61-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, mkinitrd >= 6.0.61-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, /sbin/new-kernel-pkg
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -641,6 +642,8 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-move-open-perms-check.patch
 
+Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
+
 Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
@@ -658,8 +661,8 @@ Patch1520: linux-2.6-hdpvr.patch
 Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
+Patch1811: drm-next.patch
 Patch1812: drm-modesetting-radeon.patch
-Patch1813: drm-modesetting-i915.patch
 Patch1814: drm-nouveau.patch
 
 # kludge to make ich9 e1000 work
@@ -1174,6 +1177,9 @@ ApplyPatch linux-2.6-selinux-move-open-perms-check.patch
 
 # Changes to upstream defaults.
 
+# squelch hda_beep by default
+ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
+
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
@@ -1205,9 +1211,9 @@ ApplyPatch linux-2.6-net-tulip-interrupt.patch
 ApplyPatch linux-2.6-olpc-speaker-out.patch
 
 # Nouveau DRM + drm fixes
+ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
-#ApplyPatch drm-modesetting-i915.patch
-ApplyPatch drm-nouveau.patch
+#ApplyPatch drm-nouveau.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1800,6 +1806,44 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sun Dec 21 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.0.140.rc9.git1
+- Deblobbed 2.6.28-rc9.
+- Adjusted drm-next.patch.
+
+* Sat Dec 20 2008 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.28-rc9-git1
+  Rebased patches:
+   linux-2.6-pciehp-update.patch
+   drm-next.patch
+
+* Fri Dec 19 2008 Adam Jackson <ajax@redhat.com>
+- config-generic: FB_VIRTUAL=m
+
+* Thu Dec 18 2008 Dave Airlie <airlied@redhat.com>
+- drm-next.patch/drm-modesetting-radeon.patch - rebase to upstream.
+- config-generic: turn of KMS on radeon until we fixup userspace
+
+* Thu Dec 18 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc9
+
+* Thu Dec 18 2008 Jeremy Katz <katzj@redhat.com>
+- explicitly prereq /sbin/new-kernel-pkg as opposed to just mkinitrd
+
+* Thu Dec 18 2008 Kyle McMartin <kyle@redhat.com>
+- Disable SND_HDA_BEEP by default
+
+* Thu Dec 18 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8-git6
+
+* Wed Dec 17 2008 Dave Jones <davej@redhat.com>
+- Disable PATA_HPT3X3_DMA as per Alan.
+
+* Wed Dec 17 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8-git5
+
+* Wed Dec 17 2008 Dave Jones <davej@redhat.com>
+- 2.6.28-rc8-git5
+
 * Wed Dec 17 2008 John W. Linville <linville@redhat.com>
 - iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
 
