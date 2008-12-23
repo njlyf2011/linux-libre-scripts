@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1199 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1203 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -596,13 +596,6 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
 
-# fix idr bug in 27.8
-Patch12: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
-# fix VMI crash in 27.7
-Patch13: linux-2.6.27.7-vmi-fix-crash-on-boot.patch
-# revert 2.6.27.5 patch that causes suspend/resume failures
-Patch14: linux-2.6.27.5-sched_clock-prevent-scd-clock-from-moving-backwards.patch
-
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
 
@@ -657,8 +650,11 @@ Patch413: linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-ou
 Patch414: linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 Patch415: linux-2.6-alsa-backport-beep-switch.patch
 Patch416: linux-2.6-defaults-alsa-hda-beep-off.patch
+Patch417: linux-2.6-alsa-hda-stac-dell-m6-eapd.patch
+Patch418: linux-2.6-alsa-hda-revert-remove-unneeded-hp-nid-references.patch
+Patch419: linux-2.6-alsa-hda-remove-broken-headphone-control-for-dell-laptops.patch
 
-Patch420: linux-2.6-squashfs.patch
+Patch429: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
@@ -679,7 +675,6 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch680: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch681: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
-Patch683: linux-2.6-iwlagn-fix-rx-skb-alignment.patch
 Patch684: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 Patch690: linux-2.6-at76.patch
 
@@ -703,6 +698,7 @@ Patch1810: drm-next.patch
 Patch1813: drm-modesetting-radeon.patch
 Patch1815: drm-nouveau.patch
 Patch1816: drm-intel-8xx-pae-no-gem.patch
+Patch1817: drm-fix-master-enable.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1145,10 +1141,6 @@ fi
 
 ApplyPatch git-cpufreq.patch
 
-ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
-ApplyPatch linux-2.6.27.7-vmi-fix-crash-on-boot.patch
-ApplyPatch linux-2.6.27.5-sched_clock-prevent-scd-clock-from-moving-backwards.patch -R
-
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
@@ -1270,6 +1262,9 @@ ApplyPatch linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-o
 ApplyPatch linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 ApplyPatch linux-2.6-alsa-backport-beep-switch.patch
 ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
+ApplyPatch linux-2.6-alsa-hda-stac-dell-m6-eapd.patch
+ApplyPatch linux-2.6-alsa-hda-revert-remove-unneeded-hp-nid-references.patch
+ApplyPatch linux-2.6-alsa-hda-remove-broken-headphone-control-for-dell-laptops.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1314,9 +1309,6 @@ ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 
 # Backported ath9k DMA fixes from pre-2.6.28
 ApplyPatch linux-2.6-wireless-ath9k-dma-fixes.patch
-
-# iwlagn: fix RX skb alignment
-ApplyPatch linux-2.6-iwlagn-fix-rx-skb-alignment.patch
 
 # iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
 ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
@@ -1370,6 +1362,7 @@ ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-intel-8xx-pae-no-gem.patch
+ApplyPatch drm-fix-master-enable.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1978,6 +1971,25 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Dec 23 2008 Dave Airlie <airlied@redhat.com> 2.6.27.10-167
+- drm - fix issue with second driver opening DRI
+
+* Mon Dec 22 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.10-166
+- Hopefully fix broken headphone output on some Dell notebooks.
+
+* Fri Dec 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.10-165
+- Linux 2.6.27.10
+  Dropped patches:
+    linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+    linux-2.6.27.7-vmi-fix-crash-on-boot.patch
+    linux-2.6.27.5-sched_clock-prevent-scd-clock-from-moving-backwards.patch
+    linux-2.6-iwlagn-fix-rx-skb-alignment.patch
+  Dropped from firewire-git-pending:
+    firewire: fw-ohci: fix possible IOMMU resource exhaustion
+
+* Fri Dec 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-164
+- Disable PATA_HPT3X3_DMA (from F11.)
+
 * Thu Dec 18 2008 Dave Airlie <airlied@redhat.com> 2.6.27.9-163
 - radeon drm: fix broken caching bits in radeon which broke AGP
 
