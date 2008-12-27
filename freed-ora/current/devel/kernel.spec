@@ -22,7 +22,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1180
-%define fedora_build_string %(R="$Revision: 1.1182 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1183 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -652,6 +652,7 @@ Patch690: linux-2.6-at76.patch
 
 # webcam fixes
 Patch900: linux-2.6-gspca-git.patch
+Patch901: linux-2.6-gspca-stv06xx-git.patch
 
 Patch1515: linux-2.6.27-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -1193,7 +1194,8 @@ ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 ApplyPatch linux-2.6-at76.patch
 
 # Webcam patches
-#ApplyPatch linux-2.6-gspca-git.patch
+ApplyPatch linux-2.6-gspca-git.patch
+ApplyPatch linux-2.6-gspca-stv06xx-git.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6.27-lirc.patch
@@ -1811,6 +1813,11 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Dec 26 2008 Hans de Goede <hdegoede@redhat.com>
+- Rebase gspca git patch to latest gspca git
+- Re-enable gspca git patch
+- Add gscpa-stv06xx (qc-usb replacement) driver from its own git tree
+
 * Thu Dec 25 2008 Alexandre Oliva <lxoliva@fsfla.org> -libre.2
 - Deblobbed 2.6.28.
 
