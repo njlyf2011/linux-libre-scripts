@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1203 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1205 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -759,6 +759,8 @@ Patch2806: linux-2.6-pci-fix-pciehp-irq0.patch
 Patch2807: linux-2.6-pciehp-kill-annoying-messages.patch
 
 Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
+# Delay capable check to avoid most AVCs (#478299)
+Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1202,8 +1204,9 @@ ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patc
 # bugfixes to drivers and filesystems
 #
 
-# Pending ext4 patch queue, minus fiemap, includes s/ext4dev/ext4
+# ext4
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
+ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
 
 # xfs
 
@@ -1971,6 +1974,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Jan  7 2009 Roland McGrath <roland@redhat.com> - 2.6.27.10-169
+- utrace update
+
+* Tue Jan 06 2009 Eric Sandeen <sandeen@redhat.com> 2.6.27.10-168
+- ext4 - delay capable() checks in space accounting (#478299)
+
 * Tue Dec 23 2008 Dave Airlie <airlied@redhat.com> 2.6.27.10-167
 - drm - fix issue with second driver opening DRI
 
