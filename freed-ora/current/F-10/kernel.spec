@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1205 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.5 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -621,8 +621,6 @@ Patch147: linux-2.6-imac-transparent-bridge.patch
 Patch149: linux-2.6-efika-not-chrp.patch
 
 Patch160: linux-2.6-execshield.patch
-Patch161: linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
-Patch163: linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
@@ -643,17 +641,6 @@ Patch396: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 
-Patch410: linux-2.6.27.9-alsa-driver-1.0.18a.patch
-Patch411: linux-2.6.27.7-alsa-driver-fixups.patch
-Patch412: linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
-Patch413: linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
-Patch414: linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
-Patch415: linux-2.6-alsa-backport-beep-switch.patch
-Patch416: linux-2.6-defaults-alsa-hda-beep-off.patch
-Patch417: linux-2.6-alsa-hda-stac-dell-m6-eapd.patch
-Patch418: linux-2.6-alsa-hda-revert-remove-unneeded-hp-nid-references.patch
-Patch419: linux-2.6-alsa-hda-remove-broken-headphone-control-for-dell-laptops.patch
-
 Patch429: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -672,11 +659,11 @@ Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
-Patch680: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch681: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
-Patch684: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
-Patch690: linux-2.6-at76.patch
+Patch683: linux-2.6-at76.patch
+Patch684: linux-2.6.27-ath5k-ignore-the-return-value-of-ath5k_hw_noise_floor_calibration.patch
+Patch685: linux-2.6-rtl8187b-tx-status-feedback.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -724,6 +711,9 @@ Patch2020: linux-2.6-netdev-atl2.patch
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
 Patch2031: linux-2.6-net-qla-silence-debug-printks.patch
+
+# CVE-2009-0065 SCTP buffer overflow
+Patch2032: linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
 
 # olpc fixes
 Patch2041: linux-2.6-olpc-touchpad.patch
@@ -1196,9 +1186,6 @@ ApplyPatch sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 # Exec shield
 #
 ApplyPatch linux-2.6-execshield.patch
-ApplyPatch linux-2.6-xen-execshield-add-xen-specific-load_user_cs_desc.patch
-
-ApplyPatch linux-2.6-xen-execshield-only-define-load_user_cs_desc-on-32-bit.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1258,16 +1245,6 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
-ApplyPatch linux-2.6.27.9-alsa-driver-1.0.18a.patch
-ApplyPatch linux-2.6.27.7-alsa-driver-fixups.patch
-ApplyPatch linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
-ApplyPatch linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
-ApplyPatch linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
-ApplyPatch linux-2.6-alsa-backport-beep-switch.patch
-ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
-ApplyPatch linux-2.6-alsa-hda-stac-dell-m6-eapd.patch
-ApplyPatch linux-2.6-alsa-hda-revert-remove-unneeded-hp-nid-references.patch
-ApplyPatch linux-2.6-alsa-hda-remove-broken-headphone-control-for-dell-laptops.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1305,19 +1282,19 @@ ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# make jarod's iwl4965 not panic near N APs, hopefully
-ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 
 # Backported ath9k DMA fixes from pre-2.6.28
 ApplyPatch linux-2.6-wireless-ath9k-dma-fixes.patch
 
-# iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
-ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
-
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
+
+# ignore calibration so driver will work in noisy areas
+ApplyPatch linux-2.6.27-ath5k-ignore-the-return-value-of-ath5k_hw_noise_floor_calibration.patch
+
+ApplyPatch linux-2.6-rtl8187b-tx-status-feedback.patch
 
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
@@ -1355,6 +1332,8 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 ApplyPatch linux-2.6-net-qla-silence-debug-printks.patch
+
+ApplyPatch linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
 
 ApplyPatch linux-2.6-olpc-touchpad.patch
 ApplyPatch linux-2.6-quieter-mmc.patch
@@ -1974,6 +1953,32 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Jan 20 2009 Chuck Ebbert <cebbert@redhat.com>
+- ath5k: ignore the return value of ath5k_hw_noise_floor_calibration
+  (backport to 2.6.27)
+- rtl8187: feedback transmitted packets using tx close descriptor for 8187B
+
+* Tue Jan 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.12-170.2.4
+- Fix CVE-2009-0065: SCTP buffer overflow
+
+* Tue Jan 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.12-170.2.3
+- Revert ALSA to what is upstream in 2.6.27.
+
+* Mon Jan 19 2009 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.27.12
+- linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch: merged
+- linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch: merged
+
+* Mon Jan 19 2009 Kyle McMartin <kyle@redhat.com>
+- Roll in xen changes to execshield diff as in later kernels.
+
+* Mon Jan 19 2009 Kyle McMartin <kyle@redhat.com>
+- execshield fixes: should no longer generate spurious handled GPFs,
+  fixes randomization of executables. also some clean ups.
+
+* Sun Jan 11 2009 Dave Jones <davej@redhat.com>
+- Don't use MAXSMP on x86-64
+
 * Wed Jan  7 2009 Roland McGrath <roland@redhat.com> - 2.6.27.10-169
 - utrace update
 
