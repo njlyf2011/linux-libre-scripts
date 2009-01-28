@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.887 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.8 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -615,13 +615,6 @@ Patch10: linux-2.6-hotfixes.patch
 #Patch11: linux-2.6.27.5-stable-queue.patch
 #Patch12: linux-2.6.27.5-stable-queue-reverts.patch
 
-# fix idr bug in 27.8
-Patch15: linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
-# fix VMI crash in 27.7
-Patch16: linux-2.6.27.7-vmi-fix-crash-on-boot.patch
-# fix 2.6.27.5 suspend regression
-Patch17: linux-2.6.27.5-revert-sched-clock-prevent-scd-clock-from-moving-back.patch
-
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
@@ -668,12 +661,6 @@ Patch392: linux-2.6-acpi-dock-fix-eject-request-process.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
-Patch410: linux-2.6.27.9-alsa-driver-1.0.18a.patch
-Patch411: linux-2.6.27.7-alsa-driver-fixups.patch
-Patch412: linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
-Patch413: linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
-Patch414: linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
-
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
 
@@ -701,10 +688,7 @@ Patch672: linux-2.6-sata-eeepc-faster.patch
 Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
 
 # wireless
-Patch681: linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
-Patch683: linux-2.6-iwlagn-fix-rx-skb-alignment.patch
-Patch684: linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 Patch685: linux-2.6-wireless-ath9k-dma-fixes.patch
 Patch690: linux-2.6-at76.patch
 
@@ -745,6 +729,9 @@ Patch2020: linux-2.6-netdev-atl2.patch
 
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
+# CVE-2009-0065 SCTP buffer overflow
+Patch2031: linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
 Patch2201: linux-2.6-firewire-git-pending.patch
@@ -756,6 +743,7 @@ Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 Patch2902: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
+Patch2903: linux-2.6.27.9-ext4-cap-check-delay.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1141,10 +1129,6 @@ if [ "$C" -gt 10 ]; then
 ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
-ApplyPatch linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
-ApplyPatch linux-2.6.27.7-vmi-fix-crash-on-boot.patch
-ApplyPatch linux-2.6.27.5-revert-sched-clock-prevent-scd-clock-from-moving-back.patch
-
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
@@ -1255,11 +1239,6 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
 #
-ApplyPatch linux-2.6.27.9-alsa-driver-1.0.18a.patch
-ApplyPatch linux-2.6.27.7-alsa-driver-fixups.patch
-ApplyPatch linux-2.6.27.9-alsa-hda-add-a-quirk-for-dell-studio-15.patch
-ApplyPatch linux-2.6.27.9-alsa-hda-no-headphone-as-line-out-swich-without-line-outs.patch
-ApplyPatch linux-2.6.27.9-alsa-hda-mark-dell-studio-1535-quirk.patch
 
 # block/bio
 #
@@ -1307,14 +1286,8 @@ ApplyPatch linux-2.6-sata-eeepc-faster.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 
-# make jarod's iwl4965 not panic near N APs, hopefully
-ApplyPatch linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
-# iwlagn: fix RX skb alignment
-ApplyPatch linux-2.6-iwlagn-fix-rx-skb-alignment.patch
-# iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
-ApplyPatch linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1355,12 +1328,15 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
+ApplyPatch linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+
 # Nouveau DRM + drm fixes
 ApplyPatch drm-fedora9-rollup.patch
 ApplyPatch drm-mm-readd-nopfn.patch
 
 # Filesystem patches
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
+ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1976,6 +1952,62 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jan 19 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.12-78.2.8
+- Fix CVE-2009-0065: SCTP buffer overflow
+
+* Mon Jan 19 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.12-78.2.5
+- Revert ALSA to what is upstream in 2.6.27.
+
+* Mon Jan 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.12-78.2.4
+- Linux 2.6.27.12
+
+* Mon Jan 19 2009 Kyle McMartin <kyle@redhat.com>
+- Roll in xen changes to execshield diff as in later kernels.
+  (harmless on F-9 as xen was still seperate.)
+
+* Mon Jan 19 2009 Kyle McMartin <kyle@redhat.com>
+- execshield fixes: should no longer generate spurious handled GPFs,
+  fixes randomization of executables. also some clean ups.
+
+* Fri Jan 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.12-78.2.3.rc2
+- Linux 2.6.27.12-rc2
+  Dropped patches:
+    linux-2.6-iwlwifi-use-GFP_KERNEL-to-allocate-Rx-SKB-memory.patch
+
+* Fri Jan 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.11-78.2.2
+- ext4 - delay capable() checks in space accounting (F10#478299)
+
+* Fri Jan 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.11-78.2.1
+- Linux 2.6.27.11
+  Dropped patches:
+    linux-2.6-iwlagn-downgrade-BUG_ON-in-interrupt.patch
+  Reverted -stable patches:
+    alsa-hda-add-missing-terminators-in-patch_sigmatel.c.patch
+  Added patches:
+    linux-2.6-alsa-hda-sigmatel-add-missing-terminators.patch
+
+* Sun Jan 11 2009 Dave Jones <davej@redhat.com>
+- Don't use MAXSMP on x86-64
+
+* Fri Dec 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.10-77
+- Re-enable input beep code, but disable it by default (from F10.)
+  Added:
+   linux-2.6-alsa-backport-beep-switch.patch
+   linux-2.6-defaults-alsa-hda-beep-off.patch
+
+* Fri Dec 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.10-76
+- Linux 2.6.27.10
+  Dropped patches:
+    linux-2.6-lib-idr-fix-bug-introduced-by-rcu-fix.patch
+    linux-2.6.27.7-vmi-fix-crash-on-boot.patch
+    linux-2.6.27.5-revert-sched-clock-prevent-scd-clock-from-moving-back.patch
+    linux-2.6-iwlagn-fix-rx-skb-alignment.patch
+  Dropped from firewire-git-pending:
+    firewire: fw-ohci: fix possible IOMMU resource exhaustion
+
+* Fri Dec 19 2008 Chuck Ebbert <cebbert@redhat.com> 2.6.27.9-75
+- Disable PATA_HPT3X3_DMA (from F11.)
+
 * Wed Dec 17 2008 John W. Linville <linville@redhat.com> 2.6.27.9-74
 - iwlwifi: use GFP_KERNEL to allocate Rx SKB memory
 
