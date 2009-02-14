@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.8 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.23 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 15
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -645,6 +645,7 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch330: linux-2.6-debug-no-quiet.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
+Patch350: print-dmi-hw-name-in-warnings.patch
 Patch370: linux-2.6-crash-driver.patch
 
 Patch379: linux-2.6-defaults-fat-utf8.patch
@@ -670,6 +671,7 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+Patch457: linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
 
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -681,11 +683,16 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
 # fix for ebus_dma.h
 Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
+Patch601: linux-2.6-sparc-cs4231-ebus-dma.patch
+# sparc64: Fix DAX handling via userspace access from kernel.
+Patch610: linux-2.6-niagara-DAX.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
-Patch672: linux-2.6-sata-eeepc-faster.patch
-Patch678: linux-2.6-libata-sata_nv-disable-swncq.patch
+Patch671: linux-2.6-libata-fix-ata-id-is-cfa.patch
+Patch672: linux-2.6-libata-fix-eh-device-failure-handling.patch
+Patch679: linux-2.6-libata-sata_nv-disable-swncq.patch
+Patch680: linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 
 # wireless
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
@@ -729,8 +736,8 @@ Patch2020: linux-2.6-netdev-atl2.patch
 
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
-# CVE-2009-0065 SCTP buffer overflow
-Patch2031: linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+# kvmclock is broken with unsync TSC (#475598)
+Patch2040: linux-2.6-kvmclock-unsync-tsc-workaround.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -738,12 +745,17 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+Patch2301: linux-2.6-usb-option-increase-outgoing-buffers.patch
+Patch2302: linux-2.6-usb-option-add-pantech-cards-R.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 Patch2902: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 Patch2903: linux-2.6.27.9-ext4-cap-check-delay.patch
+Patch2904: linux-2.6.27.14-ext4-patch-queue.patch
+Patch2905: linux-2.6.27.14-ext4-fix-cache-init.patch
+Patch2906: linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1176,6 +1188,8 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # SPARC64
 #
 ApplyPatch sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
+ApplyPatch linux-2.6-niagara-DAX.patch
+ApplyPatch linux-2.6-sparc-cs4231-ebus-dma.patch
 
 #
 # Exec shield
@@ -1190,7 +1204,9 @@ ApplyPatch linux-2.6-dmi-autoload.patch
 # USB
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
-
+ApplyPatch linux-2.6-usb-option-increase-outgoing-buffers.patch
+# revert stable patch that broke wireless broadband
+ApplyPatch linux-2.6-usb-option-add-pantech-cards-R.patch -R
 
 # ACPI
 # fix cpu detection (f10#435653)
@@ -1209,6 +1225,7 @@ ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-no-quiet.patch
 %endif
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
+ApplyPatch print-dmi-hw-name-in-warnings.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1261,6 +1278,9 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+# fix ms wireless kbd (F10 #475398)
+ApplyPatch linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
+
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1281,10 +1301,14 @@ ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
 # libata
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# Make Eee disk faster.
-ApplyPatch linux-2.6-sata-eeepc-faster.patch
+# properly detect modern CF devices
+ApplyPatch linux-2.6-libata-fix-ata-id-is-cfa.patch
+# drop link speed when error happen during EH reset
+ApplyPatch linux-2.6-libata-fix-eh-device-failure-handling.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
+# pata_scc ignores slaves devices
+ApplyPatch linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
@@ -1328,7 +1352,8 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
-ApplyPatch linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+# kvmclock is broken with unsync TSC (#475598)
+ApplyPatch linux-2.6-kvmclock-unsync-tsc-workaround.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-fedora9-rollup.patch
@@ -1337,6 +1362,11 @@ ApplyPatch drm-mm-readd-nopfn.patch
 # Filesystem patches
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
+ApplyPatch linux-2.6.27.14-ext4-patch-queue.patch
+# fix misapplied chunk in ext4 queue
+ApplyPatch linux-2.6.27.14-ext4-fix-cache-init.patch
+# fix more ext4 patch breakage
+ApplyPatch linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1952,6 +1982,63 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed Feb 11 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.23
+- Fix more ext4 patch queue problems.
+  (http://marc.info/?l=linux-kernel&m=123433917809157&w=2)
+
+* Tue Feb 10 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.22
+- Fix oops caused by misapplied chunk in the ext4 patchset (F10#484972)
+- Fix detection of slave ATA devices on pata_sch (F10#467457)
+- Enable CONFIG_X86_BIGSMP, to enable support for more than 8 cpus.
+
+* Fri Feb 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.21
+- 2.6.27.15
+  Dropped patches (merged in 27.25):
+  linux-2.6-input-atkbd-broaden-dell-signatures.patch
+  linux-2.6-input-atkbd-samsung-nc10-key-repeat-fix.patch
+
+* Fri Feb 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-78.2.20
+- Revert -stable patch that broke wireless broadband for some users. (F10#481401)
+
+* Fri Feb 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-78.2.19
+- Two fixes from F-10:
+  linux-2.6-kvmclock-unsync-tsc-workaround.patch
+  linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
+
+* Fri Feb 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-78.2.18
+- Add ext4 stable patch queue
+
+* Fri Feb 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-78.2.17
+- libata: detect modern CF devices properly
+- libata: drop link speed when errors happen on reset (F10#483351)
+- libata: drop redundant linux-2.6-sata-eeepc-faster.patch
+
+* Wed Feb 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.14-78.2.16
+- Print DMI product name in WARN{,_ON} dumps, backported from 2.6.29.
+
+* Mon Feb 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-78.2.15
+- Fix slow data upload with USB wireless modem (F10#473252)
+
+* Mon Feb 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-78.2.14
+- 2.6.27.14
+
+* Thu Jan 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.13-78.2.13
+- Add keyboard quirks for more systems:
+  Some Dell machines have a different vendor name in DMI.
+  Samsung NC10 doesn't generate keyup for some keys.
+
+* Mon Jan 26 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.13-78.2.12
+- 2.6.27.13 final
+
+* Fri Jan 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.13-78.2.10
+- 2.6.27.13-rc1
+  Dropped patches (merged upstream):
+    linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+
+* Thu Jan 22 2009 Dennis Gilmore <dennis@ausil.us 2.6.27.12-78.2.9
+- fix DAX handling on niagara
+- cs4231 ebus dma fixes
+
 * Mon Jan 19 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.12-78.2.8
 - Fix CVE-2009-0065: SCTP buffer overflow
 
