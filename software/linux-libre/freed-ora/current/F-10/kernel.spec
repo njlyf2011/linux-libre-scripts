@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.5 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.24 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 15
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -628,6 +628,7 @@ Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch341: linux-2.6-mm-pagefault-enable-ints.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
+Patch361: print-dmi-hw-name-in-warnings.patch
 Patch370: linux-2.6-crash-driver.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
@@ -647,6 +648,7 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+Patch457: linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
 
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -658,6 +660,9 @@ Patch590: linux-2.6-selinux-recognise-addrlabel.patch
 Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 
 Patch670: linux-2.6-ata-quirk.patch
+Patch671: linux-2.6-libata-fix-ata-id-is-cfa.patch
+Patch672: linux-2.6-libata-fix-eh-device-failure-handling.patch
+Patch673: linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 
 Patch681: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
@@ -703,6 +708,8 @@ Patch2011: linux-2.6-eeepc-laptop-update.patch
 
 # Backport Toshiba updates so Bluetooth can be enabled (#437091)
 Patch2012: linux-2.6-toshiba-acpi-update.patch
+Patch2013: linux-2.6-toshiba-acpi-close-race.patch
+Patch2014: linux-2.6-toshiba-acpi-only-register-rfkill-if-bt-enabled.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -712,12 +719,12 @@ Patch2030: linux-2.6-net-tulip-interrupt.patch
 
 Patch2031: linux-2.6-net-qla-silence-debug-printks.patch
 
-# CVE-2009-0065 SCTP buffer overflow
-Patch2032: linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+# kvmclock is broken with unsync TSC (#475598)
+Patch2040: linux-2.6-kvmclock-unsync-tsc-workaround.patch
 
 # olpc fixes
-Patch2041: linux-2.6-olpc-touchpad.patch
-Patch2042: linux-2.6-quieter-mmc.patch
+Patch2141: linux-2.6-olpc-touchpad.patch
+Patch2142: linux-2.6-quieter-mmc.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -725,6 +732,8 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
+Patch2301: linux-2.6-usb-option-increase-outgoing-buffers.patch
+Patch2302: linux-2.6-usb-option-add-pantech-cards-R.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -751,6 +760,9 @@ Patch2807: linux-2.6-pciehp-kill-annoying-messages.patch
 Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 # Delay capable check to avoid most AVCs (#478299)
 Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
+Patch2902: linux-2.6.27.14-ext4-patch-queue.patch
+Patch2903: linux-2.6.27.14-ext4-fix-cache-init.patch
+Patch2904: linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -761,6 +773,9 @@ Patch3120: linux-2.6-selinux-empty-tty-files.patch
 # Provide P4 clock modulation in-kernel for thermal reasons, but don't expose
 # ui
 Patch3130: disable-p4-cpufreq-ui.patch
+
+# Fix Apple wireless keyboards (#483168)
+Patch3140: linux-2.6-apple-wireless-keyboard-fix.patch
 
 %endif
 
@@ -1194,11 +1209,19 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
+ApplyPatch linux-2.6.27.14-ext4-patch-queue.patch
+# ext4 queue has a misapplied chunk
+ApplyPatch linux-2.6.27.14-ext4-fix-cache-init.patch
+# ext4 patch queue has missing code
+ApplyPatch linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
 
 # xfs
 
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
+ApplyPatch linux-2.6-usb-option-increase-outgoing-buffers.patch
+# revert stable patch that broke wireless broadband
+ApplyPatch linux-2.6-usb-option-add-pantech-cards-R.patch -R
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
@@ -1218,6 +1241,7 @@ ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-mm-pagefault-enable-ints.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
+ApplyPatch print-dmi-hw-name-in-warnings.patch
 
 #
 # /dev/crash driver for the crashdump analysis tool
@@ -1261,6 +1285,8 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+# fix ms wireless kbd (F10 #475398)
+ApplyPatch linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1281,6 +1307,12 @@ ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
+# properly detect modern CF devices
+ApplyPatch linux-2.6-libata-fix-ata-id-is-cfa.patch
+# drop link speed when error happen during EH reset
+ApplyPatch linux-2.6-libata-fix-eh-device-failure-handling.patch
+# fix detection of slave device on pata_sch (#467457)
+ApplyPatch linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
@@ -1325,6 +1357,8 @@ ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-toshiba-acpi-update.patch
+ApplyPatch linux-2.6-toshiba-acpi-close-race.patch
+ApplyPatch linux-2.6-toshiba-acpi-only-register-rfkill-if-bt-enabled.patch
 
 # atl2 network driver
 ApplyPatch linux-2.6-netdev-atl2.patch
@@ -1333,7 +1367,8 @@ ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
 ApplyPatch linux-2.6-net-qla-silence-debug-printks.patch
 
-ApplyPatch linux-2.6-net-sctp-avoid-memory-overflow-while-FWD-TSN-chunk-is-r.patch
+# kvmclock is broken with unsync TSC (#475598)
+ApplyPatch linux-2.6-kvmclock-unsync-tsc-workaround.patch
 
 ApplyPatch linux-2.6-olpc-touchpad.patch
 ApplyPatch linux-2.6-quieter-mmc.patch
@@ -1377,6 +1412,8 @@ ApplyPatch linux-2.6-pciehp-kill-annoying-messages.patch
 ApplyPatch linux-2.6-selinux-empty-tty-files.patch
 
 ApplyPatch disable-p4-cpufreq-ui.patch
+
+ApplyPatch linux-2.6-apple-wireless-keyboard-fix.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1953,6 +1990,72 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Feb 11 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.24
+- Fix more ext4 patch queue problems.
+  (http://marc.info/?l=linux-kernel&m=123433917809157&w=2)
+
+* Wed Feb 11 2009 Jarod Wilson <jarod@redhat.com> 2.6.27.15-170.2.23
+- Make Apple wireless keyboards behave as expected (#483168)
+
+* Tue Feb 10 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-170.2.22
+- Fix oops caused by misapplied chunk in the ext4 patchset (#484972)
+
+* Tue Feb 10 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-170.2.21
+- Fix detection of slave ATA devices on pata_sch (#467457)
+
+* Mon Feb 09 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.15-170.2.20
+- Enable CONFIG_X86_BIGSMP, to enable support for more than 8 cpus,
+  since we have NR_CPUS=32...
+
+* Fri Feb 06 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-170.2.19
+- 2.6.27.15
+  Dropped patches (merged in .27.15):
+  linux-2.6-input-atkbd-broaden-dell-signatures.patch
+  linux-2.6-input-atkbd-samsung-nc10-key-repeat-fix.patch
+
+* Fri Feb 06 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-170.2.18.rc1
+- Copy kvmclock fix from our 2.6.29 kernel.
+
+* Wed Feb 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-170.2.17.rc1
+- libata: detect modern CF devices properly
+- libata: drop link speed when errors happen on reset (#483351)
+
+* Wed Feb 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-170.2.16.rc1
+- 2.6.27.15-rc1
+- Add ext4 stable patch queue.
+
+* Wed Feb 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.14-170.2.15
+- Print DMI product name in WARN{,_ON} dumps, backported from 2.6.29.
+
+* Tue Feb 03 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-170.2.14
+- Revert -stable patch that broke wireless broadband for some users. (#481401)
+
+* Tue Feb 03 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-170.2.13
+- Fix media keys on MS wireless keyboard (#475398)
+
+* Mon Feb 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-170.2.12
+- Fix slow data upload with USB wireless modem (#473252)
+
+* Mon Feb 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-170.2.11
+- 2.6.27.14
+
+* Fri Jan 30 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.14-170.2.10.rc1
+- 2.6.27.14-rc1
+
+* Fri Jan 30 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.13-170.2.9
+- Fix oops in toshiba_acpi driver (#470215)
+
+* Fri Jan 30 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.13-170.2.8
+- Add keyboard quirks for more systems:
+  Some Dell machines have a different vendor name in DMI.
+  Samsung NC10 doesn't generate keyup for some keys.
+
+* Wed Jan 28 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.13-170.2.7
+- Drop sctp patch marged in 2.6.27.13
+
+* Mon Jan 26 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.13-170.2.6
+- 2.6.27.13 final
+
 * Tue Jan 20 2009 Chuck Ebbert <cebbert@redhat.com>
 - ath5k: ignore the return value of ath5k_hw_noise_floor_calibration
   (backport to 2.6.27)
