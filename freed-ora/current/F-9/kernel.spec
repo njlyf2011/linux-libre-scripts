@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.23 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.30 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 19
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -618,6 +618,7 @@ Patch10: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+Patch24: linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -628,7 +629,6 @@ Patch62: linux-2.6-sched-wakeup-preempt-when-small-overlap.patch
 Patch70: linux-2.6-x86-tune-generic.patch
 Patch75: linux-2.6-x86-debug-boot.patch
 Patch101: linux-2.6-x86-check-for-null-irq-context.patch
-Patch102: linux-2.6-x86-pci-amd-config-space.patch
 
 # ppc
 Patch140: linux-2.6-ps3-ehci-iso.patch
@@ -671,7 +671,6 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
-Patch457: linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
 
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -681,6 +680,7 @@ Patch520: linux-2.6.27-pci-hush-allocation-failures.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
+Patch591: selinux-netlabel_setsockopt_fix.patch
 # fix for ebus_dma.h
 Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 Patch601: linux-2.6-sparc-cs4231-ebus-dma.patch
@@ -689,8 +689,6 @@ Patch610: linux-2.6-niagara-DAX.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
-Patch671: linux-2.6-libata-fix-ata-id-is-cfa.patch
-Patch672: linux-2.6-libata-fix-eh-device-failure-handling.patch
 Patch679: linux-2.6-libata-sata_nv-disable-swncq.patch
 Patch680: linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 
@@ -727,6 +725,7 @@ Patch2000: linux-2.6-e1000-ich9.patch
 Patch2001: linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 Patch2002: linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
+Patch2005: linux-2.6-e1000e-workaround-hw-errata.patch
 
 # r8169 fixes
 Patch2007: linux-2.6-netdev-r8169-2.6.28.patch
@@ -746,20 +745,27 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2301: linux-2.6-usb-option-increase-outgoing-buffers.patch
-Patch2302: linux-2.6-usb-option-add-pantech-cards-R.patch
 
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
 Patch2902: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 Patch2903: linux-2.6.27.9-ext4-cap-check-delay.patch
-Patch2904: linux-2.6.27.14-ext4-patch-queue.patch
-Patch2905: linux-2.6.27.14-ext4-fix-cache-init.patch
-Patch2906: linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
+Patch2904: linux-2.6-ext4-ENOSPC-debug.patch
+
+# next round of ext4 patches for -stable
+Patch2910: ext4.git-765ba56963fc62e060678a4c2e788ca46722bf6a.patch
+Patch2911: ext4.git-b9eab5ac8eeff5be74ceed5cda3ab590399d89ef.patch
+Patch2912: ext4.git-19815ad26f2d60e3ce390fca4d18ad729c9f5f42.patch
+Patch2913: ext4.git-b88c4d940fbea96d7cbd5483ad91dab6a2aff834.patch
+Patch2914: ext4.git-4987213505bf23fae20412b31adeff36b41687da.patch
+Patch2915: ext4.git-b700ed3dc05f63c2cb0b39a31d1e21086f021643.patch
+Patch2916: ext4.git-ed858e512ee4f761edce33b7c97fcd39a6804c29.patch
+# fix problems(s) in ext4 queue
+Patch2920: ext4.git-fixes.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
-
 
 %endif
 
@@ -1145,6 +1151,7 @@ fi
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+ApplyPatch linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1160,8 +1167,6 @@ ApplyPatch linux-2.6-sched-wakeup-preempt-when-small-overlap.patch
 ApplyPatch linux-2.6-x86-tune-generic.patch
 # don't oops if there's no IRQ stack available
 ApplyPatch linux-2.6-x86-check-for-null-irq-context.patch
-# fix PCI config space size on AMD Barcelona
-ApplyPatch linux-2.6-x86-pci-amd-config-space.patch
 
 #
 # PowerPC
@@ -1205,8 +1210,6 @@ ApplyPatch linux-2.6-dmi-autoload.patch
 # actually honor the nousb parameter
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-option-increase-outgoing-buffers.patch
-# revert stable patch that broke wireless broadband
-ApplyPatch linux-2.6-usb-option-add-pantech-cards-R.patch -R
 
 # ACPI
 # fix cpu detection (f10#435653)
@@ -1278,8 +1281,6 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
-# fix ms wireless kbd (F10 #475398)
-ApplyPatch linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
 
 
 # Allow to use 480600 baud on 16C950 UARTs
@@ -1295,16 +1296,14 @@ ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # selinux: recognize netlink messages for 'ip addrlabel'
 ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
+# bz486225: fix setsockopt when netlabel is enabled
+ApplyPatch selinux-netlabel_setsockopt_fix.patch
 
 # Changes to upstream defaults.
 
 # libata
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
-# properly detect modern CF devices
-ApplyPatch linux-2.6-libata-fix-ata-id-is-cfa.patch
-# drop link speed when error happen during EH reset
-ApplyPatch linux-2.6-libata-fix-eh-device-failure-handling.patch
 # disable swncq on sata_nv
 ApplyPatch linux-2.6-libata-sata_nv-disable-swncq.patch
 # pata_scc ignores slaves devices
@@ -1346,6 +1345,7 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-the-82567LM-4-device.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts.patch
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
+ApplyPatch linux-2.6-e1000e-workaround-hw-errata.patch
 
 ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
 ApplyPatch linux-2.6-netdev-atl2.patch
@@ -1362,11 +1362,17 @@ ApplyPatch drm-mm-readd-nopfn.patch
 # Filesystem patches
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
-ApplyPatch linux-2.6.27.14-ext4-patch-queue.patch
-# fix misapplied chunk in ext4 queue
-ApplyPatch linux-2.6.27.14-ext4-fix-cache-init.patch
-# fix more ext4 patch breakage
-ApplyPatch linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
+ApplyPatch linux-2.6-ext4-ENOSPC-debug.patch
+
+ApplyPatch ext4.git-765ba56963fc62e060678a4c2e788ca46722bf6a.patch
+ApplyPatch ext4.git-b9eab5ac8eeff5be74ceed5cda3ab590399d89ef.patch
+ApplyPatch ext4.git-19815ad26f2d60e3ce390fca4d18ad729c9f5f42.patch
+ApplyPatch ext4.git-b88c4d940fbea96d7cbd5483ad91dab6a2aff834.patch
+ApplyPatch ext4.git-4987213505bf23fae20412b31adeff36b41687da.patch
+ApplyPatch ext4.git-b700ed3dc05f63c2cb0b39a31d1e21086f021643.patch
+ApplyPatch ext4.git-ed858e512ee4f761edce33b7c97fcd39a6804c29.patch
+
+ApplyPatch ext4.git-fixes.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1982,6 +1988,40 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Feb 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.30
+- Add ext4 stable patch queue from:
+  http://git.kernel.org/?p=linux/kernel/git/tytso/ext4.git;a=shortlog;h=for-stable-2.6.27
+
+* Sun Feb 22 2009 Kyle McMartin <kyle@redhat.com>> 2.6.27.19-78.2.29
+- Add patch from Paul Moore to fix setsockopt when netlabel is in use (ie:
+   when selinux is enabled.) resolves bz#486225.
+
+* Sat Feb 21 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.19-78.2.28
+- Set X86_MSR=y and X86_CPUID=y on 32-bit kernel.
+- Copy ext4 ENOSPC fix from rawhide.
+
+* Sat Feb 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.27
+- Fix bug in x86-64 syscall error handling. (F10#484871)
+- Fix e1000e Tx unit hang.
+
+* Sat Feb 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.26
+- 2.6.27.19
+  Dropped patches (merged upstream):
+    linux-2.6.27.14-ext4-fix-cache-init.patch
+    linux-2.6.27.14-ext4-fix-dont-allow-new-groups.patch
+    linux-2.6.27.14-ext4-patch-queue.patch
+    linux-2.6-x86-pci-amd-config-space.patch
+    linux-2.6-usb-option-add-pantech-cards-R.patch
+    linux-2.6-hid-adjust-fixup-for-ms-1028-receiver.patch
+    linux-2.6-libata-fix-ata-id-is-cfa.patch
+    linux-2.6-libata-fix-eh-device-failure-handling.patch
+
+* Fri Feb 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.25
+- Revert previous change: it needs six other patches to make it work.
+
+* Fri Feb 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.24
+- Support Terratec Cinergy DVB USB device (#486240)
+
 * Wed Feb 11 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.15-78.2.23
 - Fix more ext4 patch queue problems.
   (http://marc.info/?l=linux-kernel&m=123433917809157&w=2)
