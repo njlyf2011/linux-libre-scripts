@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.30 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.41 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 19
+%define stable_update 21
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -618,7 +618,6 @@ Patch10: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
-Patch24: linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -662,10 +661,16 @@ Patch392: linux-2.6-acpi-dock-fix-eject-request-process.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch402: linux-2.6-scsi-mpt-vmware-fix.patch
 
+Patch410: linux-2.6-alsa-hda-probe-mask-quirks.patch
+# alsa patches headed for 2.6.27.21
+Patch413: linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-via.patch
+Patch414: linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-ati.patch
+
 # filesystem patches
 Patch421: linux-2.6-squashfs.patch
 
 Patch430: linux-2.6-net-silence-noisy-printks.patch
+Patch431: linux-2.6-net-add-debug-info-for-gso-bug.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
@@ -680,12 +685,9 @@ Patch520: linux-2.6.27-pci-hush-allocation-failures.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
-Patch591: selinux-netlabel_setsockopt_fix.patch
 # fix for ebus_dma.h
 Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 Patch601: linux-2.6-sparc-cs4231-ebus-dma.patch
-# sparc64: Fix DAX handling via userspace access from kernel.
-Patch610: linux-2.6-niagara-DAX.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
@@ -695,6 +697,8 @@ Patch680: linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 # wireless
 Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch685: linux-2.6-wireless-ath9k-dma-fixes.patch
+Patch686: linux-2.6-mac80211-age-scan-results-on-resume.patch
+Patch687: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -749,20 +753,16 @@ Patch2301: linux-2.6-usb-option-increase-outgoing-buffers.patch
 # get rid of imacfb and make efifb work everywhere it was used
 Patch2600: linux-2.6-merge-efifb-imacfb.patch
 
-Patch2902: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
-Patch2903: linux-2.6.27.9-ext4-cap-check-delay.patch
-Patch2904: linux-2.6-ext4-ENOSPC-debug.patch
-
-# next round of ext4 patches for -stable
-Patch2910: ext4.git-765ba56963fc62e060678a4c2e788ca46722bf6a.patch
-Patch2911: ext4.git-b9eab5ac8eeff5be74ceed5cda3ab590399d89ef.patch
-Patch2912: ext4.git-19815ad26f2d60e3ce390fca4d18ad729c9f5f42.patch
-Patch2913: ext4.git-b88c4d940fbea96d7cbd5483ad91dab6a2aff834.patch
-Patch2914: ext4.git-4987213505bf23fae20412b31adeff36b41687da.patch
-Patch2915: ext4.git-b700ed3dc05f63c2cb0b39a31d1e21086f021643.patch
-Patch2916: ext4.git-ed858e512ee4f761edce33b7c97fcd39a6804c29.patch
-# fix problems(s) in ext4 queue
-Patch2920: ext4.git-fixes.patch
+# ext4
+Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
+Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
+# don't spew warnings when using fallback allocator
+Patch2902: linux-2.6.27-ext4-print-warning-once.patch
+# fix extent header checking
+Patch2903: linux-2.6.27-ext4-fix-header-check.patch
+# from 2.6.29-rc, 18 mar 2009
+Patch2904: linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
+Patch2905: linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1151,7 +1151,6 @@ fi
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
-ApplyPatch linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1193,7 +1192,6 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # SPARC64
 #
 ApplyPatch sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
-ApplyPatch linux-2.6-niagara-DAX.patch
 ApplyPatch linux-2.6-sparc-cs4231-ebus-dma.patch
 
 #
@@ -1259,6 +1257,9 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
 #
+ApplyPatch linux-2.6-alsa-hda-probe-mask-quirks.patch
+ApplyPatch linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-via.patch
+ApplyPatch linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-ati.patch
 
 # block/bio
 #
@@ -1273,6 +1274,8 @@ ApplyPatch linux-2.6-squashfs.patch
 # Networking
 # Disable easy to trigger printk's.
 ApplyPatch linux-2.6-net-silence-noisy-printks.patch
+# add debug stuff for hard-to-solve gso bug (#483532)
+ApplyPatch linux-2.6-net-add-debug-info-for-gso-bug.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1296,8 +1299,6 @@ ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # selinux: recognize netlink messages for 'ip addrlabel'
 ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
-# bz486225: fix setsockopt when netlabel is enabled
-ApplyPatch selinux-netlabel_setsockopt_fix.patch
 
 # Changes to upstream defaults.
 
@@ -1311,6 +1312,10 @@ ApplyPatch linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
 
 # iwl3945 fix for stable ad-hoc mode connections (#459401)
 ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
+
+# back-port scan result aging patches
+ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
+ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
@@ -1362,17 +1367,10 @@ ApplyPatch drm-mm-readd-nopfn.patch
 # Filesystem patches
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
-ApplyPatch linux-2.6-ext4-ENOSPC-debug.patch
-
-ApplyPatch ext4.git-765ba56963fc62e060678a4c2e788ca46722bf6a.patch
-ApplyPatch ext4.git-b9eab5ac8eeff5be74ceed5cda3ab590399d89ef.patch
-ApplyPatch ext4.git-19815ad26f2d60e3ce390fca4d18ad729c9f5f42.patch
-ApplyPatch ext4.git-b88c4d940fbea96d7cbd5483ad91dab6a2aff834.patch
-ApplyPatch ext4.git-4987213505bf23fae20412b31adeff36b41687da.patch
-ApplyPatch ext4.git-b700ed3dc05f63c2cb0b39a31d1e21086f021643.patch
-ApplyPatch ext4.git-ed858e512ee4f761edce33b7c97fcd39a6804c29.patch
-
-ApplyPatch ext4.git-fixes.patch
+ApplyPatch linux-2.6.27-ext4-print-warning-once.patch
+ApplyPatch linux-2.6.27-ext4-fix-header-check.patch
+ApplyPatch linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
+ApplyPatch linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1988,6 +1986,63 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Mar 23 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-170.2.41
+- 2.6.27.21
+- Dropped patches, merged in -stable:
+  linux-2.6.27-alsa-fix-vunmap-and-free-order.patch
+  linux-2.6.27-alsa-hda-fix-dma-mask-for-ati-controllers.patch
+  linux-2.6.27-alsa-mixart-fix-lock-imbalance.patch
+  linux-2.6.27-alsa-pcm-oss-fix-locking-typo.patch
+  linux-2.6-nfsd-drop-cap-mknod-for-non-root.patch
+  linux-2.6-nfsd-provide-encode-routine-for-op-openattr.patch
+  add-fwrapv-to-cflags.patch
+
+* Fri Mar 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.20-78.2.40
+- add-fwrapv-to-cflags.patch: avoid gcc optimizing away wrapping arithmetic.
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-78.2.39
+- ALSA fixes headed for -stable:
+    linux-2.6.27-alsa-fix-vunmap-and-free-order.patch
+    linux-2.6.27-alsa-hda-fix-dma-mask-for-ati-controllers.patch
+    linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-ati.patch
+    linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-via.patch
+    linux-2.6.27-alsa-mixart-fix-lock-imbalance.patch
+    linux-2.6.27-alsa-pcm-oss-fix-locking-typo.patch
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-78.2.38
+- Copy nfsd fixes from F-10:
+    linux-2.6-nfsd-drop-cap-mknod-for-non-root.patch
+    linux-2.6-nfsd-provide-encode-routine-for-op-openattr.patch
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.20-78.2.37
+- Copy ext4 fixes from F-10 2.6.27 kernel.
+
+* Tue Mar 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.20-78.2.36
+- 2.6.27.20
+- Dropped patches, merged in -stable:
+    linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
+    ext4.git*
+    selinux-netlabel_setsockopt_fix.patch
+    linux-2.6-niagara-DAX.patch
+
+* Wed Mar 11 2009 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-execshield.patch:
+   Fix from H.J. Lu, arch_get_unmapped_exec_area is only appropriate for
+   32-bit mmap currently.
+
+* Thu Mar 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.34
+- Add ext4 stable patch queue.
+- Drop linux-2.6-ext4-ENOSPC-debug.patch, replaced by upstream stable patch.
+
+* Thu Mar 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.33
+- Add ALSA HDA probe_mask quirks from 2.6.29-rc7
+
+* Fri Feb 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.32
+- Add debug patch to try and track down #483532.
+
+* Thu Feb 26 2009 John W. Linville <linville@redhat.com> 2.6.27.19-78.2.31
+- Add dcbw's back-port patches to age scan results on resume (#466136)
+
 * Tue Feb 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-78.2.30
 - Add ext4 stable patch queue from:
   http://git.kernel.org/?p=linux/kernel/git/tytso/ext4.git;a=shortlog;h=for-stable-2.6.27

@@ -7,4 +7,4 @@ kernel-2.6.*.config
 temp-*
 kernel-2.6.27
 linux-2.6.27-libre.*
-patch-2.6.27.19.bz2
+patch-2.6.27.21.bz2
