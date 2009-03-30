@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.35 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.56 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 19
+%define stable_update 21
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -602,9 +602,6 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
-Patch24: linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
-
-Patch30: linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -642,12 +639,19 @@ Patch396: linux-2.6-acpi-dock-fix-eject-request-process.patch
 
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 
+Patch410: linux-2.6-alsa-hda-probe-mask-quirks.patch
+# alsa patches headed for 2.6.27.21
+Patch413: linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-via.patch
+Patch414: linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-ati.patch
+
 Patch429: linux-2.6-squashfs.patch
 Patch430: linux-2.6-net-silence-noisy-printks.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+# 490250
+Patch455: linux-2.6-input.git-i8042-add-vostro-1510-to-nomux.patch
 
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -655,9 +659,9 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
-Patch591: selinux-netlabel_setsockopt_fix.patch
 # fix for ebus_dma.h
 Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
+Patch610: linux-2.6-sparc-cs4231-ebus-dma.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 Patch673: linux-2.6-libata-pata-sch-notice-attached-slave-devices.patch
@@ -667,6 +671,8 @@ Patch682: linux-2.6-wireless-ath9k-dma-fixes.patch
 Patch683: linux-2.6-at76.patch
 Patch684: linux-2.6.27-ath5k-ignore-the-return-value-of-ath5k_hw_noise_floor_calibration.patch
 Patch685: linux-2.6-rtl8187b-tx-status-feedback.patch
+Patch686: linux-2.6-mac80211-age-scan-results-on-resume.patch
+Patch687: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -690,6 +696,7 @@ Patch1815: drm-nouveau.patch
 Patch1816: drm-intel-8xx-pae-no-gem.patch
 Patch1817: drm-fix-master-enable.patch
 Patch1818: drm-radeon-fix-upstream-suspend.patch
+Patch1819: drm-edid-revision-0-should-be-valid.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -761,19 +768,16 @@ Patch2807: linux-2.6-pciehp-kill-annoying-messages.patch
 Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 # Delay capable check to avoid most AVCs (#478299)
 Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
-Patch2904: linux-2.6-ext4-ENOSPC-debug.patch
+# don't spew warnings when using fallback allocator
+Patch2902: linux-2.6.27-ext4-print-warning-once.patch
+# fix extent header checking
+Patch2903: linux-2.6.27-ext4-fix-header-check.patch
+
+# from 2.6.29-rc, 18 mar 2009
+Patch2904: linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
+Patch2905: linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
 
 # next round of ext4 patches for -stable
-Patch2910: ext4.git-765ba56963fc62e060678a4c2e788ca46722bf6a.patch
-Patch2911: ext4.git-b9eab5ac8eeff5be74ceed5cda3ab590399d89ef.patch
-Patch2912: ext4.git-19815ad26f2d60e3ce390fca4d18ad729c9f5f42.patch
-Patch2913: ext4.git-b88c4d940fbea96d7cbd5483ad91dab6a2aff834.patch
-Patch2914: ext4.git-4987213505bf23fae20412b31adeff36b41687da.patch
-Patch2915: ext4.git-b700ed3dc05f63c2cb0b39a31d1e21086f021643.patch
-Patch2916: ext4.git-ed858e512ee4f761edce33b7c97fcd39a6804c29.patch
-
-# fix problems(s) in ext4 queue
-Patch2920: ext4.git-fixes.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -784,6 +788,9 @@ Patch3120: linux-2.6-selinux-empty-tty-files.patch
 # Provide P4 clock modulation in-kernel for thermal reasons, but don't expose
 # ui
 Patch3130: disable-p4-cpufreq-ui.patch
+
+# Fix up the v4l2 video_open function
+Patch3140: linux-2.6.27-fix-video_open.patch
 
 %endif
 
@@ -1162,9 +1169,6 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
-ApplyPatch linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
-
-ApplyPatch linux-2.6-x86-mtrr-kill-bogus-warning.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1203,7 +1207,7 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # SPARC64
 #
 ApplyPatch sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
-
+ApplyPatch linux-2.6-sparc-cs4231-ebus-dma.patch
 #
 # Exec shield
 #
@@ -1216,17 +1220,12 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
-ApplyPatch linux-2.6-ext4-ENOSPC-debug.patch
+ApplyPatch linux-2.6.27-ext4-print-warning-once.patch
+ApplyPatch linux-2.6.27-ext4-fix-header-check.patch
 
-ApplyPatch ext4.git-765ba56963fc62e060678a4c2e788ca46722bf6a.patch
-ApplyPatch ext4.git-b9eab5ac8eeff5be74ceed5cda3ab590399d89ef.patch
-ApplyPatch ext4.git-19815ad26f2d60e3ce390fca4d18ad729c9f5f42.patch
-ApplyPatch ext4.git-b88c4d940fbea96d7cbd5483ad91dab6a2aff834.patch
-ApplyPatch ext4.git-4987213505bf23fae20412b31adeff36b41687da.patch
-ApplyPatch ext4.git-b700ed3dc05f63c2cb0b39a31d1e21086f021643.patch
-ApplyPatch ext4.git-ed858e512ee4f761edce33b7c97fcd39a6804c29.patch
-
-ApplyPatch ext4.git-fixes.patch
+# in 2.6.29  18 mar 2009
+ApplyPatch linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
+ApplyPatch linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
 
 # xfs
 
@@ -1280,6 +1279,9 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
+ApplyPatch linux-2.6-alsa-hda-probe-mask-quirks.patch
+ApplyPatch linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-via.patch
+ApplyPatch linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-ati.patch
 
 # Filesystem patches.
 # Squashfs
@@ -1296,6 +1298,8 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 # 448656
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
+# 490250
+ApplyPatch linux-2.6-input.git-i8042-add-vostro-1510-to-nomux.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1311,9 +1315,6 @@ ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # selinux: recognize netlink messages for 'ip addrlabel'
 ApplyPatch linux-2.6-selinux-recognise-addrlabel.patch
-
-# bz486225: fix setsockopt when netlabel is enabled
-ApplyPatch selinux-netlabel_setsockopt_fix.patch
 
 # Changes to upstream defaults.
 
@@ -1335,6 +1336,10 @@ ApplyPatch linux-2.6-at76.patch
 ApplyPatch linux-2.6.27-ath5k-ignore-the-return-value-of-ath5k_hw_noise_floor_calibration.patch
 
 ApplyPatch linux-2.6-rtl8187b-tx-status-feedback.patch
+
+# back-port scan result aging patches
+ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
+ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
@@ -1392,6 +1397,7 @@ ApplyPatch drm-nouveau.patch
 ApplyPatch drm-intel-8xx-pae-no-gem.patch
 ApplyPatch drm-fix-master-enable.patch
 ApplyPatch drm-radeon-fix-upstream-suspend.patch
+ApplyPatch drm-edid-revision-0-should-be-valid.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1424,6 +1430,8 @@ ApplyPatch linux-2.6-pciehp-kill-annoying-messages.patch
 ApplyPatch linux-2.6-selinux-empty-tty-files.patch
 
 ApplyPatch disable-p4-cpufreq-ui.patch
+
+ApplyPatch linux-2.6.27-fix-video_open.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2000,6 +2008,105 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Mar 23 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-170.2.56
+- 2.6.27.21
+- Dropped patches, merged in -stable:
+  linux-2.6.27-alsa-fix-vunmap-and-free-order.patch
+  linux-2.6.27-alsa-hda-fix-dma-mask-for-ati-controllers.patch
+  linux-2.6.27-alsa-mixart-fix-lock-imbalance.patch
+  linux-2.6.27-alsa-pcm-oss-fix-locking-typo.patch
+  linux-2.6-nfsd-drop-cap-mknod-for-non-root.patch
+  linux-2.6-nfsd-provide-encode-routine-for-op-openattr.patch
+  add-fwrapv-to-cflags.patch
+  linux-2.6.27-fix-video_open.patch (partial)
+
+* Fri Mar 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.20-170.2.55
+- add-fwrapv-to-cflags.patch: avoid gcc optimizing away wrapping arithmetic.
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-170.2.54
+- Add Dell Vostro to i8042 nomux quirk list (#490250)
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-170.2.53
+- ALSA fixes headed for -stable:
+    linux-2.6.27-alsa-fix-vunmap-and-free-order.patch
+    linux-2.6.27-alsa-hda-fix-dma-mask-for-ati-controllers.patch
+    linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-ati.patch
+    linux-2.6.27-alsa-hda-workaround-for-buggy-dma-on-via.patch
+    linux-2.6.27-alsa-mixart-fix-lock-imbalance.patch
+    linux-2.6.27-alsa-pcm-oss-fix-locking-typo.patch
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-170.2.52
+- Two nfsd fixes headed for -stable:
+    linux-2.6-nfsd-drop-cap-mknod-for-non-root.patch
+    linux-2.6-nfsd-provide-encode-routine-for-op-openattr.patch
+
+* Wed Mar 18 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-170.2.51
+- Two small ext4 fixes from 2.6.29:
+    linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
+    linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
+
+* Tue Mar 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-170.2.50
+- 2.6.27.20
+
+* Tue Mar 17 2009 Jarod Wilson <jarod@redhat.com> 2.6.27.20-170.2.49.rc1
+- Always default to softcarrier=1 in lirc_serial (#479576)
+
+* Mon Mar 16 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.20-170.2.48.rc1
+- Build VIA Padlock driver on PAE kernels (#490405)
+- Padlock cannot be built for x86_64.
+
+* Fri Mar 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.20-170.2.47.rc1
+- ext4 patches from rawhide:
+    Kill off distracting warning messages.
+    Fix checking of on-disk extent headers.
+
+* Fri Mar 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.20-170.2.46.rc1
+- 2.6.27.20-rc1
+- Dropped patches, merged in -stable:
+    linux-2.6-x86-64-fix-int-0x80-enosys-return.patch
+    linux-2.6-x86-mtrr-kill-bogus-warning.patch
+    ext4.git*
+    selinux-netlabel_setsockopt_fix.patch
+    linux-2.6-libata-make-sure-port-is-thawed.patch
+
+* Wed Mar 11 2009 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-execshield.patch:
+   Fix from H.J. Lu, arch_get_unmapped_exec_area is only appropriate for
+   32-bit mmap currently.
+
+* Tue Mar 10 2009 Jarod Wilson <jarod@redhat.com> 2.6.27.19-170.2.44
+- Un-muck-up hdpvr patch update -- can't use 2.6.29 features that aren't in 2.6.27...
+
+* Mon Mar 09 2009 Dennis Gilmore <dennis@ausil.us> 2.6.27.19-170.2.43
+- add cs4231 ebus dma patch
+
+* Sat Mar 07 2009 Jarod Wilson <jarod@redhat.com> 2.6.27.19-170.2.42
+- hdpvr: add addtional device IDs and permit functioning w/latest firmwares
+
+* Thu Mar 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-170.2.41
+- Add ext4 stable patch queue.
+- Drop linux-2.6-ext4-ENOSPC-debug.patch, replaced by upstream stable patch.
+
+* Thu Mar 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-170.2.40
+- Fix endless error message spew from sata_nv in 2.6.27.19 (#488371)
+
+* Thu Mar 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-170.2.39
+- Add ALSA HDA probe_mask quirks from 2.6.29-rc7 (F11#485295)
+
+* Thu Feb 26 2009 John W. Linville <linville@redhat.com>
+- Add dcbw's back-port patches to age scan results on resume
+
+* Tue Feb 24 2009 Kyle McMartin <kyle@redhat.com>
+- drm-edid-revision-0-should-be-valid.patch: bz476735, allow edid
+  read on edid 1.0 monitors.
+
+* Tue Feb 24 2009 Jarod Wilson <jarod@redhat.com> 2.6.27.19-170.2.36
+- Fix NULL ptr deref in cx23885 video_open function that triggered
+  an oops on systems w/both an HVR-1800 and HVR-1250, which prevented
+  the analog side of the 1800 from working
+- Fix NULL ptr deref in v4l2 video_open function that triggers when
+  running the uvcvideo stress-test
+
 * Mon Feb 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.19-170.2.35
 - Fix bug in ext4 patch queue.
 
