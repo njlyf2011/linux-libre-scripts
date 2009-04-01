@@ -14285,7 +14285,7 @@ index 0000000..aa4a23e
 +}
 +#endif
 diff --git a/drivers/media/video/cx25840/cx25840-audio.c b/drivers/media/video/cx25840/cx25840-audio.c
-index d199d80..95e3f95 100644
+index 93d74be..2f846f5 100644
 --- a/drivers/media/video/cx25840/cx25840-audio.c
 +++ b/drivers/media/video/cx25840/cx25840-audio.c
 @@ -32,7 +32,7 @@ static int set_audclk_freq(struct i2c_client *client, u32 freq)
@@ -14424,7 +14424,7 @@ index d199d80..95e3f95 100644
  
  static int get_volume(struct i2c_client *client)
 diff --git a/drivers/media/video/cx25840/cx25840-core.c b/drivers/media/video/cx25840/cx25840-core.c
-index a9b8e52..5884daf 100644
+index 737ee4e..f8ed3c0 100644
 --- a/drivers/media/video/cx25840/cx25840-core.c
 +++ b/drivers/media/video/cx25840/cx25840-core.c
 @@ -345,6 +345,77 @@ static void cx23885_initialize(struct i2c_client *client)
@@ -14617,7 +14617,7 @@ index a9b8e52..5884daf 100644
  	}
  
  	return 0;
-@@ -1120,6 +1206,8 @@ static int cx25840_init(struct v4l2_subdev *sd, u32 val)
+@@ -1118,6 +1204,8 @@ static int cx25840_init(struct v4l2_subdev *sd, u32 val)
  			cx25836_initialize(client);
  		else if (state->is_cx23885)
  			cx23885_initialize(client);
@@ -14626,7 +14626,7 @@ index a9b8e52..5884daf 100644
  		else
  			cx25840_initialize(client);
  	}
-@@ -1175,7 +1263,7 @@ static int cx25840_s_stream(struct v4l2_subdev *sd, int enable)
+@@ -1159,7 +1247,7 @@ static int cx25840_s_stream(struct v4l2_subdev *sd, int enable)
  	v4l_dbg(1, cx25840_debug, client, "%s output\n",
  			enable ? "enable" : "disable");
  	if (enable) {
@@ -14635,7 +14635,7 @@ index a9b8e52..5884daf 100644
  			u8 v = (cx25840_read(client, 0x421) | 0x0b);
  			cx25840_write(client, 0x421, v);
  		} else {
-@@ -1185,7 +1273,7 @@ static int cx25840_s_stream(struct v4l2_subdev *sd, int enable)
+@@ -1169,7 +1257,7 @@ static int cx25840_s_stream(struct v4l2_subdev *sd, int enable)
  					state->is_cx25836 ? 0x04 : 0x07);
  		}
  	} else {
@@ -14644,7 +14644,7 @@ index a9b8e52..5884daf 100644
  			u8 v = cx25840_read(client, 0x421) & ~(0x0b);
  			cx25840_write(client, 0x421, v);
  		} else {
-@@ -1366,6 +1454,8 @@ static int cx25840_reset(struct v4l2_subdev *sd, u32 val)
+@@ -1350,6 +1438,8 @@ static int cx25840_reset(struct v4l2_subdev *sd, u32 val)
  		cx25836_initialize(client);
  	else if (state->is_cx23885)
  		cx23885_initialize(client);
@@ -14653,7 +14653,7 @@ index a9b8e52..5884daf 100644
  	else
  		cx25840_initialize(client);
  	return 0;
-@@ -1465,6 +1555,8 @@ static int cx25840_probe(struct i2c_client *client,
+@@ -1449,6 +1539,8 @@ static int cx25840_probe(struct i2c_client *client,
  		id = V4L2_IDENT_CX25836 + ((device_id >> 4) & 0xf) - 6;
  	} else if (device_id == 0x1313) {
  		id = V4L2_IDENT_CX25836 + ((device_id >> 4) & 0xf) - 6;
@@ -14662,7 +14662,7 @@ index a9b8e52..5884daf 100644
  	}
  	else {
  		v4l_dbg(1, cx25840_debug, client, "cx25840 not found\n");
-@@ -1487,6 +1579,7 @@ static int cx25840_probe(struct i2c_client *client,
+@@ -1471,6 +1563,7 @@ static int cx25840_probe(struct i2c_client *client,
  	state->c = client;
  	state->is_cx25836 = ((device_id & 0xff00) == 0x8300);
  	state->is_cx23885 = (device_id == 0x0000) || (device_id == 0x1313);
@@ -14671,7 +14671,7 @@ index a9b8e52..5884daf 100644
  	state->aud_input = CX25840_AUDIO8;
  	state->audclk_freq = 48000;
 diff --git a/drivers/media/video/cx25840/cx25840-core.h b/drivers/media/video/cx25840/cx25840-core.h
-index be05582..93941be 100644
+index 9ad0eb8..814b565 100644
 --- a/drivers/media/video/cx25840/cx25840-core.h
 +++ b/drivers/media/video/cx25840/cx25840-core.h
 @@ -50,6 +50,7 @@ struct cx25840_state {
