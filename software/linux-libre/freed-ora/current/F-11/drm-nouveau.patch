@@ -2459,10 +2459,10 @@ index 0000000..c783de4
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.c b/drivers/gpu/drm/nouveau/nouveau_drv.c
 new file mode 100644
-index 0000000..7147114
+index 0000000..071bd02
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.c
-@@ -0,0 +1,163 @@
+@@ -0,0 +1,172 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
 + * All Rights Reserved.
@@ -2493,17 +2493,26 @@ index 0000000..7147114
 +
 +#include "drm_pciids.h"
 +
++MODULE_PARM_DESC(noagp, "Disable AGP");
++int nouveau_noagp = 0;
++module_param_named(noagp, nouveau_noagp, int, 0400);
++
++MODULE_PARM_DESC(mm_enabled, "Enable TTM/GEM memory manager");
 +int nouveau_mm_enabled = 0;
 +module_param_named(mm_enabled, nouveau_mm_enabled, int, 0400);
 +
++MODULE_PARM_DESC(modeset, "Enable kernel modesetting (>=GeForce 8)");
 +int nouveau_modeset = -1; /* kms */
 +module_param_named(modeset, nouveau_modeset, int, 0400);
 +
-+int nouveau_fbpercrtc = 0;
-+module_param_named(fbpercrtc, nouveau_fbpercrtc, int, 0400);
++MODULE_PARM_DESC(duallink, "Allow dual-link TMDS (>=GeForce 8)");
++int nouveau_duallink = 0;
++module_param_named(duallink, nouveau_duallink, int, 0400);
 +
-+int nouveau_noagp = 0;
-+module_param_named(noagp, nouveau_noagp, int, 0400);
++int nouveau_fbpercrtc = 0;
++#if 0
++module_param_named(fbpercrtc, nouveau_fbpercrtc, int, 0400);
++#endif
 +
 +static struct pci_device_id pciidlist[] = {
 +	{
@@ -3385,10 +3394,10 @@ index 0000000..f1fdeba
 +#endif /* __NOUVEAU_DRV_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_encoder.h b/drivers/gpu/drm/nouveau/nouveau_encoder.h
 new file mode 100644
-index 0000000..36fcf3f
+index 0000000..ea2b9dd
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_encoder.h
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,46 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -3423,6 +3432,8 @@ index 0000000..36fcf3f
 +
 +	struct dcb_entry *dcb_entry;
 +	int or;
++
++	bool dual_link;
 +
 +	int (*set_clock_mode) (struct nouveau_encoder *encoder,
 +			       struct drm_display_mode *mode);
@@ -10103,10 +10114,10 @@ index 0000000..44337e6
 +#    define NV50_HW_CURSOR_POS(i)         (0x00647084+(i)*0x1000)
 diff --git a/drivers/gpu/drm/nouveau/nouveau_sgdma.c b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
 new file mode 100644
-index 0000000..3be7235
+index 0000000..ed06cda
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
-@@ -0,0 +1,362 @@
+@@ -0,0 +1,336 @@
 +#include "drmP.h"
 +#include "nouveau_drv.h"
 +#include <linux/pagemap.h>
@@ -10119,12 +10130,11 @@ index 0000000..3be7235
 +	struct drm_ttm_backend backend;
 +	struct drm_device *dev;
 +
-+	int         pages;
-+	int         pages_populated;
-+	dma_addr_t *pagelist;
-+	int         is_bound;
++	struct page **pages;
++	unsigned nr_pages;
 +
-+	unsigned int pte_start;
++	unsigned pte_start;
++	bool bound;
 +};
 +
 +static int
@@ -10138,35 +10148,14 @@ index 0000000..3be7235
 +		       struct page **pages, struct page *dummy_read_page)
 +{
 +	struct nouveau_sgdma_be *nvbe = (struct nouveau_sgdma_be *)be;
-+	int p, d, o;
 +
 +	DRM_DEBUG("num_pages = %ld\n", num_pages);
 +
-+	if (nvbe->pagelist)
++	if (nvbe->pages)
 +		return -EINVAL;
-+	nvbe->pages    = (num_pages << PAGE_SHIFT) >> NV_CTXDMA_PAGE_SHIFT;
-+	nvbe->pagelist = drm_alloc(nvbe->pages*sizeof(dma_addr_t),
-+				   DRM_MEM_PAGES);
 +
-+	nvbe->pages_populated = d = 0;
-+	for (p = 0; p < num_pages; p++) {
-+		for (o = 0; o < PAGE_SIZE; o += NV_CTXDMA_PAGE_SIZE) {
-+			struct page *page = pages[p];
-+			if (!page)
-+				page = dummy_read_page;
-+			nvbe->pagelist[d] = pci_map_page(nvbe->dev->pdev,
-+							 page, o,
-+							 NV_CTXDMA_PAGE_SIZE,
-+							 PCI_DMA_BIDIRECTIONAL);
-+			if (pci_dma_mapping_error(nvbe->dev->pdev, nvbe->pagelist[d])) {
-+				be->func->clear(be);
-+				DRM_ERROR("pci_map_page failed\n");
-+				return -EINVAL;
-+			}
-+			nvbe->pages_populated = ++d;
-+		}
-+	}
-+
++	nvbe->pages = pages;
++	nvbe->nr_pages = num_pages;
 +	return 0;
 +}
 +
@@ -10174,22 +10163,26 @@ index 0000000..3be7235
 +nouveau_sgdma_clear(struct drm_ttm_backend *be)
 +{
 +	struct nouveau_sgdma_be *nvbe = (struct nouveau_sgdma_be *)be;
-+	int d;
 +
 +	DRM_DEBUG("\n");
 +
-+	if (nvbe && nvbe->pagelist) {
-+		if (nvbe->is_bound)
++	if (nvbe && nvbe->pages) {
++		if (nvbe->bound)
 +			be->func->unbind(be);
-+
-+		for (d = 0; d < nvbe->pages_populated; d++) {
-+			pci_unmap_page(nvbe->dev->pdev, nvbe->pagelist[d],
-+				       NV_CTXDMA_PAGE_SIZE,
-+				       PCI_DMA_BIDIRECTIONAL);
-+		}
-+		drm_free(nvbe->pagelist, nvbe->pages*sizeof(dma_addr_t),
-+			 DRM_MEM_PAGES);
++		nvbe->pages = NULL;
 +	}
++}
++
++static inline unsigned
++nouveau_sgdma_pte(struct drm_device *dev, uint64_t offset)
++{
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	unsigned pte = (offset >> NV_CTXDMA_PAGE_SHIFT);
++
++	if (dev_priv->card_type < NV_50)
++		return pte + 2;
++
++	return pte << 1;
 +}
 +
 +static int
@@ -10198,47 +10191,38 @@ index 0000000..3be7235
 +	struct nouveau_sgdma_be *nvbe = (struct nouveau_sgdma_be *)be;
 +	struct drm_nouveau_private *dev_priv = nvbe->dev->dev_private;
 +	struct nouveau_gpuobj *gpuobj = dev_priv->gart_info.sg_ctxdma;
-+	uint64_t offset = (mem->mm_node->start << PAGE_SHIFT);
-+	uint32_t i;
++	unsigned i, j, pte, tile = 0;
 +
-+	DRM_DEBUG("pg=0x%lx (0x%llx), cached=%d\n", mem->mm_node->start,
-+		  offset, (mem->flags & DRM_BO_FLAG_CACHED) == 1);
++	DRM_DEBUG("pg=0x%lx cached=%d\n", mem->mm_node->start,
++		  (mem->flags & DRM_BO_FLAG_CACHED) == 1);
 +
-+	if (offset & NV_CTXDMA_PAGE_MASK)
-+		return -EINVAL;
-+	nvbe->pte_start = (offset >> NV_CTXDMA_PAGE_SHIFT);
-+	if (dev_priv->card_type < NV_50)
-+		nvbe->pte_start += 2; /* skip ctxdma header */
++	if (mem->proposed_flags & DRM_NOUVEAU_BO_FLAG_TILE &&
++	    mem->proposed_flags & DRM_NOUVEAU_BO_FLAG_ZTILE)
++		tile = 0x2800;
++	else
++	if (mem->proposed_flags & DRM_NOUVEAU_BO_FLAG_TILE)
++		tile = 0x7000;
 +
 +	dev_priv->engine.instmem.prepare_access(nvbe->dev, true);
-+	for (i = nvbe->pte_start; i < nvbe->pte_start + nvbe->pages; i++) {
-+		uint64_t pteval = nvbe->pagelist[i - nvbe->pte_start];
++	pte = nouveau_sgdma_pte(nvbe->dev, mem->mm_node->start << PAGE_SHIFT);
++	nvbe->pte_start = pte;
++	for (i = 0; i < nvbe->nr_pages; i++) {
++		dma_addr_t dma_offset = page_to_phys(nvbe->pages[i]);
 +
-+		if (pteval & NV_CTXDMA_PAGE_MASK) {
-+			DRM_ERROR("Bad pteval 0x%llx\n", pteval);
-+			dev_priv->engine.instmem.finish_access(nvbe->dev);
-+			return -EINVAL;
-+		}
++		for (j = 0; j < PAGE_SIZE / NV_CTXDMA_PAGE_SIZE; j++) {
++			if (dev_priv->card_type < NV_50)
++				INSTANCE_WR(gpuobj, pte++, dma_offset | 3);
++			else {
++				INSTANCE_WR(gpuobj, pte++, dma_offset | 0x21);
++				INSTANCE_WR(gpuobj, pte++, tile);
++			}
 +
-+		if (dev_priv->card_type < NV_50) {
-+			INSTANCE_WR(gpuobj, i, pteval | 3);
-+		} else {
-+			unsigned tile = 0;
-+
-+			if (mem->proposed_flags & DRM_NOUVEAU_BO_FLAG_TILE &&
-+			    mem->proposed_flags & DRM_NOUVEAU_BO_FLAG_ZTILE)
-+				tile = 0x2800;
-+			else
-+			if (mem->proposed_flags & DRM_NOUVEAU_BO_FLAG_TILE)
-+				tile = 0x7000;
-+
-+			INSTANCE_WR(gpuobj, (i<<1)+0, pteval | 0x21);
-+			INSTANCE_WR(gpuobj, (i<<1)+1, tile);
++			dma_offset += NV_CTXDMA_PAGE_SIZE;
 +		}
 +	}
 +	dev_priv->engine.instmem.finish_access(nvbe->dev);
 +
-+	nvbe->is_bound  = 1;
++	nvbe->bound = true;
 +	return 0;
 +}
 +
@@ -10247,32 +10231,33 @@ index 0000000..3be7235
 +{
 +	struct nouveau_sgdma_be *nvbe = (struct nouveau_sgdma_be *)be;
 +	struct drm_nouveau_private *dev_priv = nvbe->dev->dev_private;
++	struct nouveau_gpuobj *gpuobj = dev_priv->gart_info.sg_ctxdma;
++	unsigned i, j, pte;
 +
 +	DRM_DEBUG("\n");
 +
-+	if (nvbe->is_bound) {
-+		struct nouveau_gpuobj *gpuobj = dev_priv->gart_info.sg_ctxdma;
-+		unsigned int pte;
++	if (!nvbe->bound)
++		return 0;
 +
-+		dev_priv->engine.instmem.prepare_access(nvbe->dev, true);
-+		pte = nvbe->pte_start;
-+		while (pte < (nvbe->pte_start + nvbe->pages)) {
-+			uint64_t pteval = dev_priv->gart_info.sg_dummy_bus;
++	dev_priv->engine.instmem.prepare_access(nvbe->dev, true);
++	pte = nvbe->pte_start;
++	for (i = 0; i < nvbe->nr_pages; i++) {
++		dma_addr_t dma_offset = dev_priv->gart_info.sg_dummy_bus;
 +
-+			if (dev_priv->card_type < NV_50) {
-+				INSTANCE_WR(gpuobj, pte, pteval | 3);
-+			} else {
-+				INSTANCE_WR(gpuobj, (pte<<1)+0, pteval | 0x21);
-+				INSTANCE_WR(gpuobj, (pte<<1)+1, 0x00000000);
++		for (j = 0; j < PAGE_SIZE / NV_CTXDMA_PAGE_SIZE; j++) {
++			if (dev_priv->card_type < NV_50)
++				INSTANCE_WR(gpuobj, pte++, dma_offset | 3);
++			else {
++				INSTANCE_WR(gpuobj, pte++, dma_offset | 0x21);
++				INSTANCE_WR(gpuobj, pte++, 0x00000000);
 +			}
 +
-+			pte++;
++			dma_offset += NV_CTXDMA_PAGE_SIZE;
 +		}
-+		dev_priv->engine.instmem.finish_access(nvbe->dev);
-+
-+		nvbe->is_bound = 0;
 +	}
++	dev_priv->engine.instmem.finish_access(nvbe->dev);
 +
++	nvbe->bound = false;
 +	return 0;
 +}
 +
@@ -10283,7 +10268,7 @@ index 0000000..3be7235
 +	if (be) {
 +		struct nouveau_sgdma_be *nvbe = (struct nouveau_sgdma_be *)be;
 +		if (nvbe) {
-+			if (nvbe->pagelist)
++			if (nvbe->pages)
 +				be->func->clear(be);
 +			drm_ctl_free(nvbe, sizeof(*nvbe), DRM_MEM_TTM);
 +		}
@@ -17003,10 +16988,10 @@ index 0000000..87c6213
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_connector.c b/drivers/gpu/drm/nouveau/nv50_connector.c
 new file mode 100644
-index 0000000..27fea86
+index 0000000..c554d27
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_connector.c
-@@ -0,0 +1,591 @@
+@@ -0,0 +1,596 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -17460,9 +17445,14 @@ index 0000000..27fea86
 +		if (mode->hdisplay > connector->native_mode->hdisplay ||
 +		    mode->vdisplay > connector->native_mode->vdisplay)
 +			return MODE_PANEL;
-+		/* fall-through */
++
++		max_clock = 400000;
++		break;
 +	case DRM_MODE_ENCODER_TMDS:
-+		max_clock = 165000;
++		if (!encoder->dual_link)
++			max_clock = 165000;
++		else
++			max_clock = 330000;
 +		break;
 +	default:
 +		max_clock = 400000;
@@ -21336,10 +21326,10 @@ index 0000000..0843473
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_sor.c b/drivers/gpu/drm/nouveau/nv50_sor.c
 new file mode 100644
-index 0000000..ff3dd42
+index 0000000..48fc393
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_sor.c
-@@ -0,0 +1,273 @@
+@@ -0,0 +1,277 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -21376,6 +21366,8 @@ index 0000000..ff3dd42
 +#include "nouveau_crtc.h"
 +#include "nv50_display.h"
 +#include "nv50_display_commands.h"
++
++extern int nouveau_duallink;
 +
 +static void
 +nv50_sor_disconnect(struct nouveau_encoder *encoder)
@@ -21590,6 +21582,8 @@ index 0000000..ff3dd42
 +
 +	encoder->dcb_entry = entry;
 +	encoder->or = ffs(entry->or) - 1;
++
++	encoder->dual_link = nouveau_duallink;
 +
 +	/* Set function pointers. */
 +	encoder->set_clock_mode = nv50_sor_set_clock_mode;

@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1478 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1483 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -657,6 +657,9 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
 Patch601: alsa-rewrite-hw_ptr-updaters.patch
+Patch602: alsa-pcm-always-reset-invalid-position.patch
+Patch603: alsa-pcm-fix-delta-calc-at-overlap.patch
+Patch604: alsa-pcm-safer-boundary-checks.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
@@ -695,7 +698,7 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2902: linux-2.6-v4l-pvrusb2-fixes.patch
+Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
 Patch2920: linux-2.6-ext4-flush-on-close.patch
@@ -711,9 +714,10 @@ Patch9003: linux-2.6-dropwatch-protocol.patch
 
 # fix for net lockups, will be in 2.6.29.1
 Patch9100: linux-2.6-net-fix-gro-bug.patch
+Patch9101: linux-2.6-net-fix-another-gro-bug.patch
 
 # fix locking in ipsec (#489764)
-Patch9101: linux-2.6-net-xfrm-fix-spin-unlock.patch
+Patch9200: linux-2.6-net-xfrm-fix-spin-unlock.patch
 
 %endif
 
@@ -1195,6 +1199,16 @@ ApplyPatch linux-2.6-pci-sysfs-remove-id.patch
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
 # ALSA
+# squelch hda_beep by default
+ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
+
+# fix alsa for pulseaudio
+ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
+ApplyPatch alsa-pcm-always-reset-invalid-position.patch
+ApplyPatch alsa-pcm-fix-delta-calc-at-overlap.patch
+ApplyPatch alsa-pcm-safer-boundary-checks.patch
+
+ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
 
@@ -1226,10 +1240,6 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
 
-# squelch hda_beep by default
-ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
-ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
-ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
@@ -1275,7 +1285,7 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyPatch linux-2.6-v4l-dvb-update.patch
 ApplyPatch linux-2.6-v4l-dvb-experimental.patch
-ApplyPatch linux-2.6-v4l-pvrusb2-fixes.patch
+ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
@@ -1285,6 +1295,8 @@ ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
 ApplyPatch linux-2.6-net-fix-gro-bug.patch
+ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
+
 ApplyPatch linux-2.6-net-xfrm-fix-spin-unlock.patch
 
 # END OF PATCH APPLICATIONS
@@ -1870,7 +1882,27 @@ fi
 # and build.
 
 %changelog
-* Mon Mar 30 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.16
+* Mon Mar 30 2009 Mark McLoughlin <markmc@redhat.com> 2.6.29-21
+- Fix guest->remote network stall with virtio/GSO (#490266)
+
+* Mon Mar 30 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch
+  - rewrite nouveau PCI(E) GART functions, should fix rh#492492
+  - kms: kernel option to allow dual-link dvi
+  - modinfo descriptions for module parameters
+
+* Sun Mar 29 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
+- more v4l/dvb updates: v4l subdev conversion and some driver improvements
+
+* Sun Mar 29 2009 Chuck Ebbert <cebbert@redhat.com>
+- More fixes for ALSA hardware pointer updating.
+
+* Sat Mar 28 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
+- linux-2.6-revert-dvb-net-kabi-change.patch: attempt to fix dvb net breakage
+- update v4l fixes patch to reflect what's ready for 2.6.30
+- update v4l devel patch to reflect what will be kept on linux-next for a while
+
+* Fri Mar 27 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.16 Mon Mar 30
 - Deblobbed 2.6.29.
 - Rebased to 2.6.28-libre2.
 - Deblobbed drm-nouveau.patch.
