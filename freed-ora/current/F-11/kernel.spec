@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1483 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1497 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -40,7 +40,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -52,9 +52,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -644,6 +644,7 @@ Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6-input-hid-extra-gamepad.patch
+Patch453: linux-2.6-input-wacom-bluetooth.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -661,6 +662,7 @@ Patch602: alsa-pcm-always-reset-invalid-position.patch
 Patch603: alsa-pcm-fix-delta-calc-at-overlap.patch
 Patch604: alsa-pcm-safer-boundary-checks.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
+Patch611: linux-2.6.29-alsa-update-quirks.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -704,6 +706,9 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 Patch2920: linux-2.6-ext4-flush-on-close.patch
 Patch3000: linux-2.6-btrfs-experimental-branch.patch
 Patch3010: linux-2.6-relatime-by-default.patch
+Patch3020: linux-2.6-fiemap-header-install.patch
+
+Patch4000: linux-2.6-bootarg-strict-devmem.patch
 
 Patch9001: revert-fix-modules_install-via-nfs.patch
 
@@ -713,11 +718,10 @@ Patch9002: cpufreq-add-atom-to-p4-clockmod.patch
 Patch9003: linux-2.6-dropwatch-protocol.patch
 
 # fix for net lockups, will be in 2.6.29.1
-Patch9100: linux-2.6-net-fix-gro-bug.patch
 Patch9101: linux-2.6-net-fix-another-gro-bug.patch
 
-# fix locking in ipsec (#489764)
-Patch9200: linux-2.6-net-xfrm-fix-spin-unlock.patch
+# http://bugs.freedesktop.org/show_bug.cgi?id=20803
+Patch9210: linux-2.6.29-pat-fixes.patch
 
 %endif
 
@@ -967,10 +971,10 @@ ApplyPatch()
 %endif
 %endif
 
-# We can share hardlinked source trees by putting the
-# directory name of the CVS checkout that we want to share
-# with in .shared-srctree. (Full pathname is required.)
-[ -f .shared-srctree ] && sharedir=$(cat .shared-srctree)
+# We can share hardlinked source trees by putting a list of
+# directory names of the CVS checkouts that we want to share
+# with in .shared-srctree. (Full pathnames are required.)
+[ -f .shared-srctree ] && sharedirs=$(cat .shared-srctree)
 
 if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
@@ -987,6 +991,11 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
     # Ok, first time we do a make prep.
     rm -f pax_global_header
+    for sharedir in $sharedirs ; do
+      if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{kversion} ]] ; then
+        break
+      fi
+    done
     if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{kversion} ]] ; then
 %setup -q -n kernel-%{kversion} -c -T
       cp -rl $sharedir/kernel-%{kversion}/vanilla-%{kversion} .
@@ -997,8 +1006,15 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
   fi
 
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" vanilla-%{kversion}/Makefile
+
 %if "%{kversion}" != "%{vanillaversion}"
 
+  for sharedir in $sharedirs ; do
+    if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} ]] ; then
+      break
+    fi
+  done
   if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} ]] ; then
 
     cp -rl $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} .
@@ -1007,8 +1023,6 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
     cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
     cd vanilla-%{vanillaversion}
-
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
 
 # Update vanilla to the latest upstream.
 # (non-released_kernel case only)
@@ -1162,6 +1176,12 @@ ApplyPatch linux-2.6-btrfs-experimental-branch.patch
 # relatime
 ApplyPatch linux-2.6-relatime-by-default.patch
 
+# put fiemap.h into kernel-headers
+ApplyPatch linux-2.6-fiemap-header-install.patch
+
+# Make strict devmem a boot arg
+ApplyPatch linux-2.6-bootarg-strict-devmem.patch
+
 # USB
 
 # ACPI
@@ -1201,6 +1221,7 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 # ALSA
 # squelch hda_beep by default
 ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
+ApplyPatch linux-2.6.29-alsa-update-quirks.patch
 
 # fix alsa for pulseaudio
 ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
@@ -1221,6 +1242,9 @@ ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
 
 # HID: add support for another version of 0e8f:0003 device in hid-pl
 ApplyPatch linux-2.6-input-hid-extra-gamepad.patch
+
+# HID: add support for Bluetooth Wacom pads
+ApplyPatch linux-2.6-input-wacom-bluetooth.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1294,10 +1318,9 @@ ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
 
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
-ApplyPatch linux-2.6-net-fix-gro-bug.patch
 ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
 
-ApplyPatch linux-2.6-net-xfrm-fix-spin-unlock.patch
+ApplyPatch linux-2.6.29-pat-fixes.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1406,7 +1429,7 @@ BuildKernel() {
 
     make -s ARCH=$Arch %{oldconfig_target} > /dev/null
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
-    make -k -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
 %if %{with_debuginfo}
@@ -1882,6 +1905,50 @@ fi
 # and build.
 
 %changelog
+* Tue Mar 31 2009 Matthew Garrett <mjg@redhat.com> 2.6.29.1-35.rc1
+- linux-2.6.29-alsa-update-quirks.patch: Backport some HDA quirk support
+
+* Tue Mar 31 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.29.1-rc1
+- Dropped patches, merged upstream:
+    linux-2.6-net-fix-gro-bug.patch
+    linux-2.6-net-xfrm-fix-spin-unlock.patch
+    linux-2.6.29-pat-change-is_linear_pfn_mapping-to-not-use-vm_pgoff.patch
+    linux-2.6.29-pat-pci-change-prot-for-inherit.patch
+
+* Tue Mar 31 2009 Eric Sandeen <sandeen@redhat.com>
+- add fiemap.h to kernel-headers
+- build ext4 (and jbd2 and crc16) into the kernel
+
+* Tue Mar 31 2009 Matthew Garrett <mjg@redhat.com>
+- update the sony laptop code
+
+* Tue Mar 31 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: support version 3.0 pll limits table
+  may help with rh#492575
+
+* Mon Mar 30 2009 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-input-wacom-bluetooth.patch: Add support for Bluetooth wacom pads
+
+* Mon Mar 30 2009 Chuck Ebbert <cebbert@redhat.com>
+- Make the .shared-srctree file a list so more than two checkouts
+  can share source files.
+
+* Mon Mar 30 2009 Chuck Ebbert <cebbert@redhat.com>
+- Separate PAT fixes that are headed for -stable from our out-of-tree ones.
+
+* Mon Mar 30 2009 Dave Jones <davej@redhat.com>
+- Make io schedulers selectable at boot time again. (#492817)
+
+* Mon Mar 30 2009 Dave Jones <davej@redhat.com>
+- Add a strict-devmem=0 boot argument (#492803)
+
+* Mon Mar 30 2009 Adam Jackson <ajax@redhat.com>
+- linux-2.6.29-pat-fixes.patch: Fix PAT/GTT interaction
+
+* Mon Mar 30 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
+- some fixes of troubles caused by v4l2 subdev conversion
+
 * Mon Mar 30 2009 Mark McLoughlin <markmc@redhat.com> 2.6.29-21
 - Fix guest->remote network stall with virtio/GSO (#490266)
 

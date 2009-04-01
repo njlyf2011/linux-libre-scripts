@@ -432,10 +432,10 @@ index 0000000..3fc521e
 +}	
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..bcbedb7
+index 0000000..ef33b39
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -0,0 +1,854 @@
+@@ -0,0 +1,898 @@
 +/*
 + * Copyright (C) 2005-2006 Erik Waling
 + * Copyright (C) 2006 Stephane Marchesin
@@ -1054,6 +1054,8 @@ index 0000000..bcbedb7
 +	 * Version 0x21: Found on Geforce 7, 8 and some Geforce 6 cards
 +	 * 5 byte header, fifth byte of unknown purpose. 35 (0x23) byte record
 +	 * length in general, some (integrated) have an extra configuration byte
++	 * Version 0x30: Found on Geforce 8, separates the register mapping
++	 * from the limits tables.
 +	 */
 +
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
@@ -1094,6 +1096,7 @@ index 0000000..bcbedb7
 +		break;
 +	case 0x20:
 +	case 0x21:
++	case 0x30:
 +		headerlen = bios->data[bios->pll_limit_tbl_ptr + 1];
 +		recordlen = bios->data[bios->pll_limit_tbl_ptr + 2];
 +		entries = bios->data[bios->pll_limit_tbl_ptr + 3];
@@ -1136,7 +1139,7 @@ index 0000000..bcbedb7
 +			pll_lim->vco2.max_n = 0x1f;
 +		pll_lim->vco2.min_m = 0x1;
 +		pll_lim->vco2.max_m = 0x4;
-+	} else if (pll_lim_ver) {	/* ver 0x20, 0x21 */
++	} else if (pll_lim_ver < 0x30) {	/* ver 0x20, 0x21 */
 +		uint16_t plloffs = bios->pll_limit_tbl_ptr + headerlen;
 +		uint32_t reg = 0; /* default match */
 +		int i;
@@ -1219,6 +1222,47 @@ index 0000000..bcbedb7
 +					pll_lim->refclk = 25000;
 +			}
 +		}*/
++	} else if (pll_lim_ver) { /* ver 0x30 */
++		uint8_t *entry = &bios->data[bios->pll_limit_tbl_ptr + headerlen];
++		uint8_t *record = NULL;
++		int i;
++
++		DRM_DEBUG("Loading PLL limits for register 0x%08x\n",
++			  
++			limit_match);
++
++		for (i = 0; i < entries; i++, entry += recordlen) {
++			if (le32_to_cpu(*(uint32_t *)&entry[3] == limit_match)) {
++				record = &bios->data[le16_to_cpu(*(uint16_t *)&entry[1])];
++				break;
++			}
++		}
++
++		if (!record) {
++			DRM_ERROR("Register 0x%08x not found in PLL limits "
++				  "table", limit_match);
++			return false;
++		}
++
++		pll_lim->vco1.minfreq = le16_to_cpu(*(uint16_t *)&record[0]) * 1000;
++		pll_lim->vco1.maxfreq = le16_to_cpu(*(uint16_t *)&record[2]) * 1000;
++		pll_lim->vco2.minfreq = le16_to_cpu(*(uint16_t *)&record[4]) * 1000;
++		pll_lim->vco2.maxfreq = le16_to_cpu(*(uint16_t *)&record[6]) * 1000;
++		pll_lim->vco1.min_inputfreq = le16_to_cpu(*(uint16_t *)&record[8]) * 1000;
++		pll_lim->vco2.min_inputfreq = le16_to_cpu(*(uint16_t *)&record[10]) * 1000;
++		pll_lim->vco1.max_inputfreq = le16_to_cpu(*(uint16_t *)&record[12]) * 1000;
++		pll_lim->vco2.max_inputfreq = le16_to_cpu(*(uint16_t *)&record[14]) * 1000;
++		pll_lim->vco1.min_n = record[16];
++		pll_lim->vco1.max_n = record[17];
++		pll_lim->vco1.min_m = record[18];
++		pll_lim->vco1.max_m = record[19];
++		pll_lim->vco2.min_n = record[20];
++		pll_lim->vco2.max_n = record[21];
++		pll_lim->vco2.min_m = record[22];
++		pll_lim->vco2.max_m = record[23];
++		pll_lim->max_log2p_bias = record[25];
++		pll_lim->log2p_bias = record[27];
++		pll_lim->refclk = le32_to_cpu(*(uint32_t *)&record[28]);
 +	}
 +
 +	/* By now any valid limit table ought to have set a max frequency for

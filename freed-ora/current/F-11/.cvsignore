@@ -8,3 +8,4 @@ deblob-2.6.29
 deblob-check
 kernel-2.6.29
 linux-2.6.29-libre.*
+patch-2.6.29.1-rc1.bz2

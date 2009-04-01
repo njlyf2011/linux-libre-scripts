@@ -193,7 +193,7 @@ Guennadi Liakhovetski (9):
       V4L/DVB (11026): sh-mobile-ceu-camera: set field to the value, configured at open()
       V4L/DVB (11027): soc-camera: configure drivers with a default format at probe time
 
-Hans Verkuil (163):
+Hans Verkuil (171):
       V4L/DVB (10231): v4l2-subdev: add v4l2_ext_controls support
       V4L/DVB (10244): v4l2: replace a few snprintfs with strlcpy
       V4L/DVB (10246): saa6752hs: convert to v4l2_subdev.
@@ -357,6 +357,14 @@ Hans Verkuil (163):
       V4L/DVB (11303): tda7432: remove legacy code for old-style i2c API
       V4L/DVB (11304): v4l2: remove v4l2_subdev_command calls where they are no longer needed.
       V4L/DVB (11305): cx88: prevent probing rtc and ir devices
+      V4L/DVB (11309): cx25840: cleanup: remove intermediate 'ioctl' step
+      V4L/DVB (11310): cx18: remove intermediate 'ioctl' step
+      V4L/DVB (11311): v4l: replace 'ioctl' references in v4l i2c drivers
+      V4L/DVB (11312): tuner: remove V4L1 code from this driver.
+      V4L/DVB (11313): v4l2-subdev: add enum_framesizes and enum_frameintervals.
+      V4L/DVB (11314): au8522: remove unused I2C_DRIVERID
+      V4L/DVB (11315): cx25840: fix 'unused variable' warning.
+      V4L/DVB (11316): saa7191: tuner ops wasn't set.
 
 Hans Werner (1):
       V4L/DVB (10392): lnbp21: documentation about the system register
@@ -545,7 +553,7 @@ Matthias Schwarzott (4):
       V4L/DVB (10823): saa7134: add DVB support for Avermedia A700 cards
       V4L/DVB (10948): flexcop-pci: Print a message in case the new stream watchdog detects a problem
 
-Mauro Carvalho Chehab (48):
+Mauro Carvalho Chehab (49):
       V4L/DVB (10211): vivi: Implements 4 inputs on vivi
       V4L/DVB (10298): remove err macro from few usb devices
       V4L/DVB (10305): videobuf-vmalloc: Fix: videobuf memory were never freed
@@ -594,6 +602,7 @@ Mauro Carvalho Chehab (48):
       V4L/DVB (11225): v4lgrab: fix compilation warnings
       V4L/DVB (11226): avoid warnings for reject_firmware on dabusb and vicam
       V4L/DVB (11227): ce6230: avoid using unitialized var
+      V4L/DVB (11308): msp3400: use the V4L2 header since no V4L1 code is there
 
 Michael Krufky (36):
       V4L/DVB (10415): dib0700: add data debug to dib0700_i2c_xfer_new
@@ -11338,10 +11347,10 @@ index 7b94f55..565dcf3 100644
  /*
 diff --git a/drivers/media/dvb/frontends/au8522_decoder.c b/drivers/media/dvb/frontends/au8522_decoder.c
 new file mode 100644
-index 0000000..2617f68
+index 0000000..d63e152
 --- /dev/null
 +++ b/drivers/media/dvb/frontends/au8522_decoder.c
-@@ -0,0 +1,836 @@
+@@ -0,0 +1,835 @@
 +/*
 + * Auvitek AU8522 QAM/8VSB demodulator driver and video decoder
 + *
@@ -12173,7 +12182,6 @@ index 0000000..2617f68
 +
 +static struct v4l2_i2c_driver_data v4l2_i2c_data = {
 +	.name = "au8522",
-+	.driverid = I2C_DRIVERID_AU8522,
 +	.probe = au8522_probe,
 +	.remove = au8522_remove,
 +	.id_table = au8522_id,
@@ -47620,8 +47628,152 @@ index cb569a6..2731d29 100644
  int cx18_audio_set_io(struct cx18 *cx);
 -void cx18_audio_set_route(struct cx18 *cx, struct v4l2_routing *route);
 -void cx18_audio_set_audio_clock_freq(struct cx18 *cx, u8 freq);
+diff --git a/drivers/media/video/cx18/cx18-av-audio.c b/drivers/media/video/cx18/cx18-av-audio.c
+index a2f0ad5..9e30983 100644
+--- a/drivers/media/video/cx18/cx18-av-audio.c
++++ b/drivers/media/video/cx18/cx18-av-audio.c
+@@ -464,82 +464,76 @@ static void set_mute(struct cx18 *cx, int mute)
+ 	}
+ }
+ 
+-int cx18_av_audio(struct cx18 *cx, unsigned int cmd, void *arg)
++int cx18_av_s_clock_freq(struct v4l2_subdev *sd, u32 freq)
+ {
++	struct cx18 *cx = v4l2_get_subdevdata(sd);
+ 	struct cx18_av_state *state = &cx->av_state;
+-	struct v4l2_control *ctrl = arg;
+ 	int retval;
++	u8 v;
+ 
+-	switch (cmd) {
+-	case VIDIOC_INT_AUDIO_CLOCK_FREQ:
+-	{
+-		u8 v;
+-		if (state->aud_input > CX18_AV_AUDIO_SERIAL2) {
+-			v = cx18_av_read(cx, 0x803) & ~0x10;
+-			cx18_av_write_expect(cx, 0x803, v, v, 0x1f);
+-			cx18_av_write(cx, 0x8d3, 0x1f);
+-		}
+-		v = cx18_av_read(cx, 0x810) | 0x1;
+-		cx18_av_write_expect(cx, 0x810, v, v, 0x0f);
++	if (state->aud_input > CX18_AV_AUDIO_SERIAL2) {
++		v = cx18_av_read(cx, 0x803) & ~0x10;
++		cx18_av_write_expect(cx, 0x803, v, v, 0x1f);
++		cx18_av_write(cx, 0x8d3, 0x1f);
++	}
++	v = cx18_av_read(cx, 0x810) | 0x1;
++	cx18_av_write_expect(cx, 0x810, v, v, 0x0f);
+ 
+-		retval = set_audclk_freq(cx, *(u32 *)arg);
++	retval = set_audclk_freq(cx, freq);
+ 
+-		v = cx18_av_read(cx, 0x810) & ~0x1;
+-		cx18_av_write_expect(cx, 0x810, v, v, 0x0f);
+-		if (state->aud_input > CX18_AV_AUDIO_SERIAL2) {
+-			v = cx18_av_read(cx, 0x803) | 0x10;
+-			cx18_av_write_expect(cx, 0x803, v, v, 0x1f);
+-		}
+-		return retval;
++	v = cx18_av_read(cx, 0x810) & ~0x1;
++	cx18_av_write_expect(cx, 0x810, v, v, 0x0f);
++	if (state->aud_input > CX18_AV_AUDIO_SERIAL2) {
++		v = cx18_av_read(cx, 0x803) | 0x10;
++		cx18_av_write_expect(cx, 0x803, v, v, 0x1f);
+ 	}
++	return retval;
++}
+ 
+-	case VIDIOC_G_CTRL:
+-		switch (ctrl->id) {
+-		case V4L2_CID_AUDIO_VOLUME:
+-			ctrl->value = get_volume(cx);
+-			break;
+-		case V4L2_CID_AUDIO_BASS:
+-			ctrl->value = get_bass(cx);
+-			break;
+-		case V4L2_CID_AUDIO_TREBLE:
+-			ctrl->value = get_treble(cx);
+-			break;
+-		case V4L2_CID_AUDIO_BALANCE:
+-			ctrl->value = get_balance(cx);
+-			break;
+-		case V4L2_CID_AUDIO_MUTE:
+-			ctrl->value = get_mute(cx);
+-			break;
+-		default:
+-			return -EINVAL;
+-		}
++int cx18_av_audio_g_ctrl(struct cx18 *cx, struct v4l2_control *ctrl)
++{
++	switch (ctrl->id) {
++	case V4L2_CID_AUDIO_VOLUME:
++		ctrl->value = get_volume(cx);
+ 		break;
+-
+-	case VIDIOC_S_CTRL:
+-		switch (ctrl->id) {
+-		case V4L2_CID_AUDIO_VOLUME:
+-			set_volume(cx, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_BASS:
+-			set_bass(cx, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_TREBLE:
+-			set_treble(cx, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_BALANCE:
+-			set_balance(cx, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_MUTE:
+-			set_mute(cx, ctrl->value);
+-			break;
+-		default:
+-			return -EINVAL;
+-		}
++	case V4L2_CID_AUDIO_BASS:
++		ctrl->value = get_bass(cx);
++		break;
++	case V4L2_CID_AUDIO_TREBLE:
++		ctrl->value = get_treble(cx);
++		break;
++	case V4L2_CID_AUDIO_BALANCE:
++		ctrl->value = get_balance(cx);
++		break;
++	case V4L2_CID_AUDIO_MUTE:
++		ctrl->value = get_mute(cx);
+ 		break;
+-
+ 	default:
+ 		return -EINVAL;
+ 	}
++	return 0;
++}
+ 
++int cx18_av_audio_s_ctrl(struct cx18 *cx, struct v4l2_control *ctrl)
++{
++	switch (ctrl->id) {
++	case V4L2_CID_AUDIO_VOLUME:
++		set_volume(cx, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_BASS:
++		set_bass(cx, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_TREBLE:
++		set_treble(cx, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_BALANCE:
++		set_balance(cx, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_MUTE:
++		set_mute(cx, ctrl->value);
++		break;
++	default:
++		return -EINVAL;
++	}
+ 	return 0;
+ }
 diff --git a/drivers/media/video/cx18/cx18-av-core.c b/drivers/media/video/cx18/cx18-av-core.c
-index 0b1c84b..21f4be8 100644
+index 0b1c84b..f4dd9d7 100644
 --- a/drivers/media/video/cx18/cx18-av-core.c
 +++ b/drivers/media/video/cx18/cx18-av-core.c
 @@ -22,8 +22,10 @@
@@ -47837,7 +47989,7 @@ index 0b1c84b..21f4be8 100644
  	}
  
  	/* Sets horizontal blanking delay and active lines */
-@@ -325,17 +403,28 @@ void cx18_av_std_setup(struct cx18 *cx)
+@@ -325,18 +403,16 @@ void cx18_av_std_setup(struct cx18 *cx)
  	cx18_av_write(cx, 0x47d, 0xff & sc >> 8);
  	cx18_av_write(cx, 0x47e, 0xff & sc >> 16);
  
@@ -47857,22 +48009,11 @@ index 0b1c84b..21f4be8 100644
  }
  
 -/* ----------------------------------------------------------------------- */
-+static int cx18_av_decode_vbi_line(struct v4l2_subdev *sd,
-+				   struct v4l2_decode_vbi_line *vbi_line)
-+{
-+	struct cx18 *cx = v4l2_get_subdevdata(sd);
-+	return cx18_av_vbi(cx, VIDIOC_INT_DECODE_VBI_LINE, vbi_line);
-+}
-+
-+static int cx18_av_s_clock_freq(struct v4l2_subdev *sd, u32 freq)
-+{
-+	struct cx18 *cx = v4l2_get_subdevdata(sd);
-+	return cx18_av_audio(cx, VIDIOC_INT_AUDIO_CLOCK_FREQ, &freq);
-+}
- 
+-
  static void input_change(struct cx18 *cx)
  {
-@@ -382,17 +471,26 @@ static void input_change(struct cx18 *cx)
+ 	struct cx18_av_state *state = &cx->av_state;
+@@ -382,17 +458,26 @@ static void input_change(struct cx18 *cx)
  	}
  }
  
@@ -47901,7 +48042,7 @@ index 0b1c84b..21f4be8 100644
  
  	if (is_composite) {
  		reg = 0xf0 + (vid_input - CX18_AV_COMPOSITE1);
-@@ -405,8 +503,8 @@ static int set_input(struct cx18 *cx, enum cx18_av_video_input vid_input,
+@@ -405,8 +490,8 @@ static int set_input(struct cx18 *cx, enum cx18_av_video_input vid_input,
  		    luma > CX18_AV_SVIDEO_LUMA8 ||
  		    chroma < CX18_AV_SVIDEO_CHROMA4 ||
  		    chroma > CX18_AV_SVIDEO_CHROMA8) {
@@ -47912,7 +48053,7 @@ index 0b1c84b..21f4be8 100644
  			return -EINVAL;
  		}
  		reg = 0xf0 + ((luma - CX18_AV_SVIDEO_LUMA1) >> 4);
-@@ -431,7 +529,8 @@ static int set_input(struct cx18 *cx, enum cx18_av_video_input vid_input,
+@@ -431,7 +516,8 @@ static int set_input(struct cx18 *cx, enum cx18_av_video_input vid_input,
  	case CX18_AV_AUDIO8: reg &= ~0xc0; reg |= 0x40; break;
  
  	default:
@@ -47922,7 +48063,7 @@ index 0b1c84b..21f4be8 100644
  		return -EINVAL;
  	}
  
-@@ -461,14 +560,118 @@ static int set_input(struct cx18 *cx, enum cx18_av_video_input vid_input,
+@@ -461,14 +547,118 @@ static int set_input(struct cx18 *cx, enum cx18_av_video_input vid_input,
  	return 0;
  }
  
@@ -47934,19 +48075,19 @@ index 0b1c84b..21f4be8 100644
 +	struct cx18 *cx = v4l2_get_subdevdata(sd);
 +	return set_input(cx, route->input, state->aud_input);
 +}
- 
--static int set_v4lstd(struct cx18 *cx)
++
 +static int cx18_av_s_audio_routing(struct v4l2_subdev *sd,
 +				   const struct v4l2_routing *route)
- {
--	struct cx18_av_state *state = &cx->av_state;
++{
 +	struct cx18_av_state *state = to_cx18_av_state(sd);
 +	struct cx18 *cx = v4l2_get_subdevdata(sd);
 +	return set_input(cx, state->vid_input, route->input);
 +}
-+
+ 
+-static int set_v4lstd(struct cx18 *cx)
 +static int cx18_av_g_tuner(struct v4l2_subdev *sd, struct v4l2_tuner *vt)
-+{
+ {
+-	struct cx18_av_state *state = &cx->av_state;
 +	struct cx18_av_state *state = to_cx18_av_state(sd);
 +	struct cx18 *cx = v4l2_get_subdevdata(sd);
 +	u8 vpres;
@@ -48044,7 +48185,7 @@ index 0b1c84b..21f4be8 100644
  	/* First tests should be against specific std */
  	if (state->std == V4L2_STD_NTSC_M_JP) {
  		fmt = 0x2;
-@@ -493,7 +696,7 @@ static int set_v4lstd(struct cx18 *cx)
+@@ -493,7 +683,7 @@ static int set_v4lstd(struct cx18 *cx)
  			fmt = 0xc;
  	}
  
@@ -48053,7 +48194,7 @@ index 0b1c84b..21f4be8 100644
  
  	/* Follow step 9 of section 3.16 in the cx18_av datasheet.
  	   Without this PAL may display a vertical ghosting effect.
-@@ -511,15 +714,22 @@ static int set_v4lstd(struct cx18 *cx)
+@@ -511,15 +701,22 @@ static int set_v4lstd(struct cx18 *cx)
  	return 0;
  }
  
@@ -48080,7 +48221,7 @@ index 0b1c84b..21f4be8 100644
  			return -ERANGE;
  		}
  
-@@ -528,8 +738,8 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+@@ -528,8 +725,8 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
  
  	case V4L2_CID_CONTRAST:
  		if (ctrl->value < 0 || ctrl->value > 127) {
@@ -48091,7 +48232,7 @@ index 0b1c84b..21f4be8 100644
  			return -ERANGE;
  		}
  
-@@ -538,8 +748,8 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+@@ -538,8 +735,8 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
  
  	case V4L2_CID_SATURATION:
  		if (ctrl->value < 0 || ctrl->value > 127) {
@@ -48102,7 +48243,7 @@ index 0b1c84b..21f4be8 100644
  			return -ERANGE;
  		}
  
-@@ -548,8 +758,9 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+@@ -548,8 +745,9 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
  		break;
  
  	case V4L2_CID_HUE:
@@ -48114,7 +48255,13 @@ index 0b1c84b..21f4be8 100644
  			return -ERANGE;
  		}
  
-@@ -566,12 +777,13 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+@@ -561,17 +759,18 @@ static int set_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+ 	case V4L2_CID_AUDIO_TREBLE:
+ 	case V4L2_CID_AUDIO_BALANCE:
+ 	case V4L2_CID_AUDIO_MUTE:
+-		return cx18_av_audio(cx, VIDIOC_S_CTRL, ctrl);
++		return cx18_av_audio_s_ctrl(cx, ctrl);
+ 
  	default:
  		return -EINVAL;
  	}
@@ -48130,7 +48277,12 @@ index 0b1c84b..21f4be8 100644
  	switch (ctrl->id) {
  	case V4L2_CID_BRIGHTNESS:
  		ctrl->value = (s8)cx18_av_read(cx, 0x414) + 128;
-@@ -594,27 +806,59 @@ static int get_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+@@ -590,31 +789,57 @@ static int get_v4lctrl(struct cx18 *cx, struct v4l2_control *ctrl)
+ 	case V4L2_CID_AUDIO_TREBLE:
+ 	case V4L2_CID_AUDIO_BALANCE:
+ 	case V4L2_CID_AUDIO_MUTE:
+-		return cx18_av_audio(cx, VIDIOC_G_CTRL, ctrl);
++		return cx18_av_audio_g_ctrl(cx, ctrl);
  	default:
  		return -EINVAL;
  	}
@@ -48139,11 +48291,15 @@ index 0b1c84b..21f4be8 100644
  }
  
 -/* ----------------------------------------------------------------------- */
-+static int cx18_av_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
-+{
-+	struct cx18_av_state *state = to_cx18_av_state(sd);
- 
+-
 -static int get_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
++static int cx18_av_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
+ {
+-	switch (fmt->type) {
+-	case V4L2_BUF_TYPE_SLICED_VBI_CAPTURE:
+-		return cx18_av_vbi(cx, VIDIOC_G_FMT, fmt);
++	struct cx18_av_state *state = to_cx18_av_state(sd);
++
 +	switch (qc->id) {
 +	case V4L2_CID_BRIGHTNESS:
 +		return v4l2_ctrl_query_fill(qc, 0, 255, 1, 128);
@@ -48166,24 +48322,18 @@ index 0b1c84b..21f4be8 100644
 +	case V4L2_CID_AUDIO_BASS:
 +	case V4L2_CID_AUDIO_TREBLE:
 +		return v4l2_ctrl_query_fill(qc, 0, 65535, 65535 / 100, 32768);
-+	default:
-+		return -EINVAL;
-+	}
-+	return -EINVAL;
-+}
-+
-+static int cx18_av_g_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
- {
-+	struct cx18 *cx = v4l2_get_subdevdata(sd);
-+
- 	switch (fmt->type) {
- 	case V4L2_BUF_TYPE_SLICED_VBI_CAPTURE:
- 		return cx18_av_vbi(cx, VIDIOC_G_FMT, fmt);
  	default:
  		return -EINVAL;
  	}
--
- 	return 0;
++	return -EINVAL;
++}
+ 
+-	return 0;
++static int cx18_av_g_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
++{
++	struct cx18 *cx = v4l2_get_subdevdata(sd);
++
++	return cx18_av_vbi_g_fmt(cx, fmt);
  }
  
 -static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
@@ -48196,7 +48346,7 @@ index 0b1c84b..21f4be8 100644
  	struct v4l2_pix_format *pix;
  	int HSC, VSC, Vsrc, Hsrc, filter, Vlines;
  	int is_50Hz = !(state->std & V4L2_STD_525_60);
-@@ -629,12 +873,26 @@ static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
+@@ -629,12 +854,26 @@ static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
  		Hsrc = (cx18_av_read(cx, 0x472) & 0x3f) << 4;
  		Hsrc |= (cx18_av_read(cx, 0x471) & 0xf0) >> 4;
  
@@ -48227,7 +48377,7 @@ index 0b1c84b..21f4be8 100644
  			return -ERANGE;
  		}
  
-@@ -651,8 +909,9 @@ static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
+@@ -651,8 +890,9 @@ static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
  		else
  			filter = 3;
  
@@ -48239,7 +48389,17 @@ index 0b1c84b..21f4be8 100644
  
  		/* HSCALE=HSC */
  		cx18_av_write(cx, 0x418, HSC & 0xff);
-@@ -674,223 +933,24 @@ static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
+@@ -666,231 +906,32 @@ static int set_v4lfmt(struct cx18 *cx, struct v4l2_format *fmt)
+ 		break;
+ 
+ 	case V4L2_BUF_TYPE_SLICED_VBI_CAPTURE:
+-		return cx18_av_vbi(cx, VIDIOC_S_FMT, fmt);
++		return cx18_av_vbi_s_fmt(cx, fmt);
+ 
+ 	case V4L2_BUF_TYPE_VBI_CAPTURE:
+-		return cx18_av_vbi(cx, VIDIOC_S_FMT, fmt);
++		return cx18_av_vbi_s_fmt(cx, fmt);
+ 
  	default:
  		return -EINVAL;
  	}
@@ -48261,15 +48421,15 @@ index 0b1c84b..21f4be8 100644
 -	case TUNER_SET_TYPE_ADDR:
 -		return 0;
 -	}
-+	struct cx18 *cx = v4l2_get_subdevdata(sd);
- 
+-
 -	if (!state->is_initialized) {
 -		CX18_DEBUG_INFO("cmd %08x triggered fw load\n", cmd);
 -		/* initialize on first use */
 -		state->is_initialized = 1;
 -		cx18_av_initialize(cx);
 -	}
--
++	struct cx18 *cx = v4l2_get_subdevdata(sd);
+ 
 -	switch (cmd) {
 -	case VIDIOC_INT_DECODE_VBI_LINE:
 -		return cx18_av_vbi(cx, cmd, arg);
@@ -48399,7 +48559,7 @@ index 0b1c84b..21f4be8 100644
 -		vt->rxsubchans = val;
 -		vt->audmode = state->audmode;
 -		break;
- 	}
+-	}
 -
 -	case VIDIOC_S_TUNER:
 -	{
@@ -48442,7 +48602,7 @@ index 0b1c84b..21f4be8 100644
 -		cx18_av_write_expect(cx, 0x809, v, v, 0xff);
 -		state->audmode = vt->audmode;
 -		break;
--	}
+ 	}
 -
 -	case VIDIOC_G_FMT:
 -		return get_v4lfmt(cx, (struct v4l2_format *)arg);
@@ -48468,7 +48628,7 @@ index 0b1c84b..21f4be8 100644
  static void log_video_status(struct cx18 *cx)
  {
  	static const char *const fmt_strs[] = {
-@@ -903,36 +963,40 @@ static void log_video_status(struct cx18 *cx)
+@@ -903,36 +944,40 @@ static void log_video_status(struct cx18 *cx)
  	};
  
  	struct cx18_av_state *state = &cx->av_state;
@@ -48522,7 +48682,7 @@ index 0b1c84b..21f4be8 100644
  	u8 download_ctl = cx18_av_read(cx, 0x803);
  	u8 mod_det_stat0 = cx18_av_read(cx, 0x804);
  	u8 mod_det_stat1 = cx18_av_read(cx, 0x805);
-@@ -955,7 +1019,7 @@ static void log_audio_status(struct cx18 *cx)
+@@ -955,7 +1000,7 @@ static void log_audio_status(struct cx18 *cx)
  	case 0xfe: p = "forced mode"; break;
  	default: p = "not defined"; break;
  	}
@@ -48531,7 +48691,7 @@ index 0b1c84b..21f4be8 100644
  
  	switch (mod_det_stat1) {
  	case 0x00: p = "not defined"; break;
-@@ -980,11 +1044,11 @@ static void log_audio_status(struct cx18 *cx)
+@@ -980,11 +1025,11 @@ static void log_audio_status(struct cx18 *cx)
  	case 0xff: p = "no detected audio standard"; break;
  	default: p = "not defined"; break;
  	}
@@ -48548,7 +48708,7 @@ index 0b1c84b..21f4be8 100644
  
  	switch (audio_config >> 4) {
  	case 0x00: p = "undefined"; break;
-@@ -1005,7 +1069,7 @@ static void log_audio_status(struct cx18 *cx)
+@@ -1005,7 +1050,7 @@ static void log_audio_status(struct cx18 *cx)
  	case 0x0f: p = "automatic detection"; break;
  	default: p = "undefined"; break;
  	}
@@ -48557,7 +48717,7 @@ index 0b1c84b..21f4be8 100644
  
  	if ((audio_config >> 4) < 0xF) {
  		switch (audio_config & 0xF) {
-@@ -1019,7 +1083,7 @@ static void log_audio_status(struct cx18 *cx)
+@@ -1019,7 +1064,7 @@ static void log_audio_status(struct cx18 *cx)
  		case 0x07: p = "DUAL3 (AB)"; break;
  		default: p = "undefined";
  		}
@@ -48566,7 +48726,7 @@ index 0b1c84b..21f4be8 100644
  	} else {
  		switch (audio_config & 0xF) {
  		case 0x00: p = "BG"; break;
-@@ -1037,14 +1101,14 @@ static void log_audio_status(struct cx18 *cx)
+@@ -1037,14 +1082,14 @@ static void log_audio_status(struct cx18 *cx)
  		case 0x0f: p = "automatic standard and mode detection"; break;
  		default: p = "undefined"; break;
  		}
@@ -48585,7 +48745,7 @@ index 0b1c84b..21f4be8 100644
  
  	switch (pref_mode & 0xf) {
  	case 0: p = "mono/language A"; break;
-@@ -1057,14 +1121,14 @@ static void log_audio_status(struct cx18 *cx)
+@@ -1057,14 +1102,14 @@ static void log_audio_status(struct cx18 *cx)
  	case 7: p = "language AB"; break;
  	default: p = "undefined"; break;
  	}
@@ -48602,14 +48762,14 @@ index 0b1c84b..21f4be8 100644
  
  		switch (afc0 & 0x7) {
  		case 0: p = "Chroma"; break;
-@@ -1074,6 +1138,131 @@ static void log_audio_status(struct cx18 *cx)
+@@ -1074,6 +1119,131 @@ static void log_audio_status(struct cx18 *cx)
  		case 4: p = "autodetect"; break;
  		default: p = "undefined"; break;
  		}
 -		CX18_INFO("Selected 45 MHz format:    %s\n", p);
 +		CX18_INFO_DEV(sd, "Selected 45 MHz format:    %s\n", p);
-+	}
-+}
+ 	}
+ }
 +
 +static int cx18_av_log_status(struct v4l2_subdev *sd)
 +{
@@ -48632,7 +48792,7 @@ index 0b1c84b..21f4be8 100644
 +	if (cx18_av_dbg_match(&chip->match)) {
 +		chip->ident = state->id;
 +		chip->revision = state->rev;
- 	}
++	}
 +	return 0;
 +}
 +
@@ -48734,9 +48894,9 @@ index 0b1c84b..21f4be8 100644
 +		 "%s %03x", cx->v4l2_dev.name, (state->rev >> 4));
 +	sd->grp_id = CX18_HW_418_AV;
 +	return v4l2_device_register_subdev(&cx->v4l2_dev, sd);
- }
++}
 diff --git a/drivers/media/video/cx18/cx18-av-core.h b/drivers/media/video/cx18/cx18-av-core.h
-index cf68a60..2687a2c 100644
+index cf68a60..c458120 100644
 --- a/drivers/media/video/cx18/cx18-av-core.h
 +++ b/drivers/media/video/cx18/cx18-av-core.h
 @@ -25,6 +25,8 @@
@@ -48807,7 +48967,7 @@ index cf68a60..2687a2c 100644
  /* ----------------------------------------------------------------------- */
  /* cx18_av-core.c 							   */
  int cx18_av_write(struct cx18 *cx, u16 addr, u8 value);
-@@ -310,9 +345,10 @@ u8 cx18_av_read(struct cx18 *cx, u16 addr);
+@@ -310,20 +345,26 @@ u8 cx18_av_read(struct cx18 *cx, u16 addr);
  u32 cx18_av_read4(struct cx18 *cx, u16 addr);
  int cx18_av_and_or(struct cx18 *cx, u16 addr, unsigned mask, u8 value);
  int cx18_av_and_or4(struct cx18 *cx, u16 addr, u32 mask, u32 value);
@@ -48819,6 +48979,24 @@ index cf68a60..2687a2c 100644
  /* ----------------------------------------------------------------------- */
  /* cx18_av-firmware.c                                                      */
  int cx18_av_loadfw(struct cx18 *cx);
+ 
+ /* ----------------------------------------------------------------------- */
+ /* cx18_av-audio.c                                                         */
+-int cx18_av_audio(struct cx18 *cx, unsigned int cmd, void *arg);
++int cx18_av_audio_g_ctrl(struct cx18 *cx, struct v4l2_control *ctrl);
++int cx18_av_audio_s_ctrl(struct cx18 *cx, struct v4l2_control *ctrl);
++int cx18_av_s_clock_freq(struct v4l2_subdev *sd, u32 freq);
+ void cx18_av_audio_set_path(struct cx18 *cx);
+ 
+ /* ----------------------------------------------------------------------- */
+ /* cx18_av-vbi.c                                                           */
+-int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg);
++int cx18_av_decode_vbi_line(struct v4l2_subdev *sd,
++			   struct v4l2_decode_vbi_line *vbi);
++int cx18_av_vbi_g_fmt(struct cx18 *cx, struct v4l2_format *fmt);
++int cx18_av_vbi_s_fmt(struct cx18 *cx, struct v4l2_format *fmt);
+ 
+ #endif
 diff --git a/drivers/media/video/cx18/cx18-av-firmware.c b/drivers/media/video/cx18/cx18-av-firmware.c
 index c64fd0a..49a55cc 100644
 --- a/drivers/media/video/cx18/cx18-av-firmware.c
@@ -48882,7 +49060,7 @@ index c64fd0a..49a55cc 100644
  	return 0;
  }
 diff --git a/drivers/media/video/cx18/cx18-av-vbi.c b/drivers/media/video/cx18/cx18-av-vbi.c
-index 1527ea4..2769983 100644
+index 1527ea4..23b3167 100644
 --- a/drivers/media/video/cx18/cx18-av-vbi.c
 +++ b/drivers/media/video/cx18/cx18-av-vbi.c
 @@ -24,6 +24,52 @@
@@ -48938,74 +49116,293 @@ index 1527ea4..2769983 100644
  static int odd_parity(u8 c)
  {
  	c ^= (c >> 4);
-@@ -136,7 +182,6 @@ int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg)
- 	case VIDIOC_S_FMT:
- 	{
- 		int is_pal = !(state->std & V4L2_STD_525_60);
+@@ -83,188 +129,189 @@ static int decode_vps(u8 *dst, u8 *p)
+ 	return err & 0xf0;
+ }
+ 
+-int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg)
++int cx18_av_vbi_g_fmt(struct cx18 *cx, struct v4l2_format *fmt)
+ {
+ 	struct cx18_av_state *state = &cx->av_state;
+-	struct v4l2_format *fmt;
+ 	struct v4l2_sliced_vbi_format *svbi;
++	static const u16 lcr2vbi[] = {
++		0, V4L2_SLICED_TELETEXT_B, 0,	/* 1 */
++		0, V4L2_SLICED_WSS_625, 0,	/* 4 */
++		V4L2_SLICED_CAPTION_525,	/* 6 */
++		0, 0, V4L2_SLICED_VPS, 0, 0,	/* 9 */
++		0, 0, 0, 0
++	};
++	int is_pal = !(state->std & V4L2_STD_525_60);
++	int i;
+ 
+-	switch (cmd) {
+-	case VIDIOC_G_FMT:
+-	{
+-		static u16 lcr2vbi[] = {
+-			0, V4L2_SLICED_TELETEXT_B, 0,	/* 1 */
+-			0, V4L2_SLICED_WSS_625, 0,	/* 4 */
+-			V4L2_SLICED_CAPTION_525,	/* 6 */
+-			0, 0, V4L2_SLICED_VPS, 0, 0,	/* 9 */
+-			0, 0, 0, 0
+-		};
+-		int is_pal = !(state->std & V4L2_STD_525_60);
+-		int i;
+-
+-		fmt = arg;
+-		if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE)
+-			return -EINVAL;
+-		svbi = &fmt->fmt.sliced;
+-		memset(svbi, 0, sizeof(*svbi));
+-		/* we're done if raw VBI is active */
+-		if ((cx18_av_read(cx, 0x404) & 0x10) == 0)
+-			break;
+-
+-		if (is_pal) {
+-			for (i = 7; i <= 23; i++) {
+-				u8 v = cx18_av_read(cx, 0x424 + i - 7);
+-
+-				svbi->service_lines[0][i] = lcr2vbi[v >> 4];
+-				svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
+-				svbi->service_set |= svbi->service_lines[0][i] |
+-					svbi->service_lines[1][i];
+-			}
+-		} else {
+-			for (i = 10; i <= 21; i++) {
+-				u8 v = cx18_av_read(cx, 0x424 + i - 10);
+-
+-				svbi->service_lines[0][i] = lcr2vbi[v >> 4];
+-				svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
+-				svbi->service_set |= svbi->service_lines[0][i] |
+-					svbi->service_lines[1][i];
+-			}
+-		}
+-		break;
+-	}
++	if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE)
++		return -EINVAL;
++	svbi = &fmt->fmt.sliced;
++	memset(svbi, 0, sizeof(*svbi));
++	/* we're done if raw VBI is active */
++	if ((cx18_av_read(cx, 0x404) & 0x10) == 0)
++		return 0;
+ 
+-	case VIDIOC_S_FMT:
+-	{
+-		int is_pal = !(state->std & V4L2_STD_525_60);
 -		int vbi_offset = is_pal ? 1 : 0;
- 		int i, x;
- 		u8 lcr[24];
- 
-@@ -153,7 +198,7 @@ int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg)
- 			cx18_av_std_setup(cx);
- 
- 			/* VBI Offset */
+-		int i, x;
+-		u8 lcr[24];
+-
+-		fmt = arg;
+-		if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE &&
+-		    fmt->type != V4L2_BUF_TYPE_VBI_CAPTURE)
+-			return -EINVAL;
+-		svbi = &fmt->fmt.sliced;
+-		if (fmt->type == V4L2_BUF_TYPE_VBI_CAPTURE) {
+-			/* raw VBI */
+-			memset(svbi, 0, sizeof(*svbi));
+-
+-			/* Setup standard */
+-			cx18_av_std_setup(cx);
+-
+-			/* VBI Offset */
 -			cx18_av_write(cx, 0x47f, vbi_offset);
-+			cx18_av_write(cx, 0x47f, state->slicer_line_delay);
- 			cx18_av_write(cx, 0x404, 0x2e);
- 			break;
+-			cx18_av_write(cx, 0x404, 0x2e);
+-			break;
++	if (is_pal) {
++		for (i = 7; i <= 23; i++) {
++			u8 v = cx18_av_read(cx, 0x424 + i - 7);
++
++			svbi->service_lines[0][i] = lcr2vbi[v >> 4];
++			svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
++			svbi->service_set |= svbi->service_lines[0][i] |
++				svbi->service_lines[1][i];
++		}
++	} else {
++		for (i = 10; i <= 21; i++) {
++			u8 v = cx18_av_read(cx, 0x424 + i - 10);
++
++			svbi->service_lines[0][i] = lcr2vbi[v >> 4];
++			svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
++			svbi->service_set |= svbi->service_lines[0][i] |
++				svbi->service_lines[1][i];
  		}
-@@ -167,8 +212,9 @@ int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg)
- 		/* Sliced VBI */
- 		cx18_av_write(cx, 0x404, 0x32);	/* Ancillary data */
- 		cx18_av_write(cx, 0x406, 0x13);
++	}
++	return 0;
++}
+ 
+-		for (x = 0; x <= 23; x++)
+-			lcr[x] = 0x00;
++int cx18_av_vbi_s_fmt(struct cx18 *cx, struct v4l2_format *fmt)
++{
++	struct cx18_av_state *state = &cx->av_state;
++	struct v4l2_sliced_vbi_format *svbi;
++	int is_pal = !(state->std & V4L2_STD_525_60);
++	int i, x;
++	u8 lcr[24];
++
++	if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE &&
++			fmt->type != V4L2_BUF_TYPE_VBI_CAPTURE)
++		return -EINVAL;
++	svbi = &fmt->fmt.sliced;
++	if (fmt->type == V4L2_BUF_TYPE_VBI_CAPTURE) {
++		/* raw VBI */
++		memset(svbi, 0, sizeof(*svbi));
+ 
+ 		/* Setup standard */
+ 		cx18_av_std_setup(cx);
+ 
+-		/* Sliced VBI */
+-		cx18_av_write(cx, 0x404, 0x32);	/* Ancillary data */
+-		cx18_av_write(cx, 0x406, 0x13);
 -		cx18_av_write(cx, 0x47f, vbi_offset);
+-
+-		if (is_pal) {
+-			for (i = 0; i <= 6; i++)
+-				svbi->service_lines[0][i] =
+-					svbi->service_lines[1][i] = 0;
+-		} else {
+-			for (i = 0; i <= 9; i++)
+-				svbi->service_lines[0][i] =
+-					svbi->service_lines[1][i] = 0;
+-
+-			for (i = 22; i <= 23; i++)
+-				svbi->service_lines[0][i] =
+-					svbi->service_lines[1][i] = 0;
+-		}
++		/* VBI Offset */
 +		cx18_av_write(cx, 0x47f, state->slicer_line_delay);
++		cx18_av_write(cx, 0x404, 0x2e);
++		return 0;
++	}
  
-+		/* Force impossible lines to 0 */
- 		if (is_pal) {
- 			for (i = 0; i <= 6; i++)
- 				svbi->service_lines[0][i] =
-@@ -183,6 +229,7 @@ int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg)
- 					svbi->service_lines[1][i] = 0;
+-		for (i = 7; i <= 23; i++) {
+-			for (x = 0; x <= 1; x++) {
+-				switch (svbi->service_lines[1-x][i]) {
+-				case V4L2_SLICED_TELETEXT_B:
+-					lcr[i] |= 1 << (4 * x);
+-					break;
+-				case V4L2_SLICED_WSS_625:
+-					lcr[i] |= 4 << (4 * x);
+-					break;
+-				case V4L2_SLICED_CAPTION_525:
+-					lcr[i] |= 6 << (4 * x);
+-					break;
+-				case V4L2_SLICED_VPS:
+-					lcr[i] |= 9 << (4 * x);
+-					break;
+-				}
+-			}
+-		}
++	for (x = 0; x <= 23; x++)
++		lcr[x] = 0x00;
++
++	/* Setup standard */
++	cx18_av_std_setup(cx);
++
++	/* Sliced VBI */
++	cx18_av_write(cx, 0x404, 0x32);	/* Ancillary data */
++	cx18_av_write(cx, 0x406, 0x13);
++	cx18_av_write(cx, 0x47f, state->slicer_line_delay);
++
++	/* Force impossible lines to 0 */
++	if (is_pal) {
++		for (i = 0; i <= 6; i++)
++			svbi->service_lines[0][i] =
++				svbi->service_lines[1][i] = 0;
++	} else {
++		for (i = 0; i <= 9; i++)
++			svbi->service_lines[0][i] =
++				svbi->service_lines[1][i] = 0;
++
++		for (i = 22; i <= 23; i++)
++			svbi->service_lines[0][i] =
++				svbi->service_lines[1][i] = 0;
++	}
+ 
+-		if (is_pal) {
+-			for (x = 1, i = 0x424; i <= 0x434; i++, x++)
+-				cx18_av_write(cx, i, lcr[6 + x]);
+-		} else {
+-			for (x = 1, i = 0x424; i <= 0x430; i++, x++)
+-				cx18_av_write(cx, i, lcr[9 + x]);
+-			for (i = 0x431; i <= 0x434; i++)
+-				cx18_av_write(cx, i, 0);
++	/* Build register values for requested service lines */
++	for (i = 7; i <= 23; i++) {
++		for (x = 0; x <= 1; x++) {
++			switch (svbi->service_lines[1-x][i]) {
++			case V4L2_SLICED_TELETEXT_B:
++				lcr[i] |= 1 << (4 * x);
++				break;
++			case V4L2_SLICED_WSS_625:
++				lcr[i] |= 4 << (4 * x);
++				break;
++			case V4L2_SLICED_CAPTION_525:
++				lcr[i] |= 6 << (4 * x);
++				break;
++			case V4L2_SLICED_VPS:
++				lcr[i] |= 9 << (4 * x);
++				break;
++			}
  		}
++	}
  
-+		/* Build register values for requested service lines */
- 		for (i = 7; i <= 23; i++) {
- 			for (x = 0; x <= 1; x++) {
- 				switch (svbi->service_lines[1-x][i]) {
-@@ -213,54 +260,61 @@ int cx18_av_vbi(struct cx18 *cx, unsigned int cmd, void *arg)
- 		}
- 
- 		cx18_av_write(cx, 0x43c, 0x16);
+-		cx18_av_write(cx, 0x43c, 0x16);
 -		cx18_av_write(cx, 0x474, is_pal ? 0x2a : 0x22);
-+		/* FIXME - should match vblank set in cx18_av_std_setup() */
-+		cx18_av_write(cx, 0x474, is_pal ? 0x2a : 26);
- 		break;
+-		break;
++	if (is_pal) {
++		for (x = 1, i = 0x424; i <= 0x434; i++, x++)
++			cx18_av_write(cx, i, lcr[6 + x]);
++	} else {
++		for (x = 1, i = 0x424; i <= 0x430; i++, x++)
++			cx18_av_write(cx, i, lcr[9 + x]);
++		for (i = 0x431; i <= 0x434; i++)
++			cx18_av_write(cx, i, 0);
  	}
  
- 	case VIDIOC_INT_DECODE_VBI_LINE:
- 	{
- 		struct v4l2_decode_vbi_line *vbi = arg;
+-	case VIDIOC_INT_DECODE_VBI_LINE:
+-	{
+-		struct v4l2_decode_vbi_line *vbi = arg;
 -		u8 *p = vbi->p;
 -		int id1, id2, l, err = 0;
--
++	cx18_av_write(cx, 0x43c, 0x16);
++	/* FIXME - should match vblank set in cx18_av_std_setup() */
++	cx18_av_write(cx, 0x474, is_pal ? 0x2a : 26);
++	return 0;
++}
++
++int cx18_av_decode_vbi_line(struct v4l2_subdev *sd,
++				   struct v4l2_decode_vbi_line *vbi)
++{
++	struct cx18 *cx = v4l2_get_subdevdata(sd);
++	struct cx18_av_state *state = &cx->av_state;
++	struct vbi_anc_data *anc = (struct vbi_anc_data *)vbi->p;
++	u8 *p;
++	int did, sdid, l, err = 0;
++
++	/*
++	 * Check for the ancillary data header for sliced VBI
++	 */
++	if (anc->preamble[0] ||
++			anc->preamble[1] != 0xff || anc->preamble[2] != 0xff ||
++			(anc->did != sliced_vbi_did[0] &&
++			 anc->did != sliced_vbi_did[1])) {
++		vbi->line = vbi->type = 0;
++		return 0;
++	}
+ 
 -		if (p[0] || p[1] != 0xff || p[2] != 0xff ||
 -		    (p[3] != 0x55 && p[3] != 0x91)) {
-+		u8 *p;
-+		struct vbi_anc_data *anc = (struct vbi_anc_data *) vbi->p;
-+		int did, sdid, l, err = 0;
-+
-+		/*
-+		 * Check for the ancillary data header for sliced VBI
-+		 */
-+		if (anc->preamble[0] ||
-+		    anc->preamble[1] != 0xff || anc->preamble[2] != 0xff ||
-+		    (anc->did != sliced_vbi_did[0] &&
-+		     anc->did != sliced_vbi_did[1])) {
- 			vbi->line = vbi->type = 0;
- 			break;
- 		}
+-			vbi->line = vbi->type = 0;
+-			break;
+-		}
++	did = anc->did;
++	sdid = anc->sdid & 0xf;
++	l = anc->idid[0] & 0x3f;
++	l += state->slicer_line_offset;
++	p = anc->payload;
  
 -		p += 4;
 -		id1 = p[-1];
@@ -49013,49 +49410,62 @@ index 1527ea4..2769983 100644
 -		l = p[2] & 0x3f;
 -		l += state->vbi_line_offset;
 -		p += 4;
-+		did = anc->did;
-+		sdid = anc->sdid & 0xf;
-+		l = anc->idid[0] & 0x3f;
-+		l += state->slicer_line_offset;
-+		p = anc->payload;
- 
+-
 -		switch (id2) {
-+		/* Decode the SDID set by the slicer */
-+		switch (sdid) {
- 		case 1:
+-		case 1:
 -			id2 = V4L2_SLICED_TELETEXT_B;
-+			sdid = V4L2_SLICED_TELETEXT_B;
- 			break;
- 		case 4:
+-			break;
+-		case 4:
 -			id2 = V4L2_SLICED_WSS_625;
-+			sdid = V4L2_SLICED_WSS_625;
- 			break;
- 		case 6:
+-			break;
+-		case 6:
 -			id2 = V4L2_SLICED_CAPTION_525;
-+			sdid = V4L2_SLICED_CAPTION_525;
- 			err = !odd_parity(p[0]) || !odd_parity(p[1]);
- 			break;
- 		case 9:
+-			err = !odd_parity(p[0]) || !odd_parity(p[1]);
+-			break;
+-		case 9:
 -			id2 = V4L2_SLICED_VPS;
-+			sdid = V4L2_SLICED_VPS;
- 			if (decode_vps(p, p) != 0)
- 				err = 1;
- 			break;
- 		default:
+-			if (decode_vps(p, p) != 0)
+-				err = 1;
+-			break;
+-		default:
 -			id2 = 0;
-+			sdid = 0;
++	/* Decode the SDID set by the slicer */
++	switch (sdid) {
++	case 1:
++		sdid = V4L2_SLICED_TELETEXT_B;
++		break;
++	case 4:
++		sdid = V4L2_SLICED_WSS_625;
++		break;
++	case 6:
++		sdid = V4L2_SLICED_CAPTION_525;
++		err = !odd_parity(p[0]) || !odd_parity(p[1]);
++		break;
++	case 9:
++		sdid = V4L2_SLICED_VPS;
++		if (decode_vps(p, p) != 0)
  			err = 1;
- 			break;
- 		}
- 
+-			break;
+-		}
+-
 -		vbi->type = err ? 0 : id2;
-+		vbi->type = err ? 0 : sdid;
- 		vbi->line = err ? 0 : l;
+-		vbi->line = err ? 0 : l;
 -		vbi->is_second_field = err ? 0 : (id1 == 0x55);
-+		vbi->is_second_field = err ? 0 : (did == sliced_vbi_did[1]);
- 		vbi->p = p;
+-		vbi->p = p;
  		break;
+-	}
++	default:
++		sdid = 0;
++		err = 1;
++		break;
  	}
+ 
++	vbi->type = err ? 0 : sdid;
++	vbi->line = err ? 0 : l;
++	vbi->is_second_field = err ? 0 : (did == sliced_vbi_did[1]);
++	vbi->p = p;
+ 	return 0;
+ }
 diff --git a/drivers/media/video/cx18/cx18-cards.c b/drivers/media/video/cx18/cx18-cards.c
 index e274043..9bc2218 100644
 --- a/drivers/media/video/cx18/cx18-cards.c
@@ -55180,8 +55590,148 @@ index 0000000..d26ae4b
 + * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 + */
 +extern void netup_initialize(struct cx23885_dev *dev);
+diff --git a/drivers/media/video/cx25840/cx25840-audio.c b/drivers/media/video/cx25840/cx25840-audio.c
+index d199d80..93d74be 100644
+--- a/drivers/media/video/cx25840/cx25840-audio.c
++++ b/drivers/media/video/cx25840/cx25840-audio.c
+@@ -363,75 +363,74 @@ static void set_mute(struct i2c_client *client, int mute)
+ 	}
+ }
+ 
+-int cx25840_audio(struct i2c_client *client, unsigned int cmd, void *arg)
++int cx25840_s_clock_freq(struct v4l2_subdev *sd, u32 freq)
+ {
+-	struct cx25840_state *state = to_state(i2c_get_clientdata(client));
+-	struct v4l2_control *ctrl = arg;
++	struct i2c_client *client = v4l2_get_subdevdata(sd);
++	struct cx25840_state *state = to_state(sd);
+ 	int retval;
+ 
+-	switch (cmd) {
+-	case VIDIOC_INT_AUDIO_CLOCK_FREQ:
+-		if (!state->is_cx25836)
+-			cx25840_and_or(client, 0x810, ~0x1, 1);
+-		if (state->aud_input != CX25840_AUDIO_SERIAL) {
+-			cx25840_and_or(client, 0x803, ~0x10, 0);
+-			cx25840_write(client, 0x8d3, 0x1f);
+-		}
+-		retval = set_audclk_freq(client, *(u32 *)arg);
+-		if (state->aud_input != CX25840_AUDIO_SERIAL) {
+-			cx25840_and_or(client, 0x803, ~0x10, 0x10);
+-		}
+-		if (!state->is_cx25836)
+-			cx25840_and_or(client, 0x810, ~0x1, 0);
+-		return retval;
+-
+-	case VIDIOC_G_CTRL:
+-		switch (ctrl->id) {
+-		case V4L2_CID_AUDIO_VOLUME:
+-			ctrl->value = get_volume(client);
+-			break;
+-		case V4L2_CID_AUDIO_BASS:
+-			ctrl->value = get_bass(client);
+-			break;
+-		case V4L2_CID_AUDIO_TREBLE:
+-			ctrl->value = get_treble(client);
+-			break;
+-		case V4L2_CID_AUDIO_BALANCE:
+-			ctrl->value = get_balance(client);
+-			break;
+-		case V4L2_CID_AUDIO_MUTE:
+-			ctrl->value = get_mute(client);
+-			break;
+-		default:
+-			return -EINVAL;
+-		}
+-		break;
++	if (!state->is_cx25836)
++		cx25840_and_or(client, 0x810, ~0x1, 1);
++	if (state->aud_input != CX25840_AUDIO_SERIAL) {
++		cx25840_and_or(client, 0x803, ~0x10, 0);
++		cx25840_write(client, 0x8d3, 0x1f);
++	}
++	retval = set_audclk_freq(client, freq);
++	if (state->aud_input != CX25840_AUDIO_SERIAL)
++		cx25840_and_or(client, 0x803, ~0x10, 0x10);
++	if (!state->is_cx25836)
++		cx25840_and_or(client, 0x810, ~0x1, 0);
++	return retval;
++}
+ 
+-	case VIDIOC_S_CTRL:
+-		switch (ctrl->id) {
+-		case V4L2_CID_AUDIO_VOLUME:
+-			set_volume(client, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_BASS:
+-			set_bass(client, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_TREBLE:
+-			set_treble(client, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_BALANCE:
+-			set_balance(client, ctrl->value);
+-			break;
+-		case V4L2_CID_AUDIO_MUTE:
+-			set_mute(client, ctrl->value);
+-			break;
+-		default:
+-			return -EINVAL;
+-		}
+-		break;
++int cx25840_audio_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
++{
++	struct i2c_client *client = v4l2_get_subdevdata(sd);
+ 
++	switch (ctrl->id) {
++	case V4L2_CID_AUDIO_VOLUME:
++		ctrl->value = get_volume(client);
++		break;
++	case V4L2_CID_AUDIO_BASS:
++		ctrl->value = get_bass(client);
++		break;
++	case V4L2_CID_AUDIO_TREBLE:
++		ctrl->value = get_treble(client);
++		break;
++	case V4L2_CID_AUDIO_BALANCE:
++		ctrl->value = get_balance(client);
++		break;
++	case V4L2_CID_AUDIO_MUTE:
++		ctrl->value = get_mute(client);
++		break;
+ 	default:
+ 		return -EINVAL;
+ 	}
++	return 0;
++}
+ 
++int cx25840_audio_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
++{
++	struct i2c_client *client = v4l2_get_subdevdata(sd);
++
++	switch (ctrl->id) {
++	case V4L2_CID_AUDIO_VOLUME:
++		set_volume(client, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_BASS:
++		set_bass(client, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_TREBLE:
++		set_treble(client, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_BALANCE:
++		set_balance(client, ctrl->value);
++		break;
++	case V4L2_CID_AUDIO_MUTE:
++		set_mute(client, ctrl->value);
++		break;
++	default:
++		return -EINVAL;
++	}
+ 	return 0;
+ }
 diff --git a/drivers/media/video/cx25840/cx25840-core.c b/drivers/media/video/cx25840/cx25840-core.c
-index 25eb3be..a9b8e52 100644
+index 25eb3be..737ee4e 100644
 --- a/drivers/media/video/cx25840/cx25840-core.c
 +++ b/drivers/media/video/cx25840/cx25840-core.c
 @@ -39,7 +39,7 @@
@@ -55218,7 +55768,51 @@ index 25eb3be..a9b8e52 100644
  			v4l_err(client, "invalid hue setting %d\n", ctrl->value);
  			return -ERANGE;
  		}
-@@ -1101,6 +1098,16 @@ static void log_audio_status(struct i2c_client *client)
+@@ -778,7 +775,7 @@ static int cx25840_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
+ 	case V4L2_CID_AUDIO_MUTE:
+ 		if (state->is_cx25836)
+ 			return -EINVAL;
+-		return cx25840_audio(client, VIDIOC_S_CTRL, ctrl);
++		return cx25840_audio_s_ctrl(sd, ctrl);
+ 
+ 	default:
+ 		return -EINVAL;
+@@ -815,7 +812,7 @@ static int cx25840_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
+ 	case V4L2_CID_AUDIO_MUTE:
+ 		if (state->is_cx25836)
+ 			return -EINVAL;
+-		return cx25840_audio(client, VIDIOC_G_CTRL, ctrl);
++		return cx25840_audio_g_ctrl(sd, ctrl);
+ 	default:
+ 		return -EINVAL;
+ 	}
+@@ -827,11 +824,9 @@ static int cx25840_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
+ 
+ static int cx25840_g_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
+ {
+-	struct i2c_client *client = v4l2_get_subdevdata(sd);
+-
+ 	switch (fmt->type) {
+ 	case V4L2_BUF_TYPE_SLICED_VBI_CAPTURE:
+-		return cx25840_vbi(client, VIDIOC_G_FMT, fmt);
++		return cx25840_vbi_g_fmt(sd, fmt);
+ 	default:
+ 		return -EINVAL;
+ 	}
+@@ -893,10 +888,10 @@ static int cx25840_s_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
+ 		break;
+ 
+ 	case V4L2_BUF_TYPE_SLICED_VBI_CAPTURE:
+-		return cx25840_vbi(client, VIDIOC_S_FMT, fmt);
++		return cx25840_vbi_s_fmt(sd, fmt);
+ 
+ 	case V4L2_BUF_TYPE_VBI_CAPTURE:
+-		return cx25840_vbi(client, VIDIOC_S_FMT, fmt);
++		return cx25840_vbi_s_fmt(sd, fmt);
+ 
+ 	default:
+ 		return -EINVAL;
+@@ -1101,6 +1096,16 @@ static void log_audio_status(struct i2c_client *client)
  
  /* ----------------------------------------------------------------------- */
  
@@ -55235,7 +55829,28 @@ index 25eb3be..a9b8e52 100644
  static int cx25840_init(struct v4l2_subdev *sd, u32 val)
  {
  	struct cx25840_state *state = to_state(sd);
-@@ -1195,10 +1202,12 @@ static int cx25840_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
+@@ -1146,20 +1151,6 @@ static int cx25840_s_register(struct v4l2_subdev *sd, struct v4l2_dbg_register *
+ }
+ #endif
+ 
+-static int cx25840_decode_vbi_line(struct v4l2_subdev *sd, struct v4l2_decode_vbi_line *vbi)
+-{
+-	struct i2c_client *client = v4l2_get_subdevdata(sd);
+-
+-	return cx25840_vbi(client, VIDIOC_INT_DECODE_VBI_LINE, vbi);
+-}
+-
+-static int cx25840_s_clock_freq(struct v4l2_subdev *sd, u32 freq)
+-{
+-	struct i2c_client *client = v4l2_get_subdevdata(sd);
+-
+-	return cx25840_audio(client, VIDIOC_INT_AUDIO_CLOCK_FREQ, &freq);
+-}
+-
+ static int cx25840_s_stream(struct v4l2_subdev *sd, int enable)
+ {
+ 	struct cx25840_state *state = to_state(sd);
+@@ -1195,10 +1186,12 @@ static int cx25840_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
  
  	switch (qc->id) {
  	case V4L2_CID_BRIGHTNESS:
@@ -55249,7 +55864,7 @@ index 25eb3be..a9b8e52 100644
  	default:
  		break;
  	}
-@@ -1210,10 +1219,11 @@ static int cx25840_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
+@@ -1210,10 +1203,11 @@ static int cx25840_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
  		return v4l2_ctrl_query_fill(qc, 0, 65535,
  				65535 / 100, state->default_volume);
  	case V4L2_CID_AUDIO_MUTE:
@@ -55262,7 +55877,7 @@ index 25eb3be..a9b8e52 100644
  	default:
  		return -EINVAL;
  	}
-@@ -1380,19 +1390,6 @@ static int cx25840_log_status(struct v4l2_subdev *sd)
+@@ -1380,19 +1374,6 @@ static int cx25840_log_status(struct v4l2_subdev *sd)
  	return 0;
  }
  
@@ -55282,7 +55897,7 @@ index 25eb3be..a9b8e52 100644
  /* ----------------------------------------------------------------------- */
  
  static const struct v4l2_subdev_core_ops cx25840_core_ops = {
-@@ -1528,8 +1525,6 @@ MODULE_DEVICE_TABLE(i2c, cx25840_id);
+@@ -1528,8 +1509,6 @@ MODULE_DEVICE_TABLE(i2c, cx25840_id);
  
  static struct v4l2_i2c_driver_data v4l2_i2c_data = {
  	.name = "cx25840",
@@ -55291,6 +55906,380 @@ index 25eb3be..a9b8e52 100644
  	.probe = cx25840_probe,
  	.remove = cx25840_remove,
  	.id_table = cx25840_id,
+diff --git a/drivers/media/video/cx25840/cx25840-core.h b/drivers/media/video/cx25840/cx25840-core.h
+index be05582..9ad0eb8 100644
+--- a/drivers/media/video/cx25840/cx25840-core.h
++++ b/drivers/media/video/cx25840/cx25840-core.h
+@@ -75,11 +75,15 @@ int cx25840_loadfw(struct i2c_client *client);
+ 
+ /* ----------------------------------------------------------------------- */
+ /* cx25850-audio.c                                                         */
+-int cx25840_audio(struct i2c_client *client, unsigned int cmd, void *arg);
+ void cx25840_audio_set_path(struct i2c_client *client);
++int cx25840_s_clock_freq(struct v4l2_subdev *sd, u32 freq);
++int cx25840_audio_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl);
++int cx25840_audio_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl);
+ 
+ /* ----------------------------------------------------------------------- */
+ /* cx25850-vbi.c                                                           */
+-int cx25840_vbi(struct i2c_client *client, unsigned int cmd, void *arg);
++int cx25840_vbi_s_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt);
++int cx25840_vbi_g_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt);
++int cx25840_decode_vbi_line(struct v4l2_subdev *sd, struct v4l2_decode_vbi_line *vbi);
+ 
+ #endif
+diff --git a/drivers/media/video/cx25840/cx25840-vbi.c b/drivers/media/video/cx25840/cx25840-vbi.c
+index 03f09b2..35f6592 100644
+--- a/drivers/media/video/cx25840/cx25840-vbi.c
++++ b/drivers/media/video/cx25840/cx25840-vbi.c
+@@ -82,199 +82,181 @@ static int decode_vps(u8 * dst, u8 * p)
+ 	return err & 0xf0;
+ }
+ 
+-int cx25840_vbi(struct i2c_client *client, unsigned int cmd, void *arg)
++int cx25840_vbi_g_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
+ {
+-	struct cx25840_state *state = to_state(i2c_get_clientdata(client));
+-	struct v4l2_format *fmt;
++	struct i2c_client *client = v4l2_get_subdevdata(sd);
++	struct cx25840_state *state = to_state(sd);
+ 	struct v4l2_sliced_vbi_format *svbi;
++	static const u16 lcr2vbi[] = {
++		0, V4L2_SLICED_TELETEXT_B, 0,	/* 1 */
++		0, V4L2_SLICED_WSS_625, 0,	/* 4 */
++		V4L2_SLICED_CAPTION_525,	/* 6 */
++		0, 0, V4L2_SLICED_VPS, 0, 0,	/* 9 */
++		0, 0, 0, 0
++	};
++	int is_pal = !(state->std & V4L2_STD_525_60);
++	int i;
+ 
+-	switch (cmd) {
+-	case VIDIOC_G_FMT:
+-	{
+-		static u16 lcr2vbi[] = {
+-			0, V4L2_SLICED_TELETEXT_B, 0,	/* 1 */
+-			0, V4L2_SLICED_WSS_625, 0,	/* 4 */
+-			V4L2_SLICED_CAPTION_525,	/* 6 */
+-			0, 0, V4L2_SLICED_VPS, 0, 0,	/* 9 */
+-			0, 0, 0, 0
+-		};
+-		int is_pal = !(state->std & V4L2_STD_525_60);
+-		int i;
+-
+-		fmt = arg;
+-		if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE)
+-			return -EINVAL;
+-		svbi = &fmt->fmt.sliced;
+-		memset(svbi, 0, sizeof(*svbi));
+-		/* we're done if raw VBI is active */
+-		if ((cx25840_read(client, 0x404) & 0x10) == 0)
+-			break;
++	if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE)
++		return -EINVAL;
++	svbi = &fmt->fmt.sliced;
++	memset(svbi, 0, sizeof(*svbi));
++	/* we're done if raw VBI is active */
++	if ((cx25840_read(client, 0x404) & 0x10) == 0)
++		return 0;
+ 
+-		if (is_pal) {
+-			for (i = 7; i <= 23; i++) {
+-				u8 v = cx25840_read(client, 0x424 + i - 7);
++	if (is_pal) {
++		for (i = 7; i <= 23; i++) {
++			u8 v = cx25840_read(client, 0x424 + i - 7);
+ 
+-				svbi->service_lines[0][i] = lcr2vbi[v >> 4];
+-				svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
+-				svbi->service_set |=
+-					svbi->service_lines[0][i] | svbi->service_lines[1][i];
+-			}
++			svbi->service_lines[0][i] = lcr2vbi[v >> 4];
++			svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
++			svbi->service_set |= svbi->service_lines[0][i] |
++					     svbi->service_lines[1][i];
+ 		}
+-		else {
+-			for (i = 10; i <= 21; i++) {
+-				u8 v = cx25840_read(client, 0x424 + i - 10);
+-
+-				svbi->service_lines[0][i] = lcr2vbi[v >> 4];
+-				svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
+-				svbi->service_set |=
+-					svbi->service_lines[0][i] | svbi->service_lines[1][i];
+-			}
++	} else {
++		for (i = 10; i <= 21; i++) {
++			u8 v = cx25840_read(client, 0x424 + i - 10);
++
++			svbi->service_lines[0][i] = lcr2vbi[v >> 4];
++			svbi->service_lines[1][i] = lcr2vbi[v & 0xf];
++			svbi->service_set |= svbi->service_lines[0][i] |
++					     svbi->service_lines[1][i];
+ 		}
+-		break;
+ 	}
++	return 0;
++}
+ 
+-	case VIDIOC_S_FMT:
+-	{
+-		int is_pal = !(state->std & V4L2_STD_525_60);
+-		int vbi_offset = is_pal ? 1 : 0;
+-		int i, x;
+-		u8 lcr[24];
+-
+-		fmt = arg;
+-		if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE &&
+-		    fmt->type != V4L2_BUF_TYPE_VBI_CAPTURE)
+-			return -EINVAL;
+-		svbi = &fmt->fmt.sliced;
+-		if (fmt->type == V4L2_BUF_TYPE_VBI_CAPTURE) {
+-			/* raw VBI */
+-			memset(svbi, 0, sizeof(*svbi));
+-
+-			/* Setup standard */
+-			cx25840_std_setup(client);
+-
+-			/* VBI Offset */
+-			cx25840_write(client, 0x47f, vbi_offset);
+-			cx25840_write(client, 0x404, 0x2e);
+-			break;
+-		}
+-
+-		for (x = 0; x <= 23; x++)
+-			lcr[x] = 0x00;
++int cx25840_vbi_s_fmt(struct v4l2_subdev *sd, struct v4l2_format *fmt)
++{
++	struct i2c_client *client = v4l2_get_subdevdata(sd);
++	struct cx25840_state *state = to_state(sd);
++	struct v4l2_sliced_vbi_format *svbi;
++	int is_pal = !(state->std & V4L2_STD_525_60);
++	int vbi_offset = is_pal ? 1 : 0;
++	int i, x;
++	u8 lcr[24];
++
++	if (fmt->type != V4L2_BUF_TYPE_SLICED_VBI_CAPTURE &&
++			fmt->type != V4L2_BUF_TYPE_VBI_CAPTURE)
++		return -EINVAL;
++	svbi = &fmt->fmt.sliced;
++	if (fmt->type == V4L2_BUF_TYPE_VBI_CAPTURE) {
++		/* raw VBI */
++		memset(svbi, 0, sizeof(*svbi));
+ 
+ 		/* Setup standard */
+ 		cx25840_std_setup(client);
+ 
+-		/* Sliced VBI */
+-		cx25840_write(client, 0x404, 0x32);	/* Ancillary data */
+-		cx25840_write(client, 0x406, 0x13);
++		/* VBI Offset */
+ 		cx25840_write(client, 0x47f, vbi_offset);
++		cx25840_write(client, 0x404, 0x2e);
++		return 0;
++	}
+ 
+-		if (is_pal) {
+-			for (i = 0; i <= 6; i++)
+-				svbi->service_lines[0][i] =
+-					svbi->service_lines[1][i] = 0;
+-		} else {
+-			for (i = 0; i <= 9; i++)
+-				svbi->service_lines[0][i] =
+-					svbi->service_lines[1][i] = 0;
+-
+-			for (i = 22; i <= 23; i++)
+-				svbi->service_lines[0][i] =
+-					svbi->service_lines[1][i] = 0;
+-		}
+-
+-		for (i = 7; i <= 23; i++) {
+-			for (x = 0; x <= 1; x++) {
+-				switch (svbi->service_lines[1-x][i]) {
+-				case V4L2_SLICED_TELETEXT_B:
+-					lcr[i] |= 1 << (4 * x);
+-					break;
+-				case V4L2_SLICED_WSS_625:
+-					lcr[i] |= 4 << (4 * x);
+-					break;
+-				case V4L2_SLICED_CAPTION_525:
+-					lcr[i] |= 6 << (4 * x);
+-					break;
+-				case V4L2_SLICED_VPS:
+-					lcr[i] |= 9 << (4 * x);
+-					break;
+-				}
+-			}
+-		}
++	for (x = 0; x <= 23; x++)
++		lcr[x] = 0x00;
++
++	/* Setup standard */
++	cx25840_std_setup(client);
++
++	/* Sliced VBI */
++	cx25840_write(client, 0x404, 0x32);	/* Ancillary data */
++	cx25840_write(client, 0x406, 0x13);
++	cx25840_write(client, 0x47f, vbi_offset);
++
++	if (is_pal) {
++		for (i = 0; i <= 6; i++)
++			svbi->service_lines[0][i] =
++				svbi->service_lines[1][i] = 0;
++	} else {
++		for (i = 0; i <= 9; i++)
++			svbi->service_lines[0][i] =
++				svbi->service_lines[1][i] = 0;
++
++		for (i = 22; i <= 23; i++)
++			svbi->service_lines[0][i] =
++				svbi->service_lines[1][i] = 0;
++	}
+ 
+-		if (is_pal) {
+-			for (x = 1, i = 0x424; i <= 0x434; i++, x++) {
+-				cx25840_write(client, i, lcr[6 + x]);
+-			}
+-		}
+-		else {
+-			for (x = 1, i = 0x424; i <= 0x430; i++, x++) {
+-				cx25840_write(client, i, lcr[9 + x]);
+-			}
+-			for (i = 0x431; i <= 0x434; i++) {
+-				cx25840_write(client, i, 0);
++	for (i = 7; i <= 23; i++) {
++		for (x = 0; x <= 1; x++) {
++			switch (svbi->service_lines[1-x][i]) {
++			case V4L2_SLICED_TELETEXT_B:
++				lcr[i] |= 1 << (4 * x);
++				break;
++			case V4L2_SLICED_WSS_625:
++				lcr[i] |= 4 << (4 * x);
++				break;
++			case V4L2_SLICED_CAPTION_525:
++				lcr[i] |= 6 << (4 * x);
++				break;
++			case V4L2_SLICED_VPS:
++				lcr[i] |= 9 << (4 * x);
++				break;
+ 			}
+ 		}
++	}
+ 
+-		cx25840_write(client, 0x43c, 0x16);
+-
+-		if (is_pal) {
+-			cx25840_write(client, 0x474, 0x2a);
+-		} else {
+-			cx25840_write(client, 0x474, 0x22);
+-		}
+-		break;
++	if (is_pal) {
++		for (x = 1, i = 0x424; i <= 0x434; i++, x++)
++			cx25840_write(client, i, lcr[6 + x]);
++	} else {
++		for (x = 1, i = 0x424; i <= 0x430; i++, x++)
++			cx25840_write(client, i, lcr[9 + x]);
++		for (i = 0x431; i <= 0x434; i++)
++			cx25840_write(client, i, 0);
+ 	}
+ 
+-	case VIDIOC_INT_DECODE_VBI_LINE:
+-	{
+-		struct v4l2_decode_vbi_line *vbi = arg;
+-		u8 *p = vbi->p;
+-		int id1, id2, l, err = 0;
++	cx25840_write(client, 0x43c, 0x16);
++	cx25840_write(client, 0x474, is_pal ? 0x2a : 0x22);
++	return 0;
++}
+ 
+-		if (p[0] || p[1] != 0xff || p[2] != 0xff ||
+-		    (p[3] != 0x55 && p[3] != 0x91)) {
+-			vbi->line = vbi->type = 0;
+-			break;
+-		}
++int cx25840_decode_vbi_line(struct v4l2_subdev *sd, struct v4l2_decode_vbi_line *vbi)
++{
++	struct cx25840_state *state = to_state(sd);
++	u8 *p = vbi->p;
++	int id1, id2, l, err = 0;
++
++	if (p[0] || p[1] != 0xff || p[2] != 0xff ||
++			(p[3] != 0x55 && p[3] != 0x91)) {
++		vbi->line = vbi->type = 0;
++		return 0;
++	}
+ 
+-		p += 4;
+-		id1 = p[-1];
+-		id2 = p[0] & 0xf;
+-		l = p[2] & 0x3f;
+-		l += state->vbi_line_offset;
+-		p += 4;
++	p += 4;
++	id1 = p[-1];
++	id2 = p[0] & 0xf;
++	l = p[2] & 0x3f;
++	l += state->vbi_line_offset;
++	p += 4;
+ 
+-		switch (id2) {
+-		case 1:
+-			id2 = V4L2_SLICED_TELETEXT_B;
+-			break;
+-		case 4:
+-			id2 = V4L2_SLICED_WSS_625;
+-			break;
+-		case 6:
+-			id2 = V4L2_SLICED_CAPTION_525;
+-			err = !odd_parity(p[0]) || !odd_parity(p[1]);
+-			break;
+-		case 9:
+-			id2 = V4L2_SLICED_VPS;
+-			if (decode_vps(p, p) != 0) {
+-				err = 1;
+-			}
+-			break;
+-		default:
+-			id2 = 0;
++	switch (id2) {
++	case 1:
++		id2 = V4L2_SLICED_TELETEXT_B;
++		break;
++	case 4:
++		id2 = V4L2_SLICED_WSS_625;
++		break;
++	case 6:
++		id2 = V4L2_SLICED_CAPTION_525;
++		err = !odd_parity(p[0]) || !odd_parity(p[1]);
++		break;
++	case 9:
++		id2 = V4L2_SLICED_VPS;
++		if (decode_vps(p, p) != 0)
+ 			err = 1;
+-			break;
+-		}
+-
+-		vbi->type = err ? 0 : id2;
+-		vbi->line = err ? 0 : l;
+-		vbi->is_second_field = err ? 0 : (id1 == 0x55);
+-		vbi->p = p;
+ 		break;
+-	}
++	default:
++		id2 = 0;
++		err = 1;
++		break;
+ 	}
+ 
++	vbi->type = err ? 0 : id2;
++	vbi->line = err ? 0 : l;
++	vbi->is_second_field = err ? 0 : (id1 == 0x55);
++	vbi->p = p;
+ 	return 0;
+ }
 diff --git a/drivers/media/video/cx88/Kconfig b/drivers/media/video/cx88/Kconfig
 index 2d250a2..4995298 100644
 --- a/drivers/media/video/cx88/Kconfig
@@ -76047,7 +77036,7 @@ index 36abd2a..66e6eb5 100644
  	if (itv && (itv->v4l2_cap & V4L2_CAP_VIDEO_OUTPUT)) {
  		if (unregister_framebuffer(&itv->osd_info->ivtvfb_info)) {
 diff --git a/drivers/media/video/ks0127.c b/drivers/media/video/ks0127.c
-index bae2d2b..4b3a116 100644
+index bae2d2b..841024b 100644
 --- a/drivers/media/video/ks0127.c
 +++ b/drivers/media/video/ks0127.c
 @@ -39,19 +39,20 @@
@@ -76160,7 +77149,7 @@ index bae2d2b..4b3a116 100644
  }
  
  
-@@ -355,439 +360,362 @@ static void ks0127_and_or(struct i2c_client *client, u8 reg, u8 and_v, u8 or_v)
+@@ -355,439 +360,363 @@ static void ks0127_and_or(struct i2c_client *client, u8 reg, u8 and_v, u8 or_v)
  /****************************************************************************
  * ks0127 private api
  ****************************************************************************/
@@ -76249,7 +77238,7 @@ index bae2d2b..4b3a116 100644
 +	case KS_INPUT_COMPOSITE_5:
 +	case KS_INPUT_COMPOSITE_6:
 +		v4l2_dbg(1, debug, sd,
-+			"VIDIOC_S_INPUT %d: Composite\n", route->input);
++			"s_routing %d: Composite\n", route->input);
 +		/* autodetect 50/60 Hz */
 +		ks0127_and_or(sd, KS_CMDA,   0xfc, 0x00);
 +		/* VSE=0 */
@@ -76287,7 +77276,7 @@ index bae2d2b..4b3a116 100644
 +	case KS_INPUT_SVIDEO_2:
 +	case KS_INPUT_SVIDEO_3:
 +		v4l2_dbg(1, debug, sd,
-+			"VIDIOC_S_INPUT %d: S-Video\n", route->input);
++			"s_routing %d: S-Video\n", route->input);
 +		/* autodetect 50/60 Hz */
 +		ks0127_and_or(sd, KS_CMDA,   0xfc, 0x00);
 +		/* VSE=0 */
@@ -76446,7 +77435,7 @@ index bae2d2b..4b3a116 100644
 -		/* force back off */
 -		ks0127_write(c, KS_DEMOD, reg_defaults[KS_DEMOD]);
 +	case KS_INPUT_YUV656:
-+		v4l2_dbg(1, debug, sd, "VIDIOC_S_INPUT 15: YUV656\n");
++		v4l2_dbg(1, debug, sd, "s_routing 15: YUV656\n");
 +		if (ks->norm & V4L2_STD_525_60)
 +			/* force 60 Hz */
 +			ks0127_and_or(sd, KS_CMDA,   0xfc, 0x03);
@@ -76504,7 +77493,7 @@ index bae2d2b..4b3a116 100644
 -		}
 +	default:
 +		v4l2_dbg(1, debug, sd,
-+			"VIDIOC_INT_S_VIDEO_ROUTING: Unknown input %d\n", route->input);
++			"s_routing: Unknown input %d\n", route->input);
  		break;
 +	}
  
@@ -76593,23 +77582,23 @@ index bae2d2b..4b3a116 100644
 +	ks->norm = std;
 +	if (std & V4L2_STD_NTSC) {
 +		v4l2_dbg(1, debug, sd,
-+			"VIDIOC_S_STD: NTSC_M\n");
++			"s_std: NTSC_M\n");
 +		ks0127_and_or(sd, KS_CHROMA, 0x9f, 0x20);
 +	} else if (std & V4L2_STD_PAL_N) {
 +		v4l2_dbg(1, debug, sd,
-+			"KS0127_SET_NORM: NTSC_N (fixme)\n");
++			"s_std: NTSC_N (fixme)\n");
 +		ks0127_and_or(sd, KS_CHROMA, 0x9f, 0x40);
 +	} else if (std & V4L2_STD_PAL) {
 +		v4l2_dbg(1, debug, sd,
-+			"VIDIOC_S_STD: PAL_N\n");
++			"s_std: PAL_N\n");
 +		ks0127_and_or(sd, KS_CHROMA, 0x9f, 0x20);
 +	} else if (std & V4L2_STD_PAL_M) {
 +		v4l2_dbg(1, debug, sd,
-+			"KS0127_SET_NORM: PAL_M (fixme)\n");
++			"s_std: PAL_M (fixme)\n");
 +		ks0127_and_or(sd, KS_CHROMA, 0x9f, 0x40);
 +	} else if (std & V4L2_STD_SECAM) {
 +		v4l2_dbg(1, debug, sd,
-+			"KS0127_SET_NORM: SECAM\n");
++			"s_std: SECAM\n");
 +
 +		/* set to secam autodetection */
 +		ks0127_and_or(sd, KS_CHROMA, 0xdf, 0x20);
@@ -76677,7 +77666,7 @@ index bae2d2b..4b3a116 100644
 -		break;
 +			ks0127_and_or(sd, KS_DEMOD, 0xf0, 0x0f);
 +	} else {
-+		v4l2_dbg(1, debug, sd, "VIDIOC_S_STD: Unknown norm %llx\n",
++		v4l2_dbg(1, debug, sd, "s_std: Unknown norm %llx\n",
 +			       (unsigned long long)std);
  	}
 +	return 0;
@@ -76729,7 +77718,6 @@ index bae2d2b..4b3a116 100644
 +	u8 status;
 +	v4l2_std_id std = V4L2_STD_ALL;
 +
-+	v4l2_dbg(1, debug, sd, "VIDIOC_QUERYSTD/VIDIOC_INT_G_INPUT_STATUS\n");
 +	status = ks0127_read(sd, KS_STAT);
 +	if (!(status & 0x20))		 /* NOVID not set */
 +		stat = 0;
@@ -76748,6 +77736,7 @@ index bae2d2b..4b3a116 100644
 +
 +static int ks0127_querystd(struct v4l2_subdev *sd, v4l2_std_id *std)
 +{
++	v4l2_dbg(1, debug, sd, "querystd\n");
 +	return ks0127_status(sd, NULL, std);
 +}
  
@@ -76756,6 +77745,7 @@ index bae2d2b..4b3a116 100644
 -#define I2C_KS0127_ONBOARD 0xDA
 +static int ks0127_g_input_status(struct v4l2_subdev *sd, u32 *status)
 +{
++	v4l2_dbg(1, debug, sd, "g_input_status\n");
 +	return ks0127_status(sd, status, NULL);
 +}
 +
@@ -77050,18 +78040,9 @@ index b76e33d..2ad11f0 100644
  		return -EINVAL;
  
 diff --git a/drivers/media/video/msp3400-driver.c b/drivers/media/video/msp3400-driver.c
-index 4d7a918..204513e 100644
+index 4d7a918..9e8e06c 100644
 --- a/drivers/media/video/msp3400-driver.c
 +++ b/drivers/media/video/msp3400-driver.c
-@@ -53,7 +53,7 @@
- #include <linux/i2c.h>
- #include <linux/kthread.h>
- #include <linux/freezer.h>
--#include <linux/videodev2.h>
-+#include <linux/videodev.h>
- #include <media/v4l2-device.h>
- #include <media/v4l2-ioctl.h>
- #include <media/v4l2-i2c-drv-legacy.h>
 @@ -366,29 +366,6 @@ int msp_sleep(struct msp_state *state, int timeout)
  }
  
@@ -89595,7 +90576,7 @@ index 7ca709f..0000000
 -	.id_table = saa7114_id,
 -};
 diff --git a/drivers/media/video/saa7115.c b/drivers/media/video/saa7115.c
-index 46c796c..591f7f9 100644
+index 46c796c..cebf159 100644
 --- a/drivers/media/video/saa7115.c
 +++ b/drivers/media/video/saa7115.c
 @@ -778,7 +778,7 @@ static int saa711x_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
@@ -89607,6 +90588,17 @@ index 46c796c..591f7f9 100644
  			v4l2_err(sd, "invalid hue setting %d\n", ctrl->value);
  			return -ERANGE;
  		}
+@@ -931,8 +931,8 @@ static void saa711x_set_v4lstd(struct v4l2_subdev *sd, v4l2_std_id std)
+ 	/* Prevent unnecessary standard changes. During a standard
+ 	   change the I-Port is temporarily disabled. Any devices
+ 	   reading from that port can get confused.
+-	   Note that VIDIOC_S_STD is also used to switch from
+-	   radio to TV mode, so if a VIDIOC_S_STD is broadcast to
++	   Note that s_std is also used to switch from
++	   radio to TV mode, so if a s_std is broadcast to
+ 	   all I2C devices then you do not want to have an unwanted
+ 	   side-effect here. */
+ 	if (std == state->std)
 @@ -1206,10 +1206,12 @@ static int saa711x_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
  {
  	switch (qc->id) {
@@ -92408,7 +93400,7 @@ index 6debb65..75747b1 100644
  	.remove = saa7185_remove,
  	.id_table = saa7185_id,
 diff --git a/drivers/media/video/saa7191.c b/drivers/media/video/saa7191.c
-index b4018cc..2e6fce5 100644
+index b4018cc..3f523ae 100644
 --- a/drivers/media/video/saa7191.c
 +++ b/drivers/media/video/saa7191.c
 @@ -19,9 +19,11 @@
@@ -92937,7 +93929,7 @@ index b4018cc..2e6fce5 100644
  		break;
  	default:
  		ret = -EINVAL;
-@@ -561,247 +552,107 @@ static int saa7191_set_control(struct i2c_client *client,
+@@ -561,247 +552,108 @@ static int saa7191_set_control(struct i2c_client *client,
  
  /* I2C-interface */
  
@@ -93142,6 +94134,7 @@ index b4018cc..2e6fce5 100644
 +static const struct v4l2_subdev_ops saa7191_ops = {
 +	.core = &saa7191_core_ops,
 +	.video = &saa7191_video_ops,
++	.tuner = &saa7191_tuner_ops,
 +};
  
 -		val = (pic->hue >> 8) - 0x80;
@@ -94625,7 +95618,7 @@ index 5c95ecd..07789c6 100644
  	.remove = tlv320aic23b_remove,
  	.id_table = tlv320aic23b_id,
 diff --git a/drivers/media/video/tuner-core.c b/drivers/media/video/tuner-core.c
-index 30640fb..421475e 100644
+index 30640fb..72d4103 100644
 --- a/drivers/media/video/tuner-core.c
 +++ b/drivers/media/video/tuner-core.c
 @@ -364,7 +364,8 @@ static void set_type(struct i2c_client *c, unsigned int type,
@@ -94648,6 +95641,215 @@ index 30640fb..421475e 100644
  		if (!dvb_attach(xc5000_attach,
  				&t->fe, t->i2c->adapter, &xc5000_cfg))
  			goto attach_failed;
+@@ -776,8 +778,7 @@ static int tuner_s_radio(struct v4l2_subdev *sd)
+ 	struct tuner *t = to_tuner(sd);
+ 	struct i2c_client *client = v4l2_get_subdevdata(sd);
+ 
+-	if (set_mode(client, t, V4L2_TUNER_RADIO, "AUDC_SET_RADIO")
+-			== -EINVAL)
++	if (set_mode(client, t, V4L2_TUNER_RADIO, "s_radio") == -EINVAL)
+ 		return 0;
+ 	if (t->radio_freq)
+ 		set_freq(client, t->radio_freq);
+@@ -791,7 +792,7 @@ static int tuner_s_standby(struct v4l2_subdev *sd, u32 standby)
+ 
+ 	tuner_dbg("Putting tuner to sleep\n");
+ 
+-	if (check_mode(t, "TUNER_SET_STANDBY") == -EINVAL)
++	if (check_mode(t, "s_standby") == -EINVAL)
+ 		return 0;
+ 	t->mode = T_STANDBY;
+ 	if (analog_ops->standby)
+@@ -799,132 +800,6 @@ static int tuner_s_standby(struct v4l2_subdev *sd, u32 standby)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_VIDEO_ALLOW_V4L1
+-static long tuner_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg)
+-{
+-	struct tuner *t = to_tuner(sd);
+-	struct i2c_client *client = v4l2_get_subdevdata(sd);
+-	struct analog_demod_ops *analog_ops = &t->fe.ops.analog_ops;
+-	struct dvb_tuner_ops *fe_tuner_ops = &t->fe.ops.tuner_ops;
+-
+-	switch (cmd) {
+-	case VIDIOCSAUDIO:
+-		if (check_mode(t, "VIDIOCSAUDIO") == -EINVAL)
+-			return 0;
+-		if (check_v4l2(t) == -EINVAL)
+-			return 0;
+-
+-		/* Should be implemented, since bttv calls it */
+-		tuner_dbg("VIDIOCSAUDIO not implemented.\n");
+-		break;
+-	case VIDIOCSCHAN:
+-		{
+-			static const v4l2_std_id map[] = {
+-				[VIDEO_MODE_PAL] = V4L2_STD_PAL,
+-				[VIDEO_MODE_NTSC] = V4L2_STD_NTSC_M,
+-				[VIDEO_MODE_SECAM] = V4L2_STD_SECAM,
+-				[4 /* bttv */ ] = V4L2_STD_PAL_M,
+-				[5 /* bttv */ ] = V4L2_STD_PAL_N,
+-				[6 /* bttv */ ] = V4L2_STD_NTSC_M_JP,
+-			};
+-			struct video_channel *vc = arg;
+-
+-			if (check_v4l2(t) == -EINVAL)
+-				return 0;
+-
+-			if (set_mode(client,t,V4L2_TUNER_ANALOG_TV, "VIDIOCSCHAN")==-EINVAL)
+-				return 0;
+-
+-			if (vc->norm < ARRAY_SIZE(map))
+-				t->std = map[vc->norm];
+-			tuner_fixup_std(t);
+-			if (t->tv_freq)
+-				set_tv_freq(client, t->tv_freq);
+-			return 0;
+-		}
+-	case VIDIOCSFREQ:
+-		{
+-			unsigned long *v = arg;
+-
+-			if (check_mode(t, "VIDIOCSFREQ") == -EINVAL)
+-				return 0;
+-			if (check_v4l2(t) == -EINVAL)
+-				return 0;
+-
+-			set_freq(client, *v);
+-			return 0;
+-		}
+-	case VIDIOCGTUNER:
+-		{
+-			struct video_tuner *vt = arg;
+-
+-			if (check_mode(t, "VIDIOCGTUNER") == -EINVAL)
+-				return 0;
+-			if (check_v4l2(t) == -EINVAL)
+-				return 0;
+-
+-			if (V4L2_TUNER_RADIO == t->mode) {
+-				if (fe_tuner_ops->get_status) {
+-					u32 tuner_status;
+-
+-					fe_tuner_ops->get_status(&t->fe, &tuner_status);
+-					if (tuner_status & TUNER_STATUS_STEREO)
+-						vt->flags |= VIDEO_TUNER_STEREO_ON;
+-					else
+-						vt->flags &= ~VIDEO_TUNER_STEREO_ON;
+-				} else {
+-					if (analog_ops->is_stereo) {
+-						if (analog_ops->is_stereo(&t->fe))
+-							vt->flags |=
+-								VIDEO_TUNER_STEREO_ON;
+-						else
+-							vt->flags &=
+-								~VIDEO_TUNER_STEREO_ON;
+-					}
+-				}
+-				if (analog_ops->has_signal)
+-					vt->signal =
+-						analog_ops->has_signal(&t->fe);
+-
+-				vt->flags |= VIDEO_TUNER_LOW;	/* Allow freqs at 62.5 Hz */
+-
+-				vt->rangelow = radio_range[0] * 16000;
+-				vt->rangehigh = radio_range[1] * 16000;
+-
+-			} else {
+-				vt->rangelow = tv_range[0] * 16;
+-				vt->rangehigh = tv_range[1] * 16;
+-			}
+-
+-			return 0;
+-		}
+-	case VIDIOCGAUDIO:
+-		{
+-			struct video_audio *va = arg;
+-
+-			if (check_mode(t, "VIDIOCGAUDIO") == -EINVAL)
+-				return 0;
+-			if (check_v4l2(t) == -EINVAL)
+-				return 0;
+-
+-			if (V4L2_TUNER_RADIO == t->mode) {
+-				if (fe_tuner_ops->get_status) {
+-					u32 tuner_status;
+-
+-					fe_tuner_ops->get_status(&t->fe, &tuner_status);
+-					va->mode = (tuner_status & TUNER_STATUS_STEREO)
+-					    ? VIDEO_SOUND_STEREO : VIDEO_SOUND_MONO;
+-				} else if (analog_ops->is_stereo)
+-					va->mode = analog_ops->is_stereo(&t->fe)
+-					    ? VIDEO_SOUND_STEREO : VIDEO_SOUND_MONO;
+-			}
+-			return 0;
+-		}
+-	}
+-	return -ENOIOCTLCMD;
+-}
+-#endif
+-
+ static int tuner_s_config(struct v4l2_subdev *sd, const struct v4l2_priv_tun_config *cfg)
+ {
+ 	struct tuner *t = to_tuner(sd);
+@@ -950,8 +825,7 @@ static int tuner_s_std(struct v4l2_subdev *sd, v4l2_std_id std)
+ 	struct tuner *t = to_tuner(sd);
+ 	struct i2c_client *client = v4l2_get_subdevdata(sd);
+ 
+-	if (set_mode(client, t, V4L2_TUNER_ANALOG_TV, "VIDIOC_S_STD")
+-			== -EINVAL)
++	if (set_mode(client, t, V4L2_TUNER_ANALOG_TV, "s_std") == -EINVAL)
+ 		return 0;
+ 
+ 	switch_v4l2();
+@@ -968,8 +842,7 @@ static int tuner_s_frequency(struct v4l2_subdev *sd, struct v4l2_frequency *f)
+ 	struct tuner *t = to_tuner(sd);
+ 	struct i2c_client *client = v4l2_get_subdevdata(sd);
+ 
+-	if (set_mode(client, t, f->type, "VIDIOC_S_FREQUENCY")
+-			== -EINVAL)
++	if (set_mode(client, t, f->type, "s_frequency") == -EINVAL)
+ 		return 0;
+ 	switch_v4l2();
+ 	set_freq(client, f->frequency);
+@@ -982,7 +855,7 @@ static int tuner_g_frequency(struct v4l2_subdev *sd, struct v4l2_frequency *f)
+ 	struct tuner *t = to_tuner(sd);
+ 	struct dvb_tuner_ops *fe_tuner_ops = &t->fe.ops.tuner_ops;
+ 
+-	if (check_mode(t, "VIDIOC_G_FREQUENCY") == -EINVAL)
++	if (check_mode(t, "g_frequency") == -EINVAL)
+ 		return 0;
+ 	switch_v4l2();
+ 	f->type = t->mode;
+@@ -1006,7 +879,7 @@ static int tuner_g_tuner(struct v4l2_subdev *sd, struct v4l2_tuner *vt)
+ 	struct analog_demod_ops *analog_ops = &t->fe.ops.analog_ops;
+ 	struct dvb_tuner_ops *fe_tuner_ops = &t->fe.ops.tuner_ops;
+ 
+-	if (check_mode(t, "VIDIOC_G_TUNER") == -EINVAL)
++	if (check_mode(t, "g_tuner") == -EINVAL)
+ 		return 0;
+ 	switch_v4l2();
+ 
+@@ -1055,7 +928,7 @@ static int tuner_s_tuner(struct v4l2_subdev *sd, struct v4l2_tuner *vt)
+ 	struct tuner *t = to_tuner(sd);
+ 	struct i2c_client *client = v4l2_get_subdevdata(sd);
+ 
+-	if (check_mode(t, "VIDIOC_S_TUNER") == -EINVAL)
++	if (check_mode(t, "s_tuner") == -EINVAL)
+ 		return 0;
+ 
+ 	switch_v4l2();
+@@ -1112,9 +985,6 @@ static int tuner_resume(struct i2c_client *c)
+ static const struct v4l2_subdev_core_ops tuner_core_ops = {
+ 	.log_status = tuner_log_status,
+ 	.s_standby = tuner_s_standby,
+-#ifdef CONFIG_VIDEO_ALLOW_V4L1
+-	.ioctl = tuner_ioctl,
+-#endif
+ };
+ 
+ static const struct v4l2_subdev_tuner_ops tuner_tuner_ops = {
 diff --git a/drivers/media/video/tvaudio.c b/drivers/media/video/tvaudio.c
 index 076ed5b..226bf35 100644
 --- a/drivers/media/video/tvaudio.c
@@ -95261,7 +96463,7 @@ index 8e23aa5..4262e60 100644
  }
  /*
 diff --git a/drivers/media/video/tvp5150.c b/drivers/media/video/tvp5150.c
-index 2cd64ef..9ee55f2 100644
+index 2cd64ef..3a5a95f 100644
 --- a/drivers/media/video/tvp5150.c
 +++ b/drivers/media/video/tvp5150.c
 @@ -8,7 +8,6 @@
@@ -95272,6 +96474,42 @@ index 2cd64ef..9ee55f2 100644
  #include <media/v4l2-device.h>
  #include <media/tvp5150.h>
  #include <media/v4l2-i2c-drv-legacy.h>
+@@ -632,7 +631,7 @@ static int tvp5150_g_sliced_vbi_cap(struct v4l2_subdev *sd,
+ 	const struct i2c_vbi_ram_value *regs = vbi_ram_default;
+ 	int line;
+ 
+-	v4l2_dbg(1, debug, sd, "VIDIOC_G_SLICED_VBI_CAP\n");
++	v4l2_dbg(1, debug, sd, "g_sliced_vbi_cap\n");
+ 	memset(cap, 0, sizeof *cap);
+ 
+ 	while (regs->reg != (u16)-1 ) {
+@@ -831,7 +830,7 @@ static int tvp5150_reset(struct v4l2_subdev *sd, u32 val)
+ 
+ static int tvp5150_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
+ {
+-	v4l2_dbg(1, debug, sd, "VIDIOC_G_CTRL called\n");
++	v4l2_dbg(1, debug, sd, "g_ctrl called\n");
+ 
+ 	switch (ctrl->id) {
+ 	case V4L2_CID_BRIGHTNESS:
+@@ -861,7 +860,7 @@ static int tvp5150_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
+ 		if (ctrl->value < tvp5150_qctrl[i].minimum ||
+ 		    ctrl->value > tvp5150_qctrl[i].maximum)
+ 			return -ERANGE;
+-		v4l2_dbg(1, debug, sd, "VIDIOC_S_CTRL: id=%d, value=%d\n",
++		v4l2_dbg(1, debug, sd, "s_ctrl: id=%d, value=%d\n",
+ 					ctrl->id, ctrl->value);
+ 		break;
+ 	}
+@@ -1015,7 +1014,7 @@ static int tvp5150_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
+ {
+ 	int i;
+ 
+-	v4l2_dbg(1, debug, sd, "VIDIOC_QUERYCTRL called\n");
++	v4l2_dbg(1, debug, sd, "queryctrl called\n");
+ 
+ 	for (i = 0; i < ARRAY_SIZE(tvp5150_qctrl); i++)
+ 		if (qc->id && qc->id == tvp5150_qctrl[i].id) {
 @@ -1126,7 +1125,6 @@ MODULE_DEVICE_TABLE(i2c, tvp5150_id);
  
  static struct v4l2_i2c_driver_data v4l2_i2c_data = {
@@ -101269,7 +102507,7 @@ index 5d73f66..42e23a4 100644
  	.remove = vp27smpx_remove,
  	.id_table = vp27smpx_id,
 diff --git a/drivers/media/video/vpx3220.c b/drivers/media/video/vpx3220.c
-index 67aa0db..0cc2353 100644
+index 67aa0db..2fa7e8b 100644
 --- a/drivers/media/video/vpx3220.c
 +++ b/drivers/media/video/vpx3220.c
 @@ -24,10 +24,10 @@
@@ -101489,92 +102727,51 @@ index 67aa0db..0cc2353 100644
 -			vpx3220_write_fp_block(client, init_ntsc,
 -					       sizeof(init_ntsc) >> 1);
 -			break;
-+	v4l2_dbg(1, debug, sd, "VIDIOC_QUERYSTD/VIDIOC_INT_G_INPUT_STATUS\n");
++	status = vpx3220_fp_read(sd, 0x0f3);
++
++	v4l2_dbg(1, debug, sd, "status: 0x%04x\n", status);
++
++	if (status < 0)
++		return status;
  
 -		case VIDEO_MODE_PAL:
 -			vpx3220_write_fp_block(client, init_pal,
 -					       sizeof(init_pal) >> 1);
--			break;
--		case VIDEO_MODE_SECAM:
--			vpx3220_write_fp_block(client, init_secam,
--					       sizeof(init_secam) >> 1);
--			break;
--		default:
--			vpx3220_write_fp_block(client, init_pal,
--					       sizeof(init_pal) >> 1);
--			break;
--		}
--		break;
--	}
-+	status = vpx3220_fp_read(sd, 0x0f3);
- 
--	case DECODER_DUMP:
--	{
--		vpx3220_dump_i2c(client);
--		break;
--	}
--
--	case DECODER_GET_CAPABILITIES:
--	{
--		struct video_decoder_capability *cap = arg;
-+	v4l2_dbg(1, debug, sd, "status: 0x%04x\n", status);
- 
--		v4l_dbg(1, debug, client, "DECODER_GET_CAPABILITIES\n");
--
--		cap->flags = VIDEO_DECODER_PAL |
--			     VIDEO_DECODER_NTSC |
--			     VIDEO_DECODER_SECAM |
--			     VIDEO_DECODER_AUTO |
--			     VIDEO_DECODER_CCIR;
--		cap->inputs = 3;
--		cap->outputs = 1;
--		break;
--	}
-+	if (status < 0)
-+		return status;
- 
--	case DECODER_GET_STATUS:
--	{
--		int res = 0, status;
 +	if ((status & 0x20) == 0) {
 +		res = 0;
- 
--		v4l_dbg(1, debug, client, "DECODER_GET_STATUS\n");
--
--		status = vpx3220_fp_read(client, 0x0f3);
--
--		v4l_dbg(1, debug, client, "status: 0x%04x\n", status);
--
--		if (status < 0)
--			return status;
++
 +		switch (status & 0x18) {
 +		case 0x00:
 +		case 0x10:
 +		case 0x14:
 +		case 0x18:
 +			std = V4L2_STD_PAL;
-+			break;
- 
--		if ((status & 0x20) == 0) {
--			res |= DECODER_STATUS_GOOD | DECODER_STATUS_COLOR;
+ 			break;
+-		case VIDEO_MODE_SECAM:
+-			vpx3220_write_fp_block(client, init_secam,
+-					       sizeof(init_secam) >> 1);
++
 +		case 0x08:
 +			std = V4L2_STD_SECAM;
-+			break;
- 
--			switch (status & 0x18) {
--			case 0x00:
--			case 0x10:
--			case 0x14:
--			case 0x18:
--				res |= DECODER_STATUS_PAL;
--				break;
+ 			break;
+-		default:
+-			vpx3220_write_fp_block(client, init_pal,
+-					       sizeof(init_pal) >> 1);
++
 +		case 0x04:
 +		case 0x0c:
 +		case 0x1c:
 +			std = V4L2_STD_NTSC;
-+			break;
-+		}
-+	}
+ 			break;
+ 		}
+-		break;
+-	}
+-
+-	case DECODER_DUMP:
+-	{
+-		vpx3220_dump_i2c(client);
+-		break;
+ 	}
 +	if (pstd)
 +		*pstd = std;
 +	if (pstatus)
@@ -101582,27 +102779,29 @@ index 67aa0db..0cc2353 100644
 +	return 0;
 +}
  
--			case 0x08:
--				res |= DECODER_STATUS_SECAM;
--				break;
+-	case DECODER_GET_CAPABILITIES:
+-	{
+-		struct video_decoder_capability *cap = arg;
 +static int vpx3220_querystd(struct v4l2_subdev *sd, v4l2_std_id *std)
 +{
++	v4l2_dbg(1, debug, sd, "querystd\n");
 +	return vpx3220_status(sd, NULL, std);
 +}
  
--			case 0x04:
--			case 0x0c:
--			case 0x1c:
--				res |= DECODER_STATUS_NTSC;
--				break;
--			}
--		}
+-		v4l_dbg(1, debug, client, "DECODER_GET_CAPABILITIES\n");
 +static int vpx3220_g_input_status(struct v4l2_subdev *sd, u32 *status)
 +{
++	v4l2_dbg(1, debug, sd, "g_input_status\n");
 +	return vpx3220_status(sd, status, NULL);
 +}
  
--		*(int *) arg = res;
+-		cap->flags = VIDEO_DECODER_PAL |
+-			     VIDEO_DECODER_NTSC |
+-			     VIDEO_DECODER_SECAM |
+-			     VIDEO_DECODER_AUTO |
+-			     VIDEO_DECODER_CCIR;
+-		cap->inputs = 3;
+-		cap->outputs = 1;
 -		break;
 +static int vpx3220_s_std(struct v4l2_subdev *sd, v4l2_std_id std)
 +{
@@ -101614,7 +102813,7 @@ index 67aa0db..0cc2353 100644
 +	   choosen video norm */
 +	temp_input = vpx3220_fp_read(sd, 0xf2);
 +
-+	v4l2_dbg(1, debug, sd, "VIDIOC_S_STD %llx\n", (unsigned long long)std);
++	v4l2_dbg(1, debug, sd, "s_std %llx\n", (unsigned long long)std);
 +	if (std & V4L2_STD_NTSC) {
 +		vpx3220_write_fp_block(sd, init_ntsc, sizeof(init_ntsc) >> 1);
 +		v4l2_dbg(1, debug, sd, "norm switched to NTSC\n");
@@ -101627,6 +102826,66 @@ index 67aa0db..0cc2353 100644
 +	} else {
 +		return -EINVAL;
  	}
+ 
+-	case DECODER_GET_STATUS:
+-	{
+-		int res = 0, status;
++	decoder->norm = std;
+ 
+-		v4l_dbg(1, debug, client, "DECODER_GET_STATUS\n");
+-
+-		status = vpx3220_fp_read(client, 0x0f3);
+-
+-		v4l_dbg(1, debug, client, "status: 0x%04x\n", status);
+-
+-		if (status < 0)
+-			return status;
++	/* And here we set the backed up video input again */
++	vpx3220_fp_write(sd, 0xf2, temp_input | 0x0010);
++	udelay(10);
++	return 0;
++}
+ 
+-		if ((status & 0x20) == 0) {
+-			res |= DECODER_STATUS_GOOD | DECODER_STATUS_COLOR;
++static int vpx3220_s_routing(struct v4l2_subdev *sd, const struct v4l2_routing *route)
++{
++	int data;
+ 
+-			switch (status & 0x18) {
+-			case 0x00:
+-			case 0x10:
+-			case 0x14:
+-			case 0x18:
+-				res |= DECODER_STATUS_PAL;
+-				break;
++	/* RJ:   route->input = 0: ST8 (PCTV) input
++		 route->input = 1: COMPOSITE  input
++		 route->input = 2: SVHS       input  */
+ 
+-			case 0x08:
+-				res |= DECODER_STATUS_SECAM;
+-				break;
++	const int input[3][2] = {
++		{0x0c, 0},
++		{0x0d, 0},
++		{0x0e, 1}
++	};
+ 
+-			case 0x04:
+-			case 0x0c:
+-			case 0x1c:
+-				res |= DECODER_STATUS_NTSC;
+-				break;
+-			}
+-		}
++	if (route->input < 0 || route->input > 2)
++		return -EINVAL;
+ 
+-		*(int *) arg = res;
+-		break;
+-	}
++	v4l2_dbg(1, debug, sd, "input switched to %s\n", inputs[route->input]);
  
 -	case DECODER_SET_NORM:
 -	{
@@ -101645,71 +102904,13 @@ index 67aa0db..0cc2353 100644
 -					       sizeof(init_ntsc) >> 1);
 -			v4l_dbg(1, debug, client, "norm switched to NTSC\n");
 -			break;
-+	decoder->norm = std;
++	vpx3220_write(sd, 0x33, input[route->input][0]);
  
 -		case VIDEO_MODE_PAL:
 -			vpx3220_write_fp_block(client, init_pal,
 -					       sizeof(init_pal) >> 1);
 -			v4l_dbg(1, debug, client, "norm switched to PAL\n");
 -			break;
-+	/* And here we set the backed up video input again */
-+	vpx3220_fp_write(sd, 0xf2, temp_input | 0x0010);
-+	udelay(10);
-+	return 0;
-+}
- 
--		case VIDEO_MODE_SECAM:
--			vpx3220_write_fp_block(client, init_secam,
--					       sizeof(init_secam) >> 1);
--			v4l_dbg(1, debug, client, "norm switched to SECAM\n");
--			break;
-+static int vpx3220_s_routing(struct v4l2_subdev *sd, const struct v4l2_routing *route)
-+{
-+	int data;
- 
--		case VIDEO_MODE_AUTO:
--			/* FIXME This is only preliminary support */
--			data = vpx3220_fp_read(client, 0xf2) & 0x20;
--			vpx3220_fp_write(client, 0xf2, 0x00c0 | data);
--			v4l_dbg(1, debug, client, "norm switched to AUTO\n");
--			break;
-+	/* RJ:   route->input = 0: ST8 (PCTV) input
-+		 route->input = 1: COMPOSITE  input
-+		 route->input = 2: SVHS       input  */
- 
--		default:
--			return -EINVAL;
--		}
--		decoder->norm = *iarg;
-+	const int input[3][2] = {
-+		{0x0c, 0},
-+		{0x0d, 0},
-+		{0x0e, 1}
-+	};
- 
--		/* And here we set the backed up video input again */
--		vpx3220_fp_write(client, 0xf2, temp_input | 0x0010);
--		udelay(10);
--		break;
--	}
-+	if (route->input < 0 || route->input > 2)
-+		return -EINVAL;
- 
--	case DECODER_SET_INPUT:
--	{
--		int *iarg = arg, data;
-+	v4l2_dbg(1, debug, sd, "input switched to %s\n", inputs[route->input]);
- 
--		/* RJ:  *iarg = 0: ST8 (PCTV) input
--		 *iarg = 1: COMPOSITE  input
--		 *iarg = 2: SVHS       input  */
-+	vpx3220_write(sd, 0x33, input[route->input][0]);
- 
--		const int input[3][2] = {
--			{0x0c, 0},
--			{0x0d, 0},
--			{0x0e, 1}
--		};
 +	data = vpx3220_fp_read(sd, 0xf2) & ~(0x0020);
 +	if (data < 0)
 +		return data;
@@ -101717,35 +102918,72 @@ index 67aa0db..0cc2353 100644
 +	vpx3220_fp_write(sd, 0xf2,
 +			data | (input[route->input][1] << 5) | 0x0010);
  
--		if (*iarg < 0 || *iarg > 2)
--			return -EINVAL;
+-		case VIDEO_MODE_SECAM:
+-			vpx3220_write_fp_block(client, init_secam,
+-					       sizeof(init_secam) >> 1);
+-			v4l_dbg(1, debug, client, "norm switched to SECAM\n");
+-			break;
 +	udelay(10);
 +	return 0;
 +}
  
--		v4l_dbg(1, debug, client, "input switched to %s\n", inputs[*iarg]);
+-		case VIDEO_MODE_AUTO:
+-			/* FIXME This is only preliminary support */
+-			data = vpx3220_fp_read(client, 0xf2) & 0x20;
+-			vpx3220_fp_write(client, 0xf2, 0x00c0 | data);
+-			v4l_dbg(1, debug, client, "norm switched to AUTO\n");
+-			break;
 +static int vpx3220_s_stream(struct v4l2_subdev *sd, int enable)
 +{
-+	v4l2_dbg(1, debug, sd, "VIDIOC_STREAM%s\n", enable ? "ON" : "OFF");
++	v4l2_dbg(1, debug, sd, "s_stream %s\n", enable ? "on" : "off");
  
--		vpx3220_write(client, 0x33, input[*iarg][0]);
+-		default:
+-			return -EINVAL;
+-		}
+-		decoder->norm = *iarg;
 +	vpx3220_write(sd, 0xf2, (enable ? 0x1b : 0x00));
 +	return 0;
 +}
  
+-		/* And here we set the backed up video input again */
+-		vpx3220_fp_write(client, 0xf2, temp_input | 0x0010);
+-		udelay(10);
++static int vpx3220_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
++{
++	switch (qc->id) {
++	case V4L2_CID_BRIGHTNESS:
++		v4l2_ctrl_query_fill(qc, -128, 127, 1, 0);
+ 		break;
+-	}
+-
+-	case DECODER_SET_INPUT:
+-	{
+-		int *iarg = arg, data;
+-
+-		/* RJ:  *iarg = 0: ST8 (PCTV) input
+-		 *iarg = 1: COMPOSITE  input
+-		 *iarg = 2: SVHS       input  */
+-
+-		const int input[3][2] = {
+-			{0x0c, 0},
+-			{0x0d, 0},
+-			{0x0e, 1}
+-		};
+ 
+-		if (*iarg < 0 || *iarg > 2)
+-			return -EINVAL;
+-
+-		v4l_dbg(1, debug, client, "input switched to %s\n", inputs[*iarg]);
+-
+-		vpx3220_write(client, 0x33, input[*iarg][0]);
+-
 -		data = vpx3220_fp_read(client, 0xf2) & ~(0x0020);
 -		if (data < 0)
 -			return data;
 -		/* 0x0010 is required to latch the setting */
 -		vpx3220_fp_write(client, 0xf2,
 -				 data | (input[*iarg][1] << 5) | 0x0010);
-+static int vpx3220_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
-+{
-+	switch (qc->id) {
-+	case V4L2_CID_BRIGHTNESS:
-+		v4l2_ctrl_query_fill(qc, -128, 127, 1, 0);
-+		break;
- 
+-
 -		udelay(10);
 +	case V4L2_CID_CONTRAST:
 +		v4l2_ctrl_query_fill(qc, 0, 63, 1, 32);
@@ -111373,7 +112611,7 @@ index b01c044..7a4529d 100644
  				    int id, const char *name);
  /* Prints the ioctl in a human-readable format */
 diff --git a/include/media/v4l2-subdev.h b/include/media/v4l2-subdev.h
-index 37b09e5..d7a72d2 100644
+index 37b09e5..1d181b4 100644
 --- a/include/media/v4l2-subdev.h
 +++ b/include/media/v4l2-subdev.h
 @@ -78,6 +78,9 @@ struct v4l2_subdev_core_ops {
@@ -111386,7 +112624,7 @@ index 37b09e5..d7a72d2 100644
  	int (*querymenu)(struct v4l2_subdev *sd, struct v4l2_querymenu *qm);
  	long (*ioctl)(struct v4l2_subdev *sd, unsigned int cmd, void *arg);
  #ifdef CONFIG_VIDEO_ADV_DEBUG
-@@ -112,9 +115,15 @@ struct v4l2_subdev_video_ops {
+@@ -112,9 +115,17 @@ struct v4l2_subdev_video_ops {
  	int (*g_vbi_data)(struct v4l2_subdev *sd, struct v4l2_sliced_vbi_data *vbi_data);
  	int (*g_sliced_vbi_cap)(struct v4l2_subdev *sd, struct v4l2_sliced_vbi_cap *cap);
  	int (*s_std_output)(struct v4l2_subdev *sd, v4l2_std_id std);
@@ -111400,10 +112638,12 @@ index 37b09e5..d7a72d2 100644
 +	int (*s_fmt)(struct v4l2_subdev *sd, struct v4l2_format *fmt);
 +	int (*g_parm)(struct v4l2_subdev *sd, struct v4l2_streamparm *param);
 +	int (*s_parm)(struct v4l2_subdev *sd, struct v4l2_streamparm *param);
++	int (*enum_framesizes)(struct v4l2_subdev *sd, struct v4l2_frmsizeenum *fsize);
++	int (*enum_frameintervals)(struct v4l2_subdev *sd, struct v4l2_frmivalenum *fival);
  };
  
  struct v4l2_subdev_ops {
-@@ -132,7 +141,7 @@ struct v4l2_subdev_ops {
+@@ -132,7 +143,7 @@ struct v4l2_subdev_ops {
  struct v4l2_subdev {
  	struct list_head list;
  	struct module *owner;
@@ -111412,7 +112652,7 @@ index 37b09e5..d7a72d2 100644
  	const struct v4l2_subdev_ops *ops;
  	/* name must be unique */
  	char name[V4L2_SUBDEV_NAME_SIZE];
-@@ -171,7 +180,7 @@ static inline void v4l2_subdev_init(struct v4l2_subdev *sd,
+@@ -171,7 +182,7 @@ static inline void v4l2_subdev_init(struct v4l2_subdev *sd,
  	/* ops->core MUST be set */
  	BUG_ON(!ops || !ops->core);
  	sd->ops = ops;
@@ -111421,7 +112661,7 @@ index 37b09e5..d7a72d2 100644
  	sd->name[0] = '\0';
  	sd->grp_id = 0;
  	sd->priv = NULL;
-@@ -186,4 +195,9 @@ static inline void v4l2_subdev_init(struct v4l2_subdev *sd,
+@@ -186,4 +197,9 @@ static inline void v4l2_subdev_init(struct v4l2_subdev *sd,
  	(!(sd) ? -ENODEV : (((sd) && (sd)->ops->o && (sd)->ops->o->f) ?	\
  		(sd)->ops->o->f((sd) , ##args) : -ENOIOCTLCMD))
  
