@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1497 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1499 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -514,7 +514,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: http://fsfla.org/selibre/linux-libre/download/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -685,6 +685,7 @@ Patch1814: drm-nouveau.patch
 Patch1816: drm-no-gem-on-i8xx.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
+Patch1820: drm-radeon-reorder-bm.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -940,6 +941,9 @@ ApplyPatch()
   shift
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1;
+  fi
+  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/kernel.spec ; then
+    [ "${patch:0:10}" != "patch-2.6." ] && echo "Patch $patch not listed in specfile" && exit 1;
   fi
   $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
   case "$patch" in
@@ -1294,6 +1298,7 @@ ApplyPatch drm-nouveau.patch
 ApplyPatch drm-no-gem-on-i8xx.patch
 ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
+ApplyPatch drm-radeon-reorder-bm.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1905,6 +1910,9 @@ fi
 # and build.
 
 %changelog
+* Wed Apr 01 2009 Dave Airlie <airlied@redhat.com>
+- drm-radeon-reorder-bm.patch: attempt PM fix for PCI/AGP cards
+
 * Tue Mar 31 2009 Matthew Garrett <mjg@redhat.com> 2.6.29.1-35.rc1
 - linux-2.6.29-alsa-update-quirks.patch: Backport some HDA quirk support
 
@@ -1971,7 +1979,6 @@ fi
 
 * Fri Mar 27 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.16 Mon Mar 30
 - Deblobbed 2.6.29.
-- Rebased to 2.6.28-libre2.
 - Deblobbed drm-nouveau.patch.
 - Deblobbed drm-next.patch.
 - Deblobbed drm-modesetting-radeon.patch.
