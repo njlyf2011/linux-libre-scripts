@@ -151,7 +151,7 @@ D/scripts////
 /merge.pl/1.9/Fri Nov  7 08:26:31 2008/-ko/Tkernel-2_6_27_21-170_2_56_fc10
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_21-170_2_56_fc10
 /nvidia-agp.patch/1.1/Fri Nov  7 08:26:31 2008/-kb/Tkernel-2_6_27_21-170_2_56_fc10
-/patch-2.6.27.21.bz2.sign/1.1.2.1/Tue Mar 24 02:45:53 2009//Tkernel-2_6_27_21-170_2_56_fc10
+/patch-2.6.27.21.bz2.sign/-1.1.2.1/Tue Mar 24 02:45:53 2009//Tkernel-2_6_27_21-170_2_56_fc10
 /print-dmi-hw-name-in-warnings.patch/1.1.2.2/Wed Feb  4 21:00:26 2009/-kb/Tkernel-2_6_27_21-170_2_56_fc10
 /sources/1.922.2.12/Result of merge+Sun Mar 29 22:55:01 2009//Tkernel-2_6_27_21-170_2_56_fc10
 /sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch/1.1/Sat Dec 13 17:42:41 2008/-kb/Tkernel-2_6_27_21-170_2_56_fc10
