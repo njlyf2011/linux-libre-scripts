@@ -34,17 +34,17 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -485,7 +485,7 @@ AutoProv: yes\
 Name: kernel%{?variant}
 Group: System Environment/Kernel
 License: GPLv2
-URL: http://www.kernel.org/
+URL: http://linux-libre.fsfla.org/
 Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
@@ -523,7 +523,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: http://fsfla.org/selibre/linux-libre/download/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
 #Source1: xen-%{xen_hv_cset}.tar.bz2
 Source2: Config.mk
 
@@ -1986,6 +1986,13 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Thu Apr  2 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre .1
+- Rebased to 2.6.27-libre1.
+- Adjusted patch-libre-2.6.27.21.
+- Deblobbed linux-2.6-at76.patch.
+- Deblobbed linux-2.6.27-lirc.patch.
+- Updated URL, thanks to Tomek Chrzczonowicz.
+
 * Mon Mar 23 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-170.2.41
 - 2.6.27.21
 - Dropped patches, merged in -stable:
