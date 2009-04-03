@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1499 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1508 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 1
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -135,7 +135,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -612,8 +612,6 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
 
-Patch30: linux-2.6-debug-dma-api.patch
-Patch31: dma-api-debug-fixes.patch
 Patch41: linux-2.6-sysrq-c.patch
 
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -652,6 +650,7 @@ Patch460: linux-2.6-serial-460800.patch
 Patch480: increase-MAX_LOCKDEP_ENTRIES.patch
 
 Patch510: linux-2.6-silence-noise.patch
+Patch511: linux-2.6-shut-up-efifb.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
@@ -669,6 +668,9 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
+Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
+Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
+Patch685: linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 
@@ -706,6 +708,7 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 # fs fixes
 Patch2920: linux-2.6-ext4-flush-on-close.patch
 Patch3000: linux-2.6-btrfs-experimental-branch.patch
+Patch3001: linux-2.6-btrfs-fix-umount-hang.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
 
@@ -1129,10 +1132,6 @@ ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
 
-# DMA API debugging
-ApplyPatch linux-2.6-debug-dma-api.patch
-ApplyPatch dma-api-debug-fixes.patch
-
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
@@ -1176,6 +1175,7 @@ ApplyPatch linux-2.6-ext4-flush-on-close.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-experimental-branch.patch
+ApplyPatch linux-2.6-btrfs-fix-umount-hang.patch
 
 # relatime
 ApplyPatch linux-2.6-relatime-by-default.patch
@@ -1258,6 +1258,9 @@ ApplyPatch increase-MAX_LOCKDEP_ENTRIES.patch
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
 
+# Avoid efifb spew
+ApplyPatch linux-2.6-shut-up-efifb.patch
+
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
@@ -1278,6 +1281,13 @@ ApplyPatch linux-2.6-rt2x00-asus-leds.patch
 # back-port scan result aging patches
 ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
 ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
+
+# back-port iwlwifi rfkill while device down patches
+ApplyPatch linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
+ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
+
+# fix locking in ipw3945 conf_tx callback
+ApplyPatch linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
@@ -1603,7 +1613,7 @@ mkdir -p $RPM_BUILD_ROOT/boot
 cd linux-%{kversion}.%{_target_cpu}
 
 %if %{with_debug}
-%if !%{with_up}
+%if %{with_up}
 BuildKernel %make_target %kernel_image debug
 %endif
 %if %{with_pae}
@@ -1901,7 +1911,9 @@ fi
 
 %kernel_variant_files %{with_up}
 %kernel_variant_files %{with_smp} smp
+%if %{with_up}
 %kernel_variant_files %{with_debug} debug
+%endif
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
@@ -1910,6 +1922,31 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-46
+- Enable debug builds and turn of debugging in the regular kernel.
+- Remove dma-debug patches.
+- Leave CONFIG_PCI_MSI_DEFAULT_ON set.
+
+* Thu Apr 02 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.29.1
+- Removed upstream commit d64260d58865004c6354e024da3450fdd607ea07
+  from v4l-dvb-fixes: merged in 2.6.29.1
+
+* Thu Apr 02 2009 John W. Linville <linville@redhat.com>
+- iwl3945: rely on priv->lock to protect priv access
+
+* Thu Apr 02 2009 John W. Linville <linville@redhat.com>
+- back-port iwlwifi rfkill while device down patches
+
+* Thu Apr 02 2009 Josef Bacik <josef@toxicpanda.com>
+- linux-2.6-btrfs-fix-umount-hang.patch: fix hang on umount
+
+* Wed Apr 01 2009 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-shut-up-efifb.patch: avoid efifb errors on unsupported hardware
+
+* Wed Apr 01 2009 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-acpi-video-didl-intel-outputs.patch: fix enabling of asle
+
 * Wed Apr 01 2009 Dave Airlie <airlied@redhat.com>
 - drm-radeon-reorder-bm.patch: attempt PM fix for PCI/AGP cards
 
