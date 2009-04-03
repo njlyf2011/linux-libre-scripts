@@ -326,7 +326,6 @@ Hans Verkuil (171):
       V4L/DVB (11051): v4l-dvb: replace remaining references to the old mailinglist.
       V4L/DVB (11052): bt819: remove an unused header
       V4L/DVB (11053): saa7134: set v4l2_dev field of video_device
-      V4L/DVB (11098): v4l2-common: remove incorrect MODULE test
       V4L/DVB (11100): au8522: fix compilation warning.
       V4L/DVB (11112): v4l2-subdev: add support for TRY_FMT, ENUM_FMT and G/S_PARM.
       V4L/DVB (11113): ov7670: convert to v4l2_subdev
@@ -98296,19 +98295,6 @@ index b8f2be8..1da8cb8 100644
     to high class IDs.
  
     This function returns the first ID that follows after the given ID.
-@@ -910,10 +797,10 @@ struct v4l2_subdev *v4l2_i2c_new_subdev(struct i2c_adapter *adapter,
- 	struct i2c_board_info info;
- 
- 	BUG_ON(!dev);
--#ifdef MODULE
-+
- 	if (module_name)
- 		request_module(module_name);
--#endif
-+
- 	/* Setup the i2c board info with the device type and
- 	   the device address. */
- 	memset(&info, 0, sizeof(info));
 @@ -927,11 +814,11 @@ struct v4l2_subdev *v4l2_i2c_new_subdev(struct i2c_adapter *adapter,
  	   We need better support from the kernel so that we
  	   can easily wait for the load to finish. */
@@ -98338,19 +98324,6 @@ index b8f2be8..1da8cb8 100644
  }
  EXPORT_SYMBOL_GPL(v4l2_i2c_new_subdev);
  
-@@ -958,10 +850,10 @@ struct v4l2_subdev *v4l2_i2c_new_probed_subdev(struct i2c_adapter *adapter,
- 	struct i2c_board_info info;
- 
- 	BUG_ON(!dev);
--#ifdef MODULE
-+
- 	if (module_name)
- 		request_module(module_name);
--#endif
-+
- 	/* Setup the i2c board info with the device type and
- 	   the device address. */
- 	memset(&info, 0, sizeof(info));
 @@ -974,11 +866,11 @@ struct v4l2_subdev *v4l2_i2c_new_probed_subdev(struct i2c_adapter *adapter,
  	   We need better support from the kernel so that we
  	   can easily wait for the load to finish. */
