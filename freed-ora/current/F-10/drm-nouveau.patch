@@ -6,13 +6,12 @@ diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
 index af32c34..1766c5a 100644
 --- a/drivers/gpu/drm/Kconfig
 +++ b/drivers/gpu/drm/Kconfig
-@@ -114,3 +114,10 @@ config DRM_SAVAGE
+@@ -114,3 +114,9 @@ config DRM_SAVAGE
  	help
  	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
  	  chipset. If M is selected the module will be called savage.
 +
 +config DRM_NOUVEAU
-+depends on NONFREE
 +	tristate "Nouveau (nVidia) cards"
 +	depends on DRM
 +	help
@@ -28,28 +27,26 @@ index cf6af69..dc12f9a 100644
 +obj-$(CONFIG_DRM_NOUVEAU) += nouveau/
  
 diff --git a/drivers/gpu/drm/drm_bufs.c b/drivers/gpu/drm/drm_bufs.c
-index 9ed8259..ed46425 100644
+index 445c762..a528dc9 100644
 --- a/drivers/gpu/drm/drm_bufs.c
 +++ b/drivers/gpu/drm/drm_bufs.c
-@@ -49,8 +49,8 @@ unsigned long drm_get_resource_len(struct drm_device *dev, unsigned int resource
+@@ -51,7 +51,7 @@ resource_size_t drm_get_resource_len(struct drm_device *dev, unsigned int resour
  
  EXPORT_SYMBOL(drm_get_resource_len);
  
 -static struct drm_map_list *drm_find_matching_map(struct drm_device *dev,
--					     drm_local_map_t *map)
 +struct drm_map_list *drm_find_matching_map(struct drm_device *dev,
-+					   drm_local_map_t *map)
+ 						  struct drm_local_map *map)
  {
  	struct drm_map_list *entry;
- 	list_for_each_entry(entry, &dev->maplist, head) {
-@@ -63,6 +63,7 @@ static struct drm_map_list *drm_find_matching_map(struct drm_device *dev,
+@@ -83,6 +83,7 @@ static struct drm_map_list *drm_find_matching_map(struct drm_device *dev,
  
  	return NULL;
  }
 +EXPORT_SYMBOL(drm_find_matching_map);
  
  static int drm_map_handle(struct drm_device *dev, struct drm_hash_item *hash,
- 			  unsigned long user_token, int hashed_handle)
+ 			  unsigned long user_token, int hashed_handle, int shm)
 diff --git a/drivers/gpu/drm/nouveau/Makefile b/drivers/gpu/drm/nouveau/Makefile
 new file mode 100644
 index 0000000..557f04e
@@ -6010,7 +6007,7 @@ index 0000000..fecab72
 + * DEALINGS IN THE SOFTWARE.
 + */
 +
-+                        
++#include <linux/swab.h>
 +
 +#include "drmP.h"
 +#include "drm.h"
@@ -6474,7 +6471,7 @@ index 0000000..fecab72
 +	reg1 = readl(regs+NV03_PMC_BOOT_1);
 +#if defined(__powerpc__)
 +	if (reg1)
-+		reg0=___swab32(reg0);
++		reg0=swab32(reg0);
 +#endif
 +
 +	/* We're dealing with >=NV10 */
@@ -10370,7 +10367,7 @@ new file mode 100644
 index 0000000..de178f5
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv40_graph.c
-@@ -0,0 +1,1915 @@
+@@ -0,0 +1,1856 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -11988,54 +11985,7 @@ index 0000000..de178f5
 +	return 0;
 +}
 +
-+/* These blocks of "magic numbers" are actually a microcode that the GPU uses
-+ * to control how graphics contexts get saved and restored between PRAMIN
-+ * and PGRAPH during a context switch.  We're currently using values seen
-+ * in mmio-traces of the binary driver.
-+ */
-+static uint32_t nv40_ctx_prog[] = {
-+	/*(DEBLOBBED)*/,
-+	~0
-+};
-+
-+static uint32_t nv41_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv43_ctx_prog[] = {
-+	/*(DEBLOBBED)*/,
-+	~0
-+};
-+
-+static uint32_t nv44_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv46_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv47_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+//this is used for nv49 and nv4b
-+static uint32_t nv49_4b_ctx_prog[] ={
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+
-+static uint32_t nv4a_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv4c_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv4e_ctx_prog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
++/*(DEBLOBBED)*/
 +
 +/*
 + * G70		0x47
@@ -12061,19 +12011,7 @@ index 0000000..de178f5
 +			 NV_PMC_ENABLE_PGRAPH);
 +
 +	switch (dev_priv->chipset) {
-+	case 0x40: ctx_prog = nv40_ctx_prog; break;
-+	case 0x41:
-+	case 0x42: ctx_prog = nv41_ctx_prog; break;
-+	case 0x43: ctx_prog = nv43_ctx_prog; break;
-+	case 0x44: ctx_prog = nv44_ctx_prog; break;
-+	case 0x46: ctx_prog = nv46_ctx_prog; break;
-+	case 0x47: ctx_prog = nv47_ctx_prog; break;
-+	case 0x49: ctx_prog = nv49_4b_ctx_prog; break;
-+	case 0x4a: ctx_prog = nv4a_ctx_prog; break;
-+	case 0x4b: ctx_prog = nv49_4b_ctx_prog; break;
-+	case 0x4c:
-+	case 0x67: ctx_prog = nv4c_ctx_prog; break;
-+	case 0x4e: ctx_prog = nv4e_ctx_prog; break;
++		/*(DEBLOBBED)*/
 +	default:
 +		DRM_ERROR("Context program for 0x%02x unavailable\n",
 +			  dev_priv->chipset);
@@ -12684,7 +12622,7 @@ new file mode 100644
 index 0000000..41a9da7
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_graph.c
-@@ -0,0 +1,331 @@
+@@ -0,0 +1,287 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -12780,28 +12718,7 @@ index 0000000..41a9da7
 +	DRM_DEBUG("\n");
 +
 +	switch (dev_priv->chipset) {
-+	case 0x50:
-+		voodoo = nv50_ctxprog;
-+		break;
-+	case 0x84:
-+		voodoo = nv84_ctxprog;
-+		break;
-+	case 0x86:
-+		voodoo = nv86_ctxprog;
-+		break;
-+	case 0x92:
-+		voodoo = nv92_ctxprog;
-+		break;
-+	case 0x94:
-+	case 0x96:
-+		voodoo = nv94_ctxprog;
-+		break;
-+	case 0x98:
-+		voodoo = nv98_ctxprog;
-+		break;
-+	case 0xaa:
-+		voodoo = nvaa_ctxprog;
-+		break;
++		/*(DEBLOBBED)*/
 +	default:
 +		DRM_ERROR("no ctxprog for chipset NV%02x\n", dev_priv->chipset);
 +		return -EINVAL;
@@ -12876,30 +12793,7 @@ index 0000000..41a9da7
 +	INSTANCE_WR(ramin, (hdr + 0x14)/4, 0x00010000);
 +
 +	switch (dev_priv->chipset) {
-+	case 0x50:
-+		ctxvals = nv50_ctxvals;
-+		break;
-+	case 0x84:
-+		ctxvals = nv84_ctxvals;
-+		break;
-+	case 0x86:
-+		ctxvals = nv86_ctxvals;
-+		break;
-+	case 0x92:
-+		ctxvals = nv92_ctxvals;
-+		break;
-+	case 0x94:
-+		ctxvals = nv94_ctxvals;
-+		break;
-+	case 0x96:
-+		ctxvals = nv96_ctxvals;
-+		break;
-+	case 0x98:
-+		ctxvals = nv98_ctxvals;
-+		break;
-+	case 0xaa:
-+		ctxvals = nvaa_ctxvals;
-+		break;
++		/*(DEBLOBBED)*?
 +	default:
 +		break;
 +	}
@@ -13021,77 +12915,11 @@ new file mode 100644
 index 0000000..d336b60
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_grctx.h
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,6 @@
 +#ifndef __NV50_GRCTX_H__
 +#define __NV50_GRCTX_H__
 +
-+static uint32_t nv50_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv50_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static uint32_t nv84_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv84_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static uint32_t nv86_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv86_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static uint32_t nv92_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nv92_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static unsigned nv96_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static uint32_t nv98_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0 
-+};
-+
-+static unsigned nv98_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static uint32_t nvaa_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static uint32_t nvaa_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
-+
-+static uint32_t nv94_ctxprog[] = {
-+	/*(DEBLOBBED)*/, ~0
-+};
-+
-+static unsigned nv94_ctxvals[] = {
-+	/*(DEBLOBBED)*/,
-+	0x0000
-+};
++/*(DEBLOBBED)*/
 +
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nv50_instmem.c b/drivers/gpu/drm/nouveau/nv50_instmem.c

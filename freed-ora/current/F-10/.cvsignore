@@ -1,10 +1,10 @@
 clog
+.shared-srctree
 GNUmakefile
 kernel-2.6.*.config
 temp-*
 deblob-main
-deblob-2.6.27
+deblob-2.6.29
 deblob-check
-kernel-2.6.27
-linux-2.6.27-libre1.*
-patch-libre-2.6.27.21*
+kernel-2.6.29
+linux-2.6.29-libre.*
