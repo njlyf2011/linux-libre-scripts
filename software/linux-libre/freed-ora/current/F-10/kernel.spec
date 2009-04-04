@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1313 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1315 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -609,9 +609,7 @@ Patch23: linux-2.6-utrace-ftrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
-Patch80: linux-2.6-vm-x86-pat-fix-warnings.patch
 Patch81: linux-2.6-defaults-saner-vm-settings.patch
-Patch82: linux-2.6.29-pat-pci-change-prot-for-inherit.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -646,8 +644,6 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
 Patch602: alsa-rewrite-hw_ptr-updaters.patch
 
-Patch640: linux-2.6-net-xfrm-fix-spin-unlock.patch
-
 Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-rt2x00-asus-leds.patch
@@ -669,6 +665,7 @@ Patch1811: drm-next.patch
 Patch1812: drm-modesetting-radeon.patch
 Patch1814: drm-nouveau.patch
 Patch1816: drm-no-gem-on-i8xx.patch
+Patch1817: drm-f10-compat.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -694,9 +691,6 @@ Patch2922: fs-relatime-make-default.patch
 # fix stalls with ext3 data writeout
 Patch2950: linux-2.6-kjournald-use-rt-io-priority.patch
 
-# don't return to userspace w/ held lock
-Patch2960: linux-2.6-fuse-fix-lseek-return-with-lock-held.patch
-
 Patch3000: linux-2.6-btrfs-experimental-branch.patch
 
 Patch9000: squashfs3.patch
@@ -706,9 +700,6 @@ Patch9010: revert-fix-modules_install-via-nfs.patch
 
 #Adding dropmonitor bits from 2.6.30
 Patch9011: linux-2.6-dropwatch-protocol.patch
-
-# fix for net lockups, will be in 2.6.29.1
-Patch9100: linux-2.6-net-fix-gro-bug.patch
 
 %endif
 
@@ -1000,6 +991,8 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
   fi
 
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" vanilla-%{kversion}/Makefile
+
 %if "%{kversion}" != "%{vanillaversion}"
 
   for sharedir in $sharedirs ; do
@@ -1015,8 +1008,6 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
     cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
     cd vanilla-%{vanillaversion}
-
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" Makefile
 
 # Update vanilla to the latest upstream.
 # (non-released_kernel case only)
@@ -1123,9 +1114,7 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-vm-x86-pat-fix-warnings.patch
 ApplyPatch linux-2.6-defaults-saner-vm-settings.patch
-ApplyPatch linux-2.6.29-pat-pci-change-prot-for-inherit.patch
 
 #
 # PowerPC
@@ -1166,9 +1155,6 @@ ApplyPatch fs-relatime-update-once-per-day.patch
 #ApplyPatch fs-relatime-make-default.patch
 
 ApplyPatch linux-2.6-kjournald-use-rt-io-priority.patch
-
-ApplyPatch linux-2.6-fuse-fix-lseek-return-with-lock-held.patch
-
 
 # ext4
 # data integrity band-aid for badly written apps
@@ -1218,7 +1204,6 @@ ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
 
 # Networking
-ApplyPatch linux-2.6-net-xfrm-fix-spin-unlock.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1275,6 +1260,7 @@ ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-no-gem-on-i8xx.patch
+ApplyPatch drm-f10-compat.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1295,8 +1281,6 @@ ApplyPatch revert-fix-modules_install-via-nfs.patch
 
 # Apply dropmonitor protocol bits from 2.6..30 net-next tree
 ApplyPatch linux-2.6-dropwatch-protocol.patch
-
-ApplyPatch linux-2.6-net-fix-gro-bug.patch
 
 # ======= END OF PATCH APPLICATIONS =============================
 
@@ -1874,6 +1858,18 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Apr 03 2009 Dave Airlie <airlied@redhat.com>
+- add backwards drm compat for radeon kms
+
+* Thu Apr 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-14
+- Linux 2.6.29.1
+- Dropped patches, merged upstream:
+    linux-2.6-net-fix-gro-bug.patch
+    linux-2.6-net-xfrm-fix-spin-unlock.patch
+    linux-2.6-vm-x86-pat-fix-warnings.patch
+    linux-2.6.29-pat-pci-change-prot-for-inherit.patch
+    linux-2.6-fuse-fix-lseek-return-with-lock-held.patch
+
 * Thu Apr  2 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.13
 - Deblobbed 2.6.29.
 - Deblobbed drm-nouveau.patch.
