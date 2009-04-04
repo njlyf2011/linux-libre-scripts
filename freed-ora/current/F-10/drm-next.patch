@@ -1,6 +1,17 @@
 * drivers/gpu/drm/radeon/r600_microcode.h: Deblobbed.
 * drivers/gpu/drm/radeon/r600_cp.c: Disabled non-Free firmware loaders.
 
+commit 41f13fe81dd1b08723ab9f3fc3c7f29cfa81f1a5
+Author: Alex Deucher <alexdeucher@gmail.com>
+Date:   Mon Mar 16 15:37:02 2009 -0400
+
+    drm/radeon: fix logic in r600_page_table_init() to match ati_gart
+    
+    This fixes page table init on rs600.
+    
+    Signed-off-by: Alex Deucher <alexdeucher@gmail.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
 commit 06f0a488c1b642d3cd7769da66600e5148c3fad8
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Fri Mar 13 09:35:32 2009 +1000
@@ -3952,7 +3963,7 @@ index cace396..3efa633 100644
  	cmdbuf->bufsz -= sizeof(u64);
 diff --git a/drivers/gpu/drm/radeon/r600_cp.c b/drivers/gpu/drm/radeon/r600_cp.c
 new file mode 100644
-index 0000000..76eb0d5
+index 0000000..9d14eee
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/r600_cp.c
 @@ -0,0 +1,2058 @@
@@ -4130,7 +4141,6 @@ index 0000000..76eb0d5
 +		if (entry->busaddr[i] == 0) {
 +			DRM_ERROR("unable to map PCIGART pages!\n");
 +			r600_page_table_cleanup(dev, gart_info);
-+			ret = -EINVAL;
 +			goto done;
 +		}
 +		entry_addr = entry->busaddr[i];
@@ -4149,6 +4159,7 @@ index 0000000..76eb0d5
 +			entry_addr += ATI_PCIGART_PAGE_SIZE;
 +		}
 +	}
++	ret = 1;
 +done:
 +	return ret;
 +}
@@ -5862,7 +5873,7 @@ index 0000000..76eb0d5
 +			  dev_priv->gart_info.addr,
 +			  dev_priv->pcigart_offset);
 +
-+		if (r600_page_table_init(dev)) {
++		if (!r600_page_table_init(dev)) {
 +			DRM_ERROR("Failed to init GART table\n");
 +			r600_do_cleanup_cp(dev);
 +			return -EINVAL;
