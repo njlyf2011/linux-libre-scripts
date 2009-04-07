@@ -2,6 +2,51 @@ Deblobbed
 * drivers/gpu/drm/radeon/radeon-cp.c: Adjust for deblobbed sources.
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
+commit 280d9ff29dead8e85ed603110ed431d99f07fb99
+Merge: 0221c81 54ed280
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Apr 6 14:35:32 2009 +1000
+
+    Merge branch 'drm-rawhide' into drm-f11
+    
+    Conflicts:
+    	drivers/gpu/drm/radeon/r300_cmdbuf.c
+    	drivers/gpu/drm/radeon/radeon_cp.c
+
+commit 54ed2800977d314d8af6c1c47cd718d82f734cb6
+Author: Jerome Glisse <glisse@freedesktop.org>
+Date:   Fri Apr 3 15:01:31 2009 +0200
+
+    radeon: cleanup userspace API
+    
+    Remove old userspace API we don't want to use and
+    rename wait_rendering to wait_idle
+    change mmap to using userspace mmap call
+
+commit 71c5ad46842fcd214a8e926eb9528e084622d488
+Author: Jerome Glisse <glisse@freedesktop.org>
+Date:   Fri Apr 3 13:48:20 2009 +0200
+
+    radeon: remove pin/unpin userspace ioctl
+
+commit 7628d2d9b66fc891fc0b030772a0ebae8e695561
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Fri Apr 3 14:56:19 2009 +1000
+
+    radeon: fix two issues with uncached allocs on PCIE systems
+
+commit 79a5ca0c53c2a149f51f71352a6bbf73bcdc40df
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 1 22:34:53 2009 +1000
+
+    radeon: reorder bm enable vs mode set
+
+commit c9e19d53bafaacd883ad9eafd3090eb6bc4e4837
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Mar 25 21:49:49 2009 +1000
+
+    radeon: add vram limit for testing lower vram
+
 commit dea27f6e83efabdc3e37bc5a91d29d6dab893853
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Wed Mar 18 17:07:07 2009 +1000
@@ -1753,7 +1798,7 @@ Date:   Thu Jul 31 15:27:27 2008 +1000
 
     drm: import TTM basic objects
 diff --git a/arch/x86/mm/pat.c b/arch/x86/mm/pat.c
-index e0ab173..69de2db 100644
+index 640339e..fdc60ea 100644
 --- a/arch/x86/mm/pat.c
 +++ b/arch/x86/mm/pat.c
 @@ -30,6 +30,7 @@
@@ -5287,10 +5332,10 @@ index 94a7688..c580c55 100644
  
  out:
 diff --git a/drivers/gpu/drm/drm_crtc_helper.c b/drivers/gpu/drm/drm_crtc_helper.c
-index 1c3a8c5..3b78927 100644
+index a04639d..0e46972 100644
 --- a/drivers/gpu/drm/drm_crtc_helper.c
 +++ b/drivers/gpu/drm/drm_crtc_helper.c
-@@ -840,6 +840,8 @@ int drm_crtc_helper_set_config(struct drm_mode_set *set)
+@@ -868,6 +868,8 @@ int drm_crtc_helper_set_config(struct drm_mode_set *set)
  						set->x, set->y, old_fb);
  		if (ret != 0)
  		    goto fail_set_mode;
@@ -5299,7 +5344,7 @@ index 1c3a8c5..3b78927 100644
  	}
  
  	kfree(save_encoders);
-@@ -980,3 +982,30 @@ int drm_helper_resume_force_mode(struct drm_device *dev)
+@@ -1007,3 +1009,30 @@ int drm_helper_resume_force_mode(struct drm_device *dev)
  	return 0;
  }
  EXPORT_SYMBOL(drm_helper_resume_force_mode);
@@ -5363,7 +5408,7 @@ index 7a8e2fb..0b2df71 100644
  /**
   * Free a buffer.
 diff --git a/drivers/gpu/drm/drm_drv.c b/drivers/gpu/drm/drm_drv.c
-index c26ee08..7687cc8 100644
+index c4ada8b..5d12e8d 100644
 --- a/drivers/gpu/drm/drm_drv.c
 +++ b/drivers/gpu/drm/drm_drv.c
 @@ -167,8 +167,12 @@ int drm_lastclose(struct drm_device * dev)
@@ -5961,10 +6006,10 @@ index 0000000..f1c386c
 +}
 +
 diff --git a/drivers/gpu/drm/drm_fops.c b/drivers/gpu/drm/drm_fops.c
-index f52663e..4f1a405 100644
+index 09a3571..71da516 100644
 --- a/drivers/gpu/drm/drm_fops.c
 +++ b/drivers/gpu/drm/drm_fops.c
-@@ -481,6 +481,10 @@ int drm_release(struct inode *inode, struct file *filp)
+@@ -478,6 +478,10 @@ int drm_release(struct inode *inode, struct file *filp)
  	}
  	mutex_unlock(&dev->ctxlist_mutex);
  
@@ -5975,7 +6020,7 @@ index f52663e..4f1a405 100644
  	mutex_lock(&dev->struct_mutex);
  
  	if (file_priv->is_master) {
-@@ -514,6 +518,7 @@ int drm_release(struct inode *inode, struct file *filp)
+@@ -511,6 +515,7 @@ int drm_release(struct inode *inode, struct file *filp)
  	/* drop the reference held my the file priv */
  	drm_master_put(&file_priv->master);
  	file_priv->is_master = 0;
@@ -5984,7 +6029,7 @@ index f52663e..4f1a405 100644
  	mutex_unlock(&dev->struct_mutex);
  
 diff --git a/drivers/gpu/drm/drm_info.c b/drivers/gpu/drm/drm_info.c
-index 60a1b6c..c6bde4c 100644
+index f0f6c6b..dfe452e 100644
 --- a/drivers/gpu/drm/drm_info.c
 +++ b/drivers/gpu/drm/drm_info.c
 @@ -35,6 +35,7 @@
@@ -6890,7 +6935,7 @@ index 0000000..dbc0cb3
 +}
 +EXPORT_SYMBOL(drm_ttm_bind);
 diff --git a/drivers/gpu/drm/drm_vm.c b/drivers/gpu/drm/drm_vm.c
-index 22f7656..9cd3605 100644
+index 22f7656..e6bbf0e 100644
 --- a/drivers/gpu/drm/drm_vm.c
 +++ b/drivers/gpu/drm/drm_vm.c
 @@ -37,9 +37,15 @@
@@ -6951,6 +6996,15 @@ index 22f7656..9cd3605 100644
  static void drm_vm_open(struct vm_area_struct *vma)
  {
  	struct drm_file *priv = vma->vm_file->private_data;
+@@ -572,7 +592,7 @@ int drm_mmap_locked(struct file *filp, struct vm_area_struct *vma)
+ 		return drm_mmap_dma(filp, vma);
+ 
+ 	if (drm_ht_find_item(&dev->map_hash, vma->vm_pgoff, &hash)) {
+-		DRM_ERROR("Could not find map\n");
++		DRM_ERROR("Could not find map %08x\n", vma->vm_pgoff);
+ 		return -EINVAL;
+ 	}
+ 
 @@ -652,6 +672,8 @@ int drm_mmap_locked(struct file *filp, struct vm_area_struct *vma)
  		vma->vm_flags |= VM_RESERVED;
  		vma->vm_page_prot = drm_dma_prot(map->type, vma);
@@ -7149,10 +7203,10 @@ index 22f7656..9cd3605 100644
 +	return 0;
 +}
 diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
-index 87b6b60..fb548e0 100644
+index ee7ce7b..95422bb 100644
 --- a/drivers/gpu/drm/i915/i915_irq.c
 +++ b/drivers/gpu/drm/i915/i915_irq.c
-@@ -374,7 +374,8 @@ static int i915_wait_irq(struct drm_device * dev, int irq_nr)
+@@ -397,7 +397,8 @@ static int i915_wait_irq(struct drm_device * dev, int irq_nr)
  	return ret;
  }
  
@@ -7163,10 +7217,10 @@ index 87b6b60..fb548e0 100644
  int i915_irq_emit(struct drm_device *dev, void *data,
  			 struct drm_file *file_priv)
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index a283427..1f159ce 100644
+index 64773ce..178386d 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
-@@ -446,12 +446,18 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
+@@ -763,12 +763,18 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
  	if (!master_priv->sarea_priv)
  		return 0;
  
@@ -7189,7 +7243,7 @@ index a283427..1f159ce 100644
  	}
  
  	return 0;
-@@ -574,12 +580,12 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -891,12 +897,12 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
  
  	switch (pipe) {
  	case 0:
@@ -14797,7 +14851,7 @@ index 0000000..5332de5
 +}
 +
 diff --git a/drivers/gpu/drm/radeon/r300_cmdbuf.c b/drivers/gpu/drm/radeon/r300_cmdbuf.c
-index 3efa633..e093532 100644
+index cb2e470..9489a05 100644
 --- a/drivers/gpu/drm/radeon/r300_cmdbuf.c
 +++ b/drivers/gpu/drm/radeon/r300_cmdbuf.c
 @@ -35,6 +35,7 @@
@@ -14830,16 +14884,16 @@ index 3efa633..e093532 100644
  
  #define ADD_RANGE(reg, count)	ADD_RANGE_MARK(reg, count, MARK_SAFE)
  
-@@ -207,7 +207,7 @@ void r300_init_reg_flags(struct drm_device *dev)
- 	ADD_RANGE(0x42C0, 2);
- 	ADD_RANGE(R300_RS_CNTL_0, 2);
+@@ -211,7 +211,7 @@ void r300_init_reg_flags(struct drm_device *dev)
+ 	if ((dev_priv->flags & RADEON_FAMILY_MASK) == CHIP_RV530)
+ 		ADD_RANGE(RV530_FG_ZBREG_DEST, 1);
  
 -	ADD_RANGE(R300_SC_HYPERZ, 2);
 +	ADD_RANGE(0x43A4, 2);
  	ADD_RANGE(0x43E8, 1);
  
  	ADD_RANGE(0x46A4, 5);
-@@ -226,12 +226,14 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -230,12 +230,15 @@ void r300_init_reg_flags(struct drm_device *dev)
  	ADD_RANGE(0x4E50, 9);
  	ADD_RANGE(0x4E88, 1);
  	ADD_RANGE(0x4EA0, 2);
@@ -14857,10 +14911,11 @@ index 3efa633..e093532 100644
 +	ADD_RANGE(0x4F30, 2);
 +	ADD_RANGE(0x4F44, 1);
 +	ADD_RANGE(0x4F54, 1);
++
+ 	ADD_RANGE(R300_ZB_ZPASS_DATA, 2); /* ZB_ZPASS_DATA, ZB_ZPASS_ADDR */
  
  	ADD_RANGE(R300_TX_FILTER_0, 16);
- 	ADD_RANGE(R300_TX_FILTER1_0, 16);
-@@ -244,11 +246,16 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -249,11 +252,16 @@ void r300_init_reg_flags(struct drm_device *dev)
  	ADD_RANGE(R300_TX_BORDER_COLOR_0, 16);
  
  	/* Sporadic registers used as primitives are emitted */
@@ -14878,7 +14933,7 @@ index 3efa633..e093532 100644
  	if ((dev_priv->flags & RADEON_FAMILY_MASK) >= CHIP_RV515) {
  		ADD_RANGE(R500_VAP_INDEX_OFFSET, 1);
  		ADD_RANGE(R500_US_CONFIG, 2);
-@@ -258,7 +265,10 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -263,7 +271,10 @@ void r300_init_reg_flags(struct drm_device *dev)
  		ADD_RANGE(R500_RS_INST_0, 16);
  		ADD_RANGE(R500_RB3D_COLOR_CLEAR_VALUE_AR, 2);
  		ADD_RANGE(R500_RB3D_CONSTANT_COLOR_AR, 2);
@@ -14890,7 +14945,7 @@ index 3efa633..e093532 100644
  	} else {
  		ADD_RANGE(R300_PFS_CNTL_0, 3);
  		ADD_RANGE(R300_PFS_NODE_0, 4);
-@@ -270,10 +280,125 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -275,10 +286,125 @@ void r300_init_reg_flags(struct drm_device *dev)
  		ADD_RANGE(R300_RS_INTERP_0, 8);
  		ADD_RANGE(R300_RS_ROUTE_0, 8);
  
@@ -15017,7 +15072,7 @@ index 3efa633..e093532 100644
  {
  	int i;
  	if (reg & ~0xffff)
-@@ -284,6 +409,13 @@ static __inline__ int r300_check_range(unsigned reg, int count)
+@@ -289,6 +415,13 @@ static __inline__ int r300_check_range(unsigned reg, int count)
  	return 0;
  }
  
@@ -15032,7 +15087,7 @@ index 3efa633..e093532 100644
  							  dev_priv,
  							  drm_radeon_kcmd_buffer_t
 diff --git a/drivers/gpu/drm/radeon/r300_reg.h b/drivers/gpu/drm/radeon/r300_reg.h
-index ee6f811..12f4abb 100644
+index bdbc95f..906c534 100644
 --- a/drivers/gpu/drm/radeon/r300_reg.h
 +++ b/drivers/gpu/drm/radeon/r300_reg.h
 @@ -126,15 +126,6 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -15351,7 +15406,7 @@ index ee6f811..12f4abb 100644
  /* BEGIN: Vertex program instruction set */
  
 diff --git a/drivers/gpu/drm/radeon/r600_cp.c b/drivers/gpu/drm/radeon/r600_cp.c
-index 9d14eee..a379ead 100644
+index bc9d09d..c3f12e6 100644
 --- a/drivers/gpu/drm/radeon/r600_cp.c
 +++ b/drivers/gpu/drm/radeon/r600_cp.c
 @@ -1720,7 +1720,7 @@ static void r600_cp_init_ring_buffer(struct drm_device *dev,
@@ -16406,10 +16461,10 @@ index 0000000..1cadda2
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_buffer.c b/drivers/gpu/drm/radeon/radeon_buffer.c
 new file mode 100644
-index 0000000..86ab054
+index 0000000..6ea52a8
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_buffer.c
-@@ -0,0 +1,457 @@
+@@ -0,0 +1,464 @@
 +/**************************************************************************
 + * 
 + * Copyright 2007 Dave Airlie
@@ -16859,12 +16914,19 @@ index 0000000..86ab054
 + */
 +uint64_t radeon_evict_flags(struct drm_buffer_object *bo)
 +{
++	struct drm_device *dev = bo->dev;
++	drm_radeon_private_t *dev_priv = dev->dev_private;
++	int cached = 0;
++
++	if (!(dev_priv->flags & RADEON_IS_AGP))
++		cached = DRM_BO_FLAG_CACHED;
++
 +	switch (bo->mem.mem_type) {
 +	case DRM_BO_MEM_LOCAL:
 +	case DRM_BO_MEM_TT:
-+		return DRM_BO_FLAG_MEM_LOCAL;
++		return DRM_BO_FLAG_MEM_LOCAL | cached;
 +	default:
-+		return DRM_BO_FLAG_MEM_TT | DRM_BO_FLAG_MEM_LOCAL;
++		return DRM_BO_FLAG_MEM_TT | DRM_BO_FLAG_MEM_LOCAL | cached;
 +	}
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_combios.c b/drivers/gpu/drm/radeon/radeon_combios.c
@@ -19255,7 +19317,7 @@ index 0000000..d45bd6c
 +	kfree(connector);
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_cp.c b/drivers/gpu/drm/radeon/radeon_cp.c
-index 6f579a8..ac31d0b 100644
+index 77a7a4d..2028a52 100644
 --- a/drivers/gpu/drm/radeon/radeon_cp.c
 +++ b/drivers/gpu/drm/radeon/radeon_cp.c
 @@ -46,8 +46,12 @@ static void radeon_do_cp_start(drm_radeon_private_t * dev_priv);
@@ -19584,7 +19646,7 @@ index 6f579a8..ac31d0b 100644
  	if ((dev_priv->flags & RADEON_FAMILY_MASK) >= CHIP_RV515) {
 -		RADEON_WRITE_PLL(R500_DYN_SCLK_PWMEM_PIPE, (1 | ((gb_pipe_sel >> 8) & 0xf) << 4));
 +		RADEON_WRITE_PLL(dev_priv, R500_DYN_SCLK_PWMEM_PIPE, (1 | ((gb_pipe_sel >> 8) & 0xf) << 4));
- 		RADEON_WRITE(R500_SU_REG_DEST, ((1 << dev_priv->num_gb_pipes) - 1));
+ 		RADEON_WRITE(R300_SU_REG_DEST, ((1 << dev_priv->num_gb_pipes) - 1));
  	}
  	RADEON_WRITE(R300_GB_TILE_CONFIG, gb_tile_config);
 @@ -547,7 +684,6 @@ static void radeon_do_cp_flush(drm_radeon_private_t * dev_priv)
@@ -21294,10 +21356,10 @@ index 6f579a8..ac31d0b 100644
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_cs.c b/drivers/gpu/drm/radeon/radeon_cs.c
 new file mode 100644
-index 0000000..d4d9110
+index 0000000..5c1082f
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_cs.c
-@@ -0,0 +1,687 @@
+@@ -0,0 +1,681 @@
 +/*
 + * Copyright 2008 Jerome Glisse.
 + * All Rights Reserved.
@@ -21399,11 +21461,6 @@ index 0000000..d4d9110
 +		if (parser.chunks[i].chunk_id == RADEON_CHUNK_ID_IB)
 +			parser.ib_index = i;
 +
-+		if (parser.chunks[i].chunk_id == RADEON_CHUNK_ID_OLD) {
-+			parser.ib_index = i;
-+			parser.reloc_index = -1;
-+		}
-+
 +		parser.chunks[i].length_dw = user_chunk.length_dw;
 +		parser.chunks[i].chunk_data = (uint32_t *)(unsigned long)user_chunk.chunk_data;
 +
@@ -21412,7 +21469,6 @@ index 0000000..d4d9110
 +
 +		switch(parser.chunks[i].chunk_id) {
 +		case RADEON_CHUNK_ID_IB:
-+		case RADEON_CHUNK_ID_OLD:
 +			if (size == 0) {
 +				r = -EINVAL;
 +				goto out;
@@ -22884,7 +22940,7 @@ index 0000000..2d5ffc9
 +	if (!ret)
 +		return ret;
 +
-+	drm_helper_initial_config(dev, false);
++	drm_helper_initial_config(dev);
 +
 +	return 0;
 +}
@@ -22903,10 +22959,10 @@ index 0000000..2d5ffc9
 +	drm_mode_config_cleanup(dev);
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_drv.c b/drivers/gpu/drm/radeon/radeon_drv.c
-index 13a60f4..fcb05a4 100644
+index 13a60f4..8207f33 100644
 --- a/drivers/gpu/drm/radeon/radeon_drv.c
 +++ b/drivers/gpu/drm/radeon/radeon_drv.c
-@@ -35,48 +35,97 @@
+@@ -35,48 +35,101 @@
  #include "radeon_drv.h"
  
  #include "drm_pciids.h"
@@ -22918,6 +22974,7 @@ index 13a60f4..fcb05a4 100644
 +int radeon_agpmode = 0;
 +int radeon_vram_zero = 0;
 +int radeon_gart_size = 512; /* default gart size */
++int radeon_vram_limit = -1;
  
  MODULE_PARM_DESC(no_wb, "Disable AGP writeback for scratch registers");
  module_param_named(no_wb, radeon_no_wb, int, 0444);
@@ -22950,6 +23007,9 @@ index 13a60f4..fcb05a4 100644
 -		RADEON_WRITE(R500_DxMODE_INT_MASK, 0);
 -	RADEON_WRITE(RADEON_GEN_INT_CNTL, 0);
 -	return 0;
++MODULE_PARM_DESC(vramlimit, "Restrict VRAM vfor testing");
++module_param_named(vramlimit, radeon_vram_limit, int, 0600);
++
 +static struct drm_driver driver;
 +
 +static struct pci_device_id pciidlist[] = {
@@ -23026,7 +23086,7 @@ index 13a60f4..fcb05a4 100644
  	.dev_priv_size = sizeof(drm_radeon_buf_priv_t),
  	.load = radeon_driver_load,
  	.firstopen = radeon_driver_firstopen,
-@@ -92,6 +141,10 @@ static struct drm_driver driver = {
+@@ -92,6 +145,10 @@ static struct drm_driver driver = {
  	.disable_vblank = radeon_disable_vblank,
  	.master_create = radeon_master_create,
  	.master_destroy = radeon_master_destroy,
@@ -23037,7 +23097,7 @@ index 13a60f4..fcb05a4 100644
  	.irq_preinstall = radeon_driver_irq_preinstall,
  	.irq_postinstall = radeon_driver_irq_postinstall,
  	.irq_uninstall = radeon_driver_irq_uninstall,
-@@ -100,7 +153,11 @@ static struct drm_driver driver = {
+@@ -100,7 +157,11 @@ static struct drm_driver driver = {
  	.get_map_ofs = drm_core_get_map_ofs,
  	.get_reg_ofs = drm_core_get_reg_ofs,
  	.ioctls = radeon_ioctls,
@@ -23049,7 +23109,7 @@ index 13a60f4..fcb05a4 100644
  	.fops = {
  		 .owner = THIS_MODULE,
  		 .open = drm_open,
-@@ -117,8 +174,15 @@ static struct drm_driver driver = {
+@@ -117,8 +178,15 @@ static struct drm_driver driver = {
  	.pci_driver = {
  		 .name = DRIVER_NAME,
  		 .id_table = pciidlist,
@@ -23065,7 +23125,7 @@ index 13a60f4..fcb05a4 100644
  	.name = DRIVER_NAME,
  	.desc = DRIVER_DESC,
  	.date = DRIVER_DATE,
-@@ -130,6 +194,29 @@ static struct drm_driver driver = {
+@@ -130,6 +198,29 @@ static struct drm_driver driver = {
  static int __init radeon_init(void)
  {
  	driver.num_ioctls = radeon_max_ioctl;
@@ -23096,7 +23156,7 @@ index 13a60f4..fcb05a4 100644
  }
  
 diff --git a/drivers/gpu/drm/radeon/radeon_drv.h b/drivers/gpu/drm/radeon/radeon_drv.h
-index 7091aaf..186e2bc 100644
+index ed4d27e..84f0a8c 100644
 --- a/drivers/gpu/drm/radeon/radeon_drv.h
 +++ b/drivers/gpu/drm/radeon/radeon_drv.h
 @@ -34,6 +34,8 @@
@@ -23338,7 +23398,7 @@ index 7091aaf..186e2bc 100644
  } drm_radeon_private_t;
  
  typedef struct drm_radeon_buf_priv {
-@@ -362,8 +488,14 @@ typedef struct drm_radeon_kcmd_buffer {
+@@ -362,8 +488,15 @@ typedef struct drm_radeon_kcmd_buffer {
  } drm_radeon_kcmd_buffer_t;
  
  extern int radeon_no_wb;
@@ -23350,10 +23410,11 @@ index 7091aaf..186e2bc 100644
 +extern int radeon_modeset;
 +extern int radeon_vram_zero;
 +extern int radeon_gart_size;
++extern int radeon_vram_limit;
  
  extern u32 radeon_get_ring_head(drm_radeon_private_t *dev_priv);
  extern void radeon_set_ring_head(drm_radeon_private_t *dev_priv, u32 val);
-@@ -397,7 +529,7 @@ extern int radeon_engine_reset(struct drm_device *dev, void *data, struct drm_fi
+@@ -397,7 +530,7 @@ extern int radeon_engine_reset(struct drm_device *dev, void *data, struct drm_fi
  extern int radeon_fullscreen(struct drm_device *dev, void *data, struct drm_file *file_priv);
  extern int radeon_cp_buffers(struct drm_device *dev, void *data, struct drm_file *file_priv);
  extern u32 radeon_read_fb_location(drm_radeon_private_t *dev_priv);
@@ -23362,7 +23423,7 @@ index 7091aaf..186e2bc 100644
  extern void radeon_write_agp_base(drm_radeon_private_t *dev_priv, u64 agp_base);
  extern u32 RADEON_READ_MM(drm_radeon_private_t *dev_priv, int addr);
  
-@@ -406,12 +538,9 @@ extern struct drm_buf *radeon_freelist_get(struct drm_device * dev);
+@@ -406,12 +539,9 @@ extern struct drm_buf *radeon_freelist_get(struct drm_device * dev);
  
  extern int radeon_wait_ring(drm_radeon_private_t * dev_priv, int n);
  
@@ -23376,7 +23437,7 @@ index 7091aaf..186e2bc 100644
  extern int radeon_mem_alloc(struct drm_device *dev, void *data, struct drm_file *file_priv);
  extern int radeon_mem_free(struct drm_device *dev, void *data, struct drm_file *file_priv);
  extern int radeon_mem_init_heap(struct drm_device *dev, void *data, struct drm_file *file_priv);
-@@ -443,13 +572,13 @@ extern int radeon_vblank_crtc_set(struct drm_device *dev, int64_t value);
+@@ -443,13 +573,13 @@ extern int radeon_vblank_crtc_set(struct drm_device *dev, int64_t value);
  extern int radeon_driver_load(struct drm_device *dev, unsigned long flags);
  extern int radeon_driver_unload(struct drm_device *dev);
  extern int radeon_driver_firstopen(struct drm_device *dev);
@@ -23394,7 +23455,7 @@ index 7091aaf..186e2bc 100644
  extern long radeon_compat_ioctl(struct file *filp, unsigned int cmd,
  				unsigned long arg);
  
-@@ -478,6 +607,12 @@ extern int r600_cp_dispatch_indirect(struct drm_device *dev,
+@@ -478,6 +608,12 @@ extern int r600_cp_dispatch_indirect(struct drm_device *dev,
  extern int r600_page_table_init(struct drm_device *dev);
  extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pcigart_info *gart_info);
  
@@ -23407,7 +23468,7 @@ index 7091aaf..186e2bc 100644
  /* Flags for stats.boxes
   */
  #define RADEON_BOX_DMA_IDLE      0x1
-@@ -486,12 +621,17 @@ extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pciga
+@@ -486,12 +622,17 @@ extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pciga
  #define RADEON_BOX_WAIT_IDLE     0x8
  #define RADEON_BOX_TEXTURE_LOAD  0x10
  
@@ -23425,7 +23486,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_AGP_COMMAND		0x0f60
  #define RADEON_AGP_COMMAND_PCI_CONFIG   0x0060	/* offset in PCI config */
  #	define RADEON_AGP_ENABLE	(1<<8)
-@@ -667,16 +807,6 @@ extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pciga
+@@ -667,16 +808,6 @@ extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pciga
  #define R520_MC_IND_WR_EN (1 << 24)
  #define R520_MC_IND_DATA  0x74
  
@@ -23442,7 +23503,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_MPP_TB_CONFIG		0x01c0
  #define RADEON_MEM_CNTL			0x0140
  #define RADEON_MEM_SDRAM_MODE_REG	0x0158
-@@ -741,6 +871,7 @@ extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pciga
+@@ -740,6 +871,7 @@ extern void r600_page_table_cleanup(struct drm_device *dev, struct drm_ati_pciga
  #define RADEON_SCRATCH_REG3		0x15ec
  #define RADEON_SCRATCH_REG4		0x15f0
  #define RADEON_SCRATCH_REG5		0x15f4
@@ -23450,7 +23511,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_SCRATCH_UMSK		0x0770
  #define RADEON_SCRATCH_ADDR		0x0774
  
-@@ -763,6 +894,12 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -762,6 +894,12 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  
  #define R600_SCRATCHOFF(x)		(R600_SCRATCH_REG_OFFSET + 4*(x))
  
@@ -23463,7 +23524,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_GEN_INT_CNTL		0x0040
  #	define RADEON_CRTC_VBLANK_MASK		(1 << 0)
  #	define RADEON_CRTC2_VBLANK_MASK		(1 << 9)
-@@ -780,10 +917,13 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -779,10 +917,13 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #	define RADEON_SW_INT_FIRE		(1 << 26)
  #       define R500_DISPLAY_INT_STATUS          (1 << 0)
  
@@ -23481,7 +23542,7 @@ index 7091aaf..186e2bc 100644
  
  #define RADEON_ISYNC_CNTL		0x1724
  #	define RADEON_ISYNC_ANY2D_IDLE3D	(1 << 0)
-@@ -822,12 +962,17 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -821,12 +962,17 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #define RADEON_PP_TXFILTER_1		0x1c6c
  #define RADEON_PP_TXFILTER_2		0x1c84
  
@@ -23505,7 +23566,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_RB3D_CNTL		0x1c3c
  #	define RADEON_ALPHA_BLEND_ENABLE	(1 << 0)
  #	define RADEON_PLANE_MASK_ENABLE		(1 << 1)
-@@ -854,11 +999,6 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -853,11 +999,6 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #	define R300_ZC_FLUSH		        (1 << 0)
  #	define R300_ZC_FREE		        (1 << 1)
  #	define R300_ZC_BUSY		        (1 << 31)
@@ -23517,7 +23578,7 @@ index 7091aaf..186e2bc 100644
  #define R300_RB3D_DSTCACHE_CTLSTAT              0x4e4c
  #	define R300_RB3D_DC_FLUSH		(2 << 0)
  #	define R300_RB3D_DC_FREE		(2 << 2)
-@@ -866,15 +1006,15 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -865,15 +1006,15 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #define RADEON_RB3D_ZSTENCILCNTL	0x1c2c
  #	define RADEON_Z_TEST_MASK		(7 << 4)
  #	define RADEON_Z_TEST_ALWAYS		(7 << 4)
@@ -23537,7 +23598,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_RBBM_SOFT_RESET		0x00f0
  #	define RADEON_SOFT_RESET_CP		(1 <<  0)
  #	define RADEON_SOFT_RESET_HI		(1 <<  1)
-@@ -1052,6 +1192,7 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -1051,6 +1192,7 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #	define RADEON_PRE_WRITE_LIMIT_SHIFT	23
  
  #define RADEON_CP_IB_BASE		0x0738
@@ -23545,7 +23606,7 @@ index 7091aaf..186e2bc 100644
  
  #define RADEON_CP_CSQ_CNTL		0x0740
  #	define RADEON_CSQ_CNT_PRIMARY_MASK	(0xff << 0)
-@@ -1062,6 +1203,8 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -1061,6 +1203,8 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #	define RADEON_CSQ_PRIBM_INDBM		(4 << 28)
  #	define RADEON_CSQ_PRIPIO_INDPIO		(15 << 28)
  
@@ -23554,7 +23615,7 @@ index 7091aaf..186e2bc 100644
  #define RADEON_AIC_CNTL			0x01d0
  #	define RADEON_PCIGART_TRANSLATE_EN	(1 << 0)
  #	define RS400_MSI_REARM	                (1 << 3)
-@@ -1144,27 +1287,6 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -1143,27 +1287,6 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #define RADEON_NUM_VERTICES_SHIFT		16
  
  #define RADEON_COLOR_FORMAT_CI8		2
@@ -23582,7 +23643,7 @@ index 7091aaf..186e2bc 100644
  
  #define R200_PP_TXCBLEND_0                0x2f00
  #define R200_PP_TXCBLEND_1                0x2f10
-@@ -1275,16 +1397,44 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -1274,16 +1397,44 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  
  #define R200_SE_TCL_POINT_SPRITE_CNTL     0x22c4
  
@@ -23629,7 +23690,7 @@ index 7091aaf..186e2bc 100644
  #define R500_D1CRTC_STATUS 0x609c
  #define R500_D2CRTC_STATUS 0x689c
  #define R500_CRTC_V_BLANK (1<<0)
-@@ -1746,6 +1896,8 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
+@@ -1745,6 +1896,8 @@ extern u32 radeon_get_scratch(drm_radeon_private_t *dev_priv, int index);
  #define RADEON_RING_HIGH_MARK		128
  
  #define RADEON_PCIGART_TABLE_SIZE      (32*1024)
@@ -23638,7 +23699,7 @@ index 7091aaf..186e2bc 100644
  
  #define RADEON_READ(reg)	DRM_READ32(  dev_priv->mmio, (reg) )
  #define RADEON_WRITE(reg, val)                                          \
-@@ -1760,11 +1912,24 @@ do {									\
+@@ -1759,11 +1912,24 @@ do {									\
  #define RADEON_READ8(reg)	DRM_READ8(  dev_priv->mmio, (reg) )
  #define RADEON_WRITE8(reg,val)	DRM_WRITE8( dev_priv->mmio, (reg), (val) )
  
@@ -23668,7 +23729,7 @@ index 7091aaf..186e2bc 100644
  } while (0)
  
  #define RADEON_WRITE_PCIE(addr, val)					\
-@@ -1802,15 +1967,18 @@ do {							        \
+@@ -1801,15 +1967,18 @@ do {							        \
  	RADEON_WRITE(RS600_MC_DATA, val);                       \
  } while (0)
  
@@ -23690,7 +23751,7 @@ index 7091aaf..186e2bc 100644
  } while (0)
  
  #define CP_PACKET0( reg, n )						\
-@@ -1831,7 +1999,7 @@ do {									\
+@@ -1830,7 +1999,7 @@ do {									\
  #define RADEON_WAIT_UNTIL_2D_IDLE() do {				\
  	OUT_RING( CP_PACKET0( RADEON_WAIT_UNTIL, 0 ) );			\
  	OUT_RING( (RADEON_WAIT_2D_IDLECLEAN |				\
@@ -23699,7 +23760,7 @@ index 7091aaf..186e2bc 100644
  } while (0)
  
  #define RADEON_WAIT_UNTIL_3D_IDLE() do {				\
-@@ -2036,4 +2204,161 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
+@@ -2035,4 +2204,158 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
  	write &= mask;						\
  } while (0)
  
@@ -23766,9 +23827,6 @@ index 7091aaf..186e2bc 100644
 +
 +	if (dev->primary->master) {
 +		master_priv = dev->primary->master->driver_priv;
-+		       
-+		if (master_priv->sarea_priv)
-+			master_priv->sarea_priv->last_fence = dev_priv->counter;
 +	}
 +	return dev_priv->counter;
 +}
@@ -26650,10 +26708,10 @@ index 0000000..13af804
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_gem.c b/drivers/gpu/drm/radeon/radeon_gem.c
 new file mode 100644
-index 0000000..ebb763d
+index 0000000..2f0c54a
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_gem.c
-@@ -0,0 +1,1577 @@
+@@ -0,0 +1,1457 @@
 +/*
 + * Copyright 2008 Red Hat Inc.
 + *
@@ -26717,11 +26775,8 @@ index 0000000..ebb763d
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
 +	struct drm_radeon_gem_info *args = data;
 +
-+	args->vram_start = dev_priv->mm.vram_offset;
 +	args->vram_size = dev_priv->mm.vram_size;
 +	args->vram_visible = dev_priv->mm.vram_visible;
-+
-+	args->gart_start = dev_priv->mm.gart_start;
 +	args->gart_size = dev_priv->mm.gart_useable;
 +
 +	return 0;
@@ -26787,11 +26842,12 @@ index 0000000..ebb763d
 +	struct drm_gem_object *obj;
 +	int ret = 0;
 +	int handle;
++	bool no_backing_store = !!(args->flags & RADEON_GEM_NO_BACKING_STORE);
 +
 +	/* create a gem object to contain this object in */
 +	args->size = roundup(args->size, PAGE_SIZE);
 +
-+	obj = radeon_gem_object_alloc(dev, args->size, args->alignment, args->initial_domain, args->no_backing_store);
++	obj = radeon_gem_object_alloc(dev, args->size, args->alignment, args->initial_domain, no_backing_store);
 +	if (!obj)
 +		return -EINVAL;
 +
@@ -26970,7 +27026,6 @@ index 0000000..ebb763d
 +	struct drm_gem_object *obj;
 +	struct drm_radeon_gem_object *obj_priv;
 +	loff_t offset;
-+	unsigned long addr;
 +
 +	obj = drm_gem_object_lookup(dev, file_priv, args->handle);
 +	if (obj == NULL)
@@ -26978,10 +27033,8 @@ index 0000000..ebb763d
 +
 +	offset = args->offset;
 +
-+	DRM_DEBUG("got here %p\n", obj);
 +	obj_priv = obj->driver_private;
 +
-+	DRM_DEBUG("got here %p %p %lld %ld\n", obj, obj_priv->bo, args->size, obj_priv->bo->num_pages);
 +	if (!obj_priv->bo) {
 +		mutex_lock(&dev->struct_mutex);
 +		drm_gem_object_unreference(obj);
@@ -26989,93 +27042,13 @@ index 0000000..ebb763d
 +		return -EINVAL;
 +	}
 +
-+	down_write(&current->mm->mmap_sem);
-+	addr = do_mmap_pgoff(file_priv->filp, 0, args->size,
-+			     PROT_READ | PROT_WRITE, MAP_SHARED,
-+			     obj_priv->bo->map_list.hash.key);
-+	up_write(&current->mm->mmap_sem);
++	args->addr_ptr = (uint64_t)obj_priv->bo->map_list.hash.key << PAGE_SHIFT;
 +
-+	DRM_DEBUG("got here %p %d\n", obj, obj_priv->bo->mem.mem_type);
 +	mutex_lock(&dev->struct_mutex);
 +	drm_gem_object_unreference(obj);
 +	mutex_unlock(&dev->struct_mutex);
-+	if (IS_ERR((void *)addr))
-+		return addr;
-+
-+	args->addr_ptr = (uint64_t) addr;
 +
 +	return 0;
-+
-+}
-+
-+int radeon_gem_pin_ioctl(struct drm_device *dev, void *data,
-+			 struct drm_file *file_priv)
-+{
-+	struct drm_radeon_gem_pin *args = data;
-+	struct drm_gem_object *obj;
-+	struct drm_radeon_gem_object *obj_priv;
-+	int ret;
-+	int flags = DRM_BO_FLAG_NO_EVICT;
-+	int mask = DRM_BO_FLAG_NO_EVICT;
-+
-+	/* check for valid args */
-+	if (args->pin_domain) {
-+		mask |= DRM_BO_MASK_MEM;
-+		if (args->pin_domain == RADEON_GEM_DOMAIN_GTT)
-+			flags |= DRM_BO_FLAG_MEM_TT;
-+		else if (args->pin_domain == RADEON_GEM_DOMAIN_VRAM)
-+			flags |= DRM_BO_FLAG_MEM_VRAM;
-+		else /* hand back the offset we currently have if no args supplied
-+		      - this is to allow old mesa to work - its a hack */
-+			flags = 0;
-+	}
-+
-+	obj = drm_gem_object_lookup(dev, file_priv, args->handle);
-+	if (obj == NULL)
-+		return -EINVAL;
-+
-+	obj_priv = obj->driver_private;
-+
-+	/* validate into a pin with no fence */
-+	DRM_DEBUG("got here %p %p %d\n", obj, obj_priv->bo, atomic_read(&obj_priv->bo->usage));
-+	if (flags && !(obj_priv->bo->type != drm_bo_type_kernel && !DRM_SUSER(DRM_CURPROC))) {
-+		ret = drm_bo_do_validate(obj_priv->bo, flags, mask,
-+					 DRM_BO_HINT_DONT_FENCE, 0);
-+	} else
-+		ret = 0;
-+
-+	args->offset = obj_priv->bo->offset;
-+	DRM_DEBUG("got here %p %p %lx\n", obj, obj_priv->bo, obj_priv->bo->offset);
-+
-+	mutex_lock(&dev->struct_mutex);
-+	drm_gem_object_unreference(obj);
-+	mutex_unlock(&dev->struct_mutex);
-+	return ret;
-+}
-+
-+int radeon_gem_unpin_ioctl(struct drm_device *dev, void *data,
-+			   struct drm_file *file_priv)
-+{
-+	struct drm_radeon_gem_unpin *args = data;
-+	struct drm_gem_object *obj;
-+	struct drm_radeon_gem_object *obj_priv;
-+	int ret;
-+
-+	obj = drm_gem_object_lookup(dev, file_priv, args->handle);
-+	if (obj == NULL)
-+		return -EINVAL;
-+
-+	obj_priv = obj->driver_private;
-+
-+	/* validate into a pin with no fence */
-+
-+	ret = drm_bo_do_validate(obj_priv->bo, 0, DRM_BO_FLAG_NO_EVICT,
-+				 DRM_BO_HINT_DONT_FENCE, 0);
-+
-+	mutex_lock(&dev->struct_mutex);
-+	drm_gem_object_unreference(obj);
-+	mutex_unlock(&dev->struct_mutex);
-+	return ret;
 +}
 +
 +int radeon_gem_busy(struct drm_device *dev, void *data,
@@ -27087,7 +27060,7 @@ index 0000000..ebb763d
 +int radeon_gem_wait_rendering(struct drm_device *dev, void *data,
 +			      struct drm_file *file_priv)
 +{
-+	struct drm_radeon_gem_wait_rendering *args = data;
++	struct drm_radeon_gem_wait_idle *args = data;
 +	struct drm_gem_object *obj;
 +	struct drm_radeon_gem_object *obj_priv;
 +	int ret;
@@ -27198,6 +27171,14 @@ index 0000000..ebb763d
 +	if (accessible > bar_size)
 +		accessible = bar_size;
 +
++	if (radeon_vram_limit > 0) {
++		if ((radeon_vram_limit *  1024) < vram) {
++			DRM_INFO("Forcing VRAM limit from %dK to %dK\n",
++				vram, radeon_vram_limit * 1024);
++			vram = radeon_vram_limit * 1024;
++		}
++	}
++		
 +	if (accessible > vram)
 +		accessible = vram;
 +
@@ -27322,11 +27303,15 @@ index 0000000..ebb763d
 +{
 +	drm_radeon_private_t *dev_priv = dev->dev_private;
 +	int ret;
++	int cached = 0;
++
++	if (!(dev_priv->flags & RADEON_IS_AGP))
++		cached = DRM_BO_FLAG_CACHED;
 +
 +	ret = drm_buffer_object_create(dev, RADEON_DEFAULT_RING_SIZE,
 +				       drm_bo_type_kernel,
 +				       DRM_BO_FLAG_READ | DRM_BO_FLAG_MEM_TT |
-+				       DRM_BO_FLAG_MAPPABLE | DRM_BO_FLAG_NO_EVICT,
++				       DRM_BO_FLAG_MAPPABLE | DRM_BO_FLAG_NO_EVICT | cached,
 +				       0, 1, 0, &dev_priv->mm.ring.bo);
 +	if (ret) {
 +		if (dev_priv->flags & RADEON_IS_AGP)
@@ -27346,7 +27331,7 @@ index 0000000..ebb763d
 +	ret = drm_buffer_object_create(dev, PAGE_SIZE,
 +				       drm_bo_type_kernel,
 +				       DRM_BO_FLAG_WRITE |DRM_BO_FLAG_READ | DRM_BO_FLAG_MEM_TT |
-+				       DRM_BO_FLAG_MAPPABLE | DRM_BO_FLAG_NO_EVICT,
++				       DRM_BO_FLAG_MAPPABLE | DRM_BO_FLAG_NO_EVICT | cached,
 +				       0, 1, 0, &dev_priv->mm.ring_read.bo);
 +	if (ret) {
 +		DRM_ERROR("failed to allocate ring read\n");
@@ -28184,53 +28169,6 @@ index 0000000..ebb763d
 +	radeon_gem_ib_destroy(dev);
 +	return -ENOMEM;
 +}
-+
-+static struct drm_gem_object *gem_object_get(struct drm_device *dev, uint32_t name)
-+{
-+	struct drm_gem_object *obj;
-+
-+	spin_lock(&dev->object_name_lock);
-+	obj = idr_find(&dev->object_name_idr, name);
-+	if (obj)
-+		drm_gem_object_reference(obj);
-+	spin_unlock(&dev->object_name_lock);
-+	return obj;
-+}
-+
-+void radeon_gem_update_offsets(struct drm_device *dev, struct drm_master *master)
-+{
-+	drm_radeon_private_t *dev_priv = dev->dev_private;
-+	struct drm_radeon_master_private *master_priv = master->driver_priv;
-+	drm_radeon_sarea_t *sarea_priv = master_priv->sarea_priv;
-+	struct drm_gem_object *obj;
-+	struct drm_radeon_gem_object *obj_priv;
-+
-+	/* update front_pitch_offset and back_pitch_offset */
-+	obj = gem_object_get(dev, sarea_priv->front_handle);
-+	if (obj) {
-+		obj_priv = obj->driver_private;
-+
-+		dev_priv->front_offset = obj_priv->bo->offset;
-+		dev_priv->front_pitch_offset = (((sarea_priv->front_pitch / 64) << 22) |
-+						((obj_priv->bo->offset
-+						  + dev_priv->fb_location) >> 10));
-+		drm_gem_object_unreference(obj);
-+	}
-+
-+	obj = gem_object_get(dev, sarea_priv->back_handle);
-+	if (obj) {
-+		obj_priv = obj->driver_private;
-+		dev_priv->back_offset = obj_priv->bo->offset;
-+		dev_priv->back_pitch_offset = (((sarea_priv->back_pitch / 64) << 22) |
-+						((obj_priv->bo->offset
-+						  + dev_priv->fb_location) >> 10));
-+		drm_gem_object_unreference(obj);
-+	}
-+	dev_priv->color_fmt = RADEON_COLOR_FORMAT_ARGB8888;
-+
-+}
-+
-+
 diff --git a/drivers/gpu/drm/radeon/radeon_gem_debugfs.c b/drivers/gpu/drm/radeon/radeon_gem_debugfs.c
 new file mode 100644
 index 0000000..93f36ce
@@ -31556,10 +31494,10 @@ index 0000000..43c28f8
 +#endif
 diff --git a/drivers/gpu/drm/radeon/radeon_pm.c b/drivers/gpu/drm/radeon/radeon_pm.c
 new file mode 100644
-index 0000000..ac7bc0a
+index 0000000..0d2f4a5
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_pm.c
-@@ -0,0 +1,257 @@
+@@ -0,0 +1,258 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -31673,8 +31611,6 @@ index 0000000..ac7bc0a
 +	if (pci_enable_device(dev->pdev))
 +		return -1;
 +
-+	/* Turn on bus mastering -todo fix properly */
-+	radeon_enable_bm(dev_priv);
 +
 +	DRM_ERROR("\n");
 +	/* on atom cards re init the whole card 
@@ -31687,7 +31623,6 @@ index 0000000..ac7bc0a
 +		radeon_combios_asic_init(dev);
 +	}
 +
-+	pci_set_master(dev->pdev);
 +
 +	for (i = 0; i < 8; i++)
 +		RADEON_WRITE(RADEON_BIOS_0_SCRATCH + (i * 4), dev_priv->pmregs.bios_scratch[i]);
@@ -31711,6 +31646,10 @@ index 0000000..ac7bc0a
 +	radeon_static_clocks_init(dev);
 +	
 +	radeon_init_memory_map(dev);
++
++	pci_set_master(dev->pdev);
++	/* Turn on bus mastering -todo fix properly */
++	radeon_enable_bm(dev_priv);
 +
 +	if (dev_priv->flags & RADEON_IS_PCIE) {
 +		memcpy_toio(dev_priv->mm.pcie_table.kmap.virtual, dev_priv->mm.pcie_table_backup, dev_priv->gart_info.table_size);
@@ -37168,7 +37107,7 @@ index 0000000..0edb592
 +
 +#endif
 diff --git a/drivers/gpu/drm/radeon/radeon_state.c b/drivers/gpu/drm/radeon/radeon_state.c
-index fa728ec..6d96e7e 100644
+index fa728ec..ebc5d6c 100644
 --- a/drivers/gpu/drm/radeon/radeon_state.c
 +++ b/drivers/gpu/drm/radeon/radeon_state.c
 @@ -305,8 +305,9 @@ static __inline__ int radeon_check_and_fixup_packet3(drm_radeon_private_t *
@@ -37274,17 +37213,7 @@ index fa728ec..6d96e7e 100644
  		/* Update the input parameters for next time */
  		image->y += height;
  		image->height -= height;
-@@ -2213,6 +2216,9 @@ static int radeon_cp_swap(struct drm_device *dev, void *data, struct drm_file *f
- 	if (sarea_priv->nbox > RADEON_NR_SAREA_CLIPRECTS)
- 		sarea_priv->nbox = RADEON_NR_SAREA_CLIPRECTS;
- 
-+	if (dev_priv->mm.vram_offset)
-+		radeon_gem_update_offsets(dev, file_priv->master);
-+
- 	radeon_cp_dispatch_swap(dev, file_priv->master);
- 	sarea_priv->ctx_owner = 0;
- 
-@@ -2610,8 +2616,8 @@ static int radeon_emit_packets(drm_radeon_private_t * dev_priv,
+@@ -2610,8 +2613,8 @@ static int radeon_emit_packets(drm_radeon_private_t * dev_priv,
  	if (id >= RADEON_MAX_STATE_PACKETS)
  		return -EINVAL;
  
@@ -37295,7 +37224,7 @@ index fa728ec..6d96e7e 100644
  
  	if (sz * sizeof(int) > cmdbuf->bufsz) {
  		DRM_ERROR("Packet size provided larger than data provided\n");
-@@ -2879,7 +2885,7 @@ static int radeon_cp_cmdbuf(struct drm_device *dev, void *data, struct drm_file
+@@ -2879,7 +2882,7 @@ static int radeon_cp_cmdbuf(struct drm_device *dev, void *data, struct drm_file
  
  	orig_nbox = cmdbuf->nbox;
  
@@ -37304,20 +37233,17 @@ index fa728ec..6d96e7e 100644
  		int temp;
  		temp = r300_do_cp_cmdbuf(dev, file_priv, cmdbuf);
  
-@@ -3081,6 +3087,12 @@ static int radeon_cp_getparam(struct drm_device *dev, void *data, struct drm_fil
+@@ -3081,6 +3084,9 @@ static int radeon_cp_getparam(struct drm_device *dev, void *data, struct drm_fil
  	case RADEON_PARAM_NUM_GB_PIPES:
  		value = dev_priv->num_gb_pipes;
  		break;
-+	case RADEON_PARAM_KERNEL_MM:
-+		value = dev_priv->mm_enabled;
-+		break;
 +	case RADEON_PARAM_DEVICE_ID:
 +		value = dev->pci_device;  /* just return the PCI device ID */
 +		break;
  	default:
  		DRM_DEBUG("Invalid parameter %d\n", param->param);
  		return -EINVAL;
-@@ -3103,11 +3115,17 @@ static int radeon_cp_setparam(struct drm_device *dev, void *data, struct drm_fil
+@@ -3103,11 +3109,17 @@ static int radeon_cp_setparam(struct drm_device *dev, void *data, struct drm_fil
  
  	switch (sp->param) {
  	case RADEON_SETPARAM_FB_LOCATION:
@@ -37335,7 +37261,7 @@ index fa728ec..6d96e7e 100644
  		if (sp->value == 0) {
  			DRM_DEBUG("color tiling disabled\n");
  			dev_priv->front_pitch_offset &= ~RADEON_DST_TILE_MACRO;
-@@ -3123,13 +3141,21 @@ static int radeon_cp_setparam(struct drm_device *dev, void *data, struct drm_fil
+@@ -3123,13 +3135,21 @@ static int radeon_cp_setparam(struct drm_device *dev, void *data, struct drm_fil
  		}
  		break;
  	case RADEON_SETPARAM_PCIGART_LOCATION:
@@ -37357,22 +37283,7 @@ index fa728ec..6d96e7e 100644
  		dev_priv->gart_info.table_size = sp->value;
  		if (dev_priv->gart_info.table_size < RADEON_PCIGART_TABLE_SIZE)
  			dev_priv->gart_info.table_size = RADEON_PCIGART_TABLE_SIZE;
-@@ -3137,6 +3163,14 @@ static int radeon_cp_setparam(struct drm_device *dev, void *data, struct drm_fil
- 	case RADEON_SETPARAM_VBLANK_CRTC:
- 		return radeon_vblank_crtc_set(dev, sp->value);
- 		break;
-+	case RADEON_SETPARAM_MM_INIT:
-+		if (drm_core_check_feature(dev, DRIVER_MODESET))
-+			return 0;
-+
-+		dev_priv->new_memmap = true;
-+		dev_priv->user_mm_enable = true;
-+		return radeon_gem_mm_init(dev);
-+		break;
- 	default:
- 		DRM_DEBUG("Invalid parameter %d\n", sp->param);
- 		return -EINVAL;
-@@ -3226,7 +3260,19 @@ struct drm_ioctl_desc radeon_ioctls[] = {
+@@ -3226,7 +3246,17 @@ struct drm_ioctl_desc radeon_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_RADEON_IRQ_WAIT, radeon_irq_wait, DRM_AUTH),
  	DRM_IOCTL_DEF(DRM_RADEON_SETPARAM, radeon_cp_setparam, DRM_AUTH),
  	DRM_IOCTL_DEF(DRM_RADEON_SURF_ALLOC, radeon_surface_alloc, DRM_AUTH),
@@ -37383,21 +37294,19 @@ index fa728ec..6d96e7e 100644
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_CREATE, radeon_gem_create_ioctl, DRM_AUTH),
 +
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_MMAP, radeon_gem_mmap_ioctl, DRM_AUTH),
-+	DRM_IOCTL_DEF(DRM_RADEON_GEM_PIN, radeon_gem_pin_ioctl, DRM_AUTH),
-+	DRM_IOCTL_DEF(DRM_RADEON_GEM_UNPIN, radeon_gem_unpin_ioctl, DRM_AUTH),
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_PREAD, radeon_gem_pread_ioctl, DRM_AUTH),
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_PWRITE, radeon_gem_pwrite_ioctl, DRM_AUTH),
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_SET_DOMAIN, radeon_gem_set_domain_ioctl, DRM_AUTH),
-+	DRM_IOCTL_DEF(DRM_RADEON_GEM_WAIT_RENDERING, radeon_gem_wait_rendering, DRM_AUTH),
++	DRM_IOCTL_DEF(DRM_RADEON_GEM_WAIT_IDLE, radeon_gem_wait_rendering, DRM_AUTH),
 +	DRM_IOCTL_DEF(DRM_RADEON_CS, radeon_cs_ioctl, DRM_AUTH),
  };
  
  int radeon_max_ioctl = DRM_ARRAY_SIZE(radeon_ioctls);
 diff --git a/include/drm/drm.h b/include/drm/drm.h
-index 8e77357..17a1e2c 100644
+index 7cb50bd..fcaef63 100644
 --- a/include/drm/drm.h
 +++ b/include/drm/drm.h
-@@ -174,6 +174,7 @@ enum drm_map_type {
+@@ -173,6 +173,7 @@ enum drm_map_type {
  	_DRM_SCATTER_GATHER = 4,  /**< Scatter/gather memory for PCI DMA */
  	_DRM_CONSISTENT = 5,	  /**< Consistent memory for PCI DMA */
  	_DRM_GEM = 6,		  /**< GEM object */
@@ -37406,7 +37315,7 @@ index 8e77357..17a1e2c 100644
  
  /**
 diff --git a/include/drm/drmP.h b/include/drm/drmP.h
-index ccbcd13..b61b0c6 100644
+index c8c4221..04fbd1e 100644
 --- a/include/drm/drmP.h
 +++ b/include/drm/drmP.h
 @@ -147,9 +147,23 @@ struct drm_device;
@@ -37602,10 +37511,10 @@ index ccbcd13..b61b0c6 100644
  
  #endif				/* __KERNEL__ */
 diff --git a/include/drm/drm_crtc_helper.h b/include/drm/drm_crtc_helper.h
-index c7d4b2e..3091fc3 100644
+index ec073d8..32ac55d 100644
 --- a/include/drm/drm_crtc_helper.h
 +++ b/include/drm/drm_crtc_helper.h
-@@ -122,4 +122,6 @@ static inline void drm_connector_helper_add(struct drm_connector *connector,
+@@ -121,4 +121,6 @@ static inline void drm_connector_helper_add(struct drm_connector *connector,
  }
  
  extern int drm_helper_resume_force_mode(struct drm_device *dev);
@@ -38532,139 +38441,101 @@ index 0000000..686a6c4
 +#endif
 +#endif
 diff --git a/include/drm/radeon_drm.h b/include/drm/radeon_drm.h
-index 937a275..f716e0a 100644
+index fe3e3a4..ed15ce2 100644
 --- a/include/drm/radeon_drm.h
 +++ b/include/drm/radeon_drm.h
-@@ -455,6 +455,15 @@ typedef struct {
- 	int pfCurrentPage;	/* which buffer is being displayed? */
- 	int crtc2_base;		/* CRTC2 frame offset */
- 	int tiling_enabled;	/* set by drm, read by 2d + 3d clients */
-+
-+	unsigned int last_fence;
-+
-+	uint32_t front_handle;
-+	uint32_t back_handle;
-+	uint32_t depth_handle;
-+	uint32_t front_pitch;
-+	uint32_t back_pitch;
-+	uint32_t depth_pitch;
- } drm_radeon_sarea_t;
- 
- /* WARNING: If you change any of these defines, make sure to change the
-@@ -495,6 +504,18 @@ typedef struct {
+@@ -496,6 +496,16 @@ typedef struct {
+ #define DRM_RADEON_SETPARAM   0x19
  #define DRM_RADEON_SURF_ALLOC 0x1a
  #define DRM_RADEON_SURF_FREE  0x1b
++/* KMS ioctl */
++#define DRM_RADEON_GEM_INFO		0x1c
++#define DRM_RADEON_GEM_CREATE		0x1d
++#define DRM_RADEON_GEM_MMAP		0x1e
++#define DRM_RADEON_GEM_PREAD		0x21
++#define DRM_RADEON_GEM_PWRITE		0x22
++#define DRM_RADEON_GEM_SET_DOMAIN	0x23
++#define DRM_RADEON_GEM_WAIT_IDLE	0x24
++#define DRM_RADEON_CS			0x26
++#define DRM_RADEON_INFO			0x27
  
-+#define DRM_RADEON_GEM_INFO   0x1c
-+#define DRM_RADEON_GEM_CREATE 0x1d
-+#define DRM_RADEON_GEM_MMAP   0x1e
-+#define DRM_RADEON_GEM_PIN    0x1f
-+#define DRM_RADEON_GEM_UNPIN  0x20
-+#define DRM_RADEON_GEM_PREAD  0x21
-+#define DRM_RADEON_GEM_PWRITE 0x22
-+#define DRM_RADEON_GEM_SET_DOMAIN 0x23
-+#define DRM_RADEON_GEM_WAIT_RENDERING 0x24
-+
-+#define DRM_RADEON_CS       0x26
-+
  #define DRM_IOCTL_RADEON_CP_INIT    DRM_IOW( DRM_COMMAND_BASE + DRM_RADEON_CP_INIT, drm_radeon_init_t)
  #define DRM_IOCTL_RADEON_CP_START   DRM_IO(  DRM_COMMAND_BASE + DRM_RADEON_CP_START)
- #define DRM_IOCTL_RADEON_CP_STOP    DRM_IOW( DRM_COMMAND_BASE + DRM_RADEON_CP_STOP, drm_radeon_cp_stop_t)
-@@ -523,6 +544,18 @@ typedef struct {
+@@ -524,6 +534,17 @@ typedef struct {
+ #define DRM_IOCTL_RADEON_SETPARAM   DRM_IOW( DRM_COMMAND_BASE + DRM_RADEON_SETPARAM, drm_radeon_setparam_t)
  #define DRM_IOCTL_RADEON_SURF_ALLOC DRM_IOW( DRM_COMMAND_BASE + DRM_RADEON_SURF_ALLOC, drm_radeon_surface_alloc_t)
  #define DRM_IOCTL_RADEON_SURF_FREE  DRM_IOW( DRM_COMMAND_BASE + DRM_RADEON_SURF_FREE, drm_radeon_surface_free_t)
++/* KMS */
++#define DRM_IOCTL_RADEON_GEM_INFO	DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_INFO, struct drm_radeon_gem_info)
++#define DRM_IOCTL_RADEON_GEM_CREATE	DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_CREATE, struct drm_radeon_gem_create)
++#define DRM_IOCTL_RADEON_GEM_MMAP	DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_MMAP, struct drm_radeon_gem_mmap)
++#define DRM_IOCTL_RADEON_GEM_PREAD	DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_PREAD, struct drm_radeon_gem_pread)
++#define DRM_IOCTL_RADEON_GEM_PWRITE	DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_PWRITE, struct drm_radeon_gem_pwrite)
++#define DRM_IOCTL_RADEON_GEM_SET_DOMAIN	DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_SET_DOMAIN, struct drm_radeon_gem_set_domain)
++#define DRM_IOCTL_RADEON_GEM_WAIT_IDLE	DRM_IOW(DRM_COMMAND_BASE + DRM_RADEON_GEM_WAIT_IDLE, struct drm_radeon_gem_wait_idle) 
++#define DRM_IOCTL_RADEON_CS		DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_CS, struct drm_radeon_cs)
++#define DRM_IOCTL_RADEON_INFO		DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_INFO, struct drm_radeon_info)
++
  
-+#define DRM_IOCTL_RADEON_GEM_INFO   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_INFO, struct drm_radeon_gem_info)
-+#define DRM_IOCTL_RADEON_GEM_CREATE   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_CREATE, struct drm_radeon_gem_create)
-+#define DRM_IOCTL_RADEON_GEM_MMAP   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_MMAP, struct drm_radeon_gem_mmap)
-+#define DRM_IOCTL_RADEON_GEM_PIN   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_PIN, struct drm_radeon_gem_pin)
-+#define DRM_IOCTL_RADEON_GEM_UNPIN   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_UNPIN, struct drm_radeon_gem_unpin)
-+#define DRM_IOCTL_RADEON_GEM_PREAD   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_PREAD, struct drm_radeon_gem_pread)
-+#define DRM_IOCTL_RADEON_GEM_PWRITE   DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_PWRITE, struct drm_radeon_gem_pwrite)
-+#define DRM_IOCTL_RADEON_GEM_SET_DOMAIN  DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_GEM_SET_DOMAIN, struct drm_radeon_gem_set_domain)
-+#define DRM_IOCTL_RADEON_GEM_WAIT_RENDERING DRM_IOW(DRM_COMMAND_BASE + DRM_RADEON_GEM_WAIT_RENDERING, struct drm_radeon_gem_wait_rendering) 
-+#define DRM_IOCTL_RADEON_CS DRM_IOWR(DRM_COMMAND_BASE + DRM_RADEON_CS, struct drm_radeon_cs)
-+
-+
  typedef struct drm_radeon_init {
  	enum {
- 		RADEON_INIT_CP = 0x01,
-@@ -680,6 +713,8 @@ typedef struct drm_radeon_indirect {
+@@ -682,6 +703,7 @@ typedef struct drm_radeon_indirect {
  #define RADEON_PARAM_VBLANK_CRTC           13   /* VBLANK CRTC */
  #define RADEON_PARAM_FB_LOCATION           14   /* FB location */
  #define RADEON_PARAM_NUM_GB_PIPES          15   /* num GB pipes */
-+#define RADEON_PARAM_KERNEL_MM             16
-+#define RADEON_PARAM_DEVICE_ID		   17
++#define RADEON_PARAM_DEVICE_ID             16
  
  typedef struct drm_radeon_getparam {
  	int param;
-@@ -734,6 +769,7 @@ typedef struct drm_radeon_setparam {
- #define RADEON_SETPARAM_NEW_MEMMAP 4		/* Use new memory map */
- #define RADEON_SETPARAM_PCIGART_TABLE_SIZE 5    /* PCI GART Table Size */
- #define RADEON_SETPARAM_VBLANK_CRTC 6           /* VBLANK CRTC */
-+#define RADEON_SETPARAM_MM_INIT 7               /* DDX wants memory manager but has no modesetting */
- /* 1.14: Clients can allocate/free a surface
-  */
- typedef struct drm_radeon_surface_alloc {
-@@ -749,4 +785,106 @@ typedef struct drm_radeon_surface_free {
+@@ -751,4 +773,112 @@ typedef struct drm_radeon_surface_free {
  #define	DRM_RADEON_VBLANK_CRTC1		1
  #define	DRM_RADEON_VBLANK_CRTC2		2
  
-+#define RADEON_GEM_DOMAIN_CPU 0x1   // Cached CPU domain
-+#define RADEON_GEM_DOMAIN_GTT 0x2   // GTT or cache flushed
-+#define RADEON_GEM_DOMAIN_VRAM 0x4  // VRAM domain
++/*
++ * Kernel modesetting world below.
++ */
++#define RADEON_GEM_DOMAIN_CPU		0x1
++#define RADEON_GEM_DOMAIN_GTT		0x2
++#define RADEON_GEM_DOMAIN_VRAM		0x4
 +
-+/* return to userspace start/size of gtt and vram apertures */
 +struct drm_radeon_gem_info {
-+	uint64_t gart_start;
-+	uint64_t gart_size;
-+	uint64_t vram_start;
-+	uint64_t vram_size;
-+	uint64_t vram_visible;
++	uint64_t	gart_size;
++	uint64_t	vram_size;
++	uint64_t	vram_visible;
 +};
 +
++#define RADEON_GEM_NO_BACKING_STORE 1
++
 +struct drm_radeon_gem_create {
-+	uint64_t size;
-+	uint64_t alignment;
-+	uint32_t handle;
-+	uint32_t initial_domain; // to allow VRAM to be created
-+	uint32_t no_backing_store; // for VRAM objects - select whether they need backing store
-+	// pretty much front/back/depth don't need it - other things do
++	uint64_t	size;
++	uint64_t	alignment;
++	uint32_t	handle;
++	uint32_t	initial_domain;
++	uint32_t	flags;
 +};
 +
 +struct drm_radeon_gem_mmap {
-+	uint32_t handle;
-+	uint32_t pad;
-+	uint64_t offset;
-+	uint64_t size;
-+	uint64_t addr_ptr;
++	uint32_t	handle;
++	uint32_t	pad;
++	uint64_t	offset;
++	uint64_t	size;
++	uint64_t	addr_ptr;
 +};
 +
 +struct drm_radeon_gem_set_domain {
-+	uint32_t handle;
-+	uint32_t read_domains;
-+	uint32_t write_domain;
++	uint32_t	handle;
++	uint32_t		read_domains;
++	uint32_t		write_domain;
 +};
 +
-+struct drm_radeon_gem_wait_rendering {
-+	uint32_t handle;
-+};
-+
-+struct drm_radeon_gem_pin {
-+	uint32_t handle;
-+	uint32_t pin_domain;
-+	uint64_t alignment;
-+	uint64_t offset;
-+};
-+
-+struct drm_radeon_gem_unpin {
-+	uint32_t handle;
-+	uint32_t pad;
++struct drm_radeon_gem_wait_idle {
++	uint32_t	handle;
++	uint32_t	pad;
 +};
 +
 +struct drm_radeon_gem_busy {
-+	uint32_t handle;
-+	uint32_t busy;
++	uint32_t	handle;
++	uint32_t	busy;
 +};
 +
 +struct drm_radeon_gem_pread {
@@ -38676,7 +38547,8 @@ index 937a275..f716e0a 100644
 +	/** Length of data to read */
 +	uint64_t size;
 +	/** Pointer to write the data into. */
-+	uint64_t data_ptr;	/* void *, but pointers are not 32/64 compatible */
++	/* void *, but pointers are not 32/64 compatible */
++	uint64_t data_ptr;
 +};
 +
 +struct drm_radeon_gem_pwrite {
@@ -38688,28 +38560,43 @@ index 937a275..f716e0a 100644
 +	/** Length of data to write */
 +	uint64_t size;
 +	/** Pointer to read the data from. */
-+	uint64_t data_ptr;	/* void *, but pointers are not 32/64 compatible */
++	/* void *, but pointers are not 32/64 compatible */
++	uint64_t data_ptr;
 +};
 +
-+
-+/* New interface which obsolete all previous interface.
-+ */
-+#define RADEON_CHUNK_ID_RELOCS 0x01
-+#define RADEON_CHUNK_ID_IB     0x02
-+#define RADEON_CHUNK_ID_OLD 0xff
++#define RADEON_CHUNK_ID_RELOCS	0x01
++#define RADEON_CHUNK_ID_IB	0x02
 +
 +struct drm_radeon_cs_chunk {
-+	uint32_t chunk_id;
-+	uint32_t length_dw;
-+	uint64_t chunk_data;
++	uint32_t		chunk_id;
++	uint32_t		length_dw;
++	uint64_t		chunk_data;
++};
++
++struct drm_radeon_cs_reloc {
++	uint32_t		handle;
++	uint32_t		read_domains;
++	uint32_t		write_domain;
++	uint32_t		flags;
 +};
 +
 +struct drm_radeon_cs {
-+	uint32_t	num_chunks;
-+	uint32_t        cs_id;
-+	uint64_t	chunks; /* this points to uint64_t * which point to
-+				   cs chunks */
++	uint32_t		num_chunks;
++	uint32_t		cs_id;
++	/* this points to uint64_t * which point to cs chunks */
++	uint64_t		chunks;
++	/* updates to the limits after this CS ioctl */
++	uint64_t		gart_limit;
++	uint64_t		vram_limit;
 +};
 +
++#define RADEON_INFO_DEVICE_ID		0x00
++#define RADEON_INFO_NUM_GB_PIPES	0x01
++
++struct drm_radeon_info {
++	uint32_t		request;
++	uint32_t		pad;
++	uint64_t		value;
++};
 +
  #endif
