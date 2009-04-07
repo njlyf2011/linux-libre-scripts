@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1508 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1514 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -614,6 +614,11 @@ Patch23: linux-2.6-utrace-ftrace.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
+Patch100: linux-2.6-e820-mark-esi-clobbered.patch
+Patch101: linux-2.6-e820-save-restore-edi-ebp.patch
+Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
+Patch103: linux-2.6-e820-guard-against-pre-acpi3.patch
+
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
@@ -638,6 +643,7 @@ Patch392: linux-2.6-acpi-strict-resources.patch
 Patch393: linux-2.6-hwmon-atk0110.patch
 Patch394: linux-2.6-acpi-video-didl-intel-outputs.patch
 Patch395: linux-2.6-sony-laptop-rfkill.patch
+Patch396: linux-2.6-acer-wmi-bail-on-aao.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
@@ -672,6 +678,8 @@ Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-d
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
+Patch700: linux-2.6-dma-debug-fixes.patch
+
 Patch1515: linux-2.6.29-lirc.patch
 
 # Fix the return code CD accesses when the CDROM drive door is closed
@@ -687,7 +695,7 @@ Patch1814: drm-nouveau.patch
 Patch1816: drm-no-gem-on-i8xx.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
-Patch1820: drm-radeon-reorder-bm.patch
+Patch1821: drm-intel-lying-systems-without-lvds.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -713,6 +721,8 @@ Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
 
 Patch4000: linux-2.6-bootarg-strict-devmem.patch
+
+Patch5000: linux-2.6-add-qcserial.patch
 
 Patch9001: revert-fix-modules_install-via-nfs.patch
 
@@ -1137,6 +1147,10 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
+ApplyPatch linux-2.6-e820-mark-esi-clobbered.patch
+ApplyPatch linux-2.6-e820-save-restore-edi-ebp.patch
+ApplyPatch linux-2.6-e820-acpi3-bios-workaround.patch
+ApplyPatch linux-2.6-e820-guard-against-pre-acpi3.patch
 
 #
 # PowerPC
@@ -1187,6 +1201,7 @@ ApplyPatch linux-2.6-fiemap-header-install.patch
 ApplyPatch linux-2.6-bootarg-strict-devmem.patch
 
 # USB
+ApplyPatch linux-2.6-add-qcserial.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1195,6 +1210,7 @@ ApplyPatch linux-2.6-acpi-strict-resources.patch
 ApplyPatch linux-2.6-hwmon-atk0110.patch
 ApplyPatch linux-2.6-acpi-video-didl-intel-outputs.patch
 ApplyPatch linux-2.6-sony-laptop-rfkill.patch
+ApplyPatch linux-2.6-acer-wmi-bail-on-aao.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1289,6 +1305,9 @@ ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 # fix locking in ipw3945 conf_tx callback
 ApplyPatch linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
+# Fix up DMA debug code
+ApplyPatch linux-2.6-dma-debug-fixes.patch
+
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 
@@ -1308,7 +1327,7 @@ ApplyPatch drm-nouveau.patch
 ApplyPatch drm-no-gem-on-i8xx.patch
 ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
-ApplyPatch drm-radeon-reorder-bm.patch
+ApplyPatch drm-intel-lying-systems-without-lvds.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1922,6 +1941,35 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 06 2009 Dave Airlie <airlied@redhat.com>
+- radeon: bust APIs and move to what we want in the end.
+
+* Sun Apr 05 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: big update.  mostly cleanups, few functional changes
+    Big code cleanup (the scary looking, but hopefully harmless part)
+    Now using "full-featured" VBIOS parser from DDX
+    Remove custom i2c code in favour of i2c_algo_bit
+    Refuse to suspend, we can't possibly resume just yet
+    Fix ramht insertions when a collision happens (rh#492427)
+    No kms warning on pre-nv50 when kms not acutally enabled (rh#493222)
+
+* Sat Apr 04 2009 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-add-qcserial.patch: Add the qcserial driver for Qualcomm modems
+
+* Fri Apr 03 2009 Jarod Wilson <jarod@redhat.com>
+- Don't set up non-existent LVDS on systems with mobile Intel graphics chips
+  that lie about having LVDS (like my Dell Studio Hybrid). Makes plymouth
+  graphical boot function properly.
+- Don't let acer-wmi do stupid things on unsupported systems (like, create
+  a bogus rfkill entry in sysfs that effectively neuters wireless in
+  NetworkManager on the Aspire One)
+
+* Fri Apr 03 2009 Chuck Ebbert <cebbert@redhat.com>
+- x86 E820 fixes from 2.6.30
+
+* Fri Apr 03 2009 Dave Jones <davej@redhat.com>
+- x86/dma: unify definition of pci_unmap_addr* and pci_unmap_len macros
+
 * Thu Apr 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-46
 - Enable debug builds and turn of debugging in the regular kernel.
 - Remove dma-debug patches.
