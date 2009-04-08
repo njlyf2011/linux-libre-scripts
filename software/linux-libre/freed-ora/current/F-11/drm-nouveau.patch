@@ -107,7 +107,7 @@ index f1c386c..fd62fd9 100644
  	if (mask & ~fence->type) {
  		DRM_ERROR("Wait trying to extend fence type"
 diff --git a/drivers/gpu/drm/drm_gem.c b/drivers/gpu/drm/drm_gem.c
-index c1173d8..2e4e667 100644
+index 4984aa8..dee9b40 100644
 --- a/drivers/gpu/drm/drm_gem.c
 +++ b/drivers/gpu/drm/drm_gem.c
 @@ -280,48 +280,58 @@ drm_gem_close_ioctl(struct drm_device *dev, void *data,
@@ -428,7 +428,7 @@ index 0000000..e3d354f
 +}	
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..7165a60
+index 0000000..78a3733
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
 @@ -0,0 +1,4570 @@
@@ -2981,9 +2981,9 @@ index 0000000..7165a60
 +		BIOS_USLEEP(ROM16(bios->data[bios->fp.xlated_entry + 7]));
 +#ifdef __powerpc__
 +	/* Powerbook specific quirks */
-+	if (script == LVDS_RESET && ((dev_priv->chipset & 0xffff) == 0x0179 || (dev_priv->chipset & 0xffff) == 0x0329))
++	if (script == LVDS_RESET && ((dev->pci_device & 0xffff) == 0x0179 || (dev->pci_device & 0xffff) == 0x0329))
 +		nv_write_tmds(dev, dcbent->or, 0, 0x02, 0x72);
-+	if ((dev_priv->chipset & 0xffff) == 0x0179 || (dev_priv->chipset & 0xffff) == 0x0189 || (dev_priv->chipset & 0xffff) == 0x0329) {
++	if ((dev->pci_device & 0xffff) == 0x0179 || (dev->pci_device & 0xffff) == 0x0189 || (dev->pci_device & 0xffff) == 0x0329) {
 +		if (script == LVDS_PANEL_ON) {
 +			bios_wr32(dev, NV_PBUS_DEBUG_DUALHEAD_CTL, bios_rd32(dev, NV_PBUS_DEBUG_DUALHEAD_CTL) | (1 << 31));
 +			bios_wr32(dev, NV_PCRTC_GPIO_EXT, bios_rd32(dev, NV_PCRTC_GPIO_EXT) | 1);
@@ -16691,7 +16691,7 @@ index 0000000..08b2171
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_state.c b/drivers/gpu/drm/nouveau/nouveau_state.c
 new file mode 100644
-index 0000000..47680b8
+index 0000000..ac03162
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_state.c
 @@ -0,0 +1,1044 @@
@@ -17340,7 +17340,7 @@ index 0000000..47680b8
 +		int size, i;
 +		const uint32_t *bios = of_get_property(dn, "NVDA,BMP", &size);
 +		if (bios) {
-+			for(i=0;i<size;i+=4)
++			for (i = 0; i < size; i+=4)
 +				nv_out32(ramin, i, bios[i/4]);
 +			NV_INFO(dev, "OF bios successfully copied (%d bytes)\n",size);
 +		} else
@@ -23182,7 +23182,7 @@ index 0000000..87c6213
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_connector.c b/drivers/gpu/drm/nouveau/nv50_connector.c
 new file mode 100644
-index 0000000..aab3166
+index 0000000..7a21b70
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_connector.c
 @@ -0,0 +1,594 @@
@@ -23594,7 +23594,7 @@ index 0000000..aab3166
 +	}
 +
 +	if (connector->i2c_chan)
-+		edid = drm_get_edid(&connector->base, &connector->i2c_chan->adapter);
++		edid = drm_get_edid(drm_connector, &connector->i2c_chan->adapter);
 +	drm_mode_connector_update_edid_property(drm_connector, edid);
 +
 +	if (edid) {
@@ -27825,7 +27825,7 @@ index b940fdf..cfa6af4 100644
  unifdef-y += via_drm.h
 +unifdef-y += nouveau_drm.h
 diff --git a/include/drm/drmP.h b/include/drm/drmP.h
-index b61b0c6..5b7ce2d 100644
+index 04fbd1e..f2a6bff 100644
 --- a/include/drm/drmP.h
 +++ b/include/drm/drmP.h
 @@ -1267,6 +1267,8 @@ extern void drm_idlelock_release(struct drm_lock_data *lock_data);

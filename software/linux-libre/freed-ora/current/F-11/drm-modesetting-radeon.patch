@@ -2,6 +2,37 @@ Deblobbed
 * drivers/gpu/drm/radeon/radeon-cp.c: Adjust for deblobbed sources.
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
+commit fd8377e53c5bb885904e8d1784276bdacee3a650
+Merge: e94c6e1 a6dd68b
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Tue Apr 7 18:35:27 2009 +1000
+
+    Merge remote branch 'origin/drm-rawhide' into drm-f11
+
+commit a6dd68b3a5dee15f59bdaabf37b6a36da18a03f4
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Tue Apr 7 17:25:13 2009 +1000
+
+    radeon: fix pinning/unpinning for frontbuffer
+
+commit 828d4bc8e75d8e8ac532269521d2aeb3b50ee529
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Tue Apr 7 16:58:35 2009 +1000
+
+    radeon: actually unpin cursor on freeing
+
+commit 70c85b35945d11fae318957c7fbc52ce566a6f03
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Apr 6 20:33:56 2009 +1000
+
+    radeon: add info ioctl
+
+commit e94c6e10efb4dec58e4c0ab419050b11a913eaf9
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Mon Apr 6 15:01:00 2009 +1000
+
+    drop initial config args
+
 commit 280d9ff29dead8e85ed603110ed431d99f07fb99
 Merge: 0221c81 54ed280
 Author: Dave Airlie <airlied@redhat.com>
@@ -22043,10 +22074,10 @@ index 0000000..5c1082f
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_cursor.c b/drivers/gpu/drm/radeon/radeon_cursor.c
 new file mode 100644
-index 0000000..531774a
+index 0000000..7ddc8fd
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_cursor.c
-@@ -0,0 +1,262 @@
+@@ -0,0 +1,264 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -22209,7 +22240,8 @@ index 0000000..531774a
 +	if (!handle) {
 +		/* turn off cursor */
 +		radeon_hide_cursor(crtc);
-+		return 0;
++		obj = NULL;
++		goto unpin;
 +	}
 +
 +	if ((width > CURSOR_WIDTH) || (height > CURSOR_HEIGHT)) {
@@ -22233,6 +22265,7 @@ index 0000000..531774a
 +	radeon_show_cursor(crtc);
 +	radeon_lock_cursor(crtc, false);
 +
++unpin:
 +	if (radeon_crtc->cursor_bo) {
 +		radeon_gem_object_unpin(radeon_crtc->cursor_bo);
 +		mutex_lock(&crtc->dev->struct_mutex);
@@ -22311,7 +22344,7 @@ index 0000000..531774a
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_display.c b/drivers/gpu/drm/radeon/radeon_display.c
 new file mode 100644
-index 0000000..2d5ffc9
+index 0000000..0e0f1bf
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_display.c
 @@ -0,0 +1,643 @@
@@ -23156,7 +23189,7 @@ index 13a60f4..8207f33 100644
  }
  
 diff --git a/drivers/gpu/drm/radeon/radeon_drv.h b/drivers/gpu/drm/radeon/radeon_drv.h
-index ed4d27e..84f0a8c 100644
+index ed4d27e..c7d2265 100644
 --- a/drivers/gpu/drm/radeon/radeon_drv.h
 +++ b/drivers/gpu/drm/radeon/radeon_drv.h
 @@ -34,6 +34,8 @@
@@ -23760,7 +23793,7 @@ index ed4d27e..84f0a8c 100644
  } while (0)
  
  #define RADEON_WAIT_UNTIL_3D_IDLE() do {				\
-@@ -2035,4 +2204,158 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
+@@ -2035,4 +2204,159 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
  	write &= mask;						\
  } while (0)
  
@@ -23770,7 +23803,7 @@ index ed4d27e..84f0a8c 100644
 +	struct drm_buffer_object *bo;
 +	struct drm_fence_object *fence;
 +	struct drm_gem_object *obj;
-+	
++	int pin_count;
 +};
 +
 +#define RADEON_IB_MEMORY (1*1024*1024)
@@ -23918,6 +23951,7 @@ index ed4d27e..84f0a8c 100644
 +extern int r300_get_reg_flags(unsigned reg);
 +int radeon_gem_prelocate(struct drm_radeon_cs_parser *parser);
 +void radeon_write_agp_base(drm_radeon_private_t *dev_priv, u64 agp_base);
++int radeon_info_ioctl(struct drm_device *dev, void *data, struct drm_file *filp);
  #endif				/* __RADEON_DRV_H__ */
 diff --git a/drivers/gpu/drm/radeon/radeon_encoders.c b/drivers/gpu/drm/radeon/radeon_encoders.c
 new file mode 100644
@@ -25670,10 +25704,10 @@ index 0000000..d3777a4
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_fb.c b/drivers/gpu/drm/radeon/radeon_fb.c
 new file mode 100644
-index 0000000..244b066
+index 0000000..148ee30
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_fb.c
-@@ -0,0 +1,927 @@
+@@ -0,0 +1,928 @@
 +/*
 + * Copyright © 2007 David Airlie
 + *
@@ -26589,6 +26623,7 @@ index 0000000..244b066
 +		drm_bo_kunmap(&radeon_fb->kmap_obj);
 +		dev_priv->mm.vram_visible += radeon_fb->obj->size;
 +		mutex_lock(&dev->struct_mutex);
++		radeon_gem_object_unpin(radeon_fb->obj);
 +		drm_gem_object_unreference(radeon_fb->obj);
 +		radeon_fb->obj = NULL;
 +		mutex_unlock(&dev->struct_mutex);
@@ -26708,10 +26743,10 @@ index 0000000..13af804
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_gem.c b/drivers/gpu/drm/radeon/radeon_gem.c
 new file mode 100644
-index 0000000..2f0c54a
+index 0000000..d1abc6e
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_gem.c
-@@ -0,0 +1,1457 @@
+@@ -0,0 +1,1496 @@
 +/*
 + * Copyright 2008 Red Hat Inc.
 + *
@@ -27847,6 +27882,10 @@ index 0000000..2f0c54a
 +
 +	obj_priv = obj->driver_private;
 +
++	obj_priv->pin_count++;
++	if (obj_priv->pin_count != 1)
++		return 0;
++
 +	if (pin_domain) {
 +		mask |= DRM_BO_MASK_MEM;
 +		if (pin_domain == RADEON_GEM_DOMAIN_GTT)
@@ -27868,6 +27907,10 @@ index 0000000..2f0c54a
 +	int ret;
 +
 +	obj_priv = obj->driver_private;
++
++	obj_priv->pin_count--;
++	if (obj_priv->pin_count != 0)
++		return 0;
 +
 +	ret = drm_bo_do_validate(obj_priv->bo, 0, DRM_BO_FLAG_NO_EVICT,
 +				 DRM_BO_HINT_DONT_FENCE, 0);
@@ -28169,6 +28212,37 @@ index 0000000..2f0c54a
 +	radeon_gem_ib_destroy(dev);
 +	return -ENOMEM;
 +}
++
++/*
++ *  * Userspace get informations ioctl
++ *   */
++int radeon_info_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
++{
++	drm_radeon_private_t *dev_priv = dev->dev_private;
++	struct drm_radeon_info *info;
++	uint32_t *value_ptr;
++	uint32_t value;
++
++	info = data;
++	value_ptr = (uint32_t*)(unsigned long)info->value;
++	switch (info->request) {
++	case RADEON_INFO_DEVICE_ID:
++		value = dev->pci_device;
++		break;
++	case RADEON_INFO_NUM_GB_PIPES:
++		value = dev_priv->num_gb_pipes;
++		break;
++	default:
++		DRM_DEBUG("Invalid request %d\n", info->request);
++		return -EINVAL;
++	}
++	if (DRM_COPY_TO_USER(value_ptr, &value, sizeof(uint32_t))) {
++		DRM_ERROR("copy_to_user\n");
++		return -EFAULT;
++	}
++	return 0;
++}
++
 diff --git a/drivers/gpu/drm/radeon/radeon_gem_debugfs.c b/drivers/gpu/drm/radeon/radeon_gem_debugfs.c
 new file mode 100644
 index 0000000..93f36ce
@@ -37107,7 +37181,7 @@ index 0000000..0edb592
 +
 +#endif
 diff --git a/drivers/gpu/drm/radeon/radeon_state.c b/drivers/gpu/drm/radeon/radeon_state.c
-index fa728ec..ebc5d6c 100644
+index fa728ec..30af2d7 100644
 --- a/drivers/gpu/drm/radeon/radeon_state.c
 +++ b/drivers/gpu/drm/radeon/radeon_state.c
 @@ -305,8 +305,9 @@ static __inline__ int radeon_check_and_fixup_packet3(drm_radeon_private_t *
@@ -37283,7 +37357,7 @@ index fa728ec..ebc5d6c 100644
  		dev_priv->gart_info.table_size = sp->value;
  		if (dev_priv->gart_info.table_size < RADEON_PCIGART_TABLE_SIZE)
  			dev_priv->gart_info.table_size = RADEON_PCIGART_TABLE_SIZE;
-@@ -3226,7 +3246,17 @@ struct drm_ioctl_desc radeon_ioctls[] = {
+@@ -3226,7 +3246,18 @@ struct drm_ioctl_desc radeon_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_RADEON_IRQ_WAIT, radeon_irq_wait, DRM_AUTH),
  	DRM_IOCTL_DEF(DRM_RADEON_SETPARAM, radeon_cp_setparam, DRM_AUTH),
  	DRM_IOCTL_DEF(DRM_RADEON_SURF_ALLOC, radeon_surface_alloc, DRM_AUTH),
@@ -37299,6 +37373,7 @@ index fa728ec..ebc5d6c 100644
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_SET_DOMAIN, radeon_gem_set_domain_ioctl, DRM_AUTH),
 +	DRM_IOCTL_DEF(DRM_RADEON_GEM_WAIT_IDLE, radeon_gem_wait_rendering, DRM_AUTH),
 +	DRM_IOCTL_DEF(DRM_RADEON_CS, radeon_cs_ioctl, DRM_AUTH),
++	DRM_IOCTL_DEF(DRM_RADEON_INFO, radeon_info_ioctl, DRM_AUTH),
  };
  
  int radeon_max_ioctl = DRM_ARRAY_SIZE(radeon_ioctls);
