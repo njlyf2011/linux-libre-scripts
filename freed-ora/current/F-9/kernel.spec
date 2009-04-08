@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.41 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.43 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -44,7 +44,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -699,6 +699,7 @@ Patch682: linux-2.6-iwl3945-ibss-tsf-fix.patch
 Patch685: linux-2.6-wireless-ath9k-dma-fixes.patch
 Patch686: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch687: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
+Patch689: linux-2.6-iwlwifi-remove-implicit-direct-scan.patch
 Patch690: linux-2.6-at76.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
@@ -756,13 +757,13 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 # ext4
 Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
-# don't spew warnings when using fallback allocator
-Patch2902: linux-2.6.27-ext4-print-warning-once.patch
-# fix extent header checking
-Patch2903: linux-2.6.27-ext4-fix-header-check.patch
-# from 2.6.29-rc, 18 mar 2009
-Patch2904: linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
-Patch2905: linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
+
+# next round for -stable
+Patch2910: ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
+Patch2911: ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
+Patch2912: ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
+Patch2913: ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
+Patch2914: ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -1317,6 +1318,9 @@ ApplyPatch linux-2.6-iwl3945-ibss-tsf-fix.patch
 ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
 ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 
+# iwlwifi: remove implicit direct scan
+ApplyPatch linux-2.6-iwlwifi-remove-implicit-direct-scan.patch
+
 # Add misc wireless bits from upstream wireless tree
 ApplyPatch linux-2.6-at76.patch
 
@@ -1367,10 +1371,12 @@ ApplyPatch drm-mm-readd-nopfn.patch
 # Filesystem patches
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
-ApplyPatch linux-2.6.27-ext4-print-warning-once.patch
-ApplyPatch linux-2.6.27-ext4-fix-header-check.patch
-ApplyPatch linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
-ApplyPatch linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
+
+ApplyPatch ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
+ApplyPatch ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
+ApplyPatch ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
+ApplyPatch ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
+ApplyPatch ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1986,7 +1992,13 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Thu Apr  2 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre .1
+* Tue Apr  7 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.43
+- iwlwifi: remove implicit direct scan
+
+* Thu Mar 26 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-170.2.42
+- Next round of ext4 fixes for -stable.
+
+* Mon Mar 23 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre .1 Thu Apr  2
 - Rebased to 2.6.27-libre1.
 - Adjusted patch-libre-2.6.27.21.
 - Deblobbed linux-2.6-at76.patch.
