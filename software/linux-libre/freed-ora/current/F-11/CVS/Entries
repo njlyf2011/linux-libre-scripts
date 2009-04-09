@@ -1,6 +1,5 @@
 D/scripts////
 /linux-2.6.29.tar.bz2.sign/-1.1/Tue Mar 24 01:31:28 2009//Tkernel-2_6_29-16_fc11
-/.cvsignore/1.1041/dummy timestamp from new-entry//Tkernel-2_6_29_1-54_fc11
 /Makefile/1.101/Mon Mar 30 09:03:33 2009//Tkernel-2_6_29_1-54_fc11
 /Makefile.config/1.70/Mon Mar 30 09:03:33 2009/-ko/Tkernel-2_6_29_1-54_fc11
 /TODO/1.62/Mon Apr  6 18:35:00 2009//Tkernel-2_6_29_1-54_fc11
@@ -32,8 +31,6 @@ D/scripts////
 /drm-i915-resume-force-mode.patch/1.2/Thu Mar 26 18:46:43 2009/-kb/Tkernel-2_6_29_1-54_fc11
 /drm-intel-big-hammer.patch/1.1/Wed Mar 11 22:45:01 2009/-kb/Tkernel-2_6_29_1-54_fc11
 /drm-intel-lying-systems-without-lvds.patch/1.4/Sat Apr  4 02:40:41 2009/-kb/Tkernel-2_6_29_1-54_fc11
-/drm-modesetting-radeon.patch/1.70/Result of merge+Wed Apr  8 05:58:16 2009/-kb/Tkernel-2_6_29_1-54_fc11
-/drm-next.patch/1.13/dummy timestamp from new-entry+Mon Apr  6 18:43:15 2009/-kb/Tkernel-2_6_29_1-54_fc11
 /drm-no-gem-on-i8xx.patch/1.1/Mon Feb  9 04:45:32 2009/-kb/Tkernel-2_6_29_1-54_fc11
 /drm-nouveau.patch/1.37/Result of merge+Wed Apr  8 05:58:19 2009/-kb/Tkernel-2_6_29_1-54_fc11
 /drm-radeon-pm.patch/1.2/Tue Mar  3 21:06:24 2009/-kb/Tkernel-2_6_29_1-54_fc11
@@ -133,3 +130,6 @@ D/scripts////
 /sources/1.1003/dummy timestamp from new-entry//Tkernel-2_6_29_1-54_fc11
 /upstream/1.914/dummy timestamp from new-entry//Tkernel-2_6_29_1-54_fc11
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_29_1-54_fc11
+/.cvsignore/1.1041/Thu Apr  9 06:17:19 2009//Tkernel-2_6_29_1-54_fc11
+/drm-modesetting-radeon.patch/1.70/Thu Apr  9 06:17:24 2009/-kb/Tkernel-2_6_29_1-54_fc11
+/drm-next.patch/1.13/Thu Apr  9 06:17:28 2009/-kb/Tkernel-2_6_29_1-54_fc11
