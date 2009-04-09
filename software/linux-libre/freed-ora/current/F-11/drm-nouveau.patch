@@ -428,10 +428,10 @@ index 0000000..e3d354f
 +}	
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..78a3733
+index 0000000..fd3e08a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -0,0 +1,4570 @@
+@@ -0,0 +1,4577 @@
 +/*
 + * Copyright 2005-2006 Erik Waling
 + * Copyright 2006 Stephane Marchesin
@@ -521,13 +521,20 @@ index 0000000..78a3733
 +
 +static void load_vbios_prom(struct drm_device *dev, uint8_t *data)
 +{
-+	uint32_t pci_nv_20 = nvReadMC(dev, NV_PBUS_PCI_NV_20);
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	uint32_t pci_nv_20, save_pci_nv_20;
 +	int pcir_ptr;
 +	int i;
 +
++	if (dev_priv->card_type >= NV_50)
++		pci_nv_20 = 0x88050;
++	else
++		pci_nv_20 = NV_PBUS_PCI_NV_20;
++
 +	/* enable ROM access */
-+	nvWriteMC(dev, NV_PBUS_PCI_NV_20,
-+		  pci_nv_20 & ~NV_PBUS_PCI_NV_20_ROM_SHADOW_ENABLED);
++	save_pci_nv_20 = nvReadMC(dev, pci_nv_20);
++	nvWriteMC(dev, pci_nv_20,
++		  save_pci_nv_20 & ~NV_PBUS_PCI_NV_20_ROM_SHADOW_ENABLED);
 +
 +	/* bail if no rom signature */
 +	if (nv_rd08(NV_PROM_OFFSET) != 0x55 ||
@@ -552,8 +559,8 @@ index 0000000..78a3733
 +
 +out:
 +	/* disable ROM access */
-+	nvWriteMC(dev, NV_PBUS_PCI_NV_20,
-+		  pci_nv_20 | NV_PBUS_PCI_NV_20_ROM_SHADOW_ENABLED);
++	nvWriteMC(dev, pci_nv_20,
++		  save_pci_nv_20 | NV_PBUS_PCI_NV_20_ROM_SHADOW_ENABLED);
 +}
 +
 +static void load_vbios_pramin(struct drm_device *dev, uint8_t *data)
@@ -12081,10 +12088,10 @@ index 0000000..74f5913
 +#endif	/* __NOUVEAU_HW_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_i2c.c b/drivers/gpu/drm/nouveau/nouveau_i2c.c
 new file mode 100644
-index 0000000..2cf6a4a
+index 0000000..5cd2fbf
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_i2c.c
-@@ -0,0 +1,189 @@
+@@ -0,0 +1,225 @@
 +/*
 + * Copyright 2009 Red Hat Inc.
 + *
@@ -12230,11 +12237,16 @@ index 0000000..2cf6a4a
 +		i2c->algo.setscl = nv50_i2c_setscl;
 +		i2c->algo.getsda = nv50_i2c_getsda;
 +		i2c->algo.getscl = nv50_i2c_getscl;
++		/* not 100% convinced this is correct everywhere, but
++		 * the best guess so far..
++		 */
 +		if (dcbi2c->read <= 3)
-+			i2c->rd = 0xe138;
++			i2c->rd = 0xe138 + (dcbi2c->read * 24);
 +		else
-+			i2c->rd = 0xe1e0;
-+		i2c->rd += dcbi2c->read * 0x18;
++		if (dev_priv->chipset < 0x90)
++			i2c->rd = 0xe1e0 + (dcbi2c->read * 24);
++		else
++			i2c->rd = 0xe1d4 + (dcbi2c->read * 32);
 +		i2c->wr = i2c->rd;
 +		break;
 +	default:
@@ -12274,12 +12286,43 @@ index 0000000..2cf6a4a
 +	drm_free(i2c, sizeof(*i2c), DRM_MEM_DRIVER);
 +}
 +
++bool
++nouveau_i2c_detect(struct nouveau_connector *connector)
++{
++	struct drm_device *dev = connector->base.dev;
++	/* kindly borrrowed from the intel driver, hope it works. */
++	uint8_t out_buf[] = { 0x0, 0x0};
++	uint8_t buf[2];
++	bool ret;
++	struct i2c_msg msgs[] = {
++		{
++			.addr = 0x50,
++			.flags = 0,
++			.len = 1,
++			.buf = out_buf,
++		},
++		{
++			.addr = 0x50,
++			.flags = I2C_M_RD,
++			.len = 1,
++			.buf = buf,
++		}
++	};
++
++	if (!connector->i2c_chan)
++		return false;
++
++	ret = (i2c_transfer(&connector->i2c_chan->adapter, msgs, 2) == 2);
++
++	NV_DEBUG(dev, "i2c_detect: bus=%d present=%d\n", connector->bus, ret);
++	return ret;
++}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_i2c.h b/drivers/gpu/drm/nouveau/nouveau_i2c.h
 new file mode 100644
-index 0000000..929b585
+index 0000000..70b1a54
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_i2c.h
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,46 @@
 +/*
 + * Copyright 2009 Red Hat Inc.
 + *
@@ -12309,6 +12352,8 @@ index 0000000..929b585
 +#include <linux/i2c-id.h>
 +#include <linux/i2c-algo-bit.h>
 +
++#include "nouveau_connector.h"
++
 +struct nouveau_i2c_chan {
 +	struct drm_device *dev;
 +	struct i2c_adapter adapter;
@@ -12321,6 +12366,7 @@ index 0000000..929b585
 +int nouveau_i2c_new(struct drm_device *, const char *, unsigned,
 +		    struct nouveau_i2c_chan **);
 +void nouveau_i2c_del(struct nouveau_i2c_chan **);
++bool nouveau_i2c_detect(struct nouveau_connector *connector);
 +
 +#endif /* __NOUVEAU_I2C_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_ioc32.c b/drivers/gpu/drm/nouveau/nouveau_ioc32.c
@@ -23182,10 +23228,10 @@ index 0000000..87c6213
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_connector.c b/drivers/gpu/drm/nouveau/nv50_connector.c
 new file mode 100644
-index 0000000..7a21b70
+index 0000000..afb9ac3
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_connector.c
-@@ -0,0 +1,594 @@
+@@ -0,0 +1,536 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -23326,52 +23372,6 @@ index 0000000..7a21b70
 +	return NULL;
 +}
 +
-+static bool nv50_connector_hpd_detect(struct nouveau_connector *connector)
-+{
-+	struct drm_device *dev = connector->base.dev;
-+	uint32_t bus = connector->bus, reg;
-+	bool present = false;
-+
-+	reg = nv_rd32(NV50_PCONNECTOR_HOTPLUG_STATE);
-+	if (reg & (NV50_PCONNECTOR_HOTPLUG_STATE_PIN_CONNECTED_I2C0 << (4 * bus)))
-+		present = true;
-+
-+	NV_DEBUG(dev, "hpd_detect: bus=%d reg=0x%08x present=%d\n",
-+		 connector->bus, reg, present);
-+	return present;
-+}
-+
-+static bool nv50_connector_i2c_detect(struct nouveau_connector *connector)
-+{
-+	struct drm_device *dev = connector->base.dev;
-+	/* kindly borrrowed from the intel driver, hope it works. */
-+	uint8_t out_buf[] = { 0x0, 0x0};
-+	uint8_t buf[2];
-+	bool ret;
-+	struct i2c_msg msgs[] = {
-+		{
-+			.addr = 0x50,
-+			.flags = 0,
-+			.len = 1,
-+			.buf = out_buf,
-+		},
-+		{
-+			.addr = 0x50,
-+			.flags = I2C_M_RD,
-+			.len = 1,
-+			.buf = buf,
-+		}
-+	};
-+
-+	if (!connector->i2c_chan)
-+		return false;
-+
-+	ret = (i2c_transfer(&connector->i2c_chan->adapter, msgs, 2) == 2);
-+
-+	NV_DEBUG(dev, "i2c_detect: bus=%d present=%d\n", connector->bus, ret);
-+	return ret;
-+}
-+
 +static void nv50_connector_destroy(struct drm_connector *drm_connector)
 +{
 +	struct nouveau_connector *connector = to_nouveau_connector(drm_connector);
@@ -23426,7 +23426,6 @@ index 0000000..7a21b70
 +	struct nouveau_connector *connector = to_nouveau_connector(drm_connector);
 +	struct nouveau_encoder *encoder = NULL;
 +	struct drm_encoder_helper_funcs *helper = NULL;
-+	bool hpd, i2c;
 +
 +	if (drm_connector->connector_type == DRM_MODE_CONNECTOR_LVDS) {
 +		if (!connector->native_mode) {
@@ -23448,18 +23447,7 @@ index 0000000..7a21b70
 +		return connector_status_connected;
 +	}
 +
-+	/* It's not certain if we can trust the hotplug pins just yet,
-+	 * at least, we haven't found a reliable way of determining which
-+	 * pin is wired to which connector.  We'll do both hpd and single-byte
-+	 * i2c detect, and report if they differ for reference, and then
-+	 * trust i2c detect.
-+	 */
-+	hpd = nv50_connector_hpd_detect(connector);
-+	i2c = nv50_connector_i2c_detect(connector);
-+	if (hpd != i2c)
-+		NV_INFO(dev, "i2c and hpd detect differ: %d vs %d\n", i2c, hpd);
-+
-+	if (i2c) {
++	if (nouveau_i2c_detect(connector)) {
 +		nv50_connector_set_digital(connector, true);
 +		return connector_status_connected;
 +	}

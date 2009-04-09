@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1516 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1521 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -711,6 +711,7 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
+Patch2902: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
@@ -733,9 +734,6 @@ Patch9003: linux-2.6-dropwatch-protocol.patch
 
 # fix for net lockups, will be in 2.6.29.1
 Patch9101: linux-2.6-net-fix-another-gro-bug.patch
-
-# http://bugs.freedesktop.org/show_bug.cgi?id=20803
-Patch9210: linux-2.6.29-pat-fixes.patch
 
 %endif
 
@@ -1343,6 +1341,7 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyPatch linux-2.6-v4l-dvb-update.patch
 ApplyPatch linux-2.6-v4l-dvb-experimental.patch
+ApplyPatch linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
@@ -1353,8 +1352,6 @@ ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
 ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
-
-ApplyPatch linux-2.6.29-pat-fixes.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1941,6 +1938,21 @@ fi
 # and build.
 
 %changelog
+* Wed Apr 08 2009 Adam Jackson <ajax@redhat.com>
+- Drop the PAT patch, sufficiently upstreamed now.
+
+* Wed Apr 08 2009 Dave Jones <davej@redhat.com> 2.6.29.1-58
+- disable MMIOTRACE in non-debug builds (#494584)
+
+* Wed Apr 08 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: nv50 kms fixes (PROM access, i2c, clean some warnings)
+
+* Tue Apr 07 2009 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch (#493053)
+
+* Tue Apr 07 2009 Dave Jones <davej@redhat.com>
+- Enable CONFIG_CIFS_STATS (#494545)
+
 * Tue Apr 07 2009 Dave Airlie <airlied@redhat.com>
 - drm-modesetting-radeon: repair vt switch
 
