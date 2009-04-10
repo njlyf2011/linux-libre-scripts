@@ -2,12 +2,58 @@ Deblobbed
 * drivers/gpu/drm/radeon/radeon-cp.c: Adjust for deblobbed sources.
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
-commit fd8377e53c5bb885904e8d1784276bdacee3a650
-Merge: e94c6e1 a6dd68b
+commit 1076a8a749c46b964ee49f5d4dc42070b1905e26
+Merge: e94c6e1 8765b83
 Author: Dave Airlie <airlied@redhat.com>
-Date:   Tue Apr 7 18:35:27 2009 +1000
+Date:   Thu Apr 9 20:04:30 2009 +1000
 
-    Merge remote branch 'origin/drm-rawhide' into drm-f11
+    Merge branch 'drm-rawhide' into drm-f11
+
+commit 8765b83462d03fcbd2b9d2eab647d7c2d362b12a
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Thu Apr 9 20:02:43 2009 +1000
+
+    radeon: commit missed change
+
+commit c6714d8fcdecbba304eb9e0745a4d8b6d0fb54b7
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Thu Apr 9 20:01:12 2009 +1000
+
+    radeon: temporary dac detection fix
+
+commit d96029a52d92bd307e93e4d917c9befff246f196
+Author: Alex Deucher <alexdeucher@gmail.com>
+Date:   Thu Apr 9 20:00:49 2009 +1000
+
+    radeon: fixups ported from userspace tree
+
+commit f9db70a117cc498c20e567cf53b75ccb5ad79927
+Author: Alex Deucher <alexdeucher@gmail.com>
+Date:   Mon Apr 6 13:32:03 2009 -0400
+
+    radeon: fix default sclk/mclk from combios
+    
+    Signed-off-by: Alex Deucher <alexdeucher@gmail.com>
+
+commit 28c6f86ef07c8f0067ece9d7fe40718854b19422
+Author: Alex Deucher <alexdeucher@gmail.com>
+Date:   Mon Apr 6 13:29:56 2009 -0400
+
+    radeon: fix crtc routing for CRT1 on r4xx ATOM
+    
+    Signed-off-by: Alex Deucher <alexdeucher@gmail.com>
+
+commit 78bf4641b234a99deb3820b8d7baece35a54dce6
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Thu Apr 9 18:41:47 2009 +1000
+
+    radeon: reset edid if none found
+
+commit a6fe700b5e32fd4db97fda76cb32977b5f381ebd
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Thu Apr 9 18:40:57 2009 +1000
+
+    radeon: fix up dual head screens on atombios
 
 commit a6dd68b3a5dee15f59bdaabf37b6a36da18a03f4
 Author: Dave Airlie <airlied@redhat.com>
@@ -14376,7 +14422,7 @@ index 0000000..9932b09
 +#endif /* _ATOMBIOS_H */
 diff --git a/drivers/gpu/drm/radeon/atombios_crtc.c b/drivers/gpu/drm/radeon/atombios_crtc.c
 new file mode 100644
-index 0000000..5332de5
+index 0000000..b7a2a6c
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/atombios_crtc.c
 @@ -0,0 +1,501 @@
@@ -14604,7 +14650,7 @@ index 0000000..5332de5
 +			if (!radeon_is_avivo(dev_priv)) {
 +				if (encoder->encoder_type != DRM_MODE_ENCODER_DAC)
 +					pll_flags |= RADEON_PLL_NO_ODD_POST_DIV;
-+				if (encoder->encoder_type == DRM_MODE_ENCODER_LVDS)
++				if (!radeon_is_avivo(dev_priv) && (encoder->encoder_type == DRM_MODE_ENCODER_LVDS))
 +					pll_flags |= RADEON_PLL_USE_REF_DIV;
 +			}
 +			radeon_encoder = to_radeon_encoder(encoder);
@@ -14724,8 +14770,8 @@ index 0000000..5332de5
 +	RADEON_WRITE(AVIVO_D1GRPH_SURFACE_OFFSET_Y + radeon_crtc->crtc_offset, 0);
 +	RADEON_WRITE(AVIVO_D1GRPH_X_START + radeon_crtc->crtc_offset, 0);
 +	RADEON_WRITE(AVIVO_D1GRPH_Y_START + radeon_crtc->crtc_offset, 0);
-+	RADEON_WRITE(AVIVO_D1GRPH_X_END + radeon_crtc->crtc_offset, crtc->mode.hdisplay); /*XXX fb width in pixels*/
-+	RADEON_WRITE(AVIVO_D1GRPH_Y_END + radeon_crtc->crtc_offset, crtc->mode.vdisplay); /*XXX fb height in pixels*/
++	RADEON_WRITE(AVIVO_D1GRPH_X_END + radeon_crtc->crtc_offset, crtc->fb->width);
++	RADEON_WRITE(AVIVO_D1GRPH_Y_END + radeon_crtc->crtc_offset, crtc->fb->height);
 +
 +	fb_pitch_pixels = crtc->fb->pitch / (crtc->fb->bits_per_pixel / 8);
 +	RADEON_WRITE(AVIVO_D1GRPH_PITCH + radeon_crtc->crtc_offset, fb_pitch_pixels);
@@ -16962,7 +17008,7 @@ index 0000000..6ea52a8
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_combios.c b/drivers/gpu/drm/radeon/radeon_combios.c
 new file mode 100644
-index 0000000..cb750f1
+index 0000000..a8d82d4
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_combios.c
 @@ -0,0 +1,1767 @@
@@ -17496,8 +17542,8 @@ index 0000000..cb750f1
 +		}
 +
 +		/* default sclk/mclk */
-+		sclk = radeon_bios16(dev_priv, pll_info + 0x8);
-+		mclk = radeon_bios16(dev_priv, pll_info + 0xa);
++		sclk = radeon_bios16(dev_priv, pll_info + 0xa);
++		mclk = radeon_bios16(dev_priv, pll_info + 0x8);
 +		if (sclk == 0)
 +			sclk = 200;
 +		if (mclk == 0)
@@ -22344,10 +22390,10 @@ index 0000000..7ddc8fd
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_display.c b/drivers/gpu/drm/radeon/radeon_display.c
 new file mode 100644
-index 0000000..0e0f1bf
+index 0000000..fd53172
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_display.c
-@@ -0,0 +1,643 @@
+@@ -0,0 +1,644 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -22592,6 +22638,7 @@ index 0000000..0e0f1bf
 +		kfree(edid);
 +		return ret;
 +	}
++	drm_mode_connector_update_edid_property(&radeon_connector->base, NULL);
 +	return -1;
 +}
 +
@@ -23955,10 +24002,10 @@ index ed4d27e..c7d2265 100644
  #endif				/* __RADEON_DRV_H__ */
 diff --git a/drivers/gpu/drm/radeon/radeon_encoders.c b/drivers/gpu/drm/radeon/radeon_encoders.c
 new file mode 100644
-index 0000000..d3777a4
+index 0000000..433ebc9
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_encoders.c
-@@ -0,0 +1,1743 @@
+@@ -0,0 +1,1716 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -24180,8 +24227,7 @@ index 0000000..d3777a4
 +}
 +
 +static void
-+atombios_dac_setup(struct drm_encoder *encoder,
-+		   struct drm_display_mode *mode)
++atombios_dac_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
@@ -24206,7 +24252,7 @@ index 0000000..d3777a4
 +		break;
 +	}
 +
-+	args.ucAction = ATOM_ENABLE;
++	args.ucAction = action;
 +
 +	if (radeon_encoder->devices & (ATOM_DEVICE_CRT_SUPPORT))
 +		args.ucDacStandard = ATOM_DAC1_PS2;
@@ -24229,15 +24275,14 @@ index 0000000..d3777a4
 +			break;
 +		}
 +	}
-+	args.usPixelClock = cpu_to_le16(mode->clock / 10);
++	args.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
 +
 +	atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
 +
 +}
 +
 +static void
-+atombios_tv_setup(struct drm_encoder *encoder,
-+		  struct drm_display_mode *mode)
++atombios_tv_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
@@ -24251,7 +24296,7 @@ index 0000000..d3777a4
 +
 +	index = GetIndexIntoMasterTable(COMMAND, TVEncoderControl);
 +
-+	args.sTVEncoder.ucAction = ATOM_ENABLE;
++	args.sTVEncoder.ucAction = action;
 +
 +	if (radeon_encoder->devices & (ATOM_DEVICE_CV_SUPPORT))
 +		args.sTVEncoder.ucTvStandard = ATOM_TV_CV;
@@ -24287,18 +24332,18 @@ index 0000000..d3777a4
 +		}
 +	}
 +
-+	args.sTVEncoder.usPixelClock = cpu_to_le16(mode->clock / 10);
++	args.sTVEncoder.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
 +
 +	atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
 +
 +}
 +
 +void
-+atombios_external_tmds_setup(struct drm_encoder *encoder,
-+			     struct drm_display_mode *mode)
++atombios_external_tmds_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
++	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 +	ENABLE_EXTERNAL_TMDS_ENCODER_PS_ALLOCATION args;
 +	int index = 0;
 +
@@ -24306,9 +24351,9 @@ index 0000000..d3777a4
 +
 +	index = GetIndexIntoMasterTable(COMMAND, DVOEncoderControl);
 +
-+	args.sXTmdsEncoder.ucEnable = ATOM_ENABLE;
++	args.sXTmdsEncoder.ucEnable = action;
 +
-+	if (mode->clock > 165000)
++	if (radeon_encoder->pixel_clock > 165000)
 +		args.sXTmdsEncoder.ucMisc = PANEL_ENCODER_MISC_DUAL;
 +
 +	/*if (pScrn->rgbBits == 8)*/
@@ -24319,11 +24364,11 @@ index 0000000..d3777a4
 +}
 +
 +static void
-+atombios_ddia_setup(struct drm_encoder *encoder,
-+		    struct drm_display_mode *mode)
++atombios_ddia_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
++	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 +	DVO_ENCODER_CONTROL_PS_ALLOCATION args;
 +	int index = 0;
 +
@@ -24331,10 +24376,10 @@ index 0000000..d3777a4
 +
 +	index = GetIndexIntoMasterTable(COMMAND, DVOEncoderControl);
 +
-+	args.sDVOEncoder.ucAction = ATOM_ENABLE;
-+	args.sDVOEncoder.usPixelClock = cpu_to_le16(mode->clock / 10);
++	args.sDVOEncoder.ucAction = action;
++	args.sDVOEncoder.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
 +
-+	if (mode->clock > 165000)
++	if (radeon_encoder->pixel_clock > 165000)
 +		args.sDVOEncoder.usDevAttr.sDigAttrib.ucAttribute = PANEL_ENCODER_MISC_DUAL;
 +
 +	atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
@@ -24347,8 +24392,7 @@ index 0000000..d3777a4
 +};
 +
 +static void
-+atombios_digital_setup(struct drm_encoder *encoder,
-+		       struct drm_display_mode *mode)
++atombios_digital_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
@@ -24403,12 +24447,12 @@ index 0000000..d3777a4
 +		switch (crev) {
 +		case 1:
 +			args.v1.ucMisc = 0;
-+			args.v1.ucAction = PANEL_ENCODER_ACTION_ENABLE;
++			args.v1.ucAction = action;
 +			/* XXX should probably check based on edid */
 +			if ((connector->connector_type == DRM_MODE_CONNECTOR_HDMIA) ||
 +			    (connector->connector_type == DRM_MODE_CONNECTOR_HDMIB))
 +				args.v1.ucMisc |= PANEL_ENCODER_MISC_HDMI_TYPE;
-+			args.v1.usPixelClock = cpu_to_le16(mode->clock / 10);
++			args.v1.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
 +			if (radeon_encoder->devices & (ATOM_DEVICE_LCD_SUPPORT)) {
 +				if (dig->lvds_misc & (1 << 0))
 +					args.v1.ucMisc |= PANEL_ENCODER_MISC_DUAL;
@@ -24417,7 +24461,7 @@ index 0000000..d3777a4
 +			} else {
 +				if (dig_connector->linkb)
 +					args.v1.ucMisc |= PANEL_ENCODER_MISC_TMDS_LINKB;
-+				if (mode->clock > 165000)
++				if (radeon_encoder->pixel_clock > 165000)
 +					args.v1.ucMisc |= PANEL_ENCODER_MISC_DUAL;
 +				/*if (pScrn->rgbBits == 8) */
 +				args.v1.ucMisc |= (1 << 1);
@@ -24426,7 +24470,7 @@ index 0000000..d3777a4
 +		case 2:
 +		case 3:
 +			args.v2.ucMisc = 0;
-+			args.v2.ucAction = PANEL_ENCODER_ACTION_ENABLE;
++			args.v2.ucAction = action;
 +			if (crev == 3) {
 +				if (dig->coherent_mode)
 +					args.v2.ucMisc |= PANEL_ENCODER_MISC_COHERENT;
@@ -24435,7 +24479,7 @@ index 0000000..d3777a4
 +			if ((connector->connector_type == DRM_MODE_CONNECTOR_HDMIA) ||
 +			    (connector->connector_type == DRM_MODE_CONNECTOR_HDMIB))
 +				args.v2.ucMisc |= PANEL_ENCODER_MISC_HDMI_TYPE;
-+			args.v2.usPixelClock = cpu_to_le16(mode->clock / 10);
++			args.v2.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
 +			args.v2.ucTruncate = 0;
 +			args.v2.ucSpatial = 0;
 +			args.v2.ucTemporal = 0;
@@ -24458,7 +24502,7 @@ index 0000000..d3777a4
 +			} else {
 +				if (dig_connector->linkb)
 +					args.v2.ucMisc |= PANEL_ENCODER_MISC_TMDS_LINKB;
-+				if (mode->clock > 165000)
++				if (radeon_encoder->pixel_clock > 165000)
 +					args.v2.ucMisc |= PANEL_ENCODER_MISC_DUAL;
 +			}
 +			break;
@@ -24543,16 +24587,15 @@ index 0000000..d3777a4
 +}
 +
 +static void
-+atombios_dig_encoder_setup(struct drm_encoder *encoder,
-+			   struct drm_display_mode *mode)
++atombios_dig_encoder_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
 +	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
-+	struct radeon_crtc *radeon_crtc = to_radeon_crtc(encoder->crtc);
 +	DIG_ENCODER_CONTROL_PS_ALLOCATION args;
 +	int index = 0, num = 0;
 +	uint8_t frev, crev;
++	struct radeon_encoder_atom_dig *dig;
 +	struct drm_connector *connector;
 +	struct radeon_connector *radeon_connector;
 +	struct radeon_connector_atom_dig *dig_connector;
@@ -24568,24 +24611,25 @@ index 0000000..d3777a4
 +
 +	dig_connector = radeon_connector->con_priv;
 +
++	if (!radeon_encoder->enc_priv)
++		return;
++
++	dig = radeon_encoder->enc_priv;
++
 +	memset(&args, 0, sizeof(args));
 +
 +	if (radeon_is_dce32(dev_priv)) {
-+		if (radeon_crtc->crtc_id)
++		if (dig->dig_block)
 +			index = GetIndexIntoMasterTable(COMMAND, DIG2EncoderControl);
 +		else
 +			index = GetIndexIntoMasterTable(COMMAND, DIG1EncoderControl);
-+		num = radeon_crtc->crtc_id + 1;
++		num = dig->dig_block + 1;
 +	} else {
 +		switch (radeon_encoder->encoder_id) {
-+		case ENCODER_OBJECT_ID_INTERNAL_TMDS1:
-+		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
 +		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
 +			index = GetIndexIntoMasterTable(COMMAND, DIG1EncoderControl);
 +			num = 1;
 +			break;
-+		case ENCODER_OBJECT_ID_INTERNAL_LVDS:
-+		case ENCODER_OBJECT_ID_INTERNAL_LVTM1:
 +		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
 +			index = GetIndexIntoMasterTable(COMMAND, DIG2EncoderControl);
 +			num = 2;
@@ -24595,8 +24639,8 @@ index 0000000..d3777a4
 +
 +	atom_parse_cmd_header(dev_priv->mode_info.atom_context, index, &frev, &crev);
 +
-+	args.ucAction = ATOM_ENABLE;
-+	args.usPixelClock = cpu_to_le16(mode->clock / 10);
++	args.ucAction = action;
++	args.usPixelClock = cpu_to_le16(radeon_encoder->pixel_clock / 10);
 +
 +	if (radeon_is_dce32(dev_priv)) {
 +		switch (radeon_encoder->encoder_id) {
@@ -24612,20 +24656,16 @@ index 0000000..d3777a4
 +		}
 +	} else {
 +		switch (radeon_encoder->encoder_id) {
-+		case ENCODER_OBJECT_ID_INTERNAL_TMDS1:
-+		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
 +		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
 +			args.ucConfig = ATOM_ENCODER_CONFIG_TRANSMITTER1;
 +			break;
-+		case ENCODER_OBJECT_ID_INTERNAL_LVDS:
-+		case ENCODER_OBJECT_ID_INTERNAL_LVTM1:
 +		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
 +			args.ucConfig = ATOM_ENCODER_CONFIG_TRANSMITTER2;
 +			break;
 +		}
 +	}
 +
-+	if (mode->clock > 165000) {
++	if (radeon_encoder->pixel_clock > 165000) {
 +		args.ucConfig |= ATOM_ENCODER_CONFIG_LINKA_B;
 +		args.ucLaneNum = 8;
 +	} else {
@@ -24648,13 +24688,11 @@ index 0000000..d3777a4
 +};
 +
 +static void
-+atombios_dig_transmitter_setup(struct drm_encoder *encoder,
-+			       struct drm_display_mode *mode)
++atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
 +	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
-+	struct radeon_crtc *radeon_crtc = to_radeon_crtc(encoder->crtc);
 +	union dig_transmitter_control args;
 +	int index = 0, num = 0;
 +	uint8_t frev, crev;
@@ -24685,13 +24723,9 @@ index 0000000..d3777a4
 +		index = GetIndexIntoMasterTable(COMMAND, UNIPHYTransmitterControl);
 +	else {
 +		switch (radeon_encoder->encoder_id) {
-+		case ENCODER_OBJECT_ID_INTERNAL_TMDS1:
-+		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
 +		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
 +			index = GetIndexIntoMasterTable(COMMAND, DIG1TransmitterControl);
 +			break;
-+		case ENCODER_OBJECT_ID_INTERNAL_LVDS:
-+		case ENCODER_OBJECT_ID_INTERNAL_LVTM1:
 +		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
 +			index = GetIndexIntoMasterTable(COMMAND, DIG2TransmitterControl);
 +			break;
@@ -24700,16 +24734,16 @@ index 0000000..d3777a4
 +
 +	atom_parse_cmd_header(dev_priv->mode_info.atom_context, index, &frev, &crev);
 +
-+	args.v1.ucAction = ATOM_TRANSMITTER_ACTION_ENABLE;
++	args.v1.ucAction = action;
 +
 +	if (radeon_is_dce32(dev_priv)) {
-+		if (mode->clock > 165000) {
-+			args.v2.usPixelClock = cpu_to_le16((mode->clock * 10 * 2) / 100);
++		if (radeon_encoder->pixel_clock > 165000) {
++			args.v2.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock * 10 * 2) / 100);
 +			args.v2.acConfig.fDualLinkConnector = 1;
 +		} else {
-+			args.v2.usPixelClock = cpu_to_le16((mode->clock * 10 * 4) / 100);
++			args.v2.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock * 10 * 4) / 100);
 +		}
-+		if (radeon_crtc->crtc_id)
++		if (dig->dig_block)
 +			args.v2.acConfig.ucEncoderSel = 1;
 +
 +		switch (radeon_encoder->encoder_id) {
@@ -24733,24 +24767,20 @@ index 0000000..d3777a4
 +		}
 +	} else {
 +		args.v1.ucConfig = ATOM_TRANSMITTER_CONFIG_CLKSRC_PPLL;
-+		args.v1.usPixelClock = cpu_to_le16((mode->clock) / 10);
++		args.v1.usPixelClock = cpu_to_le16((radeon_encoder->pixel_clock) / 10);
 +
 +		switch (radeon_encoder->encoder_id) {
-+		case ENCODER_OBJECT_ID_INTERNAL_TMDS1:
-+		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
 +		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
 +			args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_DIG1_ENCODER;
 +			if (dev_priv->flags & RADEON_IS_IGP) {
-+				if (mode->clock > 165000) {
++				if (radeon_encoder->pixel_clock > 165000) {
 +					args.v1.ucConfig |= (ATOM_TRANSMITTER_CONFIG_8LANE_LINK |
 +							     ATOM_TRANSMITTER_CONFIG_LINKA_B);
-+					/* fixme!!! lanes are based on connector, not encoder*/
 +					if (dig_connector->igp_lane_info & 0x3)
 +						args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_LANE_0_7;
 +					else if (dig_connector->igp_lane_info & 0xc)
 +						args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_LANE_8_15;
 +				} else {
-+					/* fixme!!! lanes are based on connector, not encoder*/
 +					args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_LINKA;
 +					if (dig_connector->igp_lane_info & 0x1)
 +						args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_LANE_0_3;
@@ -24762,7 +24792,7 @@ index 0000000..d3777a4
 +						args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_LANE_12_15;
 +				}
 +			} else {
-+				if (mode->clock > 165000)
++				if (radeon_encoder->pixel_clock > 165000)
 +					args.v1.ucConfig |= (ATOM_TRANSMITTER_CONFIG_8LANE_LINK |
 +							     ATOM_TRANSMITTER_CONFIG_LINKA_B |
 +							     ATOM_TRANSMITTER_CONFIG_LANE_0_7);
@@ -24774,11 +24804,9 @@ index 0000000..d3777a4
 +				}
 +			}
 +			break;
-+		case ENCODER_OBJECT_ID_INTERNAL_LVDS:
-+		case ENCODER_OBJECT_ID_INTERNAL_LVTM1:
 +		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
 +			args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_DIG2_ENCODER;
-+			if (mode->clock > 165000)
++			if (radeon_encoder->pixel_clock > 165000)
 +				args.v1.ucConfig |= (ATOM_TRANSMITTER_CONFIG_8LANE_LINK |
 +						     ATOM_TRANSMITTER_CONFIG_LINKA_B |
 +						     ATOM_TRANSMITTER_CONFIG_LANE_0_7);
@@ -24796,7 +24824,6 @@ index 0000000..d3777a4
 +				args.v1.ucConfig |= ATOM_TRANSMITTER_CONFIG_COHERENT;
 +		}
 +	}
-+	dig->transmitter_config = args.v1.ucConfig;
 +
 +	atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
 +
@@ -25034,12 +25061,29 @@ index 0000000..d3777a4
 +atombios_yuv_setup(struct drm_encoder *encoder, bool enable)
 +{
 +	struct drm_device *dev = encoder->dev;
++	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
 +	struct radeon_crtc *radeon_crtc = to_radeon_crtc(encoder->crtc);
 +	ENABLE_YUV_PS_ALLOCATION args;
 +	int index = GetIndexIntoMasterTable(COMMAND, EnableYUV);
++	uint32_t temp, reg;
 +
 +	memset(&args, 0, sizeof(args));
++
++	if (dev_priv->chip_family >= CHIP_R600)
++		reg = R600_BIOS_3_SCRATCH;
++	else
++		reg = RADEON_BIOS_3_SCRATCH;
++
++	temp = RADEON_READ(reg);
++	if (radeon_encoder->devices & (ATOM_DEVICE_TV_SUPPORT))
++		RADEON_WRITE(reg, (ATOM_S3_TV1_ACTIVE |
++				(radeon_crtc->crtc_id << 18)));
++	else if (radeon_encoder->devices & (ATOM_DEVICE_CV_SUPPORT))
++		RADEON_WRITE(reg, (ATOM_S3_CV_ACTIVE |
++				(radeon_crtc->crtc_id << 18)));
++	else
++		RADEON_WRITE(reg, 0);
 +
 +	if (enable)
 +		args.ucEnable = ATOM_ENABLE;
@@ -25047,6 +25091,7 @@ index 0000000..d3777a4
 +
 +	atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
 +
++	RADEON_WRITE(reg, 0);
 +}
 +
 +static void
@@ -25099,8 +25144,7 @@ index 0000000..d3777a4
 +}
 +
 +static void
-+atombios_scaler_setup(struct drm_encoder *encoder,
-+		      struct drm_display_mode *mode)
++atombios_scaler_setup(struct drm_encoder *encoder)
 +{
 +	struct drm_device *dev = encoder->dev;
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
@@ -25174,57 +25218,6 @@ index 0000000..d3777a4
 +}
 +
 +static void
-+atombios_dig_dpms(struct drm_encoder *encoder, int mode)
-+{
-+	struct drm_device *dev = encoder->dev;
-+	struct drm_radeon_private *dev_priv = dev->dev_private;
-+	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
-+	DIG_TRANSMITTER_CONTROL_PS_ALLOCATION args;
-+	int index = 0;
-+	struct radeon_encoder_atom_dig *dig;
-+
-+	if (!radeon_encoder->enc_priv)
-+		return;
-+
-+	dig = radeon_encoder->enc_priv;
-+
-+	memset(&args, 0, sizeof(args));
-+
-+	switch (mode) {
-+	case DRM_MODE_DPMS_ON:
-+		args.ucAction = ATOM_TRANSMITTER_ACTION_ENABLE_OUTPUT;
-+		break;
-+	case DRM_MODE_DPMS_STANDBY:
-+	case DRM_MODE_DPMS_SUSPEND:
-+	case DRM_MODE_DPMS_OFF:
-+		args.ucAction = ATOM_TRANSMITTER_ACTION_DISABLE_OUTPUT;
-+		break;
-+	}
-+
-+	args.ucConfig = dig->transmitter_config;
-+
-+	if (radeon_is_dce32(dev_priv))
-+		index = GetIndexIntoMasterTable(COMMAND, UNIPHYTransmitterControl);
-+	else {
-+		switch (radeon_encoder->encoder_id) {
-+		case ENCODER_OBJECT_ID_INTERNAL_TMDS1:
-+		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
-+		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
-+			index = GetIndexIntoMasterTable(COMMAND, DIG1TransmitterControl);
-+			break;
-+		case ENCODER_OBJECT_ID_INTERNAL_LVDS:
-+		case ENCODER_OBJECT_ID_INTERNAL_LVTM1:
-+		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
-+			index = GetIndexIntoMasterTable(COMMAND, DIG2TransmitterControl);
-+			break;
-+		}
-+	}
-+
-+	atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
-+
-+}
-+
-+static void
 +radeon_atom_encoder_dpms(struct drm_encoder *encoder, int mode)
 +{
 +	struct drm_device *dev = encoder->dev;
@@ -25281,9 +25274,18 @@ index 0000000..d3777a4
 +		break;
 +	}
 +
-+	if (is_dig)
-+		atombios_dig_dpms(encoder, mode);
-+	else {
++	if (is_dig) {
++		switch (mode) {
++		case DRM_MODE_DPMS_ON:
++			atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_ENABLE);
++			break;
++		case DRM_MODE_DPMS_STANDBY:
++		case DRM_MODE_DPMS_SUSPEND:
++		case DRM_MODE_DPMS_OFF:
++			atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_DISABLE);
++			break;
++		}
++	} else {
 +		switch (mode) {
 +		case DRM_MODE_DPMS_ON:
 +			args.ucAction = ATOM_ENABLE;
@@ -25326,8 +25328,12 @@ index 0000000..d3777a4
 +		default:
 +			if (radeon_is_avivo(dev_priv))
 +				args.v1.ucCRTC = radeon_crtc->crtc_id;
-+			else
-+				args.v1.ucCRTC = radeon_crtc->crtc_id << 2;
++			else {
++				if (radeon_encoder->encoder_id == ENCODER_OBJECT_ID_INTERNAL_DAC1)
++					args.v1.ucCRTC = radeon_crtc->crtc_id;
++				else
++					args.v1.ucCRTC = radeon_crtc->crtc_id << 2;
++			}
 +			switch (radeon_encoder->encoder_id) {
 +			case ENCODER_OBJECT_ID_INTERNAL_TMDS1:
 +			case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
@@ -25453,9 +25459,17 @@ index 0000000..d3777a4
 +	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 +	struct radeon_crtc *radeon_crtc = to_radeon_crtc(encoder->crtc);
 +
++	if (radeon_encoder->enc_priv) {
++		struct radeon_encoder_atom_dig *dig;
++
++		dig = radeon_encoder->enc_priv;
++		dig->dig_block = radeon_crtc->crtc_id;
++	}
++	radeon_encoder->pixel_clock = adjusted_mode->clock;
++
 +	radeon_atombios_encoder_crtc_scratch_regs(encoder, radeon_crtc->crtc_id);
 +	atombios_overscan_setup(encoder, mode, adjusted_mode);
-+	atombios_scaler_setup(encoder, adjusted_mode);
++	atombios_scaler_setup(encoder);
 +	atombios_set_encoder_crtc_source(encoder);
 +
 +	if (radeon_is_avivo(dev_priv)) {
@@ -25470,29 +25484,31 @@ index 0000000..d3777a4
 +	case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_TMDS1:
 +	case ENCODER_OBJECT_ID_INTERNAL_LVDS:
 +	case ENCODER_OBJECT_ID_INTERNAL_LVTM1:
-+		atombios_digital_setup(encoder, adjusted_mode);
++		atombios_digital_setup(encoder, PANEL_ENCODER_ACTION_ENABLE);
 +		break;
 +	case ENCODER_OBJECT_ID_INTERNAL_UNIPHY:
 +	case ENCODER_OBJECT_ID_INTERNAL_UNIPHY1:
 +	case ENCODER_OBJECT_ID_INTERNAL_UNIPHY2:
 +	case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
-+		atombios_dig_encoder_setup(encoder, adjusted_mode);
-+		atombios_dig_transmitter_setup(encoder, adjusted_mode);
++		atombios_dig_encoder_setup(encoder, ATOM_ENABLE);
++		atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_INIT);
++		atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_SETUP);
++		atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_ENABLE);
 +		break;
 +	case ENCODER_OBJECT_ID_INTERNAL_DDI:
-+		atombios_ddia_setup(encoder, adjusted_mode);
++		atombios_ddia_setup(encoder, ATOM_ENABLE);
 +		break;
 +	case ENCODER_OBJECT_ID_INTERNAL_DVO1:
 +	case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_DVO1:
-+		atombios_external_tmds_setup(encoder, adjusted_mode);
++		atombios_external_tmds_setup(encoder, ATOM_ENABLE);
 +		break;
 +	case ENCODER_OBJECT_ID_INTERNAL_DAC1:
 +	case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_DAC1:
 +	case ENCODER_OBJECT_ID_INTERNAL_DAC2:
 +	case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_DAC2:
-+		atombios_dac_setup(encoder, adjusted_mode);
++		atombios_dac_setup(encoder, ATOM_ENABLE);
 +		if (radeon_encoder->devices & (ATOM_DEVICE_TV_SUPPORT | ATOM_DEVICE_CV_SUPPORT))
-+			atombios_tv_setup(encoder, adjusted_mode);
++			atombios_tv_setup(encoder, ATOM_ENABLE);
 +		break;
 +	}
 +	atombios_apply_encoder_quirks(encoder, adjusted_mode);
@@ -25518,7 +25534,8 @@ index 0000000..d3777a4
 +
 +		args.sDacload.ucMisc = 0;
 +
-+		if (radeon_encoder->encoder_id == ENCODER_OBJECT_ID_INTERNAL_DAC1)
++		if (radeon_encoder->encoder_id == ENCODER_OBJECT_ID_INTERNAL_DAC1 ||
++		    radeon_encoder->encoder_id == ENCODER_OBJECT_ID_INTERNAL_KLDSCP_DAC1)
 +			args.sDacload.ucDacType = ATOM_DAC_A;
 +		else
 +			args.sDacload.ucDacType = ATOM_DAC_B;
@@ -25531,8 +25548,11 @@ index 0000000..d3777a4
 +			args.sDacload.usDeviceID = cpu_to_le16(ATOM_DEVICE_CV_SUPPORT);
 +			if (crev >= 3)
 +				args.sDacload.ucMisc = DAC_LOAD_MISC_YPrPb;
-+		} else if (radeon_encoder->devices & ATOM_DEVICE_TV1_SUPPORT)
++		} else if (radeon_encoder->devices & ATOM_DEVICE_TV1_SUPPORT) {
 +			args.sDacload.usDeviceID = cpu_to_le16(ATOM_DEVICE_TV1_SUPPORT);
++			if (crev >= 3)
++				args.sDacload.ucMisc = DAC_LOAD_MISC_YPrPb;
++		}
 +
 +		atom_execute_table(dev_priv->mode_info.atom_context, index, (uint32_t *)&args);
 +
@@ -29872,10 +29892,10 @@ index 0000000..1227471
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_legacy_encoders.c b/drivers/gpu/drm/radeon/radeon_legacy_encoders.c
 new file mode 100644
-index 0000000..a991fb0
+index 0000000..175397c
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_legacy_encoders.c
-@@ -0,0 +1,1283 @@
+@@ -0,0 +1,1284 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -30701,7 +30721,8 @@ index 0000000..a991fb0
 +		radeon_legacy_rmx_mode_set(encoder, mode, adjusted_mode);
 +
 +	if (dev_priv->is_atom_bios) {
-+		atombios_external_tmds_setup(encoder, adjusted_mode);
++ 		radeon_encoder->pixel_clock = adjusted_mode->clock;
++ 		atombios_external_tmds_setup(encoder, ATOM_ENABLE);
 +		fp2_gen_cntl = RADEON_READ(RADEON_FP2_GEN_CNTL);
 +	} else {
 +		fp2_gen_cntl = RADEON_READ(RADEON_FP2_GEN_CNTL);
@@ -31174,7 +31195,7 @@ index 4af5286..40134c8 100644
  
 diff --git a/drivers/gpu/drm/radeon/radeon_mode.h b/drivers/gpu/drm/radeon/radeon_mode.h
 new file mode 100644
-index 0000000..43c28f8
+index 0000000..963859c
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_mode.h
 @@ -0,0 +1,388 @@
@@ -31414,8 +31435,8 @@ index 0000000..43c28f8
 +
 +struct radeon_encoder_atom_dig {
 +	/* atom dig */
-+	uint32_t transmitter_config;
 +	bool coherent_mode;
++	int dig_block;
 +	/* atom lvds */
 +	uint32_t lvds_misc;
 +	uint16_t panel_pwr_delay;
@@ -31428,6 +31449,7 @@ index 0000000..43c28f8
 +	uint32_t encoder_id;
 +	uint32_t devices;
 +	uint32_t flags;
++	uint32_t pixel_clock;
 +	enum radeon_rmx_type rmx_type;
 +	struct radeon_native_mode native_mode;
 +	void *enc_priv;
@@ -31476,8 +31498,7 @@ index 0000000..43c28f8
 +struct drm_encoder *radeon_encoder_legacy_tv_dac_add(struct drm_device *dev, int bios_index, int with_tv);
 +struct drm_encoder *radeon_encoder_legacy_tmds_int_add(struct drm_device *dev, int bios_index);
 +struct drm_encoder *radeon_encoder_legacy_tmds_ext_add(struct drm_device *dev, int bios_index);
-+extern void atombios_external_tmds_setup(struct drm_encoder *encoder,
-+					 struct drm_display_mode *mode);
++extern void atombios_external_tmds_setup(struct drm_encoder *encoder, int action);
 +extern int atombios_get_encoder_mode(struct drm_encoder *encoder);
 +
 +extern void radeon_crtc_load_lut(struct drm_crtc *crtc);
