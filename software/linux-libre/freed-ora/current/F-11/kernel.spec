@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1521 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1527 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -660,7 +660,7 @@ Patch511: linux-2.6-shut-up-efifb.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
-
+Patch590: linux-2.6.29.1-sparc-regression.patch
 Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
 Patch601: alsa-rewrite-hw_ptr-updaters.patch
 Patch602: alsa-pcm-always-reset-invalid-position.patch
@@ -680,6 +680,8 @@ Patch685: linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
+Patch800: linux-2.6-crash-driver.patch
+
 Patch1515: linux-2.6.29-lirc.patch
 
 # Fix the return code CD accesses when the CDROM drive door is closed
@@ -696,6 +698,7 @@ Patch1816: drm-no-gem-on-i8xx.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
 Patch1821: drm-intel-lying-systems-without-lvds.patch
+Patch1822: drm-intel-gen3-fb-hack.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -720,8 +723,6 @@ Patch3000: linux-2.6-btrfs-experimental-branch.patch
 Patch3001: linux-2.6-btrfs-fix-umount-hang.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
-
-Patch4000: linux-2.6-bootarg-strict-devmem.patch
 
 Patch5000: linux-2.6-add-qcserial.patch
 
@@ -1170,7 +1171,7 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 #
 
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
-
+ApplyPatch linux-2.6.29.1-sparc-regression.patch
 #
 # Exec shield
 #
@@ -1194,9 +1195,6 @@ ApplyPatch linux-2.6-relatime-by-default.patch
 
 # put fiemap.h into kernel-headers
 ApplyPatch linux-2.6-fiemap-header-install.patch
-
-# Make strict devmem a boot arg
-ApplyPatch linux-2.6-bootarg-strict-devmem.patch
 
 # USB
 ApplyPatch linux-2.6-add-qcserial.patch
@@ -1306,6 +1304,9 @@ ApplyPatch linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 # Fix up DMA debug code
 ApplyPatch linux-2.6-dma-debug-fixes.patch
 
+# /dev/crash driver.
+ApplyPatch linux-2.6-crash-driver.patch
+
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 
@@ -1326,6 +1327,7 @@ ApplyPatch drm-no-gem-on-i8xx.patch
 ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-lying-systems-without-lvds.patch
+ApplyPatch drm-intel-gen3-fb-hack.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1938,6 +1940,19 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 09 2009 Dennis Gilmore <dennis@ausil.us> 2.6.29.1-59
+- add patch to fix regression on sparc
+
+* Thu Apr 09 2009 Adam Jackson <ajax@redhat.com>
+- drm-intel-gen3-fb-hack.patch: Allow up to 4k framebuffers on 9[14]5.  3D
+  will be broken if you do that, but at least dualhead will be less broken.
+
+* Thu Apr 09 2009 Dave Jones <davej@redhat.com>
+- Bring back the /dev/crash driver. (#492803)
+
+* Thu Apr 09 2009 Dave Airlie <airlied@redhat.com>
+- radeon: fix some kms bugs, dac detect + screen resize
+
 * Wed Apr 08 2009 Adam Jackson <ajax@redhat.com>
 - Drop the PAT patch, sufficiently upstreamed now.
 
