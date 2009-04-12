@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1527 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1530 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -612,6 +612,9 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
 
+# Support suspend/resume, other crash fixes
+Patch30: linux-2.6-iommu-fixes.patch
+
 Patch41: linux-2.6-sysrq-c.patch
 
 Patch100: linux-2.6-e820-mark-esi-clobbered.patch
@@ -719,6 +722,8 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
 Patch2920: linux-2.6-ext4-flush-on-close.patch
+Patch2921: linux-2.6-ext4-really-print-warning-once.patch
+
 Patch3000: linux-2.6-btrfs-experimental-branch.patch
 Patch3001: linux-2.6-btrfs-fix-umount-hang.patch
 Patch3010: linux-2.6-relatime-by-default.patch
@@ -946,17 +951,28 @@ exit 1
 %endif
 %endif
 
+# more sanity checking; do it quietly
+for patch in %{patches} ; do
+  if [ ! -f $patch ] ; then
+    echo "ERROR: Patch  ${patch##/*/}  listed in specfile but is missing"
+    exit 1
+  fi
+done 2>/dev/null
+
 patch_command='patch -p1 -F1 -s'
 ApplyPatch()
 {
   local patch=$1
   shift
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
-    exit 1;
+    exit 1
   fi
   if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/kernel.spec ; then
-    [ "${patch:0:10}" != "patch-2.6." ] && echo "Patch $patch not listed in specfile" && exit 1;
-  fi
+    if [ "${patch:0:10}" != "patch-2.6." ] ; then
+      echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
+      exit 1
+    fi
+  fi 2>/dev/null
   $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1141,6 +1157,9 @@ ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
 
+# IOMMU fixes backported to 2.6.29
+ApplyPatch linux-2.6-iommu-fixes.patch
+
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
@@ -1183,6 +1202,7 @@ ApplyPatch linux-2.6-execshield.patch
 
 # ext4
 ApplyPatch linux-2.6-ext4-flush-on-close.patch
+ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
 
 # xfs
 
@@ -1940,6 +1960,13 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 10 2009 David Woodhouse <David.Woodhouse@intel.com>
+- Fix suspend/resume with Intel IOMMU, handle devices behind PCI-PCI
+  bridges, cope with BIOS claiming IOMMU is at address zero.
+
+* Thu Apr 09 2009 Chuck Ebbert <cebbert@redhat.com>
+- Only print ext4 allocator fallback warning once.
+
 * Thu Apr 09 2009 Dennis Gilmore <dennis@ausil.us> 2.6.29.1-59
 - add patch to fix regression on sparc
 
