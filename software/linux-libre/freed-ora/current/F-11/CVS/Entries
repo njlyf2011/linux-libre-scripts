@@ -33,7 +33,6 @@ D/scripts////
 /drm-intel-big-hammer.patch/1.1/Wed Mar 11 22:45:01 2009/-kb/Tkernel-2_6_29_1-68_fc11
 /drm-intel-gen3-fb-hack.patch/1.1/Thu Apr  9 17:49:38 2009/-kb/Tkernel-2_6_29_1-68_fc11
 /drm-intel-lying-systems-without-lvds.patch/1.4/Sat Apr  4 02:40:41 2009/-kb/Tkernel-2_6_29_1-68_fc11
-/drm-modesetting-radeon.patch/1.71/dummy timestamp from new-entry+Fri Apr 10 00:59:53 2009/-kb/Tkernel-2_6_29_1-68_fc11
 /drm-next.patch/1.13/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_1-68_fc11
 /drm-no-gem-on-i8xx.patch/1.1/Mon Feb  9 04:45:32 2009/-kb/Tkernel-2_6_29_1-68_fc11
 /drm-nouveau.patch/1.38/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_1-68_fc11
@@ -137,3 +136,4 @@ D/scripts////
 /sources/1.1003/dummy timestamp from new-entry//Tkernel-2_6_29_1-68_fc11
 /upstream/1.914/dummy timestamp from new-entry//Tkernel-2_6_29_1-68_fc11
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_29_1-68_fc11
+/drm-modesetting-radeon.patch/1.71/Sun Apr 12 20:26:04 2009/-kb/Tkernel-2_6_29_1-68_fc11
