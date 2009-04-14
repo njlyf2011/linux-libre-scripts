@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.59 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.60 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -673,8 +673,7 @@ Patch684: linux-2.6.27-ath5k-ignore-the-return-value-of-ath5k_hw_noise_floor_cal
 Patch685: linux-2.6-rtl8187b-tx-status-feedback.patch
 Patch686: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch687: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
-Patch688: linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
-Patch689: linux-2.6-iwlwifi-remove-implicit-direct-scan.patch
+Patch688: linux-2.6-iwlwifi-remove-implicit-direct-scan.patch
 
 Patch700: linux-2.6-nfs-client-mounts-hang.patch
 
@@ -1346,9 +1345,6 @@ ApplyPatch linux-2.6-rtl8187b-tx-status-feedback.patch
 ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
 ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 
-# fix locking in ipw3945 conf_tx callback
-ApplyPatch linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
-
 # NFS Client mounts hang when exported directory do not exist
 ApplyPatch linux-2.6-nfs-client-mounts-hang.patch
 
@@ -2016,6 +2012,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Apr 13 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.59
+- Remove iwlwifi: remove implicit direct scan
+
 * Tue Apr  7 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.58
 - iwlwifi: remove implicit direct scan
 
