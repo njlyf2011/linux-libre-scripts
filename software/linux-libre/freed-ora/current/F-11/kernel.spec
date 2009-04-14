@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1530 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1532 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -669,6 +669,10 @@ Patch601: alsa-rewrite-hw_ptr-updaters.patch
 Patch602: alsa-pcm-always-reset-invalid-position.patch
 Patch603: alsa-pcm-fix-delta-calc-at-overlap.patch
 Patch604: alsa-pcm-safer-boundary-checks.patch
+Patch605: alsa-hda-dont-reset-BDL-unnecessarily.patch
+Patch606: alsa-dont-reset-stream-at-each-prepare-callb.patch
+Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
+Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 Patch611: linux-2.6.29-alsa-update-quirks.patch
 
@@ -679,7 +683,6 @@ Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
-Patch685: linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
@@ -1264,7 +1267,10 @@ ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
 ApplyPatch alsa-pcm-always-reset-invalid-position.patch
 ApplyPatch alsa-pcm-fix-delta-calc-at-overlap.patch
 ApplyPatch alsa-pcm-safer-boundary-checks.patch
-
+ApplyPatch alsa-hda-dont-reset-BDL-unnecessarily.patch
+ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
+ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
+ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
@@ -1317,9 +1323,6 @@ ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 # back-port iwlwifi rfkill while device down patches
 ApplyPatch linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
-
-# fix locking in ipw3945 conf_tx callback
-ApplyPatch linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
 # Fix up DMA debug code
 ApplyPatch linux-2.6-dma-debug-fixes.patch
@@ -1960,6 +1963,17 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 13 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-70
+- merge alsa fixes from wwoods:
+  alsa-hda-dont-reset-BDL-unnecessarily.patch
+  alsa-dont-reset-stream-at-each-prepare-callb.patch
+  alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
+  alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+    bbf6ad13, fa00e046 from alsa-kernel/master (and deps)
+
+* Mon Apr 13 2009 John W. Linville <linville@redhat.com>
+- Remove back-port iwlwifi rfkill while device down patches (#495003)
+
 * Fri Apr 10 2009 David Woodhouse <David.Woodhouse@intel.com>
 - Fix suspend/resume with Intel IOMMU, handle devices behind PCI-PCI
   bridges, cope with BIOS claiming IOMMU is at address zero.
