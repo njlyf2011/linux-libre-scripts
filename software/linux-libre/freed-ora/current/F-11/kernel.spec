@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1532 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1543 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -732,7 +732,23 @@ Patch3001: linux-2.6-btrfs-fix-umount-hang.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
 
+Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
+
 Patch5000: linux-2.6-add-qcserial.patch
+
+# patches headed for -stable
+# fix oops in md raid1 (#495550)
+Patch6000: linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
+# fix squashfs on systems where pagesize > blocksize (ia64, ppc64 w/64k pages)
+Patch6010: squashfs-broken-when-pagesize-greater-than-blocksize.patch
+# fix duplicated flags value
+Patch7000: linux-2.6-mm-define-unique-value-for-as_unevictable.patch
+# fix posix clock monotonicity
+Patch7001: linux-2.6-posix-timers-fix-clock-monotonicity.patch
+# make RLIMIT_CPU work again
+Patch7002: linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
+Patch7003: linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
+Patch7004: linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
 
 Patch9001: revert-fix-modules_install-via-nfs.patch
 
@@ -743,6 +759,11 @@ Patch9003: linux-2.6-dropwatch-protocol.patch
 
 # fix for net lockups, will be in 2.6.29.1
 Patch9101: linux-2.6-net-fix-another-gro-bug.patch
+
+# kvm fixes
+Patch9300: linux-2.6-kvm-kconfig-irqchip.patch
+Patch9301: linux-2.6-kvm-mask-notifiers.patch
+Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 
 %endif
 
@@ -955,12 +976,14 @@ exit 1
 %endif
 
 # more sanity checking; do it quietly
-for patch in %{patches} ; do
-  if [ ! -f $patch ] ; then
-    echo "ERROR: Patch  ${patch##/*/}  listed in specfile but is missing"
-    exit 1
-  fi
-done 2>/dev/null
+if [ "%{patches}" != "%%{patches}" ] ; then
+  for patch in %{patches} ; do
+    if [ ! -f $patch ] ; then
+      echo "ERROR: Patch  ${patch##/*/}  listed in specfile but is missing"
+      exit 1
+    fi
+  done
+fi 2>/dev/null
 
 patch_command='patch -p1 -F1 -s'
 ApplyPatch()
@@ -1221,6 +1244,7 @@ ApplyPatch linux-2.6-fiemap-header-install.patch
 
 # USB
 ApplyPatch linux-2.6-add-qcserial.patch
+ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1369,6 +1393,15 @@ ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 
+# patches headed for -stable
+ApplyPatch linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
+ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
+ApplyPatch linux-2.6-mm-define-unique-value-for-as_unevictable.patch
+ApplyPatch linux-2.6-posix-timers-fix-clock-monotonicity.patch
+ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
+ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
+ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
 
@@ -1377,6 +1410,11 @@ ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
 ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
+
+# kvm fixes
+ApplyPatch linux-2.6-kvm-kconfig-irqchip.patch
+ApplyPatch linux-2.6-kvm-mask-notifiers.patch
+ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1963,6 +2001,37 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 14 2009 Marcelo Tosatti <mtosatti@redhat.com>
+- kvm fixes for bz#491625
+
+* Tue Apr 14 2009 Jarod Wilson <jarod@redhat.com>
+- Make squashfs behave on systems where pagesize > blocksize (Doug Chapman)
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- Add missing patch for broken RLIMIT_CPU
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix warnings/errors in USB cdc-acm modem driver (#495446)
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- Timer fixes headed for -stable
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix duplicated flag value in pagemap.h (-stable patch)
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- acer-wmi: use upstream code to blacklist an additional model
+- Trivial fix to drm-modesetting-radeon to fix failure to apply
+
+* Tue Apr 14 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-73
+- drm-modesetting-radeon.patch: more bug fixes
+
+* Mon Apr 13 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix oops in md raid1 resync (#495550)
+
+* Mon Apr 13 2009 Eric Sandeen <sandeen@redhat.com>
+- Turn of CONFIG_SND_HDA_POWER_SAVE_DEFAULT again (#493972)
+
 * Mon Apr 13 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-70
 - merge alsa fixes from wwoods:
   alsa-hda-dont-reset-BDL-unnecessarily.patch
