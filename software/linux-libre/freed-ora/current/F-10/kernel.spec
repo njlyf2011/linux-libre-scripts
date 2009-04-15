@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1315 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1330 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -599,6 +599,7 @@ Patch05: linux-2.6-makefile-after_link.patch
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
+Patch11: git-bluetooth.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -606,6 +607,9 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
+
+# Support suspend/resume, other crash fixes
+Patch30: linux-2.6-iommu-fixes.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -633,6 +637,7 @@ Patch382: linux-2.6-defaults-pciehp.patch
 Patch383: linux-2.6-defaults-fat-utf8.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
+Patch396: linux-2.6-acer-wmi-bail-on-aao.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
@@ -642,7 +647,15 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
-Patch602: alsa-rewrite-hw_ptr-updaters.patch
+Patch601: alsa-rewrite-hw_ptr-updaters.patch
+Patch602: alsa-pcm-always-reset-invalid-position.patch
+Patch603: alsa-pcm-fix-delta-calc-at-overlap.patch
+Patch604: alsa-pcm-safer-boundary-checks.patch
+Patch605: alsa-hda-dont-reset-BDL-unnecessarily.patch
+Patch606: alsa-dont-reset-stream-at-each-prepare-callb.patch
+Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
+Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+Patch609: alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -651,7 +664,6 @@ Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
-Patch685: linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -663,6 +675,7 @@ Patch1550: linux-2.6-cdrom-door-status.patch
 # nouveau + drm fixes
 Patch1811: drm-next.patch
 Patch1812: drm-modesetting-radeon.patch
+Patch1813: drm-modesetting-radeon-fixes.patch
 Patch1814: drm-nouveau.patch
 Patch1816: drm-no-gem-on-i8xx.patch
 Patch1817: drm-f10-compat.patch
@@ -680,7 +693,10 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
+Patch2900: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
+
 Patch2911: linux-2.6-ext4-flush-on-close.patch
+Patch2912: linux-2.6-ext4-really-print-warning-once.patch
 
 # relatime patches from 2.6.30
 Patch2920: fs-relatime-add-strictatime-option.patch
@@ -692,6 +708,20 @@ Patch2922: fs-relatime-make-default.patch
 Patch2950: linux-2.6-kjournald-use-rt-io-priority.patch
 
 Patch3000: linux-2.6-btrfs-experimental-branch.patch
+
+Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
+
+# patches headed for -stable
+# fix oops in md raid1 (#495550)
+Patch6000: linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
+# fix duplicated flags
+Patch7000: linux-2.6-mm-define-unique-value-for-as_unevictable.patch
+# fix posix clock monotonicity
+Patch7001: linux-2.6-posix-timers-fix-clock-monotonicity.patch
+# make RLIMIT_CPU work again
+Patch7002: linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
+Patch7003: linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
+Patch7004: linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
 
 Patch9000: squashfs3.patch
 Patch9001: squashfs-fixups.patch
@@ -918,14 +948,30 @@ exit 1
 %endif
 %endif
 
+# more sanity checking; do it quietly
+if [ "%{patches}" != "%%{patches}" ] ; then
+  for patch in %{patches} ; do
+    if [ ! -f $patch ] ; then
+      echo "ERROR: Patch  ${patch##/*/}  listed in specfile but is missing"
+      exit 1
+    fi
+  done
+fi 2>/dev/null
+
 patch_command='patch -p1 -F1 -s'
 ApplyPatch()
 {
   local patch=$1
   shift
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
-    exit 1;
+    exit 1
   fi
+  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/kernel.spec ; then
+    if [ "${patch:0:10}" != "patch-2.6." ] ; then
+      echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
+      exit 1
+    fi
+  fi 2>/dev/null
   $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1101,6 +1147,7 @@ ApplyPatch linux-2.6-upstream-reverts.patch -R
 fi
 
 #ApplyPatch git-cpufreq.patch
+ApplyPatch git-bluetooth.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1108,6 +1155,9 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
+
+# IOMMU fixes backported to 2.6.29
+ApplyPatch linux-2.6-iommu-fixes.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1159,6 +1209,8 @@ ApplyPatch linux-2.6-kjournald-use-rt-io-priority.patch
 # ext4
 # data integrity band-aid for badly written apps
 ApplyPatch linux-2.6-ext4-flush-on-close.patch
+# missing braces cause warning to print more than once
+ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
 
 # xfs
 
@@ -1166,10 +1218,12 @@ ApplyPatch linux-2.6-ext4-flush-on-close.patch
 ApplyPatch linux-2.6-btrfs-experimental-branch.patch
 
 # USB
+ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
+ApplyPatch linux-2.6-acer-wmi-bail-on-aao.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1200,8 +1254,16 @@ ApplyPatch linux-2.6-defaults-fat-utf8.patch
 # fix cpqarray pci enable
 ApplyPatch linux-2.6-scsi-cpqarray-set-master.patch
 
-# ALSA
+# fix alsa for pulseaudio
 ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
+ApplyPatch alsa-pcm-always-reset-invalid-position.patch
+ApplyPatch alsa-pcm-fix-delta-calc-at-overlap.patch
+ApplyPatch alsa-pcm-safer-boundary-checks.patch
+ApplyPatch alsa-hda-dont-reset-BDL-unnecessarily.patch
+ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
+ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
+ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+ApplyPatch alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
 
@@ -1241,9 +1303,6 @@ ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 ApplyPatch linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 
-# fix locking in ipw3945 conf_tx callback
-ApplyPatch linux-2.6-iwl3945-rely-on-priv-_lock-to-protect-priv-access.patch
-
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 # http://hg.jannau.net/hdpvr/
@@ -1258,6 +1317,7 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-next.patch
 ApplyPatch drm-modesetting-radeon.patch
+ApplyPatch drm-modesetting-radeon-fixes.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-no-gem-on-i8xx.patch
 ApplyPatch drm-f10-compat.patch
@@ -1272,9 +1332,20 @@ fi
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
+# patches headed for -stable
+ApplyPatch linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
+ApplyPatch linux-2.6-mm-define-unique-value-for-as_unevictable.patch
+ApplyPatch linux-2.6-posix-timers-fix-clock-monotonicity.patch
+ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
+ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
+ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+
 # we need squashfs3 for Fedora-10
 ApplyPatch squashfs3.patch
 ApplyPatch squashfs-fixups.patch
+
+# s/uint16_t/__u16/ (#493053)
+ApplyPatch linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
@@ -1858,6 +1929,45 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-30
+- Add missing patch for broken RLIMIT_CPU
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-28
+- Fix warnings/errors in USB cdc-acm modem driver (F11#495446)
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-27
+- Timer fixes headed for -stable
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-26
+- Fix duplicated flag value in pagemap.h (-stable patch)
+
+* Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-25
+- Blacklist acer-wmi on the AAO to fix rfkill switch problems
+
+* Tue Apr 14 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-24
+- radeon: add some more kms fixes backported from F11
+
+* Mon Apr 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-23
+- Fix oops in md raid1 resync (F11#495550)
+
+* Mon Apr 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-22
+- Copy ALSA pulseaudio fixes from F-11.
+
+* Mon Apr 13 2009 John W. Linville <linville@redhat.com>  2.6.29.1-21
+- Remove iwl3945: rely on priv->lock to protect priv access
+
+* Mon Apr 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-20
+- Copy Intel iommu fixes, backported from 2.6.30, from F-11 kernel.
+
+* Thu Apr 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-18
+- Only print ext4 allocator fallback warning once.
+
+* Tue Apr 07 2009 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch (#493053)
+
+* Mon Apr 06 2009 Kyle McMartin <kyle@redhat.com>
+- add git-bluetooth.patch from F-11, bluetooth fixes from 2.6.30
+
 * Fri Apr 03 2009 Dave Airlie <airlied@redhat.com>
 - add backwards drm compat for radeon kms
 
