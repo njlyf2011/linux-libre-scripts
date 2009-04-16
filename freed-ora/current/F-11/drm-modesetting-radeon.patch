@@ -2,6 +2,40 @@ Deblobbed
 * drivers/gpu/drm/radeon/radeon-cp.c: Adjust for deblobbed sources.
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
+commit 18efcb54320d301dc356647a8fc2a2d308d8ef46
+Merge: e9777f8 1d8fea4
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 15 16:05:37 2009 +1000
+
+    Merge remote branch 'origin/drm-rawhide' into drm-f11
+
+commit 1d8fea416fd0d69d7d5ca8e88d52d23c55293941
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 15 15:58:59 2009 +1000
+
+    radeon: fixup fixed point calculations code
+    
+    port over avivo memory code as well
+
+commit e9777f869fd9d3a778ab833467a2dc242a84228a
+Merge: 02b2eac 8957181
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 15 13:54:29 2009 +1000
+
+    Merge remote branch 'origin/drm-rawhide' into drm-f11
+
+commit 89571817485aaba00509f0d716388bd97b5d1f9e
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 15 13:46:50 2009 +1000
+
+    drm: check for minor having a master before dropping master
+
+commit f8108e9b9b8518f4f137a44a53545700f43c4166
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Wed Apr 15 13:28:53 2009 +1000
+
+    rs6x0: fix sync xv
+
 commit 02b2eac96ef3cd6a59bf2a13c9ae104f855ff582
 Merge: 1076a8a 24eacd0
 Author: Dave Airlie <airlied@redhat.com>
@@ -6532,7 +6566,7 @@ index 0000000..9cf1138
 +
 +extern struct drm_page_alloc_usage drm_page_alloc_data;
 diff --git a/drivers/gpu/drm/drm_stub.c b/drivers/gpu/drm/drm_stub.c
-index d009661..5d45cbf 100644
+index d009661..5f7e431 100644
 --- a/drivers/gpu/drm/drm_stub.c
 +++ b/drivers/gpu/drm/drm_stub.c
 @@ -102,6 +102,7 @@ struct drm_master *drm_master_create(struct drm_minor *minor)
@@ -6543,6 +6577,15 @@ index d009661..5d45cbf 100644
  
  	list_add_tail(&master->head, &minor->master_list);
  
+@@ -178,7 +179,7 @@ int drm_setmaster_ioctl(struct drm_device *dev, void *data,
+ int drm_dropmaster_ioctl(struct drm_device *dev, void *data,
+ 			 struct drm_file *file_priv)
+ {
+-	if (!file_priv->master)
++	if (!file_priv->minor->master)
+ 		return -EINVAL;
+ 	mutex_lock(&dev->struct_mutex);
+ 	drm_master_put(&file_priv->minor->master);
 @@ -202,6 +203,7 @@ static int drm_fill_in_dev(struct drm_device * dev, struct pci_dev *pdev,
  	init_timer(&dev->timer);
  	mutex_init(&dev->struct_mutex);
@@ -14481,10 +14524,10 @@ index 0000000..9932b09
 +#endif /* _ATOMBIOS_H */
 diff --git a/drivers/gpu/drm/radeon/atombios_crtc.c b/drivers/gpu/drm/radeon/atombios_crtc.c
 new file mode 100644
-index 0000000..b7a2a6c
+index 0000000..ac268dd
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/atombios_crtc.c
-@@ -0,0 +1,501 @@
+@@ -0,0 +1,629 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -14517,6 +14560,8 @@ index 0000000..b7a2a6c
 +#include "drm_crtc_helper.h"
 +#include "atom.h"
 +#include "atom-bits.h"
++
++#include "radeon_fixed.h"
 +
 +static void atombios_lock_crtc(struct drm_crtc *crtc, int lock)
 +{
@@ -14946,6 +14991,7 @@ index 0000000..b7a2a6c
 +		radeon_crtc_set_base(crtc, x, y, old_fb);
 +		radeon_legacy_atom_set_surface(crtc);
 +	}
++	radeon_init_disp_bandwidth(dev);
 +	return 0;
 +}
 +
@@ -14986,8 +15032,133 @@ index 0000000..b7a2a6c
 +	drm_crtc_helper_add(&radeon_crtc->base, &atombios_helper_funcs);
 +}
 +
++void radeon_init_disp_bw_avivo(struct drm_device *dev,
++			       struct drm_display_mode *mode1,
++			       uint32_t pixel_bytes1,
++			       struct drm_display_mode *mode2,
++			       uint32_t pixel_bytes2)
++{
++	struct drm_radeon_private *dev_priv = dev->dev_private;
++	fixed20_12 min_mem_eff;
++	fixed20_12 peak_disp_bw, mem_bw, pix_clk, pix_clk2, temp_ff;
++	fixed20_12 sclk_ff, mclk_ff;
++	uint32_t dc_lb_memory_split, temp;
++
++	min_mem_eff.full = rfixed_const_8(0);
++	if (dev_priv->disp_priority == 2) {
++		uint32_t mc_init_misc_lat_timer = 0;
++		if (dev_priv->chip_family == CHIP_RV515)
++			mc_init_misc_lat_timer = RADEON_READ_MCIND(dev_priv, RV515_MC_INIT_MISC_LAT_TIMER);
++		else if (dev_priv->chip_family == CHIP_RS690)
++			mc_init_misc_lat_timer = RADEON_READ_MCIND(dev_priv, RS690_MC_INIT_MISC_LAT_TIMER);
++
++		mc_init_misc_lat_timer &= ~(R300_MC_DISP1R_INIT_LAT_MASK << R300_MC_DISP1R_INIT_LAT_SHIFT);
++		mc_init_misc_lat_timer &= ~(R300_MC_DISP0R_INIT_LAT_MASK << R300_MC_DISP0R_INIT_LAT_SHIFT);
++
++		if (mode2)
++			mc_init_misc_lat_timer |= (1 << R300_MC_DISP1R_INIT_LAT_SHIFT);
++		if (mode1)
++			mc_init_misc_lat_timer |= (1 << R300_MC_DISP0R_INIT_LAT_SHIFT);
++
++		if (dev_priv->chip_family == CHIP_RV515)
++			RADEON_WRITE_MCIND(RV515_MC_INIT_MISC_LAT_TIMER, mc_init_misc_lat_timer);
++		else if (dev_priv->chip_family == CHIP_RS690)
++			RADEON_WRITE_MCIND(RS690_MC_INIT_MISC_LAT_TIMER, mc_init_misc_lat_timer);
++	}
++
++	/*
++ 	 * determine is there is enough bw for current mode
++ 	 */
++	temp_ff.full = rfixed_const(100);
++	mclk_ff.full = rfixed_const(dev_priv->mode_info.mclk);
++	mclk_ff.full = rfixed_div(mclk_ff, temp_ff);
++	sclk_ff.full = rfixed_const(dev_priv->mode_info.sclk);
++	sclk_ff.full = rfixed_div(sclk_ff, temp_ff);
++
++	temp = (dev_priv->ram_width / 8) * (dev_priv->is_ddr ? 2 : 1);
++	temp_ff.full = rfixed_const(temp);
++	mem_bw.full = rfixed_mul(mclk_ff, temp_ff);
++	mem_bw.full = rfixed_mul(mem_bw, min_mem_eff);
++
++	pix_clk.full = 0;
++	pix_clk2.full = 0;
++	peak_disp_bw.full = 0;
++	if (mode1) {
++		temp_ff.full = rfixed_const(1000);
++		pix_clk.full = rfixed_const(mode1->clock); /* convert to fixed point */
++		pix_clk.full = rfixed_div(pix_clk, temp_ff);
++		temp_ff.full = rfixed_const(pixel_bytes1);
++		peak_disp_bw.full += rfixed_mul(pix_clk, temp_ff);
++	}
++	if (mode2) {
++		temp_ff.full = rfixed_const(1000);
++		pix_clk2.full = rfixed_const(mode2->clock); /* convert to fixed point */
++		pix_clk2.full = rfixed_div(pix_clk2, temp_ff);
++		temp_ff.full = rfixed_const(pixel_bytes2);
++		peak_disp_bw.full += rfixed_mul(pix_clk2, temp_ff);
++	}
++
++	if (peak_disp_bw.full >= mem_bw.full) {
++		DRM_ERROR("You may not have enough display bandwidth for current mode\n"
++			  "If you have flickering problem, try to lower resolution, refresh rate, or color depth\n");
++		printk("peak disp bw %d, mem_bw %d\n", rfixed_trunc(peak_disp_bw),
++			rfixed_trunc(mem_bw));
++	}
++
++	/*
++	 * Line Buffer Setup
++	 * There is a single line buffer shared by both display controllers.
++	 * DC_LB_MEMORY_SPLIT controls how that line buffer is shared between the display
++	 * controllers.  The paritioning can either be done manually or via one of four
++	 * preset allocations specified in bits 1:0:
++	 * 0 - line buffer is divided in half and shared between each display controller
++	 * 1 - D1 gets 3/4 of the line buffer, D2 gets 1/4
++	 * 2 - D1 gets the whole buffer
++	 * 3 - D1 gets 1/4 of the line buffer, D2 gets 3/4
++	 * Setting bit 2 of DC_LB_MEMORY_SPLIT controls switches to manual allocation mode.
++	 * In manual allocation mode, D1 always starts at 0, D1 end/2 is specified in bits
++	 * 14:4; D2 allocation follows D1.
++	 */
++
++	/* is auto or manual better ? */
++	dc_lb_memory_split = RADEON_READ(AVIVO_DC_LB_MEMORY_SPLIT) & ~AVIVO_DC_LB_MEMORY_SPLIT_MASK;
++	dc_lb_memory_split &= ~AVIVO_DC_LB_MEMORY_SPLIT_SHIFT_MODE;
++#if 1
++	/* auto */
++	if (mode1 && mode2) {
++		if (mode1->hdisplay > mode2->hdisplay) {
++			if (mode1->hdisplay > 2560)
++				dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1_3Q_D2_1Q;
++			else
++				dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1HALF_D2HALF;
++		} else if (mode2->hdisplay > mode1->hdisplay) {
++			if (mode2->hdisplay > 2560)
++				dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1_1Q_D2_3Q;
++			else
++				dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1HALF_D2HALF;
++		} else
++			dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1HALF_D2HALF;
++	} else if (mode1) {
++		dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1_ONLY;
++	} else if (mode2) {
++		dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_D1_1Q_D2_3Q;
++	}
++#else
++	/* manual */
++	dc_lb_memory_split |= AVIVO_DC_LB_MEMORY_SPLIT_SHIFT_MODE;
++	dc_lb_memory_split &= ~(AVIVO_DC_LB_DISP1_END_ADR_MASK << AVIVO_DC_LB_DISP1_END_ADR_SHIFT);
++	if (mode1) {
++		dc_lb_memory_split |= ((((mode1->hdisplay / 2) + 64 /*???*/) & AVIVO_DC_LB_DISP1_END_ADR_MASK)
++				       << AVIVO_DC_LB_DISP1_END_ADR_SHIFT);
++	} else if (mode2) {
++		dc_lb_memory_split |= (0 << AVIVO_DC_LB_DISP1_END_ADR_SHIFT);
++	}
++
++#endif
++	RADEON_WRITE(AVIVO_DC_LB_MEMORY_SPLIT, dc_lb_memory_split);
++}
 diff --git a/drivers/gpu/drm/radeon/r300_cmdbuf.c b/drivers/gpu/drm/radeon/r300_cmdbuf.c
-index cb2e470..9489a05 100644
+index cb2e470..f4ccfbb 100644
 --- a/drivers/gpu/drm/radeon/r300_cmdbuf.c
 +++ b/drivers/gpu/drm/radeon/r300_cmdbuf.c
 @@ -35,6 +35,7 @@
@@ -15051,7 +15222,7 @@ index cb2e470..9489a05 100644
  	ADD_RANGE(R300_ZB_ZPASS_DATA, 2); /* ZB_ZPASS_DATA, ZB_ZPASS_ADDR */
  
  	ADD_RANGE(R300_TX_FILTER_0, 16);
-@@ -249,11 +252,16 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -249,11 +252,21 @@ void r300_init_reg_flags(struct drm_device *dev)
  	ADD_RANGE(R300_TX_BORDER_COLOR_0, 16);
  
  	/* Sporadic registers used as primitives are emitted */
@@ -15066,10 +15237,15 @@ index cb2e470..9489a05 100644
 +		ADD_RANGE(R300_DST_PIPE_CONFIG, 1);
 +	}
 +
++	if ((dev_priv->flags & RADEON_FAMILY_MASK) >= CHIP_RS600)
++		ADD_RANGE_MARK(AVIVO_D1MODE_VLINE_START_END, 1, MARK_CHECK_WAIT_VLINE);
++	else
++		ADD_RANGE_MARK(RADEON_CRTC_GUI_TRIG_VLINE, 1, MARK_CHECK_WAIT_VLINE);
++
  	if ((dev_priv->flags & RADEON_FAMILY_MASK) >= CHIP_RV515) {
  		ADD_RANGE(R500_VAP_INDEX_OFFSET, 1);
  		ADD_RANGE(R500_US_CONFIG, 2);
-@@ -263,7 +271,10 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -263,7 +276,9 @@ void r300_init_reg_flags(struct drm_device *dev)
  		ADD_RANGE(R500_RS_INST_0, 16);
  		ADD_RANGE(R500_RB3D_COLOR_CLEAR_VALUE_AR, 2);
  		ADD_RANGE(R500_RB3D_CONSTANT_COLOR_AR, 2);
@@ -15077,15 +15253,13 @@ index cb2e470..9489a05 100644
 +//		ADD_RANGE(R500_ZB_FIFO_SIZE  2);
 +		ADD_RANGE(R500_GA_US_VECTOR_INDEX, 2);
 +
-+		ADD_RANGE_MARK(AVIVO_D1MODE_VLINE_START_END, 1, MARK_CHECK_WAIT_VLINE);
  	} else {
  		ADD_RANGE(R300_PFS_CNTL_0, 3);
  		ADD_RANGE(R300_PFS_NODE_0, 4);
-@@ -275,10 +286,125 @@ void r300_init_reg_flags(struct drm_device *dev)
+@@ -274,11 +289,124 @@ void r300_init_reg_flags(struct drm_device *dev)
+ 		ADD_RANGE(R300_PFS_INSTR3_0, 64);
  		ADD_RANGE(R300_RS_INTERP_0, 8);
  		ADD_RANGE(R300_RS_ROUTE_0, 8);
- 
-+		ADD_RANGE_MARK(RADEON_CRTC_GUI_TRIG_VLINE, 1, MARK_CHECK_WAIT_VLINE);
 +	}
 +
 +	/* add 2d blit engine registers for DDX */
@@ -15110,7 +15284,7 @@ index cb2e470..9489a05 100644
 +
 +	/* TODO SCISSOR */
 +	ADD_RANGE_MARK(R300_SC_SCISSOR0, 2, MARK_CHECK_SCISSOR);
-+
+ 
 +	ADD_RANGE(R300_SC_CLIP_0_A, 2);
 +	ADD_RANGE(R300_SC_CLIP_RULE, 1);
 +	ADD_RANGE(R300_SC_SCREENDOOR, 1);
@@ -15208,7 +15382,7 @@ index cb2e470..9489a05 100644
  {
  	int i;
  	if (reg & ~0xffff)
-@@ -289,6 +415,13 @@ static __inline__ int r300_check_range(unsigned reg, int count)
+@@ -289,6 +417,13 @@ static __inline__ int r300_check_range(unsigned reg, int count)
  	return 0;
  }
  
@@ -22476,10 +22650,10 @@ index 0000000..7ddc8fd
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_display.c b/drivers/gpu/drm/radeon/radeon_display.c
 new file mode 100644
-index 0000000..76834ae
+index 0000000..2d33137
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_display.c
-@@ -0,0 +1,673 @@
+@@ -0,0 +1,678 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -23145,6 +23319,11 @@ index 0000000..76834ae
 +	}
 +  
 +	if (radeon_is_avivo(dev_priv)) {
++		radeon_init_disp_bw_avivo(dev,
++					  modes[0],
++					  pixel_bytes[0],
++					  modes[1],
++					  pixel_bytes[1]);
 +	} else {
 +		radeon_init_disp_bw_legacy(dev,
 +					   modes[0],
@@ -26889,6 +27068,65 @@ index 0000000..13af804
 +	.poll = radeon_fence_poll,
 +};
 +
+diff --git a/drivers/gpu/drm/radeon/radeon_fixed.h b/drivers/gpu/drm/radeon/radeon_fixed.h
+new file mode 100644
+index 0000000..504290b
+--- /dev/null
++++ b/drivers/gpu/drm/radeon/radeon_fixed.h
+@@ -0,0 +1,53 @@
++/*
++ * Copyright 2009 Red Hat Inc.
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a
++ * copy of this software and associated documentation files (the "Software"),
++ * to deal in the Software without restriction, including without limitation
++ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
++ * and/or sell copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++ * THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
++ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
++ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ * OTHER DEALINGS IN THE SOFTWARE.
++ *
++ * Authors: Dave Airlie
++ */
++#include "drmP.h"
++#include "radeon_drm.h"
++#include "radeon_drv.h"
++#ifndef RADEON_FIXED_H
++#define RADEON_FIXED_H
++
++typedef union rfixed {
++	u32 full;
++} fixed20_12;
++
++
++#define rfixed_const(A) (u32)((A<<12))// + ((B + 0.000122)*4096))
++#define rfixed_const_half(A) (u32)((A<<12) + 2048)
++#define rfixed_const_666(A) (u32)((A<<12) + 2731)
++#define rfixed_const_8(A) (u32)((A<<12) + 3277)
++#define rfixed_mul(A,B) (u64)((u64)A.full*B.full+2048) >> 12
++#define fixed_init(A) { .full = rfixed_const(A) }
++#define fixed_init_half(A) { .full = rfixed_const_half(A) }
++#define rfixed_trunc(A) (A.full >> 12)
++
++static inline u32 rfixed_div(fixed20_12 A, fixed20_12 B)
++{
++	u64 tmp = ((u64)A.full << 13);
++
++	do_div(tmp, B.full);
++	tmp += 1;
++	tmp /= 2;
++	return (lower_32_bits(tmp));
++}
++#endif
 diff --git a/drivers/gpu/drm/radeon/radeon_gem.c b/drivers/gpu/drm/radeon/radeon_gem.c
 new file mode 100644
 index 0000000..a0b0f5b
@@ -29010,10 +29248,10 @@ index 9836c70..d4f0f6f 100644
  	dev->max_vblank_count = 0x001fffff;
 diff --git a/drivers/gpu/drm/radeon/radeon_legacy_crtc.c b/drivers/gpu/drm/radeon/radeon_legacy_crtc.c
 new file mode 100644
-index 0000000..93038a7
+index 0000000..2961292
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_legacy_crtc.c
-@@ -0,0 +1,1608 @@
+@@ -0,0 +1,1600 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -29042,7 +29280,7 @@ index 0000000..93038a7
 +#include "drmP.h"
 +#include "radeon_drm.h"
 +#include "radeon_drv.h"
-+
++#include "radeon_fixed.h"
 +#include "drm_crtc_helper.h"
 +
 +void radeon_restore_common_regs(struct drm_device *dev)
@@ -30107,6 +30345,7 @@ index 0000000..93038a7
 +		break;
 +
 +	}
++	radeon_init_disp_bandwidth(crtc->dev);
 +	return 0;
 +}
 +
@@ -30136,18 +30375,6 @@ index 0000000..93038a7
 +	drm_crtc_helper_add(&radeon_crtc->base, &legacy_helper_funcs);
 +}
 +
-+
-+typedef union rfixed {
-+	uint32_t full;
-+} fixed20_12;
-+
-+#define rfixed_const(A,B) (uint32_t)((A<<12) + ((B + 0.000122)*4096))
-+#define rfixed_mul(A,B)  (uint64_t)(A.full*B.full+2048) >> 12
-+#define rfixed_div(A,B)   (uint64_t)(((A.full<<13)/B.full)+1)/2
-+#define fixed_init(A,B) { .full = rfixed_const(A,B) }
-+#define rfixed_trunc(A) (A.full >> 12)
-+/* fixed point shift */
-+#define R_FIXED_INT_SHIFT 10000
 +void radeon_init_disp_bw_legacy(struct drm_device *dev,
 +				struct drm_display_mode *mode1,
 +				uint32_t pixel_bytes1,
@@ -30155,62 +30382,61 @@ index 0000000..93038a7
 +				uint32_t pixel_bytes2)
 +	
 +{
-+#if 0 // GCC ICEs
 +	struct drm_radeon_private *dev_priv = dev->dev_private;
 +	fixed20_12 trcd_ff, trp_ff, tras_ff, trbs_ff, tcas_ff;
 +	fixed20_12 sclk_ff, mclk_ff, sclk_eff_ff, sclk_delay_ff;
 +	fixed20_12 peak_disp_bw, mem_bw, pix_clk, pix_clk2, temp_ff, crit_point_ff;
 +	uint32_t temp, data, mem_trcd, mem_trp, mem_tras;
 +	fixed20_12 memtcas_ff[8] = {
-+		fixed_init(1, 0),
-+		fixed_init(2, 0),
-+		fixed_init(3, 0),
-+		fixed_init(0, 0),
-+		fixed_init(1, 0.5),
-+		fixed_init(2, 0.5),
-+		fixed_init(0, 0),
++		fixed_init(1),
++		fixed_init(2),
++		fixed_init(3),
++		fixed_init(0),
++		fixed_init_half(1),
++		fixed_init_half(2),
++		fixed_init(0),
 +	};
 +	fixed20_12 memtcas_rs480_ff[8] = {
-+		fixed_init(0,0),
-+		fixed_init(1,0),
-+		fixed_init(2,0),
-+		fixed_init(3,0),
-+		fixed_init(0,0),
-+		fixed_init(1,0.5),
-+		fixed_init(2,0.5),
-+		fixed_init(3,0.5)
++		fixed_init(0),
++		fixed_init(1),
++		fixed_init(2),
++		fixed_init(3),
++		fixed_init(0),
++		fixed_init_half(1),
++		fixed_init_half(2),
++		fixed_init_half(3),
 +	};
 +	fixed20_12 memtcas2_ff[8] = {
-+		fixed_init(0,0),
-+		fixed_init(1,0),
-+		fixed_init(2,0),
-+		fixed_init(3,0),
-+		fixed_init(4,0),
-+		fixed_init(5,0),
-+		fixed_init(6,0),
-+		fixed_init(7,0),
++		fixed_init(0),
++		fixed_init(1),
++		fixed_init(2),
++		fixed_init(3),
++		fixed_init(4),
++		fixed_init(5),
++		fixed_init(6),
++		fixed_init(7),
 +	};
 +	fixed20_12 memtrbs[8] = {
-+		fixed_init(1,0),
-+		fixed_init(1,0.5),
-+		fixed_init(2,0),
-+		fixed_init(2,0.5),
-+		fixed_init(3,0),
-+		fixed_init(3,0.5),
-+		fixed_init(4,0),
-+		fixed_init(4,0.5)
++		fixed_init(1),
++		fixed_init_half(1),
++		fixed_init(2),
++		fixed_init_half(2),
++		fixed_init(3),
++		fixed_init_half(3),
++		fixed_init(4),
++		fixed_init_half(4)
 +	};
 +	fixed20_12 memtrbs_r4xx[8] = {
-+		fixed_init(4,0),
-+		fixed_init(5,0),
-+		fixed_init(6,0),
-+		fixed_init(7,0),
-+		fixed_init(8,0),
-+		fixed_init(9,0),
-+		fixed_init(10,0),
-+		fixed_init(11,0)
++		fixed_init(4),
++		fixed_init(5),
++		fixed_init(6),
++		fixed_init(7),
++		fixed_init(8),
++		fixed_init(9),
++		fixed_init(10),
++		fixed_init(11)
 +	};
-+	fixed20_12 min_mem_eff = fixed_init(8, 0);
++	fixed20_12 min_mem_eff;
 +	fixed20_12 mc_latency_sclk, mc_latency_mclk, k1;
 +	fixed20_12 cur_latency_mclk, cur_latency_sclk;
 +	fixed20_12 disp_latency, disp_latency_overhead, disp_drain_rate,
@@ -30222,6 +30448,7 @@ index 0000000..93038a7
 +//	uint32_t read_return_rate, time_disp1_drop_priority;
 +	int stop_req, max_stop_req;
 +
++	min_mem_eff.full = rfixed_const_8(0);
 +	/* get modes */
 +	if ((dev_priv->disp_priority == 2) && radeon_is_r300(dev_priv)) {
 +		uint32_t mc_init_misc_lat_timer = RADEON_READ(R300_MC_INIT_MISC_LAT_TIMER);
@@ -30238,28 +30465,32 @@ index 0000000..93038a7
 +	/*
 + 	 * determine is there is enough bw for current mode
 + 	 */
-+	mclk_ff.full = rfixed_const(dev_priv->mode_info.mclk, 0);
-+	temp_ff.full = rfixed_const(100, 0);
++	mclk_ff.full = rfixed_const(dev_priv->mode_info.mclk);
++	temp_ff.full = rfixed_const(100);
 +	mclk_ff.full = rfixed_div(mclk_ff, temp_ff);
-+	sclk_ff.full = rfixed_const(dev_priv->mode_info.sclk, 0);
++	sclk_ff.full = rfixed_const(dev_priv->mode_info.sclk);
 +	sclk_ff.full = rfixed_div(sclk_ff, temp_ff);
 +
 +	temp = (dev_priv->ram_width / 8) * (dev_priv->is_ddr ? 2 : 1);
-+	temp_ff.full = rfixed_const(temp, 0);
++	temp_ff.full = rfixed_const(temp);
 +	mem_bw.full = rfixed_mul(mclk_ff, temp_ff);
 +
 +	pix_clk.full = 0;
 +	pix_clk2.full = 0;
 +	peak_disp_bw.full = 0;
 +	if (mode1) {
-+		pix_clk.full = rfixed_const(mode1->clock, 0); /* convert to fixed point */
-+		temp_ff.full = rfixed_const(pixel_bytes1, 0);
++		temp_ff.full = rfixed_const(1000);
++		pix_clk.full = rfixed_const(mode1->clock); /* convert to fixed point */
++		pix_clk.full = rfixed_div(pix_clk, temp_ff);
++		temp_ff.full = rfixed_const(pixel_bytes1);
 +		peak_disp_bw.full += rfixed_mul(pix_clk, temp_ff);
 +	}
 +	if (mode2) {
-+		pix_clk2.full = rfixed_const(mode2->clock, 0); /* convert to fixed point */
-+		temp_ff.full = rfixed_const(pixel_bytes2, 0);
-+		peak_disp_bw.full += rfixed_mul(pix_clk, temp_ff);
++		temp_ff.full = rfixed_const(1000);
++		pix_clk2.full = rfixed_const(mode2->clock); /* convert to fixed point */
++		pix_clk2.full = rfixed_div(pix_clk2, temp_ff);
++		temp_ff.full = rfixed_const(pixel_bytes2);
++		peak_disp_bw.full += rfixed_mul(pix_clk2, temp_ff);
 +	}
 +
 +	mem_bw.full = rfixed_mul(mem_bw, min_mem_eff);
@@ -30304,9 +30535,9 @@ index 0000000..93038a7
 +		mem_tras = ((temp >> 12) & 0xf) + 4;
 +	}
 +	/* convert to FF */
-+	trcd_ff.full = rfixed_const(mem_trcd, 0);
-+	trp_ff.full = rfixed_const(mem_trp, 0);
-+	tras_ff.full = rfixed_const(mem_tras, 0);
++	trcd_ff.full = rfixed_const(mem_trcd);
++	trp_ff.full = rfixed_const(mem_trp);
++	tras_ff.full = rfixed_const(mem_tras);
 +
 +	/* Get values from the MEM_SDRAM_MODE_REG register...converting its */
 +	temp = RADEON_READ(RADEON_MEM_SDRAM_MODE_REG);
@@ -30324,7 +30555,7 @@ index 0000000..93038a7
 +		/* extra cas latency stored in bits 23-25 0-4 clocks */
 +		data = (temp >> 23) & 0x7;
 +		if (data < 5)
-+			tcas_ff.full += rfixed_const(data, 0);
++			tcas_ff.full += rfixed_const(data);
 +	}
 +	
 +	if (radeon_is_r300(dev_priv) && !(dev_priv->flags & RADEON_IS_IGP)) {
@@ -30361,26 +30592,26 @@ index 0000000..93038a7
 +	
 +	if (dev_priv->flags & RADEON_IS_AGP) {
 +		fixed20_12 agpmode_ff;
-+		agpmode_ff.full = rfixed_const(radeon_agpmode, 0);
-+		temp_ff.full = rfixed_const(16, 0.6666);
++		agpmode_ff.full = rfixed_const(radeon_agpmode);
++		temp_ff.full = rfixed_const_666(16);
 +		sclk_eff_ff.full -= rfixed_mul(agpmode_ff, temp_ff);
 +	}
 +	/* TODO PCIE lanes may affect this - agpmode == 16?? */
 +	
 +	if (radeon_is_r300(dev_priv)) {
-+		sclk_delay_ff.full = rfixed_const(250, 0);;
++		sclk_delay_ff.full = rfixed_const(250);
 +	} else {
 +		if ((dev_priv->chip_family == CHIP_RV100) ||
 +		    dev_priv->flags & RADEON_IS_IGP) {
 +			if (dev_priv->is_ddr)
-+				sclk_delay_ff.full = rfixed_const(41, 0);
++				sclk_delay_ff.full = rfixed_const(41);
 +			else
-+				sclk_delay_ff.full = rfixed_const(33, 0);
++				sclk_delay_ff.full = rfixed_const(33);
 +		} else {
 +			if (dev_priv->ram_width == 128)
-+				sclk_delay_ff.full = rfixed_const(57, 0);
++				sclk_delay_ff.full = rfixed_const(57);
 +			else
-+				sclk_delay_ff.full = rfixed_const(41, 0);
++				sclk_delay_ff.full = rfixed_const(41);
 +		}
 +	}
 +
@@ -30388,22 +30619,22 @@ index 0000000..93038a7
 +
 +	if (dev_priv->is_ddr) {
 +		if (dev_priv->ram_width == 32) {
-+			k1.full = rfixed_const(40, 0);
++			k1.full = rfixed_const(40);
 +			c  = 3;
 +		} else {
-+			k1.full = rfixed_const(20, 0);
++			k1.full = rfixed_const(20);
 +			c  = 1;
 +		}
 +	} else {
-+		k1.full = rfixed_const(40, 0);
++		k1.full = rfixed_const(40);
 +		c  = 3;
 +	}
 +
-+	temp_ff.full = rfixed_const(2, 0);
++	temp_ff.full = rfixed_const(2);
 +	mc_latency_mclk.full = rfixed_mul(trcd_ff, temp_ff);
-+	temp_ff.full = rfixed_const(c, 0);
++	temp_ff.full = rfixed_const(c);
 +	mc_latency_mclk.full += rfixed_mul(tcas_ff, temp_ff);
-+	temp_ff.full = rfixed_const(4, 0);
++	temp_ff.full = rfixed_const(4);
 +	mc_latency_mclk.full += rfixed_mul(tras_ff, temp_ff);
 +	mc_latency_mclk.full += rfixed_mul(trp_ff, temp_ff);
 +	mc_latency_mclk.full += k1.full;
@@ -30414,18 +30645,18 @@ index 0000000..93038a7
 +	/*
 +	  HW cursor time assuming worst case of full size colour cursor.
 +	*/
-+	temp_ff.full = rfixed_const((2 * (cur_size - (dev_priv->is_ddr + 1))), 0);
++	temp_ff.full = rfixed_const((2 * (cur_size - (dev_priv->is_ddr + 1))));
 +	temp_ff.full += trcd_ff.full;
 +	if (temp_ff.full < tras_ff.full)
 +		temp_ff.full = tras_ff.full;
 +	cur_latency_mclk.full = rfixed_div(temp_ff, mclk_ff);
 +
-+	temp_ff.full = rfixed_const(cur_size, 0);
++	temp_ff.full = rfixed_const(cur_size);
 +	cur_latency_sclk.full = rfixed_div(temp_ff, sclk_eff_ff);
 +	/*
 +	  Find the total latency for the display data.
 +	*/
-+	disp_latency_overhead.full = rfixed_const(80, 0);
++	disp_latency_overhead.full = rfixed_const(80);
 +	disp_latency_overhead.full = rfixed_div(disp_latency_overhead, sclk_ff);
 +	mc_latency_mclk.full += disp_latency_overhead.full + cur_latency_mclk.full;
 +	mc_latency_sclk.full += disp_latency_overhead.full + cur_latency_sclk.full;
@@ -30454,14 +30685,14 @@ index 0000000..93038a7
 +		/*
 +		  Find the drain rate of the display buffer.
 +		*/
-+		temp_ff.full = rfixed_const((16/pixel_bytes1), 0);
++		temp_ff.full = rfixed_const((16/pixel_bytes1));
 +		disp_drain_rate.full = rfixed_div(pix_clk, temp_ff);
 +
 +		/*
 +		  Find the critical point of the display buffer.
 +		*/
 +		crit_point_ff.full = rfixed_mul(disp_drain_rate, disp_latency);
-+		crit_point_ff.full += rfixed_const(0, 0.5);
++		crit_point_ff.full += rfixed_const_half(0);
 +		
 +		critical_point = rfixed_trunc(crit_point_ff);
 +
@@ -30533,7 +30764,7 @@ index 0000000..93038a7
 +		/*
 +		  Find the drain rate of the display buffer.
 +		*/
-+		temp_ff.full = rfixed_const((16/pixel_bytes2), 0);
++		temp_ff.full = rfixed_const((16/pixel_bytes2));
 +		disp_drain_rate2.full = rfixed_div(pix_clk2, temp_ff);
 +
 +		temp = RADEON_READ(RADEON_GRPH2_BUFFER_CNTL);
@@ -30555,7 +30786,7 @@ index 0000000..93038a7
 +			critical_point2 = 0;
 +		else {
 +			temp = (dev_priv->ram_width * dev_priv->is_ddr + 1)/128;
-+			temp_ff.full = rfixed_const(temp, 0);
++			temp_ff.full = rfixed_const(temp);
 +			temp_ff.full = rfixed_mul(mclk_ff, temp_ff);
 +			if (sclk_ff.full < temp_ff.full)
 +				temp_ff.full = sclk_ff.full;
@@ -30570,7 +30801,7 @@ index 0000000..93038a7
 +
 +			crit_point_ff.full = disp_latency.full + time_disp1_drop_priority.full + disp_latency.full;
 +			crit_point_ff.full = rfixed_mul(crit_point_ff, disp_drain_rate2);
-+			crit_point_ff.full += rfixed_const(0, 0.5);
++			crit_point_ff.full += rfixed_const_half(0);
 +		
 +			critical_point2 = rfixed_trunc(crit_point_ff);
 +			
@@ -30618,7 +30849,6 @@ index 0000000..93038a7
 +//			  (unsigned int)info->SavedReg->grph2_buffer_cntl,
 +			  (unsigned int)RADEON_READ(RADEON_GRPH2_BUFFER_CNTL));
 +	}
-+#endif
 +}
 +
 +
@@ -31927,10 +32157,10 @@ index 4af5286..40134c8 100644
  
 diff --git a/drivers/gpu/drm/radeon/radeon_mode.h b/drivers/gpu/drm/radeon/radeon_mode.h
 new file mode 100644
-index 0000000..f2ac719
+index 0000000..63f2c8f
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_mode.h
-@@ -0,0 +1,393 @@
+@@ -0,0 +1,399 @@
 +/*
 + * Copyright 2000 ATI Technologies Inc., Markham, Ontario, and
 + *                VA Linux Systems Inc., Fremont, California.
@@ -32323,6 +32553,12 @@ index 0000000..f2ac719
 +				uint32_t pixel_bytes1,
 +				struct drm_display_mode *mode2,
 +				uint32_t pixel_bytes2);
++void radeon_init_disp_bw_avivo(struct drm_device *dev,
++				struct drm_display_mode *mode1,
++				uint32_t pixel_bytes1,
++				struct drm_display_mode *mode2,
++				uint32_t pixel_bytes2);
++void radeon_init_disp_bandwidth(struct drm_device *dev);
 +#endif
 diff --git a/drivers/gpu/drm/radeon/radeon_pm.c b/drivers/gpu/drm/radeon/radeon_pm.c
 new file mode 100644
@@ -32595,10 +32831,10 @@ index 0000000..5a57056
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_reg.h b/drivers/gpu/drm/radeon/radeon_reg.h
 new file mode 100644
-index 0000000..7daff2c
+index 0000000..1a5e157
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_reg.h
-@@ -0,0 +1,5348 @@
+@@ -0,0 +1,5361 @@
 +/*
 + * Copyright 2000 ATI Technologies Inc., Markham, Ontario, and
 + *                VA Linux Systems Inc., Fremont, California.
@@ -36096,6 +36332,7 @@ index 0000000..7daff2c
 +#define RS690_MC_AGP_LOCATION			0x101
 +#define RS690_MC_AGP_BASE			0x102
 +#define RS690_MC_AGP_BASE_2                     0x103
++#define RS690_MC_INIT_MISC_LAT_TIMER            0x104
 +#define RS690_MC_STATUS                         0x90
 +#define RS690_MC_STATUS_IDLE                    (1 << 0)
 +
@@ -36104,6 +36341,7 @@ index 0000000..7daff2c
 +#define R520_MC_STATUS_IDLE (1<<1)
 +#define RV515_MC_STATUS 0x08
 +#define RV515_MC_STATUS_IDLE (1<<4)
++#define RV515_MC_INIT_MISC_LAT_TIMER            0x09
 +#define AVIVO_MC_DATA						0x0074
 +
 +#define RV515_MC_FB_LOCATION   0x1
@@ -36267,6 +36505,17 @@ index 0000000..7daff2c
 +#define AVIVO_DC_LUTA_WHITE_OFFSET_BLUE         0x64d0
 +#define AVIVO_DC_LUTA_WHITE_OFFSET_GREEN        0x64d4
 +#define AVIVO_DC_LUTA_WHITE_OFFSET_RED          0x64d8
++
++#define AVIVO_DC_LB_MEMORY_SPLIT                0x6520
++#       define AVIVO_DC_LB_MEMORY_SPLIT_MASK    0x3
++#       define AVIVO_DC_LB_MEMORY_SPLIT_SHIFT   0
++#       define AVIVO_DC_LB_MEMORY_SPLIT_D1HALF_D2HALF  0
++#       define AVIVO_DC_LB_MEMORY_SPLIT_D1_3Q_D2_1Q    1
++#       define AVIVO_DC_LB_MEMORY_SPLIT_D1_ONLY        2
++#       define AVIVO_DC_LB_MEMORY_SPLIT_D1_1Q_D2_3Q    3
++#       define AVIVO_DC_LB_MEMORY_SPLIT_SHIFT_MODE (1 << 2)
++#       define AVIVO_DC_LB_DISP1_END_ADR_SHIFT  4
++#       define AVIVO_DC_LB_DISP1_END_ADR_MASK   0x7ff
 +
 +#define AVIVO_D1MODE_DATA_FORMAT                0x6528
 +#       define AVIVO_D1MODE_INTERLEAVE_EN       (1 << 0)
