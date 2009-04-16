@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1543 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1547 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -654,6 +654,7 @@ Patch452: linux-2.6-input-hid-extra-gamepad.patch
 Patch453: linux-2.6-input-wacom-bluetooth.patch
 
 Patch460: linux-2.6-serial-460800.patch
+Patch461: linux-2.6-serial-add-txen-test-param.patch
 
 # 8192 too low
 Patch480: increase-MAX_LOCKDEP_ENTRIES.patch
@@ -764,6 +765,8 @@ Patch9101: linux-2.6-net-fix-another-gro-bug.patch
 Patch9300: linux-2.6-kvm-kconfig-irqchip.patch
 Patch9301: linux-2.6-kvm-mask-notifiers.patch
 Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
+
+Patch9304: linux-2.6-kvm-skip-pit-check.patch
 
 %endif
 
@@ -1314,6 +1317,8 @@ ApplyPatch linux-2.6-input-wacom-bluetooth.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
+# let users skip the TXEN bug test
+ApplyPatch linux-2.6-serial-add-txen-test-param.patch
 
 ApplyPatch increase-MAX_LOCKDEP_ENTRIES.patch
 
@@ -1415,6 +1420,7 @@ ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
 ApplyPatch linux-2.6-kvm-kconfig-irqchip.patch
 ApplyPatch linux-2.6-kvm-mask-notifiers.patch
 ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
+ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2001,6 +2007,15 @@ fi
 # and build.
 
 %changelog
+* Wed Apr 15 2009 Marcelo Tosatti <mtosatti@redhat.com> 2.6.29.1-85
+- Skip PIT-through-IOAPIC routing check on KVM guests.
+
+* Wed Apr 15 2009 Chuck Ebbert <cebbert@redhat.com>
+- Add serial driver option to skip testing for the TXEN bug. (#495762)
+
+* Wed Apr 15 2009 Dave Airlie <airlied@redhat.com>
+- drm-modesetting-radeon: fix rs690 video (#492685) + add bandwidth calcs
+
 * Thu Apr 14 2009 Marcelo Tosatti <mtosatti@redhat.com>
 - kvm fixes for bz#491625
 
