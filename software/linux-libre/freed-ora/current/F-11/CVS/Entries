@@ -39,7 +39,6 @@ D/scripts////
 /drm-intel-lying-systems-without-lvds.patch/1.4/Sat Apr  4 02:40:41 2009/-kb/Tkernel-2_6_29_1-97_fc11
 /drm-intel-tiled-front.patch/1.1/Fri Apr 17 21:35:04 2009/-kb/Tkernel-2_6_29_1-97_fc11
 /drm-modesetting-radeon.patch/1.79/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_1-97_fc11
-/drm-next.patch/1.14/dummy timestamp from new-entry+Fri Apr 17 18:23:57 2009/-kb/Tkernel-2_6_29_1-97_fc11
 /drm-no-gem-on-i8xx.patch/1.1/Mon Feb  9 04:45:32 2009/-kb/Tkernel-2_6_29_1-97_fc11
 /drm-nouveau.patch/1.41/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_1-97_fc11
 /drm-radeon-pm.patch/1.2/Tue Mar  3 21:06:24 2009/-kb/Tkernel-2_6_29_1-97_fc11
@@ -154,3 +153,4 @@ D/scripts////
 /squashfs-broken-when-pagesize-greater-than-blocksize.patch/1.1/Tue Apr 14 14:18:26 2009/-kb/Tkernel-2_6_29_1-97_fc11
 /upstream/1.914/dummy timestamp from new-entry//Tkernel-2_6_29_1-97_fc11
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_29_1-97_fc11
+/drm-next.patch/1.14/Sat Apr 18 23:47:13 2009/-kb/Tkernel-2_6_29_1-97_fc11
