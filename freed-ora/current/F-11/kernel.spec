@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1559 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1562 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -769,6 +769,8 @@ Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 
 Patch9304: linux-2.6-kvm-skip-pit-check.patch
 
+Patch9400: pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1424,6 +1426,8 @@ ApplyPatch linux-2.6-kvm-mask-notifiers.patch
 ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 
+ApplyPatch pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2009,6 +2013,16 @@ fi
 # and build.
 
 %changelog
+* Sat Apr 18 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-100
+- pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch:
+   Fix the spew of "Xorg:3254 freeing invalid memtype" messages.
+
+* Sat Apr 18 2009 Chuck Ebbert <cebbert@redhat.com>
+- Build in the rfkill and rfkill-input modules (F10#485322)
+
+* Sat Apr 18 2009 Chuck Ebbert <cebbert@redhat.com>
+- Set CONFIG_UEVENT_HELPER_PATH to the empty string (#496296)
+
 * Fri Apr 17 2009 Adam Jackson <ajax@redhat.com> 2.6.29.1-97
 - drm-intel-tiled-front.patch: Enable tiled front buffer on gen4
 
