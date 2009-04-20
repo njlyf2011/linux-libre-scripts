@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1562 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1563 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -766,8 +766,8 @@ Patch9101: linux-2.6-net-fix-another-gro-bug.patch
 Patch9300: linux-2.6-kvm-kconfig-irqchip.patch
 Patch9301: linux-2.6-kvm-mask-notifiers.patch
 Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
-
-Patch9304: linux-2.6-kvm-skip-pit-check.patch
+Patch9303: linux-2.6-kvm-skip-pit-check.patch
+Patch9304: linux-2.6-xen-check-for-nx-support.patch
 
 Patch9400: pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
 
@@ -1425,6 +1425,7 @@ ApplyPatch linux-2.6-kvm-kconfig-irqchip.patch
 ApplyPatch linux-2.6-kvm-mask-notifiers.patch
 ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
+ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 
 ApplyPatch pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
 
@@ -2013,6 +2014,9 @@ fi
 # and build.
 
 %changelog
+* Sun Apr 19 2009 Mark McLoughlin <markmc@redhat.com> - 2.6.29.1-101
+- Fix xen boot on machines without NX support (#492523)
+
 * Sat Apr 18 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-100
 - pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch:
    Fix the spew of "Xorg:3254 freeing invalid memtype" messages.
