@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1563 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1564 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -604,6 +604,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
 Patch11: git-bluetooth.patch
+Patch12: git-bluetooth2.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -1181,6 +1182,7 @@ fi
 
 #ApplyPatch git-cpufreq.patch
 ApplyPatch git-bluetooth.patch
+ApplyPatch git-bluetooth2.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -2014,6 +2016,9 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-102
+- git-bluetooth2.patch: Bluetooth fixes from 2.6.30-rc2.
+
 * Sun Apr 19 2009 Mark McLoughlin <markmc@redhat.com> - 2.6.29.1-101
 - Fix xen boot on machines without NX support (#492523)
 
