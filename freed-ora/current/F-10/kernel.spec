@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1330 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1336 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -600,6 +600,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
 Patch11: git-bluetooth.patch
+Patch12: git-bluetooth2.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -656,6 +657,8 @@ Patch606: alsa-dont-reset-stream-at-each-prepare-callb.patch
 Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
 Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 Patch609: alsa-hda_intel-prealloc-4mb-dmabuffer.patch
+Patch610: alsa-add-subdevice_mask-to-quirk-entries.patch
+Patch611: alsa-hda-update-quirks.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -730,6 +733,16 @@ Patch9010: revert-fix-modules_install-via-nfs.patch
 
 #Adding dropmonitor bits from 2.6.30
 Patch9011: linux-2.6-dropwatch-protocol.patch
+
+# fix for net lockups, will be in 2.6.29.1
+Patch9101: linux-2.6-net-fix-another-gro-bug.patch
+
+# kvm fixes
+Patch9300: linux-2.6-kvm-kconfig-irqchip.patch
+Patch9301: linux-2.6-kvm-mask-notifiers.patch
+Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
+Patch9303: linux-2.6-kvm-skip-pit-check.patch
+Patch9304: linux-2.6-xen-check-for-nx-support.patch
 
 %endif
 
@@ -1148,6 +1161,7 @@ fi
 
 #ApplyPatch git-cpufreq.patch
 ApplyPatch git-bluetooth.patch
+ApplyPatch git-bluetooth2.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1264,6 +1278,8 @@ ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
 ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
 ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 ApplyPatch alsa-hda_intel-prealloc-4mb-dmabuffer.patch
+ApplyPatch alsa-add-subdevice_mask-to-quirk-entries.patch
+ApplyPatch alsa-hda-update-quirks.patch
 
 # Networking
 
@@ -1352,6 +1368,15 @@ ApplyPatch revert-fix-modules_install-via-nfs.patch
 
 # Apply dropmonitor protocol bits from 2.6..30 net-next tree
 ApplyPatch linux-2.6-dropwatch-protocol.patch
+
+ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
+
+# kvm fixes
+ApplyPatch linux-2.6-kvm-kconfig-irqchip.patch
+ApplyPatch linux-2.6-kvm-mask-notifiers.patch
+ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
+ApplyPatch linux-2.6-kvm-skip-pit-check.patch
+ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 
 # ======= END OF PATCH APPLICATIONS =============================
 
@@ -1929,6 +1954,26 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Apr 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-36
+- git-bluetooth2.patch: Bluetooth fixes from F-11.
+
+* Mon Apr 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-35
+- Copy Xen and KVM fixes from Fedora 11:
+    Fix xen boot on machines without NX support (F11#492523)
+    Skip PIT-through-IOAPIC routing check on KVM guests.
+
+* Sat Apr 18 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-34
+- Build in the rfkill and rfkill-input modules (#485322)
+
+* Sat Apr 18 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-33
+- Set CONFIG_UEVENT_HELPER_PATH to the empty string (#496296)
+
+* Thu Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>> 2.6.29.1-32
+- Copy ALSA quirk updates from Fedora 11
+
+* Thu Apr 14 2009 Chuck Ebbert <cebbert@redhat.com>> 2.6.29.1-31
+- Copy kvm fixes for bz#491625 and missed networking fix from F11 kernel
+
 * Tue Apr 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-30
 - Add missing patch for broken RLIMIT_CPU
 
