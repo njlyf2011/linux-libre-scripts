@@ -2,6 +2,45 @@ Deblobbed
 * drivers/gpu/drm/radeon/radeon-cp.c: Adjust for deblobbed sources.
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
+commit ef416eafca3c5ed83b089e90fb50c15062accecd
+Merge: fa4687f f891418
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Tue Apr 21 15:13:21 2009 +1000
+
+    Merge remote branch 'origin/drm-rawhide' into drm-f11
+
+commit f891418afa0e216bfaba22865ef06a72a6c74474
+Author: Dave Airlie <airlied@dhcp-1-203.bne.redhat.com>
+Date:   Tue Apr 21 14:29:32 2009 +1000
+
+    radeon: legacy fix more desktop layout scenarios
+
+commit 4b59aa2f4e377fd35bb00462030549eafde0a39c
+Author: Dave Airlie <airlied@dhcp-1-203.bne.redhat.com>
+Date:   Tue Apr 21 13:34:38 2009 +1000
+
+    radeon: legacy crtc, set buffer pitch at set base time.
+    
+    this deals with the case where the fb resizes but we don't switch modes
+
+commit cd12e87b4f13f717caf4bd81b46b25072f6d9ed0
+Author: Dave Airlie <airlied@dhcp-1-203.bne.redhat.com>
+Date:   Tue Apr 21 11:55:16 2009 +1000
+
+    radeon: fixup bandwidth calcs for second legacy head
+
+commit b462b817a8dee1e8b69f8118862e77674a56faa4
+Author: Dave Airlie <airlied@dhcp-1-203.bne.redhat.com>
+Date:   Tue Apr 21 11:15:52 2009 +1000
+
+    radeon: fix bios parsing bug for LCD DDC, also make LCD code use core ddc
+
+commit 5d9a97d1d81e5d0c0115e01d7a1cf7b3f72b3c0d
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Fri Apr 17 20:49:35 2009 +1000
+
+    drm: add missing helper commit
+
 commit fa4687fdb659e807b8e3b05bf971f79e7aebde62
 Merge: 9283b7e 389363f
 Author: Dave Airlie <airlied@redhat.com>
@@ -17380,10 +17419,10 @@ index 0000000..3bc3d79
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_combios.c b/drivers/gpu/drm/radeon/radeon_combios.c
 new file mode 100644
-index 0000000..fab8f75
+index 0000000..5f5a4cb
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_combios.c
-@@ -0,0 +1,1767 @@
+@@ -0,0 +1,1768 @@
 +/*
 + * Copyright 2004 ATI Technologies Inc., Markham, Ontario
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
@@ -18551,6 +18590,7 @@ index 0000000..fab8f75
 +					ddc_i2c.get_data_mask = radeon_bios32(dev_priv, lcd_ddc_info + 7);
 +					break;
 +				default:
++					ddc_i2c.valid = false;
 +					break;
 +				}
 +				DRM_DEBUG("LCD DDC Info Table found!\n");
@@ -19153,10 +19193,10 @@ index 0000000..fab8f75
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_connectors.c b/drivers/gpu/drm/radeon/radeon_connectors.c
 new file mode 100644
-index 0000000..cd3acf0
+index 0000000..2696f22
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_connectors.c
-@@ -0,0 +1,608 @@
+@@ -0,0 +1,600 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -19310,17 +19350,9 @@ index 0000000..cd3acf0
 +	struct drm_display_mode *mode;
 +
 +	if (radeon_connector->ddc_bus) {
-+		radeon_i2c_do_lock(radeon_connector, 1);
-+		edid = drm_get_edid(connector, &radeon_connector->ddc_bus->adapter);
-+		radeon_i2c_do_lock(radeon_connector, 0);
-+		if (edid) {
-+			drm_mode_connector_update_edid_property(&radeon_connector->base, edid);
-+			ret = drm_add_edid_modes(&radeon_connector->base, edid);
-+			kfree(edid);
-+			if (ret == 0)
-+				goto native;
++		ret = radeon_ddc_get_modes(radeon_connector);
++		if (ret > 0)
 +			return ret;
-+		}
 +	}
 +
 +native:
@@ -22769,7 +22801,7 @@ index 0000000..7ddc8fd
 +
 diff --git a/drivers/gpu/drm/radeon/radeon_display.c b/drivers/gpu/drm/radeon/radeon_display.c
 new file mode 100644
-index 0000000..bb2f0d8
+index 0000000..78f23da
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_display.c
 @@ -0,0 +1,680 @@
@@ -23433,7 +23465,7 @@ index 0000000..bb2f0d8
 +	list_for_each_entry(crtc, &dev->mode_config.crtc_list, head) {
 +		struct radeon_crtc *radeon_crtc = to_radeon_crtc(crtc);
 +			
-+		if (crtc->enabled) {
++		if (crtc->enabled && crtc->fb) {
 +			modes[radeon_crtc->crtc_id] = &crtc->mode;
 +			pixel_bytes[radeon_crtc->crtc_id] = crtc->fb->bits_per_pixel / 8;
 +		}
@@ -29379,10 +29411,10 @@ index 9836c70..d4f0f6f 100644
  	dev->max_vblank_count = 0x001fffff;
 diff --git a/drivers/gpu/drm/radeon/radeon_legacy_crtc.c b/drivers/gpu/drm/radeon/radeon_legacy_crtc.c
 new file mode 100644
-index 0000000..2961292
+index 0000000..7322ac3
 --- /dev/null
 +++ b/drivers/gpu/drm/radeon/radeon_legacy_crtc.c
-@@ -0,0 +1,1600 @@
+@@ -0,0 +1,1602 @@
 +/*
 + * Copyright 2007-8 Advanced Micro Devices, Inc.
 + * Copyright 2008 Red Hat Inc.
@@ -29628,6 +29660,7 @@ index 0000000..2961292
 +	struct drm_radeon_gem_object *obj_priv;
 +	uint32_t base;
 +	uint32_t crtc_offset, crtc_offset_cntl, crtc_tile_x0_y0 = 0;
++	uint32_t crtc_pitch, pitch_pixels;
 +
 +	DRM_DEBUG("\n");
 +
@@ -29638,6 +29671,12 @@ index 0000000..2961292
 +
 +	if (radeon_gem_object_pin(obj, 0, RADEON_GEM_DOMAIN_VRAM))
 +		return -EINVAL;
++
++	pitch_pixels = crtc->fb->pitch / (crtc->fb->bits_per_pixel / 8);
++	crtc_pitch  = (((pitch_pixels * crtc->fb->bits_per_pixel) +
++			((crtc->fb->bits_per_pixel * 8) - 1)) /
++		       (crtc->fb->bits_per_pixel * 8));
++	crtc_pitch |= crtc_pitch << 16;
 +
 +	crtc_offset = obj_priv->bo->offset;
 +
@@ -29674,7 +29713,7 @@ index 0000000..2961292
 +			crtc_offset_cntl |= (y % 16);
 +		}
 +	} else {
-+		int offset = y * crtc->fb->pitch + x;
++		int offset = y * pitch_pixels + x;
 +		switch (crtc->fb->bits_per_pixel) {
 +		case 15:
 +		case 16:
@@ -29706,6 +29745,7 @@ index 0000000..2961292
 +		RADEON_WRITE(R300_CRTC_TILE_X0_Y0, crtc_tile_x0_y0);
 +	RADEON_WRITE(RADEON_CRTC_OFFSET_CNTL, crtc_offset_cntl);
 +	RADEON_WRITE(RADEON_CRTC_OFFSET, crtc_offset);
++	RADEON_WRITE(RADEON_CRTC_PITCH, crtc_pitch);
 +
 +	if (old_fb) {
 +		radeon_fb = to_radeon_framebuffer(old_fb);
@@ -29729,7 +29769,6 @@ index 0000000..2961292
 +	uint32_t crtc_h_sync_strt_wid;
 +	uint32_t crtc_v_total_disp;
 +	uint32_t crtc_v_sync_strt_wid;
-+	uint32_t crtc_pitch;
 +	uint32_t disp_merge_cntl;
 +
 +	DRM_DEBUG("\n");
@@ -29798,10 +29837,6 @@ index 0000000..2961292
 +				   ? RADEON_CRTC_V_SYNC_POL
 +				   : 0));
 +
-+	crtc_pitch  = ((((crtc->fb->pitch / (crtc->fb->bits_per_pixel / 8)) * crtc->fb->bits_per_pixel) +
-+			((crtc->fb->bits_per_pixel * 8) - 1)) /
-+		       (crtc->fb->bits_per_pixel * 8));
-+	crtc_pitch |= crtc_pitch << 16;
 +
 +	/* TODO -> Dell Server */
 +	if (0) {
@@ -29840,8 +29875,6 @@ index 0000000..2961292
 +	RADEON_WRITE(RADEON_CRTC_H_SYNC_STRT_WID, crtc_h_sync_strt_wid);
 +	RADEON_WRITE(RADEON_CRTC_V_TOTAL_DISP, crtc_v_total_disp);
 +	RADEON_WRITE(RADEON_CRTC_V_SYNC_STRT_WID, crtc_v_sync_strt_wid);
-+
-+	RADEON_WRITE(RADEON_CRTC_PITCH, crtc_pitch);
 +
 +	RADEON_WRITE(RADEON_CRTC_GEN_CNTL, crtc_gen_cntl);
 +
@@ -30063,6 +30096,7 @@ index 0000000..2961292
 +	struct drm_radeon_gem_object *obj_priv;
 +	uint32_t base;
 +	uint32_t crtc2_offset, crtc2_offset_cntl, crtc2_tile_x0_y0 = 0;
++	uint32_t crtc2_pitch, pitch_pixels;
 +
 +	DRM_DEBUG("\n");
 +
@@ -30075,6 +30109,12 @@ index 0000000..2961292
 +		return -EINVAL;
 +
 +	crtc2_offset = obj_priv->bo->offset;
++
++	pitch_pixels = crtc->fb->pitch / (crtc->fb->bits_per_pixel / 8);
++	crtc2_pitch  = (((pitch_pixels * crtc->fb->bits_per_pixel) +
++			((crtc->fb->bits_per_pixel * 8) - 1)) /
++		       (crtc->fb->bits_per_pixel * 8));
++	crtc2_pitch |= crtc2_pitch << 16;
 +
 +	crtc2_offset_cntl = 0;
 +
@@ -30109,7 +30149,7 @@ index 0000000..2961292
 +			crtc2_offset_cntl |= (y % 16);
 +		}
 +	} else {
-+		int offset = y * crtc->fb->pitch + x;
++		int offset = y * pitch_pixels + x;
 +		switch (crtc->fb->bits_per_pixel) {
 +		case 15:
 +		case 16:
@@ -30139,6 +30179,7 @@ index 0000000..2961292
 +		RADEON_WRITE(R300_CRTC2_TILE_X0_Y0, crtc2_tile_x0_y0);
 +	RADEON_WRITE(RADEON_CRTC2_OFFSET_CNTL, crtc2_offset_cntl);
 +	RADEON_WRITE(RADEON_CRTC2_OFFSET, crtc2_offset);
++	RADEON_WRITE(RADEON_CRTC2_PITCH,  crtc2_pitch);
 +
 + out:
 +	if (old_fb) {
@@ -30164,7 +30205,6 @@ index 0000000..2961292
 +        uint32_t crtc2_v_sync_strt_wid;
 +	uint32_t fp_h2_sync_strt_wid;
 +	uint32_t fp_v2_sync_strt_wid;
-+	uint32_t crtc2_pitch;
 +	uint32_t disp2_merge_cntl;
 +
 +	DRM_DEBUG("\n");
@@ -30240,11 +30280,6 @@ index 0000000..2961292
 +	fp_h2_sync_strt_wid = crtc2_h_sync_strt_wid;
 +	fp_v2_sync_strt_wid = crtc2_v_sync_strt_wid;
 +
-+	crtc2_pitch  = ((((crtc->fb->pitch / (crtc->fb->bits_per_pixel / 8)) * crtc->fb->bits_per_pixel) +
-+			((crtc->fb->bits_per_pixel * 8) - 1)) /
-+		       (crtc->fb->bits_per_pixel * 8));
-+	crtc2_pitch |= crtc2_pitch << 16;
-+
 +	disp2_merge_cntl = RADEON_READ(RADEON_DISP2_MERGE_CNTL);
 +	disp2_merge_cntl &= ~RADEON_DISP2_RGB_OFFSET_EN;
 +	RADEON_WRITE(RADEON_DISP2_MERGE_CNTL,      disp2_merge_cntl);
@@ -30261,8 +30296,6 @@ index 0000000..2961292
 +
 +	RADEON_WRITE(RADEON_FP_H2_SYNC_STRT_WID,   fp_h2_sync_strt_wid);
 +	RADEON_WRITE(RADEON_FP_V2_SYNC_STRT_WID,   fp_v2_sync_strt_wid);
-+
-+	RADEON_WRITE(RADEON_CRTC2_PITCH,           crtc2_pitch);
 +
 +	RADEON_WRITE(RADEON_CRTC2_GEN_CNTL,        crtc2_gen_cntl);
 +
@@ -30887,6 +30920,7 @@ index 0000000..2961292
 +	}
 +
 +	if (mode2) {
++		u32 grph2_cntl;
 +		stop_req = mode2->hdisplay * pixel_bytes2 / 16;
 +		
 +		if (stop_req > max_stop_req)
@@ -30898,17 +30932,17 @@ index 0000000..2961292
 +		temp_ff.full = rfixed_const((16/pixel_bytes2));
 +		disp_drain_rate2.full = rfixed_div(pix_clk2, temp_ff);
 +
-+		temp = RADEON_READ(RADEON_GRPH2_BUFFER_CNTL);
-+		temp &= ~(RADEON_GRPH_STOP_REQ_MASK);
-+		temp |= (stop_req << RADEON_GRPH_STOP_REQ_SHIFT);
-+		temp &= ~(RADEON_GRPH_START_REQ_MASK);
++		grph2_cntl = RADEON_READ(RADEON_GRPH2_BUFFER_CNTL);
++		grph2_cntl &= ~(RADEON_GRPH_STOP_REQ_MASK);
++		grph2_cntl |= (stop_req << RADEON_GRPH_STOP_REQ_SHIFT);
++		grph2_cntl &= ~(RADEON_GRPH_START_REQ_MASK);
 +		if ((dev_priv->chip_family == CHIP_R350) &&
 +		    (stop_req > 0x15)) {
 +			stop_req -= 0x10;
 +		}
-+		temp |= (stop_req << RADEON_GRPH_START_REQ_SHIFT);
-+		temp |= RADEON_GRPH_BUFFER_SIZE;
-+		temp &= ~(RADEON_GRPH_CRITICAL_CNTL   |
++		grph2_cntl |= (stop_req << RADEON_GRPH_START_REQ_SHIFT);
++		grph2_cntl |= RADEON_GRPH_BUFFER_SIZE;
++		grph2_cntl &= ~(RADEON_GRPH_CRITICAL_CNTL   |
 +			  RADEON_GRPH_CRITICAL_AT_SOF |
 +			  RADEON_GRPH_STOP_CNTL);
 +		
@@ -30950,7 +30984,7 @@ index 0000000..2961292
 +			critical_point2 = 0x10;
 +		}
 +		
-+		RADEON_WRITE(RADEON_GRPH2_BUFFER_CNTL, ((temp & ~RADEON_GRPH_CRITICAL_POINT_MASK) |
++		RADEON_WRITE(RADEON_GRPH2_BUFFER_CNTL, ((grph2_cntl & ~RADEON_GRPH_CRITICAL_POINT_MASK) |
 +						  (critical_point2 << RADEON_GRPH_CRITICAL_POINT_SHIFT)));
 +		
 +		if ((dev_priv->chip_family == CHIP_RS400) ||
@@ -38733,9 +38767,18 @@ index c8c4221..04fbd1e 100644
  
  #endif				/* __KERNEL__ */
 diff --git a/include/drm/drm_crtc_helper.h b/include/drm/drm_crtc_helper.h
-index ec073d8..32ac55d 100644
+index ec073d8..86a8a87 100644
 --- a/include/drm/drm_crtc_helper.h
 +++ b/include/drm/drm_crtc_helper.h
+@@ -96,7 +96,7 @@ extern int drm_crtc_helper_set_config(struct drm_mode_set *set);
+ extern bool drm_crtc_helper_set_mode(struct drm_crtc *crtc,
+ 				     struct drm_display_mode *mode,
+ 				     int x, int y,
+-				     struct drm_framebuffer *old_fb);
++				     struct drm_framebuffer *old_fb, int conn_changed);
+ extern bool drm_helper_crtc_in_use(struct drm_crtc *crtc);
+ 
+ extern int drm_helper_mode_fill_fb_struct(struct drm_framebuffer *fb,
 @@ -121,4 +121,6 @@ static inline void drm_connector_helper_add(struct drm_connector *connector,
  }
  
@@ -39822,15 +39865,3 @@ index fe3e3a4..ed15ce2 100644
 +};
 +
  #endif
-diff -up linux-2.6.29.noarch/include/drm/drm_crtc_helper.h.dave linux-2.6.29.noarch/include/drm/drm_crtc_helper.h
---- linux-2.6.29.noarch/include/drm/drm_crtc_helper.h.dave	2009-04-17 20:35:37.000000000 +1000
-+++ linux-2.6.29.noarch/include/drm/drm_crtc_helper.h	2009-04-17 20:35:56.000000000 +1000
-@@ -96,7 +96,7 @@ extern int drm_crtc_helper_set_config(st
- extern bool drm_crtc_helper_set_mode(struct drm_crtc *crtc,
- 				     struct drm_display_mode *mode,
- 				     int x, int y,
--				     struct drm_framebuffer *old_fb);
-+				     struct drm_framebuffer *old_fbm, int conn_changed);
- extern bool drm_helper_crtc_in_use(struct drm_crtc *crtc);
- 
- extern int drm_helper_mode_fill_fb_struct(struct drm_framebuffer *fb,

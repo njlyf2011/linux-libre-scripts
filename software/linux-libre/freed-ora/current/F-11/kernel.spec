@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1564 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1566 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -708,6 +708,7 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1821: drm-intel-lying-systems-without-lvds.patch
 Patch1822: drm-intel-gen3-fb-hack.patch
 Patch1823: drm-intel-tiled-front.patch
+Patch1824: drm-intel-hdmi-edid-fix.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1386,6 +1387,7 @@ ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-lying-systems-without-lvds.patch
 ApplyPatch drm-intel-gen3-fb-hack.patch
 ApplyPatch drm-intel-tiled-front.patch
+ApplyPatch drm-intel-hdmi-edid-fix.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2016,6 +2018,12 @@ fi
 # and build.
 
 %changelog
+* Tue Apr 21 2009 Adam Jackson <ajax@redhat.com> 2.6.29.1-104
+- drm-intel-hdmi-edid-fix.patch: Fix EDID fetch on SDVO HDMI.
+
+* Tue Apr 21 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-103
+- radeon kms: fix lcd edid detection + fix legacy crtc setup
+
 * Mon Apr 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-102
 - git-bluetooth2.patch: Bluetooth fixes from 2.6.30-rc2.
 
