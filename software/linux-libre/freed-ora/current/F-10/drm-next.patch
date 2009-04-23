@@ -3204,7 +3204,7 @@ index 37427e4..8d5ec5f 100644
  	if (!obj_priv->page_cpu_valid)
 @@ -2160,7 +2157,6 @@ i915_gem_object_set_to_full_cpu_read_domain(struct drm_gem_object *obj)
  				continue;
- 			drm_clflush_pages(obj_priv->page_list + i, 1);
+ 			drm_clflush_pages(obj_priv->pages + i, 1);
  		}
 -		drm_agp_chipset_flush(dev);
  	}
