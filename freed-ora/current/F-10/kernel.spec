@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1336 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1342 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -638,7 +638,6 @@ Patch382: linux-2.6-defaults-pciehp.patch
 Patch383: linux-2.6-defaults-fat-utf8.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
-Patch396: linux-2.6-acer-wmi-bail-on-aao.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch460: linux-2.6-serial-460800.patch
@@ -667,6 +666,7 @@ Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
+Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -715,16 +715,9 @@ Patch3000: linux-2.6-btrfs-experimental-branch.patch
 Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 # patches headed for -stable
-# fix oops in md raid1 (#495550)
-Patch6000: linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
-# fix duplicated flags
-Patch7000: linux-2.6-mm-define-unique-value-for-as_unevictable.patch
-# fix posix clock monotonicity
-Patch7001: linux-2.6-posix-timers-fix-clock-monotonicity.patch
 # make RLIMIT_CPU work again
 Patch7002: linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
-Patch7003: linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
-Patch7004: linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+Patch7010: linux-2.6-forcedeth-fix-resume-from-hibernate.patch
 
 Patch9000: squashfs3.patch
 Patch9001: squashfs-fixups.patch
@@ -734,15 +727,14 @@ Patch9010: revert-fix-modules_install-via-nfs.patch
 #Adding dropmonitor bits from 2.6.30
 Patch9011: linux-2.6-dropwatch-protocol.patch
 
-# fix for net lockups, will be in 2.6.29.1
-Patch9101: linux-2.6-net-fix-another-gro-bug.patch
-
 # kvm fixes
-Patch9300: linux-2.6-kvm-kconfig-irqchip.patch
-Patch9301: linux-2.6-kvm-mask-notifiers.patch
-Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
+
+Patch9400: linux-2.6-crypto-aes-padlock-fix-autoload.patch
+
+# Backport of upstream memory reduction for ftrace
+Patch10000: linux-2.6-ftrace-memory-reduction.patch
 
 %endif
 
@@ -993,6 +985,20 @@ ApplyPatch()
   esac
 }
 
+# don't apply patch if it's empty
+ApplyOptionalPatch()
+{
+  local patch=$1
+  shift
+  if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
+    exit 1
+  fi
+  local C=$(wc -l $RPM_SOURCE_DIR/$patch | awk '{print $1}')
+  if [ "$C" -gt 9 ]; then
+    ApplyPatch $patch ${1+"$@"}
+  fi
+}
+
 # First we unpack the kernel tarball.
 # If this isn't the first make prep, we use links to the existing clean tarball
 # which speeds things up quite a bit.
@@ -1134,7 +1140,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-#ApplyPatch git-linus.diff
+ApplyOptionalPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1146,18 +1152,12 @@ ApplyPatch linux-2.6-makefile-after_link.patch
 #
 # misc small stuff to make things compile
 #
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-compile-fixes.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-compile-fixes.patch
-fi
+ApplyOptionalPatch linux-2.6-compile-fixes.patch
 
 %if !%{nopatches}
 
 # revert patches from upstream that conflict or that we get via other means
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-upstream-reverts.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-upstream-reverts.patch -R
-fi
+ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 #ApplyPatch git-cpufreq.patch
 ApplyPatch git-bluetooth.patch
@@ -1237,7 +1237,6 @@ ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch linux-2.6-acer-wmi-bail-on-aao.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1319,6 +1318,9 @@ ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 ApplyPatch linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 
+# back-port mac80211: fix beacon loss detection after scan
+ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 # http://hg.jannau.net/hdpvr/
@@ -1340,21 +1342,14 @@ ApplyPatch drm-f10-compat.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
-C=$(wc -l $RPM_SOURCE_DIR/linux-2.6-firewire-git-pending.patch | awk '{print $1}')
-if [ "$C" -gt 10 ]; then
-ApplyPatch linux-2.6-firewire-git-pending.patch
-fi
+ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # patches headed for -stable
-ApplyPatch linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
-ApplyPatch linux-2.6-mm-define-unique-value-for-as_unevictable.patch
-ApplyPatch linux-2.6-posix-timers-fix-clock-monotonicity.patch
 ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
-ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
-ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+ApplyPatch linux-2.6-forcedeth-fix-resume-from-hibernate.patch
 
 # we need squashfs3 for Fedora-10
 ApplyPatch squashfs3.patch
@@ -1369,14 +1364,15 @@ ApplyPatch revert-fix-modules_install-via-nfs.patch
 # Apply dropmonitor protocol bits from 2.6..30 net-next tree
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
-ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
-
 # kvm fixes
-ApplyPatch linux-2.6-kvm-kconfig-irqchip.patch
-ApplyPatch linux-2.6-kvm-mask-notifiers.patch
-ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
+
+# make padlock autoload again
+ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload.patch
+
+# Reduce the memory usage of ftrace if you don't use it.
+ApplyPatch linux-2.6-ftrace-memory-reduction.patch
 
 # ======= END OF PATCH APPLICATIONS =============================
 
@@ -1630,7 +1626,7 @@ hwcap 0 nosegneg"
     rm -f modinfo modnames
 
     # remove files that will be auto generated by depmod at rpm -i time
-    for i in alias ccwmap dep ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols usbmap
+    for i in alias alias.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap
     do
       rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$i
     done
@@ -1954,6 +1950,35 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Apr 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-42
+- Fix loss of link on resume from hibernate with forcdeth adapter (reported in Bodhi)
+
+* Wed Apr 22 2009 John W. Linville <linville@redhat.com> 2.6.29.1-41
+- back-port mac80211: fix beacon loss detection after scan
+
+* Tue Apr 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-40
+- Add 2.6.29.2 patch queue (as git-linus.diff)
+- Drop queued patches:
+    linux-2.6-acer-wmi-bail-on-aao.patch
+    linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
+    linux-2.6-mm-define-unique-value-for-as_unevictable.patch
+    linux-2.6-posix-timers-fix-clock-monotonicity.patch
+    linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
+    linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+    linux-2.6-net-fix-another-gro-bug.patch
+    linux-2.6-kvm-kconfig-irqchip.patch
+    linux-2.6-kvm-mask-notifiers.patch
+    linux-2.6-kvm-reset-pit-irq-on-unmask.patch
+
+* Tue Apr 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-39
+- Don't include the modules.*.bin files in the RPM package.
+
+* Mon Apr 21 2009 Neil Horman <nhorman@redhat.com> 2.6.29.1-38
+- Reduce ftrace memory usage at boot (bz 481448) 
+
+* Mon Apr 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-37
+- Fix VIA Padlock autoload (#496140)
+
 * Mon Apr 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-36
 - git-bluetooth2.patch: Bluetooth fixes from F-11.
 
