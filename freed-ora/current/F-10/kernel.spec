@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1342 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1348 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,9 +50,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -599,8 +599,6 @@ Patch05: linux-2.6-makefile-after_link.patch
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
-Patch11: git-bluetooth.patch
-Patch12: git-bluetooth2.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -682,6 +680,7 @@ Patch1813: drm-modesetting-radeon-fixes.patch
 Patch1814: drm-nouveau.patch
 Patch1816: drm-no-gem-on-i8xx.patch
 Patch1817: drm-f10-compat.patch
+Patch1818: drm-backport-f11-fixes-1.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -716,7 +715,6 @@ Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 # patches headed for -stable
 # make RLIMIT_CPU work again
-Patch7002: linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
 Patch7010: linux-2.6-forcedeth-fix-resume-from-hibernate.patch
 
 Patch9000: squashfs3.patch
@@ -732,6 +730,7 @@ Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
 
 Patch9400: linux-2.6-crypto-aes-padlock-fix-autoload.patch
+Patch9401: linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
 
 # Backport of upstream memory reduction for ftrace
 Patch10000: linux-2.6-ftrace-memory-reduction.patch
@@ -1159,10 +1158,6 @@ ApplyOptionalPatch linux-2.6-compile-fixes.patch
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
-#ApplyPatch git-cpufreq.patch
-ApplyPatch git-bluetooth.patch
-ApplyPatch git-bluetooth2.patch
-
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
@@ -1339,6 +1334,7 @@ ApplyPatch drm-modesetting-radeon-fixes.patch
 ApplyPatch drm-nouveau.patch
 ApplyPatch drm-no-gem-on-i8xx.patch
 ApplyPatch drm-f10-compat.patch
+ApplyPatch drm-backport-f11-fixes-1.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1348,7 +1344,6 @@ ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # patches headed for -stable
-ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
 ApplyPatch linux-2.6-forcedeth-fix-resume-from-hibernate.patch
 
 # we need squashfs3 for Fedora-10
@@ -1370,6 +1365,7 @@ ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 
 # make padlock autoload again
 ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload.patch
+ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
 
 # Reduce the memory usage of ftrace if you don't use it.
 ApplyPatch linux-2.6-ftrace-memory-reduction.patch
@@ -1950,13 +1946,31 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Tue Apr 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-42
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-48.rc1
+- Revert 2.6.29.2-rc1 patch that won't be in the final release.
+
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-47.rc1
+- Drop POSIX timer patch accidentally committed in 2.6.30.
+
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-46.rc1
+- Add missed patch for fixing VIA Padlock driver autoload.
+
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-45.rc1
+- drm-backport-f11-fixes-1.patch
+
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-44.rc1
+- 2.6.29.2-rc1
+
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-43
+- Remove bluetooth updates that broke OBEX.
+
+* Wed Apr 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-42
 - Fix loss of link on resume from hibernate with forcdeth adapter (reported in Bodhi)
 
 * Wed Apr 22 2009 John W. Linville <linville@redhat.com> 2.6.29.1-41
 - back-port mac80211: fix beacon loss detection after scan
 
-* Tue Apr 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-40
+* Wed Apr 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-40
 - Add 2.6.29.2 patch queue (as git-linus.diff)
 - Drop queued patches:
     linux-2.6-acer-wmi-bail-on-aao.patch
