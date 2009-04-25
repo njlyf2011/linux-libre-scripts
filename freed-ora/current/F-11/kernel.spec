@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1568 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1573 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -751,9 +751,11 @@ Patch7000: linux-2.6-mm-define-unique-value-for-as_unevictable.patch
 # fix posix clock monotonicity
 Patch7001: linux-2.6-posix-timers-fix-clock-monotonicity.patch
 # make RLIMIT_CPU work again
-Patch7002: linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
 Patch7003: linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
 Patch7004: linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+Patch7005: linux-2.6-i2c-fix-bit-algorithm-timeout.patch
+
+Patch9000: hpet-fixes.patch
 
 Patch9001: revert-fix-modules_install-via-nfs.patch
 
@@ -1415,9 +1417,11 @@ ApplyPatch linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
 ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
 ApplyPatch linux-2.6-mm-define-unique-value-for-as_unevictable.patch
 ApplyPatch linux-2.6-posix-timers-fix-clock-monotonicity.patch
-ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork.patch
 ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
 ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+ApplyPatch linux-2.6-i2c-fix-bit-algorithm-timeout.patch
+
+ApplyPatch hpet-fixes.patch
 
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
@@ -2022,6 +2026,18 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-111
+- backport hpet fixes from 2.6.30-rc3.
+
+* Fri Apr 24 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-109
+- linux-2.6-i2c-fix-bit-algorithm-timeout.patch - fix i2c EDID timeout
+
+* Fri Apr 24 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.1-108
+- nouveau/nv50: don't clobber 0x001700 during instmem init, can confuse ddx
+
+* Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-107
+- Drop POSIX timer patch accidentally committed in 2.6.30.
+
 * Wed Apr 22 2009 John W. Linville <linville@redhat.com> 2.6.29.1-106
 - back-port mac80211: fix beacon loss detection after scan
 
