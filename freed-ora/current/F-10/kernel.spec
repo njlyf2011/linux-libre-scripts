@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1348 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1352 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -52,7 +52,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 2
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -732,6 +732,14 @@ Patch9304: linux-2.6-xen-check-for-nx-support.patch
 Patch9400: linux-2.6-crypto-aes-padlock-fix-autoload.patch
 Patch9401: linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
 
+# fix hpet hang at boot
+Patch9500: linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
+Patch9501: linux-2.6-x86-hpet-stop-counter-when-programming.patch
+Patch9502: linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
+
+# FPU state can become corrupt
+Patch9510: linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
+
 # Backport of upstream memory reduction for ftrace
 Patch10000: linux-2.6-ftrace-memory-reduction.patch
 
@@ -1367,6 +1375,13 @@ ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload.patch
 ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
 
+# fix hpet hang at boot
+ApplyPatch linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
+ApplyPatch linux-2.6-x86-hpet-stop-counter-when-programming.patch
+ApplyPatch linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
+
+ApplyPatch linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
+
 # Reduce the memory usage of ftrace if you don't use it.
 ApplyPatch linux-2.6-ftrace-memory-reduction.patch
 
@@ -1946,6 +1961,18 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Apr 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-52
+- Fix possible FPU context corruption on x86-64.
+
+* Mon Apr 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-51
+- Fix HPET hang at boot on AMD 81xx, caused by backported 2.6.30 HPET fixes.
+
+* Mon Apr 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-50
+- Linux 2.6.29.2
+
+* Fri Apr 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-49.rc1
+- Fix hang with HPET timer at boot (F11#497351)
+
 * Thu Apr 23 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-48.rc1
 - Revert 2.6.29.2-rc1 patch that won't be in the final release.
 
