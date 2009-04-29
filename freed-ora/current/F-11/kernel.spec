@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1573 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1577 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -710,6 +710,7 @@ Patch1821: drm-intel-lying-systems-without-lvds.patch
 Patch1822: drm-intel-gen3-fb-hack.patch
 Patch1823: drm-intel-tiled-front.patch
 Patch1824: drm-intel-hdmi-edid-fix.patch
+Patch1825: drm-intel-tiling-transition.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -775,6 +776,9 @@ Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
 
 Patch9400: pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
+
+# FPU state can become corrupt
+Patch9510: linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
 
 %endif
 
@@ -1004,7 +1008,7 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1
   fi
-  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/kernel.spec ; then
+  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
     if [ "${patch:0:10}" != "patch-2.6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
@@ -1394,6 +1398,7 @@ ApplyPatch drm-intel-lying-systems-without-lvds.patch
 ApplyPatch drm-intel-gen3-fb-hack.patch
 ApplyPatch drm-intel-tiled-front.patch
 ApplyPatch drm-intel-hdmi-edid-fix.patch
+ApplyPatch drm-intel-tiling-transition.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1440,6 +1445,8 @@ ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 
 ApplyPatch pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
+
+ApplyPatch linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2026,6 +2033,18 @@ fi
 # and build.
 
 %changelog
+* Tue Apr 28 2009 Adam Jackson <ajax@redhat.com> 2.6.29.1-115
+- drm-intel-tiling-transition.patch: Fix transitions to linear mode.
+
+* Tue Apr 28 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-114
+- Make the kernel-vanilla package buildable again.
+
+* Mon Apr 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.1-113
+- Fix possible FPU context corruption on x86-64.
+
+* Mon Apr 27 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-112
+- 7a6f9cbb: x86: hpet: fix periodic mode programming on AMD 81xx
+
 * Fri Apr 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.1-111
 - backport hpet fixes from 2.6.30-rc3.
 
