@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.43 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.47 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,9 +50,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 21
+%define stable_update 22
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -733,7 +733,9 @@ Patch2003: linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 Patch2005: linux-2.6-e1000e-workaround-hw-errata.patch
 
 # r8169 fixes
-Patch2007: linux-2.6-netdev-r8169-2.6.28.patch
+Patch2007: linux-2.6-netdev-r8169-2.6.30.patch
+Patch2008: linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch
+Patch2009: linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -1356,7 +1358,10 @@ ApplyPatch linux-2.6-e1000e-add-support-for-82567LM-3-and-82567LF-3-ICH10D-parts
 ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 ApplyPatch linux-2.6-e1000e-workaround-hw-errata.patch
 
-ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
+ApplyPatch linux-2.6-netdev-r8169-2.6.30.patch
+ApplyPatch linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch -R
+ApplyPatch linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch -R
+
 ApplyPatch linux-2.6-netdev-atl2.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
@@ -1992,10 +1997,25 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
-* Tue Apr  7 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.43
+* Thu Apr 30 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.22-78.2.47.rc1
+- Revert netdevice_ops changes in the r8169 driver so it builds on 2.6.27.
+
+* Wed Apr 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.22-78.2.46.rc1
+- Linux 2.6.27.22-rc1
+- Update r8169 network driver to 2.6.30-rc3-git6
+- Dropped patches merged upstream:
+  linux-2.6-usb-cdc-wdm-fix-oops.patch
+
+* Sat Apr 18 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.21-78.2.45
+- Set CONFIG_UEVENT_HELPER_PATH to the empty string (#496296)
+
+* Wed Apr 08 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-78.2.44
+- Fix oops in cdc-wdm modem driver. (#481741)
+
+* Tue Apr  7 2009 John W. Linville <linville@redhat.com>  2.6.27.21-78.2.43
 - iwlwifi: remove implicit direct scan
 
-* Thu Mar 26 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-170.2.42
+* Thu Mar 26 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-78.2.42
 - Next round of ext4 fixes for -stable.
 
 * Mon Mar 23 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre .1 Thu Apr  2
@@ -2005,7 +2025,7 @@ fi
 - Deblobbed linux-2.6.27-lirc.patch.
 - Updated URL, thanks to Tomek Chrzczonowicz.
 
-* Mon Mar 23 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-170.2.41
+* Mon Mar 23 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.21-78.2.41
 - 2.6.27.21
 - Dropped patches, merged in -stable:
   linux-2.6.27-alsa-fix-vunmap-and-free-order.patch
