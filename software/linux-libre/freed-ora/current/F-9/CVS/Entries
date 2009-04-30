@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Thu Oct 30 04:41:21 2008//Tkernel-2_6_27_4-19_fc9
 /patch-2.6.27.21.bz2.sign/-1.1.2.1/Tue Mar 24 02:53:24 2009//Tkernel-2_6_27_21-78_2_41_fc9
-/.cvsignore/1.837.2.11/dummy timestamp from new-entry+Thu Apr 30 01:50:47 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /COPYING.modules/1.5/Mon Aug  4 21:46:27 2008/-ko/Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /Config.mk/1.4/Mon Aug  4 21:46:27 2008//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /Makefile/1.71/Fri Oct 31 05:07:05 2008//Tkernel-2_6_27_22-78_2_47_rc1_fc9
@@ -135,8 +134,9 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /patch-2.6.27.22-rc1.bz2.sign/1.1.2.1/Thu Apr 30 01:37:27 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /print-dmi-hw-name-in-warnings.patch/1.1.2.2/Wed Feb  4 20:59:41 2009/-kb/Tkernel-2_6_27_22-78_2_47_rc1_fc9
-/sources/1.798.2.11/dummy timestamp from new-entry+Thu Apr 30 01:50:43 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch/1.1/Sat Dec 13 17:42:41 2008/-kb/Tkernel-2_6_27_22-78_2_47_rc1_fc9
-/upstream/1.717.2.11/dummy timestamp from new-entry+Thu Apr 30 01:50:39 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27_22-78_2_47_rc1_fc9
 /kernel.spec/1.891.2.47/Thu Apr 30 06:02:11 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
+/.cvsignore/1.837.2.11/Thu Apr 30 16:55:56 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
+/sources/1.798.2.11/Thu Apr 30 16:55:58 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
+/upstream/1.717.2.11/Thu Apr 30 16:56:00 2009//Tkernel-2_6_27_22-78_2_47_rc1_fc9
