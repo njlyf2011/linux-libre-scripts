@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1577 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1580 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -711,6 +711,8 @@ Patch1822: drm-intel-gen3-fb-hack.patch
 Patch1823: drm-intel-tiled-front.patch
 Patch1824: drm-intel-hdmi-edid-fix.patch
 Patch1825: drm-intel-tiling-transition.patch
+Patch1826: linux-2.6-drm-r128-ioremap.patch
+Patch1827: drm-radeon-kms-fixes.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1399,6 +1401,8 @@ ApplyPatch drm-intel-gen3-fb-hack.patch
 ApplyPatch drm-intel-tiled-front.patch
 ApplyPatch drm-intel-hdmi-edid-fix.patch
 ApplyPatch drm-intel-tiling-transition.patch
+ApplyPatch linux-2.6-drm-r128-ioremap.patch
+ApplyPatch drm-radeon-kms-fixes.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2033,6 +2037,16 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 30 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-118
+- drm-radeon-kms-fixes.patch: revert rs480 snoop break
+
+* Thu Apr 30 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-117
+- drm-radeon-kms-fixes.patch: add r300 clip regs
+
+* Thu Apr 30 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-116
+- linux-2.6-drm-r128-ioremap.patch: fix r128 DRI fail
+- drm-radeon-kms-fixes.patch: hopefully fix AGP corruption
+
 * Tue Apr 28 2009 Adam Jackson <ajax@redhat.com> 2.6.29.1-115
 - drm-intel-tiling-transition.patch: Fix transitions to linear mode.
 
