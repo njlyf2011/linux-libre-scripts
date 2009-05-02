@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1580 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1583 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -52,7 +52,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -605,6 +605,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 Patch10: git-cpufreq.patch
 Patch11: git-bluetooth.patch
 Patch12: git-bluetooth2.patch
+Patch13: git-bluetooth3.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -618,7 +619,6 @@ Patch30: linux-2.6-iommu-fixes.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
-Patch100: linux-2.6-e820-mark-esi-clobbered.patch
 Patch101: linux-2.6-e820-save-restore-edi-ebp.patch
 Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
 Patch103: linux-2.6-e820-guard-against-pre-acpi3.patch
@@ -647,7 +647,6 @@ Patch392: linux-2.6-acpi-strict-resources.patch
 Patch393: linux-2.6-hwmon-atk0110.patch
 Patch394: linux-2.6-acpi-video-didl-intel-outputs.patch
 Patch395: linux-2.6-sony-laptop-rfkill.patch
-Patch396: linux-2.6-acer-wmi-bail-on-aao.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
@@ -665,7 +664,6 @@ Patch511: linux-2.6-shut-up-efifb.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
-Patch590: linux-2.6.29.1-sparc-regression.patch
 Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
 Patch601: alsa-rewrite-hw_ptr-updaters.patch
 Patch602: alsa-pcm-always-reset-invalid-position.patch
@@ -725,8 +723,7 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
-Patch2899: linux-2.6-v4l-dvb-fixes.patch
-Patch2900: linux-2.6-v4l-dvb-update.patch
+Patch2900: linux-2.6-v4l-dvb-fixes.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2902: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
@@ -734,6 +731,7 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 # fs fixes
 Patch2920: linux-2.6-ext4-flush-on-close.patch
 Patch2921: linux-2.6-ext4-really-print-warning-once.patch
+Patch2922: linux-2.6-ext4-prealloc-fixes.patch
 
 Patch3000: linux-2.6-btrfs-experimental-branch.patch
 Patch3001: linux-2.6-btrfs-fix-umount-hang.patch
@@ -745,17 +743,8 @@ Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 Patch5000: linux-2.6-add-qcserial.patch
 
 # patches headed for -stable
-# fix oops in md raid1 (#495550)
-Patch6000: linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
 # fix squashfs on systems where pagesize > blocksize (ia64, ppc64 w/64k pages)
 Patch6010: squashfs-broken-when-pagesize-greater-than-blocksize.patch
-# fix duplicated flags value
-Patch7000: linux-2.6-mm-define-unique-value-for-as_unevictable.patch
-# fix posix clock monotonicity
-Patch7001: linux-2.6-posix-timers-fix-clock-monotonicity.patch
-# make RLIMIT_CPU work again
-Patch7003: linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
-Patch7004: linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
 Patch7005: linux-2.6-i2c-fix-bit-algorithm-timeout.patch
 
 Patch9000: hpet-fixes.patch
@@ -767,17 +756,9 @@ Patch9002: cpufreq-add-atom-to-p4-clockmod.patch
 #Adding dropwatch into rawhide until we get to 2.6.30
 Patch9003: linux-2.6-dropwatch-protocol.patch
 
-# fix for net lockups, will be in 2.6.29.1
-Patch9101: linux-2.6-net-fix-another-gro-bug.patch
-
 # kvm fixes
-Patch9300: linux-2.6-kvm-kconfig-irqchip.patch
-Patch9301: linux-2.6-kvm-mask-notifiers.patch
-Patch9302: linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
-
-Patch9400: pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
 
 # FPU state can become corrupt
 Patch9510: linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
@@ -1193,6 +1174,7 @@ fi
 #ApplyPatch git-cpufreq.patch
 ApplyPatch git-bluetooth.patch
 ApplyPatch git-bluetooth2.patch
+ApplyPatch git-bluetooth3.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1209,7 +1191,6 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-e820-mark-esi-clobbered.patch
 ApplyPatch linux-2.6-e820-save-restore-edi-ebp.patch
 ApplyPatch linux-2.6-e820-acpi3-bios-workaround.patch
 ApplyPatch linux-2.6-e820-guard-against-pre-acpi3.patch
@@ -1234,7 +1215,6 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 #
 
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
-ApplyPatch linux-2.6.29.1-sparc-regression.patch
 #
 # Exec shield
 #
@@ -1247,6 +1227,7 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 ApplyPatch linux-2.6-ext4-flush-on-close.patch
 ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
+ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
 
 # xfs
 
@@ -1271,7 +1252,6 @@ ApplyPatch linux-2.6-acpi-strict-resources.patch
 ApplyPatch linux-2.6-hwmon-atk0110.patch
 ApplyPatch linux-2.6-acpi-video-didl-intel-outputs.patch
 ApplyPatch linux-2.6-sony-laptop-rfkill.patch
-ApplyPatch linux-2.6-acer-wmi-bail-on-aao.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1416,18 +1396,12 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 ApplyPatch linux-2.6-v4l-dvb-fixes.patch
-ApplyPatch linux-2.6-v4l-dvb-update.patch
 ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 
 # patches headed for -stable
-ApplyPatch linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
 ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
-ApplyPatch linux-2.6-mm-define-unique-value-for-as_unevictable.patch
-ApplyPatch linux-2.6-posix-timers-fix-clock-monotonicity.patch
-ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
-ApplyPatch linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
 ApplyPatch linux-2.6-i2c-fix-bit-algorithm-timeout.patch
 
 ApplyPatch hpet-fixes.patch
@@ -1439,16 +1413,9 @@ ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
 
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
-ApplyPatch linux-2.6-net-fix-another-gro-bug.patch
-
 # kvm fixes
-ApplyPatch linux-2.6-kvm-kconfig-irqchip.patch
-ApplyPatch linux-2.6-kvm-mask-notifiers.patch
-ApplyPatch linux-2.6-kvm-reset-pit-irq-on-unmask.patch
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
-
-ApplyPatch pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
 
 ApplyPatch linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
 
@@ -2037,6 +2004,37 @@ fi
 # and build.
 
 %changelog
+* Fri May 01 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-121
+- More bluetooth fixes from 2.6.30-rc.
+- linux-2.6-v4l-dvb-fixes.patch: restore, accidently nuked.
+- linux-2.6-v4l-dvb-experimental.patch: restore to previous version
+   to fix rejects against restored -fixes.
+
+* Fri May 01 2009 Eric Sandeen <sandeen@redhat.com>
+- Fix ext4 corruption on partial write into prealloc block
+
+* Thu Apr 30 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-119
+- Update to 2.6.29.2
+- Patches rebased:
+  linux-2.6-v4l-dvb-experimental.patch
+  drm-next.patch
+- Patches merged upstream:
+  linux-2.6-acer-wmi-bail-on-aao.patch
+  linux-2.6-e820-mark-esi-clobbered.patch
+  linux-2.6-kvm-kconfig-irqchip.patch
+  linux-2.6-kvm-mask-notifiers.patch
+  linux-2.6-kvm-reset-pit-irq-on-unmask.patch
+  linux-2.6-md-raid1-dont-assume-new-bvecs-are-init.patch
+  linux-2.6-mm-define-unique-value-for-as_unevictable.patch
+  linux-2.6-net-fix-another-gro-bug.patch
+  linux-2.6-posix-timers-fix-clock-monotonicity.patch
+  linux-2.6-posix-timers-fix-rlimit_cpu-fork-2.patch
+  linux-2.6-posix-timers-fix-rlimit_cpu-setitimer.patch
+  linux-2.6-v4l-dvb-fixes.patch
+  linux-2.6-v4l-dvb-update.patch
+  linux-2.6.29.1-sparc-regression.patch
+  pat-remove-page-granularity-tracking-for-vm_insert_pfn_maps.patch
+
 * Thu Apr 30 2009 Dave Airlie <airlied@redhat.com> 2.6.29.1-118
 - drm-radeon-kms-fixes.patch: revert rs480 snoop break
 
