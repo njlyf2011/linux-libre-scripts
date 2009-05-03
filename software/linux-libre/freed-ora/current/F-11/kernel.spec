@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1583 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1585 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1721,7 +1721,8 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+make htmldocs || %{doc_build_fail}
+make %{?_smp_mflags} mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -2004,6 +2005,14 @@ fi
 # and build.
 
 %changelog
+* Sat May 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-123
+- Build htmldocs single threaded.
+
+* Sat May 02 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.2-122
+- drm-nouveau.patch: nv50 connector grouping fixes
+- bios parser updates from ddx (nv50 panel mode from VBIOS table)
+- pre-nv50 modesetting updates from ddx (in disabled codepath)
+
 * Fri May 01 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-121
 - More bluetooth fixes from 2.6.30-rc.
 - linux-2.6-v4l-dvb-fixes.patch: restore, accidently nuked.
