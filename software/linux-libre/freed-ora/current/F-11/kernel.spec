@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1585 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1586 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2005,6 +2005,11 @@ fi
 # and build.
 
 %changelog
+* Sun May 03 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.2-124
+- drm-nouveau.patch: ignore unsupported dcb encoder types completely
+- nv50: module option to run output scripts, too raw to be by default yet,
+  but will fix a number of issues in the places where they work.
+
 * Sat May 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-123
 - Build htmldocs single threaded.
 
