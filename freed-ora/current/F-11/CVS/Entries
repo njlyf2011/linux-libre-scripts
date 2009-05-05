@@ -43,7 +43,6 @@ D/scripts////
 /drm-modesetting-radeon.patch/1.80/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_2-126_fc11
 /drm-next.patch/1.15/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_2-126_fc11
 /drm-no-gem-on-i8xx.patch/1.1/Mon Feb  9 04:45:32 2009/-kb/Tkernel-2_6_29_2-126_fc11
-/drm-nouveau.patch/1.44/dummy timestamp from new-entry+Sun May  3 12:36:05 2009/-kb/Tkernel-2_6_29_2-126_fc11
 /drm-radeon-kms-fixes.patch/1.3/Thu Apr 30 09:34:25 2009/-kb/Tkernel-2_6_29_2-126_fc11
 /drm-radeon-pm.patch/1.2/Tue Mar  3 21:06:24 2009/-kb/Tkernel-2_6_29_2-126_fc11
 /find-provides/1.18/Sun Apr 27 23:43:36 2008/-ko/Tkernel-2_6_29_2-126_fc11
@@ -152,3 +151,4 @@ D/scripts////
 /squashfs-broken-when-pagesize-greater-than-blocksize.patch/1.1/Tue Apr 14 14:18:26 2009/-kb/Tkernel-2_6_29_2-126_fc11
 /upstream/1.915/dummy timestamp from new-entry//Tkernel-2_6_29_2-126_fc11
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_29_2-126_fc11
+/drm-nouveau.patch/1.44/Tue May  5 00:13:03 2009/-kb/Tkernel-2_6_29_2-126_fc11
