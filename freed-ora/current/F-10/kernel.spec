@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1352 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1355 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -665,6 +665,7 @@ Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+Patch686: linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -739,6 +740,9 @@ Patch9502: linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
 
 # FPU state can become corrupt
 Patch9510: linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
+
+# fix some broken bluetooth dongles
+Patch9600: linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
 
 # Backport of upstream memory reduction for ftrace
 Patch10000: linux-2.6-ftrace-memory-reduction.patch
@@ -978,7 +982,7 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1
   fi
-  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/kernel.spec ; then
+  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
     if [ "${patch:0:10}" != "patch-2.6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
@@ -1324,6 +1328,9 @@ ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 # back-port mac80211: fix beacon loss detection after scan
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
+# back-port ath9k: Fix FIF_BCN_PRBRESP_PROMISC handling
+ApplyPatch linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
+
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 # http://hg.jannau.net/hdpvr/
@@ -1381,6 +1388,8 @@ ApplyPatch linux-2.6-x86-hpet-stop-counter-when-programming.patch
 ApplyPatch linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
 
 ApplyPatch linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
+
+ApplyPatch linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
 
 # Reduce the memory usage of ftrace if you don't use it.
 ApplyPatch linux-2.6-ftrace-memory-reduction.patch
@@ -1961,6 +1970,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed May 06 2009 John W. Linville <linville@redhat.com> 2.6.29.2-55
+- back-port ath9k: Fix FIF_BCN_PRBRESP_PROMISC handling
+
+* Tue Apr 28 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-54
+- Make the kernel-vanilla package buildable again.
+
+* Mon Apr 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-53
+- Fix some broken bluetooth USB adapters
+
 * Mon Apr 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-52
 - Fix possible FPU context corruption on x86-64.
 
