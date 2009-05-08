@@ -13919,7 +13919,7 @@ index 0000000..44b3b34
 +
 +	/* setup a mtrr over the FB */
 +	dev_priv->fb_mtrr = drm_mtrr_add(drm_get_resource_start(dev, 1),
-+					 nouveau_mem_fb_amount(dev),
++					 drm_get_resource_len(dev, 1),
 +					 DRM_MTRR_WC);
 +
 +	if (dev_priv->card_type >= NV_50) {
