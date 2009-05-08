@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1595 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1596 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -614,6 +614,10 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
 
+# vm patches
+Patch25: linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
+Patch26: linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
+
 # Support suspend/resume, other crash fixes
 Patch30: linux-2.6-iommu-fixes.patch
 
@@ -1184,6 +1188,10 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
+
+# vm patches
+ApplyPatch linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
+ApplyPatch linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
 
 # IOMMU fixes backported to 2.6.29
 ApplyPatch linux-2.6-iommu-fixes.patch
@@ -2011,6 +2019,12 @@ fi
 # and build.
 
 %changelog
+* Fri May 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-134
+- linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
+  linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
+    Add VM patches from Rik to fix responsiveness, tested on the rawhide
+    kernel.
+
 * Thu May 07 2009 Adam Jackson <ajax@redhat.com>
 - drm-intel-debugfs-ringbuffer.patch: Add debugfs support for
   intel_gpu_dump utility.
