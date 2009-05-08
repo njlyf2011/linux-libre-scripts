@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1588 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1592 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -684,6 +684,7 @@ Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+Patch686: linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
@@ -709,8 +710,6 @@ Patch1822: drm-intel-gen3-fb-hack.patch
 Patch1823: drm-intel-tiled-front.patch
 Patch1824: drm-intel-hdmi-edid-fix.patch
 Patch1825: drm-intel-tiling-transition.patch
-Patch1826: linux-2.6-drm-r128-ioremap.patch
-Patch1827: drm-radeon-kms-fixes.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1351,6 +1350,9 @@ ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 # back-port mac80211: fix beacon loss detection after scan
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
+# back-port ath9k: Fix FIF_BCN_PRBRESP_PROMISC handling
+ApplyPatch linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
+
 # Fix up DMA debug code
 ApplyPatch linux-2.6-dma-debug-fixes.patch
 
@@ -1381,8 +1383,6 @@ ApplyPatch drm-intel-gen3-fb-hack.patch
 ApplyPatch drm-intel-tiled-front.patch
 ApplyPatch drm-intel-hdmi-edid-fix.patch
 ApplyPatch drm-intel-tiling-transition.patch
-ApplyPatch linux-2.6-drm-r128-ioremap.patch
-ApplyPatch drm-radeon-kms-fixes.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2005,6 +2005,20 @@ fi
 # and build.
 
 %changelog
+* Wed May 06 2009 John W. Linville <linville@redhat.com> 2.6.29.2-130
+- back-port ath9k: Fix FIF_BCN_PRBRESP_PROMISC handling
+
+* Wed May 06 2009 Dave Airlie <airlied@redhat.com> 2.6.29.2-129
+- drm-next: update with latest patch queue for upstream + intel fixes
+- drm-modesetting-radeon.patch: rebase onto drm-next
+- drm-nouveau.patch: rebase onto drm-next
+
+* Tue May 05 2009 Dave Airlie <airlied@redhat.com> 2.6.29.2-128
+- radeon kms: backport some fixes - put back old internal interface
+
+* Tue May 05 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.2-127
+- drm-nouveau.patch: bump dac load detection delay to match ddx
+
 * Mon May 04 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.2-126
 - Explicitly enable CONFIG_FB_MODE_HELPERS to fix build..
 
