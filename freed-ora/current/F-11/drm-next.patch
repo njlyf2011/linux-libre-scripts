@@ -3284,7 +3284,7 @@ index b293ef0..2c01676 100644
  
  	.name = DRIVER_NAME,
 diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
-index d6cc986..317b122 100644
+index 9239747..d9a39e1 100644
 --- a/drivers/gpu/drm/i915/i915_drv.h
 +++ b/drivers/gpu/drm/i915/i915_drv.h
 @@ -159,6 +159,9 @@ typedef struct drm_i915_private {
@@ -3344,8 +3344,8 @@ index d6cc986..317b122 100644
  /* i915_suspend.c */
  extern int i915_save_state(struct drm_device *dev);
  extern int i915_restore_state(struct drm_device *dev);
-@@ -784,15 +791,21 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
- 		     (dev)->pci_device == 0x2E22 || \
+@@ -786,15 +793,21 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
+ 		     (dev)->pci_device == 0x2E32 || \
  		     IS_GM45(dev))
  
 +#define IS_IGDG(dev) ((dev)->pci_device == 0xa001)
@@ -3368,7 +3368,7 @@ index d6cc986..317b122 100644
  
  #define I915_NEED_GFX_HWS(dev) (IS_G33(dev) || IS_GM45(dev) || IS_G4X(dev))
  /* With the 945 and later, Y tiling got adjusted so that it was 32 128-byte
-@@ -801,6 +814,7 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
+@@ -803,6 +816,7 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
  #define HAS_128_BYTE_Y_TILING(dev) (IS_I9XX(dev) && !(IS_I915G(dev) || \
  						      IS_I915GM(dev)))
  #define SUPPORTS_INTEGRATED_HDMI(dev)	(IS_G4X(dev))
@@ -5636,7 +5636,7 @@ index 87b6b60..ee7ce7b 100644
  	I915_WRITE(PIPEASTAT, 0);
  	I915_WRITE(PIPEBSTAT, 0);
 diff --git a/drivers/gpu/drm/i915/i915_reg.h b/drivers/gpu/drm/i915/i915_reg.h
-index cc2938d..e805b59 100644
+index a787fb8..5211947 100644
 --- a/drivers/gpu/drm/i915/i915_reg.h
 +++ b/drivers/gpu/drm/i915/i915_reg.h
 @@ -190,6 +190,8 @@
@@ -5796,7 +5796,7 @@ index 61c108e..9bdd959 100644
  
  	if (IS_GM45(dev))
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index 601a76f..64773ce 100644
+index 254c5ca..080f92d 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
 @@ -56,11 +56,13 @@ typedef struct {
@@ -6284,7 +6284,7 @@ index 601a76f..64773ce 100644
  }
  
  static int
-@@ -634,7 +951,7 @@ static int intel_get_core_clock_speed(struct drm_device *dev)
+@@ -643,7 +960,7 @@ static int intel_get_core_clock_speed(struct drm_device *dev)
  		return 400000;
  	else if (IS_I915G(dev))
  		return 333000;
@@ -6293,7 +6293,7 @@ index 601a76f..64773ce 100644
  		return 200000;
  	else if (IS_I915GM(dev)) {
  		u16 gcfgc = 0;
-@@ -733,6 +1050,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -742,6 +1059,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	bool is_crt = false, is_lvds = false, is_tv = false;
  	struct drm_mode_config *mode_config = &dev->mode_config;
  	struct drm_connector *connector;
@@ -6301,7 +6301,7 @@ index 601a76f..64773ce 100644
  	int ret;
  
  	drm_vblank_pre_modeset(dev, pipe);
-@@ -776,13 +1094,42 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -785,13 +1103,42 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		refclk = 48000;
  	}
  
@@ -6346,7 +6346,7 @@ index 601a76f..64773ce 100644
  
  	dpll = DPLL_VGA_MODE_DIS;
  	if (IS_I9XX(dev)) {
-@@ -799,7 +1146,10 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -808,7 +1155,10 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		}
  
  		/* compute bitmask from p1 value */
@@ -6358,7 +6358,7 @@ index 601a76f..64773ce 100644
  		switch (clock.p2) {
  		case 5:
  			dpll |= DPLL_DAC_SERIAL_P2_CLOCK_DIV_5;
-@@ -1279,10 +1629,20 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
+@@ -1288,10 +1638,20 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
  		fp = I915_READ((pipe == 0) ? FPA1 : FPB1);
  
  	clock.m1 = (fp & FP_M1_DIV_MASK) >> FP_M1_DIV_SHIFT;
@@ -6382,7 +6382,7 @@ index 601a76f..64773ce 100644
  			       DPLL_FPA01_P1_POST_DIV_SHIFT);
  
  		switch (dpll & DPLL_MODE_MASK) {
-@@ -1301,7 +1661,7 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
+@@ -1310,7 +1670,7 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
  		}
  
  		/* XXX: Handle the 100Mhz refclk */
@@ -6391,7 +6391,7 @@ index 601a76f..64773ce 100644
  	} else {
  		bool is_lvds = (pipe == 1) && (I915_READ(LVDS) & LVDS_PORT_EN);
  
-@@ -1313,9 +1673,9 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
+@@ -1322,9 +1682,9 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
  			if ((dpll & PLL_REF_INPUT_MASK) ==
  			    PLLB_REF_INPUT_SPREADSPECTRUMIN) {
  				/* XXX: might not be 66MHz */
@@ -6403,7 +6403,7 @@ index 601a76f..64773ce 100644
  		} else {
  			if (dpll & PLL_P1_DIVIDE_BY_TWO)
  				clock.p1 = 2;
-@@ -1328,7 +1688,7 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
+@@ -1337,7 +1697,7 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
  			else
  				clock.p2 = 2;
  
@@ -12180,7 +12180,7 @@ index 8dbd257..26641e9 100644
  /** Write memory barrier */
  #define DRM_WRITEMEMORYBARRIER()	wmb()
 diff --git a/include/drm/drm_pciids.h b/include/drm/drm_pciids.h
-index 5165f24..2df74eb 100644
+index 671fab3..cdc8cb8 100644
 --- a/include/drm/drm_pciids.h
 +++ b/include/drm/drm_pciids.h
 @@ -239,10 +239,123 @@
@@ -12307,10 +12307,10 @@ index 5165f24..2df74eb 100644
  	{0, 0, 0}
  
  #define r128_PCI_IDS \
-@@ -418,4 +531,6 @@
- 	{0x8086, 0x2e02, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
+@@ -419,4 +532,6 @@
  	{0x8086, 0x2e12, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
  	{0x8086, 0x2e22, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
+ 	{0x8086, 0x2e32, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
 +	{0x8086, 0xa001, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
 +	{0x8086, 0xa011, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
  	{0, 0, 0}
