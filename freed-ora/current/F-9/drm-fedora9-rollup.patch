@@ -12565,9 +12565,9 @@ diff --git a/drivers/gpu/drm/drm_pciids.h b/drivers/gpu/drm/drm_pciids.h
 index 135bd19..8c19f4c 100644
 --- a/include/drm/drm_pciids.h
 +++ b/include/drm/drm_pciids.h
-@@ -413,3 +413,265 @@
- 	{0x8086, 0x2e12, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
+@@ -414,3 +414,265 @@
  	{0x8086, 0x2e22, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
+ 	{0x8086, 0x2e32, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
  	{0, 0, 0}
 +
 +#define nouveau_PCI_IDS \
