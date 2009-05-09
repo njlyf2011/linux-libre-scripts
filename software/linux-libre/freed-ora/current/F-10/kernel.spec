@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1355 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1360 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -613,6 +613,9 @@ Patch30: linux-2.6-iommu-fixes.patch
 Patch41: linux-2.6-sysrq-c.patch
 
 Patch81: linux-2.6-defaults-saner-vm-settings.patch
+Patch90: linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
+Patch91: linux-2.6-mm-lru-report-vm-flags-in-page-referenced.patch
+Patch92: linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
 
 Patch140: linux-2.6-ps3-ehci-iso.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
@@ -656,6 +659,7 @@ Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 Patch609: alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 Patch610: alsa-add-subdevice_mask-to-quirk-entries.patch
 Patch611: alsa-hda-update-quirks.patch
+Patch612: alsa-pcm-core-avoid-jiffies-check.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -665,7 +669,6 @@ Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
-Patch686: linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -714,10 +717,6 @@ Patch3000: linux-2.6-btrfs-experimental-branch.patch
 
 Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
-# patches headed for -stable
-# make RLIMIT_CPU work again
-Patch7010: linux-2.6-forcedeth-fix-resume-from-hibernate.patch
-
 Patch9000: squashfs3.patch
 Patch9001: squashfs-fixups.patch
 
@@ -737,9 +736,6 @@ Patch9401: linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
 Patch9500: linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
 Patch9501: linux-2.6-x86-hpet-stop-counter-when-programming.patch
 Patch9502: linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
-
-# FPU state can become corrupt
-Patch9510: linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
 
 # fix some broken bluetooth dongles
 Patch9600: linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
@@ -1183,9 +1179,13 @@ ApplyPatch linux-2.6-iommu-fixes.patch
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
+ApplyPatch linux-2.6-defaults-saner-vm-settings.patch
+ApplyPatch linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
+ApplyPatch linux-2.6-mm-lru-report-vm-flags-in-page-referenced.patch
+ApplyPatch linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
+
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-defaults-saner-vm-settings.patch
 
 #
 # PowerPC
@@ -1286,6 +1286,7 @@ ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 ApplyPatch alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 ApplyPatch alsa-add-subdevice_mask-to-quirk-entries.patch
 ApplyPatch alsa-hda-update-quirks.patch
+ApplyPatch alsa-pcm-core-avoid-jiffies-check.patch
 
 # Networking
 
@@ -1328,9 +1329,6 @@ ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 # back-port mac80211: fix beacon loss detection after scan
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
-# back-port ath9k: Fix FIF_BCN_PRBRESP_PROMISC handling
-ApplyPatch linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
-
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 # http://hg.jannau.net/hdpvr/
@@ -1358,9 +1356,6 @@ ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
-# patches headed for -stable
-ApplyPatch linux-2.6-forcedeth-fix-resume-from-hibernate.patch
-
 # we need squashfs3 for Fedora-10
 ApplyPatch squashfs3.patch
 ApplyPatch squashfs-fixups.patch
@@ -1386,8 +1381,6 @@ ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
 ApplyPatch linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
 ApplyPatch linux-2.6-x86-hpet-stop-counter-when-programming.patch
 ApplyPatch linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
-
-ApplyPatch linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
 
 ApplyPatch linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
 
@@ -1970,6 +1963,32 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat May 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.3-60
+- Add less-intrusive version of the mm patch to prevent executable
+  pages from being deactivated.
+
+* Fri May 08 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.3-59
+- Linux 2.6.29.3
+- Dropped patches, merged upstream:
+    linux-2.6-ath9k-Fix-FIF_BCN_PRBRESP_PROMISC-handling.patch
+    linux-2.6-forcedeth-fix-resume-from-hibernate.patch
+    linux-2.6-x86-64-fix-fpu-corruption-with-signals-and-preemption.patch
+- Removed three patches from iommu-fixes.patch, merged upstream:
+    intel-iommu: Avoid panic() for DRHD at address zero
+    intel-iommu: Fix device-to-iommu mapping for PCI-PCI bridges
+    intel-iommu: Fix oops in device_to_iommu() when devices not found
+
+* Fri May 08 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-58
+- ALSA: Avoid jiffies check for devices with BATCH flag
+
+* Fri May 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.2-57
+- Fix build error in "mm: evict streaming I/O pages before other pages"
+
+* Thu May 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.2-56
+- Fix responsiveness problems with the new memory manager:
+     mm: evict streaming I/O pages before other pages
+     mm: don't evict mapped executable pages
+
 * Wed May 06 2009 John W. Linville <linville@redhat.com> 2.6.29.2-55
 - back-port ath9k: Fix FIF_BCN_PRBRESP_PROMISC handling
 
