@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.49 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.50 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -770,6 +770,9 @@ Patch2914: ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
 
+Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+Patch4001: cifs-fix-unicode-string-area-word-alignment-2.6.27.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1394,6 +1397,9 @@ fi
 # get rid of imacfb and make efifb work everywhere it was used
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
+ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+ApplyPatch cifs-fix-unicode-string-area-word-alignment-2.6.27.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1997,6 +2003,10 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon May 11 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.23-78.2.50
+- Add stable patch from 2.6.29.1
+- Add stable patch pending in 2.6.29-stable
+
 * Fri May 08 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.23-78.2.49
 - Linux 2.6.27.23
 
