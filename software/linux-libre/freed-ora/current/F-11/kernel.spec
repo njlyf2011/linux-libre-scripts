@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1597 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1599 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -679,6 +679,9 @@ Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
 Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 Patch611: linux-2.6.29-alsa-update-quirks.patch
+Patch612: alsa-hda-add-debugging.patch
+
+Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -1298,8 +1301,10 @@ ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
 ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
 ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
+ApplyPatch alsa-hda-add-debugging.patch
 
 # Networking
+ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -2007,6 +2012,13 @@ fi
 # and build.
 
 %changelog
+* Mon May 11 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-137
+- net-revert-forcedeth-power-down-phy-when-interface-is.patch:
+   Attempt to fix forcedeth failures, (#484505)
+
+* Sat May 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.3-136
+- Add more verbose debug messages for bug #498401
+
 * Fri May 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-135
 - Linux 2.6.29.3
 - Merged patches:
