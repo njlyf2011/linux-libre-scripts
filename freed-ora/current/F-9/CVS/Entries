@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Thu Oct 30 04:41:21 2008//Tkernel-2_6_27_4-19_fc9
 /patch-2.6.27.23.bz2.sign/-1.1.2.1/Sat May  9 01:29:16 2009//Tkernel-2_6_27_23-78_2_49_fc9
-/.cvsignore/1.837.2.13/dummy timestamp from new-entry+Sat May  9 09:57:00 2009//Tkernel-2_6_27_23-78_2_50_fc9
 /COPYING.modules/1.5/Mon Aug  4 21:46:27 2008/-ko/Tkernel-2_6_27_23-78_2_50_fc9
 /Config.mk/1.4/Mon Aug  4 21:46:27 2008//Tkernel-2_6_27_23-78_2_50_fc9
 /Makefile/1.71/Fri Oct 31 05:07:05 2008//Tkernel-2_6_27_23-78_2_50_fc9
@@ -27,7 +26,6 @@ D/scripts////
 /config-sparc64-smp/1.2/Fri Oct 31 05:07:05 2008//Tkernel-2_6_27_23-78_2_50_fc9
 /config-x86-generic/1.38.2.2/Fri Feb 27 03:32:51 2009//Tkernel-2_6_27_23-78_2_50_fc9
 /config-x86_64-generic/1.39/Wed Jan 28 05:04:51 2009//Tkernel-2_6_27_23-78_2_50_fc9
-/drm-fedora9-rollup.patch/1.5.2.1/dummy timestamp from new-entry+Sat May  9 09:58:30 2009/-kb/Tkernel-2_6_27_23-78_2_50_fc9
 /drm-mm-readd-nopfn.patch/1.1/Thu Oct 30 14:52:45 2008/-kb/Tkernel-2_6_27_23-78_2_50_fc9
 /ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch/1.1.2.1/Thu Mar 26 21:41:33 2009/-kb/Tkernel-2_6_27_23-78_2_50_fc9
 /ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch/1.1.2.1/Thu Mar 26 21:41:33 2009/-kb/Tkernel-2_6_27_23-78_2_50_fc9
@@ -137,7 +135,9 @@ D/scripts////
 /merge.pl/1.9/Mon Aug  4 21:46:35 2008/-ko/Tkernel-2_6_27_23-78_2_50_fc9
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_23-78_2_50_fc9
 /print-dmi-hw-name-in-warnings.patch/1.1.2.2/Wed Feb  4 20:59:41 2009/-kb/Tkernel-2_6_27_23-78_2_50_fc9
-/sources/1.798.2.13/dummy timestamp from new-entry+Sat May  9 10:02:56 2009//Tkernel-2_6_27_23-78_2_50_fc9
 /sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch/1.1/Sat Dec 13 17:42:41 2008/-kb/Tkernel-2_6_27_23-78_2_50_fc9
-/upstream/1.717.2.13/dummy timestamp from new-entry+Sat May  9 09:59:24 2009//Tkernel-2_6_27_23-78_2_50_fc9
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27_23-78_2_50_fc9
+/.cvsignore/1.837.2.13/Tue May 12 16:29:19 2009//Tkernel-2_6_27_23-78_2_50_fc9
+/sources/1.798.2.13/Tue May 12 16:29:21 2009//Tkernel-2_6_27_23-78_2_50_fc9
+/upstream/1.717.2.13/Tue May 12 16:29:23 2009//Tkernel-2_6_27_23-78_2_50_fc9
+/drm-fedora9-rollup.patch/1.5.2.1/Tue May 12 16:29:26 2009/-kb/Tkernel-2_6_27_23-78_2_50_fc9
