@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1599 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1602 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -604,8 +604,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch10: git-cpufreq.patch
 Patch11: git-bluetooth.patch
-Patch12: git-bluetooth2.patch
-Patch13: git-bluetooth3.patch
+Patch12: git-bluetooth-fixes.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -739,8 +738,7 @@ Patch2920: linux-2.6-ext4-flush-on-close.patch
 Patch2921: linux-2.6-ext4-really-print-warning-once.patch
 Patch2922: linux-2.6-ext4-prealloc-fixes.patch
 
-Patch3000: linux-2.6-btrfs-experimental-branch.patch
-Patch3001: linux-2.6-btrfs-fix-umount-hang.patch
+Patch3000: linux-2.6-btrfs-unstable-update.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
 
@@ -1176,8 +1174,7 @@ fi
 
 #ApplyPatch git-cpufreq.patch
 ApplyPatch git-bluetooth.patch
-ApplyPatch git-bluetooth2.patch
-ApplyPatch git-bluetooth3.patch
+ApplyPatch git-bluetooth-fixes.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1239,8 +1236,7 @@ ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
 # xfs
 
 # btrfs
-ApplyPatch linux-2.6-btrfs-experimental-branch.patch
-ApplyPatch linux-2.6-btrfs-fix-umount-hang.patch
+ApplyPatch linux-2.6-btrfs-unstable-update.patch
 
 # relatime
 ApplyPatch linux-2.6-relatime-by-default.patch
@@ -2012,6 +2008,16 @@ fi
 # and build.
 
 %changelog
+* Tue May 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-140
+- git-bluetooth-fixes.patch: fix build error in backport from previous
+  commit.
+
+* Tue May 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-139
+- git-bluetooth.patch: suck in three more fixes from 2.6.30.
+
+* Tue May 12 2009 Josef Bacik <josef@toxicpanda.com>
+- bring btrfs uptodate with mainline
+
 * Mon May 11 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-137
 - net-revert-forcedeth-power-down-phy-when-interface-is.patch:
    Attempt to fix forcedeth failures, (#484505)
