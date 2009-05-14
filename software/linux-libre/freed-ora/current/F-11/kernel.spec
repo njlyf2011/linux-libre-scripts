@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1602 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1604 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2008,6 +2008,16 @@ fi
 # and build.
 
 %changelog
+* Tue May 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-142
+- linux-2.6-iommu-fixes.patch: intel-iommu: fix PCI device detach
+    from virtual machine
+  3199aa6bc8766e17b8f60820c4f78d59c25fce0e upstream.
+
+* Tue May 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-141
+- linux-2.6-iommu-fixes.patch: intel-iommu: PAE memory corruption fix
+  fd18de50b9e7965f93d231e7390436fb8900c0e6 upstream. Also, re-cherry-pick
+  patchset and fix up merge conflicts against 2.6.29.3.
+
 * Tue May 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-140
 - git-bluetooth-fixes.patch: fix build error in backport from previous
   commit.
