@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1604 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1605 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -716,6 +716,7 @@ Patch1824: drm-intel-hdmi-edid-fix.patch
 Patch1825: drm-intel-tiling-transition.patch
 Patch1826: drm-intel-next.patch
 Patch1828: drm-intel-debugfs-ringbuffer.patch
+Patch1829: drm-edid-ignore-tiny-modes.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1387,6 +1388,7 @@ ApplyPatch drm-intel-hdmi-edid-fix.patch
 ApplyPatch drm-intel-tiling-transition.patch
 ApplyPatch drm-intel-next.patch
 ApplyPatch drm-intel-debugfs-ringbuffer.patch
+ApplyPatch drm-edid-ignore-tiny-modes.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2008,6 +2010,9 @@ fi
 # and build.
 
 %changelog
+* Fri May 15 2009 Adam Jackson <ajax@redhat.com>
+- drm: ignore tiny modes from EDID.
+
 * Tue May 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-142
 - linux-2.6-iommu-fixes.patch: intel-iommu: fix PCI device detach
     from virtual machine
