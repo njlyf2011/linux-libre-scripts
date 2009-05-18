@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1605 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1612 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -717,6 +717,7 @@ Patch1825: drm-intel-tiling-transition.patch
 Patch1826: drm-intel-next.patch
 Patch1828: drm-intel-debugfs-ringbuffer.patch
 Patch1829: drm-edid-ignore-tiny-modes.patch
+Patch1830: linux-2.6.29.3-boot-vga.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -735,15 +736,21 @@ Patch2902: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
+# ext4 fixes, all from upstream (.30)
 Patch2920: linux-2.6-ext4-flush-on-close.patch
 Patch2921: linux-2.6-ext4-really-print-warning-once.patch
 Patch2922: linux-2.6-ext4-prealloc-fixes.patch
+Patch2923: linux-2.6-ext4-fake-delalloc-bno.patch
+Patch2924: linux-2.6-ext4-clear-unwritten-flag.patch
+Patch2925: linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 Patch3000: linux-2.6-btrfs-unstable-update.patch
+Patch3001: linux-2.6-btrfs-fix-page-mkwrite.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
 
 Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
+Patch4010: linux-2.6-ftdi-oops.patch
 
 Patch5000: linux-2.6-add-qcserial.patch
 
@@ -764,6 +771,9 @@ Patch9003: linux-2.6-dropwatch-protocol.patch
 # kvm fixes
 Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
+Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
+Patch9306: linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+Patch9307: linux-2.6.29-xen-disable-gbpages.patch
 
 %endif
 
@@ -1233,11 +1243,15 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-ext4-flush-on-close.patch
 ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
 ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
+ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
+ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
+ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 # xfs
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-unstable-update.patch
+ApplyPatch linux-2.6-btrfs-fix-page-mkwrite.patch
 
 # relatime
 ApplyPatch linux-2.6-relatime-by-default.patch
@@ -1248,6 +1262,7 @@ ApplyPatch linux-2.6-fiemap-header-install.patch
 # USB
 ApplyPatch linux-2.6-add-qcserial.patch
 ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
+ApplyPatch linux-2.6-ftdi-oops.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1389,6 +1404,7 @@ ApplyPatch drm-intel-tiling-transition.patch
 ApplyPatch drm-intel-next.patch
 ApplyPatch drm-intel-debugfs-ringbuffer.patch
 ApplyPatch drm-edid-ignore-tiny-modes.patch
+ApplyPatch linux-2.6.29.3-boot-vga.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1422,6 +1438,9 @@ ApplyPatch linux-2.6-dropwatch-protocol.patch
 # kvm fixes
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
+ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
+ApplyPatch linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2010,6 +2029,30 @@ fi
 # and build.
 
 %changelog
+* Mon May 18 2009 Adam Jackson <ajax@redhat.com>
+- Expose whether VGA devices were active at boot or not in sysfs.
+
+* Mon May 18 2009 Justin M. Forbes <jforbes@redhat.com>
+- Disable GB pages for Xen guests BZ# 499592
+
+* Mon May 18 2009 Kyle McMartin <kyle@redhat.com>
+- increase-MAX_LOCKDEP_ENTRIES.patch: suck in upstream fix
+  d80c19df5fcceb8c741e96f09f275c2da719efef
+
+* Mon May 18 2009 Justin M. Forbes <jforbes@redhat.com>
+- xen/blkfront: fix warning when deleting gendisk on unplug/shutdown. BZ# 499621
+- xen/blkfront: allow xenbus state transition to closing->closed when
+  not connected
+
+* Mon May 18 2009 Josef Bacik <josef@toxicpanda.com>
+- fix page_mkwrite in btrfs
+
+* Mon May 18 2009 David Woodhouse <David.Woodhouse@intel.com>
+- Fix oops on FTDI removal.
+
+* Fri May 15 2009 Eric Sandeen <sandeen@redhat.com>
+- ext4: corruption fixes from upstream.
+
 * Fri May 15 2009 Adam Jackson <ajax@redhat.com>
 - drm: ignore tiny modes from EDID.
 
