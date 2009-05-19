@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Copyright (C) 2008,2009  Robert Millan
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Upstream extraversion is shipped in the patchset; this script makes
+# sure deblob is run against the _patched_ tree.
+
+set -ex
+
+which patch sponge
+
+eval `grep ^revisions debian/bin/patch.apply | sed -e "s/\.split.*//g;s/ = /=/g"`
+
+for i in ${revisions} ; do
+  # deblob will take care of those
+  if [ "$i" = orig-0 ] ; then continue ; fi
+
+  echo "*** PROCESSING debian/patches/series/$i"
+  grep -v "^\($\|#\)" debian/patches/series/$i | while read action file opts ; do
+    if [ "$opts" != "" ] ; then
+      echo "skipping patch $file with opts $opts"
+      continue
+    fi
+
+    args=""
+
+    if [ "$action" = "+" ] ; then
+      echo "appliing patch $file"
+    elif [ "$action" = "-" ] ; then
+      echo "unappliing patch $file"
+      args="$args -R"
+    else
+      echo "FUCK"
+      exit 1
+    fi
+
+    patch $args -p1 < debian/patches/$file
+    grep -v "$file" debian/patches/series/$i | sponge debian/patches/series/$i
+  done
+done
