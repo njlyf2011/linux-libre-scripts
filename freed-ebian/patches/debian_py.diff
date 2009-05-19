@@ -1,0 +1,10 @@
+--- debian/lib/python/debian_linux/debian.py	2009-05-05 12:38:17.000000000 +0200
++++ debian/lib/python/debian_linux/debian.py	2009-04-21 23:04:35.000000000 +0200
+@@ -103,6 +103,7 @@
+     (?P<major>\d+\.\d+)
+     \.
+     \d+
++    (?:-libre\d+)?
+ )
+ (?:
+     ~
