@@ -1,0 +1,53 @@
+diff -ur debian/config/amd64/defines debian/config/amd64/defines
+--- debian/config/amd64/defines	2009-05-05 12:38:17.000000000 +0200
++++ debian/config/amd64/defines	2009-04-21 23:04:35.000000000 +0200
+@@ -1,8 +1,4 @@
+ [base]
+-featuresets:
+- openvz
+- vserver
+- xen
+ flavours:
+  amd64
+ kernel-arch: x86
+diff -ur debian/config/defines debian/config/defines
+--- debian/config/defines	2009-05-05 12:38:17.000000000 +0200
++++ debian/config/defines	2009-04-21 23:04:35.000000000 +0200
+@@ -19,15 +19,6 @@
+ compiler: gcc-4.1
+ featuresets:
+  none
+- openvz
+- vserver
+- xen
+-
+-[featureset-openvz_base]
+-enabled: true
+-
+-[featureset-vserver_base]
+-enabled: true
+ 
+ [image]
+ desc-long-part-xen: This kernel also runs on a Xen hypervisor.
+diff -ur debian/config/i386/defines debian/config/i386/defines
+--- debian/config/i386/defines	2009-05-05 12:38:17.000000000 +0200
++++ debian/config/i386/defines	2009-04-21 23:04:35.000000000 +0200
+@@ -1,8 +1,4 @@
+ [base]
+-featuresets:
+- openvz
+- vserver
+- xen
+ flavours:
+  486
+  686
+diff -ur debian/config/powerpc/defines debian/config/powerpc/defines
+--- debian/config/powerpc/defines	2009-05-05 12:38:17.000000000 +0200
++++ debian/config/powerpc/defines	2009-04-21 23:04:35.000000000 +0200
+@@ -1,6 +1,4 @@
+ [base]
+-featuresets:
+- vserver
+ flavours:
+  powerpc
+  powerpc-smp
