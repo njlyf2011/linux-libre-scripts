@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1612 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1614 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -718,6 +718,7 @@ Patch1826: drm-intel-next.patch
 Patch1828: drm-intel-debugfs-ringbuffer.patch
 Patch1829: drm-edid-ignore-tiny-modes.patch
 Patch1830: linux-2.6.29.3-boot-vga.patch
+Patch1831: drm-intel-include-965gme-pci-id.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1404,6 +1405,7 @@ ApplyPatch drm-intel-tiling-transition.patch
 ApplyPatch drm-intel-next.patch
 ApplyPatch drm-intel-debugfs-ringbuffer.patch
 ApplyPatch drm-edid-ignore-tiny-modes.patch
+ApplyPatch drm-intel-include-965gme-pci-id.patch
 ApplyPatch linux-2.6.29.3-boot-vga.patch
 
 # linux1394 git patches
@@ -2029,6 +2031,14 @@ fi
 # and build.
 
 %changelog
+* Tue May 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-151
+- net-revert-forcedeth-power-down-phy-when-interface-is.patch: revert only
+  hunks that powered down the phy. fixes rhbz#501249.
+
+* Mon May 18 2009 Kyle McMartin <kyle@redhat.com>
+- drm-intel-include-965gme-pci-id.patch: add patch patch from git head to
+  treat 965GME like 965GM.
+
 * Mon May 18 2009 Adam Jackson <ajax@redhat.com>
 - Expose whether VGA devices were active at boot or not in sysfs.
 
