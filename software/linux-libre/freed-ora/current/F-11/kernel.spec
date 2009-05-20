@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1614 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1616 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -622,9 +622,9 @@ Patch30: linux-2.6-iommu-fixes.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
-Patch101: linux-2.6-e820-save-restore-edi-ebp.patch
-Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
-Patch103: linux-2.6-e820-guard-against-pre-acpi3.patch
+#Patch101: linux-2.6-e820-save-restore-edi-ebp.patch
+#Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
+#Patch103: linux-2.6-e820-guard-against-pre-acpi3.patch
 
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
@@ -719,6 +719,7 @@ Patch1828: drm-intel-debugfs-ringbuffer.patch
 Patch1829: drm-edid-ignore-tiny-modes.patch
 Patch1830: linux-2.6.29.3-boot-vga.patch
 Patch1831: drm-intel-include-965gme-pci-id.patch
+Patch1832: drm-intel-gem-use-dma32-on-pae.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1207,9 +1208,9 @@ ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-e820-save-restore-edi-ebp.patch
-ApplyPatch linux-2.6-e820-acpi3-bios-workaround.patch
-ApplyPatch linux-2.6-e820-guard-against-pre-acpi3.patch
+#ApplyPatch linux-2.6-e820-save-restore-edi-ebp.patch
+#ApplyPatch linux-2.6-e820-acpi3-bios-workaround.patch
+#ApplyPatch linux-2.6-e820-guard-against-pre-acpi3.patch
 
 #
 # PowerPC
@@ -1407,6 +1408,7 @@ ApplyPatch drm-intel-debugfs-ringbuffer.patch
 ApplyPatch drm-edid-ignore-tiny-modes.patch
 ApplyPatch drm-intel-include-965gme-pci-id.patch
 ApplyPatch linux-2.6.29.3-boot-vga.patch
+ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2031,6 +2033,19 @@ fi
 # and build.
 
 %changelog
+* Wed May 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-154
+- disable e820 backports, causes problems in some places, bz#499396.
+  linux-2.6-e820-save-restore-edi-ebp.patch
+  linux-2.6-e820-acpi3-bios-workaround.patch
+  linux-2.6-e820-guard-against-pre-acpi3.patch
+
+* Tue May 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-153
+- drm-intel-gem-use-dma32-on-pae.patch: Force GEM allocations to be DMA32
+  when using PAE. This should fix bz#493526. Leave the gfp flags for every
+  other chipset (radeon, really...) unset so we don't fribble the flags.
+- agp-set_memory_ucwb.patch: comment out rejecting hunk that's no longer
+  necessary (forcing gem on with highmem64g.)
+
 * Tue May 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-151
 - net-revert-forcedeth-power-down-phy-when-interface-is.patch: revert only
   hunks that powered down the phy. fixes rhbz#501249.
