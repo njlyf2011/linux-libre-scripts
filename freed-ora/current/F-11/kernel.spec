@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1616 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1617 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -720,6 +720,8 @@ Patch1829: drm-edid-ignore-tiny-modes.patch
 Patch1830: linux-2.6.29.3-boot-vga.patch
 Patch1831: drm-intel-include-965gme-pci-id.patch
 Patch1832: drm-intel-gem-use-dma32-on-pae.patch
+Patch1833: drm-intel-i8xx-cursors.patch
+Patch1834: drm-intel-vmalloc.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1409,6 +1411,8 @@ ApplyPatch drm-edid-ignore-tiny-modes.patch
 ApplyPatch drm-intel-include-965gme-pci-id.patch
 ApplyPatch linux-2.6.29.3-boot-vga.patch
 ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
+ApplyPatch drm-intel-i8xx-cursors.patch
+ApplyPatch drm-intel-vmalloc.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2033,6 +2037,11 @@ fi
 # and build.
 
 %changelog
+* Wed May 20 2009  <krh@redhat.com> - 2.6.29.3-155
+- Add drm-intel-i8xx-cursors.patch to fix cursors on i8xx desktop
+  chipsets (#488980).
+- Add drm-intel-vmalloc.patch as part of the fix for #498131.
+
 * Wed May 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-154
 - disable e820 backports, causes problems in some places, bz#499396.
   linux-2.6-e820-save-restore-edi-ebp.patch
