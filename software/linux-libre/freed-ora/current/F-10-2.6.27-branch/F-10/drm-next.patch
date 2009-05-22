@@ -14596,7 +14596,7 @@ index 135bd19..5165f24 100644
  	{0, 0, 0}
  
  #define r128_PCI_IDS \
-@@ -389,27 +395,27 @@
+@@ -389,28 +395,28 @@
  	{0, 0, 0}
  
  #define i915_PCI_IDS \
@@ -14623,6 +14623,7 @@ index 135bd19..5165f24 100644
 -	{0x8086, 0x2e02, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
 -	{0x8086, 0x2e12, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
 -	{0x8086, 0x2e22, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
+-	{0x8086, 0x2e32, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0}, \
 +	{0x8086, 0x3577, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
 +	{0x8086, 0x2562, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
 +	{0x8086, 0x3582, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
@@ -14646,6 +14647,7 @@ index 135bd19..5165f24 100644
 +	{0x8086, 0x2e02, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
 +	{0x8086, 0x2e12, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
 +	{0x8086, 0x2e22, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
++	{0x8086, 0x2e32, PCI_ANY_ID, PCI_ANY_ID, PCI_CLASS_DISPLAY_VGA << 8, 0xffff00, 0}, \
  	{0, 0, 0}
 diff --git a/include/drm/i915_drm.h b/include/drm/i915_drm.h
 index 05c66cf..152b34d 100644

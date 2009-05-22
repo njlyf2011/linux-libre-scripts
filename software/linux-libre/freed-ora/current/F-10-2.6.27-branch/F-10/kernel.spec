@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.60 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.68 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 21
+%define stable_update 24
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -589,6 +589,9 @@ Patch04: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
+# fix build on newer userspace, even for -vanilla
+Patch06: linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
+
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
@@ -602,6 +605,7 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+Patch24: linux-2.6-x86-workaround-failures-on-intel-atom.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -723,6 +727,7 @@ Patch2014: linux-2.6-toshiba-acpi-only-register-rfkill-if-bt-enabled.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+Patch2021: linux-2.6-netdev-atl2-2.0.5-update.patch
 
 # Fix DEBUG_SHIRQ problem in tulip driver.  (454575)
 Patch2030: linux-2.6-net-tulip-interrupt.patch
@@ -769,16 +774,19 @@ Patch2807: linux-2.6-pciehp-kill-annoying-messages.patch
 Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 # Delay capable check to avoid most AVCs (#478299)
 Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
-# don't spew warnings when using fallback allocator
-Patch2902: linux-2.6.27-ext4-print-warning-once.patch
-# fix extent header checking
-Patch2903: linux-2.6.27-ext4-fix-header-check.patch
-
-# from 2.6.29-rc, 18 mar 2009
-Patch2904: linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
-Patch2905: linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
 
 # next round of ext4 patches for -stable
+Patch2910: ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
+Patch2911: ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
+Patch2912: ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
+Patch2913: ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
+Patch2914: ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
+
+# ext4 fixes from fedora 11
+Patch2920: linux-2.6-ext4-clear-unwritten-flag.patch
+Patch2921: linux-2.6-ext4-fake-delalloc-bno.patch
+Patch2922: linux-2.6-ext4-fix-i_cached_extent-race.patch
+Patch2923: linux-2.6-ext4-prealloc-fixes.patch
 
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
@@ -792,6 +800,8 @@ Patch3130: disable-p4-cpufreq-ui.patch
 
 # Fix up the v4l2 video_open function
 Patch3140: linux-2.6.27-fix-video_open.patch
+
+Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
 
 %endif
 
@@ -1146,6 +1156,9 @@ ApplyPatch linux-2.6-build-nonintconfig.patch
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
+# Fix building kernel on newer userspace
+ApplyPatch linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
+
 #
 # misc small stuff to make things compile
 #
@@ -1170,6 +1183,9 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+
+# work around atom errata
+ApplyPatch linux-2.6-x86-workaround-failures-on-intel-atom.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -1221,12 +1237,19 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
-ApplyPatch linux-2.6.27-ext4-print-warning-once.patch
-ApplyPatch linux-2.6.27-ext4-fix-header-check.patch
 
-# in 2.6.29  18 mar 2009
-ApplyPatch linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
-ApplyPatch linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
+# ext4 patches scheduled for -stable
+ApplyPatch ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
+ApplyPatch ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
+ApplyPatch ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
+ApplyPatch ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
+ApplyPatch ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
+
+# ext4 patches from f-11
+ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
+ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
+ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
+ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
 
 # xfs
 
@@ -1382,6 +1405,7 @@ ApplyPatch linux-2.6-toshiba-acpi-only-register-rfkill-if-bt-enabled.patch
 
 # atl2 network driver
 ApplyPatch linux-2.6-netdev-atl2.patch
+ApplyPatch linux-2.6-netdev-atl2-2.0.5-update.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1436,6 +1460,8 @@ ApplyPatch linux-2.6-selinux-empty-tty-files.patch
 ApplyPatch disable-p4-cpufreq-ui.patch
 
 ApplyPatch linux-2.6.27-fix-video_open.patch
+
+ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2012,13 +2038,50 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Mon Apr 13 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.59
-- Remove iwlwifi: remove implicit direct scan
+* Wed May 20 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.68
+- Enable Divas (formerly Eicon) ISDN drivers on x86_64. (#480837)
 
-* Tue Apr  7 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.58
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.67
+- Enable sfc driver for Solarflare SFC4000 network adapter (#499392)
+  (disabled on powerpc)
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.66
+- Add workaround for Intel Atom erratum AAH41 (#499803)
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.65
+- Allow building the F-10 2.6.27 kernel on F-11.
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.64
+- ext4 fixes from Fedora 11:
+    linux-2.6-ext4-clear-unwritten-flag.patch
+    linux-2.6-ext4-fake-delalloc-bno.patch
+    linux-2.6-ext4-fix-i_cached_extent-race.patch
+    linux-2.6-ext4-prealloc-fixes.patch
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.63
+- Merge official ext4 patches headed for -stable.
+- Drop ext4 patches we already had:
+    linux-2.6.27-ext4-fix-header-check.patch
+    linux-2.6.27-ext4-print-warning-once.patch
+    linux-2.6.27-ext4-fix-bogus-bug-ons-in-mballoc.patch
+    linux-2.6.27-ext4-fix-bb-prealloc-list-corruption.patch
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.62
+- Add patches from Fedora 9:
+  Update the atl2 network driver to version 2.0.5
+  KVM: don't allow access to the EFER from 32-bit x86 guests
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-170.2.61
+- Linux 2.6.27.24
+- Fix up execshield, utrace, r8169 and drm patches for .24
+
+* Mon Apr 13 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.60
+- Remove iwl3945: rely on priv->lock to protect priv access
+
+* Tue Apr  7 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.59
 - iwlwifi: remove implicit direct scan
 
-* Thu Apr  2 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.57
+* Thu Apr  2 2009 John W. Linville <linville@redhat.com>  2.6.27.21-170.2.58
 - iwl3945: rely on priv->lock to protect priv access
 
 * Thu Apr  2 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre .1
