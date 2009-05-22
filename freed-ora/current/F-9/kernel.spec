@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.50 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.53 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 23
+%define stable_update 24
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -606,11 +606,14 @@ Patch07: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch08: linux-2.6-makefile-after_link.patch
 
+# fix build on newer userspace, even for -vanilla
+Patch09: linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
+
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
-Patch09: linux-2.6-upstream-reverts.patch
-Patch10: linux-2.6-hotfixes.patch
+Patch15: linux-2.6-upstream-reverts.patch
+Patch16: linux-2.6-hotfixes.patch
 # patches queued for the next -stable release
 #Patch11: linux-2.6.27.5-stable-queue.patch
 #Patch12: linux-2.6.27.5-stable-queue-reverts.patch
@@ -739,6 +742,7 @@ Patch2009: linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
+Patch2021: linux-2.6-netdev-atl2-2.0.5-update.patch
 
 Patch2030: linux-2.6-net-tulip-interrupt.patch
 
@@ -767,11 +771,16 @@ Patch2912: ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
 Patch2913: ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
 Patch2914: ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
 
+# ext4 fixes from fedora 11
+Patch2920: linux-2.6-ext4-clear-unwritten-flag.patch
+Patch2921: linux-2.6-ext4-fake-delalloc-bno.patch
+Patch2922: linux-2.6-ext4-fix-i_cached_extent-race.patch
+Patch2923: linux-2.6-ext4-prealloc-fixes.patch
+
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
 
 Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
-Patch4001: cifs-fix-unicode-string-area-word-alignment-2.6.27.patch
 
 %endif
 
@@ -1131,6 +1140,9 @@ ApplyPatch linux-2.6-build-nonintconfig.patch
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
+# Fix building kernel on newer userspace
+ApplyPatch linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
+
 #
 # misc small stuff to make things compile
 #
@@ -1366,6 +1378,7 @@ ApplyPatch linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch -R
 ApplyPatch linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch -R
 
 ApplyPatch linux-2.6-netdev-atl2.patch
+ApplyPatch linux-2.6-netdev-atl2-2.0.5-update.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
 
@@ -1386,6 +1399,12 @@ ApplyPatch ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
 ApplyPatch ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
 ApplyPatch ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
 
+# ext4 patches from f-11
+ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
+ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
+ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
+ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
+
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
 
@@ -1398,7 +1417,6 @@ fi
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
-ApplyPatch cifs-fix-unicode-string-area-word-alignment-2.6.27.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2003,6 +2021,22 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-78.2.53
+- Allow building the F-9 kernel on F-11.
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.24-78.2.52
+- ext4 fixes from Fedora 11:
+    linux-2.6-ext4-clear-unwritten-flag.patch
+    linux-2.6-ext4-fake-delalloc-bno.patch
+    linux-2.6-ext4-fix-i_cached_extent-race.patch
+    linux-2.6-ext4-prealloc-fixes.patch
+
+* Wed May 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.24-78.2.51
+- Linux 2.6.27.24
+- Dropped patches, merged upstream:
+    cifs-fix-unicode-string-area-word-alignment-2.6.27.patch
+- Update atl2 driver to version 2.0.5
+
 * Mon May 11 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.23-78.2.50
 - Add stable patch from 2.6.29.1
 - Add stable patch pending in 2.6.29-stable
