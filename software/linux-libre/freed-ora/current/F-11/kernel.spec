@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1617 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1619 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -690,6 +690,7 @@ Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+Patch686: mac80211-don-t-drop-nullfunc-frames-during-software.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
@@ -1376,6 +1377,8 @@ ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 # back-port mac80211: fix beacon loss detection after scan
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
+ApplyPatch mac80211-don-t-drop-nullfunc-frames-during-software.patch
+
 # Fix up DMA debug code
 ApplyPatch linux-2.6-dma-debug-fixes.patch
 
@@ -2037,6 +2040,13 @@ fi
 # and build.
 
 %changelog
+* Thu May 21 2009 Kyle McMartin <kyle@redhat.com> - 2.6.29.3-157
+- mac80211-don-t-drop-nullfunc-frames-during-software.patch:
+   upstream a9a6ffffd05f97e6acbdeafc595e269855829751.
+
+* Wed May 20 2009  Chuck Ebbert <cebbert@redhat.com> - 2.6.29.3-156
+- Enable Divas (formerly Eicon) ISDN drivers on x86_64. (#480837)
+
 * Wed May 20 2009  <krh@redhat.com> - 2.6.29.3-155
 - Add drm-intel-i8xx-cursors.patch to fix cursors on i8xx desktop
   chipsets (#488980).
