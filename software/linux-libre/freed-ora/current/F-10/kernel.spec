@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1360 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1372 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -660,6 +660,9 @@ Patch609: alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 Patch610: alsa-add-subdevice_mask-to-quirk-entries.patch
 Patch611: alsa-hda-update-quirks.patch
 Patch612: alsa-pcm-core-avoid-jiffies-check.patch
+Patch613: alsa-hda-hp-tx25xx-quirk.patch
+
+Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -668,7 +671,9 @@ Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
-Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+Patch685: linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.patch
+Patch686: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+Patch687: mac80211-don-t-drop-nullfunc-frames-during-software.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -685,6 +690,17 @@ Patch1814: drm-nouveau.patch
 Patch1816: drm-no-gem-on-i8xx.patch
 Patch1817: drm-f10-compat.patch
 Patch1818: drm-backport-f11-fixes-1.patch
+Patch1829: drm-edid-ignore-tiny-modes.patch
+Patch1835: drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+
+Patch1850: drm-intel-big-hammer.patch
+Patch1851: drm-intel-lying-systems-without-lvds.patch
+Patch1852: drm-intel-gen3-fb-hack.patch
+Patch1853: drm-intel-hdmi-edid-fix.patch
+Patch1854: drm-intel-tiling-transition.patch
+Patch1855: drm-intel-include-965gme-pci-id.patch
+Patch1856: drm-intel-gem-use-dma32-on-pae.patch
+Patch1857: drm-intel-i8xx-cursors.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -703,6 +719,10 @@ Patch2900: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 
 Patch2911: linux-2.6-ext4-flush-on-close.patch
 Patch2912: linux-2.6-ext4-really-print-warning-once.patch
+Patch2913: linux-2.6-ext4-prealloc-fixes.patch
+Patch2914: linux-2.6-ext4-fake-delalloc-bno.patch
+Patch2915: linux-2.6-ext4-clear-unwritten-flag.patch
+Patch2916: linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 # relatime patches from 2.6.30
 Patch2920: fs-relatime-add-strictatime-option.patch
@@ -713,7 +733,7 @@ Patch2922: fs-relatime-make-default.patch
 # fix stalls with ext3 data writeout
 Patch2950: linux-2.6-kjournald-use-rt-io-priority.patch
 
-Patch3000: linux-2.6-btrfs-experimental-branch.patch
+Patch3000: linux-2.6-btrfs-unstable-update.patch
 
 Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
@@ -1233,10 +1253,16 @@ ApplyPatch linux-2.6-ext4-flush-on-close.patch
 # missing braces cause warning to print more than once
 ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
 
+# more ext4 fixes from f11
+ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
+ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
+ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
+ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
+
 # xfs
 
 # btrfs
-ApplyPatch linux-2.6-btrfs-experimental-branch.patch
+ApplyPatch linux-2.6-btrfs-unstable-update.patch
 
 # USB
 ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
@@ -1282,13 +1308,15 @@ ApplyPatch alsa-pcm-safer-boundary-checks.patch
 ApplyPatch alsa-hda-dont-reset-BDL-unnecessarily.patch
 ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
 ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
-ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+#ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 ApplyPatch alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 ApplyPatch alsa-add-subdevice_mask-to-quirk-entries.patch
 ApplyPatch alsa-hda-update-quirks.patch
-ApplyPatch alsa-pcm-core-avoid-jiffies-check.patch
+#ApplyPatch alsa-pcm-core-avoid-jiffies-check.patch
+ApplyPatch alsa-hda-hp-tx25xx-quirk.patch
 
 # Networking
+ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1325,9 +1353,12 @@ ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 # back-port iwlwifi rfkill while device down patches
 ApplyPatch linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
+ApplyPatch linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.patch
 
 # back-port mac80211: fix beacon loss detection after scan
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
+
+ApplyPatch mac80211-don-t-drop-nullfunc-frames-during-software.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
@@ -1348,6 +1379,17 @@ ApplyPatch drm-nouveau.patch
 ApplyPatch drm-no-gem-on-i8xx.patch
 ApplyPatch drm-f10-compat.patch
 ApplyPatch drm-backport-f11-fixes-1.patch
+ApplyPatch drm-edid-ignore-tiny-modes.patch
+ApplyPatch drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+
+ApplyPatch drm-intel-big-hammer.patch
+ApplyPatch drm-intel-lying-systems-without-lvds.patch
+ApplyPatch drm-intel-gen3-fb-hack.patch
+#ApplyPatch drm-intel-hdmi-edid-fix.patch
+ApplyPatch drm-intel-tiling-transition.patch
+ApplyPatch drm-intel-include-965gme-pci-id.patch
+ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
+ApplyPatch drm-intel-i8xx-cursors.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1963,6 +2005,60 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri May 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.29.4-72
+- Comment out one DRM patch that breaks the build.
+
+* Fri May 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.29.4-71
+- Copy DRM fixes from F-11:
+    drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+    drm-edid-ignore-tiny-modes.patch
+    drm-intel-big-hammer.patch
+    drm-intel-gem-use-dma32-on-pae.patch
+    drm-intel-gen3-fb-hack.patch
+    drm-intel-hdmi-edid-fix.patch
+    drm-intel-i8xx-cursors.patch
+    drm-intel-include-965gme-pci-id.patch
+    drm-intel-lying-systems-without-lvds.patch
+    drm-intel-tiling-transition.patch
+
+* Fri May 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.29.4-70
+- Copy fix from F-11:
+   mac80211-don-t-drop-nullfunc-frames-during-software.patch:
+    upstream a9a6ffffd05f97e6acbdeafc595e269855829751.
+
+* Fri May 22 2009 John W. Linville <linville@redhat.com> - 2.6.29.4-69
+- back-port "iwl3945: use cancel_delayed_work_sync to cancel rfkill_poll"
+
+* Thu May 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-68
+- Disable alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+  because of F11 bug #498858.
+
+* Thu May 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-67
+- Copy the latest btrfs unstable update from F-11.
+- Remove hunks from btrfs update that went into 2.6.29.4 .
+
+* Thu May 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-66
+- Copy net-revert-forcedeth-power-down-phy-when-interface-is.patch
+  from F-11. This reverts only the power-down part of the original
+  upstream patch. (F11#501249)
+
+* Thu May 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-65
+- Linux 2.6.29.4
+
+* Fri May 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-64.rc1
+- Linux 2.6.29.4-rc1
+- Add ext4 corruption fixes from F-11
+
+* Thu May 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.3-63
+- net-revert-forcedeth-power-down-phy-when-interface-is.patch:
+   Fix forcedeth failures, (F11#484505)
+
+* Wed May 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.3-62
+- Fix sound on HP TX25xx series notebooks (#498060)
+
+* Mon May 11 2009 Neil Horman <nhorman@redhat.com>
+- Turn on Garmin GPS module (bz 417824)
+
 * Sat May 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.3-60
 - Add less-intrusive version of the mm patch to prevent executable
   pages from being deactivated.
