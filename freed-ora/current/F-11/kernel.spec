@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1619 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1621 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -690,7 +690,8 @@ Patch682: linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 Patch683: linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
-Patch686: mac80211-don-t-drop-nullfunc-frames-during-software.patch
+Patch686: linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.patch
+Patch687: mac80211-don-t-drop-nullfunc-frames-during-software.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
@@ -723,6 +724,7 @@ Patch1831: drm-intel-include-965gme-pci-id.patch
 Patch1832: drm-intel-gem-use-dma32-on-pae.patch
 Patch1833: drm-intel-i8xx-cursors.patch
 Patch1834: drm-intel-vmalloc.patch
+Patch1835: drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1373,6 +1375,7 @@ ApplyPatch linux-2.6-ipw2x00-age-scan-results-on-resume.patch
 # back-port iwlwifi rfkill while device down patches
 ApplyPatch linux-2.6-iwl3945-report-killswitch-changes-even-if-the-interface-is-down.patch
 ApplyPatch linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
+ApplyPatch linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.patch
 
 # back-port mac80211: fix beacon loss detection after scan
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
@@ -1416,6 +1419,7 @@ ApplyPatch linux-2.6.29.3-boot-vga.patch
 ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
 ApplyPatch drm-intel-i8xx-cursors.patch
 ApplyPatch drm-intel-vmalloc.patch
+ApplyPatch drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2040,6 +2044,15 @@ fi
 # and build.
 
 %changelog
+* Fri May 22 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-159
+- drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch:
+  Fix possible hang in drmWaitVblank.
+   upstream 9b6fe313bfce27d4a261257da70196be0ac2bef5.
+
+* Fri May 22 2009 John W. Linville <linville@redhat.com> - 2.6.29.3-158
+- back-port "iwl3945: use cancel_delayed_work_sync to cancel rfkill_poll"
+- modify changelog entry from Apr 13 2009 to reference correct patch
+
 * Thu May 21 2009 Kyle McMartin <kyle@redhat.com> - 2.6.29.3-157
 - mac80211-don-t-drop-nullfunc-frames-during-software.patch:
    upstream a9a6ffffd05f97e6acbdeafc595e269855829751.
@@ -2362,7 +2375,7 @@ fi
     bbf6ad13, fa00e046 from alsa-kernel/master (and deps)
 
 * Mon Apr 13 2009 John W. Linville <linville@redhat.com>
-- Remove back-port iwlwifi rfkill while device down patches (#495003)
+- Remove "iwl3945: rely on priv->lock to protect priv access" (#495003)
 
 * Fri Apr 10 2009 David Woodhouse <David.Woodhouse@intel.com>
 - Fix suspend/resume with Intel IOMMU, handle devices behind PCI-PCI
