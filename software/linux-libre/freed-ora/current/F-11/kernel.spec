@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1621 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1624 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -52,7 +52,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -626,6 +626,8 @@ Patch41: linux-2.6-sysrq-c.patch
 #Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
 #Patch103: linux-2.6-e820-guard-against-pre-acpi3.patch
 
+Patch120: keys-Handle-there-being-no-fallback-destination-key.patch
+
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
@@ -752,19 +754,16 @@ Patch2924: linux-2.6-ext4-clear-unwritten-flag.patch
 Patch2925: linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 Patch3000: linux-2.6-btrfs-unstable-update.patch
-Patch3001: linux-2.6-btrfs-fix-page-mkwrite.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
 
 Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
-Patch4010: linux-2.6-ftdi-oops.patch
 
 Patch5000: linux-2.6-add-qcserial.patch
 
 # patches headed for -stable
 # fix squashfs on systems where pagesize > blocksize (ia64, ppc64 w/64k pages)
 Patch6010: squashfs-broken-when-pagesize-greater-than-blocksize.patch
-Patch7005: linux-2.6-i2c-fix-bit-algorithm-timeout.patch
 
 Patch9000: hpet-fixes.patch
 
@@ -781,6 +780,9 @@ Patch9304: linux-2.6-xen-check-for-nx-support.patch
 Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 Patch9306: linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
 Patch9307: linux-2.6.29-xen-disable-gbpages.patch
+Patch9308: kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+Patch9309: kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
+
 
 %endif
 
@@ -1211,6 +1213,8 @@ ApplyPatch linux-2.6-iommu-fixes.patch
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
+ApplyPatch keys-Handle-there-being-no-fallback-destination-key.patch
+
 # Architecture patches
 # x86(-64)
 #ApplyPatch linux-2.6-e820-save-restore-edi-ebp.patch
@@ -1258,7 +1262,6 @@ ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-unstable-update.patch
-ApplyPatch linux-2.6-btrfs-fix-page-mkwrite.patch
 
 # relatime
 ApplyPatch linux-2.6-relatime-by-default.patch
@@ -1269,7 +1272,6 @@ ApplyPatch linux-2.6-fiemap-header-install.patch
 # USB
 ApplyPatch linux-2.6-add-qcserial.patch
 ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
-ApplyPatch linux-2.6-ftdi-oops.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1439,7 +1441,6 @@ ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 
 # patches headed for -stable
 ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
-ApplyPatch linux-2.6-i2c-fix-bit-algorithm-timeout.patch
 
 ApplyPatch hpet-fixes.patch
 
@@ -1456,6 +1457,9 @@ ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 ApplyPatch linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
 ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
+ApplyPatch kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+ApplyPatch kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
+
 
 
 # END OF PATCH APPLICATIONS
@@ -2044,6 +2048,24 @@ fi
 # and build.
 
 %changelog
+* Mon May 25 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-162
+- keys-Handle-there-being-no-fallback-destination-key.patch:
+  fix oops at boot with autofs/krb/cifs rhbz#501588.
+
+* Mon May 25 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-161
+- Linux 2.6.29.4
+- dropped patches:
+  linux-2.6-i2c-fix-bit-algorithm-timeout.patch
+  linux-2.6-ftdi-oops.patch
+  linux-2.6-btrfs-fix-page-mkwrite.patch
+- rebased patches:
+  linux-2.6-btrfs-unstable-update.patch, page_mkwrite fixes.
+  
+* Mon May 25 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-160
+- kvm fixes destined for 2.6.30, rhbz#492838:
+   kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+   kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
+
 * Fri May 22 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-159
 - drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch:
   Fix possible hang in drmWaitVblank.
