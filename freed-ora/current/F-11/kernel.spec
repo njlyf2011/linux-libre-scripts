@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1624 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1625 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2048,6 +2048,9 @@ fi
 # and build.
 
 %changelog
+* Tue May 27 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.4-163
+- drm-nouveau.patch: fix sor dpms (rh#501877)
+
 * Mon May 25 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-162
 - keys-Handle-there-being-no-fallback-destination-key.patch:
   fix oops at boot with autofs/krb/cifs rhbz#501588.
