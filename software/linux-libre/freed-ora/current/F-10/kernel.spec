@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1372 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1375 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -748,6 +748,11 @@ Patch9011: linux-2.6-dropwatch-protocol.patch
 # kvm fixes
 Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
+Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
+Patch9306: linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+Patch9307: linux-2.6.29-xen-disable-gbpages.patch
+Patch9308: kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+Patch9309: kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
 
 Patch9400: linux-2.6-crypto-aes-padlock-fix-autoload.patch
 Patch9401: linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
@@ -759,6 +764,9 @@ Patch9502: linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
 
 # fix some broken bluetooth dongles
 Patch9600: linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
+
+# fix keyring oops (f11#501588)
+Patch9700: keys-handle-no-fallback-keyring.patch
 
 # Backport of upstream memory reduction for ftrace
 Patch10000: linux-2.6-ftrace-memory-reduction.patch
@@ -1414,6 +1422,11 @@ ApplyPatch linux-2.6-dropwatch-protocol.patch
 # kvm fixes
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
+ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
+ApplyPatch linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
+ApplyPatch kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+ApplyPatch kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
 
 # make padlock autoload again
 ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload.patch
@@ -1425,6 +1438,9 @@ ApplyPatch linux-2.6-x86-hpet-stop-counter-when-programming.patch
 ApplyPatch linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
 
 ApplyPatch linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
+
+# fix oops in keyring code
+ApplyPatch keys-handle-no-fallback-keyring.patch
 
 # Reduce the memory usage of ftrace if you don't use it.
 ApplyPatch linux-2.6-ftrace-memory-reduction.patch
@@ -2005,6 +2021,20 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon May 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-75
+- Fix oops in keyring code (F11#501588)
+
+* Mon May 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-74
+- Copy Xen / KVM updates from Fedora 11 kernel:
+    kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+    kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
+    linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
+    linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+    linux-2.6.29-xen-disable-gbpages.patch
+
+* Mon May 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-73
+- Enable PCI Message Signaled Interrupts (MSI) by default.
+
 * Fri May 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.29.4-72
 - Comment out one DRM patch that breaks the build.
 
