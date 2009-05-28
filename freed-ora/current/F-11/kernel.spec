@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1625 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1629 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -727,6 +727,10 @@ Patch1832: drm-intel-gem-use-dma32-on-pae.patch
 Patch1833: drm-intel-i8xx-cursors.patch
 Patch1834: drm-intel-vmalloc.patch
 Patch1835: drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+Patch1836: drm-intel-disable-kms-i8xx.patch
+Patch1837: drm-i915-apply-a-big-hammer-to-865-gem-object.patch
+Patch1838: drm-i915-fix-tiling-pitch.patch
+Patch1839: drm-intel-set-domain-on-fault.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1422,6 +1426,11 @@ ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
 ApplyPatch drm-intel-i8xx-cursors.patch
 ApplyPatch drm-intel-vmalloc.patch
 ApplyPatch drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+# These should be fixed with the fix-tiling patch
+# ApplyPatch drm-intel-disable-kms-i8xx.patch
+ApplyPatch drm-i915-apply-a-big-hammer-to-865-gem-object.patch
+ApplyPatch drm-i915-fix-tiling-pitch.patch
+ApplyPatch drm-intel-set-domain-on-fault.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2048,7 +2057,28 @@ fi
 # and build.
 
 %changelog
-* Tue May 27 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.4-163
+* Wed May 27 2009 Kristian Høgsberg <krh@madara.bos.redhat.com> - 2.6.4.167
+- Actually disable drm-intel-disable-kms-i8xx.patch.
+
+* Wed May 27 2009 Kristian Høgsberg <krh@redhat.com> - 2.6.29.4-166
+- Add drm-intel-set-domain-on-fault.patch to fix random gem object
+  corruption when swapping (495323 and probably others).
+- Enable kms on 845 and 855 as well, Erics tiling patch should fix
+  those too.
+
+* Wed May 27 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-165
+- Enable KMS/gem on I865.
+- drm-no-gem-on-i8xx.patch: Remove I865 so GEM will be enabled.
+- drm-intel-disable-kms-i8xx.patch: Enable KMS on I865. 
+- Two fixes from Eric Anholt to fix i8x5:
+   drm-i915-apply-a-big-hammer-to-865-gem-object.patch
+   drm-i915-fix-tiling-pitch.patch
+
+* Wed May 27 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-164
+- drm-intel-disable-kms-i8xx.patch: disable KMS by default on 845, 855,
+  and 865. It can be forced on with i915.modeset=1 boot parameter.
+ 
+* Tue May 26 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.4-163
 - drm-nouveau.patch: fix sor dpms (rh#501877)
 
 * Mon May 25 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-162
