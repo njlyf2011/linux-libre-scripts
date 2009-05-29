@@ -1,0 +1,11 @@
+--- debian/rules.real~	2009-05-17 21:56:24.000000000 +0200
++++ debian/rules.real	2009-05-29 14:45:54.000000000 +0200
+@@ -173,7 +173,7 @@
+ 	dh_installdeb
+ 	dh_gencontrol -- $(GENCONTROL_ARGS)
+ 	dh_md5sums
+-	dh_builddeb
++	dh_builddeb -- -Zlzma
+ 
+ install-doc: PACKAGE_NAME = linux-doc-$(VERSION)
+ install-doc: DIR = $(BUILD_DIR)/build-doc
