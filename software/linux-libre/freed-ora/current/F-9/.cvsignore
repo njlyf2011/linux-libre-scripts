@@ -6,5 +6,5 @@ GNUmakefile
 kernel-2.6.*.config
 temp-*
 kernel-2.6.27
-linux-2.6.27-libre1.*
+linux-2.6.27-libre2.*
 patch-libre-2.6.27.24*
