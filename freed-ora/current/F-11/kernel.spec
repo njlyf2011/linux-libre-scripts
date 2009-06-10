@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1629 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1630 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2061,6 +2061,9 @@ fi
 - Switched to 2.6.29-libre1, fixes e100, disables again mga, r128 and radeon.
 - Adjust drm-modesetting-radeon.patch.
 
+* Tue Jun  2 2009 Roland McGrath <roland@redhat.com> - 2.6.29.4-168
+- utrace update (fixes stap PR10185)
+
 * Wed May 27 2009 Kristian Høgsberg <krh@redhat.com> - 2.6.29.4-167
 - Actually disable drm-intel-disable-kms-i8xx.patch.
 
@@ -2073,7 +2076,7 @@ fi
 * Wed May 27 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-165
 - Enable KMS/gem on I865.
 - drm-no-gem-on-i8xx.patch: Remove I865 so GEM will be enabled.
-- drm-intel-disable-kms-i8xx.patch: Enable KMS on I865. 
+- drm-intel-disable-kms-i8xx.patch: Enable KMS on I865.
 - Two fixes from Eric Anholt to fix i8x5:
    drm-i915-apply-a-big-hammer-to-865-gem-object.patch
    drm-i915-fix-tiling-pitch.patch
@@ -2081,7 +2084,7 @@ fi
 * Wed May 27 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.4-164
 - drm-intel-disable-kms-i8xx.patch: disable KMS by default on 845, 855,
   and 865. It can be forced on with i915.modeset=1 boot parameter.
- 
+
 * Tue May 26 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.4-163
 - drm-nouveau.patch: fix sor dpms (rh#501877)
 
@@ -2097,7 +2100,7 @@ fi
   linux-2.6-btrfs-fix-page-mkwrite.patch
 - rebased patches:
   linux-2.6-btrfs-unstable-update.patch, page_mkwrite fixes.
-  
+
 * Mon May 25 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.3-160
 - kvm fixes destined for 2.6.30, rhbz#492838:
    kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
