@@ -1,5 +1,6 @@
 Deblobbed
-* drivers/gpu/drm/radeon/radeon-cp.c: Adjust for deblobbed sources.
+* drivers/gpu/drm/Kconfig: Adjust for deblobbed sources.
+* drivers/gpu/drm/radeon/radeon-cp.c: Likewise.
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
 commit dea27f6e83efabdc3e37bc5a91d29d6dab893853
@@ -1769,8 +1770,8 @@ index 3a22eb9..a74980b 100644
 --- a/drivers/gpu/drm/Kconfig
 +++ b/drivers/gpu/drm/Kconfig
 @@ -35,6 +35,9 @@ config DRM_R128
- 
  config DRM_RADEON
+ depends on NONFREE
  	tristate "ATI Radeon"
 +	select FB_CFB_FILLRECT
 +	select FB_CFB_COPYAREA
