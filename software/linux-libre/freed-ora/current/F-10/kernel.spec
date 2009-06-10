@@ -34,7 +34,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -44,7 +44,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -2021,6 +2021,10 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Jun  9 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1
+- Switched to 2.6.29-libre1, fixes e100, disables again mga, r128 and radeon.
+- Adjust drm-modesetting-radeon.patch.
+
 * Mon May 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-75
 - Fix oops in keyring code (F11#501588)
 
