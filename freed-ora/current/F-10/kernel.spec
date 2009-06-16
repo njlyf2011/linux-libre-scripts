@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1375 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1380 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -44,7 +44,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -451,11 +451,14 @@ Summary: The Linux kernel
 #
 %define kernel_reqprovconf \
 Provides: kernel = %{rpmversion}-%{pkg_release}\
+Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
+Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 11\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
@@ -606,6 +609,8 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
+# bz #481753: ptraced processes fail to deliver exit notification
+Patch24: linux-2.6-ptrace-fix-possible-zombie-leak.patch
 
 # Support suspend/resume, other crash fixes
 Patch30: linux-2.6-iommu-fixes.patch
@@ -641,6 +646,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
+Patch451: linux-2.6-input-atkbd-forced-release.patch
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -663,6 +669,7 @@ Patch612: alsa-pcm-core-avoid-jiffies-check.patch
 Patch613: alsa-hda-hp-tx25xx-quirk.patch
 
 Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
+Patch640: linux-2.6-netdev-ehea-fix-circular-locking.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -674,6 +681,8 @@ Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.patch
 Patch686: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 Patch687: mac80211-don-t-drop-nullfunc-frames-during-software.patch
+
+Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-request.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
@@ -771,6 +780,8 @@ Patch9700: keys-handle-no-fallback-keyring.patch
 # Backport of upstream memory reduction for ftrace
 Patch10000: linux-2.6-ftrace-memory-reduction.patch
 
+Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -862,9 +873,13 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 %description -n kernel%{?variant}%{?1:-%{1}}-devel\
@@ -1200,6 +1215,8 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
+# bz #481753
+ApplyPatch linux-2.6-ptrace-fix-possible-zombie-leak.patch
 
 # IOMMU fixes backported to 2.6.29
 ApplyPatch linux-2.6-iommu-fixes.patch
@@ -1325,10 +1342,13 @@ ApplyPatch alsa-hda-hp-tx25xx-quirk.patch
 
 # Networking
 ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
+ApplyPatch linux-2.6-netdev-ehea-fix-circular-locking.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+# keyboard release quirks from 2.6.30-rc
+ApplyPatch linux-2.6-input-atkbd-forced-release.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1367,6 +1387,9 @@ ApplyPatch linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.
 ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
 ApplyPatch mac80211-don-t-drop-nullfunc-frames-during-software.patch
+
+# neigh: fix state transition INCOMPLETE->FAILED via Netlink request
+ApplyPatch linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-request.patch
 
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
@@ -1444,6 +1467,9 @@ ApplyPatch keys-handle-no-fallback-keyring.patch
 
 # Reduce the memory usage of ftrace if you don't use it.
 ApplyPatch linux-2.6-ftrace-memory-reduction.patch
+
+# finally fix the proc registration bug (F11#503773 and others)
+ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 
 # ======= END OF PATCH APPLICATIONS =============================
 
@@ -2021,7 +2047,30 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
-* Tue Jun  9 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1
+* Mon Jun 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Add -libre provides for kernel and devel packages.
+
+* Mon Jun 15 2009 John W. Linville <linville@redhat.com> 2.6.29.4-80
+- Enable the userspace ARP daemon (#502844)
+- neigh: fix state transition INCOMPLETE->FAILED via Netlink request
+
+* Fri Jun 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-79
+- Fix the parport sysctl registration bug (F11#503773)
+  linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
+* Thu Jun 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-78
+- Add linux-2.6-netdev-ehea-fix-circular-locking.patch
+  (fixes F-11 bug #498854)
+
+* Wed Jun 03 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-77
+- Add keyboard forced key release quirks from 2.6.30-rc7
+  Fixes Samsung NC20 and Q45, Amilio Xi 3650 and PA 1510.
+
+* Tue Jun 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.4-76
+- Fix F11 bug #481753: ptraced processes fail to deliver exit notification
+- Copy utrace update from F-11
+
+* Mon May 25 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1 Tue Jun  9 2009 
 - Switched to 2.6.29-libre1, fixes e100, disables again mga, r128 and radeon.
 - Adjust drm-modesetting-radeon.patch.
 
