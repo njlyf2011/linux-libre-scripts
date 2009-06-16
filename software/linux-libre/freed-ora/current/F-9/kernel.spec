@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.53 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.54 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -44,13 +44,13 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 24
+%define stable_update 25
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -464,11 +464,14 @@ Summary: The Linux kernel
 #
 %define kernel_reqprovconf \
 Provides: kernel = %{rpmversion}-%{pkg_release}\
+Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
+Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 10\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
@@ -764,23 +767,11 @@ Patch2600: linux-2.6-merge-efifb-imacfb.patch
 Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
 
-# next round for -stable
-Patch2910: ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
-Patch2911: ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
-Patch2912: ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
-Patch2913: ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
-Patch2914: ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
-
-# ext4 fixes from fedora 11
-Patch2920: linux-2.6-ext4-clear-unwritten-flag.patch
-Patch2921: linux-2.6-ext4-fake-delalloc-bno.patch
-Patch2922: linux-2.6-ext4-fix-i_cached_extent-race.patch
-Patch2923: linux-2.6-ext4-prealloc-fixes.patch
-
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
 
 Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+Patch4010: kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
 
 %endif
 
@@ -875,9 +866,13 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 %description -n kernel%{?variant}%{?1:-%{1}}-devel\
@@ -1393,18 +1388,6 @@ ApplyPatch drm-mm-readd-nopfn.patch
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
 
-ApplyPatch ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
-ApplyPatch ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
-ApplyPatch ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
-ApplyPatch ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
-ApplyPatch ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
-
-# ext4 patches from f-11
-ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
-ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
-ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
-ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
-
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
 
@@ -1417,6 +1400,7 @@ fi
 ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+ApplyPatch kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2021,6 +2005,25 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Mon Jun 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Add -libre provides for kernel and devel packages.
+- Deblobbed 2.6.27.25.
+
+* Sun Jun 14 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.25-78.2.54
+- Linux 2.6.27.25
+- Dropped patches, merged in .25
+    ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
+    ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
+    ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
+    ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
+    ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
+    linux-2.6-ext4-clear-unwritten-flag.patch
+    linux-2.6-ext4-fake-delalloc-bno.patch
+    linux-2.6-ext4-fix-i_cached_extent-race.patch
+    linux-2.6-ext4-prealloc-fixes.patch
+- Added patch from 2.6.29.4:
+    kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
+
 * Tue Jun  9 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1
 - Switched to 2.6.27-libre2, disables again mga, r128 and radeon.
 
