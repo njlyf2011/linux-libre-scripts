@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1630 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1648 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -46,13 +46,13 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -454,11 +454,14 @@ Summary: The Linux kernel
 #
 %define kernel_reqprovconf \
 Provides: kernel = %{rpmversion}-%{pkg_release}\
+Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
+Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 12\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
@@ -626,8 +629,6 @@ Patch41: linux-2.6-sysrq-c.patch
 #Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
 #Patch103: linux-2.6-e820-guard-against-pre-acpi3.patch
 
-Patch120: keys-Handle-there-being-no-fallback-destination-key.patch
-
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
@@ -642,6 +643,7 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
+Patch370: linux-2.6-debug-selinux-null-creds.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
@@ -657,9 +659,13 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6-input-hid-extra-gamepad.patch
 Patch453: linux-2.6-input-wacom-bluetooth.patch
+Patch454: linux-2.6-input-atkbd-forced-release.patch
+Patch455: linux-2.6-input-bcm5974-new-header-type.patch
+Patch456: linux-2.6-input-bcm5974-add-quad-finger.patch
+Patch457: linux-2.6-input-bcm5974-add-macbook-unibody.patch
 
-Patch460: linux-2.6-serial-460800.patch
-Patch461: linux-2.6-serial-add-txen-test-param.patch
+Patch470: linux-2.6-serial-460800.patch
+Patch471: linux-2.6-serial-add-txen-test-param.patch
 
 # 8192 too low
 Patch480: increase-MAX_LOCKDEP_ENTRIES.patch
@@ -673,7 +679,6 @@ Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
 Patch601: alsa-rewrite-hw_ptr-updaters.patch
 Patch602: alsa-pcm-always-reset-invalid-position.patch
 Patch603: alsa-pcm-fix-delta-calc-at-overlap.patch
-Patch604: alsa-pcm-safer-boundary-checks.patch
 Patch605: alsa-hda-dont-reset-BDL-unnecessarily.patch
 Patch606: alsa-dont-reset-stream-at-each-prepare-callb.patch
 Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
@@ -698,6 +703,8 @@ Patch687: mac80211-don-t-drop-nullfunc-frames-during-software.patch
 Patch700: linux-2.6-dma-debug-fixes.patch
 
 Patch800: linux-2.6-crash-driver.patch
+
+Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-request.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 
@@ -731,9 +738,17 @@ Patch1836: drm-intel-disable-kms-i8xx.patch
 Patch1837: drm-i915-apply-a-big-hammer-to-865-gem-object.patch
 Patch1838: drm-i915-fix-tiling-pitch.patch
 Patch1839: drm-intel-set-domain-on-fault.patch
+Patch1840: drm-modesetting-radeon-fixes.patch
+Patch1841: drm-radeon-fix-ring-commit.patch
+Patch1842: drm-radeon-new-pciids.patch
+Patch1843: drm-dont-frob-i2c.patch
+Patch1844: drm-connector-dpms-fix.patch
+Patch1845: drm-intel-tv-fix.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
+# BZ #498854
+Patch2010: linux-2.6-netdev-ehea-fix-circular-locking.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -749,19 +764,11 @@ Patch2902: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
-# ext4 fixes, all from upstream (.30)
-Patch2920: linux-2.6-ext4-flush-on-close.patch
-Patch2921: linux-2.6-ext4-really-print-warning-once.patch
-Patch2922: linux-2.6-ext4-prealloc-fixes.patch
-Patch2923: linux-2.6-ext4-fake-delalloc-bno.patch
-Patch2924: linux-2.6-ext4-clear-unwritten-flag.patch
-Patch2925: linux-2.6-ext4-fix-i_cached_extent-race.patch
+# ext4 fixes
 
 Patch3000: linux-2.6-btrfs-unstable-update.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
-
-Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 Patch5000: linux-2.6-add-qcserial.patch
 
@@ -769,24 +776,34 @@ Patch5000: linux-2.6-add-qcserial.patch
 # fix squashfs on systems where pagesize > blocksize (ia64, ppc64 w/64k pages)
 Patch6010: squashfs-broken-when-pagesize-greater-than-blocksize.patch
 
-Patch9000: hpet-fixes.patch
-
 Patch9001: revert-fix-modules_install-via-nfs.patch
+Patch9010: linux-2.6-nfsd-report-short-writes.patch
 
-Patch9002: cpufreq-add-atom-to-p4-clockmod.patch
+Patch9100: cpufreq-add-atom-to-p4-clockmod.patch
+Patch9110: linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
 
 #Adding dropwatch into rawhide until we get to 2.6.30
-Patch9003: linux-2.6-dropwatch-protocol.patch
+Patch9200: linux-2.6-dropwatch-protocol.patch
 
 # kvm fixes
 Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
 Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
-Patch9306: linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
 Patch9307: linux-2.6.29-xen-disable-gbpages.patch
-Patch9308: kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
-Patch9309: kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
 
+Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
+# via nano: disable mwait, enable 64-bit padlock support
+Patch11100: via-centaur-merge-32-64-bit-init.patch
+Patch11101: via-nano-disable-mwait.patch
+Patch11105: via-sdmmc.patch
+Patch11106: via-rng-64-bit-enable.patch
+Patch11107: via-padlock-nano-workarounds-ecb.patch
+Patch11108: via-padlock-nano-workarounds-cbc.patch
+Patch11109: via-padlock-cryptodev-1-64bit-enable.patch
+Patch11110: via-padlock-cryptodev-2-64bit-enable.patch
+Patch11120: via-padlock-fix-might-sleep.patch
+Patch11130: via-hwmon-temp-sensor.patch
 
 %endif
 
@@ -879,9 +896,13 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 %description -n kernel%{?variant}%{?1:-%{1}}-devel\
@@ -1217,8 +1238,6 @@ ApplyPatch linux-2.6-iommu-fixes.patch
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
-ApplyPatch keys-Handle-there-being-no-fallback-destination-key.patch
-
 # Architecture patches
 # x86(-64)
 #ApplyPatch linux-2.6-e820-save-restore-edi-ebp.patch
@@ -1255,12 +1274,6 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # ext4
-ApplyPatch linux-2.6-ext4-flush-on-close.patch
-ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
-ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
-ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
-ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
-ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 # xfs
 
@@ -1275,7 +1288,6 @@ ApplyPatch linux-2.6-fiemap-header-install.patch
 
 # USB
 ApplyPatch linux-2.6-add-qcserial.patch
-ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1292,6 +1304,7 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
+ApplyPatch linux-2.6-debug-selinux-null-creds.patch
 
 #
 # PCI
@@ -1320,7 +1333,6 @@ ApplyPatch linux-2.6.29-alsa-update-quirks.patch
 ApplyPatch alsa-rewrite-hw_ptr-updaters.patch
 ApplyPatch alsa-pcm-always-reset-invalid-position.patch
 ApplyPatch alsa-pcm-fix-delta-calc-at-overlap.patch
-ApplyPatch alsa-pcm-safer-boundary-checks.patch
 ApplyPatch alsa-hda-dont-reset-BDL-unnecessarily.patch
 ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
 ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
@@ -1343,6 +1355,14 @@ ApplyPatch linux-2.6-input-hid-extra-gamepad.patch
 
 # HID: add support for Bluetooth Wacom pads
 ApplyPatch linux-2.6-input-wacom-bluetooth.patch
+
+# atkbd: add forced key release quirks for four more notebooks
+ApplyPatch linux-2.6-input-atkbd-forced-release.patch
+
+# bcm5974: macbook 5 (unibody) support
+ApplyPatch linux-2.6-input-bcm5974-new-header-type.patch
+ApplyPatch linux-2.6-input-bcm5974-add-quad-finger.patch
+ApplyPatch linux-2.6-input-bcm5974-add-macbook-unibody.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1394,6 +1414,9 @@ ApplyPatch linux-2.6-dma-debug-fixes.patch
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
+# neigh: fix state transition INCOMPLETE->FAILED via Netlink request
+ApplyPatch linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-request.patch
+
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 
@@ -1402,6 +1425,8 @@ ApplyPatch linux-2.6.29-lirc.patch
 ApplyPatch linux-2.6-cdrom-door-status.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
+# bz 498854
+ApplyPatch linux-2.6-netdev-ehea-fix-circular-locking.patch
 
 ApplyPatch agp-set_memory_ucwb.patch
 # Nouveau DRM + drm fixes
@@ -1431,6 +1456,12 @@ ApplyPatch drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
 ApplyPatch drm-i915-apply-a-big-hammer-to-865-gem-object.patch
 ApplyPatch drm-i915-fix-tiling-pitch.patch
 ApplyPatch drm-intel-set-domain-on-fault.patch
+ApplyPatch drm-modesetting-radeon-fixes.patch
+ApplyPatch drm-radeon-fix-ring-commit.patch
+ApplyPatch drm-radeon-new-pciids.patch
+ApplyPatch drm-dont-frob-i2c.patch
+ApplyPatch drm-connector-dpms-fix.patch
+ApplyPatch drm-intel-tv-fix.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1451,12 +1482,14 @@ ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 # patches headed for -stable
 ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
 
-ApplyPatch hpet-fixes.patch
-
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
 
+# fix nfs reporting of short writes (#493500)
+ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+
 ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
+ApplyPatch linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
 
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
@@ -1464,12 +1497,22 @@ ApplyPatch linux-2.6-dropwatch-protocol.patch
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
-ApplyPatch linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
 ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
-ApplyPatch kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
-ApplyPatch kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
 
+# finally fix the proc registration bug (F11#503773 and others)
+ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 
+# via nano: disable mwait, add 64-bit padlock support
+ApplyPatch via-centaur-merge-32-64-bit-init.patch
+ApplyPatch via-nano-disable-mwait.patch
+ApplyPatch via-padlock-fix-might-sleep.patch
+ApplyPatch via-padlock-cryptodev-1-64bit-enable.patch
+ApplyPatch via-padlock-cryptodev-2-64bit-enable.patch
+ApplyPatch via-padlock-nano-workarounds-ecb.patch
+ApplyPatch via-padlock-nano-workarounds-cbc.patch
+ApplyPatch via-sdmmc.patch
+ApplyPatch via-rng-64-bit-enable.patch
+ApplyPatch via-hwmon-temp-sensor.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2057,7 +2100,93 @@ fi
 # and build.
 
 %changelog
-* Tue Jun  9 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1
+* Tue Jun 16 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Add -libre provides for kernel and devel packages.
+- Adjusted drm-modesetting-radeon-fixes.patch for deblobbed sources.
+- Adjusted drm-radeon-new-pciids.patch for deblobbed sources.
+
+* Tue Jun 16 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.5-186
+- nouveau: Use VBIOS image from PRAMIN in preference to PROM (#492658)
+
+* Tue Jun 16 2009 Dave Airlie <airlied@redhat.com> 2.6.29.5-185
+- drm-connector-dpms-fix.patch - allow hw to dpms off
+- drm-dont-frob-i2c.patch - don't play with i2c bits just do EDID
+- drm-intel-tv-fix.patch - fixed intel tv after connector dpms
+- drm-modesetting-radeon-fixes.patch - fix AGP issues (go faster) (otaylor)
+- drm-radeon-fix-ring-commit.patch - fix stability on some radeons
+- drm-radeon-new-pciids.patch - add rv770/790 support
+- drm-intel-vmalloc.patch - fix vmalloc patch
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.5-184
+- Get rid of the annoying parport sysctl registration warning (#503773)
+  (linux-2.6-parport-quickfix-the-proc-registration-bug.patch)
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.5-183
+- Linux 2.6.29.5
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.5-182.rc1
+- Add support for touchpad on MacBook 5 (Unibody) (#504197)
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.5-181.rc1
+- Fix reporting of short writes to the NFS client (#493500)
+
+* Mon Jun 15 2009 John W. Linville <linville@redhat.com>
+- neigh: fix state transition INCOMPLETE->FAILED via Netlink request
+
+* Fri Jun 12 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.5-179.rc1
+- VIA Nano / VX800 fixes
+    Padlock 64-bit fixes
+    Disable mwait on the Nano
+    Add via-sdmmc driver
+    Enable the VIA random number generator on 64-bit
+- Enable the userspace ARP daemon (#502844)
+
+* Wed Jun 10 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: fill in modes derived from VBIOS tables better
+
+* Tue Jun  9 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.5-177.rc1
+- 2.6.29.5-rc1
+- Reverted from stable, patch already in drm-next:
+    drm-r128-fix-r128-ioremaps-to-use-ioremap_wc.patch
+- Dropped patches, merged in -stable:
+    hpet-fixes.patch
+    keys-Handle-there-being-no-fallback-destination-key.patch
+    kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+    kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
+    linux-2.6-ptrace-fix-possible-zombie-leak.patch
+    linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
+    linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+    linux-2.6.29.5-ext4-stable-fixes.patch
+
+* Tue Jun 09 2009 John W. Linville <linville@tuxdriver.com>
+- Clean-up some wireless bits in config-generic
+
+* Tue Jun  9 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-175
+- Add ext4 stable patch queue, 18 patches submitted for 2.6.29.5
+  (adds 10 patches that weren't already in F-11.)
+
+* Tue Jun  9 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-174
+- Add support for ACPI P-states on VIA processors.
+- Disable the e_powersaver driver.
+
+* Mon Jun  8 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-173
+- Add linux-2.6-ptrace-fix-possible-zombie-leak.patch
+  Fixes bug #481753, ptraced processes fail to deliver exit notification to parent
+
+* Mon Jun  8 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-172
+- Add linux-2.6-netdev-ehea-fix-circular-locking.patch (#498854)
+
+* Mon Jun  8 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-171
+- Add AT keyboard forced key release quirks for four more notebooks.
+  (Fixes Samsung NC20/Q45, Fujitsu PA1510/Xi3650)
+
+* Mon Jun  8 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-170
+- Drop ALSA jiffies-based PCM boundary checking (#498858)
+
+* Mon Jun  8 2009 Chuck Ebbert <cebbert@redhat.com> - 2.6.29.4-169
+- Add debug patch for finding null security credentials. (494067)
+
+* Tue Jun  2 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1 Tue Jun  9 2009
 - Switched to 2.6.29-libre1, fixes e100, disables again mga, r128 and radeon.
 - Adjust drm-modesetting-radeon.patch.
 
