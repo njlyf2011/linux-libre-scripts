@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1380 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1384 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -609,8 +609,6 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
-# bz #481753: ptraced processes fail to deliver exit notification
-Patch24: linux-2.6-ptrace-fix-possible-zombie-leak.patch
 
 # Support suspend/resume, other crash fixes
 Patch30: linux-2.6-iommu-fixes.patch
@@ -661,15 +659,14 @@ Patch604: alsa-pcm-safer-boundary-checks.patch
 Patch605: alsa-hda-dont-reset-BDL-unnecessarily.patch
 Patch606: alsa-dont-reset-stream-at-each-prepare-callb.patch
 Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
-Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 Patch609: alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 Patch610: alsa-add-subdevice_mask-to-quirk-entries.patch
 Patch611: alsa-hda-update-quirks.patch
-Patch612: alsa-pcm-core-avoid-jiffies-check.patch
-Patch613: alsa-hda-hp-tx25xx-quirk.patch
 
 Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
 Patch640: linux-2.6-netdev-ehea-fix-circular-locking.patch
+Patch641: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+Patch642: linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -726,13 +723,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
 Patch2900: linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 
-Patch2911: linux-2.6-ext4-flush-on-close.patch
-Patch2912: linux-2.6-ext4-really-print-warning-once.patch
-Patch2913: linux-2.6-ext4-prealloc-fixes.patch
-Patch2914: linux-2.6-ext4-fake-delalloc-bno.patch
-Patch2915: linux-2.6-ext4-clear-unwritten-flag.patch
-Patch2916: linux-2.6-ext4-fix-i_cached_extent-race.patch
-
 # relatime patches from 2.6.30
 Patch2920: fs-relatime-add-strictatime-option.patch
 Patch2921: fs-relatime-update-once-per-day.patch
@@ -744,43 +734,29 @@ Patch2950: linux-2.6-kjournald-use-rt-io-priority.patch
 
 Patch3000: linux-2.6-btrfs-unstable-update.patch
 
-Patch4000: linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
-
 Patch9000: squashfs3.patch
 Patch9001: squashfs-fixups.patch
 
 Patch9010: revert-fix-modules_install-via-nfs.patch
+Patch9011: linux-2.6-nfsd-report-short-writes.patch
 
 #Adding dropmonitor bits from 2.6.30
-Patch9011: linux-2.6-dropwatch-protocol.patch
+Patch9100: linux-2.6-dropwatch-protocol.patch
 
 # kvm fixes
 Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
 Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
-Patch9306: linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
 Patch9307: linux-2.6.29-xen-disable-gbpages.patch
-Patch9308: kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
-Patch9309: kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
-
-Patch9400: linux-2.6-crypto-aes-padlock-fix-autoload.patch
-Patch9401: linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
-
-# fix hpet hang at boot
-Patch9500: linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
-Patch9501: linux-2.6-x86-hpet-stop-counter-when-programming.patch
-Patch9502: linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
 
 # fix some broken bluetooth dongles
 Patch9600: linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
-
-# fix keyring oops (f11#501588)
-Patch9700: keys-handle-no-fallback-keyring.patch
 
 # Backport of upstream memory reduction for ftrace
 Patch10000: linux-2.6-ftrace-memory-reduction.patch
 
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+Patch11100: linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 %endif
 
@@ -1215,8 +1191,6 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
-# bz #481753
-ApplyPatch linux-2.6-ptrace-fix-possible-zombie-leak.patch
 
 # IOMMU fixes backported to 2.6.29
 ApplyPatch linux-2.6-iommu-fixes.patch
@@ -1273,16 +1247,6 @@ ApplyPatch fs-relatime-update-once-per-day.patch
 ApplyPatch linux-2.6-kjournald-use-rt-io-priority.patch
 
 # ext4
-# data integrity band-aid for badly written apps
-ApplyPatch linux-2.6-ext4-flush-on-close.patch
-# missing braces cause warning to print more than once
-ApplyPatch linux-2.6-ext4-really-print-warning-once.patch
-
-# more ext4 fixes from f11
-ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
-ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
-ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
-ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
 
 # xfs
 
@@ -1290,7 +1254,6 @@ ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
 ApplyPatch linux-2.6-btrfs-unstable-update.patch
 
 # USB
-ApplyPatch linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1333,16 +1296,17 @@ ApplyPatch alsa-pcm-safer-boundary-checks.patch
 ApplyPatch alsa-hda-dont-reset-BDL-unnecessarily.patch
 ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
 ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
-#ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
 ApplyPatch alsa-hda_intel-prealloc-4mb-dmabuffer.patch
 ApplyPatch alsa-add-subdevice_mask-to-quirk-entries.patch
 ApplyPatch alsa-hda-update-quirks.patch
-#ApplyPatch alsa-pcm-core-avoid-jiffies-check.patch
-ApplyPatch alsa-hda-hp-tx25xx-quirk.patch
 
 # Networking
 ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
 ApplyPatch linux-2.6-netdev-ehea-fix-circular-locking.patch
+
+# r8169 fixes from 2.6.30
+ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1439,6 +1403,9 @@ ApplyPatch linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
 
+# fix nfs reporting of short writes (#493500)
+ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+
 # Apply dropmonitor protocol bits from 2.6..30 net-next tree
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
@@ -1446,30 +1413,17 @@ ApplyPatch linux-2.6-dropwatch-protocol.patch
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
-ApplyPatch linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
 ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
-ApplyPatch kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
-ApplyPatch kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
-
-# make padlock autoload again
-ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload.patch
-ApplyPatch linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
-
-# fix hpet hang at boot
-ApplyPatch linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
-ApplyPatch linux-2.6-x86-hpet-stop-counter-when-programming.patch
-ApplyPatch linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
 
 ApplyPatch linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
-
-# fix oops in keyring code
-ApplyPatch keys-handle-no-fallback-keyring.patch
 
 # Reduce the memory usage of ftrace if you don't use it.
 ApplyPatch linux-2.6-ftrace-memory-reduction.patch
 
 # finally fix the proc registration bug (F11#503773 and others)
 ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
+ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 # ======= END OF PATCH APPLICATIONS =============================
 
@@ -2047,6 +2001,40 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-84
+- Avoid lockup on OOM with /dev/zero
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-83
+- Two r8169 driver updates from 2.6.30
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-82
+- Fix reporting of short writes to the NFS client (#493500)
+
+* Mon Jun 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-81
+- Linux 2.6.29.5
+- Dropped patches merged in -stable:
+    linux-2.6-ptrace-fix-possible-zombie-leak.patch
+    linux-2.6-ext4-clear-unwritten-flag.patch
+    linux-2.6-ext4-fake-delalloc-bno.patch
+    linux-2.6-ext4-fix-i_cached_extent-race.patch
+    linux-2.6-ext4-flush-on-close.patch
+    linux-2.6-ext4-prealloc-fixes.patch
+    linux-2.6-ext4-really-print-warning-once.patch
+    linux-2.6-usb-cdc-acm-remove-low-latency-flag.patch
+    alsa-hda-hp-tx25xx-quirk.patch
+    linux-2.6-xen-xenbus_state_transition_when_not_connected.patch
+    kvm-Fix-PDPTR-reloading-on-CR4-writes.patch
+    kvm-Make-paravirt-tlb-flush-also-reload-the-PAE-PDP.patch
+    linux-2.6-crypto-aes-padlock-fix-autoload-2.patch
+    linux-2.6-crypto-aes-padlock-fix-autoload.patch
+    linux-2.6-x86-hpet-fix-periodic-mode-on-amd-81xx.patch
+    linux-2.6-x86-hpet-stop-counter-when-programming.patch
+    linux-2.6-x86-hpet-provide-separate-start-stop-fns.patch
+    keys-handle-no-fallback-keyring.patch
+- Drop two ALSA patches commented out earlier:
+    alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+    alsa-pcm-core-avoid-jiffies-check.patch
+
 * Mon Jun 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Add -libre provides for kernel and devel packages.
 
