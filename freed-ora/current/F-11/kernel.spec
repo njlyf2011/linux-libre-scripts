@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1648 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1653 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -617,8 +617,10 @@ Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ftrace.patch
 
 # vm patches
+Patch24: linux-2.6-defaults-saner-vm-settings.patch
 Patch25: linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
-Patch26: linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
+Patch26: linux-2.6-mm-lru-report-vm-flags-in-page-referenced.patch
+Patch27: linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
 
 # Support suspend/resume, other crash fixes
 Patch30: linux-2.6-iommu-fixes.patch
@@ -688,6 +690,8 @@ Patch611: linux-2.6.29-alsa-update-quirks.patch
 Patch612: alsa-hda-add-debugging.patch
 
 Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
+Patch641: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+Patch642: linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
@@ -780,6 +784,7 @@ Patch9001: revert-fix-modules_install-via-nfs.patch
 Patch9010: linux-2.6-nfsd-report-short-writes.patch
 
 Patch9100: cpufreq-add-atom-to-p4-clockmod.patch
+# VIA processors: enable pstates
 Patch9110: linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
 
 #Adding dropwatch into rawhide until we get to 2.6.30
@@ -792,10 +797,11 @@ Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 Patch9307: linux-2.6.29-xen-disable-gbpages.patch
 
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
 
-# via nano: disable mwait, enable 64-bit padlock support
+# via: enable 64-bit padlock support on nano, add CPU temp sensor,
+#  add via-sdmmc driver
 Patch11100: via-centaur-merge-32-64-bit-init.patch
-Patch11101: via-nano-disable-mwait.patch
 Patch11105: via-sdmmc.patch
 Patch11106: via-rng-64-bit-enable.patch
 Patch11107: via-padlock-nano-workarounds-ecb.patch
@@ -1229,7 +1235,9 @@ ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ftrace.patch
 
 # vm patches
+ApplyPatch linux-2.6-defaults-saner-vm-settings.patch
 ApplyPatch linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
+ApplyPatch linux-2.6-mm-lru-report-vm-flags-in-page-referenced.patch
 ApplyPatch linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
 
 # IOMMU fixes backported to 2.6.29
@@ -1304,7 +1312,7 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
-ApplyPatch linux-2.6-debug-selinux-null-creds.patch
+#ApplyPatch linux-2.6-debug-selinux-null-creds.patch
 
 #
 # PCI
@@ -1342,6 +1350,10 @@ ApplyPatch alsa-hda-add-debugging.patch
 
 # Networking
 ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
+
+# r8169 fixes from 2.6.30
+ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1502,9 +1514,10 @@ ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
 # finally fix the proc registration bug (F11#503773 and others)
 ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 
-# via nano: disable mwait, add 64-bit padlock support
+ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
+
+# VIA: add 64-bit padlock support, sdmmc driver, temp sensor driver
 ApplyPatch via-centaur-merge-32-64-bit-init.patch
-ApplyPatch via-nano-disable-mwait.patch
 ApplyPatch via-padlock-fix-might-sleep.patch
 ApplyPatch via-padlock-cryptodev-1-64bit-enable.patch
 ApplyPatch via-padlock-cryptodev-2-64bit-enable.patch
@@ -2100,6 +2113,26 @@ fi
 # and build.
 
 %changelog
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-191
+- Copy latest version of the -mm streaming IO and executable pages patches from F-10
+- Copy the saner-vm-settings patch from F-10:
+    change writeback interval from 5,30 seconds to 3,10 seconds
+- Comment out the null credentials debugging patch (bug #494067)
+
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-190
+- Two r8169 driver updates from 2.6.30
+- Update via-sdmmc driver
+
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-189
+- New debug patch for bug #494067, now enabled for non-debug kernels too.
+
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-188
+- Avoid lockup on OOM with /dev/zero
+
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-187
+- Drop the disable of mwait on VIA Nano processor. The lockup bug is
+  fixed by BIOS updates.
+
 * Tue Jun 16 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Add -libre provides for kernel and devel packages.
 - Adjusted drm-modesetting-radeon-fixes.patch for deblobbed sources.
