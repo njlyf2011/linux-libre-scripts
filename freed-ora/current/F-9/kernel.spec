@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   813
-%define fedora_build_string %(R="$Revision: 1.891.2.54 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.891.2.56 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -691,9 +691,13 @@ Patch520: linux-2.6.27-pci-hush-allocation-failures.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch590: linux-2.6-selinux-recognise-addrlabel.patch
+
 # fix for ebus_dma.h
 Patch600: sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch
 Patch601: linux-2.6-sparc-cs4231-ebus-dma.patch
+Patch641: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+Patch642: linux-2.6-netdev-r8169-use-different-family-defaults.patch
+Patch643: r8169-avoid-losing-msi-interrupts.patch
 
 # libata
 Patch670: linux-2.6-ata-quirk.patch
@@ -772,6 +776,9 @@ Patch3110: linux-2.6-dmi-autoload.patch
 
 Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
 Patch4010: kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
+
+Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 %endif
 
@@ -1376,6 +1383,10 @@ ApplyPatch linux-2.6-netdev-atl2.patch
 ApplyPatch linux-2.6-netdev-atl2-2.0.5-update.patch
 
 ApplyPatch linux-2.6-net-tulip-interrupt.patch
+# r8169 fixes from 2.6.30/2.6.29.5
+ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
+ApplyPatch r8169-avoid-losing-msi-interrupts.patch
 
 # kvmclock is broken with unsync TSC (#475598)
 ApplyPatch linux-2.6-kvmclock-unsync-tsc-workaround.patch
@@ -1401,6 +1412,11 @@ ApplyPatch linux-2.6-merge-efifb-imacfb.patch
 
 ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
 ApplyPatch kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
+
+# finally fix the proc registration bug (F11#503773 and others)
+ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
+ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2005,6 +2021,13 @@ fi
 %kernel_variant_files -a /%{image_install_path}/xen*-%{KVERREL}.xen -e /etc/ld.so.conf.d/kernelcap-%{KVERREL}.xen.conf %{with_xen} xen
 
 %changelog
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.25-78.2.56
+- r8169 network driver fixes from 2.6.29.5 and 2.6.30
+
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.27.25-78.2.55
+- Avoid lockup on OOM with /dev/zero
+- Stop spewing useless warning on parport sysctl registration
+
 * Mon Jun 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Add -libre provides for kernel and devel packages.
 - Deblobbed 2.6.27.25.
