@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.68 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.72 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -44,13 +44,13 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 24
+%define stable_update 25
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -447,11 +447,14 @@ Summary: The Linux kernel
 #
 %define kernel_reqprovconf \
 Provides: kernel = %{rpmversion}-%{pkg_release}\
+Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
+Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 11\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Conflicts: %{kernel_dot_org_conflicts}\
 Conflicts: %{package_conflicts}\
@@ -605,7 +608,6 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
-Patch24: linux-2.6-x86-workaround-failures-on-intel-atom.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
@@ -715,15 +717,21 @@ Patch2004: linux-2.6-e1000e-enable-ecc-on-82571.patch
 Patch2005: linux-2.6-e1000e-workaround-hw-errata.patch
 
 # r8169 fixes
-Patch2009: linux-2.6-netdev-r8169-2.6.28.patch
-
-# Make Eee laptop driver suck less
-Patch2011: linux-2.6-eeepc-laptop-update.patch
+Patch2006: linux-2.6-netdev-r8169-2.6.30.patch
+Patch2007: linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch
+Patch2008: linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch
+# r8169 fixes from 2.6.31
+Patch2009: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+Patch2010: linux-2.6-netdev-r8169-use-different-family-defaults.patch
+Patch2011: linux-2.6-netdev-r8169-avoid-losing-msi-interrupts.patch
 
 # Backport Toshiba updates so Bluetooth can be enabled (#437091)
-Patch2012: linux-2.6-toshiba-acpi-update.patch
-Patch2013: linux-2.6-toshiba-acpi-close-race.patch
-Patch2014: linux-2.6-toshiba-acpi-only-register-rfkill-if-bt-enabled.patch
+Patch2014: linux-2.6-toshiba-acpi-update.patch
+Patch2015: linux-2.6-toshiba-acpi-close-race.patch
+Patch2016: linux-2.6-toshiba-acpi-only-register-rfkill-if-bt-enabled.patch
+
+# Make Eee laptop driver suck less
+Patch2018: linux-2.6-eeepc-laptop-update.patch
 
 # atl2 network driver
 Patch2020: linux-2.6-netdev-atl2.patch
@@ -775,19 +783,6 @@ Patch2900: linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 # Delay capable check to avoid most AVCs (#478299)
 Patch2901: linux-2.6.27.9-ext4-cap-check-delay.patch
 
-# next round of ext4 patches for -stable
-Patch2910: ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
-Patch2911: ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
-Patch2912: ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
-Patch2913: ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
-Patch2914: ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
-
-# ext4 fixes from fedora 11
-Patch2920: linux-2.6-ext4-clear-unwritten-flag.patch
-Patch2921: linux-2.6-ext4-fake-delalloc-bno.patch
-Patch2922: linux-2.6-ext4-fix-i_cached_extent-race.patch
-Patch2923: linux-2.6-ext4-prealloc-fixes.patch
-
 # Add better support for DMI-based autoloading
 Patch3110: linux-2.6-dmi-autoload.patch
 
@@ -802,6 +797,10 @@ Patch3130: disable-p4-cpufreq-ui.patch
 Patch3140: linux-2.6.27-fix-video_open.patch
 
 Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+Patch4010: kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
+
+Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 %endif
 
@@ -894,9 +893,13 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-libre-devel = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 %description -n kernel%{?variant}%{?1:-%{1}}-devel\
@@ -1184,9 +1187,6 @@ ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
-# work around atom errata
-ApplyPatch linux-2.6-x86-workaround-failures-on-intel-atom.patch
-
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
@@ -1237,19 +1237,6 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 ApplyPatch linux-2.6.27-ext4-rename-ext4dev-to-ext4.patch
 ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
-
-# ext4 patches scheduled for -stable
-ApplyPatch ext4.git-1-8657e625a390d09a21970a810f271d74e99b4c8f.patch
-ApplyPatch ext4.git-2-b3239aab20df1446ddfb8d0520076d5fd0d4ecd2.patch
-ApplyPatch ext4.git-3-e9b9a50398f0cc909e5645716c74cc1aecd6699e.patch
-ApplyPatch ext4.git-4-ce54e9c7949d1158512accf23825641a92bd07f9.patch
-ApplyPatch ext4.git-5-e0ee7aa0b15299bc678758a754eec51ee537c53f.patch
-
-# ext4 patches from f-11
-ApplyPatch linux-2.6-ext4-clear-unwritten-flag.patch
-ApplyPatch linux-2.6-ext4-fake-delalloc-bno.patch
-ApplyPatch linux-2.6-ext4-fix-i_cached_extent-race.patch
-ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
 
 # xfs
 
@@ -1396,7 +1383,13 @@ ApplyPatch linux-2.6-e1000e-add-support-for-new-82574L-part.patch
 ApplyPatch linux-2.6-e1000e-enable-ecc-on-82571.patch
 ApplyPatch linux-2.6-e1000e-workaround-hw-errata.patch
 
-ApplyPatch linux-2.6-netdev-r8169-2.6.28.patch
+ApplyPatch linux-2.6-netdev-r8169-2.6.30.patch
+ApplyPatch linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch -R
+ApplyPatch linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch -R
+# r8169 fixes from 2.6.30/2.6.29.5
+ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
+ApplyPatch linux-2.6-netdev-r8169-avoid-losing-msi-interrupts.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-toshiba-acpi-update.patch
@@ -1462,7 +1455,12 @@ ApplyPatch disable-p4-cpufreq-ui.patch
 ApplyPatch linux-2.6.27-fix-video_open.patch
 
 ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+ApplyPatch kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
 
+# finally fix the proc registration bug (F11#503773 and others)
+ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
+ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2038,6 +2036,26 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Jun 23 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Add -libre provides for kernel and devel packages.
+
+* Sat Jun 20 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.25-170.2.72
+- Copy fixes from latest F-9:
+    kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
+    linux-2.6-dev-zero-avoid-oom-lockup.patch
+    linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+
+* Sat Jun 20 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.25-170.2.70
+- Update r8169 network driver to the version in Fedora 9:
+  the 2.6.30 version + fixes from 2.6.31
+
+* Sat Jun 20 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.25-170.2.69
+- Linux 2.6.27.25
+- Dropped patches merged upstream in -stable:
+    linux-2.6-x86-workaround-failures-on-intel-atom.patch
+    ext4.git*
+    linux-2.6-ext4*
+
 * Tue Jun  9 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre...1
 - Switched to 2.6.27-libre2, disables again mga, r128 and radeon.
 
