@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1653 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1660 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -668,6 +668,7 @@ Patch457: linux-2.6-input-bcm5974-add-macbook-unibody.patch
 
 Patch470: linux-2.6-serial-460800.patch
 Patch471: linux-2.6-serial-add-txen-test-param.patch
+Patch472: linux-2.6-drivers-char-low-latency-removal.patch
 
 # 8192 too low
 Patch480: increase-MAX_LOCKDEP_ENTRIES.patch
@@ -748,6 +749,7 @@ Patch1842: drm-radeon-new-pciids.patch
 Patch1843: drm-dont-frob-i2c.patch
 Patch1844: drm-connector-dpms-fix.patch
 Patch1845: drm-intel-tv-fix.patch
+Patch1846: drm-radeon-cs-oops-fix.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -798,6 +800,7 @@ Patch9307: linux-2.6.29-xen-disable-gbpages.patch
 
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
+Patch11020: linux-2.6-usb-remove-low-latency-hack.patch
 
 # via: enable 64-bit padlock support on nano, add CPU temp sensor,
 #  add via-sdmmc driver
@@ -1380,6 +1383,8 @@ ApplyPatch linux-2.6-input-bcm5974-add-macbook-unibody.patch
 ApplyPatch linux-2.6-serial-460800.patch
 # let users skip the TXEN bug test
 ApplyPatch linux-2.6-serial-add-txen-test-param.patch
+# fix oops in nozomi drver (#507005) plus two others
+ApplyPatch linux-2.6-drivers-char-low-latency-removal.patch
 
 ApplyPatch increase-MAX_LOCKDEP_ENTRIES.patch
 
@@ -1474,6 +1479,7 @@ ApplyPatch drm-radeon-new-pciids.patch
 ApplyPatch drm-dont-frob-i2c.patch
 ApplyPatch drm-connector-dpms-fix.patch
 ApplyPatch drm-intel-tv-fix.patch
+ApplyPatch drm-radeon-cs-oops-fix.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1491,30 +1497,29 @@ ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch linux-2.6-v4l-dvb-fix-uint16_t-audio-h.patch
 ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 
-# patches headed for -stable
-ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
-
 # revert 8b249b6856f16f09b0e5b79ce5f4d435e439b9d6
 ApplyPatch revert-fix-modules_install-via-nfs.patch
 
-# fix nfs reporting of short writes (#493500)
-ApplyPatch linux-2.6-nfsd-report-short-writes.patch
-
-ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
-ApplyPatch linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
-
 ApplyPatch linux-2.6-dropwatch-protocol.patch
 
+# patches headed for -stable
+ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
+# fix nfs reporting of short writes (#493500)
+ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+# cpufreq
+ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
+ApplyPatch linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
 # kvm fixes
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
-
 # finally fix the proc registration bug (F11#503773 and others)
 ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
-
+#
 ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
+# fix oopses in usb serial devices (#500954)
+ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
 
 # VIA: add 64-bit padlock support, sdmmc driver, temp sensor driver
 ApplyPatch via-centaur-merge-32-64-bit-init.patch
@@ -2113,6 +2118,40 @@ fi
 # and build.
 
 %changelog
+* Wed Jun 24 2009 Jarod Wilson <jarod@redhat.com> 2.6.29.5-198
+- Fix lirc_i2c functionality (#507047)
+- Add ability to disable lirc_imon mouse mode
+
+* Wed Jun 24 2009 Kyle McMartin <kyle@redhat.com>
+- config changes:
+ - generic:
+  - CONFIG_SCSI_DEBUG=m (was off, requested by davidz.)
+
+* Mon Jun 22 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-196
+- Fix oopses in a bunch of USB serial devices (#500954)
+
+* Sat Jun 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-195
+- Add linux-2.6-drivers-char-low-latency-removal.patch
+  to fix oops in nozomi driver (#507005)
+
+* Thu Jun 18 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.5-194
+- drm-nouveau.patch: un-break DPMS after DRM changes
+
+* Thu Jun 18 2009 Dave Airlie <airlied@redhat.com> 2.6.29.5-193
+- drm-radeon-cs-oops-fix.patch: fix oops if CS path called from non-kms
+
+* Wed Jun 17 2009 Jarod Wilson <jarod@redhat.com>
+- New lirc_imon hotness:
+  * support dual-interface devices with a single lirc device
+  * directional pad functions as an input device mouse
+  * touchscreen devices finally properly supported
+  * support for using MCE/RC-6 protocol remotes
+  * fix oops in RF remote association code (F10 bug #475496)
+  * fix re-enabling case/panel buttons and/or knobs
+- Add some misc additional lirc_mceusb2 transceiver IDs
+- Add missing unregister_chrdev_region() call to lirc_dev exit
+- Add it8720 support to lirc_it87
+
 * Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-191
 - Copy latest version of the -mm streaming IO and executable pages patches from F-10
 - Copy the saner-vm-settings patch from F-10:

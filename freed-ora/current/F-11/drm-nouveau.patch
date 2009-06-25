@@ -23486,10 +23486,10 @@ index 0000000..87c6213
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_connector.c b/drivers/gpu/drm/nouveau/nv50_connector.c
 new file mode 100644
-index 0000000..8074cb8
+index 0000000..fffb8f2
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_connector.c
-@@ -0,0 +1,498 @@
+@@ -0,0 +1,491 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -23656,14 +23656,6 @@ index 0000000..8074cb8
 +	struct drm_device *dev = drm_connector->dev;
 +	struct nouveau_connector *connector = to_nouveau_connector(drm_connector);
 +	int rval;
-+
-+	/* DPMS */
-+	if (property == dev->mode_config.dpms_property) {
-+		if (value > 3)
-+			return -EINVAL;
-+
-+		drm_helper_set_connector_dpms(drm_connector, value);
-+	}
 +
 +	/* Scaling mode */
 +	if (property == dev->mode_config.scaling_mode_property) {
@@ -23884,6 +23876,7 @@ index 0000000..8074cb8
 +};
 +
 +static const struct drm_connector_funcs nv50_connector_funcs = {
++	.dpms = drm_helper_connector_dpms,
 +	.save = NULL,
 +	.restore = NULL,
 +	.detect = nv50_connector_detect,
