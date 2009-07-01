@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1384 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1388 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -2001,6 +2001,30 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Jun 30 2009 Jarod Wilson <jarod@redhat.com>
+- Fix broken lirc_serial (F11#504402)
+
+* Wed Jun 24 2009 Jarod Wilson <jarod@redhat.com>
+- Fix lirc_i2c functionality (F11#507047)
+- Add ability to disable lirc_imon mouse mode
+
+* Wed Jun 17 2009 Jarod Wilson <jarod@redhat.com>
+- New lirc_imon hotness:
+  * support dual-interface devices with a single lirc device
+  * directional pad functions as an input device mouse
+  * touchscreen devices finally properly supported
+  * support for using MCE/RC-6 protocol remotes
+  * fix oops in RF remote association code (#475496)
+  * fix re-enabling case/panel buttons and/or knobs
+- Add some misc additional lirc_mceusb2 transceiver IDs
+- Add missing unregister_chrdev_region() call to lirc_dev exit
+- Add it8720 support to lirc_it87
+
+* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-85
+- Adjust saner-vm-settings:
+    dirty_writeback_interval  =  3 * HZ
+    int dirty_expire_interval = 10 * HZ
+
 * Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-84
 - Avoid lockup on OOM with /dev/zero
 
