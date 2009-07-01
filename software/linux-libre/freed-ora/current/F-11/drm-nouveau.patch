@@ -379,10 +379,10 @@ index 0000000..e3d354f
 +}	
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..b90beab
+index 0000000..d63baf3
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -0,0 +1,4828 @@
+@@ -0,0 +1,4852 @@
 +/*
 + * Copyright 2005-2006 Erik Waling
 + * Copyright 2006 Stephane Marchesin
@@ -3433,14 +3433,12 @@ index 0000000..b90beab
 +		bios->fp.dual_link = bios->data[lvdsofs] & 1;
 +		bios->fp.BITbit1 = bios->data[lvdsofs] & 2;
 +		bios->fp.duallink_transition_clk = ROM16(bios->data[bios->fp.lvdsmanufacturerpointer + 5]) * 10;
-+#if 0	// currently unused
 +		break;
 +	case 0x40:
 +		/* fairly sure, but not 100% */
-+		bios->fp.dual_link = bios->data[lvdsofs] & 1;
++//		bios->fp.dual_link = bios->data[lvdsofs] & 1;
 +		bios->fp.duallink_transition_clk = ROM16(bios->data[bios->fp.lvdsmanufacturerpointer + 5]) * 10;
 +		break;
-+#endif
 +	}
 +
 +	/* set dual_link flag for EDID case */
@@ -3450,69 +3448,6 @@ index 0000000..b90beab
 +	*dl = bios->fp.dual_link;
 +
 +	return 0;
-+}
-+
-+static int
-+find_script_pointers(struct drm_device *dev, uint8_t *table, uint16_t *script0,
-+		     uint16_t *script1, uint16_t headerlen, int pxclk,
-+		     int cmpval)
-+{
-+	/* The output script tables describing a particular output type
-+	 * look as follows:
-+	 *
-+	 * offset + 0   (32 bits): output this table matches (hash of DCB)
-+	 * offset + 4   ( 8 bits): unknown
-+	 * offset + 5   ( 8 bits): number of configurations
-+	 * offset + 6   (16 bits): pointer to some script
-+	 * offset + 8   (16 bits): pointer to some script
-+	 *
-+	 * headerlen == 10
-+	 * offset + 10           : configuration 0
-+	 *
-+	 * headerlen == 12
-+	 * offset + 10           : pointer to some script
-+	 * offset + 12           : configuration 0
-+	 *
-+	 * Each config entry is as follows:
-+	 *
-+	 * offset + 0   (16 bits): unknown, assumed to be a match value
-+	 * offset + 2   (16 bits): pointer to script table (clock set?)
-+	 * offset + 4   (16 bits): pointer to script table (reset?)
-+	 *
-+	 * There doesn't appear to be a count value to say how many
-+	 * entries exist in each script table, instead, a 0 value in
-+	 * the first 16-bit word seems to indicate both the end of the
-+	 * list and the default entry.  The second 16-bit word in the
-+	 * script tables is a pointer to the script to execute.
-+	 */
-+
-+	struct drm_nouveau_private *dev_priv = dev->dev_private;
-+	struct nvbios *bios = &dev_priv->VBIOS;
-+	int i;
-+
-+	*script0 = *script1 = 0;
-+	for (i = 0; i < table[5]; i++) {
-+		uint16_t offset;
-+
-+		if (ROM16(table[headerlen + i*6 + 0]) != cmpval)
-+			continue;
-+
-+		offset = ROM16(table[headerlen + i*6 + 2]);
-+		if (offset)
-+			*script0 = clkcmptable(bios, offset, pxclk);
-+
-+		if (!*script0)
-+			NV_WARN(dev, "script0 missing!\n");
-+
-+		offset = ROM16(table[headerlen + i*6 + 4]);
-+		if (offset)
-+			*script1 = clkcmptable(bios, offset, pxclk);
-+
-+		return 0;
-+	}
-+
-+	NV_ERROR(dev, "couldn't find suitable output scripts\n");
-+	return 1;
 +}
 +
 +int
@@ -3546,18 +3481,47 @@ index 0000000..b90beab
 +	struct nvbios *bios = &dev_priv->VBIOS;
 +	uint8_t *table = &bios->data[bios->display.script_table_ptr];
 +	uint8_t *entry, *otable = NULL;
-+	uint16_t script0, script1;
-+	int i;
++	uint16_t script;
++	int i, sub;
 +
 +	if (!bios->display.script_table_ptr) {
 +		NV_ERROR(dev, "No pointer to output script table\n");
 +		return 1;
 +	}
 +
-+	if (table[0] != 0x20) {
++	if (table[0] != 0x20 && table[0] != 0x21) {
 +		NV_ERROR(dev, "Output script table version 0x%02x unknown\n", table[0]);
 +		return 1;
 +	}
++
++	/* The output script tables describing a particular output type
++	 * look as follows:
++	 *
++	 * offset + 0   (32 bits): output this table matches (hash of DCB)
++	 * offset + 4   ( 8 bits): unknown
++	 * offset + 5   ( 8 bits): number of configurations
++	 * offset + 6   (16 bits): pointer to some script
++	 * offset + 8   (16 bits): pointer to some script
++	 *
++	 * headerlen == 10
++	 * offset + 10           : configuration 0
++	 *
++	 * headerlen == 12
++	 * offset + 10           : pointer to some script
++	 * offset + 12           : configuration 0
++	 *
++	 * Each config entry is as follows:
++	 *
++	 * offset + 0   (16 bits): unknown, assumed to be a match value
++	 * offset + 2   (16 bits): pointer to script table (clock set?)
++	 * offset + 4   (16 bits): pointer to script table (reset?)
++	 *
++	 * There doesn't appear to be a count value to say how many
++	 * entries exist in each script table, instead, a 0 value in
++	 * the first 16-bit word seems to indicate both the end of the
++	 * list and the default entry.  The second 16-bit word in the
++	 * script tables is a pointer to the script to execute.
++	 */
 +
 +	NV_DEBUG(dev, "Searching for output entry for %d %d %d\n",
 +			dcbent->type, dcbent->location, dcbent->or);
@@ -3582,29 +3546,89 @@ index 0000000..b90beab
 +		return 1;
 +	}
 +
-+	if (find_script_pointers(dev, otable, &script0, &script1, table[4],
-+				 pxclk, dcbent->type == OUTPUT_LVDS ?
-+				 0x0100 : (pxclk > 165000 ? 0x0105 : 0x0001)))
-+		return 1;
-+	bios->display.head = ffs(dcbent->or) - 1;
-+
-+	if (script0) {
-+		NV_TRACE(dev, "0x%04X: Parsing output Script0\n", script0);
-+		parse_init_table(dev, bios, script0, &iexec);
-+	} else {
-+		NV_ERROR(dev, "clock script missing!\n");
-+		return 1;
++	/* Anyone have an idea to know which to use for certain? */
++	switch (dcbent->type) {
++	case OUTPUT_LVDS:
++		sub = 0x0100; /* 0x0000 0x0100 0x0200 0x0300 */
++		break;
++	case OUTPUT_TMDS:
++		sub = 0x0001; /* 0x0001 0x0002 0x0105 */
++		break;
++	default:
++		sub = 0x0000; /* 0x0000 */
++		break;
 +	}
 +
-+	if (script1) {
-+		NV_TRACE(dev, "0x%04X: Parsing output Script1\n", script1);
-+		parse_init_table(dev, bios, script1, &iexec);
++	for (i = 0; i < otable[5]; i++) {
++		if (ROM16(otable[table[4] + i*6]) == sub)
++			break;
++	}
++
++	if (i == otable[5])
++		i = 0;
++
++	bios->display.head = ffs(dcbent->or) - 1;
++
++	if (pxclk == 0) {
++		script = ROM16(otable[6]);
++		if (!script) {
++			NV_DEBUG(dev, "output script 0 not found\n");
++			return 1;
++		}
++
++		NV_TRACE(dev, "0x%04X: parsing output script 0\n", script);
++		parse_init_table(dev, bios, script, &iexec);
++	} else
++	if (pxclk == -1) {
++		script = ROM16(otable[8]);
++		if (!script) {
++			NV_DEBUG(dev, "output script 1 not found\n");
++			return 1;
++		}
++
++		NV_TRACE(dev, "0x%04X: parsing output script 1\n", script);
++		parse_init_table(dev, bios, script, &iexec);
++	} else
++	if (pxclk == -2) {
++		if (table[4] >= 12)
++			script = ROM16(otable[10]);
++		else
++			script = 0;
++		if (!script) {
++			NV_DEBUG(dev, "output script 2 not found\n");
++			return 1;
++		}
++
++		NV_TRACE(dev, "0x%04X: parsing output script 2\n", script);
++		parse_init_table(dev, bios, script, &iexec);
++	} else
++	if (pxclk > 0) {
++		script = ROM16(otable[table[4] + i*6 + 2]);
++		if (script)
++			script = clkcmptable(bios, script, pxclk);
++		if (!script) {
++			NV_ERROR(dev, "clock script 0 not found\n");
++			return 1;
++		}
++
++		NV_TRACE(dev, "0x%04X: parsing clock script 0\n", script);
++		parse_init_table(dev, bios, script, &iexec);
++	} else
++	if (pxclk < 0) {
++		script = ROM16(otable[table[4] + i*6 + 4]);
++		if (script)
++			script = clkcmptable(bios, script, -pxclk);
++		if (!script) {
++			NV_DEBUG(dev, "clock script 1 not found\n");
++			return 1;
++		}
++
++		NV_TRACE(dev, "0x%04X: parsing clock script 1\n", script);
++		parse_init_table(dev, bios, script, &iexec);
 +	}
 +
 +	return 0;
 +}
-+
-+
 +int run_tmds_table(struct drm_device *dev, struct dcb_entry *dcbent, int head, int pxclk)
 +{
 +	/* the pxclk parameter is in kHz
@@ -7276,10 +7300,10 @@ index 0000000..578983e
 +MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.h b/drivers/gpu/drm/nouveau/nouveau_drv.h
 new file mode 100644
-index 0000000..13d6f9d
+index 0000000..6f63693
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.h
-@@ -0,0 +1,834 @@
+@@ -0,0 +1,836 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
 + * All Rights Reserved.
@@ -7829,6 +7853,8 @@ index 0000000..13d6f9d
 +extern int nouveau_bios_run_display_table(struct drm_device *,
 +					  struct dcb_entry *, int pxclk);
 +bool nouveau_bios_fp_mode(struct drm_device *, struct drm_display_mode *);
++int nouveau_bios_parse_lvds_table(struct drm_device *dev, int pxclk, bool *dl,
++				  bool *if_is_24bit);
 +
 +/* nv04_fb.c */
 +extern int  nv04_fb_init(struct drm_device *);
@@ -8027,7 +8053,7 @@ index 0000000..13d6f9d
 +#define nv_wr16(reg,val) nv_out16(mmio, (reg), (val))
 +#define nv_rd08(reg) nv_in08(mmio, (reg))
 +#define nv_wr08(reg,val) nv_out08(mmio, (reg), (val))
-+#define nv_wait(reg,mask,val) nouveau_wait_until(dev, 1000000000ULL, (reg),    \
++#define nv_wait(reg,mask,val) nouveau_wait_until(dev, 2000000000ULL, (reg),    \
 +						 (mask), (val))
 +
 +/* VRAM access */
@@ -12708,7 +12734,7 @@ index 0000000..f55ae7a
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_irq.c b/drivers/gpu/drm/nouveau/nouveau_irq.c
 new file mode 100644
-index 0000000..c3ad906
+index 0000000..371108a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_irq.c
 @@ -0,0 +1,592 @@
@@ -13230,20 +13256,20 @@ index 0000000..c3ad906
 +static void
 +nouveau_nv50_display_irq_handler(struct drm_device *dev)
 +{
-+	uint32_t val = nv_rd32(NV50_PDISPLAY_SUPERVISOR);
++	uint32_t val = nv_rd32(NV50_PDISPLAY_INTR);
 +
-+	NV_DEBUG(dev, "NV50_PDISPLAY_SUPERVISOR - 0x%08X\n", val);
++	NV_DEBUG(dev, "NV50_PDISPLAY_INTR - 0x%08X\n", val);
 +
 +	/* vblank interrupts */
-+	if (val & NV50_PDISPLAY_SUPERVISOR_CRTCn) {
-+		nv_wr32(NV50_PDISPLAY_SUPERVISOR, val & NV50_PDISPLAY_SUPERVISOR_CRTCn);
-+		val &= ~NV50_PDISPLAY_SUPERVISOR_CRTCn;
++	if (val & NV50_PDISPLAY_INTR_VBLANK_CRTCn) {
++		nv_wr32(NV50_PDISPLAY_INTR, val & NV50_PDISPLAY_INTR_VBLANK_CRTCn);
++		val &= ~NV50_PDISPLAY_INTR_VBLANK_CRTCn;
 +	}
 +
 +	if (val)
 +		NV_ERROR(dev, "unsupported NV50_DISPLAY_INTR - 0x%08X\n", val);
 +
-+	nv_wr32(NV50_PDISPLAY_SUPERVISOR, val);
++	nv_wr32(NV50_PDISPLAY_INTR, val);
 +}
 +
 +static void
@@ -15809,10 +15835,10 @@ index 0000000..5fed5cb
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_reg.h b/drivers/gpu/drm/nouveau/nouveau_reg.h
 new file mode 100644
-index 0000000..44337e6
+index 0000000..a22049a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_reg.h
-@@ -0,0 +1,835 @@
+@@ -0,0 +1,854 @@
 +
 +
 +#define NV03_BOOT_0                                        0x00100000
@@ -16504,20 +16530,22 @@ index 0000000..44337e6
 +#define NV50_PDISPLAY                                       0x00610000
 +#define NV50_PDISPLAY__LEN                                         0x1
 +#define NV50_PDISPLAY__ESIZE                                   0x10000
-+#    define NV50_PDISPLAY_SUPERVISOR                        0x00610024
-+#        define NV50_PDISPLAY_SUPERVISOR_CRTCn              0x0000000c
-+#        define NV50_PDISPLAY_SUPERVISOR_CRTCn__SHIFT                2
-+#        define NV50_PDISPLAY_SUPERVISOR_CRTC0                  (1<<2)
-+#        define NV50_PDISPLAY_SUPERVISOR_CRTC1                  (1<<3)
-+#        define NV50_PDISPLAY_SUPERVISOR_CLK_MASK           0x00000070
-+#        define NV50_PDISPLAY_SUPERVISOR_CLK_MASK__SHIFT             4
-+#        define NV50_PDISPLAY_SUPERVISOR_CLK_UPDATE             (1<<5)
-+#    define NV50_PDISPLAY_SUPERVISOR_INTR                   0x0061002c
-+#        define NV50_PDISPLAY_SUPERVISOR_INTR_VBLANK_CRTC0      (1<<2)
-+#        define NV50_PDISPLAY_SUPERVISOR_INTR_VBLANK_CRTC1      (1<<3)
-+#        define NV50_PDISPLAY_SUPERVISOR_INTR_UNK1              (1<<4)
-+#        define NV50_PDISPLAY_SUPERVISOR_INTR_CLK_UPDATE        (1<<5)
-+#        define NV50_PDISPLAY_SUPERVISOR_INTR_UNK4              (1<<6)
++#    define NV50_PDISPLAY_OBJECTS                           0x00610010
++#    define NV50_PDISPLAY_INTR                              0x00610024
++#        define NV50_PDISPLAY_INTR_VBLANK_CRTCn             0x0000000c
++#        define NV50_PDISPLAY_INTR_VBLANK_CRTCn__SHIFT               2
++#        define NV50_PDISPLAY_INTR_VBLANK_CRTC(n)     (1 << ((n) + 2))
++#        define NV50_PDISPLAY_INTR_VBLANK_CRTC0                 (1<<2)
++#        define NV50_PDISPLAY_INTR_VBLANK_CRTC1                 (1<<3)
++#        define NV50_PDISPLAY_INTR_CLK_UNK10                    (1<<4)
++#        define NV50_PDISPLAY_INTR_CLK_UNK20                    (1<<5)
++#        define NV50_PDISPLAY_INTR_CLK_UNK40                    (1<<6)
++#    define NV50_PDISPLAY_INTR_EN                           0x0061002c
++#        define NV50_PDISPLAY_INTR_EN_VBLANK_CRTC0              (1<<2)
++#        define NV50_PDISPLAY_INTR_EN_VBLANK_CRTC1              (1<<3)
++#        define NV50_PDISPLAY_INTR_EN_CLK_UNK10                 (1<<4)
++#        define NV50_PDISPLAY_INTR_EN_CLK_UNK20                 (1<<5)
++#        define NV50_PDISPLAY_INTR_EN_CLK_UNK40                 (1<<6)
 +#    define NV50_PDISPLAY_UNK30_CTRL                        0x00610030
 +#        define NV50_PDISPLAY_UNK30_CTRL_UPDATE_VCLK0           (1<<9)
 +#        define NV50_PDISPLAY_UNK30_CTRL_UPDATE_VCLK1          (1<<10)
@@ -16530,6 +16558,17 @@ index 0000000..44337e6
 +#        define NV50_PDISPLAY_UNK50_CTRL_CRTC1_ACTIVE_MASK  0x00000300
 +#        define NV50_PDISPLAY_UNK50_CTRL_CRTC1_ACTIVE_MASK__SHIFT    8
 +#    define NV50_PDISPLAY_UNK200_CTRL                       0x00610200
++#    define NV50_PDISPLAY_CHANNEL_STAT(i)                (0x00610200 + (i*0x10))
++#    define NV50_PDISPLAY_CHANNEL_STAT_DMA                  0x00000010
++#    define NV50_PDISPLAY_CHANNEL_STAT_DMA_DISABLED         0x00000000
++#    define NV50_PDISPLAY_CHANNEL_STAT_DMA_ENABLED          0x00000010
++#    define NV50_PDISPLAY_CHANNEL_DMA_CB(i)              (0x00610204 + (i*0x10))
++#    define NV50_PDISPLAY_CHANNEL_DMA_CB_LOCATION           0x00000002
++#    define NV50_PDISPLAY_CHANNEL_DMA_CB_LOCATION_VRAM      0x00000000
++#    define NV50_PDISPLAY_CHANNEL_DMA_CB_LOCATION_SYSTEM    0x00000002
++#    define NV50_PDISPLAY_CHANNEL_DMA_CB_VALID              0x00000001
++#    define NV50_PDISPLAY_CHANNEL_UNK2(i)                (0x00610208 + (i*0x10))
++#    define NV50_PDISPLAY_CHANNEL_UNK3(i)                (0x0061020c + (i*0x10))
 +#    define NV50_PDISPLAY_CURSOR                            0x00610270
 +#    define NV50_PDISPLAY_CURSOR__LEN                              0x2
 +#    define NV50_PDISPLAY_CURSOR__ESIZE                           0x10
@@ -16547,58 +16586,63 @@ index 0000000..44337e6
 +#    define NV50_PDISPLAY_RAM_AMOUNT                        0x00610384
 +#    define NV50_PDISPLAY_UNK_388                           0x00610388
 +#    define NV50_PDISPLAY_UNK_38C                           0x0061038c
-+#    define NV50_PDISPLAY_CRTC_VAL                          0x00610a00
-+#    define NV50_PDISPLAY_CRTC_VAL__LEN                            0x2
-+#            define NV50_PDISPLAY_CRTC_VAL_UNK_900(i,j) (0x00610a18+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_CLUT_MODE(i,j) (0x00610a24+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_INTERLACE(i,j) (0x00610a48+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_SCALE_CTRL(i,j) (0x00610a50+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_CURSOR_CTRL(i,j) (0x00610a58+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_UNK_904(i,j) (0x00610ab8+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_DEPTH(i,j) (0x00610ac8+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_CLOCK(i,j) (0x00610ad0+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_COLOR_CTRL(i,j) (0x00610ae0+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_SYNC_START_TO_BLANK_END(i,j) (0x00610ae8+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_MODE_UNK1(i,j) (0x00610af0+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_DISPLAY_TOTAL(i,j) (0x00610af8+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_SYNC_DURATION(i,j) (0x00610b00+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_MODE_UNK2(i,j) (0x00610b08+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_UNK_828(i,j) (0x00610b10+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_FB_SIZE(i,j) (0x00610b18+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_FB_PITCH(i,j) (0x00610b20+(i)*0x540+(j)*0x4)
-+#                define NV50_PDISPLAY_CRTC_VAL_FB_PITCH_LINEAR_FB (1<<20)
-+#            define NV50_PDISPLAY_CRTC_VAL_FB_POS(i,j) (0x00610b28+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_SCALE_CENTER_OFFSET(i,j) (0x00610b38+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_REAL_RES(i,j) (0x00610b40+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_SCALE_RES1(i,j) (0x00610b48+(i)*0x540+(j)*0x4)
-+#            define NV50_PDISPLAY_CRTC_VAL_SCALE_RES2(i,j) (0x00610b50+(i)*0x540+(j)*0x4)
++#define NV50_PDISPLAY_CRTC_P(i,r)         ((i) * 0x540 + NV50_PDISPLAY_CRTC_##r)
++#define NV50_PDISPLAY_CRTC_C(i,r)     (4 + (i) * 0x540 + NV50_PDISPLAY_CRTC_##r)
++#define NV50_PDISPLAY_CRTC_UNK_0A18 /* mthd 0x0900 */                0x00610a18
++#define NV50_PDISPLAY_CRTC_CLUT_MODE                                 0x00610a24
++#define NV50_PDISPLAY_CRTC_INTERLACE                                 0x00610a48
++#define NV50_PDISPLAY_CRTC_SCALE_CTRL                                0x00610a50
++#define NV50_PDISPLAY_CRTC_CURSOR_CTRL                               0x00610a58
++#define NV50_PDISPLAY_CRTC_UNK0A78 /* mthd 0x0904 */                 0x00610a78
++#define NV50_PDISPLAY_CRTC_UNK0AB8                                   0x00610ab8
++#define NV50_PDISPLAY_CRTC_DEPTH                                     0x00610ac8
++#define NV50_PDISPLAY_CRTC_CLOCK                                     0x00610ad0
++#define NV50_PDISPLAY_CRTC_COLOR_CTRL                                0x00610ae0
++#define NV50_PDISPLAY_CRTC_SYNC_START_TO_BLANK_END                   0x00610ae8
++#define NV50_PDISPLAY_CRTC_MODE_UNK1                                 0x00610af0
++#define NV50_PDISPLAY_CRTC_DISPLAY_TOTAL                             0x00610af8
++#define NV50_PDISPLAY_CRTC_SYNC_DURATION                             0x00610b00
++#define NV50_PDISPLAY_CRTC_MODE_UNK2                                 0x00610b08
++#define NV50_PDISPLAY_CRTC_UNK_0B10 /* mthd 0x0828 */                0x00610b10
++#define NV50_PDISPLAY_CRTC_FB_SIZE                                   0x00610b18
++#define NV50_PDISPLAY_CRTC_FB_PITCH                                  0x00610b20
++#define NV50_PDISPLAY_CRTC_FB_PITCH_LINEAR                           0x00100000
++#define NV50_PDISPLAY_CRTC_FB_POS                                    0x00610b28
++#define NV50_PDISPLAY_CRTC_SCALE_CENTER_OFFSET                       0x00610b38
++#define NV50_PDISPLAY_CRTC_REAL_RES                                  0x00610b40
++#define NV50_PDISPLAY_CRTC_SCALE_RES1                                0x00610b48
++#define NV50_PDISPLAY_CRTC_SCALE_RES2                                0x00610b50
 +
++#define NV50_PDISPLAY_DAC_MODE_CTRL_P(i)                (0x00610b58 + (i) * 0x8)
++#define NV50_PDISPLAY_DAC_MODE_CTRL_C(i)                (0x00610b5c + (i) * 0x8)
++#define NV50_PDISPLAY_SOR_MODE_CTRL_P(i)                (0x00610b70 + (i) * 0x8)
++#define NV50_PDISPLAY_SOR_MODE_CTRL_C(i)                (0x00610b74 + (i) * 0x8)
++#define NV50_PDISPLAY_DAC_MODE_CTRL2_P(i)               (0x00610bdc + (i) * 0x8)
++#define NV50_PDISPLAY_DAC_MODE_CTRL2_C(i)               (0x00610be0 + (i) * 0x8)
 +
-+#            define NV50_PDISPLAY_DAC_VAL_MODE_CTRL(i,j) (0x00610b58+(i)*0x8+(j)*0x4)
++#define NV90_PDISPLAY_SOR_MODE_CTRL_P(i)                (0x00610794 + (i) * 0x8)
++#define NV90_PDISPLAY_SOR_MODE_CTRL_C(i)                (0x00610798 + (i) * 0x8)
++#define NV90_PDISPLAY_DAC_MODE_CTRL_P(i)                (0x00610b58 + (i) * 0x8)
++#define NV90_PDISPLAY_DAC_MODE_CTRL_C(i)                (0x00610b5c + (i) * 0x8)
++#define NV90_PDISPLAY_DAC_MODE_CTRL2_P(i)               (0x00610b80 + (i) * 0x8)
++#define NV90_PDISPLAY_DAC_MODE_CTRL2_C(i)               (0x00610b84 + (i) * 0x8)
 +
++#define NV50_PDISPLAY_CRTC_CLK                                       0x00614000
++#define NV50_PDISPLAY_CRTC_CLK__LEN                                         0x2
++#define NV50_PDISPLAY_CRTC_CLK_CTRL1(i)                 ((i) * 0x800 + 0x614100)
++#define NV50_PDISPLAY_CRTC_CLK_CTRL1_CONNECTED                       0x00000600
++#define NV50_PDISPLAY_CRTC_CLK_CTRL1_CONNECTED__SHIFT                         9
++#define NV50_PDISPLAY_CRTC_CLK_VPLL_A(i)                ((i) * 0x800 + 0x614104)
++#define NV50_PDISPLAY_CRTC_CLK_VPLL_B(i)                ((i) * 0x800 + 0x614108)
++#define NV50_PDISPLAY_CRTC_CLK_CTRL2(i)                 ((i) * 0x800 + 0x614200)
 +
-+#            define NV50_PDISPLAY_SOR_VAL_MODE_CTRL(i,j) (0x00610b70+(i)*0x8+(j)*0x4)
++#define NV50_PDISPLAY_DAC_CLK                                        0x00614000
++#define NV50_PDISPLAY_DAC_CLK__LEN                                          0x3
++#define NV50_PDISPLAY_DAC_CLK_CTRL2(i)                  ((i) * 0x800 + 0x614280)
 +
-+
-+#            define NV50_PDISPLAY_DAC_VAL_MODE_CTRL2(i,j) (0x00610bdc+(i)*0x8+(j)*0x4)
-+
-+
-+#    define NV50_PDISPLAY_CRTC_CLK                          0x00614000
-+#    define NV50_PDISPLAY_CRTC_CLK__LEN                            0x2
-+#        define NV50_PDISPLAY_CRTC_CLK_CLK_CTRL1(i) (0x00614100+(i)*0x800)
-+#            define NV50_PDISPLAY_CRTC_CLK_CLK_CTRL1_CONNECTED 0x00000600
-+#            define NV50_PDISPLAY_CRTC_CLK_CLK_CTRL1_CONNECTED__SHIFT 9
-+#        define NV50_PDISPLAY_CRTC_CLK_VPLL_A(i) (0x00614104+(i)*0x800)
-+#        define NV50_PDISPLAY_CRTC_CLK_VPLL_B(i) (0x00614108+(i)*0x800)
-+#        define NV50_PDISPLAY_CRTC_CLK_CLK_CTRL2(i) (0x00614200+(i)*0x800)
-+
-+#    define NV50_PDISPLAY_DAC_CLK                           0x00614000
-+#    define NV50_PDISPLAY_DAC_CLK__LEN                             0x3
-+#        define NV50_PDISPLAY_DAC_CLK_CLK_CTRL2(i) (0x00614280+(i)*0x800)
-+
-+#    define NV50_PDISPLAY_SOR_CLK                           0x00614000
-+#    define NV50_PDISPLAY_SOR_CLK__LEN                             0x3
-+#        define NV50_PDISPLAY_SOR_CLK_CLK_CTRL2(i) (0x00614300+(i)*0x800)
++#define NV50_PDISPLAY_SOR_CLK                                        0x00614000
++#define NV50_PDISPLAY_SOR_CLK__LEN                                          0x3
++#define NV50_PDISPLAY_SOR_CLK_CTRL2(i)                  ((i) * 0x800 + 0x614300)
 +
 +#    define NV50_PDISPLAY_DAC_REGS                          0x0061a000
 +#    define NV50_PDISPLAY_DAC_REGS__LEN                            0x3
@@ -16636,12 +16680,13 @@ index 0000000..44337e6
 +#            define NV50_PDISPLAY_SOR_REGS_DPMS_STATE_ACTIVE__SHIFT 16
 +#            define NV50_PDISPLAY_SOR_REGS_DPMS_STATE_BLANKED  (1<<19)
 +#            define NV50_PDISPLAY_SOR_REGS_DPMS_STATE_WAIT     (1<<28)
++#define NV50_PDISPLAY_BACKLIGHT				0x0061c084
++#	define NV50_PDISPLAY_BACKLIGHT_ENABLE		0x80000000
 +
-+
-+#define NV50_UNK640000                                      0x00640000
-+#define NV50_UNK640000__LEN                                        0x6
-+#define NV50_UNK640000__ESIZE                                   0x1000
-+#    define NV50_UNK640000_UNK_000(i)          (0x00640000+(i)*0x1000)
++#define NV50_PDISPLAY_USER(i)                          (0x00640000 + (i)*0x1000)
++#define NV50_PDISPLAY_USER__SIZE                                               6
++#define NV50_PDISPLAY_USER_PUT(i)                      (0x00640000 + (i)*0x1000)
++#define NV50_PDISPLAY_USER_GET(i)                      (0x00640000 + (i)*0x1000)
 +
 +#define NV50_HW_CURSOR                                      0x00647000
 +#define NV50_HW_CURSOR__LEN                                        0x2
@@ -23983,10 +24028,10 @@ index 0000000..fffb8f2
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_crtc.c b/drivers/gpu/drm/nouveau/nv50_crtc.c
 new file mode 100644
-index 0000000..8790d4c
+index 0000000..5ab448a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_crtc.c
-@@ -0,0 +1,807 @@
+@@ -0,0 +1,810 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -24244,13 +24289,12 @@ index 0000000..8790d4c
 +}
 +
 +static int
-+nv50_crtc_calc_clock(struct nouveau_crtc *crtc, struct drm_display_mode *mode,
++nv50_crtc_calc_clock(struct drm_device *dev, int head, int clk,
 +		     uint32_t *bestN1, uint32_t *bestN2, uint32_t *bestM1,
 +		     uint32_t *bestM2, uint32_t *bestlog2P)
 +{
-+	struct drm_device *dev = crtc->base.dev;
 +	struct pll_lims limits;
-+	int clk = mode->clock, vco2, crystal;
++	int vco2, crystal;
 +	int minvco1, minvco2, minU1, maxU1, minU2, maxU2, minM1, maxM1;
 +	int maxvco1, maxvco2, minN1, maxN1, minM2, maxM2, minN2, maxN2;
 +	bool fixedgain2;
@@ -24263,8 +24307,8 @@ index 0000000..8790d4c
 +	NV_DEBUG(dev, "\n");
 +
 +	/* These are in the g80 bios tables, at least in mine. */
-+	ret = get_pll_limits(crtc->base.dev,
-+			     NV50_PDISPLAY_CRTC_CLK_CLK_CTRL1(crtc->index),
++	ret = get_pll_limits(dev,
++			     NV50_PDISPLAY_CRTC_CLK_CTRL1(head),
 +			     &limits);
 +	if (ret)
 +		return ret;
@@ -24346,24 +24390,23 @@ index 0000000..8790d4c
 +	return bestclk;
 +}
 +
-+static int
-+nv50_crtc_set_clock(struct nouveau_crtc *crtc, struct drm_display_mode *mode)
++int
++nv50_crtc_set_clock(struct drm_device *dev, int head, int pclk)
 +{
-+	struct drm_device *dev = crtc->base.dev;
-+	uint32_t pll_reg = NV50_PDISPLAY_CRTC_CLK_CLK_CTRL1(crtc->index);
++	uint32_t pll_reg = NV50_PDISPLAY_CRTC_CLK_CTRL1(head);
 +	uint32_t N1 = 0, N2 = 0, M1 = 0, M2 = 0, log2P = 0;
 +	uint32_t reg1 = nv_rd32(pll_reg + 4);
 +	uint32_t reg2 = nv_rd32(pll_reg + 8);
 +
 +	NV_DEBUG(dev, "\n");
 +
-+	nv_wr32(pll_reg, NV50_PDISPLAY_CRTC_CLK_CLK_CTRL1_CONNECTED | 0x10000011);
++	nv_wr32(pll_reg, NV50_PDISPLAY_CRTC_CLK_CTRL1_CONNECTED | 0x10000011);
 +
 +	/* The other bits are typically empty, but let's be on the safe side. */
 +	reg1 &= 0xff00ff00;
 +	reg2 &= 0x8000ff00;
 +
-+	if (!nv50_crtc_calc_clock(crtc, mode, &N1, &N2, &M1, &M2, &log2P))
++	if (!nv50_crtc_calc_clock(dev, head, pclk, &N1, &N2, &M1, &M2, &log2P))
 +		return -EINVAL;
 +
 +	NV_DEBUG(dev, "N1 %d N2 %d M1 %d M2 %d log2P %d\n", N1, N2, M1, M2, log2P);
@@ -24377,6 +24420,11 @@ index 0000000..8790d4c
 +	return 0;
 +}
 +
++static int
++nv50_crtc_set_clock_old(struct nouveau_crtc *crtc, struct drm_display_mode *mode) {
++	return nv50_crtc_set_clock(crtc->base.dev, crtc->index, mode->clock);
++}
++
 +static int nv50_crtc_set_clock_mode(struct nouveau_crtc *crtc)
 +{
 +	struct drm_device *dev = crtc->base.dev;
@@ -24384,7 +24432,7 @@ index 0000000..8790d4c
 +	NV_DEBUG(dev, "\n");
 +
 +	/* This acknowledges a clock request. */
-+	nv_wr32(NV50_PDISPLAY_CRTC_CLK_CLK_CTRL2(crtc->index), 0);
++	nv_wr32(NV50_PDISPLAY_CRTC_CLK_CTRL2(crtc->index), 0);
 +
 +	return 0;
 +}
@@ -24780,7 +24828,7 @@ index 0000000..8790d4c
 +	/* set function pointers */
 +	crtc->set_dither = nv50_crtc_set_dither;
 +	crtc->set_scale = nv50_crtc_set_scale;
-+	crtc->set_clock = nv50_crtc_set_clock;
++	crtc->set_clock = nv50_crtc_set_clock_old;
 +	crtc->set_clock_mode = nv50_crtc_set_clock_mode;
 +
 +	crtc->mode_set.crtc = &crtc->base;
@@ -24946,10 +24994,10 @@ index 0000000..763cffe
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_dac.c b/drivers/gpu/drm/nouveau/nv50_dac.c
 new file mode 100644
-index 0000000..ecd16d2
+index 0000000..e0569d0
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_dac.c
-@@ -0,0 +1,280 @@
+@@ -0,0 +1,287 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -25005,7 +25053,7 @@ index 0000000..ecd16d2
 +
 +	NV_DEBUG(dev, "or %d\n", encoder->or);
 +
-+	nv_wr32(NV50_PDISPLAY_DAC_CLK_CLK_CTRL2(encoder->or),  0);
++	nv_wr32(NV50_PDISPLAY_DAC_CLK_CTRL2(encoder->or),  0);
 +	return 0;
 +}
 +
@@ -25144,12 +25192,19 @@ index 0000000..ecd16d2
 +{
 +	struct nouveau_encoder *encoder = to_nouveau_encoder(drm_encoder);
 +	struct drm_device *dev = drm_encoder->dev;
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
 +	struct nouveau_crtc *crtc = to_nouveau_crtc(drm_encoder->crtc);
 +	uint32_t offset = encoder->or * 0x80;
 +	uint32_t mode_ctl = NV50_DAC_MODE_CTRL_OFF;
 +	uint32_t mode_ctl2 = 0;
++	bool tmp;
 +
 +	NV_DEBUG(dev, "or %d\n", encoder->or);
++
++	tmp = dev_priv->in_modeset;
++	dev_priv->in_modeset = false;
++	nv50_dac_dpms(drm_encoder, DRM_MODE_DPMS_ON);
++	dev_priv->in_modeset = tmp;
 +
 +	if (crtc->index == 1)
 +		mode_ctl |= NV50_DAC_MODE_CTRL_CRTC1;
@@ -25232,10 +25287,10 @@ index 0000000..ecd16d2
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_display.c b/drivers/gpu/drm/nouveau/nv50_display.c
 new file mode 100644
-index 0000000..fd253c5
+index 0000000..c34e65f
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_display.c
-@@ -0,0 +1,421 @@
+@@ -0,0 +1,637 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -25268,6 +25323,8 @@ index 0000000..fd253c5
 +#include "nouveau_connector.h"
 +#include "nouveau_fb.h"
 +#include "drm_crtc_helper.h"
++
++extern int nouveau_uscript;
 +
 +static int nv50_display_pre_init(struct drm_device *dev)
 +{
@@ -25335,8 +25392,8 @@ index 0000000..fd253c5
 +	/* The precise purpose is unknown, i suspect it has something to do
 +	 * with text mode.
 +	 */
-+	if (nv_rd32(NV50_PDISPLAY_SUPERVISOR) & 0x100) {
-+		nv_wr32(NV50_PDISPLAY_SUPERVISOR, 0x100);
++	if (nv_rd32(NV50_PDISPLAY_INTR) & 0x100) {
++		nv_wr32(NV50_PDISPLAY_INTR, 0x100);
 +		nv_wr32(0x006194e8, nv_rd32(0x006194e8) & ~1);
 +		if (!nv_wait(0x006194e8, 2, 0)) {
 +			NV_ERROR(dev, "timeout: (0x6194e8 & 2) != 0\n");
@@ -25382,7 +25439,7 @@ index 0000000..fd253c5
 +	OUT_MODE(NV50_CRTC0_UNK82C, 0);
 +
 +	/* enable clock change interrupts. */
-+//	nv_wr32(NV50_PDISPLAY_SUPERVISOR_INTR, nv_rd32(NV50_PDISPLAY_SUPERVISOR_INTR) | 0x70);
++//	nv_wr32(NV50_PDISPLAY_INTR_EN, nv_rd32(NV50_PDISPLAY_INTR_EN) | 0x70);
 +
 +	/* enable hotplug interrupts */
 +	nv_wr32(NV50_PCONNECTOR_HOTPLUG_CTRL, 0x7FFF7FFF);
@@ -25415,12 +25472,12 @@ index 0000000..fd253c5
 +			uint32_t mask;
 +
 +			if (crtc->index == 1)
-+				mask = NV50_PDISPLAY_SUPERVISOR_CRTC1;
++				mask = NV50_PDISPLAY_INTR_VBLANK_CRTC1;
 +			else
-+				mask = NV50_PDISPLAY_SUPERVISOR_CRTC0;
++				mask = NV50_PDISPLAY_INTR_VBLANK_CRTC0;
 +
-+			nv_wr32(NV50_PDISPLAY_SUPERVISOR, mask);
-+			if (!nv_wait(NV50_PDISPLAY_SUPERVISOR, mask, mask)) {
++			nv_wr32(NV50_PDISPLAY_INTR, mask);
++			if (!nv_wait(NV50_PDISPLAY_INTR, mask, mask)) {
 +				NV_ERROR(dev, "timeout: (0x610024 & 0x%08x) == "
 +					  "0x%08x\n", mask, mask);
 +				NV_ERROR(dev, "0x610024 = 0x%08x\n",
@@ -25447,8 +25504,8 @@ index 0000000..fd253c5
 +	}
 +
 +	/* disable clock change interrupts. */
-+	nv_wr32(NV50_PDISPLAY_SUPERVISOR_INTR,
-+		nv_rd32(NV50_PDISPLAY_SUPERVISOR_INTR) & ~0x70);
++	nv_wr32(NV50_PDISPLAY_INTR_EN,
++		nv_rd32(NV50_PDISPLAY_INTR_EN) & ~0x70);
 +
 +	/* disable hotplug interrupts */
 +	nv_wr32(NV50_PCONNECTOR_HOTPLUG_INTR, 0);
@@ -25619,6 +25676,216 @@ index 0000000..fd253c5
 +	}
 +}
 +
++static int
++nv50_display_irq_head(struct drm_device *dev, int *phead,
++		      struct dcb_entry **pdcbent)
++{
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	uint32_t unk30 = nv_rd32(NV50_PDISPLAY_UNK30_CTRL);
++	uint32_t dac = 0, sor = 0;
++	int head, i, or;
++
++	/* We're assuming that head 0 *or* head 1 will be active here,
++	 * and not both.  I'm not sure if the hw will even signal both
++	 * ever, but it definitely shouldn't for us as we commit each
++	 * CRTC separately, and submission will be blocked by the GPU
++	 * until we handle each in turn.
++	 */
++	NV_DEBUG(dev, "0x610030: 0x%08x\n", unk30);
++	head = ffs((unk30 >> 9) & 3) - 1;
++	if (head < 0) {
++		NV_ERROR(dev, "no active heads: 0x%08x\n", nv_rd32(0x610030));
++		return -EINVAL;
++	}
++
++	/* This assumes CRTCs are never bound to multiple encoders, which
++	 * should be the case.
++	 */
++	for (i = 0; i < 3; i++) {
++		if (nv_rd32(NV50_PDISPLAY_DAC_MODE_CTRL_P(i)) & (1 << head))
++			dac |= (1 << i);
++	}
++
++	if (dev_priv->chipset < 0x90 || dev_priv->chipset == 0x92 ||
++	    dev_priv->chipset == 0xa0) {
++		for (i = 0; i < 4; i++) {
++			if (nv_rd32(NV50_PDISPLAY_SOR_MODE_CTRL_P(i)) & (1 << head))
++				sor |= (1 << i);
++		}
++	} else {
++		for (i = 0; i < 4; i++) {
++			if (nv_rd32(NV90_PDISPLAY_SOR_MODE_CTRL_P(i)) & (1 << head))
++				sor |= (1 << i);
++		}
++ 	}
++
++	NV_DEBUG(dev, "dac: 0x%08x, sor: 0x%08x\n", dac, sor);
++
++	if (dac && sor) {
++		NV_ERROR(dev, "multiple encoders: 0x%08x 0x%08x\n", dac, sor);
++		return -1;
++	} else
++	if (dac) {
++		or = ffs(dac) - 1;
++		if (dac & ~(1 << or)) {
++			NV_ERROR(dev, "multiple DAC: 0x%08x\n", dac);
++			return -1;
++		}
++	} else
++	if (sor) {
++		or = ffs(sor) - 1;
++		if (sor & ~(1 << or)) {
++			NV_ERROR(dev, "multiple SOR: 0x%08x\n", sor);
++			return -1;
++		}
++	} else {
++		NV_ERROR(dev, "no encoders!\n");
++		return -1;
++	}
++
++	for (i = 0; i < dev_priv->vbios->dcb->entries; i++) {
++		struct dcb_entry *dcbent = &dev_priv->vbios->dcb->entry[i];
++
++		if (dac && (dcbent->type != OUTPUT_ANALOG &&
++			    dcbent->type != OUTPUT_TV))
++			continue;
++		else
++		if (sor && (dcbent->type != OUTPUT_TMDS &&
++			    dcbent->type != OUTPUT_LVDS))
++			continue;
++
++		if (dcbent->or & (1 << or)) {
++			*phead = head;
++			*pdcbent = dcbent;
++			return 0;
++		}
++	}
++
++	NV_ERROR(dev, "no DCB entry for %d %d\n", dac != 0, or);
++	return 0;
++}
++
++static void
++nv50_display_vblank_handler(struct drm_device *dev, uint32_t intr)
++{
++	nv_wr32(NV50_PDISPLAY_INTR, intr & NV50_PDISPLAY_INTR_VBLANK_CRTCn);
++}
++
++static void
++nv50_display_unk10_handler(struct drm_device *dev)
++{
++	struct dcb_entry *dcbent;
++	int head, ret;
++
++	ret = nv50_display_irq_head(dev, &head, &dcbent);
++	if (ret)
++		goto ack;
++
++	nv_wr32(0x619494, nv_rd32(0x619494) & ~8);
++
++	nouveau_bios_run_display_table(dev, dcbent, -1);
++
++ack:
++	nv_wr32(NV50_PDISPLAY_INTR, NV50_PDISPLAY_INTR_CLK_UNK10);
++	nv_wr32(0x610030, 0x80000000);
++}
++
++static void
++nv50_display_unk20_handler(struct drm_device *dev)
++{
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nvbios *bios = &dev_priv->VBIOS;
++	struct dcb_entry *dcbent;
++	uint32_t tmp, pclk;
++	int head, or, ret;
++
++	ret = nv50_display_irq_head(dev, &head, &dcbent);
++	if (ret)
++		goto ack;
++	or = ffs(dcbent->or) - 1;
++	pclk = nv_rd32(NV50_PDISPLAY_CRTC_P(head, CLOCK)) & 0x3fffff;
++
++	NV_DEBUG(dev, "head %d pxclk: %dKHz\n", head, pclk);
++
++	nouveau_bios_run_display_table(dev, dcbent, -2);
++
++	nv50_crtc_set_clock(dev, head, pclk);
++
++	nouveau_bios_run_display_table(dev, dcbent, pclk);
++
++	tmp = nv_rd32(NV50_PDISPLAY_CRTC_CLK_CTRL2(head));
++	tmp &= ~0x000000f;
++	nv_wr32(NV50_PDISPLAY_CRTC_CLK_CTRL2(head), tmp);
++
++	if (dcbent->type != OUTPUT_ANALOG) {
++		int tclk;
++
++		if (dcbent->type == OUTPUT_LVDS)
++			tclk = bios->fp.duallink_transition_clk;
++		else
++			tclk = 165000;
++
++		tmp = nv_rd32(NV50_PDISPLAY_SOR_CLK_CTRL2(or));
++		tmp &= ~0x00000f0f;
++		if (pclk > tclk)
++			tmp |= 0x00000101;
++		nv_wr32(NV50_PDISPLAY_SOR_CLK_CTRL2(or), tmp);
++	} else {
++		nv_wr32(NV50_PDISPLAY_DAC_CLK_CTRL2(or), 0);
++	}
++
++ack:
++	nv_wr32(NV50_PDISPLAY_INTR, NV50_PDISPLAY_INTR_CLK_UNK20);
++	nv_wr32(0x610030, 0x80000000);
++}
++
++static void
++nv50_display_unk40_handler(struct drm_device *dev)
++{
++	struct dcb_entry *dcbent;
++	int head, pclk, ret;
++
++	ret = nv50_display_irq_head(dev, &head, &dcbent);
++	if (ret)
++		goto ack;
++	pclk = nv_rd32(NV50_PDISPLAY_CRTC_P(head, CLOCK)) & 0x3fffff;
++
++	nouveau_bios_run_display_table(dev, dcbent, -pclk);
++
++ack:
++	nv_wr32(NV50_PDISPLAY_INTR, NV50_PDISPLAY_INTR_CLK_UNK40);
++	nv_wr32(0x610030, 0x80000000);
++	nv_wr32(0x619494, nv_rd32(0x619494) | 8);
++}
++
++static void
++nv50_display_irq_handler(struct drm_device *dev)
++{
++	uint32_t unk20 = nv_rd32(0x610020);
++	uint32_t intr = nv_rd32(NV50_PDISPLAY_INTR);
++	(void)unk20;
++
++	if (!intr)
++		return;
++	NV_DEBUG(dev, "PDISPLAY_INTR 0x%08x\n", intr);
++
++	if (intr & NV50_PDISPLAY_INTR_CLK_UNK10)
++		nv50_display_unk10_handler(dev);
++	else
++	if (intr & NV50_PDISPLAY_INTR_CLK_UNK20)
++		nv50_display_unk20_handler(dev);
++	else
++	if (intr & NV50_PDISPLAY_INTR_CLK_UNK40)
++		nv50_display_unk40_handler(dev);
++	else
++	if (intr & NV50_PDISPLAY_INTR_VBLANK_CRTCn)
++		nv50_display_vblank_handler(dev, intr);
++	else {
++		NV_ERROR(dev, "unknown PDISPLAY_INTR: 0x%08x\n", intr);
++		nv_wr32(NV50_PDISPLAY_INTR, intr);
++	}
++}
++
 +void nv50_display_command(struct drm_device *dev, uint32_t mthd, uint32_t val)
 +{
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
@@ -25634,19 +25901,23 @@ index 0000000..fd253c5
 +
 +	start = ptimer->read(dev);
 +	while (nv_rd32(NV50_PDISPLAY_CTRL_STATE) & NV50_PDISPLAY_CTRL_STATE_PENDING) {
-+		const uint32_t super = nv_rd32(NV50_PDISPLAY_SUPERVISOR);
-+		uint32_t state;
++		if (nouveau_uscript) {
++			nv50_display_irq_handler(dev);
++		} else {
++			const uint32_t super = nv_rd32(NV50_PDISPLAY_INTR);
++			uint32_t state;
 +
-+		state   = (super & NV50_PDISPLAY_SUPERVISOR_CLK_MASK);
-+		state >>= NV50_PDISPLAY_SUPERVISOR_CLK_MASK__SHIFT;
-+		if (state) {
-+			if (state == 2)
-+				nv50_display_vclk_update(dev);
++			state   = (super & (NV50_PDISPLAY_INTR_CLK_UNK10 |
++					    NV50_PDISPLAY_INTR_CLK_UNK20 |
++					    NV50_PDISPLAY_INTR_CLK_UNK40));
++			if (state) {
++				if (state == NV50_PDISPLAY_INTR_CLK_UNK20)
++					nv50_display_vclk_update(dev);
 +
-+			nv_wr32(NV50_PDISPLAY_SUPERVISOR,
-+				(super & NV50_PDISPLAY_SUPERVISOR_CLK_MASK));
-+			nv_wr32(NV50_PDISPLAY_UNK30_CTRL,
-+				NV50_PDISPLAY_UNK30_CTRL_PENDING);
++				nv_wr32(NV50_PDISPLAY_INTR, state);
++				nv_wr32(NV50_PDISPLAY_UNK30_CTRL,
++					NV50_PDISPLAY_UNK30_CTRL_PENDING);
++			}
 +		}
 +
 +		if (ptimer->read(dev) - start > 1000000000ULL) {
@@ -25659,10 +25930,10 @@ index 0000000..fd253c5
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_display.h b/drivers/gpu/drm/nouveau/nv50_display.h
 new file mode 100644
-index 0000000..8cd7fe6
+index 0000000..6bfd56c
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_display.h
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,44 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -25704,6 +25975,7 @@ index 0000000..8cd7fe6
 +int nv50_display_create(struct drm_device *dev);
 +int nv50_display_destroy(struct drm_device *dev);
 +int nv50_crtc_blank(struct nouveau_crtc *, bool blank);
++int nv50_crtc_set_clock(struct drm_device *dev, int head, int pclk);
 +
 +#endif /* __NV50_DISPLAY_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nv50_display_commands.h b/drivers/gpu/drm/nouveau/nv50_display_commands.h
@@ -26486,7 +26758,7 @@ index 0000000..fbbc235
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_graph.c b/drivers/gpu/drm/nouveau/nv50_graph.c
 new file mode 100644
-index 0000000..1832c3f
+index 0000000..303edbc
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_graph.c
 @@ -0,0 +1,286 @@
@@ -26684,9 +26956,9 @@ index 0000000..1832c3f
 +
 +	INSTANCE_WR(ctx, 0x00000/4, chan->ramin->instance >> 12);
 +	if ((dev_priv->chipset & 0xf0) == 0xa0)
-+		INSTANCE_WR(ctx, 0x00004/4, 0x00000002);
++		INSTANCE_WR(ctx, 0x00004/4, 0x00000000);
 +	else
-+		INSTANCE_WR(ctx, 0x0011c/4, 0x00000002);
++		INSTANCE_WR(ctx, 0x0011c/4, 0x00000000);
 +
 +	dev_priv->engine.instmem.finish_access(dev);
 +
@@ -27224,10 +27496,10 @@ index 0000000..6572f12
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_sor.c b/drivers/gpu/drm/nouveau/nv50_sor.c
 new file mode 100644
-index 0000000..f26cc7b
+index 0000000..3fa5b4d
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_sor.c
-@@ -0,0 +1,292 @@
+@@ -0,0 +1,303 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -27306,7 +27578,7 @@ index 0000000..f26cc7b
 +	 * initialisation on certain gpu's. I presume it's some kind of
 +	 * clock setting, but what precisely i do not know.
 +	 */
-+	nv_wr32(NV50_PDISPLAY_SOR_CLK_CLK_CTRL2(encoder->or),
++	nv_wr32(NV50_PDISPLAY_SOR_CLK_CTRL2(encoder->or),
 +		0x70000 | ((mode->clock > limit) ? 0x101 : 0));
 +
 +	return 0;
@@ -27412,11 +27684,18 @@ index 0000000..f26cc7b
 +{
 +	struct nouveau_encoder *encoder = to_nouveau_encoder(drm_encoder);
 +	struct drm_device *dev = drm_encoder->dev;
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
 +	struct nouveau_crtc *crtc = to_nouveau_crtc(drm_encoder->crtc);
 +	uint32_t offset = encoder->or * 0x40;
 +	uint32_t mode_ctl = NV50_SOR_MODE_CTRL_OFF;
++	bool tmp;
 +
 +	NV_DEBUG(dev, "or %d\n", encoder->or);
++
++	tmp = dev_priv->in_modeset;
++	dev_priv->in_modeset = false;
++	nv50_sor_dpms(drm_encoder, DRM_MODE_DPMS_ON);
++	dev_priv->in_modeset = tmp;
 +
 +	if (encoder->base.encoder_type == DRM_MODE_ENCODER_LVDS) {
 +		mode_ctl |= NV50_SOR_MODE_CTRL_LVDS;
@@ -27472,7 +27751,8 @@ index 0000000..f26cc7b
 +int nv50_sor_create(struct drm_device *dev, struct dcb_entry *entry)
 +{
 +	struct nouveau_encoder *encoder = NULL;
-+	int type;
++	int type, ret;
++	bool dum;
 +
 +	NV_DEBUG(dev, "\n");
 +
@@ -27484,6 +27764,9 @@ index 0000000..f26cc7b
 +	case OUTPUT_LVDS:
 +		NV_INFO(dev, "Detected a LVDS output\n");
 +		type = DRM_MODE_ENCODER_LVDS;
++		ret = nouveau_bios_parse_lvds_table(dev, 0, &dum, &dum);
++		if (ret)
++			NV_ERROR(dev, "Error parsing LVDS table: %d\n", ret);
 +		break;
 +	default:
 +		return -EINVAL;

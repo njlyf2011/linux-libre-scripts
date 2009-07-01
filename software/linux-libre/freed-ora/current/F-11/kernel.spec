@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1660 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1668 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -665,6 +665,7 @@ Patch454: linux-2.6-input-atkbd-forced-release.patch
 Patch455: linux-2.6-input-bcm5974-new-header-type.patch
 Patch456: linux-2.6-input-bcm5974-add-quad-finger.patch
 Patch457: linux-2.6-input-bcm5974-add-macbook-unibody.patch
+Patch458: linux-2.6-hid-apple-mini-keyboard.patch
 
 Patch470: linux-2.6-serial-460800.patch
 Patch471: linux-2.6-serial-add-txen-test-param.patch
@@ -781,6 +782,9 @@ Patch5000: linux-2.6-add-qcserial.patch
 # patches headed for -stable
 # fix squashfs on systems where pagesize > blocksize (ia64, ppc64 w/64k pages)
 Patch6010: squashfs-broken-when-pagesize-greater-than-blocksize.patch
+
+# CIFS
+Patch6100: linux-2.6-fs-cifs-fix-port-numbers.patch
 
 Patch9001: revert-fix-modules_install-via-nfs.patch
 Patch9010: linux-2.6-nfsd-report-short-writes.patch
@@ -1315,7 +1319,7 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
-#ApplyPatch linux-2.6-debug-selinux-null-creds.patch
+ApplyPatch linux-2.6-debug-selinux-null-creds.patch
 
 #
 # PCI
@@ -1378,6 +1382,9 @@ ApplyPatch linux-2.6-input-atkbd-forced-release.patch
 ApplyPatch linux-2.6-input-bcm5974-new-header-type.patch
 ApplyPatch linux-2.6-input-bcm5974-add-quad-finger.patch
 ApplyPatch linux-2.6-input-bcm5974-add-macbook-unibody.patch
+
+# support apple mini keyboard (#507517)
+ApplyPatch linux-2.6-hid-apple-mini-keyboard.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1506,6 +1513,9 @@ ApplyPatch linux-2.6-dropwatch-protocol.patch
 ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
 # fix nfs reporting of short writes (#493500)
 ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+# fix cifs mount option "port=" (#506574)
+ApplyPatch linux-2.6-fs-cifs-fix-port-numbers.patch
+
 # cpufreq
 ApplyPatch cpufreq-add-atom-to-p4-clockmod.patch
 ApplyPatch linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
@@ -2118,6 +2128,30 @@ fi
 # and build.
 
 %changelog
+* Tue Jun 30 2009 Jarod Wilson <jarod@redhat.com> 2.6.29.5-206
+- Fix busticated lirc_serial (#504402)
+
+* Tue Jun 30 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.5-205
+- nouveau: Forcibly DPMS on DAC/SORs during modeset
+
+* Mon Jun 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-204
+- Fix "port=" option in CIFS mount calls. (#506574)
+
+* Mon Jun 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-203
+- Add support for Apple mini keyboard (#507517)
+
+* Mon Jun 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-202
+- New debug patch for null selinux credentials (for bug #494067)
+
+* Mon Jun 26 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.5-201
+- nouveau: bump timeout up a bit, some people hitting false hangs
+
+* Mon Jun 26 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.29.5-200
+- nouveau: backport nv50 output script fixes from upstream
+
+* Mon Jun 26 2009 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: fix GT200 context control, will allow use of 3D engine now
+
 * Wed Jun 24 2009 Jarod Wilson <jarod@redhat.com> 2.6.29.5-198
 - Fix lirc_i2c functionality (#507047)
 - Add ability to disable lirc_imon mouse mode
