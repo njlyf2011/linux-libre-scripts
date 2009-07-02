@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1668 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1671 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -52,9 +52,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -661,7 +661,6 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6-input-hid-extra-gamepad.patch
 Patch453: linux-2.6-input-wacom-bluetooth.patch
-Patch454: linux-2.6-input-atkbd-forced-release.patch
 Patch455: linux-2.6-input-bcm5974-new-header-type.patch
 Patch456: linux-2.6-input-bcm5974-add-quad-finger.patch
 Patch457: linux-2.6-input-bcm5974-add-macbook-unibody.patch
@@ -692,7 +691,6 @@ Patch611: linux-2.6.29-alsa-update-quirks.patch
 Patch612: alsa-hda-add-debugging.patch
 
 Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
-Patch641: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
 Patch642: linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 Patch670: linux-2.6-ata-quirk.patch
@@ -751,6 +749,9 @@ Patch1843: drm-dont-frob-i2c.patch
 Patch1844: drm-connector-dpms-fix.patch
 Patch1845: drm-intel-tv-fix.patch
 Patch1846: drm-radeon-cs-oops-fix.patch
+Patch1847: drm-intel-a17-fix.patch
+Patch1848: drm-pnp-add-resource-range-checker.patch
+Patch1849: drm-i915-enable-mchbar.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -788,6 +789,7 @@ Patch6100: linux-2.6-fs-cifs-fix-port-numbers.patch
 
 Patch9001: revert-fix-modules_install-via-nfs.patch
 Patch9010: linux-2.6-nfsd-report-short-writes.patch
+Patch9020: linux-2.6-nfsd-report-short-writes-fix.patch
 
 Patch9100: cpufreq-add-atom-to-p4-clockmod.patch
 # VIA processors: enable pstates
@@ -805,6 +807,7 @@ Patch9307: linux-2.6.29-xen-disable-gbpages.patch
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
 Patch11020: linux-2.6-usb-remove-low-latency-hack.patch
+Patch11030: linux-2.6-x86-delay-tsc-barrier.patch
 
 # via: enable 64-bit padlock support on nano, add CPU temp sensor,
 #  add via-sdmmc driver
@@ -1359,7 +1362,6 @@ ApplyPatch alsa-hda-add-debugging.patch
 ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
 
 # r8169 fixes from 2.6.30
-ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
 ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 # Misc fixes
@@ -1374,9 +1376,6 @@ ApplyPatch linux-2.6-input-hid-extra-gamepad.patch
 
 # HID: add support for Bluetooth Wacom pads
 ApplyPatch linux-2.6-input-wacom-bluetooth.patch
-
-# atkbd: add forced key release quirks for four more notebooks
-ApplyPatch linux-2.6-input-atkbd-forced-release.patch
 
 # bcm5974: macbook 5 (unibody) support
 ApplyPatch linux-2.6-input-bcm5974-new-header-type.patch
@@ -1487,6 +1486,9 @@ ApplyPatch drm-dont-frob-i2c.patch
 ApplyPatch drm-connector-dpms-fix.patch
 ApplyPatch drm-intel-tv-fix.patch
 ApplyPatch drm-radeon-cs-oops-fix.patch
+ApplyPatch drm-intel-a17-fix.patch
+ApplyPatch drm-pnp-add-resource-range-checker.patch
+ApplyPatch drm-i915-enable-mchbar.patch
 
 # linux1394 git patches
 ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1511,8 +1513,12 @@ ApplyPatch linux-2.6-dropwatch-protocol.patch
 
 # patches headed for -stable
 ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
+
 # fix nfs reporting of short writes (#493500)
 ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+# fix the short write fix (#508174)
+ApplyPatch linux-2.6-nfsd-report-short-writes-fix.patch
+
 # fix cifs mount option "port=" (#506574)
 ApplyPatch linux-2.6-fs-cifs-fix-port-numbers.patch
 
@@ -1530,6 +1536,8 @@ ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
 # fix oopses in usb serial devices (#500954)
 ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
+
+ApplyPatch linux-2.6-x86-delay-tsc-barrier.patch
 
 # VIA: add 64-bit padlock support, sdmmc driver, temp sensor driver
 ApplyPatch via-centaur-merge-32-64-bit-init.patch
@@ -2128,6 +2136,22 @@ fi
 # and build.
 
 %changelog
+* Wed Jul 01 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-209.rc1
+- Linux 2.6.29.6-rc1
+- Enable CONFIG_DEBUG_CREDENTIALS in debug kernels only.
+- Dropped patches merged upstream:
+    linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+    linux-2.6-input-atkbd-forced-release.patch
+
+* Wed Jul 01 2009 Dave Airlie <airlied@redhat.com> 2.6.29.5-208
+- drm-intel-a17-fix.patch, drm-pnp-add-resource-range-checker.patch,
+  drm-i915-enable-mchbar.patch:
+    backport upstream fixes for 915/945 tiling slowness.
+
+* Tue Jun 30 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.5-207
+- Fix stalled NFS writes (#508174)
+- Fix broken TSC-based delay.
+
 * Tue Jun 30 2009 Jarod Wilson <jarod@redhat.com> 2.6.29.5-206
 - Fix busticated lirc_serial (#504402)
 
