@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1671 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1673 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 6
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -645,7 +645,6 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
-Patch370: linux-2.6-debug-selinux-null-creds.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
@@ -790,6 +789,7 @@ Patch6100: linux-2.6-fs-cifs-fix-port-numbers.patch
 Patch9001: revert-fix-modules_install-via-nfs.patch
 Patch9010: linux-2.6-nfsd-report-short-writes.patch
 Patch9020: linux-2.6-nfsd-report-short-writes-fix.patch
+Patch9030: linux-2.6-nfsd-cred-refcount-fix.patch
 
 Patch9100: cpufreq-add-atom-to-p4-clockmod.patch
 # VIA processors: enable pstates
@@ -1322,7 +1322,6 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
-ApplyPatch linux-2.6-debug-selinux-null-creds.patch
 
 #
 # PCI
@@ -1518,6 +1517,8 @@ ApplyPatch squashfs-broken-when-pagesize-greater-than-blocksize.patch
 ApplyPatch linux-2.6-nfsd-report-short-writes.patch
 # fix the short write fix (#508174)
 ApplyPatch linux-2.6-nfsd-report-short-writes-fix.patch
+# Fix null credential bug (#494067)
+ApplyPatch linux-2.6-nfsd-cred-refcount-fix.patch
 
 # fix cifs mount option "port=" (#506574)
 ApplyPatch linux-2.6-fs-cifs-fix-port-numbers.patch
@@ -2136,6 +2137,13 @@ fi
 # and build.
 
 %changelog
+* Thu Jul 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-211
+- Fix NFSD null credentials bug (#494067)
+- Remove null credentials debugging patch.
+
+* Thu Jul 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-210
+- Linux 2.6.29.6
+
 * Wed Jul 01 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-209.rc1
 - Linux 2.6.29.6-rc1
 - Enable CONFIG_DEBUG_CREDENTIALS in debug kernels only.
