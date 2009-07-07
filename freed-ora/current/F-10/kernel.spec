@@ -21,7 +21,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1388 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1393 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +50,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -644,8 +644,9 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch400: linux-2.6-scsi-cpqarray-set-master.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch451: linux-2.6-input-atkbd-forced-release.patch
 Patch460: linux-2.6-serial-460800.patch
+Patch472: linux-2.6-drivers-char-low-latency-removal.patch
+
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
@@ -665,7 +666,6 @@ Patch611: alsa-hda-update-quirks.patch
 
 Patch630: net-revert-forcedeth-power-down-phy-when-interface-is.patch
 Patch640: linux-2.6-netdev-ehea-fix-circular-locking.patch
-Patch641: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
 Patch642: linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 Patch670: linux-2.6-ata-quirk.patch
@@ -698,6 +698,10 @@ Patch1817: drm-f10-compat.patch
 Patch1818: drm-backport-f11-fixes-1.patch
 Patch1829: drm-edid-ignore-tiny-modes.patch
 Patch1835: drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+# from F-11 Jun 15 update
+Patch1836: drm-connector-dpms-fix.patch
+Patch1837: drm-radeon-cs-oops-fix.patch
+Patch1838: drm-radeon-fix-ring-commit.patch
 
 Patch1850: drm-intel-big-hammer.patch
 Patch1851: drm-intel-lying-systems-without-lvds.patch
@@ -739,6 +743,8 @@ Patch9001: squashfs-fixups.patch
 
 Patch9010: revert-fix-modules_install-via-nfs.patch
 Patch9011: linux-2.6-nfsd-report-short-writes.patch
+Patch9012: linux-2.6-nfsd-report-short-writes-fix.patch
+Patch9013: linux-2.6-nfsd-cred-refcount-fix.patch
 
 #Adding dropmonitor bits from 2.6.30
 Patch9100: linux-2.6-dropwatch-protocol.patch
@@ -757,6 +763,8 @@ Patch10000: linux-2.6-ftrace-memory-reduction.patch
 
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11100: linux-2.6-dev-zero-avoid-oom-lockup.patch
+Patch11020: linux-2.6-usb-remove-low-latency-hack.patch
+Patch11030: linux-2.6-x86-delay-tsc-barrier.patch
 
 %endif
 
@@ -1305,19 +1313,18 @@ ApplyPatch net-revert-forcedeth-power-down-phy-when-interface-is.patch
 ApplyPatch linux-2.6-netdev-ehea-fix-circular-locking.patch
 
 # r8169 fixes from 2.6.30
-ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
 ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
-# keyboard release quirks from 2.6.30-rc
-ApplyPatch linux-2.6-input-atkbd-forced-release.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
+# fix oops in nozomi and mxser drivers
+ApplyPatch linux-2.6-drivers-char-low-latency-removal.patch
 
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
@@ -1376,6 +1383,9 @@ ApplyPatch drm-f10-compat.patch
 ApplyPatch drm-backport-f11-fixes-1.patch
 ApplyPatch drm-edid-ignore-tiny-modes.patch
 ApplyPatch drm-copyback-ioctl-data-to-userspace-regardless-of-retcode.patch
+ApplyPatch drm-connector-dpms-fix.patch
+ApplyPatch drm-radeon-cs-oops-fix.patch
+ApplyPatch drm-radeon-fix-ring-commit.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-lying-systems-without-lvds.patch
@@ -1405,6 +1415,10 @@ ApplyPatch revert-fix-modules_install-via-nfs.patch
 
 # fix nfs reporting of short writes (#493500)
 ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+# fix the fix (#508095)
+ApplyPatch linux-2.6-nfsd-report-short-writes-fix.patch
+# Fix nfs credential refcounting (F11 #494067)
+ApplyPatch linux-2.6-nfsd-cred-refcount-fix.patch
 
 # Apply dropmonitor protocol bits from 2.6..30 net-next tree
 ApplyPatch linux-2.6-dropwatch-protocol.patch
@@ -1424,6 +1438,12 @@ ApplyPatch linux-2.6-ftrace-memory-reduction.patch
 ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 
 ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
+
+# fix oopses in usb serial devices (#500954)
+ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
+
+# fix broken tsc delay code
+ApplyPatch linux-2.6-x86-delay-tsc-barrier.patch
 
 # ======= END OF PATCH APPLICATIONS =============================
 
@@ -2001,6 +2021,29 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Jul 06 2009 Chuck Ebbert <cebbert@redhat.com> kernel-2.6.29.6-93
+- From F-11 Jun 15 DRM fixes:
+    drm-connector-dpms-fix.patch
+    drm-radeon-cs-oops-fix.patch
+    drm-radeon-fix-ring-commit.patch
+
+* Mon Jul 06 2009 Chuck Ebbert <cebbert@redhat.com> kernel-2.6.29.6-92
+- From F-11:
+    Fix use of low_latency flag in USB and serial drivers.
+    Fix broken TSC delay code.
+
+* Fri Jul 03 2009 Chuck Ebbert <cebbert@redhat.com> kernel-2.6.29.6-91
+- Fix NFSD credential refcounting.
+
+* Fri Jul 03 2009 Chuck Ebbert <cebbert@redhat.com> kernel-2.6.29.6-90
+- Linux 2.6.29.6
+- Dropped patches merged in -stable:
+    linux-2.6-input-atkbd-forced-release.patch
+    linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+
+* Tue Jun 30 2009 Chuck Ebbert <cebbert@redhat.com> kernel-2.6.29.5-89
+- Fix NFS, broken by the report-short-writes patch (#508095)
+
 * Tue Jun 30 2009 Jarod Wilson <jarod@redhat.com>
 - Fix broken lirc_serial (F11#504402)
 
