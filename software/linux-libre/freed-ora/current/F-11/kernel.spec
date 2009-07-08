@@ -27,7 +27,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1673 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1675 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -684,7 +684,7 @@ Patch603: alsa-pcm-fix-delta-calc-at-overlap.patch
 Patch605: alsa-hda-dont-reset-BDL-unnecessarily.patch
 Patch606: alsa-dont-reset-stream-at-each-prepare-callb.patch
 Patch607: alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
-Patch608: alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+Patch608: alsa-pcm-safer-boundary-checks.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 Patch611: linux-2.6.29-alsa-update-quirks.patch
 Patch612: alsa-hda-add-debugging.patch
@@ -756,6 +756,8 @@ Patch1849: drm-i915-enable-mchbar.patch
 Patch2000: linux-2.6-e1000-ich9.patch
 # BZ #498854
 Patch2010: linux-2.6-netdev-ehea-fix-circular-locking.patch
+Patch2012: linux-2.6-netdev-ehea-fix-page-alignment.patch
+Patch2013: linux-2.6-netdev-ehea-remove-from-list.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -1353,7 +1355,7 @@ ApplyPatch alsa-pcm-fix-delta-calc-at-overlap.patch
 ApplyPatch alsa-hda-dont-reset-BDL-unnecessarily.patch
 ApplyPatch alsa-dont-reset-stream-at-each-prepare-callb.patch
 ApplyPatch alsa-hda_intel-fix-unexpected-ring-buffer-positio.patch
-ApplyPatch alsa-pcm-midlevel-add-more-strict-buffer-position.patch
+ApplyPatch alsa-pcm-safer-boundary-checks.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 ApplyPatch alsa-hda-add-debugging.patch
 
@@ -1449,6 +1451,8 @@ ApplyPatch linux-2.6-cdrom-door-status.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 # bz 498854
 ApplyPatch linux-2.6-netdev-ehea-fix-circular-locking.patch
+ApplyPatch linux-2.6-netdev-ehea-fix-page-alignment.patch
+ApplyPatch linux-2.6-netdev-ehea-remove-from-list.patch
 
 ApplyPatch agp-set_memory_ucwb.patch
 # Nouveau DRM + drm fixes
@@ -2137,6 +2141,12 @@ fi
 # and build.
 
 %changelog
+* Tue Jul 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-213
+- Drop the correct patch to fix bug #498858
+
+* Mon Jul 06 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-212
+- Additional fixes for bug #498854
+
 * Thu Jul 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-211
 - Fix NFSD null credentials bug (#494067)
 - Remove null credentials debugging patch.
