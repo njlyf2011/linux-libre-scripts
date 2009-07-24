@@ -1,10 +1,12 @@
+# We have to override the new %%install behavior because, well... the kernel is special.
+%global __spec_install_pre %{___build_pre}
 
 Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 1
+%global released_kernel 1
 
 # Versions of various parts
 
@@ -27,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1675 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -702,6 +704,9 @@ Patch684: linux-2.6-iwlagn-fix-hw-rfkill-while-the-interface-is-down.patch
 Patch685: linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 Patch686: linux-2.6-iwl3945-use-cancel_delayed_work_sync-to-cancel-rfkill_poll.patch
 Patch687: mac80211-don-t-drop-nullfunc-frames-during-software.patch
+Patch690: iwl3945-release-resources-before-shutting-down.patch
+Patch691: iwl3945-add-debugging-for-wrong-command-queue.patch
+Patch692: iwl3945-fix-rfkill-sw-and-hw-mishmash.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
@@ -805,6 +810,7 @@ Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
 Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 Patch9307: linux-2.6.29-xen-disable-gbpages.patch
+Patch9308: linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
@@ -1432,6 +1438,10 @@ ApplyPatch linux-2.6-mac80211-fix-beacon-loss-detection-after-scan.patch
 
 ApplyPatch mac80211-don-t-drop-nullfunc-frames-during-software.patch
 
+ApplyPatch iwl3945-release-resources-before-shutting-down.patch
+ApplyPatch iwl3945-add-debugging-for-wrong-command-queue.patch
+ApplyPatch iwl3945-fix-rfkill-sw-and-hw-mishmash.patch
+
 # Fix up DMA debug code
 ApplyPatch linux-2.6-dma-debug-fixes.patch
 
@@ -1535,6 +1545,8 @@ ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
+# http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=4eff3cae9c9809720c636e64bc72f212258e0bd5 (#510304)
+ApplyPatch linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 # finally fix the proc registration bug (F11#503773 and others)
 ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 #
@@ -2141,6 +2153,23 @@ fi
 # and build.
 
 %changelog
+* Thu Jul 23 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.6-217
+- Apply three patches requested by sgruszka@redhat.com:
+ - iwl3945-release-resources-before-shutting-down.patch
+ - iwl3945-add-debugging-for-wrong-command-queue.patch
+ - iwl3945-fix-rfkill-sw-and-hw-mishmash.patch
+ 
+* Thu Jul 23 2009 Jarod Wilson <jarod@redhat.com>
+- virtio_blk: don't bounce highmem requests, works around a frequent
+  oops in kvm guests using virtio block devices (#510304)
+
+* Wed Jul 22 2009 Tom "spot" Callaway <tcallawa@redhat.com>
+- We have to override the new %%install behavior because, well... the kernel is
+special.
+
+* Wed Jul 22 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: Fix DPMS off for DAC outputs, NV4x PFIFO typo
+
 * Tue Jul 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-213
 - Drop the correct patch to fix bug #498858
 
