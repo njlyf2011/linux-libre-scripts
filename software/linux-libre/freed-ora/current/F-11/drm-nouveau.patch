@@ -21417,7 +21417,7 @@ index 0000000..530bbee
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv40_fifo.c b/drivers/gpu/drm/nouveau/nv40_fifo.c
 new file mode 100644
-index 0000000..2f44daa
+index 0000000..742ef4c
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv40_fifo.c
 @@ -0,0 +1,216 @@
@@ -21564,7 +21564,7 @@ index 0000000..2f44daa
 +
 +	/* Set channel active, and in DMA mode */
 +	nv_wr32(NV03_PFIFO_CACHE1_PUSH1,
-+		 NV03_PFIFO_CACHE1_PUSH1_DMA | chan->id);
++		NV40_PFIFO_CACHE1_PUSH1_DMA | chan->id);
 +
 +	/* Reset DMA_CTL_AT_INFO to INVALID */
 +	tmp = nv_rd32(NV04_PFIFO_CACHE1_DMA_CTL) & ~(1<<31);
@@ -24994,10 +24994,10 @@ index 0000000..763cffe
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_dac.c b/drivers/gpu/drm/nouveau/nv50_dac.c
 new file mode 100644
-index 0000000..e0569d0
+index 0000000..6140391
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_dac.c
-@@ -0,0 +1,287 @@
+@@ -0,0 +1,288 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -25098,7 +25098,8 @@ index 0000000..e0569d0
 +	load_state = nv_rd32(NV50_PDISPLAY_DAC_REGS_LOAD_CTRL(or));
 +
 +	nv_wr32(NV50_PDISPLAY_DAC_REGS_LOAD_CTRL(or), 0);
-+	nv_wr32(NV50_PDISPLAY_DAC_REGS_DPMS_CTRL(or), dpms_state);
++	nv_wr32(NV50_PDISPLAY_DAC_REGS_DPMS_CTRL(or), dpms_state |
++		NV50_PDISPLAY_DAC_REGS_DPMS_CTRL_PENDING);
 +
 +	if ((load_state & NV50_PDISPLAY_DAC_REGS_LOAD_CTRL_PRESENT) ==
 +			  NV50_PDISPLAY_DAC_REGS_LOAD_CTRL_PRESENT)
