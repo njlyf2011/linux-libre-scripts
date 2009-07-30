@@ -61,7 +61,6 @@ D/scripts////
 /drm-modesetting-radeon.patch/1.82/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /drm-next.patch/1.18/dummy timestamp from new-entry/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /drm-no-gem-on-i8xx.patch/1.2/Thu May 28 05:56:48 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
-/drm-nouveau.patch/1.59/dummy timestamp from new-entry+Thu Jul 23 20:35:59 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /drm-pnp-add-resource-range-checker.patch/1.1/Wed Jul  1 00:03:06 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /drm-radeon-cs-oops-fix.patch/1.2/Tue Jun 23 20:00:46 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /drm-radeon-fix-ring-commit.patch/1.1/Tue Jun 16 00:20:54 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
@@ -208,3 +207,4 @@ D/scripts////
 /via-padlock-nano-workarounds-ecb.patch/1.1/Sat Jun 13 02:07:59 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /via-rng-64-bit-enable.patch/1.1/Sat Jun 13 02:07:59 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
 /via-sdmmc.patch/1.3/Wed Jun 17 04:43:54 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
+/drm-nouveau.patch/1.59/Thu Jul 30 18:26:15 2009/-kb/Tkernel-2_6_29_6-217_2_3_fc11
