@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.3 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -783,6 +783,7 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 Patch3000: linux-2.6-btrfs-unstable-update.patch
 Patch3010: linux-2.6-relatime-by-default.patch
 Patch3020: linux-2.6-fiemap-header-install.patch
+Patch3030: linux-2.6-ecryptfs-overflow-fixes.patch
 
 Patch5000: linux-2.6-add-qcserial.patch
 
@@ -828,6 +829,13 @@ Patch11109: via-padlock-cryptodev-1-64bit-enable.patch
 Patch11110: via-padlock-cryptodev-2-64bit-enable.patch
 Patch11120: via-padlock-fix-might-sleep.patch
 Patch11130: via-hwmon-temp-sensor.patch
+
+# CVE-2009-1895
+Patch12000: security-use-mmap_min_addr-indepedently-of-security-models.patch
+Patch12010: personality-fix-per_clear_on_setid.patch
+
+# make gcc stop optimizing away null pointer tests
+Patch13000: add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
 
 %endif
 
@@ -1306,6 +1314,9 @@ ApplyPatch linux-2.6-execshield.patch
 # btrfs
 ApplyPatch linux-2.6-btrfs-unstable-update.patch
 
+# eCryptfs
+ApplyPatch linux-2.6-ecryptfs-overflow-fixes.patch
+
 # relatime
 ApplyPatch linux-2.6-relatime-by-default.patch
 
@@ -1555,6 +1566,13 @@ ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
 ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
 
 ApplyPatch linux-2.6-x86-delay-tsc-barrier.patch
+
+# CVE-2009-1895
+ApplyPatch security-use-mmap_min_addr-indepedently-of-security-models.patch
+ApplyPatch personality-fix-per_clear_on_setid.patch
+
+# don't optimize out null pointer tests
+ApplyPatch add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
 
 # VIA: add 64-bit padlock support, sdmmc driver, temp sensor driver
 ApplyPatch via-centaur-merge-32-64-bit-init.patch
@@ -2153,6 +2171,16 @@ fi
 # and build.
 
 %changelog
+* Wed Jul 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-217.2.3
+- Don't optimize away NULL pointer tests where pointer is used before the test.
+  (CVE-2009-1897)
+
+* Wed Jul 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-217.2.2
+- Fix mmap_min_addr security bugs (CVE-2009-1895)
+
+* Wed Jul 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-217.2.1
+- Fix eCryptfs overflow issues (CVE-2009-2406, CVE-2009-2407)
+
 * Thu Jul 23 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.6-217
 - Apply three patches requested by sgruszka@redhat.com:
  - iwl3945-release-resources-before-shutting-down.patch
