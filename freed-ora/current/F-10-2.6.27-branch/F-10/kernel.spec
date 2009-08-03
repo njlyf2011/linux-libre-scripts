@@ -1,3 +1,6 @@
+# We have to override the new %%install behavior because, well... the kernel is special.
+%global __spec_install_pre %{___build_pre}
+
 Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
@@ -21,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.72 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.78 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -50,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 25
+%define stable_update 29
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -592,9 +595,6 @@ Patch04: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
-# fix build on newer userspace, even for -vanilla
-Patch06: linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
-
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
@@ -721,9 +721,7 @@ Patch2006: linux-2.6-netdev-r8169-2.6.30.patch
 Patch2007: linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch
 Patch2008: linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch
 # r8169 fixes from 2.6.31
-Patch2009: linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
 Patch2010: linux-2.6-netdev-r8169-use-different-family-defaults.patch
-Patch2011: linux-2.6-netdev-r8169-avoid-losing-msi-interrupts.patch
 
 # Backport Toshiba updates so Bluetooth can be enabled (#437091)
 Patch2014: linux-2.6-toshiba-acpi-update.patch
@@ -801,6 +799,8 @@ Patch4010: kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
 
 Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
+
+Patch12000: linux-2.6-virtio-blk-dont-bounce-highmem-requests.patch
 
 %endif
 
@@ -1159,9 +1159,6 @@ ApplyPatch linux-2.6-build-nonintconfig.patch
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
-# Fix building kernel on newer userspace
-ApplyPatch linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
-
 #
 # misc small stuff to make things compile
 #
@@ -1387,9 +1384,7 @@ ApplyPatch linux-2.6-netdev-r8169-2.6.30.patch
 ApplyPatch linux-2.6-netdev-r8169-add-more-netdevice-ops-R.patch -R
 ApplyPatch linux-2.6-netdev-r8169-convert-to-netdevice-ops-R.patch -R
 # r8169 fixes from 2.6.30/2.6.29.5
-ApplyPatch linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
 ApplyPatch linux-2.6-netdev-r8169-use-different-family-defaults.patch
-ApplyPatch linux-2.6-netdev-r8169-avoid-losing-msi-interrupts.patch
 
 ApplyPatch linux-2.6-eeepc-laptop-update.patch
 ApplyPatch linux-2.6-toshiba-acpi-update.patch
@@ -1461,6 +1456,10 @@ ApplyPatch kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
 ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 
 ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
+
+# fix oops with virtio block driver requests (#510304)
+ApplyPatch linux-2.6-virtio-blk-dont-bounce-highmem-requests.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2036,6 +2035,27 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Jul 31 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.29-170.2.78
+- The kernel package needs to override the new rpm %%install behavior.
+
+* Thu Jul 30 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.29-170.2.77
+- Linux 2.6.27.29
+
+* Wed Jul 29 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.29-170.2.75.rc1
+- Linux 2.6.27.29-rc1 (CVE-2009-2406, CVE-2009-2407)
+- Drop linux-2.6-netdev-r8169-avoid-losing-msi-interrupts.patch, now in -stable.
+
+* Wed Jul 29 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.28-170.2.74
+- Don't bounce virtio_blk requests (#510304)
+
+* Mon Jul 27 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.28-170.2.73
+- Linux 2.6.27.28 (CVE-2009-1895, CVE-2009-1897)
+  Dropped patches, merged in stable:
+    linux-2.6-kbuild-fix-unifdef.c-usage-of-getline.patch
+    linux-2.6-netdev-r8169-fix-lg-pkt-crash.patch
+  New config item:
+    CONFIG_DEFAULT_MMAP_MIN_ADDR=32768
+
 * Tue Jun 23 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Add -libre provides for kernel and devel packages.
 
