@@ -4,8 +4,8 @@ GNUmakefile
 kernel-2.6.*.config
 temp-*
 deblob-main
-deblob-2.6.29
+deblob-2.6.30
 deblob-check
-kernel-2.6.29
-linux-2.6.29-libre1.*
-patch-2.6.29.6.bz2
+kernel-2.6.30
+linux-2.6.30-libre.*
+patch-2.6.30.4.bz2

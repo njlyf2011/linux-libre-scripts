@@ -4,7 +4,7 @@ Deblobbed
 (radeon_modeset_cp_resume): Deblob call to radeon_cp_load_microcode.
 
 diff --git a/arch/x86/mm/pat.c b/arch/x86/mm/pat.c
-index 640339e..fdc60ea 100644
+index e6718bb..3bbdbe3 100644
 --- a/arch/x86/mm/pat.c
 +++ b/arch/x86/mm/pat.c
 @@ -30,6 +30,7 @@
@@ -13,10 +13,10 @@ index 640339e..fdc60ea 100644
  int __read_mostly pat_enabled = 1;
 +EXPORT_SYMBOL_GPL(pat_enabled);
  
- void __cpuinit pat_disable(char *reason)
+ static inline void pat_disable(const char *reason)
  {
 diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
-index 3a22eb9..a74980b 100644
+index f5d46e7..f8d5074 100644
 --- a/drivers/gpu/drm/Kconfig
 +++ b/drivers/gpu/drm/Kconfig
 @@ -35,6 +35,9 @@ config DRM_R128
@@ -3467,10 +3467,10 @@ index 0000000..abeab6a
 +EXPORT_SYMBOL(drm_bo_pfn_prot);
 +
 diff --git a/drivers/gpu/drm/drm_bufs.c b/drivers/gpu/drm/drm_bufs.c
-index 6d80d17..4d2161f 100644
+index 0411d91..07e0c51 100644
 --- a/drivers/gpu/drm/drm_bufs.c
 +++ b/drivers/gpu/drm/drm_bufs.c
-@@ -249,7 +249,7 @@ static int drm_addmap_core(struct drm_device * dev, resource_size_t offset,
+@@ -257,7 +257,7 @@ static int drm_addmap_core(struct drm_device * dev, resource_size_t offset,
  		map->offset = (unsigned long)map->handle;
  		if (map->flags & _DRM_CONTAINS_LOCK) {
  			/* Prevent a 2nd X Server from creating a 2nd lock */
@@ -3479,7 +3479,7 @@ index 6d80d17..4d2161f 100644
  				vfree(map->handle);
  				drm_free(map, sizeof(*map), DRM_MEM_MAPS);
  				return -EBUSY;
-@@ -463,8 +463,8 @@ int drm_rmmap_locked(struct drm_device *dev, struct drm_local_map *map)
+@@ -471,8 +471,8 @@ int drm_rmmap_locked(struct drm_device *dev, struct drm_local_map *map)
  		vfree(map->handle);
  		if (master) {
  			if (dev->sigdata.lock == master->lock.hw_lock)
@@ -3490,7 +3490,7 @@ index 6d80d17..4d2161f 100644
  			master->lock.file_priv = NULL;
  			wake_up_interruptible_all(&master->lock.lock_queue);
  		}
-@@ -481,6 +481,9 @@ int drm_rmmap_locked(struct drm_device *dev, struct drm_local_map *map)
+@@ -489,6 +489,9 @@ int drm_rmmap_locked(struct drm_device *dev, struct drm_local_map *map)
  	case _DRM_GEM:
  		DRM_ERROR("tried to rmmap GEM object\n");
  		break;
@@ -3500,7 +3500,7 @@ index 6d80d17..4d2161f 100644
  	}
  	drm_free(map, sizeof(*map), DRM_MEM_MAPS);
  
-@@ -1580,6 +1583,7 @@ int drm_mapbufs(struct drm_device *dev, void *data,
+@@ -1588,6 +1591,7 @@ int drm_mapbufs(struct drm_device *dev, void *data,
  	dev->buf_use++;		/* Can't allocate more after this call */
  	spin_unlock(&dev->count_lock);
  
@@ -3508,7 +3508,7 @@ index 6d80d17..4d2161f 100644
  	if (request->count >= dma->buf_count) {
  		if ((drm_core_has_AGP(dev) && (dma->flags & _DRM_DMA_USE_AGP))
  		    || (drm_core_check_feature(dev, DRIVER_SG)
-@@ -1590,6 +1594,7 @@ int drm_mapbufs(struct drm_device *dev, void *data,
+@@ -1598,6 +1602,7 @@ int drm_mapbufs(struct drm_device *dev, void *data,
  			unsigned long token = dev->agp_buffer_token;
  
  			if (!map) {
@@ -3516,7 +3516,7 @@ index 6d80d17..4d2161f 100644
  				retcode = -EINVAL;
  				goto done;
  			}
-@@ -1607,6 +1612,7 @@ int drm_mapbufs(struct drm_device *dev, void *data,
+@@ -1615,6 +1620,7 @@ int drm_mapbufs(struct drm_device *dev, void *data,
  			up_write(&current->mm->mmap_sem);
  		}
  		if (virtual > -1024UL) {
@@ -3525,7 +3525,7 @@ index 6d80d17..4d2161f 100644
  			retcode = (signed long)virtual;
  			goto done;
 diff --git a/drivers/gpu/drm/drm_crtc.c b/drivers/gpu/drm/drm_crtc.c
-index 94a7688..c580c55 100644
+index 8fab789..e4b8f56 100644
 --- a/drivers/gpu/drm/drm_crtc.c
 +++ b/drivers/gpu/drm/drm_crtc.c
 @@ -1511,7 +1511,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
@@ -3538,10 +3538,10 @@ index 94a7688..c580c55 100644
  
  out:
 diff --git a/drivers/gpu/drm/drm_crtc_helper.c b/drivers/gpu/drm/drm_crtc_helper.c
-index 4589044..f6182a5 100644
+index a6f73f1..c613e37 100644
 --- a/drivers/gpu/drm/drm_crtc_helper.c
 +++ b/drivers/gpu/drm/drm_crtc_helper.c
-@@ -849,6 +849,8 @@ int drm_crtc_helper_set_config(struct drm_mode_set *set)
+@@ -872,6 +872,8 @@ int drm_crtc_helper_set_config(struct drm_mode_set *set)
  						set->x, set->y, old_fb);
  		if (ret != 0)
  		    goto fail_set_mode;
@@ -3550,7 +3550,7 @@ index 4589044..f6182a5 100644
  	}
  
  	kfree(save_encoders);
-@@ -988,3 +990,30 @@ int drm_helper_resume_force_mode(struct drm_device *dev)
+@@ -1093,3 +1095,30 @@ int drm_helper_resume_force_mode(struct drm_device *dev)
  	return 0;
  }
  EXPORT_SYMBOL(drm_helper_resume_force_mode);
@@ -3614,7 +3614,7 @@ index 7a8e2fb..0b2df71 100644
  /**
   * Free a buffer.
 diff --git a/drivers/gpu/drm/drm_drv.c b/drivers/gpu/drm/drm_drv.c
-index f01def1..11eedcb 100644
+index 019b7c5..fe5e460 100644
 --- a/drivers/gpu/drm/drm_drv.c
 +++ b/drivers/gpu/drm/drm_drv.c
 @@ -167,8 +167,12 @@ int drm_lastclose(struct drm_device * dev)
@@ -5416,7 +5416,7 @@ index 22f7656..e6bbf0e 100644
 +	return 0;
 +}
 diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
-index ee7ce7b..95422bb 100644
+index 98bb4c8..d733d11 100644
 --- a/drivers/gpu/drm/i915/i915_irq.c
 +++ b/drivers/gpu/drm/i915/i915_irq.c
 @@ -397,7 +397,8 @@ static int i915_wait_irq(struct drm_device * dev, int irq_nr)
@@ -5430,10 +5430,10 @@ index ee7ce7b..95422bb 100644
  int i915_irq_emit(struct drm_device *dev, void *data,
  			 struct drm_file *file_priv)
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index 64773ce..178386d 100644
+index c9d6f10..d0ac174 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
-@@ -763,12 +763,18 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
+@@ -774,12 +774,18 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
  	if (!master_priv->sarea_priv)
  		return 0;
  
@@ -5456,7 +5456,7 @@ index 64773ce..178386d 100644
  	}
  
  	return 0;
-@@ -891,12 +897,12 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -902,12 +908,12 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
  
  	switch (pipe) {
  	case 0:
@@ -17403,7 +17403,7 @@ index 0000000..0fb98cb
 +	kfree(connector);
 +}
 diff --git a/drivers/gpu/drm/radeon/radeon_cp.c b/drivers/gpu/drm/radeon/radeon_cp.c
-index 77a7a4d..abad524 100644
+index aff90bb..179d408 100644
 --- a/drivers/gpu/drm/radeon/radeon_cp.c
 +++ b/drivers/gpu/drm/radeon/radeon_cp.c
 @@ -46,8 +46,12 @@ static void radeon_do_cp_start(drm_radeon_private_t * dev_priv);
@@ -21284,7 +21284,7 @@ index 13a60f4..298ae3d 100644
  }
  
 diff --git a/drivers/gpu/drm/radeon/radeon_drv.h b/drivers/gpu/drm/radeon/radeon_drv.h
-index 8071d96..fb1e40a 100644
+index 0c6bfc1..e3498a4 100644
 --- a/drivers/gpu/drm/radeon/radeon_drv.h
 +++ b/drivers/gpu/drm/radeon/radeon_drv.h
 @@ -34,6 +34,8 @@
@@ -21897,7 +21897,7 @@ index 8071d96..fb1e40a 100644
  } while (0)
  
  #define RADEON_WAIT_UNTIL_3D_IDLE() do {				\
-@@ -2036,4 +2207,159 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
+@@ -2039,4 +2210,159 @@ extern void radeon_commit_ring(drm_radeon_private_t *dev_priv);
  	write &= mask;						\
  } while (0)
  
@@ -36150,7 +36150,7 @@ index 7cb50bd..fcaef63 100644
  
  /**
 diff --git a/include/drm/drmP.h b/include/drm/drmP.h
-index c8c4221..04fbd1e 100644
+index b84d8ae..b0d024c 100644
 --- a/include/drm/drmP.h
 +++ b/include/drm/drmP.h
 @@ -147,9 +147,23 @@ struct drm_device;
@@ -36305,7 +36305,7 @@ index c8c4221..04fbd1e 100644
  
  extern drm_dma_handle_t *drm_pci_alloc(struct drm_device *dev, size_t size,
  				       size_t align, dma_addr_t maxaddr);
-@@ -1525,6 +1584,39 @@ extern void drm_free(void *pt, size_t size, int area);
+@@ -1549,6 +1608,39 @@ extern void drm_free(void *pt, size_t size, int area);
  extern void *drm_calloc(size_t nmemb, size_t size, int area);
  #endif
  
@@ -36346,10 +36346,10 @@ index c8c4221..04fbd1e 100644
  
  #endif				/* __KERNEL__ */
 diff --git a/include/drm/drm_crtc_helper.h b/include/drm/drm_crtc_helper.h
-index ec073d8..32ac55d 100644
+index 6769ff6..ad1b392 100644
 --- a/include/drm/drm_crtc_helper.h
 +++ b/include/drm/drm_crtc_helper.h
-@@ -121,4 +121,6 @@ static inline void drm_connector_helper_add(struct drm_connector *connector,
+@@ -123,4 +123,6 @@ static inline void drm_connector_helper_add(struct drm_connector *connector,
  }
  
  extern int drm_helper_resume_force_mode(struct drm_device *dev);

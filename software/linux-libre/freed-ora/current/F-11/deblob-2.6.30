@@ -44,7 +44,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.29 extra=1
+kver=2.6.30 extra=
 
 fatal () {
   echo "$@"
@@ -186,6 +186,13 @@ reject_firmware () {
 	clean_sed '
 s,request\(_ihex\)\?_firmware\(_nowait\)\?,reject_firmware\2,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
+}
+
+maybe_reject_firmware () {
+	#$1 = file
+	clean_sed '
+s,request_firmware\(_nowait\)\?,maybe_reject_firmware\1,g
+' "$1" 'retain Free firmware-loading machinery, disabling non-Free one'
 }
 
 undefine_macro () {
@@ -366,6 +373,15 @@ clean_blob arch/arm/mach-netx/xc.c
 clean_kconfig arch/arm/Kconfig 'ARCH_NETX'
 clean_mk CONFIG_ARCH_NETX arch/arm/Makefile
 
+###########
+# Chipset #
+###########
+
+announce STLC45XX - "stlc4550/4560 chipset support"
+reject_firmware drivers/staging/stlc45xx/stlc45xx.c
+clean_blob drivers/staging/stlc45xx/stlc45xx.c
+clean_kconfig drivers/staging/stlc45xx/Kconfig 'STLC45XX'
+clean_mk CONFIG_STLC45XX drivers/staging/stlc45xx/Makefile
 
 #######
 # ATM #
@@ -387,6 +403,11 @@ clean_blob Documentation/dontdiff
 clean_kconfig drivers/atm/Kconfig 'ATM_FORE200E'
 clean_mk CONFIG_ATM_FORE200E drivers/atm/Makefile
 
+announce ATM_SOLOS - "Solos ADSL2+ PCI Multiport card driver"
+reject_firmware drivers/atm/solos-pci.c
+clean_blob drivers/atm/solos-pci.c
+clean_kconfig drivers/atm/Kconfig 'ATM_SOLOS'
+clean_mk CONFIG_ATM_SOLOS drivers/atm/Makefile
 
 ########
 # char #
@@ -460,6 +481,27 @@ clean_sed '
 }' drivers/gpu/drm/radeon/radeon_cp.c 'report missing Free microcode on resume'
 clean_blob drivers/gpu/drm/radeon/radeon_cp.c
 clean_blob drivers/gpu/drm/radeon/radeon_microcode.h
+clean_sed '
+/^int r600_do_init_cp([^;]*$/,/^}$/{
+  /^		r[67]00_cp_load_microcode(dev_priv);$/{
+    i\
+		do {\
+			DRM_ERROR("Missing Free microcode!\\n");\
+			r600_do_cleanup_cp(dev);\
+			return -EINVAL;\
+		} while (0);
+  }
+}' drivers/gpu/drm/radeon/r600_cp.c 'report missing Free microcode on init'
+clean_sed '
+/^int r600_do_resume_cp([^;]*$/,/^}$/{
+  /^		r[67]00_cp_load_microcode(dev_priv);$/{
+    i\
+		DRM_ERROR("Missing Free microcode!\\n");\
+		return -EINVAL;
+  }
+}' drivers/gpu/drm/radeon/r600_cp.c 'report missing Free microcode on resume'
+clean_blob drivers/gpu/drm/radeon/r600_cp.c
+clean_blob drivers/gpu/drm/radeon/r600_microcode.h
 clean_kconfig -f drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
@@ -489,7 +531,9 @@ clean_mk CONFIG_MEDIA_TUNER_XC2028 drivers/media/common/tuners/Makefile
 announce MEDIA_TUNER_XC5000 - "Xceive XC5000 silicon tuner"
 undefine_macro 'XC5000_DEFAULT_FIRMWARE_SIZE' 0 \
   'removed non-Free firmware size' drivers/media/common/tuners/xc5000.c
-undefault_firmware 'XC5000' drivers/media/common/tuners/xc5000.c
+undefault_firmware 'XC5000' \
+  drivers/media/common/tuners/xc5000.c \
+  drivers/media/video/cx231xx/cx231xx-cards.c
 reject_firmware drivers/media/common/tuners/xc5000.c
 clean_kconfig drivers/media/common/tuners/Kconfig 'MEDIA_TUNER_XC5000'
 clean_mk CONFIG_MEDIA_TUNER_XC5000 drivers/media/common/tuners/Makefile
@@ -691,22 +735,8 @@ clean_mk CONFIG_DVB_TDA1004X drivers/media/dvb/frontends/Makefile
 # dvb
 
 announce DVB_AV7110 - "AV7110 cards"
-# The bootcode is actually Free Software under GPLv2, but since it's
-# being distributed without source code, we're taking it out for now.
-clean_sed '
-s,^	\/\* boot \*\/$,	printk(KERN_ERR "dvb-ttpci: av7110_bootarm(): Missing Free bootcode\\n");\n	return -EINVAL;\n\n&,
-' drivers/media/dvb/ttpci/av7110_hw.c 'report missing Free bootcode'
-clean_sed '
-s,mwdebi(.*bootcode.*$,/* & */,
-' drivers/media/dvb/ttpci/av7110_hw.c 'adjust bootcode loader'
-clean_blob drivers/media/dvb/ttpci/av7110_hw.c
 reject_firmware drivers/media/dvb/ttpci/av7110.c
 clean_blob drivers/media/dvb/ttpci/av7110.c
-clean_sed '
-/^config DVB_AV7110_FIRMWARE_FILE$/, /^config / {
-  /^	default.*dvb-ttpci-01/ s,".*","/*(DEBLOBBED)*/",;
-}' drivers/media/dvb/ttpci/Kconfig 'removed default firmware'
-clean_kconfig -f drivers/media/dvb/ttpci/Kconfig 'DVB_AV7110_FIRMWARE'
 clean_kconfig drivers/media/dvb/ttpci/Kconfig 'DVB_AV7110'
 clean_mk CONFIG_DVB_AV7110 drivers/media/dvb/ttpci/Makefile
 
@@ -868,14 +898,11 @@ clean_kconfig drivers/net/Kconfig 'ADAPTEC_STARFIRE'
 clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/Makefile
 
 announce BNX2 - "Broadcom NetXtremeII"
-clean_file drivers/net/bnx2_fw.h
-clean_file drivers/net/bnx2_fw2.h
-clean_sed '
-/ bnx2_init_cpus(/i\
-	printk (KERN_ERR "%s: Missing Free firmware\\n", bp->dev->name);\
-	return -EINVAL;\
-#define bnx2_init_cpus(bp) (-EINVAL)
-' drivers/net/bnx2.c 'report missing Free firmware'
+drop_fw_file firmware/bnx2/bnx2-mips-09-4.6.17.fw.ihex firmware/bnx2/bnx2-mips-09-4.6.17.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-09-4.6.15.fw.ihex firmware/bnx2/bnx2-rv2p-09-4.6.15.fw
+drop_fw_file firmware/bnx2/bnx2-mips-06-4.6.16.fw.ihex firmware/bnx2/bnx2-mips-06-4.6.16.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-06-4.6.16.fw.ihex firmware/bnx2/bnx2-rv2p-06-4.6.16.fw
+reject_firmware drivers/net/bnx2.c
 clean_blob drivers/net/bnx2.c
 clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
@@ -903,7 +930,7 @@ clean_mk CONFIG_CASSINI drivers/net/Makefile
 announce CHELSIO_T3 - "Chelsio AEL 2005 support"
 drop_fw_file firmware/cxgb3/t3b_psram-1.1.0.bin.ihex firmware/cxgb3/t3b_psram-1.1.0.bin
 drop_fw_file firmware/cxgb3/t3c_psram-1.1.0.bin.ihex firmware/cxgb3/t3c_psram-1.1.0.bin
-drop_fw_file firmware/cxgb3/t3fw-7.0.0.bin.ihex firmware/cxgb3/t3fw-7.0.0.bin
+drop_fw_file firmware/cxgb3/t3fw-7.1.0.bin.ihex firmware/cxgb3/t3fw-7.1.0.bin
 reject_firmware drivers/net/cxgb3/cxgb3_main.c
 clean_sed '
 /^static int ael2005_setup_\(sr\|twinax\)_edc([^;]*$/,/^}$/{
@@ -930,13 +957,8 @@ clean_kconfig drivers/net/Kconfig 'E100'
 clean_mk CONFIG_E100 drivers/net/Makefile
 
 announce MYRI_SBUS - "MyriCOM Gigabit Ethernet"
-clean_file drivers/net/myri_code.h
-clean_sed '
-/myri_load_lanai.*;/{
-  i\
-	printk(KERN_ERR "Missing Free firmware\\n");\
-	goto err_free_irq;
-}' drivers/net/myri_sbus.c 'report missing Free firmware'
+drop_fw_file firmware/myricom/lanai.bin.ihex firmware/myricom/lanai.bin
+reject_firmware drivers/net/myri_sbus.c
 clean_blob drivers/net/myri_sbus.c
 clean_kconfig drivers/net/Kconfig 'MYRI_SBUS'
 clean_mk CONFIG_MYRI_SBUS drivers/net/Makefile
@@ -947,14 +969,15 @@ clean_blob drivers/net/myri10ge/myri10ge.c
 clean_kconfig drivers/net/Kconfig 'MYRI10GE'
 clean_mk CONFIG_MYRI10GE drivers/net/myri10ge/Makefile
 
+announce NETXEN_NIC - "NetXen Multi port (1/10) Gigabit Ethernet NIC"
+reject_firmware drivers/net/netxen/netxen_nic_hw.c
+clean_blob drivers/net/netxen/netxen_nic_hw.c
+clean_kconfig drivers/net/Kconfig 'NETXEN_NIC'
+clean_mk CONFIG_NETXEN_NIC drivers/net/Makefile
+
 announce SLICOSS - "Alacritech Gigabit IS-NIC cards"
 reject_firmware drivers/staging/slicoss/slicoss.c
 clean_blob drivers/staging/slicoss/slicoss.c
-clean_blob drivers/staging/slicoss/gbdownload.h
-clean_blob drivers/staging/slicoss/oasisdownload.h
-clean_blob drivers/staging/slicoss/oasisdbgdownload.h
-clean_blob drivers/staging/slicoss/gbrcvucode.h
-clean_blob drivers/staging/slicoss/oasisrcvucode.h
 clean_kconfig drivers/staging/slicoss/Kconfig 'SLICOSS'
 clean_mk CONFIG_SLICOSS drivers/staging/slicoss/Makefile
 
@@ -967,19 +990,22 @@ clean_kconfig drivers/net/Kconfig 'SPIDER_NET'
 clean_mk CONFIG_SPIDER_NET drivers/net/Makefile
 
 announce SXG - "Alacritech SLIC Technology Non-Accelerated 10Gbe cards"
-clean_blob drivers/staging/sxg/saharadbgdownload.h
-clean_blob drivers/staging/sxg/sxgphycode.h
+clean_file drivers/staging/sxg/sxgphycode-1.2.h
+reject_firmware drivers/staging/sxg/sxg.c
+clean_sed '
+/^static int sxg_phy_init(/,/^}$/{
+  /for (p = PhyUcode/i\
+		printk("%s: missing Free firmware\\n", __func__);\
+		return (STATUS_FAILURE);\
+#define PhyUcode NULL		
+}' drivers/staging/sxg/sxg.c
+clean_blob drivers/staging/sxg/sxg.c
 clean_kconfig drivers/staging/sxg/Kconfig 'SXG'
 clean_mk CONFIG_SXG drivers/staging/sxg/Makefile
 
 announce TEHUTI - "Tehuti Networks 10G Ethernet"
-clean_blob drivers/net/tehuti_fw.h
-clean_sed '
-/bdx_tx_push_desc_safe.*s_firmLoad.*/{
-  i\
-		ERR("%s: Missing Free firmware\\n", priv->ndev->name);\
-		RET(-EINVAL);
-}' drivers/net/tehuti.c 'report missing Free firmware'
+drop_fw_file firmware/tehuti/bdx.bin.ihex firmware/tehuti/bdx.bin
+reject_firmware drivers/net/tehuti.c
 clean_blob drivers/net/tehuti.c
 clean_kconfig drivers/net/Kconfig 'TEHUTI'
 clean_mk CONFIG_TEHUTI drivers/net/Makefile
@@ -994,17 +1020,9 @@ clean_kconfig drivers/net/Kconfig 'TIGON3'
 clean_mk CONFIG_TIGON3 drivers/net/Makefile
 
 announce TYPHOON - "3cr990 series Typhoon"
-clean_blob drivers/net/typhoon-firmware.h
-clean_sed '
-/^typhoon_download_firmware([^;]*$/,/^}/{
-  /typhoon_firmware_image/{
-    i\
-	printk(KERN_ERR "%s: Missing Free firmware\\n", tp->name);\
-	err = -EINVAL;\
-	goto err_out;
-    d;
-  }
-}' drivers/net/typhoon.c 'report missing Free firmware'
+drop_fw_file firmware/3com/typhoon.bin.ihex firmware/3com/typhoon.bin
+reject_firmware drivers/net/typhoon.c
+clean_blob drivers/net/typhoon.c
 clean_kconfig drivers/net/Kconfig 'TYPHOON'
 clean_mk CONFIG_TYPHOON drivers/net/Makefile
 
@@ -1028,14 +1046,9 @@ clean_mk CONFIG_COPS drivers/net/appletalk/Makefile
 # hamradio
 
 announce YAM - "YAM driver for AX.25"
-clean_file drivers/net/hamradio/yam1200.h
-clean_file drivers/net/hamradio/yam9600.h
-clean_sed '
-/add_mcs(bits_\(12\|96\)00, bitrate)/{
-  i\
-		printk(KERN_ERR "yam: Missing Free firmware\\n");
-  s:add_mcs(bits_\(12\|96\)00, bitrate):NULL:
-}' drivers/net/hamradio/yam.c 'report missing Free firmware'
+drop_fw_file firmware/yam/1200.bin.ihex firmware/yam/1200.bin
+drop_fw_file firmware/yam/9600.bin.ihex firmware/yam/9600.bin
+reject_firmware drivers/net/hamradio/yam.c
 clean_blob drivers/net/hamradio/yam.c
 clean_kconfig drivers/net/hamradio/Kconfig 'YAM'
 clean_mk CONFIG_YAM drivers/net/hamradio/Makefile
@@ -1051,15 +1064,8 @@ clean_mk CONFIG_USB_IRDA drivers/net/irda/Makefile
 # pcmcia
 
 announce PCMCIA_SMC91C92 - "SMC 91Cxx PCMCIA"
-clean_sed '
-/^\(static int \)\?osi_setup([^;]*$/,/^}$/{
-  s/^\(.*\)[/][*] Download.*firmware [*][/]/\1printk(KERN_ERR "%s: Missing Free firmware\\n", dev->name);\n\1rc = -EINVAL;\n\1goto free_cfg_mem;\n&/
-}' drivers/net/pcmcia/smc91c92_cs.c 'report missing Free firmware'
-clean_sed '
-/^\(static int \)\?smc91c92_resume([^;]*$/,/^}$/{
-  s/^\(.*\)[/][*] Download.*firmware [*][/]/\1printk(KERN_ERR "%s: Missing Free firmware\\n", dev->name);\n\1return -EINVAL;\n&/
-}' drivers/net/pcmcia/smc91c92_cs.c 'report another missing Free firmware'
-clean_blob drivers/net/pcmcia/ositech.h
+drop_fw_file firmware/ositech/Xilinx7OD.bin.ihex firmware/ositech/Xilinx7OD.bin
+reject_firmware drivers/net/pcmcia/smc91c92_cs.c
 clean_blob drivers/net/pcmcia/smc91c92_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_SMC91C92'
 clean_mk CONFIG_PCMCIA_SMC91C92 drivers/net/pcmcia/Makefile
@@ -1080,6 +1086,7 @@ clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_3C589'
 clean_mk CONFIG_PCMCIA_3C589 drivers/net/pcmcia/Makefile
 
 announce PCMCIA_PCNET - "NE2000 compatible PCMCIA support"
+drop_fw_file firmware/cis/LA-PCM.cis.ihex firmware/cis/LA-PCM.cis
 clean_blob drivers/net/pcmcia/pcnet_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_PCNET'
 clean_mk CONFIG_PCMCIA_PCNET drivers/net/pcmcia/Makefile
@@ -1087,13 +1094,7 @@ clean_mk CONFIG_PCMCIA_PCNET drivers/net/pcmcia/Makefile
 # tokenring
 
 announce 3C359 - "3Com 3C359 Token Link Velocity XL adapter"
-clean_file drivers/net/tokenring/3c359_microcode.h
-clean_sed '
-/^\(static int \)\?xl_hw_reset([^;]*$/,/^}/{
-  /start = .*mc_size/i\
-		printk(KERN_ERR "%s: Missing Free firmware\\n", dev->name);\
-		return -EINVAL;
-}' drivers/net/tokenring/3c359.c 'report missing Free firmware'
+drop_fw_file firmware/3com/3C359.bin.ihex firmware/3com/3C359.bin
 clean_blob drivers/net/tokenring/3c359.c
 clean_kconfig drivers/net/tokenring/Kconfig '3C359'
 clean_mk CONFIG_3C359 drivers/net/tokenring/Makefile
@@ -1131,15 +1132,30 @@ clean_blob drivers/net/wireless/atmel.c
 clean_kconfig drivers/net/wireless/Kconfig 'ATMEL'
 clean_mk CONFIG_ATMEL drivers/net/wireless/Makefile
 
-announce USB_ATMEL - "Atmel at76c503/at76c505/at76c505a USB cards"
+announce AT76C50X_USB - "Atmel at76c503/at76c505/at76c505a USB cards"
+reject_firmware drivers/net/wireless/at76c50x-usb.c
+clean_blob drivers/net/wireless/at76c50x-usb.c
+clean_kconfig drivers/net/wireless/Kconfig 'AT76C50X_USB'
+clean_mk CONFIG_AT76C50X_USB drivers/net/wireless/Makefile
+
+announce USB_ATMEL - "Atmel at76c503/at76c505/at76c505a USB cards (in staging)"
 reject_firmware drivers/staging/at76_usb/at76_usb.c
 clean_blob drivers/staging/at76_usb/at76_usb.c
 clean_kconfig drivers/staging/at76_usb/Kconfig 'USB_ATMEL'
 clean_mk CONFIG_USB_ATMEL drivers/staging/at76_usb/Makefile
 
 announce B43 - "Broadcom 43xx wireless support (mac80211 stack)"
-reject_firmware drivers/net/wireless/b43/main.c
-# Major portions of firwmare filenames not deblobbed.
+maybe_reject_firmware drivers/net/wireless/b43/main.c
+clean_sed '
+/^static int b43_upload_microcode(/,/^}$/{
+  /	if (dev->fw\.opensource) {$/i\
+	if (!dev->fw.opensource) {\
+		b43err(dev->wl, "Rejected non-Free firmware\\n");\
+		err = -EOPNOTSUPP;\
+		goto error;\
+	}
+}' drivers/net/wireless/b43/main.c 'double-check and reject non-Free firmware'
+# Major portions of firmware filenames not deblobbed.
 clean_blob drivers/net/wireless/b43/main.c
 clean_kconfig drivers/net/wireless/b43/Kconfig 'B43'
 clean_mk CONFIG_B43 drivers/net/wireless/b43/Makefile
@@ -1152,8 +1168,8 @@ clean_kconfig drivers/net/wireless/b43legacy/Kconfig 'B43LEGACY'
 clean_mk CONFIG_B43LEGACY drivers/net/wireless/b43legacy/Makefile
 
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
-reject_firmware drivers/net/wireless/orinoco/orinoco.c
-clean_blob drivers/net/wireless/orinoco/orinoco.c
+reject_firmware drivers/net/wireless/orinoco/fw.c
+clean_blob drivers/net/wireless/orinoco/fw.c
 clean_kconfig drivers/net/wireless/Kconfig 'HERMES'
 clean_mk CONFIG_HERMES drivers/net/wireless/orinoco/Makefile
 
@@ -1189,6 +1205,8 @@ clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlwifi/Makefile
 
 announce IWL5000 - "Intel Wireless WiFi 5000AGN"
 clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWL5000'
 clean_mk CONFIG_IWL5000 drivers/net/wireless/iwlwifi/Makefile
 
@@ -1204,6 +1222,12 @@ clean_blob drivers/net/wireless/libertas/if_sdio.c
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_SDIO'
 clean_mk CONFIG_LIBERTAS_SDIO drivers/net/wireless/libertas/Makefile
 
+announce LIBERTAS_SPI - "Marvell Libertas 8686 SPI 802.11b/g cards"
+reject_firmware drivers/net/wireless/libertas/if_spi.c
+clean_blob drivers/net/wireless/libertas/if_spi.c
+clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_SPI'
+clean_mk CONFIG_LIBERTAS_SPI drivers/net/wireless/libertas/Makefile
+
 announce LIBERTAS_USB - "Marvell Libertas 8388 USB 802.11b/g cards"
 reject_firmware drivers/net/wireless/libertas/if_usb.c
 clean_blob drivers/net/wireless/libertas/if_usb.c
@@ -1217,11 +1241,27 @@ clean_blob drivers/net/wireless/libertas_tf/if_usb.c
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_THINFIRM_USB'
 clean_mk CONFIG_LIBERTAS_THINFIRM_USB drivers/net/wireless/libertas_tf/Makefile
 
+announce MWL8K - 'Marvell 88W8xxx PCI/PCIe Wireless support'
+reject_firmware drivers/net/wireless/mwl8k.c
+clean_blob drivers/net/wireless/mwl8k.c
+clean_kconfig drivers/net/wireless/Kconfig 'MWL8K'
+clean_mk CONFIG_MWL8K drivers/net/wireless/Makefile
+
 announce P54_PCI - "Prism54 PCI support"
 reject_firmware drivers/net/wireless/p54/p54pci.c
 clean_blob drivers/net/wireless/p54/p54pci.c
 clean_kconfig drivers/net/wireless/p54/Kconfig 'P54_PCI'
 clean_mk CONFIG_P54_PCI drivers/net/wireless/p54/Makefile
+
+announce P54_SPI - "Prism54 SPI (stlc45xx) support"
+# There's support for loading custom 3826.eeprom here, with a default
+# eeprom that is clearly pure data.  Without Free 3826.arm, there's
+# little point in trying to retain the ability to load 3826.eeprom, so
+# we drop it altogether.
+reject_firmware drivers/net/wireless/p54/p54spi.c
+clean_blob drivers/net/wireless/p54/p54spi.c
+clean_kconfig drivers/net/wireless/p54/Kconfig 'P54_SPI'
+clean_mk CONFIG_P54_SPI drivers/net/wireless/p54/Makefile
 
 announce P54_USB - "Prism54 USB support"
 reject_firmware drivers/net/wireless/p54/p54usb.c
@@ -1345,6 +1385,26 @@ clean_blob drivers/staging/rt2870/common/rtmp_init.c
 clean_kconfig drivers/staging/rt2870/Kconfig RT2870
 clean_mk CONFIG_RT2870 drivers/staging/rt2870/Makefile
 
+announce RT3070 - "Ralink 3070 wireless support"
+clean_file drivers/staging/rt3070/firmware.h
+clean_blob drivers/staging/rt3070/rt_linux.h
+clean_blob drivers/staging/rt3070/rt_ate.h
+clean_blob drivers/staging/rt3070/rt_ate.c
+clean_sed '
+/^INT[	]set_eFuseLoadFromBin_Proc(/,/^}$/{
+  /src = kmalloc/i\
+	printk("%s: missing Free firmware\\n", __func__);\
+	return FALSE;	
+}' drivers/staging/rt3070/common/eeprom.c 'report missing Free firmware'
+clean_blob drivers/staging/rt3070/common/eeprom.c
+clean_sed '
+/^NDIS_STATUS NICLoadFirmware(/,/^}$/{
+  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
+}' drivers/staging/rt3070/common/rtmp_init.c 'report missing Free firmware'
+clean_blob drivers/staging/rt3070/common/rtmp_init.c
+clean_kconfig drivers/staging/rt3070/Kconfig RT3070
+clean_kconfig 'CONFIG_RT3070' drivers/staging/rt3070/Makefile
+
 # wimax
 
 announce WIMAX_I2400M - "Intel Wireless WiMAX Connection 2400"
@@ -1386,6 +1446,24 @@ clean_blob drivers/serial/ucc_uart.c
 clean_kconfig drivers/serial/Kconfig 'SERIAL_QE'
 clean_mk CONFIG_SERIAL_QE drivers/serial/Makefile
 
+####################
+# Data acquisition #
+####################
+
+announce COMEDI_PCI_DRIVERS - "Data acquisition support Comedi PCI drivers"
+reject_firmware drivers/staging/comedi/drivers/jr3_pci.c
+clean_blob drivers/staging/comedi/drivers/jr3_pci.c
+clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_PCI_DRIVERS'
+clean_mk CONFIG_COMEDI_PCI_DRIVERS drivers/staging/comedi/drivers/Makefile
+
+announce COMEDI_USB_DRIVERS - "Data acquisition support Comedi USB drivers"
+reject_firmware drivers/staging/comedi/drivers/usbdux.c
+clean_blob drivers/staging/comedi/drivers/usbdux.c
+reject_firmware drivers/staging/comedi/drivers/usbduxfast.c
+clean_blob drivers/staging/comedi/drivers/usbduxfast.c
+clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USB_DRIVERS'
+clean_mk CONFIG_COMEDI_USB_DRIVERS drivers/staging/comedi/drivers/Makefile
+
 announce ME4000 - "Meilhaus ME-4000 I/O board"
 clean_file drivers/staging/me4000/me4000_firmware.h
 clean_file drivers/staging/me4000/me4610_firmware.h
@@ -1413,73 +1491,28 @@ clean_mk CONFIG_ME6000 drivers/staging/meilhaus/Makefile
 ########
 
 announce SCSI_QLOGICPTI - "PTI Qlogic, ISP Driver"
-clean_file drivers/scsi/qlogicpti_asm.c
-clean_sed '
-/^static int __devinit qlogicpti_load_firmware([^;]*$/,/^}$/{
-  /[&]sbus_risc_code01/{
-    i\
-	printk(KERN_ERR "qlogicpti%d: Missing Free firmware\\n", qpti->qpti_id);\
-	return -EINVAL;
-  }
-  s,[&]sbus_risc_code01\[0\],NULL,
-  s,sbus_risc_code_length01,0,
-}' drivers/scsi/qlogicpti.c 'report missing Free firmware'
+drop_fw_file firmware/qlogic/isp1000.bin.ihex firmware/qlogic/isp1000.bin
+reject_firmware drivers/scsi/qlogicpti.c
 clean_blob drivers/scsi/qlogicpti.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_QLOGICPTI'
 clean_mk CONFIG_SCSI_QLOGICPTI drivers/scsi/Makefile
 
 announce SCSI_ADVANSYS - "AdvanSys SCSI"
-clean_sed '
-/ASC_DBG.*_asc_mcode_chksum);/d;
-/^\(static ASC_CNT \)\?AscLoadMicroCode([^;]*$/,/^}$/{
-  /^}$/{
-    p;
-    i\
-#define AscLoadMicroCode(x1,x2,x3,x4) ((x1),(x2),(x3),(x4),printk(KERN_ERR "advansys: Missing Free firmware\\n"), -1)
-    d;
-  }
-}
-/^\(static int \)\?AdvLoadMicrocode([^;]*$/,/^}$/{
-  /^}$/{
-    p;
-    i\
-#define AdvLoadMicrocode(x1,x2,x3,x4,x5) ((x1),(x2),(x3),(x4),(x5),printk(KERN_ERR "advansys: Missing Free firmware\\n"), ASC_IERR_MCODE_CHKSUM)
-    d;
-  }
-}
-s/\([ 	(]\)_\(asc_mcode\|adv_asc3\(550\|8C\(08\|16\)00\)\)_buf,/\1NULL,/;
-s/\([ 	]\)_\(asc_mcode\|adv_asc3\(550\|8C\(08\|16\)00\)\)_size\([,)]\)/\1(unsigned short)0\5/;
-s/\([ 	]\)_\(asc_mcode\|adv_asc3\(550\|8C\(08\|16\)00\)\)_chksum\([,)]\)/\1(ADV_DCNT)0\5/;
-' drivers/scsi/advansys.c 'report missing Free firmware'
+drop_fw_file firmware/advansys/mcode.bin.ihex firmware/advansys/mcode.bin
+drop_fw_file firmware/advansys/3550.bin.ihex firmware/advansys/3550.bin
+drop_fw_file firmware/advansys/38C0800.bin.ihex firmware/advansys/38C0800.bin
+drop_fw_file firmware/advansys/38C1600.bin.ihex firmware/advansys/38C1600.bin
+reject_firmware drivers/scsi/advansys.c
 clean_blob drivers/scsi/advansys.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_ADVANSYS'
 clean_mk CONFIG_SCSI_ADVANSYS drivers/scsi/Makefile
 
 announce SCSI_QLOGIC_1280 - "Qlogic QLA 1240/1x80/1x160 SCSI"
-clean_blob drivers/scsi/ql1280_fw.h
-clean_blob drivers/scsi/ql1040_fw.h
-clean_blob drivers/scsi/ql12160_fw.h
-clean_sed '
-s,[&]\(fw12\(160\|80e\)i\|risc\(_code\)\?\)_\(code01\[0\]\|length01\),NULL,g;
-/^qla1280_load_firmware\(_pio\)\?([^;]*$/,/^}$/{
-  /risc_code_size = [*]/{
-    i\
-	if (!risc_code_address) {\
-		printk(KERN_ERR "scsi(%li): Missing Free firmware\\n", ha->host_no);\
-		return -EINVAL;\
-	}
-  }
-}
-/^qla1280_load_firmware_dma([^;]*$/,/^}$/{
-  /risc_code_size = [*]/{
-    i\
-	if (!risc_code_address) {\
-		printk(KERN_ERR "scsi(%li): Missing Free firmware\\n", ha->host_no);\
-		err = -EINVAL;\
-		goto out;\
-	}
-  }
-}' drivers/scsi/qla1280.c 'report missing Free firmware'
+drop_fw_file firmware/qlogic/1040.bin.ihex firmware/qlogic/1040.bin
+drop_fw_file firmware/qlogic/1280.bin.ihex firmware/qlogic/1280.bin
+drop_fw_file firmware/qlogic/12160.bin.ihex firmware/qlogic/12160.bin
+reject_firmware drivers/scsi/qla1280.c
+clean_blob drivers/scsi/qla1280.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_QLOGIC_1280'
 clean_mk CONFIG_SCSI_QLOGIC_1280 drivers/scsi/Makefile
 
@@ -1709,13 +1742,7 @@ clean_kconfig sound/isa/Kconfig 'SND_SB16_CSP'
 clean_mk 'CONFIG_SND_SB16_CSP' sound/isa/sb/Makefile
 
 announce SND_WAVEFRONT - "Turtle Beach Maui,Tropez,Tropez+ (Wavefront)"
-clean_blob sound/isa/wavefront/yss225.c
-clean_sed '
-/firmware = &yss225_registers_firmware/i\
-	snd_printk(KERN_ERR "FX: Missing Free firmware\\n");\
-	err = -EINVAL;\
-	goto out;
-' sound/isa/wavefront/wavefront_fx.c 'report missing Free firmware'
+drop_fw_file firmware/yamaha/yss225_registers.bin.ihex firmware/yamaha/yss225_registers.bin
 reject_firmware sound/isa/wavefront/wavefront_fx.c
 clean_blob sound/isa/wavefront/wavefront_fx.c
 reject_firmware sound/isa/wavefront/wavefront_synth.c
@@ -1764,10 +1791,20 @@ clean_blob sound/pci/echoaudio/indigodj.c
 clean_kconfig sound/pci/Kconfig 'SND_INDIGODJ'
 clean_mk CONFIG_SND_INDIGODJ sound/pci/echoaudio/Makefile
 
+announce SND_INDIGODJX - "(Echoaudio) Indigo DJx"
+clean_blob sound/pci/echoaudio/indigodjx.c
+clean_kconfig sound/pci/Kconfig 'SND_INDIGODJX'
+clean_mk CONFIG_SND_INDIGODJX sound/pci/echoaudio/Makefile
+
 announce SND_INDIGOIO - "(Echoaudio) Indigo IO"
 clean_blob sound/pci/echoaudio/indigoio.c
 clean_kconfig sound/pci/Kconfig 'SND_INDIGOIO'
 clean_mk CONFIG_SND_INDIGOIO sound/pci/echoaudio/Makefile
+
+announce SND_INDIGOIOX - "(Echoaudio) Indigo IOx"
+clean_blob sound/pci/echoaudio/indigoiox.c
+clean_kconfig sound/pci/Kconfig 'SND_INDIGOIOX'
+clean_mk CONFIG_SND_INDIGOIOX sound/pci/echoaudio/Makefile
 
 announce SND_LAYLA20 - "(Echoaudio) Layla20"
 clean_blob sound/pci/echoaudio/layla20.c
@@ -1829,7 +1866,19 @@ clean_blob sound/sh/aica.c
 clean_kconfig sound/sh/Kconfig 'SND_AICA'
 clean_mk CONFIG_SND_AICA sound/sh/Makefile
 
-announce SOUND_MSNDCLAS - "Support for Turtle Beach MultiSound Classic, Tahiti, Monterey"
+announce SND_MSND_PINNACLE - "Support for Turtle Beach MultiSound Pinnacle"
+clean_blob sound/isa/msnd/msnd_pinnacle.h
+reject_firmware sound/isa/msnd/msnd_pinnacle.c
+clean_blob sound/isa/msnd/msnd_pinnacle.c
+clean_kconfig sound/isa/Kconfig 'SND_MSND_PINNACLE'
+clean_mk CONFIG_SND_MSND_PINNACLE sound/isa/msnd/Makefile
+
+announce SND_MSND_CLASSIC - "Support for Turtle Beach MultiSound Classic, Tahiti, Monterey"
+clean_blob sound/isa/msnd/msnd_classic.h
+clean_kconfig sound/isa/Kconfig 'SND_MSND_CLASSIC'
+clean_mk CONFIG_SND_MSND_CLASSIC sound/isa/msnd/Makefile
+
+announce SOUND_MSNDCLAS - "Support for Turtle Beach MultiSound Classic, Tahiti, Monterey (oss)"
 clean_blob sound/oss/msnd_classic.h
 clean_kconfig sound/oss/Kconfig 'SOUND_MSNDCLAS'
 clean_sed '
@@ -1841,7 +1890,7 @@ clean_sed '
 }' sound/oss/Kconfig 'removed default firmware'
 clean_mk CONFIG_SOUND_MSNDCLAS sound/oss/Makefile
 
-announce SOUND_MSNDPIN - "Support for Turtle Beach MultiSound Pinnacle"
+announce SOUND_MSNDPIN - "Support for Turtle Beach MultiSound Pinnacle (oss)"
 clean_blob sound/oss/msnd_pinnacle.h
 clean_kconfig sound/oss/Kconfig 'SOUND_MSNDPIN'
 clean_sed '
@@ -1901,6 +1950,7 @@ clean_blob Documentation/sound/oss/PSS-updates
 clean_file Documentation/dvb/get_dvb_firmware
 clean_file Documentation/video4linux/extract_xc3028.pl
 clean_sed s,usb8388,whatever,g drivers/base/Kconfig 'removed blob name'
+clean_blob firmware/README.AddingFirmware
 clean_blob firmware/WHENCE
 
 exit 0
