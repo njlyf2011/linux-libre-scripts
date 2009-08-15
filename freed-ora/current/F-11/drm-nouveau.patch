@@ -3,10 +3,10 @@ be just data, but since we're deblobbing other stuff that renders the
 rest unusable, why take risks?
 
 diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
-index a74980b..36582ff 100644
+index f8d5074..3ada5e4 100644
 --- a/drivers/gpu/drm/Kconfig
 +++ b/drivers/gpu/drm/Kconfig
-@@ -133,3 +133,18 @@ config DRM_SAVAGE
+@@ -140,3 +140,18 @@ config DRM_SAVAGE
  	help
  	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
  	  chipset. If M is selected the module will be called savage.
@@ -36,7 +36,7 @@ index d6788df..97aa0c8 100644
 +obj-$(CONFIG_DRM_NOUVEAU) +=nouveau/
  
 diff --git a/drivers/gpu/drm/drm_bufs.c b/drivers/gpu/drm/drm_bufs.c
-index 4d2161f..ac503e2 100644
+index 07e0c51..9ac171c 100644
 --- a/drivers/gpu/drm/drm_bufs.c
 +++ b/drivers/gpu/drm/drm_bufs.c
 @@ -51,38 +51,24 @@ resource_size_t drm_get_resource_len(struct drm_device *dev, unsigned int resour
@@ -84,7 +84,7 @@ index 4d2161f..ac503e2 100644
  
  static int drm_map_handle(struct drm_device *dev, struct drm_hash_item *hash,
  			  unsigned long user_token, int hashed_handle, int shm)
-@@ -349,7 +335,7 @@ static int drm_addmap_core(struct drm_device * dev, resource_size_t offset,
+@@ -357,7 +343,7 @@ static int drm_addmap_core(struct drm_device * dev, resource_size_t offset,
  	/* We do it here so that dev->struct_mutex protects the increment */
  	user_token = (map->type == _DRM_SHM) ? (unsigned long)map->handle :
  		map->offset;
@@ -28315,7 +28315,7 @@ index b940fdf..cfa6af4 100644
  unifdef-y += via_drm.h
 +unifdef-y += nouveau_drm.h
 diff --git a/include/drm/drmP.h b/include/drm/drmP.h
-index 04fbd1e..f2a6bff 100644
+index b0d024c..fb93588 100644
 --- a/include/drm/drmP.h
 +++ b/include/drm/drmP.h
 @@ -1267,6 +1267,8 @@ extern void drm_idlelock_release(struct drm_lock_data *lock_data);

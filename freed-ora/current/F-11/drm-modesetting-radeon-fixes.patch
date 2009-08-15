@@ -68,7 +68,7 @@ index ae64a83..dbc0cb3 100644
  		   bo_driver->ttm_cache_flush)
  		bo_driver->ttm_cache_flush(ttm);
 diff --git a/drivers/gpu/drm/radeon/radeon_cp.c b/drivers/gpu/drm/radeon/radeon_cp.c
-index 967723e..c0d5e6a 100644
+index 179d408..2d18df9 100644
 --- a/drivers/gpu/drm/radeon/radeon_cp.c
 +++ b/drivers/gpu/drm/radeon/radeon_cp.c
 @@ -2722,16 +2722,7 @@ int radeon_modeset_cp_resume(struct drm_device *dev)
@@ -90,10 +90,10 @@ index 967723e..c0d5e6a 100644
  
  	DRM_ERROR("Missing Free microcode!\n");
 diff --git a/drivers/gpu/drm/radeon/radeon_drv.h b/drivers/gpu/drm/radeon/radeon_drv.h
-index b821f60..c802889 100644
+index e3498a4..6a69864 100644
 --- a/drivers/gpu/drm/radeon/radeon_drv.h
 +++ b/drivers/gpu/drm/radeon/radeon_drv.h
-@@ -2250,6 +2250,7 @@ extern int radeon_init_mem_type(struct drm_device * dev, uint32_t type,
+@@ -2253,6 +2253,7 @@ extern int radeon_init_mem_type(struct drm_device * dev, uint32_t type,
  extern int radeon_move(struct drm_buffer_object * bo,
  		       int evict, int no_wait, struct drm_bo_mem_reg * new_mem);
  
@@ -101,7 +101,7 @@ index b821f60..c802889 100644
  extern void radeon_gart_flush(struct drm_device *dev);
  extern uint64_t radeon_evict_flags(struct drm_buffer_object *bo);
  
-@@ -2327,6 +2328,7 @@ struct drm_gem_object *radeon_gem_object_alloc(struct drm_device *dev, int size,
+@@ -2330,6 +2331,7 @@ struct drm_gem_object *radeon_gem_object_alloc(struct drm_device *dev, int size,
  					       int initial_domain, bool discardable);
  int radeon_modeset_init(struct drm_device *dev);
  void radeon_modeset_cleanup(struct drm_device *dev);

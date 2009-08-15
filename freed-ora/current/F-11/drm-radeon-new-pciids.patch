@@ -1,8 +1,7 @@
-Deblobbed
-* drivers/gpu/drm/radeon/r600_cp.c: Adjusted for deblobbed sources.
+Deblobbed bits removed by earlier deblobbing.
 
 diff --git a/drivers/gpu/drm/radeon/r600_cp.c b/drivers/gpu/drm/radeon/r600_cp.c
-index bc9d09d..146f357 100644
+index c3f12e6..cbbfbbf 100644
 --- a/drivers/gpu/drm/radeon/r600_cp.c
 +++ b/drivers/gpu/drm/radeon/r600_cp.c
 @@ -1324,6 +1325,10 @@ static void r700_gfx_init(struct drm_device *dev,
@@ -65,10 +64,10 @@ index bc9d09d..146f357 100644
  		break;
  	case CHIP_RV710:
 diff --git a/drivers/gpu/drm/radeon/radeon_drv.h b/drivers/gpu/drm/radeon/radeon_drv.h
-index 8071d96..e266e5f 100644
+index 6a69864..07913ec 100644
 --- a/drivers/gpu/drm/radeon/radeon_drv.h
 +++ b/drivers/gpu/drm/radeon/radeon_drv.h
-@@ -146,6 +146,7 @@ enum radeon_family {
+@@ -148,6 +148,7 @@ enum radeon_family {
  	CHIP_RV770,
  	CHIP_RV730,
  	CHIP_RV710,
@@ -77,7 +76,7 @@ index 8071d96..e266e5f 100644
  };
  
 diff --git a/include/drm/drm_pciids.h b/include/drm/drm_pciids.h
-index 8b4c80c..f8634ab 100644
+index fc55db7..71bfec9 100644
 --- a/include/drm/drm_pciids.h
 +++ b/include/drm/drm_pciids.h
 @@ -254,6 +254,11 @@
