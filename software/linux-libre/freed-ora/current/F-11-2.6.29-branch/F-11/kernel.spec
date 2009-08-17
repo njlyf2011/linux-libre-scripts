@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.8 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.7 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -630,7 +630,6 @@ Patch30: linux-2.6-iommu-fixes.patch
 Patch41: linux-2.6-sysrq-c.patch
 
 Patch50: make-sock_sendpage-use-kernel_sendpage.patch
-Patch51: posix-timers-fix-oops-in-clock_nanosleep.patch
 
 #Patch101: linux-2.6-e820-save-restore-edi-ebp.patch
 #Patch102: linux-2.6-e820-acpi3-bios-workaround.patch
@@ -1589,7 +1588,6 @@ ApplyPatch personality-fix-per_clear_on_setid.patch
 ApplyPatch add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
 
 ApplyPatch make-sock_sendpage-use-kernel_sendpage.patch
-ApplyPatch posix-timers-fix-oops-in-clock_nanosleep.patch
 
 # VIA: add 64-bit padlock support, sdmmc driver, temp sensor driver
 ApplyPatch via-centaur-merge-32-64-bit-init.patch
@@ -2188,9 +2186,6 @@ fi
 # and build.
 
 %changelog
-* Sat Aug 15 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.6-217.2.8
-- CVE-2009-2767: Fix clock_nanosleep NULL ptr deref.
-
 * Fri Aug 14 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.6-217.2.7
 - CVE-2009-2692: Fix sock sendpage NULL ptr deref.
 
