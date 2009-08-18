@@ -1,5 +1,4 @@
 D/scripts////
-/.cvsignore/1.1010/dummy timestamp from new-entry+Tue Jul  7 04:49:38 2009//Tkernel-2_6_29_6-97_fc10
 /Makefile/1.92/Fri Apr  3 01:52:02 2009//Tkernel-2_6_29_6-97_fc10
 /Makefile.config/1.68/Fri Nov  7 08:26:31 2008/-ko/Tkernel-2_6_29_6-97_fc10
 /TODO/1.55/Wed Jun 17 04:43:51 2009//Tkernel-2_6_29_6-97_fc10
@@ -154,8 +153,9 @@ D/scripts////
 /patch-2.6.29.6.bz2.sign/1.1/Fri Jul  3 04:05:56 2009//Tkernel-2_6_29_6-97_fc10
 /posix-timers-fix-oops-in-clock_nanosleep.patch/1.1/Sat Aug 15 04:32:10 2009/-kb/Tkernel-2_6_29_6-97_fc10
 /revert-fix-modules_install-via-nfs.patch/1.1/Sun Feb  1 05:50:58 2009/-kb/Tkernel-2_6_29_6-97_fc10
-/sources/1.971/dummy timestamp from new-entry+Tue Jul  7 04:49:46 2009//Tkernel-2_6_29_6-97_fc10
 /squashfs-fixups.patch/1.1/Tue Mar 24 04:30:57 2009/-kb/Tkernel-2_6_29_6-97_fc10
 /squashfs3.patch/1.2/Tue Mar 24 04:14:20 2009/-kb/Tkernel-2_6_29_6-97_fc10
-/upstream/1.882/dummy timestamp from new-entry+Tue Jul  7 04:49:43 2009//Tkernel-2_6_29_6-97_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_29_6-97_fc10
+/.cvsignore/1.1010/Tue Aug 18 06:08:06 2009//Tkernel-2_6_29_6-97_fc10
+/sources/1.971/Tue Aug 18 06:08:06 2009//Tkernel-2_6_29_6-97_fc10
+/upstream/1.882/Tue Aug 18 06:08:06 2009//Tkernel-2_6_29_6-97_fc10
