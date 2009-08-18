@@ -1,9 +1,12 @@
+# We have to override the new %%install behavior because, well... the kernel is special.
+%global __spec_install_pre %{___build_pre}
+
 Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%define released_kernel 1
+%global released_kernel 1
 
 # Versions of various parts
 
@@ -21,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1393 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1397 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -615,6 +618,9 @@ Patch30: linux-2.6-iommu-fixes.patch
 
 Patch41: linux-2.6-sysrq-c.patch
 
+Patch50: make-sock_sendpage-use-kernel_sendpage.patch
+Patch51: posix-timers-fix-oops-in-clock_nanosleep.patch
+
 Patch81: linux-2.6-defaults-saner-vm-settings.patch
 Patch90: linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
 Patch91: linux-2.6-mm-lru-report-vm-flags-in-page-referenced.patch
@@ -737,6 +743,7 @@ Patch2922: fs-relatime-make-default.patch
 Patch2950: linux-2.6-kjournald-use-rt-io-priority.patch
 
 Patch3000: linux-2.6-btrfs-unstable-update.patch
+Patch3001: linux-2.6-ecryptfs-overflow-fixes.patch
 
 Patch9000: squashfs3.patch
 Patch9001: squashfs-fixups.patch
@@ -754,6 +761,7 @@ Patch9303: linux-2.6-kvm-skip-pit-check.patch
 Patch9304: linux-2.6-xen-check-for-nx-support.patch
 Patch9305: linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 Patch9307: linux-2.6.29-xen-disable-gbpages.patch
+Patch9308: linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 # fix some broken bluetooth dongles
 Patch9600: linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
@@ -1206,6 +1214,9 @@ ApplyPatch linux-2.6-iommu-fixes.patch
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
+ApplyPatch make-sock_sendpage-use-kernel_sendpage.patch
+ApplyPatch posix-timers-fix-oops-in-clock_nanosleep.patch
+
 ApplyPatch linux-2.6-defaults-saner-vm-settings.patch
 ApplyPatch linux-2.6-mm-lru-evict-streaming-io-pages-first.patch
 ApplyPatch linux-2.6-mm-lru-report-vm-flags-in-page-referenced.patch
@@ -1260,6 +1271,9 @@ ApplyPatch linux-2.6-kjournald-use-rt-io-priority.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-unstable-update.patch
+
+# eCryptfs
+ApplyPatch linux-2.6-ecryptfs-overflow-fixes.patch
 
 # USB
 
@@ -1428,6 +1442,8 @@ ApplyPatch linux-2.6-kvm-skip-pit-check.patch
 ApplyPatch linux-2.6-xen-check-for-nx-support.patch
 ApplyPatch linux-2.6-xen-fix_warning_when_deleting_gendisk.patch
 ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
+# http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=4eff3cae9c9809720c636e64bc72f212258e0bd5 (#510304)
+ApplyPatch linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 ApplyPatch linux-2.6-bluetooth-submit-bulk-urbs-with-interrupt-urbs.patch
 
@@ -2021,6 +2037,22 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Aug 15 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.6-96
+- For F-10-updates-testing:
+- CVE-2009-2767: Fix clock_nanosleep NULL ptr deref.
+- CVE-2009-2692: Fix sock sendpage NULL ptr deref.
+
+* Tue Jul 28 2009 Eric Sandeen <sandeen@redhat.com>
+- Fix eCryptfs overflow issues (CVE-2009-2406, CVE-2009-2407)
+
+* Thu Jul 23 2009 Jarod Wilson <jarod@redhat.com>
+- virtio_blk: don't bounce highmem requests, works around a frequent
+  oops in kvm guests using virtio block devices (#510304)
+
+* Wed Jul 22 2009 Tom "spot" Callaway <tcallawa@redhat.com>
+- We have to override the new %%install behavior because, well... the kernel is
+special.
+
 * Mon Jul 06 2009 Chuck Ebbert <cebbert@redhat.com> kernel-2.6.29.6-93
 - From F-11 Jun 15 DRM fixes:
     drm-connector-dpms-fix.patch
