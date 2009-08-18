@@ -2,11 +2,14 @@ Linux Infrared Remote Control drivers -- http://www.lirc.org
 
 From http://git.wilsonet.com/linux-2.6-lirc.git/
 
-Refreshed 20090910
+Refreshed 20090917
 
 Signed-off-by: Jarod Wilson <jarod@redhat.com>
 
 ---
+ MAINTAINERS                           |    9 +
+ drivers/input/Kconfig                 |    2 +
+ drivers/input/Makefile                |    2 +
  drivers/input/lirc/Kconfig            |  112 ++
  drivers/input/lirc/Makefile           |   20 +
  drivers/input/lirc/lirc.h             |  100 ++
@@ -15,7 +18,7 @@ Signed-off-by: Jarod Wilson <jarod@redhat.com>
  drivers/input/lirc/lirc_dev.h         |  184 +++
  drivers/input/lirc/lirc_i2c.c         |  649 ++++++++++
  drivers/input/lirc/lirc_igorplugusb.c |  556 ++++++++
- drivers/input/lirc/lirc_imon.c        | 2298 +++++++++++++++++++++++++++++++++
+ drivers/input/lirc/lirc_imon.c        | 2297 +++++++++++++++++++++++++++++++++
  drivers/input/lirc/lirc_it87.c        |  986 ++++++++++++++
  drivers/input/lirc/lirc_it87.h        |  116 ++
  drivers/input/lirc/lirc_ite8709.c     |  539 ++++++++
@@ -28,8 +31,51 @@ Signed-off-by: Jarod Wilson <jarod@redhat.com>
  drivers/input/lirc/lirc_streamzap.c   |  777 +++++++++++
  drivers/input/lirc/lirc_ttusbir.c     |  397 ++++++
  drivers/input/lirc/lirc_zilog.c       | 1374 ++++++++++++++++++++
- 21 files changed, 14832 insertions(+), 0 deletions(-)
+ 24 files changed, 14844 insertions(+), 0 deletions(-)
 
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 59fd2d1..ad1b16c 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -2749,6 +2749,15 @@ W:	http://www.pasemi.com/
+ L:	linuxppc-dev@ozlabs.org
+ S:	Supported
+ 
++LINUX INFRARED REMOTE CONTROL DRIVERS (LIRC)
++P:	Jarod Wilson
++M:	jarod@redhat.com
++P:	Christoph Bartelmus
++M:	lirc@bartelmus.de
++W:	http://www.lirc.org/
++L:	lirc-list@lists.sourceforge.net
++S:	Maintained
++
+ LINUX SECURITY MODULE (LSM) FRAMEWORK
+ P:	Chris Wright
+ M:	chrisw@sous-sol.org
+diff --git a/drivers/input/Kconfig b/drivers/input/Kconfig
+index 5f9d860..2ba0904 100644
+--- a/drivers/input/Kconfig
++++ b/drivers/input/Kconfig
+@@ -170,6 +170,8 @@ source "drivers/input/tablet/Kconfig"
+ 
+ source "drivers/input/touchscreen/Kconfig"
+ 
++source "drivers/input/lirc/Kconfig"
++
+ source "drivers/input/misc/Kconfig"
+ 
+ endif
+diff --git a/drivers/input/Makefile b/drivers/input/Makefile
+index 4c9c745..99e2b5e 100644
+--- a/drivers/input/Makefile
++++ b/drivers/input/Makefile
+@@ -25,3 +25,5 @@ obj-$(CONFIG_INPUT_MISC)	+= misc/
+ obj-$(CONFIG_INPUT_APMPOWER)	+= apm-power.o
+ 
+ obj-$(CONFIG_XEN_KBDDEV_FRONTEND)	+= xen-kbdfront.o
++
++obj-$(CONFIG_INPUT_LIRC)       += lirc/
 diff --git a/drivers/input/lirc/Kconfig b/drivers/input/lirc/Kconfig
 new file mode 100644
 index 0000000..6ef8622
@@ -2935,10 +2981,10 @@ index 0000000..ff49bdd
 +
 diff --git a/drivers/input/lirc/lirc_imon.c b/drivers/input/lirc/lirc_imon.c
 new file mode 100644
-index 0000000..3c87d94
+index 0000000..05fe0c7
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_imon.c
-@@ -0,0 +1,2298 @@
+@@ -0,0 +1,2297 @@
 +/*
 + *   lirc_imon.c:  LIRC/VFD/LCD driver for SoundGraph iMON IR/VFD/LCD
 + *		   including the iMON PAD model
@@ -3339,8 +3385,7 @@ index 0000000..3c87d94
 +		 "open. 0=don't disable, 1=disable. (default: don't disable)");
 +module_param(pad_thresh, int, S_IRUGO | S_IWUSR);
 +MODULE_PARM_DESC(pad_thresh, "Threshold at which a pad push registers as an "
-+		 "arrow key in kbd mode (default 80 on newer devices, 15 on "
-+		 "older devices)");
++		 "arrow key in kbd mode (default: 28)");
 +
 +static void free_imon_context(struct imon_context *context)
 +{
@@ -4354,7 +4399,7 @@ index 0000000..3c87d94
 +		len = 8;
 +		timeout = 500;	/* in msecs */
 +		/* (2*threshold) x (2*threshold) square */
-+		threshold = pad_thresh ? pad_thresh : 80;
++		threshold = pad_thresh ? pad_thresh : 28;
 +		rel_x = buf[2];
 +		rel_y = buf[3];
 +
