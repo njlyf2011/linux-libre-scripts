@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.78 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.79 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -609,6 +609,8 @@ Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
+Patch30: make-sock_sendpage-use-kernel_sendpage.patch
+
 Patch41: linux-2.6-sysrq-c.patch
 
 Patch60: linux-2.6-sched-fine-tune-SD_MC_INIT.patch
@@ -1183,6 +1185,8 @@ ApplyPatch linux-2.6-hotfixes.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
+
+ApplyPatch make-sock_sendpage-use-kernel_sendpage.patch
 
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
@@ -2035,6 +2039,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Aug 14 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.29-170.2.79
+- CVE-2009-2692: Fix sock sendpage NULL ptr deref.
+
 * Fri Jul 31 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.29-170.2.78
 - The kernel package needs to override the new rpm %%install behavior.
 
