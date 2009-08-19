@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1704 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1707 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,9 +54,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -114,7 +114,7 @@ Summary: The Linux kernel
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
 %if 0%{?released_kernel}
-%define doc_build_fail false
+%define doc_build_fail true
 %else
 %define doc_build_fail true
 %endif
@@ -686,7 +686,6 @@ Patch1819: drm-intel-gem-use-dma32-on-pae.patch
 Patch1820: drm-modesetting-radeon-fixes.patch
 Patch1821: drm-radeon-new-pciids.patch
 Patch1822: drm-dont-frob-i2c.patch
-Patch1823: drm-intel-tv-fix.patch
 Patch1824: drm-radeon-cs-oops-fix.patch
 Patch1825: drm-pnp-add-resource-range-checker.patch
 Patch1826: drm-i915-enable-mchbar.patch
@@ -1329,7 +1328,6 @@ ApplyPatch drm-intel-hdmi-edid-fix.patch
 ApplyPatch drm-modesetting-radeon-fixes.patch
 ApplyPatch drm-radeon-new-pciids.patch
 ApplyPatch drm-dont-frob-i2c.patch
-ApplyPatch drm-intel-tv-fix.patch
 ApplyPatch drm-radeon-cs-oops-fix.patch
 ApplyPatch drm-pnp-add-resource-range-checker.patch
 ApplyPatch drm-i915-enable-mchbar.patch
@@ -1941,6 +1939,10 @@ fi
 # and build.
 
 %changelog
+* Fri Aug 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-27.rc2
+- Linux 2.6.30.5-rc2
+- Dropped drm-intel-tv-fix.patch, merged in -stable now.
+
 * Fri Aug 14 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.25
 - Deblobbed linux-2.6.30, updated deblobbing of patches.
 
