@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1707 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1711 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -56,7 +56,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 5
 # Is it a -stable RC?
-%define stable_rc 2
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -1939,7 +1939,19 @@ fi
 # and build.
 
 %changelog
-* Fri Aug 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-27.rc2
+* Mon Aug 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-32
+- Change config options:
+  CONFIG_SCSI_DEBUG=m
+  CONFIG_PCI_MSI_DEFAULT_ON=y
+
+* Mon Aug 17 2009 Jarod Wilson <jarod@redhat.com> 2.6.30.5-31
+- Fix flub in prior lirc patch update that resulted in no lirc
+  drivers getting built
+
+* Sun Aug 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-29
+- Linux 2.6.30.5
+
+* Fri Aug 14 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-28.rc2
 - Linux 2.6.30.5-rc2
 - Dropped drm-intel-tv-fix.patch, merged in -stable now.
 
