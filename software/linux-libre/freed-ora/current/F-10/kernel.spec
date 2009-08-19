@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1300
-%define fedora_build_string %(R="$Revision: 1.1397 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1399 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -773,6 +773,10 @@ Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11100: linux-2.6-dev-zero-avoid-oom-lockup.patch
 Patch11020: linux-2.6-usb-remove-low-latency-hack.patch
 Patch11030: linux-2.6-x86-delay-tsc-barrier.patch
+# security fixes from the F-11 2.6.29.6 kernel
+Patch11040: add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
+Patch11050: security-use-mmap_min_addr-indepedently-of-security-models.patch
+Patch11060: personality-fix-per_clear_on_setid.patch
 
 %endif
 
@@ -1461,6 +1465,13 @@ ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
 # fix broken tsc delay code
 ApplyPatch linux-2.6-x86-delay-tsc-barrier.patch
 
+# security fixes from the F-11 2.6.29.6 kernel
+# fix test-after-use of null pointers
+ApplyPatch add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
+# mmap zero page fixes
+ApplyPatch security-use-mmap_min_addr-indepedently-of-security-models.patch
+ApplyPatch personality-fix-per_clear_on_setid.patch
+
 # ======= END OF PATCH APPLICATIONS =============================
 
 %endif
@@ -2037,6 +2048,13 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Aug 17 2009 Jarod Wilson <jarod@redhat.com> 2.6.29.6-99
+- Fix flub in prior lirc patch update that resulted in no lirc
+  drivers getting built
+
+* Mon Aug 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-98
+- More security fixes from the F-11 2.6.29.6 kernel.
+
 * Sat Aug 15 2009 Kyle McMartin <kyle@redhat.com> 2.6.29.6-96
 - For F-10-updates-testing:
 - CVE-2009-2767: Fix clock_nanosleep NULL ptr deref.
