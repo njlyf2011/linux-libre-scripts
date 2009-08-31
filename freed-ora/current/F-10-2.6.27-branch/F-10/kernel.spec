@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.79 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.82 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 29
+%define stable_update 30
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -609,8 +609,6 @@ Patch21: linux-2.6-utrace.patch
 Patch22: linux-2.6-x86-tracehook.patch
 Patch23: linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
-Patch30: make-sock_sendpage-use-kernel_sendpage.patch
-
 Patch41: linux-2.6-sysrq-c.patch
 
 Patch60: linux-2.6-sched-fine-tune-SD_MC_INIT.patch
@@ -660,6 +658,8 @@ Patch452: linux-2.6.27-hwmon-applesmc-2.6.28.patch
 Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 # 490250
 Patch455: linux-2.6-input.git-i8042-add-vostro-1510-to-nomux.patch
+
+Patch458: linux-2.6-char-remove-low_latency-nozomi-mxser.patch
 
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
@@ -756,6 +756,8 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2301: linux-2.6-usb-option-increase-outgoing-buffers.patch
+# kill more misuse of tty->low_latency flag
+Patch2302: linux-2.6-usb-remove-low-latency-hack.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -1186,8 +1188,6 @@ ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-x86-tracehook.patch
 ApplyPatch linux-2.6.27-x86-tracehook-syscall-arg-order.patch
 
-ApplyPatch make-sock_sendpage-use-kernel_sendpage.patch
-
 # enable sysrq-c on all kernels, not only kexec
 ApplyPatch linux-2.6-sysrq-c.patch
 
@@ -1244,6 +1244,7 @@ ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-option-increase-outgoing-buffers.patch
+ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
@@ -1312,6 +1313,8 @@ ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 # 490250
 ApplyPatch linux-2.6-input.git-i8042-add-vostro-1510-to-nomux.patch
+# from f-11: fix oopses in nozomi and mxser driver
+ApplyPatch linux-2.6-char-remove-low_latency-nozomi-mxser.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -2039,6 +2042,16 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Aug 17 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.30-170.2.82
+- Backport F-11 patch to fix oopses in USB serial drivers. (#517259)
+
+* Mon Aug 17 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.30-170.2.81
+- Backport F-11 patch to fix oopses in nozomi and mxser drivers.
+
+* Sun Aug 16 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.30-170.2.80
+- Linux 2.6.27.30
+- Dropped patch make-sock_sendpage-use-kernel_sendpage.patch
+
 * Fri Aug 14 2009 Kyle McMartin <kyle@redhat.com> 2.6.27.29-170.2.79
 - CVE-2009-2692: Fix sock sendpage NULL ptr deref.
 
