@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.9 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.16 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -640,6 +640,7 @@ Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
+Patch148: linux-2.6-ppc64-vs-broadcom.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -838,10 +839,26 @@ Patch11120: via-padlock-fix-might-sleep.patch
 Patch11130: via-hwmon-temp-sensor.patch
 
 # CVE-2009-1895
-Patch12000: security-use-mmap_min_addr-indepedently-of-security-models.patch
+Patch12000: make-mmap_min_addr-suck-less.patch
+#Patch12000: security-use-mmap_min_addr-indepedently-of-security-models.patch
 Patch12010: personality-fix-per_clear_on_setid.patch
 
+# CVE-2009-2848
+Patch12020: execve-must-clear-current-clear_child_tid.patch
+
+# CVE-2009-2849
+Patch12030: md-avoid-dereferencing-NULL-ptr-suspend-sysfs.patch
+
+# CVE-2009-2847
+Patch12040: do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
+
+# CVE-2009-2691
+Patch12050: mm_for_maps-simplify-use-ptrace_may_access.patch
+Patch12060: mm_for_maps-shift-down_read-to-the-caller.patch
+Patch12070: mm_for_maps-take-cred_guard_mutex-to-fix-the-race-with-exec.patch
+
 # make gcc stop optimizing away null pointer tests
+# (fixes similar bugs to CVE-2009-1897)
 Patch13000: add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
 
 %endif
@@ -1300,6 +1317,8 @@ ApplyPatch linux-2.6-g5-therm-shutdown.patch
 ApplyPatch linux-2.6-vio-modalias.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
+# Fix b43 support on no-iommu devices with <1GiB RAM
+ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
 
 #
 # SPARC64
@@ -1582,8 +1601,23 @@ ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
 ApplyPatch linux-2.6-x86-delay-tsc-barrier.patch
 
 # CVE-2009-1895
-ApplyPatch security-use-mmap_min_addr-indepedently-of-security-models.patch
+ApplyPatch make-mmap_min_addr-suck-less.patch
+#ApplyPatch security-use-mmap_min_addr-indepedently-of-security-models.patch
 ApplyPatch personality-fix-per_clear_on_setid.patch
+
+# CVE-2009-2848
+ApplyPatch execve-must-clear-current-clear_child_tid.patch
+
+# CVE-2009-2849
+ApplyPatch md-avoid-dereferencing-NULL-ptr-suspend-sysfs.patch
+
+# CVE-2009-2847
+ApplyPatch do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
+
+# CVE-2009-2691
+ApplyPatch mm_for_maps-simplify-use-ptrace_may_access.patch
+ApplyPatch mm_for_maps-shift-down_read-to-the-caller.patch
+ApplyPatch mm_for_maps-take-cred_guard_mutex-to-fix-the-race-with-exec.patch
 
 # don't optimize out null pointer tests
 ApplyPatch add-fno-delete-null-pointer-checks-to-gcc-cflags.patch
@@ -2188,6 +2222,21 @@ fi
 # and build.
 
 %changelog
+* Mon Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-217.2.16
+- Fix CVE-2009-2691: local information disclosure in /proc
+
+* Fri Aug 21 2009 David Woodhouse <David.Woodhouse@intel.com>
+- Fix b43 on iMac G5 (#514787)
+
+* Tue Aug 18 2009 Kyle McMartin <kyle@redhat.com>
+- CVE-2009-2848: execve: must clear current->clear_child_tid
+- Cherry pick upstream commits 52dec22e739eec8f3a0154f768a599f5489048bd
+  which improve mmap_min_addr.
+- CVE-2009-2849: md: avoid dereferencing null ptr when accessing suspend
+  sysfs attributes.
+- CVE-2009-2847: do_sigaltstack: avoid copying 'stack_t' as a structure
+  to userspace
+
 * Mon Aug 17 2009 Jarod Wilson <jarod@redhat.com> 2.6.29.6-217.2.9
 - Fix flub in prior lirc patch update that resulted in no lirc
   drivers getting built
