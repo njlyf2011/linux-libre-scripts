@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1462
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.16 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1679.2.18 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -712,6 +712,7 @@ Patch690: iwl3945-release-resources-before-shutting-down.patch
 Patch691: iwl3945-add-debugging-for-wrong-command-queue.patch
 Patch692: iwl3945-fix-rfkill-sw-and-hw-mishmash.patch
 Patch693: linux-2.6-iwlwifi_-fix-TX-queue-race.patch
+Patch694: linux-2.6-zd1211rw_-adding-083a_e503-as-a-ZD1211B-device.patch
 
 Patch700: linux-2.6-dma-debug-fixes.patch
 
@@ -722,6 +723,7 @@ Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 Patch1515: linux-2.6.29-lirc.patch
 Patch1517: hdpvr-ir-enable.patch
 Patch1518: hid-ignore-all-recent-imon-devices.patch
+Patch1519: lirc_zilog-revert-2.6.31-i2c-changes.patch
 
 # Fix the return code CD accesses when the CDROM drive door is closed
 # but the drive isn't yet ready.
@@ -1483,6 +1485,9 @@ ApplyPatch iwl3945-fix-rfkill-sw-and-hw-mishmash.patch
 # iwlwifi: fix TX queue race
 ApplyPatch linux-2.6-iwlwifi_-fix-TX-queue-race.patch
 
+# zd1211rw: adding 083a:e503 as a ZD1211B device
+ApplyPatch linux-2.6-zd1211rw_-adding-083a_e503-as-a-ZD1211B-device.patch
+
 # Fix up DMA debug code
 ApplyPatch linux-2.6-dma-debug-fixes.patch
 
@@ -1495,6 +1500,7 @@ ApplyPatch linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 # http://www.lirc.org/
 ApplyPatch linux-2.6.29-lirc.patch
 ApplyPatch hid-ignore-all-recent-imon-devices.patch
+ApplyPatch lirc_zilog-revert-2.6.31-i2c-changes.patch
 
 # Fix the return code CD accesses when the CDROM drive door is closed
 # but the drive isn't yet ready.
@@ -2222,7 +2228,14 @@ fi
 # and build.
 
 %changelog
-* Mon Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-217.2.16
+* Thu Aug 27 2009 John W. Linville <linville@redhat.com>
+- zd1211rw: adding 083a:e503 as a ZD1211B device (#518538)
+
+* Wed Aug 26 2009 Jarod Wilson <jarod@redhat.com>
+- Fix up hdpvr ir enable patch for use w/modular i2c (David Engel)
+- Revert lirc_zilog 2.6.31 i2c changes so it works on pre-2.6.31
+
+* Mon Aug 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29.6-217.2.16
 - Fix CVE-2009-2691: local information disclosure in /proc
 
 * Fri Aug 21 2009 David Woodhouse <David.Woodhouse@intel.com>
