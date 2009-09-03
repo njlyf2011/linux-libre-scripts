@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1711 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1722 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -625,6 +625,7 @@ Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
+Patch148: linux-2.6-ppc64-vs-broadcom.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -643,6 +644,7 @@ Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
+Patch392: linux-2.6-defaults-die-floppy-die.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6-input-wacom-bluetooth.patch
@@ -663,10 +665,15 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 Patch682: linux-2.6-iwlwifi_-fix-TX-queue-race.patch
+Patch683: linux-2.6-zd1211rw_-adding-083a_e503-as-a-ZD1211B-device.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
 Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-request.patch
+
+# Virt Patches
+Patch1200: linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
+Patch1201: linux-2.6-xen-clean-up-warnings.patch
 
 Patch1515: linux-2.6.29-lirc.patch
 Patch1517: hid-ignore-all-recent-imon-devices.patch
@@ -731,6 +738,31 @@ Patch12000: linux-2.6-xfrm-export-gc_thresh.patch
 Patch13000: linux-2.6-kvm-skip-pit-check.patch
 Patch13001: linux-2.6.29-xen-disable-gbpages.patch
 Patch13002: linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
+
+Patch14000: make-mmap_min_addr-suck-less.patch
+
+# ----- patches headed for -stable -----
+
+Patch14001: do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
+
+# fix hang on older x86 machines
+Patch14010: linux-2.6-x86-dont-send-ipi-to-empty-set-cpus.patch
+Patch14020: linux-2.6-bitmap-make-ops-return-result.patch
+Patch14030: linux-2.6-x86-dont-call-send-ipi-mask-with-empty-mask.patch
+
+# fix race in clone()
+Patch14040: linux-2.6-clone-fix-race-between-copy-process-and-de-thread.patch
+
+# Fix string overflows found by stackprotector:
+Patch14050: hda-check-strcpy-length.patch
+Patch14060: linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
+
+# fix race in kthreads
+Patch14070: linux-2.6-kthreads-fix-kthread-create-vs-kthread-stop.patch
+
+# fix stack protector problems with xen on x86_64
+Patch14080: linux-2.6-x86-load-percpu-segment-no-stackprotector.patch
+Patch14090: linux-2.6-xen-rearrange-to-fix-stackprotector.patch
 
 %endif
 
@@ -1202,7 +1234,9 @@ ApplyPatch linux-2.6-g5-therm-shutdown.patch
 ApplyPatch linux-2.6-vio-modalias.patch
 # Work around PCIe bridge setup on iSight
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
-
+# Fix b43 support on no-iommu devices with <1GiB RAM
+ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
+ 
 #
 # SPARC64
 #
@@ -1270,9 +1304,16 @@ ApplyPatch linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 # add ich9 lan
 ApplyPatch linux-2.6-e1000-ich9.patch
 
+# Virt Fixes
+# Xen Guest
+ApplyPatch linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
+ApplyPatch linux-2.6-xen-clean-up-warnings.patch
+
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+# don't load the floppy driver by default
+ApplyPatch linux-2.6-defaults-die-floppy-die.patch
 
 # Get away from having to poll Toshibas
 ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
@@ -1307,6 +1348,9 @@ ApplyPatch linux-2.6-ata-quirk.patch
 
 # iwlwifi: fix TX queue race
 ApplyPatch linux-2.6-iwlwifi_-fix-TX-queue-race.patch
+
+# zd1211rw: adding 083a:e503 as a ZD1211B device
+ApplyPatch linux-2.6-zd1211rw_-adding-083a_e503-as-a-ZD1211B-device.patch
 
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1353,6 +1397,32 @@ ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
 
 # v12n
 ApplyPatch linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
+
+ApplyPatch make-mmap_min_addr-suck-less.patch
+
+# ----- patches headed for -stable -----
+
+# CVE-2009-2847
+ApplyPatch do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
+
+# fix hang on older x86 machines
+ApplyPatch linux-2.6-x86-dont-send-ipi-to-empty-set-cpus.patch
+ApplyPatch linux-2.6-bitmap-make-ops-return-result.patch
+ApplyPatch linux-2.6-x86-dont-call-send-ipi-mask-with-empty-mask.patch
+
+# fix race in clone()
+ApplyPatch linux-2.6-clone-fix-race-between-copy-process-and-de-thread.patch
+
+# Fix string overflows found by stackprotector:
+ApplyPatch hda-check-strcpy-length.patch
+ApplyPatch linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
+
+# fix race in kthreads
+ApplyPatch linux-2.6-kthreads-fix-kthread-create-vs-kthread-stop.patch
+
+# fix stack protector problems with xen on x86_64
+ApplyPatch linux-2.6-x86-load-percpu-segment-no-stackprotector.patch
+ApplyPatch linux-2.6-xen-rearrange-to-fix-stackprotector.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1939,6 +2009,44 @@ fi
 # and build.
 
 %changelog
+* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-43
+- Don't load the floppy driver automatically:
+  linux-2.6-defaults-die-floppy-die.patch
+
+* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-42
+- Fix stackprotector problems with Xen on x86_64.
+- Disable stackprotector on i386 until 32-bit Xen gets fixed.
+
+* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-41
+- linux-2.6-kthreads-fix-kthread-create-vs-kthread-stop.patch:
+  fix race in kthreads.
+
+* Thu Aug 27 2009 Justin M. Forbes <jforbes@redhat.com> 2.6.30.5-40
+- xen: Fix guest crash when trying to debug. (#458385)
+
+* Thu Aug 27 2009 John W. Linville <linville@redhat.com> 2.6.30.5-39
+- zd1211rw: adding 083a:e503 as a ZD1211B device (#518538)
+
+* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-38
+- Fix string overflows found by stackprotector:
+  hda-check-strcpy-length.patch
+  linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
+
+* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-37
+- Fix race in clone() syscall.
+
+* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-36
+- Fix hangs on older x86 systems with 440*X chipsets.
+
+* Fri Aug 21 2009 David Woodhouse <David.Woodhouse@intel.com>
+- Fix b43 on iMac G5 (#514787)
+
+* Tue Aug 18 2009 Kyle McMartin <kyle@redhat.com>
+- Backport several upstream commits 52dec22e739eec8f3a0154f768a599f5489048bd
+  to improve mmap_min_addr.
+- CVE-2009-2847: do_sigaltstack: avoid copying 'stack_t' as a
+  structure to user space
+
 * Mon Aug 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-32
 - Change config options:
   CONFIG_SCSI_DEBUG=m
