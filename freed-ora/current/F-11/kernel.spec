@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1722 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1724 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -675,9 +675,10 @@ Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 Patch1200: linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
 Patch1201: linux-2.6-xen-clean-up-warnings.patch
 
-Patch1515: linux-2.6.29-lirc.patch
+Patch1515: lirc-2.6.31.patch
 Patch1517: hid-ignore-all-recent-imon-devices.patch
 Patch1518: hdpvr-ir-enable.patch
+Patch1519: lirc-revert-2.6.31-i2c-changes.patch
 
 Patch1700: agp-set_memory_ucwb.patch
 # nouveau + drm fixes
@@ -713,6 +714,7 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
+Patch2904: v4l-dvb-fix-cx25840-firmware-load.patch
 
 # fs fixes
 Patch3000: linux-2.6-fs-cifs-fix-port-numbers.patch
@@ -1356,7 +1358,10 @@ ApplyPatch linux-2.6-zd1211rw_-adding-083a_e503-as-a-ZD1211B-device.patch
 ApplyPatch linux-2.6-crash-driver.patch
 
 # http://www.lirc.org/
-ApplyPatch linux-2.6.29-lirc.patch
+ApplyPatch lirc-2.6.31.patch
+ApplyPatch hid-ignore-all-recent-imon-devices.patch
+ApplyPatch hdpvr-ir-enable.patch
+ApplyPatch lirc-revert-2.6.31-i2c-changes.patch
 
 # DRM patches
 ApplyPatch agp-set_memory_ucwb.patch
@@ -1388,6 +1393,7 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 #ApplyPatch linux-2.6-v4l-dvb-update.patch
 #ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
+ApplyPatch v4l-dvb-fix-cx25840-firmware-load.patch
 
 # kvm
 ApplyPatch linux-2.6-kvm-skip-pit-check.patch
@@ -2009,6 +2015,16 @@ fi
 # and build.
 
 %changelog
+* Tue Sep 01 2009 Jarod Wilson <jarod@redhat.com> 2.5.30.5-45
+- Refresh lirc patches, add new lirc_ene0100 driver
+- Fix up hdpvr driver for use with modular i2c so that
+  lirc_zilog can actually bind to it
+- Make lirc_zilog IR transmit and receive work on the hdpvr
+- Fix audio on PVR-500 when used in same system as HVR-1800 (#480728)
+
+* Fri Aug 28 2009 David Woodhouse <David.Woodhouse@intel.com>
+- Enable Solos DSL driver
+
 * Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-43
 - Don't load the floppy driver automatically:
   linux-2.6-defaults-die-floppy-die.patch
