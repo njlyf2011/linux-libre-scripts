@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.82 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.90 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 30
+%define stable_update 32
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -659,8 +659,6 @@ Patch454: linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 # 490250
 Patch455: linux-2.6-input.git-i8042-add-vostro-1510-to-nomux.patch
 
-Patch458: linux-2.6-char-remove-low_latency-nozomi-mxser.patch
-
 Patch460: linux-2.6-serial-460800.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -692,10 +690,6 @@ Patch902: linux-2.6-gspca-vc0321-fix-frame-overflow.patch
 Patch1101: linux-2.6-default-mmf_dump_elf_headers.patch
 Patch1515: linux-2.6.27-lirc.patch
 Patch1520: linux-2.6-hdpvr.patch
-
-# Fix the return code CD accesses when the CDROM drive door is closed
-# but the drive isn't yet ready.
-Patch1550: linux-2.6-cdrom-door-status.patch
 
 # nouveau + drm fixes
 Patch1800: nvidia-agp.patch
@@ -756,8 +750,6 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # make USB EHCI driver respect "nousb" parameter
 Patch2300: linux-2.6-usb-ehci-hcd-respect-nousb.patch
 Patch2301: linux-2.6-usb-option-increase-outgoing-buffers.patch
-# kill more misuse of tty->low_latency flag
-Patch2302: linux-2.6-usb-remove-low-latency-hack.patch
 
 # Add fips_enable flag
 Patch2400: linux-2.6-crypto-fips_enable.patch
@@ -797,14 +789,26 @@ Patch3130: disable-p4-cpufreq-ui.patch
 
 # Fix up the v4l2 video_open function
 Patch3140: linux-2.6.27-fix-video_open.patch
+# Fix simultaneous use of hvr-1800 and pvr-500 (#480728)
+Patch3141: v4l-dvb-fix-cx25840-firmware-load.patch
 
-Patch4000: kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
-Patch4010: kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
-
-Patch11000: linux-2.6-parport-quickfix-the-proc-registration-bug.patch
 Patch11010: linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 Patch12000: linux-2.6-virtio-blk-dont-bounce-highmem-requests.patch
+
+Patch13000: make-mmap_min_addr-suck-less.patch
+
+# fix NFS short writes (#493500)
+Patch14000: linux-2.6-nfsd-report-short-writes-fix.patch
+Patch14001: linux-2.6-nfsd-report-short-writes.patch
+
+# patches requested for the next -stable release
+Patch14010: linux-2.6-slub-fix-destroy-by-rcu.patch
+
+# send for -stable
+Patch15000: linux-2.6-ppc64-vs-broadcom.patch
+Patch15001: linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
+Patch15002: linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
 %endif
 
@@ -1244,7 +1248,6 @@ ApplyPatch linux-2.6.27.9-ext4-cap-check-delay.patch
 # USB
 ApplyPatch linux-2.6-usb-ehci-hcd-respect-nousb.patch
 ApplyPatch linux-2.6-usb-option-increase-outgoing-buffers.patch
-ApplyPatch linux-2.6-usb-remove-low-latency-hack.patch
 
 # Add the ability to turn FIPS-compliant mode on or off at boot
 ApplyPatch linux-2.6-crypto-fips_enable.patch
@@ -1313,8 +1316,6 @@ ApplyPatch linux-2.6.27-hwmon-applesmc-2.6.28.patch
 ApplyPatch linux-2.6-input.git-i8042-add-xps-m1530-to-nomux.patch
 # 490250
 ApplyPatch linux-2.6-input.git-i8042-add-vostro-1510-to-nomux.patch
-# from f-11: fix oopses in nozomi and mxser driver
-ApplyPatch linux-2.6-char-remove-low_latency-nozomi-mxser.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1373,10 +1374,6 @@ ApplyPatch linux-2.6-default-mmf_dump_elf_headers.patch
 ApplyPatch linux-2.6.27-lirc.patch
 # http://hg.jannau.net/hdpvr/
 ApplyPatch linux-2.6-hdpvr.patch
-
-# Fix the return code CD accesses when the CDROM drive door is closed
-# but the drive isn't yet ready.
-ApplyPatch linux-2.6-cdrom-door-status.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
@@ -1455,17 +1452,26 @@ ApplyPatch linux-2.6-selinux-empty-tty-files.patch
 ApplyPatch disable-p4-cpufreq-ui.patch
 
 ApplyPatch linux-2.6.27-fix-video_open.patch
-
-ApplyPatch kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
-ApplyPatch kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
-
-# finally fix the proc registration bug (F11#503773 and others)
-ApplyPatch linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+ApplyPatch v4l-dvb-fix-cx25840-firmware-load.patch
 
 ApplyPatch linux-2.6-dev-zero-avoid-oom-lockup.patch
 
 # fix oops with virtio block driver requests (#510304)
 ApplyPatch linux-2.6-virtio-blk-dont-bounce-highmem-requests.patch
+
+ApplyPatch make-mmap_min_addr-suck-less.patch
+
+# fix NFS short writes (#493500)
+ApplyPatch linux-2.6-nfsd-report-short-writes.patch
+ApplyPatch linux-2.6-nfsd-report-short-writes-fix.patch
+
+# patches requested for the next -stable release
+ApplyPatch linux-2.6-slub-fix-destroy-by-rcu.patch
+
+# send for -stable:
+ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
+ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
+ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2042,6 +2048,41 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Sep 09 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.32-170.2.90
+- 2.6.27.32 final
+- Drop linux-2.6-ocfs2-handle-len-0.patch, added after .32-rc1
+
+* Mon Sep 07 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.32-170.2.89.rc1
+- Backport fix for b43 on ppc64 to 2.6.27 (#514787)
+
+* Sun Sep 06 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.32-170.2.88.rc1
+- Add patches requested for the next stable release:
+   linux-2.6-slub-fix-destroy-by-rcu.patch (fixes bug in 2.6.27.29)
+   linux-2.6-ocfs2-handle-len-0.patch (fixes bug in 2.6.27.32-rc1)
+
+* Fri Sep 04 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.32-170.2.87.rc1
+- Copy fix for NFS short write reporting from F-10 2.6.29 kernel (#493500)
+
+* Fri Sep 04 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.32-170.2.86.rc1
+- 2.6.27.31: no functional changes, update had been manually applied already.
+- 2.6.27.32-rc1: drop upstream patches:
+  linux-2.6-usb-remove-low-latency-hack.patch
+  linux-2.6-char-remove-low_latency-nozomi-mxser.patch
+  linux-2.6-cdrom-door-status.patch
+  kvm-vmx-don-t-allow-uninhibited-access-to-efer-on-i386.patch
+  kvm-make-efer-reads-safe-when-efer-does-not-exist.patch
+  linux-2.6-parport-quickfix-the-proc-registration-bug.patch
+  do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
+
+* Mon Aug 31 2009 Jarod Wilson <jarod@redhat.com>
+- Fix audio on PVR-500 when used in same system as HVR-1800 (#480728)
+
+* Tue Aug 18 2009 Kyle McMartin <kyle@redhat.com>
+- Backport several upstream commits 52dec22e739eec8f3a0154f768a599f5489048bd
+  to improve mmap_min_addr.
+- CVE-2009-2847: do_sigaltstack: avoid copying 'stack_t' as a structure
+  to user space
+
 * Mon Aug 17 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.30-170.2.82
 - Backport F-11 patch to fix oopses in USB serial drivers. (#517259)
 
