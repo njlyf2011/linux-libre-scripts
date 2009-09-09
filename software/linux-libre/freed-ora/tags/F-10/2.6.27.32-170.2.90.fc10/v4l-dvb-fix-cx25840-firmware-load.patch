@@ -1,0 +1,28 @@
+Deblobbed: adjust reject_firmware call.
+
+CX25840: Bugfix CX23885 and CX241xx caused ivtv regression.
+
+From: Steven Toth <stoth@kernellabs.com>
+
+If we override a global we need to ensure the else case resets it correctly,
+or we end up loading an incorrect firmware.
+
+Priority: normal
+
+Signed-off-by: Steven Toth <stoth@kernellabs.com>
+
+Trivial backport to 2.6.27
+
+Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+--- linux/drivers/media/video/cx25840/cx25840-firmware.c.orig	2009-08-31 15:19:21.000000000 -0400
++++ linux/drivers/media/video/cx25840/cx25840-firmware.c	2009-08-31 15:19:37.000000000 -0400
+@@ -99,6 +99,8 @@ int cx25840_loadfw(struct i2c_client *cl
+ 
+ 	if (state->is_cx23885)
+ 		firmware = FWFILE_CX23885;
++	else
++		firmware = FWFILE;
+ 
+ 	if (reject_firmware(&fw, firmware, FWDEV(client)) != 0) {
+ 		v4l_err(client, "unable to open firmware %s\n", firmware);
