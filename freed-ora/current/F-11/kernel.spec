@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1724 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1732 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -624,8 +624,10 @@ Patch83: linux-2.6-mm-lru-dont-evict-mapped-executable-pages.patch
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
-Patch147: linux-2.6-imac-transparent-bridge.patch
-Patch148: linux-2.6-ppc64-vs-broadcom.patch
+Patch145: linux-2.6-imac-transparent-bridge.patch
+Patch146: linux-2.6-ppc64-vs-broadcom.patch
+Patch147: linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
+Patch148: linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -745,22 +747,12 @@ Patch14000: make-mmap_min_addr-suck-less.patch
 
 # ----- patches headed for -stable -----
 
-Patch14001: do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
-
-# fix hang on older x86 machines
-Patch14010: linux-2.6-x86-dont-send-ipi-to-empty-set-cpus.patch
-Patch14020: linux-2.6-bitmap-make-ops-return-result.patch
-Patch14030: linux-2.6-x86-dont-call-send-ipi-mask-with-empty-mask.patch
-
-# fix race in clone()
-Patch14040: linux-2.6-clone-fix-race-between-copy-process-and-de-thread.patch
-
 # Fix string overflows found by stackprotector:
 Patch14050: hda-check-strcpy-length.patch
 Patch14060: linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
 
-# fix race in kthreads
-Patch14070: linux-2.6-kthreads-fix-kthread-create-vs-kthread-stop.patch
+# fix bug introduced in 2.6.30.4
+Patch14070: linux-2.6-slub-fix-destroy-by-rcu.patch
 
 # fix stack protector problems with xen on x86_64
 Patch14080: linux-2.6-x86-load-percpu-segment-no-stackprotector.patch
@@ -1238,7 +1230,9 @@ ApplyPatch linux-2.6-vio-modalias.patch
 ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # Fix b43 support on no-iommu devices with <1GiB RAM
 ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
- 
+ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch 
+ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch 
+
 #
 # SPARC64
 #
@@ -1409,26 +1403,17 @@ ApplyPatch make-mmap_min_addr-suck-less.patch
 # ----- patches headed for -stable -----
 
 # CVE-2009-2847
-ApplyPatch do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
-
-# fix hang on older x86 machines
-ApplyPatch linux-2.6-x86-dont-send-ipi-to-empty-set-cpus.patch
-ApplyPatch linux-2.6-bitmap-make-ops-return-result.patch
-ApplyPatch linux-2.6-x86-dont-call-send-ipi-mask-with-empty-mask.patch
-
-# fix race in clone()
-ApplyPatch linux-2.6-clone-fix-race-between-copy-process-and-de-thread.patch
 
 # Fix string overflows found by stackprotector:
 ApplyPatch hda-check-strcpy-length.patch
 ApplyPatch linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
 
-# fix race in kthreads
-ApplyPatch linux-2.6-kthreads-fix-kthread-create-vs-kthread-stop.patch
-
 # fix stack protector problems with xen on x86_64
 ApplyPatch linux-2.6-x86-load-percpu-segment-no-stackprotector.patch
 ApplyPatch linux-2.6-xen-rearrange-to-fix-stackprotector.patch
+
+# fix 2.6.30.4 bug
+ApplyPatch linux-2.6-slub-fix-destroy-by-rcu.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1808,7 +1793,10 @@ rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
 %endif
 
 %if %{with_firmware}
+# having a .config file present during firmware install creates confusion
+mv .config .config.firmware_save
 make INSTALL_FW_PATH=$RPM_BUILD_ROOT/lib/firmware firmware_install
+mv .config.firmware_save .config
 %endif
 
 %if %{with_bootwrapper}
@@ -2015,7 +2003,43 @@ fi
 # and build.
 
 %changelog
-* Tue Sep 01 2009 Jarod Wilson <jarod@redhat.com> 2.5.30.5-45
+* Thu Sep 10 2009 Dennis Gilmore <dennis@ausil.us> 2.6.30.6-53
+- kgdb only works on sparc64 smp kernels so disable on the up one and enable on the smp one
+- update to 256 cpus supported on sparc64 smp
+
+* Wed Sep 09 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.6-52
+- Add linux-2.6-slub-fix-destroy-by-rcu.patch (fixes bug in 2.6.30.4)
+
+* Wed Sep 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.6-51
+- 2.6.30.6
+- Drop patches merged in -stable:
+  do_sigaltstack-avoid-copying-stack_t-as-a-structure-to-userspace.patch
+  linux-2.6-x86-dont-send-ipi-to-empty-set-cpus.patch
+  linux-2.6-bitmap-make-ops-return-result.patch
+  linux-2.6-x86-dont-call-send-ipi-mask-with-empty-mask.patch
+  linux-2.6-clone-fix-race-between-copy-process-and-de-thread.patch
+  linux-2.6-kthreads-fix-kthread-create-vs-kthread-stop.patch
+  linux-2.6-xen-x86-dont-probe-if-apics-are-disabled.patch
+
+* Tue Sep 08 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-50
+- Disable Amiga One support to fix powerpc coherency bug (#521703)
+
+* Fri Sep 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-49
+- Fix build system getting confused during firmware install.
+
+* Fri Sep 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-48
+- Added additional fixes needed for #514787:
+  linux-2.6-ppc64-vs-broadcom-lmb-no-init-*.patch
+- Fix up lirc patch context so it applies.
+
+* Wed Sep 02 2009 Jarod Wilson <jarod@redhat.com>
+- Make it possible to rmmod lirc_zilog w/o it hanging indefinitely
+- Add transmit support (via port 2 only) on 1st-gen mceusb transceiver
+
+* Tue Sep 01 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.5-46
+- Fix yet another Xen boot crash (#520517)
+
+* Tue Sep 01 2009 Jarod Wilson <jarod@redhat.com> 2.6.30.5-45
 - Refresh lirc patches, add new lirc_ene0100 driver
 - Fix up hdpvr driver for use with modular i2c so that
   lirc_zilog can actually bind to it
