@@ -1,0 +1,10 @@
+clog
+GNUmakefile
+kernel-2.6.*.config
+temp-*
+deblob-main
+deblob-2.6.27
+deblob-check
+kernel-2.6.27
+linux-2.6.27-libre2.*
+patch-libre-2.6.27.34.*
