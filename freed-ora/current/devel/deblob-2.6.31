@@ -2,6 +2,7 @@
 
 #    Copyright (C) 2008, 2009 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
+#    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -44,16 +45,26 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.30 extra=
-
-fatal () {
-  echo "$@"
-  exit 1
-}
+kver=2.6.31 extra=1
 
 case $1 in
---force) die () { echo ERROR: "$@": ignored >&2; }; forced=:; shift;;
-*) die () { fatal "$@"; }; forced=false;;
+--force)
+  echo "WARNING: Using the force, ignored errors will be" >&2
+  die () {
+    echo ERROR: "$@" >&2
+    errors=:
+  }
+  forced=: errors=false
+  shift
+  ;;
+*)
+  die () {
+    echo ERROR: "$@" >&2
+    echo Use --force to ignore
+    exit 1
+  }
+  forced=false errors=false
+  ;;
 esac
 
 check=`echo "$0" | sed 's,[^/]*$,,;s,^$,.,;s,/*$,,'`/deblob-check
@@ -68,129 +79,129 @@ else
   have_check=:
 fi
 
+filetest () {
+  [ -f $1 ]
+}
+
 announce () {
-	echo
-	echo "$@"
+  echo
+  echo "$@"
 }
 
 clean_file () {
-	#$1 = filename
-	if test ! -f $1; then
-		die $1 does not exist, something is wrong
-	fi
-	rm $1
-	echo $1: removed
+  #$1 = filename
+  filetest $1 || return
+  rm $1
+  echo $1: removed
 }
 
 check_changed () {
-	if test ! -f $1; then
-		die $1 does not exist, something is wrong
-	elif cmp $1.deblob $1 > /dev/null; then
-		die $1 did not change, something is wrong
-	fi
-	mv $1.deblob $1
+  #$1 = filename
+  if cmp $1.deblob $1 > /dev/null; then
+    rm $1.deblob
+    die $1 did not change, something is wrong && return 1
+  fi
+  mv $1.deblob $1
 }
 
 clean_blob () {
-	#$1 = filename
-	if $have_check; then
-	    if test ! -f $1; then
-		die $1 does not exist, something is wrong
-	    fi
-	    name=$1
-	    set fnord "$@" -d
-	    shift 2
-	    $check "$@" -i linux-$kver $name > $name.deblob
-	    echo $name: removed blobs
-	    check_changed $name
-	else
-	    clean_file $1
-	fi
+  #$1 = filename
+  filetest $1 || return
+  if $have_check; then
+    name=$1
+    set fnord "$@" -d
+    shift 2
+    $check "$@" -i linux-$kver $name > $name.deblob
+    check_changed $name && echo $name: removed blobs
+  else
+    clean_file $1
+  fi
 }
 
 dummy_blob () {
-	#$1 = filename
-	if test -f $1; then
-	    die $1 exists, something is wrong
-	elif test ! -f firmware/Makefile; then
-	    die firmware/Makefile does not exist, something is wrong
-	fi
+  #$1 = filename
+  if test -f $1; then
+    die $1 exists, something is wrong && return
+  elif test ! -f firmware/Makefile; then
+    die firmware/Makefile does not exist, something is wrong && return
+  fi
 
-	clean_sed "s,`echo $1 | sed s,^firmware/,,`,\$(DEBLOBBED),g" \
-	  firmware/Makefile "dropped $1"
+  clean_sed "s,`echo $1 | sed s,^firmware/,,`,\$(DEBLOBBED),g" \
+    firmware/Makefile "dropped $1"
 }
 
 clean_fw () {
-	#$1 = firmware text input, $2 = firmware output
-	if test ! -f $1; then
-		die $1 does not exist, something is wrong
-	elif test -f $2; then
-		die $2 exists, something is wrong
-	fi
-	clean_blob $1 -s 4
-	dummy_blob $2
+  #$1 = firmware text input, $2 = firmware output
+  filetest $1 || return
+  if test -f $2; then
+    die $2 exists, something is wrong && return
+  fi
+  clean_blob $1 -s 4
+  dummy_blob $2
 }
 
 drop_fw_file () {
-	#$1 = firmware text input, $2 = firmware output
-	if test ! -f $1; then
-		die $1 does not exist, something is wrong
-	elif test -f $2; then
-		die $2 exists, something is wrong
-	fi
-	clean_file $1
-	dummy_blob $2
+  #$1 = firmware text input, $2 = firmware output
+  filetest $1 || return
+  if test -f $2; then
+    die $2 exists, something is wrong && return
+  fi
+  clean_file $1
+  dummy_blob $2
 }
 
 clean_kconfig () {
-        #$1 = filename $2 = things to remove
-	case $1 in
-	-f)
-		shift
-		;;
-	*)
-		if $have_check; then
-			return
-		fi
-		;;
-	esac
-	sed "/^config \\($2\\)\$/{p;i\
+  #$1 = filename $2 = things to remove
+  case $1 in
+  -f)
+    shift
+    ;;
+  *)
+    if $have_check; then
+      return
+    fi
+    ;;
+  esac
+  filetest $1 || return
+  sed "/^config \\($2\\)\$/{p;i\
 	depends on NONFREE
 d;}" $1 > $1.deblob
-	echo $1: marked config $2 as depending on NONFREE
-	check_changed $1
+  check_changed $1 && echo $1: marked config $2 as depending on NONFREE
 }
 
 clean_mk () {
-	#$1 = config $2 = Makefile name
-	# We don't clean up Makefiles any more --lxoliva
-	# sed -i "/\\($1\\)/d" $2
-	# echo $2: removed $1 support
-	# check_changed $2
-	if sed -n "/\\($1\\)/p" $2 | grep . > /dev/null; then
-	    :
-	else
-	    die $2 does not contain matches for $1
-	fi
+  #$1 = config $2 = Makefile name
+  # We don't clean up Makefiles any more --lxoliva
+  # sed -i "/\\($1\\)/d" $2
+  # echo $2: removed $1 support
+  # check_changed $2
+  filetest $2 || return
+  if sed -n "/\\($1\\)/p" $2 | grep . > /dev/null; then
+    :
+  else
+    die $2 does not contain matches for $1
+  fi
 }
 
 clean_sed () {
-	#$1 = sed-script $2 = file $3 = comment
-	sed -e "$1" "$2" > "$2".deblob
-	echo $2: ${3-applied sed script $1}
-	check_changed "$2"
+  #$1 = sed-script $2 = file $3 = comment
+  filetest $2 || return
+  sed -e "$1" "$2" > "$2".deblob
+  check_changed $2 && echo $2: ${3-applied sed script $1} 
 }
 
 reject_firmware () {
-	#$1 = file
-	clean_sed '
+  #$1 = file
+  filetest $1 || return
+  clean_sed '
 s,request\(_ihex\)\?_firmware\(_nowait\)\?,reject_firmware\2,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
 }
 
 maybe_reject_firmware () {
-	#$1 = file
-	clean_sed '
+  #$1 = file
+  filetest $1 || return
+  clean_sed '
 s,request_firmware\(_nowait\)\?,maybe_reject_firmware\1,g
 ' "$1" 'retain Free firmware-loading machinery, disabling non-Free one'
 }
@@ -203,8 +214,8 @@ undefine_macro () {
   macro=$1 repl=$2 msg=$3; shift 3
   for f in "$@"; do
     clean_sed "
-  s,^#define $macro .*\$,/*(DEBLOBBED)*/,;
-  s,$macro,$repl,g;
+s,^#define $macro .*\$,/*(DEBLOBBED)*/,;
+s,$macro,$repl,g;
 " "$f" "$msg"
   done
 }
@@ -255,18 +266,18 @@ for f in \
     sound/pci/cs46xx/imgs/cwcdma.asp \
 ; do
   if test ! $f; then
-    die $f is not present, something is amiss
+    die $f is not present, something is amiss && return
   fi
 done
 
 # Identify the tarball.
-clean_sed "
-s,^EXTRAVERSION.*,&-libre$extra,
+grep -q 'EXTRAVERSION.*-libre' Makefile ||
+clean_sed "s,^EXTRAVERSION.*,&-libre$extra,
 " Makefile 'added -libre to EXTRAVERSION'
 
 # Add reject_firmware and maybe_reject_firmware
-clean_sed '
-$i\
+grep -q _LINUX_LIBRE_FIRMWARE_H include/linux/firmware.h ||
+clean_sed '$i\
 #ifndef _LINUX_LIBRE_FIRMWARE_H\
 #define _LINUX_LIBRE_FIRMWARE_H\
 \
@@ -448,58 +459,58 @@ clean_mk CONFIG_DRM_MGA drivers/gpu/drm/Makefile
 
 announce DRM_R128 - "ATI Rage 128"
 clean_sed '
-/^static int r128_do_init_cce([^;]*$/,/^}$/{
-  /^	r128_cce_load_microcode(dev_priv);$/{
-    i\
-	DRM_ERROR("Missing Free microcode!\\n");\
-	dev->dev_private = (void *)dev_priv;\
-	r128_do_cleanup_cce(dev);\
-	return -EINVAL;
-  }
-}' drivers/gpu/drm/r128/r128_cce.c 'report missing Free microcode'
+/^static void r128_cce_load_microcode(drm_r128_private_t \* dev_priv)/i\
+#define r128_cce_load_microcode(dev_priv) \\\
+  do { \\\
+    DRM_ERROR("Missing Free microcode!\\n"); \\\
+    dev->dev_private = (void *)dev_priv; \\\
+    r128_do_cleanup_cce(dev); \\\
+    return -EINVAL; \\\
+  } while (0)
+' drivers/gpu/drm/r128/r128_cce.c 'report missing Free microcode'
 clean_blob drivers/gpu/drm/r128/r128_cce.c
 clean_kconfig -f drivers/gpu/drm/Kconfig 'DRM_R128'
 clean_mk CONFIG_DRM_R128 drivers/gpu/drm/Makefile
 
 announce DRM_RADEON - "ATI Radeon"
 clean_sed '
-/^static int radeon_do_init_cp([^;]*$/,/^}$/{
-  /^	radeon_cp_load_microcode(dev_priv);$/{
-    i\
-	DRM_ERROR("Missing Free microcode!\\n");\
-	radeon_do_cleanup_cp(dev);\
-	return -EINVAL;
-  }
-}' drivers/gpu/drm/radeon/radeon_cp.c 'report missing Free microcode on init'
-clean_sed '
-/^static int radeon_do_resume_cp([^;]*$/,/^}$/{
-  /^	radeon_cp_load_microcode(dev_priv);$/{
-    i\
-	DRM_ERROR("Missing Free microcode!\\n");\
-	return -EINVAL;
-  }
-}' drivers/gpu/drm/radeon/radeon_cp.c 'report missing Free microcode on resume'
+/^static void radeon_cp_load_microcode(drm_radeon_private_t \* dev_priv)/i\
+#define radeon_cp_load_microcode(dev_priv) \\\
+  do { \\\
+    DRM_ERROR("Missing Free microcode!\\n"); \\\
+    radeon_do_cleanup_cp(dev); \\\
+    return -EINVAL; \\\
+  } while (0)
+' drivers/gpu/drm/radeon/radeon_cp.c 'report missing Free microcode'
 clean_blob drivers/gpu/drm/radeon/radeon_cp.c
 clean_blob drivers/gpu/drm/radeon/radeon_microcode.h
 clean_sed '
-/^int r600_do_init_cp([^;]*$/,/^}$/{
-  /^		r[67]00_cp_load_microcode(dev_priv);$/{
-    i\
-		do {\
-			DRM_ERROR("Missing Free microcode!\\n");\
-			r600_do_cleanup_cp(dev);\
-			return -EINVAL;\
-		} while (0);
-  }
-}' drivers/gpu/drm/radeon/r600_cp.c 'report missing Free microcode on init'
+/^static void r100_cp_load_microcode(struct radeon_device \*rdev)/i\
+#define r100_cp_load_microcode(rdev) \\\
+  do { \\\
+    DRM_ERROR("Missing Free microcode!\\n"); \\\
+    return -EINVAL; \\\
+  } while (0)
+' drivers/gpu/drm/radeon/r100.c 'report missing Free microcode'
+clean_blob drivers/gpu/drm/radeon/r100.c
 clean_sed '
-/^int r600_do_resume_cp([^;]*$/,/^}$/{
-  /^		r[67]00_cp_load_microcode(dev_priv);$/{
-    i\
-		DRM_ERROR("Missing Free microcode!\\n");\
-		return -EINVAL;
-  }
-}' drivers/gpu/drm/radeon/r600_cp.c 'report missing Free microcode on resume'
+/^static void r600_cp_load_microcode(drm_radeon_private_t \*dev_priv)/i\
+#define r600_cp_load_microcode(dev_priv) \\\
+  do { \\\
+    DRM_ERROR("Missing Free microcode!\\n"); \\\
+    r600_do_cleanup_cp(dev); \\\
+    return -EINVAL; \\\
+  } while (0)
+' drivers/gpu/drm/radeon/r600_cp.c 'report missing Free r600 microcode'
+clean_sed '
+/^static void r700_cp_load_microcode(drm_radeon_private_t \*dev_priv)/i\
+#define r700_cp_load_microcode(dev_priv) \\\
+  do { \\\
+    DRM_ERROR("Missing Free microcode!\\n"); \\\
+    r600_do_cleanup_cp(dev); \\\
+    return -EINVAL; \\\
+  } while (0)
+' drivers/gpu/drm/radeon/r600_cp.c 'report missing Free r700 microcode'
 clean_blob drivers/gpu/drm/radeon/r600_cp.c
 clean_blob drivers/gpu/drm/radeon/r600_microcode.h
 clean_kconfig -f drivers/gpu/drm/Kconfig 'DRM_RADEON'
@@ -518,6 +529,7 @@ undefault_firmware 'XC\(2028\|3028L\)' \
   drivers/media/video/saa7134/saa7134-cards.c \
   drivers/media/video/ivtv/ivtv-driver.c \
   drivers/media/video/cx18/cx18-driver.c \
+  drivers/media/video/cx18/cx18-dvb.c \
   drivers/media/video/cx23885/cx23885-dvb.c \
   drivers/media/video/cx88/cx88-dvb.c \
   drivers/media/video/cx88/cx88-cards.c \
@@ -759,14 +771,18 @@ clean_mk CONFIG_DVB_DRX397XD drivers/media/dvb/frontends/Makefile
 announce DVB_PLUTO2 - "Pluto2 cards"
 reject_firmware drivers/media/dvb/pluto2/pluto2.c
 
-announce DVB_SIANO_SMS1XXX - "Siano SMS1XXX USB dongle support"
+announce SMS_SIANO_MDTV - "Siano SMS1xxx based MDTV receiver"
 reject_firmware drivers/media/dvb/siano/smscoreapi.c
-reject_firmware drivers/media/dvb/siano/smsusb.c
 clean_blob drivers/media/dvb/siano/smscoreapi.c
-clean_blob drivers/media/dvb/siano/smsusb.c
 clean_blob drivers/media/dvb/siano/sms-cards.c
-clean_kconfig drivers/media/dvb/siano/Kconfig 'DVB_SIANO_SMS1XXX'
-clean_mk CONFIG_DVB_SIANO_SMS1XXX drivers/media/dvb/siano/Makefile
+clean_kconfig drivers/media/dvb/siano/Kconfig 'SMS_SIANO_MDTV'
+clean_mk CONFIG_SMS_SIANO_MDTV drivers/media/dvb/siano/Makefile
+
+announce SMS_USB_DRV - "Siano's USB interface support"
+reject_firmware drivers/media/dvb/siano/smsusb.c
+clean_blob drivers/media/dvb/siano/smsusb.c
+clean_kconfig drivers/media/dvb/siano/Kconfig 'SMS_USB_DRV'
+clean_mk CONFIG_SMS_USB_DRV drivers/media/dvb/siano/Makefile
 
 announce DVB_TTUSB_BUDGET - "Technotrend/Hauppauge Nova-USB devices"
 drop_fw_file firmware/ttusb-budget/dspbootcode.bin.ihex firmware/ttusb-budget/dspbootcode.bin
@@ -797,8 +813,10 @@ clean_mk CONFIG_VIDEO_CPIA2 drivers/media/video/cpia2/Makefile
 
 announce VIDEO_CX18 - "Conexant cx23418 MPEG encoder support"
 reject_firmware drivers/media/video/cx18/cx18-av-firmware.c
+reject_firmware drivers/media/video/cx18/cx18-dvb.c
 reject_firmware drivers/media/video/cx18/cx18-firmware.c
 clean_blob drivers/media/video/cx18/cx18-av-firmware.c
+clean_blob drivers/media/video/cx18/cx18-dvb.c
 clean_blob drivers/media/video/cx18/cx18-firmware.c
 clean_kconfig drivers/media/video/cx18/Kconfig 'VIDEO_CX18'
 clean_mk CONFIG_VIDEO_CX18 drivers/media/video/cx18/Makefile
@@ -908,8 +926,9 @@ clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
 
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
-clean_blob drivers/net/bnx2x_init_values.h
-clean_blob drivers/net/bnx2x_init.h
+drop_fw_file firmware/bnx2x-e1-4.8.53.0.fw.ihex firmware/bnx2x-e1-4.8.53.0.fw
+drop_fw_file firmware/bnx2x-e1h-4.8.53.0.fw.ihex firmware/bnx2x-e1h-4.8.53.0.fw
+reject_firmware drivers/net/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
   /^$/i\
@@ -917,6 +936,9 @@ clean_sed '
   return (printk(KERN_ERR PFX "%s: Missing Free firmware\\n", bp->dev->name),\\\
 	  -EINVAL)
 }' drivers/net/bnx2x_main.c 'report missing Free firmware'
+clean_blob drivers/net/bnx2x_main.c
+clean_blob drivers/net/bnx2x_hsi.h
+clean_blob drivers/net/bnx2x_init_ops.h
 clean_kconfig drivers/net/Kconfig 'BNX2X'
 clean_mk CONFIG_BNX2X drivers/net/Makefile
 
@@ -930,7 +952,7 @@ clean_mk CONFIG_CASSINI drivers/net/Makefile
 announce CHELSIO_T3 - "Chelsio AEL 2005 support"
 drop_fw_file firmware/cxgb3/t3b_psram-1.1.0.bin.ihex firmware/cxgb3/t3b_psram-1.1.0.bin
 drop_fw_file firmware/cxgb3/t3c_psram-1.1.0.bin.ihex firmware/cxgb3/t3c_psram-1.1.0.bin
-drop_fw_file firmware/cxgb3/t3fw-7.1.0.bin.ihex firmware/cxgb3/t3fw-7.1.0.bin
+drop_fw_file firmware/cxgb3/t3fw-7.4.0.bin.ihex firmware/cxgb3/t3fw-7.4.0.bin
 reject_firmware drivers/net/cxgb3/cxgb3_main.c
 clean_sed '
 /^static int ael2005_setup_\(sr\|twinax\)_edc([^;]*$/,/^}$/{
@@ -970,8 +992,10 @@ clean_kconfig drivers/net/Kconfig 'MYRI10GE'
 clean_mk CONFIG_MYRI10GE drivers/net/myri10ge/Makefile
 
 announce NETXEN_NIC - "NetXen Multi port (1/10) Gigabit Ethernet NIC"
-reject_firmware drivers/net/netxen/netxen_nic_hw.c
-clean_blob drivers/net/netxen/netxen_nic_hw.c
+reject_firmware drivers/net/netxen/netxen_nic.h
+reject_firmware drivers/net/netxen/netxen_nic_main.c
+reject_firmware drivers/net/netxen/netxen_nic_init.c
+clean_blob drivers/net/netxen/netxen_nic_init.c
 clean_kconfig drivers/net/Kconfig 'NETXEN_NIC'
 clean_mk CONFIG_NETXEN_NIC drivers/net/Makefile
 
@@ -998,7 +1022,7 @@ clean_sed '
 		printk("%s: missing Free firmware\\n", __func__);\
 		return (STATUS_FAILURE);\
 #define PhyUcode NULL		
-}' drivers/staging/sxg/sxg.c
+}' drivers/staging/sxg/sxg.c 'report missing Free firmware'
 clean_blob drivers/staging/sxg/sxg.c
 clean_kconfig drivers/staging/sxg/Kconfig 'SXG'
 clean_mk CONFIG_SXG drivers/staging/sxg/Makefile
@@ -1076,11 +1100,13 @@ clean_kconfig drivers/pcmcia/Kconfig 'PCCARD'
 clean_mk CONFIG_PCCARD drivers/pcmcia/Makefile
 
 announce PCMCIA_3C574 - "3Com 3c574 PCMCIA support"
+drop_fw_file firmware/cis/3CCFEM556.cis.ihex firmware/cis/3CCFEM556.cis
 clean_blob drivers/net/pcmcia/3c574_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_3C574'
 clean_mk CONFIG_PCMCIA_3C574 drivers/net/pcmcia/Makefile
 
 announce PCMCIA_3C589 - "3Com 3c589 PCMCIA support"
+drop_fw_file firmware/cis/3CXEM556.cis.ihex firmware/cis/3CXEM556.cis
 clean_blob drivers/net/pcmcia/3c589_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_3C589'
 clean_mk CONFIG_PCMCIA_3C589 drivers/net/pcmcia/Makefile
@@ -1210,6 +1236,12 @@ clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWL5000'
 clean_mk CONFIG_IWL5000 drivers/net/wireless/iwlwifi/Makefile
 
+announce IWM - "Intel Wireless Multicomm 3200 WiFi driver"
+reject_firmware drivers/net/wireless/iwmc3200wifi/fw.c
+clean_blob drivers/net/wireless/iwmc3200wifi/sdio.c
+clean_kconfig drivers/net/wireless/iwmc3200wifi/Kconfig 'IWM'
+clean_mk CONFIG_IWM drivers/net/wireless/iwmc3200wifi/Makefile
+
 announce LIBERTAS_CS - "Marvell Libertas 8385 CompactFlash 802.11b/g cards"
 reject_firmware drivers/net/wireless/libertas/if_cs.c
 clean_blob drivers/net/wireless/libertas/if_cs.c
@@ -1246,6 +1278,42 @@ reject_firmware drivers/net/wireless/mwl8k.c
 clean_blob drivers/net/wireless/mwl8k.c
 clean_kconfig drivers/net/wireless/Kconfig 'MWL8K'
 clean_mk CONFIG_MWL8K drivers/net/wireless/Makefile
+
+announce OTUS - "Atheros OTUS 802.11n USB wireless support"
+clean_blob drivers/staging/otus/hal/hpDKfwu.c
+clean_blob drivers/staging/otus/hal/hpfw2.c
+clean_blob drivers/staging/otus/hal/hpfwbu.c
+clean_blob drivers/staging/otus/hal/hpfwspiu.c
+clean_blob drivers/staging/otus/hal/hpfwu.c
+clean_blob drivers/staging/otus/hal/hpfwu.c.drv_ba_resend
+clean_blob drivers/staging/otus/hal/hpfwu_2k.c
+clean_blob drivers/staging/otus/hal/hpfwu_BA.c
+clean_blob drivers/staging/otus/hal/hpfwu_FB50_mdk.c
+clean_blob drivers/staging/otus/hal/hpfwu_OTUS_RC.c
+clean_blob drivers/staging/otus/hal/hpfwu_txstream.c
+clean_blob drivers/staging/otus/hal/hpfwuinit.c
+clean_sed '
+/^u16_t zfFirmwareDownload\(NotJump\)\?(.*)$/,/^}$/ {
+  /    image = (u8_t\*) fw;/i\
+    zm_msg0_init(ZM_LV_0, "Missing Free firmware");\
+    ret = ZM_ERR_FIRMWARE_WRONG_TYPE;\
+    goto exit;\
+
+}
+' drivers/staging/otus/hal/hpusb.c \
+  'disabled non-Free firmware-loading machinery'
+clean_sed 's/^extern u16_t \(zfFirmwareDownload\(NotJump\)\?\)([^;]*);/&\n#define \1(dev,fw,len,offset) (\1)(dev,NULL,0,offset)/
+' drivers/staging/otus/hal/hpmain.c \
+  'disabled non-Free firmware-loading machinery'
+clean_blob drivers/staging/otus/hal/hpmain.c
+clean_kconfig drivers/staging/otus/Kconfig OTUS
+clean_mk CONFIG_OTUS drivers/staging/otus/Makefile
+
+announce PRISM2_USB - "Prism2.5/3 USB driver"
+reject_firmware drivers/staging/wlan-ng/prism2fw.c
+clean_blob drivers/staging/wlan-ng/prism2fw.c
+clean_kconfig drivers/staging/wlan-ng/Kconfig PRISM2_USB
+clean_mk CONFIG_PRISM2_USB drivers/staging/wlan-ng/Makefile
 
 announce P54_PCI - "Prism54 PCI support"
 reject_firmware drivers/net/wireless/p54/p54pci.c
@@ -1297,6 +1365,57 @@ clean_blob drivers/net/wireless/rt2x00/rt73usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig 'RT73USB'
 clean_mk CONFIG_RT73USB drivers/net/wireless/rt2x00/Makefile
 
+announce RT2800USB - "Ralink rt2800 (USB) support"
+clean_blob drivers/net/wireless/rt2x00/rt2800usb.h
+clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
+clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
+clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
+
+announce RT2860 - "Ralink 2860 wireless support"
+clean_file drivers/staging/rt2860/common/firmware.h
+clean_blob drivers/staging/rt2860/rt_linux.h
+clean_sed '
+/^NDIS_STATUS NICLoadFirmware(/,/^}$/{
+  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
+}' drivers/staging/rt2860/common/rtmp_init.c 'report missing Free firmware'
+clean_blob drivers/staging/rt2860/common/rtmp_init.c
+clean_sed '
+/^INT[	]set_eFuseLoadFromBin_Proc(/,/^}$/{
+  /src = kmalloc/i\
+	printk("%s: missing Free firmware\\n", __func__);\
+	return FALSE;	
+}' drivers/staging/rt2860/common/eeprom.c 'report missing Free firmware'
+clean_blob drivers/staging/rt2860/common/eeprom.c
+clean_kconfig drivers/staging/rt2860/Kconfig RT2860
+clean_mk CONFIG_RT2860 drivers/staging/rt2860/Makefile
+
+announce RT2870 - "Ralink 2870 wireless support"
+clean_file drivers/staging/rt2870/common/firmware.h
+clean_kconfig drivers/staging/rt2870/Kconfig RT2870
+clean_mk CONFIG_RT2870 drivers/staging/rt2870/Makefile
+
+announce RT3070 - "Ralink 3070 wireless support"
+clean_file drivers/staging/rt3070/firmware.h
+clean_kconfig drivers/staging/rt3070/Kconfig RT3070
+clean_kconfig 'CONFIG_RT3070' drivers/staging/rt3070/Makefile
+
+announce RTL8192SU - "RealTek RTL8192SU Wireless LAN NIC driver"
+reject_firmware drivers/staging/rtl8192su/r819xU_firmware.c
+reject_firmware drivers/staging/rtl8192su/r8192S_firmware.c
+clean_blob drivers/staging/rtl8192su/r8192SU_HWImg.c
+clean_blob drivers/staging/rtl8192su/r8192S_FwImgDTM.h
+clean_blob drivers/staging/rtl8192su/r8192S_firmware.c
+clean_blob drivers/staging/rtl8192su/r819xU_firmware_img.c
+clean_blob drivers/staging/rtl8192su/r819xU_firmware.c
+clean_kconfig drivers/staging/rtl8192su/Kconfig 'RTL8192SU'
+clean_mk CONFIG_RTL8192SU drivers/staging/rtl8192su/Makefile
+
+announce WL12XX - "TI wl1251/wl1271 support"
+reject_firmware drivers/net/wireless/wl12xx/main.c
+clean_blob drivers/net/wireless/wl12xx/wl1251.h
+clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX'
+clean_mk CONFIG_WL12XX drivers/net/wireless/wl12xx/Makefile
+
 announce USB_ZD1201 - "USB ZD1201 based Wireless device support"
 reject_firmware drivers/net/wireless/zd1201.c
 clean_blob drivers/net/wireless/zd1201.c
@@ -1328,82 +1447,6 @@ reject_firmware drivers/bluetooth/bt3c_cs.c
 clean_blob drivers/bluetooth/bt3c_cs.c
 clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBT3C'
 clean_mk CONFIG_BT_HCIBT3C drivers/bluetooth/Makefile
-
-announce OTUS - "Atheros OTUS 802.11n USB wireless support"
-clean_blob drivers/staging/otus/hal/hpDKfwu.c
-clean_blob drivers/staging/otus/hal/hpfw2.c
-clean_blob drivers/staging/otus/hal/hpfwbu.c
-clean_blob drivers/staging/otus/hal/hpfwspiu.c
-clean_blob drivers/staging/otus/hal/hpfwu.c
-clean_blob drivers/staging/otus/hal/hpfwu.c.drv_ba_resend
-clean_blob drivers/staging/otus/hal/hpfwu_2k.c
-clean_blob drivers/staging/otus/hal/hpfwu_BA.c
-clean_blob drivers/staging/otus/hal/hpfwu_FB50_mdk.c
-clean_blob drivers/staging/otus/hal/hpfwu_OTUS_RC.c
-clean_blob drivers/staging/otus/hal/hpfwu_txstream.c
-clean_blob drivers/staging/otus/hal/hpfwuinit.c
-clean_sed '
-/^u16_t zfFirmwareDownload\(NotJump\)\?(.*)$/,/^}$/ {
-  /    image = (u8_t\*) fw;/i\
-    zm_msg0_init(ZM_LV_0, "Missing Free firmware");\
-    ret = ZM_ERR_FIRMWARE_WRONG_TYPE;\
-    goto exit;\
-
-}
-' drivers/staging/otus/hal/hpusb.c \
-  'disabled non-Free firmware-loading machinery'
-clean_sed 's/^extern u16_t \(zfFirmwareDownload\(NotJump\)\?\)([^;]*);/&\n#define \1(dev,fw,len,offset) (\1)(dev,NULL,0,offset)/
-' drivers/staging/otus/hal/hpmain.c \
-  'disabled non-Free firmware-loading machinery'
-clean_blob drivers/staging/otus/hal/hpmain.c
-clean_kconfig drivers/staging/otus/Kconfig OTUS
-clean_mk CONFIG_OTUS drivers/staging/otus/Makefile
-
-announce RT2860 - "Ralink 2860 wireless support"
-clean_file drivers/staging/rt2860/common/firmware.h
-clean_blob drivers/staging/rt2860/rt_linux.h
-clean_blob drivers/staging/rt2860/rt_ate.h
-clean_blob drivers/staging/rt2860/rt_ate.c
-clean_sed '
-/^NDIS_STATUS NICLoadFirmware(/,/^}$/{
-  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
-}' drivers/staging/rt2860/common/rtmp_init.c 'report missing Free firmware'
-clean_blob drivers/staging/rt2860/common/rtmp_init.c
-clean_kconfig drivers/staging/rt2860/Kconfig RT2860
-clean_mk CONFIG_RT2860 drivers/staging/rt2860/Makefile
-
-announce RT2870 - "Ralink 2870 wireless support"
-clean_file drivers/staging/rt2870/common/firmware.h
-clean_blob drivers/staging/rt2870/rt_linux.h
-clean_blob drivers/staging/rt2870/rt_ate.h
-clean_blob drivers/staging/rt2870/rt_ate.c
-clean_sed '
-/^NDIS_STATUS NICLoadFirmware(/,/^}$/{
-  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
-}' drivers/staging/rt2870/common/rtmp_init.c 'report missing Free firmware'
-clean_blob drivers/staging/rt2870/common/rtmp_init.c
-clean_kconfig drivers/staging/rt2870/Kconfig RT2870
-clean_mk CONFIG_RT2870 drivers/staging/rt2870/Makefile
-
-announce RT3070 - "Ralink 3070 wireless support"
-clean_file drivers/staging/rt3070/firmware.h
-clean_blob drivers/staging/rt3070/rt_linux.h
-clean_blob drivers/staging/rt3070/rt_ate.h
-clean_blob drivers/staging/rt3070/rt_ate.c
-clean_sed '
-/^INT[	]set_eFuseLoadFromBin_Proc(/,/^}$/{
-  /src = kmalloc/i\
-	printk("%s: missing Free firmware\\n", __func__);\
-	return FALSE;	
-}' drivers/staging/rt3070/common/eeprom.c 'report missing Free firmware'
-clean_blob drivers/staging/rt3070/common/eeprom.c
-clean_sed '
-/^NDIS_STATUS NICLoadFirmware(/,/^}$/{
-  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
-}' drivers/staging/rt3070/common/rtmp_init.c 'report missing Free firmware'
-clean_blob drivers/staging/rt3070/common/rtmp_init.c
-clean_kconfig drivers/staging/rt3070/Kconfig RT3070
-clean_kconfig 'CONFIG_RT3070' drivers/staging/rt3070/Makefile
 
 # wimax
 
@@ -1952,5 +1995,9 @@ clean_file Documentation/video4linux/extract_xc3028.pl
 clean_sed s,usb8388,whatever,g drivers/base/Kconfig 'removed blob name'
 clean_blob firmware/README.AddingFirmware
 clean_blob firmware/WHENCE
+
+if $errors; then
+  echo errors above were ignored because of --force >&2
+fi
 
 exit 0
