@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1819 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1826 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -447,7 +447,7 @@ Summary: The Linux kernel
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
 %if %{with_dracut}
-%define initrd_prereq  dracut-kernel >= 001-7
+%define initrd_prereq  dracut >= 001-7
 %else
 %define initrd_prereq  mkinitrd >= 6.0.61-1
 %endif
@@ -524,7 +524,7 @@ BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
 %define fancy_debuginfo 0
 %if %{with_debuginfo}
-%if 0%{?fedora} >= 8
+%if 0%{?fedora} >= 8 || 0%{?rhel} >= 6
 %define fancy_debuginfo 1
 %endif
 %endif
@@ -731,6 +731,7 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
+Patch1827: drm-edid-fixes.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -1427,6 +1428,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
+ApplyPatch drm-edid-fixes.patch
 
 # VGA arb + drm
 ApplyPatch linux-2.6-vga-arb.patch
@@ -1594,7 +1596,7 @@ EOF
     install -m 644 .config $RPM_BUILD_ROOT/boot/config-$KernelVer
     install -m 644 System.map $RPM_BUILD_ROOT/boot/System.map-$KernelVer
 %if %{with_dracut}
-    touch $RPM_BUILD_ROOT/boot/dracut-$KernelVer.img
+    touch $RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img
 %else
     touch $RPM_BUILD_ROOT/boot/initrd-$KernelVer.img
 %endif
@@ -1946,7 +1948,7 @@ fi\
 %{-r:\
 if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
-  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel-libre%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
 %{expand:\
 %if %{with_dracut}\
@@ -2074,7 +2076,7 @@ fi
 %endif\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
 %if %{with_dracut}\
-%ghost /boot/dracut-%{KVERREL}%{?2:.%{2}}.img\
+%ghost /boot/initramfs-%{KVERREL}%{?2:.%{2}}.img\
 %else\
 %ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
 %endif\
@@ -2117,7 +2119,24 @@ fi
 # and build.
 
 %changelog
-* Mon Sep 21 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Sep 23 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-39
+- touch initramfs-$foo not dracut-$foo.
+
+* Wed Sep 23 2009 Adam Jackson <ajax@redhat.com> 2.6.31-37
+- drm: Fix various buglets in EDID parsing.
+
+* Mon Sep 21 2009 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: more on rh#522649, added some useful info to debugfs
+- lots of coding style cleanups, which is the reason for the huge commit
+
+* Fri Sep 18 2009 Dave Jones <davej@redhat.com>
+- %ghost the dracut initramfs file.
+
+* Thu Sep 17 2009 Hans de Goede <hdegoede@redhat.com>
+- Now that we have %%post generation of dracut images we do not need to
+  Require dracut-kernel anymore
+
+* Thu Sep 17 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Sep 21 2009
 - Adjust iwlwifi patches for earlier deblobbing.
 
 * Thu Sep 17 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-33
