@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.91 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.92 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 34
+%define stable_update 35
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -798,10 +798,6 @@ Patch12000: linux-2.6-virtio-blk-dont-bounce-highmem-requests.patch
 
 Patch13000: make-mmap_min_addr-suck-less.patch
 
-# fix NFS short writes (#493500)
-Patch14000: linux-2.6-nfsd-report-short-writes-fix.patch
-Patch14001: linux-2.6-nfsd-report-short-writes.patch
-
 # send for -stable
 Patch15000: linux-2.6-ppc64-vs-broadcom.patch
 Patch15001: linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
@@ -1458,10 +1454,6 @@ ApplyPatch linux-2.6-virtio-blk-dont-bounce-highmem-requests.patch
 
 ApplyPatch make-mmap_min_addr-suck-less.patch
 
-# fix NFS short writes (#493500)
-ApplyPatch linux-2.6-nfsd-report-short-writes.patch
-ApplyPatch linux-2.6-nfsd-report-short-writes-fix.patch
-
 # send for -stable:
 ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
@@ -2042,6 +2034,12 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Sep 24 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.35-170.2.92
+- Linux 2.6.27.35
+- Drop merged patches:
+    linux-2.6-nfsd-report-short-writes-fix.patch
+    linux-2.6-nfsd-report-short-writes.patch
+
 * Tue Sep 15 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.34-170.2.91
 - Linux 2.6.27.34
 - Drop merged patch: linux-2.6-slub-fix-destroy-by-rcu.patch
