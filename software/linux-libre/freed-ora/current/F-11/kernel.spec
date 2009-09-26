@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1732 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1743 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -676,6 +676,7 @@ Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 # Virt Patches
 Patch1200: linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
 Patch1201: linux-2.6-xen-clean-up-warnings.patch
+Patch1202: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 
 Patch1515: lirc-2.6.31.patch
 Patch1517: hid-ignore-all-recent-imon-devices.patch
@@ -700,7 +701,6 @@ Patch1824: drm-radeon-cs-oops-fix.patch
 Patch1825: drm-pnp-add-resource-range-checker.patch
 Patch1826: drm-i915-enable-mchbar.patch
 
-
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
@@ -720,6 +720,9 @@ Patch2904: v4l-dvb-fix-cx25840-firmware-load.patch
 
 # fs fixes
 Patch3000: linux-2.6-fs-cifs-fix-port-numbers.patch
+
+# ACPI
+Patch4000: linux-2.6.30-cpuidle-faster-io.patch
 
 #snmp fixes
 Patch10000: linux-2.6-missing-rfc2465-stats.patch
@@ -745,18 +748,28 @@ Patch13002: linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 Patch14000: make-mmap_min_addr-suck-less.patch
 
+# ----- send for upstream inclusion -----
+Patch14010: linux-2.6-cifs-reenable-lanman-security.patch
+
 # ----- patches headed for -stable -----
 
 # Fix string overflows found by stackprotector:
 Patch14050: hda-check-strcpy-length.patch
 Patch14060: linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
 
-# fix bug introduced in 2.6.30.4
-Patch14070: linux-2.6-slub-fix-destroy-by-rcu.patch
-
 # fix stack protector problems with xen on x86_64
 Patch14080: linux-2.6-x86-load-percpu-segment-no-stackprotector.patch
 Patch14090: linux-2.6-xen-rearrange-to-fix-stackprotector.patch
+
+# fix lockdep warnings in cpufreq (#522685)
+Patch14100: linux-2.6-cpufreq-eliminate-lockdep-warnings.patch
+Patch14101: linux-2.6-cpufreq-cleanup-locking-in-ondemand.patch
+
+# fix hostap (#522269)
+Patch14200: hostap-revert-toxic-part-of-conversion.patch
+
+# fix cfq performance regression in 2.6.30
+Patch14300: linux-2.6-cfq-choose-new-next-req.patch
 
 %endif
 
@@ -1266,6 +1279,7 @@ ApplyPatch linux-2.6-fs-cifs-fix-port-numbers.patch
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
+ApplyPatch linux-2.6.30-cpuidle-faster-io.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1304,6 +1318,9 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 # Xen Guest
 ApplyPatch linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
 ApplyPatch linux-2.6-xen-clean-up-warnings.patch
+
+# Misc Virt
+ApplyPatch linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1367,7 +1384,7 @@ ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-gen3-fb-hack.patch
 ApplyPatch drm-intel-hdmi-edid-fix.patch
-#ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
+ApplyPatch drm-intel-gem-use-dma32-on-pae.patch
 ApplyPatch drm-modesetting-radeon-fixes.patch
 ApplyPatch drm-radeon-new-pciids.patch
 ApplyPatch drm-dont-frob-i2c.patch
@@ -1400,6 +1417,9 @@ ApplyPatch linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 ApplyPatch make-mmap_min_addr-suck-less.patch
 
+# ----- sent for upstream inclusion -----
+ApplyPatch linux-2.6-cifs-reenable-lanman-security.patch
+
 # ----- patches headed for -stable -----
 
 # CVE-2009-2847
@@ -1412,8 +1432,15 @@ ApplyPatch linux-2.6-v4l-dvb-af9015-fix-stack-corruption.patch
 ApplyPatch linux-2.6-x86-load-percpu-segment-no-stackprotector.patch
 ApplyPatch linux-2.6-xen-rearrange-to-fix-stackprotector.patch
 
-# fix 2.6.30.4 bug
-ApplyPatch linux-2.6-slub-fix-destroy-by-rcu.patch
+# fix lockdep warnings in cpufreq (#522685)
+ApplyPatch linux-2.6-cpufreq-eliminate-lockdep-warnings.patch
+ApplyPatch linux-2.6-cpufreq-cleanup-locking-in-ondemand.patch
+
+# fix hostap driver (#522269)
+ApplyPatch hostap-revert-toxic-part-of-conversion.patch
+
+# fix cfq performance regression in 2.6.30
+ApplyPatch linux-2.6-cfq-choose-new-next-req.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1854,7 +1881,7 @@ fi\
 %{-r:\
 if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
-  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel-libre%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
 /sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
 #if [ -x /sbin/weak-modules ]\
@@ -2003,6 +2030,43 @@ fi
 # and build.
 
 %changelog
+* Fri Sep 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-64
+- Fix serious CFQ performance regression.
+
+* Fri Sep 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-63
+- Disable the GEM graphics manager on i686 PAE kernels
+  (fixes modesetting on Intel graphics.)
+
+* Fri Sep 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-62
+- Fix breakage in hostap driver (#522269)
+
+* Thu Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-61
+- Backport the cpuidle-faster-io fix from Fedora 12 to fix I/O
+  performance problems when reading/writing multiple disks.
+
+* Thu Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-60
+- Linux 2.6.30.8
+
+* Thu Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.7-59
+- Disable sound powersave by default; it still pops when playing sounds. (#523836)
+
+* Wed Sep 16 2009 Justin M. Forbes <jforbes@redhat.com> 2.6.30.7-58
+- Revert virtio_blk to rotational mode. (#509383)
+
+* Tue Sep 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.7-57
+- Linux 2.6.30.7
+
+* Tue Sep 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.7-56.rc1
+- Fix CIFS security flags mask broken in 2.6.30 (#523173)
+
+* Tue Sep 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.7-55.rc1
+- Fix cpufreq lockdep warnings (#522685)
+
+* Sat Sep 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.7-54.rc1
+- 2.6.30.7-rc1
+- Drop patches merged in -stable:
+   linux-2.6-slub-fix-destroy-by-rcu.patch
+
 * Thu Sep 10 2009 Dennis Gilmore <dennis@ausil.us> 2.6.30.6-53
 - kgdb only works on sparc64 smp kernels so disable on the up one and enable on the smp one
 - update to 256 cpus supported on sparc64 smp
