@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1826 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1834 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -715,14 +715,12 @@ Patch1550: linux-2.6-ksm.patch
 Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-ksm-updates.patch
 Patch1553: linux-2.6-ksm-fix-munlock.patch
-Patch1575: linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
-Patch1576: linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
-Patch1577: linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
 Patch1578: linux-2.6-xen-stack-protector-fix.patch
 Patch1579: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
+Patch1580: linux-2.6-xen-check-efer-fix.patch
 
 # nouveau + drm fixes
-Patch1812: drm-next.patch
+Patch1812: drm-next-8ef8678c8.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -731,7 +729,6 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
-Patch1827: drm-edid-fixes.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -774,9 +771,6 @@ Patch13000: ppc-hates-my-family-and-swore-revenge.patch
 
 # patches headed for -stable
 
-# scsi oops fixes
-Patch14000: linux-2.6-scsi-sd-fix-oops-during-scanning.patch
-Patch14001: linux-2.6-scsi-sg-fix-oops-in-error-path.patch
 # Raid10 lockdep fix
 Patch14002: linux-2.6-raidlockdep.patch
 
@@ -1376,7 +1370,8 @@ ApplyPatch linux-2.6-iwlwifi-remove-deprecated-6000-series-adapters.patch
 # Mark kernel data as NX
 ApplyPatch linux-2.6.31-nx-data.patch
 # Apply NX/RO to modules
-ApplyPatch linux-2.6.31-modules-ro-nx.patch
+# breaks ftrace NOP replacement
+#ApplyPatch linux-2.6.31-modules-ro-nx.patch
 
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1405,11 +1400,9 @@ ApplyPatch linux-2.6-ksm-fix-munlock.patch
 ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
-ApplyPatch linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
-ApplyPatch linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
-ApplyPatch linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
 ApplyPatch linux-2.6-xen-stack-protector-fix.patch
 ApplyPatch linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
+ApplyPatch linux-2.6-xen-check-efer-fix.patch
 
 # Fix block I/O errors in KVM
 ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1417,7 +1410,7 @@ ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next.patch
+ApplyPatch drm-next-8ef8678c8.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1428,7 +1421,6 @@ ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
-ApplyPatch drm-edid-fixes.patch
 
 # VGA arb + drm
 ApplyPatch linux-2.6-vga-arb.patch
@@ -1457,9 +1449,6 @@ ApplyPatch linux-2.6-selinux-module-load-perms.patch
 
 # patches headed for -stable
 
-# scsi oops fixes
-ApplyPatch linux-2.6-scsi-sd-fix-oops-during-scanning.patch
-ApplyPatch linux-2.6-scsi-sg-fix-oops-in-error-path.patch
 # Raid10 lockdep fix
 ApplyPatch linux-2.6-raidlockdep.patch
 
@@ -2119,6 +2108,37 @@ fi
 # and build.
 
 %changelog
+* Sat Sep 26 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-48
+- drm-next-8ef8678c8.patch: fix intel/nouveau kms
+
+* Fri Sep 25 2009 Justin M. Forbes <bskeggs@redhat.com> 2.6.31.1-47
+- Fix xen guest booting when NX is disabled (#525290)
+
+* Fri Sep 25 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.1-46
+- drm-nouveau.patch: cleanups, fixes, pre-G80 s/r fixes, init rework
+
+* Fri Sep 25 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-45
+- drm-next-adea4796c.patch: fix r600 glxgears
+
+* Fri Sep 25 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-44
+- bump a extra one because I accidentially CVS.
+
+* Thu Sep 24 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-42
+- drm-next update - fix r600 s/r, and command line mode picking and r600 tv
+
+* Thu Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.1-41
+- Linux 2.6.31.1
+- Drop patches merged upstream:
+    linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
+    linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
+    linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
+    linux-2.6-scsi-sd-fix-oops-during-scanning.patch
+    linux-2.6-scsi-sg-fix-oops-in-error-path.patch
+
+* Thu Sep 24 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-40
+- Drop the modules-ro-nx patch: it's causing ftrace to be unable
+  to NOP out module function call tracking. (#524042)
+
 * Wed Sep 23 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-39
 - touch initramfs-$foo not dracut-$foo.
 
