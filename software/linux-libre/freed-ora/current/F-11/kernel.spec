@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1743 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1746 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -746,6 +746,14 @@ Patch13000: linux-2.6-kvm-skip-pit-check.patch
 Patch13001: linux-2.6.29-xen-disable-gbpages.patch
 Patch13002: linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
+# sched fixes cherry-picked from 2.6.32
+Patch13100: sched-deal-with-low-load-in-wake-affine.patch
+Patch13101: sched-disable-NEW-FAIR-SLEEPERS-for-now.patch
+Patch13102: sched-ensure-child-cant-gain-time-over-its-parent-after-fork.patch
+Patch13103: sched-remove-shortcut-from-select-task-rq-fair.patch
+# latency defaults from 2.6.32 but changed to be not so aggressive
+Patch13104: sched-retune-scheduler-latency-defaults.patch
+
 Patch14000: make-mmap_min_addr-suck-less.patch
 
 # ----- send for upstream inclusion -----
@@ -770,6 +778,16 @@ Patch14200: hostap-revert-toxic-part-of-conversion.patch
 
 # fix cfq performance regression in 2.6.30
 Patch14300: linux-2.6-cfq-choose-new-next-req.patch
+
+# kvm fixes from 2.6.31.1, including fix for CVE-2009-3290
+Patch14400: kvm-guest-fix-bogus-wallclock-physical-address-calculation.patch
+Patch14401: kvm-mmu-make-__kvm_mmu_free_some_pages-handle-empty-list.patch
+Patch14402: kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
+Patch14403: kvm-vmx-fix-cr8-exiting-control-clobbering-by-ept.patch
+Patch14404: kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
+
+# appletalk: fix skb leak (CVE-2009-2903)
+Patch15200: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
 
 %endif
 
@@ -1415,6 +1433,14 @@ ApplyPatch linux-2.6.29-xen-disable-gbpages.patch
 # v12n
 ApplyPatch linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
+# sched fixes cherry-picked from 2.6.32
+ApplyPatch sched-deal-with-low-load-in-wake-affine.patch
+ApplyPatch sched-disable-NEW-FAIR-SLEEPERS-for-now.patch
+ApplyPatch sched-ensure-child-cant-gain-time-over-its-parent-after-fork.patch
+ApplyPatch sched-remove-shortcut-from-select-task-rq-fair.patch
+# latency defaults from 2.6.32 but changed to be not so aggressive
+ApplyPatch sched-retune-scheduler-latency-defaults.patch
+
 ApplyPatch make-mmap_min_addr-suck-less.patch
 
 # ----- sent for upstream inclusion -----
@@ -1441,6 +1467,16 @@ ApplyPatch hostap-revert-toxic-part-of-conversion.patch
 
 # fix cfq performance regression in 2.6.30
 ApplyPatch linux-2.6-cfq-choose-new-next-req.patch
+
+# kvm fixes from 2.6.31.1, including fix for CVE-2009-3290
+ApplyPatch kvm-guest-fix-bogus-wallclock-physical-address-calculation.patch
+ApplyPatch kvm-mmu-make-__kvm_mmu_free_some_pages-handle-empty-list.patch
+ApplyPatch kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
+ApplyPatch kvm-vmx-fix-cr8-exiting-control-clobbering-by-ept.patch
+ApplyPatch kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
+
+# appletalk: fix skb leak (CVE-2009-2903)
+ApplyPatch appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2030,6 +2066,16 @@ fi
 # and build.
 
 %changelog
+* Sat Sep 26 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.8-67
+- Scheduler fixes cherry-picked from 2.6.32
+
+* Sat Sep 26 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.8-66
+- Backport "appletalk: Fix skb leak when ipddp interface is not loaded"
+  (fixes CVE-2009-2903)
+
+* Sat Sep 26 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-65
+- KVM fixes from 2.6.31.1, including fix for CVE-2009-3290
+
 * Fri Sep 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.8-64
 - Fix serious CFQ performance regression.
 
