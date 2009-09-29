@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1834 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1839 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -673,6 +673,8 @@ Patch460: linux-2.6-serial-460800.patch
 
 Patch470: die-floppy-die.patch
 
+Patch500: linux-2.6.31-copy_from_user-bounds.patch
+
 Patch510: linux-2.6-silence-noise.patch
 Patch520: linux-2.6.30-hush-rom-warning.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -718,9 +720,14 @@ Patch1553: linux-2.6-ksm-fix-munlock.patch
 Patch1578: linux-2.6-xen-stack-protector-fix.patch
 Patch1579: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 Patch1580: linux-2.6-xen-check-efer-fix.patch
+Patch1581: linux-2.6-xen-spinlock-enable-interrupts-only-when-blocking.patch
+Patch1582: linux-2.6-xen-spinlock-stronger-barrier.patch
+Patch1583: linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
+Patch1584: linux-2.6-xen-improvement-to-wait_for_devices.patch
+Patch1585: linux-2.6-xen-increase-device-connection-timeout.patch
 
 # nouveau + drm fixes
-Patch1812: drm-next-8ef8678c8.patch
+Patch1812: drm-next-4c57edba4.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -766,8 +773,6 @@ Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12012: linux-2.6-rtc-show-hctosys.patch
 Patch12013: linux-2.6-rfkill-all.patch
 Patch12014: linux-2.6-selinux-module-load-perms.patch
-
-Patch13000: ppc-hates-my-family-and-swore-revenge.patch
 
 # patches headed for -stable
 
@@ -1327,6 +1332,9 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
 
+# make copy_from_user to a stack slot provable right
+ApplyPatch linux-2.6.31-copy_from_user-bounds.patch
+
 # Get away from having to poll Toshibas
 #ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
 
@@ -1403,6 +1411,13 @@ ApplyPatch linux-2.6-ksm-kvm.patch
 ApplyPatch linux-2.6-xen-stack-protector-fix.patch
 ApplyPatch linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 ApplyPatch linux-2.6-xen-check-efer-fix.patch
+ApplyPatch linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
+ApplyPatch linux-2.6-xen-improvement-to-wait_for_devices.patch
+ApplyPatch linux-2.6-xen-increase-device-connection-timeout.patch
+
+# improve xen spinlock scalability
+ApplyPatch linux-2.6-xen-spinlock-enable-interrupts-only-when-blocking.patch
+ApplyPatch linux-2.6-xen-spinlock-stronger-barrier.patch
 
 # Fix block I/O errors in KVM
 ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1410,7 +1425,7 @@ ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next-8ef8678c8.patch
+ApplyPatch drm-next-4c57edba4.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1444,8 +1459,6 @@ ApplyPatch v4l-dvb-fix-cx25840-firmware-loading.patch
 ApplyPatch linux-2.6-rtc-show-hctosys.patch
 ApplyPatch linux-2.6-rfkill-all.patch
 ApplyPatch linux-2.6-selinux-module-load-perms.patch
-
-#ApplyPatch ppc-hates-my-family-and-swore-revenge.patch
 
 # patches headed for -stable
 
@@ -2108,6 +2121,19 @@ fi
 # and build.
 
 %changelog
+* Tue Sep 29 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-53
+- drm-next-4c57edba4.patch: fix r600 dri1 memory leak and r600 bugs
+
+* Mon Sep 28 2009 Dave Jones <davej@redhat.com> 2.6.31.1-52
+- Use __builtin_object_size to validate the buffer size for copy_from_user
+  + associated fixes to various copy_from_user invocations.
+
+* Mon Sep 28 2009 Justin M. Forbes <jmforbes@redhat.com> 2.6.31.1-50
+- Increase timeout for xen frontend devices to connect.
+
+* Sat Sep 26 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.1-49
+- Add Xen spinlock patches to improve scalability.
+
 * Sat Sep 26 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-48
 - drm-next-8ef8678c8.patch: fix intel/nouveau kms
 
