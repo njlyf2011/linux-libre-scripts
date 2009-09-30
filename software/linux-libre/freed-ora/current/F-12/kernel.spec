@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1839 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1842 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -1333,7 +1333,8 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch die-floppy-die.patch
 
 # make copy_from_user to a stack slot provable right
-ApplyPatch linux-2.6.31-copy_from_user-bounds.patch
+# hosed stuff, just drop this close to beta
+#ApplyPatch linux-2.6.31-copy_from_user-bounds.patch
 
 # Get away from having to poll Toshibas
 #ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
@@ -2121,6 +2122,16 @@ fi
 # and build.
 
 %changelog
+* Wed Sep 30 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-56
+- revert all the arjan patches until someone tests them.
+
+* Tue Sep 29 2009 Steve Dickson <steved@redhat.com>  2.6.31.1-55
+- Updated the NFS4 pseudo root code with a fix from upstream
+
+* Tue Sep 29 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-54
+- Fix broken capabilties that stopped dbus working due to copy from user
+  fixups.
+
 * Tue Sep 29 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-53
 - drm-next-4c57edba4.patch: fix r600 dri1 memory leak and r600 bugs
 
