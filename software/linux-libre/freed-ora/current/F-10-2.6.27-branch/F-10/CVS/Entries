@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.27.tar.bz2.sign/-1.1/Fri Oct 10 00:26:03 2008//Tkernel-2_6_27-1_fc10
 /patch-2.6.27.35.bz2.sign/-1.1.2.1/Thu Sep 24 20:02:59 2009//Tkernel-2_6_27_35-170_2_92_fc10
-/.cvsignore/1.960.2.22/dummy timestamp from new-entry+Sat Sep 26 00:52:59 2009//Tkernel-2_6_27_35-170_2_94_fc10
 /Makefile/1.90/Wed Apr  8 06:18:32 2009//Tkernel-2_6_27_35-170_2_94_fc10
 /Makefile.config/1.68/Wed Apr  8 06:18:32 2009/-ko/Tkernel-2_6_27_35-170_2_94_fc10
 /TODO/1.46.2.5/Wed Apr  8 06:18:32 2009//Tkernel-2_6_27_35-170_2_94_fc10
@@ -162,8 +161,9 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_35-170_2_94_fc10
 /nvidia-agp.patch/1.1/Wed Apr  8 06:18:47 2009/-kb/Tkernel-2_6_27_35-170_2_94_fc10
 /print-dmi-hw-name-in-warnings.patch/1.1.2.2/Wed Apr  8 06:18:50 2009/-kb/Tkernel-2_6_27_35-170_2_94_fc10
-/sources/1.922.2.22/dummy timestamp from new-entry+Sat Sep 26 01:25:43 2009//Tkernel-2_6_27_35-170_2_94_fc10
 /sparc-2.6.git-aae7fb87ec4d2df6cb551670b1765cf4e5795a3b.patch/1.1/Wed Apr  8 06:18:50 2009/-kb/Tkernel-2_6_27_35-170_2_94_fc10
-/upstream/1.834.2.22/dummy timestamp from new-entry+Sat Sep 26 01:26:27 2009//Tkernel-2_6_27_35-170_2_94_fc10
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_27_35-170_2_94_fc10
 /v4l-dvb-fix-cx25840-firmware-load.patch/1.1.2.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_27_35-170_2_94_fc10
+/.cvsignore/1.960.2.22/Fri Oct  2 06:03:31 2009//Tkernel-2_6_27_35-170_2_94_fc10
+/sources/1.922.2.22/Fri Oct  2 06:03:31 2009//Tkernel-2_6_27_35-170_2_94_fc10
+/upstream/1.834.2.22/Fri Oct  2 06:03:31 2009//Tkernel-2_6_27_35-170_2_94_fc10
