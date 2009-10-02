@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.92 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.94 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -803,6 +803,12 @@ Patch15000: linux-2.6-ppc64-vs-broadcom.patch
 Patch15001: linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
 Patch15002: linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
+# kvm hypercall must be from cpl0 on guest
+Patch15100: kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
+
+# appletalk: fix skb leak (CVE-2009-2903)
+Patch15200: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1459,6 +1465,12 @@ ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
+# kvm hypercall must be from cpl0 on guest (CVE-2009-3290)
+ApplyPatch kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
+
+# appletalk: fix skb leak (CVE-2009-2903)
+ApplyPatch appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2034,6 +2046,14 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sat Sep 26 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.35-170.2.94
+- Backport "appletalk: Fix skb leak when ipddp interface is not loaded"
+  (fixes CVE-2009-2903)
+
+* Sat Sep 26 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.35-170.2.93
+- Backport "KVM: x86: Disallow hypercalls for guest callers in rings > 0"
+  (fixes CVE-2009-3290)
+
 * Thu Sep 24 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.35-170.2.92
 - Linux 2.6.27.35
 - Drop merged patches:
