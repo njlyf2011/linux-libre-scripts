@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1842 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1844 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -696,6 +696,7 @@ Patch683: linux-2.6-iwlwifi-fix-debugfs-buffer-handling.patch
 Patch684: linux-2.6-iwlwifi-traverse-linklist-to-find-the-valid-OTP-block.patch
 Patch685: linux-2.6-iwlwifi-fix-unloading-driver-while-scanning.patch
 Patch686: linux-2.6-iwlwifi-remove-deprecated-6000-series-adapters.patch
+Patch687: linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
 Patch700: linux-2.6.31-nx-data.patch
 Patch701: linux-2.6.31-modules-ro-nx.patch
@@ -1372,6 +1373,7 @@ ApplyPatch linux-2.6-iwlwifi-update-1000-series-API-version-to-match-firmware.pa
 ApplyPatch linux-2.6-iwlwifi-fix-debugfs-buffer-handling.patch
 ApplyPatch linux-2.6-iwlwifi-traverse-linklist-to-find-the-valid-OTP-block.patch
 ApplyPatch linux-2.6-iwlwifi-fix-unloading-driver-while-scanning.patch
+ApplyPatch linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
 # remove support for deprecated iwl6000 parts
 ApplyPatch linux-2.6-iwlwifi-remove-deprecated-6000-series-adapters.patch
@@ -2122,6 +2124,12 @@ fi
 # and build.
 
 %changelog
+* Fri Oct  2 2009 John W. Linville <linville@redhat.com>
+- Backport "iwlwifi: reduce noise when skb allocation fails"
+
+* Wed Sep 30 2009 David Woodhouse <David.Woodhouse@intel.com>
+- Update IOMMU code; mostly a bunch more workarounds for broken BIOSes.
+
 * Wed Sep 30 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-56
 - revert all the arjan patches until someone tests them.
 
