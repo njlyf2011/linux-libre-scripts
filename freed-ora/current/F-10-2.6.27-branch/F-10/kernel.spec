@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.94 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.97 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 35
+%define stable_update 36
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -809,6 +809,9 @@ Patch15100: kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
 # appletalk: fix skb leak (CVE-2009-2903)
 Patch15200: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
 
+# fix stack randomization (#526882)
+Patch15300: x86-increase-min_gap-to-include-randomized-stack.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1471,6 +1474,9 @@ ApplyPatch kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
 # appletalk: fix skb leak (CVE-2009-2903)
 ApplyPatch appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
 
+# backport of stack randomization fix from 2.6.31.2
+ApplyPatch x86-increase-min_gap-to-include-randomized-stack.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2046,6 +2052,15 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Oct 05 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.36-170.2.97
+- Linux 2.6.27.36
+
+* Sun Oct 04 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.36-170.2.96.rc2
+- Backport stack randomization fix from 2.6.31.2 (#526882)
+
+* Sun Oct 04 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.36-170.2.95.rc2
+- Linux 2.6.27.36-rc2
+
 * Sat Sep 26 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.35-170.2.94
 - Backport "appletalk: Fix skb leak when ipddp interface is not loaded"
   (fixes CVE-2009-2903)
