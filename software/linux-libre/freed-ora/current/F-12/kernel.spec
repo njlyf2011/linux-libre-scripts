@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1844 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1851 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -726,9 +726,10 @@ Patch1582: linux-2.6-xen-spinlock-stronger-barrier.patch
 Patch1583: linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
 Patch1584: linux-2.6-xen-improvement-to-wait_for_devices.patch
 Patch1585: linux-2.6-xen-increase-device-connection-timeout.patch
+Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # nouveau + drm fixes
-Patch1812: drm-next-4c57edba4.patch
+Patch1812: drm-next-d4ac6a05.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -1417,6 +1418,7 @@ ApplyPatch linux-2.6-xen-check-efer-fix.patch
 ApplyPatch linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
 ApplyPatch linux-2.6-xen-improvement-to-wait_for_devices.patch
 ApplyPatch linux-2.6-xen-increase-device-connection-timeout.patch
+ApplyPatch linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # improve xen spinlock scalability
 ApplyPatch linux-2.6-xen-spinlock-enable-interrupts-only-when-blocking.patch
@@ -1428,7 +1430,7 @@ ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next-4c57edba4.patch
+ApplyPatch drm-next-d4ac6a05.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -2081,9 +2083,9 @@ fi
 %endif\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
 %if %{with_dracut}\
-%ghost /boot/initramfs-%{KVERREL}%{?2:.%{2}}.img\
+/boot/initramfs-%{KVERREL}%{?2:.%{2}}.img\
 %else\
-%ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
+/boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
 %endif\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
@@ -2124,6 +2126,25 @@ fi
 # and build.
 
 %changelog
+* Thu Oct 08 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.1-65
+- nouveau: {drm-next,context,fbcon,misc} fixes, connector forcing
+
+* Thu Oct 08 2009 Dave Airlie <airlied@redhat.com> 2.6.31.1-64
+- rebase latest drm-next, fixes many s/r and r600 problems
+
+* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
+- Don't mark the initramfs file as a ghost.
+
+* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
+- Enable FUNCTION_GRAPH_TRACER on x86-64.
+
+* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
+- Disable CONFIG_IRQSOFF_TRACER on srostedt's recommendation.
+  (Adds unwanted overhead when not in use).
+
+* Tue Oct  6 2009 Justin M. Forbes <jforbes@redhat.com>
+- virtio_blk: add support for cache flush (#526869)
+
 * Fri Oct  2 2009 John W. Linville <linville@redhat.com>
 - Backport "iwlwifi: reduce noise when skb allocation fails"
 
