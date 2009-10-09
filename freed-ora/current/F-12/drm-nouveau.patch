@@ -1770,10 +1770,10 @@ index 0000000..20564f8
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..09ccffd
+index 0000000..7a55199
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -0,0 +1,5499 @@
+@@ -0,0 +1,5536 @@
 +/*
 + * Copyright 2005-2006 Erik Waling
 + * Copyright 2006 Stephane Marchesin
@@ -4234,6 +4234,27 @@ index 0000000..09ccffd
 +}
 +
 +static bool
++init_87(struct nvbios *bios, uint16_t offset, struct init_exec *iexec)
++{
++	/*
++	 * INIT_87   opcode: 0x87 ('')
++	 *
++	 * offset      (8 bit): opcode
++	 * offset + 1  (8 bit): unknown
++	 * offset + 4 (32 bit): unknown entry 0
++	 *
++	 * Unknown function.  Stubbed here as one of my cards can resume
++	 * fine without it, but we'd still want to run the remainder
++	 * of the script instead of aborting.
++	 *
++	 * Starting from offset+4 there are BIT_M+2 32-bit entries.
++	 */
++
++	NV_WARN(bios->dev, "INIT_87 stubbed!\n");
++	return true;
++}
++
++static bool
 +init_8e(struct nvbios *bios, uint16_t offset, struct init_exec *iexec)
 +{
 +	/*
@@ -4564,6 +4585,7 @@ index 0000000..09ccffd
 +	{ "INIT_INDEX_IO"                     , 0x78, 6       , 0       , 0       , init_index_io                   },
 +	{ "INIT_PLL"                          , 0x79, 7       , 0       , 0       , init_pll                        },
 +	{ "INIT_ZM_REG"                       , 0x7A, 9       , 0       , 0       , init_zm_reg                     },
++	{ "INIT_87"                           , 0x87, 2       , 0       , 0       , init_87                         },
 +	{ "INIT_8E"                           , 0x8E, 1       , 0       , 0       , init_8e                         },
 +	/* INIT_RAM_RESTRICT_ZM_REG_GROUP's mult is loaded by M table in BIT */
 +	{ "INIT_RAM_RESTRICT_ZM_REG_GROUP"    , 0x8F, 7       , 6       , 0       , init_ram_restrict_zm_reg_group  },
@@ -6063,10 +6085,14 @@ index 0000000..09ccffd
 +	if (bitentry->length < 0x5)
 +		return 0;
 +
++	/* adjust length of INIT_87 */
++	for (i = 0; itbl_entry[i].name && (itbl_entry[i].id != 0x87); i++);
++	itbl_entry[i].length += bios->data[bitentry->offset + 2] * 4;
++
 +	/* set up multiplier for INIT_RAM_RESTRICT_ZM_REG_GROUP */
-+	for (i = 0; itbl_entry[i].name && (itbl_entry[i].id != 0x8f); i++)
-+		;
++	for (; itbl_entry[i].name && (itbl_entry[i].id != 0x8f); i++);
 +	itbl_entry[i].length_multiplier = bios->data[bitentry->offset + 2] * 4;
++
 +	init_ram_restrict_zm_reg_group_blocklen = itbl_entry[i].length_multiplier;
 +
 +	bios->ram_restrict_tbl_ptr = ROM16(bios->data[bitentry->offset + 3]);
@@ -6968,6 +6994,17 @@ index 0000000..09ccffd
 +		if (dcb->entry[i].i2c_index == 0xf)
 +			continue;
 +
++		/*
++		 * Ignore the I2C index for on-chip TV-out, as there
++		 * are cards with bogus values (nv31m in bug 23212),
++		 * and it's otherwise useless.
++		 */
++		if (dcb->entry[i].type == OUTPUT_TV &&
++		    dcb->entry[i].location == DCB_LOC_ON_CHIP) {
++			dcb->entry[i].i2c_index = 0xf;
++			continue;
++		}
++
 +		dcb->entry[i].connector = dcb->entry[i].i2c_index;
 +		if (dcb->entry[i].connector > high)
 +			high = dcb->entry[i].connector;
@@ -7275,10 +7312,10 @@ index 0000000..09ccffd
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.h b/drivers/gpu/drm/nouveau/nouveau_bios.h
 new file mode 100644
-index 0000000..a7f02b4
+index 0000000..33f3172
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.h
-@@ -0,0 +1,235 @@
+@@ -0,0 +1,236 @@
 +/*
 + * Copyright 2007-2008 Nouveau Project
 + *
@@ -7366,6 +7403,7 @@ index 0000000..a7f02b4
 +	OUTPUT_TMDS = 2,
 +	OUTPUT_LVDS = 3,
 +	OUTPUT_DP = 6,
++	OUTPUT_ANY = -1
 +};
 +
 +enum nouveau_or {
@@ -8774,10 +8812,10 @@ index 0000000..3f80db8
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_channel.c b/drivers/gpu/drm/nouveau/nouveau_channel.c
 new file mode 100644
-index 0000000..1a87041
+index 0000000..8e7a9fe
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_channel.c
-@@ -0,0 +1,482 @@
+@@ -0,0 +1,464 @@
 +/*
 + * Copyright 2005-2006 Stephane Marchesin
 + * All Rights Reserved.
@@ -9064,32 +9102,18 @@ index 0000000..1a87041
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
 +	struct nouveau_pgraph_engine *pgraph = &dev_priv->engine.graph;
 +	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
-+	struct nouveau_timer_engine *ptimer = &dev_priv->engine.timer;
-+	unsigned fbdev_flags = 0;
-+	uint64_t t_start;
-+	bool timeout = false;
++	unsigned long flags;
 +	int ret;
 +
 +	NV_INFO(dev, "%s: freeing fifo %d\n", __func__, chan->id);
 +
 +	nouveau_debugfs_channel_fini(chan);
 +
-+	/* Give the channel a chance to idle, wait 2s (hopefully) */
-+	t_start = ptimer->read(dev);
-+	while (!nouveau_channel_idle(chan)) {
-+		if (ptimer->read(dev) - t_start > 2000000000ULL) {
-+			NV_ERROR(dev, "Failed to idle channel %d.  "
-+				      "Prepare for strangeness..\n", chan->id);
-+			timeout = true;
-+			break;
-+		}
-+	}
-+
-+	/* Wait on a fence until channel goes idle, this ensures the engine
-+	 * has finished with the last push buffer completely before we destroy
-+	 * the channel.
-+	 */
-+	if (!timeout) {
++	/* Give outstanding push buffers a chance to complete */
++	spin_lock_irqsave(&chan->fence.lock, flags);
++	nouveau_fence_update(chan);
++	spin_unlock_irqrestore(&chan->fence.lock, flags);
++	if (chan->fence.sequence != chan->fence.sequence_ack) {
 +		struct nouveau_fence *fence = NULL;
 +
 +		ret = nouveau_fence_new(chan, &fence, true);
@@ -9098,11 +9122,8 @@ index 0000000..1a87041
 +			nouveau_fence_unref((void *)&fence);
 +		}
 +
-+		if (ret) {
-+			NV_ERROR(dev, "Failed to fence channel %d.  "
-+				      "Prepare for strangeness..\n", chan->id);
-+			timeout = true;
-+		}
++		if (ret)
++			NV_ERROR(dev, "Failed to idle channel %d.\n", chan->id);
 +	}
 +
 +	/* Ensure all outstanding fences are signaled.  They should be if the
@@ -9111,31 +9132,30 @@ index 0000000..1a87041
 +	 */
 +	nouveau_fence_fini(chan);
 +
-+	/* disable the fifo caches */
-+	if (dev_priv->fbdev_info) {
-+		fbdev_flags = dev_priv->fbdev_info->flags;
-+		dev_priv->fbdev_info->flags |= FBINFO_HWACCEL_DISABLED;
-+	}
-+
++	/* Ensure the channel is no longer active on the GPU */
 +	pfifo->reassign(dev, false);
-+	pfifo->disable(dev);
-+	pfifo->destroy_context(chan);
++
++	if (pgraph->channel(dev) == chan) {
++		pgraph->fifo_access(dev, false);
++		pgraph->unload_context(dev);
++		pgraph->fifo_access(dev, true);
++	}
 +	pgraph->destroy_context(chan);
-+	pfifo->enable(dev);
++
++	if (pfifo->channel_id(dev) == chan->id) {
++		pfifo->disable(dev);
++		pfifo->unload_context(dev);
++		pfifo->enable(dev);
++	}
++	pfifo->destroy_context(chan);
++
 +	pfifo->reassign(dev, true);
 +
-+	if (dev_priv->fbdev_info)
-+		dev_priv->fbdev_info->flags = fbdev_flags;
-+
-+	/* Deallocate push buffer */
++	/* Release the channel's resources */
 +	nouveau_gpuobj_ref_del(dev, &chan->pushbuf);
 +	nouveau_bo_ref(NULL, &chan->pushbuf_bo);
-+
-+	/* Destroy objects belonging to the channel */
 +	nouveau_gpuobj_channel_takedown(chan);
-+
 +	nouveau_notifier_takedown_channel(chan);
-+
 +	if (chan->user)
 +		iounmap(chan->user);
 +
@@ -9262,10 +9282,10 @@ index 0000000..1a87041
 +int nouveau_max_ioctl = DRM_ARRAY_SIZE(nouveau_ioctls);
 diff --git a/drivers/gpu/drm/nouveau/nouveau_connector.c b/drivers/gpu/drm/nouveau/nouveau_connector.c
 new file mode 100644
-index 0000000..3346f49
+index 0000000..9a233e0
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_connector.c
-@@ -0,0 +1,755 @@
+@@ -0,0 +1,781 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -9295,7 +9315,6 @@ index 0000000..3346f49
 +#include "drmP.h"
 +#include "drm_edid.h"
 +#include "drm_crtc_helper.h"
-+#include "drm_fb_helper.h"
 +#include "nouveau_reg.h"
 +#include "nouveau_drv.h"
 +#include "nouveau_encoder.h"
@@ -9327,7 +9346,7 @@ index 0000000..3346f49
 +			continue;
 +		nv_encoder = nouveau_encoder(obj_to_encoder(obj));
 +
-+		if (nv_encoder->dcb->type == type)
++		if (type == OUTPUT_ANY || nv_encoder->dcb->type == type)
 +			return nv_encoder;
 +	}
 +
@@ -9560,6 +9579,32 @@ index 0000000..3346f49
 +	}
 +
 +	return connector_status_disconnected;
++}
++
++static void
++nouveau_connector_force(struct drm_connector *connector)
++{
++	struct drm_device *dev = connector->dev;
++	struct nouveau_encoder *nv_encoder;
++	int type;
++
++	if (connector->connector_type == DRM_MODE_CONNECTOR_DVII) {
++		if (connector->force == DRM_FORCE_ON_DIGITAL)
++			type = OUTPUT_TMDS;
++		else
++			type = OUTPUT_ANALOG;
++	} else
++		type = OUTPUT_ANY;
++
++	nv_encoder = find_encoder_by_type(connector, type);
++	if (!nv_encoder) {
++		NV_ERROR(dev, "can't find encoder to force %s on!\n",
++			 drm_get_connector_name(connector));
++		connector->status = connector_status_disconnected;
++		return;
++	}
++
++	nouveau_connector_set_encoder(connector, nv_encoder);
 +}
 +
 +static int
@@ -9833,7 +9878,8 @@ index 0000000..3346f49
 +	.detect = nouveau_connector_detect,
 +	.destroy = nouveau_connector_destroy,
 +	.fill_modes = drm_helper_probe_single_connector_modes,
-+	.set_property = nouveau_connector_set_property
++	.set_property = nouveau_connector_set_property,
++	.force = nouveau_connector_force
 +};
 +
 +static int
@@ -10681,10 +10727,10 @@ index 0000000..7035536
 +
 diff --git a/drivers/gpu/drm/nouveau/nouveau_dma.h b/drivers/gpu/drm/nouveau/nouveau_dma.h
 new file mode 100644
-index 0000000..a8a6ea1
+index 0000000..2edd38d
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_dma.h
-@@ -0,0 +1,148 @@
+@@ -0,0 +1,151 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -10714,7 +10760,8 @@ index 0000000..a8a6ea1
 +#ifndef __NOUVEAU_DMA_H__
 +#define __NOUVEAU_DMA_H__
 +
-+/* There's a hw race condition where you can't jump to your PUT offset,
++/*
++ * There's a hw race condition where you can't jump to your PUT offset,
 + * to avoid this we jump to offset + SKIPS and fill the difference with
 + * NOPs.
 + *
@@ -10725,15 +10772,17 @@ index 0000000..a8a6ea1
 + */
 +#define NOUVEAU_DMA_SKIPS (128 / 4)
 +
-+typedef enum {
++/* Hardcoded object assignments to subchannels (subchannel id). */
++enum {
 +	NvSubM2MF	= 0,
 +	NvSub2D		= 1,
 +	NvSubCtxSurf2D  = 1,
 +	NvSubGdiRect    = 2,
 +	NvSubImageBlit  = 3
-+} nouveau_subchannel_id_t;
++};
 +
-+typedef enum {
++/* Object handles. */
++enum {
 +	NvM2MF		= 0x80000001,
 +	NvDmaFB		= 0x80000002,
 +	NvDmaTT		= 0x80000003,
@@ -10752,7 +10801,7 @@ index 0000000..a8a6ea1
 +	NvEvoVRAM	= 0x01000000,
 +	NvEvoFB16	= 0x01000001,
 +	NvEvoFB32	= 0x01000002
-+} nouveau_object_handle_t;
++};
 +
 +#define NV_MEMORY_TO_MEMORY_FORMAT                                    0x00000039
 +#define NV_MEMORY_TO_MEMORY_FORMAT_NAME                               0x00000000
@@ -10835,10 +10884,10 @@ index 0000000..a8a6ea1
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.c b/drivers/gpu/drm/nouveau/nouveau_drv.c
 new file mode 100644
-index 0000000..f19152b
+index 0000000..a251712
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.c
-@@ -0,0 +1,421 @@
+@@ -0,0 +1,413 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
 + * All Rights Reserved.
@@ -10871,6 +10920,7 @@ index 0000000..f19152b
 +#include "nouveau_drv.h"
 +#include "nouveau_hw.h"
 +#include "nouveau_fb.h"
++#include "nouveau_fbcon.h"
 +#include "nv50_display.h"
 +
 +#include "drm_pciids.h"
@@ -10884,7 +10934,7 @@ index 0000000..f19152b
 +module_param_named(modeset, nouveau_modeset, int, 0400);
 +
 +MODULE_PARM_DESC(vbios, "Override default VBIOS location");
-+char *nouveau_vbios = NULL;
++char *nouveau_vbios;
 +module_param_named(vbios, nouveau_vbios, charp, 0400);
 +
 +MODULE_PARM_DESC(vram_pushbuf, "Force DMA push buffers to be in VRAM");
@@ -11023,19 +11073,8 @@ index 0000000..f19152b
 +	nouveau_wait_for_idle(dev);
 +	pfifo->reassign(dev, false);
 +	pfifo->disable(dev);
-+
-+	i = pfifo->channel_id(dev);
-+	if (i >= 0 && i < pfifo->channels && dev_priv->fifos[i]) {
-+		chan = dev_priv->fifos[i];
-+		NV_INFO(dev, "Active channel on PFIFO is %d...\n", chan->id);
-+		pfifo->save_context(chan);
-+	}
-+
-+	chan = pgraph->channel(dev);
-+	if (chan) {
-+		NV_INFO(dev, "Active channel on PGRAPH is %d\n", chan->id);
-+		pgraph->save_context(chan);
-+	}
++	pfifo->unload_context(dev);
++	pgraph->unload_context(dev);
 +
 +	NV_INFO(dev, "Suspending GPU objects...\n");
 +	ret = nouveau_gpuobj_suspend(dev);
@@ -11164,6 +11203,8 @@ index 0000000..f19152b
 +	fb_set_suspend(dev_priv->fbdev_info, 0);
 +	release_console_sem();
 +
++	nouveau_fbcon_zfill(dev);
++
 +	drm_helper_resume_force_mode(dev);
 +	dev_priv->fbdev_info->flags = fbdev_flags;
 +	return 0;
@@ -11262,10 +11303,10 @@ index 0000000..f19152b
 +MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.h b/drivers/gpu/drm/nouveau/nouveau_drv.h
 new file mode 100644
-index 0000000..00bc806
+index 0000000..7e8ab42
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.h
-@@ -0,0 +1,1281 @@
+@@ -0,0 +1,1282 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
 + * All Rights Reserved.
@@ -11561,7 +11602,7 @@ index 0000000..00bc806
 +	int  (*create_context)(struct nouveau_channel *);
 +	void (*destroy_context)(struct nouveau_channel *);
 +	int  (*load_context)(struct nouveau_channel *);
-+	int  (*save_context)(struct nouveau_channel *);
++	int  (*unload_context)(struct drm_device *);
 +};
 +
 +struct nouveau_pgraph_object_method {
@@ -11589,7 +11630,7 @@ index 0000000..00bc806
 +	int  (*create_context)(struct nouveau_channel *);
 +	void (*destroy_context)(struct nouveau_channel *);
 +	int  (*load_context)(struct nouveau_channel *);
-+	int  (*save_context)(struct nouveau_channel *);
++	int  (*unload_context)(struct drm_device *);
 +};
 +
 +struct nouveau_engine {
@@ -12140,7 +12181,7 @@ index 0000000..00bc806
 +extern int  nv04_fifo_create_context(struct nouveau_channel *);
 +extern void nv04_fifo_destroy_context(struct nouveau_channel *);
 +extern int  nv04_fifo_load_context(struct nouveau_channel *);
-+extern int  nv04_fifo_save_context(struct nouveau_channel *);
++extern int  nv04_fifo_unload_context(struct drm_device *);
 +
 +/* nv10_fifo.c */
 +extern int  nv10_fifo_init(struct drm_device *);
@@ -12148,14 +12189,14 @@ index 0000000..00bc806
 +extern int  nv10_fifo_create_context(struct nouveau_channel *);
 +extern void nv10_fifo_destroy_context(struct nouveau_channel *);
 +extern int  nv10_fifo_load_context(struct nouveau_channel *);
-+extern int  nv10_fifo_save_context(struct nouveau_channel *);
++extern int  nv10_fifo_unload_context(struct drm_device *);
 +
 +/* nv40_fifo.c */
 +extern int  nv40_fifo_init(struct drm_device *);
 +extern int  nv40_fifo_create_context(struct nouveau_channel *);
 +extern void nv40_fifo_destroy_context(struct nouveau_channel *);
 +extern int  nv40_fifo_load_context(struct nouveau_channel *);
-+extern int  nv40_fifo_save_context(struct nouveau_channel *);
++extern int  nv40_fifo_unload_context(struct drm_device *);
 +
 +/* nv50_fifo.c */
 +extern int  nv50_fifo_init(struct drm_device *);
@@ -12164,7 +12205,7 @@ index 0000000..00bc806
 +extern int  nv50_fifo_create_context(struct nouveau_channel *);
 +extern void nv50_fifo_destroy_context(struct nouveau_channel *);
 +extern int  nv50_fifo_load_context(struct nouveau_channel *);
-+extern int  nv50_fifo_save_context(struct nouveau_channel *);
++extern int  nv50_fifo_unload_context(struct drm_device *);
 +
 +/* nv04_graph.c */
 +extern struct nouveau_pgraph_object_class nv04_graph_grclass[];
@@ -12175,7 +12216,7 @@ index 0000000..00bc806
 +extern int  nv04_graph_create_context(struct nouveau_channel *);
 +extern void nv04_graph_destroy_context(struct nouveau_channel *);
 +extern int  nv04_graph_load_context(struct nouveau_channel *);
-+extern int  nv04_graph_save_context(struct nouveau_channel *);
++extern int  nv04_graph_unload_context(struct drm_device *);
 +extern void nv04_graph_context_switch(struct drm_device *);
 +
 +/* nv10_graph.c */
@@ -12186,7 +12227,7 @@ index 0000000..00bc806
 +extern int  nv10_graph_create_context(struct nouveau_channel *);
 +extern void nv10_graph_destroy_context(struct nouveau_channel *);
 +extern int  nv10_graph_load_context(struct nouveau_channel *);
-+extern int  nv10_graph_save_context(struct nouveau_channel *);
++extern int  nv10_graph_unload_context(struct drm_device *);
 +extern void nv10_graph_context_switch(struct drm_device *);
 +
 +/* nv20_graph.c */
@@ -12195,7 +12236,7 @@ index 0000000..00bc806
 +extern int  nv20_graph_create_context(struct nouveau_channel *);
 +extern void nv20_graph_destroy_context(struct nouveau_channel *);
 +extern int  nv20_graph_load_context(struct nouveau_channel *);
-+extern int  nv20_graph_save_context(struct nouveau_channel *);
++extern int  nv20_graph_unload_context(struct drm_device *);
 +extern int  nv20_graph_init(struct drm_device *);
 +extern void nv20_graph_takedown(struct drm_device *);
 +extern int  nv30_graph_init(struct drm_device *);
@@ -12208,7 +12249,7 @@ index 0000000..00bc806
 +extern int  nv40_graph_create_context(struct nouveau_channel *);
 +extern void nv40_graph_destroy_context(struct nouveau_channel *);
 +extern int  nv40_graph_load_context(struct nouveau_channel *);
-+extern int  nv40_graph_save_context(struct nouveau_channel *);
++extern int  nv40_graph_unload_context(struct drm_device *);
 +
 +/* nv50_graph.c */
 +extern struct nouveau_pgraph_object_class nv50_graph_grclass[];
@@ -12219,7 +12260,7 @@ index 0000000..00bc806
 +extern int  nv50_graph_create_context(struct nouveau_channel *);
 +extern void nv50_graph_destroy_context(struct nouveau_channel *);
 +extern int  nv50_graph_load_context(struct nouveau_channel *);
-+extern int  nv50_graph_save_context(struct nouveau_channel *);
++extern int  nv50_graph_unload_context(struct drm_device *);
 +extern void nv50_graph_context_switch(struct drm_device *);
 +
 +/* nv04_instmem.c */
@@ -12320,6 +12361,7 @@ index 0000000..00bc806
 +struct nouveau_fence;
 +extern int nouveau_fence_init(struct nouveau_channel *);
 +extern void nouveau_fence_fini(struct nouveau_channel *);
++extern void nouveau_fence_update(struct nouveau_channel *);
 +extern int nouveau_fence_new(struct nouveau_channel *, struct nouveau_fence **,
 +			     bool emit);
 +extern int nouveau_fence_emit(struct nouveau_fence *);
@@ -12674,10 +12716,10 @@ index 0000000..4a3f31a
 +#endif /* __NOUVEAU_FB_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_fbcon.c b/drivers/gpu/drm/nouveau/nouveau_fbcon.c
 new file mode 100644
-index 0000000..071e3c6
+index 0000000..52743f7
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_fbcon.c
-@@ -0,0 +1,360 @@
+@@ -0,0 +1,381 @@
 +/*
 + * Copyright © 2007 David Airlie
 + *
@@ -12786,6 +12828,7 @@ index 0000000..071e3c6
 +	.fb_sync = nouveau_fbcon_sync,
 +	.fb_pan_display = drm_fb_helper_pan_display,
 +	.fb_blank = drm_fb_helper_blank,
++	.fb_setcmap = drm_fb_helper_setcmap,
 +};
 +
 +static void nouveau_fbcon_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
@@ -12798,8 +12841,19 @@ index 0000000..071e3c6
 +	nv_crtc->lut.b[regno] = blue;
 +}
 +
++static void nouveau_fbcon_gamma_get(struct drm_crtc *crtc, u16 *red, u16 *green,
++				    u16 *blue, int regno)
++{
++	struct nouveau_crtc *nv_crtc = nouveau_crtc(crtc);
++
++	*red = nv_crtc->lut.r[regno];
++	*green = nv_crtc->lut.g[regno];
++	*blue = nv_crtc->lut.b[regno];
++}
++
 +static struct drm_fb_helper_funcs nouveau_fbcon_helper_funcs = {
 +	.gamma_set = nouveau_fbcon_gamma_set,
++	.gamma_get = nouveau_fbcon_gamma_get
 +};
 +
 +#if defined(__i386__) || defined(__x86_64__)
@@ -12840,6 +12894,25 @@ index 0000000..071e3c6
 +}
 +#endif
 +
++void
++nouveau_fbcon_zfill(struct drm_device *dev)
++{
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct fb_info *info = dev_priv->fbdev_info;
++	struct fb_fillrect rect;
++
++	/* Clear the entire fbcon.  The drm will program every connector
++	 * with it's preferred mode.  If the sizes differ, one display will
++	 * quite likely have garbage around the console.
++	 */
++	rect.dx = rect.dy = 0;
++	rect.width = info->var.xres_virtual;
++	rect.height = info->var.yres_virtual;
++	rect.color = 0;
++	rect.rop = ROP_COPY;
++	info->fbops->fb_fillrect(info, &rect);
++}
++
 +static int
 +nouveau_fbcon_create(struct drm_device *dev, uint32_t fb_width,
 +		     uint32_t fb_height, uint32_t surface_width,
@@ -12854,7 +12927,6 @@ index 0000000..071e3c6
 +	struct nouveau_bo *nvbo;
 +	struct drm_mode_fb_cmd mode_cmd;
 +	struct device *device = &dev->pdev->dev;
-+	struct fb_fillrect rect;
 +	int size, ret;
 +
 +	mode_cmd.width = surface_width;
@@ -12930,7 +13002,7 @@ index 0000000..071e3c6
 +	info->screen_base = nvbo_kmap_obj_iovirtual(nouveau_fb->nvbo);
 +	info->screen_size = size;
 +
-+	drm_fb_helper_fill_fix(info, fb->pitch);
++	drm_fb_helper_fill_fix(info, fb->pitch, fb->depth);
 +	drm_fb_helper_fill_var(info, fb, fb_width, fb_height);
 +
 +	/* FIXME: we really shouldn't expose mmio space at all */
@@ -12978,16 +13050,7 @@ index 0000000..071e3c6
 +		break;
 +	};
 +
-+	/* Clear the entire fbcon.  The drm will program every connector
-+	 * with it's preferred mode.  If the sizes differ, one display will
-+	 * quite likely have garbage around the console.
-+	 */
-+	rect.dx = rect.dy = 0;
-+	rect.width = surface_width;
-+	rect.height = surface_height;
-+	rect.color = 0;
-+	rect.rop = ROP_COPY;
-+	info->fbops->fb_fillrect(info, &rect);
++	nouveau_fbcon_zfill(dev);
 +
 +	/* To allow resizeing without swapping buffers */
 +	NV_INFO(dev, "allocated %dx%d fb: 0x%lx, bo %p\n",
@@ -13009,7 +13072,7 @@ index 0000000..071e3c6
 +{
 +	NV_DEBUG(dev, "\n");
 +
-+	return drm_fb_helper_single_fb_probe(dev, nouveau_fbcon_create);
++	return drm_fb_helper_single_fb_probe(dev, 32, nouveau_fbcon_create);
 +}
 +
 +int
@@ -13040,10 +13103,10 @@ index 0000000..071e3c6
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_fbcon.h b/drivers/gpu/drm/nouveau/nouveau_fbcon.h
 new file mode 100644
-index 0000000..0f40414
+index 0000000..41cbe88
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_fbcon.h
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,49 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -13086,6 +13149,7 @@ index 0000000..0f40414
 +int nouveau_fbcon_probe(struct drm_device *dev);
 +int nouveau_fbcon_remove(struct drm_device *dev, struct drm_framebuffer *fb);
 +void nouveau_fbcon_restore(void);
++void nouveau_fbcon_zfill(struct drm_device *dev);
 +
 +int nv04_fbcon_accel_init(struct fb_info *info);
 +int nv50_fbcon_accel_init(struct fb_info *info);
@@ -13094,7 +13158,7 @@ index 0000000..0f40414
 +
 diff --git a/drivers/gpu/drm/nouveau/nouveau_fence.c b/drivers/gpu/drm/nouveau/nouveau_fence.c
 new file mode 100644
-index 0000000..f2edc70
+index 0000000..0cff7eb
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_fence.c
 @@ -0,0 +1,262 @@
@@ -13156,7 +13220,7 @@ index 0000000..f2edc70
 +	kfree(fence);
 +}
 +
-+static void
++void
 +nouveau_fence_update(struct nouveau_channel *chan)
 +{
 +	struct drm_nouveau_private *dev_priv = chan->dev->dev_private;
@@ -16251,10 +16315,10 @@ index 0000000..a2c30f4
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_irq.c b/drivers/gpu/drm/nouveau/nouveau_irq.c
 new file mode 100644
-index 0000000..d5c11ac
+index 0000000..597007a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_irq.c
-@@ -0,0 +1,688 @@
+@@ -0,0 +1,696 @@
 +/*
 + * Copyright (C) 2006 Ben Skeggs.
 + *
@@ -16906,11 +16970,16 @@ index 0000000..d5c11ac
 +{
 +	struct drm_device *dev = (struct drm_device *)arg;
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
-+	uint32_t status;
++	uint32_t status, fbdev_flags = 0;
 +
 +	status = nv_rd32(dev, NV03_PMC_INTR_0);
 +	if (!status)
 +		return IRQ_NONE;
++
++	if (dev_priv->fbdev_info) {
++		fbdev_flags = dev_priv->fbdev_info->flags;
++		dev_priv->fbdev_info->flags |= FBINFO_HWACCEL_DISABLED;
++	}
 +
 +	if (status & NV_PMC_INTR_0_PFIFO_PENDING) {
 +		nouveau_fifo_irq_handler(dev);
@@ -16940,6 +17009,9 @@ index 0000000..d5c11ac
 +
 +	if (status)
 +		NV_ERROR(dev, "Unhandled PMC INTR status bits 0x%08x\n", status);
++
++	if (dev_priv->fbdev_info)
++		dev_priv->fbdev_info->flags = fbdev_flags;
 +
 +	return IRQ_HANDLED;
 +}
@@ -19818,10 +19890,10 @@ index 0000000..3a5f43a
 +#define NV50_PDISPLAY_CURSOR_USER_POS(i)             ((i) * 0x1000 + 0x00647084)
 diff --git a/drivers/gpu/drm/nouveau/nouveau_sgdma.c b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
 new file mode 100644
-index 0000000..503d563
+index 0000000..4c7f1e4
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_sgdma.c
-@@ -0,0 +1,318 @@
+@@ -0,0 +1,321 @@
 +#include "drmP.h"
 +#include "nouveau_drv.h"
 +#include <linux/pagemap.h>
@@ -19854,6 +19926,9 @@ index 0000000..503d563
 +		return -EINVAL;
 +
 +	nvbe->pages = kmalloc(sizeof(dma_addr_t) * num_pages, GFP_KERNEL);
++	if (!nvbe->pages)
++		return -ENOMEM;
++
 +	nvbe->nr_pages = 0;
 +	while (num_pages--) {
 +		nvbe->pages[nvbe->nr_pages] =
@@ -20142,7 +20217,7 @@ index 0000000..503d563
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_state.c b/drivers/gpu/drm/nouveau/nouveau_state.c
 new file mode 100644
-index 0000000..ea5e941
+index 0000000..790630d
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_state.c
 @@ -0,0 +1,872 @@
@@ -20260,7 +20335,7 @@ index 0000000..ea5e941
 +		engine->graph.create_context	= nv04_graph_create_context;
 +		engine->graph.destroy_context	= nv04_graph_destroy_context;
 +		engine->graph.load_context	= nv04_graph_load_context;
-+		engine->graph.save_context	= nv04_graph_save_context;
++		engine->graph.unload_context	= nv04_graph_unload_context;
 +		engine->fifo.channels		= 16;
 +		engine->fifo.init		= nv04_fifo_init;
 +		engine->fifo.takedown		= nouveau_stub_takedown;
@@ -20271,7 +20346,7 @@ index 0000000..ea5e941
 +		engine->fifo.create_context	= nv04_fifo_create_context;
 +		engine->fifo.destroy_context	= nv04_fifo_destroy_context;
 +		engine->fifo.load_context	= nv04_fifo_load_context;
-+		engine->fifo.save_context	= nv04_fifo_save_context;
++		engine->fifo.unload_context	= nv04_fifo_unload_context;
 +		break;
 +	case 0x10:
 +		engine->instmem.init		= nv04_instmem_init;
@@ -20299,7 +20374,7 @@ index 0000000..ea5e941
 +		engine->graph.destroy_context	= nv10_graph_destroy_context;
 +		engine->graph.fifo_access	= nv04_graph_fifo_access;
 +		engine->graph.load_context	= nv10_graph_load_context;
-+		engine->graph.save_context	= nv10_graph_save_context;
++		engine->graph.unload_context	= nv10_graph_unload_context;
 +		engine->fifo.channels		= 32;
 +		engine->fifo.init		= nv10_fifo_init;
 +		engine->fifo.takedown		= nouveau_stub_takedown;
@@ -20310,7 +20385,7 @@ index 0000000..ea5e941
 +		engine->fifo.create_context	= nv10_fifo_create_context;
 +		engine->fifo.destroy_context	= nv10_fifo_destroy_context;
 +		engine->fifo.load_context	= nv10_fifo_load_context;
-+		engine->fifo.save_context	= nv10_fifo_save_context;
++		engine->fifo.unload_context	= nv10_fifo_unload_context;
 +		break;
 +	case 0x20:
 +		engine->instmem.init		= nv04_instmem_init;
@@ -20338,7 +20413,7 @@ index 0000000..ea5e941
 +		engine->graph.destroy_context	= nv20_graph_destroy_context;
 +		engine->graph.fifo_access	= nv04_graph_fifo_access;
 +		engine->graph.load_context	= nv20_graph_load_context;
-+		engine->graph.save_context	= nv20_graph_save_context;
++		engine->graph.unload_context	= nv20_graph_unload_context;
 +		engine->fifo.channels		= 32;
 +		engine->fifo.init		= nv10_fifo_init;
 +		engine->fifo.takedown		= nouveau_stub_takedown;
@@ -20349,7 +20424,7 @@ index 0000000..ea5e941
 +		engine->fifo.create_context	= nv10_fifo_create_context;
 +		engine->fifo.destroy_context	= nv10_fifo_destroy_context;
 +		engine->fifo.load_context	= nv10_fifo_load_context;
-+		engine->fifo.save_context	= nv10_fifo_save_context;
++		engine->fifo.unload_context	= nv10_fifo_unload_context;
 +		break;
 +	case 0x30:
 +		engine->instmem.init		= nv04_instmem_init;
@@ -20377,7 +20452,7 @@ index 0000000..ea5e941
 +		engine->graph.create_context	= nv20_graph_create_context;
 +		engine->graph.destroy_context	= nv20_graph_destroy_context;
 +		engine->graph.load_context	= nv20_graph_load_context;
-+		engine->graph.save_context	= nv20_graph_save_context;
++		engine->graph.unload_context	= nv20_graph_unload_context;
 +		engine->fifo.channels		= 32;
 +		engine->fifo.init		= nv10_fifo_init;
 +		engine->fifo.takedown		= nouveau_stub_takedown;
@@ -20388,7 +20463,7 @@ index 0000000..ea5e941
 +		engine->fifo.create_context	= nv10_fifo_create_context;
 +		engine->fifo.destroy_context	= nv10_fifo_destroy_context;
 +		engine->fifo.load_context	= nv10_fifo_load_context;
-+		engine->fifo.save_context	= nv10_fifo_save_context;
++		engine->fifo.unload_context	= nv10_fifo_unload_context;
 +		break;
 +	case 0x40:
 +	case 0x60:
@@ -20417,7 +20492,7 @@ index 0000000..ea5e941
 +		engine->graph.create_context	= nv40_graph_create_context;
 +		engine->graph.destroy_context	= nv40_graph_destroy_context;
 +		engine->graph.load_context	= nv40_graph_load_context;
-+		engine->graph.save_context	= nv40_graph_save_context;
++		engine->graph.unload_context	= nv40_graph_unload_context;
 +		engine->fifo.channels		= 32;
 +		engine->fifo.init		= nv40_fifo_init;
 +		engine->fifo.takedown		= nouveau_stub_takedown;
@@ -20428,7 +20503,7 @@ index 0000000..ea5e941
 +		engine->fifo.create_context	= nv40_fifo_create_context;
 +		engine->fifo.destroy_context	= nv40_fifo_destroy_context;
 +		engine->fifo.load_context	= nv40_fifo_load_context;
-+		engine->fifo.save_context	= nv40_fifo_save_context;
++		engine->fifo.unload_context	= nv40_fifo_unload_context;
 +		break;
 +	case 0x50:
 +	case 0x80: /* gotta love NVIDIA's consistency.. */
@@ -20459,7 +20534,7 @@ index 0000000..ea5e941
 +		engine->graph.create_context	= nv50_graph_create_context;
 +		engine->graph.destroy_context	= nv50_graph_destroy_context;
 +		engine->graph.load_context	= nv50_graph_load_context;
-+		engine->graph.save_context	= nv50_graph_save_context;
++		engine->graph.unload_context	= nv50_graph_unload_context;
 +		engine->fifo.channels		= 128;
 +		engine->fifo.init		= nv50_fifo_init;
 +		engine->fifo.takedown		= nv50_fifo_takedown;
@@ -20470,7 +20545,7 @@ index 0000000..ea5e941
 +		engine->fifo.create_context	= nv50_fifo_create_context;
 +		engine->fifo.destroy_context	= nv50_fifo_destroy_context;
 +		engine->fifo.load_context	= nv50_fifo_load_context;
-+		engine->fifo.save_context	= nv50_fifo_save_context;
++		engine->fifo.unload_context	= nv50_fifo_unload_context;
 +		break;
 +	default:
 +		NV_ERROR(dev, "NV%02x unsupported\n", dev_priv->chipset);
@@ -21059,7 +21134,7 @@ index 0000000..5b9409f
 +int nouveau_sw_method_execute(struct drm_device *dev, uint32_t oclass, uint32_t method); /* execute the given software method, returns 0 on success */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_ttm.c b/drivers/gpu/drm/nouveau/nouveau_ttm.c
 new file mode 100644
-index 0000000..352f04d
+index 0000000..7818981
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_ttm.c
 @@ -0,0 +1,131 @@
@@ -21168,7 +21243,7 @@ index 0000000..352f04d
 +	dev_priv->ttm.bo_global_ref.mem_glob = global_ref->object;
 +	global_ref = &dev_priv->ttm.bo_global_ref.ref;
 +	global_ref->global_type = TTM_GLOBAL_TTM_BO;
-+	global_ref->size = sizeof(struct ttm_mem_global);
++	global_ref->size = sizeof(struct ttm_bo_global);
 +	global_ref->init = &ttm_bo_global_init;
 +	global_ref->release = &ttm_bo_global_release;
 +
@@ -21196,10 +21271,10 @@ index 0000000..352f04d
 +
 diff --git a/drivers/gpu/drm/nouveau/nv04_crtc.c b/drivers/gpu/drm/nouveau/nv04_crtc.c
 new file mode 100644
-index 0000000..68bf626
+index 0000000..6837670
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv04_crtc.c
-@@ -0,0 +1,1019 @@
+@@ -0,0 +1,995 @@
 +/*
 + * Copyright 1993-2003 NVIDIA, Corporation
 + * Copyright 2006 Dave Airlie
@@ -21926,45 +22001,20 @@ index 0000000..68bf626
 +	kfree(nv_crtc);
 +}
 +
-+#define DEPTH_SHIFT(val, w) ((val << (8 - w)) | (val >> ((w << 1) - 8)))
 +static void
-+nv_crtc_gamma_load(struct nouveau_crtc *nv_crtc)
++nv_crtc_gamma_load(struct drm_crtc *crtc)
 +{
++	struct nouveau_crtc *nv_crtc = nouveau_crtc(crtc);
 +	struct drm_device *dev = nv_crtc->base.dev;
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
 +	struct rgb { uint8_t r, g, b; } __attribute__((packed)) *rgbs;
 +	int i;
 +
 +	rgbs = (struct rgb *)dev_priv->mode_reg.crtc_reg[nv_crtc->index].DAC;
-+
-+	switch (nv_crtc->base.fb->depth) {
-+	case 15:
-+		/* R5G5B5 */
-+		/* spread 5 bits per colour (32 colours) over 256 (per colour) registers */
-+		for (i = 0; i < 32; i++) {
-+			rgbs[DEPTH_SHIFT(i, 5)].r = nv_crtc->lut.r[i] >> 8;
-+			rgbs[DEPTH_SHIFT(i, 5)].g = nv_crtc->lut.g[i] >> 8;
-+			rgbs[DEPTH_SHIFT(i, 5)].b = nv_crtc->lut.b[i] >> 8;
-+		}
-+		break;
-+	case 16:
-+		/* R5G6B5 */
-+		for (i = 0; i < 64; i++) {
-+			/* set 64 regs for green's 6 bits of colour */
-+			rgbs[DEPTH_SHIFT(i, 6)].g = nv_crtc->lut.g[i] >> 8;
-+			if (i < 32) {
-+				rgbs[DEPTH_SHIFT(i, 5)].r =  nv_crtc->lut.r[i] >> 8;
-+				rgbs[DEPTH_SHIFT(i, 5)].b = nv_crtc->lut.b[i] >> 8;
-+			}
-+		}
-+		break;
-+	default:
-+		/* R8G8B8 */
-+		for (i = 0; i < 256; i++) {
-+			rgbs[i].r = nv_crtc->lut.r[i] >> 8;
-+			rgbs[i].g = nv_crtc->lut.g[i] >> 8;
-+			rgbs[i].b = nv_crtc->lut.b[i] >> 8;
-+		}
++	for (i = 0; i < 256; i++) {
++		rgbs[i].r = nv_crtc->lut.r[i] >> 8;
++		rgbs[i].g = nv_crtc->lut.g[i] >> 8;
++		rgbs[i].b = nv_crtc->lut.b[i] >> 8;
 +	}
 +
 +	nouveau_hw_load_state_palette(dev, nv_crtc->index, &dev_priv->mode_reg);
@@ -21995,7 +22045,7 @@ index 0000000..68bf626
 +		return;
 +	}
 +
-+	nv_crtc_gamma_load(nv_crtc);
++	nv_crtc_gamma_load(crtc);
 +}
 +
 +static int
@@ -22022,7 +22072,7 @@ index 0000000..68bf626
 +
 +	if (nv_crtc->lut.depth != drm_fb->depth) {
 +		nv_crtc->lut.depth = drm_fb->depth;
-+		nv_crtc_gamma_load(nv_crtc);
++		nv_crtc_gamma_load(crtc);
 +	}
 +
 +	regp->CRTC[NV_CIO_CRE_PIXEL_INDEX] &= ~3;
@@ -22176,6 +22226,7 @@ index 0000000..68bf626
 +	.mode_fixup = nv_crtc_mode_fixup,
 +	.mode_set = nv_crtc_mode_set,
 +	.mode_set_base = nv04_crtc_mode_set_base,
++	.load_lut = nv_crtc_gamma_load,
 +};
 +
 +int
@@ -22297,7 +22348,7 @@ index 0000000..fc9156e
 +
 diff --git a/drivers/gpu/drm/nouveau/nv04_dac.c b/drivers/gpu/drm/nouveau/nv04_dac.c
 new file mode 100644
-index 0000000..6a1db41
+index 0000000..587b6f5
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv04_dac.c
 @@ -0,0 +1,529 @@
@@ -22551,7 +22602,7 @@ index 0000000..6a1db41
 +		nvWriteMC(dev, NV_PBUS_POWERCTRL_4, saved_powerctrl_4 & 0xffffffcf);
 +	}
 +
-+	if (nv_arch(dev) >= NV_30) {
++	if (dev_priv->chipset >= 0x34) {
 +		saved_gpio_ext = NVReadCRTC(dev, 0, NV_PCRTC_GPIO_EXT);
 +
 +		NVWriteCRTC(dev, 0, NV_PCRTC_GPIO_EXT, (saved_gpio_ext & ~(3 << 20)) |
@@ -22611,7 +22662,7 @@ index 0000000..6a1db41
 +		nvWriteMC(dev, NV_PBUS_POWERCTRL_4, saved_powerctrl_4);
 +	nvWriteMC(dev, NV_PBUS_POWERCTRL_2, saved_powerctrl_2);
 +
-+	if (nv_arch(dev) >= NV_30)
++	if (dev_priv->chipset >= 0x34)
 +		NVWriteRAMDAC(dev, 0, NV_PCRTC_GPIO_EXT, saved_gpio_ext);
 +
 +	if (present) {
@@ -23785,10 +23836,10 @@ index 0000000..638cf60
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv04_fbcon.c b/drivers/gpu/drm/nouveau/nv04_fbcon.c
 new file mode 100644
-index 0000000..db05cd7
+index 0000000..09a3107
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv04_fbcon.c
-@@ -0,0 +1,295 @@
+@@ -0,0 +1,316 @@
 +/*
 + * Copyright 2009 Ben Skeggs
 + * Copyright 2008 Stuart Bennett
@@ -23912,8 +23963,14 @@ index 0000000..db05cd7
 +	width = (image->width + 31) & ~31;
 +	dsize = (width * image->height) >> 5;
 +
-+	fg = ((uint32_t *) info->pseudo_palette)[image->fg_color];
-+	bg = ((uint32_t *) info->pseudo_palette)[image->bg_color];
++	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
++	    info->fix.visual == FB_VISUAL_DIRECTCOLOR) {
++		fg = ((uint32_t *) info->pseudo_palette)[image->fg_color];
++		bg = ((uint32_t *) info->pseudo_palette)[image->bg_color];
++	} else {
++		fg = image->fg_color;
++		bg = image->bg_color;
++	}
 +
 +	BEGIN_RING(chan, NvSubGdiRect, 0x0be4, 7);
 +	OUT_RING(chan, (image->dy << 16) | (image->dx & 0xffff));
@@ -23972,6 +24029,34 @@ index 0000000..db05cd7
 +	int surface_fmt, pattern_fmt, rect_fmt;
 +	int ret;
 +
++	switch (info->var.bits_per_pixel) {
++	case 8:
++		surface_fmt = 1;
++		pattern_fmt = 3;
++		rect_fmt = 3;
++		break;
++	case 16:
++		surface_fmt = 4;
++		pattern_fmt = 1;
++		rect_fmt = 1;
++		break;
++	case 32:
++		switch (info->var.transp.length) {
++		case 0: /* depth 24 */
++		case 8: /* depth 32 */
++			break;
++		default:
++			return -EINVAL;
++		}
++
++		surface_fmt = 6;
++		pattern_fmt = 3;
++		rect_fmt = 3;
++		break;
++	default:
++		return -EINVAL;
++	}
++
 +	ret = nv04_fbcon_grobj_new(dev, dev_priv->card_type >= NV_10 ?
 +				   0x0062 : 0x0042, NvCtxSurf2D);
 +	if (ret)
@@ -23997,19 +24082,6 @@ index 0000000..db05cd7
 +				   0x009f : 0x005f, NvImageBlit);
 +	if (ret)
 +		return ret;
-+
-+	switch (info->var.bits_per_pixel) {
-+	case 16:
-+		surface_fmt = 4;
-+		pattern_fmt = 1;
-+		rect_fmt = 1;
-+		break;
-+	default:
-+		surface_fmt = 6;
-+		pattern_fmt = 3;
-+		rect_fmt = 3;
-+		break;
-+	}
 +
 +	if (RING_SPACE(chan, 49)) {
 +		NV_ERROR(dev, "GPU lockup - switching to software fbcon\n");
@@ -24086,10 +24158,10 @@ index 0000000..db05cd7
 +
 diff --git a/drivers/gpu/drm/nouveau/nv04_fifo.c b/drivers/gpu/drm/nouveau/nv04_fifo.c
 new file mode 100644
-index 0000000..3a68b0b
+index 0000000..0c3cd53
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv04_fifo.c
-@@ -0,0 +1,257 @@
+@@ -0,0 +1,271 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -24235,6 +24307,9 @@ index 0000000..3a68b0b
 +	nv_wr32(dev, NV04_PFIFO_CACHE1_PULL1, nv_ri32(dev, fc + 24));
 +
 +	dev_priv->engine.instmem.finish_access(dev);
++
++	nv_wr32(dev, NV03_PFIFO_CACHE1_GET, 0);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUT, 0);
 +}
 +
 +int
@@ -24255,27 +24330,38 @@ index 0000000..3a68b0b
 +}
 +
 +int
-+nv04_fifo_save_context(struct nouveau_channel *chan)
++nv04_fifo_unload_context(struct drm_device *dev)
 +{
-+	struct drm_device *dev = chan->dev;
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
++	struct nouveau_channel *chan = NULL;
 +	uint32_t tmp;
++	int chid;
++
++	chid = pfifo->channel_id(dev);
++	if (chid < 0 || chid >= dev_priv->engine.fifo.channels)
++		return 0;
++
++	chan = dev_priv->fifos[chid];
++	if (!chan) {
++		NV_ERROR(dev, "Inactive channel on PFIFO: %d\n", chid);
++		return -EINVAL;
++	}
 +
 +	dev_priv->engine.instmem.prepare_access(dev, true);
-+
 +	RAMFC_WR(DMA_PUT, nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_PUT));
 +	RAMFC_WR(DMA_GET, nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_GET));
-+
 +	tmp  = nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_DCOUNT) << 16;
 +	tmp |= nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_INSTANCE);
 +	RAMFC_WR(DMA_INSTANCE, tmp);
-+
 +	RAMFC_WR(DMA_STATE, nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_STATE));
 +	RAMFC_WR(DMA_FETCH, nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_FETCH));
 +	RAMFC_WR(ENGINE, nv_rd32(dev, NV04_PFIFO_CACHE1_ENGINE));
 +	RAMFC_WR(PULL1_ENGINE, nv_rd32(dev, NV04_PFIFO_CACHE1_PULL1));
-+
 +	dev_priv->engine.instmem.finish_access(dev);
++
++	nv04_fifo_do_load_context(dev, pfifo->channels - 1);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUSH1, pfifo->channels - 1);
 +	return 0;
 +}
 +
@@ -24349,7 +24435,7 @@ index 0000000..3a68b0b
 +
 diff --git a/drivers/gpu/drm/nouveau/nv04_graph.c b/drivers/gpu/drm/nouveau/nv04_graph.c
 new file mode 100644
-index 0000000..56369f8
+index 0000000..396ee92
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv04_graph.c
 @@ -0,0 +1,579 @@
@@ -24724,28 +24810,15 @@ index 0000000..56369f8
 +nv04_graph_context_switch(struct drm_device *dev)
 +{
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_pgraph_engine *pgraph = &dev_priv->engine.graph;
 +	struct nouveau_channel *chan = NULL;
-+	uint32_t tmp;
 +	int chid;
 +
-+	nv_wr32(dev, NV04_PGRAPH_FIFO, 0);
++	pgraph->fifo_access(dev, false);
 +	nouveau_wait_for_idle(dev);
 +
 +	/* If previous context is valid, we need to save it */
-+	if (nv_rd32(dev, NV04_PGRAPH_CTX_CONTROL) & 0x00010000) {
-+		chid = nv_rd32(dev, NV04_PGRAPH_CTX_USER) >> 24;
-+		if (chid < dev_priv->engine.fifo.channels)
-+			chan = dev_priv->fifos[chid];
-+	}
-+
-+	if (chan) {
-+		nv04_graph_save_context(chan);
-+
-+		nv_wr32(dev, NV04_PGRAPH_CTX_CONTROL, 0x10000000);
-+		tmp  = nv_rd32(dev, NV04_PGRAPH_CTX_USER) & 0x00ffffff;
-+		tmp |= (dev_priv->engine.fifo.channels - 1) << 24;
-+		nv_wr32(dev, NV04_PGRAPH_CTX_USER, tmp);
-+	}
++	pgraph->unload_context(dev);
 +
 +	/* Load context for next channel */
 +	chid = dev_priv->engine.fifo.channel_id(dev);
@@ -24753,7 +24826,7 @@ index 0000000..56369f8
 +	if (chan)
 +		nv04_graph_load_context(chan);
 +
-+	nv_wr32(dev, NV04_PGRAPH_FIFO, 1);
++	pgraph->fifo_access(dev, true);
 +}
 +
 +int nv04_graph_create_context(struct nouveau_channel *chan)
@@ -24803,15 +24876,28 @@ index 0000000..56369f8
 +	return 0;
 +}
 +
-+int nv04_graph_save_context(struct nouveau_channel *chan)
++int
++nv04_graph_unload_context(struct drm_device *dev)
 +{
-+	struct drm_device *dev = chan->dev;
-+	struct graph_state *pgraph_ctx = chan->pgraph_ctx;
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_pgraph_engine *pgraph = &dev_priv->engine.graph;
++	struct nouveau_channel *chan = NULL;
++	struct graph_state *ctx;
++	uint32_t tmp;
 +	int i;
 +
-+	for (i = 0; i < ARRAY_SIZE(nv04_graph_ctx_regs); i++)
-+		pgraph_ctx->nv04[i] = nv_rd32(dev, nv04_graph_ctx_regs[i]);
++	chan = pgraph->channel(dev);
++	if (!chan)
++		return 0;
++	ctx = chan->pgraph_ctx;
 +
++	for (i = 0; i < ARRAY_SIZE(nv04_graph_ctx_regs); i++)
++		ctx->nv04[i] = nv_rd32(dev, nv04_graph_ctx_regs[i]);
++
++	nv_wr32(dev, NV04_PGRAPH_CTX_CONTROL, 0x10000000);
++	tmp  = nv_rd32(dev, NV04_PGRAPH_CTX_USER) & 0x00ffffff;
++	tmp |= (dev_priv->engine.fifo.channels - 1) << 24;
++	nv_wr32(dev, NV04_PGRAPH_CTX_USER, tmp);
 +	return 0;
 +}
 +
@@ -25574,10 +25660,10 @@ index 0000000..79e2d10
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv10_fifo.c b/drivers/gpu/drm/nouveau/nv10_fifo.c
 new file mode 100644
-index 0000000..78bcd6a
+index 0000000..877f00e
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv10_fifo.c
-@@ -0,0 +1,248 @@
+@@ -0,0 +1,260 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -25698,6 +25784,9 @@ index 0000000..78bcd6a
 +
 +out:
 +	dev_priv->engine.instmem.finish_access(dev);
++
++	nv_wr32(dev, NV03_PFIFO_CACHE1_GET, 0);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUT, 0);
 +}
 +
 +int
@@ -25720,11 +25809,17 @@ index 0000000..78bcd6a
 +}
 +
 +int
-+nv10_fifo_save_context(struct nouveau_channel *chan)
++nv10_fifo_unload_context(struct drm_device *dev)
 +{
-+	struct drm_nouveau_private *dev_priv = chan->dev->dev_private;
-+	struct drm_device *dev = chan->dev;
-+	uint32_t fc = NV10_RAMFC(chan->id), tmp;
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
++	uint32_t fc, tmp;
++	int chid;
++
++	chid = pfifo->channel_id(dev);
++	if (chid < 0 || chid >= dev_priv->engine.fifo.channels)
++		return 0;
++	fc = NV10_RAMFC(chid);
 +
 +	dev_priv->engine.instmem.prepare_access(dev, true);
 +
@@ -25751,6 +25846,9 @@ index 0000000..78bcd6a
 +
 +out:
 +	dev_priv->engine.instmem.finish_access(dev);
++
++	nv10_fifo_do_load_context(dev, pfifo->channels - 1);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUSH1, pfifo->channels - 1);
 +	return 0;
 +}
 +
@@ -25828,10 +25926,10 @@ index 0000000..78bcd6a
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv10_graph.c b/drivers/gpu/drm/nouveau/nv10_graph.c
 new file mode 100644
-index 0000000..eb1b101
+index 0000000..cf5c9c4
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv10_graph.c
-@@ -0,0 +1,949 @@
+@@ -0,0 +1,891 @@
 +/*
 + * Copyright 2007 Matthieu CASTET <castet.matthieu@free.fr>
 + * All Rights Reserved.
@@ -25877,346 +25975,346 @@ index 0000000..eb1b101
 +};
 +
 +static int nv10_graph_ctx_regs[] = {
-+NV10_PGRAPH_CTX_SWITCH1,
-+NV10_PGRAPH_CTX_SWITCH2,
-+NV10_PGRAPH_CTX_SWITCH3,
-+NV10_PGRAPH_CTX_SWITCH4,
-+NV10_PGRAPH_CTX_SWITCH5,
-+NV10_PGRAPH_CTX_CACHE1,	/* 8 values from 0x400160 to 0x40017c */
-+NV10_PGRAPH_CTX_CACHE2,	/* 8 values from 0x400180 to 0x40019c */
-+NV10_PGRAPH_CTX_CACHE3,	/* 8 values from 0x4001a0 to 0x4001bc */
-+NV10_PGRAPH_CTX_CACHE4,	/* 8 values from 0x4001c0 to 0x4001dc */
-+NV10_PGRAPH_CTX_CACHE5,	/* 8 values from 0x4001e0 to 0x4001fc */
-+0x00400164,
-+0x00400184,
-+0x004001a4,
-+0x004001c4,
-+0x004001e4,
-+0x00400168,
-+0x00400188,
-+0x004001a8,
-+0x004001c8,
-+0x004001e8,
-+0x0040016c,
-+0x0040018c,
-+0x004001ac,
-+0x004001cc,
-+0x004001ec,
-+0x00400170,
-+0x00400190,
-+0x004001b0,
-+0x004001d0,
-+0x004001f0,
-+0x00400174,
-+0x00400194,
-+0x004001b4,
-+0x004001d4,
-+0x004001f4,
-+0x00400178,
-+0x00400198,
-+0x004001b8,
-+0x004001d8,
-+0x004001f8,
-+0x0040017c,
-+0x0040019c,
-+0x004001bc,
-+0x004001dc,
-+0x004001fc,
-+NV10_PGRAPH_CTX_USER,
-+NV04_PGRAPH_DMA_START_0,
-+NV04_PGRAPH_DMA_START_1,
-+NV04_PGRAPH_DMA_LENGTH,
-+NV04_PGRAPH_DMA_MISC,
-+NV10_PGRAPH_DMA_PITCH,
-+NV04_PGRAPH_BOFFSET0,
-+NV04_PGRAPH_BBASE0,
-+NV04_PGRAPH_BLIMIT0,
-+NV04_PGRAPH_BOFFSET1,
-+NV04_PGRAPH_BBASE1,
-+NV04_PGRAPH_BLIMIT1,
-+NV04_PGRAPH_BOFFSET2,
-+NV04_PGRAPH_BBASE2,
-+NV04_PGRAPH_BLIMIT2,
-+NV04_PGRAPH_BOFFSET3,
-+NV04_PGRAPH_BBASE3,
-+NV04_PGRAPH_BLIMIT3,
-+NV04_PGRAPH_BOFFSET4,
-+NV04_PGRAPH_BBASE4,
-+NV04_PGRAPH_BLIMIT4,
-+NV04_PGRAPH_BOFFSET5,
-+NV04_PGRAPH_BBASE5,
-+NV04_PGRAPH_BLIMIT5,
-+NV04_PGRAPH_BPITCH0,
-+NV04_PGRAPH_BPITCH1,
-+NV04_PGRAPH_BPITCH2,
-+NV04_PGRAPH_BPITCH3,
-+NV04_PGRAPH_BPITCH4,
-+NV10_PGRAPH_SURFACE,
-+NV10_PGRAPH_STATE,
-+NV04_PGRAPH_BSWIZZLE2,
-+NV04_PGRAPH_BSWIZZLE5,
-+NV04_PGRAPH_BPIXEL,
-+NV10_PGRAPH_NOTIFY,
-+NV04_PGRAPH_PATT_COLOR0,
-+NV04_PGRAPH_PATT_COLOR1,
-+NV04_PGRAPH_PATT_COLORRAM, /* 64 values from 0x400900 to 0x4009fc */
-+0x00400904,
-+0x00400908,
-+0x0040090c,
-+0x00400910,
-+0x00400914,
-+0x00400918,
-+0x0040091c,
-+0x00400920,
-+0x00400924,
-+0x00400928,
-+0x0040092c,
-+0x00400930,
-+0x00400934,
-+0x00400938,
-+0x0040093c,
-+0x00400940,
-+0x00400944,
-+0x00400948,
-+0x0040094c,
-+0x00400950,
-+0x00400954,
-+0x00400958,
-+0x0040095c,
-+0x00400960,
-+0x00400964,
-+0x00400968,
-+0x0040096c,
-+0x00400970,
-+0x00400974,
-+0x00400978,
-+0x0040097c,
-+0x00400980,
-+0x00400984,
-+0x00400988,
-+0x0040098c,
-+0x00400990,
-+0x00400994,
-+0x00400998,
-+0x0040099c,
-+0x004009a0,
-+0x004009a4,
-+0x004009a8,
-+0x004009ac,
-+0x004009b0,
-+0x004009b4,
-+0x004009b8,
-+0x004009bc,
-+0x004009c0,
-+0x004009c4,
-+0x004009c8,
-+0x004009cc,
-+0x004009d0,
-+0x004009d4,
-+0x004009d8,
-+0x004009dc,
-+0x004009e0,
-+0x004009e4,
-+0x004009e8,
-+0x004009ec,
-+0x004009f0,
-+0x004009f4,
-+0x004009f8,
-+0x004009fc,
-+NV04_PGRAPH_PATTERN,	/* 2 values from 0x400808 to 0x40080c */
-+0x0040080c,
-+NV04_PGRAPH_PATTERN_SHAPE,
-+NV03_PGRAPH_MONO_COLOR0,
-+NV04_PGRAPH_ROP3,
-+NV04_PGRAPH_CHROMA,
-+NV04_PGRAPH_BETA_AND,
-+NV04_PGRAPH_BETA_PREMULT,
-+0x00400e70,
-+0x00400e74,
-+0x00400e78,
-+0x00400e7c,
-+0x00400e80,
-+0x00400e84,
-+0x00400e88,
-+0x00400e8c,
-+0x00400ea0,
-+0x00400ea4,
-+0x00400ea8,
-+0x00400e90,
-+0x00400e94,
-+0x00400e98,
-+0x00400e9c,
-+NV10_PGRAPH_WINDOWCLIP_HORIZONTAL, /* 8 values from 0x400f00 to 0x400f1c */
-+NV10_PGRAPH_WINDOWCLIP_VERTICAL,   /* 8 values from 0x400f20 to 0x400f3c */
-+0x00400f04,
-+0x00400f24,
-+0x00400f08,
-+0x00400f28,
-+0x00400f0c,
-+0x00400f2c,
-+0x00400f10,
-+0x00400f30,
-+0x00400f14,
-+0x00400f34,
-+0x00400f18,
-+0x00400f38,
-+0x00400f1c,
-+0x00400f3c,
-+NV10_PGRAPH_XFMODE0,
-+NV10_PGRAPH_XFMODE1,
-+NV10_PGRAPH_GLOBALSTATE0,
-+NV10_PGRAPH_GLOBALSTATE1,
-+NV04_PGRAPH_STORED_FMT,
-+NV04_PGRAPH_SOURCE_COLOR,
-+NV03_PGRAPH_ABS_X_RAM,	/* 32 values from 0x400400 to 0x40047c */
-+NV03_PGRAPH_ABS_Y_RAM,	/* 32 values from 0x400480 to 0x4004fc */
-+0x00400404,
-+0x00400484,
-+0x00400408,
-+0x00400488,
-+0x0040040c,
-+0x0040048c,
-+0x00400410,
-+0x00400490,
-+0x00400414,
-+0x00400494,
-+0x00400418,
-+0x00400498,
-+0x0040041c,
-+0x0040049c,
-+0x00400420,
-+0x004004a0,
-+0x00400424,
-+0x004004a4,
-+0x00400428,
-+0x004004a8,
-+0x0040042c,
-+0x004004ac,
-+0x00400430,
-+0x004004b0,
-+0x00400434,
-+0x004004b4,
-+0x00400438,
-+0x004004b8,
-+0x0040043c,
-+0x004004bc,
-+0x00400440,
-+0x004004c0,
-+0x00400444,
-+0x004004c4,
-+0x00400448,
-+0x004004c8,
-+0x0040044c,
-+0x004004cc,
-+0x00400450,
-+0x004004d0,
-+0x00400454,
-+0x004004d4,
-+0x00400458,
-+0x004004d8,
-+0x0040045c,
-+0x004004dc,
-+0x00400460,
-+0x004004e0,
-+0x00400464,
-+0x004004e4,
-+0x00400468,
-+0x004004e8,
-+0x0040046c,
-+0x004004ec,
-+0x00400470,
-+0x004004f0,
-+0x00400474,
-+0x004004f4,
-+0x00400478,
-+0x004004f8,
-+0x0040047c,
-+0x004004fc,
-+NV03_PGRAPH_ABS_UCLIP_XMIN,
-+NV03_PGRAPH_ABS_UCLIP_XMAX,
-+NV03_PGRAPH_ABS_UCLIP_YMIN,
-+NV03_PGRAPH_ABS_UCLIP_YMAX,
-+0x00400550,
-+0x00400558,
-+0x00400554,
-+0x0040055c,
-+NV03_PGRAPH_ABS_UCLIPA_XMIN,
-+NV03_PGRAPH_ABS_UCLIPA_XMAX,
-+NV03_PGRAPH_ABS_UCLIPA_YMIN,
-+NV03_PGRAPH_ABS_UCLIPA_YMAX,
-+NV03_PGRAPH_ABS_ICLIP_XMAX,
-+NV03_PGRAPH_ABS_ICLIP_YMAX,
-+NV03_PGRAPH_XY_LOGIC_MISC0,
-+NV03_PGRAPH_XY_LOGIC_MISC1,
-+NV03_PGRAPH_XY_LOGIC_MISC2,
-+NV03_PGRAPH_XY_LOGIC_MISC3,
-+NV03_PGRAPH_CLIPX_0,
-+NV03_PGRAPH_CLIPX_1,
-+NV03_PGRAPH_CLIPY_0,
-+NV03_PGRAPH_CLIPY_1,
-+NV10_PGRAPH_COMBINER0_IN_ALPHA,
-+NV10_PGRAPH_COMBINER1_IN_ALPHA,
-+NV10_PGRAPH_COMBINER0_IN_RGB,
-+NV10_PGRAPH_COMBINER1_IN_RGB,
-+NV10_PGRAPH_COMBINER_COLOR0,
-+NV10_PGRAPH_COMBINER_COLOR1,
-+NV10_PGRAPH_COMBINER0_OUT_ALPHA,
-+NV10_PGRAPH_COMBINER1_OUT_ALPHA,
-+NV10_PGRAPH_COMBINER0_OUT_RGB,
-+NV10_PGRAPH_COMBINER1_OUT_RGB,
-+NV10_PGRAPH_COMBINER_FINAL0,
-+NV10_PGRAPH_COMBINER_FINAL1,
-+0x00400e00,
-+0x00400e04,
-+0x00400e08,
-+0x00400e0c,
-+0x00400e10,
-+0x00400e14,
-+0x00400e18,
-+0x00400e1c,
-+0x00400e20,
-+0x00400e24,
-+0x00400e28,
-+0x00400e2c,
-+0x00400e30,
-+0x00400e34,
-+0x00400e38,
-+0x00400e3c,
-+NV04_PGRAPH_PASSTHRU_0,
-+NV04_PGRAPH_PASSTHRU_1,
-+NV04_PGRAPH_PASSTHRU_2,
-+NV10_PGRAPH_DIMX_TEXTURE,
-+NV10_PGRAPH_WDIMX_TEXTURE,
-+NV10_PGRAPH_DVD_COLORFMT,
-+NV10_PGRAPH_SCALED_FORMAT,
-+NV04_PGRAPH_MISC24_0,
-+NV04_PGRAPH_MISC24_1,
-+NV04_PGRAPH_MISC24_2,
-+NV03_PGRAPH_X_MISC,
-+NV03_PGRAPH_Y_MISC,
-+NV04_PGRAPH_VALID1,
-+NV04_PGRAPH_VALID2,
++	NV10_PGRAPH_CTX_SWITCH1,
++	NV10_PGRAPH_CTX_SWITCH2,
++	NV10_PGRAPH_CTX_SWITCH3,
++	NV10_PGRAPH_CTX_SWITCH4,
++	NV10_PGRAPH_CTX_SWITCH5,
++	NV10_PGRAPH_CTX_CACHE1,	/* 8 values from 0x400160 to 0x40017c */
++	NV10_PGRAPH_CTX_CACHE2,	/* 8 values from 0x400180 to 0x40019c */
++	NV10_PGRAPH_CTX_CACHE3,	/* 8 values from 0x4001a0 to 0x4001bc */
++	NV10_PGRAPH_CTX_CACHE4,	/* 8 values from 0x4001c0 to 0x4001dc */
++	NV10_PGRAPH_CTX_CACHE5,	/* 8 values from 0x4001e0 to 0x4001fc */
++	0x00400164,
++	0x00400184,
++	0x004001a4,
++	0x004001c4,
++	0x004001e4,
++	0x00400168,
++	0x00400188,
++	0x004001a8,
++	0x004001c8,
++	0x004001e8,
++	0x0040016c,
++	0x0040018c,
++	0x004001ac,
++	0x004001cc,
++	0x004001ec,
++	0x00400170,
++	0x00400190,
++	0x004001b0,
++	0x004001d0,
++	0x004001f0,
++	0x00400174,
++	0x00400194,
++	0x004001b4,
++	0x004001d4,
++	0x004001f4,
++	0x00400178,
++	0x00400198,
++	0x004001b8,
++	0x004001d8,
++	0x004001f8,
++	0x0040017c,
++	0x0040019c,
++	0x004001bc,
++	0x004001dc,
++	0x004001fc,
++	NV10_PGRAPH_CTX_USER,
++	NV04_PGRAPH_DMA_START_0,
++	NV04_PGRAPH_DMA_START_1,
++	NV04_PGRAPH_DMA_LENGTH,
++	NV04_PGRAPH_DMA_MISC,
++	NV10_PGRAPH_DMA_PITCH,
++	NV04_PGRAPH_BOFFSET0,
++	NV04_PGRAPH_BBASE0,
++	NV04_PGRAPH_BLIMIT0,
++	NV04_PGRAPH_BOFFSET1,
++	NV04_PGRAPH_BBASE1,
++	NV04_PGRAPH_BLIMIT1,
++	NV04_PGRAPH_BOFFSET2,
++	NV04_PGRAPH_BBASE2,
++	NV04_PGRAPH_BLIMIT2,
++	NV04_PGRAPH_BOFFSET3,
++	NV04_PGRAPH_BBASE3,
++	NV04_PGRAPH_BLIMIT3,
++	NV04_PGRAPH_BOFFSET4,
++	NV04_PGRAPH_BBASE4,
++	NV04_PGRAPH_BLIMIT4,
++	NV04_PGRAPH_BOFFSET5,
++	NV04_PGRAPH_BBASE5,
++	NV04_PGRAPH_BLIMIT5,
++	NV04_PGRAPH_BPITCH0,
++	NV04_PGRAPH_BPITCH1,
++	NV04_PGRAPH_BPITCH2,
++	NV04_PGRAPH_BPITCH3,
++	NV04_PGRAPH_BPITCH4,
++	NV10_PGRAPH_SURFACE,
++	NV10_PGRAPH_STATE,
++	NV04_PGRAPH_BSWIZZLE2,
++	NV04_PGRAPH_BSWIZZLE5,
++	NV04_PGRAPH_BPIXEL,
++	NV10_PGRAPH_NOTIFY,
++	NV04_PGRAPH_PATT_COLOR0,
++	NV04_PGRAPH_PATT_COLOR1,
++	NV04_PGRAPH_PATT_COLORRAM, /* 64 values from 0x400900 to 0x4009fc */
++	0x00400904,
++	0x00400908,
++	0x0040090c,
++	0x00400910,
++	0x00400914,
++	0x00400918,
++	0x0040091c,
++	0x00400920,
++	0x00400924,
++	0x00400928,
++	0x0040092c,
++	0x00400930,
++	0x00400934,
++	0x00400938,
++	0x0040093c,
++	0x00400940,
++	0x00400944,
++	0x00400948,
++	0x0040094c,
++	0x00400950,
++	0x00400954,
++	0x00400958,
++	0x0040095c,
++	0x00400960,
++	0x00400964,
++	0x00400968,
++	0x0040096c,
++	0x00400970,
++	0x00400974,
++	0x00400978,
++	0x0040097c,
++	0x00400980,
++	0x00400984,
++	0x00400988,
++	0x0040098c,
++	0x00400990,
++	0x00400994,
++	0x00400998,
++	0x0040099c,
++	0x004009a0,
++	0x004009a4,
++	0x004009a8,
++	0x004009ac,
++	0x004009b0,
++	0x004009b4,
++	0x004009b8,
++	0x004009bc,
++	0x004009c0,
++	0x004009c4,
++	0x004009c8,
++	0x004009cc,
++	0x004009d0,
++	0x004009d4,
++	0x004009d8,
++	0x004009dc,
++	0x004009e0,
++	0x004009e4,
++	0x004009e8,
++	0x004009ec,
++	0x004009f0,
++	0x004009f4,
++	0x004009f8,
++	0x004009fc,
++	NV04_PGRAPH_PATTERN,	/* 2 values from 0x400808 to 0x40080c */
++	0x0040080c,
++	NV04_PGRAPH_PATTERN_SHAPE,
++	NV03_PGRAPH_MONO_COLOR0,
++	NV04_PGRAPH_ROP3,
++	NV04_PGRAPH_CHROMA,
++	NV04_PGRAPH_BETA_AND,
++	NV04_PGRAPH_BETA_PREMULT,
++	0x00400e70,
++	0x00400e74,
++	0x00400e78,
++	0x00400e7c,
++	0x00400e80,
++	0x00400e84,
++	0x00400e88,
++	0x00400e8c,
++	0x00400ea0,
++	0x00400ea4,
++	0x00400ea8,
++	0x00400e90,
++	0x00400e94,
++	0x00400e98,
++	0x00400e9c,
++	NV10_PGRAPH_WINDOWCLIP_HORIZONTAL, /* 8 values from 0x400f00-0x400f1c */
++	NV10_PGRAPH_WINDOWCLIP_VERTICAL,   /* 8 values from 0x400f20-0x400f3c */
++	0x00400f04,
++	0x00400f24,
++	0x00400f08,
++	0x00400f28,
++	0x00400f0c,
++	0x00400f2c,
++	0x00400f10,
++	0x00400f30,
++	0x00400f14,
++	0x00400f34,
++	0x00400f18,
++	0x00400f38,
++	0x00400f1c,
++	0x00400f3c,
++	NV10_PGRAPH_XFMODE0,
++	NV10_PGRAPH_XFMODE1,
++	NV10_PGRAPH_GLOBALSTATE0,
++	NV10_PGRAPH_GLOBALSTATE1,
++	NV04_PGRAPH_STORED_FMT,
++	NV04_PGRAPH_SOURCE_COLOR,
++	NV03_PGRAPH_ABS_X_RAM,	/* 32 values from 0x400400 to 0x40047c */
++	NV03_PGRAPH_ABS_Y_RAM,	/* 32 values from 0x400480 to 0x4004fc */
++	0x00400404,
++	0x00400484,
++	0x00400408,
++	0x00400488,
++	0x0040040c,
++	0x0040048c,
++	0x00400410,
++	0x00400490,
++	0x00400414,
++	0x00400494,
++	0x00400418,
++	0x00400498,
++	0x0040041c,
++	0x0040049c,
++	0x00400420,
++	0x004004a0,
++	0x00400424,
++	0x004004a4,
++	0x00400428,
++	0x004004a8,
++	0x0040042c,
++	0x004004ac,
++	0x00400430,
++	0x004004b0,
++	0x00400434,
++	0x004004b4,
++	0x00400438,
++	0x004004b8,
++	0x0040043c,
++	0x004004bc,
++	0x00400440,
++	0x004004c0,
++	0x00400444,
++	0x004004c4,
++	0x00400448,
++	0x004004c8,
++	0x0040044c,
++	0x004004cc,
++	0x00400450,
++	0x004004d0,
++	0x00400454,
++	0x004004d4,
++	0x00400458,
++	0x004004d8,
++	0x0040045c,
++	0x004004dc,
++	0x00400460,
++	0x004004e0,
++	0x00400464,
++	0x004004e4,
++	0x00400468,
++	0x004004e8,
++	0x0040046c,
++	0x004004ec,
++	0x00400470,
++	0x004004f0,
++	0x00400474,
++	0x004004f4,
++	0x00400478,
++	0x004004f8,
++	0x0040047c,
++	0x004004fc,
++	NV03_PGRAPH_ABS_UCLIP_XMIN,
++	NV03_PGRAPH_ABS_UCLIP_XMAX,
++	NV03_PGRAPH_ABS_UCLIP_YMIN,
++	NV03_PGRAPH_ABS_UCLIP_YMAX,
++	0x00400550,
++	0x00400558,
++	0x00400554,
++	0x0040055c,
++	NV03_PGRAPH_ABS_UCLIPA_XMIN,
++	NV03_PGRAPH_ABS_UCLIPA_XMAX,
++	NV03_PGRAPH_ABS_UCLIPA_YMIN,
++	NV03_PGRAPH_ABS_UCLIPA_YMAX,
++	NV03_PGRAPH_ABS_ICLIP_XMAX,
++	NV03_PGRAPH_ABS_ICLIP_YMAX,
++	NV03_PGRAPH_XY_LOGIC_MISC0,
++	NV03_PGRAPH_XY_LOGIC_MISC1,
++	NV03_PGRAPH_XY_LOGIC_MISC2,
++	NV03_PGRAPH_XY_LOGIC_MISC3,
++	NV03_PGRAPH_CLIPX_0,
++	NV03_PGRAPH_CLIPX_1,
++	NV03_PGRAPH_CLIPY_0,
++	NV03_PGRAPH_CLIPY_1,
++	NV10_PGRAPH_COMBINER0_IN_ALPHA,
++	NV10_PGRAPH_COMBINER1_IN_ALPHA,
++	NV10_PGRAPH_COMBINER0_IN_RGB,
++	NV10_PGRAPH_COMBINER1_IN_RGB,
++	NV10_PGRAPH_COMBINER_COLOR0,
++	NV10_PGRAPH_COMBINER_COLOR1,
++	NV10_PGRAPH_COMBINER0_OUT_ALPHA,
++	NV10_PGRAPH_COMBINER1_OUT_ALPHA,
++	NV10_PGRAPH_COMBINER0_OUT_RGB,
++	NV10_PGRAPH_COMBINER1_OUT_RGB,
++	NV10_PGRAPH_COMBINER_FINAL0,
++	NV10_PGRAPH_COMBINER_FINAL1,
++	0x00400e00,
++	0x00400e04,
++	0x00400e08,
++	0x00400e0c,
++	0x00400e10,
++	0x00400e14,
++	0x00400e18,
++	0x00400e1c,
++	0x00400e20,
++	0x00400e24,
++	0x00400e28,
++	0x00400e2c,
++	0x00400e30,
++	0x00400e34,
++	0x00400e38,
++	0x00400e3c,
++	NV04_PGRAPH_PASSTHRU_0,
++	NV04_PGRAPH_PASSTHRU_1,
++	NV04_PGRAPH_PASSTHRU_2,
++	NV10_PGRAPH_DIMX_TEXTURE,
++	NV10_PGRAPH_WDIMX_TEXTURE,
++	NV10_PGRAPH_DVD_COLORFMT,
++	NV10_PGRAPH_SCALED_FORMAT,
++	NV04_PGRAPH_MISC24_0,
++	NV04_PGRAPH_MISC24_1,
++	NV04_PGRAPH_MISC24_2,
++	NV03_PGRAPH_X_MISC,
++	NV03_PGRAPH_Y_MISC,
++	NV04_PGRAPH_VALID1,
++	NV04_PGRAPH_VALID2,
 +};
 +
 +static int nv17_graph_ctx_regs[] = {
-+NV10_PGRAPH_DEBUG_4,
-+0x004006b0,
-+0x00400eac,
-+0x00400eb0,
-+0x00400eb4,
-+0x00400eb8,
-+0x00400ebc,
-+0x00400ec0,
-+0x00400ec4,
-+0x00400ec8,
-+0x00400ecc,
-+0x00400ed0,
-+0x00400ed4,
-+0x00400ed8,
-+0x00400edc,
-+0x00400ee0,
-+0x00400a00,
-+0x00400a04,
++	NV10_PGRAPH_DEBUG_4,
++	0x004006b0,
++	0x00400eac,
++	0x00400eb0,
++	0x00400eb4,
++	0x00400eb8,
++	0x00400ebc,
++	0x00400ec0,
++	0x00400ec4,
++	0x00400ec8,
++	0x00400ecc,
++	0x00400ed0,
++	0x00400ed4,
++	0x00400ed8,
++	0x00400edc,
++	0x00400ee0,
++	0x00400a00,
++	0x00400a04,
 +};
 +
 +struct graph_state {
@@ -26513,23 +26611,36 @@ index 0000000..eb1b101
 +	return 0;
 +}
 +
-+int nv10_graph_save_context(struct nouveau_channel *chan)
++int
++nv10_graph_unload_context(struct drm_device *dev)
 +{
-+	struct drm_device *dev = chan->dev;
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
-+	struct graph_state *pgraph_ctx = chan->pgraph_ctx;
++	struct nouveau_pgraph_engine *pgraph = &dev_priv->engine.graph;
++	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
++	struct nouveau_channel *chan;
++	struct graph_state *ctx;
++	uint32_t tmp;
 +	int i;
 +
++	chan = pgraph->channel(dev);
++	if (!chan)
++		return 0;
++	ctx = chan->pgraph_ctx;
++
 +	for (i = 0; i < ARRAY_SIZE(nv10_graph_ctx_regs); i++)
-+		pgraph_ctx->nv10[i] = nv_rd32(dev, nv10_graph_ctx_regs[i]);
++		ctx->nv10[i] = nv_rd32(dev, nv10_graph_ctx_regs[i]);
++
 +	if (dev_priv->chipset >= 0x17) {
 +		for (i = 0; i < ARRAY_SIZE(nv17_graph_ctx_regs); i++)
-+			pgraph_ctx->nv17[i] = nv_rd32(dev,
-+						nv17_graph_ctx_regs[i]);
++			ctx->nv17[i] = nv_rd32(dev, nv17_graph_ctx_regs[i]);
 +	}
 +
 +	nv10_graph_save_pipe(chan);
 +
++	nv_wr32(dev, NV10_PGRAPH_CTX_CONTROL, 0x10000000);
++	tmp  = nv_rd32(dev, NV10_PGRAPH_CTX_USER) & 0x00ffffff;
++	tmp |= (pfifo->channels - 1) << 24;
++	nv_wr32(dev, NV10_PGRAPH_CTX_USER, tmp);
 +	return 0;
 +}
 +
@@ -26537,28 +26648,15 @@ index 0000000..eb1b101
 +nv10_graph_context_switch(struct drm_device *dev)
 +{
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_pgraph_engine *pgraph = &dev_priv->engine.graph;
 +	struct nouveau_channel *chan = NULL;
-+	uint32_t tmp;
 +	int chid;
 +
-+	nv_wr32(dev, NV04_PGRAPH_FIFO, 0);
++	pgraph->fifo_access(dev, false);
 +	nouveau_wait_for_idle(dev);
 +
 +	/* If previous context is valid, we need to save it */
-+	if (nv_rd32(dev, NV10_PGRAPH_CTX_CONTROL) & 0x00010000) {
-+		chid = nv_rd32(dev, NV10_PGRAPH_CTX_USER) >> 24;
-+		if (chid < dev_priv->engine.fifo.channels)
-+			chan = dev_priv->fifos[chid];
-+	}
-+
-+	if (chan) {
-+		nv10_graph_save_context(chan);
-+
-+		nv_wr32(dev, NV10_PGRAPH_CTX_CONTROL, 0x10000000);
-+		tmp  = nv_rd32(dev, NV10_PGRAPH_CTX_USER) & 0x00ffffff;
-+		tmp |= (dev_priv->engine.fifo.channels - 1) << 24;
-+		nv_wr32(dev, NV10_PGRAPH_CTX_USER, tmp);
-+	}
++	nv10_graph_unload_context(dev);
 +
 +	/* Load context for next channel */
 +	chid = (nv_rd32(dev, NV04_PGRAPH_TRAPPED_ADDR) >> 20) & 0x1f;
@@ -26566,7 +26664,7 @@ index 0000000..eb1b101
 +	if (chan)
 +		nv10_graph_load_context(chan);
 +
-+	nv_wr32(dev, NV04_PGRAPH_FIFO, 1);
++	pgraph->fifo_access(dev, true);
 +}
 +
 +#define NV_WRITE_CTX(reg, val) do { \
@@ -26609,34 +26707,6 @@ index 0000000..eb1b101
 +	if (pgraph_ctx == NULL)
 +		return -ENOMEM;
 +
-+	/* mmio trace suggest that should be done in ddx with methods/objects */
-+#if 0
-+	uint32_t tmp, vramsz;
-+	/* per channel init from ddx */
-+	tmp = nv_rd32(dev, NV10_PGRAPH_SURFACE) & 0x0007ff00;
-+	/*XXX the original ddx code, does this in 2 steps :
-+	 * tmp = nv_rd32(dev, NV10_PGRAPH_SURFACE) & 0x0007ff00;
-+	 * nv_wr32(dev, NV10_PGRAPH_SURFACE, tmp);
-+	 * tmp = nv_rd32(dev, NV10_PGRAPH_SURFACE) | 0x00020100;
-+	 * nv_wr32(dev, NV10_PGRAPH_SURFACE, tmp);
-+	 */
-+	tmp |= 0x00020100;
-+	NV_WRITE_CTX(NV10_PGRAPH_SURFACE, tmp);
-+
-+	vramsz = drm_get_resource_len(dev, 0) - 1;
-+	NV_WRITE_CTX(NV04_PGRAPH_BOFFSET0, 0);
-+	NV_WRITE_CTX(NV04_PGRAPH_BOFFSET1, 0);
-+	NV_WRITE_CTX(NV04_PGRAPH_BLIMIT0 , vramsz);
-+	NV_WRITE_CTX(NV04_PGRAPH_BLIMIT1 , vramsz);
-+
-+	NV_WRITE_CTX(NV04_PGRAPH_PATTERN_SHAPE, 0x00000000);
-+	NV_WRITE_CTX(NV04_PGRAPH_BETA_AND     , 0xFFFFFFFF);
-+
-+	NV_WRITE_CTX(NV03_PGRAPH_ABS_UCLIP_XMIN, 0);
-+	NV_WRITE_CTX(NV03_PGRAPH_ABS_UCLIP_YMIN, 0);
-+	NV_WRITE_CTX(NV03_PGRAPH_ABS_UCLIP_XMAX, 0x7fff);
-+	NV_WRITE_CTX(NV03_PGRAPH_ABS_UCLIP_YMAX, 0x7fff);
-+#endif
 +
 +	NV_WRITE_CTX(0x00400e88, 0x08000000);
 +	NV_WRITE_CTX(0x00400e9c, 0x4b7fffff);
@@ -26663,40 +26733,10 @@ index 0000000..eb1b101
 +
 +void nv10_graph_destroy_context(struct nouveau_channel *chan)
 +{
-+	struct drm_device *dev = chan->dev;
-+	struct drm_nouveau_private *dev_priv = dev->dev_private;
-+	struct nouveau_engine *engine = &dev_priv->engine;
 +	struct graph_state *pgraph_ctx = chan->pgraph_ctx;
-+	int chid;
 +
 +	kfree(pgraph_ctx);
 +	chan->pgraph_ctx = NULL;
-+
-+	chid = (nv_rd32(dev, NV10_PGRAPH_CTX_USER) >> 24) &
-+						(engine->fifo.channels - 1);
-+
-+	/* This code seems to corrupt the 3D pipe, but blob seems to do similar things ????
-+	 */
-+#if 0
-+	/* does this avoid a potential context switch while we are written graph
-+	 * reg, or we should mask graph interrupt ???
-+	 */
-+	nv_wr32(dev, NV04_PGRAPH_FIFO, 0x0);
-+	if (chid == chan->id) {
-+		NV_INFO(dev, "cleanning a channel with graph in current context\n");
-+		nouveau_wait_for_idle(dev);
-+		NV_INFO(dev, "reseting current graph context\n");
-+		/*
-+		 * can't be call here because of dynamic mem alloc
-+		 * nv10_graph_create_context(chan);
-+		 */
-+		nv10_graph_load_context(chan);
-+	}
-+	nv_wr32(dev, NV04_PGRAPH_FIFO, 0x1);
-+#else
-+	if (chid == chan->id)
-+		NV_INFO(dev, "cleaning a channel with graph in current context\n");
-+#endif
 +}
 +
 +int nv10_graph_init(struct drm_device *dev)
@@ -26783,7 +26823,7 @@ index 0000000..eb1b101
 +};
 diff --git a/drivers/gpu/drm/nouveau/nv17_tv.c b/drivers/gpu/drm/nouveau/nv17_tv.c
 new file mode 100644
-index 0000000..a9a33e9
+index 0000000..34f95c7
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv17_tv.c
 @@ -0,0 +1,689 @@
@@ -26967,13 +27007,13 @@ index 0000000..a9a33e9
 +			return MODE_NO_DBLESCAN;
 +
 +	} else {
-+		const int vsync_tolerance = 10;
++		const int vsync_tolerance = 600;
 +
 +		if (mode->clock > 70000)
 +			return MODE_CLOCK_HIGH;
 +
-+		if (abs(drm_mode_vrefresh(mode) -
-+			    tv_norm->tv_enc_mode.vrefresh) > vsync_tolerance)
++		if (abs(drm_mode_vrefresh(mode) * 1000 -
++			tv_norm->tv_enc_mode.vrefresh) > vsync_tolerance)
 +			return MODE_VSYNC;
 +
 +		/* The encoder takes care of the actual interlacing */
@@ -27026,7 +27066,7 @@ index 0000000..a9a33e9
 +
 +	nv_load_ptv(dev, regs, 200);
 +
-+	if (nv_arch(dev) >= NV_30) {
++	if (dev_priv->chipset >= 0x34) {
 +		uint32_t *gpio_ext = &dev_priv->mode_reg.crtc_reg[0].gpio_ext;
 +
 +		*gpio_ext &= ~(3 << 20);
@@ -28229,10 +28269,10 @@ index 0000000..d64683d
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv20_graph.c b/drivers/gpu/drm/nouveau/nv20_graph.c
 new file mode 100644
-index 0000000..a2ee007
+index 0000000..eeadc14
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv20_graph.c
-@@ -0,0 +1,769 @@
+@@ -0,0 +1,778 @@
 +#include "drmP.h"
 +#include "drm.h"
 +#include "nouveau_drv.h"
@@ -28704,13 +28744,17 @@ index 0000000..a2ee007
 +}
 +
 +int
-+nv20_graph_save_context(struct nouveau_channel *chan)
++nv20_graph_unload_context(struct drm_device *dev)
 +{
-+	struct drm_device *dev = chan->dev;
-+	uint32_t inst;
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_pgraph_engine *pgraph = &dev_priv->engine.graph;
++	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
++	struct nouveau_channel *chan;
++	uint32_t inst, tmp;
 +
-+	if (!chan->ramin_grctx)
-+		return -EINVAL;
++	chan = pgraph->channel(dev);
++	if (!chan)
++		return 0;
 +	inst = chan->ramin_grctx->instance >> 4;
 +
 +	nv_wr32(dev, NV20_PGRAPH_CHANNEL_CTX_POINTER, inst);
@@ -28718,6 +28762,11 @@ index 0000000..a2ee007
 +		     NV20_PGRAPH_CHANNEL_CTX_XFER_SAVE);
 +
 +	nouveau_wait_for_idle(dev);
++
++	nv_wr32(dev, NV10_PGRAPH_CTX_CONTROL, 0x10000000);
++	tmp  = nv_rd32(dev, NV10_PGRAPH_CTX_USER) & 0x00ffffff;
++	tmp |= (pfifo->channels - 1) << 24;
++	nv_wr32(dev, NV10_PGRAPH_CTX_USER, tmp);
 +	return 0;
 +}
 +
@@ -29072,10 +29121,10 @@ index 0000000..ca1d271
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv40_fifo.c b/drivers/gpu/drm/nouveau/nv40_fifo.c
 new file mode 100644
-index 0000000..faebc0b
+index 0000000..b4f19cc
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv40_fifo.c
-@@ -0,0 +1,304 @@
+@@ -0,0 +1,314 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -29201,6 +29250,9 @@ index 0000000..faebc0b
 +	nv_wr32(dev, 0x3300, nv_ri32(dev, fc + 80));
 +
 +	dev_priv->engine.instmem.finish_access(dev);
++
++	nv_wr32(dev, NV03_PFIFO_CACHE1_GET, 0);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUT, 0);
 +}
 +
 +int
@@ -29224,14 +29276,19 @@ index 0000000..faebc0b
 +}
 +
 +int
-+nv40_fifo_save_context(struct nouveau_channel *chan)
++nv40_fifo_unload_context(struct drm_device *dev)
 +{
-+	struct drm_nouveau_private *dev_priv = chan->dev->dev_private;
-+	struct drm_device *dev = chan->dev;
-+	uint32_t fc = NV40_RAMFC(chan->id), tmp;
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
++	uint32_t fc, tmp;
++	int chid;
++
++	chid = pfifo->channel_id(dev);
++	if (chid < 0 || chid >= dev_priv->engine.fifo.channels)
++		return 0;
++	fc = NV40_RAMFC(chid);
 +
 +	dev_priv->engine.instmem.prepare_access(dev, true);
-+
 +	nv_wi32(dev, fc + 0, nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_PUT));
 +	nv_wi32(dev, fc + 4, nv_rd32(dev, NV04_PFIFO_CACHE1_DMA_GET));
 +	nv_wi32(dev, fc + 8, nv_rd32(dev, NV10_PFIFO_CACHE1_REF_CNT));
@@ -29260,14 +29317,16 @@ index 0000000..faebc0b
 +	nv_wi32(dev, fc + 68, nv_rd32(dev, 0x32e8));
 +	nv_wi32(dev, fc + 76, nv_rd32(dev, 0x2088));
 +	nv_wi32(dev, fc + 80, nv_rd32(dev, 0x3300));
-+
 +#if 0 /* no real idea which is PUT/GET in UNK_48.. */
 +	tmp  = nv_rd32(dev, NV04_PFIFO_CACHE1_GET);
 +	tmp |= (nv_rd32(dev, NV04_PFIFO_CACHE1_PUT) << 16);
 +	nv_wi32(dev, fc + 72, tmp);
 +#endif
-+
 +	dev_priv->engine.instmem.finish_access(dev);
++
++	nv40_fifo_do_load_context(dev, pfifo->channels - 1);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUSH1,
++		     NV40_PFIFO_CACHE1_PUSH1_DMA | (pfifo->channels - 1));
 +	return 0;
 +}
 +
@@ -29382,10 +29441,10 @@ index 0000000..faebc0b
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv40_graph.c b/drivers/gpu/drm/nouveau/nv40_graph.c
 new file mode 100644
-index 0000000..06849e4
+index 0000000..9b5e03a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv40_graph.c
-@@ -0,0 +1,1888 @@
+@@ -0,0 +1,1880 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -30926,17 +30985,6 @@ index 0000000..06849e4
 +void
 +nv40_graph_destroy_context(struct nouveau_channel *chan)
 +{
-+	struct drm_device *dev = chan->dev;
-+	uint32_t inst;
-+
-+	/* Mark context as unloaded if still active on PGRAPH */
-+	inst = nv_rd32(dev, NV40_PGRAPH_CTXCTL_CUR);
-+	if (inst & NV40_PGRAPH_CTXCTL_CUR_LOADED) {
-+		inst &= NV40_PGRAPH_CTXCTL_CUR_INSTANCE;
-+		if (inst == (chan->ramin_grctx->instance >> 4))
-+			nv_wr32(dev, NV40_PGRAPH_CTXCTL_CUR, inst);
-+	}
-+
 +	nouveau_gpuobj_ref_del(chan->dev, &chan->ramin_grctx);
 +}
 +
@@ -30981,20 +31029,6 @@ index 0000000..06849e4
 +	return 0;
 +}
 +
-+/* Save current context (from PGRAPH) into the channel's context */
-+int
-+nv40_graph_save_context(struct nouveau_channel *chan)
-+{
-+	struct drm_device *dev = chan->dev;
-+	uint32_t inst;
-+
-+	if (!chan->ramin_grctx)
-+		return -EINVAL;
-+	inst = chan->ramin_grctx->instance >> 4;
-+
-+	return nv40_graph_transfer_context(dev, inst, 1);
-+}
-+
 +/* Restore the context for a specific channel into PGRAPH */
 +int
 +nv40_graph_load_context(struct nouveau_channel *chan)
@@ -31026,6 +31060,23 @@ index 0000000..06849e4
 +	 */
 +	nv_wr32(dev, NV40_PFIFO_GRCTX_INSTANCE, inst);
 +	return 0;
++}
++
++int
++nv40_graph_unload_context(struct drm_device *dev)
++{
++	uint32_t inst;
++	int ret;
++
++	inst = nv_rd32(dev, NV40_PGRAPH_CTXCTL_CUR);
++	if (!(inst & NV40_PGRAPH_CTXCTL_CUR_LOADED))
++		return 0;
++	inst &= NV40_PGRAPH_CTXCTL_CUR_INSTANCE;
++
++	ret = nv40_graph_transfer_context(dev, inst, 1);
++
++	nv_wr32(dev, NV40_PGRAPH_CTXCTL_CUR, inst);
++	return ret;
 +}
 +
 +/*(DEBLOBBED)*/
@@ -31320,10 +31371,10 @@ index 0000000..2a3495e
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv50_crtc.c b/drivers/gpu/drm/nouveau/nv50_crtc.c
 new file mode 100644
-index 0000000..5e7df86
+index 0000000..2bf1a12
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_crtc.c
-@@ -0,0 +1,810 @@
+@@ -0,0 +1,784 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -31364,58 +31415,27 @@ index 0000000..5e7df86
 +#include "nv50_display.h"
 +
 +#define NV50_LUT_INDEX(val, w) ((val << (8 - w)) | (val >> ((w << 1) - 8)))
-+static int
-+nv50_crtc_lut_load(struct nouveau_crtc *crtc)
++static void
++nv50_crtc_lut_load(struct drm_crtc *drm_crtc)
 +{
++	struct nouveau_crtc *crtc = nouveau_crtc(drm_crtc);
 +	struct drm_device *dev = crtc->base.dev;
-+	uint32_t index = 0, i;
 +	void __iomem *lut = nvbo_kmap_obj_iovirtual(crtc->lut.nvbo);
++	int i;
 +
 +	NV_DEBUG(dev, "\n");
 +
-+	/* 16 bits, red, green, blue, unused, total of 64 bits per index */
-+	/* 10 bits lut, with 14 bits values. */
-+	switch (crtc->lut.depth) {
-+	case 15:
-+		/* R5G5B5 */
-+		for (i = 0; i < 32; i++) {
-+			index = NV50_LUT_INDEX(i, 5);
-+			writew(crtc->lut.r[i] >> 2, lut + 8*index + 0);
-+			writew(crtc->lut.g[i] >> 2, lut + 8*index + 2);
-+			writew(crtc->lut.b[i] >> 2, lut + 8*index + 4);
-+		}
-+		break;
-+	case 16:
-+		/* R5G6B5 */
-+		for (i = 0; i < 32; i++) {
-+			index = NV50_LUT_INDEX(i, 5);
-+			writew(crtc->lut.r[i] >> 2, lut + 8*index + 0);
-+			writew(crtc->lut.b[i] >> 2, lut + 8*index + 4);
-+		}
-+
-+		/* Green has an extra bit. */
-+		for (i = 0; i < 64; i++) {
-+			index = NV50_LUT_INDEX(i, 6);
-+			writew(crtc->lut.g[i] >> 2, lut + 8*index + 2);
-+		}
-+		break;
-+	default:
-+		/* R8G8B8 */
-+		for (i = 0; i < 256; i++) {
-+			writew(crtc->lut.r[i] >> 2, lut + 8*i + 0);
-+			writew(crtc->lut.g[i] >> 2, lut + 8*i + 2);
-+			writew(crtc->lut.b[i] >> 2, lut + 8*i + 4);
-+		}
-+
-+		if (crtc->lut.depth == 30) {
-+			writew(crtc->lut.r[i-1] >> 2, lut + 8*i + 0);
-+			writew(crtc->lut.g[i-1] >> 2, lut + 8*i + 2);
-+			writew(crtc->lut.b[i-1] >> 2, lut + 8*i + 4);
-+		}
-+		break;
++	for (i = 0; i < 256; i++) {
++		writew(crtc->lut.r[i] >> 2, lut + 8*i + 0);
++		writew(crtc->lut.g[i] >> 2, lut + 8*i + 2);
++		writew(crtc->lut.b[i] >> 2, lut + 8*i + 4);
 +	}
 +
-+	return 0;
++	if (crtc->lut.depth == 30) {
++		writew(crtc->lut.r[i - 1] >> 2, lut + 8*i + 0);
++		writew(crtc->lut.g[i - 1] >> 2, lut + 8*i + 2);
++		writew(crtc->lut.b[i - 1] >> 2, lut + 8*i + 4);
++	}
 +}
 +
 +int
@@ -31770,7 +31790,7 @@ index 0000000..5e7df86
 +		return;
 +	}
 +
-+	nv50_crtc_lut_load(crtc);
++	nv50_crtc_lut_load(drm_crtc);
 +}
 +
 +static void
@@ -31918,7 +31938,7 @@ index 0000000..5e7df86
 +			OUT_RING(evo, NvEvoVRAM);
 +	}
 +
-+	ret = RING_SPACE(evo, 10);
++	ret = RING_SPACE(evo, 12);
 +	if (ret)
 +		return ret;
 +
@@ -31937,6 +31957,10 @@ index 0000000..5e7df86
 +	else
 +		OUT_RING(evo, format);
 +
++	BEGIN_RING(evo, 0, NV50_EVO_CRTC(crtc->index, CLUT_MODE), 1);
++	OUT_RING(evo, fb->base.depth == 8 ?
++		 NV50_EVO_CRTC_CLUT_MODE_OFF : NV50_EVO_CRTC_CLUT_MODE_ON);
++
 +	BEGIN_RING(evo, 0, NV50_EVO_CRTC(crtc->index, COLOR_CTRL), 1);
 +	OUT_RING(evo, NV50_EVO_CRTC_COLOR_CTRL_COLOR);
 +	BEGIN_RING(evo, 0, NV50_EVO_CRTC(crtc->index, FB_POS), 1);
@@ -31944,7 +31968,7 @@ index 0000000..5e7df86
 +
 +	if (crtc->lut.depth != fb->base.depth) {
 +		crtc->lut.depth = fb->base.depth;
-+		nv50_crtc_lut_load(crtc);
++		nv50_crtc_lut_load(drm_crtc);
 +	}
 +
 +	if (update) {
@@ -32063,6 +32087,7 @@ index 0000000..5e7df86
 +	.mode_fixup = nv50_crtc_mode_fixup,
 +	.mode_set = nv50_crtc_mode_set,
 +	.mode_set_base = nv50_crtc_mode_set_base,
++	.load_lut = nv50_crtc_lut_load,
 +};
 +
 +int
@@ -33673,10 +33698,10 @@ index 0000000..aae1334
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_fbcon.c b/drivers/gpu/drm/nouveau/nv50_fbcon.c
 new file mode 100644
-index 0000000..aca9ea6
+index 0000000..6bcc6d3
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_fbcon.c
-@@ -0,0 +1,256 @@
+@@ -0,0 +1,273 @@
 +#include "drmP.h"
 +#include "nouveau_drv.h"
 +#include "nouveau_dma.h"
@@ -33793,8 +33818,14 @@ index 0000000..aca9ea6
 +	dwords = (width * image->height) >> 5;
 +
 +	BEGIN_RING(chan, NvSub2D, 0x0814, 2);
-+	OUT_RING(chan, palette[image->bg_color] | mask);
-+	OUT_RING(chan, palette[image->fg_color] | mask);
++	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
++	    info->fix.visual == FB_VISUAL_DIRECTCOLOR) {
++		OUT_RING(chan, palette[image->bg_color] | mask);
++		OUT_RING(chan, palette[image->fg_color] | mask);
++	} else {
++		OUT_RING(chan, image->bg_color);
++		OUT_RING(chan, image->fg_color);
++	}
 +	BEGIN_RING(chan, NvSub2D, 0x0838, 2);
 +	OUT_RING(chan, image->width);
 +	OUT_RING(chan, image->height);
@@ -33836,19 +33867,30 @@ index 0000000..aca9ea6
 +	int ret, format;
 +
 +	switch (info->var.bits_per_pixel) {
++	case 8:
++		format = 0xf3;
++		break;
++	case 15:
++		format = 0xf8;
++		break;
 +	case 16:
 +		format = 0xe8;
 +		break;
-+	default:
++	case 32:
 +		switch (info->var.transp.length) {
-+		case 2:
++		case 0: /* depth 24 */
++		case 8: /* depth 32, just use 24.. */
++			format = 0xe6;
++			break;
++		case 2: /* depth 30 */
 +			format = 0xd1;
 +			break;
 +		default:
-+			format = 0xe6;
-+			break;
++			return -EINVAL;
 +		}
 +		break;
++	default:
++		return -EINVAL;
 +	}
 +
 +	ret = nouveau_gpuobj_gr_new(dev_priv->channel, 0x502d, &eng2d);
@@ -33935,10 +33977,10 @@ index 0000000..aca9ea6
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_fifo.c b/drivers/gpu/drm/nouveau/nv50_fifo.c
 new file mode 100644
-index 0000000..10ed193
+index 0000000..c2396a6
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_fifo.c
-@@ -0,0 +1,481 @@
+@@ -0,0 +1,493 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -34261,9 +34303,6 @@ index 0000000..10ed193
 +
 +	NV_DEBUG(dev, "ch%d\n", chan->id);
 +
-+	if ((nv_rd32(dev, NV03_PFIFO_CACHE1_PUSH1) & 0xffff) == chan->id)
-+		nv_wr32(dev, NV03_PFIFO_CACHE1_PUSH1, 127);
-+
 +	nouveau_gpuobj_ref_del(dev, &chan->ramfc);
 +	nouveau_gpuobj_ref_del(dev, &chan->cache);
 +
@@ -34342,20 +34381,34 @@ index 0000000..10ed193
 +
 +	dev_priv->engine.instmem.finish_access(dev);
 +
++	nv_wr32(dev, NV03_PFIFO_CACHE1_GET, 0);
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUT, 0);
 +	nv_wr32(dev, NV03_PFIFO_CACHE1_PUSH1, chan->id | (1<<16));
 +	return 0;
 +}
 +
 +int
-+nv50_fifo_save_context(struct nouveau_channel *chan)
++nv50_fifo_unload_context(struct drm_device *dev)
 +{
-+	struct drm_device *dev = chan->dev;
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
-+	struct nouveau_gpuobj *ramfc = chan->ramfc->gpuobj;
-+	struct nouveau_gpuobj *cache = chan->cache->gpuobj;
-+	int put, get, ptr;
++	struct nouveau_fifo_engine *pfifo = &dev_priv->engine.fifo;
++	struct nouveau_gpuobj *ramfc, *cache;
++	struct nouveau_channel *chan = NULL;
++	int chid, get, put, ptr;
 +
 +	NV_DEBUG(chan->dev, "ch%d\n", chan->id);
++
++	chid = pfifo->channel_id(dev);
++	if (chid < 0 || chid >= dev_priv->engine.fifo.channels)
++		return 0;
++
++	chan = dev_priv->fifos[chid];
++	if (!chan) {
++		NV_ERROR(dev, "Inactive channel on PFIFO: %d\n", chid);
++		return -EINVAL;
++	}
++	ramfc = chan->ramfc->gpuobj;
++	cache = chan->cache->gpuobj;
 +
 +	dev_priv->engine.instmem.prepare_access(dev, true);
 +
@@ -34406,7 +34459,6 @@ index 0000000..10ed193
 +
 +	/* guessing that all the 0x34xx regs aren't on NV50 */
 +	if (!IS_G80) {
-+
 +		nv_wo32(dev, ramfc, 0x84/4, ptr >> 1);
 +		nv_wo32(dev, ramfc, 0x88/4, nv_rd32(dev, 0x340c));
 +		nv_wo32(dev, ramfc, 0x8c/4, nv_rd32(dev, 0x3400));
@@ -34417,15 +34469,17 @@ index 0000000..10ed193
 +
 +	dev_priv->engine.instmem.finish_access(dev);
 +
++	/*XXX: probably reload ch127 (NULL) state back too */
++	nv_wr32(dev, NV03_PFIFO_CACHE1_PUSH1, 127);
 +	return 0;
 +}
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_graph.c b/drivers/gpu/drm/nouveau/nv50_graph.c
 new file mode 100644
-index 0000000..d9c3e21
+index 0000000..93a4b66
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_graph.c
-@@ -0,0 +1,412 @@
+@@ -0,0 +1,405 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -34665,19 +34719,11 @@ index 0000000..d9c3e21
 +	struct drm_device *dev = chan->dev;
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
 +	int i, hdr = IS_G80 ? 0x200 : 0x20;
-+	uint32_t inst;
 +
 +	NV_DEBUG(dev, "ch%d\n", chan->id);
 +
 +	if (!chan->ramin || !chan->ramin->gpuobj)
 +		return;
-+
-+	inst = nv_rd32(dev, NV50_PGRAPH_CTXCTL_CUR);
-+	if (inst & NV50_PGRAPH_CTXCTL_CUR_LOADED) {
-+		inst &= NV50_PGRAPH_CTXCTL_CUR_INSTANCE;
-+		if (inst == chan->ramin->instance >> 12)
-+			nv_wr32(dev, NV50_PGRAPH_CTXCTL_CUR, inst);
-+	}
 +
 +	dev_priv->engine.instmem.prepare_access(dev, true);
 +	for (i = hdr; i < hdr + 24; i += 4)
@@ -34704,6 +34750,7 @@ index 0000000..d9c3e21
 +	if (nouveau_wait_for_idle(dev))
 +		nv_wr32(dev, 0x40032c, inst | (1<<31));
 +	nv_wr32(dev, 0x400500, fifo);
++
 +	return 0;
 +}
 +
@@ -34732,12 +34779,18 @@ index 0000000..d9c3e21
 +}
 +
 +int
-+nv50_graph_save_context(struct nouveau_channel *chan)
++nv50_graph_unload_context(struct drm_device *dev)
 +{
-+	uint32_t inst = chan->ramin->instance >> 12;
++	uint32_t inst;
++	int ret;
 +
-+	NV_DEBUG(chan->dev, "ch%d\n", chan->id);
-+	return nv50_graph_do_save_context(chan->dev, inst);
++	inst  = nv_rd32(dev, NV50_PGRAPH_CTXCTL_CUR);
++	if (!(inst & NV50_PGRAPH_CTXCTL_CUR_LOADED))
++		return 0;
++	inst &= NV50_PGRAPH_CTXCTL_CUR_INSTANCE;
++	ret = nv50_graph_do_save_context(dev, inst);
++	nv_wr32(dev, NV50_PGRAPH_CTXCTL_CUR, inst);
++	return 0;
 +}
 +
 +void
@@ -34745,17 +34798,11 @@ index 0000000..d9c3e21
 +{
 +	uint32_t inst;
 +
-+	inst = nv_rd32(dev, NV50_PGRAPH_CTXCTL_CUR);
-+	if (inst & NV50_PGRAPH_CTXCTL_CUR_LOADED)
-+		nv50_graph_do_save_context(dev, inst);
-+	nv_wr32(dev, NV50_PGRAPH_CTXCTL_CUR,
-+				inst & NV50_PGRAPH_CTXCTL_CUR_INSTANCE);
++	nv50_graph_unload_context(dev);
 +
-+	inst = nv_rd32(dev, NV50_PGRAPH_CTXCTL_NEXT) &
-+		       NV50_PGRAPH_CTXCTL_NEXT_INSTANCE;
++	inst  = nv_rd32(dev, NV50_PGRAPH_CTXCTL_NEXT);
++	inst &= NV50_PGRAPH_CTXCTL_NEXT_INSTANCE;
 +	nv50_graph_do_load_context(dev, inst);
-+	nv_wr32(dev, NV50_PGRAPH_CTXCTL_CUR,
-+				inst | NV50_PGRAPH_CTXCTL_CUR_LOADED);
 +
 +	nv_wr32(dev, NV40_PGRAPH_INTR_EN, nv_rd32(dev,
 +		NV40_PGRAPH_INTR_EN) | NV_PGRAPH_INTR_CONTEXT_SWITCH);
