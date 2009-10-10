@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1746 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1757 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -634,6 +634,12 @@ Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 Patch160: linux-2.6-execshield.patch
 
 Patch200: linux-2.6-ext4-prealloc-fixes.patch
+# eCryptfs fixes taken from 2.6.31.2 (fixes CVE-2009-2908)
+Patch210: ecryptfs-handle-unrecognized-tag-3-cipher-codes.patch
+Patch211: ecryptfs-check-for-o_rdonly-lower-inodes-when-opening-lower-files.patch
+Patch212: ecryptfs-filename-encryption-only-supports-password-auth-tokens.patch
+Patch213: ecryptfs-validate-global-auth-tok-keys.patch
+Patch214: ecryptfs-prevent-lower-dentry-from-going-negative-during-unlink.patch
 
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
@@ -677,6 +683,7 @@ Patch1000: linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 Patch1200: linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
 Patch1201: linux-2.6-xen-clean-up-warnings.patch
 Patch1202: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
+Patch1203: linux-2.6-virtio-net-refill-on-out-of-memory.patch
 
 Patch1515: lirc-2.6.31.patch
 Patch1517: hid-ignore-all-recent-imon-devices.patch
@@ -704,6 +711,9 @@ Patch1826: drm-i915-enable-mchbar.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
+# fix forcedeth race (#526546)
+Patch2010: forcedeth-fix-napi-race.patch
+
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
 Patch2201: linux-2.6-firewire-git-pending.patch
@@ -723,6 +733,10 @@ Patch3000: linux-2.6-fs-cifs-fix-port-numbers.patch
 
 # ACPI
 Patch4000: linux-2.6.30-cpuidle-faster-io.patch
+# EC fixes from 2.6.32 (#492699, #525681)
+Patch4010: acpi-ec-merge-irq-and-poll-modes.patch
+Patch4020: acpi-ec-use-burst-mode-only-for-msi-notebooks.patch
+Patch4030: acpi-ec-restart-command-even-if-no-interrupts-from-ec.patch
 
 #snmp fixes
 Patch10000: linux-2.6-missing-rfc2465-stats.patch
@@ -748,7 +762,6 @@ Patch13002: linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 # sched fixes cherry-picked from 2.6.32
 Patch13100: sched-deal-with-low-load-in-wake-affine.patch
-Patch13101: sched-disable-NEW-FAIR-SLEEPERS-for-now.patch
 Patch13102: sched-ensure-child-cant-gain-time-over-its-parent-after-fork.patch
 Patch13103: sched-remove-shortcut-from-select-task-rq-fair.patch
 # latency defaults from 2.6.32 but changed to be not so aggressive
@@ -757,7 +770,6 @@ Patch13104: sched-retune-scheduler-latency-defaults.patch
 Patch14000: make-mmap_min_addr-suck-less.patch
 
 # ----- send for upstream inclusion -----
-Patch14010: linux-2.6-cifs-reenable-lanman-security.patch
 
 # ----- patches headed for -stable -----
 
@@ -779,15 +791,15 @@ Patch14200: hostap-revert-toxic-part-of-conversion.patch
 # fix cfq performance regression in 2.6.30
 Patch14300: linux-2.6-cfq-choose-new-next-req.patch
 
-# kvm fixes from 2.6.31.1, including fix for CVE-2009-3290
-Patch14400: kvm-guest-fix-bogus-wallclock-physical-address-calculation.patch
-Patch14401: kvm-mmu-make-__kvm_mmu_free_some_pages-handle-empty-list.patch
-Patch14402: kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
-Patch14403: kvm-vmx-fix-cr8-exiting-control-clobbering-by-ept.patch
-Patch14404: kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
-
 # appletalk: fix skb leak (CVE-2009-2903)
 Patch15200: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
+
+# fix stack randomization (F10#526882)
+Patch15300: x86-increase-min_gap-to-include-randomized-stack.patch
+
+# x86: Don't leak 64-bit reg contents to 32-bit tasks.
+Patch15400: x86-dont-leak-64-bit-kernel-register-values.patch
+
 
 %endif
 
@@ -1286,6 +1298,14 @@ ApplyPatch linux-2.6-execshield.patch
 
 # ecryptfs
 
+# 5 fixes from 2.6.31.2
+ApplyPatch ecryptfs-handle-unrecognized-tag-3-cipher-codes.patch
+ApplyPatch ecryptfs-check-for-o_rdonly-lower-inodes-when-opening-lower-files.patch
+ApplyPatch ecryptfs-filename-encryption-only-supports-password-auth-tokens.patch
+ApplyPatch ecryptfs-validate-global-auth-tok-keys.patch
+# fixes CVE-2009-2908
+ApplyPatch ecryptfs-prevent-lower-dentry-from-going-negative-during-unlink.patch
+
 # nfs
 
 # cifs
@@ -1298,6 +1318,10 @@ ApplyPatch linux-2.6-fs-cifs-fix-port-numbers.patch
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6.30-cpuidle-faster-io.patch
+# EC fixes from 2.6.32 (#492699, #525681)
+ApplyPatch acpi-ec-merge-irq-and-poll-modes.patch
+ApplyPatch acpi-ec-use-burst-mode-only-for-msi-notebooks.patch
+ApplyPatch acpi-ec-restart-command-even-if-no-interrupts-from-ec.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1332,6 +1356,9 @@ ApplyPatch linux-2.6-neigh_-fix-state-transition-INCOMPLETE-_FAILED-via-Netlink-
 # add ich9 lan
 ApplyPatch linux-2.6-e1000-ich9.patch
 
+# fix forcedeth race
+ApplyPatch forcedeth-fix-napi-race.patch
+
 # Virt Fixes
 # Xen Guest
 ApplyPatch linux-2.6-xen-fix-brkpoints-hw-watchpoints.patch
@@ -1339,6 +1366,7 @@ ApplyPatch linux-2.6-xen-clean-up-warnings.patch
 
 # Misc Virt
 ApplyPatch linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
+ApplyPatch linux-2.6-virtio-net-refill-on-out-of-memory.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1435,7 +1463,6 @@ ApplyPatch linux-2.6-virtio_blk-dont-bounce-highmem-requests.patch
 
 # sched fixes cherry-picked from 2.6.32
 ApplyPatch sched-deal-with-low-load-in-wake-affine.patch
-ApplyPatch sched-disable-NEW-FAIR-SLEEPERS-for-now.patch
 ApplyPatch sched-ensure-child-cant-gain-time-over-its-parent-after-fork.patch
 ApplyPatch sched-remove-shortcut-from-select-task-rq-fair.patch
 # latency defaults from 2.6.32 but changed to be not so aggressive
@@ -1444,7 +1471,6 @@ ApplyPatch sched-retune-scheduler-latency-defaults.patch
 ApplyPatch make-mmap_min_addr-suck-less.patch
 
 # ----- sent for upstream inclusion -----
-ApplyPatch linux-2.6-cifs-reenable-lanman-security.patch
 
 # ----- patches headed for -stable -----
 
@@ -1468,15 +1494,13 @@ ApplyPatch hostap-revert-toxic-part-of-conversion.patch
 # fix cfq performance regression in 2.6.30
 ApplyPatch linux-2.6-cfq-choose-new-next-req.patch
 
-# kvm fixes from 2.6.31.1, including fix for CVE-2009-3290
-ApplyPatch kvm-guest-fix-bogus-wallclock-physical-address-calculation.patch
-ApplyPatch kvm-mmu-make-__kvm_mmu_free_some_pages-handle-empty-list.patch
-ApplyPatch kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
-ApplyPatch kvm-vmx-fix-cr8-exiting-control-clobbering-by-ept.patch
-ApplyPatch kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
-
 # appletalk: fix skb leak (CVE-2009-2903)
 ApplyPatch appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
+
+# copy stack randomization fix from 2.6.31.2
+ApplyPatch x86-increase-min_gap-to-include-randomized-stack.patch
+
+ApplyPatch x86-dont-leak-64-bit-kernel-register-values.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2066,6 +2090,50 @@ fi
 # and build.
 
 %changelog
+* Wed Oct 07 2009 Dave Jones <davej@redhat.com>       2.6.30.9-78
+- Disable IRQSOFF tracer. (Adds unnecessary overhead when unused)
+
+* Wed Oct 07 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-77
+- eCryptfs fixes taken from 2.6.31.2 (fixes CVE-2009-2908)
+
+* Tue Oct 06 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-76
+- fix race in forcedeth network driver (#526546)
+
+* Tue Oct 06 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-75
+- x86: Don't leak 64-bit reg contents to 32-bit tasks.
+
+* Tue Oct 06 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-74
+- ACPI EC bug fixes taken from kernel 2.6.32 (#492699, #525681)
+
+* Mon Oct 05 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-73
+- Linux 2.6.30.9
+
+* Sun Oct 04 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-72.rc3
+- Copy stack randomization fix from 2.6.31.2 (F10#526882)
+
+* Sun Oct 04 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-71.rc3
+- Linux 2.6.30.9-rc3
+- Drop merged upstream patches:
+  linux-2.6-cifs-reenable-lanman-security.patch
+  kvm-guest-fix-bogus-wallclock-physical-address-calculation.patch
+  kvm-mmu-make-__kvm_mmu_free_some_pages-handle-empty-list.patch
+  kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
+  kvm-vmx-fix-cr8-exiting-control-clobbering-by-ept.patch
+  kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
+  linux-2.6-kvm-revert-x86-check-for-cr3-validity.patch
+
+* Fri Oct  2 2009  Justin M. Forbes <jforbes@redhat.com>  2.6.30.8-70
+- Add linux-2.6-virtio-net-refill-on-out-of-memory.patch, from 2.6.31
+  to prevent page allocation failures in guests. (#520119)
+
+* Mon Sep 28 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.8-69
+- Add linux-2.6-kvm-revert-x86-check-for-cr3-validity.patch, from
+  2.6.32-rc, fixes bug #525743
+
+* Mon Sep 28 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.8-68
+- Drop sched-disable-NEW-FAIR-SLEEPERS-for-now.patch, reported to
+  cause problems on 2.6.30.
+
 * Sat Sep 26 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.8-67
 - Scheduler fixes cherry-picked from 2.6.32
 
