@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1851 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1853 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -41,7 +41,7 @@ Summary: The Linux kernel
 %define librev 1
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -653,7 +653,6 @@ Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
-Patch301: linux-2.6-fix-usb-serial-autosuspend.diff
 Patch302: linux-2.6-qcserial-autosuspend.diff
 Patch303: linux-2.6-bluetooth-autosuspend.diff
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
@@ -689,13 +688,6 @@ Patch611: alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-ahci-export-capabilities.patch
 
-Patch680: linux-2.6-iwlagn-modify-digital-SVR-for-1000.patch
-Patch681: linux-2.6-iwlwifi-update-1000-series-API-version-to-match-firmware.patch
-Patch682: linux-2.6-iwlwifi-Handle-new-firmware-file-with-ucode-build-number-in-header.patch
-Patch683: linux-2.6-iwlwifi-fix-debugfs-buffer-handling.patch
-Patch684: linux-2.6-iwlwifi-traverse-linklist-to-find-the-valid-OTP-block.patch
-Patch685: linux-2.6-iwlwifi-fix-unloading-driver-while-scanning.patch
-Patch686: linux-2.6-iwlwifi-remove-deprecated-6000-series-adapters.patch
 Patch687: linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
 Patch700: linux-2.6.31-nx-data.patch
@@ -704,8 +696,6 @@ Patch701: linux-2.6.31-modules-ro-nx.patch
 Patch800: linux-2.6-crash-driver.patch
 
 Patch900: linux-2.6-pci-cacheline-sizing.patch
-
-Patch1000: linux-2.6.31-cpufreq-powernow-k8-oops.patch
 
 Patch1100: linux-2.6.31-cpuidle-faster-io.patch
 
@@ -718,11 +708,7 @@ Patch1550: linux-2.6-ksm.patch
 Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-ksm-updates.patch
 Patch1553: linux-2.6-ksm-fix-munlock.patch
-Patch1578: linux-2.6-xen-stack-protector-fix.patch
 Patch1579: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
-Patch1580: linux-2.6-xen-check-efer-fix.patch
-Patch1581: linux-2.6-xen-spinlock-enable-interrupts-only-when-blocking.patch
-Patch1582: linux-2.6-xen-spinlock-stronger-barrier.patch
 Patch1583: linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
 Patch1584: linux-2.6-xen-improvement-to-wait_for_devices.patch
 Patch1585: linux-2.6-xen-increase-device-connection-timeout.patch
@@ -1020,7 +1006,8 @@ ApplyPatch()
     exit 1
   fi
   if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:10}" != "patch-2.6." ] ; then
+    if [ "${patch:0:10}" != "patch-2.6." ] && 
+       [ "${patch:0:16}" != "patch-libre-2.6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
@@ -1285,7 +1272,6 @@ ApplyPatch linux-2.6-nfs4-ver4opt.patch
 
 # USB
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
-ApplyPatch linux-2.6-fix-usb-serial-autosuspend.diff
 ApplyPatch linux-2.6-qcserial-autosuspend.diff
 ApplyPatch linux-2.6-bluetooth-autosuspend.diff
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
@@ -1367,17 +1353,8 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # Make it possible to identify non-hotplug SATA ports
 ApplyPatch linux-2.6-ahci-export-capabilities.patch
 
-# iwl1000 support patches
-ApplyPatch linux-2.6-iwlagn-modify-digital-SVR-for-1000.patch
-ApplyPatch linux-2.6-iwlwifi-Handle-new-firmware-file-with-ucode-build-number-in-header.patch
-ApplyPatch linux-2.6-iwlwifi-update-1000-series-API-version-to-match-firmware.patch
-ApplyPatch linux-2.6-iwlwifi-fix-debugfs-buffer-handling.patch
-ApplyPatch linux-2.6-iwlwifi-traverse-linklist-to-find-the-valid-OTP-block.patch
-ApplyPatch linux-2.6-iwlwifi-fix-unloading-driver-while-scanning.patch
+# iwlagn quiet
 ApplyPatch linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
-
-# remove support for deprecated iwl6000 parts
-ApplyPatch linux-2.6-iwlwifi-remove-deprecated-6000-series-adapters.patch
 
 # Mark kernel data as NX
 ApplyPatch linux-2.6.31-nx-data.patch
@@ -1390,9 +1367,6 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Determine cacheline sizes in a generic manner.
 ApplyPatch linux-2.6-pci-cacheline-sizing.patch
-
-# fix upstream bug #13780
-ApplyPatch linux-2.6.31-cpufreq-powernow-k8-oops.patch
 
 # cpuidle: Fix the menu governor to boost IO performance
 ApplyPatch linux-2.6.31-cpuidle-faster-io.patch
@@ -1412,17 +1386,11 @@ ApplyPatch linux-2.6-ksm-fix-munlock.patch
 ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
-ApplyPatch linux-2.6-xen-stack-protector-fix.patch
 ApplyPatch linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
-ApplyPatch linux-2.6-xen-check-efer-fix.patch
 ApplyPatch linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
 ApplyPatch linux-2.6-xen-improvement-to-wait_for_devices.patch
 ApplyPatch linux-2.6-xen-increase-device-connection-timeout.patch
 ApplyPatch linux-2.6-virtio_blk-add-support-for-cache-flush.patch
-
-# improve xen spinlock scalability
-ApplyPatch linux-2.6-xen-spinlock-enable-interrupts-only-when-blocking.patch
-ApplyPatch linux-2.6-xen-spinlock-stronger-barrier.patch
 
 # Fix block I/O errors in KVM
 ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -2126,6 +2094,30 @@ fi
 # and build.
 
 %changelog
+* Sat Oct 10 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.67
+* Deblobbed and adjusted patch-libre-2.6.31.3.
+
+* Thu Oct 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.3-67
+- Linux 2.6.31.3
+- rebase drm-next trivially.
+- dropped merged upstream patches,
+ - linux-2.6-fix-usb-serial-autosuspend.diff
+ - linux-2.6-iwlagn-modify-digital-SVR-for-1000.patch
+ - linux-2.6-iwlwifi-Handle-new-firmware-file-with-ucode-build-number-in-header.patch
+ - linux-2.6-iwlwifi-fix-debugfs-buffer-handling.patch
+ - linux-2.6-iwlwifi-fix-unloading-driver-while-scanning.patch
+ - linux-2.6-iwlwifi-remove-deprecated-6000-series-adapters.patch
+ - linux-2.6-iwlwifi-traverse-linklist-to-find-the-valid-OTP-block.patch
+ - linux-2.6-iwlwifi-update-1000-series-API-version-to-match-firmware.patch
+ - linux-2.6-xen-check-efer-fix.patch
+ - linux-2.6-xen-spinlock-enable-interrupts-only-when-blocking.patch
+ - linux-2.6-xen-spinlock-stronger-barrier.patch
+ - linux-2.6-xen-stack-protector-fix.patch
+ - linux-2.6.31-cpufreq-powernow-k8-oops.patch
+
+* Thu Oct 08 2009 Ben Skeggs <bskeggs@redhat.com>
+- ppc: compile nvidiafb as a module only, nvidiafb+nouveau = bang! (rh#491308)
+
 * Thu Oct 08 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.1-65
 - nouveau: {drm-next,context,fbcon,misc} fixes, connector forcing
 
