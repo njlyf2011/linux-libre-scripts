@@ -4240,7 +4240,7 @@ index 50d1f78..9909505 100644
  	}
  
 diff --git a/drivers/gpu/drm/i915/i915_drv.c b/drivers/gpu/drm/i915/i915_drv.c
-index fc4b68a..dbe568c 100644
+index c078d99..e8cf18d 100644
 --- a/drivers/gpu/drm/i915/i915_drv.c
 +++ b/drivers/gpu/drm/i915/i915_drv.c
 @@ -37,12 +37,15 @@
@@ -4260,7 +4260,7 @@ index fc4b68a..dbe568c 100644
  static struct drm_driver driver;
  
  static struct pci_device_id pciidlist[] = {
-@@ -188,8 +191,8 @@ static struct drm_driver driver = {
+@@ -186,8 +189,8 @@ static struct drm_driver driver = {
  	.master_create = i915_master_create,
  	.master_destroy = i915_master_destroy,
  #if defined(CONFIG_DEBUG_FS)
@@ -4407,7 +4407,7 @@ index 5b4f87e..77ed060 100644
  
  #endif
 diff --git a/drivers/gpu/drm/i915/i915_gem.c b/drivers/gpu/drm/i915/i915_gem.c
-index 7edb5b9..954fb69 100644
+index 2b7aeee..6a32682 100644
 --- a/drivers/gpu/drm/i915/i915_gem.c
 +++ b/drivers/gpu/drm/i915/i915_gem.c
 @@ -29,6 +29,7 @@
@@ -4456,7 +4456,7 @@ index 7edb5b9..954fb69 100644
  		ret = i915_gem_object_set_to_gtt_domain(obj, write_domain != 0);
  
  		/* Update the LRU on the fence for the CPU access that's
-@@ -2776,6 +2781,8 @@ i915_gem_object_set_to_gpu_domain(struct drm_gem_object *obj)
+@@ -2760,6 +2765,8 @@ i915_gem_object_set_to_gpu_domain(struct drm_gem_object *obj)
  	BUG_ON(obj->pending_read_domains & I915_GEM_DOMAIN_CPU);
  	BUG_ON(obj->pending_write_domain == I915_GEM_DOMAIN_CPU);
  
@@ -4465,7 +4465,7 @@ index 7edb5b9..954fb69 100644
  #if WATCH_BUF
  	DRM_INFO("%s: object %p read %08x -> %08x write %08x -> %08x\n",
  		 __func__, obj,
-@@ -4093,7 +4100,6 @@ i915_gem_init_ringbuffer(struct drm_device *dev)
+@@ -4088,7 +4095,6 @@ i915_gem_init_ringbuffer(struct drm_device *dev)
  
  	/* Set up the kernel mapping for the ring. */
  	ring->Size = obj->size;
@@ -4876,7 +4876,7 @@ index cb3b974..0000000
 -#endif /* CONFIG_DEBUG_FS */
 -
 diff --git a/drivers/gpu/drm/i915/i915_gem_tiling.c b/drivers/gpu/drm/i915/i915_gem_tiling.c
-index a2d527b..200e398 100644
+index e774a4a..200e398 100644
 --- a/drivers/gpu/drm/i915/i915_gem_tiling.c
 +++ b/drivers/gpu/drm/i915/i915_gem_tiling.c
 @@ -94,23 +94,15 @@
@@ -5025,35 +5025,6 @@ index a2d527b..200e398 100644
  		}
  	}
  
-@@ -234,7 +209,13 @@ i915_gem_detect_bit_6_swizzle(struct drm_device *dev)
- 	uint32_t swizzle_y = I915_BIT_6_SWIZZLE_UNKNOWN;
- 	bool need_disable;
- 
--	if (!IS_I9XX(dev)) {
-+	if (IS_IGDNG(dev)) {
-+		/* On IGDNG whatever DRAM config, GPU always do
-+		 * same swizzling setup.
-+		 */
-+		swizzle_x = I915_BIT_6_SWIZZLE_9_10;
-+		swizzle_y = I915_BIT_6_SWIZZLE_9;
-+	} else if (!IS_I9XX(dev)) {
- 		/* As far as we know, the 865 doesn't have these bit 6
- 		 * swizzling issues.
- 		 */
-@@ -317,13 +298,6 @@ i915_gem_detect_bit_6_swizzle(struct drm_device *dev)
- 		}
- 	}
- 
--	/* FIXME: check with memory config on IGDNG */
--	if (IS_IGDNG(dev)) {
--		DRM_ERROR("disable tiling on IGDNG...\n");
--		swizzle_x = I915_BIT_6_SWIZZLE_UNKNOWN;
--		swizzle_y = I915_BIT_6_SWIZZLE_UNKNOWN;
--	}
--
- 	dev_priv->mm.bit_6_swizzle_x = swizzle_x;
- 	dev_priv->mm.bit_6_swizzle_y = swizzle_y;
- }
 diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
 index 7ebc84c..6c89f2f 100644
 --- a/drivers/gpu/drm/i915/i915_irq.c
@@ -5087,7 +5058,7 @@ index 7ebc84c..6c89f2f 100644
  
  		I915_WRITE(IIR, iir);
 diff --git a/drivers/gpu/drm/i915/i915_reg.h b/drivers/gpu/drm/i915/i915_reg.h
-index 2955083..e38cd21 100644
+index 106a1ae..268d272 100644
 --- a/drivers/gpu/drm/i915/i915_reg.h
 +++ b/drivers/gpu/drm/i915/i915_reg.h
 @@ -55,7 +55,7 @@
@@ -5271,24 +5242,6 @@ index 2955083..e38cd21 100644
  #define PIPEASTAT		0x70024
  #define   PIPE_FIFO_UNDERRUN_STATUS		(1UL<<31)
  #define   PIPE_CRC_ERROR_ENABLE			(1UL<<29)
-@@ -1733,6 +1864,7 @@
- #define   DISPPLANE_NO_LINE_DOUBLE		0
- #define   DISPPLANE_STEREO_POLARITY_FIRST	0
- #define   DISPPLANE_STEREO_POLARITY_SECOND	(1<<18)
-+#define   DISPPLANE_TRICKLE_FEED_DISABLE	(1<<14) /* IGDNG */
- #define   DISPPLANE_TILED			(1<<10)
- #define DSPAADDR		0x70184
- #define DSPASTRIDE		0x70188
-@@ -1913,6 +2045,9 @@
- #define GTIIR   0x44018
- #define GTIER   0x4401c
- 
-+#define DISP_ARB_CTL	0x45000
-+#define  DISP_TILE_SURFACE_SWIZZLING	(1<<13)
-+
- /* PCH */
- 
- /* south display engine interrupt */
 diff --git a/drivers/gpu/drm/i915/i915_suspend.c b/drivers/gpu/drm/i915/i915_suspend.c
 index 1d04e19..20d4d19 100644
 --- a/drivers/gpu/drm/i915/i915_suspend.c
@@ -5312,10 +5265,10 @@ index 1d04e19..20d4d19 100644
  	/* Cache mode state */
  	I915_WRITE (CACHE_MODE_0, dev_priv->saveCACHE_MODE_0 | 0xffff0000);
 diff --git a/drivers/gpu/drm/i915/intel_bios.c b/drivers/gpu/drm/i915/intel_bios.c
-index f806fcc..1e28c16 100644
+index 698a0ed..4337414 100644
 --- a/drivers/gpu/drm/i915/intel_bios.c
 +++ b/drivers/gpu/drm/i915/intel_bios.c
-@@ -355,8 +355,14 @@ parse_driver_features(struct drm_i915_private *dev_priv,
+@@ -358,8 +358,14 @@ parse_driver_features(struct drm_i915_private *dev_priv,
  	}
  
  	driver = find_section(bdb, BDB_DRIVER_FEATURES);
@@ -5332,7 +5285,7 @@ index f806fcc..1e28c16 100644
  
  /**
 diff --git a/drivers/gpu/drm/i915/intel_crt.c b/drivers/gpu/drm/i915/intel_crt.c
-index 590f81c..88814fa 100644
+index 5ae4c1a..212e227 100644
 --- a/drivers/gpu/drm/i915/intel_crt.c
 +++ b/drivers/gpu/drm/i915/intel_crt.c
 @@ -64,6 +64,34 @@ static void intel_crt_dpms(struct drm_encoder *encoder, int mode)
@@ -5371,7 +5324,7 @@ index 590f81c..88814fa 100644
  
  static int intel_crt_mode_valid(struct drm_connector *connector,
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index 748ed50..8939039 100644
+index 8b5af29..a865af5 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
 @@ -38,6 +38,7 @@
@@ -5587,18 +5540,7 @@ index 748ed50..8939039 100644
  					int this_err;
  
  					intel_clock(dev, refclk, &clock);
-@@ -1008,6 +1064,10 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
- 			dspcntr &= ~DISPPLANE_TILED;
- 	}
- 
-+	if (IS_IGDNG(dev))
-+		/* must disable */
-+		dspcntr |= DISPPLANE_TRICKLE_FEED_DISABLE;
-+
- 	I915_WRITE(dspcntr_reg, dspcntr);
- 
- 	Start = obj_priv->gtt_offset;
-@@ -1030,8 +1090,11 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
+@@ -1034,8 +1090,11 @@ intel_pipe_set_base(struct drm_crtc *crtc, int x, int y,
  
  	if (old_fb) {
  		intel_fb = to_intel_framebuffer(old_fb);
@@ -5610,7 +5552,7 @@ index 748ed50..8939039 100644
  	mutex_unlock(&dev->struct_mutex);
  
  	if (!dev->primary->master)
-@@ -1581,6 +1644,8 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1599,6 +1658,8 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
  	else
  		i9xx_crtc_dpms(crtc, mode);
  
@@ -5619,7 +5561,7 @@ index 748ed50..8939039 100644
  	if (!dev->primary->master)
  		return;
  
-@@ -1603,8 +1668,6 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1621,8 +1682,6 @@ static void intel_crtc_dpms(struct drm_crtc *crtc, int mode)
  		DRM_ERROR("Can't update pipe %d in SAREA\n", pipe);
  		break;
  	}
@@ -5628,7 +5570,7 @@ index 748ed50..8939039 100644
  }
  
  static void intel_crtc_prepare (struct drm_crtc *crtc)
-@@ -2054,6 +2117,18 @@ static int intel_get_fifo_size(struct drm_device *dev, int plane)
+@@ -2079,6 +2138,18 @@ static int intel_get_fifo_size(struct drm_device *dev, int plane)
  	return size;
  }
  
@@ -5647,7 +5589,7 @@ index 748ed50..8939039 100644
  static void i965_update_wm(struct drm_device *dev)
  {
  	struct drm_i915_private *dev_priv = dev->dev_private;
-@@ -2105,7 +2180,8 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2130,7 +2201,8 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  	cwm = 2;
  
  	/* Calc sr entries for one plane configs */
@@ -5657,7 +5599,7 @@ index 748ed50..8939039 100644
  		/* self-refresh has much higher latency */
  		const static int sr_latency_ns = 6000;
  
-@@ -2120,8 +2196,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2145,8 +2217,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  		srwm = total_size - sr_entries;
  		if (srwm < 0)
  			srwm = 1;
@@ -5667,7 +5609,7 @@ index 748ed50..8939039 100644
  	}
  
  	DRM_DEBUG("Setting FIFO watermarks - A: %d, B: %d, C: %d, SR %d\n",
-@@ -2195,9 +2270,6 @@ static void intel_update_watermarks(struct drm_device *dev)
+@@ -2220,9 +2291,6 @@ static void intel_update_watermarks(struct drm_device *dev)
  	unsigned long planea_clock = 0, planeb_clock = 0, sr_clock = 0;
  	int enabled = 0, pixel_size = 0;
  
@@ -5677,7 +5619,7 @@ index 748ed50..8939039 100644
  	/* Get the clock config from both planes */
  	list_for_each_entry(crtc, &dev->mode_config.crtc_list, head) {
  		intel_crtc = to_intel_crtc(crtc);
-@@ -2230,7 +2302,9 @@ static void intel_update_watermarks(struct drm_device *dev)
+@@ -2255,7 +2323,9 @@ static void intel_update_watermarks(struct drm_device *dev)
  	else if (IS_IGD(dev))
  		igd_disable_cxsr(dev);
  
@@ -5688,7 +5630,7 @@ index 748ed50..8939039 100644
  		i965_update_wm(dev);
  	else if (IS_I9XX(dev) || IS_MOBILE(dev))
  		i9xx_update_wm(dev, planea_clock, planeb_clock, sr_hdisplay,
-@@ -2264,9 +2338,9 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2289,9 +2359,9 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	int dsppos_reg = (pipe == 0) ? DSPAPOS : DSPBPOS;
  	int pipesrc_reg = (pipe == 0) ? PIPEASRC : PIPEBSRC;
  	int refclk, num_outputs = 0;
@@ -5701,7 +5643,7 @@ index 748ed50..8939039 100644
  	bool is_crt = false, is_lvds = false, is_tv = false, is_dp = false;
  	bool is_edp = false;
  	struct drm_mode_config *mode_config = &dev->mode_config;
-@@ -2349,6 +2423,14 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2374,6 +2444,14 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		return -EINVAL;
  	}
  
@@ -5716,7 +5658,7 @@ index 748ed50..8939039 100644
  	/* SDVO TV has fixed PLL values depend on its clock range,
  	   this mirrors vbios setting. */
  	if (is_sdvo && is_tv) {
-@@ -2394,10 +2476,17 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2419,10 +2497,17 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  				  link_bw, &m_n);
  	}
  
@@ -5736,7 +5678,7 @@ index 748ed50..8939039 100644
  
  	if (!IS_IGDNG(dev))
  		dpll = DPLL_VGA_MODE_DIS;
-@@ -2426,6 +2515,8 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2451,6 +2536,8 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  			/* also FPA1 */
  			if (IS_IGDNG(dev))
  				dpll |= (1 << (clock.p1 - 1)) << DPLL_FPA1_P1_POST_DIV_SHIFT;
@@ -5745,7 +5687,7 @@ index 748ed50..8939039 100644
  		}
  		switch (clock.p2) {
  		case 5:
-@@ -2573,6 +2664,22 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2598,6 +2685,22 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		udelay(150);
  	}
  
@@ -5768,20 +5710,7 @@ index 748ed50..8939039 100644
  	I915_WRITE(htot_reg, (adjusted_mode->crtc_hdisplay - 1) |
  		   ((adjusted_mode->crtc_htotal - 1) << 16));
  	I915_WRITE(hblank_reg, (adjusted_mode->crtc_hblank_start - 1) |
-@@ -2616,6 +2723,12 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
- 
- 	intel_wait_for_vblank(dev);
- 
-+	if (IS_IGDNG(dev)) {
-+		/* enable address swizzle for tiling buffer */
-+		temp = I915_READ(DISP_ARB_CTL);
-+		I915_WRITE(DISP_ARB_CTL, temp | DISP_TILE_SURFACE_SWIZZLING);
-+	}
-+
- 	I915_WRITE(dspcntr_reg, dspcntr);
- 
- 	/* Flush the plane changes */
-@@ -2769,10 +2882,16 @@ static int intel_crtc_cursor_move(struct drm_crtc *crtc, int x, int y)
+@@ -2800,10 +2903,16 @@ static int intel_crtc_cursor_move(struct drm_crtc *crtc, int x, int y)
  	struct drm_device *dev = crtc->dev;
  	struct drm_i915_private *dev_priv = dev->dev_private;
  	struct intel_crtc *intel_crtc = to_intel_crtc(crtc);
@@ -5798,7 +5727,7 @@ index 748ed50..8939039 100644
  	if (x < 0) {
  		temp |= CURSOR_POS_SIGN << CURSOR_X_SHIFT;
  		x = -x;
-@@ -2803,6 +2922,16 @@ void intel_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
+@@ -2834,6 +2943,16 @@ void intel_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
  	intel_crtc->lut_b[regno] = blue >> 8;
  }
  
@@ -5815,7 +5744,7 @@ index 748ed50..8939039 100644
  static void intel_crtc_gamma_set(struct drm_crtc *crtc, u16 *red, u16 *green,
  				 u16 *blue, uint32_t size)
  {
-@@ -3070,12 +3199,319 @@ struct drm_display_mode *intel_crtc_mode_get(struct drm_device *dev,
+@@ -3101,12 +3220,319 @@ struct drm_display_mode *intel_crtc_mode_get(struct drm_device *dev,
  	return mode;
  }
  
@@ -6137,7 +6066,7 @@ index 748ed50..8939039 100644
  	drm_crtc_cleanup(crtc);
  	kfree(intel_crtc);
  }
-@@ -3087,6 +3523,7 @@ static const struct drm_crtc_helper_funcs intel_helper_funcs = {
+@@ -3118,6 +3544,7 @@ static const struct drm_crtc_helper_funcs intel_helper_funcs = {
  	.mode_set_base = intel_pipe_set_base,
  	.prepare = intel_crtc_prepare,
  	.commit = intel_crtc_commit,
@@ -6145,7 +6074,7 @@ index 748ed50..8939039 100644
  };
  
  static const struct drm_crtc_funcs intel_crtc_funcs = {
-@@ -3122,15 +3559,10 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
+@@ -3153,15 +3580,10 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
  	intel_crtc->dpms_mode = DRM_MODE_DPMS_OFF;
  	drm_crtc_helper_add(&intel_crtc->base, &intel_helper_funcs);
  
@@ -6154,9 +6083,9 @@ index 748ed50..8939039 100644
 -	intel_crtc->mode_set.num_connectors = 0;
 -
 -	if (i915_fbpercrtc) {
+-
 +	intel_crtc->busy = false;
  
--
 -
 -	}
 +	setup_timer(&intel_crtc->idle_timer, intel_crtc_idle_timer,
@@ -6164,7 +6093,7 @@ index 748ed50..8939039 100644
  }
  
  int intel_get_pipe_from_crtc_id(struct drm_device *dev, void *data,
-@@ -3138,30 +3570,26 @@ int intel_get_pipe_from_crtc_id(struct drm_device *dev, void *data,
+@@ -3169,30 +3591,26 @@ int intel_get_pipe_from_crtc_id(struct drm_device *dev, void *data,
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	struct drm_i915_get_pipe_from_crtc_id *pipe_from_crtc_id = data;
@@ -6203,7 +6132,7 @@ index 748ed50..8939039 100644
  }
  
  struct drm_crtc *intel_get_crtc_from_pipe(struct drm_device *dev, int pipe)
-@@ -3362,8 +3790,56 @@ static const struct drm_mode_config_funcs intel_mode_funcs = {
+@@ -3393,8 +3811,56 @@ static const struct drm_mode_config_funcs intel_mode_funcs = {
  	.fb_changed = intelfb_probe,
  };
  
@@ -6260,7 +6189,7 @@ index 748ed50..8939039 100644
  	int num_pipe;
  	int i;
  
-@@ -3398,15 +3874,47 @@ void intel_modeset_init(struct drm_device *dev)
+@@ -3429,15 +3895,47 @@ void intel_modeset_init(struct drm_device *dev)
  	DRM_DEBUG("%d display pipe%s available.\n",
  		  num_pipe, num_pipe > 1 ? "s" : "");
  
@@ -6309,10 +6238,10 @@ index 748ed50..8939039 100644
  }
  
 diff --git a/drivers/gpu/drm/i915/intel_drv.h b/drivers/gpu/drm/i915/intel_drv.h
-index 25aa6fa..aa96b52 100644
+index 26a6227..dcfc53c 100644
 --- a/drivers/gpu/drm/i915/intel_drv.h
 +++ b/drivers/gpu/drm/i915/intel_drv.h
-@@ -116,9 +116,9 @@ struct intel_crtc {
+@@ -117,9 +117,9 @@ struct intel_crtc {
  	uint32_t cursor_addr;
  	u8 lut_r[256], lut_g[256], lut_b[256];
  	int dpms_mode;
@@ -6325,7 +6254,7 @@ index 25aa6fa..aa96b52 100644
  };
  
  #define to_intel_crtc(x) container_of(x, struct intel_crtc, base)
-@@ -137,6 +137,7 @@ extern void intel_hdmi_init(struct drm_device *dev, int sdvox_reg);
+@@ -138,6 +138,7 @@ extern void intel_hdmi_init(struct drm_device *dev, int sdvox_reg);
  extern bool intel_sdvo_init(struct drm_device *dev, int output_device);
  extern void intel_dvo_init(struct drm_device *dev);
  extern void intel_tv_init(struct drm_device *dev);
@@ -6333,7 +6262,7 @@ index 25aa6fa..aa96b52 100644
  extern void intel_lvds_init(struct drm_device *dev);
  extern void intel_dp_init(struct drm_device *dev, int dp_reg);
  void
-@@ -172,6 +173,8 @@ extern int intelfb_resize(struct drm_device *dev, struct drm_crtc *crtc);
+@@ -173,6 +174,8 @@ extern int intelfb_resize(struct drm_device *dev, struct drm_crtc *crtc);
  extern void intelfb_restore(void);
  extern void intel_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
  				    u16 blue, int regno);
@@ -7219,7 +7148,7 @@ index 62b8bea..c7eab72 100644
  
  /*
 diff --git a/drivers/gpu/drm/i915/intel_lvds.c b/drivers/gpu/drm/i915/intel_lvds.c
-index 8df02ef..dafc0da 100644
+index b7d091b..e18ee7a 100644
 --- a/drivers/gpu/drm/i915/intel_lvds.c
 +++ b/drivers/gpu/drm/i915/intel_lvds.c
 @@ -38,16 +38,6 @@
@@ -7239,8 +7168,8 @@ index 8df02ef..dafc0da 100644
  /* Private structure for the integrated LVDS support */
  struct intel_lvds_priv {
  	int fitting_mode;
-@@ -336,7 +326,7 @@ static bool intel_lvds_mode_fixup(struct drm_encoder *encoder,
- 	I915_WRITE(BCLRPAT_B, 0);
+@@ -342,7 +332,7 @@ static bool intel_lvds_mode_fixup(struct drm_encoder *encoder,
+ 	}
  
  	switch (lvds_priv->fitting_mode) {
 -	case DRM_MODE_SCALE_NO_SCALE:
@@ -7248,7 +7177,7 @@ index 8df02ef..dafc0da 100644
  		/*
  		 * For centered modes, we have to calculate border widths &
  		 * heights and modify the values programmed into the CRTC.
-@@ -672,9 +662,8 @@ static int intel_lvds_set_property(struct drm_connector *connector,
+@@ -677,9 +667,8 @@ static int intel_lvds_set_property(struct drm_connector *connector,
  				connector->encoder) {
  		struct drm_crtc *crtc = connector->encoder->crtc;
  		struct intel_lvds_priv *lvds_priv = intel_output->dev_priv;
@@ -7260,7 +7189,7 @@ index 8df02ef..dafc0da 100644
  			return 0;
  		}
  		if (lvds_priv->fitting_mode == value) {
-@@ -731,8 +720,7 @@ static const struct drm_encoder_funcs intel_lvds_enc_funcs = {
+@@ -736,8 +725,7 @@ static const struct drm_encoder_funcs intel_lvds_enc_funcs = {
  
  static int __init intel_no_lvds_dmi_callback(const struct dmi_system_id *id)
  {
@@ -7270,7 +7199,7 @@ index 8df02ef..dafc0da 100644
  	return 1;
  }
  
-@@ -1027,7 +1015,7 @@ out:
+@@ -1032,7 +1020,7 @@ out:
  	return;
  
  failed:
@@ -7280,7 +7209,7 @@ index 8df02ef..dafc0da 100644
  		intel_i2c_destroy(intel_output->ddc_bus);
  	drm_connector_cleanup(connector);
 diff --git a/drivers/gpu/drm/i915/intel_sdvo.c b/drivers/gpu/drm/i915/intel_sdvo.c
-index d3b74ba..0bf28ef 100644
+index 66dc1a5..0bf28ef 100644
 --- a/drivers/gpu/drm/i915/intel_sdvo.c
 +++ b/drivers/gpu/drm/i915/intel_sdvo.c
 @@ -37,7 +37,19 @@
@@ -7335,17 +7264,7 @@ index d3b74ba..0bf28ef 100644
  	/*
  	 * supported encoding mode, used to determine whether HDMI is
  	 * supported
-@@ -114,6 +127,9 @@ struct intel_sdvo_priv {
- 	/* DDC bus used by this SDVO output */
- 	uint8_t ddc_bus;
- 
-+	/* Mac mini hack -- use the same DDC as the analog connector */
-+	struct i2c_adapter *analog_ddc_bus;
-+
- 	int save_sdvo_mult;
- 	u16 save_active_outputs;
- 	struct intel_sdvo_dtd save_input_dtd_1, save_input_dtd_2;
-@@ -188,7 +204,7 @@ static bool intel_sdvo_read_byte(struct intel_output *intel_output, u8 addr,
+@@ -191,7 +204,7 @@ static bool intel_sdvo_read_byte(struct intel_output *intel_output, u8 addr,
  		return true;
  	}
  
@@ -7354,7 +7273,7 @@ index d3b74ba..0bf28ef 100644
  	return false;
  }
  
-@@ -298,7 +314,7 @@ static void intel_sdvo_debug_write(struct intel_output *intel_output, u8 cmd,
+@@ -301,7 +314,7 @@ static void intel_sdvo_debug_write(struct intel_output *intel_output, u8 cmd,
  	struct intel_sdvo_priv *sdvo_priv = intel_output->dev_priv;
  	int i;
  
@@ -7363,7 +7282,7 @@ index d3b74ba..0bf28ef 100644
  				SDVO_NAME(sdvo_priv), cmd);
  	for (i = 0; i < args_len; i++)
  		DRM_LOG_KMS("%02X ", ((u8 *)args)[i]);
-@@ -351,7 +367,7 @@ static void intel_sdvo_debug_response(struct intel_output *intel_output,
+@@ -354,7 +367,7 @@ static void intel_sdvo_debug_response(struct intel_output *intel_output,
  	struct intel_sdvo_priv *sdvo_priv = intel_output->dev_priv;
  	int i;
  
@@ -7372,7 +7291,7 @@ index d3b74ba..0bf28ef 100644
  	for (i = 0; i < response_len; i++)
  		DRM_LOG_KMS("%02X ", ((u8 *)response)[i]);
  	for (; i < 8; i++)
-@@ -668,10 +684,10 @@ static int intel_sdvo_get_clock_rate_mult(struct intel_output *intel_output)
+@@ -671,10 +684,10 @@ static int intel_sdvo_get_clock_rate_mult(struct intel_output *intel_output)
  	status = intel_sdvo_read_response(intel_output, &response, 1);
  
  	if (status != SDVO_CMD_STATUS_SUCCESS) {
@@ -7385,7 +7304,7 @@ index d3b74ba..0bf28ef 100644
  	}
  
  	return response;
-@@ -945,23 +961,28 @@ static void intel_sdvo_set_avi_infoframe(struct intel_output *output,
+@@ -948,23 +961,28 @@ static void intel_sdvo_set_avi_infoframe(struct intel_output *output,
  
  static void intel_sdvo_set_tv_format(struct intel_output *output)
  {
@@ -7429,7 +7348,7 @@ index d3b74ba..0bf28ef 100644
  }
  
  static bool intel_sdvo_mode_fixup(struct drm_encoder *encoder,
-@@ -1230,8 +1251,8 @@ static void intel_sdvo_dpms(struct drm_encoder *encoder, int mode)
+@@ -1233,8 +1251,8 @@ static void intel_sdvo_dpms(struct drm_encoder *encoder, int mode)
  		 * a given it the status is a success, we succeeded.
  		 */
  		if (status == SDVO_CMD_STATUS_SUCCESS && !input1) {
@@ -7440,7 +7359,7 @@ index d3b74ba..0bf28ef 100644
  		}
  
  		if (0)
-@@ -1326,8 +1347,8 @@ static void intel_sdvo_restore(struct drm_connector *connector)
+@@ -1329,8 +1347,8 @@ static void intel_sdvo_restore(struct drm_connector *connector)
  			intel_wait_for_vblank(dev);
  		status = intel_sdvo_get_trained_inputs(intel_output, &input1, &input2);
  		if (status == SDVO_CMD_STATUS_SUCCESS && !input1)
@@ -7451,7 +7370,7 @@ index d3b74ba..0bf28ef 100644
  	}
  
  	intel_sdvo_set_active_outputs(intel_output, sdvo_priv->save_active_outputs);
-@@ -1405,7 +1426,7 @@ int intel_sdvo_supports_hotplug(struct drm_connector *connector)
+@@ -1408,7 +1426,7 @@ int intel_sdvo_supports_hotplug(struct drm_connector *connector)
  	u8 response[2];
  	u8 status;
  	struct intel_output *intel_output;
@@ -7460,60 +7379,7 @@ index d3b74ba..0bf28ef 100644
  
  	if (!connector)
  		return 0;
-@@ -1478,6 +1499,36 @@ intel_sdvo_multifunc_encoder(struct intel_output *intel_output)
- 	return (caps > 1);
- }
- 
-+static struct drm_connector *
-+intel_find_analog_connector(struct drm_device *dev)
-+{
-+	struct drm_connector *connector;
-+	struct intel_output *intel_output;
-+
-+	list_for_each_entry(connector, &dev->mode_config.connector_list, head) {
-+		intel_output = to_intel_output(connector);
-+		if (intel_output->type == INTEL_OUTPUT_ANALOG)
-+			return connector;
-+	}
-+	return NULL;
-+}
-+
-+static int
-+intel_analog_is_connected(struct drm_device *dev)
-+{
-+	struct drm_connector *analog_connector;
-+	analog_connector = intel_find_analog_connector(dev);
-+
-+	if (!analog_connector)
-+		return false;
-+
-+	if (analog_connector->funcs->detect(analog_connector) ==
-+			connector_status_disconnected)
-+		return false;
-+
-+	return true;
-+}
-+
- enum drm_connector_status
- intel_sdvo_hdmi_sink_detect(struct drm_connector *connector, u16 response)
- {
-@@ -1488,6 +1539,15 @@ intel_sdvo_hdmi_sink_detect(struct drm_connector *connector, u16 response)
- 
- 	edid = drm_get_edid(&intel_output->base,
- 			    intel_output->ddc_bus);
-+
-+	/* when there is no edid and no monitor is connected with VGA
-+	 * port, try to use the CRT ddc to read the EDID for DVI-connector
-+	 */
-+	if (edid == NULL &&
-+	    sdvo_priv->analog_ddc_bus &&
-+	    !intel_analog_is_connected(intel_output->base.dev))
-+		edid = drm_get_edid(&intel_output->base,
-+				    sdvo_priv->analog_ddc_bus);
- 	if (edid != NULL) {
- 		/* Don't report the output as connected if it's a DVI-I
- 		 * connector with a non-digital EDID coming out.
-@@ -1516,10 +1576,11 @@ static enum drm_connector_status intel_sdvo_detect(struct drm_connector *connect
+@@ -1558,10 +1576,11 @@ static enum drm_connector_status intel_sdvo_detect(struct drm_connector *connect
  	struct intel_output *intel_output = to_intel_output(connector);
  	struct intel_sdvo_priv *sdvo_priv = intel_output->dev_priv;
  
@@ -7527,48 +7393,9 @@ index d3b74ba..0bf28ef 100644
  
  	if (status != SDVO_CMD_STATUS_SUCCESS)
  		return connector_status_unknown;
-@@ -1540,50 +1601,32 @@ static enum drm_connector_status intel_sdvo_detect(struct drm_connector *connect
- static void intel_sdvo_get_ddc_modes(struct drm_connector *connector)
- {
- 	struct intel_output *intel_output = to_intel_output(connector);
-+	struct intel_sdvo_priv *sdvo_priv = intel_output->dev_priv;
-+	int num_modes;
- 
- 	/* set the bus switch and get the modes */
--	intel_ddc_get_modes(intel_output);
-+	num_modes = intel_ddc_get_modes(intel_output);
- 
--#if 0
--	struct drm_device *dev = encoder->dev;
--	struct drm_i915_private *dev_priv = dev->dev_private;
--	/* Mac mini hack.  On this device, I get DDC through the analog, which
--	 * load-detects as disconnected.  I fail to DDC through the SDVO DDC,
--	 * but it does load-detect as connected.  So, just steal the DDC bits
--	 * from analog when we fail at finding it the right way.
-+	/*
-+	 * Mac mini hack.  On this device, the DVI-I connector shares one DDC
-+	 * link between analog and digital outputs. So, if the regular SDVO
-+	 * DDC fails, check to see if the analog output is disconnected, in
-+	 * which case we'll look there for the digital DDC data.
- 	 */
--	crt = xf86_config->output[0];
--	intel_output = crt->driver_private;
--	if (intel_output->type == I830_OUTPUT_ANALOG &&
--	    crt->funcs->detect(crt) == XF86OutputStatusDisconnected) {
--		I830I2CInit(pScrn, &intel_output->pDDCBus, GPIOA, "CRTDDC_A");
--		edid_mon = xf86OutputGetEDID(crt, intel_output->pDDCBus);
--		xf86DestroyI2CBusRec(intel_output->pDDCBus, true, true);
--	}
--	if (edid_mon) {
--		xf86OutputSetEDID(output, edid_mon);
--		modes = xf86OutputGetEDIDModes(output);
--	}
--#endif
--}
-+	if (num_modes == 0 &&
-+	    sdvo_priv->analog_ddc_bus &&
-+	    !intel_analog_is_connected(intel_output->base.dev)) {
-+		struct i2c_adapter *digital_ddc_bus;
+@@ -1610,25 +1629,6 @@ static void intel_sdvo_get_ddc_modes(struct drm_connector *connector)
+ 	}
+ }
  
 -/**
 - * This function checks the current TV format, and chooses a default if
@@ -7580,24 +7407,19 @@ index d3b74ba..0bf28ef 100644
 -	struct intel_sdvo_priv *dev_priv = output->dev_priv;
 -	struct intel_sdvo_tv_format format;
 -	uint8_t status;
-+		/* Switch to the analog ddc bus and try that
-+		 */
-+		digital_ddc_bus = intel_output->ddc_bus;
-+		intel_output->ddc_bus = sdvo_priv->analog_ddc_bus;
- 
+-
 -	intel_sdvo_write_cmd(output, SDVO_CMD_GET_TV_FORMAT, NULL, 0);
 -	status = intel_sdvo_read_response(output, &format, sizeof(format));
 -	if (status != SDVO_CMD_STATUS_SUCCESS)
 -		return;
-+		(void) intel_ddc_get_modes(intel_output);
- 
+-
 -	memcpy(&dev_priv->tv_format, &format, sizeof(format));
-+		intel_output->ddc_bus = digital_ddc_bus;
-+	}
- }
- 
+-}
+-
  /*
-@@ -1656,17 +1699,26 @@ static void intel_sdvo_get_tv_modes(struct drm_connector *connector)
+  * Set of SDVO TV modes.
+  * Note!  This is in reply order (see loop in get_tv_modes).
+@@ -1699,17 +1699,26 @@ static void intel_sdvo_get_tv_modes(struct drm_connector *connector)
  	struct intel_output *output = to_intel_output(connector);
  	struct intel_sdvo_priv *sdvo_priv = output->dev_priv;
  	struct intel_sdvo_sdtv_resolution_request tv_res;
@@ -7629,7 +7451,7 @@ index d3b74ba..0bf28ef 100644
  	intel_sdvo_write_cmd(output, SDVO_CMD_GET_SDTV_RESOLUTION_SUPPORT,
  			     &tv_res, sizeof(tv_res));
  	status = intel_sdvo_read_response(output, &reply, 3);
-@@ -1681,6 +1733,7 @@ static void intel_sdvo_get_tv_modes(struct drm_connector *connector)
+@@ -1724,6 +1733,7 @@ static void intel_sdvo_get_tv_modes(struct drm_connector *connector)
  			if (nmode)
  				drm_mode_probed_add(connector, nmode);
  		}
@@ -7637,14 +7459,7 @@ index d3b74ba..0bf28ef 100644
  }
  
  static void intel_sdvo_get_lvds_modes(struct drm_connector *connector)
-@@ -1748,17 +1801,62 @@ static void intel_sdvo_destroy(struct drm_connector *connector)
- 		intel_i2c_destroy(intel_output->i2c_bus);
- 	if (intel_output->ddc_bus)
- 		intel_i2c_destroy(intel_output->ddc_bus);
-+	if (sdvo_priv->analog_ddc_bus)
-+		intel_i2c_destroy(sdvo_priv->analog_ddc_bus);
- 
- 	if (sdvo_priv->sdvo_lvds_fixed_mode != NULL)
+@@ -1798,12 +1808,55 @@ static void intel_sdvo_destroy(struct drm_connector *connector)
  		drm_mode_destroy(connector->dev,
  				 sdvo_priv->sdvo_lvds_fixed_mode);
  
@@ -7700,7 +7515,7 @@ index d3b74ba..0bf28ef 100644
  static const struct drm_encoder_helper_funcs intel_sdvo_helper_funcs = {
  	.dpms = intel_sdvo_dpms,
  	.mode_fixup = intel_sdvo_mode_fixup,
-@@ -1773,6 +1871,7 @@ static const struct drm_connector_funcs intel_sdvo_connector_funcs = {
+@@ -1818,6 +1871,7 @@ static const struct drm_connector_funcs intel_sdvo_connector_funcs = {
  	.restore = intel_sdvo_restore,
  	.detect = intel_sdvo_detect,
  	.fill_modes = drm_helper_probe_single_connector_modes,
@@ -7708,7 +7523,7 @@ index d3b74ba..0bf28ef 100644
  	.destroy = intel_sdvo_destroy,
  };
  
-@@ -2013,10 +2112,9 @@ intel_sdvo_output_setup(struct intel_output *intel_output, uint16_t flags)
+@@ -2058,10 +2112,9 @@ intel_sdvo_output_setup(struct intel_output *intel_output, uint16_t flags)
  
  		sdvo_priv->controlled_output = 0;
  		memcpy(bytes, &sdvo_priv->caps.output_flags, 2);
@@ -7722,7 +7537,7 @@ index d3b74ba..0bf28ef 100644
  		ret = false;
  	}
  	intel_output->crtc_mask = (1 << 0) | (1 << 1);
-@@ -2029,6 +2127,55 @@ intel_sdvo_output_setup(struct intel_output *intel_output, uint16_t flags)
+@@ -2074,6 +2127,55 @@ intel_sdvo_output_setup(struct intel_output *intel_output, uint16_t flags)
  
  }
  
@@ -7778,7 +7593,7 @@ index d3b74ba..0bf28ef 100644
  bool intel_sdvo_init(struct drm_device *dev, int output_device)
  {
  	struct drm_connector *connector;
-@@ -2066,18 +2213,22 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
+@@ -2111,8 +2213,7 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
  	/* Read the regs to test if we can talk to the device */
  	for (i = 0; i < 0x40; i++) {
  		if (!intel_sdvo_read_byte(intel_output, i, &ch[i])) {
@@ -7788,24 +7603,7 @@ index d3b74ba..0bf28ef 100644
  					output_device == SDVOB ? 'B' : 'C');
  			goto err_i2c;
  		}
- 	}
- 
- 	/* setup the DDC bus. */
--	if (output_device == SDVOB)
-+	if (output_device == SDVOB) {
- 		intel_output->ddc_bus = intel_i2c_create(dev, GPIOE, "SDVOB DDC BUS");
--	else
-+		sdvo_priv->analog_ddc_bus = intel_i2c_create(dev, GPIOA,
-+						"SDVOB/VGA DDC BUS");
-+	} else {
- 		intel_output->ddc_bus = intel_i2c_create(dev, GPIOE, "SDVOC DDC BUS");
-+		sdvo_priv->analog_ddc_bus = intel_i2c_create(dev, GPIOA,
-+						"SDVOC/VGA DDC BUS");
-+	}
- 
- 	if (intel_output->ddc_bus == NULL)
- 		goto err_i2c;
-@@ -2090,7 +2241,7 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
+@@ -2140,7 +2241,7 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
  
  	if (intel_sdvo_output_setup(intel_output,
  				    sdvo_priv->caps.output_flags) != true) {
@@ -7814,7 +7612,7 @@ index d3b74ba..0bf28ef 100644
  			  output_device == SDVOB ? 'B' : 'C');
  		goto err_i2c;
  	}
-@@ -2111,6 +2262,8 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
+@@ -2161,6 +2262,8 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
  	drm_encoder_helper_add(&intel_output->enc, &intel_sdvo_helper_funcs);
  
  	drm_mode_connector_attach_encoder(&intel_output->base, &intel_output->enc);
@@ -7823,7 +7621,7 @@ index d3b74ba..0bf28ef 100644
  	drm_sysfs_connector_add(connector);
  
  	intel_sdvo_select_ddc_bus(sdvo_priv);
-@@ -2123,7 +2276,7 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
+@@ -2173,7 +2276,7 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
  					       &sdvo_priv->pixel_clock_max);
  
  
@@ -7832,17 +7630,8 @@ index d3b74ba..0bf28ef 100644
  			"clock range %dMHz - %dMHz, "
  			"input 1: %c, input 2: %c, "
  			"output 1: %c, output 2: %c\n",
-@@ -2143,6 +2296,8 @@ bool intel_sdvo_init(struct drm_device *dev, int output_device)
- 	return true;
- 
- err_i2c:
-+	if (sdvo_priv->analog_ddc_bus != NULL)
-+		intel_i2c_destroy(sdvo_priv->analog_ddc_bus);
- 	if (intel_output->ddc_bus != NULL)
- 		intel_i2c_destroy(intel_output->ddc_bus);
- 	if (intel_output->i2c_bus != NULL)
 diff --git a/drivers/gpu/drm/i915/intel_tv.c b/drivers/gpu/drm/i915/intel_tv.c
-index 2fbe13a..a6c686c 100644
+index 5b1c9e9..c64eab4 100644
 --- a/drivers/gpu/drm/i915/intel_tv.c
 +++ b/drivers/gpu/drm/i915/intel_tv.c
 @@ -1437,6 +1437,35 @@ intel_tv_detect_type (struct drm_crtc *crtc, struct intel_output *intel_output)
