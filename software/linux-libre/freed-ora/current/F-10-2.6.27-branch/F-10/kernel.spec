@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.97 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.104 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 36
+%define stable_update 37
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -803,14 +803,22 @@ Patch15000: linux-2.6-ppc64-vs-broadcom.patch
 Patch15001: linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
 Patch15002: linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
-# kvm hypercall must be from cpl0 on guest
-Patch15100: kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
-
 # appletalk: fix skb leak (CVE-2009-2903)
-Patch15200: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
+Patch15100: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
 
-# fix stack randomization (#526882)
-Patch15300: x86-increase-min_gap-to-include-randomized-stack.patch
+# Networking fixes from 2.6.31-stable:
+Patch15200: ax25-fix-possible-oops-in-ax25_make_new.patch
+Patch15210: net-unix-fix-sending-fds-in-multiple-buffers.patch
+Patch15220: sit-fix-off-by-one-in-ipip6_tunnel_get_prl.patch
+Patch15230: sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
+Patch15240: tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
+Patch15250: x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
+
+# Fix broken IrDA stack in 2.6.27 (#508874)
+Patch15300: irda-add-irda-skb-cb-qdisc-related-padding.patch
+
+# Fix ext3 file corruption in some cases
+Patch15400: jbd-fix-return-value-of-journal-start-commit.patch
 
 %endif
 
@@ -1468,14 +1476,22 @@ ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
-# kvm hypercall must be from cpl0 on guest (CVE-2009-3290)
-ApplyPatch kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
-
 # appletalk: fix skb leak (CVE-2009-2903)
 ApplyPatch appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
 
-# backport of stack randomization fix from 2.6.31.2
-ApplyPatch x86-increase-min_gap-to-include-randomized-stack.patch
+# Networking fixes from 2.6.31-stable:
+ApplyPatch ax25-fix-possible-oops-in-ax25_make_new.patch
+ApplyPatch net-unix-fix-sending-fds-in-multiple-buffers.patch
+ApplyPatch sit-fix-off-by-one-in-ipip6_tunnel_get_prl.patch
+ApplyPatch sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
+ApplyPatch tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
+ApplyPatch x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
+
+# Fix broken IrDA stack in 2.6.27 (#508874)
+ApplyPatch irda-add-irda-skb-cb-qdisc-related-padding.patch
+
+# Fix ext3 file corruption in some cases
+ApplyPatch jbd-fix-return-value-of-journal-start-commit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2052,6 +2068,42 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Oct 12 2009  Alexandre Oliva <lxoliva@fsfla.org> -libre.170.2.104
+- Adjusted patch-libre-2.6.27.37.
+
+* Mon Oct 12 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.104
+- Add jbd fix for file corruption (the jbd2 version is already in.)
+
+* Mon Oct 12 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.103
+- Linux 2.6.27.37
+
+* Sun Oct 11 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.102.rc1
+- Fix broken IrDA stack in 2.6.27 (#508874)
+
+* Sun Oct 11 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.101.rc1
+- Networking fixes from 2.6.31-stable:
+  ax25-fix-possible-oops-in-ax25_make_new.patch
+  net-unix-fix-sending-fds-in-multiple-buffers.patch
+  sit-fix-off-by-one-in-ipip6_tunnel_get_prl.patch
+  sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
+  tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
+  x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
+
+* Sun Oct 11 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.100.rc1
+- Linux 2.6.27.37-rc1
+- Drop merged patches:
+  kvm-x86-disallow-hypercalls-for-guest-callers-in-rings-0.patch
+  x86-increase-min_gap-to-include-randomized-stack.patch
+  ecryptfs-prevent-lower-dentry-from-going-negative-during-unlink.patch
+  x86-dont-leak-64-bit-kernel-register-values.patch
+  x86-streamline-32-bit-syscall-entry-code.patch
+
+* Wed Oct 07 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.36-170.2.99
+- x86: fix leakage of kernel 64-bit registers to 32-bit tasks.
+
+* Wed Oct 07 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.36-170.2.98
+- eCryptfs: Prevent lower dentry from going negative during unlink (CVE-2009-2908)
+
 * Mon Oct 05 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.27.36-170.2.97
 - Linux 2.6.27.36
 
