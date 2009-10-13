@@ -163,7 +163,7 @@ D/scripts////
 /mirrors/1.5/dummy timestamp from new-entry//Tkernel-2_6_27_37-170_2_104_fc10
 /net-unix-fix-sending-fds-in-multiple-buffers.patch/1.1.2.1/Sun Oct 11 22:08:53 2009/-kb/Tkernel-2_6_27_37-170_2_104_fc10
 /nvidia-agp.patch/1.1/Wed Apr  8 06:18:47 2009/-kb/Tkernel-2_6_27_37-170_2_104_fc10
-/patch-2.6.27.37.bz2.sign/1.1.2.1/Tue Oct 13 00:36:58 2009//Tkernel-2_6_27_37-170_2_104_fc10
+/patch-2.6.27.37.bz2.sign/-1.1.2.1/Tue Oct 13 00:36:58 2009//Tkernel-2_6_27_37-170_2_104_fc10
 /print-dmi-hw-name-in-warnings.patch/1.1.2.2/Wed Apr  8 06:18:50 2009/-kb/Tkernel-2_6_27_37-170_2_104_fc10
 /sit-fix-off-by-one-in-ipip6_tunnel_get_prl.patch/1.1.2.1/Sun Oct 11 22:08:53 2009/-kb/Tkernel-2_6_27_37-170_2_104_fc10
 /sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch/1.1.2.1/Sun Oct 11 22:08:53 2009/-kb/Tkernel-2_6_27_37-170_2_104_fc10
