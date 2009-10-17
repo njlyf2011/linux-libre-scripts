@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1853 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1870 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -125,7 +125,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %endif
@@ -508,12 +508,7 @@ BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
 BuildRequires: net-tools
-%if %{with_doc}
-BuildRequires: xmlto
-%if %{with_perf}
-BuildRequires: asciidoc
-%endif
-%endif
+BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
 %endif
@@ -690,9 +685,6 @@ Patch671: linux-2.6-ahci-export-capabilities.patch
 
 Patch687: linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
-Patch700: linux-2.6.31-nx-data.patch
-Patch701: linux-2.6.31-modules-ro-nx.patch
-
 Patch800: linux-2.6-crash-driver.patch
 
 Patch900: linux-2.6-pci-cacheline-sizing.patch
@@ -751,6 +743,7 @@ Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
 Patch3060: linux-2.6-nfs4-ver4opt.patch
+Patch3061: linux-2.6-nfs4-callback-hidden.patch
 
 # VIA Nano / VX8xx updates
 Patch11010: via-hwmon-temp-sensor.patch
@@ -766,6 +759,21 @@ Patch12014: linux-2.6-selinux-module-load-perms.patch
 
 # Raid10 lockdep fix
 Patch14002: linux-2.6-raidlockdep.patch
+
+# make perf counter API available to userspace (#527264)
+Patch14010: perf-make-perf-counter-h-available-to-userspace.patch
+
+# Fix 2.6.31 regression that caused device failures with ACPI enabled.
+Patch14100: pci-increase-alignment-to-make-more-space.patch
+
+# fix resource counter issues on *big* machines
+Patch14101: improve-resource-counter-scalability.patch
+
+# fix boot hang on some systems
+Patch14200: acpi-revert-attach-device-to-handle-early.patch
+
+# disable 64-bit DMA on SB600 SATA controllers
+Patch14300: ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
 
 %endif
 
@@ -1269,6 +1277,7 @@ ApplyPatch linux-2.6-execshield.patch
 # NFSv4
 ApplyPatch linux-2.6-nfsd4-proots.patch
 ApplyPatch linux-2.6-nfs4-ver4opt.patch
+ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
@@ -1356,12 +1365,6 @@ ApplyPatch linux-2.6-ahci-export-capabilities.patch
 # iwlagn quiet
 ApplyPatch linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
-# Mark kernel data as NX
-ApplyPatch linux-2.6.31-nx-data.patch
-# Apply NX/RO to modules
-# breaks ftrace NOP replacement
-#ApplyPatch linux-2.6.31-modules-ro-nx.patch
-
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
@@ -1437,6 +1440,20 @@ ApplyPatch linux-2.6-selinux-module-load-perms.patch
 
 # Raid10 lockdep fix
 ApplyPatch linux-2.6-raidlockdep.patch
+
+# make perf counter API available to userspace (#527264)
+ApplyPatch perf-make-perf-counter-h-available-to-userspace.patch
+
+# Fix 2.6.31 regression that caused device failures with ACPI enabled.
+ApplyPatch pci-increase-alignment-to-make-more-space.patch
+
+ApplyPatch improve-resource-counter-scalability.patch
+
+# fix boot hang on some systems
+ApplyPatch acpi-revert-attach-device-to-handle-early.patch
+
+# disable 64-bit DMA on SB600 SATA controllers
+ApplyPatch ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1527,11 +1544,6 @@ BuildKernel() {
 
     # make sure EXTRAVERSION says what we want it to say
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
-
-    cat >> Makefile <<\EOF
-# XXX temp workaround for https://bugzilla.redhat.com/show_bug.cgi?id=521991
-KBUILD_CFLAGS += $(call cc-option,-fno-var-tracking-assignments)
-EOF
 
     # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -1690,7 +1702,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register'
+    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -1759,17 +1771,19 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
-
-%if %{with_perf}
-make %{?_smp_mflags} man || %{doc_build_fail}
-%endif
+# XXX nix %{?_smp_mflags} here, buggy Documentation/*/Makefile!
+make htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
 find Documentation -type d | xargs chmod u+w
 %endif
 
+%if %{with_perf}
+pushd tools/perf
+make %{?_smp_mflags} man || %{doc_build_fail}
+popd
+%endif
 
 ###
 ### Special hacks for debuginfo subpackages.
@@ -1813,6 +1827,7 @@ mkdir -p $man9dir
 find Documentation/DocBook/man -name '*.9.gz' -print0 |
 xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
 ls $man9dir | grep -q '' || > $man9dir/BROKEN
+%endif # with_doc
 
 # perf docs
 %if %{with_perf}
@@ -1827,9 +1842,7 @@ for d in *.1; do
  gzip $d;
 done
 popd
-
-%endif
-%endif
+%endif # with_perf
 
 # perf shell wrapper
 %if %{with_perf}
@@ -2013,9 +2026,7 @@ fi
 %defattr(-,root,root)
 %{_datadir}/doc/perf
 /usr/sbin/perf
-%if %{with_doc}
 %{_datadir}/man/man1/*
-%endif
 %endif
 
 # This is %{image_install_path} on an arch where that includes ELF files,
@@ -2094,8 +2105,71 @@ fi
 # and build.
 
 %changelog
-* Sat Oct 10 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.67
-* Deblobbed and adjusted patch-libre-2.6.31.3.
+* Fri Oct 16 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.84
+- Deblobbed and adjusted patch-libre-2.6.31.4.
+
+* Fri Oct 16 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.4-84
+- nouveau: more vbios opcodes, minor fixes, hopeful fix for rh#529292
+
+* Wed Oct 14 2009 Roland McGrath <roland@redhat.com> 2.6.31.4-83
+- Remove work-around for gcc bug #521991, now fixed.
+- Build *docs non-parallel, working around kernel's makefile bugs.
+
+* Wed Oct 14 2009 Peter Jones <pjones@redhat.com>
+- Add scsi_register_device_handler to modules.block's symbol list so
+  we'll have scsi device handlers in installer images.
+
+* Tue Oct 13 2009 Steve Dickson <steved@redhat.com> 2.6.31.4-81
+- Fixed hang during NFS installs (bz 528537)
+
+* Tue Oct 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.4-80
+- Disable 64-bit DMA on SB600 SATA controllers.
+
+* Tue Oct 13 2009 Kyle McMartin <kyle@redhat.com>
+- Always build perf docs, regardless of whether we build kernel-doc.
+  Seems rather unfair to not ship the manpages half the time.
+  Also, drop BuildRequires %if when not with_doc, the rules about %if
+  there are f*!&^ing complicated.
+
+* Mon Oct 12 2009 Kyle McMartin <kyle@redhat.com>
+- Build the perf manpages properly.
+
+* Mon Oct 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.4-77
+- Fix boot hang with ACPI on some systems.
+
+* Mon Oct 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.4-76
+- Linux 2.6.31.4
+
+* Mon Oct 12 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.4-75.rc2
+- improve-resource-counter-scalability.patch: Fix scalability issues
+  on big machines, requested by prarit.
+
+* Mon Oct 12 2009 Jarod Wilson <jarod@redhat.com>
+- Fix irq status check bugs in lirc_ene0100
+
+* Mon Oct 12 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix 2.6.31 regression that caused device failures with ACPI enabled.
+
+* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.31.4-rc2
+- Drop merged patch: linux-2.6-frace-fixes.patch
+
+* Sat Oct 10 2009 Chuck Ebbert <cebbert@redhat.com>
+- Make performance counter API available to userspace programs (#527264)
+
+* Sat Oct 10 2009 Dave Jones <davej@redhat.com>
+- Drop the NX kernel data patch for now. Causes no-boot on some systems.
+
+* Fri Oct 09 2009 Dave Jones <davej@redhat.com>
+- Backport two critical ftrace fixes.
+  ftrace: check for failure for all conversions
+  tracing: correct module boundaries for ftrace_release
+
+* Fri Oct 09 2009 Jarod Wilson <jarod@redhat.com>
+- Build docs sub-package again
+
+* Fri Oct 09 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.67 Sat Oct 10
+- Deblobbed and adjusted patch-libre-2.6.31.3.
 
 * Thu Oct 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.3-67
 - Linux 2.6.31.3
