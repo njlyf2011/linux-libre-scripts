@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1757 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1769 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -800,6 +800,40 @@ Patch15300: x86-increase-min_gap-to-include-randomized-stack.patch
 # x86: Don't leak 64-bit reg contents to 32-bit tasks.
 Patch15400: x86-dont-leak-64-bit-kernel-register-values.patch
 
+# critical ftrace fixes
+Patch15500: ftrace-use-module-notifier-for-function-tracer.patch
+Patch15510: ftrace-check-for-failure-for-all-conversions.patch
+Patch15520: tracing-correct-module-boundaries-for-ftrace_release.patch
+
+# fix boot hang on some systems
+Patch15600: acpi-revert-attach-device-to-handle-early.patch
+
+# networking fixes from 2.6.31-stable
+Patch15700: net-fix-wrong-sizeof.patch
+Patch15710: net-unix-fix-sending-fds-in-multiple-buffers.patch
+Patch15720: sit-fix-off-by-one-in-ipip6_tunnel_get_prl.patch
+Patch15730: sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
+Patch15740: smsc95xx-fix-transmission-where-zlp-is-expected.patch
+Patch15750: tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
+Patch15760: x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
+
+# libata fix from 2.6.31.4 (#524756)
+Patch15800: libata-fix-incorrect-link-online-check-during-probe.patch
+
+# ax25 security fix (cve-2009-2909)
+Patch15900: ax25-fix-possible-oops-in-ax25_make_new.patch
+
+# netlink security fix (CVE-2009-3612)
+Patch16000: netlink-fix-typo-in-initialization.patch
+
+Patch16200: sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
+
+# fix mouse and keyboard detection (#522126)
+Patch16300: input-i8042-bypass-aux-irq-delivery-test-on-laptops.patch
+Patch16310: input-i8042-try-disabling-and-re-enabling-aux-port-at-close.patch
+
+# fix null deref in r128
+Patch16400: drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
 
 %endif
 
@@ -1502,6 +1536,42 @@ ApplyPatch x86-increase-min_gap-to-include-randomized-stack.patch
 
 ApplyPatch x86-dont-leak-64-bit-kernel-register-values.patch
 
+# critical ftrace fixes
+ApplyPatch ftrace-use-module-notifier-for-function-tracer.patch
+ApplyPatch ftrace-check-for-failure-for-all-conversions.patch
+ApplyPatch tracing-correct-module-boundaries-for-ftrace_release.patch
+
+# fix boot hang on some systems
+ApplyPatch acpi-revert-attach-device-to-handle-early.patch
+
+# networking fixes from 2.6.31-stable
+ApplyPatch net-fix-wrong-sizeof.patch
+ApplyPatch net-unix-fix-sending-fds-in-multiple-buffers.patch
+ApplyPatch sit-fix-off-by-one-in-ipip6_tunnel_get_prl.patch
+ApplyPatch sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
+ApplyPatch smsc95xx-fix-transmission-where-zlp-is-expected.patch
+ApplyPatch tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
+ApplyPatch x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
+
+# libata fix from 2.6.31.4 (#524756)
+ApplyPatch libata-fix-incorrect-link-online-check-during-probe.patch
+
+# ax25 security fix (cve-2009-2909)
+ApplyPatch ax25-fix-possible-oops-in-ax25_make_new.patch
+
+# netlink security fix (CVE-2009-3612)
+ApplyPatch netlink-fix-typo-in-initialization.patch
+
+# fix wakeup latency
+ApplyPatch sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
+
+# fix mouse and keyboard detection (#522126)
+ApplyPatch input-i8042-bypass-aux-irq-delivery-test-on-laptops.patch
+ApplyPatch input-i8042-try-disabling-and-re-enabling-aux-port-at-close.patch
+
+# fix null deref in r128
+ApplyPatch drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2090,6 +2160,44 @@ fi
 # and build.
 
 %changelog
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-90
+- Fix null deref in r128 (F10#487546)
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-89
+- Keyboard and mouse fixes from 2.6.32 (#522126)
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-88
+- Scheduler wakeup patch, fixes high latency on wakeup
+  (sched-update-the-clock-of-runqueue-select-task-rq-selected.patch)
+
+* Fri Oct 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-87
+- Fix uninitialized data leak in netlink (CVE-2009-3612)
+
+* Thu Oct 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-86
+- AX.25 security fix (CVE-2009-2909)
+
+* Thu Oct 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-85
+- Disable CONFIG_USB_STORAGE_CYPRESS_ATACB because it causes failure
+  to boot from USB disks using Cypress bridges (#524998)
+
+* Tue Oct 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-84
+- Copy libata drive detection fix from 2.6.31.4 (#524756)
+
+* Tue Oct 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-83
+- Networking fixes taken from 2.6.31-stable
+
+* Tue Oct 13 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-82
+- Fix boot hang with ACPI on some systems.
+
+* Mon Oct 12 2009  Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-81
+- Critical ftrace fixes:
+  ftrace-use-module-notifier-for-function-tracer.patch
+  ftrace-check-for-failure-for-all-conversions.patch
+  tracing-correct-module-boundaries-for-ftrace_release.patch
+
+* Thu Oct 08 2009 Ben Skeggs <bskeggs@redhat.com>     2.6.30.9-80
+- ppc: compile nvidiafb as a module only, nvidiafb+nouveau = bang! (rh#491308)
+
 * Wed Oct 07 2009 Dave Jones <davej@redhat.com>       2.6.30.9-78
 - Disable IRQSOFF tracer. (Adds unnecessary overhead when unused)
 
