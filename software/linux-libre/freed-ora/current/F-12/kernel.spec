@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1870 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1882 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -143,7 +143,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -628,6 +628,8 @@ Patch22: linux-2.6-utrace.patch
 
 Patch30: sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
 
+Patch31: disable-stackprotector-all.patch
+
 Patch41: linux-2.6-sysrq-c.patch
 
 # Intel IOMMU fixes/workarounds
@@ -716,6 +718,7 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
+Patch1827: drm-fix-palette.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -740,6 +743,9 @@ Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 
 # fs fixes
 
+#btrfs
+Patch3000: linux-2.6-btrfs-upstream.patch
+
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
 Patch3060: linux-2.6-nfs4-ver4opt.patch
@@ -757,9 +763,6 @@ Patch12014: linux-2.6-selinux-module-load-perms.patch
 
 # patches headed for -stable
 
-# Raid10 lockdep fix
-Patch14002: linux-2.6-raidlockdep.patch
-
 # make perf counter API available to userspace (#527264)
 Patch14010: perf-make-perf-counter-h-available-to-userspace.patch
 
@@ -774,6 +777,22 @@ Patch14200: acpi-revert-attach-device-to-handle-early.patch
 
 # disable 64-bit DMA on SB600 SATA controllers
 Patch14300: ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
+
+# fix ACPI boot hang/crash (#513680)
+Patch14400: acpi-pci-fix-null-pointer-dereference-in-acpi-get-pci-dev.patch
+
+# fix local DoS connecting to shutdown unix socket (#529626)
+Patch14401: af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+
+# Fix exploitable OOPS in keyring code. (CVE-2009-3624)
+Patch14410: keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
+
+# Fix kernel memory leak to userspace. (CVE-2009-3612)
+Patch14411: netlink-fix-typo-in-initialization.patch
+
+# fix perf for sysprof
+Patch14420: perf-events-fix-swevent-hrtimer-sampling.patch
+Patch14421: perf-events-dont-generate-events-for-the-idle-task.patch
 
 %endif
 
@@ -1219,6 +1238,7 @@ ApplyPatch linux-2.6-utrace.patch
 
 ApplyPatch sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
 
+ApplyPatch disable-stackprotector-all.patch
 # enable sysrq-c on all kernels, not only kexec
 #ApplyPatch linux-2.6-sysrq-c.patch
 
@@ -1271,6 +1291,7 @@ ApplyPatch linux-2.6-execshield.patch
 # xfs
 
 # btrfs
+ApplyPatch linux-2.6-btrfs-upstream.patch
 
 # eCryptfs
 
@@ -1412,6 +1433,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
+ApplyPatch drm-fix-palette.patch
 
 # VGA arb + drm
 ApplyPatch linux-2.6-vga-arb.patch
@@ -1438,9 +1460,6 @@ ApplyPatch linux-2.6-selinux-module-load-perms.patch
 
 # patches headed for -stable
 
-# Raid10 lockdep fix
-ApplyPatch linux-2.6-raidlockdep.patch
-
 # make perf counter API available to userspace (#527264)
 ApplyPatch perf-make-perf-counter-h-available-to-userspace.patch
 
@@ -1454,6 +1473,22 @@ ApplyPatch acpi-revert-attach-device-to-handle-early.patch
 
 # disable 64-bit DMA on SB600 SATA controllers
 ApplyPatch ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
+
+# fix ACPI boot hang/crash (#513680)
+ApplyPatch acpi-pci-fix-null-pointer-dereference-in-acpi-get-pci-dev.patch
+
+# fix for local DoS on AF_UNIX
+ApplyPatch af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+
+# Fix exploitable OOPS in keyring code. (CVE-2009-3624)
+ApplyPatch keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
+
+# Fix kernel memory leak to userspace. (CVE-2009-3612)
+ApplyPatch netlink-fix-typo-in-initialization.patch
+
+# fix perf for sysprof
+ApplyPatch perf-events-fix-swevent-hrtimer-sampling.patch
+ApplyPatch perf-events-dont-generate-events-for-the-idle-task.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2105,6 +2140,52 @@ fi
 # and build.
 
 %changelog
+* Mon Oct 26 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.96
+- Deblobbed and adjusted patch-libre-2.6.31.5.
+
+* Fri Oct 23 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.5-96
+- Bump NR_CPUS to 256 on x86_64.
+- Add two backports (ugh, just had to go renaming perf counters to events...)
+  for fixing sysprof with perf.
+
+* Fri Oct 23 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-95
+- re enable MSI
+
+* Fri Oct 23 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-94
+- disable debug + stackprotector
+
+* Fri Oct 23 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.31.5
+
+* Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix exploitable OOPS in keyring code. (CVE-2009-3624)
+- Fix kernel memory leak to userspace. (CVE-2009-3612)
+
+* Thu Oct 22 2009 Dave Airlie <airlied@redhat.com>  2.6.31.5-91.rc1
+- kms: fix palette
+
+* Wed Oct 21 2009 Chuck Ebbert <cebbert@redhat.com>
+- Disable powersave by default for AC97 audio devices. (#524414)
+
+* Wed Oct 21 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.31.5-rc1
+- Remove the merged HP DC7900 workaround from iommu-updates patch.
+- Drop merged patch:
+  linux-2.6-raidlockdep.patch
+
+* Mon Oct 19 2009 Kyle McMartin <kyle@redhat.com>
+- af_unix-fix-deadlock-connecting-to-shutdown-socket.patch: fix for
+  rhbz#529626.
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>
+- Replace linux-2.6-bluetooth-autosuspend.diff with upstream version.
+
+* Fri Oct 16 2009 Josef Bacik <josef@toxicpanda.com>
+- Update btrfs to latest upstream
+
+* Fri Oct 16 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.4-85
+- Fix another ACPI boot hang (#513680)
+
 * Fri Oct 16 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.84
 - Deblobbed and adjusted patch-libre-2.6.31.4.
 
