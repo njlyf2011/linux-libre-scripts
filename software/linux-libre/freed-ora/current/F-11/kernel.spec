@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1769 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1773 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -707,6 +707,7 @@ Patch1822: drm-dont-frob-i2c.patch
 Patch1824: drm-radeon-cs-oops-fix.patch
 Patch1825: drm-pnp-add-resource-range-checker.patch
 Patch1826: drm-i915-enable-mchbar.patch
+Patch1827: shut-up-LOCK_TEST_WITH_RETURN.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -834,6 +835,15 @@ Patch16310: input-i8042-try-disabling-and-re-enabling-aux-port-at-close.patch
 
 # fix null deref in r128
 Patch16400: drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
+
+# rhbz#529626
+Patch16401: af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+
+# Fix exploitable oops in keyring code
+Patch16420: keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
+
+# Fix overflow in KVM cpuid code
+Patch16430: kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
 
 %endif
 
@@ -1471,6 +1481,7 @@ ApplyPatch drm-dont-frob-i2c.patch
 ApplyPatch drm-radeon-cs-oops-fix.patch
 ApplyPatch drm-pnp-add-resource-range-checker.patch
 ApplyPatch drm-i915-enable-mchbar.patch
+ApplyPatch shut-up-LOCK_TEST_WITH_RETURN.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1571,6 +1582,15 @@ ApplyPatch input-i8042-try-disabling-and-re-enabling-aux-port-at-close.patch
 
 # fix null deref in r128
 ApplyPatch drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
+
+# rhbz#529626
+ApplyPatch af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+
+# Fix exploitable oops in keyring code.
+ApplyPatch keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
+
+# Fix overflow in KVM cpuid code
+ApplyPatch kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2160,6 +2180,20 @@ fi
 # and build.
 
 %changelog
+* Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-94
+- Fix overflow in KVM cpuid code.
+
+* Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-93
+- Fix exploitable oops in keyring code (CVE-2009-3624)
+
+* Wed Oct 21 2009 Kyle McMartin <kyle@redhat.com>
+- shut-up-LOCK_TEST_WITH_RETURN.patch: sort out #445331... or paper bag
+  over it for now until the lock warnings can be killed.
+
+* Mon Oct 19 2009 Kyle McMartin <kyle@redhat.com>
+- af_unix-fix-deadlock-connecting-to-shutdown-socket.patch: fix for
+  rhbz#529626 local DoS.
+
 * Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-90
 - Fix null deref in r128 (F10#487546)
 
