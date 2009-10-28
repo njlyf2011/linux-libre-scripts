@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1882 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1883 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -709,16 +709,15 @@ Patch1585: linux-2.6-xen-increase-device-connection-timeout.patch
 Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # nouveau + drm fixes
-Patch1812: drm-next-d4ac6a05.patch
+Patch1812: drm-next-3e5cb98d.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
-Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
-Patch1827: drm-fix-palette.patch
+Patch1827: drm-disable-r600-aspm.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -1422,18 +1421,17 @@ ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next-d4ac6a05.patch
+ApplyPatch drm-next-3e5cb98d.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
 #ApplyPatch drm-radeon-pm.patch
 ApplyPatch drm-i915-resume-force-mode.patch
-ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
-ApplyPatch drm-fix-palette.patch
+ApplyPatch drm-disable-r600-aspm.patch
 
 # VGA arb + drm
 ApplyPatch linux-2.6-vga-arb.patch
@@ -2140,6 +2138,14 @@ fi
 # and build.
 
 %changelog
+* Tue Oct 27 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.97
+- Deblobbed and adjusted drm-next-3e5cb98d.patch.
+
+* Mon Oct 26 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-97
+- drm: rebase to drm-next, drop palette fix, merged upstream
+- drm-intel-big-hammer.patch: drop, proper fix in 2.6.31.5
+- drm-disable-r600-aspm.patch: test patch to disable aspm on r600/r700 for now
+
 * Mon Oct 26 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.96
 - Deblobbed and adjusted patch-libre-2.6.31.5.
 
