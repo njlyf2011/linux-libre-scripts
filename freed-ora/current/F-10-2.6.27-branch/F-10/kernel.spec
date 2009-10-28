@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.104 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.111 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 37
+%define stable_update 38
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -820,6 +820,18 @@ Patch15300: irda-add-irda-skb-cb-qdisc-related-padding.patch
 # Fix ext3 file corruption in some cases
 Patch15400: jbd-fix-return-value-of-journal-start-commit.patch
 
+# netlink security fix (CVE-2009-3612)
+Patch16100: netlink-fix-typo-in-initialization.patch
+
+# fix null deref in r128
+Patch16200: drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
+
+# rhbz#529626
+Patch16201: af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+
+# Fix overflow in KVM cpuid code
+Patch16230: kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1493,6 +1505,18 @@ ApplyPatch irda-add-irda-skb-cb-qdisc-related-padding.patch
 # Fix ext3 file corruption in some cases
 ApplyPatch jbd-fix-return-value-of-journal-start-commit.patch
 
+# netlink security fix (CVE-2009-3612)
+ApplyPatch netlink-fix-typo-in-initialization.patch
+
+# fix null deref in r128
+ApplyPatch drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
+
+# rhbz#529626
+ApplyPatch af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+
+# Fix overflow in KVM cpuid code
+ApplyPatch kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2068,6 +2092,28 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Mon Oct 26 2009  Alexandre Oliva <lxoliva@fsfla.org> -libre.170.2.111
+- Adjusted patch-libre-2.6.27.38.
+
+* Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.111
+- Linux 2.6.27.38
+
+* Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.110.rc1
+- Fix overflow in KVM cpuid code.
+
+* Mon Oct 19 2009 Kyle McMartin <kyle@redhat.com>
+- af_unix-fix-deadlock-connecting-to-shutdown-socket.patch: fix for
+  rhbz#529626.
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.108.rc1
+- Linux 2.6.27.38-rc1
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.107
+- Fix null deref in r128 (#487546)
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.105
+- Fix uninitialized data leak in netlink (CVE-2009-3612)
+
 * Mon Oct 12 2009  Alexandre Oliva <lxoliva@fsfla.org> -libre.170.2.104
 - Adjusted patch-libre-2.6.27.37.
 
