@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1883 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1890 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -709,7 +709,8 @@ Patch1585: linux-2.6-xen-increase-device-connection-timeout.patch
 Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # nouveau + drm fixes
-Patch1812: drm-next-3e5cb98d.patch
+Patch1810: kms-offb-handoff.patch
+Patch1812: drm-next-ea1495a6.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -718,6 +719,7 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
 Patch1827: drm-disable-r600-aspm.patch
+Patch1828: drm-radeon-kms-arbiter-return-ignore.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -792,6 +794,9 @@ Patch14411: netlink-fix-typo-in-initialization.patch
 # fix perf for sysprof
 Patch14420: perf-events-fix-swevent-hrtimer-sampling.patch
 Patch14421: perf-events-dont-generate-events-for-the-idle-task.patch
+
+# Fix oops in padlock
+Patch14430: crypto-via-padlock-fix-nano-aes.patch
 
 %endif
 
@@ -1421,7 +1426,8 @@ ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next-3e5cb98d.patch
+ApplyPatch kms-offb-handoff.patch
+ApplyPatch drm-next-ea1495a6.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1436,6 +1442,7 @@ ApplyPatch drm-disable-r600-aspm.patch
 # VGA arb + drm
 ApplyPatch linux-2.6-vga-arb.patch
 ApplyPatch drm-vga-arb.patch
+ApplyPatch drm-radeon-kms-arbiter-return-ignore.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1487,6 +1494,9 @@ ApplyPatch netlink-fix-typo-in-initialization.patch
 # fix perf for sysprof
 ApplyPatch perf-events-fix-swevent-hrtimer-sampling.patch
 ApplyPatch perf-events-dont-generate-events-for-the-idle-task.patch
+
+# Fix oops in padlock
+ApplyPatch crypto-via-padlock-fix-nano-aes.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1616,9 +1626,11 @@ BuildKernel() {
     install -m 644 .config $RPM_BUILD_ROOT/boot/config-$KernelVer
     install -m 644 System.map $RPM_BUILD_ROOT/boot/System.map-$KernelVer
 %if %{with_dracut}
-    touch $RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img
+    # We estimate the size of the initramfs because rpm needs to take this size
+    # into consideration when performing disk space calculations. (See bz #530778)
+    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img bs=1M count=20
 %else
-    touch $RPM_BUILD_ROOT/boot/initrd-$KernelVer.img
+    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initrd-$KernelVer.img bs=1M count=5
 %endif
     if [ -f arch/$Arch/boot/zImage.stub ]; then
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
@@ -2138,7 +2150,32 @@ fi
 # and build.
 
 %changelog
-* Tue Oct 27 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.97
+* Wed Oct 28 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.104
+- Deblobbed and adjusted drm-next-ea1495a6.patch and drm-nouveau.patch.
+
+* Wed Oct 28 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-104
+- drm-next-ea1495a6.patch: fix rs400 resume on my test box
+
+* Wed Oct 28 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-103
+- drm-next-fc7f7119.patch: fix oops in SS code, fix multi-card, dvo.
+- drm-radeon-kms-arbiter-return-ignore.patch: fix arbiter for non-VGA display
+
+* Tue Oct 27 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix oops in VIA padlock-aes code.
+
+* Tue Oct 27 2009 Dave Airlie <airlied@redhat.com>
+- kms: add offb handoff patch for ppc to work
+
+* Tue Oct 27 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: misc fixes, very initial NVA8 work
+
+* Tue Oct 27 2009 Dave Airlie <airlied@redhat.com>
+- fix dd command lines
+
+* Mon Oct 26 2009 Dave Jones <davej@redhat.com>
+- Make a 20MB initramfs file so rpm gets its diskspace calculations right. (#530778)
+
+* Mon Oct 26 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.97 Tue Oct 27
 - Deblobbed and adjusted drm-next-3e5cb98d.patch.
 
 * Mon Oct 26 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-97
