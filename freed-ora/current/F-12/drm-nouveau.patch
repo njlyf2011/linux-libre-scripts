@@ -1781,10 +1781,10 @@ index 0000000..20564f8
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..1c13f5f
+index 0000000..c3b091f
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -0,0 +1,5709 @@
+@@ -0,0 +1,5713 @@
 +/*
 + * Copyright 2005-2006 Erik Waling
 + * Copyright 2006 Stephane Marchesin
@@ -7456,13 +7456,17 @@ index 0000000..1c13f5f
 +	bios->execute = false;
 +
 +	/* ... unless card isn't POSTed already */
-+	if (dev_priv->card_type == NV_50) {
-+		if (NVReadVgaCrtc(dev, 0, 0x00) == 0 &&
-+		    NVReadVgaCrtc(dev, 0, 0x1a) == 0) {
-+			NV_INFO(dev, "Adaptor not initialised, "
-+				     "running VBIOS init tables\n");
-+			bios->execute = true;
++	if (dev_priv->card_type >= NV_10 &&
++	    NVReadVgaCrtc(dev, 0, 0x00) == 0 &&
++	    NVReadVgaCrtc(dev, 0, 0x1a) == 0) {
++		NV_INFO(dev, "Adaptor not initialised\n");
++		if (dev_priv->card_type < NV_50) {
++			NV_ERROR(dev, "Unable to POST this chipset\n");
++			return -ENODEV;
 +		}
++
++		NV_INFO(dev, "Running VBIOS init tables\n");
++		bios->execute = true;
 +	}
 +
 +	bios_wr32(bios, NV_PEXTDEV_BOOT_0, saved_nv_pextdev_boot_0);
@@ -7738,10 +7742,10 @@ index 0000000..1ffda97
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bo.c b/drivers/gpu/drm/nouveau/nouveau_bo.c
 new file mode 100644
-index 0000000..639d24b
+index 0000000..01293ab
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bo.c
-@@ -0,0 +1,620 @@
+@@ -0,0 +1,633 @@
 +/*
 + * Copyright 2007 Dave Airlied
 + * All Rights Reserved.
@@ -7818,7 +7822,7 @@ index 0000000..639d24b
 +		flags |= TTM_PL_FLAG_PRIV0;
 +
 +	/*
-+	 * Some of the tile_flags have a periodic structure of 24*4096 bytes,
++	 * Some of the tile_flags have a periodic structure of N*4096 bytes,
 +	 * align to to that as well as the page size. Overallocate memory to
 +	 * avoid corruption of other buffer objects.
 +	 */
@@ -7827,8 +7831,21 @@ index 0000000..639d24b
 +	case 0x2800:
 +	case 0x4800:
 +	case 0x7a00:
-+		size += 6 * 4096;
-+		align = 2 * 24 * 4096;
++		if (dev_priv->chipset >= 0xA0) {
++			/* This is guesswork.*/
++			size += 6 * 4096;
++			/* Guesswork as well, therefore not in units of 4096. */
++			align = 2 * 65536;
++		} else if (dev_priv->chipset >= 0x90) {
++			size += 4 * 4096;
++			/* Somewhat useless being smaller than a page. */
++			align = 8 * 4096;
++		} else {
++			size += 6 * 4096;
++			/* 24 * 4096 is the actual alignment requirement,
++			 * but we must also align to page size. */
++			align = 2 * 24 * 4096;
++		}
 +		break;
 +	default:
 +		break;
@@ -13639,10 +13656,10 @@ index 0000000..0cff7eb
 +
 diff --git a/drivers/gpu/drm/nouveau/nouveau_gem.c b/drivers/gpu/drm/nouveau/nouveau_gem.c
 new file mode 100644
-index 0000000..b508a35
+index 0000000..65da3fa
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_gem.c
-@@ -0,0 +1,954 @@
+@@ -0,0 +1,964 @@
 +/*
 + * Copyright (C) 2008 Ben Skeggs.
 + * All Rights Reserved.
@@ -13979,7 +13996,17 @@ index 0000000..b508a35
 +
 +		if (unlikely(atomic_read(&nvbo->bo.cpu_writers) > 0)) {
 +			nouveau_gem_pushbuf_backoff(list);
++
++			if (nvbo->cpu_filp == file_priv) {
++				NV_ERROR(dev, "bo %p mapped by process trying "
++					      "to validate it!\n", nvbo);
++				ret = -EINVAL;
++				goto out_unref;
++			}
++
 +			ret = ttm_bo_wait_cpu(&nvbo->bo, false);
++			if (ret == -ERESTART)
++				ret = -EAGAIN;
 +			if (ret)
 +				goto out_unref;
 +			goto retry;
@@ -17230,10 +17257,10 @@ index 0000000..597007a
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_mem.c b/drivers/gpu/drm/nouveau/nouveau_mem.c
 new file mode 100644
-index 0000000..147c18f
+index 0000000..9d2037a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_mem.c
-@@ -0,0 +1,572 @@
+@@ -0,0 +1,575 @@
 +/*
 + * Copyright (C) The Weather Channel, Inc.  2002.  All Rights Reserved.
 + * Copyright 2005 Stephane Marchesin
@@ -17751,6 +17778,7 @@ index 0000000..147c18f
 +
 +	/* non-mappable vram */
 +	dev_priv->fb_available_size = nouveau_mem_fb_amount(dev);
++	NV_INFO(dev, "%d MiB VRAM\n", (int)(dev_priv->fb_available_size >> 20));
 +	dev_priv->fb_available_size -= dev_priv->ramin_rsvd_vram;
 +	vram_size = dev_priv->fb_available_size >> PAGE_SHIFT;
 +	bar1_size = drm_get_resource_len(dev, 1) >> PAGE_SHIFT;
@@ -17792,8 +17820,10 @@ index 0000000..147c18f
 +									ret);
 +	}
 +
++	NV_INFO(dev, "%d MiB GART (aperture)\n",
++		(int)(dev_priv->gart_info.aper_size >> 20));
 +	ret = ttm_bo_init_mm(bdev, TTM_PL_TT, 0,
-+				dev_priv->gart_info.aper_size >> PAGE_SHIFT);
++			     dev_priv->gart_info.aper_size >> PAGE_SHIFT);
 +	if (ret) {
 +		NV_ERROR(dev, "Failed TT mm init: %d\n", ret);
 +		return ret;
@@ -18009,7 +18039,7 @@ index 0000000..1791dea
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_object.c b/drivers/gpu/drm/nouveau/nouveau_object.c
 new file mode 100644
-index 0000000..9bc7abd
+index 0000000..93379bb
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_object.c
 @@ -0,0 +1,1294 @@
@@ -18384,7 +18414,7 @@ index 0000000..9bc7abd
 +		return -EINVAL;
 +	}
 +
-+	if (gpuobj->flags & NVOBJ_FLAG_ZERO_FREE) {
++	if (gpuobj->im_pramin && (gpuobj->flags & NVOBJ_FLAG_ZERO_FREE)) {
 +		engine->instmem.prepare_access(dev, true);
 +		for (i = 0; i < gpuobj->im_pramin->size; i += 4)
 +			nv_wo32(dev, gpuobj, i/4, 0);
@@ -34689,10 +34719,10 @@ index 0000000..c2396a6
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_graph.c b/drivers/gpu/drm/nouveau/nv50_graph.c
 new file mode 100644
-index 0000000..93a4b66
+index 0000000..06ce5b9
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_graph.c
-@@ -0,0 +1,405 @@
+@@ -0,0 +1,407 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -35093,14 +35123,16 @@ index 0000000..93a4b66
 +	{ 0x0030, false, NULL }, /* null */
 +	{ 0x5039, false, NULL }, /* m2mf */
 +	{ 0x502d, false, NULL }, /* 2d */
++	{ 0x50c0, false, NULL }, /* compute */
 +	{ 0x5097, false, NULL }, /* tesla (nv50) */
 +	{ 0x8297, false, NULL }, /* tesla (nv80/nv90) */
 +	{ 0x8397, false, NULL }, /* tesla (nva0) */
++	{ 0x8597, false, NULL }, /* tesla (nva8) */
 +	{}
 +};
 diff --git a/drivers/gpu/drm/nouveau/nv50_grctx.h b/drivers/gpu/drm/nouveau/nv50_grctx.h
 new file mode 100644
-index 0000000..5aef504
+index 0000000..62914d8
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_grctx.h
 @@ -0,0 +1,6 @@
