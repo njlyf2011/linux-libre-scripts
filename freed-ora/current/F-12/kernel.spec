@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1890 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1893 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -719,11 +719,12 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
 Patch1827: drm-disable-r600-aspm.patch
-Patch1828: drm-radeon-kms-arbiter-return-ignore.patch
+Patch1828: drm-radeon-agp-font-fix.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
 Patch1901: drm-vga-arb.patch
+Patch1902: drm-radeon-kms-arbiter-return-ignore.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1428,6 +1429,7 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 # Nouveau DRM + drm fixes
 ApplyPatch kms-offb-handoff.patch
 ApplyPatch drm-next-ea1495a6.patch
+ApplyPatch drm-radeon-agp-font-fix.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -2150,6 +2152,15 @@ fi
 # and build.
 
 %changelog
+* Mon Nov 02 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-107
+- r600: back that out, thanks to yaneti for testing.
+
+* Mon Nov 02 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-106
+- r600: ring size guesswork fix.
+
+* Fri Oct 30 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-105
+- drm-radeon-agp-font-fix.patch: hopefully fix AGP coherency issue
+
 * Wed Oct 28 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.104
 - Deblobbed and adjusted drm-next-ea1495a6.patch and drm-nouveau.patch.
 
