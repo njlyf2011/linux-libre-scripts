@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1893 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1898 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -685,6 +685,7 @@ Patch611: alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch
 Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-ahci-export-capabilities.patch
 
+Patch680: prism54-remove-pci-dev-table.patch
 Patch687: linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
 Patch800: linux-2.6-crash-driver.patch
@@ -720,6 +721,8 @@ Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
 Patch1827: drm-disable-r600-aspm.patch
 Patch1828: drm-radeon-agp-font-fix.patch
+Patch1829: drm-radeon-fix-ring-rmw-issue.patch
+Patch1830: drm-r600-lenovo-w500-fix.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -1388,6 +1391,9 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # Make it possible to identify non-hotplug SATA ports
 ApplyPatch linux-2.6-ahci-export-capabilities.patch
 
+# prism54: remove pci modinfo device table
+ApplyPatch prism54-remove-pci-dev-table.patch
+
 # iwlagn quiet
 ApplyPatch linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
 
@@ -1430,6 +1436,8 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 ApplyPatch kms-offb-handoff.patch
 ApplyPatch drm-next-ea1495a6.patch
 ApplyPatch drm-radeon-agp-font-fix.patch
+ApplyPatch drm-radeon-fix-ring-rmw-issue.patch
+ApplyPatch drm-r600-lenovo-w500-fix.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1439,7 +1447,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
-ApplyPatch drm-disable-r600-aspm.patch
+#ApplyPatch drm-disable-r600-aspm.patch
 
 # VGA arb + drm
 ApplyPatch linux-2.6-vga-arb.patch
@@ -2152,6 +2160,22 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 03 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-112
+- drm-r600-lenovo-w500-fix.patch: add second patch from upstream fix
+
+* Tue Nov 03 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-111
+- drm-r600-lenovo-w500-fix.patch: fix lenovo w500 acpi video kill laptop dead
+- drop aspm r600 patch as correct fix should be in 110
+
+* Tue Nov 03 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-110
+- r600: fix for ring setup RMW issue.
+
+* Mon Nov 02 2009 John W. Linville <linville@redhat.com> 2.6.31.5-109
+- prism54: remove pci modinfo device table (#447047)
+
+* Mon Nov 02 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.5-108
+- Enable acerhdf driver for fan speed control on Acer Aspire One notebook (#532463)
+
 * Mon Nov 02 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-107
 - r600: back that out, thanks to yaneti for testing.
 
