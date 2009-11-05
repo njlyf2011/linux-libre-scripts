@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.111 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.113 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -832,6 +832,10 @@ Patch16201: af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
 # Fix overflow in KVM cpuid code
 Patch16230: kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
 
+# fs/pipe.c: null ptr dereference fix
+# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
+Patch16240: fs-pipe-null-ptr-deref-fix.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1517,6 +1521,10 @@ ApplyPatch af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
 # Fix overflow in KVM cpuid code
 ApplyPatch kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
 
+# fs/pipe.c: null ptr dereference fix
+# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
+ApplyPatch fs-pipe-null-ptr-deref-fix.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2092,6 +2100,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Nov 04 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.113
+- fs/pipe.c: fix null pointer dereference (CVE-2009-3547)
+
 * Mon Oct 26 2009  Alexandre Oliva <lxoliva@fsfla.org> -libre.170.2.111
 - Adjusted patch-libre-2.6.27.38.
 
@@ -2099,17 +2110,17 @@ fi
 - Linux 2.6.27.38
 
 * Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.110.rc1
-- Fix overflow in KVM cpuid code.
+- Fix overflow in KVM cpuid code. (CVE-2009-3638)
 
 * Mon Oct 19 2009 Kyle McMartin <kyle@redhat.com>
 - af_unix-fix-deadlock-connecting-to-shutdown-socket.patch: fix for
-  rhbz#529626.
+  rhbz#529626. (CVE-2009-3621)
 
 * Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.108.rc1
 - Linux 2.6.27.38-rc1
 
 * Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.107
-- Fix null deref in r128 (#487546)
+- Fix null deref in r128 (#487546) (CVE-2009-3620)
 
 * Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.37-170.2.105
 - Fix uninitialized data leak in netlink (CVE-2009-3612)
