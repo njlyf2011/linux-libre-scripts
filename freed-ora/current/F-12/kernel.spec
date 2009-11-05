@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1898 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1903 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -723,6 +723,8 @@ Patch1827: drm-disable-r600-aspm.patch
 Patch1828: drm-radeon-agp-font-fix.patch
 Patch1829: drm-radeon-fix-ring-rmw-issue.patch
 Patch1830: drm-r600-lenovo-w500-fix.patch
+Patch1831: drm-conservative-fallback-modes.patch
+Patch1832: drm-edid-retry.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -799,8 +801,19 @@ Patch14411: netlink-fix-typo-in-initialization.patch
 Patch14420: perf-events-fix-swevent-hrtimer-sampling.patch
 Patch14421: perf-events-dont-generate-events-for-the-idle-task.patch
 
-# Fix oops in padlock
 Patch14430: crypto-via-padlock-fix-nano-aes.patch
+
+# fs/pipe.c: null ptr dereference fix
+# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
+Patch14440: fs-pipe-null-ptr-deref-fix.patch
+
+# tg3 fixes (#527209)
+Patch14451: tg3-01-delay-mdio-bus-init-until-fw-finishes.patch
+Patch14452: tg3-02-fix-tso-test-against-wrong-flags-var.patch
+Patch14453: tg3-03-fix-57780-asic-rev-pcie-link-receiver-errors.patch
+Patch14454: tg3-04-prevent-tx-bd-corruption.patch
+Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
 %endif
 
@@ -1438,6 +1451,7 @@ ApplyPatch drm-next-ea1495a6.patch
 ApplyPatch drm-radeon-agp-font-fix.patch
 ApplyPatch drm-radeon-fix-ring-rmw-issue.patch
 ApplyPatch drm-r600-lenovo-w500-fix.patch
+ApplyPatch drm-conservative-fallback-modes.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1507,6 +1521,18 @@ ApplyPatch perf-events-dont-generate-events-for-the-idle-task.patch
 
 # Fix oops in padlock
 ApplyPatch crypto-via-padlock-fix-nano-aes.patch
+
+# fs/pipe.c: null ptr dereference fix
+# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
+ApplyPatch fs-pipe-null-ptr-deref-fix.patch
+
+# tg3 fixes (#527209)
+ApplyPatch tg3-01-delay-mdio-bus-init-until-fw-finishes.patch
+ApplyPatch tg3-02-fix-tso-test-against-wrong-flags-var.patch
+ApplyPatch tg3-03-fix-57780-asic-rev-pcie-link-receiver-errors.patch
+ApplyPatch tg3-04-prevent-tx-bd-corruption.patch
+ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2160,6 +2186,25 @@ fi
 # and build.
 
 %changelog
+* Wed Nov 04 2009 Adam Jackson <ajax@redhat.com> 2.6.31.5-117
+- drm-edid-retry.patch: Try DDC up to four times, like X. (#532957)
+
+* Wed Nov 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.5-116
+- tg3 bug fixes (#527209)
+
+* Wed Nov 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.5-115
+- fs/pipe.c: fix null pointer dereference (CVE-2009-3547)
+
+* Wed Nov 04 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.5-114
+- nouveau: provide info userspace needs to handle low memory situations
+- nouveau: fix for rh#532711
+- nouveau: add option to provide more debug info for rh#532579
+- patch only so large because of included register rename
+
+* Tue Nov 03 2009 Adam Jackson <ajax@redhat.com> 2.6.31.5-113
+- drm-conservative-fallback-modes.patch: When an output is connected but
+  fails EDID, only add modes with refresh rates <= 60 (#514600)
+
 * Tue Nov 03 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-112
 - drm-r600-lenovo-w500-fix.patch: add second patch from upstream fix
 
