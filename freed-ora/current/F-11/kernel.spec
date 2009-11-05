@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1773 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1775 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -827,6 +827,7 @@ Patch15900: ax25-fix-possible-oops-in-ax25_make_new.patch
 # netlink security fix (CVE-2009-3612)
 Patch16000: netlink-fix-typo-in-initialization.patch
 
+# Fix huge wakeup latencies
 Patch16200: sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
 
 # fix mouse and keyboard detection (#522126)
@@ -844,6 +845,13 @@ Patch16420: keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
 
 # Fix overflow in KVM cpuid code
 Patch16430: kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
+
+# disable the stackprotector on fns that don't have onstack arrays
+Patch16440: disable-stackprotector-all.patch
+
+# fs/pipe.c: null ptr dereference fix
+# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
+Patch16450: fs-pipe-null-ptr-deref-fix.patch
 
 %endif
 
@@ -1592,6 +1600,13 @@ ApplyPatch keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
 # Fix overflow in KVM cpuid code
 ApplyPatch kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
 
+# disable the stackprotector on fns that don't have onstack arrays
+ApplyPatch disable-stackprotector-all.patch
+
+# fs/pipe.c: null ptr dereference fix
+# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
+ApplyPatch fs-pipe-null-ptr-deref-fix.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2180,8 +2195,14 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.30.9-96
+- fs/pipe.c: fix null pointer dereference (CVE-2009-3547)
+
+* Sun Oct 25 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-95
+- Disable the stack protector on functions that don't have onstack arrays.
+
 * Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-94
-- Fix overflow in KVM cpuid code.
+- Fix overflow in KVM cpuid code. (CVE-2009-3638)
 
 * Thu Oct 22 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-93
 - Fix exploitable oops in keyring code (CVE-2009-3624)
@@ -2192,10 +2213,10 @@ fi
 
 * Mon Oct 19 2009 Kyle McMartin <kyle@redhat.com>
 - af_unix-fix-deadlock-connecting-to-shutdown-socket.patch: fix for
-  rhbz#529626 local DoS.
+  rhbz#529626 local DoS. (CVE-2009-3621)
 
 * Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.30.9-90
-- Fix null deref in r128 (F10#487546)
+- Fix null deref in r128 (F10#487546) (CVE-2009-3620)
 
 * Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-89
 - Keyboard and mouse fixes from 2.6.32 (#522126)
