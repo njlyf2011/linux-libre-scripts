@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1903 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1908 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -725,6 +725,7 @@ Patch1829: drm-radeon-fix-ring-rmw-issue.patch
 Patch1830: drm-r600-lenovo-w500-fix.patch
 Patch1831: drm-conservative-fallback-modes.patch
 Patch1832: drm-edid-retry.patch
+Patch1833: drm-radeon-fix-agp-resume.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -814,6 +815,9 @@ Patch14453: tg3-03-fix-57780-asic-rev-pcie-link-receiver-errors.patch
 Patch14454: tg3-04-prevent-tx-bd-corruption.patch
 Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 Patch14456: tg3-06-fix-5906-transmit-hangs.patch
+
+Patch14460: highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
+Patch14461: highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
 
 %endif
 
@@ -1452,6 +1456,7 @@ ApplyPatch drm-radeon-agp-font-fix.patch
 ApplyPatch drm-radeon-fix-ring-rmw-issue.patch
 ApplyPatch drm-r600-lenovo-w500-fix.patch
 ApplyPatch drm-conservative-fallback-modes.patch
+ApplyPatch drm-radeon-fix-agp-resume.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1533,6 +1538,9 @@ ApplyPatch tg3-03-fix-57780-asic-rev-pcie-link-receiver-errors.patch
 ApplyPatch tg3-04-prevent-tx-bd-corruption.patch
 ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
+
+#ApplyPatch highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
+#ApplyPatch highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2186,6 +2194,23 @@ fi
 # and build.
 
 %changelog
+* Thu Nov 05 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-122
+- comment out kmap atomic for now, it breaks ppc build
+
+* Thu Nov 05 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-121
+- drm-radeon-fix-agp-resume.patch (#531825)
+
+* Thu Nov 05 2009 Kyle McMartin <kyle@redhat.com>
+- Add two patches from Soren from mingo/linux-2.6-x86.git to fix
+  debug_kmap_atomic prints.
+
+* Thu Nov 05 2009 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: fix rh#532924
+
+* Wed Nov 04 2009 Kyle McMartin <kyle@redhat.com>
+- Make JBD2_DEBUG a toggleable debug setting. Leave it the way it was.
+  (Double checked resulting configs, don't fret.)
+
 * Wed Nov 04 2009 Adam Jackson <ajax@redhat.com> 2.6.31.5-117
 - drm-edid-retry.patch: Try DDC up to four times, like X. (#532957)
 
