@@ -7745,7 +7745,7 @@ index 0000000..1ffda97
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bo.c b/drivers/gpu/drm/nouveau/nouveau_bo.c
 new file mode 100644
-index 0000000..ef0149f
+index 0000000..8d1383a
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bo.c
 @@ -0,0 +1,663 @@
@@ -7912,7 +7912,7 @@ index 0000000..ef0149f
 +		switch (bo->mem.mem_type) {
 +		case TTM_PL_VRAM:
 +		case TTM_PL_PRIV0:
-+			dev_priv->fb_available_size -= bo->mem.size;
++			dev_priv->fb_aper_free -= bo->mem.size;
 +			break;
 +		case TTM_PL_TT:
 +			dev_priv->gart_info.aper_free -= bo->mem.size;
@@ -7950,7 +7950,7 @@ index 0000000..ef0149f
 +		switch (bo->mem.mem_type) {
 +		case TTM_PL_VRAM:
 +		case TTM_PL_PRIV0:
-+			dev_priv->fb_available_size += bo->mem.size;
++			dev_priv->fb_aper_free += bo->mem.size;
 +			break;
 +		case TTM_PL_TT:
 +			dev_priv->gart_info.aper_free += bo->mem.size;
@@ -11575,10 +11575,10 @@ index 0000000..d8de3f6
 +MODULE_LICENSE("GPL and additional rights");
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.h b/drivers/gpu/drm/nouveau/nouveau_drv.h
 new file mode 100644
-index 0000000..ef07f66
+index 0000000..d16c843
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.h
-@@ -0,0 +1,1287 @@
+@@ -0,0 +1,1288 @@
 +/*
 + * Copyright 2005 Stephane Marchesin.
 + * All Rights Reserved.
@@ -12101,6 +12101,7 @@ index 0000000..ef07f66
 +	/* base physical adresses */
 +	uint64_t fb_phys;
 +	uint64_t fb_available_size;
++	uint64_t fb_aper_free;
 +
 +	struct {
 +		enum {
@@ -13700,7 +13701,7 @@ index 0000000..0cff7eb
 +
 diff --git a/drivers/gpu/drm/nouveau/nouveau_gem.c b/drivers/gpu/drm/nouveau/nouveau_gem.c
 new file mode 100644
-index 0000000..de64088
+index 0000000..a95b8f7
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_gem.c
 @@ -0,0 +1,977 @@
@@ -14493,7 +14494,7 @@ index 0000000..de64088
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
 +	struct drm_nouveau_gem_pushbuf_call *req = data;
 +
-+	req->vram_available = dev_priv->fb_available_size;
++	req->vram_available = dev_priv->fb_aper_free;
 +	req->gart_available = dev_priv->gart_info.aper_free;
 +
 +	return nouveau_gem_ioctl_pushbuf_call(dev, data, file_priv);
@@ -17314,10 +17315,10 @@ index 0000000..597007a
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_mem.c b/drivers/gpu/drm/nouveau/nouveau_mem.c
 new file mode 100644
-index 0000000..67c92eb
+index 0000000..4a6fde6
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_mem.c
-@@ -0,0 +1,584 @@
+@@ -0,0 +1,585 @@
 +/*
 + * Copyright (C) The Weather Channel, Inc.  2002.  All Rights Reserved.
 + * Copyright 2005 Stephane Marchesin
@@ -17838,6 +17839,7 @@ index 0000000..67c92eb
 +
 +	/* remove reserved space at end of vram from available amount */
 +	dev_priv->fb_available_size -= dev_priv->ramin_rsvd_vram;
++	dev_priv->fb_aper_free = dev_priv->fb_available_size;
 +
 +	/* non-mappable vram */
 +	vram_size = dev_priv->fb_available_size >> PAGE_SHIFT;
@@ -17856,7 +17858,7 @@ index 0000000..67c92eb
 +	}
 +
 +	/* remove reserved space at start of vram from available amount */
-+	dev_priv->fb_available_size -= (256 * 1024);
++	dev_priv->fb_aper_free -= (256 * 1024);
 +	text_size  = (256 * 1024) >> PAGE_SHIFT;
 +	vram_size -= text_size;
 +
