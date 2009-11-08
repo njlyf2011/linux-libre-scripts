@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1908 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1913 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-firmware
-%define with_firmware  %{?_with_firmware:  1} %{?!_with_firmware:  0}
+%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
 # tools/perf
 %define with_perftool  %{?_without_perftool:  0} %{?!_without_perftool:  1}
 # perf noarch subpkg
@@ -136,6 +136,8 @@ Summary: The Linux kernel
 %define with_baseonly  %{?_with_baseonly:     1} %{?!_with_baseonly:     0}
 # Only build the smp kernel (--with smponly):
 %define with_smponly   %{?_with_smponly:      1} %{?!_with_smponly:      0}
+# Only build the debug kernel (--with dbgonly):
+%define with_dbgonly   %{?_with_dbgonly:      1} %{?!_with_dbgonly:      0}
 
 # should we do C=1 builds with sparse
 %define with_sparse	%{?_with_sparse:      1} %{?!_with_sparse:      0}
@@ -234,6 +236,18 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_kdump 0
 %define with_debug 0
+%endif
+
+# if requested, only build debug kernel
+%if %{with_dbgonly}
+%if %{debugbuildsenabled}
+%define with_up 0
+%endif
+%define with_smp 0
+%define with_pae 0
+%define with_xen 0
+%define with_kdump 0
+%define with_perftool 0
 %endif
 
 %define all_x86 i386 i686
@@ -635,6 +649,7 @@ Patch41: linux-2.6-sysrq-c.patch
 # Intel IOMMU fixes/workarounds
 Patch100: linux-2.6-die-closed-source-bios-muppets-die.patch
 Patch101: linux-2.6-intel-iommu-updates.patch
+Patch102: linux-2.6-iommu-at-zero.patch
 
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
@@ -687,6 +702,7 @@ Patch671: linux-2.6-ahci-export-capabilities.patch
 
 Patch680: prism54-remove-pci-dev-table.patch
 Patch687: linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
+Patch690: linux-2.6-libertas-crash.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -1281,6 +1297,7 @@ ApplyPatch linux-2.6-die-closed-source-bios-muppets-die.patch
 # most importantly: notice when the BIOS points us to a region that returns
 # all 0xFF, and claims that there's an IOMMU there.
 ApplyPatch linux-2.6-intel-iommu-updates.patch
+ApplyPatch linux-2.6-iommu-at-zero.patch
 
 #
 # PowerPC
@@ -1413,6 +1430,9 @@ ApplyPatch prism54-remove-pci-dev-table.patch
 
 # iwlagn quiet
 ApplyPatch linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
+
+# libertas crash
+ApplyPatch linux-2.6-libertas-crash.patch
 
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1834,12 +1854,11 @@ mkdir -p $RPM_BUILD_ROOT/boot
 cd linux-%{kversion}.%{_target_cpu}
 
 %if %{with_debug}
-%if %{with_up}
 BuildKernel %make_target %kernel_image debug
 %endif
-%if %{with_pae}
+
+%if %{with_pae_debug}
 BuildKernel %make_target %kernel_image PAEdebug
-%endif
 %endif
 
 %if %{with_pae}
@@ -2183,9 +2202,7 @@ fi
 
 %kernel_variant_files %{with_up}
 %kernel_variant_files %{with_smp} smp
-%if %{with_up}
 %kernel_variant_files %{with_debug} debug
-%endif
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
@@ -2194,6 +2211,23 @@ fi
 # and build.
 
 %changelog
+* Sun Nov 08 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.5-127
+- Apply fix for fallback when HP/Acer BIOS bug detected (#524808)
+- Re-enable DMAR.
+- Fix libertas crash due to skb pointer bug
+ 
+* Sat Nov 07 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.5-126
+- Re-enable linux-2.6-die-closed-source-bios-muppets-die.patch, DMAR
+  still defaulting to off.
+
+* Sat Nov 07 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.5-125
+- Disable linux-2.6-die-closed-source-bios-muppets-die.patch and
+  default DMAR to off (can be re-enabled with intel_iommu=on on the
+  command line due to last minute issues and reversion upstream.)
+
+* Thu Nov 05 2009 Jarod Wilson <jarod@redhat.com>
+- Add --with dbgonly rpmbuild option to build only debug kernels
+
 * Thu Nov 05 2009 Dave Airlie <airlied@redhat.com> 2.6.31.5-122
 - comment out kmap atomic for now, it breaks ppc build
 
