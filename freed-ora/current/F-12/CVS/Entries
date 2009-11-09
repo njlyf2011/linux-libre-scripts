@@ -38,7 +38,6 @@ D/scripts////
 /drm-intel-no-tv-hotplug.patch/1.1/Wed Sep 16 17:44:25 2009/-kb/Tkernel-2_6_31_5-127_fc12
 /drm-intel-pm.patch/1.5/Tue Sep 22 01:04:44 2009/-kb/Tkernel-2_6_31_5-127_fc12
 /drm-next-ea1495a6.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_31_5-127_fc12
-/drm-nouveau.patch/1.67/dummy timestamp from new-entry+Fri Nov  6 02:17:18 2009/-kb/Tkernel-2_6_31_5-127_fc12
 /drm-r600-lenovo-w500-fix.patch/1.2/Tue Nov  3 05:00:37 2009/-kb/Tkernel-2_6_31_5-127_fc12
 /drm-radeon-agp-font-fix.patch/1.1/Fri Oct 30 04:14:20 2009/-kb/Tkernel-2_6_31_5-127_fc12
 /drm-radeon-fix-agp-resume.patch/1.1/Thu Nov  5 05:46:01 2009/-kb/Tkernel-2_6_31_5-127_fc12
@@ -165,3 +164,4 @@ D/scripts////
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_31_5-127_fc12
 /v4l-dvb-fix-cx25840-firmware-loading.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_31_5-127_fc12
 /via-hwmon-temp-sensor.patch/1.3/Tue Sep 22 01:04:21 2009/-kb/Tkernel-2_6_31_5-127_fc12
+/drm-nouveau.patch/1.67/Mon Nov  9 01:09:19 2009/-kb/Tkernel-2_6_31_5-127_fc12
