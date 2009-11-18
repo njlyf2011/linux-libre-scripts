@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1913 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1920 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -701,8 +701,6 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-ahci-export-capabilities.patch
 
 Patch680: prism54-remove-pci-dev-table.patch
-Patch687: linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
-Patch690: linux-2.6-libertas-crash.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -719,6 +717,7 @@ Patch1550: linux-2.6-ksm.patch
 Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-ksm-updates.patch
 Patch1553: linux-2.6-ksm-fix-munlock.patch
+Patch1554: linux-2.6-ksm-updates-from-32.patch
 Patch1579: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 Patch1583: linux-2.6-xen-fix-is_disconnected_device-exists_disconnected_device.patch
 Patch1584: linux-2.6-xen-improvement-to-wait_for_devices.patch
@@ -727,7 +726,7 @@ Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # nouveau + drm fixes
 Patch1810: kms-offb-handoff.patch
-Patch1812: drm-next-ea1495a6.patch
+Patch1812: drm-next-984d1f3c.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -735,13 +734,9 @@ Patch1818: drm-i915-resume-force-mode.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
-Patch1827: drm-disable-r600-aspm.patch
-Patch1828: drm-radeon-agp-font-fix.patch
-Patch1829: drm-radeon-fix-ring-rmw-issue.patch
-Patch1830: drm-r600-lenovo-w500-fix.patch
 Patch1831: drm-conservative-fallback-modes.patch
 Patch1832: drm-edid-retry.patch
-Patch1833: drm-radeon-fix-agp-resume.patch
+Patch1834: drm-edid-header-fixup.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -762,7 +757,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 
 # fs fixes
@@ -790,39 +784,14 @@ Patch12014: linux-2.6-selinux-module-load-perms.patch
 # make perf counter API available to userspace (#527264)
 Patch14010: perf-make-perf-counter-h-available-to-userspace.patch
 
-# Fix 2.6.31 regression that caused device failures with ACPI enabled.
-Patch14100: pci-increase-alignment-to-make-more-space.patch
-
 # fix resource counter issues on *big* machines
 Patch14101: improve-resource-counter-scalability.patch
-
-# fix boot hang on some systems
-Patch14200: acpi-revert-attach-device-to-handle-early.patch
-
-# disable 64-bit DMA on SB600 SATA controllers
-Patch14300: ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
-
-# fix ACPI boot hang/crash (#513680)
-Patch14400: acpi-pci-fix-null-pointer-dereference-in-acpi-get-pci-dev.patch
-
-# fix local DoS connecting to shutdown unix socket (#529626)
-Patch14401: af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
-
-# Fix exploitable OOPS in keyring code. (CVE-2009-3624)
-Patch14410: keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
-
-# Fix kernel memory leak to userspace. (CVE-2009-3612)
-Patch14411: netlink-fix-typo-in-initialization.patch
 
 # fix perf for sysprof
 Patch14420: perf-events-fix-swevent-hrtimer-sampling.patch
 Patch14421: perf-events-dont-generate-events-for-the-idle-task.patch
 
 Patch14430: crypto-via-padlock-fix-nano-aes.patch
-
-# fs/pipe.c: null ptr dereference fix
-# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
-Patch14440: fs-pipe-null-ptr-deref-fix.patch
 
 # tg3 fixes (#527209)
 Patch14451: tg3-01-delay-mdio-bus-init-until-fw-finishes.patch
@@ -1428,12 +1397,6 @@ ApplyPatch linux-2.6-ahci-export-capabilities.patch
 # prism54: remove pci modinfo device table
 ApplyPatch prism54-remove-pci-dev-table.patch
 
-# iwlagn quiet
-ApplyPatch linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
-
-# libertas crash
-ApplyPatch linux-2.6-libertas-crash.patch
-
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
@@ -1454,6 +1417,7 @@ ApplyPatch hid-ignore-all-recent-imon-devices.patch
 ApplyPatch linux-2.6-ksm.patch
 ApplyPatch linux-2.6-ksm-updates.patch
 ApplyPatch linux-2.6-ksm-fix-munlock.patch
+ApplyPatch linux-2.6-ksm-updates-from-32.patch
 # Optimize KVM for KSM support
 ApplyPatch linux-2.6-ksm-kvm.patch
 
@@ -1471,12 +1435,10 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch kms-offb-handoff.patch
-ApplyPatch drm-next-ea1495a6.patch
-ApplyPatch drm-radeon-agp-font-fix.patch
-ApplyPatch drm-radeon-fix-ring-rmw-issue.patch
-ApplyPatch drm-r600-lenovo-w500-fix.patch
+ApplyPatch drm-next-984d1f3c.patch
 ApplyPatch drm-conservative-fallback-modes.patch
-ApplyPatch drm-radeon-fix-agp-resume.patch
+ApplyPatch drm-edid-retry.patch
+ApplyPatch drm-edid-header-fixup.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -1494,17 +1456,19 @@ ApplyPatch drm-vga-arb.patch
 ApplyPatch drm-radeon-kms-arbiter-return-ignore.patch
 
 # linux1394 git patches
-#ApplyPatch linux-2.6-firewire-git-update.patch
-#ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
+# apply if non-empty
+ApplyOptionalPatch linux-2.6-firewire-git-update.patch
+ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # V4L/DVB updates/fixes/experimental drivers
-#ApplyPatch linux-2.6-v4l-dvb-fixes.patch
-#ApplyPatch linux-2.6-v4l-dvb-update.patch
-#ApplyPatch linux-2.6-v4l-dvb-experimental.patch
-#ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
+# apply if non-empty
+ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
+
 ApplyPatch v4l-dvb-fix-cx25840-firmware-loading.patch
 
 # Patches headed upstream
@@ -1517,28 +1481,7 @@ ApplyPatch linux-2.6-selinux-module-load-perms.patch
 # make perf counter API available to userspace (#527264)
 ApplyPatch perf-make-perf-counter-h-available-to-userspace.patch
 
-# Fix 2.6.31 regression that caused device failures with ACPI enabled.
-ApplyPatch pci-increase-alignment-to-make-more-space.patch
-
 ApplyPatch improve-resource-counter-scalability.patch
-
-# fix boot hang on some systems
-ApplyPatch acpi-revert-attach-device-to-handle-early.patch
-
-# disable 64-bit DMA on SB600 SATA controllers
-ApplyPatch ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
-
-# fix ACPI boot hang/crash (#513680)
-ApplyPatch acpi-pci-fix-null-pointer-dereference-in-acpi-get-pci-dev.patch
-
-# fix for local DoS on AF_UNIX
-ApplyPatch af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
-
-# Fix exploitable OOPS in keyring code. (CVE-2009-3624)
-ApplyPatch keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
-
-# Fix kernel memory leak to userspace. (CVE-2009-3612)
-ApplyPatch netlink-fix-typo-in-initialization.patch
 
 # fix perf for sysprof
 ApplyPatch perf-events-fix-swevent-hrtimer-sampling.patch
@@ -1546,10 +1489,6 @@ ApplyPatch perf-events-dont-generate-events-for-the-idle-task.patch
 
 # Fix oops in padlock
 ApplyPatch crypto-via-padlock-fix-nano-aes.patch
-
-# fs/pipe.c: null ptr dereference fix
-# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
-ApplyPatch fs-pipe-null-ptr-deref-fix.patch
 
 # tg3 fixes (#527209)
 ApplyPatch tg3-01-delay-mdio-bus-init-until-fw-finishes.patch
@@ -2211,6 +2150,41 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 17 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.134
+- Deblobbed and adjusted patch-libre-2.6.31.6 and drm-next-984d1f3c.patch.
+
+* Tue Nov 17 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-134
+- glad to see edid retry patch was compiled.
+
+* Tue Nov 17 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-133
+- drm-next-984d1f3c.patch: rebase with upstream fixes - drop all merged
+
+* Thu Nov 12 2009 Adam Jackson <ajax@redhat.com>
+- Actually apply the EDID retry patch
+- drm-edid-header-fixup.patch: Fix up some broken EDID headers (#534120)
+
+* Thu Nov 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.6-130
+- Use ApplyOptionalPatch for v4l and firewire updates.
+- Drop unused v4l ABI fix.
+
+* Thu Nov 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.6-129
+- Linux 2.6.31.6
+- Drop merged patches:
+  linux-2.6-iwlwifi-reduce-noise-when-skb-allocation-fails.patch
+  linux-2.6-libertas-crash.patch
+  pci-increase-alignment-to-make-more-space.patch
+  acpi-revert-attach-device-to-handle-early.patch
+  ahci-revert-restore-sb600-sata-controller-64-bit-dma.patch
+  acpi-pci-fix-null-pointer-dereference-in-acpi-get-pci-dev.patch
+  af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+  keys-get_instantiation_keyring-should-inc-the-keyring-refcount.patch
+  netlink-fix-typo-in-initialization.patch
+  fs-pipe-null-ptr-deref-fix.patch
+
+* Wed Nov 11 2009 Justin M. Forbes <jforbes@redhat.com> 2.6.31.5-128
+- Fix KSM for i686 users. (#532215)
+- Add KSM fixes from 2.6.32
+
 * Sun Nov 08 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.5-127
 - Apply fix for fallback when HP/Acer BIOS bug detected (#524808)
 - Re-enable DMAR.
