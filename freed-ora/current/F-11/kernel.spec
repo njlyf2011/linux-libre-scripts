@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1775 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1778 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -708,6 +708,7 @@ Patch1824: drm-radeon-cs-oops-fix.patch
 Patch1825: drm-pnp-add-resource-range-checker.patch
 Patch1826: drm-i915-enable-mchbar.patch
 Patch1827: shut-up-LOCK_TEST_WITH_RETURN.patch
+Patch1838: drm-silence-pointless-vblank-warning.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -852,6 +853,10 @@ Patch16440: disable-stackprotector-all.patch
 # fs/pipe.c: null ptr dereference fix
 # rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
 Patch16450: fs-pipe-null-ptr-deref-fix.patch
+
+# another try at fixing bug #524756
+Patch16460: sata_nv-make-sure-link-is-brough-up-online-when-skipping-hardreset.patch
+Patch16470: sata_nv-use-hardreset-only-for-post-boot-probing.patch
 
 %endif
 
@@ -1343,6 +1348,7 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # ext4
+ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
 
 # xfs
 
@@ -1490,6 +1496,8 @@ ApplyPatch drm-radeon-cs-oops-fix.patch
 ApplyPatch drm-pnp-add-resource-range-checker.patch
 ApplyPatch drm-i915-enable-mchbar.patch
 ApplyPatch shut-up-LOCK_TEST_WITH_RETURN.patch
+# 537196
+ApplyPatch drm-silence-pointless-vblank-warning.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1606,6 +1614,10 @@ ApplyPatch disable-stackprotector-all.patch
 # fs/pipe.c: null ptr dereference fix
 # rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
 ApplyPatch fs-pipe-null-ptr-deref-fix.patch
+
+# 524756
+ApplyPatch sata_nv-use-hardreset-only-for-post-boot-probing.patch
+ApplyPatch sata_nv-make-sure-link-is-brough-up-online-when-skipping-hardreset.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2195,6 +2207,15 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-99
+- Silence pointless DRM warning message (#537196)
+
+* Tue Nov 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-98
+- More sata_nv fixes (#524756).
+
+* Mon Nov 16 2009 Eric Sandeen <sandeen@redhat.com> 2.6.30.9-97
+- Fix ext4 preallocation-related corruption (#513221)
+
 * Tue Nov 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.30.9-96
 - fs/pipe.c: fix null pointer dereference (CVE-2009-3547)
 
