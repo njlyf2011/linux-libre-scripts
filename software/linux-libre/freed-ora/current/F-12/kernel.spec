@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1920 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1923 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -706,7 +706,12 @@ Patch800: linux-2.6-crash-driver.patch
 
 Patch900: linux-2.6-pci-cacheline-sizing.patch
 
+# ACPI
 Patch1100: linux-2.6.31-cpuidle-faster-io.patch
+# EC fixes from 2.6.32 (#492699, #525681)
+Patch1110: acpi-ec-merge-irq-and-poll-modes.patch
+Patch1120: acpi-ec-use-burst-mode-only-for-msi-notebooks.patch
+Patch1130: acpi-ec-restart-command-even-if-no-interrupts-from-ec.patch
 
 Patch1515: lirc-2.6.31.patch
 Patch1517: hdpvr-ir-enable.patch
@@ -778,6 +783,15 @@ Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12012: linux-2.6-rtc-show-hctosys.patch
 Patch12013: linux-2.6-rfkill-all.patch
 Patch12014: linux-2.6-selinux-module-load-perms.patch
+
+# sched fixes cherry-picked from 2.6.32
+Patch13100: sched-deal-with-low-load-in-wake-affine.patch
+Patch13101: sched-ensure-child-cant-gain-time-over-its-parent-after-fork.patch
+Patch13102: sched-remove-shortcut-from-select-task-rq-fair.patch
+# latency defaults from 2.6.32
+Patch13110: sched-retune-scheduler-latency-defaults.patch
+# Fix huge wakeup latencies
+Patch13120: sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
 
 # patches headed for -stable
 
@@ -1320,6 +1334,12 @@ ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
+# cpuidle: Fix the menu governor to boost IO performance
+ApplyPatch linux-2.6.31-cpuidle-faster-io.patch
+# EC fixes from 2.6.32 (#492699, #525681)
+ApplyPatch acpi-ec-merge-irq-and-poll-modes.patch
+ApplyPatch acpi-ec-use-burst-mode-only-for-msi-notebooks.patch
+ApplyPatch acpi-ec-restart-command-even-if-no-interrupts-from-ec.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1402,9 +1422,6 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Determine cacheline sizes in a generic manner.
 ApplyPatch linux-2.6-pci-cacheline-sizing.patch
-
-# cpuidle: Fix the menu governor to boost IO performance
-ApplyPatch linux-2.6.31-cpuidle-faster-io.patch
 
 # http://www.lirc.org/
 ApplyPatch lirc-2.6.31.patch
@@ -1497,6 +1514,15 @@ ApplyPatch tg3-03-fix-57780-asic-rev-pcie-link-receiver-errors.patch
 ApplyPatch tg3-04-prevent-tx-bd-corruption.patch
 ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
+
+# sched fixes cherry-picked from 2.6.32
+ApplyPatch sched-deal-with-low-load-in-wake-affine.patch
+ApplyPatch sched-ensure-child-cant-gain-time-over-its-parent-after-fork.patch
+ApplyPatch sched-remove-shortcut-from-select-task-rq-fair.patch
+# latency defaults from 2.6.32
+ApplyPatch sched-retune-scheduler-latency-defaults.patch
+# fix wakeup latency
+ApplyPatch sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
 
 #ApplyPatch highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
 #ApplyPatch highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
@@ -2150,6 +2176,15 @@ fi
 # and build.
 
 %changelog
+* Wed Nov 18 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.6-137
+- Actually force the IOMMU not to be used when we detect the HP/Acer bug.
+
+* Tue Nov 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.6-136
+- ACPI embedded controller fixes from Fedora 11.
+
+* Tue Nov 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.6-135
+- Scheduler fixes and latency tuning patches from F-11.
+
 * Tue Nov 17 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.134
 - Deblobbed and adjusted patch-libre-2.6.31.6 and drm-next-984d1f3c.patch.
 
