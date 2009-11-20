@@ -3,10 +3,10 @@ be just data, but since we're deblobbing other stuff that renders the
 rest unusable, why take risks?
 
 diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
-index e4d971c..62dd13c 100644
+index f831ea1..a2320ac 100644
 --- a/drivers/gpu/drm/Kconfig
 +++ b/drivers/gpu/drm/Kconfig
-@@ -153,3 +153,59 @@ config DRM_SAVAGE
+@@ -154,3 +154,59 @@ config DRM_SAVAGE
  	help
  	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
  	  chipset. If M is selected the module will be called savage.
@@ -1781,10 +1781,10 @@ index 0000000..20564f8
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
 new file mode 100644
-index 0000000..34d193e
+index 0000000..ba946df
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -0,0 +1,5716 @@
+@@ -0,0 +1,5734 @@
 +/*
 + * Copyright 2005-2006 Erik Waling
 + * Copyright 2006 Stephane Marchesin
@@ -4259,103 +4259,120 @@ index 0000000..34d193e
 +}
 +
 +static bool
-+init_87(struct nvbios *bios, uint16_t offset, struct init_exec *iexec)
++init_ram_restrict_pll(struct nvbios *bios, uint16_t offset,
++		      struct init_exec *iexec)
 +{
 +	/*
-+	 * INIT_87   opcode: 0x87 ('')
++	 * INIT_RAM_RESTRICT_PLL   opcode: 0x87 ('')
 +	 *
 +	 * offset      (8 bit): opcode
-+	 * offset + 1  (8 bit): unknown
-+	 * offset + 4 (32 bit): unknown entry 0
++	 * offset + 1  (8 bit): PLL type
++	 * offset + 2 (32 bit): frequency 0
 +	 *
-+	 * Unknown function.  Stubbed here as one of my cards can resume
-+	 * fine without it, but we'd still want to run the remainder
-+	 * of the script instead of aborting.
++	 * Uses the RAMCFG strap of PEXTDEV_BOOT as an index into the table at
++	 * ram_restrict_table_ptr.  The value read from there is used to select
++	 * a frequency from the table starting at 'frequency 0' to be
++	 * programmed into the PLL corresponding to 'type'.
 +	 *
-+	 * Starting from offset+4 there are BIT_M+2 32-bit entries.
++	 * The PLL limits table on cards using this opcode has a mapping of
++	 * 'type' to the relevant registers.
 +	 */
 +
-+	NV_WARN(bios->dev, "INIT_87 stubbed!\n");
++	struct drm_device *dev = bios->dev;
++	uint32_t strap = (bios_rd32(bios, NV_PEXTDEV_BOOT_0) & 0x0000003c) >> 2;
++	uint8_t index = bios->data[bios->ram_restrict_tbl_ptr + strap];
++	uint8_t type = bios->data[offset + 1];
++	uint32_t freq = ROM32(bios->data[offset + 2 + (index * 4)]);
++	uint8_t *pll_limits = &bios->data[bios->pll_limit_tbl_ptr], *entry;
++	int i;
++
++	if (!iexec->execute)
++		return true;
++
++	if (!bios->pll_limit_tbl_ptr || (pll_limits[0] & 0xf0) != 0x30) {
++		NV_ERROR(dev, "PLL limits table not version 3.x\n");
++		return true; /* deliberate, allow default clocks to remain */
++	}
++
++	entry = pll_limits + pll_limits[1];
++	for (i = 0; i < pll_limits[3]; i++, entry += pll_limits[2]) {
++		if (entry[0] == type) {
++			uint32_t reg = ROM32(entry[3]);
++
++			BIOSLOG(bios, "0x%04X: "
++				      "Type %02x Reg 0x%08x Freq %dKHz\n",
++				offset, type, reg, freq);
++
++			setPLL(bios, reg, freq);
++			return true;
++		}
++	}
++
++	NV_ERROR(dev, "PLL type 0x%02x not found in PLL limits table", type);
 +	return true;
 +}
 +
 +static bool
-+init_8e(struct nvbios *bios, uint16_t offset, struct init_exec *iexec)
++init_gpio(struct nvbios *bios, uint16_t offset, struct init_exec *iexec)
 +{
 +	/*
-+	 * INIT_8E   opcode: 0x8E ('')
++	 * INIT_GPIO   opcode: 0x8E ('')
 +	 *
 +	 * offset      (8 bit): opcode
 +	 *
-+	 * The purpose of this opcode is unclear (being for nv50 cards), and
-+	 * the literal functionality can be seen in the code below.
-+	 *
-+	 * A brief synopsis is that for each entry in a table pointed to by the
-+	 * DCB table header, depending on the settings of various bits, various
-+	 * other bits in registers 0xe100, 0xe104, and 0xe108, are set or
-+	 * cleared.
++	 * Loop over all entries in the DCB GPIO table, and initialise
++	 * each GPIO according to various values listed in each entry
 +	 */
 +
-+	uint8_t headerlen = bios->data[bios->bdcb.init8e_table_ptr + 1];
-+	uint8_t entries = bios->data[bios->bdcb.init8e_table_ptr + 2];
-+	uint8_t recordlen = bios->data[bios->bdcb.init8e_table_ptr + 3];
++	const uint32_t nv50_gpio_reg[4] = { 0xe104, 0xe108, 0xe280, 0xe284 };
++	const uint32_t nv50_gpio_ctl[2] = { 0xe100, 0xe28c };
++	const uint8_t *gpio_table = &bios->data[bios->bdcb.init8e_table_ptr];
++	const uint8_t *gpio_entry;
 +	int i;
 +
 +	if (bios->bdcb.version != 0x40) {
 +		NV_ERROR(bios->dev, "DCB table not version 4.0\n");
 +		return false;
 +	}
++
 +	if (!bios->bdcb.init8e_table_ptr) {
 +		NV_WARN(bios->dev, "Invalid pointer to INIT_8E table\n");
 +		return false;
 +	}
 +
-+	for (i = 0; i < entries; i++) {
-+		uint32_t entry = ROM32(bios->data[bios->bdcb.init8e_table_ptr + headerlen + recordlen * i]);
-+		int shift = (entry & 0x1f) * 4;
-+		uint32_t mask;
-+		uint32_t reg = 0xe104;
-+		uint32_t data;
++	gpio_entry = gpio_table + gpio_table[1];
++	for (i = 0; i < gpio_table[2]; i++, gpio_entry += gpio_table[3]) {
++		uint32_t entry = ROM32(gpio_entry[0]), r, s, v;
++		int line = (entry & 0x0000001f);
 +
-+		if ((entry & 0xff00) == 0xff00)
++		BIOSLOG(bios, "0x%04X: Entry: 0x%08X\n", offset, entry);
++
++		if ((entry & 0x0000ff00) == 0x0000ff00)
 +			continue;
 +
-+		if (shift >= 32) {
-+			reg += 4;
-+			shift -= 32;
-+		}
-+		shift %= 32;
-+
-+		mask = ~(3 << shift);
-+		if (entry & (1 << 24))
-+			data = (entry >> 21);
++		r = nv50_gpio_reg[line >> 3];
++		s = (line & 0x07) << 2;
++		v = bios_rd32(bios, r) & ~(0x00000003 << s);
++		if (entry & 0x01000000)
++			v |= (((entry & 0x60000000) >> 29) ^ 2) << s;
 +		else
-+			data = (entry >> 19);
-+		data = ((data & 3) ^ 2) << shift;
++			v |= (((entry & 0x18000000) >> 27) ^ 2) << s;
++		bios_wr32(bios, r, v);
 +
-+		BIOSLOG(bios, "0x%04X: Entry: 0x%08X, Reg: 0x%08X, "
-+			      "Shift: 0x%02X, Mask: 0x%08X, Data: 0x%08X\n",
-+			offset, entry, reg, shift, mask, data);
-+
-+		bios_wr32(bios, reg, (bios_rd32(bios, reg) & mask) | data);
-+
-+		reg = 0xe100;
-+		shift = entry & 0x1f;
-+
-+		mask = ~(1 << 16 | 1);
-+		mask = mask << shift | mask >> (32 - shift);
-+		data = 0;
-+		if ((entry & (3 << 25)) == (1 << 25))
-+			data |= 1;
-+		if ((entry & (3 << 25)) == (2 << 25))
-+			data |= 0x10000;
-+		data <<= shift;
-+
-+		BIOSLOG(bios, "0x%04X: Entry: 0x%08X, Reg: 0x%08X, "
-+			      "Shift: 0x%02X, Mask: 0x%08X, Data: 0x%08X\n",
-+			offset, entry, reg, shift, mask, data);
-+
-+		bios_wr32(bios, reg, (bios_rd32(bios, reg) & mask) | data);
++		r = nv50_gpio_ctl[line >> 4];
++		s = (line & 0x0f);
++		v = bios_rd32(bios, r) & ~(0x00010001 << s);
++		switch ((entry & 0x06000000) >> 25) {
++		case 1:
++			v |= (0x00000001 << s);
++			break;
++		case 2:
++			v |= (0x00010000 << s);
++			break;
++		default:
++			break;
++		}
++		bios_wr32(bios, r, v);
 +	}
 +
 +	return true;
@@ -4738,8 +4755,9 @@ index 0000000..34d193e
 +	{ "INIT_INDEX_IO"                     , 0x78, 6       , 0       , 0       , init_index_io                   },
 +	{ "INIT_PLL"                          , 0x79, 7       , 0       , 0       , init_pll                        },
 +	{ "INIT_ZM_REG"                       , 0x7A, 9       , 0       , 0       , init_zm_reg                     },
-+	{ "INIT_87"                           , 0x87, 2       , 0       , 0       , init_87                         },
-+	{ "INIT_8E"                           , 0x8E, 1       , 0       , 0       , init_8e                         },
++	/* INIT_RAM_RESTRICT_PLL's length is adjusted by the BIT M table */
++	{ "INIT_RAM_RESTRICT_PLL"             , 0x87, 2       , 0       , 0       , init_ram_restrict_pll           },
++	{ "INIT_GPIO"                         , 0x8E, 1       , 0       , 0       , init_gpio                       },
 +	/* INIT_RAM_RESTRICT_ZM_REG_GROUP's mult is loaded by M table in BIT */
 +	{ "INIT_RAM_RESTRICT_ZM_REG_GROUP"    , 0x8F, 7       , 6       , 0       , init_ram_restrict_zm_reg_group  },
 +	{ "INIT_COPY_ZM_REG"                  , 0x90, 9       , 0       , 0       , init_copy_zm_reg                },
@@ -13701,10 +13719,10 @@ index 0000000..0cff7eb
 +
 diff --git a/drivers/gpu/drm/nouveau/nouveau_gem.c b/drivers/gpu/drm/nouveau/nouveau_gem.c
 new file mode 100644
-index 0000000..a95b8f7
+index 0000000..b8c3664
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_gem.c
-@@ -0,0 +1,977 @@
+@@ -0,0 +1,981 @@
 +/*
 + * Copyright (C) 2008 Ben Skeggs.
 + * All Rights Reserved.
@@ -14311,7 +14329,7 @@ index 0000000..a95b8f7
 +	struct drm_gem_object *gem;
 +	struct nouveau_bo *pbbo;
 +	struct list_head list;
-+	int ret = 0, do_reloc = 0;
++	int i, ret = 0, do_reloc = 0;
 +
 +	NOUVEAU_CHECK_INITIALISED_WITH_RETURN;
 +	NOUVEAU_GET_USER_CHANNEL_WITH_RETURN(req->channel, file_priv, chan);
@@ -14387,8 +14405,8 @@ index 0000000..a95b8f7
 +	if (!PUSHBUF_CAL) {
 +		uint32_t retaddy;
 +
-+		if (chan->dma.free < 4) {
-+			ret = nouveau_dma_wait(chan, 4);
++		if (chan->dma.free < 4 + NOUVEAU_DMA_SKIPS) {
++			ret = nouveau_dma_wait(chan, 4 + NOUVEAU_DMA_SKIPS);
 +			if (ret) {
 +				NV_ERROR(dev, "jmp_space: %d\n", ret);
 +				goto out;
@@ -14445,7 +14463,7 @@ index 0000000..a95b8f7
 +				  req->offset) | 2);
 +		OUT_RING(chan, 0);
 +	} else {
-+		ret = RING_SPACE(chan, 2);
++		ret = RING_SPACE(chan, 2 + NOUVEAU_DMA_SKIPS);
 +		if (ret) {
 +			NV_ERROR(dev, "jmp_space: %d\n", ret);
 +			goto out;
@@ -14453,6 +14471,10 @@ index 0000000..a95b8f7
 +		OUT_RING(chan, ((pbbo->bo.mem.mm_node->start << PAGE_SHIFT) +
 +				  req->offset) | 0x20000000);
 +		OUT_RING(chan, 0);
++
++		/* Space the jumps apart with NOPs. */
++		for (i = 0; i < NOUVEAU_DMA_SKIPS; i++)
++			OUT_RING(chan, 0);
 +	}
 +
 +	ret = nouveau_fence_emit(fence);
@@ -16222,10 +16244,10 @@ index 0000000..ff4993a
 +#endif	/* __NOUVEAU_HW_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_i2c.c b/drivers/gpu/drm/nouveau/nouveau_i2c.c
 new file mode 100644
-index 0000000..3f219dd
+index 0000000..cca2b6c
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_i2c.c
-@@ -0,0 +1,256 @@
+@@ -0,0 +1,257 @@
 +/*
 + * Copyright 2009 Red Hat Inc.
 + *
@@ -16404,6 +16426,7 @@ index 0000000..3f219dd
 +		 "nouveau-%s-%d", pci_name(dev->pdev), index);
 +	i2c->adapter.owner = THIS_MODULE;
 +	i2c->adapter.algo_data = &i2c->algo;
++	i2c->adapter.dev.parent = &dev->pdev->dev;
 +	i2c->dev = dev;
 +
 +	switch (entry->port_type) {
@@ -21405,45 +21428,6 @@ index 0000000..790630d
 +	return true;
 +}
 +
-diff --git a/drivers/gpu/drm/nouveau/nouveau_swmthd.h b/drivers/gpu/drm/nouveau/nouveau_swmthd.h
-new file mode 100644
-index 0000000..5b9409f
---- /dev/null
-+++ b/drivers/gpu/drm/nouveau/nouveau_swmthd.h
-@@ -0,0 +1,33 @@
-+/*
-+ * Copyright (C) 2007 Arthur Huillet.
-+ *
-+ * All Rights Reserved.
-+ *
-+ * Permission is hereby granted, free of charge, to any person obtaining
-+ * a copy of this software and associated documentation files (the
-+ * "Software"), to deal in the Software without restriction, including
-+ * without limitation the rights to use, copy, modify, merge, publish,
-+ * distribute, sublicense, and/or sell copies of the Software, and to
-+ * permit persons to whom the Software is furnished to do so, subject to
-+ * the following conditions:
-+ *
-+ * The above copyright notice and this permission notice (including the
-+ * next paragraph) shall be included in all copies or substantial
-+ * portions of the Software.
-+ *
-+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-+ * IN NO EVENT SHALL THE COPYRIGHT OWNER(S) AND/OR ITS SUPPLIERS BE
-+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-+ *
-+ */
-+
-+/*
-+ * Authors:
-+ *   Arthur Huillet <arthur.huillet AT free DOT fr>
-+ */
-+
-+int nouveau_sw_method_execute(struct drm_device *dev, uint32_t oclass, uint32_t method); /* execute the given software method, returns 0 on success */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_ttm.c b/drivers/gpu/drm/nouveau/nouveau_ttm.c
 new file mode 100644
 index 0000000..7818981
@@ -26235,10 +26219,10 @@ index 0000000..877f00e
 +}
 diff --git a/drivers/gpu/drm/nouveau/nv10_graph.c b/drivers/gpu/drm/nouveau/nv10_graph.c
 new file mode 100644
-index 0000000..cf5c9c4
+index 0000000..6bf6804
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv10_graph.c
-@@ -0,0 +1,891 @@
+@@ -0,0 +1,892 @@
 +/*
 + * Copyright 2007 Matthieu CASTET <castet.matthieu@free.fr>
 + * All Rights Reserved.
@@ -26914,7 +26898,8 @@ index 0000000..cf5c9c4
 +	nv10_graph_load_pipe(chan);
 +
 +	nv_wr32(dev, NV10_PGRAPH_CTX_CONTROL, 0x10010100);
-+	nv_wr32(dev, NV10_PGRAPH_CTX_USER, chan->id << 24);
++	tmp = nv_rd32(dev, NV10_PGRAPH_CTX_USER);
++	nv_wr32(dev, NV10_PGRAPH_CTX_USER, (tmp & 0xffffff) | chan->id << 24);
 +	tmp = nv_rd32(dev, NV10_PGRAPH_FFINTFC_ST2);
 +	nv_wr32(dev, NV10_PGRAPH_FFINTFC_ST2, tmp & 0xcfffffff);
 +	return 0;
@@ -34301,10 +34286,10 @@ index 0000000..6bcc6d3
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_fifo.c b/drivers/gpu/drm/nouveau/nv50_fifo.c
 new file mode 100644
-index 0000000..c2396a6
+index 0000000..77ae1aa
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_fifo.c
-@@ -0,0 +1,493 @@
+@@ -0,0 +1,494 @@
 +/*
 + * Copyright (C) 2007 Ben Skeggs.
 + * All Rights Reserved.
@@ -34720,7 +34705,7 @@ index 0000000..c2396a6
 +	struct nouveau_channel *chan = NULL;
 +	int chid, get, put, ptr;
 +
-+	NV_DEBUG(chan->dev, "ch%d\n", chan->id);
++	NV_DEBUG(dev, "\n");
 +
 +	chid = pfifo->channel_id(dev);
 +	if (chid < 0 || chid >= dev_priv->engine.fifo.channels)
@@ -34731,6 +34716,7 @@ index 0000000..c2396a6
 +		NV_ERROR(dev, "Inactive channel on PFIFO: %d\n", chid);
 +		return -EINVAL;
 +	}
++	NV_DEBUG(dev, "ch%d\n", chan->id);
 +	ramfc = chan->ramfc->gpuobj;
 +	cache = chan->cache->gpuobj;
 +
@@ -34800,7 +34786,7 @@ index 0000000..c2396a6
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_graph.c b/drivers/gpu/drm/nouveau/nv50_graph.c
 new file mode 100644
-index 0000000..06ce5b9
+index 0000000..eef3ebd
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_graph.c
 @@ -0,0 +1,407 @@
@@ -35213,7 +35199,7 @@ index 0000000..06ce5b9
 +};
 diff --git a/drivers/gpu/drm/nouveau/nv50_grctx.h b/drivers/gpu/drm/nouveau/nv50_grctx.h
 new file mode 100644
-index 0000000..62914d8
+index 0000000..a5fd0e9
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_grctx.h
 @@ -0,0 +1,6 @@
