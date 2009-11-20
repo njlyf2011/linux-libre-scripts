@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1923 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1928 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -731,7 +731,7 @@ Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # nouveau + drm fixes
 Patch1810: kms-offb-handoff.patch
-Patch1812: drm-next-984d1f3c.patch
+Patch1812: drm-next-44c83571.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -747,6 +747,9 @@ Patch1834: drm-edid-header-fixup.patch
 Patch1900: linux-2.6-vga-arb.patch
 Patch1901: drm-vga-arb.patch
 Patch1902: drm-radeon-kms-arbiter-return-ignore.patch
+
+# make harmless fbcon debug less loud
+Patch1903: fbcon-lower-debug.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1452,7 +1455,7 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch kms-offb-handoff.patch
-ApplyPatch drm-next-984d1f3c.patch
+ApplyPatch drm-next-44c83571.patch
 ApplyPatch drm-conservative-fallback-modes.patch
 ApplyPatch drm-edid-retry.patch
 ApplyPatch drm-edid-header-fixup.patch
@@ -1471,6 +1474,9 @@ ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyPatch linux-2.6-vga-arb.patch
 ApplyPatch drm-vga-arb.patch
 ApplyPatch drm-radeon-kms-arbiter-return-ignore.patch
+
+# Lower debug level of fbcon handover messages (rh#538526)
+ApplyPatch fbcon-lower-debug.patch
 
 # linux1394 git patches
 # apply if non-empty
@@ -2176,6 +2182,29 @@ fi
 # and build.
 
 %changelog
+* Thu Nov 19 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed drm-next-44c83571.patch.
+- Updated drm-nouveau.patch.
+
+* Thu Nov 19 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.6-142
+- Oops, add new patch to spec file
+
+* Thu Nov 19 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.6-141
+- Lower debug level of fbcon handover messages (rh#538526)
+
+* Thu Nov 19 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-140
+- drm-next-44c83571.patch: oops pulled the wrong tree into my f12 tree
+
+* Thu Nov 19 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.6-139
+- nouveau: s/r fixes on chipsets using bios opcode 0x87
+- nouveau: fixes to bios opcode 0x8e
+- nouveau: hopefully fix nv1x context switching issues (rh#526577)
+- nouveau: support for NVA5 (GeForce G220)
+- nouveau: fixes for NVAA support
+
+* Thu Nov 19 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-138
+- drm-next-d56672a9.patch: fix some rn50 cloning issues
+
 * Wed Nov 18 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.6-137
 - Actually force the IOMMU not to be used when we detect the HP/Acer bug.
 
