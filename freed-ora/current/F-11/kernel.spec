@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1778 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1779 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2207,6 +2207,9 @@ fi
 # and build.
 
 %changelog
+* Thu Nov 19 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.30.9-100
+- Re-enable CONFIG_DMAR_GFX_WA on x86_64.
+
 * Tue Nov 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.9-99
 - Silence pointless DRM warning message (#537196)
 
