@@ -37,7 +37,6 @@ D/scripts////
 /drm-intel-no-tv-hotplug.patch/1.1/Wed Sep 16 17:44:25 2009/-kb/Tkernel-2_6_31_6-144_fc12
 /drm-intel-pm.patch/1.5/Tue Sep 22 01:04:44 2009/-kb/Tkernel-2_6_31_6-144_fc12
 /drm-next-44c83571.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_31_6-144_fc12
-/drm-nouveau.patch/1.68/dummy timestamp from new-entry+Thu Nov 19 19:19:01 2009/-kb/Tkernel-2_6_31_6-144_fc12
 /drm-radeon-kms-arbiter-return-ignore.patch/1.1/Wed Oct 28 05:59:33 2009/-kb/Tkernel-2_6_31_6-144_fc12
 /drm-radeon-pm.patch/1.2/Tue Sep 22 01:04:34 2009/-kb/Tkernel-2_6_31_6-144_fc12
 /drm-vga-arb.patch/1.9/Thu Oct  8 05:13:43 2009/-kb/Tkernel-2_6_31_6-144_fc12
@@ -161,3 +160,4 @@ D/scripts////
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_31_6-144_fc12
 /v4l-dvb-fix-cx25840-firmware-loading.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_31_6-144_fc12
 /via-hwmon-temp-sensor.patch/1.3/Tue Sep 22 01:04:21 2009/-kb/Tkernel-2_6_31_6-144_fc12
+/drm-nouveau.patch/1.68/Sat Nov 21 19:30:32 2009/-kb/Tkernel-2_6_31_6-144_fc12
