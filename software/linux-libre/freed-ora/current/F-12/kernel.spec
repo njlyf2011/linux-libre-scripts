@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1930 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1931 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -821,6 +821,7 @@ Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
 Patch14460: highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
 Patch14461: highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
+Patch14462: highmem-fix-arm-powerpc-kmap_types.patch
 
 %endif
 
@@ -1532,8 +1533,9 @@ ApplyPatch sched-retune-scheduler-latency-defaults.patch
 # fix wakeup latency
 ApplyPatch sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
 
-#ApplyPatch highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
-#ApplyPatch highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
+ApplyPatch highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
+ApplyPatch highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
+ApplyPatch highmem-fix-arm-powerpc-kmap_types.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2184,6 +2186,9 @@ fi
 # and build.
 
 %changelog
+* Fri Nov 21 2009 Kyle McMartin <kyle@redhat.com>
+- Fix up ssp' highmem fixes with fixes for arm & ppc.
+
 * Thu Nov 20 2009 Chris Wright <chrisw@redhat.com> 2.6.31.6-144
 - VT-d: another fallback for another BIOS bug (#524808)
 
