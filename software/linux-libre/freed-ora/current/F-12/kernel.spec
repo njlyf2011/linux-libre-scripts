@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1933 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1934 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -744,6 +744,7 @@ Patch1831: drm-conservative-fallback-modes.patch
 Patch1832: drm-edid-retry.patch
 Patch1834: drm-edid-header-fixup.patch
 Patch1835: drm-default-mode.patch
+Patch1836: drm-radeon-hdp-cache-flush.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -887,11 +888,12 @@ Group: Development/Debug
 This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
 
-%package -n perf
+%package -n perf-libre
+Provides: perf = %{rpmversion}-%{pkg_release}
 Summary: Performance monitoring for the Linux kernel
 Group: Development/System
 License: GPLv2
-%description -n perf
+%description -n perf-libre
 This package provides the supporting documentation for the perf tool
 shipped in each kernel image subpackage.
 
@@ -1460,6 +1462,7 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 # Nouveau DRM + drm fixes
 ApplyPatch kms-offb-handoff.patch
 ApplyPatch drm-next-44c83571.patch
+ApplyPatch drm-radeon-hdp-cache-flush.patch
 ApplyPatch drm-conservative-fallback-modes.patch
 ApplyPatch drm-edid-retry.patch
 ApplyPatch drm-edid-header-fixup.patch
@@ -2107,7 +2110,7 @@ fi
 %endif
 
 %if %{with_perf}
-%files -n perf
+%files -n perf-libre
 %defattr(-,root,root)
 %{_datadir}/doc/perf
 /usr/sbin/perf
@@ -2188,6 +2191,12 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 24 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Rename subpackage perf to perf-libre; add provides.
+
+* Tue Nov 24 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-148
+- radeon: flush HDP cache on rendering wait - fixes r600 rendercheck failure
+
 * Mon Nov 23 2009 Adam Jackson <ajax@redhat.com>
 - drm-default-mode.patch: Default to 1024x768 to match UMS. (#538761)
 
