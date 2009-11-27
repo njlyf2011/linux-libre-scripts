@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1936 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1937 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -653,6 +653,7 @@ Patch102: linux-2.6-iommu-at-zero.patch
 Patch103: linux-2.6-iommu-dmar-all-1s.patch
 Patch104: linux-2.6-iommu-another-hp-screwup.patch
 Patch105: linux-2.6-iommu-sanity-checks-for-intr-remap-too.patch
+Patch106: linux-2.6-iommu-hp-cantiga-resume.patch
 
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
@@ -1298,6 +1299,8 @@ ApplyPatch linux-2.6-iommu-dmar-all-1s.patch
 ApplyPatch linux-2.6-iommu-another-hp-screwup.patch
 # Apply the 'at zero' and 'all 0xFF' sanity checks for intr_remap too
 ApplyPatch linux-2.6-iommu-sanity-checks-for-intr-remap-too.patch
+# Fix up MMIO BAR for integrated graphics on HP laptops on resume (#536675)
+ApplyPatch linux-2.6-iommu-hp-cantiga-resume.patch
 
 #
 # PowerPC
@@ -2201,6 +2204,9 @@ fi
 # and build.
 
 %changelog
+* Wed Nov 26 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.6-151
+- VT-d: Work around yet more HP BIOS brokenness (#536675)
+
 * Wed Nov 25 2009 Kyle McMartin <kyle@redhat.com>
 - dlm: fix connection close handling.
   Fix by lmb, requested by fabio.
