@@ -4,7 +4,7 @@ Deblobbed
 
 Linux Infrared Remote Control drivers -- http://www.lirc.org
 
-Last updated: Thursday, September 03, 2009
+Last updated: Friday, November 27, 2009
 
 From http://git.wilsonet.com/linux-2.6-lirc.git/
 
@@ -14,36 +14,37 @@ Signed-off-by: Jarod Wilson <jarod@redhat.com>
  MAINTAINERS                           |    9 +
  drivers/input/Kconfig                 |    2 +
  drivers/input/Makefile                |    2 +
- drivers/input/lirc/Kconfig            |  119 ++
+ drivers/input/lirc/Kconfig            |  114 ++
  drivers/input/lirc/Makefile           |   21 +
  drivers/input/lirc/lirc.h             |  100 ++
- drivers/input/lirc/lirc_bt829.c       |  383 ++++++
- drivers/input/lirc/lirc_dev.c         |  839 ++++++++++++
- drivers/input/lirc/lirc_dev.h         |  184 +++
- drivers/input/lirc/lirc_ene0100.c     |  644 +++++++++
+ drivers/input/lirc/lirc_bt829.c       |  383 +++++
+ drivers/input/lirc/lirc_dev.c         |  837 +++++++++++
+ drivers/input/lirc/lirc_dev.h         |  194 +++
+ drivers/input/lirc/lirc_ene0100.c     |  645 +++++++++
  drivers/input/lirc/lirc_ene0100.h     |  169 +++
- drivers/input/lirc/lirc_i2c.c         |  537 ++++++++
+ drivers/input/lirc/lirc_i2c.c         |  538 +++++++
  drivers/input/lirc/lirc_igorplugusb.c |  556 ++++++++
- drivers/input/lirc/lirc_imon.c        | 2301 +++++++++++++++++++++++++++++++++
- drivers/input/lirc/lirc_it87.c        |  986 ++++++++++++++
+ drivers/input/lirc/lirc_imon.c        | 2467 +++++++++++++++++++++++++++++++++
+ drivers/input/lirc/lirc_imon.h        |  209 +++
+ drivers/input/lirc/lirc_it87.c        |  986 +++++++++++++
  drivers/input/lirc/lirc_it87.h        |  116 ++
- drivers/input/lirc/lirc_ite8709.c     |  539 ++++++++
- drivers/input/lirc/lirc_mceusb.c      | 1242 ++++++++++++++++++
+ drivers/input/lirc/lirc_ite8709.c     |  540 +++++++
+ drivers/input/lirc/lirc_mceusb.c      | 1232 ++++++++++++++++
  drivers/input/lirc/lirc_parallel.c    |  709 ++++++++++
  drivers/input/lirc/lirc_parallel.h    |   26 +
  drivers/input/lirc/lirc_sasem.c       |  931 +++++++++++++
- drivers/input/lirc/lirc_serial.c      | 1316 +++++++++++++++++++
- drivers/input/lirc/lirc_sir.c         | 1283 ++++++++++++++++++
- drivers/input/lirc/lirc_streamzap.c   |  794 ++++++++++++
+ drivers/input/lirc/lirc_serial.c      | 1316 ++++++++++++++++++
+ drivers/input/lirc/lirc_sir.c         | 1283 +++++++++++++++++
+ drivers/input/lirc/lirc_streamzap.c   |  794 +++++++++++
  drivers/input/lirc/lirc_ttusbir.c     |  397 ++++++
- drivers/input/lirc/lirc_zilog.c       | 1395 ++++++++++++++++++++
- 26 files changed, 15600 insertions(+), 0 deletions(-)
+ drivers/input/lirc/lirc_zilog.c       | 1396 +++++++++++++++++++
+ 27 files changed, 15972 insertions(+), 0 deletions(-)
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 8dca9d8..f25dc26 100644
+index 81d68d5..f6af1bd 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -3129,6 +3129,15 @@ W:	http://www.pasemi.com/
+@@ -3219,6 +3219,15 @@ W:	http://www.pasemi.com/
  L:	linuxppc-dev@ozlabs.org
  S:	Supported
  
@@ -84,15 +85,15 @@ index 4c9c745..99e2b5e 100644
 +obj-$(CONFIG_INPUT_LIRC)       += lirc/
 diff --git a/drivers/input/lirc/Kconfig b/drivers/input/lirc/Kconfig
 new file mode 100644
-index 0000000..ab13cfe
+index 0000000..8678018
 --- /dev/null
 +++ b/drivers/input/lirc/Kconfig
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,114 @@
 +#
 +# LIRC driver(s) configuration
 +#
 +menuconfig INPUT_LIRC
-+	bool "Linux Infrared Remote Control IR receiver/transmitter drivers"
++	tristate "Linux Infrared Remote Control IR receiver/transmitter drivers"
 +	help
 +	  Say Y here, and all supported Linux Infrared Remote Control IR and
 +	  RF receiver and transmitter drivers will be displayed. When paired
@@ -101,20 +102,15 @@ index 0000000..ab13cfe
 +
 +if INPUT_LIRC
 +
-+config LIRC_DEV
-+	tristate "LIRC device loadable module support"
-+	help
-+	  LIRC device loadable module support, required for most LIRC drivers
-+
 +config LIRC_BT829
 +        tristate "BT829 based hardware"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for the IR interface on BT829-based hardware
 +
 +config LIRC_ENE0100
 +	tristate "ENE KB3924/ENE0100 CIR Port Reciever"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  This is a driver for CIR port handled by ENE KB3924 embedded
 +	  controller found on some notebooks.
@@ -122,56 +118,56 @@ index 0000000..ab13cfe
 +
 +config LIRC_I2C
 +	tristate "I2C Based IR Receivers"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for I2C-based IR receivers, such as those commonly
 +	  found onboard Hauppauge PVR-150/250/350 video capture cards
 +
 +config LIRC_IGORPLUGUSB
 +	tristate "Igor Cesko's USB IR Receiver"
-+	depends on LIRC_DEV && USB
++	depends on INPUT_LIRC && USB
 +	help
 +	  Driver for Igor Cesko's USB IR Receiver
 +
 +config LIRC_IMON
-+	tristate "Soundgraph IMON Receiver"
-+	depends on LIRC_DEV
++	tristate "SoundGraph iMON Receiver and Display"
++	depends on INPUT_LIRC
 +	help
-+	  Driver for the Soundgraph IMON IR Receiver
++	  Driver for the SoundGraph iMON IR Receiver and Display
 +
 +config LIRC_IT87
 +	tristate "ITE IT87XX CIR Port Receiver"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for the ITE IT87xx IR Receiver
 +
 +config LIRC_ITE8709
 +	tristate "ITE8709 CIR Port Receiver"
-+	depends on LIRC_DEV && PNP
++	depends on INPUT_LIRC && PNP
 +	help
 +	  Driver for the ITE8709 IR Receiver
 +
 +config LIRC_MCEUSB
 +	tristate "Windows Media Center Ed. USB IR Transceiver"
-+	depends on LIRC_DEV && USB
++	depends on INPUT_LIRC && USB
 +	help
 +	  Driver for Windows Media Center Ed. USB IR Transceivers
 +
 +config LIRC_PARALLEL
 +	tristate "Homebrew Parallel Port Receiver"
-+	depends on LIRC_DEV && !SMP
++	depends on INPUT_LIRC && !SMP
 +	help
 +	  Driver for Homebrew Parallel Port Receivers
 +
 +config LIRC_SASEM
 +	tristate "Sasem USB IR Remote"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for the Sasem OnAir Remocon-V or Dign HV5 HTPC IR/VFD Module
 +
 +config LIRC_SERIAL
 +	tristate "Homebrew Serial Port Receiver"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for Homebrew Serial Port Receivers
 +
@@ -184,32 +180,32 @@ index 0000000..ab13cfe
 +
 +config LIRC_SIR
 +	tristate "Built-in SIR IrDA port"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for the SIR IrDA port
 +
 +config LIRC_STREAMZAP
 +	tristate "Streamzap PC Receiver"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for the Streamzap PC Receiver
 +
 +config LIRC_TTUSBIR
 +	tristate "Technotrend USB IR Receiver"
-+	depends on LIRC_DEV && USB
++	depends on INPUT_LIRC && USB
 +	help
 +	  Driver for the Technotrend USB IR Receiver
 +
 +config LIRC_ZILOG
 +	tristate "Zilog/Hauppauge IR Transmitter"
-+	depends on LIRC_DEV
++	depends on INPUT_LIRC
 +	help
 +	  Driver for the Zilog/Hauppauge IR Transmitter, found on
 +	  PVR-150/500, HVR-1200/1250/1700/1800, HD-PVR and other cards
 +endif
 diff --git a/drivers/input/lirc/Makefile b/drivers/input/lirc/Makefile
 new file mode 100644
-index 0000000..8da7aa9
+index 0000000..9122e87
 --- /dev/null
 +++ b/drivers/input/lirc/Makefile
 @@ -0,0 +1,21 @@
@@ -218,7 +214,7 @@ index 0000000..8da7aa9
 +
 +# Each configuration option enables a list of files.
 +
-+obj-$(CONFIG_LIRC_DEV)		+= lirc_dev.o
++obj-$(CONFIG_INPUT_LIRC)	+= lirc_dev.o
 +obj-$(CONFIG_LIRC_BT829)	+= lirc_bt829.o
 +obj-$(CONFIG_LIRC_ENE0100)	+= lirc_ene0100.o
 +obj-$(CONFIG_LIRC_I2C)		+= lirc_i2c.o
@@ -731,10 +727,10 @@ index 0000000..0485884
 +MODULE_PARM_DESC(debug, "Debug enabled or not");
 diff --git a/drivers/input/lirc/lirc_dev.c b/drivers/input/lirc/lirc_dev.c
 new file mode 100644
-index 0000000..48ab5af
+index 0000000..bbc6fb2
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_dev.c
-@@ -0,0 +1,839 @@
+@@ -0,0 +1,837 @@
 +/*
 + * LIRC base driver
 + *
@@ -781,15 +777,10 @@ index 0000000..48ab5af
 +#include "lirc_dev.h"
 +
 +static int debug;
-+#define dprintk(fmt, args...)					\
-+	do {							\
-+		if (debug)					\
-+			printk(KERN_DEBUG fmt, ## args);	\
-+	} while (0)
 +
-+#define IRCTL_DEV_NAME    "BaseRemoteCtl"
-+#define NOPLUG            -1
-+#define LOGHEAD           "lirc_dev (%s[%d]): "
++#define IRCTL_DEV_NAME	"BaseRemoteCtl"
++#define NOPLUG		-1
++#define LOGHEAD		"lirc_dev (%s[%d]): "
 +
 +static dev_t lirc_base_dev;
 +
@@ -820,14 +811,15 @@ index 0000000..48ab5af
 + */
 +static void init_irctl(struct irctl *ir)
 +{
-+	dprintk(LOGHEAD "initializing irctl\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "initializing irctl\n",
++		ir->d.name, ir->d.minor);
 +	mutex_init(&ir->buffer_lock);
 +	ir->d.minor = NOPLUG;
 +}
 +
 +static void cleanup(struct irctl *ir)
 +{
-+	dprintk(LOGHEAD "cleaning up\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "cleaning up\n", ir->d.name, ir->d.minor);
 +
 +	device_destroy(lirc_class, MKDEV(MAJOR(lirc_base_dev), ir->d.minor));
 +
@@ -874,7 +866,8 @@ index 0000000..48ab5af
 +{
 +	struct irctl *ir = irctl;
 +
-+	dprintk(LOGHEAD "poll thread started\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "poll thread started\n",
++		ir->d.name, ir->d.minor);
 +
 +	do {
 +		if (ir->open) {
@@ -892,7 +885,8 @@ index 0000000..48ab5af
 +		}
 +	} while (!kthread_should_stop());
 +
-+	dprintk(LOGHEAD "poll thread ended\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "poll thread ended\n",
++		ir->d.name, ir->d.minor);
 +
 +	return 0;
 +}
@@ -949,49 +943,48 @@ index 0000000..48ab5af
 +	}
 +
 +	if (MAX_IRCTL_DEVICES <= d->minor) {
-+		printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+		       "\"minor\" must be between 0 and %d (%d)!\n",
-+		       MAX_IRCTL_DEVICES-1, d->minor);
++		dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++			"\"minor\" must be between 0 and %d (%d)!\n",
++			MAX_IRCTL_DEVICES-1, d->minor);
 +		err = -EBADRQC;
 +		goto out;
 +	}
 +
 +	if (1 > d->code_length || (BUFLEN * 8) < d->code_length) {
-+		printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+		       "code length in bits for minor (%d) "
-+		       "must be less than %d!\n",
-+		       d->minor, BUFLEN * 8);
++		dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++			"code length in bits for minor (%d) "
++			"must be less than %d!\n",
++			d->minor, BUFLEN * 8);
 +		err = -EBADRQC;
 +		goto out;
 +	}
 +
-+	printk(KERN_INFO "lirc_dev: lirc_register_driver: sample_rate: %d\n",
++	dev_dbg(d->dev, "lirc_dev: lirc_register_driver: sample_rate: %d\n",
 +		d->sample_rate);
 +	if (d->sample_rate) {
 +		if (2 > d->sample_rate || HZ < d->sample_rate) {
-+			printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+			       "sample_rate must be between 2 and %d!\n", HZ);
++			dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++				"sample_rate must be between 2 and %d!\n", HZ);
 +			err = -EBADRQC;
 +			goto out;
 +		}
 +		if (!d->add_to_buf) {
-+			printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+			       "add_to_buf cannot be NULL when "
-+			       "sample_rate is set\n");
++			dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++				"add_to_buf cannot be NULL when "
++				"sample_rate is set\n");
 +			err = -EBADRQC;
 +			goto out;
 +		}
 +	} else if (!(d->fops && d->fops->read) && !d->rbuf) {
-+		printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+		       "fops->read and rbuf "
-+		       "cannot all be NULL!\n");
++		dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++			"fops->read and rbuf cannot all be NULL!\n");
 +		err = -EBADRQC;
 +		goto out;
 +	} else if (!d->rbuf) {
 +		if (!(d->fops && d->fops->read && d->fops->poll &&
 +		      d->fops->ioctl)) {
-+			printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+			       "neither read, poll nor ioctl can be NULL!\n");
++			dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++				"neither read, poll nor ioctl can be NULL!\n");
 +			err = -EBADRQC;
 +			goto out;
 +		}
@@ -1007,14 +1000,14 @@ index 0000000..48ab5af
 +			if (!irctls[minor])
 +				break;
 +		if (MAX_IRCTL_DEVICES == minor) {
-+			printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+			       "no free slots for drivers!\n");
++			dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++				"no free slots for drivers!\n");
 +			err = -ENOMEM;
 +			goto out_lock;
 +		}
 +	} else if (irctls[minor]) {
-+		printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+		       "minor (%d) just registered!\n", minor);
++		dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++			"minor (%d) just registered!\n", minor);
 +		err = -EBUSY;
 +		goto out_lock;
 +	}
@@ -1074,9 +1067,9 @@ index 0000000..48ab5af
 +		/* try to fire up polling thread */
 +		ir->task = kthread_run(lirc_thread, (void *)ir, "lirc_dev");
 +		if (IS_ERR(ir->task)) {
-+			printk(KERN_ERR "lirc_dev: lirc_register_driver: "
-+			       "cannot run poll thread for minor = %d\n",
-+			       d->minor);
++			dev_err(d->dev, "lirc_dev: lirc_register_driver: "
++				"cannot run poll thread for minor = %d\n",
++				d->minor);
 +			err = -ECHILD;
 +			goto out_sysfs;
 +		}
@@ -1089,8 +1082,8 @@ index 0000000..48ab5af
 +	ir->attached = 1;
 +	mutex_unlock(&lirc_dev_lock);
 +
-+	dprintk("lirc_dev: driver %s registered at minor number = %d\n",
-+		ir->d.name, ir->d.minor);
++	dev_info(ir->d.dev, "lirc_dev: driver %s registered at minor = %d\n",
++		 ir->d.name, ir->d.minor);
 +	return minor;
 +
 +out_sysfs:
@@ -1128,12 +1121,12 @@ index 0000000..48ab5af
 +	if (ir->task)
 +		kthread_stop(ir->task);
 +
-+	dprintk("lirc_dev: driver %s unregistered from minor number = %d\n",
++	dev_dbg(ir->d.dev, "lirc_dev: driver %s unregistered from minor = %d\n",
 +		ir->d.name, ir->d.minor);
 +
 +	ir->attached = 0;
 +	if (ir->open) {
-+		dprintk(LOGHEAD "releasing opened driver\n",
++		dev_dbg(ir->d.dev, LOGHEAD "releasing opened driver\n",
 +			ir->d.name, ir->d.minor);
 +		wake_up_interruptible(&ir->buf->wait_poll);
 +		mutex_lock(&ir->buffer_lock);
@@ -1160,8 +1153,8 @@ index 0000000..48ab5af
 +	int retval = 0;
 +
 +	if (iminor(inode) >= MAX_IRCTL_DEVICES) {
-+		dprintk("lirc_dev [%d]: open result = -ENODEV\n",
-+			iminor(inode));
++		printk(KERN_WARNING "lirc_dev [%d]: open result = -ENODEV\n",
++		       iminor(inode));
 +		return -ENODEV;
 +	}
 +
@@ -1174,7 +1167,7 @@ index 0000000..48ab5af
 +		goto error;
 +	}
 +
-+	dprintk(LOGHEAD "open called\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "open called\n", ir->d.name, ir->d.minor);
 +
 +	if (ir->d.minor == NOPLUG) {
 +		retval = -ENODEV;
@@ -1202,8 +1195,8 @@ index 0000000..48ab5af
 +
 +error:
 +	if (ir)
-+		dprintk(LOGHEAD "open result = %d\n", ir->d.name, ir->d.minor,
-+			retval);
++		dev_dbg(ir->d.dev, LOGHEAD "open result = %d\n",
++			ir->d.name, ir->d.minor, retval);
 +
 +	mutex_unlock(&lirc_dev_lock);
 +
@@ -1215,7 +1208,7 @@ index 0000000..48ab5af
 +{
 +	struct irctl *ir = irctls[iminor(inode)];
 +
-+	dprintk(LOGHEAD "close called\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "close called\n", ir->d.name, ir->d.minor);
 +
 +	WARN_ON(mutex_lock_killable(&lirc_dev_lock));
 +
@@ -1240,7 +1233,7 @@ index 0000000..48ab5af
 +	struct irctl *ir = irctls[iminor(file->f_dentry->d_inode)];
 +	unsigned int ret;
 +
-+	dprintk(LOGHEAD "poll called\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "poll called\n", ir->d.name, ir->d.minor);
 +
 +	if (!ir->attached) {
 +		mutex_unlock(&ir->buffer_lock);
@@ -1257,7 +1250,7 @@ index 0000000..48ab5af
 +	else
 +		ret = POLLERR;
 +
-+	dprintk(LOGHEAD "poll result = %d\n",
++	dev_dbg(ir->d.dev, LOGHEAD "poll result = %d\n",
 +		ir->d.name, ir->d.minor, ret);
 +
 +	return ret;
@@ -1271,11 +1264,11 @@ index 0000000..48ab5af
 +	int result = 0;
 +	struct irctl *ir = irctls[iminor(inode)];
 +
-+	dprintk(LOGHEAD "ioctl called (0x%x)\n",
++	dev_dbg(ir->d.dev, LOGHEAD "ioctl called (0x%x)\n",
 +		ir->d.name, ir->d.minor, cmd);
 +
 +	if (ir->d.minor == NOPLUG || !ir->attached) {
-+		dprintk(LOGHEAD "ioctl result = -ENODEV\n",
++		dev_dbg(ir->d.dev, LOGHEAD "ioctl result = -ENODEV\n",
 +			ir->d.name, ir->d.minor);
 +		return -ENODEV;
 +	}
@@ -1311,7 +1304,7 @@ index 0000000..48ab5af
 +		result = -EINVAL;
 +	}
 +
-+	dprintk(LOGHEAD "ioctl result = %d\n",
++	dev_dbg(ir->d.dev, LOGHEAD "ioctl result = %d\n",
 +		ir->d.name, ir->d.minor, result);
 +
 +	return result;
@@ -1422,7 +1415,7 @@ index 0000000..48ab5af
 +	int ret = 0, written = 0;
 +	DECLARE_WAITQUEUE(wait, current);
 +
-+	dprintk(LOGHEAD "read called\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "read called\n", ir->d.name, ir->d.minor);
 +
 +	if (mutex_lock_interruptible(&ir->buffer_lock))
 +		return -ERESTARTSYS;
@@ -1432,7 +1425,7 @@ index 0000000..48ab5af
 +	}
 +
 +	if (length % ir->chunk_size) {
-+		dprintk(LOGHEAD "read result = -EINVAL\n",
++		dev_dbg(ir->d.dev, LOGHEAD "read result = -EINVAL\n",
 +			ir->d.name, ir->d.minor);
 +		mutex_unlock(&ir->buffer_lock);
 +		return -EINVAL;
@@ -1492,7 +1485,7 @@ index 0000000..48ab5af
 +	set_current_state(TASK_RUNNING);
 +	mutex_unlock(&ir->buffer_lock);
 +
-+	dprintk(LOGHEAD "read result = %s (%d)\n",
++	dev_dbg(ir->d.dev, LOGHEAD "read result = %s (%d)\n",
 +		ir->d.name, ir->d.minor, ret ? "-EFAULT" : "OK", ret);
 +
 +	return ret ? ret : written;
@@ -1520,7 +1513,7 @@ index 0000000..48ab5af
 +{
 +	struct irctl *ir = irctls[iminor(file->f_dentry->d_inode)];
 +
-+	dprintk(LOGHEAD "write called\n", ir->d.name, ir->d.minor);
++	dev_dbg(ir->d.dev, LOGHEAD "write called\n", ir->d.name, ir->d.minor);
 +
 +	if (!ir->attached)
 +		return -ENODEV;
@@ -1541,7 +1534,8 @@ index 0000000..48ab5af
 +		goto error;
 +	}
 +
-+	retval = alloc_chrdev_region(&lirc_base_dev, 0, MAX_IRCTL_DEVICES, IRCTL_DEV_NAME);
++	retval = alloc_chrdev_region(&lirc_base_dev, 0, MAX_IRCTL_DEVICES,
++				     IRCTL_DEV_NAME);
 +	if (retval) {
 +		class_destroy(lirc_class);
 +		printk(KERN_ERR "lirc_dev: alloc_chrdev_region failed\n");
@@ -1562,7 +1556,7 @@ index 0000000..48ab5af
 +{
 +	class_destroy(lirc_class);
 +	unregister_chrdev_region(lirc_base_dev, MAX_IRCTL_DEVICES);
-+	dprintk("lirc_dev: module unloaded\n");
++	printk(KERN_INFO "lirc_dev: module unloaded\n");
 +}
 +
 +module_init(lirc_dev_init);
@@ -1576,10 +1570,10 @@ index 0000000..48ab5af
 +MODULE_PARM_DESC(debug, "Enable debugging messages");
 diff --git a/drivers/input/lirc/lirc_dev.h b/drivers/input/lirc/lirc_dev.h
 new file mode 100644
-index 0000000..8eeffa2
+index 0000000..ff27678
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_dev.h
-@@ -0,0 +1,184 @@
+@@ -0,0 +1,194 @@
 +/*
 + * LIRC base driver
 + *
@@ -1611,13 +1605,16 @@ index 0000000..8eeffa2
 +	 * And should allow for some performance fine tunning later */
 +	struct kfifo *fifo;
 +};
++
 +static inline void lirc_buffer_clear(struct lirc_buffer *buf)
 +{
 +	if (buf->fifo)
 +		kfifo_reset(buf->fifo);
 +	else
-+		WARN(1, "calling lirc_buffer_clear on an uninitialized lirc_buffer\n");
++		WARN(1, "calling %s on an uninitialized lirc_buffer\n",
++		     __func__);
 +}
++
 +static inline int lirc_buffer_init(struct lirc_buffer *buf,
 +				    unsigned int chunk_size,
 +				    unsigned int size)
@@ -1631,21 +1628,26 @@ index 0000000..8eeffa2
 +		return -ENOMEM;
 +	return 0;
 +}
++
 +static inline void lirc_buffer_free(struct lirc_buffer *buf)
 +{
 +	if (buf->fifo)
 +		kfifo_free(buf->fifo);
 +	else
-+		WARN(1, "calling lirc_buffer_free on an uninitialized lirc_buffer\n");
++		WARN(1, "calling %s on an uninitialized lirc_buffer\n",
++		     __func__);
 +}
++
 +static inline int lirc_buffer_full(struct lirc_buffer *buf)
 +{
 +	return kfifo_len(buf->fifo) == buf->size * buf->chunk_size;
 +}
++
 +static inline int lirc_buffer_empty(struct lirc_buffer *buf)
 +{
 +	return !kfifo_len(buf->fifo);
 +}
++
 +static inline int lirc_buffer_available(struct lirc_buffer *buf)
 +{
 +	return buf->size - (kfifo_len(buf->fifo) / buf->chunk_size);
@@ -1657,6 +1659,7 @@ index 0000000..8eeffa2
 +	if (kfifo_len(buf->fifo) >= buf->chunk_size)
 +		kfifo_get(buf->fifo, dest, buf->chunk_size);
 +}
++
 +static inline void lirc_buffer_write(struct lirc_buffer *buf,
 +				unsigned char *orig)
 +{
@@ -1682,6 +1685,7 @@ index 0000000..8eeffa2
 +	struct device *dev;
 +	struct module *owner;
 +};
++
 +/* name:
 + * this string will be used for logs
 + *
@@ -1766,10 +1770,10 @@ index 0000000..8eeffa2
 +#endif
 diff --git a/drivers/input/lirc/lirc_ene0100.c b/drivers/input/lirc/lirc_ene0100.c
 new file mode 100644
-index 0000000..e84368f
+index 0000000..6276ce1
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_ene0100.c
-@@ -0,0 +1,644 @@
+@@ -0,0 +1,645 @@
 +/*
 + * driver for ENE KB3926 B/C/D CIR (also known as ENE0100)
 + *
@@ -1796,6 +1800,7 @@ index 0000000..e84368f
 +#include <linux/pnp.h>
 +#include <linux/io.h>
 +#include <linux/interrupt.h>
++#include <linux/sched.h>
 +#include "lirc_ene0100.h"
 +
 +static int sample_period = 75;
@@ -2591,10 +2596,10 @@ index 0000000..01cffa2
 +};
 diff --git a/drivers/input/lirc/lirc_i2c.c b/drivers/input/lirc/lirc_i2c.c
 new file mode 100644
-index 0000000..e27d937
+index 0000000..1f74931
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_i2c.c
-@@ -0,0 +1,537 @@
+@@ -0,0 +1,538 @@
 +/*
 + * lirc_i2c.c
 + *
@@ -3010,6 +3015,7 @@ index 0000000..e27d937
 +	ir->l.data    = ir;
 +	ir->l.minor   = minor;
 +	ir->l.sample_rate = 10;
++	ir->l.dev     = &ir->c.dev;
 +	ir->nextkey   = -1;
 +
 +	switch (addr) {
@@ -3134,7 +3140,7 @@ index 0000000..e27d937
 +module_exit(lirc_i2c_exit);
 diff --git a/drivers/input/lirc/lirc_igorplugusb.c b/drivers/input/lirc/lirc_igorplugusb.c
 new file mode 100644
-index 0000000..ff49bdd
+index 0000000..ecd984a
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_igorplugusb.c
 @@ -0,0 +1,556 @@
@@ -3490,7 +3496,7 @@ index 0000000..ff49bdd
 +			printk(DRIVER_NAME "[%d]: SET_INFRABUFFER_EMPTY: "
 +			       "error %d\n", ir->devnum, ret);
 +		return 0;
-+	} else
++	} else if (ret < 0)
 +		printk(DRIVER_NAME "[%d]: GET_INFRACODE: error %d\n",
 +			ir->devnum, ret);
 +
@@ -3696,15 +3702,16 @@ index 0000000..ff49bdd
 +
 diff --git a/drivers/input/lirc/lirc_imon.c b/drivers/input/lirc/lirc_imon.c
 new file mode 100644
-index 0000000..93acb33
+index 0000000..f12265a
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_imon.c
-@@ -0,0 +1,2301 @@
+@@ -0,0 +1,2467 @@
 +/*
 + *   lirc_imon.c:  LIRC/VFD/LCD driver for SoundGraph iMON IR/VFD/LCD
 + *		   including the iMON PAD model
 + *
 + *   Copyright(C) 2004  Venky Raju(dev@venky.ws)
++ *   Copyright(C) 2009  Jarod Wilson <jarod@wilsonet.com>
 + *
 + *   lirc_imon is free software; you can redistribute it and/or modify
 + *   it under the terms of the GNU General Public License as published by
@@ -3734,12 +3741,14 @@ index 0000000..93acb33
 +
 +#include "lirc.h"
 +#include "lirc_dev.h"
++#include "lirc_imon.h"
 +
 +
 +#define MOD_AUTHOR	"Venky Raju <dev@venky.ws>"
++#define MOD_AUTHOR2	"Jarod Wilson <jarod@wilsonet.com>"
 +#define MOD_DESC	"Driver for SoundGraph iMON MultiMedia IR/Display"
 +#define MOD_NAME	"lirc_imon"
-+#define MOD_VERSION	"0.6"
++#define MOD_VERSION	"0.7"
 +
 +#define DISPLAY_MINOR_BASE	144
 +#define DEVICE_NAME	"lcd%d"
@@ -3750,12 +3759,6 @@ index 0000000..93acb33
 +#define BIT_DURATION	250	/* each bit received is 250us */
 +
 +#define IMON_CLOCK_ENABLE_PACKETS	2
-+
-+#define dprintk(fmt, args...)						\
-+	do {								\
-+		if (debug)						\
-+			printk(KERN_INFO MOD_NAME ": " fmt, ## args);	\
-+	} while (0)
 +
 +/*** P R O T O T Y P E S ***/
 +
@@ -3835,14 +3838,16 @@ index 0000000..93acb33
 +
 +	int ffdc_dev;			/* is this the overused ffdc ID? */
 +	int ir_protocol;		/* iMON or MCE (RC6) IR protocol? */
-+	struct input_dev *mouse;	/* input device for iMON PAD remote */
++	struct input_dev *idev;		/* input device for remote */
 +	struct input_dev *touch;	/* input device for touchscreen */
++	u16 last_keycode;		/* last reported input keycode */
++	u8 last_mce_byte;		/* last mce toggle byte */
 +	int display_type;		/* store the display type */
 +	int pad_mouse;			/* toggle kbd(0)/mouse(1) mode */
 +	int touch_x;			/* x coordinate on touchscreen */
 +	int touch_y;			/* y coordinate on touchscreen */
-+	char name_mouse[128];
-+	char phys_mouse[64];
++	char name_idev[128];
++	char phys_idev[64];
 +	char name_touch[128];
 +	char phys_touch[64];
 +	struct timer_list timer;
@@ -4078,10 +4083,13 @@ index 0000000..93acb33
 +/* threshold at which a pad push registers as an arrow key in kbd mode */
 +static int pad_thresh;
 +
++/* run onboard decode device in lirc mode rather than as pure input device */
++static int lirc_mode = 1;
 +
 +/***  M O D U L E   C O D E ***/
 +
 +MODULE_AUTHOR(MOD_AUTHOR);
++MODULE_AUTHOR(MOD_AUTHOR2);
 +MODULE_DESCRIPTION(MOD_DESC);
 +MODULE_VERSION(MOD_VERSION);
 +MODULE_LICENSE("GPL");
@@ -4101,6 +4109,9 @@ index 0000000..93acb33
 +module_param(pad_thresh, int, S_IRUGO | S_IWUSR);
 +MODULE_PARM_DESC(pad_thresh, "Threshold at which a pad push registers as an "
 +		 "arrow key in kbd mode (default: 28)");
++module_param(lirc_mode, int, S_IRUGO | S_IWUSR);
++MODULE_PARM_DESC(lirc_mode, "Run onboard decoding receiver in lirc mode rather "
++		 "than as a pure input device");
 +
 +static void free_imon_context(struct imon_context *context)
 +{
@@ -4112,7 +4123,7 @@ index 0000000..93acb33
 +	kfree(context->driver);
 +	kfree(context);
 +
-+	dprintk("%s: iMON context freed\n", __func__);
++	dev_dbg(context->driver->dev, "%s: iMON context freed\n", __func__);
 +}
 +
 +static void deregister_from_lirc(struct imon_context *context)
@@ -4172,7 +4183,7 @@ index 0000000..93acb33
 +	} else {
 +		context->display_isopen = 1;
 +		file->private_data = context;
-+		printk(KERN_INFO "display port opened\n");
++		dev_info(context->driver->dev, "display port opened\n");
 +	}
 +
 +	mutex_unlock(&context->lock);
@@ -4208,7 +4219,7 @@ index 0000000..93acb33
 +		retval = -EIO;
 +	} else {
 +		context->display_isopen = 0;
-+		printk(KERN_INFO "display port closed\n");
++		dev_info(context->driver->dev, "display port closed\n");
 +		if (!context->dev_present_intf0 && !context->ir_isopen) {
 +			/*
 +			 * Device disconnected before close and IR port is not
@@ -4226,7 +4237,8 @@ index 0000000..93acb33
 +}
 +
 +/**
-+ * Sends a packet to the device
++ * Sends a packet to the device -- this function must be called
++ * with context->lock held.
 + */
 +static int send_packet(struct imon_context *context)
 +{
@@ -4265,8 +4277,8 @@ index 0000000..93acb33
 +		pipe = usb_sndctrlpipe(context->usbdev_intf0, 0);
 +
 +		/* build the control urb */
-+		usb_fill_control_urb(context->tx_urb, context->usbdev_intf0, pipe,
-+				     (unsigned char *)control_req,
++		usb_fill_control_urb(context->tx_urb, context->usbdev_intf0,
++				     pipe, (unsigned char *)control_req,
 +				     context->usb_tx_buf,
 +				     sizeof(context->usb_tx_buf),
 +				     usb_tx_callback, context);
@@ -4351,7 +4363,7 @@ index 0000000..93acb33
 +		return -ENODEV;
 +	}
 +
-+	switch(context->display_type) {
++	switch (context->display_type) {
 +	case IMON_DISPLAY_TYPE_LCD:
 +		clock_enable_pkt[0][0] = 0x80;
 +		clock_enable_pkt[0][1] = year;
@@ -4404,7 +4416,6 @@ index 0000000..93acb33
 +		return -ENODEV;
 +	}
 +
-+
 +	for (i = 0; i < IMON_CLOCK_ENABLE_PACKETS; i++) {
 +		memcpy(context->usb_tx_buf, clock_enable_pkt[i], 8);
 +		retval = send_packet(context);
@@ -4416,7 +4427,6 @@ index 0000000..93acb33
 +	}
 +
 +	return retval;
-+
 +}
 +
 +/**
@@ -4432,16 +4442,16 @@ index 0000000..93acb33
 +		return -ENODEV;
 +
 +	mutex_lock(&context->lock);
-+	if (context->ir_isassociating) {
++	if (context->ir_isassociating)
 +		strcpy(buf, "associating\n");
-+	} else if (context->ir_isopen) {
++	else if (context->ir_isopen)
 +		strcpy(buf, "open\n");
-+	} else {
++	else
 +		strcpy(buf, "closed\n");
-+	}
-+	printk(KERN_INFO "Visit http://www.lirc.org/html/imon-24g.html for "
-+	       "instructions on how to associate your iMON 2.4G DT/LT "
-+	       "remote\n");
++
++	dev_info(d, "Visit http://www.lirc.org/html/imon-24g.html for "
++		 "instructions on how to associate your iMON 2.4G DT/LT "
++		 "remote\n");
 +	mutex_unlock(&context->lock);
 +	return strlen(buf);
 +}
@@ -4711,7 +4721,8 @@ index 0000000..93acb33
 +		err("%s: send packet failed!", __func__);
 +		goto exit;
 +	} else {
-+		dprintk("%s: write %d bytes to LCD\n", __func__, (int) n_bytes);
++		dev_dbg(context->driver->dev, "%s: write %d bytes to LCD\n",
++			__func__, (int) n_bytes);
 +	}
 +exit:
 +	mutex_unlock(&context->lock);
@@ -4749,48 +4760,45 @@ index 0000000..93acb33
 +static void imon_set_ir_protocol(struct imon_context *context)
 +{
 +	int retval;
++	struct device *dev = context->driver->dev;
 +	unsigned char ir_proto_packet[] =
 +		{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86 };
 +
 +	switch (ir_protocol) {
 +	case IMON_IR_PROTOCOL_MCE:
-+		/* MCE proto not supported on devices without tx control */
-+		if (!context->tx_control) {
-+			printk(KERN_INFO "%s: MCE IR protocol not supported on "
-+			       "this device, using iMON protocol\n", __func__);
-+			context->ir_protocol = IMON_IR_PROTOCOL_IMON;
-+			return;
-+		}
-+		dprintk("Configuring IR receiver for MCE protocol\n");
++		dev_dbg(dev, "Configuring IR receiver for MCE protocol\n");
 +		ir_proto_packet[0] = 0x01;
 +		context->ir_protocol = IMON_IR_PROTOCOL_MCE;
 +		break;
 +	case IMON_IR_PROTOCOL_IMON:
-+		dprintk("Configuring IR receiver for iMON protocol\n");
++		dev_dbg(dev, "Configuring IR receiver for iMON protocol\n");
 +		/* ir_proto_packet[0] = 0x00; // already the default */
 +		context->ir_protocol = IMON_IR_PROTOCOL_IMON;
 +		break;
 +	case IMON_IR_PROTOCOL_IMON_NOPAD:
-+		dprintk("Configuring IR receiver for iMON protocol without "
-+			"PAD stabilize function enabled\n");
++		dev_dbg(dev, "Configuring IR receiver for iMON protocol "
++			"without PAD stabilize function enabled\n");
 +		/* ir_proto_packet[0] = 0x00; // already the default */
 +		context->ir_protocol = IMON_IR_PROTOCOL_IMON_NOPAD;
 +		break;
 +	default:
-+		printk(KERN_INFO "%s: unknown IR protocol specified, will "
-+		       "just default to iMON protocol\n", __func__);
++		dev_info(dev, "%s: unknown IR protocol specified, will "
++			 "just default to iMON protocol\n", __func__);
 +		context->ir_protocol = IMON_IR_PROTOCOL_IMON;
 +		break;
 +	}
 +
-+	/* Don't send config packet on devices w/o tx ctrl ep */
-+	if (!context->tx_control)
-+		return;
-+
 +	memcpy(context->usb_tx_buf, &ir_proto_packet, sizeof(ir_proto_packet));
++
 +	retval = send_packet(context);
-+	if (retval)
-+		printk(KERN_INFO "%s: failed to set remote type\n", __func__);
++	if (retval) {
++		dev_info(dev, "%s: failed to set IR protocol, falling back "
++			 "to standard iMON protocol mode\n", __func__);
++		ir_protocol = IMON_IR_PROTOCOL_IMON;
++		context->ir_protocol = IMON_IR_PROTOCOL_IMON;
++	}
++
++	return;
 +}
 +
 +
@@ -4813,11 +4821,14 @@ index 0000000..93acb33
 +	context->rx.prev_bit = 0;
 +
 +	/* set new IR protocol if it has changed since init or last open */
-+	if (ir_protocol != context->ir_protocol)
++	if (ir_protocol != context->ir_protocol) {
++		mutex_lock(&context->lock);
 +		imon_set_ir_protocol(context);
++		mutex_unlock(&context->lock);
++	}
 +
 +	context->ir_isopen = 1;
-+	printk(KERN_INFO MOD_NAME ": IR port opened\n");
++	dev_info(context->driver->dev, "IR port opened\n");
 +
 +	mutex_unlock(&driver_lock);
 +	return retval;
@@ -4840,7 +4851,7 @@ index 0000000..93acb33
 +
 +	context->ir_isopen = 0;
 +	context->ir_isassociating = 0;
-+	printk(KERN_INFO MOD_NAME ": IR port closed\n");
++	dev_info(context->driver->dev, "IR port closed\n");
 +
 +	if (!context->dev_present_intf0) {
 +		/*
@@ -4874,7 +4885,7 @@ index 0000000..93acb33
 +	int value = context->rx.count;
 +	int i;
 +
-+	dprintk("submitting data to LIRC\n");
++	dev_dbg(context->driver->dev, "submitting data to LIRC\n");
 +
 +	value *= BIT_DURATION;
 +	value &= PULSE_MASK;
@@ -4987,6 +4998,52 @@ index 0000000..93acb33
 +	return result;
 +}
 +
++static int imon_remote_key_lookup(u32 hw_code)
++{
++	int i;
++	u32 code = be32_to_cpu(hw_code);
++
++	/* Look for the initial press of a button */
++	for (i = 0; i < ARRAY_SIZE(imon_remote_key_table); i++)
++		if (imon_remote_key_table[i].hw_code == code)
++			return i;
++
++	/* Look for the release of a button */
++	for (i = 0; i < ARRAY_SIZE(imon_remote_key_table); i++)
++		if ((imon_remote_key_table[i].hw_code | 0x4000) == code)
++			return i;
++
++	return -1;
++}
++
++static int imon_mce_key_lookup(u32 hw_code)
++{
++	int i;
++	u32 code = be32_to_cpu(hw_code);
++
++	for (i = 0; i < ARRAY_SIZE(imon_mce_key_table); i++)
++		if (imon_mce_key_table[i].hw_code == code)
++			return i;
++
++	for (i = 0; i < ARRAY_SIZE(imon_mce_key_table); i++)
++		if (imon_mce_key_table[i].hw_code == (code | 0x8000))
++			return i;
++
++	return -1;
++}
++
++static int imon_panel_key_lookup(u64 hw_code)
++{
++	int i;
++	u64 code = be64_to_cpu(hw_code);
++
++	for (i = 0; i < ARRAY_SIZE(imon_panel_key_table); i++)
++		if (imon_panel_key_table[i].hw_code == (code | 0xfee))
++			return i;
++
++	return -1;
++}
++
 +/**
 + * Process the incoming packet
 + */
@@ -4995,6 +5052,7 @@ index 0000000..93acb33
 +{
 +	int len = urb->actual_length;
 +	unsigned char *buf = urb->transfer_buffer;
++	struct device *dev = context->driver->dev;
 +	char rel_x = 0x00, rel_y = 0x00;
 +	int octet, bit;
 +	unsigned char mask;
@@ -5002,30 +5060,47 @@ index 0000000..93acb33
 +	int ts_input = 0;
 +	int dir = 0;
 +	u16 timeout, threshold;
++	u16 keycode;
++	u16 norelease = 0;
++	int k;
++	u32 remote_key = 0;
++	u64 panel_key = 0;
 +	int mouse_input;
 +	int right_shift = 1;
-+	struct input_dev *mouse = NULL;
++	struct input_dev *idev = NULL;
 +	struct input_dev *touch = NULL;
-+	const unsigned char toggle_button1[] = { 0x29, 0x91, 0x15, 0xb7 };
-+	const unsigned char toggle_button2[] = { 0x29, 0x91, 0x35, 0xb7 };
-+	const unsigned char ch_up[]   = { 0x28, 0x93, 0x95, 0xb7 };
-+	const unsigned char ch_down[] = { 0x28, 0x87, 0x95, 0xb7 };
 +
-+	mouse = context->mouse;
++	idev = context->idev;
 +	if (context->display_type == IMON_DISPLAY_TYPE_VGA)
 +		touch = context->touch;
 +
++	/* Figure out what key was pressed */
++	if (len == 8 && buf[7] == 0xee) {
++		memcpy(&panel_key, buf, len);
++		k = imon_panel_key_lookup(panel_key);
++		keycode = imon_panel_key_table[k].keycode;
++	} else {
++		memcpy(&remote_key, buf, sizeof(remote_key));
++		if (context->ir_protocol == IMON_IR_PROTOCOL_MCE) {
++			k = imon_mce_key_lookup(remote_key);
++			keycode = imon_mce_key_table[k].keycode;
++		} else {
++			k = imon_remote_key_lookup(remote_key);
++			keycode = imon_remote_key_table[k].keycode;
++		}
++	}
++
 +	/* keyboard/mouse mode toggle button */
-+	if (memcmp(buf, toggle_button1, 4) == 0 ||
-+	    memcmp(buf, toggle_button2, 4) == 0) {
++	if (keycode == KEY_KEYBOARD && (buf[2] & 0x40) != 0x40) {
 +		if (!nomouse) {
 +			context->pad_mouse = ~(context->pad_mouse) & 0x1;
-+			dprintk("toggling to %s mode\n",
++			dev_dbg(dev, "toggling to %s mode\n",
 +				context->pad_mouse ? "mouse" : "keyboard");
 +		} else {
 +			context->pad_mouse = 0;
-+			dprintk("mouse mode was disabled by modparam\n");
++			dev_dbg(dev, "mouse mode was disabled by modparam\n");
 +		}
++		context->last_keycode = keycode;
 +		return;
 +	}
 +
@@ -5033,8 +5108,8 @@ index 0000000..93acb33
 +	if (context->display_type == IMON_DISPLAY_TYPE_VGA && len == 8 &&
 +	    buf[7] == 0x86) {
 +		if (touch == NULL) {
-+			printk(KERN_WARNING "%s: touchscreen input device is "
-+			       "NULL!\n", __func__);
++			dev_warn(dev, "%s: touchscreen input device is "
++				 "NULL!\n", __func__);
 +			return;
 +		}
 +		mod_timer(&context->timer, jiffies + TOUCH_TIMEOUT);
@@ -5047,7 +5122,7 @@ index 0000000..93acb33
 +		ts_input = 1;
 +
 +	/* send mouse events through input subsystem in mouse mode */
-+	} else if (context->pad_mouse || !context->ir_isopen) {
++	} else if (context->pad_mouse || (!context->ir_isopen && lirc_mode)) {
 +		/* newer iMON device PAD or mouse button */
 +		if (!context->ffdc_dev && (buf[0] & 0x01) && len == 5) {
 +			mouse_input = 1;
@@ -5069,49 +5144,56 @@ index 0000000..93acb33
 +				rel_y |= ~0x0f;
 +			rel_y = rel_y + rel_y / 2;
 +			right_shift = 2;
++		/* some ffdc devices decode mouse buttons differently... */
++		} else if (context->ffdc_dev && (buf[0] == 0x68)) {
++			mouse_input = 1;
++			right_shift = 2;
 +		/* ch+/- buttons, which we use for an emulated scroll wheel */
-+		} else if (!memcmp(buf, ch_up, 4)) {
++		} else if (keycode == KEY_CHANNELUP &&
++			   (buf[2] & 0x40) != 0x40) {
 +			mouse_input = 1;
 +			dir = 1;
-+		} else if (!memcmp(buf, ch_down, 4)) {
++		} else if (keycode == KEY_CHANNELDOWN &&
++			   (buf[2] & 0x40) != 0x40) {
 +			mouse_input = 1;
 +			dir = -1;
 +		} else
 +			mouse_input = 0;
 +
 +		if (mouse_input) {
-+			if (mouse == NULL) {
-+				printk(KERN_WARNING "%s: mouse input device "
-+				       "is NULL!\n", __func__);
++			if (idev == NULL) {
++				dev_warn(dev, "%s: idev input device "
++					 "is NULL!\n", __func__);
 +				return;
 +			}
-+			dprintk("sending mouse data via input subsystem\n");
++			dev_dbg(context->driver->dev,
++				"sending mouse data via input subsystem\n");
 +
-+			if (dir == 0) {
-+				input_report_key(mouse, BTN_LEFT,
-+						 buf[1] & 0x01);
-+				input_report_key(mouse, BTN_RIGHT,
-+						 buf[1] >> right_shift & 0x01);
-+				input_report_rel(mouse, REL_X, rel_x);
-+				input_report_rel(mouse, REL_Y, rel_y);
-+			} else
-+				input_report_rel(mouse, REL_WHEEL, dir);
-+			input_sync(mouse);
++			if (dir) {
++				input_report_rel(idev, REL_WHEEL, dir);
++			} else if (rel_x || rel_y) {
++				input_report_rel(idev, REL_X, rel_x);
++				input_report_rel(idev, REL_Y, rel_y);
++			} else {
++				input_report_key(idev, BTN_LEFT, buf[1] & 0x1);
++				input_report_key(idev, BTN_RIGHT,
++						 buf[1] >> right_shift & 0x1);
++			}
++			input_sync(idev);
++			context->last_keycode = keycode;
 +			return;
 +		}
 +	}
 +
 +	/*
-+	 * at this point, mouse and touchscreen input has been handled, so
-+	 * anything else goes to lirc -- bail out if no listening IR client
++	 * at this point, mouse and touchscreen input has been handled
++	 * handled, so if we're in lirc mode, bail out if no listening
++	 * IR client
 +	 */
-+	if (!context->ir_isopen)
++	if (!context->ir_isopen && lirc_mode)
 +		return;
 +
-+	/*
-+	 * we need to add some special handling for
-+	 * the imon's IR mouse events
-+	 */
++	/* Now for some special handling to convert pad input to arrow keys */
 +	if ((len == 5) && (buf[0] == 0x01) && (buf[4] == 0x00)) {
 +		/* first, pad to 8 bytes so it conforms with everything else */
 +		buf[5] = buf[6] = buf[7] = 0;
@@ -5140,16 +5222,22 @@ index 0000000..93acb33
 +					return;
 +				buf[2] = dir & 0xFF;
 +				buf[3] = (dir >> 8) & 0xFF;
++				memcpy(&remote_key, buf, sizeof(remote_key));
++				k = imon_remote_key_lookup(remote_key);
++				keycode = imon_remote_key_table[k].keycode;
 +			}
 +		} else {
 +			if (abs(rel_y) > abs(rel_x)) {
 +				buf[2] = (rel_y > 0) ? 0x7F : 0x80;
 +				buf[3] = 0;
++				keycode = (rel_y > 0) ? KEY_DOWN : KEY_UP;
 +			} else {
 +				buf[2] = 0;
 +				buf[3] = (rel_x > 0) ? 0x7F : 0x80;
++				keycode = (rel_x > 0) ? KEY_RIGHT : KEY_LEFT;
 +			}
 +		}
++		norelease = 1;
 +
 +	} else if ((len == 8) && (buf[0] & 0x40) &&
 +		   !(buf[1] & 0x01 || buf[1] >> 2 & 0x01)) {
@@ -5173,12 +5261,12 @@ index 0000000..93acb33
 +		/* buf[1] is x */
 +		rel_x = (buf[1] & 0x08) | (buf[1] & 0x10) >> 2 |
 +			(buf[1] & 0x20) >> 4 | (buf[1] & 0x40) >> 6;
-+		if(buf[0] & 0x02)
++		if (buf[0] & 0x02)
 +			rel_x |= ~0x10+1;
 +		/* buf[2] is y */
 +		rel_y = (buf[2] & 0x08) | (buf[2] & 0x10) >> 2 |
 +			(buf[2] & 0x20) >> 4 | (buf[2] & 0x40) >> 6;
-+		if(buf[0] & 0x01)
++		if (buf[0] & 0x01)
 +			rel_y |= ~0x10+1;
 +
 +		buf[0] = 0x01;
@@ -5195,11 +5283,14 @@ index 0000000..93acb33
 +			if (abs(rel_y) > abs(rel_x)) {
 +				buf[2] = (rel_y > 0) ? 0x7F : 0x80;
 +				buf[3] = 0;
++				keycode = (rel_y > 0) ? KEY_DOWN : KEY_UP;
 +			} else {
 +				buf[2] = 0;
 +				buf[3] = (rel_x > 0) ? 0x7F : 0x80;
++				keycode = (rel_x > 0) ? KEY_RIGHT : KEY_LEFT;
 +			}
 +		}
++		norelease = 1;
 +
 +	} else if (ts_input) {
 +		/*
@@ -5216,9 +5307,76 @@ index 0000000..93acb33
 +		buf[7] = 0xff;
 +	}
 +
++	if (!lirc_mode && context->ir_onboard_decode) {
++		int press_type = 0;
++		static int seen_first;
++		int msec;
++		struct timeval t;
++		static struct timeval prev_time = { 0, 0 };
++		if (debug) {
++			printk(KERN_INFO "intf%d decoded packet: ", intf);
++			for (i = 0; i < len; ++i)
++				printk("%02x ", buf[i]);
++			printk("\n");
++		}
++
++		/* key release of 0x02XXXXXX key */
++		if (k == -1 && buf[0] == 0x02 && buf[3] == 0x00)
++			keycode = context->last_keycode;
++
++		/* initial mce button press */
++		else if (ir_protocol == IMON_IR_PROTOCOL_MCE && buf[0] == 0x80
++			 && buf[2] != context->last_mce_byte)
++			goto input_out;
++
++		/* subsequent mce button press, on which we'll act */
++		else if (ir_protocol == IMON_IR_PROTOCOL_MCE && buf[0] == 0x80
++			 && seen_first) {
++			press_type = 1;
++			norelease = 1;
++
++		/* incoherent or irrelevant data */
++		} else if (k == -1)
++			return;
++
++		/* key release of 0xXXXXXXb7 key */
++		else if (buf[3] == 0xb7 && (buf[2] & 0x40) == 0x40)
++			press_type = 0;
++
++		/* this is a button press */
++		else
++			press_type = 1;
++
++		/* KEY_MUTE repeats need to be suppressed */
++		if (keycode == KEY_MUTE && context->last_keycode == KEY_MUTE) {
++			do_gettimeofday(&t);
++			msec = tv2int(&t, &prev_time);
++			prev_time = t;
++			if (msec < 500)
++				return;
++		}
++
++		input_report_key(idev, keycode, press_type);
++		input_sync(idev);
++
++		/* panel keys and some remote keys don't generate a release */
++		if (panel_key || norelease) {
++			input_report_key(idev, keycode, 0);
++			input_sync(idev);
++		}
++
++input_out:
++		context->last_keycode = keycode;
++		if (ir_protocol == IMON_IR_PROTOCOL_MCE && buf[0] == 0x80) {
++			seen_first = ~seen_first & 0x1;
++			context->last_mce_byte = buf[2];
++		}
++		return;
++	}
++
 +	if (len != 8) {
-+		printk(KERN_WARNING "imon %s: invalid incoming packet "
-+		       "size (len = %d, intf%d)\n", __func__, len, intf);
++		dev_warn(dev, "imon %s: invalid incoming packet "
++			 "size (len = %d, intf%d)\n", __func__, len, intf);
 +		return;
 +	}
 +
@@ -5230,8 +5388,8 @@ index 0000000..93acb33
 +	    buf[5] == 0xFF &&				/* iMON 2.4G */
 +	   ((buf[6] == 0x4E && buf[7] == 0xDF) ||	/* LT */
 +	    (buf[6] == 0x5E && buf[7] == 0xDF))) {	/* DT */
-+		printk(KERN_WARNING "%s: remote associated refid=%02X\n",
-+		       __func__, buf[1]);
++		dev_warn(dev, "%s: remote associated refid=%02X\n",
++			 __func__, buf[1]);
 +		context->ir_isassociating = 0;
 +	}
 +
@@ -5252,9 +5410,9 @@ index 0000000..93acb33
 +
 +	if (debug) {
 +		if (context->ir_onboard_decode)
-+			printk("intf%d decoded packet: ", intf);
++			printk(KERN_INFO "intf%d decoded packet: ", intf);
 +		else
-+			printk("raw packet: ");
++			printk(KERN_INFO "raw packet: ");
 +		for (i = 0; i < len; ++i)
 +			printk("%02x ", buf[i]);
 +		printk("\n");
@@ -5363,8 +5521,8 @@ index 0000000..93acb33
 +		break;
 +
 +	default:
-+		printk(KERN_WARNING "imon %s: status(%d): ignored\n",
-+		       __func__, urb->status);
++		dev_warn(context->driver->dev, "imon %s: status(%d): ignored\n",
++			 __func__, urb->status);
 +		break;
 +	}
 +
@@ -5399,8 +5557,8 @@ index 0000000..93acb33
 +		break;
 +
 +	default:
-+		printk(KERN_WARNING "imon %s: status(%d): ignored\n",
-+		       __func__, urb->status);
++		dev_warn(context->driver->dev, "imon %s: status(%d): ignored\n",
++			 __func__, urb->status);
 +		break;
 +	}
 +
@@ -5424,6 +5582,7 @@ index 0000000..93acb33
 +	struct lirc_driver *driver = NULL;
 +	struct lirc_buffer *rbuf = NULL;
 +	struct usb_interface *first_if;
++	struct device *dev = &interface->dev;
 +	int ifnum;
 +	int lirc_minor = 0;
 +	int num_endpts;
@@ -5459,8 +5618,8 @@ index 0000000..93acb33
 +			configured_display_type = IMON_DISPLAY_TYPE_VFD;
 +	} else {
 +		configured_display_type = display_type;
-+		dprintk("%s: overriding display type to %d via modparam\n",
-+			__func__, display_type);
++		dev_dbg(dev, "%s: overriding display type to %d via "
++			"modparam\n", __func__, display_type);
 +	}
 +
 +	/*
@@ -5486,7 +5645,7 @@ index 0000000..93acb33
 +	vendor     = le16_to_cpu(usbdev->descriptor.idVendor);
 +	product    = le16_to_cpu(usbdev->descriptor.idProduct);
 +
-+	dprintk("%s: found iMON device (%04x:%04x, intf%d)\n",
++	dev_dbg(dev, "%s: found iMON device (%04x:%04x, intf%d)\n",
 +		__func__, vendor, product, ifnum);
 +
 +	/* prevent races probing devices w/multiple interfaces */
@@ -5514,14 +5673,14 @@ index 0000000..93acb33
 +
 +			rx_endpoint = ep;
 +			ir_ep_found = 1;
-+			dprintk("%s: found IR endpoint\n", __func__);
++			dev_dbg(dev, "%s: found IR endpoint\n", __func__);
 +
 +		} else if (!display_ep_found &&
 +			   ep_dir == USB_DIR_OUT &&
 +			   ep_type == USB_ENDPOINT_XFER_INT) {
 +			tx_endpoint = ep;
 +			display_ep_found = 1;
-+			dprintk("%s: found display endpoint\n", __func__);
++			dev_dbg(dev, "%s: found display endpoint\n", __func__);
 +		}
 +	}
 +
@@ -5533,7 +5692,7 @@ index 0000000..93acb33
 +		if (usb_match_id(interface, ctl_ep_device_list)) {
 +			tx_control = 1;
 +			display_ep_found = 1;
-+			dprintk("%s: device uses control endpoint, not "
++			dev_dbg(dev, "%s: device uses control endpoint, not "
 +				"interface OUT endpoint\n", __func__);
 +		}
 +	}
@@ -5545,7 +5704,7 @@ index 0000000..93acb33
 +	 */
 +	if (configured_display_type == IMON_DISPLAY_TYPE_NONE) {
 +		display_ep_found = 0;
-+		dprintk("%s: device has no display\n", __func__);
++		dev_dbg(dev, "%s: device has no display\n", __func__);
 +	}
 +
 +	/*
@@ -5554,7 +5713,7 @@ index 0000000..93acb33
 +	 */
 +	if (configured_display_type == IMON_DISPLAY_TYPE_VGA) {
 +		display_ep_found = 0;
-+		dprintk("%s: iMON Touch device found\n", __func__);
++		dev_dbg(dev, "%s: iMON Touch device found\n", __func__);
 +	}
 +
 +	/* Input endpoint is mandatory */
@@ -5567,7 +5726,7 @@ index 0000000..93acb33
 +		if (usb_match_id(interface, ir_onboard_decode_list))
 +			ir_onboard_decode = 1;
 +
-+		dprintk("%s: ir_onboard_decode: %d\n",
++		dev_dbg(dev, "%s: ir_onboard_decode: %d\n",
 +			__func__, ir_onboard_decode);
 +	}
 +
@@ -5576,7 +5735,7 @@ index 0000000..93acb33
 +		if (usb_match_id(interface, vfd_proto_6p_list))
 +			vfd_proto_6p = 1;
 +
-+		dprintk("%s: vfd_proto_6p: %d\n",
++		dev_dbg(dev, "%s: vfd_proto_6p: %d\n",
 +			__func__, vfd_proto_6p);
 +	}
 +
@@ -5652,8 +5811,8 @@ index 0000000..93acb33
 +			alloc_status = 7;
 +			goto alloc_status_switch;
 +		} else
-+			printk(KERN_INFO MOD_NAME ": Registered iMON driver "
-+			       "(lirc minor: %d)\n", lirc_minor);
++			dev_info(dev, "Registered iMON driver "
++				 "(lirc minor: %d)\n", lirc_minor);
 +
 +		/* Needed while unregistering! */
 +		driver->minor = lirc_minor;
@@ -5696,38 +5855,50 @@ index 0000000..93acb33
 +
 +		context->display_type = configured_display_type;
 +
-+		context->mouse = input_allocate_device();
++		context->idev = input_allocate_device();
++		input_set_drvdata(context->idev, context);
 +
-+		snprintf(context->name_mouse, sizeof(context->name_mouse),
-+			 "iMON PAD IR Mouse (%04x:%04x)", vendor, product);
-+		context->mouse->name = context->name_mouse;
++		snprintf(context->name_idev, sizeof(context->name_idev),
++			 "iMON IR Remote (%04x:%04x)", vendor, product);
++		context->idev->name = context->name_idev;
 +
-+		usb_make_path(usbdev, context->phys_mouse,
-+			      sizeof(context->phys_mouse));
-+		strlcat(context->phys_mouse, "/input0",
-+			sizeof(context->phys_mouse));
-+		context->mouse->phys = context->phys_mouse;
++		usb_make_path(usbdev, context->phys_idev,
++			      sizeof(context->phys_idev));
++		strlcat(context->phys_idev, "/input0",
++			sizeof(context->phys_idev));
++		context->idev->phys = context->phys_idev;
 +
-+		context->mouse->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_REL);
-+		context->mouse->keybit[BIT_WORD(BTN_MOUSE)] =
-+			BIT_MASK(BTN_LEFT) | BIT_MASK(BTN_RIGHT) |
-+			BIT_MASK(BTN_MIDDLE) | BIT_MASK(BTN_SIDE) |
-+			BIT_MASK(BTN_EXTRA);
-+		context->mouse->relbit[0] = BIT_MASK(REL_X) | BIT_MASK(REL_Y) |
++		context->idev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_REL);
++
++		context->idev->keybit[BIT_WORD(BTN_MOUSE)] =
++			BIT_MASK(BTN_LEFT) | BIT_MASK(BTN_RIGHT);
++		context->idev->relbit[0] = BIT_MASK(REL_X) | BIT_MASK(REL_Y) |
 +			BIT_MASK(REL_WHEEL);
 +
-+		input_set_drvdata(context->mouse, context);
++		/* register all the keys we support */
++		for (i = 0; i < ARRAY_SIZE(imon_remote_key_table); i++) {
++			u16 kc = imon_remote_key_table[i].keycode;
++			__set_bit(kc, context->idev->keybit);
++		}
++		for (i = 0; i < ARRAY_SIZE(imon_panel_key_table); i++) {
++			u16 kc = imon_panel_key_table[i].keycode;
++			__set_bit(kc, context->idev->keybit);
++		}
++		for (i = 0; i < ARRAY_SIZE(imon_mce_key_table); i++) {
++			u16 kc = imon_mce_key_table[i].keycode;
++			__set_bit(kc, context->idev->keybit);
++		}
 +
-+		usb_to_input_id(usbdev, &context->mouse->id);
-+		context->mouse->dev.parent = &interface->dev;
-+		retval = input_register_device(context->mouse);
++		usb_to_input_id(usbdev, &context->idev->id);
++		context->idev->dev.parent = &interface->dev;
++		retval = input_register_device(context->idev);
 +		if (retval)
-+			printk(KERN_INFO "%s: pad mouse input device setup failed\n",
-+			       __func__);
++			dev_info(dev, "%s: input device setup failed\n",
++				 __func__);
 +
 +		usb_fill_int_urb(context->rx_urb_intf0, context->usbdev_intf0,
 +			usb_rcvintpipe(context->usbdev_intf0,
-+					context->rx_endpoint_intf0->bEndpointAddress),
++				context->rx_endpoint_intf0->bEndpointAddress),
 +			context->usb_rx_buf, sizeof(context->usb_rx_buf),
 +			usb_rx_callback_intf0, context,
 +			context->rx_endpoint_intf0->bInterval);
@@ -5777,8 +5948,8 @@ index 0000000..93acb33
 +			context->touch->dev.parent = &interface->dev;
 +			retval = input_register_device(context->touch);
 +			if (retval)
-+				printk(KERN_INFO "%s: touchscreen input device setup failed\n",
-+				       __func__);
++				dev_info(dev, "%s: touchscreen input device "
++					 "setup failed\n", __func__);
 +		} else
 +			context->touch = NULL;
 +
@@ -5811,7 +5982,8 @@ index 0000000..93acb33
 +	}
 +
 +	if (context->display_supported && ifnum == 0) {
-+		dprintk("%s: Registering iMON display with sysfs\n", __func__);
++		dev_dbg(dev, "%s: Registering iMON display with sysfs\n",
++			__func__);
 +
 +		/* set up sysfs entry for built-in clock */
 +		sysfs_err = sysfs_create_group(&interface->dev.kobj,
@@ -5822,8 +5994,8 @@ index 0000000..93acb33
 +
 +		if (usb_register_dev(interface, &imon_class)) {
 +			/* Not a fatal error, so ignore */
-+			printk(KERN_INFO "%s: could not get a minor number for "
-+			       "display\n", __func__);
++			dev_info(dev, "%s: could not get a minor number for "
++				 "display\n", __func__);
 +		}
 +
 +		/* Enable front-panel buttons and/or knobs */
@@ -5831,16 +6003,16 @@ index 0000000..93acb33
 +		retval = send_packet(context);
 +		/* Not fatal, but warn about it */
 +		if (retval)
-+			printk(KERN_INFO "%s: failed to enable front-panel "
-+			       "buttons and/or knobs\n", __func__);
++			dev_info(dev, "%s: failed to enable front-panel "
++				 "buttons and/or knobs\n", __func__);
 +	}
 +
 +	/* set IR protocol/remote type */
 +	imon_set_ir_protocol(context);
 +
-+	printk(KERN_INFO MOD_NAME ": iMON device (%04x:%04x, intf%d) on "
-+	       "usb<%d:%d> initialized\n", vendor, product, ifnum,
-+	       usbdev->bus->busnum, usbdev->devnum);
++	dev_info(dev, "iMON device (%04x:%04x, intf%d) on "
++		 "usb<%d:%d> initialized\n", vendor, product, ifnum,
++		 usbdev->bus->busnum, usbdev->devnum);
 +
 +alloc_status_switch:
 +	mutex_unlock(&context->lock);
@@ -5909,7 +6081,7 @@ index 0000000..93acb33
 +	if (ifnum == 0) {
 +		context->dev_present_intf0 = 0;
 +		usb_kill_urb(context->rx_urb_intf0);
-+		input_unregister_device(context->mouse);
++		input_unregister_device(context->idev);
 +		if (context->display_supported)
 +			usb_deregister_dev(interface, &imon_class);
 +	} else {
@@ -5957,7 +6129,7 @@ index 0000000..93acb33
 +	if (ifnum == 0) {
 +		usb_fill_int_urb(context->rx_urb_intf0, context->usbdev_intf0,
 +			usb_rcvintpipe(context->usbdev_intf0,
-+					context->rx_endpoint_intf0->bEndpointAddress),
++				context->rx_endpoint_intf0->bEndpointAddress),
 +			context->usb_rx_buf, sizeof(context->usb_rx_buf),
 +			usb_rx_callback_intf0, context,
 +			context->rx_endpoint_intf0->bInterval);
@@ -6001,6 +6173,221 @@ index 0000000..93acb33
 +
 +module_init(imon_init);
 +module_exit(imon_exit);
+diff --git a/drivers/input/lirc/lirc_imon.h b/drivers/input/lirc/lirc_imon.h
+new file mode 100644
+index 0000000..019f288
+--- /dev/null
++++ b/drivers/input/lirc/lirc_imon.h
+@@ -0,0 +1,209 @@
++/*
++ *   lirc_imon.h:  LIRC/VFD/LCD driver for SoundGraph iMON IR/VFD/LCD
++ *		   including the iMON PAD model
++ *
++ *   Copyright(C) 2004  Venky Raju(dev@venky.ws)
++ *   Copyright(C) 2009  Jarod Wilson <jarod@wilsonet.com>
++ *
++ *   lirc_imon is free software; you can redistribute it and/or modify
++ *   it under the terms of the GNU General Public License as published by
++ *   the Free Software Foundation; either version 2 of the License, or
++ *   (at your option) any later version.
++ *
++ *   This program is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *   GNU General Public License for more details.
++ *
++ *   You should have received a copy of the GNU General Public License
++ *   along with this program; if not, write to the Free Software
++ *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++ */
++
++static const struct {
++	u32 hw_code;
++	u16 keycode;
++} imon_remote_key_table[] = {
++	/* keys sorted mostly by frequency of use to optimize lookups */
++	{ 0x2a8195b7, KEY_REWIND },
++	{ 0x298315b7, KEY_REWIND },
++	{ 0x2b8115b7, KEY_FASTFORWARD },
++	{ 0x2b8315b7, KEY_FASTFORWARD },
++	{ 0x2b9115b7, KEY_PREVIOUS },
++	{ 0x298195b7, KEY_NEXT },
++
++	{ 0x2a8115b7, KEY_PLAY },
++	{ 0x2a8315b7, KEY_PLAY },
++	{ 0x2a9115b7, KEY_PAUSE },
++	{ 0x2b9715b7, KEY_STOP },
++	{ 0x298115b7, KEY_RECORD },
++
++	{ 0x01008000, KEY_UP },
++	{ 0x01007f00, KEY_DOWN },
++	{ 0x01000080, KEY_LEFT },
++	{ 0x0100007f, KEY_RIGHT },
++
++	{ 0x2aa515b7, KEY_UP },
++	{ 0x289515b7, KEY_DOWN },
++	{ 0x29a515b7, KEY_LEFT },
++	{ 0x2ba515b7, KEY_RIGHT },
++
++	{ 0x0200002c, KEY_SPACE }, /* Select/Space */
++	{ 0x02000028, KEY_ENTER },
++	{ 0x288195b7, KEY_EXIT },
++	{ 0x02000029, KEY_ESC },
++	{ 0x0200002a, KEY_BACKSPACE },
++
++	{ 0x2b9595b7, KEY_MUTE },
++	{ 0x28a395b7, KEY_VOLUMEUP },
++	{ 0x28a595b7, KEY_VOLUMEDOWN },
++	{ 0x289395b7, KEY_CHANNELUP },
++	{ 0x288795b7, KEY_CHANNELDOWN },
++
++	{ 0x0200001e, KEY_NUMERIC_1 },
++	{ 0x0200001f, KEY_NUMERIC_2 },
++	{ 0x02000020, KEY_NUMERIC_3 },
++	{ 0x02000021, KEY_NUMERIC_4 },
++	{ 0x02000022, KEY_NUMERIC_5 },
++	{ 0x02000023, KEY_NUMERIC_6 },
++	{ 0x02000024, KEY_NUMERIC_7 },
++	{ 0x02000025, KEY_NUMERIC_8 },
++	{ 0x02000026, KEY_NUMERIC_9 },
++	{ 0x02000027, KEY_NUMERIC_0 },
++
++	{ 0x02200025, KEY_NUMERIC_STAR },
++	{ 0x02200020, KEY_NUMERIC_POUND },
++
++	{ 0x2b8515b7, KEY_VIDEO },
++	{ 0x299195b7, KEY_AUDIO },
++	{ 0x2ba115b7, KEY_CAMERA },
++	{ 0x28a515b7, KEY_TV },
++	{ 0x29a395b7, KEY_DVD },
++	{ 0x29a295b7, KEY_DVD },
++
++	/* the Menu key between DVD and Subtitle on the RM-200... */
++	{ 0x2ba385b7, KEY_MENU },
++	{ 0x2ba395b7, KEY_MENU },
++
++	{ 0x288515b7, KEY_BOOKMARKS },
++	{ 0x2ab715b7, KEY_MEDIA }, /* Thumbnail */
++	{ 0x298595b7, KEY_SUBTITLE },
++	{ 0x2b8595b7, KEY_LANGUAGE },
++
++	{ 0x29a595b7, KEY_ZOOM },
++	{ 0x2aa395b7, KEY_SCREEN }, /* FullScreen */
++
++	{ 0x299115b7, KEY_KEYBOARD },
++	{ 0x299135b7, KEY_KEYBOARD },
++
++	{ 0x01010000, BTN_LEFT },
++	{ 0x01020000, BTN_RIGHT },
++	{ 0x01010080, BTN_LEFT },
++	{ 0x01020080, BTN_RIGHT },
++
++	{ 0x2a9395b7, KEY_CYCLEWINDOWS }, /* TaskSwitcher */
++	{ 0x2b8395b7, KEY_TIME }, /* Timer */
++
++	{ 0x289115b7, KEY_POWER },
++	{ 0x29b195b7, KEY_EJECTCD }, /* the one next to play */
++	{ 0x299395b7, KEY_EJECTCLOSECD }, /* eject (above TaskSwitcher) */
++
++	{ 0x02800000, KEY_MENU }, /* Left Menu */
++	{ 0x02000065, KEY_COMPOSE }, /* RightMenu */
++	{ 0x2ab195b7, KEY_PROG1 }, /* Go */
++	{ 0x29b715b7, KEY_DASHBOARD }, /* AppLauncher */
++};
++
++static const struct {
++	u32 hw_code;
++	u16 keycode;
++} imon_mce_key_table[] = {
++	/* keys sorted mostly by frequency of use to optimize lookups */
++	{ 0x800f8415, KEY_REWIND },
++	{ 0x800f8414, KEY_FASTFORWARD },
++	{ 0x800f841b, KEY_PREVIOUS },
++	{ 0x800f841a, KEY_NEXT },
++
++	{ 0x800f8416, KEY_PLAY },
++	{ 0x800f8418, KEY_PAUSE },
++	{ 0x800f8418, KEY_PAUSE },
++	{ 0x800f8419, KEY_STOP },
++	{ 0x800f8417, KEY_RECORD },
++
++	{ 0x02000052, KEY_UP },
++	{ 0x02000051, KEY_DOWN },
++	{ 0x02000050, KEY_LEFT },
++	{ 0x0200004f, KEY_RIGHT },
++
++	{ 0x02000028, KEY_ENTER },
++/* the OK and Enter buttons decode to the same value
++	{ 0x02000028, KEY_OK }, */
++	{ 0x0200002a, KEY_EXIT },
++	{ 0x02000029, KEY_DELETE },
++
++	{ 0x800f840e, KEY_MUTE },
++	{ 0x800f8410, KEY_VOLUMEUP },
++	{ 0x800f8411, KEY_VOLUMEDOWN },
++	{ 0x800f8412, KEY_CHANNELUP },
++	{ 0x800f8413, KEY_CHANNELDOWN },
++
++	{ 0x0200001e, KEY_NUMERIC_1 },
++	{ 0x0200001f, KEY_NUMERIC_2 },
++	{ 0x02000020, KEY_NUMERIC_3 },
++	{ 0x02000021, KEY_NUMERIC_4 },
++	{ 0x02000022, KEY_NUMERIC_5 },
++	{ 0x02000023, KEY_NUMERIC_6 },
++	{ 0x02000024, KEY_NUMERIC_7 },
++	{ 0x02000025, KEY_NUMERIC_8 },
++	{ 0x02000026, KEY_NUMERIC_9 },
++	{ 0x02000027, KEY_NUMERIC_0 },
++
++	{ 0x02200025, KEY_NUMERIC_STAR },
++	{ 0x02200020, KEY_NUMERIC_POUND },
++
++	{ 0x800f8446, KEY_TV },
++	{ 0x800f8447, KEY_AUDIO },
++	{ 0x800f8448, KEY_PVR }, /* RecordedTV */
++	{ 0x800f8449, KEY_CAMERA },
++	{ 0x800f844a, KEY_VIDEO },
++	{ 0x800f8424, KEY_DVD },
++	{ 0x800f8425, KEY_TUNER }, /* LiveTV */
++
++	{ 0x800f845b, KEY_RED },
++	{ 0x800f845c, KEY_GREEN },
++	{ 0x800f845d, KEY_YELLOW },
++	{ 0x800f845e, KEY_BLUE },
++
++	{ 0x800f840f, KEY_INFO },
++	{ 0x800f8426, KEY_EPG }, /* Guide */
++	{ 0x800f845a, KEY_SUBTITLE }, /* Caption */
++
++	{ 0x800f840c, KEY_POWER },
++	{ 0x800f840d, KEY_PROG1 }, /* Windows MCE button */
++
++};
++
++static const struct {
++	u64 hw_code;
++	u16 keycode;
++} imon_panel_key_table[] = {
++	{ 0x000000000f000fee, KEY_PROG1 }, /* Go */
++	{ 0x000000001f000fee, KEY_AUDIO },
++	{ 0x0000000020000fee, KEY_VIDEO },
++	{ 0x0000000021000fee, KEY_CAMERA },
++	{ 0x0000000027000fee, KEY_DVD },
++/* the TV key on my panel is broken, doesn't work under any OS
++	{ 0x0000000000000fee, KEY_TV }, */
++	{ 0x0000000005000fee, KEY_PREVIOUS },
++	{ 0x0000000007000fee, KEY_REWIND },
++	{ 0x0000000004000fee, KEY_STOP },
++	{ 0x000000003c000fee, KEY_PLAYPAUSE },
++	{ 0x0000000008000fee, KEY_FASTFORWARD },
++	{ 0x0000000006000fee, KEY_NEXT },
++	{ 0x0000000100000fee, KEY_RIGHT },
++	{ 0x0000010000000fee, KEY_LEFT },
++	{ 0x000000003d000fee, KEY_SELECT },
++	{ 0x0001000000000fee, KEY_VOLUMEUP },
++	{ 0x0100000000000fee, KEY_VOLUMEDOWN },
++	{ 0x0000000001000fee, KEY_MUTE },
++};
 diff --git a/drivers/input/lirc/lirc_it87.c b/drivers/input/lirc/lirc_it87.c
 new file mode 100644
 index 0000000..f363727
@@ -7117,10 +7504,10 @@ index 0000000..cf021c8
 +/********************************* ITE IT87xx ************************/
 diff --git a/drivers/input/lirc/lirc_ite8709.c b/drivers/input/lirc/lirc_ite8709.c
 new file mode 100644
-index 0000000..3d53181
+index 0000000..3be37ae
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_ite8709.c
-@@ -0,0 +1,539 @@
+@@ -0,0 +1,540 @@
 +/*
 + * LIRC driver for ITE8709 CIR port
 + *
@@ -7144,6 +7531,7 @@ index 0000000..3d53181
 +
 +#include <linux/module.h>
 +#include <linux/interrupt.h>
++#include <linux/sched.h>
 +#include <linux/delay.h>
 +#include <linux/pnp.h>
 +#include <linux/io.h>
@@ -7662,10 +8050,10 @@ index 0000000..3d53181
 +MODULE_PARM_DESC(debug, "Enable debugging messages");
 diff --git a/drivers/input/lirc/lirc_mceusb.c b/drivers/input/lirc/lirc_mceusb.c
 new file mode 100644
-index 0000000..8b48a56
+index 0000000..a9d5172
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_mceusb.c
-@@ -0,0 +1,1242 @@
+@@ -0,0 +1,1232 @@
 +/*
 + * LIRC driver for Windows Media Center Edition USB Infrared Transceivers
 + *
@@ -7678,14 +8066,9 @@ index 0000000..8b48a56
 + * Copyright (c) 2003-2004 Dan Conti <dconti@acm.wwu.edu>
 + *
 + * Original lirc_mceusb driver deprecated in favor of this driver, which
-+ * supports the 1st-gen device now too. Transmitting on the 1st-gen device
-+ * only functions on port #2 at the moment.
-+ *
-+ * Support for 1st-gen device added June 2009,
-+ * by Jarod Wilson <jarod@wilsonet.com>
-+ *
-+ * Initial transmission support for 1st-gen device added August 2009,
-+ * by Patrick Calhoun <phineas@ou.edu>
++ * supports the 1st-gen device now too. Transmit and receive support for
++ * the 1st-gen device added June-September 2009,
++ * by Jarod Wilson <jarod@wilsonet.com> and Patrick Calhoun <phineas@ou.edu>
 + *
 + * Derived from ATI USB driver by Paul Miller and the original
 + * MCE USB driver by Dan Conti (and now including chunks of the latter
@@ -7757,11 +8140,6 @@ index 0000000..8b48a56
 +#else
 +static int debug;
 +#endif
-+#define dprintk(fmt, args...)					\
-+	do {							\
-+		if (debug)					\
-+			printk(KERN_DEBUG fmt, ## args);	\
-+	} while (0)
 +
 +/* general constants */
 +#define SEND_FLAG_IN_PROGRESS	1
@@ -7814,6 +8192,8 @@ index 0000000..8b48a56
 +	{ USB_DEVICE(VENDOR_SMK, 0x0322) },
 +	/* bundled with Hauppauge PVR-150 */
 +	{ USB_DEVICE(VENDOR_SMK, 0x0334) },
++	/* SMK eHome Infrared Transceiver */
++	{ USB_DEVICE(VENDOR_SMK, 0x0338) },
 +	/* Tatung eHome Infrared Transceiver */
 +	{ USB_DEVICE(VENDOR_TATUNG, 0x9150) },
 +	/* Shuttle eHome Infrared Transceiver */
@@ -7887,6 +8267,7 @@ index 0000000..8b48a56
 +};
 +
 +static struct usb_device_id transmitter_mask_list[] = {
++	{ USB_DEVICE(VENDOR_MICROSOFT, 0x006d) },
 +	{ USB_DEVICE(VENDOR_SMK, 0x031d) },
 +	{ USB_DEVICE(VENDOR_SMK, 0x0322) },
 +	{ USB_DEVICE(VENDOR_SMK, 0x0334) },
@@ -7960,8 +8341,7 @@ index 0000000..8b48a56
 +	for (i = 0; i < len && i < USB_BUFLEN; i++)
 +		snprintf(codes + i * 3, 4, "%02x ", buf[i] & 0xFF);
 +
-+	printk(KERN_INFO "" DRIVER_NAME "[%d]: data received %s (length=%d)\n",
-+		ir->devnum, codes, len);
++	dev_info(ir->d->dev, "data received %s (length=%d)\n", codes, len);
 +}
 +
 +static void usb_async_callback(struct urb *urb, struct pt_regs *regs)
@@ -7976,9 +8356,8 @@ index 0000000..8b48a56
 +	if (ir) {
 +		len = urb->actual_length;
 +
-+		dprintk(DRIVER_NAME
-+			"[%d]: callback called (status=%d len=%d)\n",
-+			ir->devnum, urb->status, len);
++		dev_dbg(ir->d->dev, "callback called (status=%d len=%d)\n",
++			urb->status, len);
 +
 +		if (debug)
 +			mceusb_dev_printdata(ir, urb->transfer_buffer, len);
@@ -8031,20 +8410,17 @@ index 0000000..8b48a56
 +		ir->send_flags = RECV_FLAG_IN_PROGRESS;
 +	}
 +
-+	dprintk(DRIVER_NAME "[%d]: receive request called (size=%#x)\n",
-+		ir->devnum, size);
++	dev_dbg(ir->d->dev, "receive request called (size=%#x)\n", size);
 +
 +	async_urb->transfer_buffer_length = size;
 +	async_urb->dev = ir->usbdev;
 +
 +	res = usb_submit_urb(async_urb, GFP_ATOMIC);
 +	if (res) {
-+		dprintk(DRIVER_NAME "[%d]: receive request FAILED! (res=%d)\n",
-+			ir->devnum, res);
++		dev_dbg(ir->d->dev, "receive request FAILED! (res=%d)\n", res);
 +		return;
 +	}
-+	dprintk(DRIVER_NAME "[%d]: receive request complete (res=%d)\n",
-+		ir->devnum, res);
++	dev_dbg(ir->d->dev, "receive request complete (res=%d)\n", res);
 +}
 +
 +static int unregister_from_lirc(struct mceusb_dev *ir)
@@ -8054,16 +8430,15 @@ index 0000000..8b48a56
 +	int rtn;
 +
 +	devnum = ir->devnum;
-+	dprintk(DRIVER_NAME "[%d]: unregister from lirc called\n", devnum);
++	dev_dbg(ir->d->dev, "unregister from lirc called\n");
 +
 +	rtn = lirc_unregister_driver(d->minor);
 +	if (rtn > 0) {
-+		printk(DRIVER_NAME "[%d]: error in lirc_unregister minor: %d\n"
-+			"Trying again...\n", devnum, d->minor);
++		dev_info(ir->d->dev, "error in lirc_unregister minor: %d\n"
++			 "Trying again...\n", d->minor);
 +		if (rtn == -EBUSY) {
-+			printk(DRIVER_NAME
-+				"[%d]: device is opened, will unregister"
-+				" on close\n", devnum);
++			dev_info(ir->d->dev, "device is opened, will "
++				 "unregister on close\n");
 +			return -EAGAIN;
 +		}
 +		set_current_state(TASK_INTERRUPTIBLE);
@@ -8071,16 +8446,15 @@ index 0000000..8b48a56
 +
 +		rtn = lirc_unregister_driver(d->minor);
 +		if (rtn > 0)
-+			printk(DRIVER_NAME "[%d]: lirc_unregister failed\n",
-+			devnum);
++			dev_info(ir->d->dev, "lirc_unregister failed\n");
 +	}
 +
 +	if (rtn) {
-+		printk(DRIVER_NAME "[%d]: didn't free resources\n", devnum);
++		dev_info(ir->d->dev, "didn't free resources\n");
 +		return -EAGAIN;
 +	}
 +
-+	printk(DRIVER_NAME "[%d]: usb remote disconnected\n", devnum);
++	dev_info(ir->d->dev, "usb remote disconnected\n");
 +
 +	lirc_buffer_free(d->rbuf);
 +	kfree(d->rbuf);
@@ -8094,11 +8468,12 @@ index 0000000..8b48a56
 +	struct mceusb_dev *ir = data;
 +
 +	if (!ir) {
-+		printk(DRIVER_NAME "[?]: %s called with no context\n",
-+		       __func__);
++		printk(KERN_WARNING DRIVER_NAME
++		       "[?]: %s called with no context\n", __func__);
 +		return -EIO;
 +	}
-+	dprintk(DRIVER_NAME "[%d]: mceusb IR device opened\n", ir->devnum);
++
++	dev_dbg(ir->d->dev, "mceusb IR device opened\n");
 +
 +	if (!ir->flags.connected) {
 +		if (!ir->usbdev)
@@ -8114,11 +8489,12 @@ index 0000000..8b48a56
 +	struct mceusb_dev *ir = data;
 +
 +	if (!ir) {
-+		printk(DRIVER_NAME "[?]: %s called with no context\n",
-+		       __func__);
++		printk(KERN_WARNING DRIVER_NAME
++		       "[?]: %s called with no context\n", __func__);
 +		return;
 +	}
-+	dprintk(DRIVER_NAME "[%d]: mceusb IR device closed\n", ir->devnum);
++
++	dev_dbg(ir->d->dev, "mceusb IR device closed\n");
 +
 +	if (ir->flags.connected) {
 +		mutex_lock(&ir->lock);
@@ -8166,8 +8542,9 @@ index 0000000..8b48a56
 +
 +	for (i = start_index; i < buf_len; i++) {
 +		/* decode mce packets of the form (84),AA,BB,CC,DD */
-+		if (ir->buf_in[i] >= 0x80 && ir->buf_in[i] <= 0x9e) {
++
 +		/* data headers */
++		if (ir->buf_in[i] >= 0x80 && ir->buf_in[i] <= 0x9e) {
 +			/* decode packet data */
 +			packet_len = ir->buf_in[i] & MCE_PACKET_LENGTH_MASK;
 +			ir->overflow_len = i + 1 + packet_len - buf_len;
@@ -8189,8 +8566,9 @@ index 0000000..8b48a56
 +			}
 +
 +			i += packet_len;
-+		} else if (ir->buf_in[i] == MCE_CONTROL_HEADER) {
++
 +		/* status header (0x9F) */
++		} else if (ir->buf_in[i] == MCE_CONTROL_HEADER) {
 +			/*
 +			 * A transmission containing one or more consecutive ir
 +			 * commands always ends with a GAP of 100ms followed by
@@ -8202,18 +8580,18 @@ index 0000000..8b48a56
 +	to lirc directly instead of at the beginning of the next transmission.
 +	Changes pulse/space order.
 +
-+			if (++i < buf_len && ir->buf_in[i]==0x01)
++			if (++i < buf_len && ir->buf_in[i] == 0x01)
 +				send_packet_to_lirc(ir);
 +
 +#endif
 +
 +			/* end decode loop */
-+			dprintk(DRIVER_NAME "[%d] %s: found control header\n",
++			dev_dbg(ir->d->dev, "[%d] %s: found control header\n",
 +				ir->devnum, __func__);
 +			ir->overflow_len = 0;
 +			break;
 +		} else {
-+			dprintk(DRIVER_NAME "[%d] %s: stray packet?\n",
++			dev_dbg(ir->d->dev, "[%d] %s: stray packet?\n",
 +				ir->devnum, __func__);
 +			ir->overflow_len = 0;
 +		}
@@ -8243,8 +8621,8 @@ index 0000000..8b48a56
 +
 +	if (ir->send_flags == RECV_FLAG_IN_PROGRESS) {
 +		ir->send_flags = SEND_FLAG_COMPLETE;
-+		dprintk(DRIVER_NAME "[%d]: setup answer received %d bytes\n",
-+			ir->devnum, buf_len);
++		dev_dbg(ir->d->dev, "setup answer received %d bytes\n",
++			buf_len);
 +	}
 +
 +	switch (urb->status) {
@@ -8377,8 +8755,8 @@ index 0000000..8b48a56
 +
 +		if (carrier <= 0) {
 +			ir->carrier_freq = carrier;
-+			dprintk(DRIVER_NAME "[%d]: SET_CARRIER disabling "
-+				"carrier modulation\n", ir->devnum);
++			dev_dbg(ir->d->dev, "SET_CARRIER disabling carrier "
++				"modulation\n");
 +			request_packet_async(ir, ir->usb_ep_out,
 +					     cmdbuf, sizeof(cmdbuf),
 +					     MCEUSB_OUTBOUND);
@@ -8391,9 +8769,8 @@ index 0000000..8b48a56
 +				ir->carrier_freq = carrier;
 +				cmdbuf[2] = prescaler;
 +				cmdbuf[3] = divisor;
-+				dprintk(DRIVER_NAME "[%d]: SET_CARRIER "
-+					"requesting %d Hz\n",
-+					ir->devnum, carrier);
++				dev_dbg(ir->d->dev, "SET_CARRIER requesting "
++					"%d Hz\n", carrier);
 +
 +				/* Transmit new carrier to mce device */
 +				request_packet_async(ir, ir->usb_ep_out,
@@ -8442,7 +8819,7 @@ index 0000000..8b48a56
 +			return MCE_MAX_CHANNELS;
 +		}
 +
-+		dprintk(DRIVER_NAME ": SET_TRANSMITTERS mask=%d\n", ivalue);
++		dev_dbg(ir->d->dev, ": SET_TRANSMITTERS mask=%d\n", ivalue);
 +		break;
 +
 +	case LIRC_GET_SEND_MODE:
@@ -8518,7 +8895,7 @@ index 0000000..8b48a56
 +			      0, 0, data, 2, HZ * 3);
 +
 +	/*    ret = usb_get_status( ir->usbdev, 0, 0, data ); */
-+	dprintk("%s - ret = %d status = 0x%x 0x%x\n", __func__,
++	dev_dbg(ir->d->dev, "%s - ret = %d status = 0x%x 0x%x\n", __func__,
 +		ret, data[0], data[1]);
 +
 +	/*
@@ -8530,29 +8907,29 @@ index 0000000..8b48a56
 +	ret = usb_control_msg(ir->usbdev, usb_rcvctrlpipe(ir->usbdev, 0),
 +			      USB_REQ_SET_ADDRESS, USB_TYPE_VENDOR, 0, 0,
 +			      data, 2, HZ * 3);
-+	dprintk("%s - ret = %d, devnum = %d\n",
++	dev_dbg(ir->d->dev, "%s - ret = %d, devnum = %d\n",
 +		__func__, ret, ir->usbdev->devnum);
-+	dprintk("%s - data[0] = %d, data[1] = %d\n",
++	dev_dbg(ir->d->dev, "%s - data[0] = %d, data[1] = %d\n",
 +		__func__, data[0], data[1]);
 +
-+	/* set feature */
++	/* set feature: bit rate 38400 bps */
 +	ret = usb_control_msg(ir->usbdev, usb_sndctrlpipe(ir->usbdev, 0),
 +			      USB_REQ_SET_FEATURE, USB_TYPE_VENDOR,
 +			      0xc04e, 0x0000, NULL, 0, HZ * 3);
 +
-+	dprintk("%s - ret = %d\n", __func__, ret);
++	dev_dbg(ir->d->dev, "%s - ret = %d\n", __func__, ret);
 +
-+	/* strange: bRequest == 4 */
++	/* bRequest 4: set char length to 8 bits */
 +	ret = usb_control_msg(ir->usbdev, usb_sndctrlpipe(ir->usbdev, 0),
 +			      4, USB_TYPE_VENDOR,
 +			      0x0808, 0x0000, NULL, 0, HZ * 3);
-+	dprintk("%s - retB = %d\n", __func__, ret);
++	dev_dbg(ir->d->dev, "%s - retB = %d\n", __func__, ret);
 +
-+	/* strange: bRequest == 2 */
++	/* bRequest 2: set handshaking to use DTR/DSR */
 +	ret = usb_control_msg(ir->usbdev, usb_sndctrlpipe(ir->usbdev, 0),
 +			      2, USB_TYPE_VENDOR,
 +			      0x0000, 0x0100, NULL, 0, HZ * 3);
-+	dprintk("%s - retC = %d\n", __func__, ret);
++	dev_dbg(ir->d->dev, "%s - retC = %d\n", __func__, ret);
 +
 +	return ret;
 +
@@ -8578,7 +8955,7 @@ index 0000000..8b48a56
 +	int is_pinnacle;
 +	int is_microsoft_gen1;
 +
-+	dprintk(DRIVER_NAME ": %s called\n", __func__);
++	dev_dbg(&intf->dev, ": %s called\n", __func__);
 +
 +	usb_reset_device(dev);
 +
@@ -8602,7 +8979,7 @@ index 0000000..8b48a56
 +			|| ((ep->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK)
 +			    == USB_ENDPOINT_XFER_INT))) {
 +
-+			dprintk(DRIVER_NAME ": acceptable inbound endpoint "
++			dev_dbg(&intf->dev, ": acceptable inbound endpoint "
 +				"found\n");
 +			ep_in = ep;
 +			ep_in->bmAttributes = USB_ENDPOINT_XFER_INT;
@@ -8624,7 +9001,7 @@ index 0000000..8b48a56
 +			|| ((ep->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK)
 +			    == USB_ENDPOINT_XFER_INT))) {
 +
-+			dprintk(DRIVER_NAME ": acceptable outbound endpoint "
++			dev_dbg(&intf->dev, ": acceptable outbound endpoint "
 +				"found\n");
 +			ep_out = ep;
 +			ep_out->bmAttributes = USB_ENDPOINT_XFER_INT;
@@ -8639,7 +9016,7 @@ index 0000000..8b48a56
 +		}
 +	}
 +	if (ep_in == NULL) {
-+		dprintk(DRIVER_NAME ": inbound and/or endpoint not found\n");
++		dev_dbg(&intf->dev, ": inbound and/or endpoint not found\n");
 +		return -ENODEV;
 +	}
 +
@@ -8683,7 +9060,7 @@ index 0000000..8b48a56
 +		goto mem_failure_switch;
 +	}
 +
-+	strcpy(driver->name, DRIVER_NAME " ");
++	strcpy(driver->name, DRIVER_NAME);
 +	driver->minor = -1;
 +	driver->features = LIRC_CAN_SEND_PULSE |
 +		LIRC_CAN_SET_TRANSMITTER_MASK |
@@ -8721,8 +9098,7 @@ index 0000000..8b48a56
 +	case 2:
 +		kfree(ir);
 +	case 1:
-+		printk(DRIVER_NAME "[%d]: out of memory (code=%d)\n",
-+			devnum, mem_failure);
++		dev_info(&intf->dev, "out of memory (code=%d)\n", mem_failure);
 +		return -ENOMEM;
 +	}
 +
@@ -8756,8 +9132,6 @@ index 0000000..8b48a56
 +			  buf, sizeof(buf)) > 0)
 +		snprintf(name + strlen(name), sizeof(name) - strlen(name),
 +			 " %s", buf);
-+	printk(DRIVER_NAME "[%d]: %s on usb%d:%d\n", devnum, name,
-+	       dev->bus->busnum, devnum);
 +
 +	/* inbound data */
 +	usb_fill_int_urb(ir->urb_in, dev, pipe, ir->buf_in,
@@ -8779,8 +9153,7 @@ index 0000000..8b48a56
 +		 */
 +
 +		usbret = usb_reset_configuration(dev);
-+		printk(DRIVER_NAME "[%d]: usb reset config ret %x\n",
-+		       devnum, usbret);
++		dev_info(ir->d->dev, "usb reset config ret %x\n", usbret);
 +
 +		/*
 +		 * its possible we really should wait for a return
@@ -8821,6 +9194,9 @@ index 0000000..8b48a56
 +
 +	usb_set_intfdata(intf, ir);
 +
++	dev_info(ir->d->dev, "Registered %s on usb%d:%d\n", name,
++		 dev->bus->busnum, devnum);
++
 +	return 0;
 +}
 +
@@ -8850,7 +9226,7 @@ index 0000000..8b48a56
 +static int mceusb_dev_suspend(struct usb_interface *intf, pm_message_t message)
 +{
 +	struct mceusb_dev *ir = usb_get_intfdata(intf);
-+	printk(DRIVER_NAME "[%d]: suspend\n", ir->devnum);
++	dev_info(ir->d->dev, "suspend\n");
 +	usb_kill_urb(ir->urb_in);
 +	return 0;
 +}
@@ -8858,7 +9234,7 @@ index 0000000..8b48a56
 +static int mceusb_dev_resume(struct usb_interface *intf)
 +{
 +	struct mceusb_dev *ir = usb_get_intfdata(intf);
-+	printk(DRIVER_NAME "[%d]: resume\n", ir->devnum);
++	dev_info(ir->d->dev, "resume\n");
 +	if (usb_submit_urb(ir->urb_in, GFP_ATOMIC))
 +		return -EIO;
 +	return 0;
@@ -8880,11 +9256,13 @@ index 0000000..8b48a56
 +
 +	printk(KERN_INFO DRIVER_NAME ": " DRIVER_DESC " " DRIVER_VERSION "\n");
 +	printk(KERN_INFO DRIVER_NAME ": " DRIVER_AUTHOR "\n");
-+	dprintk(DRIVER_NAME ": debug mode enabled\n");
++	if (debug)
++		printk(KERN_DEBUG DRIVER_NAME ": debug mode enabled\n");
 +
 +	i = usb_register(&mceusb_dev_driver);
 +	if (i < 0) {
-+		printk(DRIVER_NAME ": usb register failed, result = %d\n", i);
++		printk(KERN_ERR DRIVER_NAME
++		       ": usb register failed, result = %d\n", i);
 +		return -ENODEV;
 +	}
 +
@@ -11916,7 +12294,7 @@ index 0000000..d602e90
 +MODULE_PARM_DESC(debug, "Enable debugging messages");
 diff --git a/drivers/input/lirc/lirc_sir.c b/drivers/input/lirc/lirc_sir.c
 new file mode 100644
-index 0000000..b497642
+index 0000000..d28d006
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_sir.c
 @@ -0,0 +1,1283 @@
@@ -12296,7 +12674,7 @@ index 0000000..b497642
 +	case LIRC_SET_SEND_DUTY_CYCLE:
 +		retval = get_user(ivalue, (unsigned int *) arg);
 +		if (retval)
-+			return reetval;
++			return retval;
 +		if (ivalue <= 0 || ivalue > 100)
 +			return -EINVAL;
 +		/* (ivalue/100)*(1000000/freq) */
@@ -14408,10 +14786,10 @@ index 0000000..2955bad
 +module_exit(ttusbir_exit_module);
 diff --git a/drivers/input/lirc/lirc_zilog.c b/drivers/input/lirc/lirc_zilog.c
 new file mode 100644
-index 0000000..c4080f5
+index 0000000..b19c447
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_zilog.c
-@@ -0,0 +1,1395 @@
+@@ -0,0 +1,1396 @@
 +/*
 + * i2c IR lirc driver for devices with zilog IR processors
 + *
@@ -15707,6 +16085,7 @@ index 0000000..c4080f5
 +	ir->l.fops	  = &lirc_fops;
 +	ir->l.data	  = ir;
 +	ir->l.minor       = minor;
++	ir->l.dev         = &adap->dev;
 +	ir->l.sample_rate = 0;
 +
 +	/* register with lirc */

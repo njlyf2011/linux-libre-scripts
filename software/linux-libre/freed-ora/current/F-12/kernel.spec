@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1937 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1939 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -743,6 +743,7 @@ Patch1818: drm-i915-resume-force-mode.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
+Patch1827: drm-i915-fix-tvmode-oops.patch
 Patch1831: drm-conservative-fallback-modes.patch
 Patch1832: drm-edid-retry.patch
 Patch1834: drm-edid-header-fixup.patch
@@ -1487,6 +1488,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
+ApplyPatch drm-i915-fix-tvmode-oops.patch
 #ApplyPatch drm-disable-r600-aspm.patch
 
 # VGA arb + drm
@@ -2204,6 +2206,13 @@ fi
 # and build.
 
 %changelog
+* Fri Nov 27 2009 Jarod Wilson <jarod@redhat.com> 2.6.31.6-153
+- add device name to lirc_zilog, fixes issues w/multiple target devices
+- add lirc_imon pure input mode support for onboard decode devices
+
+* Wed Nov 26 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.6-152
+- Fix intel_tv_mode_set oops (#540218)
+
 * Wed Nov 26 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31.6-151
 - VT-d: Work around yet more HP BIOS brokenness (#536675)
 
