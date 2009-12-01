@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1939 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1941 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -644,8 +644,6 @@ Patch30: sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
 
 Patch31: disable-stackprotector-all.patch
 
-Patch41: linux-2.6-sysrq-c.patch
-
 # Intel IOMMU fixes/workarounds
 Patch100: linux-2.6-die-closed-source-bios-muppets-die.patch
 Patch101: linux-2.6-intel-iommu-updates.patch
@@ -749,6 +747,7 @@ Patch1832: drm-edid-retry.patch
 Patch1834: drm-edid-header-fixup.patch
 Patch1835: drm-default-mode.patch
 Patch1836: drm-radeon-hdp-cache-flush.patch
+Patch1837: drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -1277,8 +1276,6 @@ ApplyPatch linux-2.6-utrace.patch
 ApplyPatch sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
 
 ApplyPatch disable-stackprotector-all.patch
-# enable sysrq-c on all kernels, not only kexec
-#ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
@@ -1489,6 +1486,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyPatch drm-i915-fix-tvmode-oops.patch
+ApplyPatch drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 #ApplyPatch drm-disable-r600-aspm.patch
 
 # VGA arb + drm
@@ -2206,6 +2204,12 @@ fi
 # and build.
 
 %changelog
+* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com>
+- drm-i915-fix-sync-to-vbl-when-vga-is-off.patch: add (rhbz#541670)
+
+* Sun Nov 29 2009 Kyle McMartin <kyle@redhat.com>
+- Drop linux-2.6-sysrq-c.patch, made consistent upstream.
+
 * Fri Nov 27 2009 Jarod Wilson <jarod@redhat.com> 2.6.31.6-153
 - add device name to lirc_zilog, fixes issues w/multiple target devices
 - add lirc_imon pure input mode support for onboard decode devices
