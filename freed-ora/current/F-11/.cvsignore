@@ -7,5 +7,5 @@ deblob-main
 deblob-2.6.30
 deblob-check
 kernel-2.6.30
-linux-2.6.30-libre.*
+linux-2.6.30-libre1.*
 patch-2.6.30.9.bz2
