@@ -812,11 +812,11 @@ Group: Development/Debug
 This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
 
-%package -n perf
+%package -n perf-libre
 Summary: Performance monitoring for the Linux kernel
 Group: Development/System
 License: GPLv2
-%description -n perf
+%description -n perf-libre
 This package provides the supporting documentation for the perf tool
 shipped in each kernel image subpackage.
 
@@ -1961,7 +1961,7 @@ fi
 %endif
 
 %if %{with_perf}
-%files -n perf
+%files -n perf-libre
 %defattr(-,root,root)
 %{_datadir}/doc/perf
 /usr/sbin/perf
@@ -2044,6 +2044,7 @@ fi
 %changelog
 * Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed 2.6.32
+- Rename subpackage perf to perf-libre; add provides.
 
 * Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-1
 - Linux 2.6.32
