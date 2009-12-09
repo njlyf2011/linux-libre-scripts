@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1941 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1948 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -38,7 +38,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -703,6 +703,7 @@ Patch670: linux-2.6-ata-quirk.patch
 Patch671: linux-2.6-ahci-export-capabilities.patch
 
 Patch680: prism54-remove-pci-dev-table.patch
+Patch681: linux-2.6-ath9k-fixes.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -733,7 +734,7 @@ Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 
 # nouveau + drm fixes
 Patch1810: kms-offb-handoff.patch
-Patch1812: drm-next-44c83571.patch
+Patch1812: drm-next-b390f944.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -746,8 +747,9 @@ Patch1831: drm-conservative-fallback-modes.patch
 Patch1832: drm-edid-retry.patch
 Patch1834: drm-edid-header-fixup.patch
 Patch1835: drm-default-mode.patch
-Patch1836: drm-radeon-hdp-cache-flush.patch
 Patch1837: drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
+Patch1839: drm-radeon-misc-fixes.patch
+Patch1840: drm-radeon-rv410-test-fix.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -829,6 +831,9 @@ Patch14461: highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
 Patch14462: highmem-fix-arm-powerpc-kmap_types.patch
 
 Patch14463: dlm-fix-connection-close-handling.patch
+
+# rhbz#544144 [bbf31bf18d34caa87dd01f08bf713635593697f2]
+Patch14464: ipv4-fix-null-ptr-deref-in-ip_fragment.patch
 
 %endif
 
@@ -1435,6 +1440,9 @@ ApplyPatch linux-2.6-ahci-export-capabilities.patch
 # prism54: remove pci modinfo device table
 ApplyPatch prism54-remove-pci-dev-table.patch
 
+# ath9k: add fixes suggested by upstream maintainer
+ApplyPatch linux-2.6-ath9k-fixes.patch
+
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
@@ -1470,8 +1478,9 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch kms-offb-handoff.patch
-ApplyPatch drm-next-44c83571.patch
-ApplyPatch drm-radeon-hdp-cache-flush.patch
+ApplyPatch drm-next-b390f944.patch
+ApplyPatch drm-radeon-misc-fixes.patch
+ApplyPatch drm-radeon-rv410-test-fix.patch
 ApplyPatch drm-conservative-fallback-modes.patch
 ApplyPatch drm-edid-retry.patch
 ApplyPatch drm-edid-header-fixup.patch
@@ -1554,6 +1563,9 @@ ApplyPatch highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
 ApplyPatch highmem-fix-arm-powerpc-kmap_types.patch
 
 ApplyPatch dlm-fix-connection-close-handling.patch
+
+# rhbz#544144
+ApplyPatch ipv4-fix-null-ptr-deref-in-ip_fragment.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2204,6 +2216,34 @@ fi
 # and build.
 
 %changelog
+* Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Rebased to linux-2.6.31-libre2.
+
+* Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.6-162
+- ipv4-fix-null-ptr-deref-in-ip_fragment.patch: null ptr deref
+  bug fix.
+
+* Thu Dec 03 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-161
+- rv410 LVDS on resume test fix from AMD (#541562)
+
+* Wed Dec 02 2009 John W. Linville <linville@redhat.com> 2.6.31.6-160
+- ath9k: add fixes suggested by upstream maintainer
+
+* Wed Dec 02 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-159
+- drm-radeon-misc-fixes.patch: r400 LVDS, r600 digital dpms, cursor fix, tv property
+
+* Wed Dec 02 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.6-158
+- nouveau: more complete lvds script selection on >=G80 (rh#522690, rh#529859)
+- nouveau: more complete tmds script selection on >=G80 (rh#537853)
+- nouveau: TV detection fixes
+
+* Tue Dec 01 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-157
+- div/0 fix harder (#540593) - also ignore unposted GPUs with no BIOS
+
+* Tue Dec 01 2009 Dave Airlie <airlied@redhat.com> 2.6.31.6-156
+- drm-next: fixes LVDS resume on r4xx, div/0 on no bios (#540593)
+  lockup on tv-out only startup.
+
 * Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com>
 - drm-i915-fix-sync-to-vbl-when-vga-is-off.patch: add (rhbz#541670)
 
