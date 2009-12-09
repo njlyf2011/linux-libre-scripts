@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1779 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1781 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -38,7 +38,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -858,6 +858,12 @@ Patch16450: fs-pipe-null-ptr-deref-fix.patch
 Patch16460: sata_nv-make-sure-link-is-brough-up-online-when-skipping-hardreset.patch
 Patch16470: sata_nv-use-hardreset-only-for-post-boot-probing.patch
 
+# rhbz#538734 (CVE-tbd) [f60311d5f7670d9539b424e4ed8b5c0872fc9e83]
+Patch16471: fuse-prevent-fuse_put_request-in-invalid-ptr.patch
+
+# rhbz#544144 [bbf31bf18d34caa87dd01f08bf713635593697f2]
+Patch16472: ipv4-fix-null-ptr-deref-in-ip_fragment.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1619,6 +1625,11 @@ ApplyPatch fs-pipe-null-ptr-deref-fix.patch
 ApplyPatch sata_nv-use-hardreset-only-for-post-boot-probing.patch
 ApplyPatch sata_nv-make-sure-link-is-brough-up-online-when-skipping-hardreset.patch
 
+ApplyPatch fuse-prevent-fuse_put_request-in-invalid-ptr.patch
+
+# rhbz#544144
+ApplyPatch ipv4-fix-null-ptr-deref-in-ip_fragment.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2207,6 +2218,17 @@ fi
 # and build.
 
 %changelog
+* Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Rebased to linux-2.6.30-libre1.
+
+* Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.30.9-102
+- ipv4-fix-null-ptr-deref-in-ip_fragment.patch: null ptr deref
+  bug fix.
+
+* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com>
+- fuse-prevent-fuse_put_request-in-invalid-ptr.patch: fix oops in fuse
+  when low on memory. rhbz#538734.
+
 * Thu Nov 19 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.30.9-100
 - Re-enable CONFIG_DMAR_GFX_WA on x86_64.
 
