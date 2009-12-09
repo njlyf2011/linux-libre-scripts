@@ -27,18 +27,18 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1786
+%define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1788 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1864 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 31
+%define base_sublevel 32
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+#define librev
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -73,9 +73,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 9
+%define rcrev 0
 # The git snapshot level
-%define gitrev 2
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-firmware
-%define with_firmware  %{?_with_firmware:  1} %{?!_with_firmware:  0}
+%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
 # tools/perf
 %define with_perftool  %{?_without_perftool:  0} %{?!_without_perftool:  1}
 # perf noarch subpkg
@@ -136,6 +136,8 @@ Summary: The Linux kernel
 %define with_baseonly  %{?_with_baseonly:     1} %{?!_with_baseonly:     0}
 # Only build the smp kernel (--with smponly):
 %define with_smponly   %{?_with_smponly:      1} %{?!_with_smponly:      0}
+# Only build the debug kernel (--with dbgonly):
+%define with_dbgonly   %{?_with_dbgonly:      1} %{?!_with_dbgonly:      0}
 
 # should we do C=1 builds with sparse
 %define with_sparse	%{?_with_sparse:      1} %{?!_with_sparse:      0}
@@ -162,12 +164,13 @@ Summary: The Linux kernel
 # non-released_kernel
 %if 0%{?rcrev}
 %define rctag .rc%rcrev
+%else
+%define rctag .rc0
 %endif
 %if 0%{?gitrev}
 %define gittag .git%gitrev
-%if !0%{?rcrev}
-%define rctag .rc0
-%endif
+%else
+%define gittag .git0
 %endif
 %define pkg_release 0.%{fedora_build}%{?rctag}%{?gittag}%{?buildid}%{?dist}%{?libres}
 
@@ -234,6 +237,18 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_kdump 0
 %define with_debug 0
+%endif
+
+# if requested, only build debug kernel
+%if %{with_dbgonly}
+%if %{debugbuildsenabled}
+%define with_up 0
+%endif
+%define with_smp 0
+%define with_pae 0
+%define with_xen 0
+%define with_kdump 0
+%define with_perftool 0
 %endif
 
 %define all_x86 i386 i686
@@ -447,7 +462,7 @@ Summary: The Linux kernel
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
 %if %{with_dracut}
-%define initrd_prereq  dracut-kernel >= 001-7
+%define initrd_prereq  dracut >= 001-7
 %else
 %define initrd_prereq  mkinitrd >= 6.0.61-1
 %endif
@@ -508,12 +523,7 @@ BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
 BuildRequires: net-tools
-%if %{with_doc}
-BuildRequires: xmlto
-%if %{with_perf}
-BuildRequires: asciidoc
-%endif
-%endif
+BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
 %endif
@@ -524,7 +534,7 @@ BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
 %define fancy_debuginfo 0
 %if %{with_debuginfo}
-%if 0%{?fedora} >= 8
+%if 0%{?fedora} >= 8 || 0%{?rhel} >= 6
 %define fancy_debuginfo 1
 %endif
 %endif
@@ -631,13 +641,8 @@ Patch20: linux-2.6-hotfixes.patch
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 
-Patch30: sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
-
-Patch41: linux-2.6-sysrq-c.patch
-
-# Intel IOMMU fixes/workarounds
-Patch100: linux-2.6-die-closed-source-bios-muppets-die.patch
-Patch101: linux-2.6-intel-iommu-updates.patch
+# More workaround for BIOS brokenness, fix intel_iommu=igfx_off oops
+Patch100: linux-2.6-iommu-updates.patch
 
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
@@ -655,7 +660,6 @@ Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch301: linux-2.6-fix-usb-serial-autosuspend.diff
 Patch302: linux-2.6-qcserial-autosuspend.diff
-Patch303: linux-2.6-bluetooth-autosuspend.diff
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
@@ -680,14 +684,16 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
-Patch601: linux-2.6-alsa-improve-hda-powerdown.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
-Patch611: alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
+Patch682: linux-2.6-ath9k-fixes.patch
+
+Patch700: linux-2.6.31-nx-data.patch
+Patch701: linux-2.6.31-modules-ro-nx.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -695,21 +701,13 @@ Patch900: linux-2.6-pci-cacheline-sizing.patch
 
 Patch1515: lirc-2.6.31.patch
 Patch1517: hdpvr-ir-enable.patch
-Patch1518: hid-ignore-all-recent-imon-devices.patch
 
 # virt + ksm patches
-Patch1550: linux-2.6-ksm.patch
 Patch1551: linux-2.6-ksm-kvm.patch
-Patch1552: linux-2.6-ksm-updates.patch
-Patch1553: linux-2.6-ksm-fix-munlock.patch
-Patch1575: linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
-Patch1576: linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
-Patch1577: linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
-Patch1578: linux-2.6-xen-stack-protector-fix.patch
-Patch1579: linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 
 # nouveau + drm fixes
-Patch1812: drm-next.patch
+Patch1811: drm-radeon-fixes.patch
+Patch1812: drm-radeon-dp-support.patch
 Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -718,10 +716,8 @@ Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
-
-# vga arb
-Patch1900: linux-2.6-vga-arb.patch
-Patch1901: drm-vga-arb.patch
+Patch1826: drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
+Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -738,12 +734,12 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
-Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 
 # fs fixes
 
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
+Patch3051: linux-2.6-nfs4-callback-hidden.patch
 
 # VIA Nano / VX8xx updates
 Patch11010: via-hwmon-temp-sensor.patch
@@ -751,6 +747,7 @@ Patch11010: via-hwmon-temp-sensor.patch
 # patches headed upstream
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
+Patch12013: linux-2.6-rfkill-all.patch
 
 %endif
 
@@ -990,6 +987,7 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1
   fi
+%if !%{using_upstream_branch}
   if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
     if [ "${patch:0:10}" != "patch-2.6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
@@ -997,6 +995,7 @@ ApplyPatch()
     fi
   fi 2>/dev/null
   $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
+%endif
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
   *.gz) gunzip < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1042,6 +1041,8 @@ ApplyOptionalPatch()
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
 %define vanillaversion 2.6.%{base_sublevel}-git%{gitrev}
+%else
+%define vanillaversion 2.6.%{base_sublevel}
 %endif
 %endif
 %endif
@@ -1165,7 +1166,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-#ApplyOptionalPatch git-linus.diff
+ApplyOptionalPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1190,13 +1191,8 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
-ApplyPatch linux-2.6-tracehook.patch
+#ApplyPatch linux-2.6-tracehook.patch # merged
 ApplyPatch linux-2.6-utrace.patch
-
-ApplyPatch sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
-
-# enable sysrq-c on all kernels, not only kexec
-#ApplyPatch linux-2.6-sysrq-c.patch
 
 # Architecture patches
 # x86(-64)
@@ -1206,12 +1202,7 @@ ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 #
 # Intel IOMMU
 #
-# Quiesce USB host controllers before setting up the IOMMU
-ApplyPatch linux-2.6-die-closed-source-bios-muppets-die.patch
-# Some performance fixes, unify hardware/software passthrough support, and
-# most importantly: notice when the BIOS points us to a region that returns
-# all 0xFF, and claims that there's an IOMMU there.
-ApplyPatch linux-2.6-intel-iommu-updates.patch
+ApplyPatch linux-2.6-iommu-updates.patch
 
 #
 # PowerPC
@@ -1252,12 +1243,12 @@ ApplyPatch linux-2.6-execshield.patch
 
 # NFSv4
 ApplyPatch linux-2.6-nfsd4-proots.patch
+ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
-ApplyPatch linux-2.6-fix-usb-serial-autosuspend.diff
+#ApplyPatch linux-2.6-fix-usb-serial-autosuspend.diff
 ApplyPatch linux-2.6-qcserial-autosuspend.diff
-ApplyPatch linux-2.6-bluetooth-autosuspend.diff
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 
 # ACPI
@@ -1291,9 +1282,7 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 # ALSA
 # squelch hda_beep by default
 ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
-ApplyPatch linux-2.6-alsa-improve-hda-powerdown.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
-ApplyPatch alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch
 
 # Networking
 
@@ -1336,6 +1325,14 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # back-port scan result aging patches
 #ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
 
+# ath9k: add fixes suggested by upstream maintainer
+ApplyPatch linux-2.6-ath9k-fixes.patch
+
+# Mark kernel data as NX
+#ApplyPatch linux-2.6.31-nx-data.patch
+# Apply NX/RO to modules
+#ApplyPatch linux-2.6.31-modules-ro-nx.patch
+
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
@@ -1346,44 +1343,33 @@ ApplyPatch linux-2.6-pci-cacheline-sizing.patch
 ApplyPatch lirc-2.6.31.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
-# tell usbhid to ignore all imon devices (sent upstream 2009.07.31)
-ApplyPatch hid-ignore-all-recent-imon-devices.patch
 
 # Add kernel KSM support
-ApplyPatch linux-2.6-ksm.patch
-ApplyPatch linux-2.6-ksm-updates.patch
-ApplyPatch linux-2.6-ksm-fix-munlock.patch
 # Optimize KVM for KSM support
-ApplyPatch linux-2.6-ksm-kvm.patch
+#ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
-ApplyPatch linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
-ApplyPatch linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
-ApplyPatch linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
-ApplyPatch linux-2.6-xen-stack-protector-fix.patch
-ApplyPatch linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
 
 # Fix block I/O errors in KVM
-ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
+#ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-next.patch
-
+ApplyPatch drm-radeon-fixes.patch
+ApplyPatch drm-radeon-dp-support.patch
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
 #ApplyPatch drm-radeon-pm.patch
-ApplyPatch drm-i915-resume-force-mode.patch
+#ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
-ApplyPatch drm-page-flip.patch
+#ApplyPatch drm-page-flip.patch
 ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
-
-# VGA arb + drm
-ApplyPatch linux-2.6-vga-arb.patch
-ApplyPatch drm-vga-arb.patch
+ApplyPatch drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
+# Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
+ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1397,9 +1383,9 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 #ApplyPatch linux-2.6-v4l-dvb-update.patch
 #ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
-ApplyPatch v4l-dvb-fix-cx25840-firmware-loading.patch
 
 # Patches headed upstream
+ApplyPatch linux-2.6-rfkill-all.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1459,7 +1445,8 @@ cd ..
 # beforehand to get the proper final build ID bits into the embedded image.
 # This affects the vDSO images in vmlinux, and the vmlinux image in bzImage.
 export AFTER_LINK=\
-'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug -i $@"'
+'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug \
+    				-i $@ > $@.id"'
 %endif
 
 cp_vmlinux()
@@ -1490,11 +1477,6 @@ BuildKernel() {
 
     # make sure EXTRAVERSION says what we want it to say
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
-
-    cat >> Makefile <<\EOF
-# XXX temp workaround for https://bugzilla.redhat.com/show_bug.cgi?id=521991
-KBUILD_CFLAGS += -fno-var-tracking-assignments
-EOF
 
     # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -1534,9 +1516,11 @@ EOF
     install -m 644 .config $RPM_BUILD_ROOT/boot/config-$KernelVer
     install -m 644 System.map $RPM_BUILD_ROOT/boot/System.map-$KernelVer
 %if %{with_dracut}
-    touch $RPM_BUILD_ROOT/boot/dracut-$KernelVer.img
+    # We estimate the size of the initramfs because rpm needs to take this size
+    # into consideration when performing disk space calculations. (See bz #530778)
+    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img bs=1M count=20
 %else
-    touch $RPM_BUILD_ROOT/boot/initrd-$KernelVer.img
+    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initrd-$KernelVer.img bs=1M count=5
 %endif
     if [ -f arch/$Arch/boot/zImage.stub ]; then
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
@@ -1626,6 +1610,12 @@ hwcap 0 nosegneg"
     cp $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/config/auto.conf
     cd ..
 
+    if test -s vmlinux.id; then
+      cp vmlinux.id $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/vmlinux.id
+    else
+      echo >&2 "*** WARNING *** no vmlinux build ID! ***"
+    fi
+
     #
     # save the vmlinux file for kernel debugging into the kernel-debuginfo rpm
     #
@@ -1653,7 +1643,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register'
+    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -1696,12 +1686,11 @@ mkdir -p $RPM_BUILD_ROOT/boot
 cd linux-%{kversion}.%{_target_cpu}
 
 %if %{with_debug}
-%if %{with_up}
 BuildKernel %make_target %kernel_image debug
 %endif
-%if %{with_pae}
+
+%if %{with_pae_debug}
 BuildKernel %make_target %kernel_image PAEdebug
-%endif
 %endif
 
 %if %{with_pae}
@@ -1724,15 +1713,16 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 # Make the HTML and man pages.
 make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
 
-%if %{with_perf}
-make %{?_smp_mflags} man || %{doc_build_fail}
-%endif
-
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
 find Documentation -type d | xargs chmod u+w
 %endif
 
+%if %{with_perf}
+pushd tools/perf
+make %{?_smp_mflags} man || %{doc_build_fail}
+popd
+%endif
 
 ###
 ### Special hacks for debuginfo subpackages.
@@ -1776,6 +1766,7 @@ mkdir -p $man9dir
 find Documentation/DocBook/man -name '*.9.gz' -print0 |
 xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
 ls $man9dir | grep -q '' || > $man9dir/BROKEN
+%endif # with_doc
 
 # perf docs
 %if %{with_perf}
@@ -1790,9 +1781,7 @@ for d in *.1; do
  gzip $d;
 done
 popd
-
-%endif
-%endif
+%endif # with_perf
 
 # perf shell wrapper
 %if %{with_perf}
@@ -1886,7 +1875,7 @@ fi\
 %{-r:\
 if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
-  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
+  /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel-libre%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
 %{expand:\
 %if %{with_dracut}\
@@ -1976,9 +1965,7 @@ fi
 %defattr(-,root,root)
 %{_datadir}/doc/perf
 /usr/sbin/perf
-%if %{with_doc}
 %{_datadir}/man/man1/*
-%endif
 %endif
 
 # This is %{image_install_path} on an arch where that includes ELF files,
@@ -2014,7 +2001,7 @@ fi
 %endif\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
 %if %{with_dracut}\
-%ghost /boot/dracut-%{KVERREL}%{?2:.%{2}}.img\
+%ghost /boot/initramfs-%{KVERREL}%{?2:.%{2}}.img\
 %else\
 %ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
 %endif\
@@ -2046,9 +2033,7 @@ fi
 
 %kernel_variant_files %{with_up}
 %kernel_variant_files %{with_smp} smp
-%if %{with_up}
 %kernel_variant_files %{with_debug} debug
-%endif
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
@@ -2057,7 +2042,325 @@ fi
 # and build.
 
 %changelog
-* Mon Sep 21 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed 2.6.32
+
+* Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-1
+- Linux 2.6.32
+
+* Wed Dec 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.65.rc8.git5
+- 2.6.32-rc8-git5
+- nuke 9p cachefiles fix, upstream.
+- SLOW_WORK_PROC was renamed to SLOW_WORK_DEBUG, debugfs instead of procfs.
+
+* Wed Dec 02 2009 John W. Linville <linville@redhat.com> 2.6.32-0.64.rc8.git2
+- ath9k: add fixes suggested by upstream maintainer
+
+* Wed Dec 02 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.32-0.63.rc8.git2
+- forward port IOMMU fixes from F-12 for HP BIOS brokenness
+- Fix oops with intel_iommu=igfx_off
+- agp/intel: Clear full GTT at startup
+
+* Wed Dec 02 2009 Dave Airlie <airlied@redhat.com> 2.6.32-0.62.rc8.git2
+- forward port radeon fixes from F-12 + add radeon display port support
+
+* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.61.rc8.git2
+- fix-9p-fscache.patch: fix build.
+
+* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.60.rc8.git2
+- 2.6.32-rc8-git2 daily snapshot
+- nuke include/generated nuke-age since the patch was reverted upstream
+- config changes:
+ - generic:
+  +CONFIG_FSCACHE_OBJECT_LIST=y
+  +CONFIG_SLOW_WORK_PROC=y
+
+* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com>
+- drm-i915-fix-sync-to-vbl-when-vga-is-off.patch: add, (rhbz#541670) 
+
+* Sun Nov 29 2009 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-sysrq-c.patch: drop, was made consistent upstream.
+
+* Sat Nov 28 2009 Jarod Wilson <jarod@redhat.com> 2.6.32-0.55.rc8.git1
+- add device name to lirc_zilog, fixes issues w/multiple target devices
+- add lirc_imon pure input mode support for onboard decode devices
+
+* Fri Nov 27 2009 Dave Airlie <airlied@redhat.com> 2.6.32-0.54.rc8.git1
+- attempt to put nouveau back - same patch as F-12 should work
+
+* Mon Nov 23 2009 Roland McGrath <roland@redhat.com>
+- Install vmlinux.id file in kernel-devel rpm.
+
+* Fri Nov 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.52.rc8.git1
+- 2.6.32-rc8-git1
+- Enable CONFIG_MEMORY_HOTPLUG (and HOTREMOVE) on x86_64
+
+* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.51.rc7.git2
+- Oops, re-enable debug builds for rawhide... didn't mean to commit that.
+
+* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.50.rc7.git2
+- Disable FUNCTION_TRACER and DYNAMIC_FTRACE in non-debug builds for
+  Fedora 13. Some pondering required to see if it's actually worth doing
+  though. Anecdotal evidence worth half as much as benchmarks.
+  STACK_TRACER selects FUNCTION_TRACER, so it has to go off too, sadly,
+  since it hooks every mcount to log the stack depth for the task.
+
+* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.49.rc7.git2
+- 2.6.32-rc7-git2
+
+* Mon Nov 16 2009 Dave Airlie <airlied@redhat.com> 2.6.32-0.48.rc7.git1
+- backout gpg change now that koji is fixed
+
+* Sun Nov 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.47.rc7.git1
+- Buildrequire gpg
+
+* Sun Nov 15 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix oops in VIA Padlock driver.
+
+* Sun Nov 15 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.32-rc7-git1
+
+* Fri Nov 13 2009 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.32-rc7
+
+* Thu Nov 05 2009 Jarod Wilson <jarod@redhat.com>
+- Add --with dbgonly rpmbuild option to build only debug kernels
+
+* Wed Nov 04 2009 Kyle McMartin <kyle@redhat.com>
+- Make JBD2_DEBUG a toggleable config option.
+
+* Wed Nov 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.39.rc6.git0
+- 2.6.32-rc6, fix for NULL ptr deref in cfg80211.
+
+* Mon Nov 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.39.rc5.git6
+- 2.6.32-rc5-git6 (with sandeen's reversion of "ext4: Remove journal_checksum
+  mount option and enable it by default")
+
+* Mon Nov 02 2009 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.32-rc5-git5
+
+* Tue Oct 27 2009 John W. Linville <linville@redhat.com>
+- Disable build of prism54 module
+
+* Tue Oct 27 2009 Dave Airlie <airlied@redhat.com>
+- Get dd command line args correct.
+
+* Mon Oct 26 2009 Dave Jones <davej@redhat.com>
+- Make a 20MB initramfs file so rpm gets its diskspace calculations right. (#530778)
+
+* Sat Oct 23 2009 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.32-rc5-git3
+- Drop merged patch:
+  linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
+
+* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.33.rc5.git1
+- 2.6.32-rc5-git1
+
+* Fri Oct 16 2009 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.32-rc5
+- New config option: CONFIG_VMXNET3=m
+
+* Wed Oct 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.32-rc4-git4
+
+* Wed Oct 14 2009 Steve Dickson <steved@redhat.com>
+- Updated the NFS v4 pseudo root patch so it will apply
+- Fixed hang during NFS installs (bz 528537)
+
+* Wed Oct 14 2009 Peter Jones <pjones@redhat.com>
+- Add scsi_register_device_handler to modules.block's symbol list so
+  we'll have scsi device handlers in installer images.
+
+* Tue Oct 13 2009 Kyle McMartin <kyle@redhat.com>
+- Always build perf docs, regardless of whether we build kernel-doc.
+  Seems rather unfair to not ship the manpages half the time.
+  Also, drop BuildRequires %if when not with_doc, the rules about %if
+  there are f*!&^ing complicated.
+
+* Tue Oct 13 2009 Kyle McMartin <kyle@redhat.com>
+- Build perf manpages properly.
+
+* Tue Oct 13 2009 Dave Airlie <airlied@redhat.com>
+- cleanup some of drm vga arb bits that are upstream
+
+* Mon Oct 12 2009 Jarod Wilson <jarod@redhat.com>
+- Merge lirc compile fixes into lirc patch
+- Refresh lirc patch with additional irq handling fixage
+- Fix IR transmit on port 1 of 1st-gen mceusb transceiver
+- Support another mouse button variant on imon devices
+
+* Mon Oct 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.24.rc4.git0
+- Last-minute USB fix from upstream.
+
+* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix lirc build after header changes.
+- Fix bug in lirc interrupt processing.
+
+* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix up multiple definition of debug options
+  (EXT4_DEBUG, DEBUG_FORCE_WEAK_PER_CPU)
+
+* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.32-rc4
+- New config options:
+  CONFIG_BE2ISCSI=m
+  CONFIG_SCSI_BFA_FC=m
+  CONFIG_USB_MUSB_HDRC is not set
+
+* Sun Oct 11 2009 Kyle McMartin <kyle@redhat.com>
+- 2.6.32-rc3-git3
+
+* Thu Oct 08 2009 Ben Skeggs <bskeggs@redhat.com>
+- ppc: compile nvidiafb as a module only, nvidiafb+nouveau = bang! (rh#491308)
+
+* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
+- Enable FUNCTION_GRAPH_TRACER on x86-64.
+
+* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
+- Disable CONFIG_IRQSOFF_TRACER on srostedt's recommendation.
+  (Adds unwanted overhead when not in use).
+
+* Sun Oct 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.17.rc3.git0
+- 2.6.32-rc3 (bah, rebase script didn't catch it.)
+
+* Sun Oct 04 2009 Kyle McMartin <kyle@redhat.com>
+- 2.6.32-rc1-git7
+- [x86,x86_64] ACPI_PROCESSOR_AGGREGATOR=m
+
+* Mon Sep 28 2009 Kyle McMartin <kyle@redhat.com>
+- 2.6.32-rc1
+- rebased crash-driver patchset, ia64_ksyms.c conflicts. move x86 crash.h
+  file to the right place.
+- full changelog forthcoming & to fedora-kernel-list.
+
+* Mon Sep 28 2009 Kyle McMartin <kyle@redhat.com>
+- sick of rejects.
+
+* Mon Sep 28 2009 Chuck Ebbert <cebbert@redhat.com>
+- Fix up some items missing in make debug vs. make release,
+  rearrange so the options are in the same order.
+- Add new debug options:
+  CONFIG_EXT4_DEBUG
+  CONFIG_DEBUG_FORCE_WEAK_PER_CPU
+
+* Sun Sep 27 2009 Kyle McMartin <kyle@redhat.com>
+- Must now make mrproper after each config pass, due to Kbuild
+  stashing away the $ARCH variable.
+
+* Sun Sep 27 2009 Kyle McMartin <kyle@redhat.com>
+- 2.6.31-git18
+- rebased:
+ - hdpvr-ir-enable.patch
+ - linux-2.6-build-nonintconfig.patch
+ - linux-2.6-debug-sizeof-structs.patch
+ - linux-2.6-debug-vm-would-have-oomkilled.patch
+ - linux-2.6-execshield.patch
+ - linux-2.6-makefile-after_link.patch
+ - linux-2.6-serial-460800.patch
+ - linux-2.6-utrace.patch
+ - via-hwmon-temp-sensor.patch
+- merged:
+ - linux-2.6-tracehook.patch
+ - linux-2.6-die-closed-source-bios-muppets-die.patch
+ - linux-2.6-intel-iommu-updates.patch
+ - linux-2.6-ksm.patch
+ - linux-2.6-ksm-updates.patch
+ - linux-2.6-ksm-fix-munlock.patch
+ - linux-2.6-vga-arb.patch
+ - v4l-dvb-fix-cx25840-firmware-loading.patch
+ - linux-2.6-rtc-show-hctosys.patch
+
+* Fri Sep 18 2009 Dave Jones <davej@redhat.com>
+- %ghost the dracut initramfs file.
+
+* Thu Sep 17 2009 Hans de Goede <hdegoede@redhat.com>
+- Now that we have %%post generation of dracut images we do not need to
+  Require dracut-kernel anymore
+
+* Thu Sep 17 2009 Chuck Ebbert <cebbert@redhat.com>
+- Disable drm-nouveau too -- it won't build without other
+  drm updates.
+
+* Wed Sep 16 2009 Roland McGrath <roland@redhat.com>
+- Remove workaround for gcc bug #521991, now fixed.
+
+* Tue Sep 15 2009 Kyle McMartin <kyle@redhat.com>
+- 2.6.31-git4
+- rebased:
+ - linux-2.6-execshield.patch: split paravirt_types.h
+ - linux-2.6-buildnonintconfig.patch
+- disabled:
+ - ksm, drm.
+- merged:
+ - linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
+ - linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
+ - linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
+ - linux-2.6-xen-stack-protector-fix.patch
+ - linux-2.6-bluetooth-autosuspend.diff
+ - hid-ignore-all-recent-imon-devices.patch
+- config changes:
+ - arm:
+  - CONFIG_HIGHPTE off, seems safer this way.
+ - generic:
+  - RDS_RDMA/RDS_TCP=m
+  - SCSI_PMCRAID=m
+  - WLAN=y, CFG80211_DEFAULT_PS=y, NL80211_TESTMODE off.
+  - WL12XX=m
+  - B43_PHY_LP=y
+  - BT_MRVL=m
+  - new MISDN stuff modular.
+ - sparc:
+  - enable PERF_COUNTERS & EVENT_PROFILE
+ - ppc:
+  - XILINX_EMACSLITE=m
+
+* Mon Sep 14 2009 Chuck Ebbert <cebbert@redhat.com>
+- 2.6.31-git2
+- Drop merged patches:
+  sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
+  linux-2.6-nfs4-ver4opt.patch
+  linux-2.6-alsa-improve-hda-powerdown.patch
+  alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch
+  linux-2.6-ahci-export-capabilities.patch
+- New s390 config option:
+   CONFIG_SCLP_ASYNC=m
+- New generic config options:
+   CONFIG_ATA_VERBOSE_ERROR=y
+   CONFIG_PATA_RDC=m
+   CONFIG_SOUND_OSS_CORE_PRECLAIM=y
+   CONFIG_SND_HDA_PATCH_LOADER=y
+   CONFIG_SND_HDA_CODEC_CIRRUS=y
+   CONFIG_OPROFILE_EVENT_MULTIPLEX=y
+   CONFIG_CRYPTO_VMAC=m
+   CONFIG_CRYPTO_GHASH=m
+- New debug option:
+   CONFIG_DEBUG_CREDENTIALS=y in debug kernels
+
+* Mon Sep 14 2009 Steve Dickson <steved@redhat.com>
+- Added support for -o v4 mount parsing
+
+* Fri Sep 11 2009 Dave Jones <davej@redhat.com>
+- Apply NX/RO to modules
+
+* Fri Sep 11 2009 Dave Jones <davej@redhat.com>
+- Mark kernel data section as NX
+
+* Fri Sep 11 2009 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: bring in Matthew Garret's initial switchable graphics support
+
+* Fri Sep 11 2009 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: fixed use of strap-based panel mode when required (rh#522649)
+- nouveau: temporarily block accel on NVAC chipsets (rh#522361, rh#522575)
+
+* Thu Sep 10 2009 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-ahci-export-capabilities.patch: Backport from upstream
+- linux-2.6-rtc-show-hctosys.patch: Export the hctosys state of an rtc
+- linux-2.6-rfkill-all.patch: Support for keys that toggle all rfkill state
+
+* Thu Sep 10 2009 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau.patch: add some scaler-only modes for LVDS, GEM/TTM fixes
+
+* Wed Sep 09 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Sep 21
 - Deblobbed 2.6.31.
 - Updated deblobbing of linux-2.6-v4l-dvb-fixes.patch, drm-next.patch and 
 drm-nouveau.patch.

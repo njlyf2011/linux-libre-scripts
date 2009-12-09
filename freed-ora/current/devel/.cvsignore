@@ -4,7 +4,7 @@ GNUmakefile
 kernel-2.6.*.config
 temp-*
 deblob-main
-deblob-2.6.31
+deblob-2.6.32
 deblob-check
-kernel-2.6.31
-linux-2.6.31-libre1.*
+kernel-2.6.32
+linux-2.6.32-libre.*
