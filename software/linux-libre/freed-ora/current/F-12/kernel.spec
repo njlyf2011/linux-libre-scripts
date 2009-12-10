@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1948 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1952 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -781,7 +781,7 @@ Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 Patch3000: linux-2.6-btrfs-upstream.patch
 
 # NFSv4
-Patch3050: linux-2.6-nfsd4-proots.patch
+Patch3050: linux-2.6.31-nfsd-proot.patch
 Patch3060: linux-2.6-nfs4-ver4opt.patch
 Patch3061: linux-2.6-nfs4-callback-hidden.patch
 
@@ -834,6 +834,9 @@ Patch14463: dlm-fix-connection-close-handling.patch
 
 # rhbz#544144 [bbf31bf18d34caa87dd01f08bf713635593697f2]
 Patch14464: ipv4-fix-null-ptr-deref-in-ip_fragment.patch
+
+# rhbz#544471
+Patch14465: ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
 
 %endif
 
@@ -1344,7 +1347,7 @@ ApplyPatch linux-2.6-btrfs-upstream.patch
 # eCryptfs
 
 # NFSv4
-ApplyPatch linux-2.6-nfsd4-proots.patch
+ApplyPatch linux-2.6.31-nfsd-proot.patch
 ApplyPatch linux-2.6-nfs4-ver4opt.patch
 ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
@@ -1566,6 +1569,9 @@ ApplyPatch dlm-fix-connection-close-handling.patch
 
 # rhbz#544144
 ApplyPatch ipv4-fix-null-ptr-deref-in-ip_fragment.patch
+
+# rhbz#544471
+ApplyPatch ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2216,7 +2222,27 @@ fi
 # and build.
 
 %changelog
-* Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Dec 09 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.6-166
+- ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch: CVE-2009-4131
+  fix insufficient permission checking which could result in arbitrary
+  data corruption by a local unprivileged user.
+
+* Tue Dec  8 2009 Steve Dickson <steved@redhat.com> 2.6.31.6-165
+- nfsd: Updated to latest pseudo root code fixing rhbz# 538609
+
+* Mon Dec 07 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.6-164
+- nouveau: fix NV17 breakage caused by NVA8 fixes
+- nouveau: use ratelimit for GPU error message
+
+* Fri Dec 04 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.6-163
+- nouveau: reduce debug level of some warning messages (rh#543883)
+- nouveau: modesetting fixes on nva5/nva8
+- nouveau: suspend/resume fixes on nva5/nva8 (bios opcode 0x8d)
+- nouveau: cleanup chipset/arch handling, fail init on unknown chipsets
+- nouveau: fix failure to detect some outputs when dcb table is odd
+- nouveau: eliminate unnecessary cursor state changes on nv50
+
+* Thu Dec 03 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Dec 08
 - Rebased to linux-2.6.31-libre2.
 
 * Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.6-162
