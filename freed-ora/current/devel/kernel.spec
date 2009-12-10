@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1864 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1870 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -181,7 +181,7 @@ Summary: The Linux kernel
 
 %define make_target bzImage
 
-%define KVERREL %{PACKAGE_VERSION}-libre.%{PACKAGE_RELEASE}.%{_target_cpu}
+%define KVERREL %{version}-libre.%{release}.%{_target_cpu}
 %define hdrarch %_target_cpu
 %define asmarch %_target_cpu
 
@@ -704,6 +704,7 @@ Patch1517: hdpvr-ir-enable.patch
 
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
+Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 
 # nouveau + drm fixes
 Patch1811: drm-radeon-fixes.patch
@@ -748,6 +749,9 @@ Patch11010: via-hwmon-temp-sensor.patch
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+
+# rhbz#544471
+Patch12014: ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
 
 %endif
 
@@ -1349,6 +1353,7 @@ ApplyPatch hdpvr-ir-enable.patch
 #ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
+ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1386,6 +1391,9 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
+
+# rhbz#544471
+ApplyPatch ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2042,7 +2050,30 @@ fi
 # and build.
 
 %changelog
-* Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Dec 09 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-7
+- ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch: CVE-2009-4131
+  fix insufficient permission checking which could result in arbitrary
+  data corruption by a local unprivileged user.
+
+* Tue Dec 08 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-6
+- Copy fix for #540580 from F-12.
+
+* Tue Dec 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-5
+- new rpm changes:
+ - %{PACKAGE_VERSION} -> %{version}
+ - %{PACKAGE_RELEASE} -> %{release}
+
+* Tue Dec 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-4
+- Disable CONFIG_DEBUG_PERF_USE_VMALLOC for now, causes issues
+  on x86_64. (rhbz#542791)
+
+* Mon Dec  7 2009 Justin M. Forbes <jforbes@redhat.com> 2.6.32-3
+- Allow userspace to adjust kvmclock offset (#530389)
+
+* Mon Dec  7 2009 Steve Dickson <steved@redhat.com> 2.6.32-2
+- Updated the NFS4 pseudo root code to the latest release.
+
+* Thu Dec 03 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Dec 08
 - Deblobbed 2.6.32
 - Rename subpackage perf to perf-libre; add provides.
 
