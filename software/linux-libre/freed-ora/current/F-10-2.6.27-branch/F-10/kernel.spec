@@ -24,7 +24,7 @@ Summary: The Linux kernel
 # works out to the offset from the rebase, so it doesn't get too ginormous.
 #
 %define fedora_cvs_origin   1036
-%define fedora_build_string %(R="$Revision: 1.1206.2.113 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
+%define fedora_build_string %(R="$Revision: 1.1206.2.117 $"; R="${R%% \$}"; R="${R#: 1.}"; echo $R)
 %define fedora_build_origin %(R=%{fedora_build_string}; R="${R%%%%.*}"; echo $R)
 %define fedora_build_prefix %(expr %{fedora_build_origin} - %{fedora_cvs_origin})
 %define fedora_build_suffix %(R=%{fedora_build_string}; R="${R#%{fedora_build_origin}}"; echo $R)
@@ -37,7 +37,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 2
+%define librev 3
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -53,7 +53,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 38
+%define stable_update 41
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -803,9 +803,6 @@ Patch15000: linux-2.6-ppc64-vs-broadcom.patch
 Patch15001: linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
 Patch15002: linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
-# appletalk: fix skb leak (CVE-2009-2903)
-Patch15100: appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
-
 # Networking fixes from 2.6.31-stable:
 Patch15200: ax25-fix-possible-oops-in-ax25_make_new.patch
 Patch15210: net-unix-fix-sending-fds-in-multiple-buffers.patch
@@ -814,27 +811,14 @@ Patch15230: sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
 Patch15240: tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
 Patch15250: x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
 
-# Fix broken IrDA stack in 2.6.27 (#508874)
-Patch15300: irda-add-irda-skb-cb-qdisc-related-padding.patch
-
 # Fix ext3 file corruption in some cases
 Patch15400: jbd-fix-return-value-of-journal-start-commit.patch
 
-# netlink security fix (CVE-2009-3612)
-Patch16100: netlink-fix-typo-in-initialization.patch
+# CVE-2009-4031
+Patch15500: kvm-x86-emulator-limit-insns-to-15-bytes.patch
 
 # fix null deref in r128
 Patch16200: drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
-
-# rhbz#529626
-Patch16201: af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
-
-# Fix overflow in KVM cpuid code
-Patch16230: kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
-
-# fs/pipe.c: null ptr dereference fix
-# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
-Patch16240: fs-pipe-null-ptr-deref-fix.patch
 
 %endif
 
@@ -1492,9 +1476,6 @@ ApplyPatch linux-2.6-ppc64-vs-broadcom.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-1.patch
 ApplyPatch linux-2.6-ppc64-vs-broadcom-lmb-no-init-2.patch
 
-# appletalk: fix skb leak (CVE-2009-2903)
-ApplyPatch appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
-
 # Networking fixes from 2.6.31-stable:
 ApplyPatch ax25-fix-possible-oops-in-ax25_make_new.patch
 ApplyPatch net-unix-fix-sending-fds-in-multiple-buffers.patch
@@ -1503,27 +1484,14 @@ ApplyPatch sky2-set-sky2_hw_ram_buffer-in-sky2_init.patch
 ApplyPatch tcp-fix-config_tcp_md5sig-config_preempt-timer-bug.patch
 ApplyPatch x86-fix-csum_ipv6_magic-asm-memory-clobber.patch
 
-# Fix broken IrDA stack in 2.6.27 (#508874)
-ApplyPatch irda-add-irda-skb-cb-qdisc-related-padding.patch
+# CVE-2009-4031
+ApplyPatch kvm-x86-emulator-limit-insns-to-15-bytes.patch
 
 # Fix ext3 file corruption in some cases
 ApplyPatch jbd-fix-return-value-of-journal-start-commit.patch
 
-# netlink security fix (CVE-2009-3612)
-ApplyPatch netlink-fix-typo-in-initialization.patch
-
 # fix null deref in r128
 ApplyPatch drm-r128-add-test-for-initialisation-to-all-ioctls-that-require-it.patch
-
-# rhbz#529626
-ApplyPatch af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
-
-# Fix overflow in KVM cpuid code
-ApplyPatch kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
-
-# fs/pipe.c: null ptr dereference fix
-# rhbz#530490 (CVE-2009-3547) [ad3960243e55320d74195fb85c975e0a8cc4466c]
-ApplyPatch fs-pipe-null-ptr-deref-fix.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2100,6 +2068,29 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Thu Dec 10 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Rebased to 2.6.27-libre3.
+- Adjusted patch-libre-2.6.27.41.
+
+* Wed Dec 09 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.41-170.2.117
+- Limit x86 instructions to 15 bytes in KVM (CVE-2009-4031)
+
+* Tue Dec 08 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.41-170.2.116
+- Linux 2.6.27.41
+
+* Tue Dec 08 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.40-170.2.115
+- Linux 2.6.27.40
+
+* Mon Nov 09 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.39-170.2.114
+- Linux 2.6.27.39
+- Drop merged patches:
+  appletalk-fix-skb-leak-when-ipddp-interface-is-not-loaded.patch
+  irda-add-irda-skb-cb-qdisc-related-padding.patch
+  netlink-fix-typo-in-initialization.patch
+  af_unix-fix-deadlock-connecting-to-shutdown-socket.patch
+  kvm-prevent-overflow-in-kvm-get-supported-cpuid.patch
+  fs-pipe-null-ptr-deref-fix.patch
+
 * Wed Nov 04 2009 Chuck Ebbert <cebbert@redhat.com>  2.6.27.38-170.2.113
 - fs/pipe.c: fix null pointer dereference (CVE-2009-3547)
 
