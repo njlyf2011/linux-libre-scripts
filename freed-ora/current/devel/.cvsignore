@@ -6,6 +6,7 @@ temp-*
 deblob-main
 deblob-2.6.32
 deblob-check
+freedo.patch
 kernel-2.6.32
 linux-2.6.32-libre.*
 patch-2.6.32.1.bz2
