@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1952 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1955 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -626,6 +626,8 @@ Patch04: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
+Patch08: freedo.patch
+
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
@@ -816,8 +818,6 @@ Patch14101: improve-resource-counter-scalability.patch
 Patch14420: perf-events-fix-swevent-hrtimer-sampling.patch
 Patch14421: perf-events-dont-generate-events-for-the-idle-task.patch
 
-Patch14430: crypto-via-padlock-fix-nano-aes.patch
-
 # tg3 fixes (#527209)
 Patch14451: tg3-01-delay-mdio-bus-init-until-fw-finishes.patch
 Patch14452: tg3-02-fix-tso-test-against-wrong-flags-var.patch
@@ -826,17 +826,7 @@ Patch14454: tg3-04-prevent-tx-bd-corruption.patch
 Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
-Patch14460: highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
-Patch14461: highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
-Patch14462: highmem-fix-arm-powerpc-kmap_types.patch
-
 Patch14463: dlm-fix-connection-close-handling.patch
-
-# rhbz#544144 [bbf31bf18d34caa87dd01f08bf713635593697f2]
-Patch14464: ipv4-fix-null-ptr-deref-in-ip_fragment.patch
-
-# rhbz#544471
-Patch14465: ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
 
 %endif
 
@@ -1267,6 +1257,9 @@ ApplyPatch linux-2.6-makefile-after_link.patch
 #
 ApplyOptionalPatch linux-2.6-compile-fixes.patch
 
+# Freedo logo.
+ApplyPatch freedo.patch
+
 %if !%{nopatches}
 
 # revert patches from upstream that conflict or that we get via other means
@@ -1541,9 +1534,6 @@ ApplyPatch improve-resource-counter-scalability.patch
 ApplyPatch perf-events-fix-swevent-hrtimer-sampling.patch
 ApplyPatch perf-events-dont-generate-events-for-the-idle-task.patch
 
-# Fix oops in padlock
-ApplyPatch crypto-via-padlock-fix-nano-aes.patch
-
 # tg3 fixes (#527209)
 ApplyPatch tg3-01-delay-mdio-bus-init-until-fw-finishes.patch
 ApplyPatch tg3-02-fix-tso-test-against-wrong-flags-var.patch
@@ -1561,17 +1551,7 @@ ApplyPatch sched-retune-scheduler-latency-defaults.patch
 # fix wakeup latency
 ApplyPatch sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
 
-ApplyPatch highmem-Fix-debug_kmap_atomic-to-also-handle-KM_IRQ_.patch
-ApplyPatch highmem-Fix-race-in-debug_kmap_atomic-which-could-ca.patch
-ApplyPatch highmem-fix-arm-powerpc-kmap_types.patch
-
 ApplyPatch dlm-fix-connection-close-handling.patch
-
-# rhbz#544144
-ApplyPatch ipv4-fix-null-ptr-deref-in-ip_fragment.patch
-
-# rhbz#544471
-ApplyPatch ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2222,6 +2202,23 @@ fi
 # and build.
 
 %changelog
+* Tue Dec 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed and adjusted patch-libre-2.6.31.8 and drm-next-b390f944.patch.
+- Added freedo.patch, with 100% Free Software Freedo logo.
+
+* Mon Dec 14 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.8-169
+- 2.6.31.8
+
+* Thu Dec 10 2009 Kyle McMartin <kyle@redhat.com>
+- ipv4-fix-null-ptr-deref-in-ip_fragment.patch: upstream.
+- nuke highmem patches now in stable.
+- crypto-via-padlock-fix-nano-aes.patch: upstream.
+- fix up drm-next-$sha.patch
+
+* Wed Dec 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31.6-167
+- Linux 2.6.31.7
+- NOTE: drm patch still needs fixing.
+
 * Wed Dec 09 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.6-166
 - ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch: CVE-2009-4131
   fix insufficient permission checking which could result in arbitrary
