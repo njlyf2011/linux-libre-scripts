@@ -13,7 +13,7 @@ Deblobbed:
 * drivers/gpu/drm/Kconfig: Reenable drivers that gained load error recovery.
 
 diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
-index 39b393d..e4d971c 100644
+index 012cf1f..bdcfedc 100644
 --- a/drivers/gpu/drm/Kconfig
 +++ b/drivers/gpu/drm/Kconfig
 @@ -18,6 +18,14 @@ menuconfig DRM
@@ -60,10 +60,10 @@ index 39b393d..e4d971c 100644
  	help
  	  Choose this option if you have an ATI Radeon graphics card.  There
  	  are both PCI and AGP versions.  You don't need to choose this to
-@@ -82,11 +92,10 @@ config DRM_I830
- config DRM_I915
+@@ -83,11 +93,10 @@ config DRM_I915
  	tristate "i915 driver"
  	depends on AGP_INTEL
+ 	select SHMEM
 +	select DRM_KMS_HELPER
  	select FB_CFB_FILLRECT
  	select FB_CFB_COPYAREA
@@ -73,7 +73,7 @@ index 39b393d..e4d971c 100644
  	# i915 depends on ACPI_VIDEO when ACPI is enabled
  	# but for select to work, need to select ACPI_VIDEO's dependencies, ick
  	select VIDEO_OUTPUT_CONTROL if ACPI
-@@ -116,9 +125,9 @@ endchoice
+@@ -116,8 +125,8 @@ endchoice
  endchoice
  
  config DRM_MGA
@@ -1012,7 +1012,7 @@ index b39d7bf..a75ca63 100644
  	DRM_IOCTL_DEF(DRM_IOCTL_ADD_MAP, drm_addmap_ioctl, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
  	DRM_IOCTL_DEF(DRM_IOCTL_RM_MAP, drm_rmmap_ioctl, DRM_AUTH),
 diff --git a/drivers/gpu/drm/drm_edid.c b/drivers/gpu/drm/drm_edid.c
-index 7f2728b..b54ba63 100644
+index 55fb98d..6ce18a2 100644
 --- a/drivers/gpu/drm/drm_edid.c
 +++ b/drivers/gpu/drm/drm_edid.c
 @@ -60,6 +60,12 @@
@@ -1409,29 +1409,7 @@ index 7f2728b..b54ba63 100644
  	mode = drm_mode_create(dev);
  	if (!mode)
  		return NULL;
-@@ -333,6 +653,21 @@ static struct drm_display_mode *drm_mode_detailed(struct drm_device *dev,
- 	mode->vsync_end = mode->vsync_start + vsync_pulse_width;
- 	mode->vtotal = mode->vdisplay + vblank;
- 
-+	/* perform the basic check for the detailed timing */
-+	if (mode->hsync_end > mode->htotal ||
-+		mode->vsync_end > mode->vtotal) {
-+		drm_mode_destroy(dev, mode);
-+		DRM_DEBUG_KMS("Incorrect detailed timing. "
-+				"Sync is beyond the blank.\n");
-+		return NULL;
-+	}
-+
-+	/* Some EDIDs have bogus h/vtotal values */
-+	if (mode->hsync_end > mode->htotal)
-+		mode->htotal = mode->hsync_end + 1;
-+	if (mode->vsync_end > mode->vtotal)
-+		mode->vtotal = mode->vsync_end + 1;
-+
- 	drm_mode_set_name(mode);
- 
- 	if (pt->misc & DRM_EDID_PT_INTERLACED)
-@@ -451,6 +786,19 @@ static int add_established_modes(struct drm_connector *connector, struct edid *e
+@@ -457,6 +777,19 @@ static int add_established_modes(struct drm_connector *connector, struct edid *e
  
  	return modes;
  }
@@ -1451,7 +1429,7 @@ index 7f2728b..b54ba63 100644
  
  /**
   * add_standard_modes - get std. modes from EDID and add them
-@@ -463,6 +811,9 @@ static int add_standard_modes(struct drm_connector *connector, struct edid *edid
+@@ -469,6 +802,9 @@ static int add_standard_modes(struct drm_connector *connector, struct edid *edid
  {
  	struct drm_device *dev = connector->dev;
  	int i, modes = 0;
@@ -1461,7 +1439,7 @@ index 7f2728b..b54ba63 100644
  
  	for (i = 0; i < EDID_STD_TIMINGS; i++) {
  		struct std_timing *t = &edid->standard_timings[i];
-@@ -472,7 +823,8 @@ static int add_standard_modes(struct drm_connector *connector, struct edid *edid
+@@ -478,7 +814,8 @@ static int add_standard_modes(struct drm_connector *connector, struct edid *edid
  		if (t->hsize == 1 && t->vfreq_aspect == 1)
  			continue;
  
@@ -1471,7 +1449,7 @@ index 7f2728b..b54ba63 100644
  		if (newmode) {
  			drm_mode_probed_add(connector, newmode);
  			modes++;
-@@ -496,6 +848,9 @@ static int add_detailed_info(struct drm_connector *connector,
+@@ -502,6 +839,9 @@ static int add_detailed_info(struct drm_connector *connector,
  {
  	struct drm_device *dev = connector->dev;
  	int i, j, modes = 0;
@@ -1481,7 +1459,7 @@ index 7f2728b..b54ba63 100644
  
  	for (i = 0; i < EDID_DETAILED_TIMINGS; i++) {
  		struct detailed_timing *timing = &edid->detailed_timings[i];
-@@ -519,13 +874,14 @@ static int add_detailed_info(struct drm_connector *connector,
+@@ -525,13 +865,14 @@ static int add_detailed_info(struct drm_connector *connector,
  			case EDID_DETAIL_MONITOR_CPDATA:
  				break;
  			case EDID_DETAIL_STD_MODES:
@@ -1499,7 +1477,7 @@ index 7f2728b..b54ba63 100644
  					if (newmode) {
  						drm_mode_probed_add(connector, newmode);
  						modes++;
-@@ -551,6 +907,124 @@ static int add_detailed_info(struct drm_connector *connector,
+@@ -557,6 +898,124 @@ static int add_detailed_info(struct drm_connector *connector,
  
  	return modes;
  }
@@ -1624,7 +1602,7 @@ index 7f2728b..b54ba63 100644
  
  #define DDC_ADDR 0x50
  /**
-@@ -584,7 +1058,6 @@ int drm_do_probe_ddc_edid(struct i2c_adapter *adapter,
+@@ -590,7 +1049,6 @@ int drm_do_probe_ddc_edid(struct i2c_adapter *adapter,
  	if (i2c_transfer(adapter, msgs, 2) == 2)
  		return 0;
  
@@ -1632,7 +1610,7 @@ index 7f2728b..b54ba63 100644
  	return -1;
  }
  EXPORT_SYMBOL(drm_do_probe_ddc_edid);
-@@ -597,8 +1070,6 @@ static int drm_ddc_read_edid(struct drm_connector *connector,
+@@ -603,8 +1061,6 @@ static int drm_ddc_read_edid(struct drm_connector *connector,
  
  	ret = drm_do_probe_ddc_edid(adapter, buf, len);
  	if (ret != 0) {
@@ -1641,7 +1619,7 @@ index 7f2728b..b54ba63 100644
  		goto end;
  	}
  	if (!edid_is_valid((struct edid *)buf)) {
-@@ -610,7 +1081,6 @@ end:
+@@ -616,7 +1072,6 @@ end:
  	return ret;
  }
  
@@ -1649,7 +1627,7 @@ index 7f2728b..b54ba63 100644
  /**
   * drm_get_edid - get EDID data, if available
   * @connector: connector we're probing
-@@ -763,6 +1233,7 @@ int drm_add_edid_modes(struct drm_connector *connector, struct edid *edid)
+@@ -769,6 +1224,7 @@ int drm_add_edid_modes(struct drm_connector *connector, struct edid *edid)
  	num_modes += add_established_modes(connector, edid);
  	num_modes += add_standard_modes(connector, edid);
  	num_modes += add_detailed_info(connector, edid, quirks);
@@ -1657,7 +1635,7 @@ index 7f2728b..b54ba63 100644
  
  	if (quirks & (EDID_QUIRK_PREFER_LARGE_60 | EDID_QUIRK_PREFER_LARGE_75))
  		edid_fixup_preferred(connector, quirks);
-@@ -788,3 +1259,49 @@ int drm_add_edid_modes(struct drm_connector *connector, struct edid *edid)
+@@ -794,3 +1250,49 @@ int drm_add_edid_modes(struct drm_connector *connector, struct edid *edid)
  	return num_modes;
  }
  EXPORT_SYMBOL(drm_add_edid_modes);
@@ -4367,7 +4345,7 @@ index c078d99..e8cf18d 100644
  	.gem_init_object = i915_gem_init_object,
  	.gem_free_object = i915_gem_free_object,
 diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
-index 5b4f87e..77ed060 100644
+index 88b3eff..e5f20e4 100644
 --- a/drivers/gpu/drm/i915/i915_drv.h
 +++ b/drivers/gpu/drm/i915/i915_drv.h
 @@ -85,7 +85,6 @@ struct drm_i915_gem_phys_object {
@@ -4491,7 +4469,7 @@ index 5b4f87e..77ed060 100644
  extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
  
  #define IS_I830(dev) ((dev)->pci_device == 0x3577)
-@@ -903,6 +912,9 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
+@@ -905,6 +914,9 @@ extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
  /* dsparb controlled by hw only */
  #define DSPARB_HWCONTROL(dev) (IS_G4X(dev) || IS_IGDNG(dev))
  
@@ -5121,10 +5099,10 @@ index e774a4a..200e398 100644
  	}
  
 diff --git a/drivers/gpu/drm/i915/i915_irq.c b/drivers/gpu/drm/i915/i915_irq.c
-index 7ebc84c..6c89f2f 100644
+index 9431a72..42c1709 100644
 --- a/drivers/gpu/drm/i915/i915_irq.c
 +++ b/drivers/gpu/drm/i915/i915_irq.c
-@@ -565,6 +565,27 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
+@@ -573,6 +573,27 @@ irqreturn_t i915_driver_irq_handler(DRM_IRQ_ARGS)
  
  			I915_WRITE(PORT_HOTPLUG_STAT, hotplug_status);
  			I915_READ(PORT_HOTPLUG_STAT);
@@ -5153,7 +5131,7 @@ index 7ebc84c..6c89f2f 100644
  
  		I915_WRITE(IIR, iir);
 diff --git a/drivers/gpu/drm/i915/i915_reg.h b/drivers/gpu/drm/i915/i915_reg.h
-index 106a1ae..268d272 100644
+index c017fa1..1cd645e 100644
 --- a/drivers/gpu/drm/i915/i915_reg.h
 +++ b/drivers/gpu/drm/i915/i915_reg.h
 @@ -55,7 +55,7 @@
@@ -5419,7 +5397,7 @@ index 5ae4c1a..212e227 100644
  
  static int intel_crt_mode_valid(struct drm_connector *connector,
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index 8b5af29..a865af5 100644
+index 318ba47..4c28f17 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
 @@ -38,6 +38,7 @@
@@ -5665,7 +5643,7 @@ index 8b5af29..a865af5 100644
  }
  
  static void intel_crtc_prepare (struct drm_crtc *crtc)
-@@ -2079,6 +2138,18 @@ static int intel_get_fifo_size(struct drm_device *dev, int plane)
+@@ -2080,6 +2139,18 @@ static int intel_get_fifo_size(struct drm_device *dev, int plane)
  	return size;
  }
  
@@ -5684,7 +5662,7 @@ index 8b5af29..a865af5 100644
  static void i965_update_wm(struct drm_device *dev)
  {
  	struct drm_i915_private *dev_priv = dev->dev_private;
-@@ -2130,7 +2201,8 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2131,7 +2202,8 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  	cwm = 2;
  
  	/* Calc sr entries for one plane configs */
@@ -5694,7 +5672,7 @@ index 8b5af29..a865af5 100644
  		/* self-refresh has much higher latency */
  		const static int sr_latency_ns = 6000;
  
-@@ -2145,8 +2217,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2146,8 +2218,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  		srwm = total_size - sr_entries;
  		if (srwm < 0)
  			srwm = 1;
@@ -5704,7 +5682,7 @@ index 8b5af29..a865af5 100644
  	}
  
  	DRM_DEBUG("Setting FIFO watermarks - A: %d, B: %d, C: %d, SR %d\n",
-@@ -2220,9 +2291,6 @@ static void intel_update_watermarks(struct drm_device *dev)
+@@ -2221,9 +2292,6 @@ static void intel_update_watermarks(struct drm_device *dev)
  	unsigned long planea_clock = 0, planeb_clock = 0, sr_clock = 0;
  	int enabled = 0, pixel_size = 0;
  
@@ -5714,7 +5692,7 @@ index 8b5af29..a865af5 100644
  	/* Get the clock config from both planes */
  	list_for_each_entry(crtc, &dev->mode_config.crtc_list, head) {
  		intel_crtc = to_intel_crtc(crtc);
-@@ -2255,7 +2323,9 @@ static void intel_update_watermarks(struct drm_device *dev)
+@@ -2256,7 +2324,9 @@ static void intel_update_watermarks(struct drm_device *dev)
  	else if (IS_IGD(dev))
  		igd_disable_cxsr(dev);
  
@@ -5725,7 +5703,7 @@ index 8b5af29..a865af5 100644
  		i965_update_wm(dev);
  	else if (IS_I9XX(dev) || IS_MOBILE(dev))
  		i9xx_update_wm(dev, planea_clock, planeb_clock, sr_hdisplay,
-@@ -2289,9 +2359,9 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2290,9 +2360,9 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	int dsppos_reg = (pipe == 0) ? DSPAPOS : DSPBPOS;
  	int pipesrc_reg = (pipe == 0) ? PIPEASRC : PIPEBSRC;
  	int refclk, num_outputs = 0;
@@ -5738,7 +5716,7 @@ index 8b5af29..a865af5 100644
  	bool is_crt = false, is_lvds = false, is_tv = false, is_dp = false;
  	bool is_edp = false;
  	struct drm_mode_config *mode_config = &dev->mode_config;
-@@ -2374,6 +2444,14 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2375,6 +2445,14 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		return -EINVAL;
  	}
  
@@ -5753,8 +5731,8 @@ index 8b5af29..a865af5 100644
  	/* SDVO TV has fixed PLL values depend on its clock range,
  	   this mirrors vbios setting. */
  	if (is_sdvo && is_tv) {
-@@ -2419,10 +2497,17 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
- 				  link_bw, &m_n);
+@@ -2482,10 +2560,17 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+ 		}
  	}
  
 -	if (IS_IGD(dev))
@@ -5773,7 +5751,7 @@ index 8b5af29..a865af5 100644
  
  	if (!IS_IGDNG(dev))
  		dpll = DPLL_VGA_MODE_DIS;
-@@ -2451,6 +2536,8 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2514,6 +2599,8 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  			/* also FPA1 */
  			if (IS_IGDNG(dev))
  				dpll |= (1 << (clock.p1 - 1)) << DPLL_FPA1_P1_POST_DIV_SHIFT;
@@ -5782,7 +5760,7 @@ index 8b5af29..a865af5 100644
  		}
  		switch (clock.p2) {
  		case 5:
-@@ -2598,6 +2685,22 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2661,6 +2748,22 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		udelay(150);
  	}
  
@@ -5805,7 +5783,7 @@ index 8b5af29..a865af5 100644
  	I915_WRITE(htot_reg, (adjusted_mode->crtc_hdisplay - 1) |
  		   ((adjusted_mode->crtc_htotal - 1) << 16));
  	I915_WRITE(hblank_reg, (adjusted_mode->crtc_hblank_start - 1) |
-@@ -2800,10 +2903,16 @@ static int intel_crtc_cursor_move(struct drm_crtc *crtc, int x, int y)
+@@ -2863,10 +2966,16 @@ static int intel_crtc_cursor_move(struct drm_crtc *crtc, int x, int y)
  	struct drm_device *dev = crtc->dev;
  	struct drm_i915_private *dev_priv = dev->dev_private;
  	struct intel_crtc *intel_crtc = to_intel_crtc(crtc);
@@ -5822,7 +5800,7 @@ index 8b5af29..a865af5 100644
  	if (x < 0) {
  		temp |= CURSOR_POS_SIGN << CURSOR_X_SHIFT;
  		x = -x;
-@@ -2834,6 +2943,16 @@ void intel_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
+@@ -2897,6 +3006,16 @@ void intel_crtc_fb_gamma_set(struct drm_crtc *crtc, u16 red, u16 green,
  	intel_crtc->lut_b[regno] = blue >> 8;
  }
  
@@ -5839,7 +5817,7 @@ index 8b5af29..a865af5 100644
  static void intel_crtc_gamma_set(struct drm_crtc *crtc, u16 *red, u16 *green,
  				 u16 *blue, uint32_t size)
  {
-@@ -3101,12 +3220,319 @@ struct drm_display_mode *intel_crtc_mode_get(struct drm_device *dev,
+@@ -3164,12 +3283,319 @@ struct drm_display_mode *intel_crtc_mode_get(struct drm_device *dev,
  	return mode;
  }
  
@@ -6161,7 +6139,7 @@ index 8b5af29..a865af5 100644
  	drm_crtc_cleanup(crtc);
  	kfree(intel_crtc);
  }
-@@ -3118,6 +3544,7 @@ static const struct drm_crtc_helper_funcs intel_helper_funcs = {
+@@ -3181,6 +3607,7 @@ static const struct drm_crtc_helper_funcs intel_helper_funcs = {
  	.mode_set_base = intel_pipe_set_base,
  	.prepare = intel_crtc_prepare,
  	.commit = intel_crtc_commit,
@@ -6169,7 +6147,7 @@ index 8b5af29..a865af5 100644
  };
  
  static const struct drm_crtc_funcs intel_crtc_funcs = {
-@@ -3153,15 +3580,10 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
+@@ -3216,15 +3643,10 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
  	intel_crtc->dpms_mode = DRM_MODE_DPMS_OFF;
  	drm_crtc_helper_add(&intel_crtc->base, &intel_helper_funcs);
  
@@ -6188,7 +6166,7 @@ index 8b5af29..a865af5 100644
  }
  
  int intel_get_pipe_from_crtc_id(struct drm_device *dev, void *data,
-@@ -3169,30 +3591,26 @@ int intel_get_pipe_from_crtc_id(struct drm_device *dev, void *data,
+@@ -3232,30 +3654,26 @@ int intel_get_pipe_from_crtc_id(struct drm_device *dev, void *data,
  {
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	struct drm_i915_get_pipe_from_crtc_id *pipe_from_crtc_id = data;
@@ -6227,7 +6205,7 @@ index 8b5af29..a865af5 100644
  }
  
  struct drm_crtc *intel_get_crtc_from_pipe(struct drm_device *dev, int pipe)
-@@ -3393,8 +3811,56 @@ static const struct drm_mode_config_funcs intel_mode_funcs = {
+@@ -3456,8 +3874,56 @@ static const struct drm_mode_config_funcs intel_mode_funcs = {
  	.fb_changed = intelfb_probe,
  };
  
@@ -6284,7 +6262,7 @@ index 8b5af29..a865af5 100644
  	int num_pipe;
  	int i;
  
-@@ -3429,15 +3895,47 @@ void intel_modeset_init(struct drm_device *dev)
+@@ -3492,15 +3958,47 @@ void intel_modeset_init(struct drm_device *dev)
  	DRM_DEBUG("%d display pipe%s available.\n",
  		  num_pipe, num_pipe > 1 ? "s" : "");
  
@@ -6367,7 +6345,7 @@ index 26a6227..dcfc53c 100644
  extern int intel_framebuffer_create(struct drm_device *dev,
  				    struct drm_mode_fb_cmd *mode_cmd,
 diff --git a/drivers/gpu/drm/i915/intel_fb.c b/drivers/gpu/drm/i915/intel_fb.c
-index 1d30802..2b0fe54 100644
+index 75a9b83..2b0fe54 100644
 --- a/drivers/gpu/drm/i915/intel_fb.c
 +++ b/drivers/gpu/drm/i915/intel_fb.c
 @@ -39,339 +39,36 @@
@@ -6452,7 +6430,7 @@ index 1d30802..2b0fe54 100644
 -	struct drm_framebuffer *fb = &intel_fb->base;
 -	int depth;
 -
--	if (var->pixclock == -1 || !var->pixclock)
+-	if (var->pixclock != 0)
 -		return -EINVAL;
 -
 -	/* Need to resize the fb object !!! */
@@ -6543,7 +6521,7 @@ index 1d30802..2b0fe54 100644
 -
 -	DRM_DEBUG("%d %d\n", var->xres, var->pixclock);
 -
--	if (var->pixclock != -1) {
+-	if (var->pixclock != 0) {
 -
 -		DRM_ERROR("PIXEL CLOCK SET\n");
 -		return -EINVAL;
@@ -6967,7 +6945,7 @@ index 1d30802..2b0fe54 100644
 -	par->crtc_count = 1;
 -
 -	if (new_fb) {
--		info->var.pixclock = -1;
+-		info->var.pixclock = 0;
 -		if (register_framebuffer(info) < 0)
 -			return -EINVAL;
 -	} else
@@ -7121,7 +7099,7 @@ index 1d30802..2b0fe54 100644
 -	par->crtc_count = crtc_count;
 -
 -	if (new_fb) {
--		info->var.pixclock = -1;
+-		info->var.pixclock = 0;
 -		if (register_framebuffer(info) < 0)
 -			return -EINVAL;
 -	} else
@@ -29613,7 +29591,7 @@ index 0000000..797972e
 +};
 +#endif
 diff --git a/drivers/gpu/drm/radeon/radeon_fb.c b/drivers/gpu/drm/radeon/radeon_fb.c
-index ec383ed..cb2f16a 100644
+index f1d6d3d..fc5101a 100644
 --- a/drivers/gpu/drm/radeon/radeon_fb.c
 +++ b/drivers/gpu/drm/radeon/radeon_fb.c
 @@ -28,15 +28,7 @@
@@ -29715,7 +29693,7 @@ index ec383ed..cb2f16a 100644
 -	struct drm_framebuffer *fb = &rfb->base;
 -	int depth;
 -
--	if (var->pixclock == -1 || !var->pixclock) {
+-	if (var->pixclock != 0) {
 -		return -EINVAL;
 -	}
 -	/* Need to resize the fb object !!! */
@@ -29829,7 +29807,7 @@ index ec383ed..cb2f16a 100644
 -	int ret;
 -	int i;
 -
--	if (var->pixclock != -1) {
+-	if (var->pixclock != 0) {
 -		DRM_ERROR("PIXEL CLCOK SET\n");
 -		return -EINVAL;
 -	}
@@ -30262,7 +30240,7 @@ index ec383ed..cb2f16a 100644
  	fb->fbdev = info;
  	rfbdev->rfb = rfb;
  	rfbdev->rdev = rdev;
-@@ -726,148 +303,33 @@ out:
+@@ -726,148 +303,34 @@ out:
  	return ret;
  }
  
@@ -30372,7 +30350,7 @@ index ec383ed..cb2f16a 100644
 -	rfbdev->crtc_count = crtc_count;
 -
 -	if (new_fb) {
--		info->var.pixclock = -1;
+-		info->var.pixclock = 0;
 -		if (register_framebuffer(info) < 0)
 -			return -EINVAL;
 -	} else {
@@ -30389,7 +30367,7 @@ index ec383ed..cb2f16a 100644
 -	panic_mode = *modeset;
 -	atomic_notifier_chain_register(&panic_notifier_list, &paniced);
 -	printk(KERN_INFO "registered panic notifier\n");
--
+ 
  	return 0;
  }
  
@@ -30427,7 +30405,7 @@ index ec383ed..cb2f16a 100644
  
  int radeonfb_remove(struct drm_device *dev, struct drm_framebuffer *fb)
  {
-@@ -880,16 +342,17 @@ int radeonfb_remove(struct drm_device *dev, struct drm_framebuffer *fb)
+@@ -880,16 +343,17 @@ int radeonfb_remove(struct drm_device *dev, struct drm_framebuffer *fb)
  	}
  	info = fb->fbdev;
  	if (info) {
@@ -45405,7 +45383,7 @@ index ae304cc..1f90841 100644
  struct drm_mode_get_connector {
  
 diff --git a/include/drm/drm_pciids.h b/include/drm/drm_pciids.h
-index 8535084..923361b 100644
+index 3f6e545..e6f3b12 100644
 --- a/include/drm/drm_pciids.h
 +++ b/include/drm/drm_pciids.h
 @@ -80,7 +80,7 @@
