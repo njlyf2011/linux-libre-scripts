@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1870 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1872 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -627,6 +627,8 @@ Patch04: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
+Patch08: freedo.patch
+
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
@@ -750,8 +752,7 @@ Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
 
-# rhbz#544471
-Patch12014: ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
+Patch12015: perf-dont-free-perf_mmap_data-until-work-has-been-done.patch
 
 %endif
 
@@ -1184,6 +1185,9 @@ ApplyPatch linux-2.6-makefile-after_link.patch
 #
 ApplyOptionalPatch linux-2.6-compile-fixes.patch
 
+# Freedo logo.
+ApplyPatch freedo.patch
+
 %if !%{nopatches}
 
 # revert patches from upstream that conflict or that we get via other means
@@ -1392,8 +1396,7 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
 
-# rhbz#544471
-ApplyPatch ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
+ApplyPatch perf-dont-free-perf_mmap_data-until-work-has-been-done.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2050,6 +2053,18 @@ fi
 # and build.
 
 %changelog
+* Tue Dec 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Added freedo.patch, with 100% Free Software Freedo logo.
+
+* Mon Dec 14 2009 Kyle McMartin <kyle@redhat.com> 2.6.32.1-9
+- 2.6.32.1
+- ext4 patches and more...
+
+* Wed Dec 09 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-8
+- Add a patch off lkml from krh to fix perf when DEBUG_PERF_USE_VMALLOC
+  (rhbz#542791)
+- Re-enable CONFIG_DEBUG_PERF_USE_VMALLOC on debug kernels.
+
 * Wed Dec 09 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-7
 - ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch: CVE-2009-4131
   fix insufficient permission checking which could result in arbitrary
