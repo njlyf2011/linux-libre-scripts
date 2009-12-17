@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1955 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1957 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -737,18 +737,16 @@ Patch1586: linux-2.6-virtio_blk-add-support-for-cache-flush.patch
 # nouveau + drm fixes
 Patch1810: kms-offb-handoff.patch
 Patch1812: drm-next-b390f944.patch
-Patch1813: drm-radeon-pm.patch
-Patch1814: drm-nouveau.patch
-Patch1818: drm-i915-resume-force-mode.patch
+Patch1813: drm-edid-9340d8cf.patch
+
+Patch1820: drm-radeon-pm.patch
+Patch1821: drm-nouveau.patch
+Patch1822: drm-i915-resume-force-mode.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
 Patch1827: drm-i915-fix-tvmode-oops.patch
-Patch1831: drm-conservative-fallback-modes.patch
-Patch1832: drm-edid-retry.patch
-Patch1834: drm-edid-header-fixup.patch
-Patch1835: drm-default-mode.patch
 Patch1837: drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 Patch1839: drm-radeon-misc-fixes.patch
 Patch1840: drm-radeon-rv410-test-fix.patch
@@ -1475,12 +1473,9 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 # Nouveau DRM + drm fixes
 ApplyPatch kms-offb-handoff.patch
 ApplyPatch drm-next-b390f944.patch
+ApplyPatch drm-edid-9340d8cf.patch
 ApplyPatch drm-radeon-misc-fixes.patch
 ApplyPatch drm-radeon-rv410-test-fix.patch
-ApplyPatch drm-conservative-fallback-modes.patch
-ApplyPatch drm-edid-retry.patch
-ApplyPatch drm-edid-header-fixup.patch
-ApplyPatch drm-default-mode.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -2202,6 +2197,15 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 17 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.8-171
+- drm-nouveau.patch: add support for GF7100 (NV63)
+
+* Wed Dec 16 2009 Adam Jackson <ajax@redhat.com>
+- drm-edid-9340d8cf.patch: Sync DRM EDID with Linus master.
+- drm-conservative-fallback-modes.patch, drm-edid-retry.patch,
+  drm-edid-header-fixup.patch, drm-default-mode.patch: Drop, merged into
+  the above.
+
 * Tue Dec 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed and adjusted patch-libre-2.6.31.8 and drm-next-b390f944.patch.
 - Added freedo.patch, with 100% Free Software Freedo logo.
