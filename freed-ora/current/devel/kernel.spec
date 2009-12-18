@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1873 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1874 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -702,7 +702,7 @@ Patch800: linux-2.6-crash-driver.patch
 
 Patch900: linux-2.6-pci-cacheline-sizing.patch
 
-Patch1515: lirc-2.6.31.patch
+Patch1515: lirc-2.6.32.patch
 Patch1517: hdpvr-ir-enable.patch
 
 # virt + ksm patches
@@ -1350,7 +1350,7 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-pci-cacheline-sizing.patch
 
 # http://www.lirc.org/
-ApplyPatch lirc-2.6.31.patch
+ApplyPatch lirc-2.6.32.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
 
@@ -2055,6 +2055,14 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 17 2009 Jarod Wilson <jarod@redhat.com> 2.6.32.1-11
+- Split off onboard decode imon devices into pure input driver,
+  leaving lirc_imon for the ancient imon devices only
+- Fix NULL ptr deref in lirc_serial (#543886)
+- Assorted lirc_mceusb fixups suggested by Mauro
+- Dropped compat ioctls from lirc_dev, main ioctls should now be
+  compatible between 32-bit and 64-bit (also at Mauro's suggestion)
+
 * Wed Dec 16 2009 Roland McGrath <roland@redhat.com> 2.6.32.1-10
 - utrace update, now testing the utrace-based ptrace!
 
