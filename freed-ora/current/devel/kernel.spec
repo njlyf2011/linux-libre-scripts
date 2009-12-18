@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1872 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1873 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -642,6 +642,7 @@ Patch20: linux-2.6-hotfixes.patch
 
 Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
+Patch23: linux-2.6-utrace-ptrace.patch
 
 # More workaround for BIOS brokenness, fix intel_iommu=igfx_off oops
 Patch100: linux-2.6-iommu-updates.patch
@@ -1199,8 +1200,9 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
-#ApplyPatch linux-2.6-tracehook.patch # merged
+ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
+ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
@@ -2053,6 +2055,9 @@ fi
 # and build.
 
 %changelog
+* Wed Dec 16 2009 Roland McGrath <roland@redhat.com> 2.6.32.1-10
+- utrace update, now testing the utrace-based ptrace!
+
 * Tue Dec 15 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Added freedo.patch, with 100% Free Software Freedo logo.
 
@@ -2123,7 +2128,7 @@ fi
   +CONFIG_SLOW_WORK_PROC=y
 
 * Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com>
-- drm-i915-fix-sync-to-vbl-when-vga-is-off.patch: add, (rhbz#541670) 
+- drm-i915-fix-sync-to-vbl-when-vga-is-off.patch: add, (rhbz#541670)
 
 * Sun Nov 29 2009 Kyle McMartin <kyle@redhat.com>
 - linux-2.6-sysrq-c.patch: drop, was made consistent upstream.
