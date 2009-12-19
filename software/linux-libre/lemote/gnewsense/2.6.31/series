@@ -1,0 +1,5 @@
+2.6.31.7-loongson.patch -p0 # taken from 2.6.31.6 metad build
+freedo.patch -p0 # 100% Free Software Freedo logo
+lxo-config.patch -p0
+# lxo-config-dualhead.patch -p0 # doesn't work
+# dualhead-fix.patch -p0 # doesn't work
