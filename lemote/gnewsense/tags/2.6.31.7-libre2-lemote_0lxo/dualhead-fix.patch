@@ -1,0 +1,27 @@
+Index: drivers/video/sm712/smtcfb.c
+===================================================================
+--- drivers/video/sm712/smtcfb.c.orig	2009-12-11 02:04:30.000000000 -0200
++++ drivers/video/sm712/smtcfb.c	2009-12-11 03:08:30.000000000 -0200
+@@ -37,6 +37,7 @@
+ #include <linux/uaccess.h>
+ #include <linux/console.h>
+ #include <linux/screen_info.h>
++#include <linux/delay.h>
+ 
+ #ifdef CONFIG_PM
+ #include <linux/pm.h>
+@@ -807,9 +808,13 @@ void smtc_head2_init(struct smtcfb_info 
+ 	hw2.width = smtcfb_info2.fb.var.xres;
+ 	hw2.height = smtcfb_info2.fb.var.yres;
+ 	hw2.hz = 60;
++
++	printk("will crash now\n");
++	ssleep(3);
++
+ 	hw2.m_pMMIO = smtc_RegBaseAddress;
+ 
+-	/*hard code 2nd head starting from half VRAM size postion */
++	/*hard code 2nd head starting from half VRAM size position */
+ 	hw2.BaseAddressInVRAM = smtcfb_info2.fb.fix.smem_len / 2;
+ 
+ 	hw2.m_pLFB = smtc_VRAMBaseAddress + hw2.BaseAddressInVRAM;
