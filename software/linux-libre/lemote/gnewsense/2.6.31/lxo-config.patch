@@ -1,12 +1,12 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2009-12-13 01:25:21.000000000 -0200
-@@ -0,0 +1,2167 @@
++++ .config	2009-12-15 09:01:59.000000000 -0200
+@@ -0,0 +1,2166 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.31.7-libre2-lemote
-+# Sun Dec 13 01:25:21 2009
++# Linux kernel version: 2.6.31.8-libre2-lemote
++# Tue Dec 15 09:01:59 2009
 +#
 +CONFIG_MIPS=y
 +
@@ -140,7 +140,6 @@ Index: .config
 +CONFIG_GENERIC_IRQ_PROBE=y
 +CONFIG_CPU_SUPPORTS_HIGHMEM=y
 +CONFIG_SYS_SUPPORTS_HIGHMEM=y
-+CONFIG_ARCH_FLATMEM_ENABLE=y
 +CONFIG_ARCH_POPULATES_NODE_MAP=y
 +CONFIG_SELECT_MEMORY_MODEL=y
 +# CONFIG_FLATMEM_MANUAL is not set
@@ -1276,7 +1275,7 @@ Index: .config
 +# CONFIG_FB_PM3 is not set
 +# CONFIG_FB_CARMINE is not set
 +CONFIG_FB_SM712=y
-+# CONFIG_FB_SM712_ACCEL is not set
++CONFIG_FB_SM712_ACCEL=y
 +# CONFIG_FB_SM712_DUALHEAD is not set
 +# CONFIG_FB_VIRTUAL is not set
 +# CONFIG_FB_METRONOME is not set
@@ -2172,14 +2171,14 @@ Index: .config
 +CONFIG_NLATTR=y
 Index: Makefile
 ===================================================================
---- Makefile.orig	2009-12-13 01:00:05.000000000 -0200
-+++ Makefile	2009-12-13 01:20:44.000000000 -0200
+--- Makefile.orig	2009-12-15 08:35:41.000000000 -0200
++++ Makefile	2009-12-15 01:34:27.000000000 -0200
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 31
--EXTRAVERSION = .7-libre2
-+EXTRAVERSION = .7-libre2-lemote
+-EXTRAVERSION = .8-libre2
++EXTRAVERSION = .8-libre2-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
