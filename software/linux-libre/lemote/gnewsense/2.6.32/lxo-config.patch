@@ -1,7 +1,7 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2009-12-13 01:22:30.000000000 -0200
++++ .config	2009-12-15 08:08:43.000000000 -0200
 @@ -0,0 +1,2218 @@
 +#
 +# Automatically generated make config: don't edit
@@ -1829,7 +1829,7 @@ Index: .config
 +# CONFIG_RAR_REGISTER is not set
 +# CONFIG_IIO is not set
 +CONFIG_FB_SM7XX=y
-+# CONFIG_FB_SM7XX_ACCEL is not set
++CONFIG_FB_SM7XX_ACCEL=y
 +
 +#
 +# File systems
@@ -2223,14 +2223,14 @@ Index: .config
 +CONFIG_NLATTR=y
 Index: Makefile
 ===================================================================
---- Makefile.orig	2009-12-13 01:21:42.000000000 -0200
-+++ Makefile	2009-12-13 01:21:45.000000000 -0200
+--- Makefile.orig	2009-12-15 01:33:36.000000000 -0200
++++ Makefile	2009-12-15 01:35:16.000000000 -0200
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 32
--EXTRAVERSION =-libre
-+EXTRAVERSION =-libre-lemote
+-EXTRAVERSION = .1-libre
++EXTRAVERSION = .1-libre-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
