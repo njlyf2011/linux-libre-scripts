@@ -1,0 +1,4 @@
+2.6.32-loongson.patch -p1 # lemote's patches for 2.6.32
+# 2.6.32-yeeloong-battery.patch -p0 # no positive effect
+freedo.patch -p0 # 100% Free Software Freedo logo
+lxo-config.patch -p0 # config file
