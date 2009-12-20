@@ -1,12 +1,12 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2009-12-15 09:01:59.000000000 -0200
-@@ -0,0 +1,2166 @@
++++ .config	2009-12-20 02:15:01.000000000 -0200
+@@ -0,0 +1,2193 @@
 +#
 +# Automatically generated make config: don't edit
 +# Linux kernel version: 2.6.31.8-libre2-lemote
-+# Tue Dec 15 09:01:59 2009
++# Sun Dec 20 02:15:01 2009
 +#
 +CONFIG_MIPS=y
 +
@@ -573,10 +573,13 @@ Index: .config
 +# Bluetooth device drivers
 +#
 +CONFIG_BT_HCIBTUSB=m
-+# CONFIG_BT_HCIBTSDIO is not set
-+# CONFIG_BT_HCIUART is not set
++CONFIG_BT_HCIBTSDIO=m
++CONFIG_BT_HCIUART=m
++CONFIG_BT_HCIUART_H4=y
++CONFIG_BT_HCIUART_BCSP=y
++CONFIG_BT_HCIUART_LL=y
 +# CONFIG_BT_HCIBCM203X is not set
-+# CONFIG_BT_HCIBPA10X is not set
++CONFIG_BT_HCIBPA10X=m
 +CONFIG_BT_HCIBFUSB=m
 +CONFIG_BT_HCIVHCI=m
 +# CONFIG_AF_RXRPC is not set
@@ -736,7 +739,8 @@ Index: .config
 +CONFIG_BLK_DEV_SD=m
 +# CONFIG_CHR_DEV_ST is not set
 +# CONFIG_CHR_DEV_OSST is not set
-+# CONFIG_BLK_DEV_SR is not set
++CONFIG_BLK_DEV_SR=m
++# CONFIG_BLK_DEV_SR_VENDOR is not set
 +CONFIG_CHR_DEV_SG=m
 +# CONFIG_CHR_DEV_SCH is not set
 +CONFIG_SCSI_MULTI_LUN=y
@@ -848,7 +852,7 @@ Index: .config
 +# CONFIG_8139CP is not set
 +CONFIG_8139TOO=y
 +# CONFIG_8139TOO_PIO is not set
-+# CONFIG_8139TOO_TUNE_TWISTER is not set
++CONFIG_8139TOO_TUNE_TWISTER=y
 +# CONFIG_8139TOO_8129 is not set
 +# CONFIG_8139_OLD_RX_RESET is not set
 +# CONFIG_R6040 is not set
@@ -923,7 +927,19 @@ Index: .config
 +# CONFIG_B43 is not set
 +# CONFIG_B43LEGACY is not set
 +# CONFIG_ZD1211RW is not set
-+# CONFIG_RT2X00 is not set
++CONFIG_RT2X00=m
++# CONFIG_RT2400PCI is not set
++# CONFIG_RT2500PCI is not set
++# CONFIG_RT61PCI is not set
++CONFIG_RT2500USB=m
++# CONFIG_RT73USB is not set
++# CONFIG_RT2800USB is not set
++CONFIG_RT2X00_LIB_USB=m
++CONFIG_RT2X00_LIB=m
++CONFIG_RT2X00_LIB_CRYPTO=y
++CONFIG_RT2X00_LIB_RFKILL=y
++CONFIG_RT2X00_LIB_LEDS=y
++# CONFIG_RT2X00_DEBUG is not set
 +# CONFIG_HERMES is not set
 +# CONFIG_IWM is not set
 +
@@ -962,8 +978,18 @@ Index: .config
 +# CONFIG_WAN is not set
 +# CONFIG_FDDI is not set
 +# CONFIG_HIPPI is not set
-+# CONFIG_PPP is not set
++CONFIG_PPP=m
++# CONFIG_PPP_MULTILINK is not set
++# CONFIG_PPP_FILTER is not set
++CONFIG_PPP_ASYNC=m
++CONFIG_PPP_SYNC_TTY=m
++CONFIG_PPP_DEFLATE=m
++CONFIG_PPP_BSDCOMP=m
++# CONFIG_PPP_MPPE is not set
++CONFIG_PPPOE=m
++CONFIG_PPPOL2TP=m
 +# CONFIG_SLIP is not set
++CONFIG_SLHC=m
 +# CONFIG_NET_FC is not set
 +CONFIG_NETCONSOLE=m
 +CONFIG_NETCONSOLE_DYNAMIC=y
@@ -1564,7 +1590,7 @@ Index: .config
 +# CONFIG_USB_SERIAL_CP210X is not set
 +# CONFIG_USB_SERIAL_CYPRESS_M8 is not set
 +# CONFIG_USB_SERIAL_EMPEG is not set
-+# CONFIG_USB_SERIAL_FTDI_SIO is not set
++CONFIG_USB_SERIAL_FTDI_SIO=m
 +# CONFIG_USB_SERIAL_FUNSOFT is not set
 +# CONFIG_USB_SERIAL_VISOR is not set
 +# CONFIG_USB_SERIAL_IPAQ is not set
@@ -1595,7 +1621,7 @@ Index: .config
 +# CONFIG_USB_SERIAL_TI is not set
 +# CONFIG_USB_SERIAL_CYBERJACK is not set
 +# CONFIG_USB_SERIAL_XIRCOM is not set
-+# CONFIG_USB_SERIAL_OPTION is not set
++CONFIG_USB_SERIAL_OPTION=m
 +# CONFIG_USB_SERIAL_OMNINET is not set
 +# CONFIG_USB_SERIAL_OPTICON is not set
 +# CONFIG_USB_SERIAL_DEBUG is not set
@@ -1849,7 +1875,8 @@ Index: .config
 +CONFIG_QUOTACTL=y
 +CONFIG_AUTOFS_FS=m
 +CONFIG_AUTOFS4_FS=m
-+# CONFIG_FUSE_FS is not set
++CONFIG_FUSE_FS=m
++CONFIG_CUSE=m
 +
 +#
 +# Caches
@@ -2150,7 +2177,7 @@ Index: .config
 +#
 +CONFIG_BITREVERSE=y
 +CONFIG_GENERIC_FIND_LAST_BIT=y
-+# CONFIG_CRC_CCITT is not set
++CONFIG_CRC_CCITT=m
 +CONFIG_CRC16=y
 +CONFIG_CRC_T10DIF=y
 +CONFIG_CRC_ITU_T=m
@@ -2171,8 +2198,8 @@ Index: .config
 +CONFIG_NLATTR=y
 Index: Makefile
 ===================================================================
---- Makefile.orig	2009-12-15 08:35:41.000000000 -0200
-+++ Makefile	2009-12-15 01:34:27.000000000 -0200
+--- Makefile.orig	2009-12-20 01:51:15.000000000 -0200
++++ Makefile	2009-12-20 01:51:16.000000000 -0200
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
