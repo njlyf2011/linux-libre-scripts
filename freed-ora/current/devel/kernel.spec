@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1874 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1876 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -661,9 +661,12 @@ Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
 Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
-Patch301: linux-2.6-fix-usb-serial-autosuspend.diff
-Patch302: linux-2.6-qcserial-autosuspend.diff
+Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
+Patch305: linux-2.6-fix-btusb-autosuspend.patch
+
+Patch310: linux-2.6-autoload-wmi.patch
+
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
@@ -1257,9 +1260,12 @@ ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
-#ApplyPatch linux-2.6-fix-usb-serial-autosuspend.diff
-ApplyPatch linux-2.6-qcserial-autosuspend.diff
+ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
+ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
+
+# WMI
+ApplyPatch linux-2.6-autoload-wmi.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -2055,6 +2061,15 @@ fi
 # and build.
 
 %changelog
+* Fri Dec 18 2009 Roland McGrath <roland@redhat.com> - 2.6.32.1-13
+- minor utrace update
+
+* Thu Dec 17 2009 Matthew Garrett <mjg@redhat.com> 2.6.32.1-12
+- linux-2.6-driver-level-usb-autosuspend.diff: fix so it works properly...
+- linux-2.6-fix-btusb-autosuspend.patch: avoid bluetooth connection drops
+- linux-2.6-enable-btusb-autosuspend.patch: and default it to on
+- linux-2.6-autoload-wmi.patch: autoload WMI drivers
+
 * Thu Dec 17 2009 Jarod Wilson <jarod@redhat.com> 2.6.32.1-11
 - Split off onboard decode imon devices into pure input driver,
   leaving lirc_imon for the ancient imon devices only
