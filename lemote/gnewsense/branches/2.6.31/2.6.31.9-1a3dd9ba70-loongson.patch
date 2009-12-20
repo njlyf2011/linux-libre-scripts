@@ -11,7 +11,7 @@ index b93fb7e..f6bf7c2 100644
  Module.markers
  Module.symvers
 diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 7936b80..19d94b7 100644
+index 3d5a958..43d2d8b 100644
 --- a/Documentation/kernel-parameters.txt
 +++ b/Documentation/kernel-parameters.txt
 @@ -1247,6 +1247,10 @@ and is between 256 and 4096 characters. It is defined in the file
@@ -26,7 +26,7 @@ index 7936b80..19d94b7 100644
  			than or equal to this physical address is ignored.
  
 diff --git a/Makefile b/Makefile
-index 6eefb00..06fe336 100644
+index 72b5315..5c717de 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -179,8 +179,9 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -58624,7 +58624,7 @@ index 0000000..0781725
 +#define	PIECE_START_ADDR	0xF800
 diff --git a/drivers/platform/loongson/yeeloong_laptop.c b/drivers/platform/loongson/yeeloong_laptop.c
 new file mode 100644
-index 0000000..ac5c1b6
+index 0000000..a39e729
 --- /dev/null
 +++ b/drivers/platform/loongson/yeeloong_laptop.c
 @@ -0,0 +1,1224 @@
@@ -58917,7 +58917,7 @@ index 0000000..ac5c1b6
 +		yeeloong_hwmon_dev = NULL;
 +	}
 +	/* ensure fan is set to auto mode */
-+	yeeloong_set_fan_pwm_enable(0);
++	yeeloong_set_fan_pwm_enable(2);
 +
 +	return 0;
 +}
@@ -59708,7 +59708,7 @@ index 0000000..ac5c1b6
 +	camera_set(2);
 +
 +	/* resume fan to auto mode */
-+	yeeloong_set_fan_pwm_enable(0);
++	yeeloong_set_fan_pwm_enable(2);
 +
 +	return 0;
 +}
