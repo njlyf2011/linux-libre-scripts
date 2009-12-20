@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1876 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1877 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -644,9 +644,6 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ptrace.patch
 
-# More workaround for BIOS brokenness, fix intel_iommu=igfx_off oops
-Patch100: linux-2.6-iommu-updates.patch
-
 Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
@@ -696,7 +693,6 @@ Patch670: linux-2.6-ata-quirk.patch
 
 Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
-Patch682: linux-2.6-ath9k-fixes.patch
 
 Patch700: linux-2.6.31-nx-data.patch
 Patch701: linux-2.6.31-modules-ro-nx.patch
@@ -723,7 +719,6 @@ Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
-Patch1826: drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 
 # kludge to make ich9 e1000 work
@@ -755,8 +750,6 @@ Patch11010: via-hwmon-temp-sensor.patch
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
-
-Patch12015: perf-dont-free-perf_mmap_data-until-work-has-been-done.patch
 
 %endif
 
@@ -1215,7 +1208,6 @@ ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 #
 # Intel IOMMU
 #
-ApplyPatch linux-2.6-iommu-updates.patch
 
 #
 # PowerPC
@@ -1341,9 +1333,6 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # back-port scan result aging patches
 #ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
 
-# ath9k: add fixes suggested by upstream maintainer
-ApplyPatch linux-2.6-ath9k-fixes.patch
-
 # Mark kernel data as NX
 #ApplyPatch linux-2.6.31-nx-data.patch
 # Apply NX/RO to modules
@@ -1384,7 +1373,6 @@ ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
-ApplyPatch drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 # Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
 ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
 
@@ -1403,8 +1391,6 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
-
-ApplyPatch perf-dont-free-perf_mmap_data-until-work-has-been-done.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2061,6 +2047,10 @@ fi
 # and build.
 
 %changelog
+* Fri Dec 18 2009 Kyle McMartin <kyle@redhat.com> 2.6.32.2-14
+- Linux 2.6.32.2
+- dropped upstream patches.
+
 * Fri Dec 18 2009 Roland McGrath <roland@redhat.com> - 2.6.32.1-13
 - minor utrace update
 
