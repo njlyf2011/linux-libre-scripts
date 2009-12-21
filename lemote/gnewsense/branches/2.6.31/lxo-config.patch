@@ -1,12 +1,12 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2009-12-20 02:15:01.000000000 -0200
++++ .config	2009-12-21 07:33:16.000000000 +0800
 @@ -0,0 +1,2193 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.31.8-libre2-lemote
-+# Sun Dec 20 02:15:01 2009
++# Linux kernel version: 2.6.31.9-libre2-lemote
++# Mon Dec 21 07:33:16 2009
 +#
 +CONFIG_MIPS=y
 +
@@ -2198,14 +2198,14 @@ Index: .config
 +CONFIG_NLATTR=y
 Index: Makefile
 ===================================================================
---- Makefile.orig	2009-12-20 01:51:15.000000000 -0200
-+++ Makefile	2009-12-20 01:51:16.000000000 -0200
+--- Makefile.orig	2009-12-21 07:28:35.000000000 +0800
++++ Makefile	2009-12-21 07:29:54.000000000 +0800
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 31
--EXTRAVERSION = .8-libre2
-+EXTRAVERSION = .8-libre2-lemote
+-EXTRAVERSION = .9-libre2
++EXTRAVERSION = .9-libre2-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
