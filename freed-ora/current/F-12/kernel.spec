@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1957 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1958 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -746,8 +746,6 @@ Patch1822: drm-i915-resume-force-mode.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
-Patch1827: drm-i915-fix-tvmode-oops.patch
-Patch1837: drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 Patch1839: drm-radeon-misc-fixes.patch
 Patch1840: drm-radeon-rv410-test-fix.patch
 
@@ -1485,8 +1483,6 @@ ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 ApplyPatch drm-intel-no-tv-hotplug.patch
-ApplyPatch drm-i915-fix-tvmode-oops.patch
-ApplyPatch drm-i915-fix-sync-to-vbl-when-vga-is-off.patch
 #ApplyPatch drm-disable-r600-aspm.patch
 
 # VGA arb + drm
@@ -2197,6 +2193,12 @@ fi
 # and build.
 
 %changelog
+* Sat Dec 19 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed and adjusted patch-libre-2.6.31.9.
+
+* Fri Dec 18 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.9-172
+- stable update 2.6.31.9
+
 * Thu Dec 17 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.8-171
 - drm-nouveau.patch: add support for GF7100 (NV63)
 
