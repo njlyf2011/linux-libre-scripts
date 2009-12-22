@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1958 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -747,7 +747,7 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1826: drm-intel-no-tv-hotplug.patch
 Patch1839: drm-radeon-misc-fixes.patch
-Patch1840: drm-radeon-rv410-test-fix.patch
+#Patch1840: drm-radeon-rv410-test-fix.patch
 
 # vga arb
 Patch1900: linux-2.6-vga-arb.patch
@@ -1473,7 +1473,7 @@ ApplyPatch kms-offb-handoff.patch
 ApplyPatch drm-next-b390f944.patch
 ApplyPatch drm-edid-9340d8cf.patch
 ApplyPatch drm-radeon-misc-fixes.patch
-ApplyPatch drm-radeon-rv410-test-fix.patch
+#ApplyPatch drm-radeon-rv410-test-fix.patch
 
 ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
@@ -2193,6 +2193,16 @@ fi
 # and build.
 
 %changelog
+* Mon Dec 21 2009 Dave Airlie <airlied@redhat.com> 2.6.31.9-174
+- revert rv410 fix broke some things
+
+* Mon Dec 21 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31.9-173
+- nouveau: fix dim panel issues on certain laptops (rh#547554)
+- nouveau: fix some issues when running without ctxprogs
+- nouveau: fix error handling in init paths
+- nouveau: add vga arbitration hooks
+- nouveau: fix nv04 sw methods
+
 * Sat Dec 19 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed and adjusted patch-libre-2.6.31.9.
 

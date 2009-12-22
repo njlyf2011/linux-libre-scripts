@@ -88,10 +88,10 @@ index 0000000..6d2abaf
 +obj-$(CONFIG_DRM_I2C_CH7006) += ch7006.o
 diff --git a/drivers/gpu/drm/i2c/ch7006_drv.c b/drivers/gpu/drm/i2c/ch7006_drv.c
 new file mode 100644
-index 0000000..9422a74
+index 0000000..81681a0
 --- /dev/null
 +++ b/drivers/gpu/drm/i2c/ch7006_drv.c
-@@ -0,0 +1,531 @@
+@@ -0,0 +1,536 @@
 +/*
 + * Copyright (C) 2009 Francisco Jerez.
 + * All Rights Reserved.
@@ -502,6 +502,11 @@ index 0000000..9422a74
 +
 +	ch7006_info(client, "Detected version ID: %x\n", val);
 +
++	/* I don't know what this is for, but otherwise I get no
++	 * signal.
++	 */
++	ch7006_write(client, 0x3d, 0x0);
++
 +	return 0;
 +
 +fail:
@@ -625,10 +630,10 @@ index 0000000..9422a74
 +module_exit(ch7006_exit);
 diff --git a/drivers/gpu/drm/i2c/ch7006_mode.c b/drivers/gpu/drm/i2c/ch7006_mode.c
 new file mode 100644
-index 0000000..87f5445
+index 0000000..e447dfb
 --- /dev/null
 +++ b/drivers/gpu/drm/i2c/ch7006_mode.c
-@@ -0,0 +1,473 @@
+@@ -0,0 +1,468 @@
 +/*
 + * Copyright (C) 2009 Francisco Jerez.
 + * All Rights Reserved.
@@ -1058,11 +1063,6 @@ index 0000000..87f5445
 +	ch7006_load_reg(client, state, CH7006_SUBC_INC7);
 +	ch7006_load_reg(client, state, CH7006_PLL_CONTROL);
 +	ch7006_load_reg(client, state, CH7006_CALC_SUBC_INC0);
-+
-+	/* I don't know what this is for, but otherwise I get no
-+	 * signal.
-+	 */
-+	ch7006_write(client, 0x3d, 0x0);
 +}
 +
 +void ch7006_state_save(struct i2c_client *client,
@@ -8129,10 +8129,10 @@ index 0000000..1d5f10b
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bo.c b/drivers/gpu/drm/nouveau/nouveau_bo.c
 new file mode 100644
-index 0000000..8d1383a
+index 0000000..f067fc3
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_bo.c
-@@ -0,0 +1,663 @@
+@@ -0,0 +1,661 @@
 +/*
 + * Copyright 2007 Dave Airlied
 + * All Rights Reserved.
@@ -8572,11 +8572,8 @@ index 0000000..8d1383a
 +	int ret;
 +
 +	chan = nvbo->channel;
-+	if (!chan || nvbo->tile_flags || nvbo->no_vm) {
++	if (!chan || nvbo->tile_flags || nvbo->no_vm)
 +		chan = dev_priv->channel;
-+		if (!chan)
-+			return -EINVAL;
-+	}
 +
 +	src_offset = old_mem->mm_node->start << PAGE_SHIFT;
 +	dst_offset = new_mem->mm_node->start << PAGE_SHIFT;
@@ -8733,7 +8730,8 @@ index 0000000..8d1383a
 +			return ret;
 +	}
 +
-+	if (dev_priv->init_state != NOUVEAU_CARD_INIT_DONE)
++	if (dev_priv->init_state != NOUVEAU_CARD_INIT_DONE ||
++	    !dev_priv->channel)
 +		return ttm_bo_move_memcpy(bo, evict, no_wait, new_mem);
 +
 +	if (old_mem->mem_type == TTM_PL_SYSTEM && !bo->ttm) {
@@ -11392,7 +11390,7 @@ index 0000000..04e85d8
 +#endif
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.c b/drivers/gpu/drm/nouveau/nouveau_drv.c
 new file mode 100644
-index 0000000..d8de3f6
+index 0000000..e0e8e84
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.c
 @@ -0,0 +1,413 @@
@@ -11675,7 +11673,7 @@ index 0000000..d8de3f6
 +
 +		for (i = 0; i < dev_priv->engine.fifo.channels; i++) {
 +			chan = dev_priv->fifos[i];
-+			if (!chan)
++			if (!chan || !chan->pushbuf_bo)
 +				continue;
 +
 +			for (j = 0; j < NOUVEAU_DMA_SKIPS; j++)
@@ -13212,10 +13210,10 @@ index 0000000..4a3f31a
 +#endif /* __NOUVEAU_FB_H__ */
 diff --git a/drivers/gpu/drm/nouveau/nouveau_fbcon.c b/drivers/gpu/drm/nouveau/nouveau_fbcon.c
 new file mode 100644
-index 0000000..36e8c5e
+index 0000000..d860bdc
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_fbcon.c
-@@ -0,0 +1,380 @@
+@@ -0,0 +1,382 @@
 +/*
 + * Copyright © 2007 David Airlie
 + *
@@ -13276,7 +13274,7 @@ index 0000000..36e8c5e
 +	struct nouveau_channel *chan = dev_priv->channel;
 +	int ret, i;
 +
-+	if (!chan->accel_done ||
++	if (!chan || !chan->accel_done ||
 +	    info->state != FBINFO_STATE_RUNNING ||
 +	    info->flags & FBINFO_HWACCEL_DISABLED)
 +		return 0;
@@ -13536,14 +13534,16 @@ index 0000000..36e8c5e
 +	par->nouveau_fb = nouveau_fb;
 +	par->dev = dev;
 +
-+	switch (dev_priv->card_type) {
-+	case NV_50:
-+		nv50_fbcon_accel_init(info);
-+		break;
-+	default:
-+		nv04_fbcon_accel_init(info);
-+		break;
-+	};
++	if (dev_priv->channel) {
++		switch (dev_priv->card_type) {
++		case NV_50:
++			nv50_fbcon_accel_init(info);
++			break;
++		default:
++			nv04_fbcon_accel_init(info);
++			break;
++		};
++	}
 +
 +	nouveau_fbcon_zfill(dev);
 +
@@ -20751,10 +20751,10 @@ index 0000000..4c7f1e4
 +}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_state.c b/drivers/gpu/drm/nouveau/nouveau_state.c
 new file mode 100644
-index 0000000..0de87b8
+index 0000000..27c4d48
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nouveau_state.c
-@@ -0,0 +1,865 @@
+@@ -0,0 +1,919 @@
 +/*
 + * Copyright 2005 Stephane Marchesin
 + * Copyright 2008 Stuart Bennett
@@ -20781,11 +20781,12 @@ index 0000000..0de87b8
 + */
 +
 +#include <linux/swab.h>
-+
 +#include "drmP.h"
 +#include "drm.h"
 +#include "drm_sarea.h"
 +#include "drm_crtc_helper.h"
++#include <linux/vgaarb.h>
++
 +#include "nouveau_drv.h"
 +#include "nouveau_drm.h"
 +#include "nv50_display.h"
@@ -21089,91 +21090,22 @@ index 0000000..0de87b8
 +	return 0;
 +}
 +
-+int
-+nouveau_card_init(struct drm_device *dev)
++static unsigned int
++nouveau_vga_set_decode(void *priv, bool state)
++{
++	if (state)
++		return VGA_RSRC_LEGACY_IO | VGA_RSRC_LEGACY_MEM |
++		       VGA_RSRC_NORMAL_IO | VGA_RSRC_NORMAL_MEM;
++	else
++		return VGA_RSRC_NORMAL_IO | VGA_RSRC_NORMAL_MEM;
++}
++
++static int
++nouveau_card_init_channel(struct drm_device *dev)
 +{
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
-+	struct nouveau_engine *engine;
 +	struct nouveau_gpuobj *gpuobj;
 +	int ret;
-+
-+	NV_DEBUG(dev, "prev state = %d\n", dev_priv->init_state);
-+
-+	if (dev_priv->init_state == NOUVEAU_CARD_INIT_DONE)
-+		return 0;
-+
-+	/* Initialise internal driver API hooks */
-+	ret = nouveau_init_engine_ptrs(dev);
-+	if (ret)
-+		return ret;
-+	engine = &dev_priv->engine;
-+	dev_priv->init_state = NOUVEAU_CARD_INIT_FAILED;
-+
-+	/* Parse BIOS tables / Run init tables if card not POSTed */
-+	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
-+		ret = nouveau_bios_init(dev);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	ret = nouveau_gpuobj_early_init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* Initialise instance memory, must happen before mem_init so we
-+	 * know exactly how much VRAM we're able to use for "normal"
-+	 * purposes.
-+	 */
-+	ret = engine->instmem.init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* Setup the memory manager */
-+	ret = nouveau_mem_init(dev);
-+	if (ret)
-+		return ret;
-+
-+	ret = nouveau_gpuobj_init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* PMC */
-+	ret = engine->mc.init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* PTIMER */
-+	ret = engine->timer.init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* PFB */
-+	ret = engine->fb.init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* PGRAPH */
-+	ret = engine->graph.init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* PFIFO */
-+	ret = engine->fifo.init(dev);
-+	if (ret)
-+		return ret;
-+
-+	/* this call irq_preinstall, register irq handler and
-+	 * call irq_postinstall
-+	 */
-+	ret = drm_irq_install(dev);
-+	if (ret)
-+		return ret;
-+
-+	ret = drm_vblank_init(dev, 0);
-+	if (ret)
-+		return ret;
-+
-+	/* what about PVIDEO/PCRTC/PRAMDAC etc? */
 +
 +	ret = nouveau_channel_alloc(dev, &dev_priv->channel,
 +				    (struct drm_file *)-2,
@@ -21187,39 +21119,133 @@ index 0000000..0de87b8
 +				     NV_DMA_ACCESS_RW, NV_DMA_TARGET_VIDMEM,
 +				     &gpuobj);
 +	if (ret)
-+		return ret;
++		goto out_err;
 +
 +	ret = nouveau_gpuobj_ref_add(dev, dev_priv->channel, NvDmaVRAM,
 +				     gpuobj, NULL);
-+	if (ret) {
-+		nouveau_gpuobj_del(dev, &gpuobj);
-+		return ret;
-+	}
++	if (ret)
++		goto out_err;
 +
 +	gpuobj = NULL;
 +	ret = nouveau_gpuobj_gart_dma_new(dev_priv->channel, 0,
 +					  dev_priv->gart_info.aper_size,
 +					  NV_DMA_ACCESS_RW, &gpuobj, NULL);
 +	if (ret)
-+		return ret;
++		goto out_err;
 +
 +	ret = nouveau_gpuobj_ref_add(dev, dev_priv->channel, NvDmaGART,
 +				     gpuobj, NULL);
-+	if (ret) {
-+		nouveau_gpuobj_del(dev, &gpuobj);
-+		return ret;
++	if (ret)
++		goto out_err;
++
++	return 0;
++out_err:
++	nouveau_gpuobj_del(dev, &gpuobj);
++	nouveau_channel_free(dev_priv->channel);
++	dev_priv->channel = NULL;
++	return ret;
++}
++
++int
++nouveau_card_init(struct drm_device *dev)
++{
++	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_engine *engine;
++	int ret;
++
++	NV_DEBUG(dev, "prev state = %d\n", dev_priv->init_state);
++
++	if (dev_priv->init_state == NOUVEAU_CARD_INIT_DONE)
++		return 0;
++
++	vga_client_register(dev->pdev, dev, NULL, nouveau_vga_set_decode);
++
++	/* Initialise internal driver API hooks */
++	ret = nouveau_init_engine_ptrs(dev);
++	if (ret)
++		goto out;
++	engine = &dev_priv->engine;
++	dev_priv->init_state = NOUVEAU_CARD_INIT_FAILED;
++
++	/* Parse BIOS tables / Run init tables if card not POSTed */
++	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
++		ret = nouveau_bios_init(dev);
++		if (ret)
++			goto out;
++	}
++
++	ret = nouveau_gpuobj_early_init(dev);
++	if (ret)
++		goto out_bios;
++
++	/* Initialise instance memory, must happen before mem_init so we
++	 * know exactly how much VRAM we're able to use for "normal"
++	 * purposes.
++	 */
++	ret = engine->instmem.init(dev);
++	if (ret)
++		goto out_gpuobj_early;
++
++	/* Setup the memory manager */
++	ret = nouveau_mem_init(dev);
++	if (ret)
++		goto out_instmem;
++
++	ret = nouveau_gpuobj_init(dev);
++	if (ret)
++		goto out_mem;
++
++	/* PMC */
++	ret = engine->mc.init(dev);
++	if (ret)
++		goto out_gpuobj;
++
++	/* PTIMER */
++	ret = engine->timer.init(dev);
++	if (ret)
++		goto out_mc;
++
++	/* PFB */
++	ret = engine->fb.init(dev);
++	if (ret)
++		goto out_timer;
++
++	/* PGRAPH */
++	ret = engine->graph.init(dev);
++	if (ret)
++		goto out_fb;
++
++	/* PFIFO */
++	ret = engine->fifo.init(dev);
++	if (ret)
++		goto out_graph;
++
++	/* this call irq_preinstall, register irq handler and
++	 * call irq_postinstall
++	 */
++	ret = drm_irq_install(dev);
++	if (ret)
++		goto out_fifo;
++
++	ret = drm_vblank_init(dev, 0);
++	if (ret)
++		goto out_irq;
++
++	/* what about PVIDEO/PCRTC/PRAMDAC etc? */
++
++	if (!engine->graph.accel_blocked) {
++		ret = nouveau_card_init_channel(dev);
++		if (ret)
++			goto out_irq;
 +	}
 +
 +	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
-+		if (dev_priv->card_type >= NV_50) {
++		if (dev_priv->card_type >= NV_50)
 +			ret = nv50_display_create(dev);
-+			if (ret)
-+				return ret;
-+		} else {
++		else
 +			ret = nv04_display_create(dev);
-+			if (ret)
-+				return ret;
-+		}
++		if (ret)
++			goto out_irq;
 +	}
 +
 +	ret = nouveau_backlight_init(dev);
@@ -21232,6 +21258,32 @@ index 0000000..0de87b8
 +		drm_helper_initial_config(dev);
 +
 +	return 0;
++
++out_irq:
++	drm_irq_uninstall(dev);
++out_fifo:
++	engine->fifo.takedown(dev);
++out_graph:
++	engine->graph.takedown(dev);
++out_fb:
++	engine->fb.takedown(dev);
++out_timer:
++	engine->timer.takedown(dev);
++out_mc:
++	engine->mc.takedown(dev);
++out_gpuobj:
++	nouveau_gpuobj_takedown(dev);
++out_mem:
++	nouveau_mem_close(dev);
++out_instmem:
++	engine->instmem.takedown(dev);
++out_gpuobj_early:
++	nouveau_gpuobj_late_takedown(dev);
++out_bios:
++	nouveau_bios_takedown(dev);
++out:
++	vga_client_register(dev->pdev, NULL, NULL, NULL);
++	return ret;
 +}
 +
 +static void nouveau_card_takedown(struct drm_device *dev)
@@ -21269,6 +21321,8 @@ index 0000000..0de87b8
 +
 +		nouveau_gpuobj_late_takedown(dev);
 +		nouveau_bios_takedown(dev);
++
++		vga_client_register(dev->pdev, NULL, NULL, NULL);
 +
 +		dev_priv->init_state = NOUVEAU_CARD_INIT_DOWN;
 +	}
@@ -24929,7 +24983,7 @@ index 0000000..0c3cd53
 +
 diff --git a/drivers/gpu/drm/nouveau/nv04_graph.c b/drivers/gpu/drm/nouveau/nv04_graph.c
 new file mode 100644
-index 0000000..396ee92
+index 0000000..d561d77
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv04_graph.c
 @@ -0,0 +1,579 @@
@@ -25478,7 +25532,7 @@ index 0000000..396ee92
 +
 +	nv_wi32(dev, instance, tmp);
 +	nv_wr32(dev, NV04_PGRAPH_CTX_SWITCH1, tmp);
-+	nv_wr32(dev, NV04_PGRAPH_CTX_CACHE1 + subc, tmp);
++	nv_wr32(dev, NV04_PGRAPH_CTX_CACHE1 + (subc<<2), tmp);
 +	return 0;
 +}
 +
@@ -33855,10 +33909,10 @@ index 0000000..fb5838e
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_display.c b/drivers/gpu/drm/nouveau/nv50_display.c
 new file mode 100644
-index 0000000..dd4bff2
+index 0000000..281e65c
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_display.c
-@@ -0,0 +1,998 @@
+@@ -0,0 +1,1012 @@
 +/*
 + * Copyright (C) 2008 Maarten Maathuis.
 + * All Rights Reserved.
@@ -34480,11 +34534,8 @@ index 0000000..dd4bff2
 +	 */
 +	NV_DEBUG(dev, "0x610030: 0x%08x\n", unk30);
 +	head = ffs((unk30 >> 9) & 3) - 1;
-+	if (head < 0) {
-+		NV_ERROR(dev, "no active heads: 0x%08x\n",
-+						nv_rd32(dev, 0x610030));
++	if (head < 0)
 +		return -EINVAL;
-+	}
 +
 +	/* This assumes CRTCs are never bound to multiple encoders, which
 +	 * should be the case.
@@ -34554,8 +34605,20 @@ index 0000000..dd4bff2
 +			   int pxclk)
 +{
 +	struct drm_nouveau_private *dev_priv = dev->dev_private;
++	struct nouveau_connector *nv_connector = NULL;
++	struct drm_encoder *encoder;
 +	struct nvbios *bios = &dev_priv->VBIOS;
 +	uint32_t mc, script = 0, or;
++
++	list_for_each_entry(encoder, &dev->mode_config.encoder_list, head) {
++		struct nouveau_encoder *nv_encoder = nouveau_encoder(encoder);
++
++		if (nv_encoder->dcb != dcbent)
++			continue;
++
++		nv_connector = nouveau_encoder_connector_get(nv_encoder);
++		break;
++	}
 +
 +	or = ffs(dcbent->or) - 1;
 +	mc = nv50_display_mode_ctrl(dev, dcbent->type != OUTPUT_ANALOG, or);
@@ -34574,6 +34637,11 @@ index 0000000..dd4bff2
 +					script |= 0x0200;
 +			} else
 +			if (bios->fp.strapless_is_24bit & 1)
++				script |= 0x0200;
++
++			if (nv_connector && nv_connector->edid &&
++			    (nv_connector->edid->revision >= 4) &&
++			    (nv_connector->edid->input & 0x70) >= 0x20)
 +				script |= 0x0200;
 +		}
 +
@@ -35309,7 +35377,7 @@ index 0000000..6bcc6d3
 +
 diff --git a/drivers/gpu/drm/nouveau/nv50_fifo.c b/drivers/gpu/drm/nouveau/nv50_fifo.c
 new file mode 100644
-index 0000000..77ae1aa
+index 0000000..b728228
 --- /dev/null
 +++ b/drivers/gpu/drm/nouveau/nv50_fifo.c
 @@ -0,0 +1,494 @@
@@ -35731,7 +35799,7 @@ index 0000000..77ae1aa
 +	NV_DEBUG(dev, "\n");
 +
 +	chid = pfifo->channel_id(dev);
-+	if (chid < 0 || chid >= dev_priv->engine.fifo.channels)
++	if (chid < 1 || chid >= dev_priv->engine.fifo.channels - 1)
 +		return 0;
 +
 +	chan = dev_priv->fifos[chid];
