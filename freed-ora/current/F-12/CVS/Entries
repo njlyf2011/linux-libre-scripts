@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.31.tar.bz2.sign/-1.1/Thu Sep 10 00:43:49 2009//Tkernel-2_6_31-2_fc12
 /patch-2.6.31.9.bz2.sign/-1.1/Sat Dec 19 03:06:00 2009//Tkernel-2_6_31_9-172_fc12
-/.cvsignore/1.1136/dummy timestamp from new-entry+Sun Dec 20 04:00:35 2009//Tkernel-2_6_31_9-174_fc12
 /Makefile/1.114/dummy timestamp from new-entry//Tkernel-2_6_31_9-174_fc12
 /Makefile.config/1.73/Tue Sep 22 01:04:44 2009/-ko/Tkernel-2_6_31_9-174_fc12
 /TODO/1.66/Tue Sep 22 01:04:21 2009//Tkernel-2_6_31_9-174_fc12
@@ -153,7 +152,6 @@ D/scripts////
 /sched-remove-shortcut-from-select-task-rq-fair.patch/1.1/Tue Nov 17 16:49:44 2009/-kb/Tkernel-2_6_31_9-174_fc12
 /sched-retune-scheduler-latency-defaults.patch/1.1/Tue Nov 17 16:49:44 2009/-kb/Tkernel-2_6_31_9-174_fc12
 /sched-update-the-clock-of-runqueue-select-task-rq-selected.patch/1.1/Tue Nov 17 16:49:44 2009/-kb/Tkernel-2_6_31_9-174_fc12
-/sources/1.1094/dummy timestamp from new-entry+Sun Dec 20 04:03:11 2009//Tkernel-2_6_31_9-174_fc12
 /tg3-01-delay-mdio-bus-init-until-fw-finishes.patch/1.1/Wed Nov  4 14:03:45 2009/-kb/Tkernel-2_6_31_9-174_fc12
 /tg3-02-fix-tso-test-against-wrong-flags-var.patch/1.1/Wed Nov  4 14:03:45 2009/-kb/Tkernel-2_6_31_9-174_fc12
 /tg3-03-fix-57780-asic-rev-pcie-link-receiver-errors.patch/1.1/Wed Nov  4 14:03:45 2009/-kb/Tkernel-2_6_31_9-174_fc12
@@ -164,3 +162,5 @@ D/scripts////
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_31_9-174_fc12
 /v4l-dvb-fix-cx25840-firmware-loading.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_31_9-174_fc12
 /via-hwmon-temp-sensor.patch/1.3/Tue Sep 22 01:04:21 2009/-kb/Tkernel-2_6_31_9-174_fc12
+/.cvsignore/1.1136/Tue Dec 22 22:02:14 2009//Tkernel-2_6_31_9-174_fc12
+/sources/1.1094/Tue Dec 22 22:02:14 2009//Tkernel-2_6_31_9-174_fc12
