@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1781 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -599,6 +599,8 @@ Patch04: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
+Patch08: freedo.patch
+
 %if !%{nopatches}
 
 # revert upstream patches we get via other methods
@@ -861,8 +863,8 @@ Patch16470: sata_nv-use-hardreset-only-for-post-boot-probing.patch
 # rhbz#538734 (CVE-tbd) [f60311d5f7670d9539b424e4ed8b5c0872fc9e83]
 Patch16471: fuse-prevent-fuse_put_request-in-invalid-ptr.patch
 
-# rhbz#544144 [bbf31bf18d34caa87dd01f08bf713635593697f2]
-Patch16472: ipv4-fix-null-ptr-deref-in-ip_fragment.patch
+# rhbz#549400 [0bd87182d3ab18a32a8e9175d3f68754c58e3432]
+Patch16472: fuse-fix-kunmap-in-fuse_ioctl_copy_user.patch
 
 %endif
 
@@ -1278,6 +1280,9 @@ ApplyPatch linux-2.6-makefile-after_link.patch
 #
 ApplyOptionalPatch linux-2.6-compile-fixes.patch
 
+# Freedo logo.
+ApplyPatch freedo.patch
+
 %if !%{nopatches}
 
 # revert patches from upstream that conflict or that we get via other means
@@ -1627,8 +1632,8 @@ ApplyPatch sata_nv-make-sure-link-is-brough-up-online-when-skipping-hardreset.pa
 
 ApplyPatch fuse-prevent-fuse_put_request-in-invalid-ptr.patch
 
-# rhbz#544144
-ApplyPatch ipv4-fix-null-ptr-deref-in-ip_fragment.patch
+# rhbz#549400 [0bd87182d3ab18a32a8e9175d3f68754c58e3432]
+ApplyPatch fuse-fix-kunmap-in-fuse_ioctl_copy_user.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2218,7 +2223,21 @@ fi
 # and build.
 
 %changelog
-* Tue Dec 08 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Dec 25 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Added freedo.patch, with 100% Free Software Freedo logo.
+
+* Thu Dec 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.30.10-105
+- fuse: fix kunmap in fuse_ioctl_copy_user, #549400
+
+* Tue Dec 08 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30.10-104
+- Copy fix for #540580 from F-12.
+
+* Fri Dec 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.30.10-103
+- 2.6.30.10
+- nuke ipv4-fix-null-ptr-deref-in-ip_fragment.patch, it's in the latest
+  stable release.
+
+* Thu Dec 03 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre Dec 08
 - Rebased to linux-2.6.30-libre1.
 
 * Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.30.9-102
