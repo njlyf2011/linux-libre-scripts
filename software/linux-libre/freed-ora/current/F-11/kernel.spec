@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1785 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -866,6 +866,10 @@ Patch16471: fuse-prevent-fuse_put_request-in-invalid-ptr.patch
 # rhbz#549400 [0bd87182d3ab18a32a8e9175d3f68754c58e3432]
 Patch16472: fuse-fix-kunmap-in-fuse_ioctl_copy_user.patch
 
+# fix libertas on 64-bit platforms with >= 4GB RAM
+# kernel commit e9024a059f2c17fb2bfab212ee9d31511d7b8e57
+Patch16473: linux-2.6-libertas-crash.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1635,6 +1639,9 @@ ApplyPatch fuse-prevent-fuse_put_request-in-invalid-ptr.patch
 # rhbz#549400 [0bd87182d3ab18a32a8e9175d3f68754c58e3432]
 ApplyPatch fuse-fix-kunmap-in-fuse_ioctl_copy_user.patch
 
+# libertas 64-bit crash fix [e9024a059f2c17fb2bfab212ee9d31511d7b8e57]
+ApplyPatch linux-2.6-libertas-crash.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2223,6 +2230,9 @@ fi
 # and build.
 
 %changelog
+* Fri Dec 25 2009 Dan Williams <dcbw@redhat.com> 2.6.30.10-106
+- libertas: fix crash on 64-bit platforms with >= 4GB RAM
+
 * Fri Dec 25 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Added freedo.patch, with 100% Free Software Freedo logo.
 
