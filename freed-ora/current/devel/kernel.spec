@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1877 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1878 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -720,6 +720,7 @@ Patch1821: drm-page-flip.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1827: linux-2.6-intel-agp-clear-gtt.patch
+Patch1828: drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1375,6 +1376,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #ApplyPatch drm-intel-pm.patch
 # Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
 ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
+ApplyPatch drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2047,6 +2049,10 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.32.2-15
+- Add patch from dri-devel to fix vblanks on r600.
+  [http://marc.info/?l=dri-devel&m=126137027403059&w=2]
+
 * Fri Dec 18 2009 Kyle McMartin <kyle@redhat.com> 2.6.32.2-14
 - Linux 2.6.32.2
 - dropped upstream patches.
