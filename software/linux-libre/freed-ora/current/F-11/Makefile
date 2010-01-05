@@ -1,5 +1,5 @@
 # Makefile for source rpm: kernel
-# $Id: Makefile,v 1.106 2009/11/26 00:00:00 notting Exp $
+# $Id: Makefile,v 1.107 2010/01/04 15:25:39 kyle Exp $
 NAME     := kernel
 SPECFILE := kernel.spec
 
@@ -57,6 +57,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_FAULT_INJECTION is not set/CONFIG_FAULT_INJECTION=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_FAILSLAB is not set/CONFIG_FAILSLAB=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_FAIL_PAGE_ALLOC is not set/CONFIG_FAIL_PAGE_ALLOC=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_FAIL_IO_TIMEOUT is not set/CONFIG_FAIL_IO_TIMEOUT=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_FAIL_MAKE_REQUEST is not set/CONFIG_FAIL_MAKE_REQUEST=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_FAULT_INJECTION_DEBUG_FS is not set/CONFIG_FAULT_INJECTION_DEBUG_FS=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_FAULT_INJECTION_STACKTRACE_FILTER is not set/CONFIG_FAULT_INJECTION_STACKTRACE_FILTER=y/' config-nodebug
@@ -73,17 +74,27 @@ debug:
 	@perl -pi -e 's/# CONFIG_DMA_API_DEBUG is not set/CONFIG_DMA_API_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_PM_TEST_SUSPEND is not set/CONFIG_PM_TEST_SUSPEND=y/' config-generic
 	@perl -pi -e 's/# CONFIG_BOOT_TRACER is not set/CONFIG_BOOT_TRACER=y/' config-generic
-	@perl -pi -e 's/# CONFIG_PCI_MSI_DEFAULT_ON is not set/CONFIG_PCI_MSI_DEFAULT_ON=y/' config-generic
 	@perl -pi -e 's/# CONFIG_B43_DEBUG is not set/CONFIG_B43_DEBUG=y/' config-generic
 	@perl -pi -e 's/# CONFIG_B43LEGACY_DEBUG is not set/CONFIG_B43LEGACY_DEBUG=y/' config-generic
 	@perl -pi -e 's/# CONFIG_MMIOTRACE is not set/CONFIG_MMIOTRACE=y/' config-nodebug
 	@perl -pi -e 's/CONFIG_STRIP_ASM_SYMS=y/# CONFIG_STRIP_ASM_SYMS is not set/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DEBUG_CREDENTIALS is not set/CONFIG_DEBUG_CREDENTIALS=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DEBUG_FORCE_WEAK_PER_CPU is not set/CONFIG_DEBUG_FORCE_WEAK_PER_CPU=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_ACPI_DEBUG is not set/CONFIG_ACPI_DEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_EXT4_DEBUG is not set/CONFIG_EXT4_DEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/CONFIG_DEBUG_PERF_USE_VMALLOC=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_JBD2_DEBUG is not set/CONFIG_JBD2_DEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_FUNCTION_TRACER is not set/CONFIG_FUNCTION_TRACER=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_STACK_TRACER is not set/CONFIG_STACK_TRACER=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DYNAMIC_FTRACE is not set/CONFIG_DYNAMIC_FTRACE=y/' config-nodebug
 
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 
-	@perl -pi -e 's/^%define debugbuildsenabled 1/%define debugbuildsenabled 0/' kernel.spec
 	@perl -pi -e 's/CONFIG_NR_CPUS=64/CONFIG_NR_CPUS=512/' config-x86_64-generic
+
+	@perl -pi -e 's/^%define debugbuildsenabled 1/%define debugbuildsenabled 0/' kernel.spec
+	@perl -pi -e 's/^%define rawhide_skip_docs 0/%define rawhide_skip_docs 1/' kernel.spec
 
 release:
 	@perl -pi -e 's/CONFIG_SLUB_DEBUG_ON=y/# CONFIG_SLUB_DEBUG_ON is not set/' config-nodebug
@@ -96,13 +107,12 @@ release:
 	@perl -pi -e 's/CONFIG_DEBUG_LOCK_ALLOC=y/# CONFIG_DEBUG_LOCK_ALLOC is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_PROVE_LOCKING=y/# CONFIG_PROVE_LOCKING is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_SPINLOCK=y/# CONFIG_DEBUG_SPINLOCK is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
-	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_VM=y/# CONFIG_DEBUG_VM is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_SLEEP_IN_IRQ=y/# CONFIG_DEBUG_SLEEP_IN_IRQ is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAULT_INJECTION=y/# CONFIG_FAULT_INJECTION is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAILSLAB=y/# CONFIG_FAILSLAB is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAIL_PAGE_ALLOC=y/# CONFIG_FAIL_PAGE_ALLOC is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_FAIL_IO_TIMEOUT=y/# CONFIG_FAIL_IO_TIMEOUT is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAIL_MAKE_REQUEST=y/# CONFIG_FAIL_MAKE_REQUEST is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAULT_INJECTION_DEBUG_FS=y/# CONFIG_FAULT_INJECTION_DEBUG_FS is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAULT_INJECTION_STACKTRACE_FILTER=y/# CONFIG_FAULT_INJECTION_STACKTRACE_FILTER is not set/' config-nodebug
@@ -119,11 +129,22 @@ release:
 	@perl -pi -e 's/CONFIG_DMA_API_DEBUG=y/# CONFIG_DMA_API_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_PM_TEST_SUSPEND=y/#\ CONFIG_PM_TEST_SUSPEND\ is\ not\ set/' config-generic
 	@perl -pi -e 's/CONFIG_BOOT_TRACER=y/#\ CONFIG_BOOT_TRACER\ is\ not\ set/' config-generic
-	@perl -pi -e 's/CONFIG_PCI_MSI_DEFAULT_ON=y/# CONFIG_PCI_MSI_DEFAULT_ON is not set/' config-generic
 	@perl -pi -e 's/CONFIG_B43_DEBUG=y/# CONFIG_B43_DEBUG is not set/' config-generic
 	@perl -pi -e 's/CONFIG_B43LEGACY_DEBUG=y/# CONFIG_B43LEGACY_DEBUG is not set/' config-generic
 	@perl -pi -e 's/CONFIG_MMIOTRACE=y/# CONFIG_MMIOTRACE is not set/' config-nodebug
 	@perl -pi -e 's/# CONFIG_STRIP_ASM_SYMS is not set/CONFIG_STRIP_ASM_SYMS=y/' config-nodebug
+	@perl -pi -e 's/CONFIG_DEBUG_CREDENTIALS=y/# CONFIG_DEBUG_CREDENTIALS is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_DEBUG_FORCE_WEAK_PER_CPU=y/# CONFIG_DEBUG_FORCE_WEAK_PER_CPU is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_ACPI_DEBUG=y/# CONFIG_ACPI_DEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_EXT4_DEBUG=y/# CONFIG_EXT4_DEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_DEBUG_PERF_USE_VMALLOC=y/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_JBD2_DEBUG=y/# CONFIG_JBD2_DEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_FUNCTION_TRACER=y/# CONFIG_FUNCTION_TRACER is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_STACK_TRACER=y/# CONFIG_STACK_TRACER is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_DYNAMIC_FTRACE=y/# CONFIG_DYNAMIC_FTRACE is not set/' config-nodebug
+
+	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
+	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 
 	@perl -pi -e 's/CONFIG_NR_CPUS=512/CONFIG_NR_CPUS=64/' config-x86_64-generic
 

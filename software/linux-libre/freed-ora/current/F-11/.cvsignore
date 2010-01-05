@@ -4,9 +4,9 @@ GNUmakefile
 kernel-2.6.*.config
 temp-*
 deblob-main
-deblob-2.6.30
+deblob-2.6.32
 deblob-check
 freedo.patch
-kernel-2.6.30
-linux-2.6.30-libre1.*
-patch-2.6.30.10.bz2
+kernel-2.6.32
+linux-2.6.32-libre.*
+patch-2.6.32.2.bz2
