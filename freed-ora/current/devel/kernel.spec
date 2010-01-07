@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1878 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1881 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -288,7 +288,7 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_headers 0
 %define all_arch_configs kernel-%{version}-*.config
-%define with_firmware  %{?_without_firmware:  0} %{?!_without_firmware:  1}
+%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
 %endif
 
 # bootwrapper is only on ppc
@@ -656,7 +656,6 @@ Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
-Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
@@ -816,6 +815,7 @@ This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
 
 %package -n perf-libre
+Provides: perf = %{rpmversion}-%{pkg_release}
 Summary: Performance monitoring for the Linux kernel
 Group: Development/System
 License: GPLv2
@@ -992,7 +992,8 @@ ApplyPatch()
   fi
 %if !%{using_upstream_branch}
   if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:10}" != "patch-2.6." ] ; then
+    if [ "${patch:0:10}" != "patch-2.6." ] && 
+       [ "${patch:0:16}" != "patch-libre-2.6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
@@ -1255,7 +1256,7 @@ ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
-ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
+#ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
 
 # WMI
 ApplyPatch linux-2.6-autoload-wmi.patch
@@ -1268,7 +1269,6 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
-ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
@@ -1376,7 +1376,7 @@ ApplyOptionalPatch drm-intel-next.patch
 #ApplyPatch drm-intel-pm.patch
 # Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
 ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
-ApplyPatch drm-radeon-fix-crtc-vbl-update-for-r600.patch
+#ApplyPatch drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2049,6 +2049,12 @@ fi
 # and build.
 
 %changelog
+* Thu Jan 07 2010 David Woodhouse <David.Woodhouse@intel.com> 2.6.32.2-18
+- Drop kernel-firmware package now that it's packaged separately.
+
+* Mon Jan 04 2010 Dave Jones <davej@redhat.com>
+- Drop some of the vm/spinlock taint patches. dump_stack() already does same.
+
 * Thu Dec 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.32.2-15
 - Add patch from dri-devel to fix vblanks on r600.
   [http://marc.info/?l=dri-devel&m=126137027403059&w=2]
