@@ -1,5 +1,5 @@
 # Makefile for source rpm: kernel
-# $Id: Makefile,v 1.119 2009/11/25 23:56:32 notting Exp $
+# $Id: Makefile,v 1.120 2010/01/05 11:21:12 cebbert Exp $
 NAME     := kernel
 SPECFILE := kernel.spec
 
@@ -91,7 +91,7 @@ debug:
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 
-	@perl -pi -e 's/CONFIG_NR_CPUS=64/CONFIG_NR_CPUS=512/' config-x86_64-generic
+	@perl -pi -e 's/CONFIG_NR_CPUS=256/CONFIG_NR_CPUS=512/' config-x86_64-generic
 
 	@perl -pi -e 's/^%define debugbuildsenabled 1/%define debugbuildsenabled 0/' kernel.spec
 	@perl -pi -e 's/^%define rawhide_skip_docs 0/%define rawhide_skip_docs 1/' kernel.spec
@@ -146,14 +146,14 @@ release:
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 
-	@perl -pi -e 's/CONFIG_NR_CPUS=512/CONFIG_NR_CPUS=64/' config-x86_64-generic
+	@perl -pi -e 's/CONFIG_NR_CPUS=512/CONFIG_NR_CPUS=256/' config-x86_64-generic
 
 	@perl -pi -e 's/^%define debugbuildsenabled 0/%define debugbuildsenabled 1/' kernel.spec
 	@perl -pi -e 's/^%define rawhide_skip_docs 1/%define rawhide_skip_docs 0/' kernel.spec
 
 rhel:
 	@perl -pi -e 's/# CONFIG_PPC_64K_PAGES is not set/CONFIG_PPC_64K_PAGES=y/' config-powerpc64
-	@perl -pi -e 's/CONFIG_NR_CPUS=64/CONFIG_NR_CPUS=512/' config-x86_64-generic
+	@perl -pi -e 's/CONFIG_NR_CPUS=256/CONFIG_NR_CPUS=512/' config-x86_64-generic
 
 reconfig:
 	@rm -f kernel-*-config
