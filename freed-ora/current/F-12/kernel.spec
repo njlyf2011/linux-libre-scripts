@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1961 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1970 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -125,7 +125,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %endif
@@ -145,7 +145,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -656,13 +656,14 @@ Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
-Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
-Patch305: linux-2.6-fix-btusb-autosuspend.patch
 
 Patch310: linux-2.6-autoload-wmi.patch
+# wmi autoload fixes
+Patch311: wmi-check-find_guid-return-value-to-prevent-oops.patch
+Patch312: wmi-survive-bios-with-duplicate-guids.patch
 
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
@@ -720,7 +721,6 @@ Patch1821: drm-page-flip.patch
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1827: linux-2.6-intel-agp-clear-gtt.patch
-Patch1828: drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -751,6 +751,10 @@ Patch11010: via-hwmon-temp-sensor.patch
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+
+# Patches for -stable
+Patch12101: wmi-free-the-allocated-acpi-objects.patch
+Patch12102: wmi-check-wmi-get-event-data-return-value.patch
 
 %endif
 
@@ -1257,10 +1261,12 @@ ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
-ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
 
 # WMI
 ApplyPatch linux-2.6-autoload-wmi.patch
+# autoload fixes
+ApplyPatch wmi-check-find_guid-return-value-to-prevent-oops.patch
+ApplyPatch wmi-survive-bios-with-duplicate-guids.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1270,7 +1276,6 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
-ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
@@ -1378,7 +1383,6 @@ ApplyOptionalPatch drm-intel-next.patch
 #ApplyPatch drm-intel-pm.patch
 # Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
 ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
-ApplyPatch drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1395,6 +1399,10 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
+
+# Patches for -stable
+ApplyPatch wmi-free-the-allocated-acpi-objects.patch
+ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2051,7 +2059,45 @@ fi
 # and build.
 
 %changelog
-* Tue Jan  5 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Jan 07 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-10
+- Turn off default powersave mode for AC97 and HDA audio devices
+  due to continuing bug reports (can still be enabled in sysfs.)
+- Remove some patches that are upstream:
+  v4l-dvb-fix-cx25840-firmware-loading.patch
+  fix-9p-fscache.patch
+  ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch
+
+* Thu Jan 07 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-9
+- Change configs to build the acerhdf driver again, requires
+  setting CONFIG_HWMON=y
+
+* Wed Jan 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-8
+- Linux 2.6.32.3
+
+* Wed Jan 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-7.rc2
+- Remove obsolete config options (generated .config files are
+  unchanged.)
+
+* Wed Jan 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-6.rc2
+- Linux 2.6.32.3-rc2
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-5.rc1
+- Linux 2.6.32.3-rc1
+- Drop merged patches:
+  linux-2.6-fix-btusb-autosuspend.patch
+  drm-radeon-fix-crtc-vbl-update-for-r600.patch
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-4
+- Fix WMI driver oopses and a memory leak.
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-3
+- Run 'make release', fix up tracing options to match what shipped
+  in F-12, fix CPU count on x86-64.
+
+* Mon Jan 04 2010 Dave Jones <davej@redhat.com>
+- Drop some of the spinlock/vm taint patches. dump_stack() already does same.
+
+* Mon Jan  4 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan  5
 - To 2.6.32-libre, actually.
 
 * Fri Jan  1 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.2-1
