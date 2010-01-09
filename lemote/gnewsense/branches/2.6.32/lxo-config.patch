@@ -1,12 +1,12 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2009-12-21 07:42:46.000000000 +0800
-@@ -0,0 +1,2251 @@
++++ .config	2010-01-08 04:34:24.000000000 +0000
+@@ -0,0 +1,2249 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.32.2-libre-lemote
-+# Mon Dec 21 07:42:46 2009
++# Linux kernel version: 2.6.32.3-libre-lemote
++# Fri Jan  8 04:34:24 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -122,7 +122,6 @@ Index: .config
 +# CONFIG_CPU_SB1 is not set
 +# CONFIG_CPU_CAVIUM_OCTEON is not set
 +CONFIG_SYS_SUPPORTS_ZBOOT=y
-+CONFIG_SYS_SUPPORTS_ZBOOT_UART16550=y
 +CONFIG_CPU_LOONGSON2=y
 +CONFIG_SYS_HAS_CPU_LOONGSON2F=y
 +CONFIG_SYS_SUPPORTS_32BIT_KERNEL=y
@@ -1861,7 +1860,6 @@ Index: .config
 +# CONFIG_RAR_REGISTER is not set
 +# CONFIG_IIO is not set
 +CONFIG_FB_SM7XX=y
-+CONFIG_FB_SM7XX_ACCEL=y
 +
 +#
 +# File systems
@@ -2256,14 +2254,14 @@ Index: .config
 +CONFIG_NLATTR=y
 Index: Makefile
 ===================================================================
---- Makefile.orig	2009-12-21 07:38:23.000000000 +0800
-+++ Makefile	2009-12-21 07:39:23.000000000 +0800
+--- Makefile.orig	2010-01-08 04:30:34.000000000 +0000
++++ Makefile	2010-01-08 04:30:40.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 32
--EXTRAVERSION = .2-libre
-+EXTRAVERSION = .2-libre-lemote
+-EXTRAVERSION = .3-libre
++EXTRAVERSION = .3-libre-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
