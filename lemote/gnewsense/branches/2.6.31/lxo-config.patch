@@ -2204,8 +2204,8 @@ Index: Makefile
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 31
--EXTRAVERSION = .10-libre2
-+EXTRAVERSION = .10-libre2-lemote
+-EXTRAVERSION = .11-libre2
++EXTRAVERSION = .11-libre2-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
