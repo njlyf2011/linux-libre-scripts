@@ -1,3 +1,4 @@
 2.6.31.9-c40b03e5f9-loongson.patch -p1 # lemote's patches
-freedo.patch -p0 # 100% Free Software Freedo logo
+gnewsense-binutils-flag.patch -p1
+gnu+freedo.patch -p0 # 100% Free Software Freedo logo
 lxo-config.patch -p0 # config file
