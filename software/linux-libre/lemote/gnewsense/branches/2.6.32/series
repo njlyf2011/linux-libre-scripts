@@ -1,3 +1,3 @@
-2.6.32.2-e9c74479c3-loongson.patch -p1 # lemote's patches for 2.6.32.1
+2.6.32.3-6a757e3986-loongson.patch -p1 # lemote's patches
 freedo.patch -p0 # 100% Free Software Freedo logo
 lxo-config.patch -p0 # config file
