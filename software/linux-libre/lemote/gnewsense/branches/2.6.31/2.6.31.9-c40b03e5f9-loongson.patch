@@ -20403,7 +20403,7 @@ index 0000000..4f6d8da
 +			 loongson2e_nec_fixup);
 diff --git a/arch/mips/pci/fixup-lemote2f.c b/arch/mips/pci/fixup-lemote2f.c
 new file mode 100644
-index 0000000..0eef686
+index 0000000..15429f7
 --- /dev/null
 +++ b/arch/mips/pci/fixup-lemote2f.c
 @@ -0,0 +1,171 @@
@@ -20550,7 +20550,7 @@ index 0000000..0eef686
 +
 +	/* Serial short detect enable */
 +	_rdmsr(USB_MSR_REG(USB_CONFIG), &hi, &lo);
-+	_wrmsr(USB_MSR_REG(USB_CONFIG), (1 << 1) | (1 << 2) | (1 << 3), lo);
++	_wrmsr(USB_MSR_REG(USB_CONFIG), (1 << 1) | (1 << 3), lo);
 +
 +	/* setting the USB2.0 micro frame length */
 +	pci_write_config_dword(pdev, PCI_EHCI_FLADJ_REG, 0x2000);
@@ -59988,6 +59988,27 @@ index c987a75..f45dc49 100644
  
  	if (timeout <= 0) {
  		cvmx_dprintf("cvmx_mdio_45_read: bus_id %d phy_id %2d "
+diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
+index 1ed2a16..0b317b6 100644
+--- a/drivers/usb/host/ohci-hcd.c
++++ b/drivers/usb/host/ohci-hcd.c
+@@ -833,9 +833,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+ 	}
+ 
+ 	if (ints & OHCI_INTR_WDH) {
+-		spin_lock (&ohci->lock);
+-		dl_done_list (ohci);
+-		spin_unlock (&ohci->lock);
++		if (ohci->hcca->done_head == 0) {
++			ints &= ~OHCI_INTR_WDH;
++		} else {
++			spin_lock (&ohci->lock);
++			dl_done_list (ohci);
++			spin_unlock (&ohci->lock);
++		}
+ 	}
+ 
+ 	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
 index 3b54b39..06ce71a 100644
 --- a/drivers/video/Kconfig
