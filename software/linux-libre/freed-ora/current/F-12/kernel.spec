@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1970 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1973 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -716,6 +716,7 @@ Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
+Patch1820: drm-intel-no-tv-hotplug.patch
 Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -1377,6 +1378,7 @@ ApplyPatch drm-nouveau.patch
 #ApplyPatch drm-radeon-pm.patch
 #ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
+ApplyPatch drm-intel-no-tv-hotplug.patch
 #ApplyPatch drm-page-flip.patch
 ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
@@ -1660,7 +1662,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
+    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -2059,6 +2061,19 @@ fi
 # and build.
 
 %changelog
+* Mon Jan 11 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use gnu+freedo boot splash logo.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.3-13
+- drm-intel-no-tv-hotplug.patch: re-add lost patch from F-12
+  2.6.31 (#522611, #544671)
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.3-12
+- Re-enable ATM_HE (#545289)
+
+* Fri Jan 08 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-11
+- Add another symbol to look for when generating modules.block
+
 * Thu Jan 07 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-10
 - Turn off default powersave mode for AC97 and HDA audio devices
   due to continuing bug reports (can still be enabled in sysfs.)
