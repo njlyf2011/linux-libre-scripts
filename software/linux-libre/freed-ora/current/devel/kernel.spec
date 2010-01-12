@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1863
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1881 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1884 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -1650,7 +1650,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
+    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -2049,6 +2049,20 @@ fi
 # and build.
 
 %changelog
+* Mon Jan 11 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use gnu+freedo boot splash logo.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.3-21
+- Linux 2.6.32.3
+- drm-intel-no-tv-hotplug.patch: re-add lost patch from F-12
+  2.6.31 (#522611, #544671)
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.2-20
+- Re-enable ATM_HE (#545289)
+
+* Fri Jan 08 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-19
+- Add another symbol to look for when generating modules.block
+
 * Thu Jan 07 2010 David Woodhouse <David.Woodhouse@intel.com> 2.6.32.2-18
 - Drop kernel-firmware package now that it's packaged separately.
 
