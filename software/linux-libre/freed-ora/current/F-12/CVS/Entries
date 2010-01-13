@@ -112,11 +112,11 @@ D/scripts////
 /noautobuild/1.2/Tue Jan  5 02:21:40 2010//Tkernel-2_6_32_3-13_fc12
 /patch-2.6.32.3.bz2.sign/1.1/Thu Jan  7 01:28:07 2010//Tkernel-2_6_32_3-13_fc12
 /perf/1.6/Tue Jan  5 02:21:40 2010//Tkernel-2_6_32_3-13_fc12
-/sources/1.1098/dummy timestamp from new-entry+Thu Jan  7 10:47:21 2010//Tkernel-2_6_32_3-13_fc12
-/upstream/1.1012/dummy timestamp from new-entry+Thu Jan  7 10:47:14 2010//Tkernel-2_6_32_3-13_fc12
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_32_3-13_fc12
 /via-hwmon-temp-sensor.patch/1.4/Tue Jan  5 02:22:20 2010/-kb/Tkernel-2_6_32_3-13_fc12
 /wmi-check-find_guid-return-value-to-prevent-oops.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_3-13_fc12
 /wmi-check-wmi-get-event-data-return-value.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_3-13_fc12
 /wmi-free-the-allocated-acpi-objects.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_3-13_fc12
 /wmi-survive-bios-with-duplicate-guids.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_3-13_fc12
+/sources/1.1098/Wed Jan 13 01:06:27 2010//Tkernel-2_6_32_3-13_fc12
+/upstream/1.1012/Wed Jan 13 01:06:27 2010//Tkernel-2_6_32_3-13_fc12
