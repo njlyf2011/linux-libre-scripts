@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1785
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1786 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1796 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -114,8 +114,10 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
+
 # Use dracut instead of mkinitrd for initrd image generation
-%define with_dracut       %{?_without_dracut:       0} %{?!_without_dracut:       1}
+# ...F-11 does not have dracut
+%define with_dracut 0
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
@@ -125,7 +127,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %endif
@@ -145,7 +147,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -460,11 +462,11 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}
 %if %{with_dracut}
-%define initrd_prereq  dracut >= 001-7
+%define initrd_prereq  dracut >= 001-7, grubby >= 7.0.4-1
 %else
-%define initrd_prereq  mkinitrd >= 6.0.61-1
+%define initrd_prereq  mkinitrd >= 6.0.61-1, grubby >= 6.0.87-4
 %endif
 
 #
@@ -656,13 +658,14 @@ Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
-Patch280: linux-2.6-debug-spinlock-taint.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
-Patch305: linux-2.6-fix-btusb-autosuspend.patch
 
 Patch310: linux-2.6-autoload-wmi.patch
+# wmi autoload fixes
+Patch311: wmi-check-find_guid-return-value-to-prevent-oops.patch
+Patch312: wmi-survive-bios-with-duplicate-guids.patch
 
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
@@ -715,12 +718,12 @@ Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
+Patch1820: drm-intel-no-tv-hotplug.patch
 Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
 Patch1827: linux-2.6-intel-agp-clear-gtt.patch
-Patch1828: drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -751,6 +754,10 @@ Patch11010: via-hwmon-temp-sensor.patch
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+
+# Patches for -stable
+Patch12101: wmi-free-the-allocated-acpi-objects.patch
+Patch12102: wmi-check-wmi-get-event-data-return-value.patch
 
 %endif
 
@@ -1257,10 +1264,12 @@ ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
-ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
 
 # WMI
 ApplyPatch linux-2.6-autoload-wmi.patch
+# autoload fixes
+ApplyPatch wmi-check-find_guid-return-value-to-prevent-oops.patch
+ApplyPatch wmi-survive-bios-with-duplicate-guids.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1270,7 +1279,6 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
-ApplyPatch linux-2.6-debug-spinlock-taint.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
@@ -1372,13 +1380,13 @@ ApplyPatch drm-nouveau.patch
 #ApplyPatch drm-radeon-pm.patch
 #ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
+ApplyPatch drm-intel-no-tv-hotplug.patch
 #ApplyPatch drm-page-flip.patch
 ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 # Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
 ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
-ApplyPatch drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1395,6 +1403,10 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
+
+# Patches for -stable
+ApplyPatch wmi-free-the-allocated-acpi-objects.patch
+ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1652,7 +1664,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
+    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -2051,7 +2063,47 @@ fi
 # and build.
 
 %changelog
-* Tue Jan  5 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Jan 11 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use gnu+freedo boot splash logo.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.3-11
+- drm-intel-no-tv-hotplug.patch: re-add lost patch from F-12
+  2.6.31 (#522611, #544671)
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.3-10
+- Re-enable ATM_HE (#545289)
+
+* Fri Jan 08 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-9
+- Add another symbol to look for when generating modules.block
+
+* Wed Jan 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.3-8
+- Linux 2.6.32.3
+- Drop merged patches:
+  linux-2.6-fix-btusb-autosuspend.patch
+  drm-radeon-fix-crtc-vbl-update-for-r600.patch
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-7
+- Another WMI oops fix, also sort out which WMI fixes go upstream.
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-6
+- Fix WMI driver oopses and a memory leak.
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-5
+- Older version of grubby can be used without dracut.
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-4
+- Switch back to mkinitrd since F-11 doesn't have dracut.
+
+* Tue Jan 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.2-3
+- Run 'make release', fix up tracing options to match what shipped.
+
+* Mon Jan 04 2010 Dave Jones <davej@redhat.com>
+- Drop some of the vm/spinlock taint patches. dump_stack() already does same.
+
+* Fri Jan  1 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.2-1
+- Rebased F-11 to 2.6.32, still needs forward porting of patches.
+
+* Fri Jan  1 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan  5
 - To 2.6.32-libre, actually.
 
 * Thu Dec 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.32.2-15

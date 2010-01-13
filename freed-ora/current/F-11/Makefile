@@ -1,5 +1,5 @@
 # Makefile for source rpm: kernel
-# $Id: Makefile,v 1.107 2010/01/04 15:25:39 kyle Exp $
+# $Id: Makefile,v 1.108 2010/01/05 11:33:59 cebbert Exp $
 NAME     := kernel
 SPECFILE := kernel.spec
 
@@ -84,9 +84,6 @@ debug:
 	@perl -pi -e 's/# CONFIG_EXT4_DEBUG is not set/CONFIG_EXT4_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/CONFIG_DEBUG_PERF_USE_VMALLOC=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_JBD2_DEBUG is not set/CONFIG_JBD2_DEBUG=y/' config-nodebug
-	@perl -pi -e 's/# CONFIG_FUNCTION_TRACER is not set/CONFIG_FUNCTION_TRACER=y/' config-nodebug
-	@perl -pi -e 's/# CONFIG_STACK_TRACER is not set/CONFIG_STACK_TRACER=y/' config-nodebug
-	@perl -pi -e 's/# CONFIG_DYNAMIC_FTRACE is not set/CONFIG_DYNAMIC_FTRACE=y/' config-nodebug
 
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
@@ -139,9 +136,6 @@ release:
 	@perl -pi -e 's/CONFIG_EXT4_DEBUG=y/# CONFIG_EXT4_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_PERF_USE_VMALLOC=y/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_JBD2_DEBUG=y/# CONFIG_JBD2_DEBUG is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_FUNCTION_TRACER=y/# CONFIG_FUNCTION_TRACER is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_STACK_TRACER=y/# CONFIG_STACK_TRACER is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_DYNAMIC_FTRACE=y/# CONFIG_DYNAMIC_FTRACE is not set/' config-nodebug
 
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
