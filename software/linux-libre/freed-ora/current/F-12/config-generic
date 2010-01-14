@@ -2404,6 +2404,11 @@ CONFIG_VIDEO_PVRUSB2_SYSFS=y
 # CONFIG_VIDEO_PVRUSB2_DEBUGIFC is not set
 
 #
+# Broadcom Crystal HD video decoder driver
+#
+CONFIG_CRYSTALHD=m
+
+#
 # Graphics support
 #
 

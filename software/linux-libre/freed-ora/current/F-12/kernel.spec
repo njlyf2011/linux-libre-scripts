@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1973 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1984 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -462,7 +462,7 @@ Summary: The Linux kernel
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
 %if %{with_dracut}
-%define initrd_prereq  dracut >= 001-7
+%define initrd_prereq  dracut >= 003-2 xorg-x11-drv-ati-firmware
 %else
 %define initrd_prereq  mkinitrd >= 6.0.61-1
 %endif
@@ -704,24 +704,36 @@ Patch900: linux-2.6-pci-cacheline-sizing.patch
 
 Patch1515: lirc-2.6.32.patch
 Patch1517: hdpvr-ir-enable.patch
+Patch1520: crystalhd-2.6.34-staging.patch
 
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 
+# fbdev multi-card fix
+Patch1700: linux-2.6-x86-64-fbdev-primary.patch
+Patch1701: kms-offb-handoff.patch
+
 # nouveau + drm fixes
-Patch1811: drm-radeon-fixes.patch
-Patch1812: drm-radeon-dp-support.patch
+Patch1810: drm-upgrayedd.patch
+Patch1811: drm-fixes.patch
 Patch1813: drm-radeon-pm.patch
-Patch1814: drm-nouveau.patch
+#Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
 Patch1820: drm-intel-no-tv-hotplug.patch
-Patch1821: drm-page-flip.patch
+#Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
-Patch1825: drm-intel-pm.patch
-Patch1827: linux-2.6-intel-agp-clear-gtt.patch
+#Patch1825: drm-intel-pm.patch
+#Patch1827: linux-2.6-intel-agp-clear-gtt.patch
+Patch1828: drm-nouveau-g80-ctxprog.patch
+Patch1829: drm-nouveau-shared-fb.patch
+Patch1830: drm-nouveau-bios-paranoia.patch
+Patch1831: drm-nouveau-tvout-disable.patch
+Patch1832: drm-nouveau-safetile-getparam.patch
+Patch1833: drm-nouveau-nvac-noaccel.patch
+Patch1844: drm-nouveau-kconfig.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1357,6 +1369,8 @@ ApplyPatch linux-2.6-pci-cacheline-sizing.patch
 ApplyPatch lirc-2.6.32.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
+# Broadcom Crystal HD driver from 2.6.34 staging
+ApplyPatch crystalhd-2.6.34-staging.patch
 
 # Add kernel KSM support
 # Optimize KVM for KSM support
@@ -1370,21 +1384,21 @@ ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
+ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
+ApplyPatch kms-offb-handoff.patch
 # Nouveau DRM + drm fixes
-ApplyPatch drm-radeon-fixes.patch
-ApplyPatch drm-radeon-dp-support.patch
-ApplyPatch drm-nouveau.patch
-# pm broken on my thinkpad t60p - airlied
-#ApplyPatch drm-radeon-pm.patch
-#ApplyPatch drm-i915-resume-force-mode.patch
-ApplyPatch drm-intel-big-hammer.patch
-ApplyPatch drm-intel-no-tv-hotplug.patch
-#ApplyPatch drm-page-flip.patch
+ApplyPatch drm-upgrayedd.patch
+ApplyPatch drm-fixes.patch
+#ApplyPatch drm-intel-big-hammer.patch
+#ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
-#this appears to be upstream - mjg59?
-#ApplyPatch drm-intel-pm.patch
-# Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
-ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
+#ApplyPatch drm-nouveau-g80-ctxprog.patch
+ApplyPatch drm-nouveau-shared-fb.patch
+ApplyPatch drm-nouveau-bios-paranoia.patch
+ApplyPatch drm-nouveau-tvout-disable.patch
+ApplyPatch drm-nouveau-safetile-getparam.patch
+#ApplyPatch drm-nouveau-nvac-noaccel.patch
+ApplyPatch drm-nouveau-kconfig.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2061,6 +2075,49 @@ fi
 # and build.
 
 %changelog
+* Wed Jan 13 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed drm-nouveau-g80-ctxprog.patch, disabled.
+- Deblobbed drm-nouveau-nvac-noaccel.patch, disabled.
+- Deblobbed drm-upgrayedd.patch.
+- Adjusted drm-fixes.patch.
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-24
+- drm fixes from upstream - mostly printk stupids + integrate radeon s/r fix
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-23
+- crystalhd fix build on powerpc
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-22
+- bring back offb handoff patch - fixes G5 + nouveau
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-21
+- fix regression in radeon s/r - hangs on suspend
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-20
+- force depend ati firmware, better safe than sorry. I don't
+  think dracut and dracut kernel are what I wanted to do.
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-19
+- update dracut requires to make sure we get -ati firmware
+- add fbdev multi-card console fix patch
+
+* Tue Jan 12 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.3-18
+- Add Broadcom Crystal HD driver from staging
+
+* Tue Jan 12 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.3-17
+- add nouveau to staging Kconfig
+
+* Tue Jan 12 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.3-16
+- nouveau: fix nvac noaccel patch, not sure what happened there!
+
+* Tue Jan 12 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.3-15
+- nouveau: patches and firmware from F12 that aren't in upstream kernel
+
+* Mon Jan 11 2010 Dave Airlie <airlied@redhat.com> 2.6.32.3-14
+- drm-upgrayedd.patch: rebase to present 2.6.33 (drm-linus)
+- nouveau TODO - comment out no-tv-hp for now, leave patch
+- we can readd if all the upstream goodness didn't fix it
+
 * Mon Jan 11 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use gnu+freedo boot splash logo.
 
