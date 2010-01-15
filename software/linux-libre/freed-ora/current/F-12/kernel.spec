@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1984 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1986 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -726,6 +726,7 @@ Patch1820: drm-intel-no-tv-hotplug.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 #Patch1825: drm-intel-pm.patch
+Patch1825: drm-intel-no-tv-hotplug-interrupts-dammit.patch
 #Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 Patch1828: drm-nouveau-g80-ctxprog.patch
 Patch1829: drm-nouveau-shared-fb.patch
@@ -756,6 +757,9 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
+
+# btrfs
+Patch3100: linux-2.6-btrfs-fix-acl.patch
 
 # VIA Nano / VX8xx updates
 Patch11010: via-hwmon-temp-sensor.patch
@@ -1263,6 +1267,7 @@ ApplyPatch linux-2.6-execshield.patch
 # xfs
 
 # btrfs
+ApplyPatch linux-2.6-btrfs-fix-acl.patch
 
 # eCryptfs
 
@@ -1392,6 +1397,7 @@ ApplyPatch drm-fixes.patch
 #ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-no-tv-hotplug-interrupts-dammit.patch
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
 ApplyPatch drm-nouveau-shared-fb.patch
 ApplyPatch drm-nouveau-bios-paranoia.patch
@@ -2075,6 +2081,12 @@ fi
 # and build.
 
 %changelog
+* Thu Jan 14 2010 Adam Jackson <ajax@redhat.com> 2.6.32.3-26
+- Don't generate i915 TV hotplug interrupts ever ever ever.
+
+* Thu Jan 14 2010 Josef Bacik <josef@toxicpanda.com> 2.6.32.3-25
+- fix null pointer dereference in btrfs acl code
+
 * Wed Jan 13 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed drm-nouveau-g80-ctxprog.patch, disabled.
 - Deblobbed drm-nouveau-nvac-noaccel.patch, disabled.
