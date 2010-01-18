@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1986 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1987 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -730,11 +730,11 @@ Patch1825: drm-intel-no-tv-hotplug-interrupts-dammit.patch
 #Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 Patch1828: drm-nouveau-g80-ctxprog.patch
 Patch1829: drm-nouveau-shared-fb.patch
-Patch1830: drm-nouveau-bios-paranoia.patch
 Patch1831: drm-nouveau-tvout-disable.patch
 Patch1832: drm-nouveau-safetile-getparam.patch
 Patch1833: drm-nouveau-nvac-noaccel.patch
 Patch1844: drm-nouveau-kconfig.patch
+Patch1845: drm-nouveau-update.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1400,11 +1400,11 @@ ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-no-tv-hotplug-interrupts-dammit.patch
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
 ApplyPatch drm-nouveau-shared-fb.patch
-ApplyPatch drm-nouveau-bios-paranoia.patch
 ApplyPatch drm-nouveau-tvout-disable.patch
 ApplyPatch drm-nouveau-safetile-getparam.patch
 #ApplyPatch drm-nouveau-nvac-noaccel.patch
 ApplyPatch drm-nouveau-kconfig.patch
+ApplyPatch drm-nouveau-update.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2081,6 +2081,10 @@ fi
 # and build.
 
 %changelog
+* Mon Jan 18 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.3-27
+- various nouveau fixes from upstream
+- dropped drm-nouveau-bios-paranoia.patch, it's upstream now
+
 * Thu Jan 14 2010 Adam Jackson <ajax@redhat.com> 2.6.32.3-26
 - Don't generate i915 TV hotplug interrupts ever ever ever.
 
