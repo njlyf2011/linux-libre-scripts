@@ -6,6 +6,406 @@ Deblobbed.
 * drivers/gpu/drm/radeon/r600.c: Likewise.
   (r600_cp_init_microcode): Adjust for deblobbed sources.
 
+From 718522b6c04e3f16d61cca8d481c700758bacb33 Mon Sep 17 00:00:00 2001
+From: Kyle McMartin <kyle@ihatethathostname.lab.bos.redhat.com>
+Date: Mon, 18 Jan 2010 14:10:14 -0500
+Subject: drm-upgrayedd
+
+---
+ drivers/char/agp/Kconfig                        |    3 +-
+ drivers/char/agp/amd64-agp.c                    |    9 +-
+ drivers/char/agp/frontend.c                     |   28 +-
+ drivers/char/agp/intel-agp.c                    |   96 +-
+ drivers/char/agp/uninorth-agp.c                 |   77 +-
+ drivers/gpu/drm/Makefile                        |    5 +-
+ drivers/gpu/drm/drm_crtc.c                      |  181 +-
+ drivers/gpu/drm/drm_crtc_helper.c               |   28 +-
+ drivers/gpu/drm/drm_dp_i2c_helper.c             |  209 +
+ drivers/gpu/drm/drm_drv.c                       |   55 +-
+ drivers/gpu/drm/drm_edid.c                      |  332 +-
+ drivers/gpu/drm/drm_fb_helper.c                 |   34 +-
+ drivers/gpu/drm/drm_fops.c                      |  112 +-
+ drivers/gpu/drm/drm_ioc32.c                     |   89 +-
+ drivers/gpu/drm/drm_irq.c                       |  101 +-
+ drivers/gpu/drm/drm_mm.c                        |  112 +-
+ drivers/gpu/drm/drm_modes.c                     |   28 +-
+ drivers/gpu/drm/drm_stub.c                      |   15 +
+ drivers/gpu/drm/i2c/Makefile                    |    4 +
+ drivers/gpu/drm/i2c/ch7006_drv.c                |  536 ++
+ drivers/gpu/drm/i2c/ch7006_mode.c               |  468 ++
+ drivers/gpu/drm/i2c/ch7006_priv.h               |  344 ++
+ drivers/gpu/drm/i810/i810_dma.c                 |    2 +-
+ drivers/gpu/drm/i810/i810_drv.c                 |    2 +-
+ drivers/gpu/drm/i830/i830_dma.c                 |    2 +-
+ drivers/gpu/drm/i830/i830_drv.c                 |    2 +-
+ drivers/gpu/drm/i915/Makefile                   |    2 +-
+ drivers/gpu/drm/i915/dvo_ch7017.c               |    9 +-
+ drivers/gpu/drm/i915/dvo_ch7xxx.c               |   16 +-
+ drivers/gpu/drm/i915/dvo_ivch.c                 |   37 +-
+ drivers/gpu/drm/i915/dvo_sil164.c               |   20 +-
+ drivers/gpu/drm/i915/dvo_tfp410.c               |   34 +-
+ drivers/gpu/drm/i915/i915_debugfs.c             |  141 +-
+ drivers/gpu/drm/i915/i915_dma.c                 |   63 +-
+ drivers/gpu/drm/i915/i915_drv.c                 |  177 +-
+ drivers/gpu/drm/i915/i915_drv.h                 |  182 +-
+ drivers/gpu/drm/i915/i915_gem.c                 |  352 +-
+ drivers/gpu/drm/i915/i915_gem_tiling.c          |   52 +-
+ drivers/gpu/drm/i915/i915_ioc32.c               |   23 +-
+ drivers/gpu/drm/i915/i915_irq.c                 |  195 +-
+ drivers/gpu/drm/i915/i915_opregion.c            |   92 +-
+ drivers/gpu/drm/i915/i915_reg.h                 |   78 +-
+ drivers/gpu/drm/i915/i915_suspend.c             |   86 +-
+ drivers/gpu/drm/i915/intel_bios.c               |  137 +-
+ drivers/gpu/drm/i915/intel_bios.h               |   17 +
+ drivers/gpu/drm/i915/intel_crt.c                |   52 +-
+ drivers/gpu/drm/i915/intel_display.c            | 1116 +++--
+ drivers/gpu/drm/i915/intel_dp.c                 |  162 +-
+ drivers/gpu/drm/i915/intel_dp.h                 |  144 -
+ drivers/gpu/drm/i915/intel_dp_i2c.c             |  273 -
+ drivers/gpu/drm/i915/intel_drv.h                |   44 +
+ drivers/gpu/drm/i915/intel_fb.c                 |    9 +-
+ drivers/gpu/drm/i915/intel_hdmi.c               |   60 +-
+ drivers/gpu/drm/i915/intel_i2c.c                |   21 +-
+ drivers/gpu/drm/i915/intel_lvds.c               |  176 +-
+ drivers/gpu/drm/i915/intel_overlay.c            | 1416 ++++++
+ drivers/gpu/drm/i915/intel_sdvo.c               |   19 +-
+ drivers/gpu/drm/i915/intel_tv.c                 |   49 +-
+ drivers/gpu/drm/mga/mga_drv.c                   |    2 +-
+ drivers/gpu/drm/mga/mga_ioc32.c                 |   13 +-
+ drivers/gpu/drm/nouveau/Kconfig                 |   44 +
+ drivers/gpu/drm/nouveau/Makefile                |   32 +
+ drivers/gpu/drm/nouveau/nouveau_acpi.c          |  125 +
+ drivers/gpu/drm/nouveau/nouveau_backlight.c     |  155 +
+ drivers/gpu/drm/nouveau/nouveau_bios.c          | 6078 +++++++++++++++++++++++
+ drivers/gpu/drm/nouveau/nouveau_bios.h          |  290 ++
+ drivers/gpu/drm/nouveau/nouveau_bo.c            |  771 +++
+ drivers/gpu/drm/nouveau/nouveau_calc.c          |  478 ++
+ drivers/gpu/drm/nouveau/nouveau_channel.c       |  431 ++
+ drivers/gpu/drm/nouveau/nouveau_connector.c     |  824 +++
+ drivers/gpu/drm/nouveau/nouveau_connector.h     |   54 +
+ drivers/gpu/drm/nouveau/nouveau_crtc.h          |   95 +
+ drivers/gpu/drm/nouveau/nouveau_debugfs.c       |  155 +
+ drivers/gpu/drm/nouveau/nouveau_display.c       |  115 +
+ drivers/gpu/drm/nouveau/nouveau_dma.c           |  226 +
+ drivers/gpu/drm/nouveau/nouveau_dma.h           |  159 +
+ drivers/gpu/drm/nouveau/nouveau_dp.c            |  569 +++
+ drivers/gpu/drm/nouveau/nouveau_drv.c           |  409 ++
+ drivers/gpu/drm/nouveau/nouveau_drv.h           | 1345 +++++
+ drivers/gpu/drm/nouveau/nouveau_encoder.h       |   91 +
+ drivers/gpu/drm/nouveau/nouveau_fb.h            |   47 +
+ drivers/gpu/drm/nouveau/nouveau_fbcon.c         |  389 ++
+ drivers/gpu/drm/nouveau/nouveau_fbcon.h         |   48 +
+ drivers/gpu/drm/nouveau/nouveau_fence.c         |  262 +
+ drivers/gpu/drm/nouveau/nouveau_gem.c           |  978 ++++
+ drivers/gpu/drm/nouveau/nouveau_grctx.c         |  161 +
+ drivers/gpu/drm/nouveau/nouveau_grctx.h         |  133 +
+ drivers/gpu/drm/nouveau/nouveau_hw.c            | 1080 ++++
+ drivers/gpu/drm/nouveau/nouveau_hw.h            |  455 ++
+ drivers/gpu/drm/nouveau/nouveau_i2c.c           |  269 +
+ drivers/gpu/drm/nouveau/nouveau_i2c.h           |   52 +
+ drivers/gpu/drm/nouveau/nouveau_ioc32.c         |   70 +
+ drivers/gpu/drm/nouveau/nouveau_irq.c           |  703 +++
+ drivers/gpu/drm/nouveau/nouveau_mem.c           |  659 +++
+ drivers/gpu/drm/nouveau/nouveau_notifier.c      |  196 +
+ drivers/gpu/drm/nouveau/nouveau_object.c        | 1294 +++++
+ drivers/gpu/drm/nouveau/nouveau_reg.h           |  836 ++++
+ drivers/gpu/drm/nouveau/nouveau_sgdma.c         |  321 ++
+ drivers/gpu/drm/nouveau/nouveau_state.c         |  871 ++++
+ drivers/gpu/drm/nouveau/nouveau_ttm.c           |  103 +
+ drivers/gpu/drm/nouveau/nv04_crtc.c             | 1002 ++++
+ drivers/gpu/drm/nouveau/nv04_cursor.c           |   70 +
+ drivers/gpu/drm/nouveau/nv04_dac.c              |  527 ++
+ drivers/gpu/drm/nouveau/nv04_dfp.c              |  623 +++
+ drivers/gpu/drm/nouveau/nv04_display.c          |  287 ++
+ drivers/gpu/drm/nouveau/nv04_fb.c               |   21 +
+ drivers/gpu/drm/nouveau/nv04_fbcon.c            |  315 ++
+ drivers/gpu/drm/nouveau/nv04_fifo.c             |  305 ++
+ drivers/gpu/drm/nouveau/nv04_graph.c            |  584 +++
+ drivers/gpu/drm/nouveau/nv04_instmem.c          |  208 +
+ drivers/gpu/drm/nouveau/nv04_mc.c               |   20 +
+ drivers/gpu/drm/nouveau/nv04_timer.c            |   51 +
+ drivers/gpu/drm/nouveau/nv04_tv.c               |  305 ++
+ drivers/gpu/drm/nouveau/nv10_fb.c               |   44 +
+ drivers/gpu/drm/nouveau/nv10_fifo.c             |  260 +
+ drivers/gpu/drm/nouveau/nv10_graph.c            | 1009 ++++
+ drivers/gpu/drm/nouveau/nv17_gpio.c             |   92 +
+ drivers/gpu/drm/nouveau/nv17_tv.c               |  776 +++
+ drivers/gpu/drm/nouveau/nv17_tv.h               |  156 +
+ drivers/gpu/drm/nouveau/nv17_tv_modes.c         |  583 +++
+ drivers/gpu/drm/nouveau/nv20_graph.c            |  775 +++
+ drivers/gpu/drm/nouveau/nv40_fb.c               |   75 +
+ drivers/gpu/drm/nouveau/nv40_fifo.c             |  314 ++
+ drivers/gpu/drm/nouveau/nv40_graph.c            |  406 ++
+ drivers/gpu/drm/nouveau/nv40_grctx.c            |  678 +++
+ drivers/gpu/drm/nouveau/nv40_mc.c               |   38 +
+ drivers/gpu/drm/nouveau/nv50_crtc.c             |  769 +++
+ drivers/gpu/drm/nouveau/nv50_cursor.c           |  156 +
+ drivers/gpu/drm/nouveau/nv50_dac.c              |  304 ++
+ drivers/gpu/drm/nouveau/nv50_display.c          | 1032 ++++
+ drivers/gpu/drm/nouveau/nv50_display.h          |   46 +
+ drivers/gpu/drm/nouveau/nv50_evo.h              |  113 +
+ drivers/gpu/drm/nouveau/nv50_fbcon.c            |  270 +
+ drivers/gpu/drm/nouveau/nv50_fifo.c             |  492 ++
+ drivers/gpu/drm/nouveau/nv50_graph.c            |  389 ++
+ drivers/gpu/drm/nouveau/nv50_instmem.c          |  509 ++
+ drivers/gpu/drm/nouveau/nv50_mc.c               |   40 +
+ drivers/gpu/drm/nouveau/nv50_sor.c              |  309 ++
+ drivers/gpu/drm/nouveau/nvreg.h                 |  535 ++
+ drivers/gpu/drm/r128/r128_drv.c                 |    2 +-
+ drivers/gpu/drm/r128/r128_ioc32.c               |   16 +-
+ drivers/gpu/drm/radeon/Makefile                 |    7 +-
+ drivers/gpu/drm/radeon/ObjectID.h               |  801 ++--
+ drivers/gpu/drm/radeon/atom.c                   |   45 +-
+ drivers/gpu/drm/radeon/atom.h                   |    3 +
+ drivers/gpu/drm/radeon/atombios.h               |  217 +-
+ drivers/gpu/drm/radeon/atombios_crtc.c          |   57 +-
+ drivers/gpu/drm/radeon/atombios_dp.c            |  792 +++
+ drivers/gpu/drm/radeon/mkregtable.c             |    4 +-
+ drivers/gpu/drm/radeon/r100.c                   |  308 +-
+ drivers/gpu/drm/radeon/r100_track.h             |   19 +-
+ drivers/gpu/drm/radeon/r200.c                   |   10 +-
+ drivers/gpu/drm/radeon/r300.c                   |  104 +-
+ drivers/gpu/drm/radeon/r300_cmdbuf.c            |    6 +-
+ drivers/gpu/drm/radeon/r300_reg.h               |    1 +
+ drivers/gpu/drm/radeon/r420.c                   |   66 +-
+ drivers/gpu/drm/radeon/r500_reg.h               |    2 +
+ drivers/gpu/drm/radeon/r520.c                   |    9 +-
+ drivers/gpu/drm/radeon/r600.c                   | 1177 ++++-
+ drivers/gpu/drm/radeon/r600_audio.c             |  267 +
+ drivers/gpu/drm/radeon/r600_blit_kms.c          |   34 +-
+ drivers/gpu/drm/radeon/r600_cs.c                |    4 +-
+ drivers/gpu/drm/radeon/r600_hdmi.c              |  506 ++
+ drivers/gpu/drm/radeon/r600_reg.h               |   74 +
+ drivers/gpu/drm/radeon/r600d.h                  |  212 +-
+ drivers/gpu/drm/radeon/radeon.h                 |  197 +-
+ drivers/gpu/drm/radeon/radeon_agp.c             |    6 +-
+ drivers/gpu/drm/radeon/radeon_asic.h            |   65 +-
+ drivers/gpu/drm/radeon/radeon_atombios.c        |  468 ++-
+ drivers/gpu/drm/radeon/radeon_benchmark.c       |   36 +-
+ drivers/gpu/drm/radeon/radeon_clocks.c          |   25 +-
+ drivers/gpu/drm/radeon/radeon_combios.c         |  761 +++-
+ drivers/gpu/drm/radeon/radeon_connectors.c      |  221 +-
+ drivers/gpu/drm/radeon/radeon_cp.c              |   46 +-
+ drivers/gpu/drm/radeon/radeon_cs.c              |   13 +-
+ drivers/gpu/drm/radeon/radeon_device.c          |  148 +-
+ drivers/gpu/drm/radeon/radeon_display.c         |  157 +-
+ drivers/gpu/drm/radeon/radeon_drv.c             |   12 +-
+ drivers/gpu/drm/radeon/radeon_drv.h             |    1 -
+ drivers/gpu/drm/radeon/radeon_encoders.c        |  322 +-
+ drivers/gpu/drm/radeon/radeon_fb.c              |   74 +-
+ drivers/gpu/drm/radeon/radeon_fence.c           |   65 +-
+ drivers/gpu/drm/radeon/radeon_fixed.h           |   17 +
+ drivers/gpu/drm/radeon/radeon_gart.c            |   42 +-
+ drivers/gpu/drm/radeon/radeon_gem.c             |  108 +-
+ drivers/gpu/drm/radeon/radeon_i2c.c             |  182 +-
+ drivers/gpu/drm/radeon/radeon_ioc32.c           |   38 +-
+ drivers/gpu/drm/radeon/radeon_irq.c             |   10 +-
+ drivers/gpu/drm/radeon/radeon_irq_kms.c         |   71 +-
+ drivers/gpu/drm/radeon/radeon_kms.c             |   42 +-
+ drivers/gpu/drm/radeon/radeon_legacy_crtc.c     |  102 +-
+ drivers/gpu/drm/radeon/radeon_legacy_encoders.c |  127 +-
+ drivers/gpu/drm/radeon/radeon_legacy_tv.c       |   14 +-
+ drivers/gpu/drm/radeon/radeon_mode.h            |  184 +-
+ drivers/gpu/drm/radeon/radeon_object.c          |  579 +--
+ drivers/gpu/drm/radeon/radeon_object.h          |  151 +-
+ drivers/gpu/drm/radeon/radeon_pm.c              |    9 +-
+ drivers/gpu/drm/radeon/radeon_reg.h             |   60 +-
+ drivers/gpu/drm/radeon/radeon_ring.c            |   67 +-
+ drivers/gpu/drm/radeon/radeon_state.c           |    2 +-
+ drivers/gpu/drm/radeon/radeon_test.c            |   55 +-
+ drivers/gpu/drm/radeon/radeon_ttm.c             |  112 +-
+ drivers/gpu/drm/radeon/reg_srcs/r420            |  795 +++
+ drivers/gpu/drm/radeon/reg_srcs/rs600           |   68 +-
+ drivers/gpu/drm/radeon/reg_srcs/rv515           |    6 +
+ drivers/gpu/drm/radeon/rs400.c                  |   21 +-
+ drivers/gpu/drm/radeon/rs600.c                  |  233 +-
+ drivers/gpu/drm/radeon/rs600d.h                 |  112 +-
+ drivers/gpu/drm/radeon/rs690.c                  |   40 +-
+ drivers/gpu/drm/radeon/rv515.c                  |   25 +-
+ drivers/gpu/drm/radeon/rv770.c                  |   94 +-
+ drivers/gpu/drm/savage/savage_drv.c             |    2 +-
+ drivers/gpu/drm/sis/sis_drv.c                   |    2 +-
+ drivers/gpu/drm/tdfx/tdfx_drv.c                 |    2 +-
+ drivers/gpu/drm/ttm/Makefile                    |    3 +-
+ drivers/gpu/drm/ttm/ttm_bo.c                    |  674 ++--
+ drivers/gpu/drm/ttm/ttm_bo_util.c               |    3 +-
+ drivers/gpu/drm/ttm/ttm_bo_vm.c                 |    9 +-
+ drivers/gpu/drm/ttm/ttm_execbuf_util.c          |  117 +
+ drivers/gpu/drm/ttm/ttm_lock.c                  |  311 ++
+ drivers/gpu/drm/ttm/ttm_memory.c                |   16 +-
+ drivers/gpu/drm/ttm/ttm_object.c                |  452 ++
+ drivers/gpu/drm/ttm/ttm_tt.c                    |    1 +
+ drivers/gpu/drm/via/via_drv.c                   |    2 +-
+ drivers/gpu/drm/vmwgfx/Kconfig                  |   13 +
+ drivers/gpu/drm/vmwgfx/Makefile                 |    9 +
+ drivers/gpu/drm/vmwgfx/svga3d_reg.h             | 1793 +++++++
+ drivers/gpu/drm/vmwgfx/svga_escape.h            |   89 +
+ drivers/gpu/drm/vmwgfx/svga_overlay.h           |  201 +
+ drivers/gpu/drm/vmwgfx/svga_reg.h               | 1346 +++++
+ drivers/gpu/drm/vmwgfx/svga_types.h             |   45 +
+ drivers/gpu/drm/vmwgfx/vmwgfx_buffer.c          |  229 +
+ drivers/gpu/drm/vmwgfx/vmwgfx_drv.c             |  726 +++
+ drivers/gpu/drm/vmwgfx/vmwgfx_drv.h             |  513 ++
+ drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c         |  621 +++
+ drivers/gpu/drm/vmwgfx/vmwgfx_fb.c              |  742 +++
+ drivers/gpu/drm/vmwgfx/vmwgfx_fifo.c            |  519 ++
+ drivers/gpu/drm/vmwgfx/vmwgfx_gmr.c             |  213 +
+ drivers/gpu/drm/vmwgfx/vmwgfx_ioctl.c           |   81 +
+ drivers/gpu/drm/vmwgfx/vmwgfx_irq.c             |  293 ++
+ drivers/gpu/drm/vmwgfx/vmwgfx_kms.c             |  872 ++++
+ drivers/gpu/drm/vmwgfx/vmwgfx_kms.h             |  102 +
+ drivers/gpu/drm/vmwgfx/vmwgfx_ldu.c             |  516 ++
+ drivers/gpu/drm/vmwgfx/vmwgfx_overlay.c         |  634 +++
+ drivers/gpu/drm/vmwgfx/vmwgfx_reg.h             |   57 +
+ drivers/gpu/drm/vmwgfx/vmwgfx_resource.c        | 1183 +++++
+ drivers/gpu/drm/vmwgfx/vmwgfx_ttm_glue.c        |   99 +
+ include/drm/Kbuild                              |    2 +
+ include/drm/drm.h                               |   65 +-
+ include/drm/drmP.h                              |   91 +-
+ include/drm/drm_crtc.h                          |   47 +-
+ include/drm/drm_dp_helper.h                     |  180 +
+ include/drm/drm_edid.h                          |    8 +
+ include/drm/drm_mm.h                            |   35 +
+ include/drm/drm_mode.h                          |   81 +-
+ include/drm/drm_os_linux.h                      |    2 +-
+ include/drm/i2c/ch7006.h                        |   86 +
+ include/drm/i915_drm.h                          |  132 +-
+ include/drm/mga_drm.h                           |    2 +-
+ include/drm/nouveau_drm.h                       |  220 +
+ include/drm/radeon_drm.h                        |    2 +-
+ include/drm/ttm/ttm_bo_api.h                    |  115 +-
+ include/drm/ttm/ttm_bo_driver.h                 |   37 +-
+ include/drm/ttm/ttm_execbuf_util.h              |  107 +
+ include/drm/ttm/ttm_lock.h                      |  247 +
+ include/drm/ttm/ttm_object.h                    |  271 +
+ include/drm/via_drm.h                           |    2 +-
+ include/drm/vmwgfx_drm.h                        |  574 +++
+ 268 files changed, 65112 insertions(+), 4414 deletions(-)
+ create mode 100644 drivers/gpu/drm/drm_dp_i2c_helper.c
+ create mode 100644 drivers/gpu/drm/i2c/Makefile
+ create mode 100644 drivers/gpu/drm/i2c/ch7006_drv.c
+ create mode 100644 drivers/gpu/drm/i2c/ch7006_mode.c
+ create mode 100644 drivers/gpu/drm/i2c/ch7006_priv.h
+ delete mode 100644 drivers/gpu/drm/i915/intel_dp.h
+ delete mode 100644 drivers/gpu/drm/i915/intel_dp_i2c.c
+ create mode 100644 drivers/gpu/drm/i915/intel_overlay.c
+ create mode 100644 drivers/gpu/drm/nouveau/Kconfig
+ create mode 100644 drivers/gpu/drm/nouveau/Makefile
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_acpi.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_backlight.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_bios.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_bios.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_bo.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_calc.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_channel.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_connector.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_connector.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_crtc.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_debugfs.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_display.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_dma.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_dma.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_dp.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_drv.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_drv.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_encoder.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_fb.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_fbcon.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_fbcon.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_fence.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_gem.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_grctx.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_grctx.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_hw.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_hw.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_i2c.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_i2c.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_ioc32.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_irq.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_mem.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_notifier.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_object.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_reg.h
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_sgdma.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_state.c
+ create mode 100644 drivers/gpu/drm/nouveau/nouveau_ttm.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_crtc.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_cursor.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_dac.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_dfp.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_display.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_fb.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_fbcon.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_fifo.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_graph.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_instmem.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_mc.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_timer.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv04_tv.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv10_fb.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv10_fifo.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv10_graph.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv17_gpio.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv17_tv.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv17_tv.h
+ create mode 100644 drivers/gpu/drm/nouveau/nv17_tv_modes.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv20_graph.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv40_fb.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv40_fifo.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv40_graph.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv40_grctx.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv40_mc.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_crtc.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_cursor.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_dac.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_display.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_display.h
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_evo.h
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_fbcon.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_fifo.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_graph.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_instmem.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_mc.c
+ create mode 100644 drivers/gpu/drm/nouveau/nv50_sor.c
+ create mode 100644 drivers/gpu/drm/nouveau/nvreg.h
+ create mode 100644 drivers/gpu/drm/radeon/atombios_dp.c
+ create mode 100644 drivers/gpu/drm/radeon/r600_audio.c
+ create mode 100644 drivers/gpu/drm/radeon/r600_hdmi.c
+ create mode 100644 drivers/gpu/drm/radeon/reg_srcs/r420
+ create mode 100644 drivers/gpu/drm/ttm/ttm_execbuf_util.c
+ create mode 100644 drivers/gpu/drm/ttm/ttm_lock.c
+ create mode 100644 drivers/gpu/drm/ttm/ttm_object.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/Kconfig
+ create mode 100644 drivers/gpu/drm/vmwgfx/Makefile
+ create mode 100644 drivers/gpu/drm/vmwgfx/svga3d_reg.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/svga_escape.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/svga_overlay.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/svga_reg.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/svga_types.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_buffer.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_drv.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_drv.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_fb.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_fifo.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_gmr.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_ioctl.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_irq.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_kms.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_kms.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_ldu.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_overlay.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_reg.h
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_resource.c
+ create mode 100644 drivers/gpu/drm/vmwgfx/vmwgfx_ttm_glue.c
+ create mode 100644 include/drm/drm_dp_helper.h
+ create mode 100644 include/drm/i2c/ch7006.h
+ create mode 100644 include/drm/nouveau_drm.h
+ create mode 100644 include/drm/ttm/ttm_execbuf_util.h
+ create mode 100644 include/drm/ttm/ttm_lock.h
+ create mode 100644 include/drm/ttm/ttm_object.h
+ create mode 100644 include/drm/vmwgfx_drm.h
+
 diff --git a/drivers/char/agp/Kconfig b/drivers/char/agp/Kconfig
 index ccb1fa8..2fb3a48 100644
 --- a/drivers/char/agp/Kconfig
@@ -112,7 +512,7 @@ index a96f319..43412c0 100644
  
  
 diff --git a/drivers/char/agp/intel-agp.c b/drivers/char/agp/intel-agp.c
-index 3cb56a0..30c36ac 100644
+index 4dcfef0..30c36ac 100644
 --- a/drivers/char/agp/intel-agp.c
 +++ b/drivers/char/agp/intel-agp.c
 @@ -36,10 +36,10 @@
@@ -191,15 +591,7 @@ index 3cb56a0..30c36ac 100644
  
  extern int agp_memory_reserved;
  
-@@ -178,6 +178,7 @@ static struct _intel_private {
- 	 * popup and for the GTT.
- 	 */
- 	int gtt_entries;			/* i830+ */
-+	int gtt_total_size;
- 	union {
- 		void __iomem *i9xx_flush_page;
- 		void *i8xx_flush_page;
-@@ -653,7 +654,7 @@ static void intel_i830_init_gtt_entries(void)
+@@ -654,7 +654,7 @@ static void intel_i830_init_gtt_entries(void)
  			size = 512;
  		}
  		size += 4; /* add in BIOS popup space */
@@ -208,7 +600,7 @@ index 3cb56a0..30c36ac 100644
  	/* G33's GTT size defined in gmch_ctrl */
  		switch (gmch_ctrl & G33_PGETBL_SIZE_MASK) {
  		case G33_PGETBL_SIZE_1M:
-@@ -669,7 +670,7 @@ static void intel_i830_init_gtt_entries(void)
+@@ -670,7 +670,7 @@ static void intel_i830_init_gtt_entries(void)
  			size = 512;
  		}
  		size += 4;
@@ -217,25 +609,7 @@ index 3cb56a0..30c36ac 100644
  		/* On 4 series hardware, GTT stolen is separate from graphics
  		 * stolen, ignore it in stolen gtt entries counting.  However,
  		 * 4KB of the stolen memory doesn't get mapped to the GTT.
-@@ -1153,7 +1154,7 @@ static int intel_i915_configure(void)
- 	readl(intel_private.registers+I810_PGETBL_CTL);	/* PCI Posting. */
- 
- 	if (agp_bridge->driver->needs_scratch_page) {
--		for (i = intel_private.gtt_entries; i < current_size->num_entries; i++) {
-+		for (i = intel_private.gtt_entries; i < intel_private.gtt_total_size; i++) {
- 			writel(agp_bridge->scratch_page, intel_private.gtt+i);
- 		}
- 		readl(intel_private.gtt+i-1);	/* PCI Posting. */
-@@ -1308,6 +1309,8 @@ static int intel_i915_create_gatt_table(struct agp_bridge_data *bridge)
- 	if (!intel_private.gtt)
- 		return -ENOMEM;
- 
-+	intel_private.gtt_total_size = gtt_map_size / 4;
-+
- 	temp &= 0xfff80000;
- 
- 	intel_private.registers = ioremap(temp, 128 * 4096);
-@@ -1352,15 +1355,15 @@ static void intel_i965_get_gtt_range(int *gtt_offset, int *gtt_size)
+@@ -1355,15 +1355,15 @@ static void intel_i965_get_gtt_range(int *gtt_offset, int *gtt_size)
  {
  	switch (agp_bridge->dev->device) {
  	case PCI_DEVICE_ID_INTEL_GM45_HB:
@@ -256,16 +630,7 @@ index 3cb56a0..30c36ac 100644
  		*gtt_offset = *gtt_size = MB(2);
  		break;
  	default:
-@@ -1395,6 +1398,8 @@ static int intel_i965_create_gatt_table(struct agp_bridge_data *bridge)
- 	if (!intel_private.gtt)
- 		return -ENOMEM;
- 
-+	intel_private.gtt_total_size = gtt_size / 4;
-+
- 	intel_private.registers = ioremap(temp, 128 * 4096);
- 	if (!intel_private.registers) {
- 		iounmap(intel_private.gtt);
-@@ -2340,14 +2345,14 @@ static const struct intel_driver_description {
+@@ -2345,14 +2345,14 @@ static const struct intel_driver_description {
  		NULL, &intel_g33_driver },
  	{ PCI_DEVICE_ID_INTEL_Q33_HB, PCI_DEVICE_ID_INTEL_Q33_IG, 0, "Q33",
  		NULL, &intel_g33_driver },
@@ -285,7 +650,7 @@ index 3cb56a0..30c36ac 100644
  	{ PCI_DEVICE_ID_INTEL_Q45_HB, PCI_DEVICE_ID_INTEL_Q45_IG, 0,
  	    "Q45/Q43", NULL, &intel_i965_driver },
  	{ PCI_DEVICE_ID_INTEL_G45_HB, PCI_DEVICE_ID_INTEL_G45_IG, 0,
-@@ -2356,14 +2361,14 @@ static const struct intel_driver_description {
+@@ -2361,14 +2361,14 @@ static const struct intel_driver_description {
  	    "B43", NULL, &intel_i965_driver },
  	{ PCI_DEVICE_ID_INTEL_G41_HB, PCI_DEVICE_ID_INTEL_G41_IG, 0,
  	    "G41", NULL, &intel_i965_driver },
@@ -308,7 +673,7 @@ index 3cb56a0..30c36ac 100644
  	{ 0, 0, 0, NULL, NULL, NULL }
  };
  
-@@ -2545,8 +2550,8 @@ static struct pci_device_id agp_intel_pci_table[] = {
+@@ -2550,8 +2550,8 @@ static struct pci_device_id agp_intel_pci_table[] = {
  	ID(PCI_DEVICE_ID_INTEL_82945G_HB),
  	ID(PCI_DEVICE_ID_INTEL_82945GM_HB),
  	ID(PCI_DEVICE_ID_INTEL_82945GME_HB),
@@ -319,7 +684,7 @@ index 3cb56a0..30c36ac 100644
  	ID(PCI_DEVICE_ID_INTEL_82946GZ_HB),
  	ID(PCI_DEVICE_ID_INTEL_82G35_HB),
  	ID(PCI_DEVICE_ID_INTEL_82965Q_HB),
-@@ -2557,15 +2562,15 @@ static struct pci_device_id agp_intel_pci_table[] = {
+@@ -2562,15 +2562,15 @@ static struct pci_device_id agp_intel_pci_table[] = {
  	ID(PCI_DEVICE_ID_INTEL_Q35_HB),
  	ID(PCI_DEVICE_ID_INTEL_Q33_HB),
  	ID(PCI_DEVICE_ID_INTEL_GM45_HB),
@@ -504,56 +869,6 @@ index 3c8827a..39c5aa7 100644
  obj-$(CONFIG_DRM_VIA)	+=via/
 +obj-$(CONFIG_DRM_NOUVEAU) +=nouveau/
 +obj-y			+= i2c/
-diff --git a/drivers/gpu/drm/ati_pcigart.c b/drivers/gpu/drm/ati_pcigart.c
-index 628eae3..a1fce68 100644
---- a/drivers/gpu/drm/ati_pcigart.c
-+++ b/drivers/gpu/drm/ati_pcigart.c
-@@ -39,8 +39,7 @@ static int drm_ati_alloc_pcigart_table(struct drm_device *dev,
- 				       struct drm_ati_pcigart_info *gart_info)
- {
- 	gart_info->table_handle = drm_pci_alloc(dev, gart_info->table_size,
--						PAGE_SIZE,
--						gart_info->table_mask);
-+						PAGE_SIZE);
- 	if (gart_info->table_handle == NULL)
- 		return -ENOMEM;
- 
-@@ -112,6 +111,13 @@ int drm_ati_pcigart_init(struct drm_device *dev, struct drm_ati_pcigart_info *ga
- 	if (gart_info->gart_table_location == DRM_ATI_GART_MAIN) {
- 		DRM_DEBUG("PCI: no table in VRAM: using normal RAM\n");
- 
-+		if (pci_set_dma_mask(dev->pdev, gart_info->table_mask)) {
-+			DRM_ERROR("fail to set dma mask to 0x%Lx\n",
-+				  gart_info->table_mask);
-+			ret = 1;
-+			goto done;
-+		}
-+
- 		ret = drm_ati_alloc_pcigart_table(dev, gart_info);
- 		if (ret) {
- 			DRM_ERROR("cannot allocate PCI GART page!\n");
-diff --git a/drivers/gpu/drm/drm_bufs.c b/drivers/gpu/drm/drm_bufs.c
-index 3d09e30..8417cc4 100644
---- a/drivers/gpu/drm/drm_bufs.c
-+++ b/drivers/gpu/drm/drm_bufs.c
-@@ -326,7 +326,7 @@ static int drm_addmap_core(struct drm_device * dev, resource_size_t offset,
- 		 * As we're limiting the address to 2^32-1 (or less),
- 		 * casting it down to 32 bits is no problem, but we
- 		 * need to point to a 64bit variable first. */
--		dmah = drm_pci_alloc(dev, map->size, map->size, 0xffffffffUL);
-+		dmah = drm_pci_alloc(dev, map->size, map->size);
- 		if (!dmah) {
- 			kfree(map);
- 			return -ENOMEM;
-@@ -885,7 +885,7 @@ int drm_addbufs_pci(struct drm_device * dev, struct drm_buf_desc * request)
- 
- 	while (entry->buf_count < count) {
- 
--		dmah = drm_pci_alloc(dev, PAGE_SIZE << page_order, 0x1000, 0xfffffffful);
-+		dmah = drm_pci_alloc(dev, PAGE_SIZE << page_order, 0x1000);
- 
- 		if (!dmah) {
- 			/* Set count correctly so we free the proper amount. */
 diff --git a/drivers/gpu/drm/drm_crtc.c b/drivers/gpu/drm/drm_crtc.c
 index 5cae0b3..d91fb8c 100644
 --- a/drivers/gpu/drm/drm_crtc.c
@@ -2510,32 +2825,6 @@ index 51f6772..6d81a02 100644
   *
   * FIXME: why is this needed?  shouldn't vrefresh be set already?
   *
-diff --git a/drivers/gpu/drm/drm_pci.c b/drivers/gpu/drm/drm_pci.c
-index 577094f..e68ebf9 100644
---- a/drivers/gpu/drm/drm_pci.c
-+++ b/drivers/gpu/drm/drm_pci.c
-@@ -47,8 +47,7 @@
- /**
-  * \brief Allocate a PCI consistent memory block, for DMA.
-  */
--drm_dma_handle_t *drm_pci_alloc(struct drm_device * dev, size_t size, size_t align,
--				dma_addr_t maxaddr)
-+drm_dma_handle_t *drm_pci_alloc(struct drm_device * dev, size_t size, size_t align)
- {
- 	drm_dma_handle_t *dmah;
- #if 1
-@@ -63,11 +62,6 @@ drm_dma_handle_t *drm_pci_alloc(struct drm_device * dev, size_t size, size_t ali
- 	if (align > size)
- 		return NULL;
- 
--	if (pci_set_dma_mask(dev->pdev, maxaddr) != 0) {
--		DRM_ERROR("Setting pci dma mask failed\n");
--		return NULL;
--	}
--
- 	dmah = kmalloc(sizeof(drm_dma_handle_t), GFP_KERNEL);
- 	if (!dmah)
- 		return NULL;
 diff --git a/drivers/gpu/drm/drm_stub.c b/drivers/gpu/drm/drm_stub.c
 index 55bb8a8..ad73e14 100644
 --- a/drivers/gpu/drm/drm_stub.c
@@ -4596,18 +4885,9 @@ index 26bf055..9c9998c 100644
  #endif /* CONFIG_DEBUG_FS */
 -
 diff --git a/drivers/gpu/drm/i915/i915_dma.c b/drivers/gpu/drm/i915/i915_dma.c
-index e5b138b..bbe4781 100644
+index bc2db7d..bbe4781 100644
 --- a/drivers/gpu/drm/i915/i915_dma.c
 +++ b/drivers/gpu/drm/i915/i915_dma.c
-@@ -123,7 +123,7 @@ static int i915_init_phys_hws(struct drm_device *dev)
- 	drm_i915_private_t *dev_priv = dev->dev_private;
- 	/* Program Hardware Status Page */
- 	dev_priv->status_page_dmah =
--		drm_pci_alloc(dev, PAGE_SIZE, PAGE_SIZE, 0xffffffff);
-+		drm_pci_alloc(dev, PAGE_SIZE, PAGE_SIZE);
- 
- 	if (!dev_priv->status_page_dmah) {
- 		DRM_ERROR("Can not allocate hardware status page\n");
 @@ -807,9 +807,19 @@ static int i915_getparam(struct drm_device *dev, void *data,
  	case I915_PARAM_NUM_FENCES_AVAIL:
  		value = dev_priv->num_fence_regs - dev_priv->fence_reg_start;
@@ -4665,17 +4945,7 @@ index e5b138b..bbe4781 100644
  
  	return phys;
  }
-@@ -1111,7 +1121,8 @@ static void i915_setup_compression(struct drm_device *dev, int size)
- {
- 	struct drm_i915_private *dev_priv = dev->dev_private;
- 	struct drm_mm_node *compressed_fb, *compressed_llb;
--	unsigned long cfb_base, ll_base;
-+	unsigned long cfb_base;
-+	unsigned long ll_base = 0;
- 
- 	/* Leave 1M for line length buffer & misc. */
- 	compressed_fb = drm_mm_search_free(&dev_priv->vram, size, 4096, 0);
-@@ -1194,14 +1205,6 @@ static int i915_load_modeset_init(struct drm_device *dev,
+@@ -1195,14 +1205,6 @@ static int i915_load_modeset_init(struct drm_device *dev,
  	dev->mode_config.fb_base = drm_get_resource_start(dev, fb_bar) &
  		0xff000000;
  
@@ -4690,7 +4960,7 @@ index e5b138b..bbe4781 100644
  	/* Basic memrange allocator for stolen space (aka vram) */
  	drm_mm_init(&dev_priv->vram, 0, prealloc_size);
  	DRM_INFO("set up %ldM of stolen space\n", prealloc_size / (1024*1024));
-@@ -1251,6 +1254,8 @@ static int i915_load_modeset_init(struct drm_device *dev,
+@@ -1252,6 +1254,8 @@ static int i915_load_modeset_init(struct drm_device *dev,
  	if (ret)
  		goto destroy_ringbuffer;
  
@@ -4699,7 +4969,7 @@ index e5b138b..bbe4781 100644
  	ret = drm_irq_install(dev);
  	if (ret)
  		goto destroy_ringbuffer;
-@@ -1265,8 +1270,6 @@ static int i915_load_modeset_init(struct drm_device *dev,
+@@ -1266,8 +1270,6 @@ static int i915_load_modeset_init(struct drm_device *dev,
  
  	I915_WRITE(INSTPM, (1 << 5) | (1 << 21));
  
@@ -4708,7 +4978,7 @@ index e5b138b..bbe4781 100644
  	drm_helper_initial_config(dev);
  
  	return 0;
-@@ -1306,7 +1309,7 @@ static void i915_get_mem_freq(struct drm_device *dev)
+@@ -1307,7 +1309,7 @@ static void i915_get_mem_freq(struct drm_device *dev)
  	drm_i915_private_t *dev_priv = dev->dev_private;
  	u32 tmp;
  
@@ -4717,7 +4987,7 @@ index e5b138b..bbe4781 100644
  		return;
  
  	tmp = I915_READ(CLKCFG);
-@@ -1354,7 +1357,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
+@@ -1355,7 +1357,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
  {
  	struct drm_i915_private *dev_priv = dev->dev_private;
  	resource_size_t base, size;
@@ -4726,7 +4996,7 @@ index e5b138b..bbe4781 100644
  	uint32_t agp_size, prealloc_size, prealloc_start;
  
  	/* i915 has 4 more counters */
-@@ -1370,8 +1373,10 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
+@@ -1371,8 +1373,10 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
  
  	dev->dev_private = (void *)dev_priv;
  	dev_priv->dev = dev;
@@ -4737,7 +5007,7 @@ index e5b138b..bbe4781 100644
  	base = drm_get_resource_start(dev, mmio_bar);
  	size = drm_get_resource_len(dev, mmio_bar);
  
-@@ -1413,7 +1418,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
+@@ -1414,7 +1418,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
  	if (ret)
  		goto out_iomapfree;
  
@@ -4746,7 +5016,7 @@ index e5b138b..bbe4781 100644
  	if (dev_priv->wq == NULL) {
  		DRM_ERROR("Failed to create our workqueue.\n");
  		ret = -ENOMEM;
-@@ -1434,7 +1439,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
+@@ -1435,7 +1439,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
  
  	dev->driver->get_vblank_counter = i915_get_vblank_counter;
  	dev->max_vblank_count = 0xffffff; /* only 24 bits of frame count */
@@ -4755,7 +5025,7 @@ index e5b138b..bbe4781 100644
  		dev->max_vblank_count = 0xffffffff; /* full 32 bit counter */
  		dev->driver->get_vblank_counter = gm45_get_vblank_counter;
  	}
-@@ -1489,9 +1494,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
+@@ -1490,9 +1494,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
  	}
  
  	/* Must be done after probing outputs */
@@ -4766,7 +5036,7 @@ index e5b138b..bbe4781 100644
  
  	setup_timer(&dev_priv->hangcheck_timer, i915_hangcheck_elapsed,
  		    (unsigned long) dev);
-@@ -1525,6 +1528,15 @@ int i915_driver_unload(struct drm_device *dev)
+@@ -1526,6 +1528,15 @@ int i915_driver_unload(struct drm_device *dev)
  	}
  
  	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
@@ -4782,7 +5052,7 @@ index e5b138b..bbe4781 100644
  		drm_irq_uninstall(dev);
  		vga_client_register(dev->pdev, NULL, NULL, NULL);
  	}
-@@ -1535,8 +1547,7 @@ int i915_driver_unload(struct drm_device *dev)
+@@ -1536,8 +1547,7 @@ int i915_driver_unload(struct drm_device *dev)
  	if (dev_priv->regs != NULL)
  		iounmap(dev_priv->regs);
  
@@ -4792,7 +5062,7 @@ index e5b138b..bbe4781 100644
  
  	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
  		intel_modeset_cleanup(dev);
-@@ -1548,6 +1559,8 @@ int i915_driver_unload(struct drm_device *dev)
+@@ -1549,6 +1559,8 @@ int i915_driver_unload(struct drm_device *dev)
  		mutex_unlock(&dev->struct_mutex);
  		drm_mm_takedown(&dev_priv->vram);
  		i915_gem_lastclose(dev);
@@ -4801,7 +5071,7 @@ index e5b138b..bbe4781 100644
  	}
  
  	pci_dev_put(dev_priv->bridge_dev);
-@@ -1638,6 +1651,7 @@ struct drm_ioctl_desc i915_ioctls[] = {
+@@ -1639,6 +1651,7 @@ struct drm_ioctl_desc i915_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_I915_HWS_ADDR, i915_set_status_page, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
  	DRM_IOCTL_DEF(DRM_I915_GEM_INIT, i915_gem_init_ioctl, DRM_AUTH|DRM_MASTER|DRM_ROOT_ONLY),
  	DRM_IOCTL_DEF(DRM_I915_GEM_EXECBUFFER, i915_gem_execbuffer, DRM_AUTH),
@@ -4809,7 +5079,7 @@ index e5b138b..bbe4781 100644
  	DRM_IOCTL_DEF(DRM_I915_GEM_PIN, i915_gem_pin_ioctl, DRM_AUTH|DRM_ROOT_ONLY),
  	DRM_IOCTL_DEF(DRM_I915_GEM_UNPIN, i915_gem_unpin_ioctl, DRM_AUTH|DRM_ROOT_ONLY),
  	DRM_IOCTL_DEF(DRM_I915_GEM_BUSY, i915_gem_busy_ioctl, DRM_AUTH),
-@@ -1656,6 +1670,8 @@ struct drm_ioctl_desc i915_ioctls[] = {
+@@ -1657,6 +1670,8 @@ struct drm_ioctl_desc i915_ioctls[] = {
  	DRM_IOCTL_DEF(DRM_I915_GEM_GET_APERTURE, i915_gem_get_aperture_ioctl, 0),
  	DRM_IOCTL_DEF(DRM_I915_GET_PIPE_FROM_CRTC_ID, intel_get_pipe_from_crtc_id, 0),
  	DRM_IOCTL_DEF(DRM_I915_GEM_MADVISE, i915_gem_madvise_ioctl, 0),
@@ -5045,7 +5315,7 @@ index 7f436ec..2ffffd7 100644
  
  	.name = DRIVER_NAME,
 diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
-index ecbafd0..29dd676 100644
+index 791fded..29dd676 100644
 --- a/drivers/gpu/drm/i915/i915_drv.h
 +++ b/drivers/gpu/drm/i915/i915_drv.h
 @@ -170,9 +170,33 @@ struct drm_i915_display_funcs {
@@ -5150,7 +5420,7 @@ index ecbafd0..29dd676 100644
  	u32 saveMI_ARB_STATE;
  	u32 saveSWF0[16];
  	u32 saveSWF1[16];
-@@ -539,13 +564,22 @@ typedef struct drm_i915_private {
+@@ -539,13 +564,21 @@ typedef struct drm_i915_private {
  	/* indicate whether the LVDS_BORDER should be enabled or not */
  	unsigned int lvds_border_bits;
  
@@ -5169,11 +5439,10 @@ index ecbafd0..29dd676 100644
  	u16 orig_clock;
 +	int child_dev_num;
 +	struct child_device_config *child_dev;
-+	struct drm_connector *int_lvds_connector;
+ 	struct drm_connector *int_lvds_connector;
  } drm_i915_private_t;
  
- /** driver private structure attached to each drm_gem_object */
-@@ -638,6 +672,13 @@ struct drm_i915_gem_object {
+@@ -639,6 +672,13 @@ struct drm_i915_gem_object {
  	 * Advice: are the backing pages purgeable?
  	 */
  	int madv;
@@ -5187,7 +5456,7 @@ index ecbafd0..29dd676 100644
  };
  
  /**
-@@ -738,6 +779,8 @@ i915_enable_pipestat(drm_i915_private_t *dev_priv, int pipe, u32 mask);
+@@ -739,6 +779,8 @@ i915_enable_pipestat(drm_i915_private_t *dev_priv, int pipe, u32 mask);
  void
  i915_disable_pipestat(drm_i915_private_t *dev_priv, int pipe, u32 mask);
  
@@ -5196,7 +5465,7 @@ index ecbafd0..29dd676 100644
  
  /* i915_mem.c */
  extern int i915_mem_alloc(struct drm_device *dev, void *data,
-@@ -770,6 +813,8 @@ int i915_gem_sw_finish_ioctl(struct drm_device *dev, void *data,
+@@ -771,6 +813,8 @@ int i915_gem_sw_finish_ioctl(struct drm_device *dev, void *data,
  			     struct drm_file *file_priv);
  int i915_gem_execbuffer(struct drm_device *dev, void *data,
  			struct drm_file *file_priv);
@@ -5205,7 +5474,7 @@ index ecbafd0..29dd676 100644
  int i915_gem_pin_ioctl(struct drm_device *dev, void *data,
  		       struct drm_file *file_priv);
  int i915_gem_unpin_ioctl(struct drm_device *dev, void *data,
-@@ -813,6 +858,9 @@ void i915_gem_cleanup_ringbuffer(struct drm_device *dev);
+@@ -814,6 +858,9 @@ void i915_gem_cleanup_ringbuffer(struct drm_device *dev);
  int i915_gem_do_init(struct drm_device *dev, unsigned long start,
  		     unsigned long end);
  int i915_gem_idle(struct drm_device *dev);
@@ -5215,7 +5484,7 @@ index ecbafd0..29dd676 100644
  int i915_gem_fault(struct vm_area_struct *vma, struct vm_fault *vmf);
  int i915_gem_object_set_to_gtt_domain(struct drm_gem_object *obj,
  				      int write);
-@@ -824,6 +872,7 @@ void i915_gem_free_all_phys_object(struct drm_device *dev);
+@@ -825,6 +872,7 @@ void i915_gem_free_all_phys_object(struct drm_device *dev);
  int i915_gem_object_get_pages(struct drm_gem_object *obj);
  void i915_gem_object_put_pages(struct drm_gem_object *obj);
  void i915_gem_release(struct drm_device * dev, struct drm_file *file_priv);
@@ -5223,7 +5492,7 @@ index ecbafd0..29dd676 100644
  
  void i915_gem_shrinker_init(void);
  void i915_gem_shrinker_exit(void);
-@@ -832,6 +881,9 @@ void i915_gem_shrinker_exit(void);
+@@ -833,6 +881,9 @@ void i915_gem_shrinker_exit(void);
  void i915_gem_detect_bit_6_swizzle(struct drm_device *dev);
  void i915_gem_object_do_bit_17_swizzle(struct drm_gem_object *obj);
  void i915_gem_object_save_bit_17_swizzle(struct drm_gem_object *obj);
@@ -5233,7 +5502,7 @@ index ecbafd0..29dd676 100644
  
  /* i915_gem_debug.c */
  void i915_gem_dump_object(struct drm_gem_object *obj, int len,
-@@ -863,11 +915,13 @@ extern int i915_restore_state(struct drm_device *dev);
+@@ -864,11 +915,13 @@ extern int i915_restore_state(struct drm_device *dev);
  extern int intel_opregion_init(struct drm_device *dev, int resume);
  extern void intel_opregion_free(struct drm_device *dev, int suspend);
  extern void opregion_asle_intr(struct drm_device *dev);
@@ -5247,7 +5516,7 @@ index ecbafd0..29dd676 100644
  static inline void opregion_enable_asle(struct drm_device *dev) { return; }
  #endif
  
-@@ -952,89 +1006,52 @@ extern void g4x_disable_fbc(struct drm_device *dev);
+@@ -953,89 +1006,52 @@ extern void g4x_disable_fbc(struct drm_device *dev);
  extern int i915_wrap_ring(struct drm_device * dev);
  extern int i915_wait_ring(struct drm_device * dev, int n, const char *caller);
  
@@ -5377,7 +5646,7 @@ index ecbafd0..29dd676 100644
  #define PRIMARY_RINGBUFFER_SIZE         (128*1024)
  
 diff --git a/drivers/gpu/drm/i915/i915_gem.c b/drivers/gpu/drm/i915/i915_gem.c
-index 5ddbd38..2748609 100644
+index df2c625..2748609 100644
 --- a/drivers/gpu/drm/i915/i915_gem.c
 +++ b/drivers/gpu/drm/i915/i915_gem.c
 @@ -1310,7 +1310,7 @@ out_free_list:
@@ -5477,38 +5746,7 @@ index 5ddbd38..2748609 100644
  		ADVANCE_LP_RING();
  	}
  }
-@@ -2010,9 +2021,6 @@ i915_gem_object_unbind(struct drm_gem_object *obj)
- 	/* blow away mappings if mapped through GTT */
- 	i915_gem_release_mmap(obj);
- 
--	if (obj_priv->fence_reg != I915_FENCE_REG_NONE)
--		i915_gem_clear_fence_reg(obj);
--
- 	/* Move the object to the CPU domain to ensure that
- 	 * any possible CPU writes while it's not in the GTT
- 	 * are flushed when we go to remap it. This will
-@@ -2028,6 +2036,10 @@ i915_gem_object_unbind(struct drm_gem_object *obj)
- 
- 	BUG_ON(obj_priv->active);
- 
-+	/* release the fence reg _after_ flushing */
-+	if (obj_priv->fence_reg != I915_FENCE_REG_NONE)
-+		i915_gem_clear_fence_reg(obj);
-+
- 	if (obj_priv->agp_mem != NULL) {
- 		drm_unbind_agp(obj_priv->agp_mem);
- 		drm_free_agp(obj_priv->agp_mem, obj->size / PAGE_SIZE);
-@@ -2570,9 +2582,6 @@ i915_gem_object_bind_to_gtt(struct drm_gem_object *obj, unsigned alignment)
- 	bool retry_alloc = false;
- 	int ret;
- 
--	if (dev_priv->mm.suspended)
--		return -EBUSY;
--
- 	if (obj_priv->madv != I915_MADV_WILLNEED) {
- 		DRM_ERROR("Attempting to bind a purgeable object\n");
- 		return -EINVAL;
-@@ -2761,6 +2770,22 @@ i915_gem_object_flush_cpu_write_domain(struct drm_gem_object *obj)
+@@ -2759,6 +2770,22 @@ i915_gem_object_flush_cpu_write_domain(struct drm_gem_object *obj)
  					    old_write_domain);
  }
  
@@ -5531,7 +5769,7 @@ index 5ddbd38..2748609 100644
  /**
   * Moves a single object to the GTT read, and possibly write domain.
   *
-@@ -3171,7 +3196,7 @@ i915_gem_object_set_cpu_read_domain_range(struct drm_gem_object *obj,
+@@ -3169,7 +3196,7 @@ i915_gem_object_set_cpu_read_domain_range(struct drm_gem_object *obj,
  static int
  i915_gem_object_pin_and_relocate(struct drm_gem_object *obj,
  				 struct drm_file *file_priv,
@@ -5540,7 +5778,7 @@ index 5ddbd38..2748609 100644
  				 struct drm_i915_gem_relocation_entry *relocs)
  {
  	struct drm_device *dev = obj->dev;
-@@ -3179,12 +3204,35 @@ i915_gem_object_pin_and_relocate(struct drm_gem_object *obj,
+@@ -3177,12 +3204,35 @@ i915_gem_object_pin_and_relocate(struct drm_gem_object *obj,
  	struct drm_i915_gem_object *obj_priv = obj->driver_private;
  	int i, ret;
  	void __iomem *reloc_page;
@@ -5576,7 +5814,7 @@ index 5ddbd38..2748609 100644
  	entry->offset = obj_priv->gtt_offset;
  
  	/* Apply the relocations, using the GTT aperture to avoid cache
-@@ -3346,7 +3394,7 @@ i915_gem_object_pin_and_relocate(struct drm_gem_object *obj,
+@@ -3344,7 +3394,7 @@ i915_gem_object_pin_and_relocate(struct drm_gem_object *obj,
   */
  static int
  i915_dispatch_gem_execbuffer(struct drm_device *dev,
@@ -5585,7 +5823,7 @@ index 5ddbd38..2748609 100644
  			      struct drm_clip_rect *cliprects,
  			      uint64_t exec_offset)
  {
-@@ -3436,7 +3484,7 @@ i915_gem_ring_throttle(struct drm_device *dev, struct drm_file *file_priv)
+@@ -3434,7 +3484,7 @@ i915_gem_ring_throttle(struct drm_device *dev, struct drm_file *file_priv)
  }
  
  static int
@@ -5594,7 +5832,7 @@ index 5ddbd38..2748609 100644
  			      uint32_t buffer_count,
  			      struct drm_i915_gem_relocation_entry **relocs)
  {
-@@ -3451,8 +3499,10 @@ i915_gem_get_relocs_from_user(struct drm_i915_gem_exec_object *exec_list,
+@@ -3449,8 +3499,10 @@ i915_gem_get_relocs_from_user(struct drm_i915_gem_exec_object *exec_list,
  	}
  
  	*relocs = drm_calloc_large(reloc_count, sizeof(**relocs));
@@ -5606,7 +5844,7 @@ index 5ddbd38..2748609 100644
  
  	for (i = 0; i < buffer_count; i++) {
  		struct drm_i915_gem_relocation_entry __user *user_relocs;
-@@ -3476,7 +3526,7 @@ i915_gem_get_relocs_from_user(struct drm_i915_gem_exec_object *exec_list,
+@@ -3474,7 +3526,7 @@ i915_gem_get_relocs_from_user(struct drm_i915_gem_exec_object *exec_list,
  }
  
  static int
@@ -5615,7 +5853,7 @@ index 5ddbd38..2748609 100644
  			    uint32_t buffer_count,
  			    struct drm_i915_gem_relocation_entry *relocs)
  {
-@@ -3509,7 +3559,7 @@ err:
+@@ -3507,7 +3559,7 @@ err:
  }
  
  static int
@@ -5624,7 +5862,7 @@ index 5ddbd38..2748609 100644
  			   uint64_t exec_offset)
  {
  	uint32_t exec_start, exec_len;
-@@ -3526,22 +3576,57 @@ i915_gem_check_execbuffer (struct drm_i915_gem_execbuffer *exec,
+@@ -3524,22 +3576,57 @@ i915_gem_check_execbuffer (struct drm_i915_gem_execbuffer *exec,
  	return 0;
  }
  
@@ -5688,7 +5926,7 @@ index 5ddbd38..2748609 100644
  
  #if WATCH_EXEC
  	DRM_INFO("buffers_ptr %d buffer_count %d len %08x\n",
-@@ -3552,25 +3637,13 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
+@@ -3550,25 +3637,13 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
  		DRM_ERROR("execbuf with %d buffers\n", args->buffer_count);
  		return -EINVAL;
  	}
@@ -5717,7 +5955,7 @@ index 5ddbd38..2748609 100644
  
  	if (args->num_cliprects != 0) {
  		cliprects = kcalloc(args->num_cliprects, sizeof(*cliprects),
-@@ -3599,20 +3672,19 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
+@@ -3597,20 +3672,19 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
  	i915_verify_inactive(dev, __FILE__, __LINE__);
  
  	if (atomic_read(&dev_priv->mm.wedged)) {
@@ -5739,7 +5977,7 @@ index 5ddbd38..2748609 100644
  	for (i = 0; i < args->buffer_count; i++) {
  		object_list[i] = drm_gem_object_lookup(dev, file_priv,
  						       exec_list[i].handle);
-@@ -3631,6 +3703,14 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
+@@ -3629,6 +3703,14 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
  			goto err;
  		}
  		obj_priv->in_execbuffer = true;
@@ -5754,7 +5992,7 @@ index 5ddbd38..2748609 100644
  	}
  
  	/* Pin and relocate */
-@@ -3815,20 +3895,6 @@ err:
+@@ -3813,20 +3895,6 @@ err:
  
  	mutex_unlock(&dev->struct_mutex);
  
@@ -5775,7 +6013,7 @@ index 5ddbd38..2748609 100644
  	/* Copy the updated relocations out regardless of current error
  	 * state.  Failure to update the relocs would mean that the next
  	 * time userland calls execbuf, it would do so with presumed offset
-@@ -3845,12 +3911,158 @@ err:
+@@ -3843,12 +3911,158 @@ err:
  
  pre_mutex_err:
  	drm_free_large(object_list);
@@ -5935,7 +6173,7 @@ index 5ddbd38..2748609 100644
  int
  i915_gem_object_pin(struct drm_gem_object *obj, uint32_t alignment)
  {
-@@ -3864,19 +4076,7 @@ i915_gem_object_pin(struct drm_gem_object *obj, uint32_t alignment)
+@@ -3862,19 +4076,7 @@ i915_gem_object_pin(struct drm_gem_object *obj, uint32_t alignment)
  		if (ret)
  			return ret;
  	}
@@ -5956,7 +6194,7 @@ index 5ddbd38..2748609 100644
  	obj_priv->pin_count++;
  
  	/* If the object is not active and not pending a flush,
-@@ -4357,7 +4557,7 @@ i915_gem_init_hws(struct drm_device *dev)
+@@ -4355,7 +4557,7 @@ i915_gem_init_hws(struct drm_device *dev)
  	memset(dev_priv->hw_status_page, 0, PAGE_SIZE);
  	I915_WRITE(HWS_PGA, dev_priv->status_gfx_addr);
  	I915_READ(HWS_PGA); /* posting read */
@@ -5965,7 +6203,7 @@ index 5ddbd38..2748609 100644
  
  	return 0;
  }
-@@ -4615,8 +4815,8 @@ i915_gem_load(struct drm_device *dev)
+@@ -4613,8 +4815,8 @@ i915_gem_load(struct drm_device *dev)
  			for (i = 0; i < 8; i++)
  				I915_WRITE(FENCE_REG_945_8 + (i * 4), 0);
  	}
@@ -5975,16 +6213,7 @@ index 5ddbd38..2748609 100644
  }
  
  /*
-@@ -4639,7 +4839,7 @@ int i915_gem_init_phys_object(struct drm_device *dev,
- 
- 	phys_obj->id = id;
- 
--	phys_obj->handle = drm_pci_alloc(dev, size, 0, 0xffffffff);
-+	phys_obj->handle = drm_pci_alloc(dev, size, 0);
- 	if (!phys_obj->handle) {
- 		ret = -ENOMEM;
- 		goto kfree_obj;
-@@ -4791,7 +4991,7 @@ i915_gem_phys_pwrite(struct drm_device *dev, struct drm_gem_object *obj,
+@@ -4789,7 +4991,7 @@ i915_gem_phys_pwrite(struct drm_device *dev, struct drm_gem_object *obj,
  	user_data = (char __user *) (uintptr_t) args->data_ptr;
  	obj_addr = obj_priv->phys_obj->handle->vaddr + args->offset;
  
@@ -6815,7 +7044,7 @@ index 2d51935..7cc8410 100644
  		opregion_enable_asle(dev);
  	}
 diff --git a/drivers/gpu/drm/i915/i915_reg.h b/drivers/gpu/drm/i915/i915_reg.h
-index 1687edf..149d360 100644
+index 54e5907..149d360 100644
 --- a/drivers/gpu/drm/i915/i915_reg.h
 +++ b/drivers/gpu/drm/i915/i915_reg.h
 @@ -140,6 +140,7 @@
@@ -6946,16 +7175,7 @@ index 1687edf..149d360 100644
  #define   CRT_HOTPLUG_INT_STATUS		(1 << 11)
  #define   TV_HOTPLUG_INT_STATUS			(1 << 10)
  #define   CRT_HOTPLUG_MONITOR_MASK		(3 << 8)
-@@ -968,6 +975,8 @@
- #define   LVDS_PORT_EN			(1 << 31)
- /* Selects pipe B for LVDS data.  Must be set on pre-965. */
- #define   LVDS_PIPEB_SELECT		(1 << 30)
-+/* LVDS dithering flag on 965/g4x platform */
-+#define   LVDS_ENABLE_DITHER		(1 << 25)
- /* Enable border for unscaled (or aspect-scaled) display */
- #define   LVDS_BORDER_ENABLE		(1 << 15)
- /*
-@@ -1620,7 +1629,7 @@
+@@ -1622,7 +1629,7 @@
  #define   DP_CLOCK_OUTPUT_ENABLE	(1 << 13)
  
  #define   DP_SCRAMBLING_DISABLE		(1 << 12)
@@ -6964,16 +7184,7 @@ index 1687edf..149d360 100644
  
  /** limit RGB values to avoid confusing TVs */
  #define   DP_COLOR_RANGE_16_235		(1 << 8)
-@@ -1737,6 +1746,8 @@
- 
- /* Display & cursor control */
- 
-+/* dithering flag on Ironlake */
-+#define PIPE_ENABLE_DITHER	(1 << 4)
- /* Pipe A */
- #define PIPEADSL		0x70000
- #define PIPEACONF		0x70008
-@@ -1808,7 +1819,7 @@
+@@ -1812,7 +1819,7 @@
  #define DSPFW3			0x7003c
  #define   DSPFW_HPLL_SR_EN	(1<<31)
  #define   DSPFW_CURSOR_SR_SHIFT	24
@@ -6982,7 +7193,7 @@ index 1687edf..149d360 100644
  
  /* FIFO watermark sizes etc */
  #define G4X_FIFO_LINE_SIZE	64
-@@ -1824,16 +1835,16 @@
+@@ -1828,16 +1835,16 @@
  #define G4X_MAX_WM		0x3f
  #define I915_MAX_WM		0x3f
  
@@ -7009,7 +7220,7 @@ index 1687edf..149d360 100644
  
  /*
   * The two pipe frame counter registers are not synchronized, so
-@@ -1907,6 +1918,7 @@
+@@ -1911,6 +1918,7 @@
  #define   DISPPLANE_16BPP			(0x5<<26)
  #define   DISPPLANE_32BPP_NO_ALPHA		(0x6<<26)
  #define   DISPPLANE_32BPP			(0x7<<26)
@@ -7017,7 +7228,7 @@ index 1687edf..149d360 100644
  #define   DISPPLANE_STEREO_ENABLE		(1<<25)
  #define   DISPPLANE_STEREO_DISABLE		0
  #define   DISPPLANE_SEL_PIPE_MASK		(1<<24)
-@@ -1918,7 +1930,7 @@
+@@ -1922,7 +1930,7 @@
  #define   DISPPLANE_NO_LINE_DOUBLE		0
  #define   DISPPLANE_STEREO_POLARITY_FIRST	0
  #define   DISPPLANE_STEREO_POLARITY_SECOND	(1<<18)
@@ -7026,7 +7237,7 @@ index 1687edf..149d360 100644
  #define   DISPPLANE_TILED			(1<<10)
  #define DSPAADDR		0x70184
  #define DSPASTRIDE		0x70188
-@@ -1971,7 +1983,7 @@
+@@ -1975,7 +1983,7 @@
  # define VGA_2X_MODE				(1 << 30)
  # define VGA_PIPE_B_SELECT			(1 << 29)
  
@@ -7035,7 +7246,7 @@ index 1687edf..149d360 100644
  
  #define CPU_VGACNTRL	0x41000
  
-@@ -2117,6 +2129,7 @@
+@@ -2121,6 +2129,7 @@
  #define SDE_PORTC_HOTPLUG       (1 << 9)
  #define SDE_PORTB_HOTPLUG       (1 << 8)
  #define SDE_SDVOB_HOTPLUG       (1 << 6)
@@ -7043,7 +7254,7 @@ index 1687edf..149d360 100644
  
  #define SDEISR  0xc4000
  #define SDEIMR  0xc4004
-@@ -2157,6 +2170,13 @@
+@@ -2161,6 +2170,13 @@
  #define PCH_GPIOE               0xc5020
  #define PCH_GPIOF               0xc5024
  
@@ -7057,7 +7268,7 @@ index 1687edf..149d360 100644
  #define PCH_DPLL_A              0xc6014
  #define PCH_DPLL_B              0xc6018
  
-@@ -2292,7 +2312,7 @@
+@@ -2296,7 +2312,7 @@
  #define  FDI_DP_PORT_WIDTH_X3           (2<<19)
  #define  FDI_DP_PORT_WIDTH_X4           (3<<19)
  #define  FDI_TX_ENHANCE_FRAME_ENABLE    (1<<18)
@@ -7779,7 +7990,7 @@ index e505144..ddefc87 100644
 +	dev_priv->hotplug_supported_mask |= CRT_HOTPLUG_INT_STATUS;
  }
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index f1de53b..002612f 100644
+index 121b92e..4775264 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
 @@ -32,7 +32,7 @@
@@ -8552,18 +8763,7 @@ index f1de53b..002612f 100644
  {
  	struct drm_device *dev = crtc->dev;
  	struct drm_i915_private *dev_priv = dev->dev_private;
-@@ -1473,6 +1473,10 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
- 	int trans_vsync_reg = (pipe == 0) ? TRANS_VSYNC_A : TRANS_VSYNC_B;
- 	u32 temp;
- 	int tries = 5, j, n;
-+	u32 pipe_bpc;
-+
-+	temp = I915_READ(pipeconf_reg);
-+	pipe_bpc = temp & PIPE_BPC_MASK;
- 
- 	/* XXX: When our outputs are all unaware of DPMS modes other than off
- 	 * and on, we should map those modes to DRM_MODE_DPMS_OFF in the CRTC.
-@@ -1481,7 +1485,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1485,7 +1485,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  	case DRM_MODE_DPMS_ON:
  	case DRM_MODE_DPMS_STANDBY:
  	case DRM_MODE_DPMS_SUSPEND:
@@ -8572,7 +8772,7 @@ index f1de53b..002612f 100644
  
  		if (intel_pipe_has_type(crtc, INTEL_OUTPUT_LVDS)) {
  			temp = I915_READ(PCH_LVDS);
-@@ -1493,7 +1497,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1497,7 +1497,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  
  		if (HAS_eDP) {
  			/* enable eDP PLL */
@@ -8581,19 +8781,7 @@ index f1de53b..002612f 100644
  		} else {
  			/* enable PCH DPLL */
  			temp = I915_READ(pch_dpll_reg);
-@@ -1504,13 +1508,19 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
- 
- 			/* enable PCH FDI RX PLL, wait warmup plus DMI latency */
- 			temp = I915_READ(fdi_rx_reg);
-+			/*
-+			 * make the BPC in FDI Rx be consistent with that in
-+			 * pipeconf reg.
-+			 */
-+			temp &= ~(0x7 << 16);
-+			temp |= (pipe_bpc << 11);
- 			I915_WRITE(fdi_rx_reg, temp | FDI_RX_PLL_ENABLE |
- 					FDI_SEL_PCDCLK |
- 					FDI_DP_PORT_WIDTH_X4); /* default 4 lanes */
+@@ -1520,7 +1520,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  			I915_READ(fdi_rx_reg);
  			udelay(200);
  
@@ -8602,7 +8790,7 @@ index f1de53b..002612f 100644
  			temp = I915_READ(fdi_tx_reg);
  			if ((temp & FDI_TX_PLL_ENABLE) == 0) {
  				I915_WRITE(fdi_tx_reg, temp | FDI_TX_PLL_ENABLE);
-@@ -1577,12 +1587,13 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1587,12 +1587,13 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  			udelay(150);
  
  			temp = I915_READ(fdi_rx_iir_reg);
@@ -8618,7 +8806,7 @@ index f1de53b..002612f 100644
  					if (temp & FDI_RX_BIT_LOCK)
  						break;
  					udelay(200);
-@@ -1591,11 +1602,11 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1601,11 +1602,11 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  					I915_WRITE(fdi_rx_iir_reg,
  							temp | FDI_RX_BIT_LOCK);
  				else
@@ -8632,7 +8820,7 @@ index f1de53b..002612f 100644
  			}
  			temp = I915_READ(fdi_tx_reg);
  			temp &= ~FDI_LINK_TRAIN_NONE;
-@@ -1610,12 +1621,13 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1620,12 +1621,13 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  			udelay(150);
  
  			temp = I915_READ(fdi_rx_iir_reg);
@@ -8648,7 +8836,7 @@ index f1de53b..002612f 100644
  					if (temp & FDI_RX_SYMBOL_LOCK)
  						break;
  					udelay(200);
-@@ -1623,15 +1635,15 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1633,15 +1635,15 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  				if (j != tries) {
  					I915_WRITE(fdi_rx_iir_reg,
  							temp | FDI_RX_SYMBOL_LOCK);
@@ -8668,20 +8856,7 @@ index f1de53b..002612f 100644
  
  			/* set transcoder timing */
  			I915_WRITE(trans_htot_reg, I915_READ(cpu_htot_reg));
-@@ -1644,6 +1656,12 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
- 
- 			/* enable PCH transcoder */
- 			temp = I915_READ(transconf_reg);
-+			/*
-+			 * make the BPC in transcoder be consistent with
-+			 * that in pipeconf reg.
-+			 */
-+			temp &= ~PIPE_BPC_MASK;
-+			temp |= pipe_bpc;
- 			I915_WRITE(transconf_reg, temp | TRANS_ENABLE);
- 			I915_READ(transconf_reg);
- 
-@@ -1673,7 +1691,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1689,7 +1691,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  
  	break;
  	case DRM_MODE_DPMS_OFF:
@@ -8690,7 +8865,7 @@ index f1de53b..002612f 100644
  
  		/* Disable display plane */
  		temp = I915_READ(dspcntr_reg);
-@@ -1699,12 +1717,13 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1715,12 +1717,13 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  					udelay(500);
  					continue;
  				} else {
@@ -8706,17 +8881,7 @@ index f1de53b..002612f 100644
  
  		udelay(100);
  
-@@ -1722,6 +1741,9 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
- 		I915_READ(fdi_tx_reg);
- 
- 		temp = I915_READ(fdi_rx_reg);
-+		/* BPC in FDI rx is consistent with that in pipeconf */
-+		temp &= ~(0x07 << 16);
-+		temp |= (pipe_bpc << 11);
- 		I915_WRITE(fdi_rx_reg, temp & ~FDI_RX_ENABLE);
- 		I915_READ(fdi_rx_reg);
- 
-@@ -1760,12 +1782,18 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1779,7 +1782,8 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  					udelay(500);
  					continue;
  				} else {
@@ -8726,18 +8891,7 @@ index f1de53b..002612f 100644
  					break;
  				}
  			}
- 		}
--
-+		temp = I915_READ(transconf_reg);
-+		/* BPC in transcoder is consistent with that in pipeconf */
-+		temp &= ~PIPE_BPC_MASK;
-+		temp |= pipe_bpc;
-+		I915_WRITE(transconf_reg, temp);
-+		I915_READ(transconf_reg);
- 		udelay(100);
- 
- 		/* disable PCH DPLL */
-@@ -1776,7 +1804,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1800,7 +1804,7 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  		}
  
  		if (HAS_eDP) {
@@ -8746,7 +8900,7 @@ index f1de53b..002612f 100644
  		}
  
  		temp = I915_READ(fdi_rx_reg);
-@@ -1803,6 +1831,37 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1827,6 +1831,37 @@ static void igdng_crtc_dpms(struct drm_crtc *crtc, int mode)
  	}
  }
  
@@ -8784,7 +8938,7 @@ index f1de53b..002612f 100644
  static void i9xx_crtc_dpms(struct drm_crtc *crtc, int mode)
  {
  	struct drm_device *dev = crtc->dev;
-@@ -1861,12 +1920,13 @@ static void i9xx_crtc_dpms(struct drm_crtc *crtc, int mode)
+@@ -1885,12 +1920,13 @@ static void i9xx_crtc_dpms(struct drm_crtc *crtc, int mode)
  			intel_update_fbc(crtc, &crtc->mode);
  
  		/* Give the overlay scaler a chance to enable if it's on this pipe */
@@ -8800,7 +8954,7 @@ index f1de53b..002612f 100644
  		drm_vblank_off(dev, pipe);
  
  		if (dev_priv->cfb_plane == plane &&
-@@ -1986,7 +2046,7 @@ static bool intel_crtc_mode_fixup(struct drm_crtc *crtc,
+@@ -2010,7 +2046,7 @@ static bool intel_crtc_mode_fixup(struct drm_crtc *crtc,
  				  struct drm_display_mode *adjusted_mode)
  {
  	struct drm_device *dev = crtc->dev;
@@ -8809,7 +8963,7 @@ index f1de53b..002612f 100644
  		/* FDI link clock is fixed at 2.7G */
  		if (mode->clock * 3 > 27000 * 4)
  			return MODE_CLOCK_HIGH;
-@@ -2062,7 +2122,7 @@ static int i830_get_display_clock_speed(struct drm_device *dev)
+@@ -2086,7 +2122,7 @@ static int i830_get_display_clock_speed(struct drm_device *dev)
   * Return the pipe currently connected to the panel fitter,
   * or -1 if the panel fitter is not present or not in use
   */
@@ -8818,7 +8972,7 @@ index f1de53b..002612f 100644
  {
  	struct drm_i915_private *dev_priv = dev->dev_private;
  	u32  pfit_control;
-@@ -2106,9 +2166,8 @@ fdi_reduce_ratio(u32 *num, u32 *den)
+@@ -2130,9 +2166,8 @@ fdi_reduce_ratio(u32 *num, u32 *den)
  #define LINK_N 0x80000
  
  static void
@@ -8830,7 +8984,7 @@ index f1de53b..002612f 100644
  {
  	u64 temp;
  
-@@ -2136,34 +2195,34 @@ struct intel_watermark_params {
+@@ -2160,34 +2195,34 @@ struct intel_watermark_params {
  	unsigned long cacheline_size;
  };
  
@@ -8890,7 +9044,7 @@ index f1de53b..002612f 100644
  };
  static struct intel_watermark_params g4x_wm_info = {
  	G4X_FIFO_SIZE,
-@@ -2236,11 +2295,11 @@ static unsigned long intel_calculate_wm(unsigned long clock_in_khz,
+@@ -2260,11 +2295,11 @@ static unsigned long intel_calculate_wm(unsigned long clock_in_khz,
  		1000;
  	entries_required /= wm->cacheline_size;
  
@@ -8904,7 +9058,7 @@ index f1de53b..002612f 100644
  
  	/* Don't promote wm_size to unsigned... */
  	if (wm_size > (long)wm->max_wm)
-@@ -2302,50 +2361,50 @@ static struct cxsr_latency *intel_get_cxsr_latency(int is_desktop, int fsb,
+@@ -2326,50 +2361,50 @@ static struct cxsr_latency *intel_get_cxsr_latency(int is_desktop, int fsb,
  			return latency;
  	}
  
@@ -8966,7 +9120,7 @@ index f1de53b..002612f 100644
  				latency->cursor_sr);
  	reg = I915_READ(DSPFW3);
  	reg &= ~(0x3f << 24);
-@@ -2353,7 +2412,7 @@ static void igd_enable_cxsr(struct drm_device *dev, unsigned long clock,
+@@ -2377,7 +2412,7 @@ static void igd_enable_cxsr(struct drm_device *dev, unsigned long clock,
  	I915_WRITE(DSPFW3, reg);
  
  	/* Display HPLL off SR */
@@ -8975,7 +9129,7 @@ index f1de53b..002612f 100644
  		latency->display_hpll_disable, I915_FIFO_LINE_SIZE);
  	reg = I915_READ(DSPFW3);
  	reg &= 0xfffffe00;
-@@ -2361,17 +2420,17 @@ static void igd_enable_cxsr(struct drm_device *dev, unsigned long clock,
+@@ -2385,17 +2420,17 @@ static void igd_enable_cxsr(struct drm_device *dev, unsigned long clock,
  	I915_WRITE(DSPFW3, reg);
  
  	/* cursor HPLL off SR */
@@ -8996,7 +9150,7 @@ index f1de53b..002612f 100644
  	I915_WRITE(DSPFW3, reg);
  
  	DRM_INFO("Big FIFO is enabled\n");
-@@ -2393,7 +2452,7 @@ static void igd_enable_cxsr(struct drm_device *dev, unsigned long clock,
+@@ -2417,7 +2452,7 @@ static void igd_enable_cxsr(struct drm_device *dev, unsigned long clock,
   * A value of 5us seems to be a good balance; safe for very low end
   * platforms but not overly aggressive on lower latency configs.
   */
@@ -9005,7 +9159,7 @@ index f1de53b..002612f 100644
  
  static int i9xx_get_fifo_size(struct drm_device *dev, int plane)
  {
-@@ -2407,8 +2466,8 @@ static int i9xx_get_fifo_size(struct drm_device *dev, int plane)
+@@ -2431,8 +2466,8 @@ static int i9xx_get_fifo_size(struct drm_device *dev, int plane)
  		size = ((dsparb >> DSPARB_CSTART_SHIFT) & 0x7f) -
  			(dsparb & 0x7f);
  
@@ -9016,7 +9170,7 @@ index f1de53b..002612f 100644
  
  	return size;
  }
-@@ -2426,8 +2485,8 @@ static int i85x_get_fifo_size(struct drm_device *dev, int plane)
+@@ -2450,8 +2485,8 @@ static int i85x_get_fifo_size(struct drm_device *dev, int plane)
  			(dsparb & 0x1ff);
  	size >>= 1; /* Convert to cachelines */
  
@@ -9027,7 +9181,7 @@ index f1de53b..002612f 100644
  
  	return size;
  }
-@@ -2441,7 +2500,8 @@ static int i845_get_fifo_size(struct drm_device *dev, int plane)
+@@ -2465,7 +2500,8 @@ static int i845_get_fifo_size(struct drm_device *dev, int plane)
  	size = dsparb & 0x7f;
  	size >>= 2; /* Convert to cachelines */
  
@@ -9037,7 +9191,7 @@ index f1de53b..002612f 100644
  		  size);
  
  	return size;
-@@ -2456,8 +2516,8 @@ static int i830_get_fifo_size(struct drm_device *dev, int plane)
+@@ -2480,8 +2516,8 @@ static int i830_get_fifo_size(struct drm_device *dev, int plane)
  	size = dsparb & 0x7f;
  	size >>= 1; /* Convert to cachelines */
  
@@ -9048,7 +9202,7 @@ index f1de53b..002612f 100644
  
  	return size;
  }
-@@ -2503,7 +2563,7 @@ static void g4x_update_wm(struct drm_device *dev,  int planea_clock,
+@@ -2527,7 +2563,7 @@ static void g4x_update_wm(struct drm_device *dev,  int planea_clock,
  	/* Calc sr entries for one plane configs */
  	if (sr_hdisplay && (!planea_clock || !planeb_clock)) {
  		/* self-refresh has much higher latency */
@@ -9057,7 +9211,7 @@ index f1de53b..002612f 100644
  
  		sr_clock = planea_clock ? planea_clock : planeb_clock;
  		line_time_us = ((sr_hdisplay * 1000) / sr_clock);
-@@ -2532,15 +2592,39 @@ static void g4x_update_wm(struct drm_device *dev,  int planea_clock,
+@@ -2556,15 +2592,39 @@ static void g4x_update_wm(struct drm_device *dev,  int planea_clock,
  		   (cursor_sr << DSPFW_CURSOR_SR_SHIFT));
  }
  
@@ -9069,8 +9223,7 @@ index f1de53b..002612f 100644
  	struct drm_i915_private *dev_priv = dev->dev_private;
 +	unsigned long line_time_us;
 +	int sr_clock, sr_entries, srwm = 1;
- 
--	DRM_DEBUG("Setting FIFO watermarks - A: 8, B: 8, C: 8, SR 8\n");
++
 +	/* Calc sr entries for one plane configs */
 +	if (sr_hdisplay && (!planea_clock || !planeb_clock)) {
 +		/* self-refresh has much higher latency */
@@ -9078,7 +9231,8 @@ index f1de53b..002612f 100644
 +
 +		sr_clock = planea_clock ? planea_clock : planeb_clock;
 +		line_time_us = ((sr_hdisplay * 1000) / sr_clock);
-+
+ 
+-	DRM_DEBUG("Setting FIFO watermarks - A: 8, B: 8, C: 8, SR 8\n");
 +		/* Use ns/us then divide to preserve precision */
 +		sr_entries = (((sr_latency_ns / line_time_us) + 1) *
 +			      pixel_size * sr_hdisplay) / 1000;
@@ -9101,7 +9255,7 @@ index f1de53b..002612f 100644
  	I915_WRITE(DSPFW2, (8 << 8) | (8 << 0));
  }
  
-@@ -2576,7 +2660,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2600,7 +2660,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  				       pixel_size, latency_ns);
  	planeb_wm = intel_calculate_wm(planeb_clock, &planeb_params,
  				       pixel_size, latency_ns);
@@ -9110,7 +9264,7 @@ index f1de53b..002612f 100644
  
  	/*
  	 * Overlay gets an aggressive default since video jitter is bad.
-@@ -2587,7 +2671,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2611,7 +2671,7 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  	if (HAS_FW_BLC(dev) && sr_hdisplay &&
  	    (!planea_clock || !planeb_clock)) {
  		/* self-refresh has much higher latency */
@@ -9119,7 +9273,7 @@ index f1de53b..002612f 100644
  
  		sr_clock = planea_clock ? planea_clock : planeb_clock;
  		line_time_us = ((sr_hdisplay * 1000) / sr_clock);
-@@ -2596,14 +2680,14 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
+@@ -2620,14 +2680,14 @@ static void i9xx_update_wm(struct drm_device *dev, int planea_clock,
  		sr_entries = (((sr_latency_ns / line_time_us) + 1) *
  			      pixel_size * sr_hdisplay) / 1000;
  		sr_entries = roundup(sr_entries / cacheline_size, 1);
@@ -9136,7 +9290,7 @@ index f1de53b..002612f 100644
  		  planea_wm, planeb_wm, cwm, srwm);
  
  	fwater_lo = ((planeb_wm & 0x3f) << 16) | (planea_wm & 0x3f);
-@@ -2630,7 +2714,7 @@ static void i830_update_wm(struct drm_device *dev, int planea_clock, int unused,
+@@ -2654,7 +2714,7 @@ static void i830_update_wm(struct drm_device *dev, int planea_clock, int unused,
  				       pixel_size, latency_ns);
  	fwater_lo |= (3<<8) | planea_wm;
  
@@ -9145,7 +9299,7 @@ index f1de53b..002612f 100644
  
  	I915_WRITE(FW_BLC, fwater_lo);
  }
-@@ -2684,11 +2768,11 @@ static void intel_update_watermarks(struct drm_device *dev)
+@@ -2708,11 +2768,11 @@ static void intel_update_watermarks(struct drm_device *dev)
  		if (crtc->enabled) {
  			enabled++;
  			if (intel_crtc->plane == 0) {
@@ -9159,7 +9313,7 @@ index f1de53b..002612f 100644
  					  intel_crtc->pipe, crtc->mode.clock);
  				planeb_clock = crtc->mode.clock;
  			}
-@@ -2705,10 +2789,10 @@ static void intel_update_watermarks(struct drm_device *dev)
+@@ -2729,10 +2789,10 @@ static void intel_update_watermarks(struct drm_device *dev)
  		return;
  
  	/* Single plane configs can enable self refresh */
@@ -9174,7 +9328,7 @@ index f1de53b..002612f 100644
  
  	dev_priv->display.update_wm(dev, planea_clock, planeb_clock,
  				    sr_hdisplay, pixel_size);
-@@ -2802,10 +2886,11 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2826,10 +2886,11 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  
  	if (is_lvds && dev_priv->lvds_use_ssc && num_outputs < 2) {
  		refclk = dev_priv->lvds_ssc_freq * 1000;
@@ -9188,7 +9342,7 @@ index f1de53b..002612f 100644
  			refclk = 120000; /* 120Mhz refclk */
  	} else {
  		refclk = 48000;
-@@ -2825,14 +2910,25 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2849,14 +2910,25 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		return -EINVAL;
  	}
  
@@ -9217,7 +9371,7 @@ index f1de53b..002612f 100644
  	/* SDVO TV has fixed PLL values depend on its clock range,
  	   this mirrors vbios setting. */
  	if (is_sdvo && is_tv) {
-@@ -2854,7 +2950,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2878,7 +2950,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	}
  
  	/* FDI link */
@@ -9226,26 +9380,7 @@ index f1de53b..002612f 100644
  		int lane, link_bw, bpp;
  		/* eDP doesn't require FDI link, so just set DP M/N
  		   according to current link config */
-@@ -2877,6 +2973,18 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
- 
- 		/* determine panel color depth */
- 		temp = I915_READ(pipeconf_reg);
-+		temp &= ~PIPE_BPC_MASK;
-+		if (is_lvds) {
-+			int lvds_reg = I915_READ(PCH_LVDS);
-+			/* the BPC will be 6 if it is 18-bit LVDS panel */
-+			if ((lvds_reg & LVDS_A3_POWER_MASK) == LVDS_A3_POWER_UP)
-+				temp |= PIPE_8BPC;
-+			else
-+				temp |= PIPE_6BPC;
-+		} else
-+			temp |= PIPE_8BPC;
-+		I915_WRITE(pipeconf_reg, temp);
-+		I915_READ(pipeconf_reg);
- 
- 		switch (temp & PIPE_BPC_MASK) {
- 		case PIPE_8BPC:
-@@ -2896,8 +3004,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2932,8 +3004,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  			bpp = 24;
  		}
  
@@ -9255,7 +9390,7 @@ index f1de53b..002612f 100644
  	}
  
  	/* Ironlake: try to setup display ref clock before DPLL
-@@ -2905,7 +3012,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2941,7 +3012,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	 * PCH B stepping, previous chipset stepping should be
  	 * ignoring this setting.
  	 */
@@ -9264,7 +9399,7 @@ index f1de53b..002612f 100644
  		temp = I915_READ(PCH_DREF_CONTROL);
  		/* Always enable nonspread source */
  		temp &= ~DREF_NONSPREAD_SOURCE_MASK;
-@@ -2940,7 +3047,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2976,7 +3047,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		}
  	}
  
@@ -9273,7 +9408,7 @@ index f1de53b..002612f 100644
  		fp = (1 << clock.n) << 16 | clock.m1 << 8 | clock.m2;
  		if (has_reduced_clock)
  			fp2 = (1 << reduced_clock.n) << 16 |
-@@ -2952,7 +3059,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -2988,7 +3059,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  				reduced_clock.m2;
  	}
  
@@ -9282,7 +9417,7 @@ index f1de53b..002612f 100644
  		dpll = DPLL_VGA_MODE_DIS;
  
  	if (IS_I9XX(dev)) {
-@@ -2965,19 +3072,19 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3001,19 +3072,19 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  			sdvo_pixel_multiply = adjusted_mode->clock / mode->clock;
  			if (IS_I945G(dev) || IS_I945GM(dev) || IS_G33(dev))
  				dpll |= (sdvo_pixel_multiply - 1) << SDVO_MULTIPLIER_SHIFT_HIRES;
@@ -9306,7 +9441,7 @@ index f1de53b..002612f 100644
  				dpll |= (1 << (clock.p1 - 1)) << DPLL_FPA1_P1_POST_DIV_SHIFT;
  			if (IS_G4X(dev) && has_reduced_clock)
  				dpll |= (1 << (reduced_clock.p1 - 1)) << DPLL_FPA1_P1_POST_DIV_SHIFT;
-@@ -2996,7 +3103,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3032,7 +3103,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  			dpll |= DPLLB_LVDS_P2_CLOCK_DIV_14;
  			break;
  		}
@@ -9315,7 +9450,7 @@ index f1de53b..002612f 100644
  			dpll |= (6 << PLL_LOAD_PULSE_PHASE_SHIFT);
  	} else {
  		if (is_lvds) {
-@@ -3028,9 +3135,9 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3064,9 +3135,9 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	/* Set up the display plane register */
  	dspcntr = DISPPLANE_GAMMA_ENABLE;
  
@@ -9327,7 +9462,7 @@ index f1de53b..002612f 100644
  		if (pipe == 0)
  			dspcntr &= ~DISPPLANE_SEL_PIPE_MASK;
  		else
-@@ -3057,20 +3164,20 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3093,20 +3164,20 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  
  
  	/* Disable the panel fitter if it was on our pipe */
@@ -9353,7 +9488,7 @@ index f1de53b..002612f 100644
  	} else if ((dpll & DPLL_VCO_ENABLE)) {
  		I915_WRITE(fp_reg, fp);
  		I915_WRITE(dpll_reg, dpll & ~DPLL_VCO_ENABLE);
-@@ -3085,7 +3192,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3121,7 +3192,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	if (is_lvds) {
  		u32 lvds;
  
@@ -9362,29 +9497,22 @@ index f1de53b..002612f 100644
  			lvds_reg = PCH_LVDS;
  
  		lvds = I915_READ(lvds_reg);
-@@ -3104,7 +3211,20 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
- 		 * appropriately here, but we need to look more thoroughly into how
- 		 * panels behave in the two modes.
- 		 */
--
-+		/* set the dithering flag */
-+		if (IS_I965G(dev)) {
-+			if (dev_priv->lvds_dither) {
+@@ -3143,12 +3214,12 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+ 		/* set the dithering flag */
+ 		if (IS_I965G(dev)) {
+ 			if (dev_priv->lvds_dither) {
+-				if (IS_IGDNG(dev))
 +				if (IS_IRONLAKE(dev))
-+					pipeconf |= PIPE_ENABLE_DITHER;
-+				else
-+					lvds |= LVDS_ENABLE_DITHER;
-+			} else {
+ 					pipeconf |= PIPE_ENABLE_DITHER;
+ 				else
+ 					lvds |= LVDS_ENABLE_DITHER;
+ 			} else {
+-				if (IS_IGDNG(dev))
 +				if (IS_IRONLAKE(dev))
-+					pipeconf &= ~PIPE_ENABLE_DITHER;
-+				else
-+					lvds &= ~LVDS_ENABLE_DITHER;
-+			}
-+		}
- 		I915_WRITE(lvds_reg, lvds);
- 		I915_READ(lvds_reg);
- 	}
-@@ -3118,7 +3238,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+ 					pipeconf &= ~PIPE_ENABLE_DITHER;
+ 				else
+ 					lvds &= ~LVDS_ENABLE_DITHER;
+@@ -3167,7 +3238,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		/* Wait for the clocks to stabilize. */
  		udelay(150);
  
@@ -9393,7 +9521,7 @@ index f1de53b..002612f 100644
  			if (is_sdvo) {
  				sdvo_pixel_multiply = adjusted_mode->clock / mode->clock;
  				I915_WRITE(dpll_md_reg, (0 << DPLL_MD_UDI_DIVIDER_SHIFT) |
-@@ -3138,14 +3258,14 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3187,14 +3258,14 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  		I915_WRITE(fp_reg + 4, fp2);
  		intel_crtc->lowfreq_avail = true;
  		if (HAS_PIPE_CXSR(dev)) {
@@ -9410,7 +9538,7 @@ index f1de53b..002612f 100644
  			pipeconf &= ~PIPECONF_CXSR_DOWNCLOCK;
  		}
  	}
-@@ -3165,21 +3285,21 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3214,21 +3285,21 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  	/* pipesrc and dspsize control the size that is scaled from, which should
  	 * always be the user's requested size.
  	 */
@@ -9435,7 +9563,7 @@ index f1de53b..002612f 100644
  		} else {
  			/* enable FDI RX PLL too */
  			temp = I915_READ(fdi_rx_reg);
-@@ -3193,7 +3313,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
+@@ -3242,7 +3313,7 @@ static int intel_crtc_mode_set(struct drm_crtc *crtc,
  
  	intel_wait_for_vblank(dev);
  
@@ -9444,7 +9572,7 @@ index f1de53b..002612f 100644
  		/* enable address swizzle for tiling buffer */
  		temp = I915_READ(DISP_ARB_CTL);
  		I915_WRITE(DISP_ARB_CTL, temp | DISP_TILE_SURFACE_SWIZZLING);
-@@ -3227,8 +3347,8 @@ void intel_crtc_load_lut(struct drm_crtc *crtc)
+@@ -3276,8 +3347,8 @@ void intel_crtc_load_lut(struct drm_crtc *crtc)
  	if (!crtc->enabled)
  		return;
  
@@ -9455,7 +9583,7 @@ index f1de53b..002612f 100644
  		palreg = (intel_crtc->pipe == 0) ? LGC_PALETTE_A :
  						   LGC_PALETTE_B;
  
-@@ -3257,11 +3377,11 @@ static int intel_crtc_cursor_set(struct drm_crtc *crtc,
+@@ -3306,11 +3377,11 @@ static int intel_crtc_cursor_set(struct drm_crtc *crtc,
  	size_t addr;
  	int ret;
  
@@ -9469,7 +9597,7 @@ index f1de53b..002612f 100644
  		if (IS_MOBILE(dev) || IS_I9XX(dev)) {
  			temp &= ~(CURSOR_MODE | MCURSOR_GAMMA_ENABLE);
  			temp |= CURSOR_MODE_DISABLE;
-@@ -3294,7 +3414,7 @@ static int intel_crtc_cursor_set(struct drm_crtc *crtc,
+@@ -3343,7 +3414,7 @@ static int intel_crtc_cursor_set(struct drm_crtc *crtc,
  
  	/* we only need to pin inside GTT if cursor is non-phy */
  	mutex_lock(&dev->struct_mutex);
@@ -9478,7 +9606,7 @@ index f1de53b..002612f 100644
  		ret = i915_gem_object_pin(bo, PAGE_SIZE);
  		if (ret) {
  			DRM_ERROR("failed to pin cursor bo\n");
-@@ -3329,7 +3449,7 @@ static int intel_crtc_cursor_set(struct drm_crtc *crtc,
+@@ -3378,7 +3449,7 @@ static int intel_crtc_cursor_set(struct drm_crtc *crtc,
  	I915_WRITE(base, addr);
  
  	if (intel_crtc->cursor_bo) {
@@ -9487,7 +9615,7 @@ index f1de53b..002612f 100644
  			if (intel_crtc->cursor_bo != bo)
  				i915_gem_detach_phys_object(dev, intel_crtc->cursor_bo);
  		} else
-@@ -3569,18 +3689,18 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
+@@ -3618,18 +3689,18 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
  		fp = I915_READ((pipe == 0) ? FPA1 : FPB1);
  
  	clock.m1 = (fp & FP_M1_DIV_MASK) >> FP_M1_DIV_SHIFT;
@@ -9512,7 +9640,7 @@ index f1de53b..002612f 100644
  		else
  			clock.p1 = ffs((dpll & DPLL_FPA01_P1_POST_DIV_MASK) >>
  			       DPLL_FPA01_P1_POST_DIV_SHIFT);
-@@ -3595,7 +3715,7 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
+@@ -3644,7 +3715,7 @@ static int intel_crtc_clock_get(struct drm_device *dev, struct drm_crtc *crtc)
  				7 : 14;
  			break;
  		default:
@@ -9521,7 +9649,7 @@ index f1de53b..002612f 100644
  				  "mode\n", (int)(dpll & DPLL_MODE_MASK));
  			return 0;
  		}
-@@ -3681,132 +3801,13 @@ static void intel_gpu_idle_timer(unsigned long arg)
+@@ -3730,7 +3801,7 @@ static void intel_gpu_idle_timer(unsigned long arg)
  	struct drm_device *dev = (struct drm_device *)arg;
  	drm_i915_private_t *dev_priv = dev->dev_private;
  
@@ -9530,132 +9658,7 @@ index f1de53b..002612f 100644
  
  	dev_priv->busy = false;
  
- 	queue_work(dev_priv->wq, &dev_priv->idle_work);
- }
- 
--void intel_increase_renderclock(struct drm_device *dev, bool schedule)
--{
--	drm_i915_private_t *dev_priv = dev->dev_private;
--
--	if (IS_IGDNG(dev))
--		return;
--
--	if (!dev_priv->render_reclock_avail) {
--		DRM_DEBUG("not reclocking render clock\n");
--		return;
--	}
--
--	/* Restore render clock frequency to original value */
--	if (IS_G4X(dev) || IS_I9XX(dev))
--		pci_write_config_word(dev->pdev, GCFGC, dev_priv->orig_clock);
--	else if (IS_I85X(dev))
--		pci_write_config_word(dev->pdev, HPLLCC, dev_priv->orig_clock);
--	DRM_DEBUG("increasing render clock frequency\n");
--
--	/* Schedule downclock */
--	if (schedule)
--		mod_timer(&dev_priv->idle_timer, jiffies +
--			  msecs_to_jiffies(GPU_IDLE_TIMEOUT));
--}
--
--void intel_decrease_renderclock(struct drm_device *dev)
--{
--	drm_i915_private_t *dev_priv = dev->dev_private;
--
--	if (IS_IGDNG(dev))
--		return;
--
--	if (!dev_priv->render_reclock_avail) {
--		DRM_DEBUG("not reclocking render clock\n");
--		return;
--	}
--
--	if (IS_G4X(dev)) {
--		u16 gcfgc;
--
--		/* Adjust render clock... */
--		pci_read_config_word(dev->pdev, GCFGC, &gcfgc);
--
--		/* Down to minimum... */
--		gcfgc &= ~GM45_GC_RENDER_CLOCK_MASK;
--		gcfgc |= GM45_GC_RENDER_CLOCK_266_MHZ;
--
--		pci_write_config_word(dev->pdev, GCFGC, gcfgc);
--	} else if (IS_I965G(dev)) {
--		u16 gcfgc;
--
--		/* Adjust render clock... */
--		pci_read_config_word(dev->pdev, GCFGC, &gcfgc);
--
--		/* Down to minimum... */
--		gcfgc &= ~I965_GC_RENDER_CLOCK_MASK;
--		gcfgc |= I965_GC_RENDER_CLOCK_267_MHZ;
--
--		pci_write_config_word(dev->pdev, GCFGC, gcfgc);
--	} else if (IS_I945G(dev) || IS_I945GM(dev)) {
--		u16 gcfgc;
--
--		/* Adjust render clock... */
--		pci_read_config_word(dev->pdev, GCFGC, &gcfgc);
--
--		/* Down to minimum... */
--		gcfgc &= ~I945_GC_RENDER_CLOCK_MASK;
--		gcfgc |= I945_GC_RENDER_CLOCK_166_MHZ;
--
--		pci_write_config_word(dev->pdev, GCFGC, gcfgc);
--	} else if (IS_I915G(dev)) {
--		u16 gcfgc;
--
--		/* Adjust render clock... */
--		pci_read_config_word(dev->pdev, GCFGC, &gcfgc);
--
--		/* Down to minimum... */
--		gcfgc &= ~I915_GC_RENDER_CLOCK_MASK;
--		gcfgc |= I915_GC_RENDER_CLOCK_166_MHZ;
--
--		pci_write_config_word(dev->pdev, GCFGC, gcfgc);
--	} else if (IS_I85X(dev)) {
--		u16 hpllcc;
--
--		/* Adjust render clock... */
--		pci_read_config_word(dev->pdev, HPLLCC, &hpllcc);
--
--		/* Up to maximum... */
--		hpllcc &= ~GC_CLOCK_CONTROL_MASK;
--		hpllcc |= GC_CLOCK_133_200;
--
--		pci_write_config_word(dev->pdev, HPLLCC, hpllcc);
--	}
--	DRM_DEBUG("decreasing render clock frequency\n");
--}
--
--/* Note that no increase function is needed for this - increase_renderclock()
-- *  will also rewrite these bits
-- */
--void intel_decrease_displayclock(struct drm_device *dev)
--{
--	if (IS_IGDNG(dev))
--		return;
--
--	if (IS_I945G(dev) || IS_I945GM(dev) || IS_I915G(dev) ||
--	    IS_I915GM(dev)) {
--		u16 gcfgc;
--
--		/* Adjust render clock... */
--		pci_read_config_word(dev->pdev, GCFGC, &gcfgc);
--
--		/* Down to minimum... */
--		gcfgc &= ~0xf0;
--		gcfgc |= 0x80;
--
--		pci_write_config_word(dev->pdev, GCFGC, gcfgc);
--	}
--}
--
- #define CRTC_IDLE_TIMEOUT 1000 /* ms */
- 
- static void intel_crtc_idle_timer(unsigned long arg)
-@@ -3815,7 +3816,7 @@ static void intel_crtc_idle_timer(unsigned long arg)
+@@ -3745,7 +3816,7 @@ static void intel_crtc_idle_timer(unsigned long arg)
  	struct drm_crtc *crtc = &intel_crtc->base;
  	drm_i915_private_t *dev_priv = crtc->dev->dev_private;
  
@@ -9664,7 +9667,7 @@ index f1de53b..002612f 100644
  
  	intel_crtc->busy = false;
  
-@@ -3831,14 +3832,14 @@ static void intel_increase_pllclock(struct drm_crtc *crtc, bool schedule)
+@@ -3761,14 +3832,14 @@ static void intel_increase_pllclock(struct drm_crtc *crtc, bool schedule)
  	int dpll_reg = (pipe == 0) ? DPLL_A : DPLL_B;
  	int dpll = I915_READ(dpll_reg);
  
@@ -9681,7 +9684,7 @@ index f1de53b..002612f 100644
  
  		/* Unlock panel regs */
  		I915_WRITE(PP_CONTROL, I915_READ(PP_CONTROL) | (0xabcd << 16));
-@@ -3849,7 +3850,7 @@ static void intel_increase_pllclock(struct drm_crtc *crtc, bool schedule)
+@@ -3779,7 +3850,7 @@ static void intel_increase_pllclock(struct drm_crtc *crtc, bool schedule)
  		intel_wait_for_vblank(dev);
  		dpll = I915_READ(dpll_reg);
  		if (dpll & DISPLAY_RATE_SELECT_FPA1)
@@ -9690,7 +9693,7 @@ index f1de53b..002612f 100644
  
  		/* ...and lock them again */
  		I915_WRITE(PP_CONTROL, I915_READ(PP_CONTROL) & 0x3);
-@@ -3870,7 +3871,7 @@ static void intel_decrease_pllclock(struct drm_crtc *crtc)
+@@ -3800,7 +3871,7 @@ static void intel_decrease_pllclock(struct drm_crtc *crtc)
  	int dpll_reg = (pipe == 0) ? DPLL_A : DPLL_B;
  	int dpll = I915_READ(dpll_reg);
  
@@ -9699,7 +9702,7 @@ index f1de53b..002612f 100644
  		return;
  
  	if (!dev_priv->lvds_downclock_avail)
-@@ -3881,7 +3882,7 @@ static void intel_decrease_pllclock(struct drm_crtc *crtc)
+@@ -3811,7 +3882,7 @@ static void intel_decrease_pllclock(struct drm_crtc *crtc)
  	 * the manual case.
  	 */
  	if (!HAS_PIPE_CXSR(dev) && intel_crtc->lowfreq_avail) {
@@ -9708,7 +9711,7 @@ index f1de53b..002612f 100644
  
  		/* Unlock panel regs */
  		I915_WRITE(PP_CONTROL, I915_READ(PP_CONTROL) | (0xabcd << 16));
-@@ -3892,7 +3893,7 @@ static void intel_decrease_pllclock(struct drm_crtc *crtc)
+@@ -3822,7 +3893,7 @@ static void intel_decrease_pllclock(struct drm_crtc *crtc)
  		intel_wait_for_vblank(dev);
  		dpll = I915_READ(dpll_reg);
  		if (!(dpll & DISPLAY_RATE_SELECT_FPA1))
@@ -9717,25 +9720,10 @@ index f1de53b..002612f 100644
  
  		/* ...and lock them again */
  		I915_WRITE(PP_CONTROL, I915_READ(PP_CONTROL) & 0x3);
-@@ -3920,12 +3921,6 @@ static void intel_idle_update(struct work_struct *work)
- 
- 	mutex_lock(&dev->struct_mutex);
- 
--	/* GPU isn't processing, downclock it. */
--	if (!dev_priv->busy) {
--		intel_decrease_renderclock(dev);
--		intel_decrease_displayclock(dev);
--	}
--
- 	list_for_each_entry(crtc, &dev->mode_config.crtc_list, head) {
- 		/* Skip inactive CRTCs */
- 		if (!crtc->fb)
-@@ -3959,8 +3954,11 @@ void intel_mark_busy(struct drm_device *dev, struct drm_gem_object *obj)
- 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
+@@ -3884,6 +3955,11 @@ void intel_mark_busy(struct drm_device *dev, struct drm_gem_object *obj)
  		return;
  
--	dev_priv->busy = true;
--	intel_increase_renderclock(dev, true);
+ 	dev_priv->busy = true;
 +	if (!dev_priv->busy)
 +		dev_priv->busy = true;
 +	else
@@ -9744,7 +9732,7 @@ index f1de53b..002612f 100644
  
  	list_for_each_entry(crtc, &dev->mode_config.crtc_list, head) {
  		if (!crtc->fb)
-@@ -3990,6 +3988,158 @@ static void intel_crtc_destroy(struct drm_crtc *crtc)
+@@ -3913,6 +3989,158 @@ static void intel_crtc_destroy(struct drm_crtc *crtc)
  	kfree(intel_crtc);
  }
  
@@ -9903,7 +9891,7 @@ index f1de53b..002612f 100644
  static const struct drm_crtc_helper_funcs intel_helper_funcs = {
  	.dpms = intel_crtc_dpms,
  	.mode_fixup = intel_crtc_mode_fixup,
-@@ -4006,11 +4156,13 @@ static const struct drm_crtc_funcs intel_crtc_funcs = {
+@@ -3929,11 +4157,13 @@ static const struct drm_crtc_funcs intel_crtc_funcs = {
  	.gamma_set = intel_crtc_gamma_set,
  	.set_config = drm_crtc_helper_set_config,
  	.destroy = intel_crtc_destroy,
@@ -9917,7 +9905,7 @@ index f1de53b..002612f 100644
  	struct intel_crtc *intel_crtc;
  	int i;
  
-@@ -4033,10 +4185,15 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
+@@ -3956,10 +4186,15 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
  	intel_crtc->pipe = pipe;
  	intel_crtc->plane = pipe;
  	if (IS_MOBILE(dev) && (IS_I9XX(dev) && !IS_I965G(dev))) {
@@ -9934,7 +9922,7 @@ index f1de53b..002612f 100644
  	intel_crtc->cursor_addr = 0;
  	intel_crtc->dpms_mode = DRM_MODE_DPMS_OFF;
  	drm_crtc_helper_add(&intel_crtc->base, &intel_helper_funcs);
-@@ -4113,7 +4270,7 @@ static void intel_setup_outputs(struct drm_device *dev)
+@@ -4036,7 +4271,7 @@ static void intel_setup_outputs(struct drm_device *dev)
  	if (IS_MOBILE(dev) && !IS_I830(dev))
  		intel_lvds_init(dev);
  
@@ -9943,7 +9931,7 @@ index f1de53b..002612f 100644
  		int found;
  
  		if (IS_MOBILE(dev) && (I915_READ(DP_A) & DP_DETECTED))
-@@ -4145,29 +4302,43 @@ static void intel_setup_outputs(struct drm_device *dev)
+@@ -4068,29 +4303,43 @@ static void intel_setup_outputs(struct drm_device *dev)
  		bool found = false;
  
  		if (I915_READ(SDVOB) & SDVO_DETECTED) {
@@ -9993,7 +9981,7 @@ index f1de53b..002612f 100644
  	} else if (IS_I8XX(dev))
  		intel_dvo_init(dev);
  
-@@ -4272,6 +4443,42 @@ static const struct drm_mode_config_funcs intel_mode_funcs = {
+@@ -4195,6 +4444,42 @@ static const struct drm_mode_config_funcs intel_mode_funcs = {
  	.fb_changed = intelfb_probe,
  };
  
@@ -10036,7 +10024,7 @@ index f1de53b..002612f 100644
  void intel_init_clock_gating(struct drm_device *dev)
  {
  	struct drm_i915_private *dev_priv = dev->dev_private;
-@@ -4280,7 +4487,7 @@ void intel_init_clock_gating(struct drm_device *dev)
+@@ -4203,7 +4488,7 @@ void intel_init_clock_gating(struct drm_device *dev)
  	 * Disable clock gating reported to work incorrectly according to the
  	 * specs, but enable as much else as we can.
  	 */
@@ -10045,7 +10033,7 @@ index f1de53b..002612f 100644
  		return;
  	} else if (IS_G4X(dev)) {
  		uint32_t dspclk_gate;
-@@ -4314,11 +4521,37 @@ void intel_init_clock_gating(struct drm_device *dev)
+@@ -4237,11 +4522,37 @@ void intel_init_clock_gating(struct drm_device *dev)
  		dstate |= DSTATE_PLL_D3_OFF | DSTATE_GFX_CLOCK_GATING |
  			DSTATE_DOT_CLOCK_GATING;
  		I915_WRITE(D_STATE, dstate);
@@ -10084,7 +10072,7 @@ index f1de53b..002612f 100644
  }
  
  /* Set up chip specific display functions */
-@@ -4327,8 +4560,8 @@ static void intel_init_display(struct drm_device *dev)
+@@ -4250,8 +4561,8 @@ static void intel_init_display(struct drm_device *dev)
  	struct drm_i915_private *dev_priv = dev->dev_private;
  
  	/* We always want a DPMS function */
@@ -10095,7 +10083,7 @@ index f1de53b..002612f 100644
  	else
  		dev_priv->display.dpms = i9xx_crtc_dpms;
  
-@@ -4347,13 +4580,13 @@ static void intel_init_display(struct drm_device *dev)
+@@ -4270,13 +4581,13 @@ static void intel_init_display(struct drm_device *dev)
  	}
  
  	/* Returns the core display clock speed */
@@ -10111,7 +10099,7 @@ index f1de53b..002612f 100644
  		dev_priv->display.get_display_clock_speed =
  			i9xx_misc_get_display_clock_speed;
  	else if (IS_I915GM(dev))
-@@ -4362,7 +4595,7 @@ static void intel_init_display(struct drm_device *dev)
+@@ -4285,7 +4596,7 @@ static void intel_init_display(struct drm_device *dev)
  	else if (IS_I865G(dev))
  		dev_priv->display.get_display_clock_speed =
  			i865_get_display_clock_speed;
@@ -10120,7 +10108,7 @@ index f1de53b..002612f 100644
  		dev_priv->display.get_display_clock_speed =
  			i855_get_display_clock_speed;
  	else /* 852, 830 */
-@@ -4370,7 +4603,7 @@ static void intel_init_display(struct drm_device *dev)
+@@ -4293,7 +4604,7 @@ static void intel_init_display(struct drm_device *dev)
  			i830_get_display_clock_speed;
  
  	/* For FIFO watermark updates */
@@ -10129,7 +10117,7 @@ index f1de53b..002612f 100644
  		dev_priv->display.update_wm = NULL;
  	else if (IS_G4X(dev))
  		dev_priv->display.update_wm = g4x_update_wm;
-@@ -4426,7 +4659,7 @@ void intel_modeset_init(struct drm_device *dev)
+@@ -4349,7 +4660,7 @@ void intel_modeset_init(struct drm_device *dev)
  		num_pipe = 2;
  	else
  		num_pipe = 1;
@@ -10138,7 +10126,7 @@ index f1de53b..002612f 100644
  		  num_pipe, num_pipe > 1 ? "s" : "");
  
  	if (IS_I85X(dev))
-@@ -4445,6 +4678,15 @@ void intel_modeset_init(struct drm_device *dev)
+@@ -4368,6 +4679,15 @@ void intel_modeset_init(struct drm_device *dev)
  	INIT_WORK(&dev_priv->idle_work, intel_idle_update);
  	setup_timer(&dev_priv->idle_timer, intel_gpu_idle_timer,
  		    (unsigned long)dev);
@@ -10154,11 +10142,8 @@ index f1de53b..002612f 100644
  }
  
  void intel_modeset_cleanup(struct drm_device *dev)
-@@ -4465,14 +4707,23 @@ void intel_modeset_cleanup(struct drm_device *dev)
- 		del_timer_sync(&intel_crtc->idle_timer);
- 	}
+@@ -4390,11 +4710,21 @@ void intel_modeset_cleanup(struct drm_device *dev)
  
--	intel_increase_renderclock(dev, false);
  	del_timer_sync(&dev_priv->idle_timer);
  
 -	mutex_unlock(&dev->struct_mutex);
@@ -11188,7 +11173,7 @@ index c7eab72..8673c73 100644
  	intel_i2c_quirk_set(dev, true);
  	set_data(chan, 1);
 diff --git a/drivers/gpu/drm/i915/intel_lvds.c b/drivers/gpu/drm/i915/intel_lvds.c
-index 05598ae..f4b4aa2 100644
+index 0e0e4b4..f4b4aa2 100644
 --- a/drivers/gpu/drm/i915/intel_lvds.c
 +++ b/drivers/gpu/drm/i915/intel_lvds.c
 @@ -56,7 +56,7 @@ static void intel_lvds_set_backlight(struct drm_device *dev, int level)
@@ -11286,22 +11271,7 @@ index 05598ae..f4b4aa2 100644
  	{ }
  };
  
-@@ -679,7 +686,14 @@ static int intel_lid_notify(struct notifier_block *nb, unsigned long val,
- 	struct drm_i915_private *dev_priv =
- 		container_of(nb, struct drm_i915_private, lid_notifier);
- 	struct drm_device *dev = dev_priv->dev;
-+	struct drm_connector *connector = dev_priv->int_lvds_connector;
- 
-+	/*
-+	 * check and update the status of LVDS connector after receiving
-+	 * the LID nofication event.
-+	 */
-+	if (connector)
-+		connector->status = connector->funcs->detect(connector);
- 	if (!acpi_lid_open()) {
- 		dev_priv->modeset_on_lid = 1;
- 		return NOTIFY_OK;
-@@ -854,64 +868,100 @@ static const struct dmi_system_id intel_no_lvds[] = {
+@@ -861,64 +868,100 @@ static const struct dmi_system_id intel_no_lvds[] = {
  	{ }	/* terminating entry */
  };
  
@@ -11447,7 +11417,7 @@ index 05598ae..f4b4aa2 100644
  
  /**
   * intel_lvds_init - setup LVDS connectors on this device
-@@ -936,21 +986,16 @@ void intel_lvds_init(struct drm_device *dev)
+@@ -943,21 +986,16 @@ void intel_lvds_init(struct drm_device *dev)
  	if (dmi_check_system(intel_no_lvds))
  		return;
  
@@ -11474,7 +11444,7 @@ index 05598ae..f4b4aa2 100644
  			return;
  		}
  		gpio = PCH_GPIOC;
-@@ -1023,6 +1068,7 @@ void intel_lvds_init(struct drm_device *dev)
+@@ -1030,6 +1068,7 @@ void intel_lvds_init(struct drm_device *dev)
  			dev_priv->panel_fixed_mode =
  				drm_mode_duplicate(dev, scan);
  			mutex_unlock(&dev->mode_config.mutex);
@@ -11482,7 +11452,7 @@ index 05598ae..f4b4aa2 100644
  			goto out;
  		}
  		mutex_unlock(&dev->mode_config.mutex);
-@@ -1047,8 +1093,8 @@ void intel_lvds_init(struct drm_device *dev)
+@@ -1054,8 +1093,8 @@ void intel_lvds_init(struct drm_device *dev)
  	 * correct mode.
  	 */
  
@@ -11493,7 +11463,7 @@ index 05598ae..f4b4aa2 100644
  		goto failed;
  
  	lvds = I915_READ(LVDS);
-@@ -1069,7 +1115,7 @@ void intel_lvds_init(struct drm_device *dev)
+@@ -1076,7 +1115,7 @@ void intel_lvds_init(struct drm_device *dev)
  		goto failed;
  
  out:
@@ -11502,7 +11472,7 @@ index 05598ae..f4b4aa2 100644
  		u32 pwm;
  		/* make sure PWM is enabled */
  		pwm = I915_READ(BLC_PWM_CPU_CTL2);
-@@ -1082,9 +1128,11 @@ out:
+@@ -1089,7 +1128,7 @@ out:
  	}
  	dev_priv->lid_notifier.notifier_call = intel_lid_notify;
  	if (acpi_lid_notifier_register(&dev_priv->lid_notifier)) {
@@ -11510,12 +11480,8 @@ index 05598ae..f4b4aa2 100644
 +		DRM_DEBUG_KMS("lid notifier registration failed\n");
  		dev_priv->lid_notifier.notifier_call = NULL;
  	}
-+	/* keep the LVDS connector */
-+	dev_priv->int_lvds_connector = connector;
- 	drm_sysfs_connector_add(connector);
- 	return;
- 
-@@ -1093,5 +1141,6 @@ failed:
+ 	/* keep the LVDS connector */
+@@ -1102,5 +1141,6 @@ failed:
  	if (intel_output->ddc_bus)
  		intel_i2c_destroy(intel_output->ddc_bus);
  	drm_connector_cleanup(connector);
@@ -79137,7 +79103,7 @@ index 7cb50bd..e3f46e0 100644
  #ifndef __KERNEL__
  typedef struct drm_clip_rect drm_clip_rect_t;
 diff --git a/include/drm/drmP.h b/include/drm/drmP.h
-index 9d3d684..ffac157 100644
+index 7ad3faa..ffac157 100644
 --- a/include/drm/drmP.h
 +++ b/include/drm/drmP.h
 @@ -245,16 +245,6 @@ extern void drm_ut_debug_printk(unsigned int request_level,
@@ -79299,15 +79265,6 @@ index 9d3d684..ffac157 100644
  extern int drm_release(struct inode *inode, struct file *filp);
  
  				/* Mapping support (drm_vm.h) */
-@@ -1402,7 +1408,7 @@ extern int drm_ati_pcigart_cleanup(struct drm_device *dev,
- 				   struct drm_ati_pcigart_info * gart_info);
- 
- extern drm_dma_handle_t *drm_pci_alloc(struct drm_device *dev, size_t size,
--				       size_t align, dma_addr_t maxaddr);
-+				       size_t align);
- extern void __drm_pci_free(struct drm_device *dev, drm_dma_handle_t * dmah);
- extern void drm_pci_free(struct drm_device *dev, drm_dma_handle_t * dmah);
- 
 @@ -1520,14 +1526,27 @@ static __inline__ void drm_core_dropmap(struct drm_local_map *map)
  
  static __inline__ void *drm_calloc_large(size_t nmemb, size_t size)
@@ -81981,3 +81938,6 @@ index 0000000..2be7e12
 + */
 +
 +#endif
+-- 
+1.6.5.2
+
