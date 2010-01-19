@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1987 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1988 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2081,6 +2081,10 @@ fi
 # and build.
 
 %changelog
+* Mon Jan 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.4-28
+- Linux stable 2.6.32.4
+- drm-upgrayedd: rebase for related changes in intel_display.c, i915_drv.h
+
 * Mon Jan 18 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.3-27
 - various nouveau fixes from upstream
 - dropped drm-nouveau-bios-paranoia.patch, it's upstream now
