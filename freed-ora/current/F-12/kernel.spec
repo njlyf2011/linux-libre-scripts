@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1988 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1989 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -773,6 +773,8 @@ Patch12013: linux-2.6-rfkill-all.patch
 Patch12101: wmi-free-the-allocated-acpi-objects.patch
 Patch12102: wmi-check-wmi-get-event-data-return-value.patch
 
+Patch12200: add-appleir-usb-driver.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1421,6 +1423,8 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
+
+ApplyPatch add-appleir-usb-driver.patch
 
 # Patches for -stable
 ApplyPatch wmi-free-the-allocated-acpi-objects.patch
@@ -2081,6 +2085,9 @@ fi
 # and build.
 
 %changelog
+* Wed Jan 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.4-29
+- add appleir usb driver
+
 * Mon Jan 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.4-28
 - Linux stable 2.6.32.4
 - drm-upgrayedd: rebase for related changes in intel_display.c, i915_drv.h
