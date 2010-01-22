@@ -1,6 +1,5 @@
 D/scripts////
 /linux-2.6.32.tar.bz2.sign/-1.1/Mon Jan  4 15:44:16 2010//Tkernel-2_6_32_2-1_fc12
-/.cvsignore/1.1141/dummy timestamp from new-entry+Tue Jan 19 04:24:58 2010//Tkernel-2_6_32_4-29_fc12
 /Makefile/1.116/dummy timestamp from new-entry//Tkernel-2_6_32_4-29_fc12
 /Makefile.config/1.73/Tue Jan  5 02:21:39 2010/-ko/Tkernel-2_6_32_4-29_fc12
 /TODO/1.67/Tue Jan  5 02:22:16 2010//Tkernel-2_6_32_4-29_fc12
@@ -38,7 +37,6 @@ D/scripts////
 /drm-nouveau-tvout-disable.patch/1.1/Tue Jan 12 00:14:08 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /drm-nouveau-update.patch/1.1/Mon Jan 18 04:46:31 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /drm-radeon-pm.patch/1.2/Tue Jan  5 02:21:39 2010/-kb/Tkernel-2_6_32_4-29_fc12
-/drm-upgrayedd.patch/1.2/dummy timestamp from new-entry+Tue Jan 19 04:28:49 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /find-provides/1.18/Tue Jan  5 02:21:39 2010/-ko/Tkernel-2_6_32_4-29_fc12
 /gen-patches/1.6/Tue Jan  5 02:22:18 2010//Tkernel-2_6_32_4-29_fc12
 /genkey/1.6/Tue Jan  5 02:21:39 2010/-ko/Tkernel-2_6_32_4-29_fc12
@@ -122,11 +120,13 @@ D/scripts////
 /noautobuild/1.2/Tue Jan  5 02:21:40 2010//Tkernel-2_6_32_4-29_fc12
 /patch-2.6.32.4.bz2.sign/1.1/Mon Jan 18 19:36:40 2010//Tkernel-2_6_32_4-29_fc12
 /perf/1.6/Tue Jan  5 02:21:40 2010//Tkernel-2_6_32_4-29_fc12
-/sources/1.1099/dummy timestamp from new-entry+Tue Jan 19 04:24:52 2010//Tkernel-2_6_32_4-29_fc12
-/upstream/1.1013/dummy timestamp from new-entry+Tue Jan 19 04:24:47 2010//Tkernel-2_6_32_4-29_fc12
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_32_4-29_fc12
 /via-hwmon-temp-sensor.patch/1.4/Tue Jan  5 02:22:20 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /wmi-check-find_guid-return-value-to-prevent-oops.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /wmi-check-wmi-get-event-data-return-value.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /wmi-free-the-allocated-acpi-objects.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_4-29_fc12
 /wmi-survive-bios-with-duplicate-guids.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_4-29_fc12
+/.cvsignore/1.1141/Fri Jan 22 06:57:14 2010//Tkernel-2_6_32_4-29_fc12
+/sources/1.1099/Fri Jan 22 06:57:14 2010//Tkernel-2_6_32_4-29_fc12
+/upstream/1.1013/Fri Jan 22 06:57:14 2010//Tkernel-2_6_32_4-29_fc12
+/drm-upgrayedd.patch/1.2/Fri Jan 22 06:57:15 2010/-kb/Tkernel-2_6_32_4-29_fc12
