@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1989 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1990 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -692,8 +692,7 @@ Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
-Patch680: linux-2.6-rt2x00-asus-leds.patch
-Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
+Patch680: linux-2.6-wireless_-report-reasonable-bitrate-for-MCS-rates-through-wext.patch
 
 Patch700: linux-2.6.31-nx-data.patch
 Patch701: linux-2.6.31-modules-ro-nx.patch
@@ -1355,11 +1354,8 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# rt2x00: back-port activity LED init patches
-#ApplyPatch linux-2.6-rt2x00-asus-leds.patch
-
-# back-port scan result aging patches
-#ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
+# Report meaningful values for MCS rates through wireless extensions
+ApplyPatch linux-2.6-wireless_-report-reasonable-bitrate-for-MCS-rates-through-wext.patch
 
 # Mark kernel data as NX
 #ApplyPatch linux-2.6.31-nx-data.patch
@@ -2085,7 +2081,10 @@ fi
 # and build.
 
 %changelog
-* Wed Jan 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.4-29
+* Thu Jan 21 2010 John W. Linville <linville@redhat.com> 2.6.32.4-30
+- Report meaningful values for MCS rates through wireless extensions
+
+* Wed Jan 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.4-29
 - add appleir usb driver
 
 * Mon Jan 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.4-28
