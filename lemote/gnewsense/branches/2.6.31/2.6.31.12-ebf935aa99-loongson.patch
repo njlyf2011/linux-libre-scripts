@@ -26,7 +26,7 @@ index 3d5a958..43d2d8b 100644
  			than or equal to this physical address is ignored.
  
 diff --git a/Makefile b/Makefile
-index 72b5315..5c717de 100644
+index 05c2ebf..a6a6821 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -179,8 +179,9 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
