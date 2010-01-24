@@ -4,5 +4,5 @@
 gnewsense-binutils-flag.patch
 rtl8187B_linux_26.1051.0116.2009_release.patch -p0 # as released by Lemote, modified from Realtek's release
 rtl8187B-build-in.patch # modified to build within Linux
-gnu+freedo.patch -p0 # 100% Free Software Freedo logo
+100gnu+freedo.patch -p0 # 100% Freedo[m] GNU+Freedo logo
 lxo-config.patch -p0 # config file
