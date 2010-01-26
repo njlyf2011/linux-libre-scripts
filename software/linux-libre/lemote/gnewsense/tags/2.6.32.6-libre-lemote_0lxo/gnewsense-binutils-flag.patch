@@ -1,0 +1,15 @@
+Our binutils somehow ended up with a -mfix-gs2f-kernel, rather than
+-mfix-ls2f-kernel.  Cope with it.
+
+Index: linux-2.6.27.43-libre3-lemote_0lxo/arch/mips/Makefile
+===================================================================
+--- linux-2.6.27.43-libre3-lemote_0lxo.orig/arch/mips/Makefile	2010-01-09 11:18:24.000000000 +0000
++++ linux-2.6.27.43-libre3-lemote_0lxo/arch/mips/Makefile	2010-01-09 11:19:12.000000000 +0000
+@@ -123,6 +123,7 @@
+ cflags-$(CONFIG_MACH_LM2F) += \
+ 	$(call cc-option,-march=loongson2f,-march=r4600) \
+ 	$(call as-option,-Wa$(comma)-mfix-ls2f-kernel,) \
++	$(call as-option,-Wa$(comma)-mfix-gs2f-kernel,) \
+ 	$(call as-option,-Wa$(comma)-mfix-loongson2f-nop,) \
+ 	$(call as-option,-Wa$(comma)-mfix-loongson2f-jump,)
+ cflags-$(CONFIG_CPU_MIPS32_R1)	+= $(call cc-option,-march=mips32,-mips32 -U_MIPS_ISA -D_MIPS_ISA=_MIPS_ISA_MIPS32) \
