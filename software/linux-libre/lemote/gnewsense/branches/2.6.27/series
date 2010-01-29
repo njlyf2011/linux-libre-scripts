@@ -1,8 +1,8 @@
 2.6.27-mips-fixes.patch -p1
 2.6.27.7-be75987188-loongson.patch -p1 # Lemote's patches
-2.6.27-loongson-fixes.patch 
-gnewsense-binutils-flag.patch
+2.6.27-loongson-fixes.patch -p1
+gnewsense-binutils-flag.patch -p1
 rtl8187B_linux_26.1051.0116.2009_release.patch -p0 # as released by Lemote, modified from Realtek's release
-rtl8187B-build-in.patch # modified to build within Linux
-100gnu+freedo.patch -p0 # 100% Freedo[m] GNU+Freedo logo
+rtl8187B-build-in.patch -p1 # modified to build within Linux
+100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
 lxo-config.patch -p0 # config file

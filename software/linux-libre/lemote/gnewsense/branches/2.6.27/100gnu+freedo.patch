@@ -9,10 +9,10 @@ convert -background black -flatten 100gnu+freedo.png 100gnu+freedo.ppm &&
 ppmquant -fs 223 < 100gnu+freedo.ppm |
 pnmtoplainpnm > drivers/video/logo/logo_libre_clut224.ppm
 
-Index: drivers/video/logo/Kconfig
+Index: linux-2.6.27.45/drivers/video/logo/Kconfig
 ===================================================================
---- drivers/video/logo/Kconfig.orig	2010-01-06 23:07:45.000000000 +0000
-+++ drivers/video/logo/Kconfig	2010-01-09 11:30:39.000000000 +0000
+--- linux-2.6.27.45.orig/drivers/video/logo/Kconfig	2010-01-28 23:21:45.000000000 +0000
++++ linux-2.6.27.45/drivers/video/logo/Kconfig	2010-01-29 07:26:20.000000000 +0000
 @@ -42,6 +42,10 @@
  	depends on MACH_DECSTATION || ALPHA
  	default y
@@ -24,10 +24,10 @@ Index: drivers/video/logo/Kconfig
  config LOGO_MAC_CLUT224
  	bool "224-color Macintosh Linux logo"
  	depends on MAC
-Index: drivers/video/logo/logo.c
+Index: linux-2.6.27.45/drivers/video/logo/logo.c
 ===================================================================
---- drivers/video/logo/logo.c.orig	2010-01-06 23:07:45.000000000 +0000
-+++ drivers/video/logo/logo.c	2010-01-09 11:30:39.000000000 +0000
+--- linux-2.6.27.45.orig/drivers/video/logo/logo.c	2010-01-28 23:21:45.000000000 +0000
++++ linux-2.6.27.45/drivers/video/logo/logo.c	2010-01-29 07:26:20.000000000 +0000
 @@ -27,6 +27,7 @@
  extern const struct linux_logo logo_blackfin_vga16;
  extern const struct linux_logo logo_blackfin_clut224;
@@ -47,10 +47,10 @@ Index: drivers/video/logo/logo.c
  #ifdef CONFIG_LOGO_MAC_CLUT224
  		/* Macintosh Linux logo on m68k */
  		if (MACH_IS_MAC)
-Index: drivers/video/logo/logo_libre_clut224.ppm
+Index: linux-2.6.27.45/drivers/video/logo/logo_libre_clut224.ppm
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ drivers/video/logo/logo_libre_clut224.ppm	2010-01-09 15:31:10.000000000 +0000
++++ linux-2.6.27.45/drivers/video/logo/logo_libre_clut224.ppm	2010-01-29 07:26:21.000000000 +0000
 @@ -0,0 +1,14603 @@
 +P3
 +360 200
@@ -14655,10 +14655,10 @@ Index: drivers/video/logo/logo_libre_clut224.ppm
 +0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 +0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 +
-Index: drivers/video/logo/Makefile
+Index: linux-2.6.27.45/drivers/video/logo/Makefile
 ===================================================================
---- drivers/video/logo/Makefile.orig	2010-01-06 23:07:45.000000000 +0000
-+++ drivers/video/logo/Makefile	2010-01-09 11:30:40.000000000 +0000
+--- linux-2.6.27.45.orig/drivers/video/logo/Makefile	2010-01-28 23:21:45.000000000 +0000
++++ linux-2.6.27.45/drivers/video/logo/Makefile	2010-01-29 07:26:21.000000000 +0000
 @@ -7,6 +7,7 @@
  obj-$(CONFIG_LOGO_BLACKFIN_CLUT224)	+= logo_blackfin_clut224.o
  obj-$(CONFIG_LOGO_BLACKFIN_VGA16)	+= logo_blackfin_vga16.o
