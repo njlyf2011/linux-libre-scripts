@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1990 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1997 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -41,7 +41,7 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -462,7 +462,7 @@ Summary: The Linux kernel
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
 %if %{with_dracut}
-%define initrd_prereq  dracut >= 003-2 xorg-x11-drv-ati-firmware
+%define initrd_prereq  dracut >= 002 xorg-x11-drv-ati-firmware
 %else
 %define initrd_prereq  mkinitrd >= 6.0.61-1
 %endif
@@ -750,6 +750,7 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
+Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # fs fixes
 
@@ -1416,6 +1417,7 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 #ApplyPatch linux-2.6-v4l-dvb-update.patch
 #ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
+ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
@@ -2081,6 +2083,38 @@ fi
 # and build.
 
 %changelog
+* Mon Feb  1 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use 100% gnu+freedo boot splash logo, with black background.
+- Adjusted patch-libre 2.6.32.7 for deblobbed context.
+- Deblobbed linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch.
+
+* Thu Jan 28 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.7-37
+- Linux 2.6.32.7
+
+* Mon Jan 25 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.6-36
+- fix gspca mismerge.
+
+* Mon Jan 25 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.6-35
+- stable update 2.6.32.6
+- rebase gspca crud.
+
+* Mon Jan 25 2010 Dave Jones <davej@redhat.com> 2.6.32.5-34
+- Disable CONFIG_X86_CPU_DEBUG
+
+* Sun Jan 24 2010 Hans de Goede <hdegoede@redhat.com> 2.6.32.5-33
+- Rebase gspca usb webcam driver + sub drivers to latest upstream, this
+  adds support for the following webcam bridge chipsets:
+  benq, cpia1, ovfx2, sn9c2028, w996xCF, stv0680;
+  and also includes many many bugfixes (hopefully also fixes 531234)
+
+* Sat Jan 23 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.32.5-32
+- Linux 2.6.32.5
+- Revert commit c7c85101afd0cb8ce497456d12ee1cad4aad152f from
+  upstream .32.5 because it conflicts with our DRM update.
+
+* Sat Jan 23 2010 Dave Airlie <airlied@redhat.com> 2.6.32.4-31
+- fix dracut depends
+
 * Thu Jan 21 2010 John W. Linville <linville@redhat.com> 2.6.32.4-30
 - Report meaningful values for MCS rates through wireless extensions
 
