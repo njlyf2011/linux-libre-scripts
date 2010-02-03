@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -462,7 +462,7 @@ Summary: The Linux kernel
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
 %if %{with_dracut}
-%define initrd_prereq  dracut >= 002 xorg-x11-drv-ati-firmware
+%define initrd_prereq  dracut >= 002
 %else
 %define initrd_prereq  mkinitrd >= 6.0.61-1
 %endif
@@ -2083,7 +2083,10 @@ fi
 # and build.
 
 %changelog
-* Mon Feb  1 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Feb  3 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+- Drop dependency on non-Free ati firmware package.
+
+* Mon Feb  1 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre 
 - Use 100% gnu+freedo boot splash logo, with black background.
 - Adjusted patch-libre 2.6.32.7 for deblobbed context.
 - Deblobbed linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch.
