@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Versions of various parts
 
@@ -27,9 +27,9 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1863
+%define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1884 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1908 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -42,7 +42,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-#define rcrevlibre -libre
+%define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 0
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -73,7 +73,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -661,8 +661,6 @@ Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
 Patch305: linux-2.6-fix-btusb-autosuspend.patch
 
-Patch310: linux-2.6-autoload-wmi.patch
-
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
@@ -685,7 +683,6 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
-Patch600: linux-2.6-defaults-alsa-hda-beep-off.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
@@ -698,31 +695,23 @@ Patch701: linux-2.6.31-modules-ro-nx.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
-Patch900: linux-2.6-pci-cacheline-sizing.patch
-
-Patch1515: lirc-2.6.32.patch
+Patch1515: lirc-2.6.33.patch
 Patch1517: hdpvr-ir-enable.patch
+Patch1520: crystalhd-2.6.34-staging.patch
 
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-userspace_kvmclock_offset.patch
+Patch1553: vhost_net-rollup.patch
+
+# fbdev x86-64 primary fix
+Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 # nouveau + drm fixes
-Patch1811: drm-radeon-fixes.patch
-Patch1812: drm-radeon-dp-support.patch
-Patch1813: drm-radeon-pm.patch
-Patch1814: drm-nouveau.patch
-Patch1818: drm-i915-resume-force-mode.patch
+Patch1815: drm_nouveau_ucode.patch
 Patch1819: drm-intel-big-hammer.patch
-Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
-Patch1825: drm-intel-pm.patch
-Patch1827: linux-2.6-intel-agp-clear-gtt.patch
-Patch1828: drm-radeon-fix-crtc-vbl-update-for-r600.patch
-
-# kludge to make ich9 e1000 work
-Patch2000: linux-2.6-e1000-ich9.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -740,16 +729,16 @@ Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 # fs fixes
 
 # NFSv4
-Patch3050: linux-2.6-nfsd4-proots.patch
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
 
 # VIA Nano / VX8xx updates
-Patch11010: via-hwmon-temp-sensor.patch
 
 # patches headed upstream
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+
+Patch12015: add-appleir-usb-driver.patch
 
 %endif
 
@@ -1204,7 +1193,6 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch via-hwmon-temp-sensor.patch
 ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 
 #
@@ -1249,7 +1237,6 @@ ApplyPatch linux-2.6-execshield.patch
 # eCryptfs
 
 # NFSv4
-ApplyPatch linux-2.6-nfsd4-proots.patch
 ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
@@ -1259,7 +1246,6 @@ ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 #ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
 
 # WMI
-ApplyPatch linux-2.6-autoload-wmi.patch
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
@@ -1289,8 +1275,6 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 #
 
 # ALSA
-# squelch hda_beep by default
-ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
@@ -1342,41 +1326,33 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
-# Determine cacheline sizes in a generic manner.
-ApplyPatch linux-2.6-pci-cacheline-sizing.patch
-
 # http://www.lirc.org/
-ApplyPatch lirc-2.6.32.patch
+ApplyPatch lirc-2.6.33.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
+# Broadcom Crystal HD video decoder
+ApplyPatch crystalhd-2.6.34-staging.patch
 
 # Add kernel KSM support
 # Optimize KVM for KSM support
 #ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
-ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
+#ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
+ApplyPatch vhost_net-rollup.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 
-ApplyPatch linux-2.6-e1000-ich9.patch
+# fix x86-64 fbdev primary GPU selection
+ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-radeon-fixes.patch
-ApplyPatch drm-radeon-dp-support.patch
-ApplyPatch drm-nouveau.patch
+# squash nouveau firmware into a single commit until it gets into linux-firmware
+ApplyPatch drm_nouveau_ucode.patch
 # pm broken on my thinkpad t60p - airlied
-#ApplyPatch drm-radeon-pm.patch
-#ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
-#ApplyPatch drm-page-flip.patch
 ApplyOptionalPatch drm-intel-next.patch
-#this appears to be upstream - mjg59?
-#ApplyPatch drm-intel-pm.patch
-# Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
-ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
-#ApplyPatch drm-radeon-fix-crtc-vbl-update-for-r600.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1393,6 +1369,8 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
+
+ApplyPatch add-appleir-usb-driver.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1601,21 +1579,14 @@ hwcap 0 nosegneg"
     if [ -d arch/%{asmarch}/include ]; then
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
-    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    cd include
-    cp -a acpi config crypto keys linux math-emu media mtd net pcmcia rdma rxrpc scsi sound trace video drm asm-generic $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    asmdir=$(readlink asm)
-    cp -a $asmdir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/
-    pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-    ln -s $asmdir asm
-    popd
+    cp -a include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
+
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/autoconf.h
     # Copy .config to include/config/auto.conf so "make prepare" is unnecessary.
     cp $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/config/auto.conf
-    cd ..
 
     if test -s vmlinux.id; then
       cp vmlinux.id $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/vmlinux.id
@@ -2049,6 +2020,98 @@ fi
 # and build.
 
 %changelog
+* Thu Feb  4 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use 100% gnu+freedo boot splash logo, with black background.
+- Deblobbed patch-libre-2.6.33-rc6.
+- Adjust lirc-2.6.33.patch.
+- Deblobbed drm_nouveau_ucode.patch.
+
+* Fri Jan 29 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33-0.25.rc6.git0
+- 2.6.33-rc6
+
+* Wed Jan 27 2010 Roland McGrath <roland@redhat.com> 2.6.33-0.24.rc5.git1
+- Fix include/ copying for kernel-devel.
+
+* Mon Jan 25 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.23.rc5.git1
+- 2.6.33-rc5-git1
+- arm: MTD_PISMO is not set
+
+* Mon Jan 25 2010 Dave Jones <davej@redhat.com>
+- Disable CONFIG_X86_CPU_DEBUG
+
+* Mon Jan 25 2010 Josh Boyer <jwboyer@gmail.com>
+- Turn off CONFIG_USB_FHCI_HCD.  It doesn't build
+
+* Fri Jan 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.20.rc5.git0
+- 2.6.33-rc5
+
+* Thu Jan 21 2010 Jarod Wilson <jarod@redhat.com>
+- Merge crystalhd powerpc build fix from airlied
+
+* Wed Jan 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.18.rc4.git7
+- 2.6.32-rc4-git7
+- dvb mantis drivers as modules
+
+* Wed Jan 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.17.rc4.git6
+- add appleir usb driver
+
+* Mon Jan 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.16.rc4.git6
+- 2.6.33-rc4-git6
+- execshield: rebase for mm_types.h reject
+
+* Mon Jan 18 2010 Kyle McMartin <kyle@redhat.com>
+- vhost_net-rollup.patch: https://fedoraproject.org/wiki/Features/VHostNet
+  from davem/net-next-2.6.git
+
+* Sat Jan 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.14.rc4.git3
+- DEBUG_STRICT_USER_COPY_CHECKS off for now, tickles issue in lirc_it87.c
+
+* Sat Jan 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.13.rc4.git3
+- 2.6.33-rc4-git3
+
+* Thu Jan 14 2010 Steve Dickson <steved@redhat.com>
+- Enabled the NFS4.1 (CONFIG_NFS_V4_1) kernel config
+
+* Wed Jan 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.11.rc4
+- Linux 2.6.33-rc4
+
+* Wed Jan 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.10.rc3.git5
+- 2.6.33-rc3-git5
+
+* Wed Jan 13 2010 Dave Airlie <airlied@redhat.com>
+- Add fbdev fix for multi-card primary console on x86-64
+- clean up all the drm- patches
+
+* Tue Jan 12 2010 Jarod Wilson <jarod@redhat.com>
+- Update lirc patch for 2.6.33 kfifo changes
+- Add Broadcom Crystal HD video decoder driver from staging
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com>
+- include/asm is gone, kludge it for now.
+
+* Mon Jan 11 2010 Dave Jones <davej@redhat.com>
+- Rebase exec-shield.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com>
+- drop e1000 patch.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com>
+- lirc broken due to kfifo mess.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com>
+- drm-intel-big-hammer: fix IS_I855 macro.
+
+* Mon Jan 11 2010 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.33-rc3
+- utrace: rebased from roland's people page.
+- via-hwmon-temp-sensor.patch: upstream.
+- linux-2.6-defaults-alsa-hda-beep-off.patch: new config option supercedes.
+- readd nouveau ctxprogs as firmware/ like it should be.
+- linux-2.6-pci-cacheline-sizing.patch: upstream.
+- linux-2.6-intel-agp-clear-gtt.patch: upstream.
+- linux-2.6-nfsd4-proots.patch: upstream?
+- rebased the rest.
+
 * Mon Jan 11 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use gnu+freedo boot splash logo.
 
