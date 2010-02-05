@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1997 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2001 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -676,6 +676,8 @@ Patch391: linux-2.6-acpi-video-dos.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch453: linux-2.6-input-hid-quirk-hp-touchsmart.patch
+Patch454: linux-2.6-input-hid-quirk-egalax.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -768,12 +770,18 @@ Patch11010: via-hwmon-temp-sensor.patch
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+Patch12020: linux-2.6-cantiga-iommu-gfx.patch
 
 # Patches for -stable
 Patch12101: wmi-free-the-allocated-acpi-objects.patch
 Patch12102: wmi-check-wmi-get-event-data-return-value.patch
 
 Patch12200: add-appleir-usb-driver.patch
+
+# fix possible oops in bio-integrity
+Patch12300: block-fix-bugs-in-bio-integrity-mempool-usage.patch
+
+Patch12301: fix-conntrack-bug-with-namespaces.patch
 
 %endif
 
@@ -1234,6 +1242,7 @@ ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 #
 # Intel IOMMU
 #
+ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
 
 #
 # PowerPC
@@ -1334,6 +1343,9 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
+ApplyPatch linux-2.6-input-hid-quirk-hp-touchsmart.patch
+ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
+
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
 
@@ -1427,6 +1439,11 @@ ApplyPatch add-appleir-usb-driver.patch
 # Patches for -stable
 ApplyPatch wmi-free-the-allocated-acpi-objects.patch
 ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
+
+# fix possible oops in bio-integrity
+ApplyPatch block-fix-bugs-in-bio-integrity-mempool-usage.patch
+
+ApplyPatch fix-conntrack-bug-with-namespaces.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2083,10 +2100,23 @@ fi
 # and build.
 
 %changelog
-* Mon Feb  3 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- fix-conntrack-bug-with-namespaces.patch: Fix for issue identified by jcm,
+  http://lkml.org/lkml/2010/2/3/112
+
+* Tue Feb 02 2010 David Woodhouse <David.Woodhouse@intel.com> 2.6.32.7-40
+- Disable graphics DMAR unit on Cantiga (#538163)
+
+* Mon Feb 01 2010 Dave Airlie <airlied@redhat.com> 2.6.32.7-39
+- Add two input quirks for HP and eGalax touchscreens.
+
+* Sat Jan 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.7-38
+- Fix possible oops in bio-integrity code.
+
+* Sat Jan 30 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre.1 Wed Feb  3
 - Drop dependency on non-Free ati firmware package.
 
-* Mon Feb  1 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre 
+* Fri Jan 29 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Feb  1
 - Use 100% gnu+freedo boot splash logo, with black background.
 - Adjusted patch-libre 2.6.32.7 for deblobbed context.
 - Deblobbed linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch.
