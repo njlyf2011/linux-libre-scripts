@@ -1,7 +1,5 @@
 D/scripts////
 /linux-2.6.32.tar.bz2.sign/-1.1/Thu Dec  3 07:04:21 2009//Tkernel-2_6_32_2-15_fc13
-/drm-next.patch/1.18/dummy timestamp from new-entry/-kb/Tkernel-2_6_32_3-21_fc13
-/drm-nouveau.patch/1.54/dummy timestamp from new-entry/-kb/Tkernel-2_6_32_3-21_fc13
 /.cvsignore/1.1160/Result of merge+Mon Feb  1 21:23:50 2010//Tkernel-2_6_33-0_25_rc6_git0_fc13
 /Makefile/1.123/Result of merge//Tkernel-2_6_33-0_25_rc6_git0_fc13
 /Makefile.config/1.73/Thu Sep 10 04:29:09 2009/-ko/Tkernel-2_6_33-0_25_rc6_git0_fc13
