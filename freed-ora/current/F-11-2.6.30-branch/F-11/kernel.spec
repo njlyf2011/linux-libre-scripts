@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.4 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.13 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -747,12 +747,16 @@ Patch10000: linux-2.6-missing-rfc2465-stats.patch
 
 # VIA Nano / VX8xx updates
 Patch11000: linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
+# fix for above
+Patch11001: enable-acpi-pdc-handshake-for-via-centaur-cpus.patch
+
 Patch11010: via-hwmon-temp-sensor.patch
 Patch11020: via-padlock-10-enable-64bit.patch
 Patch11030: via-padlock-20-add-x86-dependency.patch
 Patch11040: via-padlock-30-fix-might-sleep.patch
 Patch11050: via-padlock-40-nano-ecb.patch
 Patch11060: via-padlock-50-nano-cbc.patch
+Patch11065: via-padlock-60-fix-aes-oops.patch
 Patch11070: via-rng-enable-64bit.patch
 Patch11080: via-sdmmc.patch
 Patch11081: linux-2.6-x86-delay-tsc-barrier.patch
@@ -876,6 +880,29 @@ Patch16500: ipv6-skb_dst-can-be-null-in-ipv6_hop_jumbo.patch
 Patch16501: netfilter-ebtables-enforce-cap_net_admin.patch
 # cve-2010-0003
 Patch16502: kernel-signal.c-fix-kernel-information-leak-with-print-fatal-signals-1.patch
+
+# cve-2009-4141
+Patch16503: fasync-split-fasync_helper-into-separate-add-remove-functions.patch
+
+# cve-2009-4536, cve-2009-4538
+Patch16511: e1000-enhance-frame-fragment-detection.patch
+Patch16512: e1000e-enhance-frame-fragment-detection.patch
+Patch16513: e1000-e1000e-don-t-use-small-hardware-rx-buffers.patch
+# cve-2009-4537
+Patch16514: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+
+Patch16515: tty-fix-race-in-tty_fasync.patch
+Patch16516: fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+
+# cve-2010-0291
+#Patch16520: untangle-the-do_mremap-mess.patch
+
+# cve-2010-0307
+Patch16530: split-flush_old_exec-into-two-functions.patch
+Patch16531: fdpic-respect-pt_gnu_stack-exec-protection-markings-when-creating-nommu-stack.patch
+Patch16532: fix-flush_old_exec-setup_new_exec-split.patch
+Patch16533: sparc-tif_abi_pending-bit-removal.patch
+Patch16534: x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
 
 %endif
 
@@ -1323,12 +1350,14 @@ ApplyPatch linux-2.6-sysrq-c.patch
 # Architecture patches
 # x86(-64)
 ApplyPatch linux-2.6-cpufreq-enable-acpi-pstates-on-via.patch
+ApplyPatch enable-acpi-pdc-handshake-for-via-centaur-cpus.patch
 ApplyPatch via-hwmon-temp-sensor.patch
 ApplyPatch via-padlock-10-enable-64bit.patch
 ApplyPatch via-padlock-20-add-x86-dependency.patch
 ApplyPatch via-padlock-30-fix-might-sleep.patch
 ApplyPatch via-padlock-40-nano-ecb.patch
 ApplyPatch via-padlock-50-nano-cbc.patch
+ApplyPatch via-padlock-60-fix-aes-oops.patch
 ApplyPatch via-rng-enable-64bit.patch
 ApplyPatch via-sdmmc.patch
 ApplyPatch linux-2.6-x86-delay-tsc-barrier.patch
@@ -1655,6 +1684,29 @@ ApplyPatch ipv6-skb_dst-can-be-null-in-ipv6_hop_jumbo.patch
 ApplyPatch netfilter-ebtables-enforce-cap_net_admin.patch
 # cve-2010-0003
 ApplyPatch kernel-signal.c-fix-kernel-information-leak-with-print-fatal-signals-1.patch
+
+# cve-2009-4141
+ApplyPatch fasync-split-fasync_helper-into-separate-add-remove-functions.patch
+
+# cve-2009-4536, cve-2009-4538
+ApplyPatch e1000-enhance-frame-fragment-detection.patch
+ApplyPatch e1000e-enhance-frame-fragment-detection.patch
+ApplyPatch e1000-e1000e-don-t-use-small-hardware-rx-buffers.patch
+# cve-2009-4537
+ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+
+ApplyPatch tty-fix-race-in-tty_fasync.patch
+ApplyPatch fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+
+# cve-2010-0291
+#ApplyPatch untangle-the-do_mremap-mess.patch
+
+# cve-2010-0307
+ApplyPatch fdpic-respect-pt_gnu_stack-exec-protection-markings-when-creating-nommu-stack.patch
+ApplyPatch split-flush_old_exec-into-two-functions.patch
+ApplyPatch fix-flush_old_exec-setup_new_exec-split.patch
+ApplyPatch sparc-tif_abi_pending-bit-removal.patch
+ApplyPatch x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2244,6 +2296,38 @@ fi
 # and build.
 
 %changelog
+* Thu Feb  4 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use 100% gnu+freedo boot splash logo, with black background.
+
+* Tue Feb 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.13
+- Add x86 and sparc bits of the CVE-2010-0307 fix.
+
+* Tue Feb 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.12
+- Fix the CVE-2010-0307 fix.
+
+* Tue Feb 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.11
+- CVE-2010-0307 kernel: DoS on x86_64
+
+* Sat Jan 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.10
+- Fix oops in VIA padlock driver (#521265)
+
+* Sat Jan 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.9
+- kernel: tty->pgrp races (#559100)
+
+* Sat Jan 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.8
+- CVE-2009-4537 kernel: r8169 issue reported at 26c3
+  (fix taken from Red Hat/CentOS 5.4)
+
+* Sat Jan 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.7
+- Fix acpi-cpufreq on VIA processors
+
+* Sat Jan 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.6
+- CVE-2009-4536 kernel: e1000 issue reported at 26c3
+- CVE-2009-4538 kernel: e1000e frame fragment issue
+
+* Fri Jan 29 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.5
+- CVE-2009-4141 kernel: create_elf_tables can leave urandom in a bad state
+
 * Tue Jan 19 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.4
 - CVE-2010-0003: kernel: infoleak if print-fatal-signals=1
 
