@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2001 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2005 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,9 +54,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -709,7 +709,6 @@ Patch1520: crystalhd-2.6.34-staging.patch
 
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
-Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 
 # fbdev multi-card fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -778,10 +777,10 @@ Patch12102: wmi-check-wmi-get-event-data-return-value.patch
 
 Patch12200: add-appleir-usb-driver.patch
 
-# fix possible oops in bio-integrity
-Patch12300: block-fix-bugs-in-bio-integrity-mempool-usage.patch
-
 Patch12301: fix-conntrack-bug-with-namespaces.patch
+Patch12302: prevent-runtime-conntrack-changes.patch
+
+# ==============================================================================
 
 %endif
 
@@ -1393,7 +1392,6 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 #ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
-ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1440,12 +1438,10 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch wmi-free-the-allocated-acpi-objects.patch
 ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
 
-# fix possible oops in bio-integrity
-ApplyPatch block-fix-bugs-in-bio-integrity-mempool-usage.patch
-
 ApplyPatch fix-conntrack-bug-with-namespaces.patch
+ApplyPatch prevent-runtime-conntrack-changes.patch
 
-# END OF PATCH APPLICATIONS
+# END OF PATCH APPLICATIONS ====================================================
 
 %endif
 
@@ -2100,6 +2096,27 @@ fi
 # and build.
 
 %changelog
+* Fri Feb 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-45.rc2
+- Linux 2.6.32.8-rc2
+- Drop fix-net-restore-ip-source-validation.patch
+
+* Fri Feb 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-44.rc1
+- Fix networking bug in 2.6.32.8-rc1
+
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-43.rc1
+- Linux 2.6.32.8-rc1
+- Revert three DRM patches from 2.6.32.8:
+  drm-i915-only-enable-hotplug-for-detected-outputs.patch : already in
+  drm-i915-reload-hangcheck-timer-too-for-ironlake.patch : conflicts
+  drm-i915-selectively-enable-self-reclaim.patch : already in
+- Drop patches merged in -stable:
+  linux-2.6-userspace_kvmclock_offset.patch
+  block-fix-bugs-in-bio-integrity-mempool-usage.patch
+
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- Fix another conntrack issue pointed out by jcm.
+- Fix utrace header. (rhbz#561536)
+
 * Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
 - fix-conntrack-bug-with-namespaces.patch: Fix for issue identified by jcm,
   http://lkml.org/lkml/2010/2/3/112
