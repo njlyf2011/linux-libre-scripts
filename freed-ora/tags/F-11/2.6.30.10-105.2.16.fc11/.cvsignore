@@ -1,0 +1,12 @@
+clog
+.shared-srctree
+GNUmakefile
+kernel-2.6.*.config
+temp-*
+deblob-main
+deblob-2.6.30
+deblob-check
+freedo.patch
+kernel-2.6.30
+linux-2.6.30-libre1.*
+patch-2.6.30.10.bz2
