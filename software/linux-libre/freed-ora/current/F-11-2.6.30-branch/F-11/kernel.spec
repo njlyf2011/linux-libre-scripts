@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.13 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.16 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -874,6 +874,10 @@ Patch16472: fuse-fix-kunmap-in-fuse_ioctl_copy_user.patch
 # kernel commit e9024a059f2c17fb2bfab212ee9d31511d7b8e57
 Patch16473: linux-2.6-libertas-crash.patch
 
+# rhbz#533087
+Patch16474: fix-conntrack-bug-with-namespaces.patch
+Patch16475: prevent-runtime-conntrack-changes.patch
+
 # cve-2010-0006
 Patch16500: ipv6-skb_dst-can-be-null-in-ipv6_hop_jumbo.patch
 # cve-2010-0007
@@ -899,10 +903,12 @@ Patch16516: fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
 
 # cve-2010-0307
 Patch16530: split-flush_old_exec-into-two-functions.patch
+# needed for followon patches
 Patch16531: fdpic-respect-pt_gnu_stack-exec-protection-markings-when-creating-nommu-stack.patch
 Patch16532: fix-flush_old_exec-setup_new_exec-split.patch
 Patch16533: sparc-tif_abi_pending-bit-removal.patch
 Patch16534: x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
+Patch16535: powerpc-tif_abi_pending-bit-removal.patch
 
 %endif
 
@@ -1678,6 +1684,10 @@ ApplyPatch fuse-fix-kunmap-in-fuse_ioctl_copy_user.patch
 # libertas 64-bit crash fix [e9024a059f2c17fb2bfab212ee9d31511d7b8e57]
 ApplyPatch linux-2.6-libertas-crash.patch
 
+# rhbz#533087
+ApplyPatch fix-conntrack-bug-with-namespaces.patch
+ApplyPatch prevent-runtime-conntrack-changes.patch
+
 # cve-2010-0006
 ApplyPatch ipv6-skb_dst-can-be-null-in-ipv6_hop_jumbo.patch
 # cve-2010-0007
@@ -1707,6 +1717,7 @@ ApplyPatch split-flush_old_exec-into-two-functions.patch
 ApplyPatch fix-flush_old_exec-setup_new_exec-split.patch
 ApplyPatch sparc-tif_abi_pending-bit-removal.patch
 ApplyPatch x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
+ApplyPatch powerpc-tif_abi_pending-bit-removal.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2296,7 +2307,17 @@ fi
 # and build.
 
 %changelog
-* Thu Feb  4 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.16
+- Add ppc part of the CVE-2010-0307 fix.
+
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- prevent-runtime-conntrack-changes.patch: fix another conntrack issue
+  identified by jcm.
+
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- fix-conntrack-bug-with-namespaces.patch (rhbz#533087) fix kvm crash.
+
+* Wed Feb  3 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Feb  4
 - Use 100% gnu+freedo boot splash logo, with black background.
 
 * Tue Feb 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.13
