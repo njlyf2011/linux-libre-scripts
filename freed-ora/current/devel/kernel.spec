@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1908 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1910 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,7 +75,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 6
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -740,6 +740,8 @@ Patch12013: linux-2.6-rfkill-all.patch
 
 Patch12015: add-appleir-usb-driver.patch
 
+Patch12016: fix-conntrack-bug-with-namespaces.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1371,6 +1373,8 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-rfkill-all.patch
 
 ApplyPatch add-appleir-usb-driver.patch
+
+ApplyPatch fix-conntrack-bug-with-namespaces.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2020,7 +2024,14 @@ fi
 # and build.
 
 %changelog
-* Thu Feb  4 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- fix-conntrack-bug-with-namespaces.patch: Patch for issue identified
+  by jcm. (Ref: http://lkml.org/lkml/2010/2/3/112)
+
+* Mon Feb 02 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33-0.26.rc6.git1
+- 2.6.33-rc6-git1
+
+* Mon Feb  2 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Feb  4
 - Use 100% gnu+freedo boot splash logo, with black background.
 - Deblobbed patch-libre-2.6.33-rc6.
 - Adjust lirc-2.6.33.patch.
