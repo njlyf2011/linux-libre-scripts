@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.32.tar.bz2.sign/-1.1/Mon Jan  4 15:44:16 2010//Tkernel-2_6_32_2-1_fc12
 /patch-2.6.32.7.bz2.sign/-1.1/Fri Jan 29 02:44:17 2010//Tkernel-2_6_32_7-37_fc12
-/.cvsignore/1.1146/dummy timestamp from new-entry+Sat Feb  6 13:04:14 2010//Tkernel-2_6_32_8-48_rc2_fc12
 /Makefile/1.116/dummy timestamp from new-entry//Tkernel-2_6_32_8-48_rc2_fc12
 /Makefile.config/1.73/Tue Jan  5 02:21:39 2010/-ko/Tkernel-2_6_32_8-48_rc2_fc12
 /TODO/1.67/Tue Jan  5 02:22:16 2010//Tkernel-2_6_32_8-48_rc2_fc12
@@ -131,8 +130,6 @@ D/scripts////
 /patch-2.6.32.8-rc2.bz2.sign/1.1/Fri Feb  5 18:08:01 2010//Tkernel-2_6_32_8-48_rc2_fc12
 /perf/1.6/Tue Jan  5 02:21:40 2010//Tkernel-2_6_32_8-48_rc2_fc12
 /prevent-runtime-conntrack-changes.patch/1.1/Wed Feb  3 21:06:32 2010/-kb/Tkernel-2_6_32_8-48_rc2_fc12
-/sources/1.1104/dummy timestamp from new-entry+Sat Feb  6 13:03:50 2010//Tkernel-2_6_32_8-48_rc2_fc12
-/upstream/1.1018/dummy timestamp from new-entry+Sat Feb  6 13:03:38 2010//Tkernel-2_6_32_8-48_rc2_fc12
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_32_8-48_rc2_fc12
 /via-hwmon-temp-sensor.patch/1.4/Tue Jan  5 02:22:20 2010/-kb/Tkernel-2_6_32_8-48_rc2_fc12
 /wmi-check-find_guid-return-value-to-prevent-oops.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_8-48_rc2_fc12
@@ -140,3 +137,6 @@ D/scripts////
 /wmi-free-the-allocated-acpi-objects.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_8-48_rc2_fc12
 /wmi-survive-bios-with-duplicate-guids.patch/1.1/Wed Jan  6 02:34:06 2010/-kb/Tkernel-2_6_32_8-48_rc2_fc12
 /xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch/1.2/Sun Feb  7 22:05:37 2010/-kb/Tkernel-2_6_32_8-48_rc2_fc12
+/.cvsignore/1.1146/Mon Feb  8 13:03:25 2010//Tkernel-2_6_32_8-48_rc2_fc12
+/sources/1.1104/Mon Feb  8 13:03:25 2010//Tkernel-2_6_32_8-48_rc2_fc12
+/upstream/1.1018/Mon Feb  8 13:03:25 2010//Tkernel-2_6_32_8-48_rc2_fc12
