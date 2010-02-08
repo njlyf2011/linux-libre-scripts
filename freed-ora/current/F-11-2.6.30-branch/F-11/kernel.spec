@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.16 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.18 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -910,6 +910,8 @@ Patch16533: sparc-tif_abi_pending-bit-removal.patch
 Patch16534: x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
 Patch16535: powerpc-tif_abi_pending-bit-removal.patch
 
+Patch16540: fix-crash-with-sys_move_pages.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1719,6 +1721,8 @@ ApplyPatch sparc-tif_abi_pending-bit-removal.patch
 ApplyPatch x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
 ApplyPatch powerpc-tif_abi_pending-bit-removal.patch
 
+ApplyPatch fix-crash-with-sys_move_pages.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2307,6 +2311,13 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.30.10-105.2.18
+- fix-crash-with-sys_move_pages.patch: sys_move_pages doesn't bounds
+  check the node properly.
+
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.17
+- Remove obsolete config options (generated .configs are unchanged.)
+
 * Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.16
 - Add ppc part of the CVE-2010-0307 fix.
 
