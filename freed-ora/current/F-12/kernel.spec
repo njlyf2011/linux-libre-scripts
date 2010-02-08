@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2005 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2008 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -762,6 +762,9 @@ Patch3051: linux-2.6-nfs4-callback-hidden.patch
 # btrfs
 Patch3100: linux-2.6-btrfs-fix-acl.patch
 
+# XFS
+Patch3110: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
+
 # VIA Nano / VX8xx updates
 Patch11010: via-hwmon-temp-sensor.patch
 
@@ -779,6 +782,9 @@ Patch12200: add-appleir-usb-driver.patch
 
 Patch12301: fix-conntrack-bug-with-namespaces.patch
 Patch12302: prevent-runtime-conntrack-changes.patch
+
+Patch12310: fix-crash-with-sys_move_pages.patch
+Patch12311: fix-ima-null-ptr-deref.patch
 
 # ==============================================================================
 
@@ -1275,6 +1281,7 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 
 # xfs
+ApplyPatch xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-fix-acl.patch
@@ -1440,6 +1447,9 @@ ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
 
 ApplyPatch fix-conntrack-bug-with-namespaces.patch
 ApplyPatch prevent-runtime-conntrack-changes.patch
+
+ApplyPatch fix-crash-with-sys_move_pages.patch
+ApplyPatch fix-ima-null-ptr-deref.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2096,6 +2106,18 @@ fi
 # and build.
 
 %changelog
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-48.rc2
+- xfs: xfs_swap_extents needs to handle dynamic fork offsets (rhbz#510823)
+  from sandeen.
+
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-47.rc2
+- fix-ima-null-ptr-deref.patch: fix null ptr deref in IMA introduced
+  in 2.6.32-rc5.
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-46.rc2
+- fix-crash-with-sys_move_pages.patch: sys_move_pages doesn't bounds
+  check the node properly.
+
 * Fri Feb 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-45.rc2
 - Linux 2.6.32.8-rc2
 - Drop fix-net-restore-ip-source-validation.patch
