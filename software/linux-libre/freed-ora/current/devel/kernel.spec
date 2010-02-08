@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1910 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1923 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -73,9 +73,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
-%define gitrev 1
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -460,7 +460,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, kernel-libre-firmware >= %{rpmversion}-%{pkg_release}, grubby >= 7.0.4-1
+%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
 %if %{with_dracut}
 %define initrd_prereq  dracut >= 001-7
 %else
@@ -485,6 +485,9 @@ Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
+%if %{with_firmware}\
+Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
+%endif\
 Requires(post): /sbin/new-kernel-pkg\
 Requires(preun): /sbin/new-kernel-pkg\
 Conflicts: %{kernel_dot_org_conflicts}\
@@ -528,7 +531,7 @@ BuildRequires: xmlto, asciidoc
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_perftool}
-BuildRequires: elfutils-libelf-devel zlib-devel binutils-devel
+BuildRequires: elfutils-libelf-devel zlib-devel binutils-devel libdwarf-devel
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -703,6 +706,7 @@ Patch1520: crystalhd-2.6.34-staging.patch
 Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 Patch1553: vhost_net-rollup.patch
+Patch1554: virt_console-rollup.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -741,6 +745,9 @@ Patch12013: linux-2.6-rfkill-all.patch
 Patch12015: add-appleir-usb-driver.patch
 
 Patch12016: fix-conntrack-bug-with-namespaces.patch
+Patch12017: prevent-runtime-conntrack-changes.patch
+
+Patch12018: neuter_intel_microcode_load.patch
 
 %endif
 
@@ -1184,7 +1191,7 @@ ApplyPatch freedo.patch
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 #ApplyPatch git-cpufreq.patch
-#ApplyPatch git-bluetooth.patch
+ApplyPatch git-bluetooth.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1342,6 +1349,7 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 # Assorted Virt Fixes
 #ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 ApplyPatch vhost_net-rollup.patch
+ApplyPatch virt_console-rollup.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1375,6 +1383,8 @@ ApplyPatch linux-2.6-rfkill-all.patch
 ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch fix-conntrack-bug-with-namespaces.patch
+
+ApplyPatch neuter_intel_microcode_load.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1842,6 +1852,12 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1}}\
+%{expand:\
+%if %{with_dracut}\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --dracut --depmod --update %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+%else\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --update %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+%endif}\
 /sbin/new-kernel-pkg --package kernel-libre%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
 %{nil}
 
@@ -1860,11 +1876,8 @@ if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
   /bin/sed -r -i -e 's/^DEFAULTKERNEL=%{-r*}$/DEFAULTKERNEL=kernel-libre%{?-v:-%{-v*}}/' /etc/sysconfig/kernel || exit $?\
 fi}\
 %{expand:\
-%if %{with_dracut}\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --dracut --depmod --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
-%else\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
-%endif}\
+/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --install %{KVERREL}%{?-v:.%{-v*}} || exit $?\
+}\
 #if [ -x /sbin/weak-modules ]\
 #then\
 #    /sbin/weak-modules --add-kernel %{KVERREL}%{?-v*} || exit $?\
@@ -2024,6 +2037,48 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.40.rc7.git0
+- Add libdwarf-devel to build deps so perf gets linked to it.
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com>
+- virt_console-rollup.patch, for feature F13/VirtioSerial, patches
+  are all targetted at 2.6.34 (and in linux-next.)
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com>
+- git-bluetooth.patch: selection of backports from next for hadess.
+  (rhbz#562245)
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.36.rc7.git0
+- Linux 2.6.33-rc7 (oops, jumped the gun on -git6 I guess. :)
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com>
+- 2.6.33-rc6-git6
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com>
+- Hack around delay loading microcode.ko, on intel, we don't split out
+  the firmware into cpuid specific versions (in fact, I don't know who does...)
+  so just patch out the request_firmware calls in microcode_intel.c, and
+  microcode_ctl.init will do the right thing. (fixes rhbz#560031)
+  (side note: I'll fix microcode_ctl to do one better at some point.)
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com>
+- Don't want linux-firmware if %with_firmware, yet. (Think F-11/F-12 2.6.33)
+
+* Fri Feb 05 2010 Peter Jones <pjones@redhat.com>
+- Move initrd creation to %%posttrans
+  Resolves: rhbz#557922
+
+* Fri Feb 05 2010 Kyle McMartin <kyle@redhat.com>
+- If %with_firmware, continue with kernel-firmware, otherwise prereq on the
+  separate linux-firmware pkg. Thanks to dzickus for noticing.
+
+* Thu Feb 04 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.29.rc6.git4
+- 2.6.33-rc6-git4
+
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- prevent-runtime-conntrack-changes.patch: fix another conntrack issue
+  identified by jcm.
+
 * Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
 - fix-conntrack-bug-with-namespaces.patch: Patch for issue identified
   by jcm. (Ref: http://lkml.org/lkml/2010/2/3/112)
