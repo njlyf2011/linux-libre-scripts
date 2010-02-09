@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.18 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.20 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -636,6 +636,7 @@ Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 Patch160: linux-2.6-execshield.patch
 
 Patch200: linux-2.6-ext4-prealloc-fixes.patch
+Patch201: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 # eCryptfs fixes taken from 2.6.31.2 (fixes CVE-2009-2908)
 Patch210: ecryptfs-handle-unrecognized-tag-3-cipher-codes.patch
 Patch211: ecryptfs-check-for-o_rdonly-lower-inodes-when-opening-lower-files.patch
@@ -910,7 +911,11 @@ Patch16533: sparc-tif_abi_pending-bit-removal.patch
 Patch16534: x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
 Patch16535: powerpc-tif_abi_pending-bit-removal.patch
 
-Patch16540: fix-crash-with-sys_move_pages.patch
+# cve-2010-0410
+Patch16540: connector-delete-buggy-notification-code.patch
+
+# cve-2010-0415
+Patch16550: fix-crash-with-sys_move_pages.patch
 
 %endif
 
@@ -1410,6 +1415,7 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-ext4-prealloc-fixes.patch
 
 # xfs
+ApplyPatch xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # btrfs
 
@@ -1721,6 +1727,10 @@ ApplyPatch sparc-tif_abi_pending-bit-removal.patch
 ApplyPatch x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
 ApplyPatch powerpc-tif_abi_pending-bit-removal.patch
 
+# cve-2010-0410
+ApplyPatch connector-delete-buggy-notification-code.patch
+
+# cve-2010-0415
 ApplyPatch fix-crash-with-sys_move_pages.patch
 
 # END OF PATCH APPLICATIONS
@@ -2311,6 +2321,13 @@ fi
 # and build.
 
 %changelog
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.30.10-105.2.20
+- xfs: xfs_swap_extents needs to handle dynamic fork offsets (rhbz#510823)
+  from sandeen.
+
+* Sun Feb 07 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.19
+- CVE-2010-0410 kernel: OOM/crash in drivers/connector
+
 * Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.30.10-105.2.18
 - fix-crash-with-sys_move_pages.patch: sys_move_pages doesn't bounds
   check the node properly.
