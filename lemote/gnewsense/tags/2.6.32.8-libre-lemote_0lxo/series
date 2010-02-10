@@ -1,0 +1,5 @@
+2.6.32.7-236fa4ca34-loongson.patch -p1 # lemote's patches
+2.6.32.7-adjust-loongson.patch -p1 # fix lemote's patches
+gnewsense-binutils-flag.patch -p1
+100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
+lxo-config.patch -p0 # config file
