@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1785
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1796 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1814 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -41,7 +41,7 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -54,9 +54,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 8
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -222,6 +222,8 @@ Summary: The Linux kernel
 
 # kernel-PAE is only built on i686.
 %ifarch i686
+# on F-11 the non-PAE kernel is i586 only
+%define with_up 0
 %define with_pae 1
 %else
 %define with_pae 0
@@ -242,9 +244,11 @@ Summary: The Linux kernel
 %endif
 
 # if requested, only build debug kernel
+%define with_up_debug 0
 %if %{with_dbgonly}
 %if %{debugbuildsenabled}
 %define with_up 0
+%define with_up_debug 1
 %endif
 %define with_smp 0
 %define with_pae 0
@@ -253,7 +257,7 @@ Summary: The Linux kernel
 %define with_perftool 0
 %endif
 
-%define all_x86 i386 i686
+%define all_x86 i386 i586 i686
 
 %if %{with_vdso_install}
 # These arches install vdso/ directories.
@@ -265,6 +269,12 @@ Summary: The Linux kernel
 # only ppc and alphav56 need separate smp kernels
 %ifnarch ppc alphaev56
 %define with_smp 0
+%endif
+
+# no need to build headers again for these archs
+# they can just use i586 and ppc64 headers
+%ifarch i686 ppc64iseries
+%define with_headers 0
 %endif
 
 # only build kernel-kdump on ppc64
@@ -422,6 +432,10 @@ Summary: The Linux kernel
 %define with_pae_debug %{with_debug}
 %endif
 
+%if %{with_up}
+%define with_up_debug %{with_debug}
+%endif
+
 #
 # Three sets of minimum package version requirements in the form of Conflicts:
 # to versions below the minimum
@@ -565,7 +579,8 @@ Source23: config-generic
 Source24: config-rhel-generic
 
 Source30: config-x86-generic
-Source31: config-i686-PAE
+Source31: config-i586
+Source32: config-i686-PAE
 
 Source40: config-x86_64-generic
 
@@ -658,6 +673,7 @@ Patch160: linux-2.6-execshield.patch
 Patch250: linux-2.6-debug-sizeof-structs.patch
 Patch260: linux-2.6-debug-nmi-timeout.patch
 Patch270: linux-2.6-debug-taint-vm.patch
+Patch280: linux-2.6-debug-lost-audit-data.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
@@ -709,7 +725,6 @@ Patch1517: hdpvr-ir-enable.patch
 
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
-Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 
 # nouveau + drm fixes
 Patch1811: drm-radeon-fixes.patch
@@ -718,12 +733,10 @@ Patch1813: drm-radeon-pm.patch
 Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
-Patch1820: drm-intel-no-tv-hotplug.patch
 Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-pm.patch
-Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -742,6 +755,7 @@ Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
+Patch3020: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
@@ -754,11 +768,24 @@ Patch11010: via-hwmon-temp-sensor.patch
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+Patch12020: linux-2.6-cantiga-iommu-gfx.patch
 
 # Patches for -stable
 Patch12101: wmi-free-the-allocated-acpi-objects.patch
 Patch12102: wmi-check-wmi-get-event-data-return-value.patch
 
+Patch12301: fix-conntrack-bug-with-namespaces.patch
+Patch12302: prevent-runtime-conntrack-changes.patch
+
+Patch12310: fix-crash-with-sys_move_pages.patch
+Patch12311: fix-ima-null-ptr-deref.patch
+
+# backport /dev/mem patches for -stable
+Patch20010: devmem-introduce-size_inside_page.patch
+Patch20020: devmem-check-vmalloc-address-on-kmem-read-write.patch
+Patch20030: devmem-fix-kmem-write-bug-on-memory-holes.patch
+
+#===============================================================================
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1251,6 +1278,7 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 
 # xfs
+ApplyPatch xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # btrfs
 
@@ -1281,6 +1309,7 @@ ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
+ApplyPatch linux-2.6-debug-lost-audit-data.patch
 
 #
 # PCI
@@ -1365,7 +1394,6 @@ ApplyPatch hdpvr-ir-enable.patch
 #ApplyPatch linux-2.6-ksm-kvm.patch
 
 # Assorted Virt Fixes
-ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1380,13 +1408,10 @@ ApplyPatch drm-nouveau.patch
 #ApplyPatch drm-radeon-pm.patch
 #ApplyPatch drm-i915-resume-force-mode.patch
 ApplyPatch drm-intel-big-hammer.patch
-ApplyPatch drm-intel-no-tv-hotplug.patch
 #ApplyPatch drm-page-flip.patch
 ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
-# Some BIOSes don't clear the whole GTT, and it causes IOMMU faults
-ApplyPatch linux-2.6-intel-agp-clear-gtt.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1403,12 +1428,24 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
+ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
 
 # Patches for -stable
 ApplyPatch wmi-free-the-allocated-acpi-objects.patch
 ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
 
-# END OF PATCH APPLICATIONS
+ApplyPatch fix-conntrack-bug-with-namespaces.patch
+ApplyPatch prevent-runtime-conntrack-changes.patch
+
+ApplyPatch fix-crash-with-sys_move_pages.patch
+ApplyPatch fix-ima-null-ptr-deref.patch
+
+# backport /dev/mem patches for -stable
+ApplyPatch devmem-introduce-size_inside_page.patch
+ApplyPatch devmem-check-vmalloc-address-on-kmem-read-write.patch
+ApplyPatch devmem-fix-kmem-write-bug-on-memory-holes.patch
+
+# END OF PATCH APPLICATIONS ====================================================
 
 %endif
 
@@ -1706,8 +1743,11 @@ mkdir -p $RPM_BUILD_ROOT/boot
 
 cd linux-%{kversion}.%{_target_cpu}
 
+%if %{with_up}
 %if %{with_debug}
 BuildKernel %make_target %kernel_image debug
+%endif
+BuildKernel %make_target %kernel_image
 %endif
 
 %if %{with_pae_debug}
@@ -1716,10 +1756,6 @@ BuildKernel %make_target %kernel_image PAEdebug
 
 %if %{with_pae}
 BuildKernel %make_target %kernel_image PAE
-%endif
-
-%if %{with_up}
-BuildKernel %make_target %kernel_image
 %endif
 
 %if %{with_smp}
@@ -2054,7 +2090,7 @@ fi
 
 %kernel_variant_files %{with_up}
 %kernel_variant_files %{with_smp} smp
-%kernel_variant_files %{with_debug} debug
+%kernel_variant_files %{with_up_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
@@ -2063,6 +2099,87 @@ fi
 # and build.
 
 %changelog
+* Tue Feb  9 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-2.6.32.7.
+- Use 100% gnu+freedo boot splash logo, with black background.
+
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-29.rc2
+- Fix i686 builds (we only want PAE & PAEdebug, not i686-debug...)
+- Using this kernel is *NOT* recommended yet. Still needs DRM to be
+  sorted out.
+
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-28.rc2 
+- xfs: xfs_swap_extents needs to handle dynamic fork offsets (rhbz#510823)
+  from sandeen.
+
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com>
+- fix-ima-null-ptr-deref.patch: fix IMA null ptr deref introduced
+  in 2.6.32-rc5.
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com>
+- fix-crash-with-sys_move_pages.patch: sys_move_pages doesn't bounds
+  check the node properly.
+
+* Fri Feb 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-25.rc2
+- Linux 2.6.32.8-rc2
+
+* Fri Feb 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-24.rc1
+- Backport three bug fixes for /dev/kmem
+
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-23.rc1
+- Copy DMAR fix for cantiga chipset from F-12
+- Disable DMAR by default: CONFIG_DMAR_DEFAULT_ON is not set
+
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-22.rc1
+- Restore some options to their original values:
+  CONFIG_PCIEAER_INJECT is not set
+  CONFIG_SND_AC97_POWER_SAVE_DEFAULT=0
+  CONFIG_SND_HDA_POWER_SAVE_DEFAULT=0
+  CONFIG_USB_STORAGE_CYPRESS_ATACB is not set
+
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-21.rc1
+- Fix utrace header. (rhbz#561536)
+- fix-conntrack-bug-with-namespaces.patch: Fix for issue identified by jcm,
+  http://lkml.org/lkml/2010/2/3/112
+- Fix another conntrack issue pointed out by jcm.
+
+* Thu Feb 04 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-20.rc1
+- Linux 2.6.32.8-rc1
+- Drop patches merged in -stable:
+  linux-2.6-userspace_kvmclock_offset.patch
+  drm-intel-no-tv-hotplug.patch
+
+* Wed Feb 03 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.7-19
+- Fix i586 kernel build.
+
+* Tue Feb 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.7-18
+- Update scripts/sort-config from devel
+- Remove obsolete config options
+
+* Thu Jan 28 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.7-17
+- Linux 2.6.32.7
+- Disable CONFIG_DEVTMPFS
+- Add patch to show filesystem name in audit name_count error
+  messsages and dump the stack on the first error.  
+
+* Wed Jan 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.7-16.rc1
+- Linux 2.6.32.7-rc1
+
+* Tue Jan 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.6-15
+- Linux 2.6.32.6
+
+* Mon Jan 25 2010 Dave Jones <davej@redhat.com> 2.6.32.4-14
+- Disable CONFIG_X86_CPU_DEBUG
+
+* Tue Jan 19 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.4-13
+- Linux 2.6.32.4
+- Drop patch linux-2.6-intel-agp-clear-gtt.patch, added to .32.4
+  after -rc1.
+
+* Fri Jan 15 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.4-12.rc1
+- Linux 2.6.32.4-rc1
+- Fix up the execshield patch for the mremap changes in .32.4
+
 * Mon Jan 11 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use gnu+freedo boot splash logo.
 
