@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.3 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.17 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -775,8 +775,15 @@ Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 
 # fs fixes
 
+#ext4
+Patch2950: ext4-fix-dq_claim_space.patch
+Patch2951: ext4-fix-accounting-of-reserved-metadata-blocks.patch
+
 #btrfs
 Patch3000: linux-2.6-btrfs-upstream.patch
+
+#xfs
+Patch3020: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # NFSv4
 Patch3050: linux-2.6.31-nfsd-proot.patch
@@ -823,6 +830,38 @@ Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
 Patch14463: dlm-fix-connection-close-handling.patch
+
+Patch14464: fix-conntrack-bug-with-namespaces.patch
+Patch14465: prevent-runtime-conntrack-changes.patch
+
+# cve-2009-4536, cve-2009-4538
+Patch16511: e1000-enhance-frame-fragment-detection.patch
+Patch16512: e1000e-enhance-frame-fragment-detection.patch
+Patch16513: e1000-e1000e-don-t-use-small-hardware-rx-buffers.patch
+# cve-2009-4537
+Patch16514: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+
+# 559100
+Patch16515: tty-fix-race-in-tty_fasync.patch
+Patch16516: fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+
+# cve-2010-0307
+Patch16530: split-flush_old_exec-into-two-functions.patch
+# needed for followon patches
+Patch16531: fdpic-respect-pt_gnu_stack-exec-protection-markings-when-creating-nommu-stack.patch
+Patch16532: fix-flush_old_exec-setup_new_exec-split.patch
+Patch16533: sparc-tif_abi_pending-bit-removal.patch
+Patch16534: x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
+Patch16535: powerpc-tif_abi_pending-bit-removal.patch
+
+# cve-2010-0410
+Patch16540: connector-delete-buggy-notification-code.patch
+
+Patch16550: fix-crash-with-sys_move_pages.patch
+
+Patch16560: quota-remove-dquot_claim_space-warning.patch
+
+Patch16570: futex-handle-user-space-corruption-gracefully.patch
 
 %endif
 
@@ -1327,8 +1366,11 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # ext4
+ApplyPatch ext4-fix-dq_claim_space.patch
+ApplyPatch ext4-fix-accounting-of-reserved-metadata-blocks.patch
 
 # xfs
+ApplyPatch xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-upstream.patch
@@ -1543,6 +1585,38 @@ ApplyPatch sched-retune-scheduler-latency-defaults.patch
 ApplyPatch sched-update-the-clock-of-runqueue-select-task-rq-selected.patch
 
 ApplyPatch dlm-fix-connection-close-handling.patch
+
+ApplyPatch fix-conntrack-bug-with-namespaces.patch
+ApplyPatch prevent-runtime-conntrack-changes.patch
+
+# cve-2009-4536, cve-2009-4538
+ApplyPatch e1000-enhance-frame-fragment-detection.patch
+ApplyPatch e1000e-enhance-frame-fragment-detection.patch
+ApplyPatch e1000-e1000e-don-t-use-small-hardware-rx-buffers.patch
+# cve-2009-4537
+ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+
+# 559100
+ApplyPatch tty-fix-race-in-tty_fasync.patch
+ApplyPatch fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+
+# cve-2010-0307
+ApplyPatch fdpic-respect-pt_gnu_stack-exec-protection-markings-when-creating-nommu-stack.patch
+ApplyPatch split-flush_old_exec-into-two-functions.patch
+ApplyPatch fix-flush_old_exec-setup_new_exec-split.patch
+ApplyPatch sparc-tif_abi_pending-bit-removal.patch
+ApplyPatch x86-get-rid-of-the-insane-tif_abi_pending-bit.patch
+ApplyPatch powerpc-tif_abi_pending-bit-removal.patch
+
+# cve-2010-0410
+ApplyPatch connector-delete-buggy-notification-code.patch
+
+# cve-2010-0415
+ApplyPatch fix-crash-with-sys_move_pages.patch
+
+ApplyPatch quota-remove-dquot_claim_space-warning.patch
+
+ApplyPatch futex-handle-user-space-corruption-gracefully.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1793,7 +1867,7 @@ hwcap 0 nosegneg"
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
+    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -2193,6 +2267,64 @@ fi
 # and build.
 
 %changelog
+* Tue Feb  9 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use 100% gnu+freedo boot splash logo, with black background.
+
+* Tue Feb 09 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.17
+- ext4-fix-accounting-of-reserved-metadata-blocks.patch: fixes typo in
+  ext4-fix-dq_claim_space.patch
+- Make the warning about quote reservations WARN_ONCE since we still
+  don't have all the fixes for this problem.
+
+* Tue Feb 09 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.16
+- Fix the list of kernel symbols to search for when building the list
+  of block devices (copied the list from the 2.6.32 kernel.)
+
+* Tue Feb 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.15
+- futex-handle-user-space-corruption-gracefully.patch: Fix oops in
+  the PI futex code. (rhbz#563091)
+
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com>
+- ext4-fix-dq_claim_space.patch: try to fix the quota WARN_ON that's currently
+  spamming kerneloops for reals.
+
+* Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.13
+- xfs: xfs_swap_extents needs to handle dynamic fork offsets (rhbz#510823)
+  from sandeen.
+
+* Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.12
+- Only print warning message about quota reservations once, to prevent
+  filling people's logs until this is fixed.
+
+* Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.11
+- fix-crash-with-sys_move_pages.patch: sys_move_pages doesn't bounds
+  check the node properly.
+
+* Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.10
+- CVE-2010-0410 kernel: OOM/crash in drivers/connector 
+
+* Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.9
+- kernel: tty->pgrp races (#559100)
+
+* Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.8
+- CVE-2009-4537 kernel: r8169 issue reported at 26c3
+  (fix taken from Red Hat/CentOS 5.4)
+
+* Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.7
+- CVE-2009-4536 kernel: e1000 issue reported at 26c3
+- CVE-2009-4538 kernel: e1000e frame fragment issue
+
+* Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.6
+- CVE-2010-0307 kernel: DoS on x86_64
+
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- prevent-runtime-conntrack-changes.patch: fix another conntrack bug
+  identified by jcm.
+
+* Wed Feb 03 2010 Kyle McMartin <kyle@redhat.com>
+- fix-conntrack-bug-with-namespaces.patch (rhbz#533087) fix for kvm
+  crash.
+
 * Tue Jan 19 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed and adjusted patch-libre-2.6.31.12.
 
