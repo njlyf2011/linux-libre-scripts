@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 4ebd3f1..2671f7a 100644
+index 07d3c6a..f5975f6 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -313,7 +313,7 @@ index 0000000..a6b299d
 +And an existing issue: The wifi can not survive after resuming from STD, but
 +can survive from STR.
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index fd7620f..39149a1 100644
+index fd7620f..68f4541 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -5,9 +5,14 @@ config MIPS
@@ -489,16 +489,19 @@ index fd7620f..39149a1 100644
  
  #
  # Set to y for ptrace access to watch registers.
-@@ -1896,6 +1968,24 @@ config NR_CPUS
+@@ -1896,6 +1968,27 @@ config NR_CPUS
  source "kernel/time/Kconfig"
  
  #
 +# High Resolution sched_clock() Configuration
 +#
 +
++config CPU_HAS_FIXED_C0_COUNT
++	bool
++
 +config HR_SCHED_CLOCK
 +	bool "High Resolution sched_clock()"
-+	depends on CSRC_R4K
++	depends on CSRC_R4K && (CPU_HAS_FIXED_C0_COUNT || !CPU_FREQ)
 +	default n
 +	help
 +	  This option enables the MIPS c0 count based high resolution
@@ -514,7 +517,7 @@ index fd7620f..39149a1 100644
  # Timer Interrupt Frequency Configuration
  #
  
-@@ -2024,15 +2114,6 @@ config STACKTRACE_SUPPORT
+@@ -2024,15 +2117,6 @@ config STACKTRACE_SUPPORT
  
  source "init/Kconfig"
  
@@ -530,7 +533,7 @@ index fd7620f..39149a1 100644
  source "kernel/Kconfig.freezer"
  
  menu "Bus options (PCI, PCMCIA, EISA, ISA, TC)"
-@@ -2104,6 +2185,7 @@ config MMU
+@@ -2104,6 +2188,7 @@ config MMU
  
  config I8253
  	bool
@@ -538,7 +541,7 @@ index fd7620f..39149a1 100644
  
  config ZONE_DMA32
  	bool
-@@ -2180,6 +2262,8 @@ source "kernel/power/Kconfig"
+@@ -2180,6 +2265,8 @@ source "kernel/power/Kconfig"
  
  endmenu
  
@@ -547,6 +550,33 @@ index fd7620f..39149a1 100644
  source "net/Kconfig"
  
  source "drivers/Kconfig"
+diff --git a/arch/mips/Kconfig.debug b/arch/mips/Kconfig.debug
+index 364ca89..9a48472 100644
+--- a/arch/mips/Kconfig.debug
++++ b/arch/mips/Kconfig.debug
+@@ -51,4 +51,22 @@ config RUNTIME_DEBUG
+ 	  arch/mips/include/asm/debug.h for debugging macros.
+ 	  If unsure, say N.
+ 
++config DEBUG_ZBOOT
++	bool "Enable compressed kernel support debugging"
++	depends on DEBUG_KERNEL && SYS_SUPPORTS_ZBOOT
++	help
++	  If you want to add compressed kernel support to a new board, and the
++	  board supports uart16550 compatible serial port, please select
++	  SYS_SUPPORTS_ZBOOT_UART16550 for your board and enable this option to
++	  debug it.
++
++	  If your board doesn't support uart16550 compatible serial port, you
++	  can try to select SYS_SUPPORTS_ZBOOT and use the other methods to
++	  debug it. for example, add a new serial port support just as
++	  arch/mips/boot/compressed/uart-16550.c does.
++
++	  After the compressed kernel support works, please disable this option
++	  to reduce the kernel image size and speed up the booting procedure a
++	  little.
++
+ endmenu
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
 index 77f5021..fdb70f7 100644
 --- a/arch/mips/Makefile
@@ -4934,10 +4964,10 @@ index b5b3feb..0000000
 -}
 diff --git a/arch/mips/boot/compressed/Makefile b/arch/mips/boot/compressed/Makefile
 new file mode 100644
-index 0000000..6a2dae7
+index 0000000..23cc663
 --- /dev/null
 +++ b/arch/mips/boot/compressed/Makefile
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,104 @@
 +#
 +# This file is subject to the terms and conditions of the GNU General Public
 +# License.
@@ -4967,15 +4997,17 @@ index 0000000..6a2dae7
 +KBUILD_CFLAGS := $(shell echo $(KBUILD_CFLAGS) | sed -e "s/-pg//")
 +
 +KBUILD_CFLAGS := $(LINUXINCLUDE) $(KBUILD_CFLAGS) -D__KERNEL__ \
-+	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE) -D"VMLINUX_LOAD_ADDRESS_ULL=$(VMLINUX_LOAD_ADDRESS)ull" \
++	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE) -D"VMLINUX_LOAD_ADDRESS_ULL=$(VMLINUX_LOAD_ADDRESS)ull"
 +
 +KBUILD_AFLAGS := $(LINUXINCLUDE) $(KBUILD_AFLAGS) -D__ASSEMBLY__ \
-+	-DKERNEL_ENTRY=0x$(shell $(NM) $(objtree)/$(KBUILD_IMAGE) 2>/dev/null | grep " kernel_entry" | cut -f1 -d \ ) \
-+	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE)
++	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE) \
++	-DKERNEL_ENTRY=0x$(shell $(NM) $(objtree)/$(KBUILD_IMAGE) 2>/dev/null | grep " kernel_entry" | cut -f1 -d \ )
 +
 +obj-y := $(obj)/head.o $(obj)/decompress.o $(obj)/dbg.o $(obj)/cache.o
 +
++ifdef CONFIG_DEBUG_ZBOOT
 +obj-$(CONFIG_SYS_SUPPORTS_ZBOOT_UART16550) += $(obj)/uart-16550.o
++endif
 +
 +OBJCOPYFLAGS_vmlinux.bin := $(OBJCOPYFLAGS) -O binary -R .comment -S
 +$(obj)/vmlinux.bin: $(KBUILD_IMAGE)
@@ -5092,7 +5124,7 @@ index 0000000..b229614
 +}
 diff --git a/arch/mips/boot/compressed/dbg.c b/arch/mips/boot/compressed/dbg.c
 new file mode 100644
-index 0000000..ff4dc7a
+index 0000000..d5c5d9a
 --- /dev/null
 +++ b/arch/mips/boot/compressed/dbg.c
 @@ -0,0 +1,37 @@
@@ -5107,7 +5139,7 @@ index 0000000..ff4dc7a
 +#include <linux/init.h>
 +#include <linux/types.h>
 +
-+void __attribute__ ((weak)) putc(char c)
++void __weak putc(char c)
 +{
 +}
 +
@@ -20382,10 +20414,10 @@ index 0000000..a27c16c
 +}
 diff --git a/arch/mips/kernel/csrc-r4k-hres.c b/arch/mips/kernel/csrc-r4k-hres.c
 new file mode 100644
-index 0000000..2fe8be7
+index 0000000..2bdabaa
 --- /dev/null
 +++ b/arch/mips/kernel/csrc-r4k-hres.c
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,57 @@
 +/*
 + * MIPS sched_clock implementation.
 + *
@@ -20403,13 +20435,14 @@ index 0000000..2fe8be7
 +#include <linux/init.h>
 +#include <linux/timer.h>
 +
++#define CLOCK2NS_SCALE_FACTOR 8
++
 +static unsigned long __read_mostly cycle2ns_scale;
-+static unsigned long __read_mostly cycle2ns_scale_factor;
 +
 +unsigned long long notrace sched_clock(void)
 +{
 +	unsigned long long v = cnt32_to_63(read_c0_count());
-+	return (v * cycle2ns_scale) >> cycle2ns_scale_factor;
++	return (v * cycle2ns_scale) >> CLOCK2NS_SCALE_FACTOR;
 +}
 +
 +static struct timer_list cnt32_to_63_keepwarm_timer;
@@ -20425,7 +20458,10 @@ index 0000000..2fe8be7
 +	unsigned long long v;
 +	unsigned long data;
 +
-+	v = cs.mult;
++	v = NSEC_PER_SEC;
++	v <<= CLOCK2NS_SCALE_FACTOR;
++	v += clock/2;
++	do_div(v, clock);
 +	/*
 +	 * We want an even value to automatically clear the top bit
 +	 * returned by cnt32_to_63() without an additional run time
@@ -20433,10 +20469,9 @@ index 0000000..2fe8be7
 +	 */
 +	if (v & 1)
 +		v++;
-+	cycle2ns_scale = v;
-+	cycle2ns_scale_factor = cs.shift;
++	clock2ns_scale = v;
 +
-+	data = 0x80000000 / clock * HZ;
++	data = 0x80000000UL / clock * HZ;
 +	setup_timer(&cnt32_to_63_keepwarm_timer, cnt32_to_63_keepwarm, data);
 +	mod_timer(&cnt32_to_63_keepwarm_timer, round_jiffies(jiffies + data));
 +}
@@ -21108,6 +21143,22 @@ index 24630fd..75034a8 100644
  		break;
  
  	case LINUX_SMP_IPI:
+diff --git a/arch/mips/kernel/time.c b/arch/mips/kernel/time.c
+index 1f467d5..a4903e4 100644
+--- a/arch/mips/kernel/time.c
++++ b/arch/mips/kernel/time.c
+@@ -152,6 +152,11 @@ static __init int cpu_has_mfc0_count_bug(void)
+ 
+ void __init time_init(void)
+ {
++#ifdef CONFIG_HR_SCHED_CLOCK
++	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
++		write_c0_count(0);
++#endif
++
+ 	plat_time_init();
+ 
+ 	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
 diff --git a/arch/mips/kernel/vmlinux.lds.S b/arch/mips/kernel/vmlinux.lds.S
 index 162b299..f25df73 100644
 --- a/arch/mips/kernel/vmlinux.lds.S
@@ -23483,10 +23534,10 @@ index 0000000..5a42868
 +}
 +arch_initcall(loongson_pm_init);
 diff --git a/arch/mips/loongson/common/reset.c b/arch/mips/loongson/common/reset.c
-index 97e9182..dbe62f6 100644
+index 97e9182..83cc514 100644
 --- a/arch/mips/loongson/common/reset.c
 +++ b/arch/mips/loongson/common/reset.c
-@@ -21,8 +21,20 @@ static void loongson_restart(char *command)
+@@ -21,22 +21,43 @@ static void loongson_restart(char *command)
  	/* do preparation for reboot */
  	mach_prepare_reboot();
  
@@ -23508,7 +23559,32 @@ index 97e9182..dbe62f6 100644
 +
  }
  
- static void loongson_halt(void)
+-static void loongson_halt(void)
++static void loongson_poweroff(void)
+ {
+ 	mach_prepare_shutdown();
+ 	while (1)
+ 		;
+ }
+ 
++static void loongson_halt(void)
++{
++	pr_notice("** You can safely turn off the power ** !\n");
++	while (1) {
++		if (cpu_wait)
++			cpu_wait();
++	}
++}
++
+ static int __init mips_reboot_setup(void)
+ {
+ 	_machine_restart = loongson_restart;
+ 	_machine_halt = loongson_halt;
+-	pm_power_off = loongson_halt;
++	pm_power_off = loongson_poweroff;
+ 
+ 	return 0;
+ }
 diff --git a/arch/mips/loongson/common/rtc.c b/arch/mips/loongson/common/rtc.c
 new file mode 100644
 index 0000000..1f88791
@@ -24243,10 +24319,10 @@ index 0000000..77d32f9
 +}
 diff --git a/arch/mips/loongson/lemote-2f/lynloong_pc.c b/arch/mips/loongson/lemote-2f/lynloong_pc.c
 new file mode 100644
-index 0000000..a3f6ffc
+index 0000000..15f06cb
 --- /dev/null
 +++ b/arch/mips/loongson/lemote-2f/lynloong_pc.c
-@@ -0,0 +1,584 @@
+@@ -0,0 +1,587 @@
 +/*
 + *  Driver for LynLoong pc extras
 + *
@@ -24321,9 +24397,11 @@ index 0000000..a3f6ffc
 +#define MIN_BRIGHTNESS 0
 +static uint level;
 +
++DEFINE_SPINLOCK(backlight_lock);
 +/* tune the brightness */
 +static void setup_mfgpt2(void)
 +{
++	spin_lock_irqsave(&backlight_lock, flags);
 +	/* set MFGPT2 comparator 1,2 */
 +	outw(MAX_BRIGHTNESS-level, MFGPT2_CMP1);
 +	outw(MAX_BRIGHTNESS, MFGPT2_CMP2);
@@ -24331,6 +24409,7 @@ index 0000000..a3f6ffc
 +	outw(0, MFGPT2_CNT);
 +	/* enable counter, compare mode, 32k */
 +	outw(0x8280, MFGPT2_SETUP);
++	spin_unlock_irqrestore(&backlight_lock, flags);
 +}
 +
 +static int lynloong_set_brightness(struct backlight_device *bd)
@@ -26198,10 +26277,10 @@ index 0000000..b09fc93
 +MODULE_LICENSE("GPL");
 diff --git a/arch/mips/loongson/lemote-2f/yeeloong_laptop.c b/arch/mips/loongson/lemote-2f/yeeloong_laptop.c
 new file mode 100644
-index 0000000..d5e4264
+index 0000000..b0fd8da
 --- /dev/null
 +++ b/arch/mips/loongson/lemote-2f/yeeloong_laptop.c
-@@ -0,0 +1,1322 @@
+@@ -0,0 +1,1330 @@
 +/*
 + *  Driver for YeeLoong laptop extras
 + *
@@ -26236,6 +26315,28 @@ index 0000000..d5e4264
 +
 +#define DRIVER_VERSION "0.1"
 +
++#define EC_VER_LEN 64
++
++static int ec_ver_small_than(char *version)
++{
++	char *p, ec_ver[EC_VER_LEN];
++
++	p = strstr(arcs_cmdline, "EC_VER=");
++	if (!p)
++		memset(ec_ver, 0, EC_VER_LEN);
++	else {
++		strncpy(ec_ver, p, EC_VER_LEN);
++		p = strstr(ec_ver, " ");
++		if (p)
++			*p = '\0';
++	}
++
++	/* Seems EC(>=PQ1D26) does this job for us, we can not do it again,
++	 * otherwise, the brightness will not resume to the normal level! */
++	if (strncasecmp(ec_ver, version, 64) < 0)
++		return 1;
++	return 0;
++}
 +/* backlight subdriver */
 +#define MAX_BRIGHTNESS 8
 +
@@ -26623,8 +26724,10 @@ index 0000000..d5e4264
 +
 +static void lcd_vo_set(int status)
 +{
-+	lcd_output_dev->request_state = status;
-+	lcd_video_output_set(lcd_output_dev);
++	if (ec_ver_small_than("EC_VER=PQ1D27")) {
++		lcd_output_dev->request_state = status;
++		lcd_video_output_set(lcd_output_dev);
++	}
 +}
 +
 +static void crt_vo_set(int status)
@@ -26645,25 +26748,9 @@ index 0000000..d5e4264
 +	return status;
 +}
 +
-+#define EC_VER_LEN 64
-+
 +static int black_screen_handler(int status)
 +{
-+	char *p, ec_ver[EC_VER_LEN];
-+
-+	p = strstr(arcs_cmdline, "EC_VER=");
-+	if (!p)
-+		memset(ec_ver, 0, EC_VER_LEN);
-+	else {
-+		strncpy(ec_ver, p, EC_VER_LEN);
-+		p = strstr(ec_ver, " ");
-+		if (p)
-+			*p = '\0';
-+	}
-+
-+	/* Seems EC(>=PQ1D26) does this job for us, we can not do it again,
-+	 * otherwise, the brightness will not resume to the normal level! */
-+	if (strncasecmp(ec_ver, "EC_VER=PQ1D26", 64) < 0)
++	if (ec_ver_small_than("EC_VER=PQ1D26"))
 +		lcd_vo_set(status);
 +
 +	return status;
@@ -28111,6 +28198,23 @@ index 30533ba..3a467c0 100644
  	.startup = pnx833x_startup_gpio_irq,
  	.shutdown = pnx833x_disable_gpio_irq,
  	.enable = pnx833x_enable_gpio_irq,
+diff --git a/arch/mips/oprofile/common.c b/arch/mips/oprofile/common.c
+index 7832ad2..ee46c82 100644
+--- a/arch/mips/oprofile/common.c
++++ b/arch/mips/oprofile/common.c
+@@ -14,9 +14,9 @@
+ 
+ #include "op_impl.h"
+ 
+-extern struct op_mips_model op_model_mipsxx_ops __attribute__((weak));
+-extern struct op_mips_model op_model_rm9000_ops __attribute__((weak));
+-extern struct op_mips_model op_model_loongson2_ops __attribute__((weak));
++extern struct op_mips_model op_model_mipsxx_ops __weak;
++extern struct op_mips_model op_model_rm9000_ops __weak;
++extern struct op_mips_model op_model_loongson2_ops __weak;
+ 
+ static struct op_mips_model *model;
+ 
 diff --git a/arch/mips/oprofile/op_model_loongson2.c b/arch/mips/oprofile/op_model_loongson2.c
 index 575cd14..475ff46 100644
 --- a/arch/mips/oprofile/op_model_loongson2.c
