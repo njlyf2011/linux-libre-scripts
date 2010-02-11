@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.17 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.18 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -661,6 +661,7 @@ Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
+Patch151: sparc-align-clone-and-signal-stacks-to-16-bytes.patch
 
 Patch160: linux-2.6-execshield.patch
 
@@ -1355,6 +1356,7 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
+ApplyPatch sparc-align-clone-and-signal-stacks-to-16-bytes.patch
 
 #
 # Exec shield
@@ -2267,6 +2269,9 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 09 2010 Dennis Gilmore <dennis@ausil.us> 2.6.31.12-174.2.18
+- sparc stack alignment patch from davem
+
 * Tue Feb  9 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use 100% gnu+freedo boot splash logo, with black background.
 
