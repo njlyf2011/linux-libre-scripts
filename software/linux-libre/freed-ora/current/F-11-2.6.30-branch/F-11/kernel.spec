@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1679
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.22 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1784.2.23 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -898,6 +898,7 @@ Patch16514: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 
 Patch16515: tty-fix-race-in-tty_fasync.patch
 Patch16516: fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+Patch16517: fix-race-in-tty_fasync_properly.patch
 
 # cve-2010-0291
 #Patch16520: untangle-the-do_mremap-mess.patch
@@ -1717,6 +1718,7 @@ ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 
 ApplyPatch tty-fix-race-in-tty_fasync.patch
 ApplyPatch fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+ApplyPatch fix-race-in-tty_fasync_properly.patch
 
 # cve-2010-0291
 #ApplyPatch untangle-the-do_mremap-mess.patch
@@ -2325,6 +2327,10 @@ fi
 # and build.
 
 %changelog
+* Thu Feb 11 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.23
+- fix-race-in-tty_fasync_properly.patch: fix problems caused by the fix
+  for bug #559100
+
 * Tue Feb 09 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.30.10-105.2.22
 - Fix the list of kernel symbols to search for when building the list
   of block devices (copied the list from the 2.6.32 kernel.)
