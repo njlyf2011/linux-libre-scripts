@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.18 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.19 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -845,6 +845,7 @@ Patch16514: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 # 559100
 Patch16515: tty-fix-race-in-tty_fasync.patch
 Patch16516: fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+Patch16517: fix-race-in-tty_fasync_properly.patch
 
 # cve-2010-0307
 Patch16530: split-flush_old_exec-into-two-functions.patch
@@ -1601,6 +1602,7 @@ ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 # 559100
 ApplyPatch tty-fix-race-in-tty_fasync.patch
 ApplyPatch fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+ApplyPatch fix-race-in-tty_fasync_properly.patch
 
 # cve-2010-0307
 ApplyPatch fdpic-respect-pt_gnu_stack-exec-protection-markings-when-creating-nommu-stack.patch
@@ -2269,6 +2271,10 @@ fi
 # and build.
 
 %changelog
+* Wed Feb 10 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.19
+- fix-race-in-tty_fasync_properly.patch: fix problems caused by the fix
+  for bug #559100
+
 * Tue Feb 09 2010 Dennis Gilmore <dennis@ausil.us> 2.6.31.12-174.2.18
 - sparc stack alignment patch from davem
 
