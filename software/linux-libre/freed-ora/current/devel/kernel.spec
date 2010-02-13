@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1923 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1927 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -73,7 +73,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -647,10 +647,8 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ptrace.patch
 
-Patch141: linux-2.6-ps3-storage-alias.patch
 Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
-Patch147: linux-2.6-imac-transparent-bridge.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -744,7 +742,6 @@ Patch12013: linux-2.6-rfkill-all.patch
 
 Patch12015: add-appleir-usb-driver.patch
 
-Patch12016: fix-conntrack-bug-with-namespaces.patch
 Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
@@ -1212,16 +1209,10 @@ ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 # PowerPC
 #
 ### NOT (YET) UPSTREAM:
-# The storage alias patch is Fedora-local, and allows the old 'ps3_storage'
-# module name to work on upgrades. Otherwise, I believe mkinitrd will fail
-# to pull the module in,
-ApplyPatch linux-2.6-ps3-storage-alias.patch
 # Alleviate G5 thermal shutdown problems
 ApplyPatch linux-2.6-g5-therm-shutdown.patch
 # Provide modalias in sysfs for vio devices
 ApplyPatch linux-2.6-vio-modalias.patch
-# Work around PCIe bridge setup on iSight
-ApplyPatch linux-2.6-imac-transparent-bridge.patch
 
 #
 # SPARC64
@@ -1381,8 +1372,6 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch linux-2.6-rfkill-all.patch
 
 ApplyPatch add-appleir-usb-driver.patch
-
-ApplyPatch fix-conntrack-bug-with-namespaces.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
@@ -2037,6 +2026,24 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 13 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.33-rc8.
+
+* Fri Feb 12 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33-0.44.rc8
+- 2.6.33-rc8
+
+* Fri Feb 12 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33-0.43.rc7.git6
+- 2.6.33-rc7-git6
+
+* Thu Feb 11 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33-0.42.rc7.git5
+- 2.6.33-rc7-git5
+- Drop merged patches:
+  fix-conntrack-bug-with-namespaces.patch
+  commit ad60a9154887bb6162e427b0969fefd2f34e94a6 from git-bluetooth.patch
+
+* Mon Feb 08 2010 Josh Boyer <jwboyer@gmail.com>
+- Drop ppc ps3_storage and imac-transparent bridge patches
+
 * Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.40.rc7.git0
 - Add libdwarf-devel to build deps so perf gets linked to it.
 
