@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2008 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2010 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -56,7 +56,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 8
 # Is it a -stable RC?
-%define stable_rc 2
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -785,6 +785,9 @@ Patch12302: prevent-runtime-conntrack-changes.patch
 
 Patch12310: fix-crash-with-sys_move_pages.patch
 Patch12311: fix-ima-null-ptr-deref.patch
+Patch12312: futex-handle-user-space-corruption-gracefully.patch
+
+Patch12313: fix-abrtd.patch
 
 # ==============================================================================
 
@@ -1450,6 +1453,9 @@ ApplyPatch prevent-runtime-conntrack-changes.patch
 
 ApplyPatch fix-crash-with-sys_move_pages.patch
 ApplyPatch fix-ima-null-ptr-deref.patch
+ApplyPatch futex-handle-user-space-corruption-gracefully.patch
+
+ApplyPatch fix-abrtd.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2106,6 +2112,18 @@ fi
 # and build.
 
 %changelog
+* Wed Feb 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.8.
+
+* Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-50
+- fix-abrtd.patch: backport of nhorman's call_usermode_helper changes
+  from devel/ & linux-next.
+
+* Tue Feb 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-49
+- Linux 2.6.32.8
+- futex-handle-user-space-corruption-gracefully.patch: Fix oops in
+  the PI futex code. (rhbz#563091)
+
 * Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-48.rc2
 - xfs: xfs_swap_extents needs to handle dynamic fork offsets (rhbz#510823)
   from sandeen.
