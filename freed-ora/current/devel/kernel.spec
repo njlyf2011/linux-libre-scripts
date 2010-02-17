@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1927 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1929 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,7 +75,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -746,6 +746,8 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
 
+Patch12019: linux-2.6-umh-refactor.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1374,6 +1376,9 @@ ApplyPatch linux-2.6-rfkill-all.patch
 ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
+
+# Refactor UserModeHelper code & satisfy abrt recursion check request
+ApplyPatch linux-2.6-umh-refactor.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2026,6 +2031,15 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.46.rc8.git1
+- 2.6.33-rc8-git1
+- virt_console-rollup.patch: fixes from linux-next from Amit.
+
+* Mon Feb 15 2010 Neil Horman <nhorman@redhat.com>
+- Refactor usermodehelper code and change recursion check for abrt
+  with linux-2.6-umh-refactor.patch from -mm
+  fixes bz 557386
+
 * Sat Feb 13 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.33-rc8.
 
