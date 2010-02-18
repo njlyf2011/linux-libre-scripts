@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2010 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2018 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -716,7 +716,6 @@ Patch1701: kms-offb-handoff.patch
 
 # nouveau + drm fixes
 Patch1810: drm-upgrayedd.patch
-Patch1811: drm-fixes.patch
 Patch1813: drm-radeon-pm.patch
 #Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -726,15 +725,13 @@ Patch1820: drm-intel-no-tv-hotplug.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 #Patch1825: drm-intel-pm.patch
-Patch1825: drm-intel-no-tv-hotplug-interrupts-dammit.patch
 #Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 Patch1828: drm-nouveau-g80-ctxprog.patch
-Patch1829: drm-nouveau-shared-fb.patch
 Patch1831: drm-nouveau-tvout-disable.patch
 Patch1832: drm-nouveau-safetile-getparam.patch
 Patch1833: drm-nouveau-nvac-noaccel.patch
 Patch1844: drm-nouveau-kconfig.patch
-Patch1845: drm-nouveau-update.patch
+Patch1845: drm-nouveau-mutex.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -785,10 +782,19 @@ Patch12302: prevent-runtime-conntrack-changes.patch
 
 Patch12310: fix-crash-with-sys_move_pages.patch
 Patch12311: fix-ima-null-ptr-deref.patch
+
+# cve-2010-0622, cve-2010-0623
 Patch12312: futex-handle-user-space-corruption-gracefully.patch
+Patch12313: futex-handle-futex-value-corruption-gracefully.patch
+Patch12314: futex_lock_pi-key-refcnt-fix.patch
 
-Patch12313: fix-abrtd.patch
+Patch12318: fix-abrtd.patch
+Patch12319: vgaarb-fix-userspace-ptr-deref.patch
 
+# cve-2009-4537
+Patch12320: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+
+Patch12330: fix-race-in-tty_fasync-properly.patch
 # ==============================================================================
 
 %endif
@@ -1412,18 +1418,15 @@ ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 ApplyPatch kms-offb-handoff.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
-ApplyPatch drm-fixes.patch
 #ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
-ApplyPatch drm-intel-no-tv-hotplug-interrupts-dammit.patch
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
-ApplyPatch drm-nouveau-shared-fb.patch
 ApplyPatch drm-nouveau-tvout-disable.patch
 ApplyPatch drm-nouveau-safetile-getparam.patch
 #ApplyPatch drm-nouveau-nvac-noaccel.patch
 ApplyPatch drm-nouveau-kconfig.patch
-ApplyPatch drm-nouveau-update.patch
+ApplyPatch drm-nouveau-mutex.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1453,9 +1456,19 @@ ApplyPatch prevent-runtime-conntrack-changes.patch
 
 ApplyPatch fix-crash-with-sys_move_pages.patch
 ApplyPatch fix-ima-null-ptr-deref.patch
+
+# cve-2010-0622, cve-2010-0623
 ApplyPatch futex-handle-user-space-corruption-gracefully.patch
+ApplyPatch futex-handle-futex-value-corruption-gracefully.patch
+ApplyPatch futex_lock_pi-key-refcnt-fix.patch
 
 ApplyPatch fix-abrtd.patch
+ApplyPatch vgaarb-fix-userspace-ptr-deref.patch
+
+# cve-2009-4537
+ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+
+ApplyPatch fix-race-in-tty_fasync-properly.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2112,7 +2125,34 @@ fi
 # and build.
 
 %changelog
-* Wed Feb 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-58
+- fix-race-in-tty_fasync-properly.patch: fix for deadlock caused
+  by original patch in 2.6.32.6 
+
+* Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-57
+- CVE-2010-0623 kernel: local DoS via futex_lock_pi 
+
+* Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>
+- CVE-2009-4537 kernel: r8169 issue reported at 26c3
+  (fix taken from Red Hat/CentOS 5.4)
+
+* Wed Feb 17 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.8.55
+- drm-nouveau-mutex.patch: add fix that didn't quite make it to linus yet
+
+* Wed Feb 17 2010 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: rebase fedora patchset
+- drm-nouveau-shared-fb.patch: drop
+- drm-nouveau-update.patch: drop, included in previous drm update
+
+* Wed Feb 17 2010 Dave Airlie <airlied@redhat.com> 
+- drm-upgrayedd.patch - update - needs nouveau patch rebase
+- drop reverted upstream commits since rc8 - also drop other merged patches
+
+* Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-51
+- vgaarb-fix-userspace-ptr-deref.patch: fix a userspace ptr deref.
+  (rhbz#564246) [and correct upstream diff]
+
+* Tue Feb 16 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Feb 17
 - Adjusted patch-libre-2.6.32.8.
 
 * Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-50
