@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1929 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1930 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -479,7 +479,7 @@ Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
-Provides: kernel-drm-nouveau = 15\
+Provides: kernel-drm-nouveau = 16\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
@@ -710,7 +710,7 @@ Patch1554: virt_console-rollup.patch
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 # nouveau + drm fixes
-Patch1815: drm_nouveau_ucode.patch
+Patch1815: drm-nouveau-abi16.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -1351,8 +1351,7 @@ ApplyPatch virt_console-rollup.patch
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 # Nouveau DRM + drm fixes
-# squash nouveau firmware into a single commit until it gets into linux-firmware
-ApplyPatch drm_nouveau_ucode.patch
+ApplyPatch drm-nouveau-abi16.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -2031,6 +2030,10 @@ fi
 # and build.
 
 %changelog
+* Wed Feb 17 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33-0.47.rc8.git1
+- nouveau: update to new kernel interface
+- drm_nouveau_ucode.patch: drop, in linux-firmware now
+
 * Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.46.rc8.git1
 - 2.6.33-rc8-git1
 - virt_console-rollup.patch: fixes from linux-next from Amit.
