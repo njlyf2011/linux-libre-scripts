@@ -1,8 +1,6 @@
 D/scripts////
 /linux-2.6.32.tar.bz2.sign/-1.1/Thu Dec  3 07:04:21 2009//Tkernel-2_6_32_2-15_fc13
 /patch-2.6.33-rc8.bz2.sign/-1.1/Sat Feb 13 02:16:06 2010//Tkernel-2_6_33-0_44_rc8_git0_fc13
-/drm_nouveau_ucode.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_33-0_46_rc8_git1_fc13
-/.cvsignore/1.1168/dummy timestamp from new-entry+Thu Feb 18 07:45:43 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
 /Makefile/1.123/dummy timestamp from new-entry//Tkernel-2_6_33-0_47_rc8_git1_fc13
 /Makefile.config/1.73/Thu Feb 18 07:45:40 2010/-ko/Tkernel-2_6_33-0_47_rc8_git1_fc13
 /TODO/1.68/Thu Feb 18 07:44:06 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
@@ -108,9 +106,10 @@ D/scripts////
 /patch-2.6.33-rc8-git1.bz2.sign/1.1/Thu Feb 18 07:44:06 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
 /perf/1.6/Thu Feb 18 07:44:53 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
 /prevent-runtime-conntrack-changes.patch/1.1/Thu Feb 18 07:45:41 2010/-kb/Tkernel-2_6_33-0_47_rc8_git1_fc13
-/sources/1.1127/dummy timestamp from new-entry+Thu Feb 18 07:45:40 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
-/upstream/1.1040/dummy timestamp from new-entry+Thu Feb 18 07:45:40 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_33-0_47_rc8_git1_fc13
 /v4l-dvb-fix-cx25840-firmware-loading.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_33-0_47_rc8_git1_fc13
 /vhost_net-rollup.patch/1.1/Thu Feb 18 07:44:07 2010/-kb/Tkernel-2_6_33-0_47_rc8_git1_fc13
 /virt_console-rollup.patch/1.2/Thu Feb 18 07:44:37 2010/-kb/Tkernel-2_6_33-0_47_rc8_git1_fc13
+/.cvsignore/1.1168/Thu Feb 18 22:07:53 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
+/sources/1.1127/Thu Feb 18 22:07:53 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
+/upstream/1.1040/Thu Feb 18 22:07:53 2010//Tkernel-2_6_33-0_47_rc8_git1_fc13
