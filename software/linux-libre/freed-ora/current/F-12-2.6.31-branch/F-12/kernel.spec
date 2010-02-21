@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.19 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.22 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -754,9 +754,11 @@ Patch1839: drm-radeon-misc-fixes.patch
 Patch1900: linux-2.6-vga-arb.patch
 Patch1901: drm-vga-arb.patch
 Patch1902: drm-radeon-kms-arbiter-return-ignore.patch
+# RHBZ#564246
+Patch1903: vgaarb-fix-incorrect-dereference-of-userspace-pointer.patch
 
 # make harmless fbcon debug less loud
-Patch1903: fbcon-lower-debug.patch
+Patch1910: fbcon-lower-debug.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -777,8 +779,8 @@ Patch2904: v4l-dvb-fix-cx25840-firmware-loading.patch
 # fs fixes
 
 #ext4
-Patch2950: ext4-fix-dq_claim_space.patch
-Patch2951: ext4-fix-accounting-of-reserved-metadata-blocks.patch
+#Patch2950: ext4-fix-dq_claim_space.patch
+#Patch2951: ext4-fix-accounting-of-reserved-metadata-blocks.patch
 
 #btrfs
 Patch3000: linux-2.6-btrfs-upstream.patch
@@ -864,6 +866,8 @@ Patch16550: fix-crash-with-sys_move_pages.patch
 Patch16560: quota-remove-dquot_claim_space-warning.patch
 
 Patch16570: futex-handle-user-space-corruption-gracefully.patch
+
+Patch16580: partitions-use-sector-size-for-efi-gpt.patch
 
 %endif
 
@@ -1280,7 +1284,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
-#ApplyOptionalPatch git-linus.diff
+ApplyOptionalPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
 # also gives a list of missing options at the end. Useful for automated
@@ -1369,8 +1373,8 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # ext4
-ApplyPatch ext4-fix-dq_claim_space.patch
-ApplyPatch ext4-fix-accounting-of-reserved-metadata-blocks.patch
+#ApplyPatch ext4-fix-dq_claim_space.patch
+#ApplyPatch ext4-fix-accounting-of-reserved-metadata-blocks.patch
 
 # xfs
 ApplyPatch xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
@@ -1534,6 +1538,8 @@ ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyPatch linux-2.6-vga-arb.patch
 ApplyPatch drm-vga-arb.patch
 ApplyPatch drm-radeon-kms-arbiter-return-ignore.patch
+# RHBZ#564246
+ApplyPatch vgaarb-fix-incorrect-dereference-of-userspace-pointer.patch
 
 # Lower debug level of fbcon handover messages (rh#538526)
 ApplyPatch fbcon-lower-debug.patch
@@ -1621,6 +1627,8 @@ ApplyPatch fix-crash-with-sys_move_pages.patch
 ApplyPatch quota-remove-dquot_claim_space-warning.patch
 
 ApplyPatch futex-handle-user-space-corruption-gracefully.patch
+
+ApplyPatch partitions-use-sector-size-for-efi-gpt.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2270,7 +2278,27 @@ fi
 # plz don't put in a version string unless you're going to tag
 # and build.
 
+# Queued for 2.6.31.13:
+# More futex fixes (CVE-2010-0623)
+# Stuff we already have:
+#  tty-fix-race-in-tty_fasync.patch
+#  fnctl-f_modown-should-call-write_lock_irqsave-restore.patch
+#  fix-race-in-tty_fasync_properly.patch
+#  connector-delete-buggy-notification-code.patch
+#  fix-crash-with-sys_move_pages.patch
+#  futex-handle-user-space-corruption-gracefully.patch
+
 %changelog
+* Fri Feb 19 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.22
+- ext4: disable quota 'fixes' which... weren't. (wrong i_block accounting.)
+
+* Wed Feb 17 2010 Kyle McMartin <kyle@redhat.com>
+- partitions: don't hardcode 512b sectors for GPT. (fixes >2TB disks.)
+
+* Sat Feb 13 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.20
+- kernel: vgaarb: fix incorrect dereference of userspace pointer (#564246)
+- Always apply the patch git-linus.diff if it's not empty.
+
 * Wed Feb 10 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.19
 - fix-race-in-tty_fasync_properly.patch: fix problems caused by the fix
   for bug #559100
@@ -2293,7 +2321,7 @@ fi
 
 * Tue Feb 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.15
 - futex-handle-user-space-corruption-gracefully.patch: Fix oops in
-  the PI futex code. (rhbz#563091)
+  the PI futex code. (rhbz#563091) (CVE-2010-0622)
 
 * Sun Feb 07 2010 Kyle McMartin <kyle@redhat.com>
 - ext4-fix-dq_claim_space.patch: try to fix the quota WARN_ON that's currently
@@ -2309,7 +2337,7 @@ fi
 
 * Sat Feb 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.11
 - fix-crash-with-sys_move_pages.patch: sys_move_pages doesn't bounds
-  check the node properly.
+  check the node properly. (CVE-2010-0415)
 
 * Sat Feb 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.10
 - CVE-2010-0410 kernel: OOM/crash in drivers/connector 
