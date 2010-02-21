@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1930 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1931 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,7 +75,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 1
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -2030,6 +2030,9 @@ fi
 # and build.
 
 %changelog
+* Fri Feb 19 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.48.rc8.git4
+- 2.6.33-rc8-git4
+
 * Wed Feb 17 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33-0.47.rc8.git1
 - nouveau: update to new kernel interface
 - drm_nouveau_ucode.patch: drop, in linux-firmware now
