@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1883
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1931 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1935 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,7 +75,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 4
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -709,8 +709,15 @@ Patch1554: virt_console-rollup.patch
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
-# nouveau + drm fixes
-Patch1815: drm-nouveau-abi16.patch
+# nouveau fixes
+# - these should make it to linus for 2.6.33 at some point
+Patch1815: drm-nouveau-old-vgaload.patch
+Patch1816: drm-nouveau-gf8-igp.patch
+# - these not until 2.6.34
+Patch1817: drm-nouveau-abi16.patch
+Patch1818: drm-nouveau-updates.patch
+
+# drm fixes
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -727,6 +734,7 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
+Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # fs fixes
 
@@ -747,6 +755,7 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 Patch12018: neuter_intel_microcode_load.patch
 
 Patch12019: linux-2.6-umh-refactor.patch
+Patch12020: coredump-uid-pipe-check.patch
 
 %endif
 
@@ -1351,7 +1360,10 @@ ApplyPatch virt_console-rollup.patch
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 # Nouveau DRM + drm fixes
+ApplyPatch drm-nouveau-old-vgaload.patch
+ApplyPatch drm-nouveau-gf8-igp.patch
 ApplyPatch drm-nouveau-abi16.patch
+ApplyPatch drm-nouveau-updates.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1368,6 +1380,7 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 #ApplyPatch linux-2.6-v4l-dvb-update.patch
 #ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
+ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
@@ -1378,6 +1391,7 @@ ApplyPatch neuter_intel_microcode_load.patch
 
 # Refactor UserModeHelper code & satisfy abrt recursion check request
 ApplyPatch linux-2.6-umh-refactor.patch
+ApplyPatch coredump-uid-pipe-check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2030,6 +2044,20 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33-0.52.rc8.git6
+- nouveau: bring to latest upstream, reorganise patches to be more sensible
+
+* Mon Feb 22 2010 Kyle McMartin <kyle@redhat.com>
+- coredump-uid-pipe-check.patch: commit it to a useful branch.
+
+* Mon Feb 22 2010 Dave Jones <davej@redhat.com> 2.6.33-0.50.rc8.git6
+- 2.6.33-rc8-git6
+
+* Sun Feb 21 2010 Hans de Goede <hdegoede@redhat.com>
+- Rebase gspca usb webcam driver + sub drivers to latest upstream, this
+  adds support for the following webcam bridge chipsets: benq, cpia1, sn9c2028;
+  and support for new devices and many bugfixes in other gspca-subdrivers
+
 * Fri Feb 19 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.48.rc8.git4
 - 2.6.33-rc8-git4
 
