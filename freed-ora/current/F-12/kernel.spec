@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2018 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2023 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,9 +54,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -686,6 +686,7 @@ Patch470: die-floppy-die.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch520: linux-2.6.30-hush-rom-warning.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
+Patch531: viafb-neuter-device-table.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
@@ -729,9 +730,9 @@ Patch1824: drm-intel-next.patch
 Patch1828: drm-nouveau-g80-ctxprog.patch
 Patch1831: drm-nouveau-tvout-disable.patch
 Patch1832: drm-nouveau-safetile-getparam.patch
-Patch1833: drm-nouveau-nvac-noaccel.patch
 Patch1844: drm-nouveau-kconfig.patch
 Patch1845: drm-nouveau-mutex.patch
+Patch1846: drm-nouveau-update.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -771,30 +772,22 @@ Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
 Patch12020: linux-2.6-cantiga-iommu-gfx.patch
 
-# Patches for -stable
-Patch12101: wmi-free-the-allocated-acpi-objects.patch
-Patch12102: wmi-check-wmi-get-event-data-return-value.patch
-
 Patch12200: add-appleir-usb-driver.patch
 
-Patch12301: fix-conntrack-bug-with-namespaces.patch
-Patch12302: prevent-runtime-conntrack-changes.patch
+# Patches for -stable
 
-Patch12310: fix-crash-with-sys_move_pages.patch
 Patch12311: fix-ima-null-ptr-deref.patch
 
-# cve-2010-0622, cve-2010-0623
-Patch12312: futex-handle-user-space-corruption-gracefully.patch
-Patch12313: futex-handle-futex-value-corruption-gracefully.patch
-Patch12314: futex_lock_pi-key-refcnt-fix.patch
-
-Patch12318: fix-abrtd.patch
+Patch12315: fix-abrtd.patch
+Patch12316: coredump-uid-pipe-check.patch
 Patch12319: vgaarb-fix-userspace-ptr-deref.patch
 
-# cve-2009-4537
+# cve-2009-4537 [not upstream]
 Patch12320: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 
-Patch12330: fix-race-in-tty_fasync-properly.patch
+# rhbz#/566565
+Patch12340: ice1712-fix-revo71-mixer-names.patch
+
 # ==============================================================================
 
 %endif
@@ -1371,6 +1364,9 @@ ApplyPatch linux-2.6.30-hush-rom-warning.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
+# don't autoload viafb
+ApplyPatch viafb-neuter-device-table.patch
+
 # Fix the SELinux mprotect checks on executable mappings
 #ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
@@ -1424,9 +1420,8 @@ ApplyOptionalPatch drm-intel-next.patch
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
 ApplyPatch drm-nouveau-tvout-disable.patch
 ApplyPatch drm-nouveau-safetile-getparam.patch
-#ApplyPatch drm-nouveau-nvac-noaccel.patch
 ApplyPatch drm-nouveau-kconfig.patch
-ApplyPatch drm-nouveau-mutex.patch
+ApplyPatch drm-nouveau-update.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1448,27 +1443,18 @@ ApplyPatch linux-2.6-rfkill-all.patch
 ApplyPatch add-appleir-usb-driver.patch
 
 # Patches for -stable
-ApplyPatch wmi-free-the-allocated-acpi-objects.patch
-ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
 
-ApplyPatch fix-conntrack-bug-with-namespaces.patch
-ApplyPatch prevent-runtime-conntrack-changes.patch
-
-ApplyPatch fix-crash-with-sys_move_pages.patch
 ApplyPatch fix-ima-null-ptr-deref.patch
 
-# cve-2010-0622, cve-2010-0623
-ApplyPatch futex-handle-user-space-corruption-gracefully.patch
-ApplyPatch futex-handle-futex-value-corruption-gracefully.patch
-ApplyPatch futex_lock_pi-key-refcnt-fix.patch
-
 ApplyPatch fix-abrtd.patch
+ApplyPatch coredump-uid-pipe-check.patch
 ApplyPatch vgaarb-fix-userspace-ptr-deref.patch
 
 # cve-2009-4537
 ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 
-ApplyPatch fix-race-in-tty_fasync-properly.patch
+# rhbz#566565
+ApplyPatch ice1712-fix-revo71-mixer-names.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2125,6 +2111,34 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.9-63.rc1
+- nouveau: fix pre-nv17 output detection regression, support for GF8 IGPs
+
+* Mon Feb 22 2010 Kyle McMartin <kyle@redhat.com>
+- coredump-uid-pipe-check.patch: ditto from F-13/
+
+* Mon Feb 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-61.rc1
+- Drop the PCI device table in the viafb driver -- it was added in
+  2.6.32 and we don't want the driver to autoload.
+
+* Mon Feb 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-60.rc1
+- Linux 2.6.32.9-rc1
+- Revert the 14 DRM patches from 2.6.32.9: we already have them
+- Drop other patches merged upstream:
+  wmi-check-wmi-get-event-data-return-value.patch
+  wmi-free-the-allocated-acpi-objects.patch
+  fix-conntrack-bug-with-namespaces.patch
+  prevent-runtime-conntrack-changes.patch
+  fix-crash-with-sys_move_pages.patch
+  futex-handle-futex-value-corruption-gracefully.patch
+  futex-handle-user-space-corruption-gracefully.patch
+  futex_lock_pi-key-refcnt-fix.patch
+  fix-race-in-tty_fasync-properly.patch
+
+* Thu Feb 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-59
+- ice1712-fix-revo71-mixer-names.patch: fix mixer names for
+  monty. (rhbz#566565)
+
 * Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-58
 - fix-race-in-tty_fasync-properly.patch: fix for deadlock caused
   by original patch in 2.6.32.6 
