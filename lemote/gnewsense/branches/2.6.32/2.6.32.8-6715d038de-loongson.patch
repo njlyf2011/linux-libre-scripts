@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 07d3c6a..f5975f6 100644
+index f282cab..e10f041 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -24319,10 +24319,10 @@ index 0000000..77d32f9
 +}
 diff --git a/arch/mips/loongson/lemote-2f/lynloong_pc.c b/arch/mips/loongson/lemote-2f/lynloong_pc.c
 new file mode 100644
-index 0000000..15f06cb
+index 0000000..5fb06dc
 --- /dev/null
 +++ b/arch/mips/loongson/lemote-2f/lynloong_pc.c
-@@ -0,0 +1,587 @@
+@@ -0,0 +1,589 @@
 +/*
 + *  Driver for LynLoong pc extras
 + *
@@ -24401,6 +24401,8 @@ index 0000000..15f06cb
 +/* tune the brightness */
 +static void setup_mfgpt2(void)
 +{
++	unsigned long flags;
++
 +	spin_lock_irqsave(&backlight_lock, flags);
 +	/* set MFGPT2 comparator 1,2 */
 +	outw(MAX_BRIGHTNESS-level, MFGPT2_CMP1);
