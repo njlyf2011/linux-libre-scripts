@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Versions of various parts
 
@@ -27,14 +27,14 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1883
+%define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1935 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1937 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 32
+%define base_sublevel 33
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -73,9 +73,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
-%define gitrev 6
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -710,9 +710,6 @@ Patch1554: virt_console-rollup.patch
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 # nouveau fixes
-# - these should make it to linus for 2.6.33 at some point
-Patch1815: drm-nouveau-old-vgaload.patch
-Patch1816: drm-nouveau-gf8-igp.patch
 # - these not until 2.6.34
 Patch1817: drm-nouveau-abi16.patch
 Patch1818: drm-nouveau-updates.patch
@@ -1360,8 +1357,6 @@ ApplyPatch virt_console-rollup.patch
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-nouveau-old-vgaload.patch
-ApplyPatch drm-nouveau-gf8-igp.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
 # pm broken on my thinkpad t60p - airlied
@@ -2044,6 +2039,17 @@ fi
 # and build.
 
 %changelog
+* Wed Feb 24 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Make that 2.6.33-libre.
+
+* Wed Feb 24 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-1
+- Linux 2.6.33
+
+* Wed Feb 24 2010 Dave Jones <davej@redhat.com> 2.6.33-0.53.rc8.git9
+- 2.6.33-rc8-git9
+- dropped: drm-nouveau-old-vgaload.patch - merged upstream.
+- dropped: drm-nouveau-gf8-igp.patch - merged upstream.
+
 * Tue Feb 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33-0.52.rc8.git6
 - nouveau: bring to latest upstream, reorganise patches to be more sensible
 

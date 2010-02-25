@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#    Copyright (C) 2008, 2009 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008, 2009, 2010 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -45,7 +45,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.32 extra=
+kver=2.6.33 extra=
 
 case $1 in
 --force)
@@ -190,7 +190,7 @@ clean_sed () {
   filetest $2 || return
   sed -e "$1" "$2" > "$2".deblob || {
     die $2: failed: ${3-applied sed script $1} && return 1; }
-  check_changed $2 && echo $2: ${3-applied sed script $1} 
+  check_changed $2 && echo $2: ${3-applied sed script $1}
 }
 
 reject_firmware () {
@@ -324,14 +324,14 @@ discard_rejected_firmware(const struct firmware *fw, void *context)\
 static inline int\
 reject_firmware_nowait(struct module *module, int uevent,\
 		       const char *name, struct device *device,\
-		       void *context,\
+		       gfp_t gfp, void *context,\
 		       void (*cont)(const struct firmware *fw,\
 				    void *context))\
 {\
 	int retval;\
 	report_missing_free_firmware(dev_name(device), NULL);\
 	retval = request_firmware_nowait(module, uevent, NONFREE_FIRMWARE,\
-					 device, NULL,\
+					 device, gfp, NULL,\
 					 discard_rejected_firmware);\
 	if (retval)\
 		return retval;\
@@ -340,16 +340,16 @@ reject_firmware_nowait(struct module *module, int uevent,\
 static inline int\
 maybe_reject_firmware_nowait(struct module *module, int uevent,\
 			     const char *name, struct device *device,\
-			     void *context,\
+			     gfp_t gfp, void *context,\
 			     void (*cont)(const struct firmware *fw,\
 					  void *context))\
 {\
 	if (strstr (name, NONFREE_FIRMWARE))\
 		return reject_firmware_nowait(module, uevent, name,\
-					      device, context, cont);\
+					      device, gfp, context, cont);\
 	else\
 		return request_firmware_nowait(module, uevent, name,\
-					       device, context, cont);\
+					       device, gfp, context, cont);\
 }\
 \
 #endif /* _LINUX_LIBRE_FIRMWARE_H */\
@@ -384,6 +384,7 @@ clean_sed '
 s,\([" ]\)request_firmware(,\1reject_firmware(,
 ' arch/arm/mach-netx/xc.c 'disabled non-Free firmware-loading machinery'
 clean_blob arch/arm/mach-netx/xc.c
+clean_blob drivers/net/netx-eth.c
 clean_kconfig arch/arm/Kconfig 'ARCH_NETX'
 clean_mk CONFIG_ARCH_NETX arch/arm/Makefile
 
@@ -443,6 +444,13 @@ clean_kconfig drivers/char/Kconfig 'MOXA_INTELLIO'
 clean_mk CONFIG_MOXA_INTELLIO drivers/char/Makefile
 
 # gpu drm
+
+announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
+reject_firmware drivers/gpu/drm/nouveau/nouveau_grctx.c
+clean_blob drivers/gpu/drm/nouveau/nouveau_grctx.c
+clean_blob drivers/gpu/drm/nouveau/nv50_graph.c
+clean_kconfig drivers/gpu/drk/nouveau/Kconfig 'DRM_NOUVEAU'
+clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
 
 announce DRM_MGA - "Matrox g200/g400"
 drop_fw_file firmware/matrox/g200_warp.H16 firmware/matrox/g200_warp.fw
@@ -603,6 +611,11 @@ clean_blob drivers/media/dvb/dvb-usb/dw2102.c
 clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_DW2102'
 clean_mk CONFIG_DVB_USB_DW2102 drivers/media/dvb/dvb-usb/Makefile
 
+announce DVB_USB_EC168 - "E3C EC168 DVB-T USB2.0 support"
+clean_blob drivers/media/dvb/dvb-usb/ec168.c
+clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_EC168'
+clean_mk CONFIG_DVB_USB_EC168 drivers/media/dvb/dvb-usb/Makefile
+
 announce DVB_USB_GP8PSK - "GENPIX 8PSK->USB module support"
 reject_firmware drivers/media/dvb/dvb-usb/gp8psk.c
 clean_blob drivers/media/dvb/dvb-usb/gp8psk.c
@@ -666,6 +679,14 @@ clean_sed '
   "removed non-Free firmware notes"
 clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_BCM3510'
 clean_mk CONFIG_DVB_BCM3510 drivers/media/dvb/frontends/Makefile
+
+announce DVB_DS3000 - "Montage Tehnology DS3000 based"
+undefault_firmware 'DS3000' \
+  drivers/media/dvb/frontends/ds3000.c
+reject_firmware drivers/media/dvb/frontends/ds3000.c
+clean_blob drivers/media/dvb/frontends/ds3000.c
+clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_DS3000'
+clean_mk CONFIG_DVB_DS3000 drivers/media/dvb/frontends/Makefile
 
 announce DVB_LGS8GXX - "Legend Silicon LGS8913/LGS8GL5/LGS8GXX DMB-TH demodulator"
 clean_sed '
@@ -924,8 +945,8 @@ clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
 
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
-drop_fw_file firmware/bnx2x-e1-5.0.21.0.fw.ihex firmware/bnx2x-e1-5.0.21.0.fw
-drop_fw_file firmware/bnx2x-e1h-5.0.21.0.fw.ihex firmware/bnx2x-e1h-5.0.21.0.fw
+drop_fw_file firmware/bnx2x-e1-5.2.7.0.fw.ihex firmware/bnx2x-e1-5.2.7.0.fw
+drop_fw_file firmware/bnx2x-e1h-5.2.7.0.fw.ihex firmware/bnx2x-e1h-5.2.7.0.fw
 reject_firmware drivers/net/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
@@ -989,7 +1010,8 @@ announce NETXEN_NIC - "NetXen Multi port (1/10) Gigabit Ethernet NIC"
 reject_firmware drivers/net/netxen/netxen_nic.h
 reject_firmware drivers/net/netxen/netxen_nic_main.c
 reject_firmware drivers/net/netxen/netxen_nic_init.c
-clean_blob drivers/net/netxen/netxen_nic_init.c
+clean_blob drivers/net/netxen/netxen_nic.h
+clean_blob drivers/net/netxen/netxen_nic_main.c
 clean_kconfig drivers/net/Kconfig 'NETXEN_NIC'
 clean_mk CONFIG_NETXEN_NIC drivers/net/Makefile
 
@@ -1014,6 +1036,7 @@ announce SPIDER_NET - "Spider Gigabit Ethernet driver"
 reject_firmware drivers/net/spider_net.c
 clean_sed 's,spider_fw\.bin,DEBLOBBED.bin,g' \
   drivers/net/spider_net.c 'removed non-Free firmware notes'
+clean_blob drivers/net/spider_net.c
 clean_blob drivers/net/spider_net.h
 clean_kconfig drivers/net/Kconfig 'SPIDER_NET'
 clean_mk CONFIG_SPIDER_NET drivers/net/Makefile
@@ -1109,6 +1132,7 @@ drop_fw_file firmware/cis/DP83903.cis.ihex firmware/cis/DP83903.cis
 drop_fw_file firmware/cis/NE2K.cis.ihex firmware/cis/NE2K.cis
 drop_fw_file firmware/cis/tamarack.cis.ihex firmware/cis/tamarack.cis
 drop_fw_file firmware/cis/PE-200.cis.ihex firmware/cis/PE-200.cis
+drop_fw_file firmware/cis/PE520.cis.ihex firmware/cis/PE520.cis
 clean_blob drivers/net/pcmcia/pcnet_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_PCNET'
 clean_mk CONFIG_PCMCIA_PCNET drivers/net/pcmcia/Makefile
@@ -1189,6 +1213,21 @@ clean_blob drivers/net/wireless/orinoco/fw.c
 clean_kconfig drivers/net/wireless/Kconfig 'HERMES'
 clean_mk CONFIG_HERMES drivers/net/wireless/orinoco/Makefile
 
+announce WLAGS49_H2 - 'Agere Systems HERMES II Wireless PC Card Model 0110'
+# Some pieces of the firmware images are most definitely data, but
+# others seem to be code.
+clean_file drivers/staging/wlags49_h2/ap_h2.c
+clean_file drivers/staging/wlags49_h2/sta_h2.c
+clean_blob drivers/staging/wlags49_h2/wl_profile.c
+clean_kconfig drivers/staging/wlags49_h2/Kconfig 'WLAGS49_H2'
+clean_mk CONFIG_WLAGS49_H2 drivers/staging/Makefile
+
+announce WLAGS49_H25 - 'Linksys Systems HERMES II.5 Wireless-G_CompactFlash_Card'
+clean_file drivers/staging/wlags49_h2/ap_h25.c
+clean_file drivers/staging/wlags49_h2/sta_h25.c
+clean_kconfig drivers/staging/wlags49_h25/Kconfig 'WLAGS49_H25'
+clean_mk CONFIG_WLAGS49_H25 drivers/staging/Makefile
+
 announce IPW2100 - "Intel PRO/Wireless 2100 Network Connection"
 reject_firmware drivers/net/wireless/ipw2x00/ipw2100.c
 clean_blob drivers/net/wireless/ipw2x00/ipw2100.c
@@ -1231,6 +1270,14 @@ reject_firmware drivers/net/wireless/iwmc3200wifi/fw.c
 clean_blob drivers/net/wireless/iwmc3200wifi/sdio.c
 clean_kconfig drivers/net/wireless/iwmc3200wifi/Kconfig 'IWM'
 clean_mk CONFIG_IWM drivers/net/wireless/iwmc3200wifi/Makefile
+
+announce IWMC3200TOP - "Intel Wireless MultiCom Top Driver"
+reject_firmware drivers/misc/iwmc3200top/fw-download.c
+undefine_macro '_FW_NAME(api)' '"/*(DEBLOBBED)*/"' \
+  'removed non-Free firmware name' drivers/misc/iwmc3200top/iwmc3200top.h
+clean_blob drivers/misc/iwmc3200top/main.c
+clean_kconfig drivers/misc/iwmc3200top/Kconfig 'IWMC3200TOP'
+clean_mk CONFIG_IWMC3200TOP drivers/misc/iwmc3200top/Makefile
 
 announce LIBERTAS_CS - "Marvell Libertas 8385 CompactFlash 802.11b/g cards"
 reject_firmware drivers/net/wireless/libertas/if_cs.c
@@ -1351,51 +1398,36 @@ clean_blob drivers/net/wireless/rt2x00/rt73usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig 'RT73USB'
 clean_mk CONFIG_RT73USB drivers/net/wireless/rt2x00/Makefile
 
+announce RT2800PCI - "Ralink rt2800 (PCI/PCMCIA) support"
+clean_blob drivers/net/wireless/rt2x00/rt2800pci.h
+clean_blob drivers/net/wireless/rt2x00/rt2800pci.c
+clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800PCI
+clean_mk CONFIG_RT2800PCI drivers/net/wireless/rt2x00/Makefile
+
 announce RT2800USB - "Ralink rt2800 (USB) support"
 clean_blob drivers/net/wireless/rt2x00/rt2800usb.h
 clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
 
-announce RT2860 - "Ralink 2860 wireless support"
+announce RT2860 - "Ralink 2860/3090 wireless support"
 clean_file drivers/staging/rt2860/common/firmware.h
-clean_blob drivers/staging/rt2860/rt_linux.h
+clean_file drivers/staging/rt2860/common/firmware_3070.h
+clean_file drivers/staging/rt3090/firmware.h
 clean_sed '
-/^NDIS_STATUS NICLoadFirmware(/,/^}$/{
-  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
-}' drivers/staging/rt2860/common/rtmp_init.c 'report missing Free firmware'
-clean_blob drivers/staging/rt2860/common/rtmp_init.c
-clean_sed '
-/^INT[	]set_eFuseLoadFromBin_Proc(/,/^}$/{
-  /src = kmalloc/i\
-	printk("%s: missing Free firmware\\n", __func__);\
-	return FALSE;	
-}' drivers/staging/rt2860/common/eeprom.c 'report missing Free firmware'
-clean_blob drivers/staging/rt2860/common/eeprom.c
+/^int RtmpAsicLoadFirmware(/,/^}$/{
+  s/^\(	*\)pFirmwareImage =\( .*FirmwareImage.*;\|$\)/\1return printk("%s: missing Free firmware\\n", __func__),\n\1	NDIS_STATUS_FAILURE;\n&/
+}' drivers/staging/rt2860/common/rtmp_mcu.c 'report missing Free firmware'
+clean_blob drivers/staging/rt2860/common/rtmp_mcu.c
+clean_blob drivers/staging/rt2860/rtmp_def.h
+clean_blob drivers/staging/rt2860/common/ee_efuse.c
 clean_kconfig drivers/staging/rt2860/Kconfig RT2860
 clean_mk CONFIG_RT2860 drivers/staging/rt2860/Makefile
 
-announce RT2870 - "Ralink 2870 wireless support"
+announce RT2870 - "Ralink 2870/3070 wireless support"
+clean_file drivers/staging/rt3070/firmware.h
 clean_kconfig drivers/staging/rt2870/Kconfig RT2870
 clean_mk CONFIG_RT2870 drivers/staging/rt2870/Makefile
-
-announce RT3070 - "Ralink 3070 wireless support"
-clean_file drivers/staging/rt3070/firmware.h
-clean_kconfig drivers/staging/rt3070/Kconfig RT3070
-
-announce RT3090 - "Ralink 3090 wireless support"
-clean_file drivers/staging/rt3090/firmware.h
-clean_blob drivers/staging/rt3090/common/ee_efuse.c
-clean_blob drivers/staging/rt3090/rtmp_def.h
-clean_blob drivers/staging/rt3090/rt_ate.h
-clean_blob drivers/staging/rt3090/rt_ate.c
-clean_sed '
-/^NDIS_STATUS RtmpAsicLoadFirmware(/,/^}$/{
-  s/^\(	*\)pFirmwareImage = .*FirmwareImage.*;/\1printk("%s: missing Free firmware\\n", __func__);\n\1return NDIS_STATUS_FAILURE;\n&/
-}' drivers/staging/rt3090/common/rtmp_mcu.c 'report missing Free firmware'
-clean_blob drivers/staging/rt3090/common/rtmp_mcu.c
-clean_kconfig drivers/staging/rt3090/Kconfig RT3090
-clean_mk CONFIG_RT3090 drivers/staging/rt3090/Makefile
 
 announce RTL8192E - "RealTek RTL8192E Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192e/r819xE_firmware.c
@@ -1403,10 +1435,17 @@ clean_blob drivers/staging/rtl8192e/r819xE_firmware.c
 clean_kconfig drivers/staging/rtl8192e/Kconfig RTL8192E
 clean_mk CONFIG_RTL8192E drivers/staging/rtl8192e/Makefile
 
+announce RTL8192U - "RealTek RTL8192U Wireless LAN NIC driver"
+reject_firmware drivers/staging/rtl8192u/r819xU_firmware.c
+clean_blob drivers/staging/rtl8192u/r819xU_firmware.c
+clean_blob drivers/staging/rtl8192u/r819xU_firmware_img.c
+clean_kconfig drivers/staging/rtl8192u/Kconfig 'RTL8192U'
+clean_mk CONFIG_RTL8192U drivers/staging/rtl8192u/Makefile
+
 announce RTL8192SU - "RealTek RTL8192SU Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192su/r8192S_firmware.c
-clean_blob drivers/staging/rtl8192su/r8192SU_HWImg.c
 clean_blob drivers/staging/rtl8192su/r8192S_firmware.c
+clean_blob drivers/staging/rtl8192su/r8192SU_HWImg.c
 clean_kconfig drivers/staging/rtl8192su/Kconfig 'RTL8192SU'
 clean_mk CONFIG_RTL8192SU drivers/staging/rtl8192su/Makefile
 
@@ -1414,10 +1453,10 @@ announce VT6656 - "VIA Technologies VT6656 support"
 clean_sed '
 /^FIRMWAREbDownload($/,/^}$/ {
   /PBYTE.*pBuffer/ i\
-	PBYTE abyFirmware[1] = 0;
+    PBYTE abyFirmware[1] = { 0 };
   /-->Download firmware/ i\
-	printk("vt6656: missing Free firmware\\n");\
-	return (FALSE);
+    printk("vt6656: missing Free firmware\\n");\
+    return (FALSE);
 }' drivers/staging/vt6656/firmware.c 'report missing Free firmware'
 clean_blob drivers/staging/vt6656/firmware.c
 clean_kconfig drivers/staging/vt6656/Kconfig 'VT6656'
@@ -1425,12 +1464,14 @@ clean_mk CONFIG_VT6656 drivers/staging/vt6656/Makefile
 
 announce WL1251 - "TI wl1251 support"
 reject_firmware drivers/net/wireless/wl12xx/wl1251_main.c
+clean_blob drivers/net/wireless/wl12xx/wl1251_main.c
 clean_blob drivers/net/wireless/wl12xx/wl1251.h
 clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL1251'
 clean_mk CONFIG_WL1251 drivers/net/wireless/wl12xx/Makefile
 
 announce WL1271 - "TI wl1271 support"
 reject_firmware drivers/net/wireless/wl12xx/wl1271_main.c
+clean_blob drivers/net/wireless/wl12xx/wl1271_main.c
 clean_blob drivers/net/wireless/wl12xx/wl1271.h
 clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL1271'
 clean_mk CONFIG_WL1271 drivers/net/wireless/wl12xx/Makefile
@@ -1448,6 +1489,12 @@ clean_kconfig drivers/net/wireless/zd1211rw/Kconfig 'ZD1211RW'
 clean_mk CONFIG_ZD1211RW drivers/net/wireless/zd1211rw/Makefile
 
 # bluetooth
+
+announce BT_ATH3K - "Atheros firmware download driver"
+reject_firmware drivers/bluetooth/ath3k.c
+clean_blob drivers/bluetooth/ath3k.c
+clean_kconfig drivers/bluetooth/Kconfig 'BT_ATH3K'
+clean_mk CONFIG_BT_ATH3K drivers/bluetooth/Makefile
 
 announce BT_HCIBCM203X - "HCI BCM203x USB driver"
 reject_firmware drivers/bluetooth/bcm203x.c
@@ -1975,10 +2022,15 @@ clean_sed '
 }' sound/oss/Kconfig 'removed default firmware'
 clean_mk CONFIG_SOUND_MSNDPIN sound/oss/Makefile
 
-announce SOUND_SSCAPE - "Ensoniq SoundScape support"
-clean_blob sound/oss/sscape.c
-clean_kconfig sound/oss/Kconfig 'SOUND_SSCAPE'
-clean_mk CONFIG_SOUND_SSCAPE sound/oss/Makefile
+announce SND_SSCAPE - "Ensoniq SoundScape driver"
+reject_firmware sound/isa/sscape.c
+clean_blob sound/isa/sscape.c
+clean_sed '
+/^config SND_SSCAPE$/, /^config / {
+  s,"\(scope\|sndscape\)\.co[d?]","/*(DEBLOBBED)*/",g;
+}' sound/isa/Kconfig 'removed firmware names'
+clean_kconfig sound/isa/Kconfig 'SND_SSCAPE'
+clean_mk CONFIG_SND_SSCAPE sound/isa/Makefile
 
 announce SOUND_TRIX - "MediaTrix AudioTrix Pro support"
 clean_blob sound/oss/trix.c
@@ -2030,6 +2082,7 @@ clean_blob Documentation/sound/alsa/ALSA-Configuration.txt
 clean_blob Documentation/sound/oss/MultiSound
 clean_blob Documentation/sound/oss/PSS
 clean_blob Documentation/sound/oss/PSS-updates
+clean_blob Documentation/sound/oss/README.OSS
 clean_file Documentation/dvb/get_dvb_firmware
 clean_file Documentation/video4linux/extract_xc3028.pl
 clean_sed s,usb8388,whatever,g drivers/base/Kconfig 'removed blob name'
