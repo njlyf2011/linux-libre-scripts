@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2023 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2024 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -56,7 +56,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 9
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -2111,6 +2111,12 @@ fi
 # and build.
 
 %changelog
+* Wed Feb 24 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.9.
+
+* Tue Feb 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-64
+- Linux 2.6.32.9
+
 * Tue Feb 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.9-63.rc1
 - nouveau: fix pre-nv17 output detection regression, support for GF8 IGPs
 
