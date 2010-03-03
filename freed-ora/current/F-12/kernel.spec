@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2024 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2027 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -788,6 +788,15 @@ Patch12320: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 # rhbz#/566565
 Patch12340: ice1712-fix-revo71-mixer-names.patch
 
+# rhbz#567530
+Patch12350: tcp-fix-icmp-rto-war.patch
+
+# fix breakage from 2.6.32.9
+Patch12400: fs-exec.c-fix-initial-stack-reservation.patch
+
+# fix automount symlinks (#567813)
+Patch12410: fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+
 # ==============================================================================
 
 %endif
@@ -1456,6 +1465,15 @@ ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 # rhbz#566565
 ApplyPatch ice1712-fix-revo71-mixer-names.patch
 
+# rhbz#567530
+ApplyPatch tcp-fix-icmp-rto-war.patch
+
+# fix breakage from 2.6.32.9
+ApplyPatch fs-exec.c-fix-initial-stack-reservation.patch
+
+# fix automount symlinks (#567813)
+ApplyPatch fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+
 # END OF PATCH APPLICATIONS ====================================================
 
 %endif
@@ -2111,6 +2129,16 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-67
+- Fix lookup of automount symlinks (#567813)
+- Fix stack expansion rlimit check broken by a patch in 2.6.32.9
+
+* Thu Feb 25 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-66
+- TCP: fix broken RTO calculation causing high CPU load (#567530)
+
+* Thu Feb 25 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.9-65
+- nouveau: DP fix for cards with version 0x20 DP tables
+
 * Wed Feb 24 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.32.9.
 
