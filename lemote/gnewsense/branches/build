@@ -1,0 +1,112 @@
+#! /bin/sh
+
+force=false
+prep=false
+rel=false
+enough=false
+until $enough; do
+  case $1 in
+  -f | --force) force=:; shift;;
+  -p | --prep) prep=:; shift;;
+  -r | --release) rel=:; shift;;
+  "") cat >&2 << EOF
+usage: branch [extra [libre     [rel]]]
+ as in 2.6.31  .10      2        0
+ for   2.6.31  .10-libre2-lemote_0lxo
+
+args may be preceded by --prep, --force, and/or --release
+EOF
+      exit 1
+    ;;
+  *) enough=true;;
+  esac
+done
+
+branch=$1
+extra=$2
+libre=$3
+rev=${4-0}lxo
+
+branchdir=$1
+librebase=$branch$extra-libre$libre
+srcbase=linux-$librebase.tar.bz2
+pub=../pool
+buildid=$librebase-lemote_${rev}
+srctree=linux-$buildid
+xsrctree=linux-$branch$extra
+srclink=linux-source-${buildid}_mipsel.tar.bz2
+patches=linux-patches-${buildid}_mipsel.tar.bz2
+buildtb=linux-build-${buildid}_mipsel.tar.bz2
+svnbase=`svn info | sed -n 's,^URL: \(.*\)/branches,\1,p'`
+svnbranches=$svnbase/branches
+svntags=$svnbase/tags
+
+PATH=/usr/lib/ccache:$PATH
+
+set -e -x
+
+exec > $srctree.log
+: further output on $srctree.log
+exec 2>&1
+
+test -d $branchdir/.svn
+test -f $pub/$srcbase
+test ! -h $srclink || $rel || $force
+test ! -f $patches || $rel || $force
+test ! -f $buildtb || $rel || $force
+test ! -d $srctree || $rel || $force
+test ! -d $xsrctree || $rel || $force
+
+for f in $pub/*$buildid*; do
+  test -f $f || test -d $f || continue
+  $force
+  rm -f $f
+done
+
+$rel || {
+rm -rf $srctree $xsrctree $srclink $patches $buildtb || :
+
+ln -s $pub/$srcbase $srclink
+tar -xf $srclink --use=bzip2
+if $prep; then
+  rm $srclink
+  srctree=$xsrctree
+  ln -s ../$branchdir $srctree/.patches
+else
+  test -d $xsrctree
+  mv $xsrctree $srctree
+
+  tar -cvf $patches -C $branchdir --use=bzip2 --exclude=.svn .
+
+  mkdir $srctree/.patches
+  tar -C $srctree/.patches -xf $patches --use=bzip2
+fi
+
+ln -s .patches $srctree/patches
+cd $srctree
+quilt push -a
+find .pc -perm 000 -print0 | xargs --no-run-if-empty -0 chmod 400
+
+if $prep; then
+  make oldconfig
+  false
+fi
+
+make-kpkg --rootcmd fakeroot --initrd --revision $rev \
+  kernel-image kernel-headers kernel-doc
+cd ..
+
+tar -cf $buildtb -C $srctree --use=bzip2 .
+
+echo build is done, type ^C to stop, or Enter to move, commit and tag $buildid
+read proceed
+} # $rel
+
+rm -f $pub/*$buildid*.deb $pub/*$buildid*.tar.bz2 $srclink || :
+ln -s $srcbase $pub/$srclink
+mv *$buildid*.deb *$buildid*.tar.bz2 $pub
+
+cd $branchdir
+svn commit -m "$buildid"
+svn cp -m "$buildid" $svnbranches/$branchdir $svntags/$buildid
+cd ..
