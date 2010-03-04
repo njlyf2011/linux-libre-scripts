@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1785
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1814 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1824 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,9 +54,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
-%define stable_rc 2
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -702,6 +702,7 @@ Patch470: die-floppy-die.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch520: linux-2.6.30-hush-rom-warning.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
+Patch531: viafb-neuter-device-table.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
@@ -726,6 +727,7 @@ Patch1517: hdpvr-ir-enable.patch
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
 
+Patch1800: drm-2.6.30.patch
 # nouveau + drm fixes
 Patch1811: drm-radeon-fixes.patch
 Patch1812: drm-radeon-dp-support.patch
@@ -752,7 +754,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 
 # fs fixes
 Patch3020: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
@@ -771,19 +772,18 @@ Patch12013: linux-2.6-rfkill-all.patch
 Patch12020: linux-2.6-cantiga-iommu-gfx.patch
 
 # Patches for -stable
-Patch12101: wmi-free-the-allocated-acpi-objects.patch
-Patch12102: wmi-check-wmi-get-event-data-return-value.patch
-
-Patch12301: fix-conntrack-bug-with-namespaces.patch
-Patch12302: prevent-runtime-conntrack-changes.patch
-
-Patch12310: fix-crash-with-sys_move_pages.patch
 Patch12311: fix-ima-null-ptr-deref.patch
 
-# backport /dev/mem patches for -stable
-Patch20010: devmem-introduce-size_inside_page.patch
-Patch20020: devmem-check-vmalloc-address-on-kmem-read-write.patch
-Patch20030: devmem-fix-kmem-write-bug-on-memory-holes.patch
+# rhbz#567530
+Patch12350: tcp-fix-icmp-rto-war.patch
+
+# fix breakage from 2.6.32.9
+Patch12400: fs-exec.c-fix-initial-stack-reservation.patch
+
+# fix automount symlinks (#567813)
+Patch12410: fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+
+Patch20031: vgaarb-fix-userspace-ptr-deref.patch
 
 #===============================================================================
 %endif
@@ -1356,6 +1356,9 @@ ApplyPatch linux-2.6.30-hush-rom-warning.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
+# don't autoload viafb
+ApplyPatch viafb-neuter-device-table.patch
+
 # Fix the SELinux mprotect checks on executable mappings
 #ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
@@ -1400,16 +1403,17 @@ ApplyPatch hdpvr-ir-enable.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
+ApplyPatch drm-2.6.30.patch
 # Nouveau DRM + drm fixes
-ApplyPatch drm-radeon-fixes.patch
-ApplyPatch drm-radeon-dp-support.patch
-ApplyPatch drm-nouveau.patch
+#ApplyPatch drm-radeon-fixes.patch
+#ApplyPatch drm-radeon-dp-support.patch
+#ApplyPatch drm-nouveau.patch
 # pm broken on my thinkpad t60p - airlied
 #ApplyPatch drm-radeon-pm.patch
 #ApplyPatch drm-i915-resume-force-mode.patch
-ApplyPatch drm-intel-big-hammer.patch
+#ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-page-flip.patch
-ApplyOptionalPatch drm-intel-next.patch
+#ApplyOptionalPatch drm-intel-next.patch
 #this appears to be upstream - mjg59?
 #ApplyPatch drm-intel-pm.patch
 
@@ -1421,29 +1425,29 @@ ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # V4L/DVB updates/fixes/experimental drivers
-#ApplyPatch linux-2.6-v4l-dvb-fixes.patch
-#ApplyPatch linux-2.6-v4l-dvb-update.patch
-#ApplyPatch linux-2.6-v4l-dvb-experimental.patch
-#ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
+#  only applied if patch files are non-empty
+ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
 ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
 
 # Patches for -stable
-ApplyPatch wmi-free-the-allocated-acpi-objects.patch
-ApplyPatch wmi-check-wmi-get-event-data-return-value.patch
-
-ApplyPatch fix-conntrack-bug-with-namespaces.patch
-ApplyPatch prevent-runtime-conntrack-changes.patch
-
-ApplyPatch fix-crash-with-sys_move_pages.patch
 ApplyPatch fix-ima-null-ptr-deref.patch
 
-# backport /dev/mem patches for -stable
-ApplyPatch devmem-introduce-size_inside_page.patch
-ApplyPatch devmem-check-vmalloc-address-on-kmem-read-write.patch
-ApplyPatch devmem-fix-kmem-write-bug-on-memory-holes.patch
+#not backported. not a feature. not a concern.
+#ApplyPatch vgaarb-fix-userspace-ptr-deref.patch
+
+# rhbz#567530
+ApplyPatch tcp-fix-icmp-rto-war.patch
+
+# fix breakage from 2.6.32.9
+ApplyPatch fs-exec.c-fix-initial-stack-reservation.patch
+
+# fix automount symlinks (#567813)
+ApplyPatch fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2099,6 +2103,57 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.9.
+- Rebased and deblobbed drm-2.6.30.patch.
+
+* Fri Feb 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-39
+- Fix lookup of automount symlinks (#567813)
+
+* Fri Feb 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-38
+- Fix stack expansion rlimit check broken by a patch in 2.6.32.9
+
+* Thu Feb 25 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-37
+- TCP: fix broken RTO calculation causing high CPU load (#567530)
+
+* Tue Feb 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-36
+- Linux 2.6.32.9
+
+* Mon Feb 22 2010 Kyle McMartin <kyle@redhat.com>
+- Forward port F-11-2.6.30 DRM to 2.6.32... remove VGA arbiter
+  since it didn't exist in release F-11. Clean up a bunch, fix up
+  a bunch of rejects, and build failures.
+  - It probably still won't work right, here's hoping.
+
+* Mon Feb 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-34.rc1
+- Drop the PCI device table in the viafb driver -- it was added in
+  2.6.32 and we don't want the driver to autoload.
+
+* Sun Feb 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-33.rc1
+- Drop/clear unused v4l patches, use ApplyOptionalPatch
+
+* Sun Feb 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-32.rc1
+- Linux 2.6.32.9-rc1
+- Drop merged patches:
+  wmi-free-the-allocated-acpi-objects.patch
+  wmi-check-wmi-get-event-data-return-value.patch
+  fix-conntrack-bug-with-namespaces.patch
+  prevent-runtime-conntrack-changes.patch
+  futex-handle-user-space-corruption-gracefully.patch
+  devmem-introduce-size_inside_page.patch
+  devmem-check-vmalloc-address-on-kmem-read-write.patch
+  devmem-fix-kmem-write-bug-on-memory-holes.patch
+  fix-crash-with-sys_move_pages.patch
+
+* Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-31
+- vgaarb-fix-userspace-ptr-deref.patch: fix userspace null ptr deref.
+  (rhbz#564246)
+
+* Tue Feb 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.8-30
+- Linux 2.6.32.8
+- futex-handle-user-space-corruption-gracefully.patch: Fix oops in
+  the PI futex code. (rhbz#563091)
+
 * Tue Feb  9 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-2.6.32.7.
 - Use 100% gnu+freedo boot splash logo, with black background.
