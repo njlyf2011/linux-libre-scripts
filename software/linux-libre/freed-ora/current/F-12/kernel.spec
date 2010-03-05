@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2027 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2030 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -714,9 +714,11 @@ Patch1551: linux-2.6-ksm-kvm.patch
 # fbdev multi-card fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 Patch1701: kms-offb-handoff.patch
+Patch1702: linux-2.6-efi-handover.fix
 
 # nouveau + drm fixes
 Patch1810: drm-upgrayedd.patch
+Patch1811: drm-upgrayed-fixes.patch
 Patch1813: drm-radeon-pm.patch
 #Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -1421,8 +1423,10 @@ ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 ApplyPatch kms-offb-handoff.patch
+ApplyPatch linux-2.6-efi-handover.fix
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
+ApplyPatch drm-upgrayed-fixes.patch
 #ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1855,8 +1859,8 @@ xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
 ls $man9dir | grep -q '' || > $man9dir/BROKEN
 %endif # with_doc
 
-# perf docs
 %if %{with_perf}
+# perf docs
 mandir=$RPM_BUILD_ROOT%{_datadir}/man
 man1dir=$mandir/man1
 pushd tools/perf/Documentation
@@ -1868,15 +1872,14 @@ for d in *.1; do
  gzip $d;
 done
 popd
-%endif # with_perf
 
-# perf shell wrapper
-%if %{with_perf}
+# perf shell wrapper and examples
 mkdir -p $RPM_BUILD_ROOT/usr/sbin/
 cp $RPM_SOURCE_DIR/perf $RPM_BUILD_ROOT/usr/sbin/perf
 chmod 0755 $RPM_BUILD_ROOT/usr/sbin/perf
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/perf
-%endif
+cp tools/perf/Documentation/examples.txt $RPM_BUILD_ROOT%{_datadir}/doc/perf
+%endif # with_perf
 
 %if %{with_headers}
 # Install kernel headers
@@ -2094,7 +2097,6 @@ fi
 %endif\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
-%dir /usr/src/kernels\
 %verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 %if %{with_debuginfo}\
@@ -2129,6 +2131,17 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 03 2010 Dave Airlie <airlied@redhat.com> 2.6.32.9-70
+- drm-upgrayed-fixes: backport a bunch of fixes from upstream
+- should fix AGP slowdowns + rv740 hw.
+- linux-2.6-efi-handover.patch - fix efifb handover from upstream
+
+* Tue Mar 02 2010 Chuck Ebbert <cebbert@redhat.com>
+- Include examples.txt in the perf package (#569506)
+
+* Mon Mar 01 2010 Dave Jones <davej@redhat.com>
+- Don't own /usr/src/kernels any more, it's now owned by filesystem. (#569438)
+
 * Sat Feb 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.9-67
 - Fix lookup of automount symlinks (#567813)
 - Fix stack expansion rlimit check broken by a patch in 2.6.32.9
