@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1786
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.22 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960.2.25 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -792,6 +792,7 @@ Patch3020: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 Patch3050: linux-2.6.31-nfsd-proot.patch
 Patch3060: linux-2.6-nfs4-ver4opt.patch
 Patch3061: linux-2.6-nfs4-callback-hidden.patch
+Patch3063: nfs-fix-an-oops-when-truncating-a-file.patch
 
 # VIA Nano / VX8xx updates
 Patch11010: via-hwmon-temp-sensor.patch
@@ -868,6 +869,9 @@ Patch16560: quota-remove-dquot_claim_space-warning.patch
 Patch16570: futex-handle-user-space-corruption-gracefully.patch
 
 Patch16580: partitions-use-sector-size-for-efi-gpt.patch
+
+# bz#567813
+Patch16590: fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
 
 %endif
 
@@ -1388,6 +1392,7 @@ ApplyPatch linux-2.6-btrfs-upstream.patch
 ApplyPatch linux-2.6.31-nfsd-proot.patch
 ApplyPatch linux-2.6-nfs4-ver4opt.patch
 ApplyPatch linux-2.6-nfs4-callback-hidden.patch
+ApplyPatch nfs-fix-an-oops-when-truncating-a-file.patch
 
 # USB
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
@@ -1629,6 +1634,9 @@ ApplyPatch quota-remove-dquot_claim_space-warning.patch
 ApplyPatch futex-handle-user-space-corruption-gracefully.patch
 
 ApplyPatch partitions-use-sector-size-for-efi-gpt.patch
+
+# bz#567813
+ApplyPatch fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2289,6 +2297,15 @@ fi
 #  futex-handle-user-space-corruption-gracefully.patch
 
 %changelog
+* Mon Mar 01 2010 Dennis Gilmore <dennis@ausil.us> 2.6.31.12-174.2.25
+- update sparc alignment patch
+
+* Sat Feb 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.31.12-174.2.24
+- Fix lookup of automount symlinks (#567813)
+
+* Mon Feb 22 2010 Kyle McMartin <kyle@redhat.com>
+- nfs-fix-an-oops-when-truncating-a-file.patch: from 2.6.32-stable queue.
+
 * Fri Feb 19 2010 Kyle McMartin <kyle@redhat.com> 2.6.31.12-174.2.22
 - ext4: disable quota 'fixes' which... weren't. (wrong i_block accounting.)
 
