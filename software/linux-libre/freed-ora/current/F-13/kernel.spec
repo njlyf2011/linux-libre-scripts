@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1940 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1944 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -705,6 +705,7 @@ Patch1551: linux-2.6-ksm-kvm.patch
 Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 Patch1553: vhost_net-rollup.patch
 Patch1554: virt_console-rollup.patch
+Patch1555: virt_console-fix-race.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -754,6 +755,9 @@ Patch12018: neuter_intel_microcode_load.patch
 
 Patch12019: linux-2.6-umh-refactor.patch
 Patch12020: coredump-uid-pipe-check.patch
+
+# fix memory scribble
+Patch12030: x86-pci-prevent-mmconfig-memory-corruption.patch
 
 %endif
 
@@ -1350,6 +1354,7 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 #ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 ApplyPatch vhost_net-rollup.patch
 ApplyPatch virt_console-rollup.patch
+ApplyPatch virt_console-fix-race.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1389,6 +1394,9 @@ ApplyPatch neuter_intel_microcode_load.patch
 # Refactor UserModeHelper code & satisfy abrt recursion check request
 ApplyPatch linux-2.6-umh-refactor.patch
 ApplyPatch coredump-uid-pipe-check.patch
+
+# fix memory scribble
+ApplyPatch x86-pci-prevent-mmconfig-memory-corruption.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2006,7 +2014,6 @@ fi
 %endif\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
-%dir /usr/src/kernels\
 %verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 %if %{with_debuginfo}\
@@ -2041,8 +2048,21 @@ fi
 # and build.
 
 %changelog
+* Fri Mar 05 2010 Kyle McMartin <kyle@redhat.com>
+- Fix race between hvc_close and hvc_remove. (rhbz#568621)
+
+* Thu Mar 04 2010 Kyle McMartin <kyle@redhat.com>
+- Enable CGROUP_DEBUG.
+
+* Mon Mar 01 2010 Dave Jones <davej@redhat.com>
+- Don't own /usr/src/kernels any more, it's now owned by filesystem. (#569438)
+
+* Sat Feb 27 2010 Chuck Ebbert <cebbert@redhat.com>
+- Add patch from the 2.6.33 stable queue to fix memory corruption
+  in the PCI MMCONFIG code.
+
 * Thu Feb 25 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Adjuste drm-nouveau-updates.patch
+- Adjust drm-nouveau-updates.patch
 
 * Thu Feb 25 2010 Ben Skeggs <bskeggs@redhat.com>
 - nouveau: rebase to nouveau/linux-2.6 git
