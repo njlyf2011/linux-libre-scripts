@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1944 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1946 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -487,6 +487,9 @@ Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
+%endif\
+%if %{with_perftool}\
+Requires(pre): libdwarf\
 %endif\
 Requires(post): /sbin/new-kernel-pkg\
 Requires(preun): /sbin/new-kernel-pkg\
@@ -2048,6 +2051,12 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 15 2010 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: pull in more fixes from upstream
+
+* Sat Mar 06 2010 Kyle McMartin <kyle@redhat.com>
+- Add libdwarf dep if %with_perftool.
+
 * Fri Mar 05 2010 Kyle McMartin <kyle@redhat.com>
 - Fix race between hvc_close and hvc_remove. (rhbz#568621)
 
