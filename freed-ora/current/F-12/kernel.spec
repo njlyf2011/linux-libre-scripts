@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2030 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2032 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -650,6 +650,8 @@ Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
+Patch151: sparc-align-clone-and-signal-stacks-to-16-bytes.patch
+Patch152: sparc-additional-pci-id-xvr-500.patch
 
 Patch160: linux-2.6-execshield.patch
 
@@ -1281,6 +1283,8 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
+ApplyPatch sparc-align-clone-and-signal-stacks-to-16-bytes.patch
+ApplyPatch sparc-additional-pci-id-xvr-500.patch
 
 #
 # Exec shield
@@ -1379,9 +1383,9 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 ApplyPatch viafb-neuter-device-table.patch
 
 # Fix the SELinux mprotect checks on executable mappings
-#ApplyPatch linux-2.6-selinux-mprotect-checks.patch
+# ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
-#ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
+ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
 
@@ -2131,6 +2135,13 @@ fi
 # and build.
 
 %changelog
+* Thu Mar 11 2010 Dennis Gilmore <dennis@ausil.us>
+- add add aditional pci-id for  xvr-500 
+- sparc stack alignment fix
+
+* Wed Mar 10 2010 Tom "spot" Callaway <tcallawa@redhat.com>
+- cleanup and re-enable sparc selinux mprotect fix
+
 * Wed Mar 03 2010 Dave Airlie <airlied@redhat.com> 2.6.32.9-70
 - drm-upgrayed-fixes: backport a bunch of fixes from upstream
 - should fix AGP slowdowns + rv740 hw.
