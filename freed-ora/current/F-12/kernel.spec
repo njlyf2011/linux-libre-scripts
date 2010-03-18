@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2032 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2043 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -38,7 +38,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -650,8 +650,6 @@ Patch144: linux-2.6-vio-modalias.patch
 Patch147: linux-2.6-imac-transparent-bridge.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
-Patch151: sparc-align-clone-and-signal-stacks-to-16-bytes.patch
-Patch152: sparc-additional-pci-id-xvr-500.patch
 
 Patch160: linux-2.6-execshield.patch
 
@@ -678,7 +676,6 @@ Patch391: linux-2.6-acpi-video-dos.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
-Patch453: linux-2.6-input-hid-quirk-hp-touchsmart.patch
 Patch454: linux-2.6-input-hid-quirk-egalax.patch
 
 Patch460: linux-2.6-serial-460800.patch
@@ -715,7 +712,6 @@ Patch1551: linux-2.6-ksm-kvm.patch
 
 # fbdev multi-card fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
-Patch1701: kms-offb-handoff.patch
 Patch1702: linux-2.6-efi-handover.fix
 
 # nouveau + drm fixes
@@ -795,11 +791,14 @@ Patch12340: ice1712-fix-revo71-mixer-names.patch
 # rhbz#567530
 Patch12350: tcp-fix-icmp-rto-war.patch
 
-# fix breakage from 2.6.32.9
-Patch12400: fs-exec.c-fix-initial-stack-reservation.patch
+Patch12360: iwlwifi-silence-tfds-in-queue-message.patch
 
-# fix automount symlinks (#567813)
-Patch12410: fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+# rhbz#572653
+Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
+
+# fix regression caused by dropping these (#571638)
+Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
 # ==============================================================================
 
@@ -871,9 +870,10 @@ Provides: perf = %{rpmversion}-%{pkg_release}
 Summary: Performance monitoring for the Linux kernel
 Group: Development/System
 License: GPLv2
+Requires: libdwarf
 %description -n perf-libre
-This package provides the supporting documentation for the perf tool
-shipped in each kernel image subpackage.
+This package provides the perf shell script, supporting documentation and
+required libraries for the perf tool shipped in each kernel image subpackage.
 
 #
 # This macro creates a kernel-<subpackage>-debuginfo package.
@@ -1283,8 +1283,6 @@ ApplyPatch linux-2.6-imac-transparent-bridge.patch
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
-ApplyPatch sparc-align-clone-and-signal-stacks-to-16-bytes.patch
-ApplyPatch sparc-additional-pci-id-xvr-500.patch
 
 #
 # Exec shield
@@ -1366,7 +1364,6 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
-ApplyPatch linux-2.6-input-hid-quirk-hp-touchsmart.patch
 ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
@@ -1426,7 +1423,6 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
-ApplyPatch kms-offb-handoff.patch
 ApplyPatch linux-2.6-efi-handover.fix
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
@@ -1476,11 +1472,13 @@ ApplyPatch ice1712-fix-revo71-mixer-names.patch
 # rhbz#567530
 ApplyPatch tcp-fix-icmp-rto-war.patch
 
-# fix breakage from 2.6.32.9
-ApplyPatch fs-exec.c-fix-initial-stack-reservation.patch
+ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
 
-# fix automount symlinks (#567813)
-ApplyPatch fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+ApplyPatch iwlwifi-silence-tfds-in-queue-message.patch
+
+# rhbz#572653
+ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2135,8 +2133,61 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Rebase on 2.6.32-libre1.
+- Adjust patch-libre-2.6.32.10 for deblobbing.
+
+* Wed Mar 17 2010 John W. Linville <linville@redhat.com> 2.6.32.10-83
+- b43: Rewrite DMA Tx status handling sanity checks
+
+* Tue Mar 16 2010 Jarod Wilson <jarod@redhat.com>
+- Catch imon panel/knob events from older 0xffdc devices
+- Add two more variants of imon mce mode star and pound keys
+
+* Tue Mar 16 2010 Chuck Ebbert <cebbert@redhat.com>
+- iwlwifi-silence-tfds-in-queue-message.patch:
+  don't spam the log when the problem keeps happening
+
+* Tue Mar 16 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.10-78
+- Fix null ptr deref in lirc_imon (#545599)
+- Fix lirc_zilog not loading on cx2341x devices
+
+* Mon Mar 15 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.32.10
+
+* Mon Mar 15 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.10-76.rc1
+- Rebase lirc drivers to latest git tree
+- Copious amounts of imon driver update
+
+* Mon Mar 15 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.10-75.rc1
+- Make the perf package require libdwarf; fix up description (#568309)
+
+* Sun Mar 14 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix regression in tg3 driver (#571638)
+
+* Sat Mar 13 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.32.10-rc1
+- Manually fix up drm-upgrayedd.patch to apply after this stable patch:
+  drm-i915-use-a-dmi-quirk-to-skip-a-broken-sdvo-tv-output.patch
+- Added stable patches to upstream-reverts; we have these in our backports:
+  drm-ttm-handle-oom-in-ttm_tt_swapout.patch
+  v4l-dvb-13991-gspca_mr973010a-fix-cif-type-1-cameras-not-streaming-on-uhci-controllers.patch
+  drm-i915-disable-tv-hotplug-status-check.patch
+  drm-i915-fix-get_core_clock_speed-for-g33-class-desktop-chips.patch
+  drm-radeon-r6xx-r7xx-possible-security-issue-system-ram-access.patch
+  drm-radeon-kms-r600-r700-don-t-test-ib-if-ib-initialization-fails.patch
+  drm-radeon-kms-forbid-creation-of-framebuffer-with-no-valid-gem-object.patch
+  acpi-i915-blacklist-clevo-m5x0n-bad_lid-state.patch
+- Dropped merged upstream patches:
+  fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+  fs-exec.c-fix-initial-stack-reservation.patch
+  kms-offb-handoff.patch
+  linux-2.6-input-hid-quirk-hp-touchsmart.patch
+  sparc-align-clone-and-signal-stacks-to-16-bytes.patch
+  sparc-additional-pci-id-xvr-500.patch
+
 * Thu Mar 11 2010 Dennis Gilmore <dennis@ausil.us>
-- add add aditional pci-id for  xvr-500 
+- add add aditional pci-id for  xvr-500
 - sparc stack alignment fix
 
 * Wed Mar 10 2010 Tom "spot" Callaway <tcallawa@redhat.com>
