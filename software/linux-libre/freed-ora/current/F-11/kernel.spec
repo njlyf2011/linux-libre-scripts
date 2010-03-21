@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1785
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1824 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1829 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -38,7 +38,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -495,7 +495,7 @@ Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
-Provides: kernel-drm-nouveau = 15\
+Provides: kernel-drm-nouveau = 12\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
@@ -777,11 +777,11 @@ Patch12311: fix-ima-null-ptr-deref.patch
 # rhbz#567530
 Patch12350: tcp-fix-icmp-rto-war.patch
 
-# fix breakage from 2.6.32.9
-Patch12400: fs-exec.c-fix-initial-stack-reservation.patch
+Patch12360: iwlwifi-silence-tfds-in-queue-message.patch
 
-# fix automount symlinks (#567813)
-Patch12410: fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+# fix regression caused by dropping these (F12#571638)
+Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
 Patch20031: vgaarb-fix-userspace-ptr-deref.patch
 
@@ -1443,11 +1443,10 @@ ApplyPatch fix-ima-null-ptr-deref.patch
 # rhbz#567530
 ApplyPatch tcp-fix-icmp-rto-war.patch
 
-# fix breakage from 2.6.32.9
-ApplyPatch fs-exec.c-fix-initial-stack-reservation.patch
+ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
 
-# fix automount symlinks (#567813)
-ApplyPatch fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+ApplyPatch iwlwifi-silence-tfds-in-queue-message.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2103,6 +2102,35 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Rebase on 2.6.32-libre1.
+- Adjust patch-libre-2.6.32.10 for deblobbing.
+
+* Tue Mar 16 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.10-44
+- Linux 2.6.32.10
+- iwlwifi-silence-tfds-in-queue-message.patch:
+  don't spam the log when the problem keeps happening
+
+* Sun Mar 14 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix regression in tg3 driver (#571638)
+
+* Sat Mar 13 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.32.10-rc1
+- Revert -stable patches that conflict with our F-11 DRM:
+  acpi-i915-blacklist-clevo-m5x0n-bad_lid-state.patch
+  drm-i915-fix-get_core_clock_speed-for-g33-class-desktop-chips.patch
+  drm-radeon-kms-r600-r700-don-t-test-ib-if-ib-initialization-fails.patch
+  drm-radeon-r6xx-r7xx-possible-security-issue-system-ram-access.patch
+  drm-i915-disable-tv-hotplug-status-check.patch
+  drm-ttm-handle-oom-in-ttm_tt_swapout.patch
+  drm-i915-use-a-dmi-quirk-to-skip-a-broken-sdvo-tv-output.patch
+- Drop patches merged in -stable:
+  fs-exec.c-fix-initial-stack-reservation.patch
+  fix-LOOKUP_FOLLOW-on-automount-symlinks.patch
+
+* Wed Mar 03 2010 Kyle McMartin <kyle@redhat.com>
+- Fix nouveau ABI version, didn't get reset with the DRM downgrade.
+
 * Sat Feb 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.32.9.
 - Rebased and deblobbed drm-2.6.30.patch.
