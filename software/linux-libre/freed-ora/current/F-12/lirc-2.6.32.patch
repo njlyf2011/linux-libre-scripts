@@ -15,10 +15,10 @@ Deblobbed
  drivers/input/lirc/lirc_i2c.c         |  536 +++++++
  drivers/input/lirc/lirc_igorplugusb.c |  555 ++++++++
  drivers/input/lirc/lirc_imon.c        | 1053 ++++++++++++++
- drivers/input/lirc/lirc_it87.c        | 1019 ++++++++++++++
+ drivers/input/lirc/lirc_it87.c        | 1019 +++++++++++++
  drivers/input/lirc/lirc_it87.h        |  116 ++
  drivers/input/lirc/lirc_ite8709.c     |  540 +++++++
- drivers/input/lirc/lirc_mceusb.c      | 1225 ++++++++++++++++
+ drivers/input/lirc/lirc_mceusb.c      | 1378 ++++++++++++++++++
  drivers/input/lirc/lirc_parallel.c    |  709 ++++++++++
  drivers/input/lirc/lirc_parallel.h    |   26 +
  drivers/input/lirc/lirc_sasem.c       |  931 ++++++++++++
@@ -29,11 +29,11 @@ Deblobbed
  drivers/input/lirc/lirc_zilog.c       | 1388 ++++++++++++++++++
  drivers/input/misc/Kconfig            |   11 +
  drivers/input/misc/Makefile           |    1 +
- drivers/input/misc/imon.c             | 2501 +++++++++++++++++++++++++++++++++
+ drivers/input/misc/imon.c             | 2508 +++++++++++++++++++++++++++++++++
  drivers/input/sparse-keymap.c         |  250 ++++
  include/linux/input/sparse-keymap.h   |   62 +
  include/linux/lirc.h                  |   94 ++
- 31 files changed, 17113 insertions(+), 13 deletions(-)
+ 31 files changed, 17273 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/input/Kconfig b/drivers/input/Kconfig
 index cd50c00..198e48f 100644
@@ -6368,10 +6368,10 @@ index 0000000..4c3d3ad
 +MODULE_PARM_DESC(debug, "Enable debugging messages");
 diff --git a/drivers/input/lirc/lirc_mceusb.c b/drivers/input/lirc/lirc_mceusb.c
 new file mode 100644
-index 0000000..c8f0983
+index 0000000..f83cf4e
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_mceusb.c
-@@ -0,0 +1,1225 @@
+@@ -0,0 +1,1378 @@
 +/*
 + * LIRC driver for Windows Media Center Edition USB Infrared Transceivers
 + *
@@ -6582,6 +6582,12 @@ index 0000000..c8f0983
 +	{ }
 +};
 +
++static struct usb_device_id gen3_list[] = {
++	{ USB_DEVICE(VENDOR_PINNACLE, 0x0225) },
++	{ USB_DEVICE(VENDOR_TOPSEED, 0x0008) },
++	{}
++};
++
 +static struct usb_device_id pinnacle_list[] = {
 +	{ USB_DEVICE(VENDOR_PINNACLE, 0x0225) },
 +	{}
@@ -6631,7 +6637,7 @@ index 0000000..c8f0983
 +	unsigned char is_pulse;
 +	struct {
 +		u32 connected:1;
-+		u32 pinnacle:1;
++		u32 gen3:1;
 +		u32 transmitter_mask_inverted:1;
 +		u32 microsoft_gen1:1;
 +		u32 reserved:28;
@@ -6647,18 +6653,49 @@ index 0000000..c8f0983
 +	struct mutex dev_lock;
 +};
 +
-+/* init strings */
-+static char init1[] = {0x00, 0xff, 0xaa, 0xff, 0x0b};
-+static char init2[] = {0xff, 0x18};
++/*
++ * MCE Device Command Strings
++ * Device command responses vary from device to device...
++ * - DEVICE_RESET resets the hardware to its default state
++ * - GET_REVISION fetches the hardware/software revision, common
++ *   replies are ff 0b 45 ff 1b 08 and ff 0b 50 ff 1b 42
++ * - GET_CARRIER_FREQ gets the carrier mode and frequency of the
++ *   device, with replies in the form of 9f 06 MM FF, where MM is 0-3,
++ *   meaning clk of 10000000, 2500000, 625000 or 156250, and FF is
++ *   ((clk / frequency) - 1)
++ * - GET_RX_TIMEOUT fetches the receiver timeout in units of 50us,
++ *   response in the form of 9f 0c msb lsb
++ * - GET_TX_BITMASK fetches the transmitter bitmask, replies in
++ *   the form of 9f 08 bm, where bm is the bitmask
++ * - GET_RX_SENSOR fetches the RX sensor setting -- long-range
++ *   general use one or short-range learning one, in the form of
++ *   9f 14 ss, where ss is either 01 for long-range or 02 for short
++ * - SET_CARRIER_FREQ sets a new carrier mode and frequency
++ * - SET_TX_BITMASK sets the transmitter bitmask
++ * - SET_RX_TIMEOUT sets the receiver timeout
++ * - SET_RX_SENSOR sets which receiver sensor to use
++ */
++static char DEVICE_RESET[]	= {0x00, 0xff, 0xaa};
++static char GET_REVISION[]	= {0xff, 0x0b};
++static char GET_UNKNOWN[]	= {0xff, 0x18};
++static char GET_CARRIER_FREQ[]	= {0x9f, 0x07};
++static char GET_RX_TIMEOUT[]	= {0x9f, 0x0d};
++static char GET_TX_BITMASK[]	= {0x9f, 0x13};
++static char GET_RX_SENSOR[]	= {0x9f, 0x15};
++/* sub in desired values in lower byte or bytes for full command */
++//static char SET_CARRIER_FREQ[]	= {0x9f, 0x06, 0x00, 0x00};
++//static char SET_TX_BITMASK[]	= {0x9f, 0x08, 0x00};
++//static char SET_RX_TIMEOUT[]	= {0x9f, 0x0c, 0x00, 0x00};
++//static char SET_RX_SENSOR[]	= {0x9f, 0x14, 0x00};
 +
-+static char pin_init1[] = { 0x9f, 0x07};
-+static char pin_init2[] = { 0x9f, 0x13};
-+static char pin_init3[] = { 0x9f, 0x0d};
-+
-+static void mceusb_dev_printdata(struct mceusb_dev *ir, char *buf, int len)
++static void mceusb_dev_printdata(struct mceusb_dev *ir, char *buf,
++				 int len, bool out)
 +{
 +	char codes[USB_BUFLEN * 3 + 1];
++	char inout[9];
 +	int i;
++	u8 cmd, subcmd, data1, data2;
++	struct device *dev = ir->d->dev;
 +
 +	if (len <= 0)
 +		return;
@@ -6669,7 +6706,108 @@ index 0000000..c8f0983
 +	for (i = 0; i < len && i < USB_BUFLEN; i++)
 +		snprintf(codes + i * 3, 4, "%02x ", buf[i] & 0xFF);
 +
-+	dev_info(ir->d->dev, "data received %s (length=%d)\n", codes, len);
++	dev_info(dev, "%sbound data: %s (length=%d)\n",
++		 (out ? "out" : " in"), codes, len);
++
++	if (out)
++		strcpy(inout, "Request\0");
++	else
++		strcpy(inout, "Got\0");
++
++	cmd    = buf[0] & 0xff;
++	subcmd = buf[1] & 0xff;
++	data1  = buf[2] & 0xff;
++	data2  = buf[3] & 0xff;
++
++	switch (cmd) {
++	case 0x00:
++		if (subcmd == 0xff && data1 == 0xaa)
++			dev_info(dev, "Device reset requested\n");
++		else
++			dev_info(dev, "Unknown command 0x%02x 0x%02x\n",
++				 cmd, subcmd);
++		break;
++	case 0xff:
++		switch (subcmd) {
++		case 0x0b:
++			if (len == 2)
++				dev_info(dev, "Get hw/sw rev?\n");
++			else
++				dev_info(dev, "hw/sw rev 0x%02x 0x%02x "
++					 "0x%02x 0x%02x\n", data1, data2,
++					 buf[4], buf[5]);
++			break;
++		case 0xaa:
++			dev_info(dev, "Device reset requested\n");
++			break;
++		case 0xfe:
++			dev_info(dev, "Previous command not supported\n");
++			break;
++		case 0x18:
++		case 0x1b:
++		default:
++			dev_info(dev, "Unknown command 0x%02x 0x%02x\n",
++				 cmd, subcmd);
++			break;
++		}
++		break;
++	case 0x9f:
++		switch (subcmd) {
++		case 0x03:
++			dev_info(dev, "Ping\n");
++			break;
++		case 0x04:
++			dev_info(dev, "Resp to 9f 05 of 0x%02x 0x%02x\n",
++				 data1, data2);
++			break;
++		case 0x06:
++			dev_info(dev, "%s carrier mode and freq of 0x%02x 0x%02x\n",
++				 inout, data1, data2);
++			break;
++		case 0x07:
++			dev_info(dev, "Get carrier mode and freq\n");
++			break;
++		case 0x08:
++			dev_info(dev, "%s transmit blaster mask of 0x%02x\n",
++				 inout, data1);
++			break;
++		case 0x0c:
++			/* value is in units of 50us, so x*50/100 or x/2 ms */
++			dev_info(dev, "%s receive timeout of %d ms\n",
++				 inout, ((data1 << 8) | data2) / 2);
++			break;
++		case 0x0d:
++			dev_info(dev, "Get receive timeout\n");
++			break;
++		case 0x13:
++			dev_info(dev, "Get transmit blaster mask\n");
++			break;
++		case 0x14:
++			dev_info(dev, "%s %s-range receive sensor in use\n",
++				 inout, data1 == 0x02 ? "short" : "long");
++			break;
++		case 0x15:
++			if (len == 2)
++				dev_info(dev, "Get receive sensor\n");
++			else
++				dev_info(dev, "Received pulse count is %d\n",
++					 ((data1 << 8) | data2));
++			break;
++		case 0xfe:
++			dev_info(dev, "Error! Hardware is likely wedged...\n");
++			break;
++		case 0x05:
++		case 0x09:
++		case 0x0f:
++		default:
++			dev_info(dev, "Unknown command 0x%02x 0x%02x\n",
++				 cmd, subcmd);
++			break;
++		}
++		break;
++	default:
++		break;
++	}
 +}
 +
 +static void usb_async_callback(struct urb *urb, struct pt_regs *regs)
@@ -6688,54 +6826,49 @@ index 0000000..c8f0983
 +			urb->status, len);
 +
 +		if (debug)
-+			mceusb_dev_printdata(ir, urb->transfer_buffer, len);
++			mceusb_dev_printdata(ir, urb->transfer_buffer, len, true);
 +	}
 +
 +}
 +
 +/* request incoming or send outgoing usb packet - used to initialize remote */
-+static void request_packet_async(struct mceusb_dev *ir,
-+				 struct usb_endpoint_descriptor *ep,
-+				 unsigned char *data, int size, int urb_type)
++static void mce_request_packet(struct mceusb_dev *ir,
++			       struct usb_endpoint_descriptor *ep,
++			       unsigned char *data, int size, int urb_type)
 +{
 +	int res;
 +	struct urb *async_urb;
 +	unsigned char *async_buf;
 +
-+	if (urb_type) {
++	if (urb_type == MCEUSB_OUTBOUND) {
 +		async_urb = usb_alloc_urb(0, GFP_KERNEL);
-+		if (unlikely(!async_urb))
++		if (unlikely(!async_urb)) {
++			dev_err(ir->d->dev, "Error, couldn't allocate urb!\n");
 +			return;
++		}
 +
 +		async_buf = kzalloc(size, GFP_KERNEL);
 +		if (!async_buf) {
++			dev_err(ir->d->dev, "Error, couldn't allocate buf!\n");
 +			usb_free_urb(async_urb);
 +			return;
 +		}
 +
-+		if (urb_type == MCEUSB_OUTBOUND) {
-+			/* outbound data */
-+			usb_fill_int_urb(async_urb, ir->usbdev,
-+				usb_sndintpipe(ir->usbdev,
-+					       ep->bEndpointAddress),
-+				async_buf, size,
-+				(usb_complete_t) usb_async_callback,
-+				ir, ep->bInterval);
-+			memcpy(async_buf, data, size);
-+		} else {
-+			/* inbound data */
-+			usb_fill_int_urb(async_urb, ir->usbdev,
-+				usb_rcvintpipe(ir->usbdev,
-+					       ep->bEndpointAddress),
-+				async_buf, size,
-+				(usb_complete_t) usb_async_callback,
-+				ir, ep->bInterval);
-+		}
++		/* outbound data */
++		usb_fill_int_urb(async_urb, ir->usbdev,
++			usb_sndintpipe(ir->usbdev, ep->bEndpointAddress),
++			async_buf, size, (usb_complete_t) usb_async_callback,
++			ir, ep->bInterval);
++		memcpy(async_buf, data, size);
 +
-+	} else {
++	} else if (urb_type == MCEUSB_INBOUND) {
 +		/* standard request */
 +		async_urb = ir->urb_in;
 +		ir->send_flags = RECV_FLAG_IN_PROGRESS;
++
++	} else {
++		dev_err(ir->d->dev, "Error! Unknown urb type %d\n", urb_type);
++		return;
 +	}
 +
 +	dev_dbg(ir->d->dev, "receive request called (size=%#x)\n", size);
@@ -6749,6 +6882,16 @@ index 0000000..c8f0983
 +		return;
 +	}
 +	dev_dbg(ir->d->dev, "receive request complete (res=%d)\n", res);
++}
++
++static void mce_async_out(struct mceusb_dev *ir, unsigned char *data, int size)
++{
++	mce_request_packet(ir, ir->usb_ep_out, data, size, MCEUSB_OUTBOUND);
++}
++
++static void mce_sync_in(struct mceusb_dev *ir, unsigned char *data, int size)
++{
++	mce_request_packet(ir, ir->usb_ep_in, data, size, MCEUSB_INBOUND);
 +}
 +
 +static int unregister_from_lirc(struct mceusb_dev *ir)
@@ -6945,7 +7088,7 @@ index 0000000..c8f0983
 +	buf_len = urb->actual_length;
 +
 +	if (debug)
-+		mceusb_dev_printdata(ir, urb->transfer_buffer, buf_len);
++		mceusb_dev_printdata(ir, urb->transfer_buffer, buf_len, false);
 +
 +	if (ir->send_flags == RECV_FLAG_IN_PROGRESS) {
 +		ir->send_flags = SEND_FLAG_COMPLETE;
@@ -7043,8 +7186,7 @@ index 0000000..c8f0983
 +	cmdbuf[cmdcount++] = 0x80;
 +
 +	/* Transmit the command to the mce device */
-+	request_packet_async(ir, ir->usb_ep_out, cmdbuf,
-+			     cmdcount, MCEUSB_OUTBOUND);
++	mce_async_out(ir, cmdbuf, cmdcount);
 +
 +	/*
 +	 * The lircd gap calculation expects the write function to
@@ -7085,9 +7227,7 @@ index 0000000..c8f0983
 +			ir->carrier_freq = carrier;
 +			dev_dbg(ir->d->dev, "SET_CARRIER disabling carrier "
 +				"modulation\n");
-+			request_packet_async(ir, ir->usb_ep_out,
-+					     cmdbuf, sizeof(cmdbuf),
-+					     MCEUSB_OUTBOUND);
++			mce_async_out(ir, cmdbuf, sizeof(cmdbuf));
 +			return carrier;
 +		}
 +
@@ -7101,9 +7241,7 @@ index 0000000..c8f0983
 +					"%d Hz\n", carrier);
 +
 +				/* Transmit new carrier to mce device */
-+				request_packet_async(ir, ir->usb_ep_out,
-+						     cmdbuf, sizeof(cmdbuf),
-+						     MCEUSB_OUTBOUND);
++				mce_async_out(ir, cmdbuf, sizeof(cmdbuf));
 +				return carrier;
 +			}
 +		}
@@ -7280,7 +7418,7 @@ index 0000000..c8f0983
 +	int i;
 +	char buf[63], name[128] = "";
 +	int mem_failure = 0;
-+	int is_pinnacle;
++	int is_gen3;
 +	int is_microsoft_gen1;
 +
 +	dev_dbg(&intf->dev, ": %s called\n", __func__);
@@ -7291,7 +7429,7 @@ index 0000000..c8f0983
 +
 +	idesc = intf->cur_altsetting;
 +
-+	is_pinnacle = usb_match_id(intf, pinnacle_list) ? 1 : 0;
++	is_gen3 = usb_match_id(intf, gen3_list) ? 1 : 0;
 +
 +	is_microsoft_gen1 = usb_match_id(intf, microsoft_gen1_list) ? 1 : 0;
 +
@@ -7311,13 +7449,12 @@ index 0000000..c8f0983
 +				"found\n");
 +			ep_in = ep;
 +			ep_in->bmAttributes = USB_ENDPOINT_XFER_INT;
-+			if (is_pinnacle)
++			if (!is_gen3)
 +				/*
-+				 * setting seems to 1 seem to cause issues with
-+				 * Pinnacle timing out on transfer.
++				 * ideally, we'd use what the device offers up,
++				 * but that leads to non-functioning first and
++				 * second-gen devices.
 +				 */
-+				ep_in->bInterval = ep->bInterval;
-+			else
 +				ep_in->bInterval = 1;
 +		}
 +
@@ -7333,13 +7470,12 @@ index 0000000..c8f0983
 +				"found\n");
 +			ep_out = ep;
 +			ep_out->bmAttributes = USB_ENDPOINT_XFER_INT;
-+			if (is_pinnacle)
++			if (!is_gen3)
 +				/*
-+				 * setting seems to 1 seem to cause issues with
-+				 * Pinnacle timing out on transfer.
++				 * ideally, we'd use what the device offers up,
++				 * but that leads to non-functioning first and
++				 * second-gen devices.
 +				 */
-+				ep_out->bInterval = ep->bInterval;
-+			else
 +				ep_out->bInterval = 1;
 +		}
 +	}
@@ -7405,7 +7541,7 @@ index 0000000..c8f0983
 +	ir->len_in = maxp;
 +	ir->overflow_len = 0;
 +	ir->flags.connected = 0;
-+	ir->flags.pinnacle = is_pinnacle;
++	ir->flags.gen3 = is_gen3;
 +	ir->flags.microsoft_gen1 = is_microsoft_gen1;
 +	ir->flags.transmitter_mask_inverted =
 +		usb_match_id(intf, transmitter_mask_list) ? 0 : 1;
@@ -7435,8 +7571,7 @@ index 0000000..c8f0983
 +	ir->urb_in->transfer_dma = ir->dma_in;
 +	ir->urb_in->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 +
-+	/* initialize device */
-+	if (ir->flags.pinnacle) {
++	if (usb_match_id(intf, pinnacle_list)) {
 +		int usbret;
 +
 +		/*
@@ -7447,46 +7582,64 @@ index 0000000..c8f0983
 +		 * interpreted by the device and the host never does the
 +		 * completion routine
 +		 */
-+
 +		usbret = usb_reset_configuration(dev);
 +		dev_info(ir->d->dev, "usb reset config ret %x\n", usbret);
++	}
 +
-+		/*
-+		 * its possible we really should wait for a return
-+		 * for each of these...
-+		 */
-+		request_packet_async(ir, ep_in, NULL, maxp, MCEUSB_INBOUND);
-+		request_packet_async(ir, ep_out, pin_init1, sizeof(pin_init1),
-+				     MCEUSB_OUTBOUND);
-+		request_packet_async(ir, ep_in, NULL, maxp, MCEUSB_INBOUND);
-+		request_packet_async(ir, ep_out, pin_init2, sizeof(pin_init2),
-+				     MCEUSB_OUTBOUND);
-+		request_packet_async(ir, ep_in, NULL, maxp, MCEUSB_INBOUND);
-+		request_packet_async(ir, ep_out, pin_init3, sizeof(pin_init3),
-+				     MCEUSB_OUTBOUND);
++	/* initialize device */
++	if (ir->flags.gen3) {
++		mce_sync_in(ir, NULL, maxp);
++
++		/* device reset */
++		mce_async_out(ir, DEVICE_RESET, sizeof(DEVICE_RESET));
++		mce_sync_in(ir, NULL, maxp);
++
++		/* get the carrier and frequency */
++		mce_async_out(ir, GET_CARRIER_FREQ, sizeof(GET_CARRIER_FREQ));
++		mce_sync_in(ir, NULL, maxp);
++
++		/* get the transmitter bitmask */
++		mce_async_out(ir, GET_TX_BITMASK, sizeof(GET_TX_BITMASK));
++		mce_sync_in(ir, NULL, maxp);
++
++		/* get receiver timeout value */
++		mce_async_out(ir, GET_RX_TIMEOUT, sizeof(GET_RX_TIMEOUT));
++		mce_sync_in(ir, NULL, maxp);
++
++		/* get receiver sensor setting */
++		mce_async_out(ir, GET_RX_SENSOR, sizeof(GET_RX_SENSOR));
++		mce_sync_in(ir, NULL, maxp);
++
 +	} else if (ir->flags.microsoft_gen1) {
 +		/* original ms mce device requires some additional setup */
 +		mceusb_gen1_init(ir);
-+	} else {
 +
-+		request_packet_async(ir, ep_in, NULL, maxp, MCEUSB_INBOUND);
-+		request_packet_async(ir, ep_in, NULL, maxp, MCEUSB_INBOUND);
-+		request_packet_async(ir, ep_out, init1,
-+				     sizeof(init1), MCEUSB_OUTBOUND);
-+		request_packet_async(ir, ep_in, NULL, maxp, MCEUSB_INBOUND);
-+		request_packet_async(ir, ep_out, init2,
-+				     sizeof(init2), MCEUSB_OUTBOUND);
++	} else {
++		mce_sync_in(ir, NULL, maxp);
++		mce_sync_in(ir, NULL, maxp);
++
++		/* device reset */
++		mce_async_out(ir, DEVICE_RESET, sizeof(DEVICE_RESET));
++		mce_sync_in(ir, NULL, maxp);
++
++		/* get hw/sw revision? */
++		mce_async_out(ir, GET_REVISION, sizeof(GET_REVISION));
++		mce_sync_in(ir, NULL, maxp);
++
++		/* unknown what this actually returns... */
++		mce_async_out(ir, GET_UNKNOWN, sizeof(GET_UNKNOWN));
++		mce_sync_in(ir, NULL, maxp);
 +	}
 +
 +	/*
-+	 * if we don't issue the correct number of receives (MCEUSB_INBOUND)
++	 * if we don't issue the correct number of receives (mce_sync_in())
 +	 * for each outbound, then the first few ir pulses will be interpreted
 +	 * by the usb_async_callback routine - we should ensure we have the
 +	 * right amount OR less - as the mceusb_dev_recv routine will handle
 +	 * the control packets OK - they start with 0x9f - but the async
 +	 * callback doesn't handle ir pulse packets
 +	 */
-+	request_packet_async(ir, ep_in, NULL, maxp, 0);
++	mce_sync_in(ir, NULL, maxp);
 +
 +	usb_set_intfdata(intf, ir);
 +
@@ -14524,10 +14677,10 @@ index a8b8485..79358ff 100644
  obj-$(CONFIG_INPUT_M68K_BEEP)		+= m68kspkr.o
 diff --git a/drivers/input/misc/imon.c b/drivers/input/misc/imon.c
 new file mode 100644
-index 0000000..0c05f95
+index 0000000..889e77e
 --- /dev/null
 +++ b/drivers/input/misc/imon.c
-@@ -0,0 +1,2501 @@
+@@ -0,0 +1,2508 @@
 +/*
 + *   imon.c:	input and display driver for SoundGraph iMON IR/VFD/LCD
 + *
@@ -14842,11 +14995,6 @@ index 0000000..0c05f95
 +	{ KE_KEY, 0x29a515b7, { KEY_LEFT } },
 +	{ KE_KEY, 0x2ba515b7, { KEY_RIGHT } },
 +
-+	{ KE_KEY, 0x690281b7, { KEY_UP } },
-+	{ KE_KEY, 0x688291b7, { KEY_DOWN } },
-+	{ KE_KEY, 0x6a8281b7, { KEY_LEFT } },
-+	{ KE_KEY, 0x688a81b7, { KEY_RIGHT } },
-+
 +	{ KE_KEY, 0x0200002c, { KEY_SPACE } }, /* Select/Space */
 +	{ KE_KEY, 0x2a9315b7, { KEY_SPACE } }, /* Select/Space */
 +	{ KE_KEY, 0x02000028, { KEY_ENTER } },
@@ -14926,8 +15074,8 @@ index 0000000..0c05f95
 +	{ KE_KEY, 0x29b195b7, { KEY_EJECTCD } }, /* the one next to play */
 +	{ KE_KEY, 0x299395b7, { KEY_EJECTCLOSECD } }, /* eject (by TaskSw) */
 +
-+	{ KE_KEY, 0x02800000, { KEY_MENU } }, /* Left Menu */
-+	{ KE_KEY, 0x2b8195b7, { KEY_MENU } }, /* Left Menu*/
++	{ KE_KEY, 0x02800000, { KEY_CONTEXT_MENU } }, /* Left Menu */
++	{ KE_KEY, 0x2b8195b7, { KEY_CONTEXT_MENU } }, /* Left Menu*/
 +	{ KE_KEY, 0x02000065, { KEY_COMPOSE } }, /* RightMenu */
 +	{ KE_KEY, 0x28b715b7, { KEY_COMPOSE } }, /* RightMenu */
 +	{ KE_KEY, 0x2ab195b7, { KEY_PROG1 } }, /* Go or MultiMon */
@@ -16097,6 +16245,11 @@ index 0000000..0c05f95
 +	if (ictx->ki == -1 && buf[0] == 0x02 && buf[3] == 0x00)
 +		ictx->kc = ictx->last_keycode;
 +
++	/* mouse button release on (some) 0xffdc devices */
++	else if (ictx->ki == -1 && buf[0] == 0x68 && buf[1] == 0x82 &&
++		 buf[2] == 0x81 && buf[3] == 0xb7)
++		ictx->kc = ictx->last_keycode;
++
 +	/* mce-specific button handling */
 +	else if (ksrc == IMON_BUTTON_MCE) {
 +		/* initial press */
@@ -16154,6 +16307,10 @@ index 0000000..0c05f95
 +
 +	idev = ictx->idev;
 +
++	/* filter out junk data on the older 0xffdc imon devices */
++	if ((buf[0] == 0xff) && (buf[7] == 0xff))
++		return;
++
 +	/* Figure out what key was pressed */
 +	memcpy(&temp_key, buf, sizeof(temp_key));
 +	if (len == 8 && buf[7] == 0xee) {
@@ -16161,8 +16318,9 @@ index 0000000..0c05f95
 +		panel_key = le64_to_cpu(temp_key);
 +		ki = imon_panel_key_lookup(panel_key);
 +		if (ki < 0)
-+			goto unknown_key;
-+		kc = imon_panel_key_table[ki].keycode;
++			kc = KEY_UNKNOWN;
++		else
++			kc = imon_panel_key_table[ki].keycode;
 +	} else {
 +		remote_key = (u32) (le64_to_cpu(temp_key) & 0xffffffff);
 +		if (ictx->ir_protocol == IMON_IR_PROTOCOL_MCE) {
@@ -16170,13 +16328,15 @@ index 0000000..0c05f95
 +				ksrc = IMON_BUTTON_MCE;
 +			ki = imon_mce_key_lookup(remote_key);
 +			if (ki < 0)
-+				goto unknown_key;
-+			kc = imon_mce_key_table[ki].keycode;
++				kc = KEY_UNKNOWN;
++			else
++				kc = imon_mce_key_table[ki].keycode;
 +		} else {
 +			ki = imon_remote_key_lookup(remote_key);
 +			if (ki < 0)
-+				goto unknown_key;
-+			kc = imon_remote_key_table[ki % offset].keycode;
++				kc = KEY_UNKNOWN;
++			else
++				kc = imon_remote_key_table[ki % offset].keycode;
 +		}
 +	}
 +
@@ -16228,6 +16388,9 @@ index 0000000..0c05f95
 +	if (press_type < 0)
 +		goto not_input_data;
 +
++	if (ictx->kc == KEY_UNKNOWN)
++		goto unknown_key;
++
 +	/* KEY_MUTE repeats from MCE and knob need to be suppressed */
 +	if ((ictx->kc == KEY_MUTE && ictx->kc == ictx->last_keycode)
 +	    && (buf[7] == 0xee || ksrc == IMON_BUTTON_MCE)) {
@@ -16252,12 +16415,9 @@ index 0000000..0c05f95
 +	return;
 +
 +unknown_key:
-+	/* filter out junk data on the older 0xffdc imon devices */
-+	if ((buf[0] == 0xff) && (buf[7] == 0xff))
-+		return;
-+
 +	dev_info(dev, "%s: unknown keypress, code 0x%x\n", __func__,
-+		 (panel_key ? panel_key : remote_key));
++		 (panel_key ? be64_to_cpu(panel_key) :
++			      be32_to_cpu(remote_key)));
 +	return;
 +
 +not_input_data:
