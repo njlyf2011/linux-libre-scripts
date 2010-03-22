@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1946 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1955 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -41,8 +41,8 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
-%define rcrevlibre -libre
+%define stablelibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -488,9 +488,6 @@ Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
-%if %{with_perftool}\
-Requires(pre): libdwarf\
-%endif\
 Requires(post): /sbin/new-kernel-pkg\
 Requires(preun): /sbin/new-kernel-pkg\
 Conflicts: %{kernel_dot_org_conflicts}\
@@ -699,6 +696,8 @@ Patch701: linux-2.6.31-modules-ro-nx.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
+Patch900: linux-2.6-cantiga-iommu-gfx.patch
+
 Patch1515: lirc-2.6.33.patch
 Patch1517: hdpvr-ir-enable.patch
 Patch1520: crystalhd-2.6.34-staging.patch
@@ -736,7 +735,10 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 
+# Rebase gspca to what will be in 2.6.34
 Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
+# Some cherry picked fixes from v4l-dvb-next
+Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # fs fixes
 
@@ -759,8 +761,8 @@ Patch12018: neuter_intel_microcode_load.patch
 Patch12019: linux-2.6-umh-refactor.patch
 Patch12020: coredump-uid-pipe-check.patch
 
-# fix memory scribble
-Patch12030: x86-pci-prevent-mmconfig-memory-corruption.patch
+# rhbz#533746
+Patch12021: ssb_check_for_sprom.patch
 
 %endif
 
@@ -830,9 +832,10 @@ Provides: perf = %{rpmversion}-%{pkg_release}
 Summary: Performance monitoring for the Linux kernel
 Group: Development/System
 License: GPLv2
+Requires: libdwarf
 %description -n perf-libre
-This package provides the supporting documentation for the perf tool
-shipped in each kernel image subpackage.
+This package provides the perf shell script, supporting documentation and
+required libraries for the perf tool shipped in each kernel image subpackage.
 
 #
 # This macro creates a kernel-<subpackage>-debuginfo package.
@@ -1342,6 +1345,9 @@ ApplyPatch linux-2.6-ata-quirk.patch
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
+# Cantiga chipset b0rkage
+ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
+
 # http://www.lirc.org/
 ApplyPatch lirc-2.6.33.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
@@ -1386,6 +1392,7 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
+ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
@@ -1398,8 +1405,8 @@ ApplyPatch neuter_intel_microcode_load.patch
 ApplyPatch linux-2.6-umh-refactor.patch
 ApplyPatch coredump-uid-pipe-check.patch
 
-# fix memory scribble
-ApplyPatch x86-pci-prevent-mmconfig-memory-corruption.patch
+# rhbz#533746
+ApplyPatch ssb_check_for_sprom.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1775,8 +1782,8 @@ xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
 ls $man9dir | grep -q '' || > $man9dir/BROKEN
 %endif # with_doc
 
-# perf docs
 %if %{with_perf}
+# perf docs
 mandir=$RPM_BUILD_ROOT%{_datadir}/man
 man1dir=$mandir/man1
 pushd tools/perf/Documentation
@@ -1788,15 +1795,14 @@ for d in *.1; do
  gzip $d;
 done
 popd
-%endif # with_perf
 
-# perf shell wrapper
-%if %{with_perf}
+# perf shell wrapper and examples
 mkdir -p $RPM_BUILD_ROOT/usr/sbin/
 cp $RPM_SOURCE_DIR/perf $RPM_BUILD_ROOT/usr/sbin/perf
 chmod 0755 $RPM_BUILD_ROOT/usr/sbin/perf
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/perf
-%endif
+cp tools/perf/Documentation/examples.txt $RPM_BUILD_ROOT%{_datadir}/doc/perf
+%endif # with_perf
 
 %if %{with_headers}
 # Install kernel headers
@@ -2051,6 +2057,49 @@ fi
 # and build.
 
 %changelog
+* Sun Mar 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.33.1 for deblobbed sources.
+
+* Fri Mar 19 2010 John W. Linville <linville@redhat.com> 2.6.33.1-19
+- ssb: check for sprom (#533746)
+
+* Fri Mar 19 2010 Jarod Wilson <jarod@redhat.com> 2.6.33.1-18
+- Improve mouse button and pad handling on 0xffdc imon devices
+- Add xmit support to topseed 0x0008 lirc_mceusb transceiver
+
+* Fri Mar 19 2010 David Woodhouse <David.Woodhouse@intel.com>
+- Apply fix for #538163 again (Cantiga shadow GTT chipset b0rkage).
+
+* Fri Mar 19 2010 Hans de Goede <hdegoede@redhat.com>
+- Cherry pick various webcam driver fixes
+  (#571188, #572302, #572373)
+
+* Thu Mar 18 2010 Neil Horman <nhorman@redhat.com>
+- Disable TIPC protocol in config
+
+* Wed Mar 17 2010 Jarod Wilson <jarod@redhat.com>
+- lirc driver update:
+  * fix lirc_i2c on cx2341x hauppauge cards (#573675)
+  * fix null ptr deref in lirc_imon (#545599)
+  * fix lirc_zilog on cx2341x hauppauge cards
+  * adds a few new lirc_mceusb device ids
+- imon input layer driver update, adds better support for 0xffdc
+  devices and handles failed key lookups better
+
+* Tue Mar 16 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.33.1
+
+* Tue Mar 16 2010 Chuck Ebbert <cebbert@redhat.com>
+- Add examples.txt to perf docs, require libdwarf with perf package.
+  (#568309, #569506)
+
+* Mon Mar 15 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.33.1-rc1
+- Drop merged patch:
+  x86-pci-prevent-mmconfig-memory-corruption.patch
+- Revert V4l patch we already have:
+  v4l-dvb-13991-gspca_mr973010a-fix-cif-type-1-cameras-not-streaming-on-uhci-controllers.patch
+
 * Mon Mar 15 2010 Ben Skeggs <bskeggs@redhat.com>
 - nouveau: pull in more fixes from upstream
 
