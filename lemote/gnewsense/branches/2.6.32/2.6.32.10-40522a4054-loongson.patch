@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index f282cab..e10f041 100644
+index 2becebb..15ee5e7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -7675,7 +7675,7 @@ index d73f1de..a7ca995 100644
 +CONFIG_HAS_DMA=y
 +CONFIG_NLATTR=y
 diff --git a/arch/mips/configs/fuloong2e_defconfig b/arch/mips/configs/fuloong2e_defconfig
-index 0197f0d..961fcd6 100644
+index 0197f0d..4e6aeea 100644
 --- a/arch/mips/configs/fuloong2e_defconfig
 +++ b/arch/mips/configs/fuloong2e_defconfig
 @@ -1,7 +1,7 @@
@@ -7683,8 +7683,8 @@ index 0197f0d..961fcd6 100644
  # Automatically generated make config: don't edit
 -# Linux kernel version: 2.6.31-rc1
 -# Thu Jul  2 22:37:00 2009
-+# Linux kernel version: 2.6.32.2
-+# Wed Jan  6 16:45:43 2010
++# Linux kernel version: 2.6.32.9
++# Mon Mar  1 23:50:00 2010
  #
  CONFIG_MIPS=y
  
@@ -8072,6 +8072,17 @@ index 0197f0d..961fcd6 100644
  CONFIG_FILE_LOCKING=y
  CONFIG_FSNOTIFY=y
  CONFIG_DNOTIFY=y
+@@ -1497,8 +1529,8 @@ CONFIG_INOTIFY_USER=y
+ # CONFIG_QUOTA is not set
+ CONFIG_AUTOFS_FS=y
+ CONFIG_AUTOFS4_FS=y
+-CONFIG_FUSE_FS=y
+-# CONFIG_CUSE is not set
++CONFIG_FUSE_FS=m
++CONFIG_CUSE=m
+ 
+ #
+ # Caches
 @@ -1557,7 +1589,6 @@ CONFIG_OMFS_FS=m
  # CONFIG_ROMFS_FS is not set
  # CONFIG_SYSV_FS is not set
@@ -8120,14 +8131,14 @@ index 0197f0d..961fcd6 100644
  # CONFIG_CRYPTO_MICHAEL_MIC is not set
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
 new file mode 100644
-index 0000000..7548e90
+index 0000000..002ac7d
 --- /dev/null
 +++ b/arch/mips/configs/lemote2f_defconfig
-@@ -0,0 +1,2316 @@
+@@ -0,0 +1,2317 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.32.4
-+# Thu Jan 21 14:50:22 2010
++# Linux kernel version: 2.6.32.9
++# Mon Mar  1 23:49:21 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -10112,7 +10123,8 @@ index 0000000..7548e90
 +CONFIG_QUOTACTL=y
 +CONFIG_AUTOFS_FS=m
 +CONFIG_AUTOFS4_FS=m
-+# CONFIG_FUSE_FS is not set
++CONFIG_FUSE_FS=m
++CONFIG_CUSE=m
 +
 +#
 +# Caches
@@ -28474,10 +28486,10 @@ index 54e55e7..1b3e03f 100644
  	}
 diff --git a/arch/mips/pci/ops-loongson2.c b/arch/mips/pci/ops-loongson2.c
 new file mode 100644
-index 0000000..aa5d3da
+index 0000000..7793efb
 --- /dev/null
 +++ b/arch/mips/pci/ops-loongson2.c
-@@ -0,0 +1,208 @@
+@@ -0,0 +1,219 @@
 +/*
 + * fuloong2e specific PCI support.
 + *
@@ -28662,15 +28674,22 @@ index 0000000..aa5d3da
 +};
 +
 +#ifdef CONFIG_CS5536
++
++DEFINE_SPINLOCK(msr_lock);
++
 +void _rdmsr(u32 msr, u32 *hi, u32 *lo)
 +{
 +	struct pci_bus bus = {
 +		.number = PCI_BUS_CS5536
 +	};
 +	u32 devfn = PCI_DEVFN(PCI_IDSEL_CS5536, 0);
++	unsigned long flags;
++
++	spin_lock_irqsave(&msr_lock, flags);
 +	loongson_pcibios_write(&bus, devfn, PCI_MSR_ADDR, 4, msr);
 +	loongson_pcibios_read(&bus, devfn, PCI_MSR_DATA_LO, 4, lo);
 +	loongson_pcibios_read(&bus, devfn, PCI_MSR_DATA_HI, 4, hi);
++	spin_unlock_irqrestore(&msr_lock, flags);
 +}
 +EXPORT_SYMBOL(_rdmsr);
 +
@@ -28680,9 +28699,13 @@ index 0000000..aa5d3da
 +		.number = PCI_BUS_CS5536
 +	};
 +	u32 devfn = PCI_DEVFN(PCI_IDSEL_CS5536, 0);
++	unsigned long flags;
++
++	spin_lock_irqsave(&msr_lock, flags);
 +	loongson_pcibios_write(&bus, devfn, PCI_MSR_ADDR, 4, msr);
 +	loongson_pcibios_write(&bus, devfn, PCI_MSR_DATA_LO, 4, lo);
 +	loongson_pcibios_write(&bus, devfn, PCI_MSR_DATA_HI, 4, hi);
++	spin_unlock_irqrestore(&msr_lock, flags);
 +}
 +EXPORT_SYMBOL(_wrmsr);
 +#endif
@@ -72924,10 +72947,10 @@ index 473e5f2..03ac45c 100644
  		goto cleanup1;
  	}
 diff --git a/drivers/serial/8250.c b/drivers/serial/8250.c
-index 807042b..3546134 100644
+index 5ed1b82..10e33ac 100644
 --- a/drivers/serial/8250.c
 +++ b/drivers/serial/8250.c
-@@ -1214,12 +1214,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
+@@ -1217,12 +1217,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
  	}
  #endif
  
@@ -72940,7 +72963,7 @@ index 807042b..3546134 100644
  	serial_outp(up, UART_LCR, save_lcr);
  
  	if (up->capabilities != uart_config[up->port.type].flags) {
-@@ -2427,7 +2421,7 @@ serial8250_pm(struct uart_port *port, unsigned int state,
+@@ -2428,7 +2422,7 @@ serial8250_pm(struct uart_port *port, unsigned int state,
  static unsigned int serial8250_port_size(struct uart_8250_port *pt)
  {
  	if (pt->port.iotype == UPIO_AU)
@@ -72949,7 +72972,7 @@ index 807042b..3546134 100644
  #ifdef CONFIG_ARCH_OMAP
  	if (is_omap_port(pt))
  		return 0x16 << pt->port.regshift;
-@@ -2584,6 +2578,13 @@ static void serial8250_config_port(struct uart_port *port, int flags)
+@@ -2585,6 +2579,13 @@ static void serial8250_config_port(struct uart_port *port, int flags)
  
  	if (flags & UART_CONFIG_TYPE)
  		autoconfig(up, probeflags);
@@ -72984,10 +73007,10 @@ index 76cbc1a..c343f00 100644
  		dev_err(hw->dev, "tx dma put source error\n");
  
 diff --git a/drivers/staging/Kconfig b/drivers/staging/Kconfig
-index d21b346..99cfe4d 100644
+index b926b00..82084f2 100644
 --- a/drivers/staging/Kconfig
 +++ b/drivers/staging/Kconfig
-@@ -125,5 +125,7 @@ source "drivers/staging/sep/Kconfig"
+@@ -123,5 +123,7 @@ source "drivers/staging/sep/Kconfig"
  
  source "drivers/staging/iio/Kconfig"
  
@@ -72996,10 +73019,10 @@ index d21b346..99cfe4d 100644
  endif # !STAGING_EXCLUDE_BUILD
  endif # STAGING
 diff --git a/drivers/staging/Makefile b/drivers/staging/Makefile
-index 8cbf1ae..0b41de0 100644
+index 030d8f8..fbb5d97 100644
 --- a/drivers/staging/Makefile
 +++ b/drivers/staging/Makefile
-@@ -44,3 +44,4 @@ obj-$(CONFIG_VME_BUS)		+= vme/
+@@ -43,3 +43,4 @@ obj-$(CONFIG_VME_BUS)		+= vme/
  obj-$(CONFIG_RAR_REGISTER)	+= rar/
  obj-$(CONFIG_DX_SEP)		+= sep/
  obj-$(CONFIG_IIO)		+= iio/
@@ -76152,7 +76175,7 @@ index 090d300..d016c71 100755
      die "Arch $arch is not supported with CONFIG_FTRACE_MCOUNT_RECORD";
  }
 diff --git a/sound/core/pcm_native.c b/sound/core/pcm_native.c
-index ab73edf..2779b9a 100644
+index 7ba779d..a883c87 100644
 --- a/sound/core/pcm_native.c
 +++ b/sound/core/pcm_native.c
 @@ -3087,7 +3087,11 @@ static int snd_pcm_mmap_data_fault(struct vm_area_struct *area,

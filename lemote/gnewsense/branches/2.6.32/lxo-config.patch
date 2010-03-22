@@ -1,12 +1,12 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-02-23 20:04:19.000000000 +0000
-@@ -0,0 +1,2249 @@
++++ .config	2010-03-22 04:42:20.000000000 +0000
+@@ -0,0 +1,2241 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.32.9-libre-lemote
-+# Tue Feb 23 20:04:19 2010
++# Linux kernel version: 2.6.32.10-libre1-lemote
++# Mon Mar 22 04:42:20 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -273,7 +273,6 @@ Index: .config
 +CONFIG_SLUB=y
 +# CONFIG_SLOB is not set
 +CONFIG_PROFILING=y
-+CONFIG_TRACEPOINTS=y
 +CONFIG_OPROFILE=m
 +CONFIG_HAVE_OPROFILE=y
 +CONFIG_HAVE_SYSCALL_WRAPPERS=y
@@ -575,7 +574,6 @@ Index: .config
 +# Network testing
 +#
 +# CONFIG_NET_PKTGEN is not set
-+# CONFIG_NET_DROP_MONITOR is not set
 +# CONFIG_HAMRADIO is not set
 +# CONFIG_CAN is not set
 +# CONFIG_IRDA is not set
@@ -1827,7 +1825,6 @@ Index: .config
 +# CONFIG_RTL8187SE is not set
 +# CONFIG_RTL8192SU is not set
 +# CONFIG_RTL8192E is not set
-+# CONFIG_INPUT_MIMIO is not set
 +# CONFIG_TRANZPORT is not set
 +
 +#
@@ -2088,21 +2085,16 @@ Index: .config
 +# CONFIG_DEBUG_KERNEL is not set
 +# CONFIG_SLUB_DEBUG_ON is not set
 +# CONFIG_SLUB_STATS is not set
-+CONFIG_STACKTRACE=y
 +# CONFIG_DEBUG_MEMORY_INIT is not set
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 +CONFIG_SYSCTL_SYSCALL_CHECK=y
-+CONFIG_NOP_TRACER=y
 +CONFIG_HAVE_FUNCTION_TRACER=y
 +CONFIG_HAVE_FUNCTION_GRAPH_TRACER=y
 +CONFIG_HAVE_FUNCTION_TRACE_MCOUNT_TEST=y
 +CONFIG_HAVE_DYNAMIC_FTRACE=y
 +CONFIG_HAVE_FTRACE_MCOUNT_RECORD=y
 +CONFIG_RING_BUFFER=y
-+CONFIG_EVENT_TRACING=y
-+CONFIG_CONTEXT_SWITCH_TRACER=y
 +CONFIG_RING_BUFFER_ALLOW_SWAP=y
-+CONFIG_TRACING=y
 +CONFIG_TRACING_SUPPORT=y
 +# CONFIG_FTRACE is not set
 +# CONFIG_DYNAMIC_DEBUG is not set
@@ -2226,7 +2218,7 @@ Index: .config
 +CONFIG_CRYPTO_ANSI_CPRNG=m
 +CONFIG_CRYPTO_HW=y
 +# CONFIG_CRYPTO_DEV_HIFN_795X is not set
-+CONFIG_BINARY_PRINTF=y
++# CONFIG_BINARY_PRINTF is not set
 +
 +#
 +# Library routines
@@ -2254,14 +2246,14 @@ Index: .config
 +CONFIG_NLATTR=y
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-02-23 19:59:32.000000000 +0000
-+++ Makefile	2010-02-23 20:01:41.000000000 +0000
+--- Makefile.orig	2010-03-22 04:32:15.000000000 +0000
++++ Makefile	2010-03-22 04:39:51.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 32
--EXTRAVERSION = .9-libre
-+EXTRAVERSION = .9-libre-lemote
+-EXTRAVERSION = .10-libre1
++EXTRAVERSION = .10-libre1-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
