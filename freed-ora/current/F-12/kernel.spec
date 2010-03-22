@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2043 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2048 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -796,6 +796,9 @@ Patch12360: iwlwifi-silence-tfds-in-queue-message.patch
 # rhbz#572653
 Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
+# rhbz#533746
+Patch12380: ssb_check_for_sprom.patch
+
 # fix regression caused by dropping these (#571638)
 Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 Patch14456: tg3-06-fix-5906-transmit-hangs.patch
@@ -1480,6 +1483,9 @@ ApplyPatch iwlwifi-silence-tfds-in-queue-message.patch
 # rhbz#572653
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
+# rhbz#533746
+ApplyPatch ssb_check_for_sprom.patch
+
 # END OF PATCH APPLICATIONS ====================================================
 
 %endif
@@ -2133,6 +2139,19 @@ fi
 # and build.
 
 %changelog
+* Fri Mar 19 2010 John W. Linville <linville@redhat.com> 2.6.32.10-88
+- Revise "ssb: check for sprom" (#533746)
+
+* Fri Mar 19 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.10-86
+- Improve mouse button and pad handling on 0xffdc imon devices
+- Add xmit support to topseed 0x0008 lirc_mceusb transceiver
+
+* Fri Mar 19 2010 John W. Linville <linville@redhat.com> 2.6.32.10-85
+- ssb: check for sprom (#533746)
+
+* Thu Mar 18 2010 Neil Horman <nhorman@redhat.com>
+- Remove TIPC from config (bz 574800)
+
 * Wed Mar 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Rebase on 2.6.32-libre1.
 - Adjust patch-libre-2.6.32.10 for deblobbing.
