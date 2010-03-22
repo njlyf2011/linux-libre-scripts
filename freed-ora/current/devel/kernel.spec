@@ -27,14 +27,14 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1883
+%define fedora_cvs_origin   1935
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1929 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1948 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 32
+%define base_sublevel 33
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -73,7 +73,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 1
 # The git snapshot level
 %define gitrev 1
 # Set rpm version accordingly
@@ -479,7 +479,7 @@ Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
-Provides: kernel-drm-nouveau = 15\
+Provides: kernel-drm-nouveau = 16\
 Provides: kernel-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
@@ -487,6 +487,10 @@ Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
+%else\
+%if %{with_perftool}\
+Requires(pre): libdwarf\
+%endif\
 %endif\
 Requires(post): /sbin/new-kernel-pkg\
 Requires(preun): /sbin/new-kernel-pkg\
@@ -696,6 +700,8 @@ Patch701: linux-2.6.31-modules-ro-nx.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
+Patch900: linux-2.6-cantiga-iommu-gfx.patch
+
 Patch1515: lirc-2.6.33.patch
 Patch1517: hdpvr-ir-enable.patch
 Patch1520: crystalhd-2.6.34-staging.patch
@@ -711,6 +717,7 @@ Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 # nouveau + drm fixes
 Patch1815: drm_nouveau_ucode.patch
+Patch1816: drm-nouveau-abi16.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -726,7 +733,7 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
+Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # fs fixes
 
@@ -747,6 +754,7 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 Patch12018: neuter_intel_microcode_load.patch
 
 Patch12019: linux-2.6-umh-refactor.patch
+Patch12020: coredump-uid-pipe-check.patch
 
 %endif
 
@@ -1190,18 +1198,18 @@ ApplyPatch freedo.patch
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 #ApplyPatch git-cpufreq.patch
-ApplyPatch git-bluetooth.patch
+#ApplyPatch git-bluetooth.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
-ApplyPatch linux-2.6-utrace-ptrace.patch
+#ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
+#ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 
 #
 # Intel IOMMU
@@ -1224,7 +1232,7 @@ ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
 #
 # Exec shield
 #
-ApplyPatch linux-2.6-execshield.patch
+#ApplyPatch linux-2.6-execshield.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1242,9 +1250,9 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
-ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
-ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
-ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
+#ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
+#ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
+#ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 #ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
 
 # WMI
@@ -1255,7 +1263,7 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
-ApplyPatch linux-2.6-debug-nmi-timeout.patch
+#ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
@@ -1264,7 +1272,7 @@ ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 # PCI
 #
 # disable message signaled interrupts
-ApplyPatch linux-2.6-defaults-pci_no_msi.patch
+#ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 # update the pciehp driver
 #ApplyPatch linux-2.6-pciehp-update.patch
 # default to enabling passively listening for hotplug events
@@ -1277,13 +1285,13 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 #
 
 # ALSA
-ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
+#ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
-ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+#ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
@@ -1326,14 +1334,17 @@ ApplyPatch linux-2.6-ata-quirk.patch
 #ApplyPatch linux-2.6.31-modules-ro-nx.patch
 
 # /dev/crash driver.
-ApplyPatch linux-2.6-crash-driver.patch
+#ApplyPatch linux-2.6-crash-driver.patch
+
+# Cantiga chipset b0rkage
+ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
 
 # http://www.lirc.org/
 ApplyPatch lirc-2.6.33.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
 # Broadcom Crystal HD video decoder
-ApplyPatch crystalhd-2.6.34-staging.patch
+#ApplyPatch crystalhd-2.6.34-staging.patch
 
 # Add kernel KSM support
 # Optimize KVM for KSM support
@@ -1341,18 +1352,19 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 
 # Assorted Virt Fixes
 #ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
-ApplyPatch vhost_net-rollup.patch
-ApplyPatch virt_console-rollup.patch
+#ApplyPatch vhost_net-rollup.patch
+#ApplyPatch virt_console-rollup.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 
 # fix x86-64 fbdev primary GPU selection
-ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
+#ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 # Nouveau DRM + drm fixes
 # squash nouveau firmware into a single commit until it gets into linux-firmware
 ApplyPatch drm_nouveau_ucode.patch
+#ApplyPatch drm-nouveau-abi16.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1365,20 +1377,23 @@ ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # V4L/DVB updates/fixes/experimental drivers
-#ApplyPatch linux-2.6-v4l-dvb-fixes.patch
-#ApplyPatch linux-2.6-v4l-dvb-update.patch
-#ApplyPatch linux-2.6-v4l-dvb-experimental.patch
-#ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
+#  apply if non-empty
+ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
+
+#ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
 
-ApplyPatch add-appleir-usb-driver.patch
+#ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
 # Refactor UserModeHelper code & satisfy abrt recursion check request
-ApplyPatch linux-2.6-umh-refactor.patch
+#ApplyPatch linux-2.6-umh-refactor.patch
+#ApplyPatch coredump-uid-pipe-check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1996,7 +2011,6 @@ fi
 %endif\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
-%dir /usr/src/kernels\
 %verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
 %if %{with_debuginfo}\
@@ -2030,7 +2044,114 @@ fi
 # plz don't put in a version string unless you're going to tag
 # and build.
 
+#  ___________________________________________________________ 
+# / This branch is for Fedora 14. You probably want to commit \
+# \ to the F-13 branch instead, or in addition to this one.   /
+#  ----------------------------------------------------------- 
+#         \   ^__^
+#          \  (@@)\_______
+#             (__)\       )\/\
+#                 ||----w |
+#                 ||     ||
+
 %changelog
+* Sun Mar 21 2010 Alexandre Oliva <lxoliva@fsfla.org>
+- Deblobbed patch-libre-2.6.34-rc1.
+
+* Fri Mar 19 2010 David Woodhouse <David.Woodhouse@intel.com>
+- Apply fix for #538163 again (Cantiga shadow GTT chipset b0rkage).
+
+* Thu Mar 18 2010 Neil Horman <nhorman@redhat.com>
+- Disable TIPC in config
+
+* Thu Mar 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.34.0.11-rc1.git1
+- 2.6.34-rc1-git1
+
+* Mon Mar 08 2010 Kyle McMartin <kyle@redhat.com> 2.6.34.0.10-rc1.git0
+- 2.6.34-rc1
+- Flipped a bunch of stuff that went tristate => bool off, a bunch of
+  MFD devices mostly. If any of it is actually useful, give us a holler.
+
+* Sun Mar 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.8.rc0.git13
+- 2.6.33-git13
+
+* Sat Mar 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.8.rc0.git11
+- Disable usb_autosuspend for now. (Needs rebasing.)
+
+* Sat Mar 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.7.rc0.git11
+- 2.6.33-git11
+- config changes:
+ - debug flavours:
+  - PROVE_RCU
+  - PM_ADVANCED_DEBUG
+  - DMADEVICES_DEBUG (and VDEBUG)
+ - arm:
+  - PERF_EVENTS enabled
+ - sparc:
+  - GRETH module
+ - generic:
+  - IP_VS_PROTO_SCTP=y
+  - BRIDGE_IGMP_SNOOPING=y
+  - NETFILTER_XT_TARGET_CT=m
+  - NF_CONNTRACK_ZONES=y
+  - MACVTAP=m
+  - KSZ884X_PCI=m
+  - IXGBEVF=m
+  - QLCNIC=m
+  - LIBERTAS_MESH=y
+  - RT2800USB, RT2800PCI added devices enabled
+  - CAN_PLX_PCI=m (?)
+  - VGA_ARB_MAX_GPUS=16
+  - various DVB/VIDEO enables
+  - OPTPROBES=y
+  - REGULATOR framework disabled.
+ - x86:
+  - VGA_SWITCHEROO enabled.
+
+* Sat Mar 06 2010 Kyle McMartin <kyle@redhat.com>
+- Add requires on libdwarf if with_perftool.
+
+* Mon Mar 01 2010 Dave Jones <davej@redhat.com>
+- Don't own /usr/src/kernels any more, it's now owned by filesystem. (#569438)
+
+* Fri Feb 26 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.4.rc0.git2
+- Start of the 2.6.34 series in rawhide.
+- Trim changelog.
+
+* Wed Feb 24 2010 Chuck Ebbert <cebbert@redhat.com>
+- Remove obsolete config options with scripts/sort-config -nfi
+  (generated .configs are unchanged)
+
+* Wed Feb 24 2010 Chuck Ebbert <cebbert@redhat.com>
+- Drop/clear obsolete V4L patches, use ApplyOptionalPatch
+
+* Wed Feb 24 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Make that 2.6.33-libre.
+
+* Wed Feb 24 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.33
+
+* Wed Feb 24 2010 Dave Jones <davej@redhat.com>
+- Remove unnecessary redefinition of KEY_RFKILL from linux-2.6-rfkill-all.patch
+
+* Mon Feb 22 2010 Dave Jones <davej@redhat.com> 2.6.33-0.51.rc8.git6
+- 2.6.33-rc8-git6
+
+* Mon Feb 22 2010 Neil Horman <nhorman@redhat.com>
+- Fix a problem with coredump path checking uids on files when coredump
+  target is a pipe.
+
+* Sun Feb 21 2010 Hans de Goede <hdegoede@redhat.com>
+- Rebase gspca usb webcam driver + sub drivers to latest upstream, this
+  adds support for the following webcam bridge chipsets: benq, cpia1, sn9c2028;
+  and support for new devices and many bugfixes in other gspca-subdrivers
+
+* Fri Feb 19 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33-0.48.rc8.git1
+- nouveau: update to new interface version
+
+* Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>
+- This branch is now for the F-14 release.
+
 * Tue Feb 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.33-0.46.rc8.git1
 - 2.6.33-rc8-git1
 - virt_console-rollup.patch: fixes from linux-next from Amit.
@@ -2288,1532 +2409,6 @@ fi
 
 * Thu Dec 03 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-1
 - Linux 2.6.32
-
-* Wed Dec 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.65.rc8.git5
-- 2.6.32-rc8-git5
-- nuke 9p cachefiles fix, upstream.
-- SLOW_WORK_PROC was renamed to SLOW_WORK_DEBUG, debugfs instead of procfs.
-
-* Wed Dec 02 2009 John W. Linville <linville@redhat.com> 2.6.32-0.64.rc8.git2
-- ath9k: add fixes suggested by upstream maintainer
-
-* Wed Dec 02 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.32-0.63.rc8.git2
-- forward port IOMMU fixes from F-12 for HP BIOS brokenness
-- Fix oops with intel_iommu=igfx_off
-- agp/intel: Clear full GTT at startup
-
-* Wed Dec 02 2009 Dave Airlie <airlied@redhat.com> 2.6.32-0.62.rc8.git2
-- forward port radeon fixes from F-12 + add radeon display port support
-
-* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.61.rc8.git2
-- fix-9p-fscache.patch: fix build.
-
-* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.60.rc8.git2
-- 2.6.32-rc8-git2 daily snapshot
-- nuke include/generated nuke-age since the patch was reverted upstream
-- config changes:
- - generic:
-  +CONFIG_FSCACHE_OBJECT_LIST=y
-  +CONFIG_SLOW_WORK_PROC=y
-
-* Mon Nov 30 2009 Kyle McMartin <kyle@redhat.com>
-- drm-i915-fix-sync-to-vbl-when-vga-is-off.patch: add, (rhbz#541670)
-
-* Sun Nov 29 2009 Kyle McMartin <kyle@redhat.com>
-- linux-2.6-sysrq-c.patch: drop, was made consistent upstream.
-
-* Sat Nov 28 2009 Jarod Wilson <jarod@redhat.com> 2.6.32-0.55.rc8.git1
-- add device name to lirc_zilog, fixes issues w/multiple target devices
-- add lirc_imon pure input mode support for onboard decode devices
-
-* Fri Nov 27 2009 Dave Airlie <airlied@redhat.com> 2.6.32-0.54.rc8.git1
-- attempt to put nouveau back - same patch as F-12 should work
-
-* Mon Nov 23 2009 Roland McGrath <roland@redhat.com>
-- Install vmlinux.id file in kernel-devel rpm.
-
-* Fri Nov 20 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.52.rc8.git1
-- 2.6.32-rc8-git1
-- Enable CONFIG_MEMORY_HOTPLUG (and HOTREMOVE) on x86_64
-
-* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.51.rc7.git2
-- Oops, re-enable debug builds for rawhide... didn't mean to commit that.
-
-* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.50.rc7.git2
-- Disable FUNCTION_TRACER and DYNAMIC_FTRACE in non-debug builds for
-  Fedora 13. Some pondering required to see if it's actually worth doing
-  though. Anecdotal evidence worth half as much as benchmarks.
-  STACK_TRACER selects FUNCTION_TRACER, so it has to go off too, sadly,
-  since it hooks every mcount to log the stack depth for the task.
-
-* Thu Nov 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.49.rc7.git2
-- 2.6.32-rc7-git2
-
-* Mon Nov 16 2009 Dave Airlie <airlied@redhat.com> 2.6.32-0.48.rc7.git1
-- backout gpg change now that koji is fixed
-
-* Sun Nov 15 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.47.rc7.git1
-- Buildrequire gpg
-
-* Sun Nov 15 2009 Chuck Ebbert <cebbert@redhat.com>
-- Fix oops in VIA Padlock driver.
-
-* Sun Nov 15 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.32-rc7-git1
-
-* Fri Nov 13 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.32-rc7
-
-* Thu Nov 05 2009 Jarod Wilson <jarod@redhat.com>
-- Add --with dbgonly rpmbuild option to build only debug kernels
-
-* Wed Nov 04 2009 Kyle McMartin <kyle@redhat.com>
-- Make JBD2_DEBUG a toggleable config option.
-
-* Wed Nov 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.39.rc6.git0
-- 2.6.32-rc6, fix for NULL ptr deref in cfg80211.
-
-* Mon Nov 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.39.rc5.git6
-- 2.6.32-rc5-git6 (with sandeen's reversion of "ext4: Remove journal_checksum
-  mount option and enable it by default")
-
-* Mon Nov 02 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.32-rc5-git5
-
-* Tue Oct 27 2009 John W. Linville <linville@redhat.com>
-- Disable build of prism54 module
-
-* Tue Oct 27 2009 Dave Airlie <airlied@redhat.com>
-- Get dd command line args correct.
-
-* Mon Oct 26 2009 Dave Jones <davej@redhat.com>
-- Make a 20MB initramfs file so rpm gets its diskspace calculations right. (#530778)
-
-* Sat Oct 23 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.32-rc5-git3
-- Drop merged patch:
-  linux-2.6-virtio_blk-revert-QUEUE_FLAG_VIRT-addition.patch
-
-* Sat Oct 17 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.33.rc5.git1
-- 2.6.32-rc5-git1
-
-* Fri Oct 16 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.32-rc5
-- New config option: CONFIG_VMXNET3=m
-
-* Wed Oct 14 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.32-rc4-git4
-
-* Wed Oct 14 2009 Steve Dickson <steved@redhat.com>
-- Updated the NFS v4 pseudo root patch so it will apply
-- Fixed hang during NFS installs (bz 528537)
-
-* Wed Oct 14 2009 Peter Jones <pjones@redhat.com>
-- Add scsi_register_device_handler to modules.block's symbol list so
-  we'll have scsi device handlers in installer images.
-
-* Tue Oct 13 2009 Kyle McMartin <kyle@redhat.com>
-- Always build perf docs, regardless of whether we build kernel-doc.
-  Seems rather unfair to not ship the manpages half the time.
-  Also, drop BuildRequires %if when not with_doc, the rules about %if
-  there are f*!&^ing complicated.
-
-* Tue Oct 13 2009 Kyle McMartin <kyle@redhat.com>
-- Build perf manpages properly.
-
-* Tue Oct 13 2009 Dave Airlie <airlied@redhat.com>
-- cleanup some of drm vga arb bits that are upstream
-
-* Mon Oct 12 2009 Jarod Wilson <jarod@redhat.com>
-- Merge lirc compile fixes into lirc patch
-- Refresh lirc patch with additional irq handling fixage
-- Fix IR transmit on port 1 of 1st-gen mceusb transceiver
-- Support another mouse button variant on imon devices
-
-* Mon Oct 12 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.32-0.24.rc4.git0
-- Last-minute USB fix from upstream.
-
-* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
-- Fix lirc build after header changes.
-- Fix bug in lirc interrupt processing.
-
-* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
-- Fix up multiple definition of debug options
-  (EXT4_DEBUG, DEBUG_FORCE_WEAK_PER_CPU)
-
-* Sun Oct 11 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.32-rc4
-- New config options:
-  CONFIG_BE2ISCSI=m
-  CONFIG_SCSI_BFA_FC=m
-  CONFIG_USB_MUSB_HDRC is not set
-
-* Sun Oct 11 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.32-rc3-git3
-
-* Thu Oct 08 2009 Ben Skeggs <bskeggs@redhat.com>
-- ppc: compile nvidiafb as a module only, nvidiafb+nouveau = bang! (rh#491308)
-
-* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
-- Enable FUNCTION_GRAPH_TRACER on x86-64.
-
-* Wed Oct 07 2009 Dave Jones <davej@redhat.com>
-- Disable CONFIG_IRQSOFF_TRACER on srostedt's recommendation.
-  (Adds unwanted overhead when not in use).
-
-* Sun Oct 04 2009 Kyle McMartin <kyle@redhat.com> 2.6.32-0.17.rc3.git0
-- 2.6.32-rc3 (bah, rebase script didn't catch it.)
-
-* Sun Oct 04 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.32-rc1-git7
-- [x86,x86_64] ACPI_PROCESSOR_AGGREGATOR=m
-
-* Mon Sep 28 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.32-rc1
-- rebased crash-driver patchset, ia64_ksyms.c conflicts. move x86 crash.h
-  file to the right place.
-- full changelog forthcoming & to fedora-kernel-list.
-
-* Mon Sep 28 2009 Kyle McMartin <kyle@redhat.com>
-- sick of rejects.
-
-* Mon Sep 28 2009 Chuck Ebbert <cebbert@redhat.com>
-- Fix up some items missing in make debug vs. make release,
-  rearrange so the options are in the same order.
-- Add new debug options:
-  CONFIG_EXT4_DEBUG
-  CONFIG_DEBUG_FORCE_WEAK_PER_CPU
-
-* Sun Sep 27 2009 Kyle McMartin <kyle@redhat.com>
-- Must now make mrproper after each config pass, due to Kbuild
-  stashing away the $ARCH variable.
-
-* Sun Sep 27 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.31-git18
-- rebased:
- - hdpvr-ir-enable.patch
- - linux-2.6-build-nonintconfig.patch
- - linux-2.6-debug-sizeof-structs.patch
- - linux-2.6-debug-vm-would-have-oomkilled.patch
- - linux-2.6-execshield.patch
- - linux-2.6-makefile-after_link.patch
- - linux-2.6-serial-460800.patch
- - linux-2.6-utrace.patch
- - via-hwmon-temp-sensor.patch
-- merged:
- - linux-2.6-tracehook.patch
- - linux-2.6-die-closed-source-bios-muppets-die.patch
- - linux-2.6-intel-iommu-updates.patch
- - linux-2.6-ksm.patch
- - linux-2.6-ksm-updates.patch
- - linux-2.6-ksm-fix-munlock.patch
- - linux-2.6-vga-arb.patch
- - v4l-dvb-fix-cx25840-firmware-loading.patch
- - linux-2.6-rtc-show-hctosys.patch
-
-* Fri Sep 18 2009 Dave Jones <davej@redhat.com>
-- %ghost the dracut initramfs file.
-
-* Thu Sep 17 2009 Hans de Goede <hdegoede@redhat.com>
-- Now that we have %%post generation of dracut images we do not need to
-  Require dracut-kernel anymore
-
-* Thu Sep 17 2009 Chuck Ebbert <cebbert@redhat.com>
-- Disable drm-nouveau too -- it won't build without other
-  drm updates.
-
-* Wed Sep 16 2009 Roland McGrath <roland@redhat.com>
-- Remove workaround for gcc bug #521991, now fixed.
-
-* Tue Sep 15 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.31-git4
-- rebased:
- - linux-2.6-execshield.patch: split paravirt_types.h
- - linux-2.6-buildnonintconfig.patch
-- disabled:
- - ksm, drm.
-- merged:
- - linux-2.6-kvm-pvmmu-do-not-batch-pte-updates-from-interrupt-context.patch
- - linux-2.6-kvm-vmx-check-cpl-before-emulating-debug-register-access.patch
- - linux-2.6-use-__pa_symbol-to-calculate-address-of-C-symbol.patch
- - linux-2.6-xen-stack-protector-fix.patch
- - linux-2.6-bluetooth-autosuspend.diff
- - hid-ignore-all-recent-imon-devices.patch
-- config changes:
- - arm:
-  - CONFIG_HIGHPTE off, seems safer this way.
- - generic:
-  - RDS_RDMA/RDS_TCP=m
-  - SCSI_PMCRAID=m
-  - WLAN=y, CFG80211_DEFAULT_PS=y, NL80211_TESTMODE off.
-  - WL12XX=m
-  - B43_PHY_LP=y
-  - BT_MRVL=m
-  - new MISDN stuff modular.
- - sparc:
-  - enable PERF_COUNTERS & EVENT_PROFILE
- - ppc:
-  - XILINX_EMACSLITE=m
-
-* Mon Sep 14 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-git2
-- Drop merged patches:
-  sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch
-  linux-2.6-nfs4-ver4opt.patch
-  linux-2.6-alsa-improve-hda-powerdown.patch
-  alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch
-  linux-2.6-ahci-export-capabilities.patch
-- New s390 config option:
-   CONFIG_SCLP_ASYNC=m
-- New generic config options:
-   CONFIG_ATA_VERBOSE_ERROR=y
-   CONFIG_PATA_RDC=m
-   CONFIG_SOUND_OSS_CORE_PRECLAIM=y
-   CONFIG_SND_HDA_PATCH_LOADER=y
-   CONFIG_SND_HDA_CODEC_CIRRUS=y
-   CONFIG_OPROFILE_EVENT_MULTIPLEX=y
-   CONFIG_CRYPTO_VMAC=m
-   CONFIG_CRYPTO_GHASH=m
-- New debug option:
-   CONFIG_DEBUG_CREDENTIALS=y in debug kernels
-
-* Mon Sep 14 2009 Steve Dickson <steved@redhat.com>
-- Added support for -o v4 mount parsing
-
-* Fri Sep 11 2009 Dave Jones <davej@redhat.com>
-- Apply NX/RO to modules
-
-* Fri Sep 11 2009 Dave Jones <davej@redhat.com>
-- Mark kernel data section as NX
-
-* Fri Sep 11 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: bring in Matthew Garret's initial switchable graphics support
-
-* Fri Sep 11 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: fixed use of strap-based panel mode when required (rh#522649)
-- nouveau: temporarily block accel on NVAC chipsets (rh#522361, rh#522575)
-
-* Thu Sep 10 2009 Matthew Garrett <mjg@redhat.com>
-- linux-2.6-ahci-export-capabilities.patch: Backport from upstream
-- linux-2.6-rtc-show-hctosys.patch: Export the hctosys state of an rtc
-- linux-2.6-rfkill-all.patch: Support for keys that toggle all rfkill state
-
-* Thu Sep 10 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: add some scaler-only modes for LVDS, GEM/TTM fixes
-
-* Wed Sep 09 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Sep 21
-- Deblobbed 2.6.31.
-- Updated deblobbing of linux-2.6-v4l-dvb-fixes.patch, drm-next.patch and 
-drm-nouveau.patch.
-- Deblobed v4l-dvb-fix-cx25840-firmware-loading.patch and lirc-2.6.31.patch.
-
-* Wed Sep 09 2009 Dennis Gilmore <dennis@ausil.us> 2.6.31-2
-- touch the dracut initrd file when using %%{with_dracut}
-
-* Wed Sep 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-1
-- Linux 2.6.31
-
-* Wed Sep 09 2009 Chuck Ebbert <cebbert@redhat.com>
-- Enable VXpocket and PDaudioCF PCMCIA sound drivers.
-
-* Wed Sep 09 2009 Hans de Goede <hdegoede@redhat.com>
-- Move to %%post generation of dracut initrd, because of GPL issues surrounding
-  shipping a prebuild initrd
-- Require grubby >= 7.0.4-1, for %%post generation
-
-* Wed Sep  9 2009 Steve Dickson <steved@redhat.com>
-- Updated the NFS4 pseudo root code to the latest release.
-
-* Wed Sep 09 2009 Justin M. Forbes <jforbes@redhat.com>
-- Revert virtio_blk to rotational mode. (#509383)
-
-* Wed Sep 09 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.219.rc9.git
-- uggh lost nouveau bits in page flip
-
-* Wed Sep 09 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.218.rc9.git2
-- fix r600 oops with page flip patch (#520766)
-
-* Wed Sep 09 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: fix display resume on pre-G8x chips
-
-* Wed Sep 09 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: add getparam to know using tile_flags is ok for scanout
-
-* Wed Sep 09 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc9-git2
-
-* Wed Sep  9 2009 Roland McGrath <roland@redhat.com> 2.6.31-0.214.rc9.git1
-- compile with -fno-var-tracking-assignments, work around gcc bug #521991
-
-* Wed Sep 09 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.213.rc9.git1
-- fix two bugs in r600 kms, fencing + mobile lvds
-
-* Tue Sep 08 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31-0.212.rc9.git1
-- drm-nouveau.patch: fix ppc build
-
-* Tue Sep 08 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31-0.211.rc9.git1
-- drm-nouveau.patch: more misc fixes
-
-* Tue Sep 08 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.210.rc9.git1
-- drm-page-flip.patch: rebase again
-
-* Tue Sep 08 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.209.rc9.git1
-- drm-next.patch: fix r600 signal interruption return value
-
-* Tue Sep 08 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31-0.208.rc9.git1
-- drm-nouveau.patch: latest upstream + rebase onto drm-next
-
-* Tue Sep 08 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.207.rc9.git1
-- drm-vga-arb.patch: update to avoid lockdep + add r600 support
-
-* Tue Sep 08 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.206.rc9.git1
-- drm: rebase to drm-next - r600 accel + kms should start working now
-
-* Mon Sep 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.205.rc9.git1
-- 2.6.31-rc9-git1
-- Temporarily hack the drm-next patch so it still applies; the result
-  should still be safe to build.
-
-* Sat Sep 05 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.204.rc9
-- 2.6.31-rc9
-
-* Fri Sep 04 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.203.rc8.git2
-- Fix kernel build errors when building firmware by removing the
-  .config file before that step and restoring it afterward.
-
-* Thu Sep 03 2009 Adam Jackson <ajax@redhat.com>
-- drm-ddc-caching-bug.patch: Empty the connector's mode list when it's
-  disconnected.
-
-* Thu Sep 03 2009 Jarod Wilson <jarod@redhat.com>
-- Update hdpvr and lirc_zilog drivers for 2.6.31 i2c
-
-* Thu Sep 03 2009 Justin M.Forbes <jforbes@redhat.com>
-- Fix xen guest with stack protector. (#508120)
-- Small kvm fixes.
-
-* Wed Sep 02 2009 Adam Jackson <ajax@redhat.com> 2.6.31-0.199.rc8.git2
-- drm-intel-pm.patch: Disable by default, too flickery on too many machines.
-  Enable with i915.powersave=1.
-
-* Wed Sep 02 2009 Dave Jones <davej@redhat.com>
-- Add missing scriptlet dependancy. (#520788)
-
-* Tue Sep 01 2009 Adam Jackson <ajax@redhat.com>
-- Make DRM less chatty about EDID failures.  No one cares.
-
-* Tue Sep 01 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc8-git2
-- Blank out drm-intel-next: entire contents are now upstream.
-
-* Tue Sep 01 2009 Dave Jones <davej@redhat.com>
-- Make firmware buildarch noarch. (Suggested by drago01 on irc)
-
-* Tue Sep 01 2009 Jarod Wilson <jarod@redhat.com>
-- Fix up lirc_zilog to enable functional IR transmit and receive
-  on the Hauppauge HD PVR
-- Fix audio on PVR-500 when used in same system as HVR-1800 (#480728)
-
-* Sun Aug 30 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc8-git1
-- Drop linux-2.6-inotify-accounting.patch, merged upstream.
-
-* Sun Aug 30 2009 Jarod Wilson <jarod@redhat.com>
-- fix lirc_imon oops on older devices w/o tx ctrl ep (#520008)
-
-* Fri Aug 28 2009 Eric Paris <eparis@redhat.com> 2.6.31-0.190.rc8
-- fix inotify length accounting and send inotify events
-
-* Fri Aug 28 2009 David Woodhouse <David.Woodhouse@intel.com>
-- Enable Solos DSL driver
-
-* Fri Aug 28 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc8
-
-* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.185.rc7.git6
-- 2.6.31-rc7-git6
-- Drop patch merged upstream:
-  xen-fb-probe-fix.patch
-
-* Thu Aug 27 2009 Adam Jackson <ajax@redhat.com>
-- drm-rv710-ucode-fix.patch: Treat successful microcode load on RV710 as,
-  you know, success. (#519718)
-
-* Thu Aug 27 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc7-git5
-- Drop patch linux-2.6-ima-leak.patch, now merged upstream.
-
-* Wed Aug 26 2009 Jarod Wilson <jarod@redhat.com>
-- Fix up hdpvr ir enable patch for use w/modular i2c (David Engel)
-
-* Wed Aug 26 2009 Eric Paris <eparis@redhat.com>
-- fix iint_cache leak in IMA code
-  drop the ima=0 patch
-
-* Wed Aug 26 2009 Justin M. Forbes <jforbes@redhat.com>
-- Fix munlock with KSM (#516909)
-- Re-enable KSM
-
-* Wed Aug 26 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc7-git4
-- Drop patches merged upstream:
-  xen-x86-fix-stackprotect.patch
-  xen-x86-no-stackprotect.patch
-
-* Wed Aug 26 2009 Adam Jackson <ajax@redhat.com>
-- drm-intel-next.patch: Update, various output setup fixes.
-
-* Wed Aug 26 2009 David Woodhouse <David.Woodhouse@intel.com>
-- Make WiMAX modular (#512070)
-
-* Tue Aug 25 2009 Kyle McMartin <kyle@redhat.com>
-- allow-disabling-ima.diff: debugging patch... adds ima=0 kernel
-  param to disable initialization of IMA.
-
-* Tue Aug 25 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31-0.174.rc7.git2
-- drm-nouveau.patch: upstream update, pre-nv50 tv-out + misc fixes
-
-* Tue Aug 25 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.173.rc7.git2
-- Fix Xen boot (#508120)
-
-* Tue Aug 25 2009 Dave Airlie <airlied@redhat.com>
-- pull in drm-next tree + rebase around it
-
-* Mon Aug 24 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc7-git2
-
-* Mon Aug 24 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc7-git1
-
-* Sat Aug 22 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc7
-
-* Thu Aug 20 2009 Mark McLoughlin <markmc@redhat.com>
-- Disable LZMA for xen (#515831)
-
-* Thu Aug 20 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc6-git5
-- Fix up drm-r600-kms.patch
-- Drop fix-perf-make-man-failure.patch
-
-* Wed Aug 19 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc6-git5
-- Revert linux-2.6-debug-vm-would-have-oomkilled.patch to v1.2
-  because upstream changes to oom-kill.c were all reverted.
-
-* Tue Aug 18 2009 Kyle McMartin <kyle@redhat.com>
-- Fix up perf so that it builds docs now that they are fixed.
-- with_docs disables perf docs too. be warned. (logic is that the
-  build deps are (mostly) the same, so if you don't want one, odds are...)
-
-* Tue Aug 18 2009 Dave Jones <davej@redhat.com>
-- 2.6.31-rc6-git3
-
-* Mon Aug 17 2009 Dave Jones <davej@redhat.com> 2.6.31-0.161.rc6.git2
-- 2.6.31-rc6-git2
-
-* Mon Aug 17 2009 Chuck Ebbert <cebbert@redhat.com>
-- Stop generating the (unused) ppc64-kdump.config file.
-
-* Mon Aug 17 2009 Jarod Wilson <jarod@redhat.com>
-- Add new lirc driver for built-in ENE0100 device on some laptops
-
-* Sun Aug 16 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.158.rc6
-- Improve the perf script so it prints something helpful if the
-  perf binary doesn't exist.
-
-* Sat Aug 15 2009 Dave Jones <davej@redhat.com> 2.6.31-0.157.rc6
-- Disable KSM patches on a hunch.  Chasing the "encrypted VGs don't work" bug.
-
-* Fri Aug 14 2009 Dave Jones <davej@redhat.com> 2.6.31-0.155.rc6
-- 2.6.31-rc6
-
-* Wed Aug 12 2009 Kyle McMartin <kyle@redhat.com>
-- fix perf.
-- move perf to perf.$ver instead of perf-$ver...
-
-* Wed Aug 12 2009 Dennis Gilmore <dennis@ausil.us>
-- Obsolete kernel-smp on sparc64
-- Require grubby >= 7.0.2-1 since thats what introduces the dracut options we use
-
-* Wed Aug 12 2009 Kristian Høgsberg <krh@redhat.com>
-- Fix drm-page-flip.patch to not break radeon kms and to not reset
-  crtc offset into fb on flip.
-
-* Wed Aug 12 2009 Adam Jackson <ajax@redhat.com>
-- Update drm-intel-next patch
-
-* Tue Aug 11 2009 Dennis Gilmore <dennis@ausil.us> - 2.6.31-0.149.rc5.git3
-- disable building the -smp kernel on sparc64
-- disable building kernel-perf on sparc64 syscalls not supported
-
-* Tue Aug 11 2009 Eric Paris <eparis@redhat.com>
-- Enable config IMA
-
-* Tue Aug 11 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: various cleanups and fixes + more sanity checking in dma paths
-
-* Mon Aug 10 2009 Jarod Wilson <jarod@redhat.com>
-- Add new device ID to lirc_mceusb (#512483)
-- Fix some lockdep false positives
-- Add support for setting and enabling iMON clock via sysfs
-- Add tunable pad threshold support to lirc_imon
-- Add new pseudo-IR protocl to lirc_imon for universals w/o a pad
-- Fix mouse device support on older iMON devices
-
-* Mon Aug 10 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31-0.145.rc5.git3
-- Merge latest Intel IOMMU fixes and BIOS workarounds, re-enable by default.
-
-* Sun Aug 09 2009 Kyle McMartin <kyle@redhat.com>
-- btusb autosuspend: fix build on !CONFIG_PM by stubbing out
-  suspend/resume methods.
-
-* Sat Aug 08 2009 Dennis Gilmore <dennis@ausil.us> 2.6.31-0.141.rc5.git3
-- disable kgdb on sparc64 uni-processor kernel
-- set max cpus to 256 on sparc64
-- enable AT keyboard on sparc64
-
-* Fri Aug 07 2009 Justin M. Forbes <jforbes@redhat.com>
-- Apply KSM updates from upstream
-
-* Fri Aug 07 2009 Hans de Goede <hdegoede@redhat.com>
-- When building a dracut generic initrd tell new-kernel-pkg to use that
-  instead of running mkinitrd
-
-* Fri Aug 07 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.139.rc5.git3
-- drm-r600-kms.patch - update r600 KMS
-- drm-radeon-fixes.patch - patches for queue to Linus
-
-* Thu Aug 06 2009 Justin M. Forbes <jforbes@redhat.com> 2.6.31-0.138.rc5.git3
-- Fix kvm virtio_blk errors (#514901)
-
-* Thu Aug 06 2009 Adam Jackson <ajax@redhat.com>
-- Hush DRM vblank warnings, they're constant (and harmless) under DRI2.
-
-* Thu Aug 06 2009 Dave Airlie <airlied@redhat.com> 2.6.31.0.134.rc5.git3
-- fixup vga arb warning at startup and handover between gpus
-
-* Thu Aug 06 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.0.133.rc5.git3
-- die-floppy-die.patch: it's the 21st century, let's not rely on
-  steam powered technology.
-
-* Wed Aug 05 2009 Dave Airlie <airlied@redhat.com> 2.6.31.0.132.rc5.git3
-- revert-ftrace-powerpc-snafu.patch - fix ppc build
-
-* Wed Aug 05 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: respect nomodeset
-
-* Wed Aug 05 2009 Chuck Ebbert <cebbert@redhat.com>
-- Fix /usr/sbin/perf script. (#515494)
-
-* Wed Aug 05 2009 Dave Jones <davej@redhat.com>
-- Fix shift in pci cacheline size printk.
-
-* Wed Aug 05 2009 Dave Airlie <airlied@redhat.com> 2.6.31.0.128.rc5.git3
-- 2.6.31-rc5-git3
-- drop cpufreq + set memory fixes
-
-* Wed Aug 05 2009 Dave Airlie <airlied@redhat.com>
-- Add Jeromes initial r600 kms work.
-- rebase arb patch
-
-* Tue Aug 04 2009 Kyle McMartin <kyle@redhat.com>
-- alsa-tell-user-that-stream-to-be-rewound-is-suspended.patch: apply patch
-  destined for 2.6.32, requested by Lennart.
-
-* Tue Aug 04 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: more code share between nv50/<nv50 kms, bug fixes
-
-* Tue Aug 04 2009 Dave Airlie <airlied@redhat.com>
-- update VGA arb patches again
-
-* Mon Aug 03 2009 Adam Jackson <ajax@redhat.com>
-- Update intel drm from anholt's tree
-- Rebase drm-intel-pm.patch to match
-- Drop gen3 fb hack, merged
-- Drop previous watermark setup change
-
-* Mon Aug 03 2009 Dave Jones <davej@redhat.com> 2.6.31-0.122.rc5.git2
-- 2.6.31-rc5-git2
-
-* Mon Aug 03 2009 Adam Jackson <ajax@redhat.com>
-- (Attempt to) fix watermark setup on Intel 9xx parts.
-
-* Mon Aug 03 2009 Jarod Wilson <jarod@redhat.com>
-- make usbhid driver ignore all recent SoundGraph iMON devices, so the
-  lirc_imon driver can grab them instead
-
-* Mon Aug 03 2009 Dave Airlie <airlied@redhat.com>
-- update VGA arb patches
-
-* Sat Aug 01 2009 David Woodhouse <David.Woodhouse@intel.com> 2.6.31-0.118.rc5
-- Fix boot failures on ppc32 (#514010, #505071)
-
-* Fri Jul 31 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.117.rc5
-- Linux 2.6.31-rc5
-
-* Fri Jul 31 2009 Matthew Garrett <mjg@redhat.com>
-- linux-2.6-dell-laptop-rfkill-fix.patch: Fix up Dell rfkill
-
-* Fri Jul 31 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: build against 2.6.31-rc4-git6, fix script parsing on some G8x chips
-
-* Thu Jul 30 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.31-rc4-git6
-  New config item: CONFIG_BATTERY_DS2782 is not set
-- Add last-minute set_memory_wc() fix from LKML.
-
-* Thu Jul 30 2009 Matthew Garrett <mjg@redhat.com>
-- drm-intel-pm.patch: Don't reclock external outputs. Increase the reduced
-   clock slightly to avoid upsetting some hardware. Disable renderclock
-   adjustment for the moment - it's breaking on some hardware.
-
-* Thu Jul 30 2009 Ben Skeggs <bskeggs@redhat.com>
-- nouveau: another DCB 1.5 entry, G80 corruption fixes, small <G80 KMS fix
-
-* Thu Jul 30 2009 Dave Airlie <airlied@redhat.com>
-- fix VGA ARB + kms
-
-* Wed Jul 29 2009 Dave Jones <davej@redhat.com>
-- Add support for dracut. (Harald Hoyer)
-
-* Wed Jul 29 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: nv50/nva0 tiled scanout fixes, nv40 kms fixes
-
-* Wed Jul 29 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.31-rc4-git3
-- Drop linux-2.6-ecryptfs-overflow-fixes.patch, merged upstream now.
-
-* Wed Jul 29 2009 Dave Airlie <airlied@redhat.com>
-- update VGA arb patches
-
-* Tue Jul 28 2009 Adam Jackson <ajax@redhat.com>
-- Remove the pcspkr modalias.  If you're still living in 1994, load it
-  by hand.
-
-* Tue Jul 28 2009 Eric Sandeen <sandeen@redhat.com> 2.6.31-0.102.rc4.git2
-- Fix eCryptfs overflow issues (CVE-2009-2406, CVE-2009-2407)
-
-* Tue Jul 28 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.101.rc4.git2
-- 2.6.31-rc4-git2
-- rebase linux-2.6-fix-usb-serial-autosuspend.diff
-- config changes:
- - USB_GSPCA_SN9C20X=m (_EVDEV=y)
-
-* Tue Jul 28 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: cleanup userspace API, various bugfixes.
-  Looks worse than it is, register macros got cleaned up, which
-  touches pretty much everywhere..
-
-* Mon Jul 27 2009 Adam Jackson <ajax@redhat.com>
-- Warn quieter about not finding PCI bus parents for ROM BARs, they're
-  not usually needed and there's nothing you can do about it anyway.
-
-* Mon Jul 27 2009 Matthew Garrett <mjg@redhat.com>
-- linux-2.6-alsa-improve-hda-powerdown.patch - attempt to reduce audio glitches
-   caused by HDA powerdown
-- disable CONFIG_DEBUG_KOBJECT again for now, since it produces huge dmesg spew
-
-* Mon Jul 27 2009 Dave Airlie <airlied@redhat.com>
-- update vga arb code
-
-* Mon Jul 27 2009 Matthew Garrett <mjg@redhat.com>
-- drm-intel-pm.patch - Add runtime PM for Intel graphics
-
-* Fri Jul 24 2009 Kristian Høgsberg <krh@redhat.com>
-- Add drm-page-flip.patch to support vsynced page flipping on intel
-  chipsets.
-- Really add patch.
-- Fix patch to not break nouveau.
-
-* Fri Jul 24 2009 Chuck Ebbert <cebbert@redhat.com>
-- Enable CONFIG_DEBUG_KOBJECT in debug kernels. (#513606)
-
-* Thu Jul 23 2009 Kyle McMartin <kyle@redhat.com>
-- perf BuildRequires binutils-devel now.
-
-* Thu Jul 23 2009 Justin M. Forbes <jforbes@redhat.com>
-- Add KSM support
-
-* Thu Jul 23 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.87.rc4
-- Linux 2.6.31-rc4
-- config changes:
- - USB_CDC_PHONET=m [all]
- - EVENT_PROFILE=y [i386, x86_64, powerpc, s390]
-
-* Wed Jul 22 2009 Tom "spot" Callaway <tcallawa@redhat.com>
-- We have to override the new %%install behavior because, well... the kernel is special.
-
-* Wed Jul 22 2009 Dave Jones <davej@redhat.com>
-- 2.6.31-rc3-git5
-
-* Wed Jul 22 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31-0.82.rc3.git4
-- Enable KMS for nouveau
-
-* Wed Jul 22 2009 Ben Skeggs <bskeggs@redhat.com>
-- Update nouveau from upstream (initial suspend/resume + misc bugfixes)
-
-* Mon Jul 20 2009 Adam Jackson <ajax@redhat.com>
-- Disable VGA arbiter patches for a moment
-
-* Mon Jul 20 2009 Adam Jackson <ajax@redhat.com>
-- Revive 4k framebuffers for intel gen3
-
-* Mon Jul 20 2009 Dave Jones <davej@redhat.com> 2.6.31-0.78.rc3.git4
-- Enable CONFIG_RTC_HCTOSYS (#489494)
-
-* Mon Jul 20 2009 Dave Jones <davej@redhat.com> 2.6.31-0.77.rc3.git4
-- Don't build 586 kernels any more.
-
-* Sun Jul 19 2009 Dave Jones <davej@redhat.com> 2.6.31-0.75.rc3.git4
-- build a 'full' package on i686 (Bill Nottingham)
-
-* Sun Jul 19 2009 Dave Jones <davej@redhat.com> 2.6.31-0.74.rc3.git4
-- 2.6.31-rc3-git4
-
-* Sat Jul 18 2009 Matthew Garrett <mjg@redhat.com>
-- linux-2.6-driver-level-usb-autosuspend.diff - allow drivers to enable autopm
-- linux-2.6-fix-usb-serial-autosuspend.diff - fix generic usb-serial autopm
-- linux-2.6-qcserial-autosuspend.diff - enable autopm by default on qcserial
-- linux-2.6-bluetooth-autosuspend.diff - enable autopm by default on btusb
-- linux-2.6-usb-uvc-autosuspend.diff - enable autopm by default on uvc
-
-* Thu Jul 16 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc3-git3
-
-* Thu Jul 16 2009 Matthew Garrett <mjg@redhat.com>
-- linux-2.6-defaults-aspm.patch - default ASPM to on for PCIe >= 1.1 hardware
-
-* Thu Jul 16 2009 Dave Airlie <airlied@redhat.com> 2.6.31-0.69.rc3
-- linux-2.6-vga-arb.patch - add VGA arbiter.
-- drm-vga-arb.patch - add VGA arbiter support to drm
-
-* Tue Jul 14 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.68-rc3
-- 2.6.31-rc3
-- config changes:
- - RTL8192SU is not set, (staging)
-
-* Mon Jul 13 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.67.rc2.git9
-- 2.6.31-rc2-git9
-- config changes:
- - BLK_DEV_OSD=m
-
-* Mon Jul 13 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: update from upstream
-
-* Fri Jul 10 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc2-git6
-- Drop dmadebug-spinlock patch -- merged upstream.
-
-* Fri Jul 10 2009 Dave Jones <davej@redhat.com> 2.6.31-0.64.rc2.git5
-- Don't jump through hoops that ppc powerbooks have to on sensible systems
-  in cpufreq_suspend.
-
-* Fri Jul 10 2009 Dave Jones <davej@redhat.com>
-- 2.6.31-rc2-git5
-
-* Thu Jul 09 2009 Dave Jones <davej@redhat.com> 2.6.31-0.62.rc2.git4
-- Use correct spinlock initialization in dma-debug
-
-* Thu Jul 09 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.61.rc2.git4
-- 2.6.31-rc2-git4
-
-* Thu Jul 09 2009 Jarod Wilson <jarod@redhat.com>
-- Enable IR receiver on the Hauppauge HD PVR
-- Trim the changelog, axing everything before 2.6.29 (see cvs
-  if you still really want to see that far back)
-
-* Wed Jul 08 2009 Dave Jones <davej@redhat.com>
-- Enable a bunch of debugging options that were missed somehow.
-
-* Wed Jul 08 2009 Kyle McMartin <kyle@redhat.com>
-- Bump NR_CPUS on x86_64 to 512.
-
-* Wed Jul 08 2009 Adam Jackson <ajax@redhat.com>
-- drm-no-gem-on-i8xx.patch: Drop, intel 2D driver requires GEM now. This
-  should be entertaining.
-
-* Wed Jul 08 2009 Kyle McMartin <kyle@redhat.com>
-- First cut of /usr/sbin/perf wrapper script and 'perf'
-  subpackage.
-
-* Wed Jul 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.54.rc2.git2
-- Rebase and re-apply all the Fedora-specific linux-2.6-debug-*
-  patches.
-- Cull a bunch of upstreamed patches from the spec.
-
-* Wed Jul 08 2009 Steve Dickson <steved@redhat.com>
-- Added NFSD v4 dynamic pseudo root patch which allows
-  NFS v3 exports to be mounted by v4 clients.
-
-* Tue Jul 07 2009 Jarod Wilson <jarod@redhat.com>
-- See if we can't make lirc_streamzap behave better... (#508952)
-
-* Tue Jul 07 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.47.rc2.git2
-- 2.6.31-rc2-git2
-
-* Tue Jul 07 2009 Jarod Wilson <jarod@redhat.com>
-- Make lirc_i2c actually work with 2.6.31 i2c
-
-* Mon Jul 06 2009 Chuck Ebbert <cebbert@redhat.com>
-- Use LZMA for kernel compression on X86.
-
-* Mon Jul 06 2009 Jarod Wilson <jarod@redhat.com>
-- Hack up lirc_i2c and lirc_zilog to compile with 2.6.31 i2c
-  changes. The drivers might not actually be functional now, but
-  at least they compile again. Will fix later, if need be...
-
-* Sat Jul 04 2009 Dave Jones <davej@redhat.com> 2.6.31-0.42.rc2
-- 2.6.31-rc2
-
-* Sat Jul 04 2009 Chuck Ebbert <cebbert@redhat.com>
-- 2.6.31-rc1-git11
-
-* Fri Jul 03 2009 Hans de Goede <hdegoede@redhat.com>
-- Disable v4l1 ov511 and quickcam_messenger drivers (obsoleted by
-  v4l2 gspca subdrivers)
-
-* Thu Jul 02 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.39.rc1.git9
-- 2.6.31-rc1-git9
-- linux-2.6-dm-fix-exstore-search.patch: similar patch merged upstream.
-
-* Tue Jun 30 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.38.rc1.git7
-- 2.6.31-rc1-git7
-
-* Tue Jun 30 2009 Dave Jones <davej@redhat.com> 2.6.31-0.37.rc1.git5
-- Disable kmemleak. Way too noisy, and not finding any real bugs.
-
-* Tue Jun 30 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: match upstream
-
-* Mon Jun 29 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.35.rc1.git5
-- 2.6.31-rc1-git5
-- CONFIG_LEDS_LP3944=m
-
-* Mon Jun 29 2009 Chuck Ebbert <cebbert@redhat.com>
-- Try to fix the dm overlay bug for real (#505121)
-
-* Sat Jun 27 2009 Ben Skeggs <bskeggs@redhat.com> 2.6.31-0.33.rc1.git2
-- drm-nouveau.patch: fix conflicts from 2.6.31-rc1-git2
-
-* Fri Jun 26 2009 Dave Jones <davej@redhat.com> 2.6.31-0.31.rc1.git2
-- Further improvements to kmemleak
-
-* Fri Jun 26 2009 Dave Jones <davej@redhat.com> 2.6.31-0.30.rc1.git2
-- 2.6.31-rc1-git2
-
-* Fri Jun 26 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: latest upstream + reenable
-
-* Thu Jun 25 2009 Dave Jones <davej@redhat.com> 2.6.31-0.29.rc1
-- Make kmemleak scan process stacks by default.
-  Should reduce false positives (which does also increase false negatives,
-  but that's at least less noisy)
-
-* Wed Jun 24 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.28.rc1
-- 2.6.31-rc1
-- linux-2.6-utrace.patch: rebase on kernel/Makefile changes
-- config changes:
- - generic:
-  - CONFIG_DM_LOG_USERSPACE=m
-  - CONFIG_DM_MULTIPATH_QL=m
-  - CONFIG_DM_MULTIPATH_ST=m
-  - CONFIG_BATTERY_MAX17040=m
-  - CONFIG_I2C_DESIGNWARE is off (depends on clk.h)
-
-* Wed Jun 24 2009 Kyle McMartin <kyle@redhat.com>
-- Move perf to /usr/libexec/perf-$KernelVer.
-
-* Wed Jun 24 2009 Kyle McMartin <kyle@redhat.com>
-- config changes:
- - generic:
-  - CONFIG_SCSI_DEBUG=m (was off, requested by davidz)
-
-* Wed Jun 24 2009 Dave Jones <davej@redhat.com> 2.6.31-0.22.rc0.git22
-- 2.6.30-git22
-
-* Tue Jun 23 2009 Dave Jones <davej@redhat.com> 2.6.31-0.22.rc0.git20
-- 2.6.30-git20
-
-* Mon Jun 22 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.24.rc0.git18
-- Enable tools/perf, installed as /bin/perf-$KernelVer. Docs and a /bin/perf
-  wrapper come next if this builds ok.
-
-* Mon Jun 22 2009 Kyle McMartin <kyle@redhat.com>
-- sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch: pull in
-  two fixes from Mike Galbraith from tip.git
-
-* Sun Jun 21 2009 Dave Jones <davej@redhat.com> 2.6.31-0.21.rc0.git18
-- Add patch to possibly fix the pktlen problem on via-velocity.
-
-* Sun Jun 21 2009 Dave Jones <davej@redhat.com> 2.6.31-0.20.rc0.git18
-- 2.6.30-git18
-  VIA crypto & mmc patches now upstream.
-
-* Sun Jun 21 2009 Dave Jones <davej@redhat.com>
-- Determine cacheline sizes in a generic manner.
-
-* Sun Jun 21 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.31-0.18.rc0.git17
-- 2.6.30-git17
-- Config changes:
-  - powerpc32-generic
-      CONFIG_PERF_COUNTERS=y
-  - generic
-      CONFIG_KEYBOARD_LM8323 is not set
-      CONFIG_MOUSE_SYNAPTICS_I2C=m
-      CONFIG_TOUCHSCREEN_EETI=m
-      CONFIG_TOUCHSCREEN_W90X900=m
-- Dropped agp-set_memory_ucwb.patch, all fixed upstream now.
-
-* Sat Jun 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.0.17.rc0.git15
-- config changes:
- - ppc generic:
-  - CONFIG_PPC_DISABLE_WERROR=y (switched... chrp fails otherwise, stack
-    frame size.)
-
-* Sat Jun 20 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.0.16.rc0.git15
-- 2.6.30-git15
-- config changes:
- - generic:
-  - CONFIG_LBDAF=y
- - staging:
-  - CONFIG_USB_SERIAL_QUATECH2 is not set
-  - CONFIG_VT6655 is not set
-  - CONFIG_USB_CPC is not set
-  - CONFIG_RDC_17F3101X is not set
-  - CONFIG_FB_UDL is not set
- - ppc32:
-  - CONFIG_KMETER1=y
- - ppc generic:
-  - CONFIG_PPC_DISABLE_WERROR is not set
-- lirc disabled due to i2c detach_client removal.
-
-* Sat Jun 20 2009 Kyle McMartin <kyle@redhat.com>
-- sched-introduce-SCHED_RESET_ON_FORK-scheduling-policy-flag.patch: add,
-  queued in tip/sched/core (ca94c442535a44d508c99a77e54f21a59f4fc462)
-
-* Fri Jun 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.31.0.15.rc0.git14
-- Fix up ptrace, hopefully. Builds on x86_64 at least.
-
-* Fri Jun 19 2009 Chuck Ebbert <cebbert@redhat.com>
-- linux-2.6-tip.git-203abd67b75f7714ce98ab0cdbd6cfd7ad79dec4.patch
-  Fixes oops on boot with qemu (#507007)
-
-* Fri Jun 19 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.13.rc0.git14
-- 2.6.30-git14
-
-* Fri Jun 19 2009 Chuck Ebbert <cebbert@redhat.com>
-- Fix up the via-sdmmc and via-hwmon-temp-sensor patches.
-- Drop VIA Padlock patches merged upstream:
-    via-rng-enable-64bit.patch
-    via-padlock-10-enable-64bit.patch
-    via-padlock-20-add-x86-dependency.patch
-
-* Thu Jun 18 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Add -libre provides for kernel and devel packages.
-
-* Thu Jun 18 2009 Kyle McMartin <kyle@redhat.com> 2.6.31-0.11.rc0.git13
-- 2.6.30-git13
-- config changes:
- - arm:
-  - CONFIG_UACCESS_WITH_MEMCPY is not set
- - i686-PAE:
-  - CONFIG_XEN_DEV_EVTCHN=m
-  - CONFIG_XEN_SYS_HYPERVISOR=y
- - ia64:
-  - CONFIG_RCU_FANOUT=64
- - nodebug:
-  - CONFIG_DEBUG_KMEMLEAK is not set
-  - CONFIG_DEBUG_KMEMLEAK_TEST=m
- - powerpc:
-  - CONFIG_CAN_SJA1000_OF_PLATFORM=m
-  - CONFIG_PPC_EMULATED_STATS=y
-  - CONFIG_SWIOTLB=y
-  - CONFIG_RDS is not set (broken on ppc32)
- - powerpc32:
-  - CONFIG_RCU_FANOUT=32
- - powerpc64:
-  - CONFIG_RCU_FANOUT=64
-  - CONFIG_PERF_COUNTERS=y
- - s390x:
-  - CONFIG_RCU_FANOUT=64
-  - CONFIG_SECCOMP=y
-  - CONFIG_PM=y
-  - CONFIG_HIBERNATION=y
-  - CONFIG_PM_STD_PARTITION="/dev/jokes"
- - sparc64:
-  - CONFIG_RCU_FANOUT=64
- - x86:
-  - CONFIG_RCU_FANOUT=32
-  - CONFIG_IOMMU_STRESS is not set
-  - CONFIG_PERF_COUNTERS=y
-  - CONFIG_X86_OLD_MCE is not set
-  - CONFIG_X86_MCE_INTEL=y
-  - CONFIG_X86_MCE_AMD=y
-  - CONFIG_X86_ANCIENT_MCE is not set
-  - CONFIG_X86_MCE_INJECT is not set
- - x86_64:
-  - CONFIG_EDAC_AMD64=m
-  - CONFIG_EDAC_AMD64_ERROR_INJECTION is not set
-  - CONFIG_XEN_DEV_EVTCHN=m
-  - CONFIG_XEN_SYS_HYPERVISOR=y
-  - CONFIG_RCU_FANOUT=64
-  - CONFIG_IOMMU_STRESS is not set
-  - CONFIG_PERF_COUNTERS=y
-  - CONFIG_X86_MCE_INJECT is not set
- - generic:
-  - CONFIG_RCU_FANOUT=32
-  - CONFIG_MMC_SDHCI_PLTFM=m
-  - CONFIG_MMC_CB710=m
-  - CONFIG_CB710_CORE=m
-  - CONFIG_CB710_DEBUG is not set
-  - CONFIG_SCSI_MVSAS_DEBUG is not set
-  - CONFIG_SCSI_BNX2_ISCSI=m
-  - CONFIG_NETFILTER_XT_MATCH_OSF=m
-  - CONFIG_RFKILL_INPUT=y (used to be =m, which was invalid)
-  - CONFIG_DE2104X_DSL=0
-  - CONFIG_KS8842 is not set
-  - CONFIG_CFG80211_DEBUGFS=y
-  - CONFIG_MAC80211_DEFAULT_PS=y
-  - CONFIG_IWM=m
-  - CONFIG_IWM_DEBUG is not set
-  - CONFIG_RT2800USB=m
-  - CONFIG_CAN_DEV=m
-  - CONFIG_CAN_CALC_BITTIMING=y
-  - CONFIG_CAN_SJA1000=m
-  - CONFIG_CAN_SJA1000_PLATFORM=m
-  - CONFIG_CAN_EMS_PCI=m
-  - CONFIG_CAN_KVASER_PCI=m
-  - CONFIG_EEPROM_MAX6875=m
-  - CONFIG_SENSORS_TMP401=m
-  - CONFIG_MEDIA_SUPPORT=m
-  - CONFIG_SND_CTXFI=m
-  - CONFIG_SND_LX6464ES=m
-  - CONFIG_SND_HDA_CODEC_CA0110=y
-  - CONFIG_USB_XHCI_HCD=m
-  - CONFIG_USB_XHCI_HCD_DEBUGGING is not set
-  - CONFIG_DRAGONRISE_FF=y (used to be =m)
-  - CONFIG_GREENASIA_FF=y (used to be =m)
-  - CONFIG_SMARTJOYPLUS_FF=y (used to be =m)
-  - CONFIG_USB_NET_INT51X1=m
-  - CONFIG_CUSE=m
-  - CONFIG_FUNCTION_PROFILER=y
-  - CONFIG_RING_BUFFER_BENCHMARK=m
-  - CONFIG_REGULATOR_USERSPACE_CONSUMER=m
-  - CONFIG_REGULATOR_MAX1586=m
-  - CONFIG_REGULATOR_LP3971=m
-  - CONFIG_RCU_FANOUT_EXACT is not set
-  - CONFIG_DEFAULT_MMAP_MIN_ADDR=4096
-  - CONFIG_FSNOTIFY=y
-  - CONFIG_IEEE802154=m
-  - CONFIG_IEEE802154_DRIVERS=m
-  - CONFIG_IEEE802154_FAKEHARD=m
-  - CONFIG_CNIC=m
-
-* Wed Jun 17 2009 Jarod Wilson <jarod@redhat.com>
-- New lirc_imon hotness, update 2:
-  * support dual-interface devices with a single lirc device
-  * directional pad functions as an input device mouse
-  * touchscreen devices finally properly supported
-  * support for using MCE/RC-6 protocol remotes
-  * fix oops in RF remote association code (F10 bug #475496)
-  * fix re-enabling case/panel buttons and/or knobs
-- Add some misc additional lirc_mceusb2 transceiver IDs
-- Add missing unregister_chrdev_region() call to lirc_dev exit
-- Add it8720 support to lirc_it87
-
-* Tue Jun 16 2009 Chuck Ebbert <cebbert@redhat.com>
-- Update via-sdmmc driver
-
-* Mon Jun 15 2009 Jarod Wilson <jarod@redhat.com>
-- Update lirc patches w/new imon hotness
-
-* Fri Jun 12 2009 Chuck Ebbert <cebbert@redhat.com>
-- Update VIA temp sensor and mmc drivers.
-
-* Fri Jun 12 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Deblobbed 2.6.30.
-
-* Fri Jun 12 2009 John W. Linville <linville@redhat.com> 2.6.30-6
-- neigh: fix state transition INCOMPLETE->FAILED via Netlink request
-- enable CONFIG_ARPD (used by OpenNHRP)
-
-* Wed Jun 10 2009 Chuck Ebbert <cebbert@redhat.com>
-- VIA Nano updates:
-  Enable Padlock AES encryption and random number generator on x86-64
-  Add via-sdmmc and via-cputemp drivers
-
-* Wed Jun 10 2009 Kyle McMartin <kyle@redhat.com> 2.6.30-1
-- Linux 2.6.30 rebase.
-
-* Tue Jun 09 2009 John W. Linville <linville@tuxdriver.com>
-- Clean-up some wireless bits in config-generic
-
-* Tue Jun 09 2009 Chuck Ebbert <cebbert@redhat.com>
-- Add support for ACPI P-states on VIA processors.
-- Disable the e_powersaver driver.
-
-* Tue Jun 09 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.30-rc8-git6
-
-* Fri Jun 05 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.30-rc8-git1
-
-* Wed Jun 03 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.30-rc8
-
-* Tue Jun  2 2009 Roland McGrath <roland@redhat.com>
-- utrace update (fixes stap PR10185)
-
-* Tue Jun 02 2009 Dave Jones <davej@redhat.com>
-- For reasons unknown, RT2X00 driver was being built-in.
-  Make it modular.
-
-* Tue Jun 02 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc7-git5
-
-* Sat May 30 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc7-git4
-
-* Thu May 28 2009 Dave Jones <davej@redhat.com
-- 2.6.30-rc7-git3
-
-* Wed May 27 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc7-git2
-
-* Tue May 26 2009 Dave Jones <davej@redhat.com>
-- Various cpufreq patches from git.
-
-* Tue May 26 2009 Dave Jones <davej@redhat.com
-- 2.6.30-rc7-git1
-
-* Tue May 26 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc7-git1
-
-* Mon May 25 2009 Kyle McMartin <kyle@redhat.com>
-- rds-only-on-64-bit-or-x86.patch: drop patch, issue is fixed upstream.
-
-* Sat May 23 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc7
-
-* Thu May 21 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc6-git6
-
-* Wed May 20 2009  Chuck Ebbert <cebbert@redhat.com>
-- Enable Divas (formerly Eicon) ISDN drivers on x86_64. (#480837)
-
-* Wed May 20 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc6-git5
-
-* Mon May 18 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc6-git3
-
-* Sun May 17 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc6-git2
-
-* Sat May 16 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc6
-
-* Mon May 11 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.30-rc5-git1
-
-* Fri May 08 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.30-rc5
-
-* Fri May 08 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.30-rc4-git4
-
-* Wed May 06 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.30-rc4-git3
-- linux-2.6-cdrom-door-status.patch: merged upstream.
-- linux-2.6-iwl3945-remove-useless-exports.patch: merged upstream.
-- linux-2.6-utrace.patch: rebase against changes to fs/proc/array.c
-- USB_NET_CDC_EEM=m
-
-* Fri May 01 2009 Eric Sandeen <sandeen@redhat.com>
-- Fix ext4 corruption on partial write into prealloc block
-
-* Thu Apr 30 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.30-rc4
-
-* Wed Apr 29 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc3-git6
-
-* Tue Apr 28 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc3-git4
-
-* Tue Apr 28 2009 Chuck Ebbert <cebbert@redhat.com>
-- Make the kernel-vanilla package buildable again.
-- Allow building with older versions of RPM.
-
-* Tue Apr 28 2009 Neil Horman <nhorman@redhat.com>
-- Backport missing snmp stats (bz 492391)
-
-* Tue Apr 28 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30-0.72.rc3.git3
-- Drop unused exports from the iwl3945 driver.
-
-* Tue Apr 28 2009 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.30-rc3-git3
-
-* Mon Apr 27 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc3-git2
-
-* Sun Apr 26 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.30-0.68.rc3.git1
-- Linux 2.6.30-rc3-git1
-
-* Wed Apr 22 2009 Dave Jones <davej@redhat.com> 2.6.30-0.67.rc3
-- Disable SYSFS_DEPRECATED on ia64
-
-* Wed Apr 22 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.30-rc3
-- PROC_VMCORE=y: Exports the dump image of crashed
-  kernel in ELF format
-
-* Wed Apr 22 2009 Neil Horman <nhorman@redhat.com>
-- Enable RELOCATABLE and CRASH_DUMP for powerpc64
-- With this we can remove the -kdump build variant
-- for the ppc64 arch
-
-* Tue Apr 21 2009 Chuck Ebbert <cebbert@redhat.com>
-- Don't include the modules.*.bin files in the RPM package.
-
-* Tue Apr 21 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc2-git7
-
-* Mon Apr 20 2009 Dave Jones <davej@redhat.com>
-- Various s390x config tweaks. (#496596, #496601, #496605, #496607)
-
-* Mon Apr 20 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc2-git6
-
-* Sat Apr 18 2009 Chuck Ebbert <cebbert@redhat.com>
-- Set CONFIG_UEVENT_HELPER_PATH to the empty string (#496296)
-
-* Fri Apr 17 2009 Dave Jones <davej@redhat.com>
-- 2.6.30-rc2-git3
-
-* Thu Apr 16 2009 Kyle McMartin <kyle@redhat.com> 2.6.30-0.58.rc2.git1
-- 2.6.30-rc2-git1
-
-* Wed Apr 15 2009 Kyle McMartin <kyle@redhat.com> 2.6.30-0.57.rc2
-- 2.6.30-rc2
-
-* Tue Apr 14 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.30-rc1-git7
-- CONFIG_TOUCHSCREEN_AD7879_I2C=m
-- CONFIG_STRIP_ASM_SYMS=y, off for -debug
-
-* Mon Apr 13 2009 Kyle McMartin <kyle@redhat.com>
-- ppc-fix-parport_pc.patch: add from linuxppc-dev@
-
-* Mon Apr 13 2009 Kyle McMartin <kyle@redhat.com>
-- execshield: fix build (load_user_cs_desc is 32-bit only in tlb.c)
-
-* Sun Apr 12 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.30-rc1-git5
-- revert-fix-modules_install-via-nfs.patch: reverted upstream
-
-* Thu Apr 09 2009 Kyle McMartin <kyle@redhat.com>
-- actually drop utrace-ftrace from srpm.
-
-* Thu Apr 09 2009 Kyle McMartin <kyle@redhat.com>
-- 2.6.30-rc1-git2
-- CONFIG_IGBVF=m
-- CONFIG_NETFILTER_XT_TARGET_LED=m
-
-* Thu Apr 09 2009 Dave Jones <davej@redhat.com>
-- Bring back the /dev/crash driver. (#492803)
-
-* Wed Apr 08 2009 Dave Jones <davej@redhat.com>
-- disable MMIOTRACE in non-debug builds (#494584)
-
-* Wed Apr 08 2009 Kyle McMartin <kyle@redhat.com> 2.6.30-0.44.rc1
-- 2.6.30-rc1
-- linux-2.6-hwmon-atk0110.patch: drop
-- CONFIG_DETECT_HUNG_TASK=y
-- # CONFIG_BOOTPARAM_HUNG_TASK_PANIC is not set
-
-* Tue Apr  7 2009 Roland McGrath <roland@redhat.com>
-- utrace update, drop unfinished utrace-ftrace
-
-* Tue Apr 07 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.29-git15
-- EXT3_DEFAULTS_TO_ORDERED on for now.
-- X86_X2APIC enabled.
-- LEDS_LP5521, LEDS_BD2802 off... look not generally relevant.
-- LIBFCOE on.
-
-* Tue Apr 07 2009 Dave Jones <davej@redhat.com>
-- Enable CONFIG_CIFS_STATS (#494545)
-
-* Mon Apr 06 2009 Kyle McMartin <kyle@redhat.com>
-- linux-2.6-execshield.patch: rebase for 2.6.30
-
-* Mon Apr 06 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.29-git13
-- drop patches merged upstream:
-  - fix-ppc-debug_kmap_atomic.patch
-  - fix-staging-at76.patch
-  - linux-2.6-acpi-video-didl-intel-outputs.patch
-  - linux-2.6-acpi-strict-resources.patch
-  - linux-2.6-sony-laptop-rfkill.patch
-  - linux-2.6-btrfs-fix-umount-hang.patch
-  - linux-2.6-fiemap-header-install.patch
-  - linux-2.6-debug-dma-api.patch
-  - dma-api-debug-fixes.patch
-  - linux-2.6-ext4-flush-on-close.patch
-  - linux-2.6-relatime-by-default.patch
-  - linux-2.6-pci-sysfs-remove-id.patch
-  - linux-2.6-scsi-cpqarray-set-master.patch
-  - alsa-rewrite-hw_ptr-updaters.patch
-  - alsa-pcm-always-reset-invalid-position.patch
-  - alsa-pcm-fix-delta-calc-at-overlap.patch
-  - alsa-pcm-safer-boundary-checks.patch
-  - linux-2.6-input-hid-extra-gamepad.patch
-  - linux-2.6-ipw2x00-age-scan-results-on-resume.patch
-  - linux-2.6-dropwatch-protocol.patch
-  - linux-2.6-net-fix-gro-bug.patch
-  - linux-2.6-net-fix-another-gro-bug.patch
-  - linux-2.6-net-xfrm-fix-spin-unlock.patch
-  - linux-2.6.29-pat-change-is_linear_pfn_mapping-to-not-use-vm_pgoff.patch
-  - linux-2.6.29-pat-pci-change-prot-for-inherit.patch
-
-* Thu Apr 02 2009 Josef Bacik <josef@toxicpanda.com>
-- linux-2.6-btrfs-fix-umount-hang.patch: fix umount hang on btrfs
-
-* Thu Apr 02 2009 Kyle McMartin <kyle@redhat.com>
-- fix-ppc-debug_kmap_atomic.patch: fix build failures on ppc.
-
-* Thu Apr 02 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.29-git9
-
-* Tue Mar 31 2009 Kyle McMartin <kyle@redhat.com>
-- rds-only-on-64-bit-or-x86.patch: add
-- at76-netdev_ops.patch: add
-
-* Tue Mar 31 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.29-git8
-- linux-2.6-net-fix-another-gro-bug.patch: upstream.
-
-* Tue Mar 31 2009 Eric Sandeen <sandeen@redhat.com>
-- add fiemap.h to kernel-headers
-- build ext4 (and jbd2 and crc16) into the kernel
-
-* Tue Mar 31 2009 Kyle McMartin <kyle@redhat.com>
-- Linux 2.6.29-git7
-- fix-staging-at76.patch: pull patch from linux-wireless to fix...
-
-* Mon Mar 30 2009 Kyle McMartin <kyle@redhat.com> 2.6.30-0.28.rc0.git6
-- Linux 2.6.29-git6
-- Bunch of stuff disabled, most merged, some needs rebasing.
-
-* Mon Mar 30 2009 Chuck Ebbert <cebbert@redhat.com>
-- Make the .shared-srctree file a list so more than two checkouts
-  can share source files.
-
-* Mon Mar 30 2009 Chuck Ebbert <cebbert@redhat.com>
-- Separate PAT fixes that are headed for -stable from our out-of-tree ones.
-
-* Mon Mar 30 2009 Dave Jones <davej@redhat.com>
-- Make io schedulers selectable at boot time again. (#492817)
-
-* Mon Mar 30 2009 Dave Jones <davej@redhat.com>
-- Add a strict-devmem=0 boot argument (#492803)
-
-* Mon Mar 30 2009 Adam Jackson <ajax@redhat.com>
-- linux-2.6.29-pat-fixes.patch: Fix PAT/GTT interaction
-
-* Mon Mar 30 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
-- some fixes of troubles caused by v4l2 subdev conversion
-
-* Mon Mar 30 2009 Mark McLoughlin <markmc@redhat.com> 2.6.29-21
-- Fix guest->remote network stall with virtio/GSO (#490266)
-
-* Mon Mar 30 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch
-  - rewrite nouveau PCI(E) GART functions, should fix rh#492492
-  - kms: kernel option to allow dual-link dvi
-  - modinfo descriptions for module parameters
-
-* Sun Mar 29 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
-- more v4l/dvb updates: v4l subdev conversion and some driver improvements
-
-* Sun Mar 29 2009 Chuck Ebbert <cebbert@redhat.com>
-- More fixes for ALSA hardware pointer updating.
-
-* Sat Mar 28 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
-- linux-2.6-revert-dvb-net-kabi-change.patch: attempt to fix dvb net breakage
-- update v4l fixes patch to reflect what's ready for 2.6.30
-- update v4l devel patch to reflect what will be kept on linux-next for a while
-
-* Fri Mar 27 2009 Alexandre Oliva <lxoliva@fsfla.org> -libre.16 Mon Mar 30
-- Deblobbed 2.6.29.
-- Deblobbed drm-nouveau.patch.
-- Deblobbed drm-next.patch.
-- Deblobbed drm-modesetting-radeon.patch.
-- Deblobbed linux-2.6-at76.patch.
-- Deblobbed linux-2.6.27-lirc.patch.
-- Deblobbed linux-2.6.29-lirc.patch.
-- Deblobbed linux-2.6-v4l-dvb-experimental.patch
-- Deblobbed linux-2.6-v4l-dvb-fixes.patch
-- Updated URL, thanks to Tomek Chrzczonowicz.
-
-* Fri Mar 27 2009 Chuck Ebbert <cebbert@redhat.com> 2.6.29-16
-- Fix 2.6.29 networking lockups.
-- Fix locking in net/xfrm/xfrm_state.c (#489764)
-
-* Fri Mar 27 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: do nothing for dac_{prepare,commit}, it's useless
-  and breaks some things in strange ways.
-
-* Fri Mar 27 2009 Ben Skeggs <bskeggs@redhat.com>
-- nv50: clear 0x1900/8 on init, possible fix for rh#492240
-- forcibly disable GEM also if KMS requested where not supported
-- inform the user if we disable KMS because of it not being supported
-
-* Thu Mar 26 2009 Matthew Garrett <mjg@redhat.com>
-- linux-2.6-relatime-by-default.patch: Backport relatime code from 2.6.30
-
-* Thu Mar 26 2009 Dave Jones <davej@redhat.com>
-- Check for modesetting enabled before forcing mode on 915. (#490336)
-
-* Thu Mar 26 2009 Dave Jones <davej@redhat.com>
-- Set kernel-PAE as default in grub. (#487578)
-
-* Thu Mar 26 2009 Dave Jones <davej@redhat.com>
-- Enable CONFIG_MOUSE_PS2_ELANTECH (#492163)
-
-* Thu Mar 26 2009 Kyle McMartin <kyle@redhat.com>
-- linux-2.6-v4l-pvrusb2-fixes.patch: fix build for uncle steve.
-
-* Thu Mar 26 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
-- Move all 2.6.30 stuff into linux-2.6-v4l-dvb-fixes.patch, in
-  preparation for upstream pull;
-- Added two new drivers: gspca sq905c and DVB Intel ce6230
-- Updated to the latest v4l-dvb drivers.
-
-* Wed Mar 25 2009 Mauro Carvalho Chehab <mchehab@redhat.com>
-- remove duplicated Cinergy T2 entry at config-generic
-
-* Wed Mar 25 2009 Neil Horman <nhorman@redhat.com>
-- Add dropmonitor/dropwatch protocol from 2.6.30
-
-* Wed Mar 25 2009 Kyle McMartin <kyle@redhat.com>
-- alsa-rewrite-hw_ptr-updaters.patch: snd_pcm_update_hw_ptr() tries to
-  detect the unexpected hwptr jumps more strictly to avoid the position
-  mess-up, which often results in the bad quality I/O with pulseaudio.
-
-* Wed Mar 25 2009 Ben Skeggs <bskeggs@redhat.com>
-- drm-nouveau.patch: idle channels better before destroying them
-
-* Tue Mar 24 2009 Kyle McMartin <kyle@redhat.com>
-- Disable DMAR by default until suspend & resume is fixed.
-
-* Tue Mar 24 2009 Josef Bacik <josef@toxicpanda.com>
-- fsync replay fixes for btrfs
-
-* Mon Mar 23 2009 Dave Jones <davej@redhat.com>
-- 2.6.29
 
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.

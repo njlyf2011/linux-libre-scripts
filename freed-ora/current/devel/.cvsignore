@@ -4,10 +4,10 @@ GNUmakefile
 kernel-2.6.*.config
 temp-*
 deblob-main
-deblob-2.6.32
+deblob-2.6.33
 deblob-check
 freedo.patch
-kernel-2.6.32
-linux-2.6.32-libre.*
-patch-libre-2.6.33-rc8.*
-patch-2.6.33-rc8-git1.bz2
+kernel-2.6.33
+linux-2.6.33-libre.*
+patch-libre-2.6.34-rc1.*
+patch-2.6.34-rc1-git1.bz2
