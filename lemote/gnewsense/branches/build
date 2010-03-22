@@ -93,7 +93,7 @@ if $prep; then
 fi
 
 make-kpkg --rootcmd fakeroot --initrd --revision $rev \
-  kernel-image kernel-headers kernel-doc
+  kernel-image kernel-headers kernel-doc kernel-source
 cd ..
 
 tar -cf $buildtb -C $srctree --use=bzip2 .
