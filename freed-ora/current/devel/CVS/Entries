@@ -102,7 +102,6 @@ D/scripts////
 /linux-2.6.31-nx-data.patch/1.1/Fri Sep 11 15:31:53 2009/-kb/Tkernel-2_6_34-0_15_rc2_git0_fc14
 /lirc-2.6.33.patch/1.1/dummy timestamp from new-entry/-kb/Tkernel-2_6_34-0_15_rc2_git0_fc14
 /merge.pl/1.9/Sun Apr 27 23:43:40 2008/-ko/Tkernel-2_6_34-0_15_rc2_git0_fc14
-/mirrors/1.6/dummy timestamp from new-entry+Sun Mar 21 22:52:18 2010//Tkernel-2_6_34-0_15_rc2_git0_fc14
 /neuter_intel_microcode_load.patch/1.1/Sat Feb  6 22:41:04 2010/-kb/Tkernel-2_6_34-0_15_rc2_git0_fc14
 /noautobuild/1.2/Wed Feb 18 00:24:46 2009//Tkernel-2_6_34-0_15_rc2_git0_fc14
 /patch-2.6.34-rc2.bz2.sign/-1.1/Mon Mar 22 13:39:43 2010//Tkernel-2_6_34-0_15_rc2_git0_fc14
@@ -113,3 +112,4 @@ D/scripts////
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_34-0_15_rc2_git0_fc14
 /vhost_net-rollup.patch/1.1/Mon Jan 18 15:30:08 2010/-kb/Tkernel-2_6_34-0_15_rc2_git0_fc14
 /virt_console-rollup.patch/1.2/Wed Feb 17 03:03:00 2010/-kb/Tkernel-2_6_34-0_15_rc2_git0_fc14
+/mirrors/1.6/Tue Mar 23 14:40:48 2010//Tkernel-2_6_34-0_15_rc2_git0_fc14
