@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2048 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2050 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -803,6 +803,9 @@ Patch12380: ssb_check_for_sprom.patch
 Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
+# fix tg3 + netpoll with backport of  fe234f0e5cbb880792d2d1ac0743cf8c07e9dde3
+Patch14500: linux-2.6-tg3-netpoll.patch
+
 # ==============================================================================
 
 %endif
@@ -1478,6 +1481,8 @@ ApplyPatch tcp-fix-icmp-rto-war.patch
 ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
 ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
 
+ApplyPatch linux-2.6-tg3-netpoll.patch
+
 ApplyPatch iwlwifi-silence-tfds-in-queue-message.patch
 
 # rhbz#572653
@@ -2139,6 +2144,13 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 22 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.10-90
+- A few more imon driver button additions
+- Fix minor init issue w/topseed 0x0008 mceusb transceivers
+
+* Mon Mar 22 2010 Neil Horman <nhorman@redhat.com> 
+- Fix tg3 poll controller to not oops (bz 574696)
+
 * Fri Mar 19 2010 John W. Linville <linville@redhat.com> 2.6.32.10-88
 - Revise "ssb: check for sprom" (#533746)
 
