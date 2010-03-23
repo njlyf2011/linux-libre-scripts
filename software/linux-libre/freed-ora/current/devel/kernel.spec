@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1935
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1948 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1950 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -73,9 +73,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 1
+%define rcrev 2
 # The git snapshot level
-%define gitrev 1
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -733,7 +733,7 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
+Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # fs fixes
 
@@ -1220,7 +1220,7 @@ ApplyPatch linux-2.6-utrace.patch
 #
 ### NOT (YET) UPSTREAM:
 # Alleviate G5 thermal shutdown problems
-ApplyPatch linux-2.6-g5-therm-shutdown.patch
+#ApplyPatch linux-2.6-g5-therm-shutdown.patch
 # Provide modalias in sysfs for vio devices
 ApplyPatch linux-2.6-vio-modalias.patch
 
@@ -1247,7 +1247,7 @@ ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
 # eCryptfs
 
 # NFSv4
-ApplyPatch linux-2.6-nfs4-callback-hidden.patch
+#ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
 #ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
@@ -1294,7 +1294,7 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 #ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
-ApplyPatch die-floppy-die.patch
+#ApplyPatch die-floppy-die.patch #x
 
 # Get away from having to poll Toshibas
 #ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
@@ -1382,10 +1382,10 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
-#ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
+ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # Patches headed upstream
-ApplyPatch linux-2.6-rfkill-all.patch
+#ApplyPatch linux-2.6-rfkill-all.patch
 
 #ApplyPatch add-appleir-usb-driver.patch
 
@@ -2055,7 +2055,25 @@ fi
 #                 ||     ||
 
 %changelog
-* Sun Mar 21 2010 Alexandre Oliva <lxoliva@fsfla.org>
+* Mon Mar 22 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.34-rc2.
+
+* Mon Mar 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.15.rc2.git0
+- 2.6.34-rc2
+- generic:
+ - CEFS distributed filesystem (=m)
+ - PPS (pulse per second) (off, excessively niche.)
+ - smsc75xx usb gigabit ethernet (=m)
+- x86:
+ - dell netbook LEDs (=m)
+- sparc64:
+ - xvr1000 framebuffer (=y)
+
+* Fri Mar 19 2010 Hans de Goede <hdegoede@redhat.com>
+- Cherry pick various webcam driver fixes
+  (#571188, #572302, #572373)
+
+* Fri Mar 19 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Mar 21
 - Deblobbed patch-libre-2.6.34-rc1.
 
 * Fri Mar 19 2010 David Woodhouse <David.Woodhouse@intel.com>
