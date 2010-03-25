@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1955 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1957 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -741,6 +741,7 @@ Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # fs fixes
+Patch3000: linux-2.6-btrfs-update.patch
 
 # NFSv4
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
@@ -1252,6 +1253,7 @@ ApplyPatch linux-2.6-execshield.patch
 # xfs
 
 # btrfs
+ApplyPatch linux-2.6-btrfs-update.patch
 
 # eCryptfs
 
@@ -2057,6 +2059,14 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 24 2010 Josef Bacik <josef@toxicpanda.com> 2.6.33.1-21
+- Update btrfs so it includes the default subvolume stuff, for the rollback
+  feature
+
+* Mon Mar 22 2010 Jarod Wilson <jarod@redhat.com>
+- A few more imon driver button additions
+- Fix minor init issue w/topseed 0x0008 mceusb transceivers
+
 * Sun Mar 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.33.1 for deblobbed sources.
 
