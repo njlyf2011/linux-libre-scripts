@@ -2,7 +2,7 @@ Deblobbed
 
 * drivers/input/lirc/lirc_zilog.c: Deblobbed.
 
-lirc drivers, 2010.03.19
+lirc drivers, 2010.03.22
 
 Generated against linus/master from the linux-2.6-lirc.git tree at
 http://git.kernel.org/?p=linux/kernel/git/jarod/linux-2.6-lirc.git;a=summary
@@ -28,7 +28,7 @@ Signed-off-by: Jarod Wilson <jarod@redhat.com>
  drivers/input/lirc/lirc_it87.c        | 1019 +++++++++++++
  drivers/input/lirc/lirc_it87.h        |  116 ++
  drivers/input/lirc/lirc_ite8709.c     |  540 +++++++
- drivers/input/lirc/lirc_mceusb.c      | 1378 ++++++++++++++++++
+ drivers/input/lirc/lirc_mceusb.c      | 1385 ++++++++++++++++++
  drivers/input/lirc/lirc_parallel.c    |  709 ++++++++++
  drivers/input/lirc/lirc_parallel.h    |   26 +
  drivers/input/lirc/lirc_sasem.c       |  931 ++++++++++++
@@ -39,9 +39,9 @@ Signed-off-by: Jarod Wilson <jarod@redhat.com>
  drivers/input/lirc/lirc_zilog.c       | 1388 ++++++++++++++++++
  drivers/input/misc/Kconfig            |   12 +
  drivers/input/misc/Makefile           |    1 +
- drivers/input/misc/imon.c             | 2508 +++++++++++++++++++++++++++++++++
+ drivers/input/misc/imon.c             | 2511 +++++++++++++++++++++++++++++++++
  include/linux/lirc.h                  |  159 +++
- 29 files changed, 17074 insertions(+), 0 deletions(-)
+ 29 files changed, 17084 insertions(+), 0 deletions(-)
 
 diff --git a/MAINTAINERS b/MAINTAINERS
 index 47cc449..ae38439 100644
@@ -6297,10 +6297,10 @@ index 0000000..4c3d3ad
 +MODULE_PARM_DESC(debug, "Enable debugging messages");
 diff --git a/drivers/input/lirc/lirc_mceusb.c b/drivers/input/lirc/lirc_mceusb.c
 new file mode 100644
-index 0000000..f83cf4e
+index 0000000..c0869d8
 --- /dev/null
 +++ b/drivers/input/lirc/lirc_mceusb.c
-@@ -0,0 +1,1378 @@
+@@ -0,0 +1,1385 @@
 +/*
 + * LIRC driver for Windows Media Center Edition USB Infrared Transceivers
 + *
@@ -7347,8 +7347,9 @@ index 0000000..f83cf4e
 +	int i;
 +	char buf[63], name[128] = "";
 +	int mem_failure = 0;
-+	int is_gen3;
-+	int is_microsoft_gen1;
++	bool is_gen3;
++	bool is_microsoft_gen1;
++	bool is_pinnacle;
 +
 +	dev_dbg(&intf->dev, ": %s called\n", __func__);
 +
@@ -7361,6 +7362,8 @@ index 0000000..f83cf4e
 +	is_gen3 = usb_match_id(intf, gen3_list) ? 1 : 0;
 +
 +	is_microsoft_gen1 = usb_match_id(intf, microsoft_gen1_list) ? 1 : 0;
++
++	is_pinnacle = usb_match_id(intf, pinnacle_list) ? 1 : 0;
 +
 +	/* step through the endpoints to find first bulk in and out endpoint */
 +	for (i = 0; i < idesc->desc.bNumEndpoints; ++i) {
@@ -7378,11 +7381,13 @@ index 0000000..f83cf4e
 +				"found\n");
 +			ep_in = ep;
 +			ep_in->bmAttributes = USB_ENDPOINT_XFER_INT;
-+			if (!is_gen3)
++			if (!is_pinnacle)
 +				/*
-+				 * ideally, we'd use what the device offers up,
++				 * Ideally, we'd use what the device offers up,
 +				 * but that leads to non-functioning first and
-+				 * second-gen devices.
++				 * second-gen devices, and many devices have an
++				 * invalid bInterval of 0. Pinnacle devices
++				 * don't work witha  bInterval of 1 though.
 +				 */
 +				ep_in->bInterval = 1;
 +		}
@@ -7399,11 +7404,13 @@ index 0000000..f83cf4e
 +				"found\n");
 +			ep_out = ep;
 +			ep_out->bmAttributes = USB_ENDPOINT_XFER_INT;
-+			if (!is_gen3)
++			if (!is_pinnacle)
 +				/*
-+				 * ideally, we'd use what the device offers up,
++				 * Ideally, we'd use what the device offers up,
 +				 * but that leads to non-functioning first and
-+				 * second-gen devices.
++				 * second-gen devices, and many devices have an
++				 * invalid bInterval of 0. Pinnacle devices
++				 * don't work witha  bInterval of 1 though.
 +				 */
 +				ep_out->bInterval = 1;
 +		}
@@ -7500,7 +7507,7 @@ index 0000000..f83cf4e
 +	ir->urb_in->transfer_dma = ir->dma_in;
 +	ir->urb_in->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 +
-+	if (usb_match_id(intf, pinnacle_list)) {
++	if (is_pinnacle) {
 +		int usbret;
 +
 +		/*
@@ -14634,10 +14641,10 @@ index 7e95a5d..8918ce7 100644
  obj-$(CONFIG_INPUT_M68K_BEEP)		+= m68kspkr.o
 diff --git a/drivers/input/misc/imon.c b/drivers/input/misc/imon.c
 new file mode 100644
-index 0000000..889e77e
+index 0000000..d2e5d51
 --- /dev/null
 +++ b/drivers/input/misc/imon.c
-@@ -0,0 +1,2508 @@
+@@ -0,0 +1,2511 @@
 +/*
 + *   imon.c:	input and display driver for SoundGraph iMON IR/VFD/LCD
 + *
@@ -15107,13 +15114,16 @@ index 0000000..889e77e
 +	{ KE_KEY, 0x800f841c, { KEY_NUMERIC_POUND } },
 +
 +	{ KE_KEY, 0x800f8446, { KEY_TV } },
-+	{ KE_KEY, 0x800f8447, { KEY_AUDIO } },
++	{ KE_KEY, 0x800f8447, { KEY_AUDIO } }, /* My Music */
 +	{ KE_KEY, 0x800f8448, { KEY_PVR } }, /* RecordedTV */
 +	{ KE_KEY, 0x800f8449, { KEY_CAMERA } },
 +	{ KE_KEY, 0x800f844a, { KEY_VIDEO } },
 +	{ KE_KEY, 0x800f8424, { KEY_DVD } },
 +	{ KE_KEY, 0x800f8425, { KEY_TUNER } }, /* LiveTV */
 +	{ KE_KEY, 0x800f8450, { KEY_RADIO } },
++
++	{ KE_KEY, 0x800f844c, { KEY_LANGUAGE } },
++	{ KE_KEY, 0x800f8427, { KEY_ZOOM } }, /* Aspect */
 +
 +	{ KE_KEY, 0x800f845b, { KEY_RED } },
 +	{ KE_KEY, 0x800f845c, { KEY_GREEN } },
@@ -15122,7 +15132,8 @@ index 0000000..889e77e
 +
 +	{ KE_KEY, 0x800f840f, { KEY_INFO } },
 +	{ KE_KEY, 0x800f8426, { KEY_EPG } }, /* Guide */
-+	{ KE_KEY, 0x800f845a, { KEY_SUBTITLE } }, /* Caption */
++	{ KE_KEY, 0x800f845a, { KEY_SUBTITLE } }, /* Caption/Teletext */
++	{ KE_KEY, 0x800f844d, { KEY_TITLE } },
 +
 +	{ KE_KEY, 0x800f840c, { KEY_POWER } },
 +	{ KE_KEY, 0x800f840d, { KEY_PROG1 } }, /* Windows MCE button */
@@ -15140,8 +15151,7 @@ index 0000000..889e77e
 +	{ 0x000000002000ffee, KEY_VIDEO },
 +	{ 0x000000002100ffee, KEY_CAMERA },
 +	{ 0x000000002700ffee, KEY_DVD },
-+/* the TV key on my panel is broken, doesn't work under any OS
-+	{ 0x000000000000ffee, KEY_TV }, */
++	{ 0x000000002300ffee, KEY_TV },
 +	{ 0x000000000500ffee, KEY_PREVIOUS },
 +	{ 0x000000000700ffee, KEY_REWIND },
 +	{ 0x000000000400ffee, KEY_STOP },
