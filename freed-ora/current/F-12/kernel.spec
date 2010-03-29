@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2050 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2052 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -733,6 +733,7 @@ Patch1832: drm-nouveau-safetile-getparam.patch
 Patch1844: drm-nouveau-kconfig.patch
 Patch1845: drm-nouveau-mutex.patch
 Patch1846: drm-nouveau-update.patch
+Patch1847: drm-nouveau-d620.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -1441,6 +1442,7 @@ ApplyPatch drm-nouveau-tvout-disable.patch
 ApplyPatch drm-nouveau-safetile-getparam.patch
 ApplyPatch drm-nouveau-kconfig.patch
 ApplyPatch drm-nouveau-update.patch
+ApplyPatch drm-nouveau-d620.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2144,12 +2146,15 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 29 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.10-91
+- nouveau: fix display issues on Dell D620 laptops
+
 * Mon Mar 22 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.10-90
 - A few more imon driver button additions
 - Fix minor init issue w/topseed 0x0008 mceusb transceivers
 
 * Mon Mar 22 2010 Neil Horman <nhorman@redhat.com> 
-- Fix tg3 poll controller to not oops (bz 574696)
+- Fix tg3 poll controller to not oops (bz 574969)
 
 * Fri Mar 19 2010 John W. Linville <linville@redhat.com> 2.6.32.10-88
 - Revise "ssb: check for sprom" (#533746)
