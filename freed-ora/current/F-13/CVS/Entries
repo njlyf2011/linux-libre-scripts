@@ -106,7 +106,6 @@ D/scripts////
 /linux-2.6.30-no-pcspkr-modalias.patch/1.1/Thu Feb 18 07:44:46 2010/-kb/Tkernel-2_6_33_1-23_fc13
 /linux-2.6.31-modules-ro-nx.patch/1.2/Thu Feb 18 07:44:46 2010/-kb/Tkernel-2_6_33_1-23_fc13
 /linux-2.6.31-nx-data.patch/1.1/Thu Feb 18 07:44:06 2010/-kb/Tkernel-2_6_33_1-23_fc13
-/lirc-2.6.33.patch/1.5/dummy timestamp from new-entry+Wed Mar 24 23:51:05 2010/-kb/Tkernel-2_6_33_1-23_fc13
 /merge.pl/1.9/Thu Feb 18 07:44:07 2010/-ko/Tkernel-2_6_33_1-23_fc13
 /mirrors/1.6/dummy timestamp from new-entry//Tkernel-2_6_33_1-23_fc13
 /neuter_intel_microcode_load.patch/1.1/Thu Feb 18 07:44:46 2010/-kb/Tkernel-2_6_33_1-23_fc13
@@ -120,3 +119,4 @@ D/scripts////
 /vhost_net-rollup.patch/1.1/Thu Feb 18 07:44:07 2010/-kb/Tkernel-2_6_33_1-23_fc13
 /virt_console-fix-race.patch/1.1/Fri Mar  5 12:52:21 2010/-kb/Tkernel-2_6_33_1-23_fc13
 /virt_console-rollup.patch/1.2/Thu Feb 18 07:44:37 2010/-kb/Tkernel-2_6_33_1-23_fc13
+/lirc-2.6.33.patch/1.5/Tue Mar 30 18:32:43 2010/-kb/Tkernel-2_6_33_1-23_fc13
