@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1957 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1959 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -765,6 +765,10 @@ Patch12020: coredump-uid-pipe-check.patch
 # rhbz#533746
 Patch12021: ssb_check_for_sprom.patch
 
+# backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
+Patch12100: iwlwifi-reset-card-during-probe.patch
+Patch12101: iwlwifi-use-dma_alloc_coherent.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1409,6 +1413,10 @@ ApplyPatch coredump-uid-pipe-check.patch
 
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
+
+# backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
+ApplyPatch iwlwifi-reset-card-during-probe.patch
+ApplyPatch iwlwifi-use-dma_alloc_coherent.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2059,6 +2067,13 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 29 2010 John W. Linville <linville@redhat.com> 2.6.33.1-23
+- iwlwifi: reset card during probe (#557084)
+- iwlwifi: use dma_alloc_coherent (#574146)
+
+* Mon Mar 29 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.1-22
+- nouveau: sync with nouveau upstream
+
 * Wed Mar 24 2010 Josef Bacik <josef@toxicpanda.com> 2.6.33.1-21
 - Update btrfs so it includes the default subvolume stuff, for the rollback
   feature
