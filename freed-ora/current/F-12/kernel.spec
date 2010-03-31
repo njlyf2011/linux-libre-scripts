@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2052 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2053 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -807,6 +807,11 @@ Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 # fix tg3 + netpoll with backport of  fe234f0e5cbb880792d2d1ac0743cf8c07e9dde3
 Patch14500: linux-2.6-tg3-netpoll.patch
 
+# backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
+Patch14600: iwlwifi-fix-nfreed--.patch
+Patch14601: iwlwifi-reset-card-during-probe.patch
+Patch14602: iwlwifi-use-dma_alloc_coherent.patch
+
 # ==============================================================================
 
 %endif
@@ -1493,6 +1498,11 @@ ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
 
+# backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
+ApplyPatch iwlwifi-fix-nfreed--.patch
+ApplyPatch iwlwifi-reset-card-during-probe.patch
+ApplyPatch iwlwifi-use-dma_alloc_coherent.patch
+
 # END OF PATCH APPLICATIONS ====================================================
 
 %endif
@@ -2146,6 +2156,11 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 29 2010 John W. Linville <linville@redhat.com> 2.6.32.10-93
+- iwlwifi: fix nfreed--
+- iwlwifi: reset card during probe (#557084)
+- iwlwifi: use dma_alloc_coherent (#574146)
+
 * Mon Mar 29 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.32.10-91
 - nouveau: fix display issues on Dell D620 laptops
 
