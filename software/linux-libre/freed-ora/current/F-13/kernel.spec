@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1960 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1962 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -746,6 +746,8 @@ Patch3000: linux-2.6-btrfs-update.patch
 # NFSv4
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
 
+Patch4000: linux-2.6-cpufreq-locking.patch
+
 # VIA Nano / VX8xx updates
 
 # patches headed upstream
@@ -768,6 +770,11 @@ Patch12021: ssb_check_for_sprom.patch
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch12100: iwlwifi-reset-card-during-probe.patch
 Patch12101: iwlwifi-use-dma_alloc_coherent.patch
+
+Patch12200: acpi-ec-add-delay-before-write.patch
+Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
+
+Patch12300: r8169-offical-fix-for-CVE-2009-4537.patch
 
 %endif
 
@@ -1264,6 +1271,9 @@ ApplyPatch linux-2.6-btrfs-update.patch
 # NFSv4
 ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
+# CPUFREQ
+ApplyPatch linux-2.6-cpufreq-locking.patch
+
 # USB
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
@@ -1275,6 +1285,8 @@ ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
+ApplyPatch acpi-ec-add-delay-before-write.patch
+ApplyPatch acpi-ec-allow-multibyte-access-to-ec.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1417,6 +1429,8 @@ ApplyPatch ssb_check_for_sprom.patch
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-reset-card-during-probe.patch
 ApplyPatch iwlwifi-use-dma_alloc_coherent.patch
+
+ApplyPatch r8169-offical-fix-for-CVE-2009-4537.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2067,6 +2081,17 @@ fi
 # and build.
 
 %changelog
+* Tue Mar 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.1-26
+- r8169-offical-fix-for-CVE-2009-4537.patch
+
+* Tue Mar 30 2010 Chuck Ebbert <cebbert@redhat.com>
+- ACPI EC fixes pending upstream:
+   acpi-ec-add-delay-before-write.patch
+   acpi-ec-allow-multibyte-access-to-ec.patch
+
+* Tue Mar 30 2010 Dave Jones <davej@redhat.com>
+- Fix broken locking in cpufreq.
+
 * Tue Mar 30 2010 John W. Linville <linville@redhat.com> 2.6.33.1-24
 - Avoid null pointer dereference introduced by 'ssb: check for sprom' (#577463)
 
