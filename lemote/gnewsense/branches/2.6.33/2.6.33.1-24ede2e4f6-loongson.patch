@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 1b24895..41eced5 100644
+index 61c7163..ab045b8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -227,8 +227,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -113,7 +113,7 @@ index 1893efd..fca3fad 100644
  #
  # MIPS Malta board
 diff --git a/arch/mips/boot/compressed/Makefile b/arch/mips/boot/compressed/Makefile
-index 9df903d..ba400e9 100644
+index 9df903d..10805a3 100644
 --- a/arch/mips/boot/compressed/Makefile
 +++ b/arch/mips/boot/compressed/Makefile
 @@ -9,7 +9,7 @@
@@ -125,8 +125,13 @@ index 9df903d..ba400e9 100644
  #
  
  # compressed kernel load addr: VMLINUZ_LOAD_ADDRESS > VMLINUX_LOAD_ADDRESS + VMLINUX_SIZE
-@@ -27,15 +27,17 @@ BOOT_HEAP_SIZE := 0x400000
- KBUILD_CFLAGS := $(shell echo $(KBUILD_CFLAGS) | sed -e "s/-pg//")
+@@ -24,18 +24,21 @@ VMLINUZ_LOAD_ADDRESS := 0x$(shell [ -n "$(VMLINUX_SIZE)" -a -n "$(LOW32)" ] && p
+ BOOT_HEAP_SIZE := 0x400000
+ 
+ # Disable Function Tracer
+-KBUILD_CFLAGS := $(shell echo $(KBUILD_CFLAGS) | sed -e "s/-pg//")
++ORIG_CFLAGS := $(KBUILD_CFLAGS)
++KBUILD_CFLAGS = $(subst -pg,,$(ORIG_CFLAGS))
  
  KBUILD_CFLAGS := $(LINUXINCLUDE) $(KBUILD_CFLAGS) -D__KERNEL__ \
 -	-DBOOT_HEAP_SIZE=$(BOOT_HEAP_SIZE) -D"VMLINUX_LOAD_ADDRESS_ULL=$(VMLINUX_LOAD_ADDRESS)ull" \
@@ -2321,18 +2326,45 @@ index b71a0a4..f136b73 100644
  CONFIG_HAS_IOPORT=y
  CONFIG_HAS_DMA=y
 diff --git a/arch/mips/include/asm/ftrace.h b/arch/mips/include/asm/ftrace.h
-index 3986cd8..ce35c9a 100644
+index 3986cd8..6dbfa1e 100644
 --- a/arch/mips/include/asm/ftrace.h
 +++ b/arch/mips/include/asm/ftrace.h
-@@ -4,7 +4,7 @@
+@@ -3,8 +3,8 @@
+  * License.  See the file "COPYING" in the main directory of this archive for
   * more details.
   *
-  * Copyright (C) 2009 DSLab, Lanzhou University, China
+- * Copyright (C) 2009 DSLab, Lanzhou University, China
 - * Author: Wu Zhangjin <wuzj@lemote.com>
++ * Copyright (C) 2009, 2010 DSLab, Lanzhou University, China
 + * Author: Wu Zhangjin <wuzhangjin@gmail.com>
   */
  
  #ifndef _ASM_MIPS_FTRACE_H
+@@ -19,6 +19,14 @@
+ extern void _mcount(void);
+ #define mcount _mcount
+ 
++/*
++ * If the Instruction Pointer is in module space (0xc0000000), return true;
++ * otherwise, it is in kernel space (0x80000000), return false.
++ *
++ * FIXME: This may not work in some cases.
++ */
++#define in_module(ip) (unlikely((ip) & 0x40000000))
++
+ #define safe_load(load, src, dst, error)		\
+ do {							\
+ 	asm volatile (					\
+@@ -83,8 +91,8 @@ static inline unsigned long ftrace_call_adjust(unsigned long addr)
+ 
+ struct dyn_arch_ftrace {
+ };
++#endif /* CONFIG_DYNAMIC_FTRACE */
+ 
+-#endif /*  CONFIG_DYNAMIC_FTRACE */
+ #endif /* __ASSEMBLY__ */
+ #endif /* CONFIG_FUNCTION_TRACER */
+ #endif /* _ASM_MIPS_FTRACE_H */
 diff --git a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h b/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
 index 9947e57..16210ce 100644
 --- a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
@@ -2392,10 +2424,20 @@ index 021f77c..1cf86f3 100644
  
  #endif				/* _CS5536_H */
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h
-index 4b493d6..cac04ee 100644
+index 4b493d6..3a55976 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h
 +++ b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h
-@@ -32,4 +32,9 @@ static inline void __maybe_unused enable_mfgpt0_counter(void)
+@@ -24,12 +24,17 @@ static inline void __maybe_unused enable_mfgpt0_counter(void)
+ }
+ #endif
+ 
+-#define MFGPT_TICK_RATE 14318000
+-#define COMPARE  ((MFGPT_TICK_RATE + HZ/2) / HZ)
++#define MFGPT_TICK_RATE 14318000UL
++#define COMPARE  ((u16)(((u32)MFGPT_TICK_RATE + HZ/2) / HZ))
+ 
+ #define MFGPT_BASE	mfgpt_base
+ #define MFGPT0_CMP2	(MFGPT_BASE + 2)
  #define MFGPT0_CNT	(MFGPT_BASE + 4)
  #define MFGPT0_SETUP	(MFGPT_BASE + 6)
  
@@ -2832,18 +2874,389 @@ index e95a3cd..b5db0c8 100644
  	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
  
 diff --git a/arch/mips/kernel/ftrace.c b/arch/mips/kernel/ftrace.c
-index 68b0670..e9e64e0 100644
+index 68b0670..79c31f5 100644
 --- a/arch/mips/kernel/ftrace.c
 +++ b/arch/mips/kernel/ftrace.c
-@@ -3,7 +3,7 @@
+@@ -2,8 +2,8 @@
+  * Code for replacing ftrace calls with jumps.
   *
   * Copyright (C) 2007-2008 Steven Rostedt <srostedt@redhat.com>
-  * Copyright (C) 2009 DSLab, Lanzhou University, China
+- * Copyright (C) 2009 DSLab, Lanzhou University, China
 - * Author: Wu Zhangjin <wuzj@lemote.com>
++ * Copyright (C) 2009, 2010 DSLab, Lanzhou University, China
 + * Author: Wu Zhangjin <wuzhangjin@gmail.com>
   *
   * Thanks goes to Steven Rostedt for writing the original x86 version.
   */
+@@ -15,15 +15,52 @@
+ #include <asm/cacheflush.h>
+ #include <asm/asm.h>
+ #include <asm/asm-offsets.h>
++#include "../mm/uasm.h"
++
++#define INSN_S_R_SP	0xafb00000	/* s{d,w} R, offset(sp) */
+ 
+ #ifdef CONFIG_DYNAMIC_FTRACE
+ 
+-#define JAL 0x0c000000		/* jump & link: ip --> ra, jump to target */
+-#define ADDR_MASK 0x03ffffff	/*  op_code|addr : 31...26|25 ....0 */
+-#define jump_insn_encode(op_code, addr) \
+-	((unsigned int)((op_code) | (((addr) >> 2) & ADDR_MASK)))
++/* Before linking, the following instructions are fixed. */
++#ifdef CONFIG_CPU_LOONGSON2F
++#define INSN_NOP 0x00200825	/* or at, at, zero */
++#else
++#define INSN_NOP 0x00000000	/* nop */
++#endif
++#define INSN_B_1F_16 0x10000004	/* b 1f; offset = (16 >> 2) */
++#define INSN_B_1F_20 0x10000005	/* b 1f; offset = (20 >> 2) */
++#define INSN_B_1F_24 0x10000006	/* b 1f; offset = (24 >> 2) */
++
++/* After linking, the following instructions are fixed. */
++static unsigned int insn_jal_ftrace_caller __read_mostly;
++static unsigned int insn_lui_v1_hi16_mcount __read_mostly;
++static unsigned int insn_j_ftrace_graph_caller __maybe_unused __read_mostly;
++
++/* The following instructions are encoded in the run-time */
++/* insn: jal func; op_code|addr : 31...26|25 ....0 */
++#define INSN_JAL(addr) \
++	((unsigned int)(0x0c000000 | (((addr) >> 2) & 0x03ffffff)))
+ 
+-static unsigned int ftrace_nop = 0x00000000;
++static inline void ftrace_dyn_arch_init_insns(void)
++{
++	u32 *buf;
++	unsigned int v1;
++
++	/* lui v1, hi16_mcount */
++	v1 = 3;
++	buf = (u32 *)&insn_lui_v1_hi16_mcount;
++	UASM_i_LA_mostly(&buf, v1, MCOUNT_ADDR);
++
++	/* jal (ftrace_caller + 8), jump over the first two instruction */
++	buf = (u32 *)&insn_jal_ftrace_caller;
++	uasm_i_jal(&buf, (FTRACE_ADDR + 8));
++
++#ifdef CONFIG_FUNCTION_GRAPH_TRACER
++	/* j ftrace_graph_caller */
++	buf = (u32 *)&insn_j_ftrace_graph_caller;
++	uasm_i_j(&buf, (unsigned long)ftrace_graph_caller);
++#endif
++}
+ 
+ static int ftrace_modify_code(unsigned long ip, unsigned int new_code)
+ {
+@@ -31,7 +68,6 @@ static int ftrace_modify_code(unsigned long ip, unsigned int new_code)
+ 
+ 	/* *(unsigned int *)ip = new_code; */
+ 	safe_store_code(new_code, ip, faulted);
+-
+ 	if (unlikely(faulted))
+ 		return -EFAULT;
+ 
+@@ -40,118 +76,130 @@ static int ftrace_modify_code(unsigned long ip, unsigned int new_code)
+ 	return 0;
+ }
+ 
+-static int lui_v1;
+-static int jal_mcount;
++static inline unsigned int get_insn_b_1f(unsigned int *insn, unsigned long ip)
++{
++#ifndef KBUILD_MCOUNT_RA_ADDRESS
++	*insn = INSN_B_1F_16;
++	return 0;
++#else
++	int faulted;
++	unsigned int code;
++
++	ip -= 4;
++
++	/* code = *(unsigned int *)ip; */
++	safe_load_code(code, ip, faulted);
++	if (unlikely(faulted))
++		return -EFAULT;
++
++	if ((code & INSN_S_R_SP) != INSN_S_R_SP)
++		*insn = INSN_B_1F_20;
++	else
++		*insn = INSN_B_1F_24;
++
++	return 0;
++#endif
++}
+ 
+ int ftrace_make_nop(struct module *mod,
+ 		    struct dyn_ftrace *rec, unsigned long addr)
+ {
+ 	unsigned int new;
+-	int faulted;
+ 	unsigned long ip = rec->ip;
+ 
+-	/* We have compiled module with -mlong-calls, but compiled the kernel
+-	 * without it, we need to cope with them respectively. */
+-	if (ip & 0x40000000) {
+-		/* record it for ftrace_make_call */
+-		if (lui_v1 == 0) {
+-			/* lui_v1 = *(unsigned int *)ip; */
+-			safe_load_code(lui_v1, ip, faulted);
+-
+-			if (unlikely(faulted))
+-				return -EFAULT;
+-		}
+-
+-		/* lui v1, hi_16bit_of_mcount        --> b 1f (0x10000004)
+-		 * addiu v1, v1, low_16bit_of_mcount
+-		 * move at, ra
+-		 * jalr v1
+-		 * nop
+-		 * 				     1f: (ip + 12)
+-		 */
+-		new = 0x10000004;
+-	} else {
+-		/* record/calculate it for ftrace_make_call */
+-		if (jal_mcount == 0) {
+-			/* We can record it directly like this:
+-			 *     jal_mcount = *(unsigned int *)ip;
+-			 * Herein, jump over the first two nop instructions */
+-			jal_mcount = jump_insn_encode(JAL, (MCOUNT_ADDR + 8));
+-		}
+-
+-		/* move at, ra
+-		 * jalr v1		--> nop
+-		 */
+-		new = ftrace_nop;
+-	}
++	/*
++	 * We have compiled modules with -mlong-calls, but compiled kernel
++	 * without it, therefore, need to cope with them respectively.
++	 *
++	 * For module:
++	 *
++	 *	lui	v1, hi16_mcount		--> b	1f
++	 *	addiu	v1, v1, lo16_mcount
++	 *	move	at, ra
++	 *	jalr	v1
++	 *	 nop
++	 *					1f: (ip + 16)
++	 * For kernel:
++	 *
++	 *	move	at, ra
++	 *	jal	_mcount			--> nop
++	 *
++	 * And with the -mmcount-ra-address option, the offset may be 20 for
++	 * leaf fuction and 24 for non-leaf function.
++	 */
++
++	if (!in_module(ip))
++		new = INSN_NOP;
++	else if (get_insn_b_1f(&new, ip))
++		return -EFAULT;
++
+ 	return ftrace_modify_code(ip, new);
+ }
+ 
+-static int modified;	/* initialized as 0 by default */
+-
+ int ftrace_make_call(struct dyn_ftrace *rec, unsigned long addr)
+ {
+ 	unsigned int new;
+ 	unsigned long ip = rec->ip;
+ 
+-	/* We just need to remove the "b ftrace_stub" at the fist time! */
+-	if (modified == 0) {
+-		modified = 1;
+-		ftrace_modify_code(addr, ftrace_nop);
+-	}
+-	/* ip, module: 0xc0000000, kernel: 0x80000000 */
+-	new = (ip & 0x40000000) ? lui_v1 : jal_mcount;
++	new = in_module(ip) ? insn_lui_v1_hi16_mcount : insn_jal_ftrace_caller;
+ 
+ 	return ftrace_modify_code(ip, new);
+ }
+ 
+-#define FTRACE_CALL_IP ((unsigned long)(&ftrace_call))
+-
+ int ftrace_update_ftrace_func(ftrace_func_t func)
+ {
+ 	unsigned int new;
+ 
+-	new = jump_insn_encode(JAL, (unsigned long)func);
++	new = INSN_JAL((unsigned long)func);
+ 
+-	return ftrace_modify_code(FTRACE_CALL_IP, new);
++	return ftrace_modify_code((unsigned long)(&ftrace_call), new);
+ }
+ 
+ int __init ftrace_dyn_arch_init(void *data)
+ {
++	ftrace_dyn_arch_init_insns();
++
++	/*
++	 * We are safe to remove the "b ftrace_stub" for the current
++	 * ftrace_caller() is almost empty (only the stack operations), and
++	 * most importantly, the calling to mcount will be disabled later in
++	 * ftrace_init(), then there is no 'big' overhead. And in the future,
++	 * we are hoping the function_trace_stop is initialized as 1 then we
++	 * can eventually remove that 'useless' "b ftrace_stub" and the
++	 * following nop. Currently, although we can call ftrace_stop() to set
++	 * function_trace_stop as 1, but it will change the behavior of the
++	 * Function Tracer.
++	 */
++	ftrace_modify_code(MCOUNT_ADDR, INSN_NOP);
++
+ 	/* The return code is retured via data */
+ 	*(unsigned long *)data = 0;
+ 
+ 	return 0;
+ }
+-#endif				/* CONFIG_DYNAMIC_FTRACE */
++#endif	/* CONFIG_DYNAMIC_FTRACE */
+ 
+ #ifdef CONFIG_FUNCTION_GRAPH_TRACER
+ 
+ #ifdef CONFIG_DYNAMIC_FTRACE
+-
+ extern void ftrace_graph_call(void);
+-#define JMP	0x08000000	/* jump to target directly */
+-#define CALL_FTRACE_GRAPH_CALLER \
+-	jump_insn_encode(JMP, (unsigned long)(&ftrace_graph_caller))
+ #define FTRACE_GRAPH_CALL_IP	((unsigned long)(&ftrace_graph_call))
+ 
+ int ftrace_enable_ftrace_graph_caller(void)
+ {
+ 	return ftrace_modify_code(FTRACE_GRAPH_CALL_IP,
+-				  CALL_FTRACE_GRAPH_CALLER);
++			insn_j_ftrace_graph_caller);
+ }
+ 
+ int ftrace_disable_ftrace_graph_caller(void)
+ {
+-	return ftrace_modify_code(FTRACE_GRAPH_CALL_IP, ftrace_nop);
++	return ftrace_modify_code(FTRACE_GRAPH_CALL_IP, INSN_NOP);
+ }
+-
+-#endif				/* !CONFIG_DYNAMIC_FTRACE */
++#endif	/* !CONFIG_DYNAMIC_FTRACE */
+ 
+ #ifndef KBUILD_MCOUNT_RA_ADDRESS
+-#define S_RA_SP	(0xafbf << 16)	/* s{d,w} ra, offset(sp) */
+-#define S_R_SP	(0xafb0 << 16)  /* s{d,w} R, offset(sp) */
+-#define OFFSET_MASK	0xffff	/* stack offset range: 0 ~ PT_SIZE */
++#define INSN_S_RA_SP	0xafbf0000	/* s{d,w} ra, offset(sp) */
++#define STACK_OFFSET_MASK	0xffff	/* stack offset range: 0 ~ PT_SIZE */
+ 
+ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+ 				     unsigned long parent,
+@@ -162,35 +210,35 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+ 	unsigned int code;
+ 	int faulted;
+ 
+-	/* in module or kernel? */
+-	if (self_addr & 0x40000000) {
+-		/* module: move to the instruction "lui v1, HI_16BIT_OF_MCOUNT" */
+-		ip = self_addr - 20;
+-	} else {
+-		/* kernel: move to the instruction "move ra, at" */
+-		ip = self_addr - 12;
+-	}
++	/*
++	 * For module, move the ip from calling site of mcount to the
++	 * instruction "lui v1, hi_16bit_of_mcount"(offset is 20), but for
++	 * kernel, move to the instruction "move ra, at"(offset is 12)
++	 */
++	ip = self_addr - (in_module(self_addr) ? 20 : 12);
+ 
+-	/* search the text until finding the non-store instruction or "s{d,w}
+-	 * ra, offset(sp)" instruction */
++	/*
++	 * search the text until finding the non-store instruction or "s{d,w}
++	 * ra, offset(sp)" instruction
++	 */
+ 	do {
+ 		ip -= 4;
+ 
+ 		/* get the code at "ip": code = *(unsigned int *)ip; */
+ 		safe_load_code(code, ip, faulted);
+-
+ 		if (unlikely(faulted))
+ 			return 0;
+ 
+-		/* If we hit the non-store instruction before finding where the
++		/*
++		 * If we hit the non-store instruction before finding where the
+ 		 * ra is stored, then this is a leaf function and it does not
+-		 * store the ra on the stack. */
+-		if ((code & S_R_SP) != S_R_SP)
++		 * store the ra on the stack.
++		 */
++		if ((code & INSN_S_R_SP) != INSN_S_R_SP)
+ 			return parent_addr;
++	} while (((code & INSN_S_RA_SP) != INSN_S_RA_SP));
+ 
+-	} while (((code & S_RA_SP) != S_RA_SP));
+-
+-	sp = fp + (code & OFFSET_MASK);
++	sp = fp + (code & STACK_OFFSET_MASK);
+ 
+ 	/* ra = *(unsigned long *)sp; */
+ 	safe_load_stack(ra, sp, faulted);
+@@ -201,8 +249,7 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+ 		return sp;
+ 	return 0;
+ }
+-
+-#endif
++#endif	/* !KBUILD_MCOUNT_RA_ADDRESS */
+ 
+ /*
+  * Hook the return address and push it in the stack of return addrs
+@@ -211,16 +258,17 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+ void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
+ 			   unsigned long fp)
+ {
++	int faulted;
+ 	unsigned long old;
+ 	struct ftrace_graph_ent trace;
+ 	unsigned long return_hooker = (unsigned long)
+ 	    &return_to_handler;
+-	int faulted;
+ 
+ 	if (unlikely(atomic_read(&current->tracing_graph_pause)))
+ 		return;
+ 
+-	/* "parent" is the stack address saved the return address of the caller
++	/*
++	 * "parent" is the stack address saved the return address of the caller
+ 	 * of _mcount.
+ 	 *
+ 	 * if the gcc < 4.5, a leaf function does not save the return address
+@@ -241,12 +289,14 @@ void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
+ 	if (unlikely(faulted))
+ 		goto out;
+ #ifndef KBUILD_MCOUNT_RA_ADDRESS
+-	parent = (unsigned long *)ftrace_get_parent_addr(self_addr, old,
+-							 (unsigned long)parent,
+-							 fp);
+-	/* If fails when getting the stack address of the non-leaf function's
+-	 * ra, stop function graph tracer and return */
+-	if (parent == 0)
++	parent = (unsigned long *)ftrace_get_parent_addr(
++			self_addr, old, (unsigned long)parent, fp);
++
++	/*
++	 * If fails on getting the stack address of the non-leaf function's ra,
++	 * stop function graph tracer and return
++	 */
++	if (unlikely(parent == 0))
+ 		goto out;
+ #endif
+ 	/* *parent = return_hooker; */
+@@ -272,4 +322,4 @@ out:
+ 	ftrace_graph_stop();
+ 	WARN_ON(1);
+ }
+-#endif				/* CONFIG_FUNCTION_GRAPH_TRACER */
++#endif	/* CONFIG_FUNCTION_GRAPH_TRACER */
 diff --git a/arch/mips/kernel/mcount.S b/arch/mips/kernel/mcount.S
 index 0a9cfdb..6851fc9 100644
 --- a/arch/mips/kernel/mcount.S
@@ -3853,7 +4266,7 @@ index d7af2e6..ff0d94a 100644
  	if (irq == I8042_KBD_IRQ)
  		return 1;
 diff --git a/arch/mips/loongson/lemote-2f/reset.c b/arch/mips/loongson/lemote-2f/reset.c
-index 51d1a60..664002e 100644
+index 51d1a60..66e4563 100644
 --- a/arch/mips/loongson/lemote-2f/reset.c
 +++ b/arch/mips/loongson/lemote-2f/reset.c
 @@ -3,7 +3,7 @@
@@ -3865,7 +4278,7 @@ index 51d1a60..664002e 100644
   *
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
-@@ -20,7 +20,7 @@
+@@ -20,13 +20,14 @@
  #include <loongson.h>
  
  #include <cs5536/cs5536.h>
@@ -3874,42 +4287,15 @@ index 51d1a60..664002e 100644
  
  static void reset_cpu(void)
  {
-@@ -32,6 +32,7 @@ static void reset_cpu(void)
- }
- 
- /* reset support for fuloong2f */
-+DEFINE_SPINLOCK(msr_lock);
- 
- static void fl2f_reboot(void)
- {
-@@ -46,9 +47,13 @@ static void fl2f_reboot(void)
+ 	/*
+-	 * reset cpu to full speed, this is needed when enabling cpu frequency
+-	 * scalling
++	 * reset cpu to full speed, this is needed to avoid the machine reboot
++	 * very slowly for the cpu speed may be set as a low level when the
++	 * support of cpu frequency scaling is enabled.
  	 */
- 	{
- 		u32 hi, lo;
-+		unsigned long flags;
-+
-+		spin_lock_irqsave(&msr_lock, flags);
- 		_rdmsr(DIVIL_MSR_REG(DIVIL_SOFT_RESET), &hi, &lo);
- 		lo |= 0x00000001;
- 		_wrmsr(DIVIL_MSR_REG(DIVIL_SOFT_RESET), hi, lo);
-+		spin_unlock_irqrestore(&msr_lock, flags);
- 	}
+ 	LOONGSON_CHIPCFG0 |= 0x7;
  }
- 
-@@ -56,9 +61,13 @@ static void fl2f_shutdown(void)
- {
- 	u32 hi, lo, val;
- 	int gpio_base;
-+	unsigned long flags;
- 
- 	/* get gpio base */
-+	spin_lock_irqsave(&msr_lock, flags);
- 	_rdmsr(DIVIL_MSR_REG(DIVIL_LBAR_GPIO), &hi, &lo);
-+	spin_unlock_irqrestore(&msr_lock, flags);
-+
- 	gpio_base = lo & 0xff00;
- 
- 	/* make cs5536 gpio13 output enable */
 diff --git a/arch/mips/oprofile/common.c b/arch/mips/oprofile/common.c
 index 7832ad2..ee46c82 100644
 --- a/arch/mips/oprofile/common.c
@@ -3954,7 +4340,7 @@ index caf2ede..4b9768d 100644
  	/* setting the USB2.0 micro frame length */
  	pci_write_config_dword(pdev, PCI_EHCI_FLADJ_REG, 0x2000);
 diff --git a/arch/mips/pci/ops-loongson2.c b/arch/mips/pci/ops-loongson2.c
-index aa5d3da..2bb4057 100644
+index aa5d3da..8ee7fe2 100644
 --- a/arch/mips/pci/ops-loongson2.c
 +++ b/arch/mips/pci/ops-loongson2.c
 @@ -1,13 +1,11 @@
@@ -3972,6 +4358,43 @@ index aa5d3da..2bb4057 100644
   *
   *  This program is free software; you can distribute it and/or modify it
   *  under the terms of the GNU General Public License (Version 2) as
+@@ -182,15 +180,22 @@ struct pci_ops loongson_pci_ops = {
+ };
+ 
+ #ifdef CONFIG_CS5536
++
++DEFINE_RAW_SPINLOCK(msr_lock);
++
+ void _rdmsr(u32 msr, u32 *hi, u32 *lo)
+ {
+ 	struct pci_bus bus = {
+ 		.number = PCI_BUS_CS5536
+ 	};
+ 	u32 devfn = PCI_DEVFN(PCI_IDSEL_CS5536, 0);
++	unsigned long flags;
++
++	raw_spin_lock_irqsave(&msr_lock, flags);
+ 	loongson_pcibios_write(&bus, devfn, PCI_MSR_ADDR, 4, msr);
+ 	loongson_pcibios_read(&bus, devfn, PCI_MSR_DATA_LO, 4, lo);
+ 	loongson_pcibios_read(&bus, devfn, PCI_MSR_DATA_HI, 4, hi);
++	raw_spin_unlock_irqrestore(&msr_lock, flags);
+ }
+ EXPORT_SYMBOL(_rdmsr);
+ 
+@@ -200,9 +205,13 @@ void _wrmsr(u32 msr, u32 hi, u32 lo)
+ 		.number = PCI_BUS_CS5536
+ 	};
+ 	u32 devfn = PCI_DEVFN(PCI_IDSEL_CS5536, 0);
++	unsigned long flags;
++
++	raw_spin_lock_irqsave(&msr_lock, flags);
+ 	loongson_pcibios_write(&bus, devfn, PCI_MSR_ADDR, 4, msr);
+ 	loongson_pcibios_write(&bus, devfn, PCI_MSR_DATA_LO, 4, lo);
+ 	loongson_pcibios_write(&bus, devfn, PCI_MSR_DATA_HI, 4, hi);
++	raw_spin_unlock_irqrestore(&msr_lock, flags);
+ }
+ EXPORT_SYMBOL(_wrmsr);
+ #endif
 diff --git a/arch/mips/power/cpu.c b/arch/mips/power/cpu.c
 index 7995df4..26a6ef1 100644
 --- a/arch/mips/power/cpu.c
@@ -27279,10 +27702,10 @@ index 0000000..ab18683
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8187_core.c b/drivers/net/wireless/rtl8187b/r8187_core.c
 new file mode 100644
-index 0000000..063dd06
+index 0000000..08d9cce
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8187_core.c
-@@ -0,0 +1,7042 @@
+@@ -0,0 +1,7046 @@
 +/*
 +   This is part of rtl8187 OpenSource driver - v 0.1
 +   Copyright (C) Andrea Merello 2005  <andreamrl@tiscali.it> 
@@ -28376,7 +28799,11 @@ index 0000000..063dd06
 +{
 +	struct proc_dir_entry *e;
 +	struct r8180_priv *priv = (struct r8180_priv *)ieee80211_priv(dev);
-+	priv->dir_dev = create_proc_entry(dev->name, 
++	
++	if (rtl8180_proc)
++		priv->dir_dev = rtl8180_proc;
++	else
++		priv->dir_dev = create_proc_entry(dev->name, 
 +					  S_IFDIR | S_IRUGO | S_IXUGO, 
 +					  rtl8180_proc);
 +	if (!priv->dir_dev) {
@@ -38086,10 +38513,10 @@ index 0000000..2f4d8fe
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..47c20f9
+index 0000000..5858a53
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1194 @@
+@@ -0,0 +1,1199 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -38286,7 +38713,7 @@ index 0000000..47c20f9
 +		break;
 +	case POWER_SUPPLY_PROP_TIME_TO_EMPTY_NOW:
 +		/* seconds */
-+		val->intval = bat_in ? (curr_cap - 3) * 54 + 142 : 00;
++		val->intval = bat_in ? (curr_cap - 3) * 54 + 142 : 0;
 +		break;
 +	case POWER_SUPPLY_PROP_STATUS:
 +		if (!bat_in)
@@ -38320,6 +38747,9 @@ index 0000000..47c20f9
 +				health = POWER_SUPPLY_HEALTH_OVERHEAT;
 +		}
 +		val->intval = health;
++		break;
++	case POWER_SUPPLY_PROP_CHARGE_NOW:	/* 1/100(%)*1000 µAh */
++		val->intval = curr_cap * get_bat_info(FULLCHG_CAP) * 10;
 +		break;
 +	default:
 +		return -EINVAL;
@@ -38361,13 +38791,13 @@ index 0000000..47c20f9
 +	switch (psp) {
 +	/* Fixed information */
 +	case POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN:
-+		val->intval = get_bat_info(DESIGN_CAP) * 1000;	/* mV -> µV */
++		val->intval = get_bat_info(DESIGN_VOL) * 1000;	/* mV -> µV */
 +		break;
 +	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
-+		val->intval = get_bat_info(DESIGN_VOL) * 1000;	/* mA -> µA */
++		val->intval = get_bat_info(DESIGN_CAP) * 1000;	/* mAh->µAh */
 +		break;
 +	case POWER_SUPPLY_PROP_CHARGE_FULL:
-+		val->intval = get_bat_info(FULLCHG_CAP) * 1000;	/* µA */
++		val->intval = get_bat_info(FULLCHG_CAP) * 1000;	/* µAh */
 +		break;
 +	case POWER_SUPPLY_PROP_MANUFACTURER:
 +		val->strval = (ec_read(REG_BAT_VENDOR) ==
@@ -38396,6 +38826,8 @@ index 0000000..47c20f9
 +	POWER_SUPPLY_PROP_PRESENT,
 +	POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN,
 +	POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN,
++	POWER_SUPPLY_PROP_CHARGE_FULL,
++	POWER_SUPPLY_PROP_CHARGE_NOW,
 +	POWER_SUPPLY_PROP_CURRENT_NOW,
 +	POWER_SUPPLY_PROP_VOLTAGE_NOW,
 +	POWER_SUPPLY_PROP_HEALTH,
