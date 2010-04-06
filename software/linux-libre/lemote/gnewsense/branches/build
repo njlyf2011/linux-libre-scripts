@@ -86,7 +86,9 @@ ln -s .patches $srctree/patches
 cd $srctree
 quilt push lxo-config.patch
 make-kpkg --rootcmd fakeroot --initrd --revision $rev debian
-quilt push -a
+if quilt next; then
+  quilt push -a
+fi
 find .pc -perm 000 -print0 | xargs --no-run-if-empty -0 chmod 400
 
 if $prep; then
