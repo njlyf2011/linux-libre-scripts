@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2054 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2059 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +54,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -659,6 +659,7 @@ Patch270: linux-2.6-debug-taint-vm.patch
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
+Patch305: linux-2.6-usb-wwan-update.patch
 
 Patch310: linux-2.6-autoload-wmi.patch
 # wmi autoload fixes
@@ -712,7 +713,6 @@ Patch1551: linux-2.6-ksm-kvm.patch
 
 # fbdev multi-card fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
-Patch1702: linux-2.6-efi-handover.fix
 
 # nouveau + drm fixes
 Patch1810: drm-upgrayedd.patch
@@ -725,7 +725,8 @@ Patch1820: drm-intel-no-tv-hotplug.patch
 #Patch1821: drm-page-flip.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
-#Patch1825: drm-intel-pm.patch
+Patch1825: drm-intel-acpi-populate-didl.patch
+Patch1826: drm-intel-make-lvds-work.patch
 #Patch1827: linux-2.6-intel-agp-clear-gtt.patch
 Patch1828: drm-nouveau-g80-ctxprog.patch
 Patch1831: drm-nouveau-tvout-disable.patch
@@ -754,6 +755,8 @@ Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 
 # fs fixes
 
+# ext4/quota
+
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
@@ -780,7 +783,6 @@ Patch12200: add-appleir-usb-driver.patch
 Patch12311: fix-ima-null-ptr-deref.patch
 
 Patch12315: fix-abrtd.patch
-Patch12316: coredump-uid-pipe-check.patch
 Patch12319: vgaarb-fix-userspace-ptr-deref.patch
 
 # cve-2009-4537 [not upstream]
@@ -792,7 +794,6 @@ Patch12340: ice1712-fix-revo71-mixer-names.patch
 # rhbz#567530
 Patch12350: tcp-fix-icmp-rto-war.patch
 
-Patch12360: iwlwifi-silence-tfds-in-queue-message.patch
 
 # rhbz#572653
 Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
@@ -801,16 +802,12 @@ Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 Patch12380: ssb_check_for_sprom.patch
 
 # fix regression caused by dropping these (#571638)
-Patch14455: tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
-Patch14456: tg3-06-fix-5906-transmit-hangs.patch
 
 # fix tg3 + netpoll with backport of  fe234f0e5cbb880792d2d1ac0743cf8c07e9dde3
-Patch14500: linux-2.6-tg3-netpoll.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch14600: iwlwifi-fix-nfreed--.patch
 Patch14601: iwlwifi-reset-card-during-probe.patch
-Patch14602: iwlwifi-use-dma_alloc_coherent.patch
 
 # ==============================================================================
 
@@ -1323,6 +1320,7 @@ ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
+ApplyPatch linux-2.6-usb-wwan-update.patch
 
 # WMI
 ApplyPatch linux-2.6-autoload-wmi.patch
@@ -1435,13 +1433,14 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
-ApplyPatch linux-2.6-efi-handover.fix
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
 ApplyPatch drm-upgrayed-fixes.patch
 #ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-acpi-populate-didl.patch
+ApplyPatch drm-intel-make-lvds-work.patch
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
 ApplyPatch drm-nouveau-tvout-disable.patch
 ApplyPatch drm-nouveau-safetile-getparam.patch
@@ -1473,7 +1472,6 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch fix-ima-null-ptr-deref.patch
 
 ApplyPatch fix-abrtd.patch
-ApplyPatch coredump-uid-pipe-check.patch
 ApplyPatch vgaarb-fix-userspace-ptr-deref.patch
 
 # cve-2009-4537
@@ -1485,12 +1483,8 @@ ApplyPatch ice1712-fix-revo71-mixer-names.patch
 # rhbz#567530
 ApplyPatch tcp-fix-icmp-rto-war.patch
 
-ApplyPatch tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
-ApplyPatch tg3-06-fix-5906-transmit-hangs.patch
 
-ApplyPatch linux-2.6-tg3-netpoll.patch
 
-ApplyPatch iwlwifi-silence-tfds-in-queue-message.patch
 
 # rhbz#572653
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
@@ -1501,7 +1495,6 @@ ApplyPatch ssb_check_for_sprom.patch
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-fix-nfreed--.patch
 ApplyPatch iwlwifi-reset-card-during-probe.patch
-ApplyPatch iwlwifi-use-dma_alloc_coherent.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2156,6 +2149,41 @@ fi
 # and build.
 
 %changelog
+* Mon Apr  5 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjust patch-libre-2.6.32.11 for deblobbed tree.
+
+* Mon Apr 05 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.11-99
+- Fix oops in lirc_it87 driver (#579270)
+- Support more imon 0xffdc key combinations
+
+* Sat Apr 03 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.11-98
+- Linux 2.6.32.11
+- Reverted: we already have in our DRM:
+    drm-edid-unify-detailed-block-parsing-between-base-and-extension-blocks.patch
+    drm-i915-fix-gpio-register-detection-logic-for-bios-without-vbt.patch
+- Reverted: already in linux-2.6-usb-wwan-update.patch:
+    usb-qcserial-add-new-device-ids.patch
+- Dropped patches merged upstream:
+    linux-2.6-delalloc-quota-fixes.patch
+    linux-2.6-efi-handover.fix
+    coredump-uid-pipe-check.patch
+    tg3-05-assign-flags-to-fixes-in-start_xmit_dma_bug.patch
+    tg3-06-fix-5906-transmit-hangs.patch
+    linux-2.6-tg3-netpoll.patch
+    iwlwifi-silence-tfds-in-queue-message.patch
+    iwlwifi-use-dma_alloc_coherent.patch
+- Fixups:
+    drm-upgrayedd.patch: lib/lcm.o was added
+    fix-abrtd.patch: coredump-uid-pipe-check went upstream
+
+* Thu Apr 01 2010 Eric Sandeen <sandeen@redhat.com>
+- Fix quota WARN_ON for ext4 (#521914)
+
+* Thu Apr 01 2010 Matthew Garrett <mjg@redhat.com>
+- drm-intel-acpi-populate-didl.patch: Fix backlight hotkeys on some hardware
+- drm-intel-make-lvds-work.patch: Fix screen not turning back on on lid open
+- linux-2.6-usb-wwan-update.patch: Update wwan code and fix qcserial
+
 * Tue Mar 30 2010 John W. Linville <linville@redhat.com> 2.6.32.10-94
 - Avoid null pointer dereference introduced by 'ssb: check for sprom' (#577463)
 
