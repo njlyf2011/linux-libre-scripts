@@ -8,14 +8,33 @@ Summary: The Linux kernel
 # be 0.
 %global released_kernel 1
 
-# Versions of various parts
+# Save original buildid for later if it's defined
+%if 0%{?buildid:1}
+%global orig_buildid %{buildid}
+%undefine buildid
+%endif
 
 # Polite request for people who spin their own kernel rpms:
 # please modify the "buildid" define in a way that identifies
 # that the kernel isn't the stock distribution kernel, for example,
-# by setting the define to ".local" or ".bz123456"
+# by setting the define to ".local" or ".bz123456". This will be
+# appended to the full kernel version.
+#
+# (Uncomment the '#' and both spaces below to set the buildid.)
 #
 # % define buildid .local
+
+# buildid can also be specified on the rpmbuild command line
+# by adding --define="buildid .whatever". If both kinds of buildid
+# are specified they will be concatenated together.
+%if 0%{?orig_buildid:1}
+%if 0%{?buildid:1}
+%global srpm_buildid %{buildid}
+%define buildid %{srpm_buildid}%{orig_buildid}
+%else
+%define buildid %{orig_buildid}
+%endif
+%endif
 
 # fedora_build defines which build revision of this kernel version we're
 # building. Rather than incrementing forever, as with the prior versioning
@@ -29,7 +48,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1962 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1971 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +73,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -661,6 +680,7 @@ Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
 Patch305: linux-2.6-fix-btusb-autosuspend.patch
+Patch310: linux-2.6-usb-wwan-update.patch
 
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
@@ -721,6 +741,10 @@ Patch1818: drm-nouveau-updates.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
+# make sure the lvds comes back on lid open
+Patch1825: drm-intel-make-lvds-work.patch
+# make brightness hotkeys work on some machines
+Patch1826: drm-intel-acpi-populate-didl.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -762,19 +786,15 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 Patch12018: neuter_intel_microcode_load.patch
 
 Patch12019: linux-2.6-umh-refactor.patch
-Patch12020: coredump-uid-pipe-check.patch
 
 # rhbz#533746
 Patch12021: ssb_check_for_sprom.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch12100: iwlwifi-reset-card-during-probe.patch
-Patch12101: iwlwifi-use-dma_alloc_coherent.patch
 
 Patch12200: acpi-ec-add-delay-before-write.patch
 Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
-
-Patch12300: r8169-offical-fix-for-CVE-2009-4537.patch
 
 %endif
 
@@ -1279,13 +1299,15 @@ ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 #ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
+ApplyPatch linux-2.6-usb-wwan-update.patch
 
 # WMI
 
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch acpi-ec-add-delay-before-write.patch
+# Breaks boot on lenovo t410
+#ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch acpi-ec-allow-multibyte-access-to-ec.patch
 
 # Various low-impact patches to aid debugging.
@@ -1395,6 +1417,8 @@ ApplyPatch drm-nouveau-updates.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch drm-intel-acpi-populate-didl.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1421,16 +1445,12 @@ ApplyPatch neuter_intel_microcode_load.patch
 
 # Refactor UserModeHelper code & satisfy abrt recursion check request
 ApplyPatch linux-2.6-umh-refactor.patch
-ApplyPatch coredump-uid-pipe-check.patch
 
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-reset-card-during-probe.patch
-ApplyPatch iwlwifi-use-dma_alloc_coherent.patch
-
-ApplyPatch r8169-offical-fix-for-CVE-2009-4537.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2081,6 +2101,47 @@ fi
 # and build.
 
 %changelog
+* Mon Apr  5 2010 Alexandre Oliva <lxoliva@fsfla.org>
+- Adjusted patch-libre-2.6.33.2 for deblobbed sources.
+
+* Mon Apr 05 2010 Chuck Ebbert <cebbert@redhat.com>
+- Build eeepc-laptop driver for x86_64 (#565582)
+
+* Mon Apr 05 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.33.2
+- Dropped patches merged upstream:
+    coredump-uid-pipe-check.patch
+    iwlwifi-use-dma_alloc_coherent.patch
+    r8169-offical-fix-for-CVE-2009-4537.patch
+- Dropped from drm-nouveau-updates.patch:
+    "drm/nouveau: report unknown connector state if lid closed"
+- New sparc64 config option:
+    CONFIG_FB_XVR1000=y
+- Reverted from upstream:
+    usb-qcserial-add-new-device-ids.patch: Already in wwan-update patch
+
+* Mon Apr 05 2010 Chuck Ebbert <cebbert@redhat.com>
+- Comment out acpi-ec-add-delay-before-write.patch: breaks
+  boot on some machines.
+
+* Mon Apr 05 2010 Jarod Wilson <jarod@redhat.com> 2.6.33.1-32
+- Fix oops in lirc_it87 driver (#579270)
+- Support more imon 0xffdc key combinations
+
+* Sat Apr 03 2010 Chuck Ebbert <cebbert@redhat.com>
+- Build all of the DVB frontend drivers instead of just the automatically
+  selected ones. (#578755)
+
+* Thu Apr 01 2010 Matthew Garrett <mjg@redhat.com>
+- drm-intel-acpi-populate-didl.patch: Fix brightness hotkeys on some machines
+- linux-2.6-usb-wwan-update.patch: Update wwan code and fix qcserial
+
+* Wed Mar 31 2010 Matthew Garrett <mjg@redhat.com>
+- drm-intel-make-lvds-work.patch: Make sure LVDS gets turned back on
+
+* Tue Mar 30 2010 Chuck Ebbert <cebbert@redhat.com>
+- Allow setting buildid on both command line and in the SRPM.
+
 * Tue Mar 30 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.1-26
 - r8169-offical-fix-for-CVE-2009-4537.patch
 

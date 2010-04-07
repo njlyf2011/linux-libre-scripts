@@ -107,15 +107,6 @@ should work just fine.
 
 Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
 
-drm/nouveau: report unknown connector state if lid closed
-
-This is in preference to disconnected.  If there's no other outputs
-connected this will cause LVDS to be programmed even with the lid
-closed rather than having X fail to start because of no available
-outputs.
-
-Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
-
 drm/nouveau: use ALIGN instead of open coding it
 
 CC: Ben Skeggs <bskeggs@redhat.com>
@@ -329,7 +320,7 @@ Signed-off-by: Francisco Jerez <currojerez@riseup.net>
  drivers/gpu/drm/nouveau/nouveau_bo.c        |   66 +-
  drivers/gpu/drm/nouveau/nouveau_calc.c      |    4 +-
  drivers/gpu/drm/nouveau/nouveau_channel.c   |   15 +-
- drivers/gpu/drm/nouveau/nouveau_connector.c |  169 ++-
+ drivers/gpu/drm/nouveau/nouveau_connector.c |  163 ++-
  drivers/gpu/drm/nouveau/nouveau_connector.h |    3 +-
  drivers/gpu/drm/nouveau/nouveau_debugfs.c   |   18 +-
  drivers/gpu/drm/nouveau/nouveau_dma.c       |    5 +
@@ -360,7 +351,7 @@ Signed-off-by: Francisco Jerez <currojerez@riseup.net>
  drivers/gpu/drm/nouveau/nv50_graph.c        |  103 +-
  drivers/gpu/drm/nouveau/nv50_grctx.c        | 2372 +++++++++++++++++++++++++++
  drivers/gpu/drm/nouveau/nv50_instmem.c      |   18 +-
- 37 files changed, 3790 insertions(+), 675 deletions(-)
+ 37 files changed, 3786 insertions(+), 673 deletions(-)
  create mode 100644 drivers/gpu/drm/nouveau/nv50_fb.c
  create mode 100644 drivers/gpu/drm/nouveau/nv50_grctx.c
 
@@ -1876,7 +1867,7 @@ index d2f6335..14afe1e 100644
  		drm_connector_property_set_value(connector,
  			dev->mode_config.dvi_i_subconnector_property,
  			nv_encoder->dcb->type == OUTPUT_TMDS ?
-@@ -236,15 +236,17 @@ nouveau_connector_detect(struct drm_connector *connector)
+@@ -236,7 +236,7 @@ nouveau_connector_detect(struct drm_connector *connector)
  	struct nouveau_i2c_chan *i2c;
  	int type, flags;
  
@@ -1884,20 +1875,8 @@ index d2f6335..14afe1e 100644
 +	if (nv_connector->dcb->type == DCB_CONNECTOR_LVDS)
  		nv_encoder = find_encoder_by_type(connector, OUTPUT_LVDS);
  	if (nv_encoder && nv_connector->native_mode) {
-+		unsigned status = connector_status_connected;
-+
- #ifdef CONFIG_ACPI
- 		if (!nouveau_ignorelid && !acpi_lid_open())
--			return connector_status_disconnected;
-+			status = connector_status_unknown;
- #endif
- 		nouveau_connector_set_encoder(connector, nv_encoder);
--		return connector_status_connected;
-+		return status;
- 	}
- 
- 	/* Cleanup the previous EDID block. */
-@@ -279,7 +281,7 @@ nouveau_connector_detect(struct drm_connector *connector)
+ 		unsigned status = connector_status_connected;
+@@ -279,7 +279,7 @@ nouveau_connector_detect(struct drm_connector *connector)
  		 * same i2c channel so the value returned from ddc_detect
  		 * isn't necessarily correct.
  		 */
@@ -1906,7 +1885,7 @@ index d2f6335..14afe1e 100644
  			if (nv_connector->edid->input & DRM_EDID_INPUT_DIGITAL)
  				type = OUTPUT_TMDS;
  			else
-@@ -300,7 +302,7 @@ nouveau_connector_detect(struct drm_connector *connector)
+@@ -300,7 +300,7 @@ nouveau_connector_detect(struct drm_connector *connector)
  
  detect_analog:
  	nv_encoder = find_encoder_by_type(connector, OUTPUT_ANALOG);
@@ -1915,7 +1894,7 @@ index d2f6335..14afe1e 100644
  		nv_encoder = find_encoder_by_type(connector, OUTPUT_TV);
  	if (nv_encoder) {
  		struct drm_encoder *encoder = to_drm_encoder(nv_encoder);
-@@ -321,11 +323,11 @@ detect_analog:
+@@ -321,11 +321,11 @@ detect_analog:
  static void
  nouveau_connector_force(struct drm_connector *connector)
  {
@@ -1929,7 +1908,7 @@ index d2f6335..14afe1e 100644
  		if (connector->force == DRM_FORCE_ON_DIGITAL)
  			type = OUTPUT_TMDS;
  		else
-@@ -335,7 +337,7 @@ nouveau_connector_force(struct drm_connector *connector)
+@@ -335,7 +335,7 @@ nouveau_connector_force(struct drm_connector *connector)
  
  	nv_encoder = find_encoder_by_type(connector, type);
  	if (!nv_encoder) {
@@ -1938,7 +1917,7 @@ index d2f6335..14afe1e 100644
  			 drm_get_connector_name(connector));
  		connector->status = connector_status_disconnected;
  		return;
-@@ -369,7 +371,7 @@ nouveau_connector_set_property(struct drm_connector *connector,
+@@ -369,7 +369,7 @@ nouveau_connector_set_property(struct drm_connector *connector,
  		}
  
  		/* LVDS always needs gpu scaling */
@@ -1947,7 +1926,7 @@ index d2f6335..14afe1e 100644
  		    value == DRM_MODE_SCALE_NONE)
  			return -EINVAL;
  
-@@ -535,7 +537,7 @@ nouveau_connector_get_modes(struct drm_connector *connector)
+@@ -535,7 +535,7 @@ nouveau_connector_get_modes(struct drm_connector *connector)
  	/* If we're not LVDS, destroy the previous native mode, the attached
  	 * monitor could have changed.
  	 */
@@ -1956,7 +1935,7 @@ index d2f6335..14afe1e 100644
  	    nv_connector->native_mode) {
  		drm_mode_destroy(dev, nv_connector->native_mode);
  		nv_connector->native_mode = NULL;
-@@ -563,7 +565,7 @@ nouveau_connector_get_modes(struct drm_connector *connector)
+@@ -563,7 +563,7 @@ nouveau_connector_get_modes(struct drm_connector *connector)
  		ret = get_slave_funcs(nv_encoder)->
  			get_modes(to_drm_encoder(nv_encoder), connector);
  
@@ -1965,7 +1944,7 @@ index d2f6335..14afe1e 100644
  		ret += nouveau_connector_scaler_modes_add(connector);
  
  	return ret;
-@@ -613,6 +615,9 @@ nouveau_connector_mode_valid(struct drm_connector *connector,
+@@ -613,6 +613,9 @@ nouveau_connector_mode_valid(struct drm_connector *connector,
  
  		clock *= 3;
  		break;
@@ -1975,7 +1954,7 @@ index d2f6335..14afe1e 100644
  	}
  
  	if (clock < min_clock)
-@@ -680,7 +685,7 @@ nouveau_connector_create_lvds(struct drm_device *dev,
+@@ -680,7 +683,7 @@ nouveau_connector_create_lvds(struct drm_device *dev,
  	/* Firstly try getting EDID over DDC, if allowed and I2C channel
  	 * is available.
  	 */
@@ -1984,7 +1963,7 @@ index d2f6335..14afe1e 100644
  		i2c = nouveau_i2c_find(dev, nv_encoder->dcb->i2c_index);
  
  	if (i2c) {
-@@ -695,7 +700,7 @@ nouveau_connector_create_lvds(struct drm_device *dev,
+@@ -695,7 +798,7 @@ nouveau_connector_create_lvds(struct drm_device *dev,
  	 */
  	if (!nv_connector->edid && nouveau_bios_fp_mode(dev, &native) &&
  	     (nv_encoder->dcb->lvdsconf.use_straps_for_mode ||
@@ -1993,7 +1972,7 @@ index d2f6335..14afe1e 100644
  		nv_connector->native_mode = drm_mode_duplicate(dev, &native);
  		goto out;
  	}
-@@ -704,7 +709,7 @@ nouveau_connector_create_lvds(struct drm_device *dev,
+@@ -704,7 +707,7 @@ nouveau_connector_create_lvds(struct drm_device *dev,
  	 * stored for the panel stored in them.
  	 */
  	if (!nv_connector->edid && !nv_connector->native_mode &&
@@ -2002,7 +1981,7 @@ index d2f6335..14afe1e 100644
  		struct edid *edid =
  			(struct edid *)nouveau_bios_embedded_edid(dev);
  		if (edid) {
-@@ -739,46 +744,66 @@ out:
+@@ -739,46 +742,66 @@ out:
  }
  
  int
@@ -2089,7 +2068,7 @@ index d2f6335..14afe1e 100644
  	/* defaults, will get overridden in detect() */
  	connector->interlace_allowed = false;
  	connector->doublescan_allowed = false;
-@@ -786,55 +811,65 @@ nouveau_connector_create(struct drm_device *dev, int index, int type)
+@@ -786,55 +809,65 @@ nouveau_connector_create(struct drm_device *dev, int index, int type)
  	drm_connector_init(dev, connector, &nouveau_connector_funcs, type);
  	drm_connector_helper_add(connector, &nouveau_connector_helper_funcs);
  
