@@ -8,14 +8,33 @@ Summary: The Linux kernel
 # be 0.
 %global released_kernel 0
 
-# Versions of various parts
+# Save original buildid for later if it's defined
+%if 0%{?buildid:1}
+%global orig_buildid %{buildid}
+%undefine buildid
+%endif
 
 # Polite request for people who spin their own kernel rpms:
 # please modify the "buildid" define in a way that identifies
 # that the kernel isn't the stock distribution kernel, for example,
-# by setting the define to ".local" or ".bz123456"
+# by setting the define to ".local" or ".bz123456". This will be
+# appended to the full kernel version.
+#
+# (Uncomment the '#' and both spaces below to set the buildid.)
 #
 # % define buildid .local
+
+# buildid can also be specified on the rpmbuild command line
+# by adding --define="buildid .whatever". If both kinds of buildid
+# are specified they will be concatenated together.
+%if 0%{?orig_buildid:1}
+%if 0%{?buildid:1}
+%global srpm_buildid %{buildid}
+%define buildid %{srpm_buildid}%{orig_buildid}
+%else
+%define buildid %{orig_buildid}
+%endif
+%endif
 
 # fedora_build defines which build revision of this kernel version we're
 # building. Rather than incrementing forever, as with the prior versioning
@@ -29,7 +48,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1935
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1951 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1963 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -73,9 +92,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 2
+%define rcrev 3
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -651,7 +670,6 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ptrace.patch
 
-Patch143: linux-2.6-g5-therm-shutdown.patch
 Patch144: linux-2.6-vio-modalias.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
@@ -665,17 +683,15 @@ Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
 Patch305: linux-2.6-fix-btusb-autosuspend.patch
+Patch310: linux-2.6-usb-wwan-update.patch
 
 Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
-Patch381: linux-2.6-pciehp-update.patch
-Patch382: linux-2.6-defaults-pciehp.patch
 Patch383: linux-2.6-defaults-aspm.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 
 Patch460: linux-2.6-serial-460800.patch
@@ -683,7 +699,7 @@ Patch460: linux-2.6-serial-460800.patch
 Patch470: die-floppy-die.patch
 
 Patch510: linux-2.6-silence-noise.patch
-Patch520: linux-2.6.30-hush-rom-warning.patch
+Patch520: pci-hush-rom-warning.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
@@ -704,7 +720,6 @@ Patch900: linux-2.6-cantiga-iommu-gfx.patch
 
 Patch1515: lirc-2.6.33.patch
 Patch1517: hdpvr-ir-enable.patch
-Patch1520: crystalhd-2.6.34-staging.patch
 
 # virt + ksm patches
 Patch1551: linux-2.6-ksm-kvm.patch
@@ -721,6 +736,10 @@ Patch1816: drm-nouveau-abi16.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
+# make sure the lvds comes back on lid open
+Patch1825: drm-intel-make-lvds-work.patch
+# make brightness hotkeys work on some machines
+Patch1826: drm-intel-acpi-populate-didl.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -738,12 +757,10 @@ Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 # fs fixes
 
 # NFSv4
-Patch3051: linux-2.6-nfs4-callback-hidden.patch
 
 # VIA Nano / VX8xx updates
 
 # patches headed upstream
-Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
 
@@ -1205,11 +1222,10 @@ ApplyPatch linux-2.6-hotfixes.patch
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
-#ApplyPatch linux-2.6-utrace-ptrace.patch
+ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
-#ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
 
 #
 # Intel IOMMU
@@ -1219,8 +1235,6 @@ ApplyPatch linux-2.6-utrace.patch
 # PowerPC
 #
 ### NOT (YET) UPSTREAM:
-# Alleviate G5 thermal shutdown problems
-#ApplyPatch linux-2.6-g5-therm-shutdown.patch
 # Provide modalias in sysfs for vio devices
 ApplyPatch linux-2.6-vio-modalias.patch
 
@@ -1232,7 +1246,7 @@ ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
 #
 # Exec shield
 #
-#ApplyPatch linux-2.6-execshield.patch
+ApplyPatch linux-2.6-execshield.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1247,13 +1261,13 @@ ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
 # eCryptfs
 
 # NFSv4
-#ApplyPatch linux-2.6-nfs4-callback-hidden.patch
 
 # USB
 #ApplyPatch linux-2.6-driver-level-usb-autosuspend.diff
 #ApplyPatch linux-2.6-enable-btusb-autosuspend.patch
 #ApplyPatch linux-2.6-usb-uvc-autosuspend.diff
 #ApplyPatch linux-2.6-fix-btusb-autosuspend.patch
+ApplyPatch linux-2.6-usb-wwan-update.patch
 
 # WMI
 
@@ -1263,7 +1277,7 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
-#ApplyPatch linux-2.6-debug-nmi-timeout.patch
+ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
@@ -1271,12 +1285,8 @@ ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 #
 # PCI
 #
-# disable message signaled interrupts
-#ApplyPatch linux-2.6-defaults-pci_no_msi.patch
-# update the pciehp driver
-#ApplyPatch linux-2.6-pciehp-update.patch
-# default to enabling passively listening for hotplug events
-#ApplyPatch linux-2.6-defaults-pciehp.patch
+# make default state of PCI MSI a config option
+ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
 
@@ -1285,19 +1295,16 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 #
 
 # ALSA
-#ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
+ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
-#ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
-#ApplyPatch die-floppy-die.patch #x
-
-# Get away from having to poll Toshibas
-#ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
+ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
@@ -1306,7 +1313,7 @@ ApplyPatch linux-2.6-serial-460800.patch
 
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
-ApplyPatch linux-2.6.30-hush-rom-warning.patch
+ApplyPatch pci-hush-rom-warning.patch
 
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
@@ -1334,7 +1341,7 @@ ApplyPatch linux-2.6-ata-quirk.patch
 #ApplyPatch linux-2.6.31-modules-ro-nx.patch
 
 # /dev/crash driver.
-#ApplyPatch linux-2.6-crash-driver.patch
+ApplyPatch linux-2.6-crash-driver.patch
 
 # Cantiga chipset b0rkage
 ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
@@ -1343,8 +1350,6 @@ ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
 ApplyPatch lirc-2.6.33.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
-# Broadcom Crystal HD video decoder
-#ApplyPatch crystalhd-2.6.34-staging.patch
 
 # Add kernel KSM support
 # Optimize KVM for KSM support
@@ -1368,6 +1373,8 @@ ApplyPatch drm_nouveau_ucode.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch drm-intel-acpi-populate-didl.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -2055,6 +2062,52 @@ fi
 #                 ||     ||
 
 %changelog
+* Mon Apr  5 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.34-rc3.
+
+* Mon Apr 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34-0.28.rc3.git3
+- Linux 2.6.34-rc3-git3
+
+* Sat Apr 03 2010 Chuck Ebbert <cebbert@redhat.com>
+- Build all of the DVB frontend drivers instead of just the automatically
+  selected ones. (#578755)
+
+* Sat Apr 03 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc3-git2
+- New config option: CONFIG_EEEPC_WMI=m on x86 and x86_64
+- Also set CONFIG_EEEPC_LAPTOP=m on both 32- and 64-bit x86.
+
+* Thu Apr 01 2010 Matthew Garrett <mjg@redhat.com>
+- drm-intel-acpi-populate-didl.patch: Fix brightness hotkeys on some machines
+- linux-2.6-usb-wwan-update.patch: Update wwan code and fix qcserial
+
+* Wed Mar 31 2010 Matthew Garrett <mjg@redhat.com>
+- drm-intel-make-lvds-work.patch: Make sure LVDS gets turned back on
+
+* Tue Mar 30 2010 Kyle McMartin <kyle@redhat.com>
+- nuke linux-2.6-g5-therm-shutdown.patch, upstream now
+- nuke linux-2.6-dell-laptop-rfkill-fix.patch, upstream in different form
+- nuke linux-2.6-nfs4-callback-hidden.patch, upstream now
+- rebase hda_intel-prealloc-4mb-dmabuffer.patch
+- rebase linux-2.6-execshield.patch
+- rebase linux-2.6-input-kill-stupid-messages.patch
+- rebase die-floppy-die.patch
+- rebase linux-2.6-crash-driver.patch
+- nuke some other upstream patches, or patches that have been unapplied
+  for a very long time
+
+* Mon Mar 29 2010 Kyle McMartin <kyle@redhat.com>
+- rebase linux-2.6-utrace-ptrace.patch
+
+* Mon Mar 29 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.19.rc2.git4
+- 2.6.34-rc2-git4
+
+* Fri Mar 26 2010 Dave Jones <davej@redhat.com> 2.6.34-0.18.rc2.git2
+- 2.6.34-rc2-git2
+
+* Tue Mar 23 2010 Dave Jones <davej@redhat.com> 2.6.34-0.17.rc2.git1
+- 2.6.34-rc2-git1
+
 * Mon Mar 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.16.rc2.git0
 - Turn off NO_BOOTMEM on i386/x86_64.
 

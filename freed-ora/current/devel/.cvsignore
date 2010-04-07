@@ -9,4 +9,5 @@ deblob-check
 freedo.patch
 kernel-2.6.33
 linux-2.6.33-libre.*
-patch-libre-2.6.34-rc2.*
+patch-libre-2.6.34-rc3.*
+patch-2.6.34-rc3-git3.bz2
