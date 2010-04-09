@@ -1,7 +1,6 @@
 D/scripts////
 /linux-2.6.33.tar.bz2.sign/-1.1/Wed Feb 24 19:34:33 2010//Tkernel-2_6_33-1_fc13
 /patch-2.6.33.2.bz2.sign/-1.1/Mon Apr  5 22:54:02 2010//Tkernel-2_6_33_2-35_fc13
-/.cvsignore/1.1175/dummy timestamp from new-entry+Mon Apr  5 22:52:26 2010//Tkernel-2_6_33_2-38_fc13
 /Makefile/1.123/dummy timestamp from new-entry//Tkernel-2_6_33_2-38_fc13
 /Makefile.config/1.73/Thu Feb 18 07:45:40 2010/-ko/Tkernel-2_6_33_2-38_fc13
 /TODO/1.68/Thu Feb 18 07:44:06 2010//Tkernel-2_6_33_2-38_fc13
@@ -32,7 +31,6 @@ D/scripts////
 /drm-intel-make-lvds-work.patch/1.1/Wed Mar 31 20:59:00 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /drm-intel-next.patch/1.11/Thu Feb 18 07:44:37 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /drm-nouveau-abi16.patch/1.2/Tue Feb 23 18:30:56 2010/-kb/Tkernel-2_6_33_2-38_fc13
-/drm-nouveau-updates.patch/1.5/dummy timestamp from new-entry+Mon Apr  5 22:55:15 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /drm-radeon-evergreen.patch/1.1/Thu Apr  8 03:08:33 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /ext4-fix-insufficient-checks-in-EXT4_IOC_MOVE_EXT.patch/1.1/Thu Feb 18 07:45:43 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /find-provides/1.18/Thu Feb 18 07:44:06 2010/-ko/Tkernel-2_6_33_2-38_fc13
@@ -111,17 +109,19 @@ D/scripts////
 /linux-2.6.30-no-pcspkr-modalias.patch/1.1/Thu Feb 18 07:44:46 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /linux-2.6.31-modules-ro-nx.patch/1.2/Thu Feb 18 07:44:46 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /linux-2.6.31-nx-data.patch/1.1/Thu Feb 18 07:44:06 2010/-kb/Tkernel-2_6_33_2-38_fc13
-/lirc-2.6.33.patch/1.6/dummy timestamp from new-entry+Mon Apr  5 22:55:02 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /merge.pl/1.9/Thu Feb 18 07:44:07 2010/-ko/Tkernel-2_6_33_2-38_fc13
 /mirrors/1.6/dummy timestamp from new-entry//Tkernel-2_6_33_2-38_fc13
 /neuter_intel_microcode_load.patch/1.1/Thu Feb 18 07:44:46 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /noautobuild/1.2/Thu Feb 18 07:44:53 2010//Tkernel-2_6_33_2-38_fc13
 /perf/1.6/Thu Feb 18 07:44:53 2010//Tkernel-2_6_33_2-38_fc13
 /prevent-runtime-conntrack-changes.patch/1.1/Thu Feb 18 07:45:41 2010/-kb/Tkernel-2_6_33_2-38_fc13
-/sources/1.1134/dummy timestamp from new-entry+Mon Apr  5 22:53:49 2010//Tkernel-2_6_33_2-38_fc13
 /ssb_check_for_sprom.patch/1.2/Tue Mar 30 20:18:38 2010/-kb/Tkernel-2_6_33_2-38_fc13
-/upstream/1.1047/dummy timestamp from new-entry+Mon Apr  5 22:53:44 2010//Tkernel-2_6_33_2-38_fc13
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_33_2-38_fc13
 /vhost_net-rollup.patch/1.1/Thu Feb 18 07:44:07 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /virt_console-fix-race.patch/1.1/Fri Mar  5 12:52:21 2010/-kb/Tkernel-2_6_33_2-38_fc13
 /virt_console-rollup.patch/1.2/Thu Feb 18 07:44:37 2010/-kb/Tkernel-2_6_33_2-38_fc13
+/drm-nouveau-updates.patch/1.5/Fri Apr  9 04:42:14 2010/-kb/Tkernel-2_6_33_2-38_fc13
+/lirc-2.6.33.patch/1.6/Fri Apr  9 04:42:14 2010/-kb/Tkernel-2_6_33_2-38_fc13
+/.cvsignore/1.1175/Fri Apr  9 04:42:14 2010//Tkernel-2_6_33_2-38_fc13
+/sources/1.1134/Fri Apr  9 04:42:14 2010//Tkernel-2_6_33_2-38_fc13
+/upstream/1.1047/Fri Apr  9 04:42:14 2010//Tkernel-2_6_33_2-38_fc13
