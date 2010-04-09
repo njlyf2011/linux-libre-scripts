@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1971 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1974 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -732,6 +732,8 @@ Patch1555: virt_console-fix-race.patch
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
+# radeon kms backport
+Patch1810: drm-radeon-evergreen.patch
 # nouveau fixes
 # - these not until 2.6.34
 Patch1817: drm-nouveau-abi16.patch
@@ -1412,6 +1414,7 @@ ApplyPatch virt_console-fix-race.patch
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 # Nouveau DRM + drm fixes
+ApplyPatch drm-radeon-evergreen.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
 # pm broken on my thinkpad t60p - airlied
@@ -2101,6 +2104,15 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 08 2010 Dave Airlie <airlied@redhat.com>
+- Backport radeon r800 modesetting support
+
+* Wed Apr 07 2010 Chuck Ebbert <cebbert@redhat.com>
+- Disable async multicore RAID4/5/6 stripe processing (F12#575402)
+
+* Tue Apr 06 2010 Hans de Goede <hdegoede@redhat.com>
+- gspca-vc032x: Use YUYV output for OV7670 (#537332)
+
 * Mon Apr  5 2010 Alexandre Oliva <lxoliva@fsfla.org>
 - Adjusted patch-libre-2.6.33.2 for deblobbed sources.
 
