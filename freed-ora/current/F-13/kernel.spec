@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1975 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1978 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -690,6 +690,7 @@ Patch382: linux-2.6-defaults-pciehp.patch
 Patch383: linux-2.6-defaults-aspm.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
+Patch392: linux-2.6-acpi-video-export-edid.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -728,6 +729,7 @@ Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 Patch1553: vhost_net-rollup.patch
 Patch1554: virt_console-rollup.patch
 Patch1555: virt_console-fix-race.patch
+Patch1556: virt_console-fix-fix-race.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -736,8 +738,10 @@ Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 Patch1810: drm-radeon-evergreen.patch
 # nouveau fixes
 # - these not until 2.6.34
-Patch1817: drm-nouveau-abi16.patch
-Patch1818: drm-nouveau-updates.patch
+Patch1815: drm-nouveau-abi16.patch
+Patch1816: drm-nouveau-updates.patch
+# requires code that hasn't been merged upstream yet
+Patch1817: drm-nouveau-acpi-edid-fallback.patch
 
 # drm fixes
 Patch1819: drm-intel-big-hammer.patch
@@ -794,6 +798,10 @@ Patch12021: ssb_check_for_sprom.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch12100: iwlwifi-reset-card-during-probe.patch
+
+# make b43 gracefully switch to PIO mode in event of DMA errors
+Patch12101: b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
+Patch12102: b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
 Patch12200: acpi-ec-add-delay-before-write.patch
 Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
@@ -1311,6 +1319,7 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 # Breaks boot on lenovo t410
 #ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch acpi-ec-allow-multibyte-access-to-ec.patch
+ApplyPatch linux-2.6-acpi-video-export-edid.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1406,6 +1415,7 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 ApplyPatch vhost_net-rollup.patch
 ApplyPatch virt_console-rollup.patch
 ApplyPatch virt_console-fix-race.patch
+ApplyPatch virt_console-fix-fix-race.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1417,6 +1427,7 @@ ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 ApplyPatch drm-radeon-evergreen.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
+ApplyPatch drm-nouveau-acpi-edid-fallback.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1454,6 +1465,10 @@ ApplyPatch ssb_check_for_sprom.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-reset-card-during-probe.patch
+
+# make b43 gracefully switch to PIO mode in event of DMA errors
+ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
+ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2104,6 +2119,17 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 12 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-acpi-video-export-edid.patch:
+  drm-nouveau-acpi-edid-fallback.patch: Let nouveau get an EDID from ACPI
+   
+* Fri Apr 09 2010 John W. Linville <linville@redhat.com> 2.6.33.2-41
+- b43: Allow PIO mode to be selected at module load
+- b43: fall back gracefully to PIO mode after fatal DMA errors
+
+* Fri Apr 09 2010 Chuck Ebbert <cebbert@redhat.com>
+- virt_console: fix a bug in the original race fix
+
 * Fri Apr 09 2010 Ben Skeggs <bskeggs@redhat.com>
 - nouveau: fixes from upstream + NVA3 support
 
