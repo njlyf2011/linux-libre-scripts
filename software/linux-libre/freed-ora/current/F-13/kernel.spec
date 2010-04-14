@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1978 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1979 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -2119,6 +2119,9 @@ fi
 # and build.
 
 %changelog
+* Tue Apr 13 2010 Ben Skeggs <bskeggs@redhat.com>
+- drm-nouveau-acpi-edid-fallback.patch: fix oops on cards without _DSM method
+
 * Mon Apr 12 2010 Matthew Garrett <mjg@redhat.com>
 - linux-2.6-acpi-video-export-edid.patch:
   drm-nouveau-acpi-edid-fallback.patch: Let nouveau get an EDID from ACPI
