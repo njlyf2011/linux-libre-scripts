@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2059 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2062 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -806,8 +806,27 @@ Patch12380: ssb_check_for_sprom.patch
 # fix tg3 + netpoll with backport of  fe234f0e5cbb880792d2d1ac0743cf8c07e9dde3
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
-Patch14600: iwlwifi-fix-nfreed--.patch
-Patch14601: iwlwifi-reset-card-during-probe.patch
+Patch12390: iwlwifi-fix-nfreed--.patch
+Patch12391: iwlwifi-reset-card-during-probe.patch
+
+# patches from Intel to address intermittent firmware failures with iwlagn
+Patch12400: mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
+Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
+Patch12402: iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
+Patch12403: iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
+Patch12404: iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
+Patch12405: iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
+Patch12406: iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
+Patch12407: iwlwifi_-multiple-force-reset-mode.patch
+Patch12408: iwlwifi_-fix-scan-race.patch
+Patch12409: iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
+Patch12410: iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
+Patch12411: iwlwifi_-add-internal-short-scan-support-for-3945.patch
+Patch12412: iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch
+Patch12413: iwlwifi_-move-plcp-check-to-separated-function.patch
+Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
+Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
+Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
 # ==============================================================================
 
@@ -1496,6 +1515,25 @@ ApplyPatch ssb_check_for_sprom.patch
 ApplyPatch iwlwifi-fix-nfreed--.patch
 ApplyPatch iwlwifi-reset-card-during-probe.patch
 
+# patches from Intel to address intermittent firmware failures with iwlagn
+ApplyPatch mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
+ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
+ApplyPatch iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
+ApplyPatch iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
+ApplyPatch iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
+ApplyPatch iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
+ApplyPatch iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
+ApplyPatch iwlwifi_-multiple-force-reset-mode.patch
+ApplyPatch iwlwifi_-fix-scan-race.patch
+ApplyPatch iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
+ApplyPatch iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
+ApplyPatch iwlwifi_-add-internal-short-scan-support-for-3945.patch
+ApplyPatch iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch
+ApplyPatch iwlwifi_-move-plcp-check-to-separated-function.patch
+ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
+ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
+ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
 # END OF PATCH APPLICATIONS ====================================================
 
 %endif
@@ -2149,6 +2187,20 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 12 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch.
+- Adjusted iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch.
+
+* Mon Apr 12 2010 John W. Linville <linville@redhat.com> 2.6.32.11-102
+- patches from Intel to address intermittent firmware failures with iwlagn
+
+* Tue Apr 07 2010 Chuck Ebbert <cebbert@redhat.com>
+- Disable async RAID4/5/6 processing (#575402)
+
+* Tue Apr 06 2010 Chuck Ebbert <cebbert@redhat.com>
+- Build eeepc-laptop driver for x86_64 (F13#565582)
+- Build all of the DVB frontend drivers (F13#578755)
+
 * Mon Apr  5 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjust patch-libre-2.6.32.11 for deblobbed tree.
 
