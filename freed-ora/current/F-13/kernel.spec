@@ -14,6 +14,7 @@ Summary: The Linux kernel
 %undefine buildid
 %endif
 
+###################################################################
 # Polite request for people who spin their own kernel rpms:
 # please modify the "buildid" define in a way that identifies
 # that the kernel isn't the stock distribution kernel, for example,
@@ -23,6 +24,7 @@ Summary: The Linux kernel
 # (Uncomment the '#' and both spaces below to set the buildid.)
 #
 # % define buildid .local
+###################################################################
 
 # buildid can also be specified on the rpmbuild command line
 # by adding --define="buildid .whatever". If both kinds of buildid
@@ -48,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1979 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1983 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -730,6 +732,7 @@ Patch1553: vhost_net-rollup.patch
 Patch1554: virt_console-rollup.patch
 Patch1555: virt_console-fix-race.patch
 Patch1556: virt_console-fix-fix-race.patch
+Patch1557: virt_console-rollup2.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -751,6 +754,8 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-make-lvds-work.patch
 # make brightness hotkeys work on some machines
 Patch1826: drm-intel-acpi-populate-didl.patch
+
+Patch2100: linux-2.6-phylib-autoload.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -805,6 +810,9 @@ Patch12102: b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
 Patch12200: acpi-ec-add-delay-before-write.patch
 Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
+Patch12220: acpi-ec-limit-burst-to-64-bit.patch
+
+Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
 
 %endif
 
@@ -1316,10 +1324,11 @@ ApplyPatch linux-2.6-usb-wwan-update.patch
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
-# Breaks boot on lenovo t410
-#ApplyPatch acpi-ec-add-delay-before-write.patch
-ApplyPatch acpi-ec-allow-multibyte-access-to-ec.patch
 ApplyPatch linux-2.6-acpi-video-export-edid.patch
+
+ApplyPatch acpi-ec-add-delay-before-write.patch
+ApplyPatch acpi-ec-allow-multibyte-access-to-ec.patch
+ApplyPatch acpi-ec-limit-burst-to-64-bit.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1416,6 +1425,7 @@ ApplyPatch vhost_net-rollup.patch
 ApplyPatch virt_console-rollup.patch
 ApplyPatch virt_console-fix-race.patch
 ApplyPatch virt_console-fix-fix-race.patch
+ApplyPatch virt_console-rollup2.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1433,6 +1443,8 @@ ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-intel-acpi-populate-didl.patch
+
+ApplyPatch linux-2.6-phylib-autoload.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1469,6 +1481,8 @@ ApplyPatch iwlwifi-reset-card-during-probe.patch
 # make b43 gracefully switch to PIO mode in event of DMA errors
 ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
 ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
+
+ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2119,13 +2133,26 @@ fi
 # and build.
 
 %changelog
+* Wed Apr 14 2010 David Woodhouse <David.Woodhouse@intel.com>
+- Fix autoloading of phy modules (#525966)
+
+* Wed Apr 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.2-46
+- libata-fix-accesses-at-LBA28-boundary.patch
+
+* Tue Apr 13 2010 Justin M. Forbes <jforbes@redhat.com>
+- virt_console: Fixes from upstream
+
+* Tue Apr 13 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix ACPI errors on boot caused by EC burst mode patch (#581535)
+- Re-enable ACPI EC delay patch (#579510)
+
 * Tue Apr 13 2010 Ben Skeggs <bskeggs@redhat.com>
 - drm-nouveau-acpi-edid-fallback.patch: fix oops on cards without _DSM method
 
 * Mon Apr 12 2010 Matthew Garrett <mjg@redhat.com>
 - linux-2.6-acpi-video-export-edid.patch:
   drm-nouveau-acpi-edid-fallback.patch: Let nouveau get an EDID from ACPI
-   
+
 * Fri Apr 09 2010 John W. Linville <linville@redhat.com> 2.6.33.2-41
 - b43: Allow PIO mode to be selected at module load
 - b43: fall back gracefully to PIO mode after fatal DMA errors
