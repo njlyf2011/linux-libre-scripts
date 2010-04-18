@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2062 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2064 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -739,6 +739,8 @@ Patch1847: drm-nouveau-d620.patch
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
 
+Patch2100: linux-2.6-phylib-autoload.patch
+
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
 Patch2201: linux-2.6-firewire-git-pending.patch
@@ -827,6 +829,12 @@ Patch12413: iwlwifi_-move-plcp-check-to-separated-function.patch
 Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
+# make b43 gracefully switch to PIO mode in event of DMA errors
+Patch12420: b43_-Optimize-PIO-scratchbuffer-usage.patch
+Patch12421: b43_-Remove-reset-after-fatal-DMA-error.patch
+Patch12422: b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
+Patch12423: b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
 # ==============================================================================
 
@@ -1451,6 +1459,8 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 
 ApplyPatch linux-2.6-e1000-ich9.patch
 
+ApplyPatch linux-2.6-phylib-autoload.patch
+
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
@@ -1533,6 +1543,12 @@ ApplyPatch iwlwifi_-move-plcp-check-to-separated-function.patch
 ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
+# make b43 gracefully switch to PIO mode in event of DMA errors
+ApplyPatch b43_-Optimize-PIO-scratchbuffer-usage.patch
+ApplyPatch b43_-Remove-reset-after-fatal-DMA-error.patch
+ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
+ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 
@@ -2187,6 +2203,15 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 16 2010 John W. Linville <linville@redhat.com> 2.6.32.11-104
+- b43: Optimize PIO scratchbuffer usage
+- b43: Remove reset after fatal DMA error
+- b43: Allow PIO mode to be selected at module load
+- b43: fall back gracefully to PIO mode after fatal DMA errors
+
+* Wed Apr 14 2010 David Woodhouse <David.Woodhouse@intel.com>
+- Fix autoloading of phy modules (#525966)
+
 * Mon Apr 12 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch.
 - Adjusted iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch.
