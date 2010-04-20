@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1986 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1992 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -707,6 +707,8 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
+Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
+
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
@@ -741,6 +743,9 @@ Patch1800: drm-core-next.patch
 
 # radeon kms backport
 Patch1810: drm-radeon-evergreen.patch
+Patch1811: drm-radeon-firemv-pciid.patch
+Patch1812: drm-radeon-kms-fix-dual-link-dvi.patch
+Patch1813: drm-radeon-fix-rs600-tlb.patch
 # nouveau fixes
 # - these not until 2.6.34
 Patch1815: drm-nouveau-abi16.patch
@@ -754,8 +759,10 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
-# make brightness hotkeys work on some machines
-Patch1826: drm-intel-acpi-populate-didl.patch
+# disable iommu for gfx by default, just too broken
+Patch1827: linux-2.6-intel-iommu-igfx.patch
+# posted for upstream but not in an anholt tree yet
+Patch1828: drm-intel-gen5-dither.patch
 
 Patch2100: linux-2.6-phylib-autoload.patch
 
@@ -815,6 +822,25 @@ Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
 Patch12220: acpi-ec-limit-burst-to-64-bit.patch
 
 Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
+
+# patches from Intel to address intermittent firmware failures with iwlagn
+Patch12400: mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
+Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
+Patch12402: iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
+Patch12403: iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
+Patch12404: iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
+Patch12405: iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
+Patch12406: iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
+Patch12407: iwlwifi_-multiple-force-reset-mode.patch
+Patch12408: iwlwifi_-fix-scan-race.patch
+Patch12409: iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
+Patch12410: iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
+Patch12411: iwlwifi_-add-internal-short-scan-support-for-3945.patch
+Patch12412: iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch
+Patch12413: iwlwifi_-move-plcp-check-to-separated-function.patch
+Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
+Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
+Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
 %endif
 
@@ -1355,6 +1381,9 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 # SCSI Bits.
 #
 
+# ACPI
+ApplyPatch linux-2.6-acpi-sleep-live-sci-live.patch
+
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
@@ -1439,6 +1468,9 @@ ApplyPatch drm-core-next.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-radeon-evergreen.patch
+ApplyPatch drm-radeon-firemv-pciid.patch
+ApplyPatch drm-radeon-kms-fix-dual-link-dvi.patch
+ApplyPatch drm-radeon-fix-rs600-tlb.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-acpi-edid-fallback.patch
@@ -1446,7 +1478,8 @@ ApplyPatch drm-nouveau-acpi-edid-fallback.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
-ApplyPatch drm-intel-acpi-populate-didl.patch
+ApplyPatch linux-2.6-intel-iommu-igfx.patch
+ApplyPatch drm-intel-gen5-dither.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
 
@@ -1487,6 +1520,25 @@ ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
 ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
 ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
+
+# patches from Intel to address intermittent firmware failures with iwlagn
+ApplyPatch mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
+ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
+ApplyPatch iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
+ApplyPatch iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
+ApplyPatch iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
+ApplyPatch iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
+ApplyPatch iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
+ApplyPatch iwlwifi_-multiple-force-reset-mode.patch
+ApplyPatch iwlwifi_-fix-scan-race.patch
+ApplyPatch iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
+ApplyPatch iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
+ApplyPatch iwlwifi_-add-internal-short-scan-support-for-3945.patch
+ApplyPatch iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch
+ApplyPatch iwlwifi_-move-plcp-check-to-separated-function.patch
+ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
+ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
+ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2137,8 +2189,34 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 19 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch.
+- Adjusted iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch.
+- Adjusted iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch.
+
+* Mon Apr 19 2010 Adam Jackson <ajax@redhat.com> 2.6.33.2-56
+- drm-intel-next.patch: 2.6.34 as of today, plus anholt's for-linus tree as
+  of today, plus most of drm-intel-next except for the AGP/GTT split and a
+  broken TV detect fix. Tested on 945GM, GM45, and gen5.
+- drm-intel-make-lvds-work.patch: Rebase to match.
+- drm-intel-acpi-populate-didl.patch: Drop, merged in -intel-next
+- drm-intel-gen5-dither.patch: Use better dither on gen5.
+
+* Mon Apr 19 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-acpi-sleep-live-sci-live.patch: Try harder to switch to ACPI mode
+
+* Mon Apr 19 2010 Adam Jackson <ajax@redhat.com>
+- linux-2.6-intel-iommu-igfx.patch: Disable IOMMU for GFX by default, just too
+  broken.  intel_iommu=igfx_on to turn it on. (Adel Gadllah)
+
+* Mon Apr 19 2010 Dave Airlie <airlied@redhat.com>
+- radeon: add rs600 + firemv pciid + dual-link fix
+
+* Fri Apr 16 2010 John W. Linville <linville@redhat.com>
+- Patches from Intel to address intermittent firmware failures with iwlagn
+
 * Fri Apr 16 2010 Adam Jackson <ajax@redhat.com>
-- drm-core-next.patch: Update EDID and other core bits to 2.6.34ish
+- drm-core-next.patch: Update EDID and other core bits to airlied's tree
 - drm-nouveau-abi16.patch: Rediff to match
 
 * Fri Apr 16 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.2-49
