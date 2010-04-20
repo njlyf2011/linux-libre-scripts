@@ -14,6 +14,7 @@ Summary: The Linux kernel
 %undefine buildid
 %endif
 
+###################################################################
 # Polite request for people who spin their own kernel rpms:
 # please modify the "buildid" define in a way that identifies
 # that the kernel isn't the stock distribution kernel, for example,
@@ -23,10 +24,11 @@ Summary: The Linux kernel
 # (Uncomment the '#' and both spaces below to set the buildid.)
 #
 # % define buildid .local
+###################################################################
 
-# buildid can also be specified on the rpmbuild command line
-# by adding --define="buildid .whatever". If both kinds of buildid
-# are specified they will be concatenated together.
+# The buildid can also be specified on the rpmbuild command line
+# by adding --define="buildid .whatever". If both the specfile and
+# the environment define a buildid they will be concatenated together.
 %if 0%{?orig_buildid:1}
 %if 0%{?buildid:1}
 %global srpm_buildid %{buildid}
@@ -48,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1935
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1963 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1973 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -92,9 +94,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 3
+%define rcrev 5
 # The git snapshot level
-%define gitrev 3
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -704,6 +706,8 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
+Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
+
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
@@ -1293,6 +1297,9 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 #
 # SCSI Bits.
 #
+
+# ACPI
+ApplyPatch linux-2.6-acpi-sleep-live-sci-live.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
@@ -2062,6 +2069,41 @@ fi
 #                 ||     ||
 
 %changelog
+* Mon Apr 19 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.34-rc5.
+
+* Mon Apr 19 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.38.rc5.git0
+- Linux 2.6.34-rc5
+
+* Mon Apr 19 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-acpi-sleep-live-sci-live.patch: Try harder to switch to ACPI mode
+
+* Fri Apr 16 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc4-git4
+
+* Thu Apr 15 2010 Eric Paris <eparis@redhat.com>
+- enable CONFIG_INTEL_TXT for x86_64
+
+* Tue Apr 13 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34-0.34.rc4.git0
+- Linux 2.6.34-rc4
+
+* Sat Apr 10 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34-0.33.rc3.git10
+- Linux 2.6.34-rc3-git10
+
+* Fri Apr 09 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix build of qcserial and usb_wwan drivers
+
+* Fri Apr 09 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc3-git9
+
+* Wed Apr 07 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc3-git6
+- Trivial fix to context in v4l-gspca-fixes.patch
+- New option: CONFIG_CHELSIO_T4=m
+
+* Tue Apr 06 2010 Hans de Goede <hdegoede@redhat.com>
+- gspca-vc032x: Use YUYV output for OV7670 (#537332)
+
 * Mon Apr  5 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.34-rc3.
 
