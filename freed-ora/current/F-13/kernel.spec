@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1992 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1996 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -696,6 +696,7 @@ Patch392: linux-2.6-acpi-video-export-edid.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch453: thinkpad-acpi-add-x100e.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -746,6 +747,7 @@ Patch1810: drm-radeon-evergreen.patch
 Patch1811: drm-radeon-firemv-pciid.patch
 Patch1812: drm-radeon-kms-fix-dual-link-dvi.patch
 Patch1813: drm-radeon-fix-rs600-tlb.patch
+Patch1814: drm-radeon-ss-fix.patch
 # nouveau fixes
 # - these not until 2.6.34
 Patch1815: drm-nouveau-abi16.patch
@@ -841,6 +843,9 @@ Patch12413: iwlwifi_-move-plcp-check-to-separated-function.patch
 Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
+# should be upstream soon
+Patch12500: linux-2.6-creds_are_invalid-race.patch
 
 %endif
 
@@ -1400,6 +1405,7 @@ ApplyPatch die-floppy-die.patch
 #ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
+ApplyPatch thinkpad-acpi-add-x100e.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1471,6 +1477,7 @@ ApplyPatch drm-radeon-evergreen.patch
 ApplyPatch drm-radeon-firemv-pciid.patch
 ApplyPatch drm-radeon-kms-fix-dual-link-dvi.patch
 ApplyPatch drm-radeon-fix-rs600-tlb.patch
+ApplyPatch drm-radeon-ss-fix.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-acpi-edid-fallback.patch
@@ -1539,6 +1546,9 @@ ApplyPatch iwlwifi_-move-plcp-check-to-separated-function.patch
 ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
+# RHBZ#583843
+ApplyPatch linux-2.6-creds_are_invalid-race.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2189,6 +2199,15 @@ fi
 # and build.
 
 %changelog
+* Wed Apr 21 2010 Roland McGrath <roland@redhat.com> 2.6.33.2-60
+- fix race crash from bogus cred.c debugging code (#583843)
+
+* Wed Apr 21 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-add-x100e.patch: Add EC path for Thinkpad X100
+
+* Tue Apr 20 2010 Dave Airlie <airlied@redhat.com> 2.6.33.2-57
+- drm-radeon-ss-fix.patch: backport spread spectrum fix (#571874)
+
 * Mon Apr 19 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch.
 - Adjusted iwlwifi_-Recover-TX-flow-stall-due-to-stuck-queue.patch.
