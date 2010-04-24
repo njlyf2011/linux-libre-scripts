@@ -29,7 +29,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2067 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2065 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -678,7 +678,6 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch454: linux-2.6-input-hid-quirk-egalax.patch
-Patch455: thinkpad-acpi-add-x100e.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -783,8 +782,6 @@ Patch12200: add-appleir-usb-driver.patch
 
 # Patches for -stable
 
-Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
-
 Patch12311: fix-ima-null-ptr-deref.patch
 
 Patch12315: fix-abrtd.patch
@@ -805,6 +802,10 @@ Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
 # rhbz#533746
 Patch12380: ssb_check_for_sprom.patch
+
+# fix regression caused by dropping these (#571638)
+
+# fix tg3 + netpoll with backport of  fe234f0e5cbb880792d2d1ac0743cf8c07e9dde3
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch12390: iwlwifi-fix-nfreed--.patch
@@ -1404,7 +1405,6 @@ ApplyPatch die-floppy-die.patch
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
 ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
-ApplyPatch thinkpad-acpi-add-x100e.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1515,7 +1515,8 @@ ApplyPatch ice1712-fix-revo71-mixer-names.patch
 # rhbz#567530
 ApplyPatch tcp-fix-icmp-rto-war.patch
 
-ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
+
+
 
 # rhbz#572653
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
@@ -2208,12 +2209,6 @@ fi
 # and build.
 
 %changelog
-* Wed Apr 21 2010 Matthew Garrett <mjg@redhat.com>
-- thinkpad-acpi-add-x100e.patch: Add EC path for Thinkpad X100
-
-* Wed Apr 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.11-106
-- libata-fix-accesses-at-LBA28-boundary.patch
-
 * Tue Apr 20 2010 John W. Linville <linville@redhat.com> 2.6.32.11-105
 - mac80211: fix deferred hardware scan requests
 
