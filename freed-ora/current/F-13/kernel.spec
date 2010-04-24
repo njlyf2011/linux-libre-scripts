@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1993 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1999 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -696,6 +696,7 @@ Patch392: linux-2.6-acpi-video-export-edid.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch453: thinkpad-acpi-add-x100e.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -708,6 +709,7 @@ Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
+Patch601: linux-2.6-pci-fixup-resume.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
@@ -735,6 +737,7 @@ Patch1554: virt_console-rollup.patch
 Patch1555: virt_console-fix-race.patch
 Patch1556: virt_console-fix-fix-race.patch
 Patch1557: virt_console-rollup2.patch
+Patch1558: vhost_net-rollup2.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -818,6 +821,9 @@ Patch12100: iwlwifi-reset-card-during-probe.patch
 Patch12101: b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
 Patch12102: b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
+# make p54pci usable on slower hardware
+Patch12103: linux-2.6-p54pci.patch
+
 Patch12200: acpi-ec-add-delay-before-write.patch
 Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
 Patch12220: acpi-ec-limit-burst-to-64-bit.patch
@@ -842,6 +848,9 @@ Patch12413: iwlwifi_-move-plcp-check-to-separated-function.patch
 Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
+# should be upstream soon
+Patch12500: linux-2.6-creds_are_invalid-race.patch
 
 %endif
 
@@ -1384,6 +1393,7 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 
 # ACPI
 ApplyPatch linux-2.6-acpi-sleep-live-sci-live.patch
+ApplyPatch linux-2.6-pci-fixup-resume.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
@@ -1401,6 +1411,7 @@ ApplyPatch die-floppy-die.patch
 #ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
+ApplyPatch thinkpad-acpi-add-x100e.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1458,6 +1469,7 @@ ApplyPatch virt_console-rollup.patch
 ApplyPatch virt_console-fix-race.patch
 ApplyPatch virt_console-fix-fix-race.patch
 ApplyPatch virt_console-rollup2.patch
+ApplyPatch vhost_net-rollup2.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1521,6 +1533,9 @@ ApplyPatch iwlwifi-reset-card-during-probe.patch
 ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
 ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
 
+# make p54pci usable on slower hardware
+ApplyPatch linux-2.6-p54pci.patch
+
 ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
@@ -1541,6 +1556,9 @@ ApplyPatch iwlwifi_-move-plcp-check-to-separated-function.patch
 ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
+
+# RHBZ#583843
+ApplyPatch linux-2.6-creds_are_invalid-race.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2191,6 +2209,24 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 23 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted linux-2.6-p54pci.patch.
+
+* Thu Apr 22 2010 Hans de Goede <hdegoede@redhat.com>
+- Make p54pci wlan work on slower computers (#583623)
+
+* Thu Apr 22 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-pci-fixup-resume.patch: Make sure we enable power resources on D0
+
+* Wed Apr 21 2010 Justin M. Forbes <jforbes@redhat.com> 
+- vhost-net fixes from upstream
+
+* Wed Apr 21 2010 Roland McGrath <roland@redhat.com> 2.6.33.2-60
+- fix race crash from bogus cred.c debugging code (#583843)
+
+* Wed Apr 21 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-add-x100e.patch: Add EC path for Thinkpad X100
+
 * Tue Apr 20 2010 Dave Airlie <airlied@redhat.com> 2.6.33.2-57
 - drm-radeon-ss-fix.patch: backport spread spectrum fix (#571874)
 
