@@ -31,7 +31,8 @@ branchdir=$1
 librebase=$branch$extra-libre$libre
 srcbase=linux-$librebase.tar.bz2
 pub=../pool
-buildid=$librebase-lemote_${rev}
+buildnorev=$librebase-lemote
+buildid=${buildnorev}_${rev}
 srctree=linux-$buildid
 xsrctree=linux-$branch$extra
 srclink=linux-source-${buildid}_mipsel.tar.bz2
@@ -100,7 +101,7 @@ make-kpkg --rootcmd fakeroot --initrd --revision $rev \
   kernel-image kernel-headers kernel-doc kernel-source
 cd ..
 
-tar -cf $buildtb -C $srctree --use=bzip2 .
+tar -cf $buildtb -C $srctree --use=bzip2 --exclude=debian/linux-*$buildnorev .
 
 echo build is done, type ^C to stop, or Enter to move, commit and tag $buildid
 read proceed
