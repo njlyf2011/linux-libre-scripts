@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 2becebb..15ee5e7 100644
+index 78611d9..023343e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -27986,10 +27986,10 @@ index 8d1f4f3..9e8d003 100644
   * On 64-bit we've got three-level pagetables with a slightly
   * different layout ...
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index bb1719a..3d0baa4 100644
+index 5adba4f..badcf5e 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
-@@ -160,6 +160,12 @@ static u32 tlb_handler[128] __cpuinitdata;
+@@ -154,6 +154,12 @@ static u32 tlb_handler[128] __cpuinitdata;
  static struct uasm_label labels[128] __cpuinitdata;
  static struct uasm_reloc relocs[128] __cpuinitdata;
  
@@ -28002,7 +28002,7 @@ index bb1719a..3d0baa4 100644
  /*
   * The R3000 TLB handler is simple.
   */
-@@ -199,6 +205,7 @@ static void __cpuinit build_r3000_tlb_refill_handler(void)
+@@ -193,6 +199,7 @@ static void __cpuinit build_r3000_tlb_refill_handler(void)
  
  	dump_handler((u32 *)ebase, 32);
  }
@@ -28010,7 +28010,7 @@ index bb1719a..3d0baa4 100644
  
  /*
   * The R4000 TLB handler is much more complicated. We have two
-@@ -497,8 +504,9 @@ static void __cpuinit
+@@ -491,8 +498,9 @@ static void __cpuinit
  build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
  		 unsigned int tmp, unsigned int ptr)
  {
@@ -28021,7 +28021,7 @@ index bb1719a..3d0baa4 100644
  	/*
  	 * The vmalloc handling is not in the hotpath.
  	 */
-@@ -506,7 +514,15 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+@@ -500,7 +508,15 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
  	uasm_il_bltz(p, r, tmp, label_vmalloc);
  	/* No uasm_i_nop needed here, since the next insn doesn't touch TMP. */
  
@@ -28038,7 +28038,7 @@ index bb1719a..3d0baa4 100644
  # ifdef  CONFIG_MIPS_MT_SMTC
  	/*
  	 * SMTC uses TCBind value as "CPU" index
-@@ -520,7 +536,7 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+@@ -514,7 +530,7 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
  	 */
  	uasm_i_dmfc0(p, ptr, C0_CONTEXT);
  	uasm_i_dsrl(p, ptr, ptr, 23);
@@ -28047,7 +28047,7 @@ index bb1719a..3d0baa4 100644
  	UASM_i_LA_mostly(p, tmp, pgdc);
  	uasm_i_daddu(p, ptr, ptr, tmp);
  	uasm_i_dmfc0(p, tmp, C0_BADVADDR);
-@@ -1033,6 +1049,7 @@ build_pte_modifiable(u32 **p, struct uasm_reloc **r,
+@@ -1025,6 +1041,7 @@ build_pte_modifiable(u32 **p, struct uasm_reloc **r,
  	iPTE_LW(p, pte, ptr);
  }
  
@@ -28055,7 +28055,7 @@ index bb1719a..3d0baa4 100644
  /*
   * R3000 style TLB load/store/modify handlers.
   */
-@@ -1184,6 +1201,7 @@ static void __cpuinit build_r3000_tlb_modify_handler(void)
+@@ -1176,6 +1193,7 @@ static void __cpuinit build_r3000_tlb_modify_handler(void)
  
  	dump_handler(handle_tlbm, ARRAY_SIZE(handle_tlbm));
  }
@@ -28063,7 +28063,7 @@ index bb1719a..3d0baa4 100644
  
  /*
   * R4000 style TLB load/store/modify handlers.
-@@ -1400,6 +1418,7 @@ void __cpuinit build_tlb_refill_handler(void)
+@@ -1392,6 +1410,7 @@ void __cpuinit build_tlb_refill_handler(void)
  	case CPU_TX3912:
  	case CPU_TX3922:
  	case CPU_TX3927:
@@ -28071,7 +28071,7 @@ index bb1719a..3d0baa4 100644
  		build_r3000_tlb_refill_handler();
  		if (!run_once) {
  			build_r3000_tlb_load_handler();
-@@ -1407,6 +1426,9 @@ void __cpuinit build_tlb_refill_handler(void)
+@@ -1399,6 +1418,9 @@ void __cpuinit build_tlb_refill_handler(void)
  			build_r3000_tlb_modify_handler();
  			run_once++;
  		}
