@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1999 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2000 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -767,6 +767,8 @@ Patch1825: drm-intel-make-lvds-work.patch
 Patch1827: linux-2.6-intel-iommu-igfx.patch
 # posted for upstream but not in an anholt tree yet
 Patch1828: drm-intel-gen5-dither.patch
+# thanks for the untested sdvo rework guys
+Patch1829: drm-intel-sdvo-fix.patch
 
 Patch2100: linux-2.6-phylib-autoload.patch
 
@@ -1494,6 +1496,7 @@ ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 ApplyPatch drm-intel-gen5-dither.patch
+ApplyPatch drm-intel-sdvo-fix.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
 
@@ -2209,6 +2212,9 @@ fi
 # and build.
 
 %changelog
+* Mon Apr 26 2010 Adam Jackson <ajax@redhat.com>
+- drm-intel-sdvo-fix.patch: Fix DDC bus selection for SDVO (#584229)
+
 * Fri Apr 23 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted linux-2.6-p54pci.patch.
 
