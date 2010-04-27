@@ -1,12 +1,25 @@
+Index: Makefile
+===================================================================
+--- Makefile.orig	2010-04-26 22:32:23.000000000 +0000
++++ Makefile	2010-04-26 22:32:24.000000000 +0000
+@@ -1,7 +1,7 @@
+ VERSION = 2
+ PATCHLEVEL = 6
+ SUBLEVEL = 33
+-EXTRAVERSION = .3-libre
++EXTRAVERSION = .3-libre-lemote
+ NAME = Man-Eating Seals of Antiquity
+ 
+ # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-04-05 03:52:39.000000000 +0000
++++ .config	2010-04-26 22:33:15.000000000 +0000
 @@ -0,0 +1,2295 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.33.2-libre-lemote
-+# Mon Apr  5 03:52:39 2010
++# Linux kernel version: 2.6.33.3-libre-lemote
++# Mon Apr 26 22:33:15 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -2298,16 +2311,3 @@ Index: .config
 +CONFIG_HAS_DMA=y
 +CONFIG_NLATTR=y
 +CONFIG_LRU_CACHE=m
-Index: Makefile
-===================================================================
---- Makefile.orig	2010-04-05 03:50:28.000000000 +0000
-+++ Makefile	2010-04-05 03:50:31.000000000 +0000
-@@ -1,7 +1,7 @@
- VERSION = 2
- PATCHLEVEL = 6
- SUBLEVEL = 33
--EXTRAVERSION = .2-libre
-+EXTRAVERSION = .2-libre-lemote
- NAME = Man-Eating Seals of Antiquity
- 
- # *DOCUMENTATION*

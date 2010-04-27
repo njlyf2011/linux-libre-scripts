@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 61c7163..ab045b8 100644
+index 35160e3..028aa07 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -227,8 +227,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -546,7 +546,7 @@ index a09dd03..b284e26 100644
  
  #
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
-index b71a0a4..f136b73 100644
+index b71a0a4..d9e9fe6 100644
 --- a/arch/mips/configs/lemote2f_defconfig
 +++ b/arch/mips/configs/lemote2f_defconfig
 @@ -1,7 +1,7 @@
@@ -554,8 +554,8 @@ index b71a0a4..f136b73 100644
  # Automatically generated make config: don't edit
 -# Linux kernel version: 2.6.32-rc6
 -# Mon Nov  9 23:42:42 2009
-+# Linux kernel version: 2.6.33
-+# Mon Mar  1 23:36:53 2010
++# Linux kernel version: 2.6.33.2
++# Sun Apr 11 05:25:48 2010
  #
  CONFIG_MIPS=y
  
@@ -684,7 +684,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
  CONFIG_SYSCTL=y
  CONFIG_ANON_INODES=y
-@@ -251,21 +252,24 @@ CONFIG_AIO=y
+@@ -251,21 +252,21 @@ CONFIG_AIO=y
  #
  CONFIG_VM_EVENT_COUNTERS=y
  CONFIG_PCI_QUIRKS=y
@@ -696,7 +696,6 @@ index b71a0a4..f136b73 100644
  # CONFIG_SLOB is not set
 -# CONFIG_PROFILING is not set
 +CONFIG_PROFILING=y
-+CONFIG_TRACEPOINTS=y
 +CONFIG_OPROFILE=m
  CONFIG_HAVE_OPROFILE=y
  CONFIG_HAVE_SYSCALL_WRAPPERS=y
@@ -705,15 +704,13 @@ index b71a0a4..f136b73 100644
  # GCOV-based kernel profiling
  #
 -# CONFIG_SLOW_WORK is not set
-+# CONFIG_GCOV_KERNEL is not set
 +CONFIG_SLOW_WORK=y
-+# CONFIG_SLOW_WORK_DEBUG is not set
  CONFIG_HAVE_GENERIC_DMA_COHERENT=y
 -CONFIG_SLABINFO=y
  CONFIG_RT_MUTEXES=y
  CONFIG_BASE_SMALL=0
  CONFIG_MODULES=y
-@@ -283,14 +287,41 @@ CONFIG_BLOCK_COMPAT=y
+@@ -283,14 +284,41 @@ CONFIG_BLOCK_COMPAT=y
  # IO Schedulers
  #
  CONFIG_IOSCHED_NOOP=y
@@ -758,7 +755,7 @@ index b71a0a4..f136b73 100644
  CONFIG_FREEZER=y
  
  #
-@@ -300,7 +331,7 @@ CONFIG_HW_HAS_PCI=y
+@@ -300,7 +328,7 @@ CONFIG_HW_HAS_PCI=y
  CONFIG_PCI=y
  CONFIG_PCI_DOMAINS=y
  # CONFIG_ARCH_SUPPORTS_MSI is not set
@@ -767,7 +764,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_PCI_STUB is not set
  # CONFIG_PCI_IOV is not set
  CONFIG_ISA=y
-@@ -314,7 +345,7 @@ CONFIG_MMU=y
+@@ -314,7 +342,7 @@ CONFIG_MMU=y
  CONFIG_BINFMT_ELF=y
  # CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS is not set
  # CONFIG_HAVE_AOUT is not set
@@ -776,7 +773,7 @@ index b71a0a4..f136b73 100644
  CONFIG_MIPS32_COMPAT=y
  CONFIG_COMPAT=y
  CONFIG_SYSVIPC_COMPAT=y
-@@ -335,7 +366,33 @@ CONFIG_SUSPEND_FREEZER=y
+@@ -335,7 +363,33 @@ CONFIG_SUSPEND_FREEZER=y
  CONFIG_HIBERNATION_NVS=y
  CONFIG_HIBERNATION=y
  CONFIG_PM_STD_PARTITION="/dev/hda3"
@@ -811,7 +808,7 @@ index b71a0a4..f136b73 100644
  CONFIG_NET=y
  CONFIG_COMPAT_NETLINK_MESSAGES=y
  
-@@ -346,11 +403,12 @@ CONFIG_PACKET=y
+@@ -346,11 +400,12 @@ CONFIG_PACKET=y
  CONFIG_PACKET_MMAP=y
  CONFIG_UNIX=y
  CONFIG_XFRM=y
@@ -826,7 +823,7 @@ index b71a0a4..f136b73 100644
  CONFIG_INET=y
  CONFIG_IP_MULTICAST=y
  CONFIG_IP_ADVANCED_ROUTER=y
-@@ -361,12 +419,13 @@ CONFIG_IP_MULTIPLE_TABLES=y
+@@ -361,12 +416,13 @@ CONFIG_IP_MULTIPLE_TABLES=y
  CONFIG_IP_ROUTE_MULTIPATH=y
  CONFIG_IP_ROUTE_VERBOSE=y
  # CONFIG_IP_PNP is not set
@@ -843,7 +840,7 @@ index b71a0a4..f136b73 100644
  CONFIG_SYN_COOKIES=y
  # CONFIG_INET_AH is not set
  # CONFIG_INET_ESP is not set
-@@ -399,30 +458,34 @@ CONFIG_DEFAULT_BIC=y
+@@ -399,30 +455,34 @@ CONFIG_DEFAULT_BIC=y
  # CONFIG_DEFAULT_WESTWOOD is not set
  # CONFIG_DEFAULT_RENO is not set
  CONFIG_DEFAULT_TCP_CONG="bic"
@@ -883,7 +880,7 @@ index b71a0a4..f136b73 100644
  
  #
  # Core Netfilter Configuration
-@@ -446,17 +509,22 @@ CONFIG_NETFILTER_ADVANCED=y
+@@ -446,17 +506,22 @@ CONFIG_NETFILTER_ADVANCED=y
  #
  # CONFIG_IP6_NF_QUEUE is not set
  # CONFIG_IP6_NF_IPTABLES is not set
@@ -909,11 +906,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_ATALK is not set
  # CONFIG_X25 is not set
  # CONFIG_LAPB is not set
-@@ -518,26 +586,64 @@ CONFIG_NET_SCH_FIFO=y
- # Network testing
- #
- # CONFIG_NET_PKTGEN is not set
-+# CONFIG_NET_DROP_MONITOR is not set
+@@ -521,23 +586,58 @@ CONFIG_NET_SCH_FIFO=y
  # CONFIG_HAMRADIO is not set
  # CONFIG_CAN is not set
  # CONFIG_IRDA is not set
@@ -955,7 +948,6 @@ index b71a0a4..f136b73 100644
 +# CONFIG_CFG80211_DEVELOPER_WARNINGS is not set
 +# CONFIG_CFG80211_REG_DEBUG is not set
 +CONFIG_CFG80211_DEFAULT_PS=y
-+# CONFIG_CFG80211_DEBUGFS is not set
 +# CONFIG_WIRELESS_OLD_REGULATORY is not set
 +CONFIG_CFG80211_WEXT=y
  CONFIG_WIRELESS_EXT_SYSFS=y
@@ -974,7 +966,6 @@ index b71a0a4..f136b73 100644
 +CONFIG_MAC80211_RC_DEFAULT="minstrel"
 +# CONFIG_MAC80211_MESH is not set
 +CONFIG_MAC80211_LEDS=y
-+# CONFIG_MAC80211_DEBUGFS is not set
 +# CONFIG_MAC80211_DEBUG_MENU is not set
  # CONFIG_WIMAX is not set
  CONFIG_RFKILL=m
@@ -984,7 +975,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_NET_9P is not set
  
  #
-@@ -555,7 +661,7 @@ CONFIG_FW_LOADER=y
+@@ -555,7 +655,7 @@ CONFIG_FW_LOADER=y
  CONFIG_FIRMWARE_IN_KERNEL=y
  CONFIG_EXTRA_FIRMWARE=""
  # CONFIG_SYS_HYPERVISOR is not set
@@ -993,7 +984,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_MTD is not set
  # CONFIG_PARPORT is not set
  # CONFIG_PNP is not set
-@@ -566,7 +672,8 @@ CONFIG_BLK_DEV=y
+@@ -566,7 +666,8 @@ CONFIG_BLK_DEV=y
  # CONFIG_BLK_DEV_UMEM is not set
  # CONFIG_BLK_DEV_COW_COMMON is not set
  CONFIG_BLK_DEV_LOOP=y
@@ -1003,7 +994,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_BLK_DEV_NBD is not set
  # CONFIG_BLK_DEV_SX8 is not set
  # CONFIG_BLK_DEV_UB is not set
-@@ -577,19 +684,7 @@ CONFIG_BLK_DEV_RAM_SIZE=8192
+@@ -577,19 +678,7 @@ CONFIG_BLK_DEV_RAM_SIZE=8192
  # CONFIG_CDROM_PKTCDVD is not set
  # CONFIG_ATA_OVER_ETH is not set
  # CONFIG_BLK_DEV_HD is not set
@@ -1024,7 +1015,7 @@ index b71a0a4..f136b73 100644
  CONFIG_HAVE_IDE=y
  CONFIG_IDE=y
  
-@@ -619,8 +714,7 @@ CONFIG_BLK_DEV_IDEDMA_SFF=y
+@@ -619,8 +708,7 @@ CONFIG_BLK_DEV_IDEDMA_SFF=y
  #
  CONFIG_BLK_DEV_IDEPCI=y
  # CONFIG_IDEPCI_PCIBUS_ORDER is not set
@@ -1034,7 +1025,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_BLK_DEV_OPTI621 is not set
  CONFIG_BLK_DEV_IDEDMA_PCI=y
  # CONFIG_BLK_DEV_AEC62XX is not set
-@@ -700,7 +794,29 @@ CONFIG_SCSI_WAIT_SCAN=m
+@@ -700,7 +788,29 @@ CONFIG_SCSI_WAIT_SCAN=m
  # CONFIG_SCSI_DH is not set
  # CONFIG_SCSI_OSD_INITIATOR is not set
  # CONFIG_ATA is not set
@@ -1065,7 +1056,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_FUSION is not set
  
  #
-@@ -712,19 +828,19 @@ CONFIG_SCSI_WAIT_SCAN=m
+@@ -712,19 +822,19 @@ CONFIG_SCSI_WAIT_SCAN=m
  #
  
  #
@@ -1089,7 +1080,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_ARCNET is not set
  # CONFIG_PHYLIB is not set
  CONFIG_NET_ETHERNET=y
-@@ -738,6 +854,7 @@ CONFIG_MII=y
+@@ -738,6 +848,7 @@ CONFIG_MII=y
  # CONFIG_SMC91X is not set
  # CONFIG_DM9000 is not set
  # CONFIG_ETHOC is not set
@@ -1097,7 +1088,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_NET_VENDOR_RACAL is not set
  # CONFIG_DNET is not set
  # CONFIG_NET_TULIP is not set
-@@ -767,9 +884,9 @@ CONFIG_NET_PCI=y
+@@ -767,9 +878,9 @@ CONFIG_NET_PCI=y
  # CONFIG_NATSEMI is not set
  # CONFIG_NE2K_PCI is not set
  # CONFIG_8139CP is not set
@@ -1109,7 +1100,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_8139TOO_8129 is not set
  # CONFIG_8139_OLD_RX_RESET is not set
  # CONFIG_R6040 is not set
-@@ -794,7 +911,8 @@ CONFIG_NETDEV_1000=y
+@@ -794,7 +905,8 @@ CONFIG_NETDEV_1000=y
  # CONFIG_NS83820 is not set
  # CONFIG_HAMACHI is not set
  # CONFIG_YELLOWFIN is not set
@@ -1119,7 +1110,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_SIS190 is not set
  # CONFIG_SKGE is not set
  # CONFIG_SKY2 is not set
-@@ -810,15 +928,31 @@ CONFIG_R8169=y
+@@ -810,15 +922,31 @@ CONFIG_R8169=y
  # CONFIG_NETDEV_10000 is not set
  # CONFIG_TR is not set
  CONFIG_WLAN=y
@@ -1156,7 +1147,7 @@ index b71a0a4..f136b73 100644
  
  #
  # Enable WiMAX (Networking options) to see the WiMAX drivers
-@@ -831,17 +965,39 @@ CONFIG_WLAN_80211=y
+@@ -831,17 +959,39 @@ CONFIG_WLAN_80211=y
  # CONFIG_USB_KAWETH is not set
  # CONFIG_USB_PEGASUS is not set
  # CONFIG_USB_RTL8150 is not set
@@ -1200,7 +1191,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_ISDN is not set
  # CONFIG_PHONE is not set
  
-@@ -849,25 +1005,26 @@ CONFIG_WLAN_80211=y
+@@ -849,25 +999,26 @@ CONFIG_WLAN_80211=y
  # Input device support
  #
  CONFIG_INPUT=y
@@ -1232,7 +1223,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_KEYBOARD_LKKBD is not set
  # CONFIG_KEYBOARD_NEWTON is not set
  # CONFIG_KEYBOARD_OPENCORES is not set
-@@ -875,7 +1032,7 @@ CONFIG_KEYBOARD_ATKBD=y
+@@ -875,7 +1026,7 @@ CONFIG_KEYBOARD_ATKBD=y
  # CONFIG_KEYBOARD_SUNKBD is not set
  # CONFIG_KEYBOARD_XTKBD is not set
  CONFIG_INPUT_MOUSE=y
@@ -1241,7 +1232,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_MOUSE_PS2_ALPS is not set
  # CONFIG_MOUSE_PS2_LOGIPS2PP is not set
  CONFIG_MOUSE_PS2_SYNAPTICS=y
-@@ -884,7 +1041,7 @@ CONFIG_MOUSE_PS2_SYNAPTICS=y
+@@ -884,7 +1035,7 @@ CONFIG_MOUSE_PS2_SYNAPTICS=y
  # CONFIG_MOUSE_PS2_SENTELIC is not set
  # CONFIG_MOUSE_PS2_TOUCHKIT is not set
  # CONFIG_MOUSE_SERIAL is not set
@@ -1250,7 +1241,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_MOUSE_BCM5974 is not set
  # CONFIG_MOUSE_INPORT is not set
  # CONFIG_MOUSE_LOGIBM is not set
-@@ -904,6 +1061,7 @@ CONFIG_SERIO_I8042=y
+@@ -904,6 +1055,7 @@ CONFIG_SERIO_I8042=y
  # CONFIG_SERIO_PCIPS2 is not set
  CONFIG_SERIO_LIBPS2=y
  # CONFIG_SERIO_RAW is not set
@@ -1258,7 +1249,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_GAMEPORT is not set
  
  #
-@@ -915,27 +1073,13 @@ CONFIG_VT_CONSOLE=y
+@@ -915,27 +1067,13 @@ CONFIG_VT_CONSOLE=y
  CONFIG_HW_CONSOLE=y
  # CONFIG_VT_HW_CONSOLE_BINDING is not set
  CONFIG_DEVKMEM=y
@@ -1288,7 +1279,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_SERIAL_8250_PCI is not set
  CONFIG_SERIAL_8250_NR_UARTS=16
  CONFIG_SERIAL_8250_RUNTIME_UARTS=4
-@@ -953,8 +1097,7 @@ CONFIG_SERIAL_8250_FOURPORT=y
+@@ -953,8 +1091,7 @@ CONFIG_SERIAL_8250_FOURPORT=y
  #
  # Non-8250 serial port support
  #
@@ -1298,7 +1289,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_SERIAL_JSM is not set
  CONFIG_UNIX98_PTYS=y
  # CONFIG_DEVPTS_MULTIPLE_INSTANCES is not set
-@@ -963,7 +1106,6 @@ CONFIG_LEGACY_PTY_COUNT=16
+@@ -963,7 +1100,6 @@ CONFIG_LEGACY_PTY_COUNT=16
  # CONFIG_IPMI_HANDLER is not set
  CONFIG_HW_RANDOM=y
  # CONFIG_HW_RANDOM_TIMERIOMEM is not set
@@ -1306,7 +1297,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_DTLK is not set
  # CONFIG_R3964 is not set
  # CONFIG_APPLICOM is not set
-@@ -978,7 +1120,10 @@ CONFIG_DEVPORT=y
+@@ -978,7 +1114,10 @@ CONFIG_DEVPORT=y
  #
  # CONFIG_PPS is not set
  # CONFIG_W1 is not set
@@ -1318,7 +1309,7 @@ index b71a0a4..f136b73 100644
  CONFIG_HWMON=y
  # CONFIG_HWMON_VID is not set
  # CONFIG_HWMON_DEBUG_CHIP is not set
-@@ -1033,14 +1178,18 @@ CONFIG_VIDEO_MEDIA=m
+@@ -1033,14 +1172,18 @@ CONFIG_VIDEO_MEDIA=m
  #
  # Multimedia drivers
  #
@@ -1338,7 +1329,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_VIDEO_PMS is not set
  # CONFIG_VIDEO_CPIA is not set
  # CONFIG_VIDEO_CPIA2 is not set
-@@ -1049,52 +1198,55 @@ CONFIG_V4L_USB_DRIVERS=y
+@@ -1049,52 +1192,55 @@ CONFIG_V4L_USB_DRIVERS=y
  CONFIG_USB_VIDEO_CLASS=m
  CONFIG_USB_VIDEO_CLASS_INPUT_EVDEV=y
  CONFIG_USB_GSPCA=m
@@ -1428,7 +1419,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_RADIO_ADAPTERS is not set
  # CONFIG_DAB is not set
  
-@@ -1132,6 +1284,7 @@ CONFIG_FB_TILEBLITTING=y
+@@ -1132,6 +1278,7 @@ CONFIG_FB_TILEBLITTING=y
  # CONFIG_FB_CYBER2000 is not set
  # CONFIG_FB_ASILIANT is not set
  # CONFIG_FB_IMSTT is not set
@@ -1436,7 +1427,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_FB_S1D13XXX is not set
  # CONFIG_FB_NVIDIA is not set
  # CONFIG_FB_RIVA is not set
-@@ -1161,7 +1314,7 @@ CONFIG_FB_SIS_315=y
+@@ -1161,7 +1308,7 @@ CONFIG_FB_SIS_315=y
  CONFIG_BACKLIGHT_LCD_SUPPORT=y
  # CONFIG_LCD_CLASS_DEVICE is not set
  CONFIG_BACKLIGHT_CLASS_DEVICE=y
@@ -1445,7 +1436,7 @@ index b71a0a4..f136b73 100644
  
  #
  # Display device support
-@@ -1188,33 +1341,45 @@ CONFIG_FONT_MINI_4x6=y
+@@ -1188,33 +1335,45 @@ CONFIG_FONT_MINI_4x6=y
  CONFIG_FONT_SUN8x16=y
  CONFIG_FONT_SUN12x22=y
  CONFIG_FONT_10x18=y
@@ -1505,7 +1496,7 @@ index b71a0a4..f136b73 100644
  CONFIG_SND_PCI=y
  # CONFIG_SND_AD1889 is not set
  # CONFIG_SND_ALS300 is not set
-@@ -1281,7 +1446,10 @@ CONFIG_SND_CS5535AUDIO=m
+@@ -1281,7 +1440,10 @@ CONFIG_SND_CS5535AUDIO=m
  # CONFIG_SND_VX222 is not set
  # CONFIG_SND_YMFPCI is not set
  # CONFIG_SND_MIPS is not set
@@ -1517,7 +1508,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_SND_SOC is not set
  # CONFIG_SOUND_PRIME is not set
  CONFIG_AC97_BUS=m
-@@ -1299,32 +1467,41 @@ CONFIG_USB_HIDDEV=y
+@@ -1299,32 +1461,41 @@ CONFIG_USB_HIDDEV=y
  #
  # Special HID drivers
  #
@@ -1585,7 +1576,7 @@ index b71a0a4..f136b73 100644
  CONFIG_USB_SUPPORT=y
  CONFIG_USB_ARCH_HAS_HCD=y
  CONFIG_USB_ARCH_HAS_OHCI=y
-@@ -1336,15 +1513,15 @@ CONFIG_USB=y
+@@ -1336,15 +1507,15 @@ CONFIG_USB=y
  #
  # Miscellaneous USB options
  #
@@ -1604,7 +1595,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_USB_WUSB_CBAF is not set
  
  #
-@@ -1366,14 +1543,15 @@ CONFIG_USB_OHCI_LITTLE_ENDIAN=y
+@@ -1366,14 +1537,15 @@ CONFIG_USB_OHCI_LITTLE_ENDIAN=y
  CONFIG_USB_UHCI_HCD=m
  # CONFIG_USB_SL811_HCD is not set
  # CONFIG_USB_R8A66597_HCD is not set
@@ -1623,7 +1614,7 @@ index b71a0a4..f136b73 100644
  CONFIG_USB_WDM=m
  # CONFIG_USB_TMC is not set
  
-@@ -1397,7 +1575,7 @@ CONFIG_USB_STORAGE_ALAUDA=m
+@@ -1397,7 +1569,7 @@ CONFIG_USB_STORAGE_ALAUDA=m
  # CONFIG_USB_STORAGE_ONETOUCH is not set
  # CONFIG_USB_STORAGE_KARMA is not set
  # CONFIG_USB_STORAGE_CYPRESS_ATACB is not set
@@ -1632,7 +1623,7 @@ index b71a0a4..f136b73 100644
  
  #
  # USB Imaging devices
-@@ -1467,7 +1645,7 @@ CONFIG_USB_SERIAL_GENERIC=y
+@@ -1467,7 +1639,7 @@ CONFIG_USB_SERIAL_GENERIC=y
  # CONFIG_USB_LEGOTOWER is not set
  # CONFIG_USB_LCD is not set
  # CONFIG_USB_BERRY_CHARGE is not set
@@ -1641,14 +1632,13 @@ index b71a0a4..f136b73 100644
  # CONFIG_USB_CYPRESS_CY7C63 is not set
  # CONFIG_USB_CYTHERM is not set
  # CONFIG_USB_IDMOUSE is not set
-@@ -1480,19 +1658,136 @@ CONFIG_USB_SERIAL_GENERIC=y
+@@ -1480,19 +1652,135 @@ CONFIG_USB_SERIAL_GENERIC=y
  # CONFIG_USB_TEST is not set
  # CONFIG_USB_ISIGHTFW is not set
  # CONFIG_USB_VST is not set
 -# CONFIG_USB_GADGET is not set
 +CONFIG_USB_GADGET=m
 +# CONFIG_USB_GADGET_DEBUG_FILES is not set
-+# CONFIG_USB_GADGET_DEBUG_FS is not set
 +CONFIG_USB_GADGET_VBUS_DRAW=2
 +CONFIG_USB_GADGET_SELECTED=y
 +# CONFIG_USB_GADGET_AT91 is not set
@@ -1783,7 +1773,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_DMADEVICES is not set
  # CONFIG_AUXDISPLAY is not set
  # CONFIG_UIO is not set
-@@ -1504,22 +1799,21 @@ CONFIG_STAGING=y
+@@ -1504,22 +1792,20 @@ CONFIG_STAGING=y
  # CONFIG_STAGING_EXCLUDE_BUILD is not set
  # CONFIG_ET131X is not set
  # CONFIG_USB_IP_COMMON is not set
@@ -1799,7 +1789,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_RTL8192SU is not set
 +# CONFIG_RTL8192U is not set
  # CONFIG_RTL8192E is not set
- # CONFIG_INPUT_MIMIO is not set
+-# CONFIG_INPUT_MIMIO is not set
  # CONFIG_TRANZPORT is not set
  
  #
@@ -1810,7 +1800,7 @@ index b71a0a4..f136b73 100644
  # Qualcomm MSM Camera And Video
  #
  
-@@ -1527,7 +1821,6 @@ CONFIG_STAGING=y
+@@ -1527,7 +1813,6 @@ CONFIG_STAGING=y
  # Camera Sensor Selection
  #
  # CONFIG_INPUT_GPIO is not set
@@ -1818,7 +1808,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_POHMELFS is not set
  # CONFIG_B3DFG is not set
  # CONFIG_PLAN9AUTH is not set
-@@ -1544,28 +1837,57 @@ CONFIG_STAGING=y
+@@ -1544,28 +1829,55 @@ CONFIG_STAGING=y
  #
  # CONFIG_RAR_REGISTER is not set
  # CONFIG_IIO is not set
@@ -1851,9 +1841,7 @@ index b71a0a4..f136b73 100644
 +# CONFIG_EXT4_FS_SECURITY is not set
 +# CONFIG_EXT4_DEBUG is not set
  CONFIG_JBD=y
-+# CONFIG_JBD_DEBUG is not set
 +CONFIG_JBD2=y
-+# CONFIG_JBD2_DEBUG is not set
  CONFIG_FS_MBCACHE=y
 -# CONFIG_REISERFS_FS is not set
 -# CONFIG_JFS_FS is not set
@@ -1883,7 +1871,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_NILFS2_FS is not set
  CONFIG_FILE_LOCKING=y
  CONFIG_FSNOTIFY=y
-@@ -1575,17 +1897,26 @@ CONFIG_INOTIFY_USER=y
+@@ -1575,17 +1887,26 @@ CONFIG_INOTIFY_USER=y
  CONFIG_QUOTA=y
  # CONFIG_QUOTA_NETLINK_INTERFACE is not set
  CONFIG_PRINT_QUOTA_WARNING=y
@@ -1915,7 +1903,7 @@ index b71a0a4..f136b73 100644
  
  #
  # CD-ROM/DVD Filesystems
-@@ -1599,11 +1930,13 @@ CONFIG_ZISOFS=y
+@@ -1599,11 +1920,13 @@ CONFIG_ZISOFS=y
  # DOS/FAT/NT Filesystems
  #
  CONFIG_FAT_FS=m
@@ -1931,7 +1919,7 @@ index b71a0a4..f136b73 100644
  
  #
  # Pseudo filesystems
-@@ -1616,23 +1949,60 @@ CONFIG_SYSFS=y
+@@ -1616,23 +1939,60 @@ CONFIG_SYSFS=y
  CONFIG_TMPFS=y
  # CONFIG_TMPFS_POSIX_ACL is not set
  # CONFIG_HUGETLB_PAGE is not set
@@ -1997,7 +1985,7 @@ index b71a0a4..f136b73 100644
  # CONFIG_NCP_FS is not set
  # CONFIG_CODA_FS is not set
  # CONFIG_AFS_FS is not set
-@@ -1643,177 +2013,205 @@ CONFIG_SUNRPC=m
+@@ -1643,52 +2003,52 @@ CONFIG_SUNRPC=m
  # CONFIG_PARTITION_ADVANCED is not set
  CONFIG_MSDOS_PARTITION=y
  CONFIG_NLS=y
@@ -2090,37 +2078,28 @@ index b71a0a4..f136b73 100644
  CONFIG_ENABLE_WARN_DEPRECATED=y
  CONFIG_ENABLE_MUST_CHECK=y
  CONFIG_FRAME_WARN=1024
- # CONFIG_MAGIC_SYSRQ is not set
- CONFIG_STRIP_ASM_SYMS=y
- # CONFIG_UNUSED_SYMBOLS is not set
--# CONFIG_DEBUG_FS is not set
-+CONFIG_DEBUG_FS=y
+@@ -1698,119 +2058,141 @@ CONFIG_STRIP_ASM_SYMS=y
+ # CONFIG_DEBUG_FS is not set
  # CONFIG_HEADERS_CHECK is not set
  # CONFIG_DEBUG_KERNEL is not set
 -# CONFIG_SLUB_DEBUG_ON is not set
 -# CONFIG_SLUB_STATS is not set
-+CONFIG_STACKTRACE=y
  # CONFIG_DEBUG_MEMORY_INIT is not set
  # CONFIG_RCU_CPU_STALL_DETECTOR is not set
 -CONFIG_SYSCTL_SYSCALL_CHECK=y
 +# CONFIG_SYSCTL_SYSCALL_CHECK is not set
-+CONFIG_NOP_TRACER=y
 +CONFIG_HAVE_FUNCTION_TRACER=y
 +CONFIG_HAVE_FUNCTION_GRAPH_TRACER=y
 +CONFIG_HAVE_FUNCTION_TRACE_MCOUNT_TEST=y
 +CONFIG_HAVE_DYNAMIC_FTRACE=y
 +CONFIG_HAVE_FTRACE_MCOUNT_RECORD=y
 +CONFIG_RING_BUFFER=y
-+CONFIG_EVENT_TRACING=y
-+CONFIG_CONTEXT_SWITCH_TRACER=y
 +CONFIG_RING_BUFFER_ALLOW_SWAP=y
-+CONFIG_TRACING=y
  CONFIG_TRACING_SUPPORT=y
  # CONFIG_FTRACE is not set
-+# CONFIG_DYNAMIC_DEBUG is not set
  # CONFIG_SAMPLES is not set
  CONFIG_HAVE_ARCH_KGDB=y
-+CONFIG_EARLY_PRINTK=y
++# CONFIG_EARLY_PRINTK is not set
  # CONFIG_CMDLINE_BOOL is not set
  
  #
@@ -2296,12 +2275,8 @@ index b71a0a4..f136b73 100644
 +CONFIG_CRYPTO_ANSI_CPRNG=m
  CONFIG_CRYPTO_HW=y
  # CONFIG_CRYPTO_DEV_HIFN_795X is not set
--# CONFIG_BINARY_PRINTF is not set
-+CONFIG_BINARY_PRINTF=y
- 
- #
- # Library routines
-@@ -1821,14 +2219,20 @@ CONFIG_CRYPTO_HW=y
+ # CONFIG_BINARY_PRINTF is not set
+@@ -1821,14 +2203,20 @@ CONFIG_CRYPTO_HW=y
  CONFIG_BITREVERSE=y
  CONFIG_GENERIC_FIND_LAST_BIT=y
  # CONFIG_CRC_CCITT is not set
@@ -2325,6 +2300,19 @@ index b71a0a4..f136b73 100644
  CONFIG_HAS_IOMEM=y
  CONFIG_HAS_IOPORT=y
  CONFIG_HAS_DMA=y
+diff --git a/arch/mips/include/asm/dma-mapping.h b/arch/mips/include/asm/dma-mapping.h
+index 664ba53..c39bfdf 100644
+--- a/arch/mips/include/asm/dma-mapping.h
++++ b/arch/mips/include/asm/dma-mapping.h
+@@ -74,4 +74,8 @@ extern int dma_is_consistent(struct device *dev, dma_addr_t dma_addr);
+ extern void dma_cache_sync(struct device *dev, void *vaddr, size_t size,
+ 	       enum dma_data_direction direction);
+ 
++#define ARCH_HAS_DMA_MMAP_COHERENT
++extern int dma_mmap_coherent(struct device *dev, struct vm_area_struct *vma,
++		void *cpu_addr, dma_addr_t handle, size_t size);
++
+ #endif /* _ASM_DMA_MAPPING_H */
 diff --git a/arch/mips/include/asm/ftrace.h b/arch/mips/include/asm/ftrace.h
 index 3986cd8..6dbfa1e 100644
 --- a/arch/mips/include/asm/ftrace.h
@@ -4296,6 +4284,27 @@ index 51d1a60..66e4563 100644
  	 */
  	LOONGSON_CHIPCFG0 |= 0x7;
  }
+diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
+index 9367e33..0b3f2c5 100644
+--- a/arch/mips/mm/dma-default.c
++++ b/arch/mips/mm/dma-default.c
+@@ -374,3 +374,16 @@ void dma_cache_sync(struct device *dev, void *vaddr, size_t size,
+ }
+ 
+ EXPORT_SYMBOL(dma_cache_sync);
++
++int __weak dma_mmap_coherent(struct device *dev, struct vm_area_struct *vma,
++		void *cpu_addr, dma_addr_t handle, size_t size)
++{
++	struct page *pg;
++	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
++	cpu_addr = (void *)dma_addr_to_virt(dev, handle);
++	pg = virt_to_page(cpu_addr);
++	return remap_pfn_range(vma, vma->vm_start,
++		       page_to_pfn(pg) + vma->vm_pgoff,
++		       size, vma->vm_page_prot);
++}
++EXPORT_SYMBOL(dma_mmap_coherent);
 diff --git a/arch/mips/oprofile/common.c b/arch/mips/oprofile/common.c
 index 7832ad2..ee46c82 100644
 --- a/arch/mips/oprofile/common.c
