@@ -15,7 +15,7 @@ Index: debian/ruleset/arches/mipsel.mk
  
  NEED_DIRECT_GZIP_IMAGE = NO
 -kimagedest = $(INT_IMAGE_DESTDIR)/vmlinux-$(KERNELRELEASE)
-+kimagedest = $(INT_IMAGE_DESTDIR)/$(kimage)-$(KERNELRELEASE)
++kimagedest = $(INT_IMAGE_DESTDIR)/$(kimagesrc)-$(KERNELRELEASE)
 +ifeq ($(kimage),vmlinuz)
 +  int_install_vmlinux := YES
 +  kelfimagesrc = vmlinux
