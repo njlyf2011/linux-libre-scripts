@@ -19,7 +19,7 @@ Index: .config
 +#
 +# Automatically generated make config: don't edit
 +# Linux kernel version: 2.6.33.3-libre-lemote
-+# Mon Apr 26 22:33:15 2010
++# Tue Apr 27 22:47:33 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -2160,7 +2160,7 @@ Index: .config
 +# CONFIG_DYNAMIC_DEBUG is not set
 +# CONFIG_SAMPLES is not set
 +CONFIG_HAVE_ARCH_KGDB=y
-+CONFIG_EARLY_PRINTK=y
++# CONFIG_EARLY_PRINTK is not set
 +# CONFIG_CMDLINE_BOOL is not set
 +
 +#
