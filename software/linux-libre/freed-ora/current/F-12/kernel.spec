@@ -8,14 +8,34 @@ Summary: The Linux kernel
 # be 0.
 %global released_kernel 1
 
-# Versions of various parts
+# Save original buildid for later if it's defined
+%if 0%{?buildid:1}
+%global orig_buildid %{buildid}
+%undefine buildid
+%endif
 
+###################################################################
 # Polite request for people who spin their own kernel rpms:
 # please modify the "buildid" define in a way that identifies
 # that the kernel isn't the stock distribution kernel, for example,
-# by setting the define to ".local" or ".bz123456"
+# by setting the define to ".local" or ".bz123456". This will be
+# appended to the full kernel version.
 #
+# (Uncomment the '#' and the first two spaces below to set buildid.)
 # % define buildid .local
+###################################################################
+
+# The buildid can also be specified on the rpmbuild command line
+# by adding --define="buildid .whatever". If both the specfile and
+# the environment define a buildid they will be concatenated together.
+%if 0%{?orig_buildid:1}
+%if 0%{?buildid:1}
+%global srpm_buildid %{buildid}
+%define buildid %{srpm_buildid}%{orig_buildid}
+%else
+%define buildid %{orig_buildid}
+%endif
+%endif
 
 # fedora_build defines which build revision of this kernel version we're
 # building. Rather than incrementing forever, as with the prior versioning
@@ -29,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2065 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2074 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -54,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -678,6 +698,7 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch454: linux-2.6-input-hid-quirk-egalax.patch
+Patch455: thinkpad-acpi-add-x100e.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -767,7 +788,6 @@ Patch3051: linux-2.6-nfs4-callback-hidden.patch
 Patch3100: linux-2.6-btrfs-fix-acl.patch
 
 # XFS
-Patch3110: xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # VIA Nano / VX8xx updates
 Patch11010: via-hwmon-temp-sensor.patch
@@ -782,20 +802,17 @@ Patch12200: add-appleir-usb-driver.patch
 
 # Patches for -stable
 
+# ACPI EC bugfixes (not all upstream)
+Patch12250: acpi-ec-add-delay-before-write.patch
+
+Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
+
 Patch12311: fix-ima-null-ptr-deref.patch
 
 Patch12315: fix-abrtd.patch
-Patch12319: vgaarb-fix-userspace-ptr-deref.patch
-
-# cve-2009-4537 [not upstream]
-Patch12320: linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 
 # rhbz#/566565
 Patch12340: ice1712-fix-revo71-mixer-names.patch
-
-# rhbz#567530
-Patch12350: tcp-fix-icmp-rto-war.patch
-
 
 # rhbz#572653
 Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
@@ -803,24 +820,16 @@ Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 # rhbz#533746
 Patch12380: ssb_check_for_sprom.patch
 
-# fix regression caused by dropping these (#571638)
-
-# fix tg3 + netpoll with backport of  fe234f0e5cbb880792d2d1ac0743cf8c07e9dde3
-
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
-Patch12390: iwlwifi-fix-nfreed--.patch
 Patch12391: iwlwifi-reset-card-during-probe.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
-Patch12400: mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
 Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
-Patch12402: iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
 Patch12403: iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
 Patch12404: iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 Patch12405: iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 Patch12406: iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
 Patch12407: iwlwifi_-multiple-force-reset-mode.patch
-Patch12408: iwlwifi_-fix-scan-race.patch
 Patch12409: iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
 Patch12410: iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
 Patch12411: iwlwifi_-add-internal-short-scan-support-for-3945.patch
@@ -830,17 +839,18 @@ Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
-# make b43 gracefully switch to PIO mode in event of DMA errors
-Patch12420: b43_-Optimize-PIO-scratchbuffer-usage.patch
-Patch12421: b43_-Remove-reset-after-fatal-DMA-error.patch
-Patch12422: b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
-Patch12423: b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
+# RHBZ#552257
+Patch12600: hugetlb-fix-infinite-loop-in-get-futex-key.patch
+# CVE-2010-1146
+Patch12610: reiserfs-fix-permissions-on-reiserfs-priv.patch
 
-# mac80211: fix deferred hardware scan requests
-Patch12430: mac80211_-fix-deferred-hardware-scan-requests.patch
+# fix possible corruption with ssd
+Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
+
+# fix iscsi bug in 2.6.32
+Patch12800: libiscsi-regression-fix-header-digest-errors.patch
 
 # ==============================================================================
-
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1286,7 +1296,7 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 #ApplyPatch git-cpufreq.patch
 #ApplyPatch git-bluetooth.patch
 
-ApplyPatch linux-2.6-hotfixes.patch
+ApplyOptionalPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch linux-2.6-tracehook.patch
@@ -1335,7 +1345,6 @@ ApplyPatch linux-2.6-execshield.patch
 # ext4
 
 # xfs
-ApplyPatch xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-fix-acl.patch
@@ -1361,6 +1370,8 @@ ApplyPatch wmi-survive-bios-with-duplicate-guids.patch
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
+
+ApplyPatch acpi-ec-add-delay-before-write.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1405,6 +1416,7 @@ ApplyPatch die-floppy-die.patch
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
 ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
+ApplyPatch thinkpad-acpi-add-x100e.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1504,19 +1516,11 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch fix-ima-null-ptr-deref.patch
 
 ApplyPatch fix-abrtd.patch
-ApplyPatch vgaarb-fix-userspace-ptr-deref.patch
-
-# cve-2009-4537
-ApplyPatch linux-2.6-net-r8169-improved-rx-length-check-errors.patch
 
 # rhbz#566565
 ApplyPatch ice1712-fix-revo71-mixer-names.patch
 
-# rhbz#567530
-ApplyPatch tcp-fix-icmp-rto-war.patch
-
-
-
+ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
 
 # rhbz#572653
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
@@ -1525,19 +1529,15 @@ ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 ApplyPatch ssb_check_for_sprom.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
-ApplyPatch iwlwifi-fix-nfreed--.patch
 ApplyPatch iwlwifi-reset-card-during-probe.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
-ApplyPatch mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
 ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
-ApplyPatch iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
 ApplyPatch iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
 ApplyPatch iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 ApplyPatch iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 ApplyPatch iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
 ApplyPatch iwlwifi_-multiple-force-reset-mode.patch
-ApplyPatch iwlwifi_-fix-scan-race.patch
 ApplyPatch iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
 ApplyPatch iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
 ApplyPatch iwlwifi_-add-internal-short-scan-support-for-3945.patch
@@ -1547,17 +1547,18 @@ ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
-# make b43 gracefully switch to PIO mode in event of DMA errors
-ApplyPatch b43_-Optimize-PIO-scratchbuffer-usage.patch
-ApplyPatch b43_-Remove-reset-after-fatal-DMA-error.patch
-ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
-ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
+# RHBZ#552257
+ApplyPatch hugetlb-fix-infinite-loop-in-get-futex-key.patch
+# CVE-2010-1146
+ApplyPatch reiserfs-fix-permissions-on-reiserfs-priv.patch
 
-# mac80211: fix deferred hardware scan requests
-ApplyPatch mac80211_-fix-deferred-hardware-scan-requests.patch
+# fix possible corruption with ssd
+ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
+
+# fix iscsi header authentication broken in .32 (#583581)
+ApplyPatch libiscsi-regression-fix-header-digest-errors.patch
 
 # END OF PATCH APPLICATIONS ====================================================
-
 %endif
 
 # Any further pre-build tree manipulations happen here.
@@ -2209,6 +2210,58 @@ fi
 # and build.
 
 %changelog
+* Tue Apr 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.12.
+
+* Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-114
+- libiscsi-regression-fix-header-digest-errors.patch:
+  fix iscsi header authentication broken in .32 (#583581)
+
+* Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-113
+- Fix possible data corruption with ext4 mounted with -o discard
+
+* Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-112
+- hugetlb-fix-infinite-loop-in-get-futex-key.patch (#552557)
+- reiserfs-fix-permissions-on-reiserfs-priv.patch (CVE-2010-1146)
+
+* Mon Apr 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-111
+- Linux 2.6.32.12
+
+* Fri Apr 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-110.rc2
+- Linux 2.6.32.12-rc2
+- Drop -rc1 workarounds
+
+* Thu Apr 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-109.rc1
+- Linux 2.6.32.12-rc1
+- Drop patches merged upstream:
+  xfs_swap_extents-needs-to-handle-dynamic-fork-offsets.patch
+  acpi-ec-allow-multibyte-access-to-ec.patch
+  acpi-ec-limit-burst-to-64-bit.patch
+  vgaarb-fix-userspace-ptr-deref.patch
+  linux-2.6-net-r8169-improved-rx-length-check-errors.patch
+  tcp-fix-icmp-rto-war.patch
+  iwlwifi-fix-nfreed--.patch
+  mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
+  iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
+  iwlwifi_-fix-scan-race.patch
+  b43_-Optimize-PIO-scratchbuffer-usage.patch
+  b43_-Remove-reset-after-fatal-DMA-error.patch
+  b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
+  b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
+  mac80211_-fix-deferred-hardware-scan-requests.patch
+- Revert -rc1 patch: md-raid5-allow-for-more-than-2-31-chunks.patch
+  ( ERROR: "__umoddi3" [drivers/md/raid456.ko] undefined! )
+- Hotfix -rc1 lockdep patch with fix from LKML
+
+* Wed Apr 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.11-108
+- ACPI embedded controller fixes from Fedora 13 (#532161)
+
+* Wed Apr 21 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-add-x100e.patch: Add EC path for Thinkpad X100
+
+* Wed Apr 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.11-106
+- libata-fix-accesses-at-LBA28-boundary.patch
+
 * Tue Apr 20 2010 John W. Linville <linville@redhat.com> 2.6.32.11-105
 - mac80211: fix deferred hardware scan requests
 
