@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2004 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2009 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,7 +75,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -738,6 +738,7 @@ Patch1555: virt_console-fix-race.patch
 Patch1556: virt_console-fix-fix-race.patch
 Patch1557: virt_console-rollup2.patch
 Patch1558: vhost_net-rollup2.patch
+Patch1559: linux-2.6-tun-orphan_an_skb_on_tx.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -756,6 +757,7 @@ Patch1815: drm-nouveau-abi16.patch
 Patch1816: drm-nouveau-updates.patch
 # requires code that hasn't been merged upstream yet
 Patch1817: drm-nouveau-acpi-edid-fallback.patch
+Patch1818: drm-nouveau-drm-fixed-header.patch
 
 # drm fixes
 Patch1819: drm-intel-big-hammer.patch
@@ -819,29 +821,20 @@ Patch12021: ssb_check_for_sprom.patch
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch12100: iwlwifi-reset-card-during-probe.patch
 
-# make b43 gracefully switch to PIO mode in event of DMA errors
-Patch12101: b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
-Patch12102: b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
-
 # make p54pci usable on slower hardware
 Patch12103: linux-2.6-p54pci.patch
 
 Patch12200: acpi-ec-add-delay-before-write.patch
-Patch12210: acpi-ec-allow-multibyte-access-to-ec.patch
-Patch12220: acpi-ec-limit-burst-to-64-bit.patch
 
 Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
-Patch12400: mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
 Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
-Patch12402: iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
 Patch12403: iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
 Patch12404: iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 Patch12405: iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 Patch12406: iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
 Patch12407: iwlwifi_-multiple-force-reset-mode.patch
-Patch12408: iwlwifi_-fix-scan-race.patch
 Patch12409: iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
 Patch12410: iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
 Patch12411: iwlwifi_-add-internal-short-scan-support-for-3945.patch
@@ -861,6 +854,9 @@ Patch12610: reiserfs-fix-permissions-on-reiserfs-priv.patch
 
 # fix possible corruption with ssd
 Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
+
+# Revert "ath9k: fix lockdep warning when unloading module"
+Patch12800: revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
 
 %endif
 
@@ -1375,8 +1371,6 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-video-export-edid.patch
 
 ApplyPatch acpi-ec-add-delay-before-write.patch
-ApplyPatch acpi-ec-allow-multibyte-access-to-ec.patch
-ApplyPatch acpi-ec-limit-burst-to-64-bit.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1480,6 +1474,7 @@ ApplyPatch virt_console-fix-race.patch
 ApplyPatch virt_console-fix-fix-race.patch
 ApplyPatch virt_console-rollup2.patch
 ApplyPatch vhost_net-rollup2.patch
+ApplyPatch linux-2.6-tun-orphan_an_skb_on_tx.patch
 
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
@@ -1498,6 +1493,7 @@ ApplyPatch drm-radeon-ss-fix.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-acpi-edid-fallback.patch
+ApplyPatch drm-nouveau-drm-fixed-header.patch
 # pm broken on my thinkpad t60p - airlied
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1540,25 +1536,18 @@ ApplyPatch ssb_check_for_sprom.patch
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-reset-card-during-probe.patch
 
-# make b43 gracefully switch to PIO mode in event of DMA errors
-ApplyPatch b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
-ApplyPatch b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
-
 # make p54pci usable on slower hardware
 ApplyPatch linux-2.6-p54pci.patch
 
 ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
-ApplyPatch mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
 ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
-ApplyPatch iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
 ApplyPatch iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
 ApplyPatch iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 ApplyPatch iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 ApplyPatch iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
 ApplyPatch iwlwifi_-multiple-force-reset-mode.patch
-ApplyPatch iwlwifi_-fix-scan-race.patch
 ApplyPatch iwlwifi_-Adjusting-PLCP-error-threshold-for-1000-NIC.patch
 ApplyPatch iwlwifi_-separated-time-check-for-different-type-of-force-reset.patch
 ApplyPatch iwlwifi_-add-internal-short-scan-support-for-3945.patch
@@ -1578,6 +1567,9 @@ ApplyPatch reiserfs-fix-permissions-on-reiserfs-priv.patch
 
 # fix possible corruption with ssd
 ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
+
+# Revert "ath9k: fix lockdep warning when unloading module"
+ApplyPatch revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2228,6 +2220,40 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 29 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.33.3.
+
+* Thu Apr 29 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.3-73
+- nouveau: initial eDP support + DP suspend/resume fixes
+- nouveau: fix monitor detection on certain chipsets with DP support
+- nouveau: better CRTC PLL calculation on latest chipsets
+- nouveau: send hotplug events down to userspace
+
+* Wed Apr 28 2010 John W. Linville <linville@redhat.com> 2.6.33.3-72
+- Revert "ath9k: fix lockdep warning when unloading module"
+
+* Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.3-71
+- Linux 2.6.33.3
+- Drop patches merged upstream:
+   acpi-ec-allow-multibyte-access-to-ec.patch
+   acpi-ec-limit-burst-to-64-bit.patch
+   b43_-Allow-PIO-mode-to-be-selected-at-module-load.patch
+   b43_-fall-back-gracefully-to-PIO-mode-after-fatal-DMA-errors.patch
+   mac80211_-tear-down-all-agg-queues-when-restart_reconfig-hw.patch
+   iwlwifi_-clear-all-tx-queues-when-firmware-ready.patch
+   iwlwifi_-fix-scan-race.patch
+- Revert DRM patches we already have:
+   drm-radeon-kms-add-firemv-2400-pci-id.patch
+   drm-radeon-kms-fix-rs600-tlb-flush.patch
+   drm-edid-quirks-envision-en2028.patch
+   drm-return-enodev-if-the-inode-mapping-changes.patch
+   drm-remove-the-edid-blob-stored-in-the-edid-property-when-it-is-disconnected.patch
+   drm-edid-allow-certain-bogus-edids-to-hit-a-fixup-path-rather-than-fail.patch
+- Fix up drm-core-next to apply after 2.6.33.3
+
+* Tue Apr 27 2010 Justin M. Forbes <jforbes@redhat.com>
+- Orphan an skb on tx for tun/tap devices.
+
 * Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.2-68
 - Fix possible data corruption with ext4 mounted with -o discard
 
