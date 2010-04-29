@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2000 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2004 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -146,7 +146,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %endif
@@ -166,7 +166,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -853,6 +853,14 @@ Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
 # should be upstream soon
 Patch12500: linux-2.6-creds_are_invalid-race.patch
+
+# RHBZ#552257
+Patch12600: hugetlb-fix-infinite-loop-in-get-futex-key.patch
+# CVE-2010-1146
+Patch12610: reiserfs-fix-permissions-on-reiserfs-priv.patch
+
+# fix possible corruption with ssd
+Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 
 %endif
 
@@ -1563,6 +1571,14 @@ ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 # RHBZ#583843
 ApplyPatch linux-2.6-creds_are_invalid-race.patch
 
+# RHBZ#552257
+ApplyPatch hugetlb-fix-infinite-loop-in-get-futex-key.patch
+# CVE-2010-1146
+ApplyPatch reiserfs-fix-permissions-on-reiserfs-priv.patch
+
+# fix possible corruption with ssd
+ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2212,6 +2228,20 @@ fi
 # and build.
 
 %changelog
+* Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.2-68
+- Fix possible data corruption with ext4 mounted with -o discard
+
+* Mon Apr 26 2010 Chuck Ebbert <cebbert@redhat.com>
+- hugetlb-fix-infinite-loop-in-get-futex-key.patch (F12#552557)
+- reiserfs-fix-permissions-on-reiserfs-priv.patch (CVE-2010-1146)
+
+* Mon Apr 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.2-66
+- Turn off debugging and enable debug kernel builds.
+
+* Mon Apr 26 2010 Dave Jones <davej@redhat.com>
+- Revert PCI changes from 2.6.33.2.
+  Possibly causing networking problems with some drivers.
+
 * Mon Apr 26 2010 Adam Jackson <ajax@redhat.com>
 - drm-intel-sdvo-fix.patch: Fix DDC bus selection for SDVO (#584229)
 
