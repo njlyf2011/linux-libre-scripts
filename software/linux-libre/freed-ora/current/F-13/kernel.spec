@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2009 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2011 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -771,6 +771,7 @@ Patch1827: linux-2.6-intel-iommu-igfx.patch
 Patch1828: drm-intel-gen5-dither.patch
 # thanks for the untested sdvo rework guys
 Patch1829: drm-intel-sdvo-fix.patch
+Patch1830: drm-intel-sdvo-fix-2.patch
 
 Patch2100: linux-2.6-phylib-autoload.patch
 
@@ -1501,6 +1502,7 @@ ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 ApplyPatch drm-intel-gen5-dither.patch
 ApplyPatch drm-intel-sdvo-fix.patch
+ApplyPatch drm-intel-sdvo-fix-2.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
 
@@ -2220,6 +2222,13 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 29 2010 Adam Jackson <ajax@redhat.com>
+- drm-intel-sdvo-fix-2.patch: Require that the A/D bit of EDID match the
+  A/D-ness of the connector. (#584229)
+
+* Thu Apr 29 2010 Kyle McMartin <kyle@redhat.com>
+- add-appleir-usb-driver.patch: updates from hadess.
+
 * Thu Apr 29 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.33.3.
 
