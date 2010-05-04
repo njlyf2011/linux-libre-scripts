@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1960
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2074 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2075 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -850,6 +850,9 @@ Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 # fix iscsi bug in 2.6.32
 Patch12800: libiscsi-regression-fix-header-digest-errors.patch
 
+# Revert "ath9k: fix lockdep warning when unloading module"
+Patch12900: revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
 # ==============================================================================
 %endif
 
@@ -1558,6 +1561,9 @@ ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
 # fix iscsi header authentication broken in .32 (#583581)
 ApplyPatch libiscsi-regression-fix-header-digest-errors.patch
 
+# Revert "ath9k: fix lockdep warning when unloading module"
+ApplyPatch revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
 # END OF PATCH APPLICATIONS ====================================================
 %endif
 
@@ -2210,6 +2216,9 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 30 2010 John W. Linville <linville@redhat.com> 2.6.32.12-115
+- Revert "ath9k: fix lockdep warning when unloading module"
+
 * Tue Apr 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.32.12.
 
