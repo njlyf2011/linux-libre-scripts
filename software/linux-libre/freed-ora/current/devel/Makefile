@@ -1,5 +1,5 @@
 # Makefile for source rpm: kernel
-# $Id: Makefile,v 1.125 2010/03/22 13:31:58 kyle Exp $
+# $Id: Makefile,v 1.126 2010/04/21 17:11:52 cebbert Exp $
 NAME     := kernel
 SPECFILE := kernel.spec
 
@@ -98,6 +98,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_DMADEVICES_DEBUG is not set/CONFIG_DMADEVICES_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DMADEVICES_VDEBUG is not set/CONFIG_DMADEVICES_VDEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_CEPH_FS_PRETTYDEBUG is not set/CONFIG_CEPH_FS_PRETTYDEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_QUOTA_DEBUG is not set/CONFIG_QUOTA_DEBUG=y/' config-nodebug
 
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
@@ -164,6 +165,7 @@ release:
 	@perl -pi -e 's/CONFIG_DMADEVICES_DEBUG=y/# CONFIG_DMADEVICES_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DMADEVICES_VDEBUG=y/# CONFIG_DMADEVICES_VDEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_CEPH_FS_PRETTYDEBUG=y/# CONFIG_CEPH_FS_PRETTYDEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_QUOTA_DEBUG=y/# CONFIG_QUOTA_DEBUG is not set/' config-nodebug
 
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug

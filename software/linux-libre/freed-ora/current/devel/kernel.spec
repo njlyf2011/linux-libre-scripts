@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -48,14 +48,14 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1935
+%define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1973 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1993 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 33
+%define base_sublevel 34
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -94,7 +94,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 5
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -672,6 +672,8 @@ Patch21: linux-2.6-tracehook.patch
 Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ptrace.patch
 
+Patch50: linux-2.6-x86-cfi_sections.patch
+
 Patch144: linux-2.6-vio-modalias.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
@@ -695,6 +697,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch453: thinkpad-acpi-add-x100e.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -742,8 +745,6 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
-# make brightness hotkeys work on some machines
-Patch1826: drm-intel-acpi-populate-didl.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -760,11 +761,14 @@ Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # fs fixes
 
+Patch3000: fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
+
 # NFSv4
 
 # VIA Nano / VX8xx updates
 
 # patches headed upstream
+Patch12005: linux-2.6-input-hid-quirk-egalax.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
 
@@ -1230,6 +1234,7 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
+ApplyPatch linux-2.6-x86-cfi_sections.patch
 
 #
 # Intel IOMMU
@@ -1255,6 +1260,7 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
+ApplyPatch fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
 
 # ext4
 
@@ -1315,6 +1321,8 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
+ApplyPatch thinkpad-acpi-add-x100e.patch
+
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
 
@@ -1367,6 +1375,8 @@ ApplyPatch hdpvr-ir-enable.patch
 #ApplyPatch vhost_net-rollup.patch
 #ApplyPatch virt_console-rollup.patch
 
+ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
+
 # Fix block I/O errors in KVM
 #ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 
@@ -1381,7 +1391,6 @@ ApplyPatch drm_nouveau_ucode.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
-ApplyPatch drm-intel-acpi-populate-didl.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1523,7 +1532,7 @@ BuildKernel() {
     pushd tools/perf
 # make sure the scripts are executable... won't be in tarball until 2.6.31 :/
     chmod +x util/generate-cmdlist.sh util/PERF-VERSION-GEN
-    make -s V=1 %{?_smp_mflags} perf
+    make -s V=1 NO_DEMANGLE=1 %{?_smp_mflags} perf
     mkdir -p $RPM_BUILD_ROOT/usr/libexec/
     install -m 755 perf $RPM_BUILD_ROOT/usr/libexec/perf.$KernelVer
     popd
@@ -2058,10 +2067,10 @@ fi
 # plz don't put in a version string unless you're going to tag
 # and build.
 
-#  ___________________________________________________________ 
+#  ___________________________________________________________
 # / This branch is for Fedora 14. You probably want to commit \
 # \ to the F-13 branch instead, or in addition to this one.   /
-#  ----------------------------------------------------------- 
+#  -----------------------------------------------------------
 #         \   ^__^
 #          \  (@@)\_______
 #             (__)\       )\/\
@@ -2069,6 +2078,79 @@ fi
 #                 ||     ||
 
 %changelog
+* Mon May 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed 2.6.34-libre.
+
+* Sun May 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-2
+- Disable strict copy_from_user checking until lirc is fixed.
+
+* Sun May 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-1
+- Linux 2.6.34
+
+* Fri May 14 2010 Roland McGrath <roland@redhat.com> 2.6.34-0.56.rc7.git4
+- x86: put assembly CFI in .debug_frame
+
+* Thu May 13 2010 Dave Jones <davej@redhat.com>
+- 2.6.34-rc7-git4
+
+* Wed May 12 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc7-git3
+- Fix up utrace.patch
+- Drop autofs-fix-link_count-usage.patch
+
+* Mon May 10 2010 Kyle McMartin <kyle@redhat.com>
+- Don't link perf against libbfd.a.
+
+* Mon May 10 2010 Kyle McMartin <kyle@redhat.com>
+- fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch  (rhbz#588930)
+
+* Mon May 10 2010 Kyle McMartin <kyle@redhat.com>
+- linux-2.6-input-hid-quirk-egalax.patch: copy from F-13^H2.
+
+* Mon May 10 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.49.rc7.git0
+- autofs: Patch from Ian Kent to fix non-top level mounts. (rhbz#583483)
+
+* Sun May 09 2010 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.34-rc7
+
+* Sun May 09 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc6-git6
+- Fix linux-2.6-v4l-dvb-gspca-fixes.patch to apply after latest V4L push
+- CONFIG_HWMON=y to allow CONFIG_ACERHDF=m on x86
+- CONFIG_MICREL_PHY=m
+
+* Sat May 08 2010 Kyle McMartin <kyle@redhat.com>
+- Link perf against libbfd.a for name-demangling support. (rhbz#590289)
+
+* Fri Apr 30 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc6-git1
+
+* Fri Apr 30 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-0.44.rc6.git0
+- Linux 2.6.34-rc6
+- USB_SIERRA_NET=m
+
+* Mon Apr 26 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc5-git7
+- Drop merged patches:
+    linux-2.6-pci-fixup-resume.patch
+    drm-intel-acpi-populate-didl.patch
+- New config options:
+    CONFIG_USB_IPHETH=m
+    CONFIG_VMWARE_BALLOON=m
+
+* Thu Apr 22 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc5-git3
+
+* Thu Apr 22 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-pci-fixup-resume.patch: make sure we enable power resources on D0
+
+* Wed Apr 21 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.34-rc5-git1
+- New config option: CONFIG_QUOTA_DEBUG enabled for debug kernels
+
+* Wed Apr 21 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-add-x100e.patch: Add EC path for Thinkpad X100
+
 * Mon Apr 19 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.34-rc5.
 
