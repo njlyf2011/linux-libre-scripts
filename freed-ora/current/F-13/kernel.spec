@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2011 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2014 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -808,7 +808,7 @@ Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
 Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
 
-Patch12015: add-appleir-usb-driver.patch
+Patch12015: add-appleir-driver.patch
 
 Patch12017: prevent-runtime-conntrack-changes.patch
 
@@ -858,6 +858,9 @@ Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 
 # Revert "ath9k: fix lockdep warning when unloading module"
 Patch12800: revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
+# ath9k: reorder ieee80211_free_hw behind ath9k_uninit_hw to avoid oops
+Patch12810: ath9k-reorder-ieee80211_free_hw-behind-ath9k_uninit_.patch
 
 %endif
 
@@ -1525,7 +1528,8 @@ ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
 
-ApplyPatch add-appleir-usb-driver.patch
+# appleir remote controller
+ApplyPatch add-appleir-driver.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
@@ -1572,6 +1576,9 @@ ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
 
 # Revert "ath9k: fix lockdep warning when unloading module"
 ApplyPatch revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
+# ath9k: reorder ieee80211_free_hw behind ath9k_uninit_hw to avoid oops
+ApplyPatch ath9k-reorder-ieee80211_free_hw-behind-ath9k_uninit_.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2222,6 +2229,14 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 30 2010 John W. Linville <linville@redhat.com> 2.6.33.3-78
+- ath9k: reorder ieee80211_free_hw behind ath9k_uninit_hw to avoid
+  oops (#586787)
+
+* Fri Apr 30 2010 Kyle McMartin <kyle@redhat.com>
+- add-appleir-driver.patch: update from hadess, split out some other patches.
+- git-bluetooth.patch: and put them in git-bluetooth, along with other fixes.
+
 * Thu Apr 29 2010 Adam Jackson <ajax@redhat.com>
 - drm-intel-sdvo-fix-2.patch: Require that the A/D bit of EDID match the
   A/D-ness of the connector. (#584229)
