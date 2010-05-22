@@ -1,6 +1,5 @@
 D/scripts////
 /linux-2.6.34.tar.bz2.sign/-1.1/Sun May 16 22:08:59 2010//Tkernel-2_6_34-2_fc14
-/.cvsignore/1.1197/dummy timestamp from new-entry+Mon May 17 21:07:39 2010//Tkernel-2_6_34-6_fc14
 /Makefile/1.126/dummy timestamp from new-entry//Tkernel-2_6_34-6_fc14
 /Makefile.config/1.73/Thu Sep 10 04:29:09 2009/-ko/Tkernel-2_6_34-6_fc14
 /TODO/1.68/Mon Feb  1 21:23:50 2010//Tkernel-2_6_34-6_fc14
@@ -113,11 +112,12 @@ D/scripts////
 /pci-hush-rom-warning.patch/1.1/Tue Mar 30 04:24:03 2010/-kb/Tkernel-2_6_34-6_fc14
 /perf/1.6/Thu Sep 10 04:29:11 2009//Tkernel-2_6_34-6_fc14
 /prevent-runtime-conntrack-changes.patch/1.1/Wed Feb  3 21:09:15 2010/-kb/Tkernel-2_6_34-6_fc14
-/sources/1.1157/dummy timestamp from new-entry+Tue May 18 00:21:30 2010//Tkernel-2_6_34-6_fc14
 /ssb_check_for_sprom.patch/1.2/Thu May 20 15:20:37 2010/-kb/Tkernel-2_6_34-6_fc14
 /thinkpad-acpi-add-x100e.patch/1.1/Wed Apr 21 14:13:11 2010/-kb/Tkernel-2_6_34-6_fc14
 /thinkpad-acpi-fix-backlight.patch/1.1/Mon May 17 20:38:21 2010/-kb/Tkernel-2_6_34-6_fc14
-/upstream/1.1070/dummy timestamp from new-entry+Mon May 17 21:07:51 2010//Tkernel-2_6_34-6_fc14
 /upstream-key.gpg/1.1/dummy timestamp from new-entry//Tkernel-2_6_34-6_fc14
 /virt_console-rollup.patch/1.3/Fri May 21 22:17:39 2010/-kb/Tkernel-2_6_34-6_fc14
 /virtqueue-wrappers.patch/1.1/Fri May 21 14:14:32 2010/-kb/Tkernel-2_6_34-6_fc14
+/.cvsignore/1.1197/Sat May 22 06:59:15 2010//Tkernel-2_6_34-6_fc14
+/sources/1.1157/Sat May 22 06:59:15 2010//Tkernel-2_6_34-6_fc14
+/upstream/1.1070/Sat May 22 06:59:15 2010//Tkernel-2_6_34-6_fc14
