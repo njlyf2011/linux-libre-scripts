@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1993 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1997 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -680,24 +680,31 @@ Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
 Patch160: linux-2.6-execshield.patch
 
-Patch250: linux-2.6-debug-sizeof-structs.patch
-Patch260: linux-2.6-debug-nmi-timeout.patch
-Patch270: linux-2.6-debug-taint-vm.patch
+Patch200: linux-2.6-debug-sizeof-structs.patch
+Patch201: linux-2.6-debug-nmi-timeout.patch
+Patch202: linux-2.6-debug-taint-vm.patch
+Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
+Patch204: linux-2.6-debug-always-inline-kzalloc.patch
+
 Patch300: linux-2.6-driver-level-usb-autosuspend.diff
 Patch303: linux-2.6-enable-btusb-autosuspend.patch
 Patch304: linux-2.6-usb-uvc-autosuspend.diff
 Patch305: linux-2.6-fix-btusb-autosuspend.patch
+
 Patch310: linux-2.6-usb-wwan-update.patch
 
-Patch340: linux-2.6-debug-vm-would-have-oomkilled.patch
-Patch360: linux-2.6-debug-always-inline-kzalloc.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch383: linux-2.6-defaults-aspm.patch
+
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
+Patch392: linux-2.6-acpi-video-export-edid.patch
+Patch393: acpi-ec-add-delay-before-write.patch
+
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch453: thinkpad-acpi-add-x100e.patch
+Patch454: thinkpad-acpi-fix-backlight.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -715,11 +722,10 @@ Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
-Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 
-Patch700: linux-2.6.31-nx-data.patch
-Patch701: linux-2.6.31-modules-ro-nx.patch
+Patch690: iwlwifi-recalculate-average-tpt-if-not-current.patch
+Patch691: iwlwifi-fix-internal-scan-race.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -729,26 +735,28 @@ Patch1515: lirc-2.6.33.patch
 Patch1517: hdpvr-ir-enable.patch
 
 # virt + ksm patches
-Patch1551: linux-2.6-ksm-kvm.patch
-Patch1552: linux-2.6-userspace_kvmclock_offset.patch
-Patch1553: vhost_net-rollup.patch
+Patch1550: virtqueue-wrappers.patch
 Patch1554: virt_console-rollup.patch
 
-# fbdev x86-64 primary fix
-Patch1700: linux-2.6-x86-64-fbdev-primary.patch
-
+# DRM
+Patch1810: drm-1024x768-85.patch
 # nouveau + drm fixes
-Patch1815: drm_nouveau_ucode.patch
-Patch1816: drm-nouveau-abi16.patch
+Patch1815: drm-nouveau-drm-fixed-header.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
+Patch1826: drm-intel-gen5-dither.patch
+Patch1827: drm-intel-sdvo-fix-2.patch
+Patch1828: drm-intel-sdvo-fix.patch
+Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
 Patch2201: linux-2.6-firewire-git-pending.patch
+
+Patch2400: linux-2.6-phylib-autoload.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -758,6 +766,9 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
+
+Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+Patch2911: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 
@@ -769,10 +780,9 @@ Patch3000: fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
 
 # patches headed upstream
 Patch12005: linux-2.6-input-hid-quirk-egalax.patch
-Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
-Patch12013: linux-2.6-rfkill-all.patch
 
 Patch12015: add-appleir-usb-driver.patch
+Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12017: prevent-runtime-conntrack-changes.patch
 
@@ -780,6 +790,8 @@ Patch12018: neuter_intel_microcode_load.patch
 
 Patch12019: linux-2.6-umh-refactor.patch
 Patch12020: coredump-uid-pipe-check.patch
+
+Patch12030: ssb_check_for_sprom.patch
 
 %endif
 
@@ -1284,6 +1296,8 @@ ApplyPatch linux-2.6-usb-wwan-update.patch
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
+ApplyPatch linux-2.6-acpi-video-export-edid.patch
+ApplyPatch acpi-ec-add-delay-before-write.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1321,7 +1335,9 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
+ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
 ApplyPatch thinkpad-acpi-add-x100e.patch
+ApplyPatch thinkpad-acpi-fix-backlight.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1344,16 +1360,8 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# rt2x00: back-port activity LED init patches
-#ApplyPatch linux-2.6-rt2x00-asus-leds.patch
-
 # back-port scan result aging patches
 #ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
-
-# Mark kernel data as NX
-#ApplyPatch linux-2.6.31-nx-data.patch
-# Apply NX/RO to modules
-#ApplyPatch linux-2.6.31-modules-ro-nx.patch
 
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1366,31 +1374,21 @@ ApplyPatch lirc-2.6.33.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
 
-# Add kernel KSM support
-# Optimize KVM for KSM support
-#ApplyPatch linux-2.6-ksm-kvm.patch
-
 # Assorted Virt Fixes
-#ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
-#ApplyPatch vhost_net-rollup.patch
-#ApplyPatch virt_console-rollup.patch
+ApplyPatch virtqueue-wrappers.patch
+ApplyPatch virt_console-rollup.patch
 
-ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
-
-# Fix block I/O errors in KVM
-#ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
-
-# fix x86-64 fbdev primary GPU selection
-#ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
+ApplyPatch drm-1024x768-85.patch
 
 # Nouveau DRM + drm fixes
-# squash nouveau firmware into a single commit until it gets into linux-firmware
-ApplyPatch drm_nouveau_ucode.patch
-#ApplyPatch drm-nouveau-abi16.patch
-# pm broken on my thinkpad t60p - airlied
+ApplyPatch drm-nouveau-drm-fixed-header.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch linux-2.6-intel-iommu-igfx.patch
+ApplyPatch drm-intel-gen5-dither.patch
+#ApplyPatch drm-intel-sdvo-fix.patch
+#ApplyPatch drm-intel-sdvo-fix-2.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1407,16 +1405,26 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
 
-# Patches headed upstream
-#ApplyPatch linux-2.6-rfkill-all.patch
+ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
-#ApplyPatch add-appleir-usb-driver.patch
+ApplyPatch linux-2.6-phylib-autoload.patch
+
+# Patches headed upstream
+ApplyPatch add-appleir-usb-driver.patch
+ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
 # Refactor UserModeHelper code & satisfy abrt recursion check request
 #ApplyPatch linux-2.6-umh-refactor.patch
 #ApplyPatch coredump-uid-pipe-check.patch
+
+# rhbz#533746
+ApplyPatch ssb_check_for_sprom.patch
+
+ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
+ApplyPatch iwlwifi-fix-internal-scan-race.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2078,6 +2086,22 @@ fi
 #                 ||     ||
 
 %changelog
+* Fri May 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-6
+- Fixups for virt_console from Amit Shah, thanks!
+
+* Thu May 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-5
+- disable intel sdvo fixes until dependent code is backported.
+
+* Thu May 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-4
+- resync a lot of stuff with F-13...
+- linux-2.6-acpi-video-export-edid.patch: rebase & copy from F-13
+- acpi-ec-add-delay-before-write.patch: copy from F-13
+- ... and a whole lot more that I can't be bothered typing.
+
+* Mon May 17 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-fix-backlight.patch: Fix backlight support on some recent
+   Thinkpads
+
 * Mon May 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed 2.6.34-libre.
 
