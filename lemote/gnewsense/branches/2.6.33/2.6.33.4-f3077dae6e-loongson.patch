@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index de3e66c..a630c8d 100644
+index f668e8c..2dd8bf0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -227,8 +227,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -23,7 +23,7 @@ index de3e66c..a630c8d 100644
  
  include $(srctree)/arch/$(SRCARCH)/Makefile
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 8b5d174..f31757e 100644
+index 8b5d174..42500aa 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -180,7 +180,7 @@ config LASAT
@@ -35,7 +35,16 @@ index 8b5d174..f31757e 100644
  	help
  	  This enables the support of Loongson family of machines.
  
-@@ -1934,6 +1934,18 @@ config NR_CPUS
+@@ -1073,6 +1073,8 @@ config CPU_LOONGSON2F
+ 	bool "Loongson 2F"
+ 	depends on SYS_HAS_CPU_LOONGSON2F
+ 	select CPU_LOONGSON2
++	select GENERIC_GPIO
++	select ARCH_REQUIRE_GPIOLIB
+ 	help
+ 	  The Loongson 2F processor implements the MIPS III instruction set
+ 	  with many extensions.
+@@ -1934,6 +1936,18 @@ config NR_CPUS
  source "kernel/time/Kconfig"
  
  #
@@ -4073,8 +4082,49 @@ index 0000000..4fccb5d
 +#define EVENT_END	EVENT_WLAN
 +
 +#endif /* !_EC_KB3310B_H */
+diff --git a/arch/mips/include/asm/mach-loongson/gpio.h b/arch/mips/include/asm/mach-loongson/gpio.h
+new file mode 100644
+index 0000000..e30e73d
+--- /dev/null
++++ b/arch/mips/include/asm/mach-loongson/gpio.h
+@@ -0,0 +1,35 @@
++/*
++ * STLS2F GPIO Support
++ *
++ * Copyright (c) 2008  Richard Liu, STMicroelectronics <richard.liu@st.com>
++ * Copyright (c) 2008-2010  Arnaud Patard <apatard@mandriva.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#ifndef	__STLS2F_GPIO_H
++#define	__STLS2F_GPIO_H
++
++#include <asm-generic/gpio.h>
++
++extern void gpio_set_value(unsigned gpio, int value);
++extern int gpio_get_value(unsigned gpio);
++extern int gpio_cansleep(unsigned gpio);
++
++/* The chip can do interrupt
++ * but it has not been tested and doc not clear
++ */
++static inline int gpio_to_irq(int gpio)
++{
++	return -EINVAL;
++}
++
++static inline int irq_to_gpio(int gpio)
++{
++	return -EINVAL;
++}
++
++#endif				/* __STLS2F_GPIO_H */
 diff --git a/arch/mips/include/asm/mach-loongson/loongson.h b/arch/mips/include/asm/mach-loongson/loongson.h
-index ee8bc83..2894019 100644
+index ee8bc83..53d0bef 100644
 --- a/arch/mips/include/asm/mach-loongson/loongson.h
 +++ b/arch/mips/include/asm/mach-loongson/loongson.h
 @@ -1,12 +1,11 @@
@@ -4113,6 +4163,15 @@ index ee8bc83..2894019 100644
  /* irq operation functions */
  extern void bonito_irqdispatch(void);
  extern void __init bonito_irq_init(void);
+@@ -308,7 +313,7 @@ extern unsigned long _loongson_addrwincfg_base;
+  */
+ #define LOONGSON_ADDRWIN_CFG(s, d, w, src, dst, size) do {\
+ 	s##_WIN##w##_BASE = (src); \
+-	s##_WIN##w##_MMAP = (src) | ADDRWIN_MAP_DST_##d; \
++	s##_WIN##w##_MMAP = (dst) | ADDRWIN_MAP_DST_##d; \
+ 	s##_WIN##w##_MASK = ~(size-1); \
+ } while (0)
+ 
 diff --git a/arch/mips/include/asm/mach-loongson/machine.h b/arch/mips/include/asm/mach-loongson/machine.h
 index acf8359..4321338 100644
 --- a/arch/mips/include/asm/mach-loongson/machine.h
@@ -4703,10 +4762,18 @@ index fb74974..ec6bf00 100644
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
-index 7668c4d..7d4df63 100644
+index 7668c4d..a1e7a0b 100644
 --- a/arch/mips/loongson/common/Makefile
 +++ b/arch/mips/loongson/common/Makefile
-@@ -23,3 +23,9 @@ obj-$(CONFIG_CS5536) += cs5536/
+@@ -4,6 +4,7 @@
+ 
+ obj-y += setup.o init.o cmdline.o env.o time.o reset.o irq.o \
+     pci.o bonito-irq.o mem.o machtype.o platform.o
++obj-$(CONFIG_GENERIC_GPIO) += gpio.o
+ 
+ #
+ # Serial port support
+@@ -23,3 +24,9 @@ obj-$(CONFIG_CS5536) += cs5536/
  #
  
  obj-$(CONFIG_LOONGSON_SUSPEND) += pm.o
@@ -4793,7 +4860,7 @@ index b49485f..b3fd5ea 100644
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_ehci.c b/arch/mips/loongson/common/cs5536/cs5536_ehci.c
-index 74f9c59..eaf8b86 100644
+index 74f9c59..5b5cbba 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_ehci.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_ehci.c
 @@ -5,7 +5,7 @@
@@ -4805,8 +4872,17 @@ index 74f9c59..eaf8b86 100644
   *
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
+@@ -49,6 +49,8 @@ void pci_ehci_write_reg(int reg, u32 value)
+ 			lo |= SOFT_BAR_EHCI_FLAG;
+ 			_wrmsr(GLCP_MSR_REG(GLCP_SOFT_COM), hi, lo);
+ 		} else if ((value & 0x01) == 0x00) {
++			_rdmsr(USB_MSR_REG(USB_EHCI), &hi, &lo);
++			lo = value;
+ 			_wrmsr(USB_MSR_REG(USB_EHCI), hi, lo);
+ 
+ 			value &= 0xfffffff0;
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_ide.c b/arch/mips/loongson/common/cs5536/cs5536_ide.c
-index 3f61594..9a96b56 100644
+index 3f61594..681d129 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_ide.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_ide.c
 @@ -5,7 +5,7 @@
@@ -4818,8 +4894,56 @@ index 3f61594..9a96b56 100644
   *
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
+@@ -51,6 +51,7 @@ void pci_ide_write_reg(int reg, u32 value)
+ 			lo |= SOFT_BAR_IDE_FLAG;
+ 			_wrmsr(GLCP_MSR_REG(GLCP_SOFT_COM), hi, lo);
+ 		} else if (value & 0x01) {
++			_rdmsr(IDE_MSR_REG(IDE_IO_BAR), &hi, &lo);
+ 			lo = (value & 0xfffffff0) | 0x1;
+ 			_wrmsr(IDE_MSR_REG(IDE_IO_BAR), hi, lo);
+ 
+@@ -65,19 +66,30 @@ void pci_ide_write_reg(int reg, u32 value)
+ 			_rdmsr(DIVIL_MSR_REG(DIVIL_BALL_OPTS), &hi, &lo);
+ 			lo |= 0x01;
+ 			_wrmsr(DIVIL_MSR_REG(DIVIL_BALL_OPTS), hi, lo);
+-		} else
++		} else {
++			_rdmsr(IDE_MSR_REG(IDE_CFG), &hi, &lo);
++			lo = value;
+ 			_wrmsr(IDE_MSR_REG(IDE_CFG), hi, lo);
++		}
+ 		break;
+ 	case PCI_IDE_DTC_REG:
++		_rdmsr(IDE_MSR_REG(IDE_DTC), &hi, &lo);
++		lo = value;
+ 		_wrmsr(IDE_MSR_REG(IDE_DTC), hi, lo);
+ 		break;
+ 	case PCI_IDE_CAST_REG:
++		_rdmsr(IDE_MSR_REG(IDE_CAST), &hi, &lo);
++		lo = value;
+ 		_wrmsr(IDE_MSR_REG(IDE_CAST), hi, lo);
+ 		break;
+ 	case PCI_IDE_ETC_REG:
++		_rdmsr(IDE_MSR_REG(IDE_ETC), &hi, &lo);
++		lo = value;
+ 		_wrmsr(IDE_MSR_REG(IDE_ETC), hi, lo);
+ 		break;
+ 	case PCI_IDE_PM_REG:
++		_rdmsr(IDE_MSR_REG(IDE_INTERNAL_PM), &hi, &lo);
++		lo = value;
+ 		_wrmsr(IDE_MSR_REG(IDE_INTERNAL_PM), hi, lo);
+ 		break;
+ 	default:
+@@ -167,6 +179,7 @@ u32 pci_ide_read_reg(int reg)
+ 	case PCI_IDE_ETC_REG:
+ 		_rdmsr(IDE_MSR_REG(IDE_ETC), &hi, &lo);
+ 		conf_data = lo;
++		break;
+ 	case PCI_IDE_PM_REG:
+ 		_rdmsr(IDE_MSR_REG(IDE_INTERNAL_PM), &hi, &lo);
+ 		conf_data = lo;
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_isa.c b/arch/mips/loongson/common/cs5536/cs5536_isa.c
-index b6f17f5..f5c0818 100644
+index b6f17f5..4d9f65a 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_isa.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_isa.c
 @@ -5,7 +5,7 @@
@@ -4831,6 +4955,24 @@ index b6f17f5..f5c0818 100644
   *
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
+@@ -61,7 +61,7 @@ static void divil_lbar_enable(void)
+ 	for (offset = DIVIL_LBAR_SMB; offset <= DIVIL_LBAR_PMS; offset++) {
+ 		_rdmsr(DIVIL_MSR_REG(offset), &hi, &lo);
+ 		hi |= 0x01;
+-		_wrmsr(DIVIL_MSR_REG(DIVIL_LBAR_SMB), hi, lo);
++		_wrmsr(DIVIL_MSR_REG(offset), hi, lo);
+ 	}
+ }
+ 
+@@ -76,7 +76,7 @@ static void divil_lbar_disable(void)
+ 	for (offset = DIVIL_LBAR_SMB; offset <= DIVIL_LBAR_PMS; offset++) {
+ 		_rdmsr(DIVIL_MSR_REG(offset), &hi, &lo);
+ 		hi &= ~0x01;
+-		_wrmsr(DIVIL_MSR_REG(DIVIL_LBAR_SMB), hi, lo);
++		_wrmsr(DIVIL_MSR_REG(offset), hi, lo);
+ 	}
+ }
+ 
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c b/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c
 index 6cb44db..8c807c9 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c
@@ -4845,7 +4987,7 @@ index 6cb44db..8c807c9 100644
   * Reference: AMD Geode(TM) CS5536 Companion Device Data Book
   *
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_ohci.c b/arch/mips/loongson/common/cs5536/cs5536_ohci.c
-index 8fdb02b..db5900a 100644
+index 8fdb02b..bdedf51 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_ohci.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_ohci.c
 @@ -5,7 +5,7 @@
@@ -4857,6 +4999,15 @@ index 8fdb02b..db5900a 100644
   *
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
+@@ -49,6 +49,8 @@ void pci_ohci_write_reg(int reg, u32 value)
+ 			lo |= SOFT_BAR_OHCI_FLAG;
+ 			_wrmsr(GLCP_MSR_REG(GLCP_SOFT_COM), hi, lo);
+ 		} else if ((value & 0x01) == 0x00) {
++			_rdmsr(USB_MSR_REG(USB_OHCI), &hi, &lo);
++			lo = value;
+ 			_wrmsr(USB_MSR_REG(USB_OHCI), hi, lo);
+ 
+ 			value &= 0xfffffff0;
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_pci.c b/arch/mips/loongson/common/cs5536/cs5536_pci.c
 index e23f3d7..6dfeab1 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_pci.c
@@ -4947,6 +5098,151 @@ index 196d947..ae4cff9 100644
  
  	pr_info("busclock=%ld, cpuclock=%ld, memsize=%ld, highmemsize=%ld\n",
  		bus_clock, cpu_clock_freq, memsize, highmemsize);
+diff --git a/arch/mips/loongson/common/gpio.c b/arch/mips/loongson/common/gpio.c
+new file mode 100644
+index 0000000..e8a0ffa
+--- /dev/null
++++ b/arch/mips/loongson/common/gpio.c
+@@ -0,0 +1,139 @@
++/*
++ *  STLS2F GPIO Support
++ *
++ *  Copyright (c) 2008 Richard Liu,  STMicroelectronics  <richard.liu@st.com>
++ *  Copyright (c) 2008-2010 Arnaud Patard <apatard@mandriva.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ */
++
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/spinlock.h>
++#include <linux/err.h>
++#include <asm/types.h>
++#include <loongson.h>
++#include <linux/gpio.h>
++
++#define STLS2F_N_GPIO		4
++#define STLS2F_GPIO_IN_OFFSET	16
++
++static DEFINE_SPINLOCK(gpio_lock);
++
++int gpio_get_value(unsigned gpio)
++{
++	u32 val;
++	u32 mask;
++
++	if (gpio >= STLS2F_N_GPIO)
++		return __gpio_get_value(gpio);
++
++	mask = 1 << (gpio + STLS2F_GPIO_IN_OFFSET);
++	spin_lock(&gpio_lock);
++	val = LOONGSON_GPIODATA;
++	spin_unlock(&gpio_lock);
++
++	return ((val & mask) != 0);
++}
++EXPORT_SYMBOL(gpio_get_value);
++
++void gpio_set_value(unsigned gpio, int state)
++{
++	u32 val;
++	u32 mask;
++
++	if (gpio >= STLS2F_N_GPIO) {
++		__gpio_set_value(gpio, state);
++		return ;
++	}
++
++	mask = 1 << gpio;
++
++	spin_lock(&gpio_lock);
++	val = LOONGSON_GPIODATA;
++	if (state)
++		val |= mask;
++	else
++		val &= (~mask);
++	LOONGSON_GPIODATA = val;
++	spin_unlock(&gpio_lock);
++}
++EXPORT_SYMBOL(gpio_set_value);
++
++int gpio_cansleep(unsigned gpio)
++{
++	if (gpio < STLS2F_N_GPIO)
++		return 0;
++	else
++		return __gpio_cansleep(gpio);
++}
++EXPORT_SYMBOL(gpio_cansleep);
++
++static int ls2f_gpio_direction_input(struct gpio_chip *chip, unsigned gpio)
++{
++	u32 temp;
++	u32 mask;
++
++	if (gpio >= STLS2F_N_GPIO)
++		return -EINVAL;
++
++	spin_lock(&gpio_lock);
++	mask = 1 << gpio;
++	temp = LOONGSON_GPIOIE;
++	temp |= mask;
++	LOONGSON_GPIOIE = temp;
++	spin_unlock(&gpio_lock);
++
++	return 0;
++}
++
++static int ls2f_gpio_direction_output(struct gpio_chip *chip,
++		unsigned gpio, int level)
++{
++	u32 temp;
++	u32 mask;
++
++	if (gpio >= STLS2F_N_GPIO)
++		return -EINVAL;
++
++	gpio_set_value(gpio, level);
++	spin_lock(&gpio_lock);
++	mask = 1 << gpio;
++	temp = LOONGSON_GPIOIE;
++	temp &= (~mask);
++	LOONGSON_GPIOIE = temp;
++	spin_unlock(&gpio_lock);
++
++	return 0;
++}
++
++static int ls2f_gpio_get_value(struct gpio_chip *chip, unsigned gpio)
++{
++	return gpio_get_value(gpio);
++}
++
++static void ls2f_gpio_set_value(struct gpio_chip *chip,
++		unsigned gpio, int value)
++{
++	gpio_set_value(gpio, value);
++}
++
++static struct gpio_chip ls2f_chip = {
++	.label                  = "ls2f",
++	.direction_input        = ls2f_gpio_direction_input,
++	.get                    = ls2f_gpio_get_value,
++	.direction_output       = ls2f_gpio_direction_output,
++	.set                    = ls2f_gpio_set_value,
++	.base                   = 0,
++	.ngpio                  = STLS2F_N_GPIO,
++};
++
++static int __init ls2f_gpio_setup(void)
++{
++	return gpiochip_add(&ls2f_chip);
++}
++arch_initcall(ls2f_gpio_setup);
 diff --git a/arch/mips/loongson/common/init.c b/arch/mips/loongson/common/init.c
 index a2abd93..19d3415 100644
 --- a/arch/mips/loongson/common/init.c
@@ -4960,7 +5256,7 @@ index a2abd93..19d3415 100644
   * This program is free software; you can redistribute  it and/or modify it
   * under  the terms of  the GNU General  Public License as published by the
 diff --git a/arch/mips/loongson/common/machtype.c b/arch/mips/loongson/common/machtype.c
-index 0ed52b3..853f184 100644
+index 0ed52b3..81fbe6b 100644
 --- a/arch/mips/loongson/common/machtype.c
 +++ b/arch/mips/loongson/common/machtype.c
 @@ -1,6 +1,6 @@
@@ -4972,6 +5268,15 @@ index 0ed52b3..853f184 100644
   *
   * Copyright (c) 2009 Zhang Le <r0bertz@gentoo.org>
   *
+@@ -24,7 +24,7 @@ static const char *system_types[] = {
+ 	[MACH_LEMOTE_FL2F]              "lemote-fuloong-2f-box",
+ 	[MACH_LEMOTE_ML2F7]             "lemote-mengloong-2f-7inches",
+ 	[MACH_LEMOTE_YL2F89]            "lemote-yeeloong-2f-8.9inches",
+-	[MACH_DEXXON_GDIUM2F10]         "dexxon-gidum-2f-10inches",
++	[MACH_DEXXON_GDIUM2F10]         "dexxon-gdium-2f",
+ 	[MACH_LEMOTE_NAS]		"lemote-nas-2f",
+ 	[MACH_LEMOTE_LL2F]              "lemote-lynloong-2f",
+ 	[MACH_LOONGSON_END]             NULL,
 @@ -35,6 +35,10 @@ const char *get_system_type(void)
  	return system_types[mips_machtype];
  }
@@ -4996,7 +5301,7 @@ index 0ed52b3..853f184 100644
  	strncpy(str, p, MACHTYPE_LEN);
  	p = strstr(str, " ");
 diff --git a/arch/mips/loongson/common/mem.c b/arch/mips/loongson/common/mem.c
-index ceacd09..ec2f796 100644
+index ceacd09..30eba60 100644
 --- a/arch/mips/loongson/common/mem.c
 +++ b/arch/mips/loongson/common/mem.c
 @@ -16,10 +16,11 @@
@@ -5014,6 +5319,24 @@ index ceacd09..ec2f796 100644
  #ifdef CONFIG_CPU_SUPPORTS_ADDRWINCFG
  	{
  		int bit;
+@@ -74,7 +75,7 @@ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
+ 	unsigned long end = offset + size;
+ 
+ 	if (__uncached_access(file, offset)) {
+-		if (((uca_start && offset) >= uca_start) &&
++		if (uca_start && (offset >= uca_start) &&
+ 		    (end <= uca_end))
+ 			return __pgprot((pgprot_val(vma_prot) &
+ 					 ~_CACHE_MASK) |
+@@ -95,7 +96,7 @@ static int __init find_vga_mem_init(void)
+ 		return 0;
+ 
+ 	for_each_pci_dev(dev) {
+-		if ((dev->class >> 8) == PCI_CLASS_DISPLAY_VGA) {
++		if ((dev->class >> 16) == PCI_BASE_CLASS_DISPLAY) {
+ 			for (idx = 0; idx < PCI_NUM_RESOURCES; idx++) {
+ 				r = &dev->resource[idx];
+ 				if (!r->start && r->end)
 diff --git a/arch/mips/loongson/common/mtd.c b/arch/mips/loongson/common/mtd.c
 new file mode 100644
 index 0000000..49a57a7
@@ -5764,10 +6087,10 @@ index 7832ad2..ee46c82 100644
  static struct op_mips_model *model;
  
 diff --git a/arch/mips/oprofile/op_model_loongson2.c b/arch/mips/oprofile/op_model_loongson2.c
-index 475ff46..c25fb9b 100644
+index 475ff46..e134670 100644
 --- a/arch/mips/oprofile/op_model_loongson2.c
 +++ b/arch/mips/oprofile/op_model_loongson2.c
-@@ -3,7 +3,7 @@
+@@ -3,12 +3,11 @@
   *
   * Copyright (C) 2009 Lemote Inc.
   * Author: Yanhua <yanh@lemote.com>
@@ -5776,6 +6099,138 @@ index 475ff46..c25fb9b 100644
   *
   * This file is subject to the terms and conditions of the GNU General Public
   * License.  See the file "COPYING" in the main directory of this archive
+  * for more details.
+- *
+  */
+ #include <linux/init.h>
+ #include <linux/oprofile.h>
+@@ -17,24 +16,18 @@
+ #include <loongson.h>			/* LOONGSON2_PERFCNT_IRQ */
+ #include "op_impl.h"
+ 
+-/*
+- * a patch should be sent to oprofile with the loongson-specific support.
+- * otherwise, the oprofile tool will not recognize this and complain about
+- * "cpu_type 'unset' is not valid".
+- */
+ #define LOONGSON2_CPU_TYPE	"mips/loongson2"
+ 
+-#define LOONGSON2_COUNTER1_EVENT(event)	((event & 0x0f) << 5)
+-#define LOONGSON2_COUNTER2_EVENT(event)	((event & 0x0f) << 9)
+-
+-#define LOONGSON2_PERFCNT_EXL			(1UL	<<  0)
+-#define LOONGSON2_PERFCNT_KERNEL		(1UL    <<  1)
+-#define LOONGSON2_PERFCNT_SUPERVISOR	(1UL    <<  2)
+-#define LOONGSON2_PERFCNT_USER			(1UL    <<  3)
+-#define LOONGSON2_PERFCNT_INT_EN		(1UL    <<  4)
+ #define LOONGSON2_PERFCNT_OVERFLOW		(1ULL   << 31)
+ 
+-/* Loongson2 performance counter register */
++#define LOONGSON2_PERFCTRL_EXL			(1UL	<<  0)
++#define LOONGSON2_PERFCTRL_KERNEL		(1UL    <<  1)
++#define LOONGSON2_PERFCTRL_SUPERVISOR		(1UL    <<  2)
++#define LOONGSON2_PERFCTRL_USER			(1UL    <<  3)
++#define LOONGSON2_PERFCTRL_ENABLE		(1UL    <<  4)
++#define LOONGSON2_PERFCTRL_EVENT(idx, event) \
++	(((event) & 0x0f) << ((idx) ? 9 : 5))
++
+ #define read_c0_perfctrl() __read_64bit_c0_register($24, 0)
+ #define write_c0_perfctrl(val) __write_64bit_c0_register($24, 0, val)
+ #define read_c0_perfcnt() __read_64bit_c0_register($25, 0)
+@@ -51,7 +44,12 @@ DEFINE_SPINLOCK(sample_lock);
+ 
+ static char *oprofid = "LoongsonPerf";
+ static irqreturn_t loongson2_perfcount_handler(int irq, void *dev_id);
+-/* Compute all of the registers in preparation for enabling profiling.  */
++
++static void reset_counters(void *arg)
++{
++	write_c0_perfctrl(0);
++	write_c0_perfcnt(0);
++}
+ 
+ static void loongson2_reg_setup(struct op_counter_config *cfg)
+ {
+@@ -59,41 +57,38 @@ static void loongson2_reg_setup(struct op_counter_config *cfg)
+ 
+ 	reg.reset_counter1 = 0;
+ 	reg.reset_counter2 = 0;
+-	/* Compute the performance counter ctrl word.  */
+-	/* For now count kernel and user mode */
++
++	/*
++	 * Compute the performance counter ctrl word.
++	 * For now, count kernel and user mode.
++	 */
+ 	if (cfg[0].enabled) {
+-		ctrl |= LOONGSON2_COUNTER1_EVENT(cfg[0].event);
++		ctrl |= LOONGSON2_PERFCTRL_EVENT(0, cfg[0].event);
+ 		reg.reset_counter1 = 0x80000000ULL - cfg[0].count;
+ 	}
+ 
+ 	if (cfg[1].enabled) {
+-		ctrl |= LOONGSON2_COUNTER2_EVENT(cfg[1].event);
+-		reg.reset_counter2 = (0x80000000ULL - cfg[1].count);
++		ctrl |= LOONGSON2_PERFCTRL_EVENT(1, cfg[1].event);
++		reg.reset_counter2 = 0x80000000ULL - cfg[1].count;
+ 	}
+ 
+ 	if (cfg[0].enabled || cfg[1].enabled) {
+-		ctrl |= LOONGSON2_PERFCNT_EXL | LOONGSON2_PERFCNT_INT_EN;
++		ctrl |= LOONGSON2_PERFCTRL_EXL | LOONGSON2_PERFCTRL_ENABLE;
+ 		if (cfg[0].kernel || cfg[1].kernel)
+-			ctrl |= LOONGSON2_PERFCNT_KERNEL;
++			ctrl |= LOONGSON2_PERFCTRL_KERNEL;
+ 		if (cfg[0].user || cfg[1].user)
+-			ctrl |= LOONGSON2_PERFCNT_USER;
++			ctrl |= LOONGSON2_PERFCTRL_USER;
+ 	}
+ 
+ 	reg.ctrl = ctrl;
+ 
+ 	reg.cnt1_enabled = cfg[0].enabled;
+ 	reg.cnt2_enabled = cfg[1].enabled;
+-
+ }
+ 
+-/* Program all of the registers in preparation for enabling profiling.  */
+-
+ static void loongson2_cpu_setup(void *args)
+ {
+-	uint64_t perfcount;
+-
+-	perfcount = (reg.reset_counter2 << 32) | reg.reset_counter1;
+-	write_c0_perfcnt(perfcount);
++	write_c0_perfcnt((reg.reset_counter2 << 32) | reg.reset_counter1);
+ }
+ 
+ static void loongson2_cpu_start(void *args)
+@@ -117,15 +112,8 @@ static irqreturn_t loongson2_perfcount_handler(int irq, void *dev_id)
+ 	int enabled;
+ 	unsigned long flags;
+ 
+-	/*
+-	 * LOONGSON2 defines two 32-bit performance counters.
+-	 * To avoid a race updating the registers we need to stop the counters
+-	 * while we're messing with
+-	 * them ...
+-	 */
+-
+ 	/* Check whether the irq belongs to me */
+-	enabled = read_c0_perfcnt() & LOONGSON2_PERFCNT_INT_EN;
++	enabled = read_c0_perfctrl() & LOONGSON2_PERFCTRL_ENABLE;
+ 	if (!enabled)
+ 		return IRQ_NONE;
+ 	enabled = reg.cnt1_enabled | reg.cnt2_enabled;
+@@ -164,7 +152,7 @@ static int __init loongson2_init(void)
+ 
+ static void loongson2_exit(void)
+ {
+-	write_c0_perfctrl(0);
++	reset_counters(NULL);
+ 	free_irq(LOONGSON2_PERFCNT_IRQ, oprofid);
+ }
+ 
 diff --git a/arch/mips/pci/fixup-lemote2f.c b/arch/mips/pci/fixup-lemote2f.c
 index caf2ede..4b9768d 100644
 --- a/arch/mips/pci/fixup-lemote2f.c
