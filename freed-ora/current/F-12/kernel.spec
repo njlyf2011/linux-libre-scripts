@@ -47,9 +47,9 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1960
+%define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2075 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2082 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -775,6 +775,8 @@ Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2903: linux-2.6-revert-dvb-net-kabi-change.patch
 Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
+Patch2905: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+Patch2096: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 
@@ -804,8 +806,6 @@ Patch12200: add-appleir-usb-driver.patch
 
 # ACPI EC bugfixes (not all upstream)
 Patch12250: acpi-ec-add-delay-before-write.patch
-
-Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
 
 Patch12311: fix-ima-null-ptr-deref.patch
 
@@ -839,16 +839,8 @@ Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
-# RHBZ#552257
-Patch12600: hugetlb-fix-infinite-loop-in-get-futex-key.patch
-# CVE-2010-1146
-Patch12610: reiserfs-fix-permissions-on-reiserfs-priv.patch
-
 # fix possible corruption with ssd
 Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
-
-# fix iscsi bug in 2.6.32
-Patch12800: libiscsi-regression-fix-header-digest-errors.patch
 
 # Revert "ath9k: fix lockdep warning when unloading module"
 Patch12900: revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
@@ -1461,7 +1453,7 @@ ApplyPatch linux-2.6-pci-cacheline-sizing.patch
 
 # http://www.lirc.org/
 ApplyPatch lirc-2.6.32.patch
-# enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
+# enable IR transceiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
 # Broadcom Crystal HD driver from 2.6.34 staging
 ApplyPatch crystalhd-2.6.34-staging.patch
@@ -1508,6 +1500,8 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 #ApplyPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyPatch linux-2.6-revert-dvb-net-kabi-change.patch
 ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
+ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
@@ -1522,8 +1516,6 @@ ApplyPatch fix-abrtd.patch
 
 # rhbz#566565
 ApplyPatch ice1712-fix-revo71-mixer-names.patch
-
-ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
 
 # rhbz#572653
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
@@ -1550,16 +1542,8 @@ ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
-# RHBZ#552257
-ApplyPatch hugetlb-fix-infinite-loop-in-get-futex-key.patch
-# CVE-2010-1146
-ApplyPatch reiserfs-fix-permissions-on-reiserfs-priv.patch
-
 # fix possible corruption with ssd
 ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
-
-# fix iscsi header authentication broken in .32 (#583581)
-ApplyPatch libiscsi-regression-fix-header-digest-errors.patch
 
 # Revert "ath9k: fix lockdep warning when unloading module"
 ApplyPatch revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
@@ -2216,6 +2200,30 @@ fi
 # and build.
 
 %changelog
+* Fri May 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.13.
+
+* Thu May 13 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.13-120
+- Restore patch to enable hauppauge hdpvr ir part
+- Enable support for kworld ub435-q and 340u usb atsc tuners
+
+* Wed May 12 2010 Chuck Ebbert <cebbert@redhat.com>
+- Completely drop patches merged in 2.6.32.13
+
+* Wed May 12 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.13-118
+- Linux 2.6.32.13
+
+* Wed May 12 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.13-117.rc1
+- Linux 2.6.32.13-rc1
+- Drop patches:
+   libata-fix-accesses-at-LBA28-boundary.patch
+   hugetlb-fix-infinite-loop-in-get-futex-key.patch
+   reiserfs-fix-permissions-on-reiserfs-priv.patch
+   libiscsi-regression-fix-header-digest-errors.patch
+
+* Wed May 12 2010 Roland McGrath <roland@redhat.com> 2.6.32.12-116
+- utrace update (#590954)
+
 * Fri Apr 30 2010 John W. Linville <linville@redhat.com> 2.6.32.12-115
 - Revert "ath9k: fix lockdep warning when unloading module"
 
@@ -2230,7 +2238,7 @@ fi
 - Fix possible data corruption with ext4 mounted with -o discard
 
 * Tue Apr 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-112
-- hugetlb-fix-infinite-loop-in-get-futex-key.patch (#552557)
+- hugetlb-fix-infinite-loop-in-get-futex-key.patch (#552257)
 - reiserfs-fix-permissions-on-reiserfs-priv.patch (CVE-2010-1146)
 
 * Mon Apr 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.12-111
@@ -2347,7 +2355,7 @@ fi
 - A few more imon driver button additions
 - Fix minor init issue w/topseed 0x0008 mceusb transceivers
 
-* Mon Mar 22 2010 Neil Horman <nhorman@redhat.com> 
+* Mon Mar 22 2010 Neil Horman <nhorman@redhat.com>
 - Fix tg3 poll controller to not oops (bz 574969)
 
 * Fri Mar 19 2010 John W. Linville <linville@redhat.com> 2.6.32.10-88
@@ -2480,10 +2488,10 @@ fi
 
 * Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-58
 - fix-race-in-tty_fasync-properly.patch: fix for deadlock caused
-  by original patch in 2.6.32.6 
+  by original patch in 2.6.32.6
 
 * Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.8-57
-- CVE-2010-0623 kernel: local DoS via futex_lock_pi 
+- CVE-2010-0623 kernel: local DoS via futex_lock_pi
 
 * Wed Feb 17 2010 Chuck Ebbert <cebbert@redhat.com>
 - CVE-2009-4537 kernel: r8169 issue reported at 26c3
@@ -2497,7 +2505,7 @@ fi
 - drm-nouveau-shared-fb.patch: drop
 - drm-nouveau-update.patch: drop, included in previous drm update
 
-* Wed Feb 17 2010 Dave Airlie <airlied@redhat.com> 
+* Wed Feb 17 2010 Dave Airlie <airlied@redhat.com>
 - drm-upgrayedd.patch - update - needs nouveau patch rebase
 - drop reverted upstream commits since rc8 - also drop other merged patches
 
