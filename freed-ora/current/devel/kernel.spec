@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.1997 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2002 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -510,7 +510,7 @@ Requires(pre): %{initrd_prereq}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %else\
 %if %{with_perftool}\
-Requires(pre): libdwarf\
+Requires(pre): elfutils-libs\
 %endif\
 %endif\
 Requires(post): /sbin/new-kernel-pkg\
@@ -556,7 +556,7 @@ BuildRequires: xmlto, asciidoc
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_perftool}
-BuildRequires: elfutils-libelf-devel zlib-devel binutils-devel libdwarf-devel
+BuildRequires: elfutils-devel zlib-devel binutils-devel
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -1352,6 +1352,7 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 # Fix the SELinux mprotect checks on executable mappings
 #ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
+# FIXME: Can we drop this now? See updated linux-2.6-selinux-mprotect-checks.patch
 #ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
@@ -2086,6 +2087,15 @@ fi
 #                 ||     ||
 
 %changelog
+* Fri May 21 2010 Roland McGrath <roland@redhat.com> 2.6.34-11
+- utrace update
+
+* Fri May 21 2010 Dave Jones <davej@redhat.com>
+- Update the SELinux mprotect patch with a newer version from Stephen
+
+* Fri May 21 2010 Roland McGrath <roland@redhat.com>
+- perf requires libdw now, not libdwarf
+
 * Fri May 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-6
 - Fixups for virt_console from Amit Shah, thanks!
 
