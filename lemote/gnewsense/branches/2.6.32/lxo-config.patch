@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-04-26 22:37:33.000000000 +0000
-+++ Makefile	2010-04-26 22:37:39.000000000 +0000
+--- Makefile.orig	2010-05-22 08:14:35.000000000 +0000
++++ Makefile	2010-05-22 08:15:05.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 32
--EXTRAVERSION = .12-libre1
-+EXTRAVERSION = .12-libre1-lemote
+-EXTRAVERSION = .13-libre1
++EXTRAVERSION = .13-libre1-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-04-26 22:40:38.000000000 +0000
-@@ -0,0 +1,2241 @@
++++ .config	2010-05-22 08:22:59.000000000 +0000
+@@ -0,0 +1,2275 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.32.12-libre1-lemote
-+# Mon Apr 26 22:40:38 2010
++# Linux kernel version: 2.6.32.13-libre1-lemote
++# Sat May 22 08:22:58 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -100,6 +100,7 @@ Index: .config
 +# CONFIG_NO_IOPORT is not set
 +CONFIG_GENERIC_ISA_DMA=y
 +CONFIG_GENERIC_ISA_DMA_SUPPORT_BROKEN=y
++CONFIG_GENERIC_GPIO=y
 +# CONFIG_CPU_BIG_ENDIAN is not set
 +CONFIG_CPU_LITTLE_ENDIAN=y
 +CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -245,8 +246,7 @@ Index: .config
 +CONFIG_LOG_BUF_SHIFT=15
 +# CONFIG_GROUP_SCHED is not set
 +# CONFIG_CGROUPS is not set
-+CONFIG_SYSFS_DEPRECATED=y
-+CONFIG_SYSFS_DEPRECATED_V2=y
++# CONFIG_SYSFS_DEPRECATED_V2 is not set
 +# CONFIG_RELAY is not set
 +# CONFIG_NAMESPACES is not set
 +CONFIG_BLK_DEV_INITRD=y
@@ -1056,6 +1056,8 @@ Index: .config
 +CONFIG_INPUT_KEYBOARD=y
 +CONFIG_KEYBOARD_ATKBD=y
 +# CONFIG_KEYBOARD_LKKBD is not set
++# CONFIG_KEYBOARD_GPIO is not set
++# CONFIG_KEYBOARD_MATRIX is not set
 +# CONFIG_KEYBOARD_NEWTON is not set
 +# CONFIG_KEYBOARD_OPENCORES is not set
 +# CONFIG_KEYBOARD_STOWAWAY is not set
@@ -1077,6 +1079,7 @@ Index: .config
 +# CONFIG_MOUSE_LOGIBM is not set
 +# CONFIG_MOUSE_PC110PAD is not set
 +# CONFIG_MOUSE_VSXXXAA is not set
++# CONFIG_MOUSE_GPIO is not set
 +# CONFIG_INPUT_JOYSTICK is not set
 +# CONFIG_INPUT_TABLET is not set
 +# CONFIG_INPUT_TOUCHSCREEN is not set
@@ -1161,6 +1164,31 @@ Index: .config
 +# PPS support
 +#
 +# CONFIG_PPS is not set
++CONFIG_ARCH_REQUIRE_GPIOLIB=y
++CONFIG_GPIOLIB=y
++CONFIG_GPIO_SYSFS=y
++
++#
++# Memory mapped GPIO expanders:
++#
++
++#
++# I2C GPIO expanders:
++#
++
++#
++# PCI GPIO expanders:
++#
++# CONFIG_GPIO_BT8XX is not set
++# CONFIG_GPIO_LANGWELL is not set
++
++#
++# SPI GPIO expanders:
++#
++
++#
++# AC97 GPIO expanders:
++#
 +# CONFIG_W1 is not set
 +# CONFIG_POWER_SUPPLY is not set
 +CONFIG_HWMON=y
@@ -1176,6 +1204,7 @@ Index: .config
 +# CONFIG_SENSORS_IT87 is not set
 +# CONFIG_SENSORS_PC87360 is not set
 +# CONFIG_SENSORS_PC87427 is not set
++# CONFIG_SENSORS_SHT15 is not set
 +# CONFIG_SENSORS_SIS5595 is not set
 +# CONFIG_SENSORS_SMSC47M1 is not set
 +# CONFIG_SENSORS_SMSC47B397 is not set
@@ -1200,6 +1229,7 @@ Index: .config
 +# CONFIG_MFD_CORE is not set
 +# CONFIG_MFD_SM501 is not set
 +# CONFIG_HTC_PASIC3 is not set
++# CONFIG_UCB1400_CORE is not set
 +# CONFIG_MFD_TMIO is not set
 +# CONFIG_REGULATOR is not set
 +CONFIG_MEDIA_SUPPORT=m
@@ -1730,6 +1760,8 @@ Index: .config
 +#
 +# OTG and related infrastructure
 +#
++CONFIG_USB_OTG_UTILS=y
++CONFIG_USB_GPIO_VBUS=m
 +# CONFIG_NOP_USB_XCEIV is not set
 +CONFIG_UWB=m
 +CONFIG_UWB_HWA=m
@@ -1764,6 +1796,7 @@ Index: .config
 +#
 +# LED drivers
 +#
++# CONFIG_LEDS_GPIO is not set
 +
 +#
 +# LED Triggers
@@ -1773,6 +1806,7 @@ Index: .config
 +# CONFIG_LEDS_TRIGGER_IDE_DISK is not set
 +# CONFIG_LEDS_TRIGGER_HEARTBEAT is not set
 +# CONFIG_LEDS_TRIGGER_BACKLIGHT is not set
++# CONFIG_LEDS_TRIGGER_GPIO is not set
 +# CONFIG_LEDS_TRIGGER_DEFAULT_ON is not set
 +
 +#
