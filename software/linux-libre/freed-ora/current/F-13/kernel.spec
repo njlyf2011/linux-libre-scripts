@@ -48,9 +48,9 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1936
+%define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2031 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2043 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -699,6 +699,7 @@ Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch453: thinkpad-acpi-add-x100e.patch
 Patch454: linux-2.6-input-hid-quirk-egalax.patch
 Patch455: linux-2.6-input-clickpad-support.patch
+Patch456: thinkpad-acpi-fix-backlight.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -717,11 +718,7 @@ Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
-Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
-
-Patch700: linux-2.6.31-nx-data.patch
-Patch701: linux-2.6.31-modules-ro-nx.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -732,8 +729,6 @@ Patch1517: hdpvr-ir-enable.patch
 Patch1520: crystalhd-2.6.34-staging.patch
 
 # virt + ksm patches
-Patch1551: linux-2.6-ksm-kvm.patch
-Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 Patch1553: vhost_net-rollup.patch
 Patch1554: virt_console-rollup.patch
 Patch1555: virt_console-fix-race.patch
@@ -745,6 +740,8 @@ Patch1558: vhost_net-rollup2.patch
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 Patch1800: drm-core-next.patch
+# fix modeline for 1024x768@85
+Patch1801: drm-1024x768-85.patch
 
 # radeon kms backport
 Patch1810: drm-radeon-evergreen.patch
@@ -796,12 +793,14 @@ Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 
 # kworld ub435-q/340u usb atsc tuner support (still lingering
 # in one of mkrufky's trees, pending push to v4l-dvb proper)
-Patch2906: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
-Patch2907: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+Patch2906: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+Patch2907: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 Patch3000: linux-2.6-btrfs-update.patch
-Patch3010: fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
+Patch3010: writeback-fix-wb-sync-none-writeback-from-umount.patch
+Patch3012: writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
+Patch3014: writeback-update-dirty-flags-in-two-steps.patch
 
 # NFSv4
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
@@ -812,8 +811,8 @@ Patch4000: linux-2.6-cpufreq-locking.patch
 
 # patches headed upstream
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
-Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
+Patch12014: linux-2.6-x86-cfi_sections.patch
 
 Patch12015: add-appleir-driver.patch
 
@@ -864,6 +863,17 @@ Patch12830: disable-i8042-check-on-apple-mac.patch
 Patch12840: iwlwifi-recalculate-average-tpt-if-not-current.patch
 
 Patch12850: crypto-aesni-kill-module_alias.patch
+
+# automatically mount debugfs when perf needs it
+Patch12851: perf-mount-debugfs-automatically.patch
+
+# upstream 5dc6416414fb3ec6e2825fd4d20c8bf1d7fe0395 (#593226)
+Patch12900: btrfs-check-for-read-permission-on-src-file-in-clone-ioctl.patch
+
+# iwlwifi: fix scan races
+Patch12910: iwlwifi-fix-scan-races.patch
+# iwlwifi: fix internal scan race
+Patch12911: iwlwifi-fix-internal-scan-race.patch
 
 %endif
 
@@ -1320,6 +1330,7 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # Architecture patches
 # x86(-64)
 ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
+ApplyPatch linux-2.6-x86-cfi_sections.patch
 
 #
 # Intel IOMMU
@@ -1356,7 +1367,10 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-btrfs-update.patch
 
 # Sort out umount versus sync penalty: rhbz#588930
-ApplyPatch fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
+ApplyPatch writeback-fix-wb-sync-none-writeback-from-umount.patch
+# additional fixes for writeback (#593669)
+ApplyPatch writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
+ApplyPatch writeback-update-dirty-flags-in-two-steps.patch
 
 # eCryptfs
 
@@ -1428,6 +1442,7 @@ ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
 ApplyPatch linux-2.6-input-clickpad-support.patch
 ApplyPatch thinkpad-acpi-add-x100e.patch
+ApplyPatch thinkpad-acpi-fix-backlight.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1452,16 +1467,8 @@ ApplyPatch linux-2.6-selinux-avtab-size.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# rt2x00: back-port activity LED init patches
-#ApplyPatch linux-2.6-rt2x00-asus-leds.patch
-
 # back-port scan result aging patches
 #ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
-
-# Mark kernel data as NX
-#ApplyPatch linux-2.6.31-nx-data.patch
-# Apply NX/RO to modules
-#ApplyPatch linux-2.6.31-modules-ro-nx.patch
 
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1476,12 +1483,7 @@ ApplyPatch hdpvr-ir-enable.patch
 # Broadcom Crystal HD video decoder
 ApplyPatch crystalhd-2.6.34-staging.patch
 
-# Add kernel KSM support
-# Optimize KVM for KSM support
-#ApplyPatch linux-2.6-ksm-kvm.patch
-
 # Assorted Virt Fixes
-#ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 ApplyPatch vhost_net-rollup.patch
 ApplyPatch virt_console-rollup.patch
 ApplyPatch virt_console-fix-race.patch
@@ -1489,13 +1491,11 @@ ApplyPatch virt_console-fix-fix-race.patch
 ApplyPatch virt_console-rollup2.patch
 ApplyPatch vhost_net-rollup2.patch
 
-# Fix block I/O errors in KVM
-#ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
-
 # fix x86-64 fbdev primary GPU selection
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 ApplyPatch drm-core-next.patch
+ApplyPatch drm-1024x768-85.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-radeon-evergreen.patch
@@ -1534,8 +1534,8 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
 
-ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
+ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
@@ -1587,6 +1587,17 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
 
 ApplyPatch crypto-aesni-kill-module_alias.patch
+
+# automagically mount debugfs for perf
+ApplyPatch perf-mount-debugfs-automatically.patch
+
+# upstream 5dc6416414fb3ec6e2825fd4d20c8bf1d7fe0395 (#593226)
+ApplyPatch btrfs-check-for-read-permission-on-src-file-in-clone-ioctl.patch
+
+# iwlwifi: fix scan races
+ApplyPatch iwlwifi-fix-scan-races.patch
+# iwlwifi: fix internal scan race
+ApplyPatch iwlwifi-fix-internal-scan-race.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2237,7 +2248,38 @@ fi
 # and build.
 
 %changelog
-* Fri May 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu May 20 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.4-106
+- Remove "PatchNNNN" entries for dropped patches.
+- More writeback fixes from block-2.6 tree (#593669)
+
+* Thu May 20 2010 Kyle McMartin <kyle@redhat.com>
+- kill some dead patches.
+
+* Wed May 19 2010 John W. Linville <linville@redhat.com>
+- iwlwifi: fix scan races
+- iwlwifi: fix internal scan race
+
+* Wed May 19 2010 Dave Airlie <airlied@redhat.com>
+- disable vmwgfx at request of vmware
+
+* Wed May 19 2010 Roland McGrath <roland@redhat.com>
+- x86: put assembly CFI in .debug_frame
+
+* Tue May 18 2010 Kyle McMartin <kyle@redhat.com>
+- btrfs: check for read permission on src file in the clone ioctl
+  (rhbz#593226)
+
+* Mon May 17 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-fix-backlight.patch: Fix backlight control on some recent
+   Thinkpads
+
+* Mon May 17 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.4-97
+- perf-mount-debugfs-automatically.patch (#570821)
+
+* Mon May 17 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.4-96
+- drm: fix edid modeline for 1024x768@85Hz (#582472)
+
+* Fri May 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri May 21
 - Adjusted patch-libre-2.6.33.4.
 
 * Thu May 13 2010 Jarod Wilson <jarod@redhat.com> 2.6.33.4-95
