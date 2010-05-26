@@ -111,7 +111,11 @@ rm -f $pub/*$buildid*.deb $pub/*$buildid*.tar.bz2 $srclink || :
 ln -s $srcbase $pub/$srclink
 mv *$buildid*.deb *$buildid*.tar.bz2 $pub
 
-cd $branchdir
-svn commit -m "$buildid"
-svn cp -m "$buildid" $svnbranches/$branchdir $svntags/$buildid
-cd ..
+cd $branchdir &&
+svn commit -m "$buildid" &&
+svn cp -m "$buildid" $svnbranches/$branchdir $svntags/$buildid &&
+cd .. || {
+  status=$?
+  echo failed to commit or tag $buildid >&2
+  exit $status
+} 
