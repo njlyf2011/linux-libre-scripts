@@ -48,9 +48,9 @@ Summary: The Linux kernel
 # 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
 # from the second number, and then append the rest of the RCS string as is.
 # Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1937
+%define fedora_cvs_origin   1936
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2043 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2021 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,7 +75,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -697,9 +697,6 @@ Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch453: thinkpad-acpi-add-x100e.patch
-Patch454: linux-2.6-input-hid-quirk-egalax.patch
-Patch455: linux-2.6-input-clickpad-support.patch
-Patch456: thinkpad-acpi-fix-backlight.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -710,15 +707,19 @@ Patch520: linux-2.6.30-hush-rom-warning.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
-Patch581: linux-2.6-selinux-avtab-size.patch
 
 Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
+Patch601: linux-2.6-pci-fixup-resume.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
+Patch680: linux-2.6-rt2x00-asus-leds.patch
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
+
+Patch700: linux-2.6.31-nx-data.patch
+Patch701: linux-2.6.31-modules-ro-nx.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -729,19 +730,20 @@ Patch1517: hdpvr-ir-enable.patch
 Patch1520: crystalhd-2.6.34-staging.patch
 
 # virt + ksm patches
+Patch1551: linux-2.6-ksm-kvm.patch
+Patch1552: linux-2.6-userspace_kvmclock_offset.patch
 Patch1553: vhost_net-rollup.patch
 Patch1554: virt_console-rollup.patch
 Patch1555: virt_console-fix-race.patch
 Patch1556: virt_console-fix-fix-race.patch
 Patch1557: virt_console-rollup2.patch
 Patch1558: vhost_net-rollup2.patch
+Patch1559: linux-2.6-tun-orphan_an_skb_on_tx.patch
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 Patch1800: drm-core-next.patch
-# fix modeline for 1024x768@85
-Patch1801: drm-1024x768-85.patch
 
 # radeon kms backport
 Patch1810: drm-radeon-evergreen.patch
@@ -791,16 +793,8 @@ Patch2904: linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 # Some cherry picked fixes from v4l-dvb-next
 Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
 
-# kworld ub435-q/340u usb atsc tuner support (still lingering
-# in one of mkrufky's trees, pending push to v4l-dvb proper)
-Patch2906: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-Patch2907: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
-
 # fs fixes
 Patch3000: linux-2.6-btrfs-update.patch
-Patch3010: writeback-fix-wb-sync-none-writeback-from-umount.patch
-Patch3012: writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
-Patch3014: writeback-update-dirty-flags-in-two-steps.patch
 
 # NFSv4
 Patch3051: linux-2.6-nfs4-callback-hidden.patch
@@ -811,8 +805,8 @@ Patch4000: linux-2.6-cpufreq-locking.patch
 
 # patches headed upstream
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
+Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
-Patch12014: linux-2.6-x86-cfi_sections.patch
 
 Patch12015: add-appleir-driver.patch
 
@@ -833,6 +827,8 @@ Patch12103: linux-2.6-p54pci.patch
 
 Patch12200: acpi-ec-add-delay-before-write.patch
 
+Patch12300: libata-fix-accesses-at-LBA28-boundary.patch
+
 # patches from Intel to address intermittent firmware failures with iwlagn
 Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
 Patch12403: iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
@@ -849,11 +845,22 @@ Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
+# should be upstream soon
+Patch12500: linux-2.6-creds_are_invalid-race.patch
+
+# RHBZ#552257
+Patch12600: hugetlb-fix-infinite-loop-in-get-futex-key.patch
+# CVE-2010-1146
+Patch12610: reiserfs-fix-permissions-on-reiserfs-priv.patch
+
 # fix possible corruption with ssd
 Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 
 # Revert "ath9k: fix lockdep warning when unloading module"
 Patch12800: revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
+# ath9k: reorder ieee80211_free_hw behind ath9k_uninit_hw to avoid oops
+Patch12810: ath9k-reorder-ieee80211_free_hw-behind-ath9k_uninit_.patch
 
 Patch12820: ibmvscsi-fix-DMA-API-misuse.patch
 
@@ -861,19 +868,6 @@ Patch12830: disable-i8042-check-on-apple-mac.patch
 
 # iwlwifi: recalculate average tpt if not current
 Patch12840: iwlwifi-recalculate-average-tpt-if-not-current.patch
-
-Patch12850: crypto-aesni-kill-module_alias.patch
-
-# automatically mount debugfs when perf needs it
-Patch12851: perf-mount-debugfs-automatically.patch
-
-# upstream 5dc6416414fb3ec6e2825fd4d20c8bf1d7fe0395 (#593226)
-Patch12900: btrfs-check-for-read-permission-on-src-file-in-clone-ioctl.patch
-
-# iwlwifi: fix scan races
-Patch12910: iwlwifi-fix-scan-races.patch
-# iwlwifi: fix internal scan race
-Patch12911: iwlwifi-fix-internal-scan-race.patch
 
 %endif
 
@@ -1330,7 +1324,6 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # Architecture patches
 # x86(-64)
 ApplyPatch linux-2.6-dell-laptop-rfkill-fix.patch
-ApplyPatch linux-2.6-x86-cfi_sections.patch
 
 #
 # Intel IOMMU
@@ -1365,12 +1358,6 @@ ApplyPatch linux-2.6-execshield.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-update.patch
-
-# Sort out umount versus sync penalty: rhbz#588930
-ApplyPatch writeback-fix-wb-sync-none-writeback-from-umount.patch
-# additional fixes for writeback (#593669)
-ApplyPatch writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
-ApplyPatch writeback-update-dirty-flags-in-two-steps.patch
 
 # eCryptfs
 
@@ -1421,6 +1408,7 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 
 # ACPI
 ApplyPatch linux-2.6-acpi-sleep-live-sci-live.patch
+ApplyPatch linux-2.6-pci-fixup-resume.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
@@ -1438,11 +1426,7 @@ ApplyPatch die-floppy-die.patch
 #ApplyPatch linux-2.6-input-fix-toshiba-hotkeys.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
-
-ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
-ApplyPatch linux-2.6-input-clickpad-support.patch
 ApplyPatch thinkpad-acpi-add-x100e.patch
-ApplyPatch thinkpad-acpi-fix-backlight.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1458,8 +1442,6 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 #ApplyPatch linux-2.6-selinux-mprotect-checks.patch
 # Fix SELinux for sparc
 #ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
-# Shirk size of memory allocation required to load policy.  In 2.6.34
-ApplyPatch linux-2.6-selinux-avtab-size.patch
 
 # Changes to upstream defaults.
 
@@ -1467,8 +1449,16 @@ ApplyPatch linux-2.6-selinux-avtab-size.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
+# rt2x00: back-port activity LED init patches
+#ApplyPatch linux-2.6-rt2x00-asus-leds.patch
+
 # back-port scan result aging patches
 #ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
+
+# Mark kernel data as NX
+#ApplyPatch linux-2.6.31-nx-data.patch
+# Apply NX/RO to modules
+#ApplyPatch linux-2.6.31-modules-ro-nx.patch
 
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
@@ -1483,19 +1473,27 @@ ApplyPatch hdpvr-ir-enable.patch
 # Broadcom Crystal HD video decoder
 ApplyPatch crystalhd-2.6.34-staging.patch
 
+# Add kernel KSM support
+# Optimize KVM for KSM support
+#ApplyPatch linux-2.6-ksm-kvm.patch
+
 # Assorted Virt Fixes
+#ApplyPatch linux-2.6-userspace_kvmclock_offset.patch
 ApplyPatch vhost_net-rollup.patch
 ApplyPatch virt_console-rollup.patch
 ApplyPatch virt_console-fix-race.patch
 ApplyPatch virt_console-fix-fix-race.patch
 ApplyPatch virt_console-rollup2.patch
 ApplyPatch vhost_net-rollup2.patch
+ApplyPatch linux-2.6-tun-orphan_an_skb_on_tx.patch
+
+# Fix block I/O errors in KVM
+#ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 
 # fix x86-64 fbdev primary GPU selection
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 
 ApplyPatch drm-core-next.patch
-ApplyPatch drm-1024x768-85.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-radeon-evergreen.patch
@@ -1534,9 +1532,6 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch linux-2.6-v4l-dvb-rebase-gspca-to-latest.patch
 ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
 
-ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
-
 # Patches headed upstream
 ApplyPatch linux-2.6-rfkill-all.patch
 
@@ -1557,6 +1552,8 @@ ApplyPatch iwlwifi-reset-card-during-probe.patch
 # make p54pci usable on slower hardware
 ApplyPatch linux-2.6-p54pci.patch
 
+ApplyPatch libata-fix-accesses-at-LBA28-boundary.patch
+
 # patches from Intel to address intermittent firmware failures with iwlagn
 ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
 ApplyPatch iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
@@ -1573,11 +1570,22 @@ ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
+# RHBZ#583843
+ApplyPatch linux-2.6-creds_are_invalid-race.patch
+
+# RHBZ#552257
+ApplyPatch hugetlb-fix-infinite-loop-in-get-futex-key.patch
+# CVE-2010-1146
+ApplyPatch reiserfs-fix-permissions-on-reiserfs-priv.patch
+
 # fix possible corruption with ssd
 ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
 
 # Revert "ath9k: fix lockdep warning when unloading module"
 ApplyPatch revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
+# ath9k: reorder ieee80211_free_hw behind ath9k_uninit_hw to avoid oops
+ApplyPatch ath9k-reorder-ieee80211_free_hw-behind-ath9k_uninit_.patch
 
 ApplyPatch ibmvscsi-fix-DMA-API-misuse.patch
 
@@ -1585,19 +1593,6 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 # iwlwifi: recalculate average tpt if not current
 ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
-
-ApplyPatch crypto-aesni-kill-module_alias.patch
-
-# automagically mount debugfs for perf
-ApplyPatch perf-mount-debugfs-automatically.patch
-
-# upstream 5dc6416414fb3ec6e2825fd4d20c8bf1d7fe0395 (#593226)
-ApplyPatch btrfs-check-for-read-permission-on-src-file-in-clone-ioctl.patch
-
-# iwlwifi: fix scan races
-ApplyPatch iwlwifi-fix-scan-races.patch
-# iwlwifi: fix internal scan race
-ApplyPatch iwlwifi-fix-internal-scan-race.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1713,7 +1708,7 @@ BuildKernel() {
     pushd tools/perf
 # make sure the scripts are executable... won't be in tarball until 2.6.31 :/
     chmod +x util/generate-cmdlist.sh util/PERF-VERSION-GEN
-    make -s V=1 NO_DEMANGLE=1 %{?_smp_mflags} perf
+    make -s V=1 %{?_smp_mflags} perf
     mkdir -p $RPM_BUILD_ROOT/usr/libexec/
     install -m 755 perf $RPM_BUILD_ROOT/usr/libexec/perf.$KernelVer
     popd
@@ -2248,87 +2243,6 @@ fi
 # and build.
 
 %changelog
-* Thu May 20 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.4-106
-- Remove "PatchNNNN" entries for dropped patches.
-- More writeback fixes from block-2.6 tree (#593669)
-
-* Thu May 20 2010 Kyle McMartin <kyle@redhat.com>
-- kill some dead patches.
-
-* Wed May 19 2010 John W. Linville <linville@redhat.com>
-- iwlwifi: fix scan races
-- iwlwifi: fix internal scan race
-
-* Wed May 19 2010 Dave Airlie <airlied@redhat.com>
-- disable vmwgfx at request of vmware
-
-* Wed May 19 2010 Roland McGrath <roland@redhat.com>
-- x86: put assembly CFI in .debug_frame
-
-* Tue May 18 2010 Kyle McMartin <kyle@redhat.com>
-- btrfs: check for read permission on src file in the clone ioctl
-  (rhbz#593226)
-
-* Mon May 17 2010 Matthew Garrett <mjg@redhat.com>
-- thinkpad-acpi-fix-backlight.patch: Fix backlight control on some recent
-   Thinkpads
-
-* Mon May 17 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.4-97
-- perf-mount-debugfs-automatically.patch (#570821)
-
-* Mon May 17 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.4-96
-- drm: fix edid modeline for 1024x768@85Hz (#582472)
-
-* Fri May 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri May 21
-- Adjusted patch-libre-2.6.33.4.
-
-* Thu May 13 2010 Jarod Wilson <jarod@redhat.com> 2.6.33.4-95
-- Enable support for kworld ub435-q and 340u usb atsc tuners
-
-* Thu May 13 2010 Peter Hutterer <peter.hutterer@redhat.com>
-- linux-2.6-input-clickpad-support.patch: add support for ClickPad
-  touchpads (#590835)
-
-* Wed May 12 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.4-93
-- Linux 2.6.33.4
-- Drop patches merged upstream:
-    linux-2.6-pci-fixup-resume.patch
-    linux-2.6-tun-orphan_an_skb_on_tx.patch
-    libata-fix-accesses-at-LBA28-boundary.patch
-    linux-2.6-creds_are_invalid-race.patch
-    hugetlb-fix-infinite-loop-in-get-futex-key.patch
-    reiserfs-fix-permissions-on-reiserfs-priv.patch
-    ath9k-reorder-ieee80211_free_hw-behind-ath9k_uninit_.patch
-- Revert -stable DRM patches we already have:
-    drm-i915-add-initial-bits-for-vga-modesetting-bringup-on-sandybridge.patch
-    drm-i915-fix-tiling-limits-for-i915-class-hw-v2.patch
-- Fix up patches to apply on top of 2.6.33.4:
-    linux-2.6-p54pci.patch
-    vhost_net-rollup.patch
-
-* Wed May 12 2010 Roland McGrath <roland@redhat.com>
-- utrace update (#590954)
-
-* Mon May 10 2010 Kyle McMartin <kyle@redhat.com>
-- don't link binutils against perf. sigh. stupid gpl versions.
-
-* Mon May 10 2010 Eric Paris <eparis@redhat.com>
-- reduce size of selinux poliy memory allocation (rhbz#590363)
-
-* Mon May 10 2010 Kyle McMartin <kyle@redhat.com>
-- crypto-aesni-kill-module_alias.patch: kill MODULE_ALIAS to prevent
-  aesni-intel from autoloading.
-
-* Mon May 10 2010 Ben Skeggs <bskeggs@redhat.com>
-- add linux-2.6-input-hid-quirk-egalax.patch, missed from F-12, requested
-  by Peter Hutterer.
-
-* Sun May 09 2010 Kyle McMartin <kyle@redhat.com>
-- fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch (rhbz#588930)
-
-* Sat May 08 2010 Kyle McMartin <kyle@redhat.com>
-- Link perf against libbfd.a for name-demangling support. (rhbz#590289)
-
 * Thu May 06 2010 Adam Jackson <ajax@redhat.com> 2.6.33.3-85
 - drm-intel-next: Enable the display even harder (#587171)
 
@@ -2426,7 +2340,7 @@ fi
 * Thu Apr 22 2010 Matthew Garrett <mjg@redhat.com>
 - linux-2.6-pci-fixup-resume.patch: Make sure we enable power resources on D0
 
-* Wed Apr 21 2010 Justin M. Forbes <jforbes@redhat.com>
+* Wed Apr 21 2010 Justin M. Forbes <jforbes@redhat.com> 
 - vhost-net fixes from upstream
 
 * Wed Apr 21 2010 Roland McGrath <roland@redhat.com> 2.6.33.2-60
