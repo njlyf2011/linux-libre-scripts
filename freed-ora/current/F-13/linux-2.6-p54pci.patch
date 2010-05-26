@@ -43,7 +43,7 @@ index 4bf4c21..48cae48 100644
  	u32 idx, i;
  
  	i = (*index) % ring_limit;
- 	(*index) = idx = le32_to_cpu(ring_control->device_idx[ring_index]);
+ 	(*index) = idx = le32_to_cpu(ring_control->device_idx[1]);
  	idx %= ring_limit;
  
 +	spin_lock_irqsave(&priv->lock, flags);
@@ -208,7 +208,7 @@ index 48cae48..bda29c0 100644
  	struct p54p_ring_control *ring_control = priv->ring_control;
  	struct p54p_desc *desc;
 @@ -249,7 +248,6 @@ static void p54p_check_tx_ring(struct ieee80211_hw *dev, u32 *index,
- 	(*index) = idx = le32_to_cpu(ring_control->device_idx[ring_index]);
+ 	(*index) = idx = le32_to_cpu(ring_control->device_idx[1]);
  	idx %= ring_limit;
  
 -	spin_lock_irqsave(&priv->lock, flags);
@@ -275,6 +275,35 @@ index 48cae48..bda29c0 100644
  	P54P_WRITE(dev_int, cpu_to_le32(ISL38XX_DEV_INT_RESET));
  
  	for (i = 0; i < ARRAY_SIZE(priv->rx_buf_data); i++) {
+From: Darren Jenkins <darrenrjenkins@gmail.com>
+Date: Wed, 17 Feb 2010 12:40:15 +0000 (+1100)
+Subject: drivers/net/wireless/p54/txrx.c Fix off by one error
+X-Git-Tag: master-2010-02-19~38
+X-Git-Url: http://git.kernel.org/?p=linux%2Fkernel%2Fgit%2Flinville%2Fwireless-next-2.6.git;a=commitdiff_plain;h=088ea189c4c75cdf211146faa4b341a0f7476be6
+
+drivers/net/wireless/p54/txrx.c Fix off by one error
+
+fix off by one error in the queue size check of p54_tx_qos_accounting_alloc()
+
+Coverity CID: 13314
+
+Signed-off-by: Darren Jenkins <darrenrjenkins@gmail.com>
+Signed-off-by: John W. Linville <linville@tuxdriver.com>
+---
+
+diff --git a/drivers/net/wireless/p54/txrx.c b/drivers/net/wireless/p54/txrx.c
+index 0e8f694..6605799 100644
+--- a/drivers/net/wireless/p54/txrx.c
++++ b/drivers/net/wireless/p54/txrx.c
+@@ -186,7 +186,7 @@ static int p54_tx_qos_accounting_alloc(struct p54_common *priv,
+ 	struct p54_tx_queue_stats *queue;
+ 	unsigned long flags;
+ 
+-	if (WARN_ON(p54_queue > P54_QUEUE_NUM))
++	if (WARN_ON(p54_queue >= P54_QUEUE_NUM))
+ 		return -EINVAL;
+ 
+ 	queue = &priv->tx_stats[p54_queue];
 From: Quintin Pitts <geek4linux@gmail.com>
 Date: Fri, 9 Apr 2010 19:37:38 +0000 (+0200)
 Subject: p54pci: prevent stuck rx-ring on slow system
@@ -418,6 +447,43 @@ index aa29663..0a516c8 100644
  	limit = ring_limit - limit;
  
  	i = idx % ring_limit;
+Subject:
+[PATCH 1/2] p54pci: fix bugs in p54p_check_tx_ring
+From:
+Christian Lamparter <chunkeey@googlemail.com>
+Date:
+Thu, 22 Apr 2010 19:52:16 +0200
+To:
+linux-wireless@vger.kernel.org
+CC:
+linville@tuxdriver.com, hdegoede@redhat.com
+
+From: Hans de Goede <hdegoede@redhat.com>
+
+Hans de Goede identified a bug in p54p_check_tx_ring:
+
+there are two ring indices. 1 => tx data and 3 => tx management.
+But the old code had a constant "1" and this resulted in spurious
+dma unmapping failures. 
+
+Cc: stable@kernel.org
+Bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=583623
+Bug-Identified-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Christian Lamparter <chunkeey@googlemail.com>
+---
+diff --git a/drivers/net/wireless/p54/p54pci.c b/drivers/net/wireless/p54/p54pci.c
+index 679da7e..cffe2f2 100644
+--- a/drivers/net/wireless/p54/p54pci.c
++++ b/drivers/net/wireless/p54/p54pci.c
+@@ -246,7 +246,7 @@ static void p54p_check_tx_ring(struct ieee80211_hw *dev, u32 *index,
+ 	u32 idx, i;
+ 
+ 	i = (*index) % ring_limit;
+-	(*index) = idx = le32_to_cpu(ring_control->device_idx[1]);
++	(*index) = idx = le32_to_cpu(ring_control->device_idx[ring_index]);
+ 	idx %= ring_limit;
+ 
+ 	while (i != idx) {
 Subject:
 [PATCH 2/2] p54pci: fix regression from prevent stuck rx-ring on slow system
 From:
