@@ -1,3 +1,5 @@
+Dropped change for include/linux/module.h, already in 2.6.32.14.
+
 diff --git a/Makefile b/Makefile
 index 801d0e1..cb91e6e 100644
 --- a/Makefile
@@ -76060,19 +76062,6 @@ index 0000000..9872297
 +	int *pos,
 +	void(*error)(char *x));
 +#endif
-diff --git a/include/linux/module.h b/include/linux/module.h
-index 460df15..482efc8 100644
---- a/include/linux/module.h
-+++ b/include/linux/module.h
-@@ -455,7 +455,7 @@ void symbol_put_addr(void *addr);
- static inline local_t *__module_ref_addr(struct module *mod, int cpu)
- {
- #ifdef CONFIG_SMP
--	return (local_t *) per_cpu_ptr(mod->refptr, cpu);
-+	return (local_t *) (mod->refptr + per_cpu_offset(cpu));
- #else
- 	return &mod->ref;
- #endif
 diff --git a/init/Kconfig b/init/Kconfig
 index eb4b337..da6c4dd 100644
 --- a/init/Kconfig
