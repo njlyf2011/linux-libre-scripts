@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2082 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2089 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -699,6 +699,7 @@ Patch451: linux-2.6-input-fix-toshiba-hotkeys.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch454: linux-2.6-input-hid-quirk-egalax.patch
 Patch455: thinkpad-acpi-add-x100e.patch
+Patch456: thinkpad-acpi-fix-backlight.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -825,7 +826,6 @@ Patch12391: iwlwifi-reset-card-during-probe.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
 Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
-Patch12403: iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
 Patch12404: iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 Patch12405: iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 Patch12406: iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
@@ -842,8 +842,18 @@ Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 # fix possible corruption with ssd
 Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 
-# Revert "ath9k: fix lockdep warning when unloading module"
-Patch12900: revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+# iwlwifi: fix scan races
+Patch12910: iwlwifi-fix-scan-races.patch
+# iwlwifi: fix internal scan race
+Patch12911: iwlwifi-fix-internal-scan-race.patch
+# iwlwifi: recover_from_tx_stall
+Patch12912: iwlwifi-recover_from_tx_stall.patch
+
+# iwlwifi: recalculate average tpt if not current
+Patch12920: iwlwifi-recalculate-average-tpt-if-not-current.patch
+
+# CVE-2010-1437
+Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # ==============================================================================
 %endif
@@ -1412,6 +1422,7 @@ ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
 ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
 ApplyPatch thinkpad-acpi-add-x100e.patch
+ApplyPatch thinkpad-acpi-fix-backlight.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1528,7 +1539,6 @@ ApplyPatch iwlwifi-reset-card-during-probe.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
 ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
-ApplyPatch iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
 ApplyPatch iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 ApplyPatch iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 ApplyPatch iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
@@ -1545,8 +1555,18 @@ ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 # fix possible corruption with ssd
 ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
 
-# Revert "ath9k: fix lockdep warning when unloading module"
-ApplyPatch revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+# iwlwifi: fix scan races
+ApplyPatch iwlwifi-fix-scan-races.patch
+# iwlwifi: fix internal scan race
+ApplyPatch iwlwifi-fix-internal-scan-race.patch
+# iwlwifi: recover_from_tx_stall
+ApplyPatch iwlwifi-recover_from_tx_stall.patch
+
+# iwlwifi: recalculate average tpt if not current
+ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
+
+# CVE-2010-1437
+ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2199,8 +2219,43 @@ fi
 # plz don't put in a version string unless you're going to tag
 # and build.
 
+
+
 %changelog
-* Fri May 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri May 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.14.
+
+* Thu May 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.14-127
+- CVE-2010-1437: keyrings: find_keyring_by_name() can gain the freed keyring
+
+* Wed May 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.14-126
+- Linux 2.6.32.14
+- Drop merged patches:
+    btrfs-check-for-read-permission-on-src-file-in-clone-ioctl.patch
+    iwlwifi_-clear-all-the-stop_queue-flag-after-load-firmware.patch
+    revert-ath9k_-fix-lockdep-warning-when-unloading-module.patch
+
+* Mon May 24 2010 John W. Linville <linville@redhat.com>
+- iwlwifi: recalculate average tpt if not current (#588021)
+
+* Mon May 24 2010 John W. Linville <linville@redhat.com>
+- iwlwifi: recover_from_tx_stall (#589777)
+- iwlwifi: fix scan races (#592011)
+- iwlwifi: fix internal scan race (#592011)
+
+* Tue May 18 2010 Kyle McMartin <kyle@redhat.com>
+- btrfs: check for read permission on src file in the clone ioctl
+  (rhbz#593226)
+
+* Mon May 17 2010 Matthew Garrett <mjg@redhat.com>
+- thinkpad-acpi-fix-backlight.patch: Fix backlight control on some recent
+   Thinkpads
+
+* Fri May 14 2010 Jarod Wilson <jarod@redhat.com>
+- Update previous kworld patch w/the one that actually works
+  correctly w/o constant rf tracking filter recalibration
+
+* Fri May 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre May 21
 - Adjusted patch-libre-2.6.32.13.
 
 * Thu May 13 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.13-120
