@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2002 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2005 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -724,8 +724,15 @@ Patch670: linux-2.6-ata-quirk.patch
 
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 
-Patch690: iwlwifi-recalculate-average-tpt-if-not-current.patch
-Patch691: iwlwifi-fix-internal-scan-race.patch
+Patch690: iwlwifi-add-internal-short-scan-support-for-3945.patch
+Patch691: iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch
+Patch692: iwlwifi-move-plcp-check-to-separated-function.patch
+Patch693: iwlwifi-Recover-TX-flow-failure.patch
+Patch694: iwlwifi-code-cleanup-for-connectivity-recovery.patch
+Patch695: iwlwifi-iwl_good_ack_health-only-apply-to-AGN-device.patch
+Patch696: iwlwifi-recalculate-average-tpt-if-not-current.patch
+Patch697: iwlwifi-fix-internal-scan-race.patch
+Patch698: iwlwifi-recover_from_tx_stall.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -739,7 +746,7 @@ Patch1550: virtqueue-wrappers.patch
 Patch1554: virt_console-rollup.patch
 
 # DRM
-Patch1810: drm-1024x768-85.patch
+Patch1800: drm-next.patch
 # nouveau + drm fixes
 Patch1815: drm-nouveau-drm-fixed-header.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -747,9 +754,6 @@ Patch1819: drm-intel-big-hammer.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
-Patch1826: drm-intel-gen5-dither.patch
-Patch1827: drm-intel-sdvo-fix-2.patch
-Patch1828: drm-intel-sdvo-fix.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 # linux1394 git patches
@@ -1379,7 +1383,7 @@ ApplyPatch hdpvr-ir-enable.patch
 ApplyPatch virtqueue-wrappers.patch
 ApplyPatch virt_console-rollup.patch
 
-ApplyPatch drm-1024x768-85.patch
+ApplyPatch drm-next.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-drm-fixed-header.patch
@@ -1387,9 +1391,6 @@ ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
-ApplyPatch drm-intel-gen5-dither.patch
-#ApplyPatch drm-intel-sdvo-fix.patch
-#ApplyPatch drm-intel-sdvo-fix-2.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1424,8 +1425,16 @@ ApplyPatch neuter_intel_microcode_load.patch
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
 
+# iwlwifi fixes from F-13-2.6.33
+ApplyPatch iwlwifi-add-internal-short-scan-support-for-3945.patch
+ApplyPatch iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch
+ApplyPatch iwlwifi-move-plcp-check-to-separated-function.patch
+ApplyPatch iwlwifi-Recover-TX-flow-failure.patch
+ApplyPatch iwlwifi-code-cleanup-for-connectivity-recovery.patch
+ApplyPatch iwlwifi-iwl_good_ack_health-only-apply-to-AGN-device.patch
 ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
 ApplyPatch iwlwifi-fix-internal-scan-race.patch
+ApplyPatch iwlwifi-recover_from_tx_stall.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2087,6 +2096,23 @@ fi
 #                 ||     ||
 
 %changelog
+* Mon May 31 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjust iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch.
+- Adjust drm-next.patch.
+
+* Mon May 31 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-14
+- re-add drm-next.patch, should be in sync with 2.6.35 and what
+  was backported to Fedora 13.
+- drop patches merged in drm-next to 2.6.35
+- rebase relevant iwl fixes on top of 2.6.34 from the ones committed
+  to F-13 by linville.
+
+* Wed May 26 2010 Adam Jackson <ajax@redhat.com>
+- config-generic: Stop building i830.ko
+
+* Wed May 26 2010 Kyle McMartin <kyle@redhat.com>
+- iwlwifi-recover_from_tx_stall.patch: copy from F-13.
+
 * Fri May 21 2010 Roland McGrath <roland@redhat.com> 2.6.34-11
 - utrace update
 
