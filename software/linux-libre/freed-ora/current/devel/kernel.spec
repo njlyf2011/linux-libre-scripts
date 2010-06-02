@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2005 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2009 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -747,6 +747,8 @@ Patch1554: virt_console-rollup.patch
 
 # DRM
 Patch1800: drm-next.patch
+Patch1801: drm-disable-radeon_pm.patch
+Patch1802: drm_gem_object_alloc-i915_gem_alloc_object.patch
 # nouveau + drm fixes
 Patch1815: drm-nouveau-drm-fixed-header.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -776,7 +778,11 @@ Patch2911: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 
-Patch3000: fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
+Patch3000: writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch
+Patch3001: writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch
+Patch3002: writeback-Update-dirty-flags-in-two-steps.patch
+Patch3003: writeback-disable-periodic-old-data-writeback-for-di.patch
+Patch3004: writeback-bdi_writeback_task-must-set-task-state-bef.patch
 
 # NFSv4
 
@@ -796,6 +802,8 @@ Patch12019: linux-2.6-umh-refactor.patch
 Patch12020: coredump-uid-pipe-check.patch
 
 Patch12030: ssb_check_for_sprom.patch
+
+Patch12035: quiet-prove_RCU-in-cgroups.patch
 
 %endif
 
@@ -1276,7 +1284,11 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
-ApplyPatch fs-explicitly-pass-in-whether-sb-is-pinned-or-not.patch
+ApplyPatch writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch
+ApplyPatch writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch
+ApplyPatch writeback-Update-dirty-flags-in-two-steps.patch
+ApplyPatch writeback-disable-periodic-old-data-writeback-for-di.patch
+ApplyPatch writeback-bdi_writeback_task-must-set-task-state-bef.patch
 
 # ext4
 
@@ -1384,6 +1396,8 @@ ApplyPatch virtqueue-wrappers.patch
 ApplyPatch virt_console-rollup.patch
 
 ApplyPatch drm-next.patch
+ApplyPatch drm-disable-radeon_pm.patch
+ApplyPatch drm_gem_object_alloc-i915_gem_alloc_object.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-drm-fixed-header.patch
@@ -1435,6 +1449,8 @@ ApplyPatch iwlwifi-iwl_good_ack_health-only-apply-to-AGN-device.patch
 ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
 ApplyPatch iwlwifi-fix-internal-scan-race.patch
 ApplyPatch iwlwifi-recover_from_tx_stall.patch
+
+ApplyPatch quiet-prove_RCU-in-cgroups.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2096,6 +2112,21 @@ fi
 #                 ||     ||
 
 %changelog
+* Tue Jun 01 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-18
+- fix mismerge in i915_gem.c, drm_gem_object_alloc is now
+  i915_gem_alloc_object.
+- add a hunk to rcu_read{,un}lock in sched_fair too.
+
+* Tue Jun 01 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-17
+- backport writeback fixes from Jens until stable@ picks them up.
+
+* Tue Jun 01 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-16
+- quiet-prove_RCU-in-cgroups.patch: shut RCU lockdep up
+  as in 8b08ca52f5942c21564bbb90ccfb61053f2c26a1.
+
+* Tue Jun 01 2010 Kyle McMartin <kyle@redhat.com>
+- disable radeon_pm for now.
+
 * Mon May 31 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjust iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch.
 - Adjust drm-next.patch.
