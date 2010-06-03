@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2009 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2011 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -146,7 +146,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %endif
@@ -166,7 +166,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -1284,11 +1284,11 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
-ApplyPatch writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch
-ApplyPatch writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch
-ApplyPatch writeback-Update-dirty-flags-in-two-steps.patch
-ApplyPatch writeback-disable-periodic-old-data-writeback-for-di.patch
-ApplyPatch writeback-bdi_writeback_task-must-set-task-state-bef.patch
+#ApplyPatch writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch
+#ApplyPatch writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch
+#ApplyPatch writeback-Update-dirty-flags-in-two-steps.patch
+#ApplyPatch writeback-disable-periodic-old-data-writeback-for-di.patch
+#ApplyPatch writeback-bdi_writeback_task-must-set-task-state-bef.patch
 
 # ext4
 
@@ -2112,6 +2112,13 @@ fi
 #                 ||     ||
 
 %changelog
+* Wed Jun 02 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-19
+- Enable -debug flavour builds, until we branch for 2.6.35-rcX.
+
+* Wed Jun 02 2010 Kyle McMartin <kyle@redhat.com>
+- revert writeback fixes for now, there appear to be dragons
+  lurking there still.
+
 * Tue Jun 01 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-18
 - fix mismerge in i915_gem.c, drm_gem_object_alloc is now
   i915_gem_alloc_object.
