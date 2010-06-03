@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2049 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2052 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -286,12 +286,7 @@ Summary: The Linux kernel
 %define with_smp 0
 %endif
 
-# only build kernel-kdump on ppc64
-# (no relocatable kernel support upstream yet)
-#FIXME: Temporarily disabled to speed up builds.
-#ifnarch ppc64
 %define with_kdump 0
-#endif
 
 # don't do debug builds on anything but i686 and x86_64
 %ifnarch i686 x86_64
@@ -349,10 +344,17 @@ Summary: The Linux kernel
 %define kernel_image_elf 1
 %endif
 
+%ifarch s390
+%define all_arch_configs kernel-%{version}-s390*.config
+%define image_install_path boot
+%define make_target image
+%define kernel_image arch/s390/boot/image
+%endif
+
 %ifarch s390x
 %define asmarch s390
 %define hdrarch s390
-%define all_arch_configs kernel-%{version}-s390x.config
+%define all_arch_configs kernel-%{version}-s390x*.config
 %define image_install_path boot
 %define make_target image
 %define kernel_image arch/s390/boot/image
@@ -423,7 +425,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We don't build a kernel on i386; we only do kernel-headers there,
-# and we no longer build for 31bit S390. Same for 32bit sparc and arm.
+# and we no longer build for 31bit s390. Same for 32bit sparc and arm.
 %define nobuildarches i386 s390 sparc %{arm}
 
 %ifarch %nobuildarches
@@ -531,7 +533,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390x alpha alphaev56 %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390 s390x alpha alphaev56 %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -1740,6 +1742,7 @@ BuildKernel() {
     # Override $(mod-fw) because we don't want it to install any firmware
     # We'll do that ourselves with 'make firmware_install'
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
+
 %ifarch %{vdso_arches}
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
     if grep '^CONFIG_XEN=y$' .config >/dev/null; then
@@ -2243,6 +2246,9 @@ fi
 # and build.
 
 %changelog
+* Tue Jun 01 2010 Jarod Wilson <jarod@redhat.com>
+- Wire up all s390{,x} bits to match RHEL6 kernel spec
+
 * Thu May 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.33.5.
 
