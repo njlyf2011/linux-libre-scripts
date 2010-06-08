@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2052 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2055 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -342,13 +342,6 @@ Summary: The Linux kernel
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
-%endif
-
-%ifarch s390
-%define all_arch_configs kernel-%{version}-s390*.config
-%define image_install_path boot
-%define make_target image
-%define kernel_image arch/s390/boot/image
 %endif
 
 %ifarch s390x
@@ -2246,6 +2239,15 @@ fi
 # and build.
 
 %changelog
+* Mon Jun 07 2010 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: fix iommu errors on GeForce 8 and newer chipsets (rh#561267)
+
+* Thu Jun 03 2010 Kyle McMartin <kyle@redhat.com>
+- But keep it for kernel-headers...
+
+* Thu Jun 03 2010 Dave Jones <davej@redhat.com>
+- remove the 31bit s390 support again.
+
 * Tue Jun 01 2010 Jarod Wilson <jarod@redhat.com>
 - Wire up all s390{,x} bits to match RHEL6 kernel spec
 
