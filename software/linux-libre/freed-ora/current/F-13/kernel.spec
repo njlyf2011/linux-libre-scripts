@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2055 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2059 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -141,7 +141,7 @@ Summary: The Linux kernel
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
 %if 0%{?released_kernel}
-%define doc_build_fail false
+%define doc_build_fail true
 %else
 %define doc_build_fail true
 %endif
@@ -695,6 +695,7 @@ Patch453: thinkpad-acpi-add-x100e.patch
 Patch454: linux-2.6-input-hid-quirk-egalax.patch
 Patch455: linux-2.6-input-clickpad-support.patch
 Patch456: thinkpad-acpi-fix-backlight.patch
+Patch457: ntrig-backport.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -708,6 +709,7 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 Patch581: linux-2.6-selinux-avtab-size.patch
 
 Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
+Patch601: linux-2.6-acpi-indirect_fan_control.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
@@ -1414,6 +1416,7 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 
 # ACPI
 ApplyPatch linux-2.6-acpi-sleep-live-sci-live.patch
+ApplyPatch linux-2.6-acpi-indirect_fan_control.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
@@ -1436,6 +1439,7 @@ ApplyPatch linux-2.6-input-hid-quirk-egalax.patch
 ApplyPatch linux-2.6-input-clickpad-support.patch
 ApplyPatch thinkpad-acpi-add-x100e.patch
 ApplyPatch thinkpad-acpi-fix-backlight.patch
+ApplyPatch ntrig-backport.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1837,7 +1841,7 @@ hwcap 0 nosegneg"
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -2239,6 +2243,18 @@ fi
 # and build.
 
 %changelog
+* Wed Jun 09 2010 David Woodhouse <David.Woodhouse@intel.com>
+- Include PHY modules in modules.networking (#602155)
+
+* Wed Jun 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-121
+- doc_build_fail FAIL.
+
+* Wed Jun 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-120
+- backport ntrig hid driver from git head. (rhbz#584593)
+
+* Mon Jun 07 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-acpi-indirect_fan_control.patch: fix some ACPI fans (rh#531916)
+
 * Mon Jun 07 2010 Ben Skeggs <bskeggs@redhat.com>
 - nouveau: fix iommu errors on GeForce 8 and newer chipsets (rh#561267)
 
