@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2059 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2063 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -845,6 +845,8 @@ Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
+Patch12500: alsa-usbmixer-add-possibility-to-remap-dB-values.patch
+
 # fix possible corruption with ssd
 Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 
@@ -869,6 +871,9 @@ Patch12912: iwlwifi-recover_from_tx_stall.patch
 
 # CVE-2010-1437
 Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
+
+# Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
+Patch13010: rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 
 %endif
 
@@ -1362,10 +1367,10 @@ ApplyPatch linux-2.6-execshield.patch
 ApplyPatch linux-2.6-btrfs-update.patch
 
 # Sort out umount versus sync penalty: rhbz#588930
-ApplyPatch writeback-fix-wb-sync-none-writeback-from-umount.patch
+#ApplyPatch writeback-fix-wb-sync-none-writeback-from-umount.patch
 # additional fixes for writeback (#593669)
-ApplyPatch writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
-ApplyPatch writeback-update-dirty-flags-in-two-steps.patch
+#ApplyPatch writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
+#ApplyPatch writeback-update-dirty-flags-in-two-steps.patch
 
 # eCryptfs
 
@@ -1545,6 +1550,8 @@ ApplyPatch neuter_intel_microcode_load.patch
 # Refactor UserModeHelper code & satisfy abrt recursion check request
 ApplyPatch linux-2.6-umh-refactor.patch
 
+ApplyPatch alsa-usbmixer-add-possibility-to-remap-dB-values.patch
+
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
 
@@ -1592,6 +1599,9 @@ ApplyPatch iwlwifi-recover_from_tx_stall.patch
 
 # CVE-2010-1437
 ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
+
+# Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
+ApplyPatch rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2243,6 +2253,15 @@ fi
 # and build.
 
 %changelog
+* Fri Jun 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-126
+- ALSA: usbmixer - add possibility to remap dB values (rhbz#578131)
+
+* Fri Jun 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-124
+- Drop writeback patches, they appear to be able to cause oopses.
+
+* Wed Jun 09 2010 John W. Linville <linville@redhat.com>
+- Disable rt20xx and rt35xx chipset support in rt2800 drivers (#570869)
+
 * Wed Jun 09 2010 David Woodhouse <David.Woodhouse@intel.com>
 - Include PHY modules in modules.networking (#602155)
 
