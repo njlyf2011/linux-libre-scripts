@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2089 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2093 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -852,8 +852,16 @@ Patch12912: iwlwifi-recover_from_tx_stall.patch
 # iwlwifi: recalculate average tpt if not current
 Patch12920: iwlwifi-recalculate-average-tpt-if-not-current.patch
 
+Patch12921: iwlwifi-manage-QoS-by-mac-stack.patch
+Patch12922: mac80211-do-not-wipe-out-old-supported-rates.patch
+Patch12923: mac80211-explicitly-disable-enable-QoS.patch
+Patch12924: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+
 # CVE-2010-1437
 Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
+
+# iwlwifi: update supported PCI_ID list for 5xx0 series
+Patch13010: iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
 
 # ==============================================================================
 %endif
@@ -1565,8 +1573,17 @@ ApplyPatch iwlwifi-recover_from_tx_stall.patch
 # iwlwifi: recalculate average tpt if not current
 ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
 
+# mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
+ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
+ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
+ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+
 # CVE-2010-1437
 ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
+
+# iwlwifi: update supported PCI_ID list for 5xx0 series
+ApplyPatch iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2222,6 +2239,16 @@ fi
 
 
 %changelog
+* Mon Jun 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch.
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.14-131
+- mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+  patches from sgruszka@.
+
+* Wed Jun  2 2010 John W. Linville <linville@redhat.com>
+- iwlwifi: update supported PCI_ID list for 5xx0 series (#599153)
+
 * Fri May 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.32.14.
 
