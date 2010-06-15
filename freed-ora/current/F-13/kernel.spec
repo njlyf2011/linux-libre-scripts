@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2063 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2065 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -304,7 +304,7 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_headers 0
 %define all_arch_configs kernel-%{version}-*.config
-%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
+%define with_firmware  %{?_without_firmware:     0} %{?!_without_firmware:     1}
 %endif
 
 # bootwrapper is only on ppc
@@ -730,6 +730,10 @@ Patch1555: virt_console-fix-race.patch
 Patch1556: virt_console-fix-fix-race.patch
 Patch1557: virt_console-rollup2.patch
 Patch1558: vhost_net-rollup2.patch
+# EC2 is running old xen hosts and wont upgrade so we have to work around it
+Patch1559: fix_xen_guest_on_old_EC2.patch
+
+
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -868,6 +872,11 @@ Patch12910: iwlwifi-fix-scan-races.patch
 Patch12911: iwlwifi-fix-internal-scan-race.patch
 # iwlwifi: recover_from_tx_stall
 Patch12912: iwlwifi-recover_from_tx_stall.patch
+
+Patch12913: iwlwifi-manage-QoS-by-mac-stack.patch
+Patch12914: mac80211-do-not-wipe-out-old-supported-rates.patch
+Patch12915: mac80211-explicitly-disable-enable-QoS.patch
+Patch12916: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
 # CVE-2010-1437
 Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
@@ -1489,6 +1498,7 @@ ApplyPatch virt_console-fix-race.patch
 ApplyPatch virt_console-fix-fix-race.patch
 ApplyPatch virt_console-rollup2.patch
 ApplyPatch vhost_net-rollup2.patch
+ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # fix x86-64 fbdev primary GPU selection
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
@@ -1596,6 +1606,12 @@ ApplyPatch iwlwifi-fix-scan-races.patch
 ApplyPatch iwlwifi-fix-internal-scan-race.patch
 # iwlwifi: recover_from_tx_stall
 ApplyPatch iwlwifi-recover_from_tx_stall.patch
+
+# mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
+ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
+ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
+ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
 # CVE-2010-1437
 ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
@@ -2253,6 +2269,16 @@ fi
 # and build.
 
 %changelog
+* Mon Jun 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Re-enable kernel-libre-firmware.
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-128
+- mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+  patches from sgruszka@.
+
+* Fri Jun 11 2010 Justin M. Forbes <jforbes@redhat.com> 2.6.33.5-127
+- Disable xsave for so that kernel will boot on ancient EC2 hosts.
+
 * Fri Jun 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-126
 - ALSA: usbmixer - add possibility to remap dB values (rhbz#578131)
 
