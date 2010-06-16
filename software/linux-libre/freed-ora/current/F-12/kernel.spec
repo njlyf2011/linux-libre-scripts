@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2093 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2096 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -789,6 +789,9 @@ Patch3051: linux-2.6-nfs4-callback-hidden.patch
 
 # btrfs
 Patch3100: linux-2.6-btrfs-fix-acl.patch
+Patch3101: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+Patch3102: btrfs-should-add-permission-check-for-setfacl.patch
+
 
 # XFS
 
@@ -862,6 +865,9 @@ Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # iwlwifi: update supported PCI_ID list for 5xx0 series
 Patch13010: iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
+
+# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
+Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 # ==============================================================================
 %endif
@@ -1361,6 +1367,9 @@ ApplyPatch linux-2.6-execshield.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-fix-acl.patch
+ApplyPatch btrfs-should-add-permission-check-for-setfacl.patch
+ApplyPatch btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
 
 # eCryptfs
 
@@ -1584,6 +1593,9 @@ ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # iwlwifi: update supported PCI_ID list for 5xx0 series
 ApplyPatch iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
+
+# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
+ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2239,6 +2251,17 @@ fi
 
 
 %changelog
+* Tue Jun 15 2010 Kyle McMartin <kyle@redhat.com>  2.6.32.14-134
+- Fix btrfs ACL fixes... commit 431547b3c4533b8c7fd150ab36980b9a3147797b
+  changed them to take a struct dentry instead of struct inode after
+  2.6.32.
+
+* Tue Jun 15 2010 John W. Linville <linville@redhat.com> 2.6.32.14-133
+- iwlwifi: cancel scan watchdog in iwl_bg_abort_scan (#604264)
+
+* Mon Jun 14 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.14-132
+- Add in ACL fixes to btrfs from CVE-2010-2071.
+
 * Mon Jun 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch.
 
