@@ -32,7 +32,6 @@ D/scripts////
 /drm-intel-next.patch/1.11/Thu Sep 10 04:29:09 2009/-kb/Tkernel-2_6_34-38_fc14
 /drm-intel-sdvo-fix-2.patch/1.1/Thu May 20 15:20:28 2010/-kb/Tkernel-2_6_34-38_fc14
 /drm-intel-sdvo-fix.patch/1.1/Thu May 20 15:20:29 2010/-kb/Tkernel-2_6_34-38_fc14
-/drm-next.patch/1.22/dummy timestamp from new-entry+Mon Jun 14 14:47:38 2010/-kb/Tkernel-2_6_34-38_fc14
 /drm-nouveau-abi16.patch/1.2/Wed Feb 24 23:02:23 2010/-kb/Tkernel-2_6_34-38_fc14
 /drm-nouveau-drm-fixed-header.patch/1.1/Thu May 20 15:20:29 2010/-kb/Tkernel-2_6_34-38_fc14
 /drm-provide-knob-to-enable-radeon_pm.patch/1.1/Sun Jun 13 11:44:28 2010/-kb/Tkernel-2_6_34-38_fc14
@@ -137,3 +136,4 @@ D/scripts////
 /writeback-disable-periodic-old-data-writeback-for-di.patch/1.1/Tue Jun  1 13:29:11 2010/-kb/Tkernel-2_6_34-38_fc14
 /writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch/1.1/Tue Jun  1 13:29:11 2010/-kb/Tkernel-2_6_34-38_fc14
 /writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch/1.1/Tue Jun  1 13:29:11 2010/-kb/Tkernel-2_6_34-38_fc14
+/drm-next.patch/1.22/Wed Jun 16 18:49:52 2010/-kb/Tkernel-2_6_34-38_fc14
