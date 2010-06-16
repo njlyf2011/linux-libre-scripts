@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2065 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2068 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -800,6 +800,9 @@ Patch2907: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 Patch3000: linux-2.6-btrfs-update.patch
+Patch3001: btrfs-should-add-permission-check-for-setfacl.patch
+Patch3002: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
 Patch3010: writeback-fix-wb-sync-none-writeback-from-umount.patch
 Patch3012: writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
 Patch3014: writeback-update-dirty-flags-in-two-steps.patch
@@ -883,6 +886,9 @@ Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
 Patch13010: rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
+
+# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
+Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 %endif
 
@@ -1375,6 +1381,11 @@ ApplyPatch linux-2.6-execshield.patch
 # btrfs
 ApplyPatch linux-2.6-btrfs-update.patch
 
+# CVE-2010-2071
+ApplyPatch btrfs-should-add-permission-check-for-setfacl.patch
+ApplyPatch btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
+
 # Sort out umount versus sync penalty: rhbz#588930
 #ApplyPatch writeback-fix-wb-sync-none-writeback-from-umount.patch
 # additional fixes for writeback (#593669)
@@ -1618,6 +1629,9 @@ ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
 ApplyPatch rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
+
+# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
+ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2269,6 +2283,12 @@ fi
 # and build.
 
 %changelog
+* Tue Jun 15 2010 John W. Linville <linville@redhat.com> 2.6.33.5-131
+- iwlwifi: cancel scan watchdog in iwl_bg_abort_scan (#590436)
+
+* Mon Jun 14 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-129
+- Add btrfs ACL fixes from CVE-2010-2071.
+
 * Mon Jun 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Re-enable kernel-libre-firmware.
 
