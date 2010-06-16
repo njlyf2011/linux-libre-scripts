@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2011 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2029 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -115,8 +115,6 @@ Summary: The Linux kernel
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
 # kernel-smp (only valid for ppc 32-bit)
 %define with_smp       %{?_without_smp:       0} %{?!_without_smp:       1}
-# kernel-kdump
-%define with_kdump     %{?_without_kdump:     0} %{?!_without_kdump:     1}
 # kernel-debug
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-doc
@@ -135,13 +133,11 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# Use dracut instead of mkinitrd for initrd image generation
-%define with_dracut       %{?_without_dracut:       0} %{?!_without_dracut:       1}
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
 %if 0%{?released_kernel}
-%define doc_build_fail false
+%define doc_build_fail true
 %else
 %define doc_build_fail true
 %endif
@@ -249,14 +245,12 @@ Summary: The Linux kernel
 # if requested, only build base kernel
 %if %{with_baseonly}
 %define with_smp 0
-%define with_kdump 0
 %define with_debug 0
 %endif
 
 # if requested, only build smp kernel
 %if %{with_smponly}
 %define with_up 0
-%define with_kdump 0
 %define with_debug 0
 %endif
 
@@ -267,8 +261,6 @@ Summary: The Linux kernel
 %endif
 %define with_smp 0
 %define with_pae 0
-%define with_xen 0
-%define with_kdump 0
 %define with_perftool 0
 %endif
 
@@ -286,13 +278,6 @@ Summary: The Linux kernel
 %define with_smp 0
 %endif
 
-# only build kernel-kdump on ppc64
-# (no relocatable kernel support upstream yet)
-#FIXME: Temporarily disabled to speed up builds.
-#ifnarch ppc64
-%define with_kdump 0
-#endif
-
 # don't do debug builds on anything but i686 and x86_64
 %ifnarch i686 x86_64
 %define with_debug 0
@@ -309,7 +294,7 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_headers 0
 %define all_arch_configs kernel-%{version}-*.config
-%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
+%define with_firmware  %{?_without_firmware:     0} %{?!_without_firmware:     1}
 %endif
 
 # bootwrapper is only on ppc
@@ -356,10 +341,6 @@ Summary: The Linux kernel
 %define image_install_path boot
 %define make_target image
 %define kernel_image arch/s390/boot/image
-%endif
-
-%ifarch sparc
-# We only build sparc headers since we dont support sparc32 hardware
 %endif
 
 %ifarch sparc64
@@ -422,15 +403,13 @@ Summary: The Linux kernel
 # us use the previous build of that package -- it'll just be completely AWOL.
 # Which is a BadThing(tm).
 
-# We don't build a kernel on i386; we only do kernel-headers there,
-# and we no longer build for 31bit S390. Same for 32bit sparc and arm.
+# We only build kernel-headers on the following...
 %define nobuildarches i386 s390 sparc %{arm}
 
 %ifarch %nobuildarches
 %define with_up 0
 %define with_smp 0
 %define with_pae 0
-%define with_kdump 0
 %define with_debuginfo 0
 %define with_perftool 0
 %define _enable_debug_packages 0
@@ -460,19 +439,6 @@ Summary: The Linux kernel
 #
 %define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, iwl4965-firmware < 228.57.2, selinux-policy-targeted < 1.25.3-14, squashfs-tools < 4.0, wireless-tools < 29-3
 
-#
-# The ld.so.conf.d file we install uses syntax older ldconfig's don't grok.
-#
-%define kernel_xen_conflicts glibc < 2.3.5-1, xen < 3.0.1
-
-%define kernel_PAE_obsoletes kernel-smp < 2.6.17, kernel-xen <= 2.6.27-0.2.rc0.git6.fc10
-%define kernel_PAE_provides kernel-xen = %{rpmversion}-%{pkg_release}
-
-%ifarch x86_64
-%define kernel_obsoletes kernel-xen <= 2.6.27-0.2.rc0.git6.fc10
-%define kernel_provides kernel-xen = %{rpmversion}-%{pkg_release}
-%endif
-
 # We moved the drm include files into kernel-headers, make sure there's
 # a recent enough libdrm-devel on the system that doesn't have those.
 %define kernel_headers_conflicts libdrm-devel < 2.4.0-0.15
@@ -482,11 +448,7 @@ Summary: The Linux kernel
 # scripts use them.
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
-%if %{with_dracut}
 %define initrd_prereq  dracut >= 001-7
-%else
-%define initrd_prereq  mkinitrd >= 6.0.61-1
-%endif
 
 #
 # This macro does requires, provides, conflicts, obsoletes for a kernel package.
@@ -535,7 +497,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390x alpha alphaev56 %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390 s390x alpha alphaev56 %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -662,7 +624,6 @@ Patch08: freedo.patch
 # revert upstream patches we get via other methods
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
-Patch10: git-cpufreq.patch
 Patch11: git-bluetooth.patch
 
 # Standalone patches
@@ -673,8 +634,6 @@ Patch22: linux-2.6-utrace.patch
 Patch23: linux-2.6-utrace-ptrace.patch
 
 Patch50: linux-2.6-x86-cfi_sections.patch
-
-Patch144: linux-2.6-vio-modalias.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -720,8 +679,6 @@ Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
-Patch670: linux-2.6-ata-quirk.patch
-
 Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
 
 Patch690: iwlwifi-add-internal-short-scan-support-for-3945.patch
@@ -744,11 +701,11 @@ Patch1517: hdpvr-ir-enable.patch
 # virt + ksm patches
 Patch1550: virtqueue-wrappers.patch
 Patch1554: virt_console-rollup.patch
+Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
 Patch1800: drm-next.patch
-Patch1801: drm-disable-radeon_pm.patch
-Patch1802: drm_gem_object_alloc-i915_gem_alloc_object.patch
+Patch1801: drm-provide-knob-to-enable-radeon_pm.patch
 # nouveau + drm fixes
 Patch1815: drm-nouveau-drm-fixed-header.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -784,6 +741,10 @@ Patch3002: writeback-Update-dirty-flags-in-two-steps.patch
 Patch3003: writeback-disable-periodic-old-data-writeback-for-di.patch
 Patch3004: writeback-bdi_writeback_task-must-set-task-state-bef.patch
 
+Patch3011: btrfs-should-add-permission-check-for-setfacl.patch
+Patch3012: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
+
 # NFSv4
 
 # VIA Nano / VX8xx updates
@@ -804,6 +765,12 @@ Patch12020: coredump-uid-pipe-check.patch
 Patch12030: ssb_check_for_sprom.patch
 
 Patch12035: quiet-prove_RCU-in-cgroups.patch
+
+Patch12040: iwlwifi-manage-QoS-by-mac-stack.patch
+Patch12041: mac80211-do-not-wipe-out-old-supported-rates.patch
+Patch12042: mac80211-explicitly-disable-enable-QoS.patch
+Patch12043: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+
 
 %endif
 
@@ -996,17 +963,6 @@ It should only be installed when trying to gather additional information
 on kernel bugs, as some of these options impact performance noticably.
 
 The kernel-libre-debug package is the upstream kernel without the
-non-Free blobs it includes by default.
-
-
-%define variant_summary A minimal Linux kernel compiled for crash dumps
-%kernel_variant_package kdump
-%description kdump
-This package includes a kdump version of the Linux kernel. It is
-required only on machines which will use the kexec-based kernel crash dump
-mechanism.
-
-The kernel-libre-kdump package is the upstream kernel without the
 non-Free blobs it includes by default.
 
 
@@ -1246,7 +1202,6 @@ ApplyPatch freedo.patch
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
-#ApplyPatch git-cpufreq.patch
 #ApplyPatch git-bluetooth.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
@@ -1267,9 +1222,6 @@ ApplyPatch linux-2.6-x86-cfi_sections.patch
 #
 # PowerPC
 #
-### NOT (YET) UPSTREAM:
-# Provide modalias in sysfs for vio devices
-ApplyPatch linux-2.6-vio-modalias.patch
 
 #
 # SPARC64
@@ -1295,6 +1247,10 @@ ApplyPatch linux-2.6-execshield.patch
 # xfs
 
 # btrfs
+# CVE-2010-2071.
+ApplyPatch btrfs-should-add-permission-check-for-setfacl.patch
+ApplyPatch btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
 
 # eCryptfs
 
@@ -1374,9 +1330,6 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 # Changes to upstream defaults.
 
 
-# ia64 ata quirk
-ApplyPatch linux-2.6-ata-quirk.patch
-
 # back-port scan result aging patches
 #ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
 
@@ -1394,10 +1347,10 @@ ApplyPatch hdpvr-ir-enable.patch
 # Assorted Virt Fixes
 ApplyPatch virtqueue-wrappers.patch
 ApplyPatch virt_console-rollup.patch
+ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 ApplyPatch drm-next.patch
-ApplyPatch drm-disable-radeon_pm.patch
-ApplyPatch drm_gem_object_alloc-i915_gem_alloc_object.patch
+ApplyPatch drm-provide-knob-to-enable-radeon_pm.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-drm-fixed-header.patch
@@ -1449,6 +1402,12 @@ ApplyPatch iwlwifi-iwl_good_ack_health-only-apply-to-AGN-device.patch
 ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
 ApplyPatch iwlwifi-fix-internal-scan-race.patch
 ApplyPatch iwlwifi-recover_from_tx_stall.patch
+
+# mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
+ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
+ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
+ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
 ApplyPatch quiet-prove_RCU-in-cgroups.patch
 
@@ -1580,13 +1539,11 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}
     install -m 644 .config $RPM_BUILD_ROOT/boot/config-$KernelVer
     install -m 644 System.map $RPM_BUILD_ROOT/boot/System.map-$KernelVer
-%if %{with_dracut}
+
     # We estimate the size of the initramfs because rpm needs to take this size
     # into consideration when performing disk space calculations. (See bz #530778)
     dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initramfs-$KernelVer.img bs=1M count=20
-%else
-    dd if=/dev/zero of=$RPM_BUILD_ROOT/boot/initrd-$KernelVer.img bs=1M count=5
-%endif
+
     if [ -f arch/$Arch/boot/zImage.stub ]; then
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
     fi
@@ -1600,15 +1557,6 @@ BuildKernel() {
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 %ifarch %{vdso_arches}
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
-    if grep '^CONFIG_XEN=y$' .config >/dev/null; then
-      echo > ldconfig-kernel.conf "\
-# This directive teaches ldconfig to search in nosegneg subdirectories
-# and cache the DSOs there with extra bit 0 set in their hwcap match
-# fields.  In Xen guest kernels, the vDSO tells the dynamic linker to
-# search in nosegneg subdirectories and to match this extra hwcap bit
-# in the ld.so.cache file.
-hwcap 0 nosegneg"
-    fi
     if [ ! -s ldconfig-kernel.conf ]; then
       echo > ldconfig-kernel.conf "\
 # Placeholder file, no vDSO hwcap entries used in this kernel."
@@ -1699,7 +1647,7 @@ hwcap 0 nosegneg"
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -1761,10 +1709,6 @@ BuildKernel %make_target %kernel_image
 
 %if %{with_smp}
 BuildKernel %make_target %kernel_image smp
-%endif
-
-%if %{with_kdump}
-BuildKernel vmlinux vmlinux kdump vmlinux
 %endif
 
 %if %{with_doc}
@@ -1918,12 +1862,7 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1}}\
-%{expand:\
-%if %{with_dracut}\
 /sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --dracut --depmod --update %{KVERREL}%{?-v:.%{-v*}} || exit $?\
-%else\
-/sbin/new-kernel-pkg --package kernel-libre%{?-v:-%{-v*}} --mkinitrd --depmod --update %{KVERREL}%{?-v:.%{-v*}} || exit $?\
-%endif}\
 /sbin/new-kernel-pkg --package kernel-libre%{?1:-%{1}} --rpmposttrans %{KVERREL}%{?1:.%{1}} || exit $?\
 %{nil}
 
@@ -1964,22 +1903,18 @@ fi}\
 %{nil}
 
 %kernel_variant_preun
-%ifarch x86_64
-%kernel_variant_post -r (kernel-smp|kernel-xen)
-%else
 %kernel_variant_post -r kernel-smp
-%endif
 
 %kernel_variant_preun smp
 %kernel_variant_post -v smp
 
 %kernel_variant_preun PAE
-%kernel_variant_post -v PAE -r (kernel|kernel-smp|kernel-xen)
+%kernel_variant_post -v PAE -r (kernel|kernel-smp)
 
 %kernel_variant_preun debug
 %kernel_variant_post -v debug
 
-%kernel_variant_post -v PAEdebug -r (kernel|kernel-smp|kernel-xen)
+%kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
 %kernel_variant_preun PAEdebug
 
 if [ -x /sbin/ldconfig ]
@@ -2061,11 +1996,7 @@ fi
 /etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:.%{2}}.conf\
 %endif\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
-%if %{with_dracut}\
 %ghost /boot/initramfs-%{KVERREL}%{?2:.%{2}}.img\
-%else\
-%ghost /boot/initrd-%{KVERREL}%{?2:.%{2}}.img\
-%endif\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
 %verify(not mtime) /usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
@@ -2096,7 +2027,6 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
-%kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 # plz don't put in a version string unless you're going to tag
 # and build.
@@ -2112,6 +2042,65 @@ fi
 #                 ||     ||
 
 %changelog
+* Tue Jun 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Re-enable kernel-libre-firmware.
+
+* Tue Jun 15 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-38
+- Fix build by nuking superfluous "%{expand" which was missing a
+  trailing '}'. You may now reward me with an array of alcoholic
+  beverages, I so richly deserve for spending roughly a full
+  day staring at the diff of the spec.
+
+* Mon Jun 14 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-37
+- btrfs ACL fixes from CVE-2010-2071.
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-36
+- remunge and reapply hdpvr-ir-enable
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-35
+- mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+  patches from sgruszka@.
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-34
+- Provide a knob to enable radeon_pm to allow users to test
+  that functionality. Add radeon.pm=1 to your kernel cmdline
+  in order to enable it. (It still defaults to off though.)
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-33
+- Update drm-next to include fixes since 2.6.35-rc1.
+
+* Fri Jun 11 2010 Justin M. Forbes <jforbes@redhat.com> 
+- Disable xsave for so that kernel will boot on ancient EC2 hosts.
+
+* Wed Jun 09 2010 John W. Linville <linville@redhat.com>
+- Disable rt20xx and rt35xx chipset support in rt2800 drivers (#570869)
+
+* Wed Jun 09 2010 David Woodhouse <David.Woodhouse@intel.com>
+- Include PHY modules in modules.networking (#602155)
+
+* Tue Jun 08 2010 Dave Jones <davej@redhat.com>
+- Remove useless -kdump kernel support
+
+* Tue Jun 08 2010 Dave Jones <davej@redhat.com>
+- Remove ia64 ata quirk which had no explanation, and still
+  isn't upstream. No-one cares.
+
+* Tue Jun 08 2010 Dave Jones <davej@redhat.com>
+- Drop linux-2.6-vio-modalias.patch
+  Two years should have been long enough to get upstream if this is important.
+
+* Tue Jun 08 2010 Dave Jones <davej@redhat.com>
+- Remove crufty Xen remnants from specfile.
+
+* Tue Jun 08 2010 Dave Jones <davej@redhat.com>
+- Remove mkinitrd ifdefs. Dracut or GTFO.
+
+* Thu Jun 03 2010 Kyle McMartin <kyle@redhat.com>
+- Build kernel headers on s390.
+
+* Wed Jun 02 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-20
+- Disable doc_build_fail because xmlto et al. are crud.
+
 * Wed Jun 02 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-19
 - Enable -debug flavour builds, until we branch for 2.6.35-rcX.
 
