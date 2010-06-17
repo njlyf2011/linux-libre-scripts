@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2029 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2031 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -705,7 +705,6 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
 Patch1800: drm-next.patch
-Patch1801: drm-provide-knob-to-enable-radeon_pm.patch
 # nouveau + drm fixes
 Patch1815: drm-nouveau-drm-fixed-header.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -1350,7 +1349,6 @@ ApplyPatch virt_console-rollup.patch
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 ApplyPatch drm-next.patch
-ApplyPatch drm-provide-knob-to-enable-radeon_pm.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-drm-fixed-header.patch
@@ -2042,6 +2040,16 @@ fi
 #                 ||     ||
 
 %changelog
+* Wed Jun 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-40
+- Snag some more DRM commits into drm-next.patch that I missed the first
+  time.
+- Fix up radeon_pm toggle to work with the upstream code.
+
+* Tue Jun 15 2010 Prarit Bhargava <prarit@redhat.com>
+- Turn off CONFIG_I2O on x86.
+  It is broken on 64-bit address spaces (i686/PAE, x86_64), and frankly, I'm
+  having trouble finding anyone who actually uses it.
+
 * Tue Jun 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Re-enable kernel-libre-firmware.
 
