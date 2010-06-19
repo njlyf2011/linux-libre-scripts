@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2061 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2070 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -304,7 +304,7 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_headers 0
 %define all_arch_configs kernel-%{version}-*.config
-%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
+%define with_firmware  %{?_without_firmware:     0} %{?!_without_firmware:     1}
 %endif
 
 # bootwrapper is only on ppc
@@ -730,6 +730,10 @@ Patch1555: virt_console-fix-race.patch
 Patch1556: virt_console-fix-fix-race.patch
 Patch1557: virt_console-rollup2.patch
 Patch1558: vhost_net-rollup2.patch
+# EC2 is running old xen hosts and wont upgrade so we have to work around it
+Patch1559: fix_xen_guest_on_old_EC2.patch
+
+
 
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
@@ -796,6 +800,9 @@ Patch2907: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 Patch3000: linux-2.6-btrfs-update.patch
+Patch3001: btrfs-should-add-permission-check-for-setfacl.patch
+Patch3002: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
 Patch3010: writeback-fix-wb-sync-none-writeback-from-umount.patch
 Patch3012: writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch
 Patch3014: writeback-update-dirty-flags-in-two-steps.patch
@@ -845,6 +852,8 @@ Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
+Patch12500: alsa-usbmixer-add-possibility-to-remap-dB-values.patch
+
 # fix possible corruption with ssd
 Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
 
@@ -867,11 +876,19 @@ Patch12911: iwlwifi-fix-internal-scan-race.patch
 # iwlwifi: recover_from_tx_stall
 Patch12912: iwlwifi-recover_from_tx_stall.patch
 
+Patch12913: iwlwifi-manage-QoS-by-mac-stack.patch
+Patch12914: mac80211-do-not-wipe-out-old-supported-rates.patch
+Patch12915: mac80211-explicitly-disable-enable-QoS.patch
+Patch12916: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+
 # CVE-2010-1437
 Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
 Patch13010: rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
+
+# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
+Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 %endif
 
@@ -1364,6 +1381,11 @@ ApplyPatch linux-2.6-execshield.patch
 # btrfs
 ApplyPatch linux-2.6-btrfs-update.patch
 
+# CVE-2010-2071
+ApplyPatch btrfs-should-add-permission-check-for-setfacl.patch
+ApplyPatch btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
+
+
 # Sort out umount versus sync penalty: rhbz#588930
 #ApplyPatch writeback-fix-wb-sync-none-writeback-from-umount.patch
 # additional fixes for writeback (#593669)
@@ -1487,6 +1509,7 @@ ApplyPatch virt_console-fix-race.patch
 ApplyPatch virt_console-fix-fix-race.patch
 ApplyPatch virt_console-rollup2.patch
 ApplyPatch vhost_net-rollup2.patch
+ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # fix x86-64 fbdev primary GPU selection
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
@@ -1548,6 +1571,8 @@ ApplyPatch neuter_intel_microcode_load.patch
 # Refactor UserModeHelper code & satisfy abrt recursion check request
 ApplyPatch linux-2.6-umh-refactor.patch
 
+ApplyPatch alsa-usbmixer-add-possibility-to-remap-dB-values.patch
+
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
 
@@ -1593,11 +1618,20 @@ ApplyPatch iwlwifi-fix-internal-scan-race.patch
 # iwlwifi: recover_from_tx_stall
 ApplyPatch iwlwifi-recover_from_tx_stall.patch
 
+# mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
+ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
+ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
+ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+
 # CVE-2010-1437
 ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
 
 # Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
 ApplyPatch rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
+
+# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
+ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2249,6 +2283,33 @@ fi
 # and build.
 
 %changelog
+* Fri Jun 18 2010 Roland McGrath <roland@redhat.com> 2.6.33.5-133
+- make execshield respect PF_RANDOMIZE and ADDR_NO_RANDOMIZE (#220892)
+
+* Thu Jun 17 2010 Kyle McMartin <kyle@redhat.com>
+- make ghash-clmulni modular to get rid of early boot noise (rhbz#586954)
+  (not a /fix/ but it should at least quiet boot down a bit if you have
+   the cpu support)
+
+* Tue Jun 15 2010 John W. Linville <linville@redhat.com> 2.6.33.5-131
+- iwlwifi: cancel scan watchdog in iwl_bg_abort_scan (#590436)
+
+* Mon Jun 14 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-129
+- Add btrfs ACL fixes from CVE-2010-2071.
+
+* Mon Jun 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Re-enable kernel-libre-firmware.
+
+* Sun Jun 13 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-128
+- mac80211/iwlwifi fix connections to some APs (rhbz#558002)
+  patches from sgruszka@.
+
+* Fri Jun 11 2010 Justin M. Forbes <jforbes@redhat.com> 2.6.33.5-127
+- Disable xsave for so that kernel will boot on ancient EC2 hosts.
+
+* Fri Jun 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-126
+- ALSA: usbmixer - add possibility to remap dB values (rhbz#578131)
+
 * Fri Jun 11 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-124
 - Drop writeback patches, they appear to be able to cause oopses.
 
