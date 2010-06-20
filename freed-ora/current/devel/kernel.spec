@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2031 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2034 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -695,6 +695,9 @@ Patch800: linux-2.6-crash-driver.patch
 
 Patch900: linux-2.6-cantiga-iommu-gfx.patch
 
+# crypto/
+Patch1200: crypto-add-async-hash-testing.patch
+
 Patch1515: lirc-2.6.33.patch
 Patch1517: hdpvr-ir-enable.patch
 
@@ -733,12 +736,6 @@ Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 Patch2911: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
-
-Patch3000: writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch
-Patch3001: writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch
-Patch3002: writeback-Update-dirty-flags-in-two-steps.patch
-Patch3003: writeback-disable-periodic-old-data-writeback-for-di.patch
-Patch3004: writeback-bdi_writeback_task-must-set-task-state-bef.patch
 
 Patch3011: btrfs-should-add-permission-check-for-setfacl.patch
 Patch3012: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
@@ -1235,11 +1232,6 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
-#ApplyPatch writeback-fix-WB_SYNC_NONE-writeback-from-umount.patch
-#ApplyPatch writeback-ensure-that-WB_SYNC_NONE-writeback-with-sb.patch
-#ApplyPatch writeback-Update-dirty-flags-in-two-steps.patch
-#ApplyPatch writeback-disable-periodic-old-data-writeback-for-di.patch
-#ApplyPatch writeback-bdi_writeback_task-must-set-task-state-bef.patch
 
 # ext4
 
@@ -1337,6 +1329,11 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Cantiga chipset b0rkage
 ApplyPatch linux-2.6-cantiga-iommu-gfx.patch
+
+# crypto/
+
+# Add async hash testing (a8f1a05)
+ApplyPatch crypto-add-async-hash-testing.patch
 
 # http://www.lirc.org/
 ApplyPatch lirc-2.6.33.patch
@@ -2040,6 +2037,16 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Jun 17 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-42
+- Suck in patch from Dave Miller in 2.6.35 to add async hash testing,
+  hopefully fixes error from previous commit. (But making it modular
+  is still a good idea.)
+
+* Thu Jun 17 2010 Kyle McMartin <kyle@redhat.com>
+- make ghash-clmulni modular to get rid of early boot noise (rhbz#586954)
+  (not a /fix/ but it should at least quiet boot down a bit if you have
+   the cpu support)
+
 * Wed Jun 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-40
 - Snag some more DRM commits into drm-next.patch that I missed the first
   time.
