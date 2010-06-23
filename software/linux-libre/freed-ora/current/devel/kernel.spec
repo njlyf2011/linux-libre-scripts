@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1991
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2035 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2036 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -708,7 +708,8 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
 Patch1800: drm-next.patch
-Patch1801: revert-drm-kms-toggle-poll-around-switcheroo.patch
+Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
+Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
 # nouveau + drm fixes
 Patch1815: drm-nouveau-drm-fixed-header.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -1347,6 +1348,7 @@ ApplyPatch virt_console-rollup.patch
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 ApplyPatch drm-next.patch
+ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
 
 # Nouveau DRM + drm fixes
@@ -2039,6 +2041,12 @@ fi
 #                 ||     ||
 
 %changelog
+* Mon Jun 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-45
+- drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
+  Revert eb1f8e4f, bisected by Nicolas Kaiser. Thanks! (rhbz#599190) 
+  (If this works, will try to root-cause.)
+- rebase previous patch on top of above reversion
+
 * Mon Jun 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-44
 - revert-drm-kms-toggle-poll-around-switcheroo.patch (rhbz#599190)
 
