@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2070 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2073 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -772,6 +772,7 @@ Patch1830: drm-intel-sdvo-fix-2.patch
 # from 2.6.33.5
 Patch1840: drm-i915-use-pipe_control-instruction-on-ironlake-and-sandy-bridge.patch
 Patch1841: drm-i915-fix-non-ironlake-965-class-crashes.patch
+Patch1842: drm-i915-fix-edp-panels.patch
 
 Patch2100: linux-2.6-phylib-autoload.patch
 
@@ -889,6 +890,9 @@ Patch13010: rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
+
+# l2tp: fix oops in pppol2tp_xmit (#607054)
+Patch13030: l2tp-fix-oops-in-pppol2tp_xmit.patch
 
 %endif
 
@@ -1538,6 +1542,7 @@ ApplyPatch drm-intel-sdvo-fix-2.patch
 # from 2.6.33.5
 ApplyPatch drm-i915-use-pipe_control-instruction-on-ironlake-and-sandy-bridge.patch
 ApplyPatch drm-i915-fix-non-ironlake-965-class-crashes.patch
+ApplyPatch drm-i915-fix-edp-panels.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
 
@@ -1632,6 +1637,9 @@ ApplyPatch rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
+
+# l2tp: fix oops in pppol2tp_xmit (#607054)
+ApplyPatch l2tp-fix-oops-in-pppol2tp_xmit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2283,6 +2291,19 @@ fi
 # and build.
 
 %changelog
+* Fri Jun 25 2010 Dave Airlie <airlied@redhat.com> 2.6.33.5-136
+- i915: fix edp on a number of notebooks (including whot's one)
+
+* Fri Jun 25 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.5-135
+- nouveau: backport important fixes from upstream
+- Fixes unPOSTed detection + support nv4x multi-card (rhbz#607190)
+- Various VBIOS parser fixes (potential culprit for many suspend bugs)
+- Fixes memory detection on some GF8 IGPs, and boards with 4GiB VRAM
+- Corrects various problems in the behaviour of GF8 dual-link TMDS
+
+* Wed Jun 23 2010 Kyle McMartin <kyle@redhat.com> 2.6.33.5-134
+- l2tp: fix oops in pppol2tp_xmit (#607054)
+
 * Fri Jun 18 2010 Roland McGrath <roland@redhat.com> 2.6.33.5-133
 - make execshield respect PF_RANDOMIZE and ADDR_NO_RANDOMIZE (#220892)
 
