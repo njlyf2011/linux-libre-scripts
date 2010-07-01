@@ -45,7 +45,6 @@ D/scripts////
 /drm-nouveau-abi16.patch/1.3/Thu Jun 17 14:04:28 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /drm-nouveau-acpi-edid-fallback.patch/1.3/Thu Jun 17 14:04:28 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /drm-nouveau-drm-fixed-header.patch/1.1/Thu Jun 17 14:04:28 2010/-kb/Tkernel-2_6_33_5-137_fc13
-/drm-nouveau-updates.patch/1.11/dummy timestamp from new-entry+Sat Jun 26 21:59:52 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /drm-radeon-evergreen.patch/1.1/Thu Jun 17 14:04:29 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /drm-radeon-firemv-pciid.patch/1.1/Thu Jun 17 14:04:29 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /drm-radeon-fix-rs600-tlb.patch/1.1/Thu Jun 17 14:04:29 2010/-kb/Tkernel-2_6_33_5-137_fc13
@@ -184,3 +183,4 @@ D/scripts////
 /writeback-ensure-wb-sync-none-writeback-with-sb-pinned-is-sync.patch/1.1/Thu Jun 17 14:04:42 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /writeback-fix-wb-sync-none-writeback-from-umount.patch/1.1/Thu Jun 17 14:04:43 2010/-kb/Tkernel-2_6_33_5-137_fc13
 /writeback-update-dirty-flags-in-two-steps.patch/1.1/Thu Jun 17 14:04:43 2010/-kb/Tkernel-2_6_33_5-137_fc13
+/drm-nouveau-updates.patch/1.11/Thu Jul  1 18:14:59 2010/-kb/Tkernel-2_6_33_5-137_fc13
