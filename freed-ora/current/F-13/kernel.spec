@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2074 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2079 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -75,9 +75,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -773,6 +773,7 @@ Patch1830: drm-intel-sdvo-fix-2.patch
 Patch1840: drm-i915-use-pipe_control-instruction-on-ironlake-and-sandy-bridge.patch
 Patch1841: drm-i915-fix-non-ironlake-965-class-crashes.patch
 Patch1842: drm-i915-fix-edp-panels.patch
+Patch1843: drm-i915-fix-hibernate-memory-corruption.patch
 
 Patch2100: linux-2.6-phylib-autoload.patch
 
@@ -801,7 +802,6 @@ Patch2907: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
 # fs fixes
 Patch3000: linux-2.6-btrfs-update.patch
-Patch3001: btrfs-should-add-permission-check-for-setfacl.patch
 Patch3002: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
 
 Patch3010: writeback-fix-wb-sync-none-writeback-from-umount.patch
@@ -831,9 +831,6 @@ Patch12019: linux-2.6-umh-refactor.patch
 # rhbz#533746
 Patch12021: ssb_check_for_sprom.patch
 
-# backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
-Patch12100: iwlwifi-reset-card-during-probe.patch
-
 # make p54pci usable on slower hardware
 Patch12103: linux-2.6-p54pci.patch
 
@@ -862,9 +859,6 @@ Patch12820: ibmvscsi-fix-DMA-API-misuse.patch
 
 Patch12830: disable-i8042-check-on-apple-mac.patch
 
-# iwlwifi: recalculate average tpt if not current
-Patch12840: iwlwifi-recalculate-average-tpt-if-not-current.patch
-
 Patch12850: crypto-aesni-kill-module_alias.patch
 
 # automatically mount debugfs when perf needs it
@@ -882,17 +876,11 @@ Patch12914: mac80211-do-not-wipe-out-old-supported-rates.patch
 Patch12915: mac80211-explicitly-disable-enable-QoS.patch
 Patch12916: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
-# CVE-2010-1437
-Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
-
 # Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
 Patch13010: rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
-
-# l2tp: fix oops in pppol2tp_xmit (#607054)
-Patch13030: l2tp-fix-oops-in-pppol2tp_xmit.patch
 
 %endif
 
@@ -1385,8 +1373,6 @@ ApplyPatch linux-2.6-execshield.patch
 # btrfs
 ApplyPatch linux-2.6-btrfs-update.patch
 
-# CVE-2010-2071
-ApplyPatch btrfs-should-add-permission-check-for-setfacl.patch
 ApplyPatch btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
 
 
@@ -1543,6 +1529,7 @@ ApplyPatch drm-intel-sdvo-fix-2.patch
 ApplyPatch drm-i915-use-pipe_control-instruction-on-ironlake-and-sandy-bridge.patch
 ApplyPatch drm-i915-fix-non-ironlake-965-class-crashes.patch
 ApplyPatch drm-i915-fix-edp-panels.patch
+ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
 
@@ -1581,9 +1568,6 @@ ApplyPatch alsa-usbmixer-add-possibility-to-remap-dB-values.patch
 # rhbz#533746
 ApplyPatch ssb_check_for_sprom.patch
 
-# backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
-ApplyPatch iwlwifi-reset-card-during-probe.patch
-
 # make p54pci usable on slower hardware
 ApplyPatch linux-2.6-p54pci.patch
 
@@ -1608,9 +1592,6 @@ ApplyPatch ibmvscsi-fix-DMA-API-misuse.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
-# iwlwifi: recalculate average tpt if not current
-ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
-
 ApplyPatch crypto-aesni-kill-module_alias.patch
 
 # automagically mount debugfs for perf
@@ -1629,17 +1610,11 @@ ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
 ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
 ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
-# CVE-2010-1437
-ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
-
 # Disable rt20xx and rt35xx chipset support in rt2800pci and rt2800usb
 ApplyPatch rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
-
-# l2tp: fix oops in pppol2tp_xmit (#607054)
-ApplyPatch l2tp-fix-oops-in-pppol2tp_xmit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2291,6 +2266,31 @@ fi
 # and build.
 
 %changelog
+* Fri Jul 02 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.6-142.rc1
+- nouveau: fix connector ordering issues (rhbz#602492)
+
+* Fri Jul 02 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33.6-141.rc1
+- Linux 2.6.33.6-rc1
+- Drop patches merged upstream:
+    btrfs-should-add-permission-check-for-setfacl.patch (CVE-2010-2071)
+    iwlwifi-reset-card-during-probe.patch
+    iwlwifi-recalculate-average-tpt-if-not-current.patch
+    keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
+    l2tp-fix-oops-in-pppol2tp_xmit.patch
+- Revert DRM patches we already have:
+    drm-edid-fix-1024x768-85hz.patch
+    drm-i915-fix-82854-pci-id-and-treat-it-like-other-85x.patch
+- Fix up usb-wwan-update.patch for upstream additions.
+
+* Fri Jul 02 2010 Dave Airlie <airlied@redhat.com> 2.6.33.5-140
+- attempt to fix hibernate on Intel GPUs (kernel.org #13811)
+
+* Wed Jun 30 2010 Kyle McMartin <kyle@redhat.com>
+- Disable MRST here too.
+
+* Mon Jun 28 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33.5-138
+- ppc64: enable active memory sharing and DLPAR memory remove (#607175)
+
 * Mon Jun 28 2010 Dave Airlie <airlied@redhat.com> 2.6.33.5-137
 - i915: fix edp panels betterer.
 
