@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2079 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2083 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -77,7 +77,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 6
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -882,6 +882,11 @@ Patch13010: rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
+Patch13030: sched-fix-over-scheduling-bug.patch
+Patch13040: ethtool-fix-buffer-overflow.patch
+Patch13050: x86-debug-clear-reserved-bits-of-dr6.patch
+Patch13060: x86-debug-send-sigtrap-for-user-icebp.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1616,6 +1621,16 @@ ApplyPatch rt2x00-rt2800-Make-rt30xx-and-rt35xx-chipsets-configurable.patch
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
+# fix performance problem with CGROUPS
+ApplyPatch sched-fix-over-scheduling-bug.patch
+
+# CVE-2010-2478
+ApplyPatch ethtool-fix-buffer-overflow.patch
+
+# BZ#609548
+ApplyPatch x86-debug-clear-reserved-bits-of-dr6.patch
+ApplyPatch x86-debug-send-sigtrap-for-user-icebp.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2262,10 +2277,24 @@ fi
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
-# plz don't put in a version string unless you're going to tag
-# and build.
 
 %changelog
+* Tue Jul  6 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.33.6.
+
+* Tue Jul 06 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33.6-146
+- x86-debug-send-sigtrap-for-user-icebp.patch,
+  x86-debug-clear-reserved-bits-of-dr6.patch (#609548)
+
+* Tue Jul 06 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33.6-145
+- ethtool-fix-buffer-overflow.patch: ethtool buffer overflow (CVE-2010-2478)
+
+* Tue Jul 06 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33.6-144
+- sched-fix-over-scheduling-bug.patch: fix scheduler bug with CGROUPS
+
+* Tue Jul 06 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.33.6-143
+- Linux 2.6.33.6
+
 * Fri Jul 02 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.33.6-142.rc1
 - nouveau: fix connector ordering issues (rhbz#602492)
 
