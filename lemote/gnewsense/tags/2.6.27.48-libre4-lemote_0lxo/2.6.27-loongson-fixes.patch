@@ -1,0 +1,19 @@
+This is back-ported from 2.6.31, to bring in the assembler-introduced work-arounds
+that avoid CPU lock-ups in certain circumstances.
+
+Index: linux-2.6.27.43-libre3-lemote_0lxo/arch/mips/Makefile
+===================================================================
+--- linux-2.6.27.43-libre3-lemote_0lxo.orig/arch/mips/Makefile	2010-01-09 11:17:35.000000000 +0000
++++ linux-2.6.27.43-libre3-lemote_0lxo/arch/mips/Makefile	2010-01-09 11:18:08.000000000 +0000
+@@ -120,6 +120,11 @@
+ cflags-$(CONFIG_CPU_R4X00)	+= -march=r4600 -Wa,--trap
+ cflags-$(CONFIG_CPU_TX49XX)	+= -march=r4600 -Wa,--trap
+ cflags-$(CONFIG_CPU_LOONGSON2)	+= -march=r4600 -Wa,--trap
++cflags-$(CONFIG_MACH_LM2F) += \
++	$(call cc-option,-march=loongson2f,-march=r4600) \
++	$(call as-option,-Wa$(comma)-mfix-ls2f-kernel,) \
++	$(call as-option,-Wa$(comma)-mfix-loongson2f-nop,) \
++	$(call as-option,-Wa$(comma)-mfix-loongson2f-jump,)
+ cflags-$(CONFIG_CPU_MIPS32_R1)	+= $(call cc-option,-march=mips32,-mips32 -U_MIPS_ISA -D_MIPS_ISA=_MIPS_ISA_MIPS32) \
+ 			-Wa,-mips32 -Wa,--trap
+ cflags-$(CONFIG_CPU_MIPS32_R2)	+= $(call cc-option,-march=mips32r2,-mips32r2 -U_MIPS_ISA -D_MIPS_ISA=_MIPS_ISA_MIPS32) \
