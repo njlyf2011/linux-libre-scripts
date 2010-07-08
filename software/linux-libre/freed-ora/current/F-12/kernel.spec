@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2096 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2102 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 16
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -717,10 +717,11 @@ Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch670: linux-2.6-ata-quirk.patch
 
-Patch680: linux-2.6-wireless_-report-reasonable-bitrate-for-MCS-rates-through-wext.patch
-
-Patch700: linux-2.6.31-nx-data.patch
-Patch701: linux-2.6.31-modules-ro-nx.patch
+Patch701: sky2-optima-add-register-definitions.patch
+Patch702: sky2-optima-support.patch
+Patch703: sky2-optima-fix-tcp-offload.patch
+Patch704: sky2-optima-print-chip-name.patch
+Patch705: sky2-optima-add-missing-write-bits.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -738,7 +739,6 @@ Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 # nouveau + drm fixes
 Patch1810: drm-upgrayedd.patch
-Patch1811: drm-upgrayed-fixes.patch
 Patch1813: drm-radeon-pm.patch
 #Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -790,8 +790,6 @@ Patch3051: linux-2.6-nfs4-callback-hidden.patch
 # btrfs
 Patch3100: linux-2.6-btrfs-fix-acl.patch
 Patch3101: btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
-Patch3102: btrfs-should-add-permission-check-for-setfacl.patch
-
 
 # XFS
 
@@ -828,7 +826,6 @@ Patch12380: ssb_check_for_sprom.patch
 Patch12391: iwlwifi-reset-card-during-probe.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
-Patch12401: iwlwifi_-check-for-aggregation-frame-and-queue.patch
 Patch12404: iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 Patch12405: iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 Patch12406: iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
@@ -852,22 +849,19 @@ Patch12911: iwlwifi-fix-internal-scan-race.patch
 # iwlwifi: recover_from_tx_stall
 Patch12912: iwlwifi-recover_from_tx_stall.patch
 
-# iwlwifi: recalculate average tpt if not current
-Patch12920: iwlwifi-recalculate-average-tpt-if-not-current.patch
-
 Patch12921: iwlwifi-manage-QoS-by-mac-stack.patch
 Patch12922: mac80211-do-not-wipe-out-old-supported-rates.patch
 Patch12923: mac80211-explicitly-disable-enable-QoS.patch
 Patch12924: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
-# CVE-2010-1437
-Patch13000: keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
-
-# iwlwifi: update supported PCI_ID list for 5xx0 series
-Patch13010: iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
-
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
+
+# l2tp: fix oops in pppol2tp_xmit (#607054)
+Patch13030: l2tp-fix-oops-in-pppol2tp_xmit.patch
+
+Patch14000: sched-fix-over-scheduling-bug.patch
+Patch14010: ethtool-fix-buffer-overflow.patch
 
 # ==============================================================================
 %endif
@@ -1367,9 +1361,7 @@ ApplyPatch linux-2.6-execshield.patch
 
 # btrfs
 ApplyPatch linux-2.6-btrfs-fix-acl.patch
-ApplyPatch btrfs-should-add-permission-check-for-setfacl.patch
 ApplyPatch btrfs-prohibit-a-operation-of-changing-acls-mask-when-noacl-mount-option-is-used.patch
-
 
 # eCryptfs
 
@@ -1424,6 +1416,11 @@ ApplyPatch linux-2.6-defaults-alsa-hda-beep-off.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
+ApplyPatch sky2-optima-add-register-definitions.patch
+ApplyPatch sky2-optima-support.patch
+ApplyPatch sky2-optima-fix-tcp-offload.patch
+ApplyPatch sky2-optima-print-chip-name.patch
+ApplyPatch sky2-optima-add-missing-write-bits.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1465,14 +1462,6 @@ ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 # ia64 ata quirk
 ApplyPatch linux-2.6-ata-quirk.patch
 
-# Report meaningful values for MCS rates through wireless extensions
-ApplyPatch linux-2.6-wireless_-report-reasonable-bitrate-for-MCS-rates-through-wext.patch
-
-# Mark kernel data as NX
-#ApplyPatch linux-2.6.31-nx-data.patch
-# Apply NX/RO to modules
-#ApplyPatch linux-2.6.31-modules-ro-nx.patch
-
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
@@ -1502,7 +1491,6 @@ ApplyPatch linux-2.6-phylib-autoload.patch
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
-ApplyPatch drm-upgrayed-fixes.patch
 #ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1555,7 +1543,6 @@ ApplyPatch ssb_check_for_sprom.patch
 ApplyPatch iwlwifi-reset-card-during-probe.patch
 
 # patches from Intel to address intermittent firmware failures with iwlagn
-ApplyPatch iwlwifi_-check-for-aggregation-frame-and-queue.patch
 ApplyPatch iwlwifi_-add-function-to-reset_tune-radio-if-needed.patch
 ApplyPatch iwlwifi_-Logic-to-control-how-frequent-radio-should-be-reset-if-needed.patch
 ApplyPatch iwlwifi_-Tune-radio-to-prevent-unexpected-behavior.patch
@@ -1579,23 +1566,23 @@ ApplyPatch iwlwifi-fix-internal-scan-race.patch
 # iwlwifi: recover_from_tx_stall
 ApplyPatch iwlwifi-recover_from_tx_stall.patch
 
-# iwlwifi: recalculate average tpt if not current
-ApplyPatch iwlwifi-recalculate-average-tpt-if-not-current.patch
-
 # mac80211/iwlwifi fix connections to some APs (rhbz#558002)
 ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
 ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
 ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
 ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
 
-# CVE-2010-1437
-ApplyPatch keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
-
-# iwlwifi: update supported PCI_ID list for 5xx0 series
-ApplyPatch iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
-
 # iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
 ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
+
+# l2tp: fix oops in pppol2tp_xmit (#607054)
+ApplyPatch l2tp-fix-oops-in-pppol2tp_xmit.patch
+
+# fix performance problem with CGROUPS
+ApplyPatch sched-fix-over-scheduling-bug.patch
+
+# CVE-2010-2478
+ApplyPatch ethtool-fix-buffer-overflow.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2245,12 +2232,39 @@ fi
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
-# plz don't put in a version string unless you're going to tag
-# and build.
-
-
-
 %changelog
+* Tue Jul  6 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.16.
+
+* Tue Jul 06 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.32.16-140
+- ethtool-fix-buffer-overflow.patch: ethtool buffer overflow (CVE-2010-2478)
+- sched-fix-over-scheduling-bug.patch: fix scheduler bug with CGROUPS
+
+* Tue Jul 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-139
+- Linux 2.6.32.16
+
+* Fri Jul 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-138.rc1
+- Linux 2.6.32.16-rc1
+- Drop patches merged upstream:
+    btrfs-should-add-permission-check-for-setfacl.patch
+    linux-2.6-wireless_-report-reasonable-bitrate-for-MCS-rates-through-wext.patch
+    drm-upgrayed-fixes.patch
+    iwlwifi_-check-for-aggregation-frame-and-queue.patch
+    iwlwifi-recalculate-average-tpt-if-not-current.patch
+    iwlwifi-update-supported-PCI_ID-list-for-5xx0-series.patch
+    keys-find-keyring-by-name-can-gain-access-to-the-freed-keyring.patch
+- Fix up wireless patches and usb-wwan-update.patch to apply on 2.6.32.16
+
+* Thu Jul 01 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.15-137
+- Linux 2.6.32.15
+
+* Mon Jun 28 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.14-136
+- Drop unused ro-nx patches.
+- Add support for sky2 Optima chip.
+
+* Wed Jun 23 2010 Kyle McMartin <kyle@redhat.com>  2.6.32.14-135
+- l2tp: fix oops in pppol2tp_xmit (rhbz#607054)
+
 * Tue Jun 15 2010 Kyle McMartin <kyle@redhat.com>  2.6.32.14-134
 - Fix btrfs ACL fixes... commit 431547b3c4533b8c7fd150ab36980b9a3147797b
   changed them to take a struct dentry instead of struct inode after
