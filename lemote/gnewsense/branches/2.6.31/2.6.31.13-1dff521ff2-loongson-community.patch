@@ -2932,14 +2932,14 @@ index 786a9bc..0000000
 -CONFIG_HAS_DMA=y
 diff --git a/arch/mips/configs/fuloong2e_defconfig b/arch/mips/configs/fuloong2e_defconfig
 new file mode 100644
-index 0000000..b3221ff
+index 0000000..e3f84b7
 --- /dev/null
 +++ b/arch/mips/configs/fuloong2e_defconfig
-@@ -0,0 +1,1844 @@
+@@ -0,0 +1,1842 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.31.6
-+# Mon Nov 30 17:07:44 2009
++# Linux kernel version: 2.6.31.13
++# Tue May 25 10:13:16 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -3073,7 +3073,6 @@ index 0000000..b3221ff
 +CONFIG_GENERIC_IRQ_PROBE=y
 +CONFIG_CPU_SUPPORTS_HIGHMEM=y
 +CONFIG_SYS_SUPPORTS_HIGHMEM=y
-+CONFIG_ARCH_FLATMEM_ENABLE=y
 +CONFIG_ARCH_POPULATES_NODE_MAP=y
 +CONFIG_SELECT_MEMORY_MODEL=y
 +# CONFIG_FLATMEM_MANUAL is not set
@@ -3154,8 +3153,7 @@ index 0000000..b3221ff
 +CONFIG_LOG_BUF_SHIFT=14
 +# CONFIG_GROUP_SCHED is not set
 +# CONFIG_CGROUPS is not set
-+CONFIG_SYSFS_DEPRECATED=y
-+CONFIG_SYSFS_DEPRECATED_V2=y
++# CONFIG_SYSFS_DEPRECATED_V2 is not set
 +# CONFIG_RELAY is not set
 +CONFIG_NAMESPACES=y
 +# CONFIG_UTS_NS is not set
@@ -4782,14 +4780,14 @@ index 0000000..b3221ff
 +CONFIG_NLATTR=y
 diff --git a/arch/mips/configs/fuloong2f_defconfig b/arch/mips/configs/fuloong2f_defconfig
 new file mode 100644
-index 0000000..f2034cb
+index 0000000..e89becb
 --- /dev/null
 +++ b/arch/mips/configs/fuloong2f_defconfig
-@@ -0,0 +1,1768 @@
+@@ -0,0 +1,1766 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.31.6
-+# Sun Nov 29 22:12:56 2009
++# Linux kernel version: 2.6.31.13
++# Tue May 25 10:12:53 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -4925,7 +4923,6 @@ index 0000000..f2034cb
 +CONFIG_GENERIC_IRQ_PROBE=y
 +CONFIG_CPU_SUPPORTS_HIGHMEM=y
 +CONFIG_SYS_SUPPORTS_HIGHMEM=y
-+CONFIG_ARCH_FLATMEM_ENABLE=y
 +CONFIG_ARCH_POPULATES_NODE_MAP=y
 +CONFIG_SELECT_MEMORY_MODEL=y
 +# CONFIG_FLATMEM_MANUAL is not set
@@ -5005,8 +5002,7 @@ index 0000000..f2034cb
 +CONFIG_LOG_BUF_SHIFT=15
 +# CONFIG_GROUP_SCHED is not set
 +# CONFIG_CGROUPS is not set
-+CONFIG_SYSFS_DEPRECATED=y
-+CONFIG_SYSFS_DEPRECATED_V2=y
++# CONFIG_SYSFS_DEPRECATED_V2 is not set
 +# CONFIG_RELAY is not set
 +# CONFIG_NAMESPACES is not set
 +CONFIG_BLK_DEV_INITRD=y
@@ -6556,14 +6552,14 @@ index 0000000..f2034cb
 +CONFIG_NLATTR=y
 diff --git a/arch/mips/configs/fuloong2f_unas_defconfig b/arch/mips/configs/fuloong2f_unas_defconfig
 new file mode 100644
-index 0000000..e56dfc4
+index 0000000..71c8a0f
 --- /dev/null
 +++ b/arch/mips/configs/fuloong2f_unas_defconfig
-@@ -0,0 +1,1819 @@
+@@ -0,0 +1,1825 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.30.5
-+# Mon Sep  7 20:40:17 2009
++# Linux kernel version: 2.6.31.13
++# Tue May 25 10:13:36 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -6571,6 +6567,7 @@ index 0000000..e56dfc4
 +# Machine selection
 +#
 +# CONFIG_MACH_ALCHEMY is not set
++# CONFIG_AR7 is not set
 +# CONFIG_BASLER_EXCITE is not set
 +# CONFIG_BCM47XX is not set
 +# CONFIG_MIPS_COBALT is not set
@@ -6607,15 +6604,17 @@ index 0000000..e56dfc4
 +# CONFIG_WR_PPMC is not set
 +# CONFIG_CAVIUM_OCTEON_SIMULATOR is not set
 +# CONFIG_CAVIUM_OCTEON_REFERENCE_BOARD is not set
++# CONFIG_ALCHEMY_GPIO_INDIRECT is not set
 +CONFIG_ARCH_SPARSEMEM_ENABLE=y
 +# CONFIG_LEMOTE_FULOONG2E is not set
 +CONFIG_LEMOTE_FULOONG2F=y
 +# CONFIG_LEMOTE_YEELOONG2F is not set
 +CONFIG_CS5536=y
-+CONFIG_CS5536_I2C=y
 +CONFIG_CS5536_MFGPT=y
 +CONFIG_UCA_SIZE=0x2000000
++CONFIG_SYS_HAS_MACH_PROM_INIT_CMDLINE=y
 +CONFIG_LEMOTE_FL2FNAS=y
++# CONFIG_LEMOTE_LYNLOONG2F is not set
 +CONFIG_RWSEM_GENERIC_SPINLOCK=y
 +# CONFIG_ARCH_HAS_ILOG2_U32 is not set
 +# CONFIG_ARCH_HAS_ILOG2_U64 is not set
@@ -6632,7 +6631,6 @@ index 0000000..e56dfc4
 +CONFIG_DMA_NEED_PCI_MAP_STATE=y
 +CONFIG_EARLY_PRINTK=y
 +CONFIG_SYS_HAS_EARLY_PRINTK=y
-+# CONFIG_HOTPLUG_CPU is not set
 +CONFIG_I8259=y
 +# CONFIG_NO_IOPORT is not set
 +CONFIG_GENERIC_ISA_DMA=y
@@ -6697,7 +6695,6 @@ index 0000000..e56dfc4
 +CONFIG_GENERIC_IRQ_PROBE=y
 +CONFIG_CPU_SUPPORTS_HIGHMEM=y
 +CONFIG_SYS_SUPPORTS_HIGHMEM=y
-+CONFIG_ARCH_FLATMEM_ENABLE=y
 +CONFIG_ARCH_POPULATES_NODE_MAP=y
 +CONFIG_SELECT_MEMORY_MODEL=y
 +# CONFIG_FLATMEM_MANUAL is not set
@@ -6711,7 +6708,6 @@ index 0000000..e56dfc4
 +CONFIG_PHYS_ADDR_T_64BIT=y
 +CONFIG_ZONE_DMA_FLAG=0
 +CONFIG_VIRT_TO_BUS=y
-+CONFIG_UNEVICTABLE_LRU=y
 +CONFIG_HAVE_MLOCK=y
 +CONFIG_HAVE_MLOCKED_PAGE_BIT=y
 +CONFIG_DEFAULT_MMAP_MIN_ADDR=4096
@@ -6736,6 +6732,7 @@ index 0000000..e56dfc4
 +CONFIG_LOCKDEP_SUPPORT=y
 +CONFIG_STACKTRACE_SUPPORT=y
 +CONFIG_DEFCONFIG_LIST="/lib/modules/$UNAME_RELEASE/.config"
++CONFIG_CONSTRUCTORS=y
 +
 +#
 +# General setup
@@ -6785,8 +6782,7 @@ index 0000000..e56dfc4
 +# CONFIG_CPUSETS is not set
 +# CONFIG_CGROUP_CPUACCT is not set
 +# CONFIG_RESOURCE_COUNTERS is not set
-+CONFIG_SYSFS_DEPRECATED=y
-+CONFIG_SYSFS_DEPRECATED_V2=y
++# CONFIG_SYSFS_DEPRECATED_V2 is not set
 +CONFIG_RELAY=y
 +CONFIG_NAMESPACES=y
 +CONFIG_UTS_NS=y
@@ -6806,7 +6802,6 @@ index 0000000..e56dfc4
 +CONFIG_SYSCTL_SYSCALL=y
 +CONFIG_KALLSYMS=y
 +# CONFIG_KALLSYMS_EXTRA_PASS is not set
-+# CONFIG_STRIP_ASM_SYMS is not set
 +CONFIG_HOTPLUG=y
 +CONFIG_PRINTK=y
 +CONFIG_BUG=y
@@ -6820,9 +6815,14 @@ index 0000000..e56dfc4
 +CONFIG_EVENTFD=y
 +CONFIG_SHMEM=y
 +CONFIG_AIO=y
++
++#
++# Performance Counters
++#
 +CONFIG_VM_EVENT_COUNTERS=y
 +CONFIG_PCI_QUIRKS=y
 +CONFIG_SLUB_DEBUG=y
++# CONFIG_STRIP_ASM_SYMS is not set
 +CONFIG_COMPAT_BRK=y
 +# CONFIG_SLAB is not set
 +CONFIG_SLUB=y
@@ -6832,8 +6832,13 @@ index 0000000..e56dfc4
 +# CONFIG_OPROFILE is not set
 +CONFIG_HAVE_OPROFILE=y
 +CONFIG_HAVE_SYSCALL_WRAPPERS=y
++
++#
++# GCOV-based kernel profiling
++#
++# CONFIG_GCOV_KERNEL is not set
 +CONFIG_SLOW_WORK=y
-+# CONFIG_HAVE_GENERIC_DMA_COHERENT is not set
++CONFIG_HAVE_GENERIC_DMA_COHERENT=y
 +CONFIG_SLABINFO=y
 +CONFIG_RT_MUTEXES=y
 +CONFIG_BASE_SMALL=0
@@ -7047,6 +7052,7 @@ index 0000000..e56dfc4
 +CONFIG_NETFILTER_XT_MATCH_TCPMSS=m
 +# CONFIG_NETFILTER_XT_MATCH_TIME is not set
 +# CONFIG_NETFILTER_XT_MATCH_U32 is not set
++# CONFIG_NETFILTER_XT_MATCH_OSF is not set
 +# CONFIG_IP_VS is not set
 +
 +#
@@ -7110,6 +7116,7 @@ index 0000000..e56dfc4
 +# CONFIG_ECONET is not set
 +# CONFIG_WAN_ROUTER is not set
 +# CONFIG_PHONET is not set
++# CONFIG_IEEE802154 is not set
 +# CONFIG_NET_SCHED is not set
 +CONFIG_NET_CLS_ROUTE=y
 +# CONFIG_DCB is not set
@@ -7271,10 +7278,6 @@ index 0000000..e56dfc4
 +CONFIG_BLK_DEV_SR_VENDOR=y
 +CONFIG_CHR_DEV_SG=m
 +CONFIG_CHR_DEV_SCH=m
-+
-+#
-+# Some SCSI devices (e.g. CD jukebox) support multiple LUNs
-+#
 +CONFIG_SCSI_MULTI_LUN=y
 +CONFIG_SCSI_CONSTANTS=y
 +CONFIG_SCSI_LOGGING=y
@@ -7291,6 +7294,7 @@ index 0000000..e56dfc4
 +CONFIG_SCSI_SRP_ATTRS=m
 +CONFIG_SCSI_LOWLEVEL=y
 +CONFIG_ISCSI_TCP=m
++# CONFIG_SCSI_BNX2_ISCSI is not set
 +# CONFIG_BLK_DEV_3W_XXXX_RAID is not set
 +# CONFIG_SCSI_3W_9XXX is not set
 +# CONFIG_SCSI_ACARD is not set
@@ -7299,6 +7303,7 @@ index 0000000..e56dfc4
 +# CONFIG_SCSI_AIC7XXX_OLD is not set
 +# CONFIG_SCSI_AIC79XX is not set
 +# CONFIG_SCSI_AIC94XX is not set
++# CONFIG_SCSI_MVSAS is not set
 +# CONFIG_SCSI_DPT_I2O is not set
 +# CONFIG_SCSI_ADVANSYS is not set
 +# CONFIG_SCSI_IN2000 is not set
@@ -7319,7 +7324,6 @@ index 0000000..e56dfc4
 +# CONFIG_SCSI_IPS is not set
 +# CONFIG_SCSI_INITIO is not set
 +# CONFIG_SCSI_INIA100 is not set
-+# CONFIG_SCSI_MVSAS is not set
 +# CONFIG_SCSI_NCR53C406A is not set
 +# CONFIG_SCSI_STEX is not set
 +# CONFIG_SCSI_SYM53C8XX_2 is not set
@@ -7416,8 +7420,11 @@ index 0000000..e56dfc4
 +# CONFIG_DM_CRYPT is not set
 +CONFIG_DM_SNAPSHOT=m
 +CONFIG_DM_MIRROR=m
++# CONFIG_DM_LOG_USERSPACE is not set
 +CONFIG_DM_ZERO=m
 +CONFIG_DM_MULTIPATH=m
++# CONFIG_DM_MULTIPATH_QL is not set
++# CONFIG_DM_MULTIPATH_ST is not set
 +# CONFIG_DM_DELAY is not set
 +# CONFIG_DM_UEVENT is not set
 +# CONFIG_FUSION is not set
@@ -7427,13 +7434,16 @@ index 0000000..e56dfc4
 +#
 +
 +#
-+# Enable only one of the two stacks, unless you know what you are doing
++# You can enable one or both FireWire driver stacks.
++#
++
++#
++# See the help texts for more information.
 +#
 +# CONFIG_FIREWIRE is not set
 +# CONFIG_IEEE1394 is not set
 +# CONFIG_I2O is not set
 +CONFIG_NETDEVICES=y
-+CONFIG_COMPAT_NET_DEV_OPS=y
 +# CONFIG_DUMMY is not set
 +# CONFIG_BONDING is not set
 +# CONFIG_MACVLAN is not set
@@ -7462,6 +7472,7 @@ index 0000000..e56dfc4
 +# CONFIG_VIA_VELOCITY is not set
 +# CONFIG_TIGON3 is not set
 +# CONFIG_BNX2 is not set
++# CONFIG_CNIC is not set
 +# CONFIG_QLA3XXX is not set
 +# CONFIG_ATL1 is not set
 +# CONFIG_ATL1E is not set
@@ -7533,11 +7544,11 @@ index 0000000..e56dfc4
 +#
 +CONFIG_INPUT_KEYBOARD=y
 +CONFIG_KEYBOARD_ATKBD=y
-+CONFIG_KEYBOARD_SUNKBD=m
 +CONFIG_KEYBOARD_LKKBD=m
-+CONFIG_KEYBOARD_XTKBD=m
 +CONFIG_KEYBOARD_NEWTON=m
 +# CONFIG_KEYBOARD_STOWAWAY is not set
++CONFIG_KEYBOARD_SUNKBD=m
++CONFIG_KEYBOARD_XTKBD=m
 +CONFIG_INPUT_MOUSE=y
 +CONFIG_MOUSE_PS2=y
 +CONFIG_MOUSE_PS2_ALPS=y
@@ -7630,6 +7641,11 @@ index 0000000..e56dfc4
 +CONFIG_DEVPORT=y
 +# CONFIG_I2C is not set
 +# CONFIG_SPI is not set
++
++#
++# PPS support
++#
++# CONFIG_PPS is not set
 +# CONFIG_W1 is not set
 +# CONFIG_POWER_SUPPLY is not set
 +# CONFIG_HWMON is not set
@@ -7651,22 +7667,7 @@ index 0000000..e56dfc4
 +# CONFIG_HTC_PASIC3 is not set
 +# CONFIG_MFD_TMIO is not set
 +# CONFIG_REGULATOR is not set
-+
-+#
-+# Multimedia devices
-+#
-+
-+#
-+# Multimedia core support
-+#
-+# CONFIG_VIDEO_DEV is not set
-+# CONFIG_DVB_CORE is not set
-+# CONFIG_VIDEO_MEDIA is not set
-+
-+#
-+# Multimedia drivers
-+#
-+# CONFIG_DAB is not set
++# CONFIG_MEDIA_SUPPORT is not set
 +
 +#
 +# Graphics support
@@ -7710,7 +7711,7 @@ index 0000000..e56dfc4
 +# CONFIG_HID_CHERRY is not set
 +# CONFIG_HID_CHICONY is not set
 +# CONFIG_HID_CYPRESS is not set
-+# CONFIG_DRAGONRISE_FF is not set
++# CONFIG_HID_DRAGONRISE is not set
 +# CONFIG_HID_EZKEY is not set
 +# CONFIG_HID_KYE is not set
 +# CONFIG_HID_GYRATION is not set
@@ -7724,10 +7725,11 @@ index 0000000..e56dfc4
 +# CONFIG_HID_SAMSUNG is not set
 +# CONFIG_HID_SONY is not set
 +# CONFIG_HID_SUNPLUS is not set
-+# CONFIG_GREENASIA_FF is not set
++# CONFIG_HID_GREENASIA is not set
++# CONFIG_HID_SMARTJOYPLUS is not set
 +# CONFIG_HID_TOPSEED is not set
-+# CONFIG_THRUSTMASTER_FF is not set
-+# CONFIG_ZEROPLUS_FF is not set
++# CONFIG_HID_THRUSTMASTER is not set
++# CONFIG_HID_ZEROPLUS is not set
 +CONFIG_USB_SUPPORT=y
 +CONFIG_USB_ARCH_HAS_HCD=y
 +CONFIG_USB_ARCH_HAS_OHCI=y
@@ -7754,6 +7756,7 @@ index 0000000..e56dfc4
 +# USB Host Controller Drivers
 +#
 +# CONFIG_USB_C67X00_HCD is not set
++# CONFIG_USB_XHCI_HCD is not set
 +CONFIG_USB_EHCI_HCD=y
 +CONFIG_USB_EHCI_ROOT_HUB_TT=y
 +# CONFIG_USB_EHCI_TT_NEWSCHED is not set
@@ -7895,8 +7898,9 @@ index 0000000..e56dfc4
 +# CONFIG_USB_GADGET_OMAP is not set
 +# CONFIG_USB_GADGET_PXA25X is not set
 +# CONFIG_USB_GADGET_PXA27X is not set
-+# CONFIG_USB_GADGET_S3C2410 is not set
++# CONFIG_USB_GADGET_S3C_HSOTG is not set
 +# CONFIG_USB_GADGET_IMX is not set
++# CONFIG_USB_GADGET_S3C2410 is not set
 +# CONFIG_USB_GADGET_M66592 is not set
 +CONFIG_USB_GADGET_AMD5536UDC=y
 +CONFIG_USB_AMD5536UDC=m
@@ -7904,9 +7908,11 @@ index 0000000..e56dfc4
 +# CONFIG_USB_GADGET_CI13XXX is not set
 +# CONFIG_USB_GADGET_NET2280 is not set
 +# CONFIG_USB_GADGET_GOKU is not set
++# CONFIG_USB_GADGET_LANGWELL is not set
 +# CONFIG_USB_GADGET_DUMMY_HCD is not set
 +CONFIG_USB_GADGET_DUALSPEED=y
 +# CONFIG_USB_ZERO is not set
++# CONFIG_USB_AUDIO is not set
 +CONFIG_USB_ETH=m
 +CONFIG_USB_ETH_RNDIS=y
 +CONFIG_USB_GADGETFS=m
@@ -7939,6 +7945,8 @@ index 0000000..e56dfc4
 +#
 +# CONFIG_MMC_SDHCI is not set
 +# CONFIG_MMC_TIFM_SD is not set
++# CONFIG_MMC_CB710 is not set
++# CONFIG_MMC_VIA_SDMMC is not set
 +# CONFIG_MEMSTICK is not set
 +# CONFIG_NEW_LEDS is not set
 +# CONFIG_ACCESSIBILITY is not set
@@ -7983,9 +7991,12 @@ index 0000000..e56dfc4
 +# CONFIG_DMADEVICES is not set
 +# CONFIG_AUXDISPLAY is not set
 +# CONFIG_UIO is not set
++
++#
++# TI VLYNQ
++#
 +# CONFIG_STAGING is not set
 +CONFIG_LOONGSON_PLATFORM_DEVICES=y
-+CONFIG_PMON_FLASH=y
 +
 +#
 +# File systems
@@ -8029,6 +8040,7 @@ index 0000000..e56dfc4
 +CONFIG_BTRFS_FS=m
 +# CONFIG_BTRFS_FS_POSIX_ACL is not set
 +CONFIG_FILE_LOCKING=y
++CONFIG_FSNOTIFY=y
 +CONFIG_DNOTIFY=y
 +CONFIG_INOTIFY=y
 +CONFIG_INOTIFY_USER=y
@@ -8042,6 +8054,7 @@ index 0000000..e56dfc4
 +# CONFIG_AUTOFS_FS is not set
 +CONFIG_AUTOFS4_FS=m
 +CONFIG_FUSE_FS=m
++# CONFIG_CUSE is not set
 +
 +#
 +# Caches
@@ -8114,6 +8127,7 @@ index 0000000..e56dfc4
 +CONFIG_NFS_V3=y
 +CONFIG_NFS_V3_ACL=y
 +CONFIG_NFS_V4=y
++# CONFIG_NFS_V4_1 is not set
 +CONFIG_ROOT_NFS=y
 +CONFIG_NFSD=m
 +CONFIG_NFSD_V2_ACL=y
@@ -8223,19 +8237,7 @@ index 0000000..e56dfc4
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 +CONFIG_SYSCTL_SYSCALL_CHECK=y
 +CONFIG_TRACING_SUPPORT=y
-+
-+#
-+# Tracers
-+#
-+# CONFIG_IRQSOFF_TRACER is not set
-+# CONFIG_SCHED_TRACER is not set
-+# CONFIG_CONTEXT_SWITCH_TRACER is not set
-+# CONFIG_EVENT_TRACER is not set
-+# CONFIG_BOOT_TRACER is not set
-+# CONFIG_TRACE_BRANCH_PROFILING is not set
-+# CONFIG_KMEMTRACE is not set
-+# CONFIG_WORKQUEUE_TRACER is not set
-+# CONFIG_BLK_DEV_IO_TRACE is not set
++# CONFIG_FTRACE is not set
 +# CONFIG_DYNAMIC_DEBUG is not set
 +# CONFIG_SAMPLES is not set
 +CONFIG_HAVE_ARCH_KGDB=y
@@ -8381,14 +8383,14 @@ index 0000000..e56dfc4
 +CONFIG_NLATTR=y
 diff --git a/arch/mips/configs/yeeloong2f_defconfig b/arch/mips/configs/yeeloong2f_defconfig
 new file mode 100644
-index 0000000..68e38d7
+index 0000000..c5b0fcc
 --- /dev/null
 +++ b/arch/mips/configs/yeeloong2f_defconfig
-@@ -0,0 +1,2020 @@
+@@ -0,0 +1,2019 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.31.6
-+# Thu Dec  3 08:52:05 2009
++# Linux kernel version: 2.6.31.13
++# Tue May 25 10:08:50 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -8602,8 +8604,7 @@ index 0000000..68e38d7
 +CONFIG_LOG_BUF_SHIFT=15
 +# CONFIG_GROUP_SCHED is not set
 +# CONFIG_CGROUPS is not set
-+CONFIG_SYSFS_DEPRECATED=y
-+CONFIG_SYSFS_DEPRECATED_V2=y
++# CONFIG_SYSFS_DEPRECATED_V2 is not set
 +# CONFIG_RELAY is not set
 +# CONFIG_NAMESPACES is not set
 +CONFIG_BLK_DEV_INITRD=y
