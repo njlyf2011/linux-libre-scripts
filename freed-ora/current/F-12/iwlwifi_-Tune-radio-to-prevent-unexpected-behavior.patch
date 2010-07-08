@@ -85,9 +85,9 @@ diff -up linux-2.6.32.noarch/drivers/net/wireless/iwlwifi/iwl-5000.c.orig linux-
  
  struct iwl_cfg iwl5100_abg_cfg = {
 @@ -1706,6 +1708,7 @@ struct iwl_cfg iwl5100_abg_cfg = {
+ 	.valid_tx_ant = ANT_B,
  	.valid_rx_ant = ANT_AB,
  	.need_pll_cfg = true,
- 	.ht_greenfield_support = true,
 +	.plcp_delta_threshold = IWL_MAX_PLCP_ERR_LONG_THRESHOLD_DEF,
  };
  
