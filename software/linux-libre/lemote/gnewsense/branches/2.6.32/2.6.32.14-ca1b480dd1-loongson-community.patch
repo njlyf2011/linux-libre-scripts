@@ -1,7 +1,5 @@
-Dropped change for include/linux/module.h, already in 2.6.32.14.
-
 diff --git a/Makefile b/Makefile
-index 801d0e1..cb91e6e 100644
+index 47866f8..e0c4dc7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
