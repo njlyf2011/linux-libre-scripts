@@ -1,5 +1,5 @@
 # Makefile for source rpm: kernel
-# $Id: Makefile,v 1.123 2010/01/18 23:53:28 davej Exp $
+# $Id: Makefile,v 1.124 2010/07/09 09:09:09 cebbert Exp $
 NAME     := kernel
 SPECFILE := kernel.spec
 
@@ -51,6 +51,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_DEBUG_RWSEMS is not set/CONFIG_DEBUG_RWSEMS=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_LOCK_ALLOC is not set/CONFIG_DEBUG_LOCK_ALLOC=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_PROVE_LOCKING is not set/CONFIG_PROVE_LOCKING=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_PROVE_RCU is not set/CONFIG_PROVE_RCU=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_SPINLOCK is not set/CONFIG_DEBUG_SPINLOCK=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_VM is not set/CONFIG_DEBUG_VM=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_SLEEP_IN_IRQ is not set/CONFIG_DEBUG_SLEEP_IN_IRQ=y/' config-nodebug
@@ -73,6 +74,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_DEBUG_NOTIFIERS is not set/CONFIG_DEBUG_NOTIFIERS=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DMA_API_DEBUG is not set/CONFIG_DMA_API_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_PM_TEST_SUSPEND is not set/CONFIG_PM_TEST_SUSPEND=y/' config-generic
+	@perl -pi -e 's/# CONFIG_PM_ADVANCED_DEBUG is not set/CONFIG_PM_ADVANCED_DEBUG=y/' config-generic
 	@perl -pi -e 's/# CONFIG_BOOT_TRACER is not set/CONFIG_BOOT_TRACER=y/' config-generic
 	@perl -pi -e 's/# CONFIG_B43_DEBUG is not set/CONFIG_B43_DEBUG=y/' config-generic
 	@perl -pi -e 's/# CONFIG_B43LEGACY_DEBUG is not set/CONFIG_B43LEGACY_DEBUG=y/' config-generic
@@ -84,15 +86,16 @@ debug:
 	@perl -pi -e 's/# CONFIG_EXT4_DEBUG is not set/CONFIG_EXT4_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/CONFIG_DEBUG_PERF_USE_VMALLOC=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_JBD2_DEBUG is not set/CONFIG_JBD2_DEBUG=y/' config-nodebug
-	@perl -pi -e 's/# CONFIG_FUNCTION_TRACER is not set/CONFIG_FUNCTION_TRACER=y/' config-nodebug
-	@perl -pi -e 's/# CONFIG_STACK_TRACER is not set/CONFIG_STACK_TRACER=y/' config-nodebug
-	@perl -pi -e 's/# CONFIG_DYNAMIC_FTRACE is not set/CONFIG_DYNAMIC_FTRACE=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_CFQ_IOSCHED is not set/CONFIG_DEBUG_CFQ_IOSCHED=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DRBD_FAULT_INJECTION is not set/CONFIG_DRBD_FAULT_INJECTION=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_ATH_DEBUG is not set/CONFIG_ATH_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_IWLWIFI_DEVICE_TRACING is not set/CONFIG_IWLWIFI_DEVICE_TRACING=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_OBJECTS_WORK is not set/CONFIG_DEBUG_OBJECTS_WORK=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_STRICT_USER_COPY_CHECKS is not set/CONFIG_DEBUG_STRICT_USER_COPY_CHECKS=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DMADEVICES_DEBUG is not set/CONFIG_DMADEVICES_DEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DMADEVICES_VDEBUG is not set/CONFIG_DMADEVICES_VDEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_CEPH_FS_PRETTYDEBUG is not set/CONFIG_CEPH_FS_PRETTYDEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_QUOTA_DEBUG is not set/CONFIG_QUOTA_DEBUG=y/' config-nodebug
 
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
@@ -112,6 +115,7 @@ release:
 	@perl -pi -e 's/CONFIG_DEBUG_RWSEMS=y/# CONFIG_DEBUG_RWSEMS is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_LOCK_ALLOC=y/# CONFIG_DEBUG_LOCK_ALLOC is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_PROVE_LOCKING=y/# CONFIG_PROVE_LOCKING is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_PROVE_RCU=y/# CONFIG_PROVE_RCU is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_SPINLOCK=y/# CONFIG_DEBUG_SPINLOCK is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_VM=y/# CONFIG_DEBUG_VM is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_SLEEP_IN_IRQ=y/# CONFIG_DEBUG_SLEEP_IN_IRQ is not set/' config-nodebug
@@ -134,6 +138,7 @@ release:
 	@perl -pi -e 's/CONFIG_DEBUG_NOTIFIERS=y/# CONFIG_DEBUG_NOTIFIERS is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DMA_API_DEBUG=y/# CONFIG_DMA_API_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_PM_TEST_SUSPEND=y/#\ CONFIG_PM_TEST_SUSPEND\ is\ not\ set/' config-generic
+	@perl -pi -e 's/CONFIG_PM_ADVANCED_DEBUG=y/#\ CONFIG_PM_ADVANCED_DEBUG\ is\ not\ set/' config-generic
 	@perl -pi -e 's/CONFIG_BOOT_TRACER=y/#\ CONFIG_BOOT_TRACER\ is\ not\ set/' config-generic
 	@perl -pi -e 's/CONFIG_B43_DEBUG=y/# CONFIG_B43_DEBUG is not set/' config-generic
 	@perl -pi -e 's/CONFIG_B43LEGACY_DEBUG=y/# CONFIG_B43LEGACY_DEBUG is not set/' config-generic
@@ -145,15 +150,16 @@ release:
 	@perl -pi -e 's/CONFIG_EXT4_DEBUG=y/# CONFIG_EXT4_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_PERF_USE_VMALLOC=y/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_JBD2_DEBUG=y/# CONFIG_JBD2_DEBUG is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_FUNCTION_TRACER=y/# CONFIG_FUNCTION_TRACER is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_STACK_TRACER=y/# CONFIG_STACK_TRACER is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_DYNAMIC_FTRACE=y/# CONFIG_DYNAMIC_FTRACE is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_CFQ_IOSCHED=y/# CONFIG_DEBUG_CFQ_IOSCHED is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DRBD_FAULT_INJECTION=y/# CONFIG_DRBD_FAULT_INJECTION is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_ATH_DEBUG=y/# CONFIG_ATH_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_IWLWIFI_DEVICE_TRACING=y/# CONFIG_IWLWIFI_DEVICE_TRACING is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_OBJECTS_WORK=y/# CONFIG_DEBUG_OBJECTS_WORK is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_STRICT_USER_COPY_CHECKS=y/# CONFIG_DEBUG_STRICT_USER_COPY_CHECKS is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_DMADEVICES_DEBUG=y/# CONFIG_DMADEVICES_DEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_DMADEVICES_VDEBUG=y/# CONFIG_DMADEVICES_VDEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_CEPH_FS_PRETTYDEBUG=y/# CONFIG_CEPH_FS_PRETTYDEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_QUOTA_DEBUG=y/# CONFIG_QUOTA_DEBUG is not set/' config-nodebug
 
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug

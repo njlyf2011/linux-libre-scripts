@@ -45,7 +45,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.33 extra=
+kver=2.6.34 extra=
 
 case $1 in
 --force)
@@ -448,7 +448,6 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/char/Makefile
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
 reject_firmware drivers/gpu/drm/nouveau/nouveau_grctx.c
 clean_blob drivers/gpu/drm/nouveau/nouveau_grctx.c
-clean_blob drivers/gpu/drm/nouveau/nv50_graph.c
 clean_kconfig drivers/gpu/drk/nouveau/Kconfig 'DRM_NOUVEAU'
 clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
 
@@ -521,6 +520,7 @@ undefault_firmware 'XC\(2028\|3028L\)' \
   drivers/media/video/cx18/cx18-driver.c \
   drivers/media/video/cx18/cx18-dvb.c \
   drivers/media/video/cx23885/cx23885-dvb.c \
+  drivers/media/video/cx23885/cx23885-video.c \
   drivers/media/video/cx88/cx88-dvb.c \
   drivers/media/video/cx88/cx88-cards.c \
   drivers/media/video/em28xx/em28xx-cards.c \
@@ -574,6 +574,11 @@ announce DVB_USB_AF9015 - "Afatech AF9015 DVB-T USB2.0 support"
 clean_blob drivers/media/dvb/dvb-usb/af9015.c
 clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_AF9015'
 clean_mk CONFIG_DVB_USB_AF9015 drivers/media/dvb/dvb-usb/Makefile
+
+announce DVB_USB_AZ6027 - "Azurewave DVB-S/S2 USB2.0 AZ6027 support"
+clean_blob drivers/media/dvb/dvb-usb/az6027.c
+clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_AZ6027'
+clean_mk CONFIG_DVB_USB_AZ6027 drivers/media/dvb/dvb-usb/Makefile
 
 announce DVB_USB_CXUSB - "Conexant USB2.0 hybrid reference design support"
 clean_blob drivers/media/dvb/dvb-usb/cxusb.c
@@ -780,6 +785,12 @@ clean_blob drivers/media/dvb/frontends/drx397xD_fw.h
 clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_DRX397XD'
 clean_mk CONFIG_DVB_DRX397XD drivers/media/dvb/frontends/Makefile
 
+announce DVB_NGENE - "Micronas nGene support"
+reject_firmware drivers/media/dvb/ngene/ngene-core.c
+clean_blob drivers/media/dvb/ngene/ngene-core.c
+clean_kconfig drivers/media/dvb/ngene/Kconfig 'DVB_NGENE'
+clean_mk CONFIG_DVB_NGENE drivers/media/dvb/ngene/Makefile
+
 announce DVB_PLUTO2 - "Pluto2 cards"
 reject_firmware drivers/media/dvb/pluto2/pluto2.c
 
@@ -891,6 +902,12 @@ clean_blob drivers/media/video/saa7164/saa7164-fw.c
 clean_kconfig drivers/media/video/saa7164/Kconfig 'VIDEO_SAA7164'
 clean_mk CONFIG_VIDEO_SAA7164 drivers/media/video/saa7164/Makefile
 
+announce VIDEO_TLG2300 - "Telegent TLG2300 USB video capture support"
+reject_firmware drivers/media/video/tlg2300/pd-main.c
+clean_blob drivers/media/video/tlg2300/pd-main.c
+clean_kconfig drivers/media/video/tlg2300/Kconfig 'VIDEO_TLG2300'
+clean_mk CONFIG_VIDEO_TLG2300 drivers/media/video/tlg2300/Makefile
+
 announce USB_DABUSB - "DABUSB driver"
 clean_fw firmware/dabusb/bitstream.bin.ihex firmware/dabusb/bitstream.bin
 clean_fw firmware/dabusb/firmware.HEX firmware/dabusb/firmware.fw
@@ -934,10 +951,10 @@ clean_kconfig drivers/net/Kconfig 'ADAPTEC_STARFIRE'
 clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/Makefile
 
 announce BNX2 - "Broadcom NetXtremeII"
-drop_fw_file firmware/bnx2/bnx2-mips-09-5.0.0.j3.fw.ihex firmware/bnx2/bnx2-mips-09-5.0.0.j3.fw
-drop_fw_file firmware/bnx2/bnx2-rv2p-09-5.0.0.j3.fw.ihex firmware/bnx2/bnx2-rv2p-09-5.0.0.j3.fw
-drop_fw_file firmware/bnx2/bnx2-rv2p-09ax-5.0.0.j3.fw.ihex firmware/bnx2/bnx2-rv2p-09ax-5.0.0.j3.fw
-drop_fw_file firmware/bnx2/bnx2-mips-06-5.0.0.j3.fw.ihex firmware/bnx2/bnx2-mips-06-5.0.0.j3.fw
+drop_fw_file firmware/bnx2/bnx2-mips-09-5.0.0.j9.fw.ihex firmware/bnx2/bnx2-mips-09-5.0.0.j9.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-09-5.0.0.j10.fw.ihex firmware/bnx2/bnx2-rv2p-09-5.0.0.j10.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-09ax-5.0.0.j10.fw.ihex firmware/bnx2/bnx2-rv2p-09ax-5.0.0.j10.fw
+drop_fw_file firmware/bnx2/bnx2-mips-06-5.0.0.j6.fw.ihex firmware/bnx2/bnx2-mips-06-5.0.0.j6.fw
 drop_fw_file firmware/bnx2/bnx2-rv2p-06-5.0.0.j3.fw.ihex firmware/bnx2/bnx2-rv2p-06-5.0.0.j3.fw
 reject_firmware drivers/net/bnx2.c
 clean_blob drivers/net/bnx2.c
@@ -945,14 +962,14 @@ clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
 
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
-drop_fw_file firmware/bnx2x-e1-5.2.7.0.fw.ihex firmware/bnx2x-e1-5.2.7.0.fw
-drop_fw_file firmware/bnx2x-e1h-5.2.7.0.fw.ihex firmware/bnx2x-e1h-5.2.7.0.fw
+drop_fw_file firmware/bnx2x-e1-5.2.13.0.fw.ihex firmware/bnx2x-e1-5.2.13.0.fw
+drop_fw_file firmware/bnx2x-e1h-5.2.13.0.fw.ihex firmware/bnx2x-e1h-5.2.13.0.fw
 reject_firmware drivers/net/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
   /^$/i\
 #define bnx2x_init_block(bp, start, end) \\\
-  return (printk(KERN_ERR PFX "%s: Missing Free firmware\\n", bp->dev->name),\\\
+  return (printk(KERN_ERR "%s: Missing Free firmware\\n", bp->dev->name),\\\
 	  -EINVAL)
 }' drivers/net/bnx2x_main.c 'report missing Free firmware'
 clean_blob drivers/net/bnx2x_main.c
@@ -979,6 +996,12 @@ reject_firmware drivers/net/cxgb3/cxgb3_main.c
 clean_blob drivers/net/cxgb3/cxgb3_main.c
 clean_kconfig drivers/net/Kconfig 'CHELSIO_T3'
 clean_mk CONFIG_CHELSIO_T3 drivers/net/cxgb3/Makefile
+
+announce CHELSIO_T4 - "Chelsio Communications T4 Ethernet support"
+reject_firmware drivers/net/cxgb4/cxgb4_main.c
+clean_blob drivers/net/cxgb4/cxgb4_main.c
+clean_kconfig drivers/net/Kconfig 'CHELSIO_T4'
+clean_mk CONFIG_CHELSIO_T4 drivers/net/cxgb4/Makefile
 
 announce E100 - "Intel PRO/100+"
 drop_fw_file firmware/e100/d101m_ucode.bin.ihex firmware/e100/d101m_ucode.bin
@@ -1014,6 +1037,15 @@ clean_blob drivers/net/netxen/netxen_nic.h
 clean_blob drivers/net/netxen/netxen_nic_main.c
 clean_kconfig drivers/net/Kconfig 'NETXEN_NIC'
 clean_mk CONFIG_NETXEN_NIC drivers/net/Makefile
+
+announce QLCNIC - "QLOGIC QLCNIC 1/10Gb Converged Ethernet NIC Support"
+reject_firmware drivers/net/qlcnic/qlcnic.h
+reject_firmware drivers/net/qlcnic/qlcnic_init.c
+reject_firmware drivers/net/qlcnic/qlcnic_main.c
+clean_blob drivers/net/qlcnic/qlcnic.h
+clean_blob drivers/net/qlcnic/qlcnic_main.c
+clean_kconfig drivers/net/Kconfig 'QLCNIC'
+clean_mk CONFIG_QLCNIC drivers/net/qlcnic/Makefile
 
 announce R8169 - "Realtek 8169 gigabit ethernet support"
 clean_sed '
@@ -1411,13 +1443,7 @@ clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
 
 announce RT2860 - "Ralink 2860/3090 wireless support"
-clean_file drivers/staging/rt2860/common/firmware.h
-clean_file drivers/staging/rt2860/common/firmware_3070.h
-clean_file drivers/staging/rt3090/firmware.h
-clean_sed '
-/^int RtmpAsicLoadFirmware(/,/^}$/{
-  s/^\(	*\)pFirmwareImage =\( .*FirmwareImage.*;\|$\)/\1return printk("%s: missing Free firmware\\n", __func__),\n\1	NDIS_STATUS_FAILURE;\n&/
-}' drivers/staging/rt2860/common/rtmp_mcu.c 'report missing Free firmware'
+reject_firmware drivers/staging/rt2860/common/rtmp_mcu.c
 clean_blob drivers/staging/rt2860/common/rtmp_mcu.c
 clean_blob drivers/staging/rt2860/rtmp_def.h
 clean_blob drivers/staging/rt2860/common/ee_efuse.c
@@ -1425,7 +1451,6 @@ clean_kconfig drivers/staging/rt2860/Kconfig RT2860
 clean_mk CONFIG_RT2860 drivers/staging/rt2860/Makefile
 
 announce RT2870 - "Ralink 2870/3070 wireless support"
-clean_file drivers/staging/rt3070/firmware.h
 clean_kconfig drivers/staging/rt2870/Kconfig RT2870
 clean_mk CONFIG_RT2870 drivers/staging/rt2870/Makefile
 
@@ -2031,6 +2056,20 @@ clean_sed '
 }' sound/isa/Kconfig 'removed firmware names'
 clean_kconfig sound/isa/Kconfig 'SND_SSCAPE'
 clean_mk CONFIG_SND_SSCAPE sound/isa/Makefile
+
+# It's not clear that wm2000_anc.bin is pure data.
+# Check with developer, clean up for now.
+announce SND_SOC_WM2000 - "WM2000 ALSA Soc Audio driver"
+reject_firmware sound/soc/codecs/wm2000.c
+clean_blob sound/soc/codecs/wm2000.c
+clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_WM2000'
+clean_mk CONFIG_SND_SOC_WM2000 sound/soc/codecs/Makefile
+
+announce SND_SOC_SH4_SIU - "ALSA SoC driver for Renesas SH7343, SH7722 SIU peripheral"
+reject_firmware sound/soc/sh/siu_dai.c
+clean_blob sound/soc/sh/siu_dai.c
+clean_kconfig sound/soc/sh/Kconfig 'SND_SOC_SH4_SIU'
+clean_mk CONFIG_SND_SOC_SH4_SIU sound/soc/sh/Makefile
 
 announce SOUND_TRIX - "MediaTrix AudioTrix Pro support"
 clean_blob sound/oss/trix.c
