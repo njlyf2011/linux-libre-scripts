@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   2084
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2093 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2095 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -712,8 +712,9 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 Patch1800: drm-next.patch
 Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
+Patch1803: drm-encoder-disable.patch
 # nouveau + drm fixes
-Patch1815: drm-nouveau-drm-fixed-header.patch
+Patch1815: drm-nouveau-updates.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1820: drm-i915-fix-edp-panels.patch
@@ -1372,9 +1373,10 @@ ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
 ApplyPatch drm-i915-fix-edp-panels.patch
 ApplyPatch i915-fix-crt-hotplug-regression.patch
+ApplyPatch drm-encoder-disable.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-nouveau-drm-fixed-header.patch
+ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
@@ -2071,6 +2073,18 @@ fi
 
 
 %changelog
+* Wed Jul 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted drm-nouveau-updates.patch.
+
+* Tue Jul 13 2010 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: bring back patches lost from 2.6.34 update + add some more to
+  fix at least rhbz#532711 and rhbz#593046
+- remove patches relating to nouveau that are now unused
+
+* Mon Jul 12 2010 Dave Jones <davej@redhat.com>
+- Remove a bunch of x86 options from config files that get set
+  automatically, and can't be overridden.
+
 * Sat Jul 10 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed 2.6.34-libre.
 - Re-enable kernel-libre-firmware.
