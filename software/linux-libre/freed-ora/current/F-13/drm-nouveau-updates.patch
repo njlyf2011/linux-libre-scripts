@@ -1,9 +1,9 @@
 * drivers/gpu/drm/nouveau/nouveau_grctx.c: Adjusted, was already deblobbed.
 
-From b95df25f1624b567b4146686ff820bef89ebd8a9 Mon Sep 17 00:00:00 2001
+From 06b70a657cec75d89c60243d6c49bc5dae0b5612 Mon Sep 17 00:00:00 2001
 From: Ben Skeggs <bskeggs@redhat.com>
 Date: Mon, 31 May 2010 12:00:43 +1000
-Subject: [PATCH 2/2] drm-nouveau-updates
+Subject: [PATCH] drm-nouveau-updates
 
 drm/nouveau: reduce usage of fence spinlock to when absolutely necessary
 
@@ -311,19 +311,37 @@ Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
 drm/nv50: fix RAMHT size
 
 Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
+
+drm/nouveau: remove quirk to fabricate DVI-A output on DCB 1.5 boards
+
+Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
+
+drm/nouveau: support fetching LVDS EDID from ACPI
+
+Based on a patch from Matthew Garrett.
+
+Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
+
+drm/nv50: fix regression that break LVDS in some places
+
+A previous commit started additionally using the SOR link when trying to
+match the correct output script.  However, we never fill in this field
+for LVDS so we can never match a script at all.
+
+Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
 ---
  drivers/gpu/drm/nouveau/Makefile            |    2 +-
- drivers/gpu/drm/nouveau/nouveau_acpi.c      |    2 +-
- drivers/gpu/drm/nouveau/nouveau_bios.c      |  194 +++++++++-----
- drivers/gpu/drm/nouveau/nouveau_bios.h      |    1 +
+ drivers/gpu/drm/nouveau/nouveau_acpi.c      |   38 +++-
+ drivers/gpu/drm/nouveau/nouveau_bios.c      |  206 +++++++++------
+ drivers/gpu/drm/nouveau/nouveau_bios.h      |    2 +
  drivers/gpu/drm/nouveau/nouveau_bo.c        |    9 +-
  drivers/gpu/drm/nouveau/nouveau_channel.c   |    5 -
- drivers/gpu/drm/nouveau/nouveau_connector.c |  264 ++++++++----------
+ drivers/gpu/drm/nouveau/nouveau_connector.c |  281 ++++++++++----------
  drivers/gpu/drm/nouveau/nouveau_connector.h |    4 +-
  drivers/gpu/drm/nouveau/nouveau_dma.c       |    8 +-
  drivers/gpu/drm/nouveau/nouveau_dp.c        |   24 ++-
  drivers/gpu/drm/nouveau/nouveau_drv.c       |   26 +--
- drivers/gpu/drm/nouveau/nouveau_drv.h       |   87 ++-----
+ drivers/gpu/drm/nouveau/nouveau_drv.h       |   89 ++-----
  drivers/gpu/drm/nouveau/nouveau_encoder.h   |   10 +-
  drivers/gpu/drm/nouveau/nouveau_fbcon.c     |    5 +-
  drivers/gpu/drm/nouveau/nouveau_fence.c     |   31 +--
@@ -355,7 +373,7 @@ Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
  drivers/gpu/drm/nouveau/nv50_graph.c        |   86 +++----
  drivers/gpu/drm/nouveau/nv50_instmem.c      |   61 ++---
  drivers/gpu/drm/nouveau/nv50_sor.c          |  105 ++++----
- 43 files changed, 1063 insertions(+), 1590 deletions(-)
+ 43 files changed, 1123 insertions(+), 1598 deletions(-)
  delete mode 100644 drivers/gpu/drm/nouveau/nouveau_grctx.c
 
 diff --git a/drivers/gpu/drm/nouveau/Makefile b/drivers/gpu/drm/nouveau/Makefile
@@ -372,10 +390,26 @@ index acd31ed..4a1db73 100644
               nv04_mc.o nv40_mc.o nv50_mc.o \
               nv04_fb.o nv10_fb.o nv40_fb.o nv50_fb.o \
 diff --git a/drivers/gpu/drm/nouveau/nouveau_acpi.c b/drivers/gpu/drm/nouveau/nouveau_acpi.c
-index d4bcca8..381d385 100644
+index d4bcca8..c17a055 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_acpi.c
 +++ b/drivers/gpu/drm/nouveau/nouveau_acpi.c
-@@ -42,7 +42,7 @@ static const char nouveau_dsm_muid[] = {
+@@ -3,6 +3,7 @@
+ #include <linux/slab.h>
+ #include <acpi/acpi_drivers.h>
+ #include <acpi/acpi_bus.h>
++#include <acpi/video.h>
+ 
+ #include "drmP.h"
+ #include "drm.h"
+@@ -11,6 +12,7 @@
+ #include "nouveau_drv.h"
+ #include "nouveau_drm.h"
+ #include "nv50_display.h"
++#include "nouveau_connector.h"
+ 
+ #include <linux/vga_switcheroo.h>
+ 
+@@ -42,7 +44,7 @@ static const char nouveau_dsm_muid[] = {
  	0xB3, 0x4D, 0x7E, 0x5F, 0xEA, 0x12, 0x9F, 0xD4,
  };
  
@@ -384,8 +418,46 @@ index d4bcca8..381d385 100644
  {
  	struct acpi_buffer output = { ACPI_ALLOCATE_BUFFER, NULL };
  	struct acpi_object_list input;
+@@ -259,3 +261,37 @@ int nouveau_acpi_get_bios_chunk(uint8_t *bios, int offset, int len)
+ {
+ 	return nouveau_rom_call(nouveau_dsm_priv.rom_handle, bios, offset, len);
+ }
++
++int
++nouveau_acpi_edid(struct drm_device *dev, struct drm_connector *connector)
++{
++	struct nouveau_connector *nv_connector = nouveau_connector(connector);
++	struct acpi_device *acpidev;
++	acpi_handle handle;
++	int type, ret;
++	void *edid;
++
++	switch (connector->connector_type) {
++	case DRM_MODE_CONNECTOR_LVDS:
++	case DRM_MODE_CONNECTOR_eDP:
++		type = ACPI_VIDEO_DISPLAY_LCD;
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	handle = DEVICE_ACPI_HANDLE(&dev->pdev->dev);
++	if (!handle)
++		return -ENODEV;
++
++	ret = acpi_bus_get_device(handle, &acpidev);
++	if (ret)
++		return -ENODEV;
++
++	ret = acpi_video_get_edid(acpidev, type, -1, &edid);
++	if (ret < 0)
++		return ret;
++
++	nv_connector->edid = edid;
++	return 0;
++}
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
-index fc924b6..5437c89 100644
+index fc924b6..0eb1b5a 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_bios.c
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
 @@ -203,36 +203,26 @@ struct methods {
@@ -833,7 +905,35 @@ index fc924b6..5437c89 100644
  
  	if (bmplength > 74) {
  		bios->fmaxvco = ROM32(bmp[67]);
-@@ -5808,6 +5826,31 @@ void merge_like_dcb_entries(struct drm_device *dev, struct dcb_table *dcb)
+@@ -5604,9 +5622,12 @@ parse_dcb20_entry(struct drm_device *dev, struct dcb_table *dcb,
+ 			if (conf & 0x4 || conf & 0x8)
+ 				entry->lvdsconf.use_power_scripts = true;
+ 		} else {
+-			mask = ~0x5;
++			mask = ~0x7;
++			if (conf & 0x2)
++				entry->lvdsconf.use_acpi_for_edid = true;
+ 			if (conf & 0x4)
+ 				entry->lvdsconf.use_power_scripts = true;
++			entry->lvdsconf.sor.link = (conf & 0x00000030) >> 4;
+ 		}
+ 		if (conf & mask) {
+ 			/*
+@@ -5721,13 +5742,6 @@ parse_dcb15_entry(struct drm_device *dev, struct dcb_table *dcb,
+ 	case OUTPUT_TV:
+ 		entry->tvconf.has_component_output = false;
+ 		break;
+-	case OUTPUT_TMDS:
+-		/*
+-		 * Invent a DVI-A output, by copying the fields of the DVI-D
+-		 * output; reported to work by math_b on an NV20(!).
+-		 */
+-		fabricate_vga_output(dcb, entry->i2c_index, entry->heads);
+-		break;
+ 	case OUTPUT_LVDS:
+ 		if ((conn & 0x00003f00) != 0x10)
+ 			entry->lvdsconf.use_straps_for_mode = true;
+@@ -5808,6 +5822,31 @@ void merge_like_dcb_entries(struct drm_device *dev, struct dcb_table *dcb)
  	dcb->entries = newentries;
  }
  
@@ -865,7 +965,7 @@ index fc924b6..5437c89 100644
  static int
  parse_dcb_table(struct drm_device *dev, struct nvbios *bios, bool twoHeads)
  {
-@@ -5941,6 +5984,9 @@ parse_dcb_table(struct drm_device *dev, struct nvbios *bios, bool twoHeads)
+@@ -5941,6 +5980,9 @@ parse_dcb_table(struct drm_device *dev, struct nvbios *bios, bool twoHeads)
  		if ((connection & 0x0000000f) == 0x0000000f)
  			continue;
  
@@ -876,7 +976,7 @@ index fc924b6..5437c89 100644
  			     dcb->entries, connection, config);
  
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.h b/drivers/gpu/drm/nouveau/nouveau_bios.h
-index adf4ec2..bd33a54 100644
+index adf4ec2..cc52aec 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_bios.h
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.h
 @@ -81,6 +81,7 @@ struct dcb_connector_table_entry {
@@ -887,6 +987,14 @@ index adf4ec2..bd33a54 100644
  };
  
  struct dcb_connector_table {
+@@ -117,6 +118,7 @@ struct dcb_entry {
+ 		struct {
+ 			struct sor_conf sor;
+ 			bool use_straps_for_mode;
++			bool use_acpi_for_edid;
+ 			bool use_power_scripts;
+ 		} lvdsconf;
+ 		struct {
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bo.c b/drivers/gpu/drm/nouveau/nouveau_bo.c
 index 6f3c195..d8c341d 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_bo.c
@@ -946,7 +1054,7 @@ index 1fc57ef..e952c3b 100644
  
  	nouveau_channel_free(chan);
 diff --git a/drivers/gpu/drm/nouveau/nouveau_connector.c b/drivers/gpu/drm/nouveau/nouveau_connector.c
-index 9a61f3c..503a446 100644
+index 9a61f3c..2914dd9 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_connector.c
 +++ b/drivers/gpu/drm/nouveau/nouveau_connector.c
 @@ -236,20 +236,6 @@ nouveau_connector_detect(struct drm_connector *connector)
@@ -970,7 +1078,7 @@ index 9a61f3c..503a446 100644
  	/* Cleanup the previous EDID block. */
  	if (nv_connector->edid) {
  		drm_mode_connector_update_edid_property(connector, NULL);
-@@ -321,6 +307,68 @@ detect_analog:
+@@ -321,6 +307,85 @@ detect_analog:
  	return connector_status_disconnected;
  }
  
@@ -994,10 +1102,27 @@ index 9a61f3c..503a446 100644
 +	if (!nv_encoder)
 +		return connector_status_disconnected;
 +
++	/* Try retrieving EDID via DDC */
 +	if (!dev_priv->vbios.fp_no_ddc) {
 +		status = nouveau_connector_detect(connector);
 +		if (status == connector_status_connected)
 +			goto out;
++	}
++
++	/* On some laptops (Sony, i'm looking at you) there appears to
++	 * be no direct way of accessing the panel's EDID.  The only
++	 * option available to us appears to be to ask ACPI for help..
++	 *
++	 * It's important this check's before trying straps, one of the
++	 * said manufacturer's laptops are configured in such a way
++	 * the nouveau decides an entry in the VBIOS FP mode table is
++	 * valid - it's not (rh#613284)
++	 */
++	if (nv_encoder->dcb->lvdsconf.use_acpi_for_edid) {
++		if (!nouveau_acpi_edid(dev, connector)) {
++			status = connector_status_connected;
++			goto out;
++		}
 +	}
 +
 +	/* If no EDID found above, and the VBIOS indicates a hardcoded
@@ -1039,7 +1164,7 @@ index 9a61f3c..503a446 100644
  static void
  nouveau_connector_force(struct drm_connector *connector)
  {
-@@ -534,21 +582,27 @@ static int
+@@ -534,21 +599,27 @@ static int
  nouveau_connector_get_modes(struct drm_connector *connector)
  {
  	struct drm_device *dev = connector->dev;
@@ -1071,7 +1196,7 @@ index 9a61f3c..503a446 100644
  
  	/* Find the native mode if this is a digital panel, if we didn't
  	 * find any modes through DDC previously add the native mode to
-@@ -569,7 +623,8 @@ nouveau_connector_get_modes(struct drm_connector *connector)
+@@ -569,7 +640,8 @@ nouveau_connector_get_modes(struct drm_connector *connector)
  		ret = get_slave_funcs(nv_encoder)->
  			get_modes(to_drm_encoder(nv_encoder), connector);
  
@@ -1081,7 +1206,7 @@ index 9a61f3c..503a446 100644
  		ret += nouveau_connector_scaler_modes_add(connector);
  
  	return ret;
-@@ -662,148 +717,74 @@ nouveau_connector_funcs = {
+@@ -662,148 +734,74 @@ nouveau_connector_funcs = {
  	.force = nouveau_connector_force
  };
  
@@ -1256,7 +1381,7 @@ index 9a61f3c..503a446 100644
  	nv_connector->dcb = dcb;
  	connector = &nv_connector->base;
  
-@@ -811,27 +792,21 @@ nouveau_connector_create(struct drm_device *dev,
+@@ -811,27 +809,21 @@ nouveau_connector_create(struct drm_device *dev,
  	connector->interlace_allowed = false;
  	connector->doublescan_allowed = false;
  
@@ -1295,7 +1420,7 @@ index 9a61f3c..503a446 100644
  	}
  
  	/* Init DVI-I specific properties */
-@@ -841,9 +816,6 @@ nouveau_connector_create(struct drm_device *dev,
+@@ -841,9 +833,6 @@ nouveau_connector_create(struct drm_device *dev,
  		drm_connector_attach_property(connector, dev->mode_config.dvi_i_select_subconnector_property, 0);
  	}
  
@@ -1305,7 +1430,7 @@ index 9a61f3c..503a446 100644
  	switch (dcb->type) {
  	case DCB_CONNECTOR_VGA:
  		if (dev_priv->card_type >= NV_50) {
-@@ -871,14 +843,12 @@ nouveau_connector_create(struct drm_device *dev,
+@@ -871,14 +860,12 @@ nouveau_connector_create(struct drm_device *dev,
  	}
  
  	drm_sysfs_connector_add(connector);
@@ -1491,7 +1616,7 @@ index 2737704..b4d958c 100644
  	nouveau_unregister_dsm_handler();
  }
 diff --git a/drivers/gpu/drm/nouveau/nouveau_drv.h b/drivers/gpu/drm/nouveau/nouveau_drv.h
-index c697191..587a0ab 100644
+index c697191..51ccd90 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_drv.h
 +++ b/drivers/gpu/drm/nouveau/nouveau_drv.h
 @@ -123,14 +123,6 @@ nvbo_kmap_obj_iovirtual(struct nouveau_bo *nvbo)
@@ -1668,7 +1793,21 @@ index c697191..587a0ab 100644
  extern int  nouveau_mem_init(struct drm_device *);
  extern int  nouveau_mem_init_agp(struct drm_device *);
  extern void nouveau_mem_close(struct drm_device *);
-@@ -1035,12 +1005,6 @@ extern int  nv50_graph_unload_context(struct drm_device *);
+@@ -857,11 +827,13 @@ void nouveau_register_dsm_handler(void);
+ void nouveau_unregister_dsm_handler(void);
+ int nouveau_acpi_get_bios_chunk(uint8_t *bios, int offset, int len);
+ bool nouveau_acpi_rom_supported(struct pci_dev *pdev);
++int nouveau_acpi_edid(struct drm_device *, struct drm_connector *);
+ #else
+ static inline void nouveau_register_dsm_handler(void) {}
+ static inline void nouveau_unregister_dsm_handler(void) {}
+ static inline bool nouveau_acpi_rom_supported(struct pci_dev *pdev) { return false; }
+ static inline int nouveau_acpi_get_bios_chunk(uint8_t *bios, int offset, int len) { return -EINVAL; }
++static inline int nouveau_acpi_edid(struct drm_device *, struct drm_connector *) { return -EINVAL; }
+ #endif
+ 
+ /* nouveau_backlight.c */
+@@ -1035,12 +1007,6 @@ extern int  nv50_graph_unload_context(struct drm_device *);
  extern void nv50_graph_context_switch(struct drm_device *);
  extern int  nv50_grctx_init(struct nouveau_grctx *);
  
@@ -1681,7 +1820,7 @@ index c697191..587a0ab 100644
  /* nv04_instmem.c */
  extern int  nv04_instmem_init(struct drm_device *);
  extern void nv04_instmem_takedown(struct drm_device *);
-@@ -1051,8 +1015,7 @@ extern int  nv04_instmem_populate(struct drm_device *, struct nouveau_gpuobj *,
+@@ -1051,8 +1017,7 @@ extern int  nv04_instmem_populate(struct drm_device *, struct nouveau_gpuobj *,
  extern void nv04_instmem_clear(struct drm_device *, struct nouveau_gpuobj *);
  extern int  nv04_instmem_bind(struct drm_device *, struct nouveau_gpuobj *);
  extern int  nv04_instmem_unbind(struct drm_device *, struct nouveau_gpuobj *);
@@ -1691,7 +1830,7 @@ index c697191..587a0ab 100644
  
  /* nv50_instmem.c */
  extern int  nv50_instmem_init(struct drm_device *);
-@@ -1064,8 +1027,8 @@ extern int  nv50_instmem_populate(struct drm_device *, struct nouveau_gpuobj *,
+@@ -1064,8 +1029,8 @@ extern int  nv50_instmem_populate(struct drm_device *, struct nouveau_gpuobj *,
  extern void nv50_instmem_clear(struct drm_device *, struct nouveau_gpuobj *);
  extern int  nv50_instmem_bind(struct drm_device *, struct nouveau_gpuobj *);
  extern int  nv50_instmem_unbind(struct drm_device *, struct nouveau_gpuobj *);
@@ -1702,7 +1841,7 @@ index c697191..587a0ab 100644
  
  /* nv04_mc.c */
  extern int  nv04_mc_init(struct drm_device *);
-@@ -1088,13 +1051,14 @@ extern long nouveau_compat_ioctl(struct file *file, unsigned int cmd,
+@@ -1088,13 +1053,14 @@ extern long nouveau_compat_ioctl(struct file *file, unsigned int cmd,
  				 unsigned long arg);
  
  /* nv04_dac.c */
@@ -1719,7 +1858,7 @@ index c697191..587a0ab 100644
  extern int nv04_dfp_get_bound_head(struct drm_device *dev, struct dcb_entry *dcbent);
  extern void nv04_dfp_bind_head(struct drm_device *dev, struct dcb_entry *dcbent,
  			       int head, bool dl);
-@@ -1103,10 +1067,10 @@ extern void nv04_dfp_update_fp_control(struct drm_encoder *encoder, int mode);
+@@ -1103,10 +1069,10 @@ extern void nv04_dfp_update_fp_control(struct drm_encoder *encoder, int mode);
  
  /* nv04_tv.c */
  extern int nv04_tv_identify(struct drm_device *dev, int i2c_index);
@@ -1732,7 +1871,7 @@ index c697191..587a0ab 100644
  
  /* nv04_display.c */
  extern int nv04_display_create(struct drm_device *);
-@@ -1147,7 +1111,6 @@ extern int nouveau_fence_wait(void *obj, void *arg, bool lazy, bool intr);
+@@ -1147,7 +1113,6 @@ extern int nouveau_fence_wait(void *obj, void *arg, bool lazy, bool intr);
  extern int nouveau_fence_flush(void *obj, void *arg);
  extern void nouveau_fence_unref(void **obj);
  extern void *nouveau_fence_ref(void *obj);

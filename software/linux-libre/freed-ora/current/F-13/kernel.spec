@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   2084
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2095 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2099 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -625,6 +625,7 @@ Patch08: freedo.patch
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 Patch11: git-bluetooth.patch
+Patch12: git-cpufreq.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
@@ -658,6 +659,7 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch383: linux-2.6-defaults-aspm.patch
 Patch384: pci-acpi-disable-aspm-if-no-osc.patch
 Patch385: pci-aspm-dont-enable-too-early.patch
+Patch386: pci-pm-do-not-use-native-pcie-pme-by-default.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -1217,7 +1219,8 @@ ApplyPatch freedo.patch
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
-#ApplyPatch git-bluetooth.patch
+ApplyOptionalPatch git-bluetooth.patch
+ApplyOptionalPatch git-cpufreq.patch
 
 ApplyPatch linux-2.6-hotfixes.patch
 
@@ -1299,6 +1302,8 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 ApplyPatch pci-acpi-disable-aspm-if-no-osc.patch
 # allow drivers to disable aspm at load time
 ApplyPatch pci-aspm-dont-enable-too-early.patch
+# stop PCIe hotplug interrupt storm (#613412)
+ApplyPatch pci-pm-do-not-use-native-pcie-pme-by-default.patch
 
 #
 # SCSI Bits.
@@ -1384,8 +1389,8 @@ ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # linux1394 git patches
-#ApplyPatch linux-2.6-firewire-git-update.patch
-#ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
+ApplyOptionalPatch linux-2.6-firewire-git-update.patch
+ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
@@ -2073,10 +2078,27 @@ fi
 
 
 %changelog
+* Fri Jul 16 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.1-15
+- nouveau: fix lvds regression (#601002)
+- nouveau: bring back acpi edid support, with fixes (#613284)
+- nouveau: remove dcb1.5 quirk that breaks things (#595645)
+
+* Wed Jul 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-14
+- Truncate the obsolete git bluetooth and firewire patches, use
+  ApplyOptionalPatch for bluetooth, cpufreq and firewire patches.
+
+* Wed Jul 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-12
+- pci-pm-do-not-use-native-pcie-pme-by-default.patch:
+  fix PCIe hotplug interrupts firing continuously. (#613412)
+- Update pci-acpi-disable-aspm-if-no-osc.patch so it works
+  with the above patch.
+- Drop linux-2.6-defaults-pciehp.patch: pciehp_passive mode
+  does not exist anymore.
+
 * Wed Jul 14 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted drm-nouveau-updates.patch.
 
-* Tue Jul 13 2010 Ben Skeggs <bskeggs@redhat.com>
+* Tue Jul 13 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.1-11
 - nouveau: bring back patches lost from 2.6.34 update + add some more to
   fix at least rhbz#532711 and rhbz#593046
 - remove patches relating to nouveau that are now unused
