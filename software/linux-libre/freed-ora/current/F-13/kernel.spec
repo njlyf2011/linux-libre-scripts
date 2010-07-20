@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   2084
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2099 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2104 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -656,10 +656,14 @@ Patch305: linux-2.6-fix-btusb-autosuspend.patch
 Patch310: linux-2.6-usb-wwan-update.patch
 
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+# enable ASPM
 Patch383: linux-2.6-defaults-aspm.patch
 Patch384: pci-acpi-disable-aspm-if-no-osc.patch
 Patch385: pci-aspm-dont-enable-too-early.patch
+
+# 2.6.34 bugfixes
 Patch386: pci-pm-do-not-use-native-pcie-pme-by-default.patch
+Patch387: pci-fall-back-to-original-bios-bar-addresses.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -725,6 +729,8 @@ Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1830: drm-i915-fix-hibernate-memory-corruption.patch
+Patch1831: drm-i915-add-reclaimable-to-page-allocations.patch
+Patch1835: drm-i915-make-G4X-style-PLL-search-more-permissive.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 # linux1394 git patches
@@ -741,6 +747,7 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2905: linux-2.6-v4l-dvb-gspca-fixes.patch
+Patch2906: linux-2.6-v4l-dvb-uvcvideo-update.patch
 
 Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 Patch2911: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
@@ -788,6 +795,9 @@ Patch12220: sched-fix-over-scheduling-bug.patch
 Patch12230: kbuild-fix-modpost-segfault.patch
 
 Patch12240: crypto-aesni-kill-module_alias.patch
+
+Patch12250: inotify-fix-inotify-oneshot-support.patch
+Patch12260: inotify-send-IN_UNMOUNT-events.patch
 
 %endif
 
@@ -1304,6 +1314,8 @@ ApplyPatch pci-acpi-disable-aspm-if-no-osc.patch
 ApplyPatch pci-aspm-dont-enable-too-early.patch
 # stop PCIe hotplug interrupt storm (#613412)
 ApplyPatch pci-pm-do-not-use-native-pcie-pme-by-default.patch
+# fall back to original BIOS address when reassignment fails (KORG#16263)
+ApplyPatch pci-fall-back-to-original-bios-bar-addresses.patch
 
 #
 # SCSI Bits.
@@ -1378,14 +1390,21 @@ ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
 ApplyPatch drm-i915-fix-edp-panels.patch
 ApplyPatch i915-fix-crt-hotplug-regression.patch
+# RHBZ#572799
+ApplyPatch drm-i915-make-G4X-style-PLL-search-more-permissive.patch
 ApplyPatch drm-encoder-disable.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-updates.patch
+
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+
+# hibernation memory corruption fixes
 ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
+ApplyPatch drm-i915-add-reclaimable-to-page-allocations.patch
+
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # linux1394 git patches
@@ -1402,6 +1421,7 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 ApplyPatch linux-2.6-v4l-dvb-gspca-fixes.patch
+ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
 
 ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
@@ -1458,6 +1478,10 @@ ApplyPatch sched-fix-over-scheduling-bug.patch
 ApplyPatch kbuild-fix-modpost-segfault.patch
 
 ApplyPatch crypto-aesni-kill-module_alias.patch
+
+# fix broken oneshot support and missing umount events (#607327)
+ApplyPatch inotify-fix-inotify-oneshot-support.patch
+ApplyPatch inotify-send-IN_UNMOUNT-events.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2078,6 +2102,28 @@ fi
 
 
 %changelog
+* Mon Jul 19 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-20
+- pci-fall-back-to-original-bios-bar-addresses.patch:
+  Fix 2.6.34 problems with assigning PCI addresses (KORG#16263)
+
+* Mon Jul 19 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-19
+- drm-i915-add-reclaimable-to-page-allocations.patch:
+  Additional fix for hibernation memory corruption bugs.
+
+* Sun Jul 18 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-18
+- drm-i915-make-G4X-style-PLL-search-more-permissive.patch (#572799)
+
+* Sun Jul 18 2010 Hans de Goede <hdegoede@redhat.com> 2.6.34.1-17
+- Fix inotify-fix-inotify-oneshot-support.patch so that it compiles
+- Various small updates / fixes to the uvcvideo driver:
+  - Support dynamic menu controls (#576023)
+  - Fix the apple iSight camera not working (#600998)
+
+* Fri Jul 16 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-16
+- inotify-fix-inotify-oneshot-support.patch,
+  inotify-send-IN_UNMOUNT-events.patch:
+  Fix broken oneshot support and missing umount events. (#607327)
+
 * Fri Jul 16 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.1-15
 - nouveau: fix lvds regression (#601002)
 - nouveau: bring back acpi edid support, with fixes (#613284)
