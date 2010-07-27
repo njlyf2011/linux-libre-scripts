@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1937
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2084 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2084.2.4 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -733,8 +733,6 @@ Patch1558: vhost_net-rollup2.patch
 # EC2 is running old xen hosts and wont upgrade so we have to work around it
 Patch1559: fix_xen_guest_on_old_EC2.patch
 
-
-
 # fbdev x86-64 primary fix
 Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
@@ -743,11 +741,12 @@ Patch1800: drm-core-next.patch
 Patch1801: drm-1024x768-85.patch
 
 # radeon kms backport
-Patch1810: drm-radeon-evergreen.patch
-Patch1811: drm-radeon-firemv-pciid.patch
-Patch1812: drm-radeon-kms-fix-dual-link-dvi.patch
-Patch1813: drm-radeon-fix-rs600-tlb.patch
-Patch1814: drm-radeon-ss-fix.patch
+Patch1808: drm-radeon-evergreen.patch
+Patch1809: drm-radeon-firemv-pciid.patch
+Patch1810: drm-radeon-kms-fix-dual-link-dvi.patch
+Patch1811: drm-radeon-fix-rs600-tlb.patch
+Patch1812: drm-radeon-ss-fix.patch
+Patch1813: drm-radeon-fix-shared-ddc-handling.patch
 # nouveau fixes
 # - these not until 2.6.34
 Patch1815: drm-nouveau-abi16.patch
@@ -774,6 +773,9 @@ Patch1840: drm-i915-use-pipe_control-instruction-on-ironlake-and-sandy-bridge.pa
 Patch1841: drm-i915-fix-non-ironlake-965-class-crashes.patch
 Patch1842: drm-i915-fix-edp-panels.patch
 Patch1843: drm-i915-fix-hibernate-memory-corruption.patch
+Patch1844: drm-i915-add-reclaimable-to-page-allocations.patch
+Patch1845: drm-i915-make-G4X-style-PLL-search-more-permissive.patch
+Patch1846: drm-intel-945gm-stability-fixes.patch
 
 Patch2100: linux-2.6-phylib-autoload.patch
 
@@ -886,6 +888,13 @@ Patch13030: sched-fix-over-scheduling-bug.patch
 Patch13040: ethtool-fix-buffer-overflow.patch
 Patch13050: x86-debug-clear-reserved-bits-of-dr6.patch
 Patch13060: x86-debug-send-sigtrap-for-user-icebp.patch
+
+Patch13070: cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+
+Patch13074: inotify-fix-inotify-oneshot-support.patch
+Patch13076: inotify-send-IN_UNMOUNT-events.patch
+
+Patch13080: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
 %endif
 
@@ -1518,6 +1527,7 @@ ApplyPatch drm-radeon-firemv-pciid.patch
 ApplyPatch drm-radeon-kms-fix-dual-link-dvi.patch
 ApplyPatch drm-radeon-fix-rs600-tlb.patch
 ApplyPatch drm-radeon-ss-fix.patch
+ApplyPatch drm-radeon-fix-shared-ddc-handling.patch
 ApplyPatch drm-nouveau-abi16.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-acpi-edid-fallback.patch
@@ -1534,7 +1544,14 @@ ApplyPatch drm-intel-sdvo-fix-2.patch
 ApplyPatch drm-i915-use-pipe_control-instruction-on-ironlake-and-sandy-bridge.patch
 ApplyPatch drm-i915-fix-non-ironlake-965-class-crashes.patch
 ApplyPatch drm-i915-fix-edp-panels.patch
+# hibernation memory corruption fixes
 ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
+ApplyPatch drm-i915-add-reclaimable-to-page-allocations.patch
+
+# RHBZ#572799
+ApplyPatch drm-i915-make-G4X-style-PLL-search-more-permissive.patch
+
+ApplyPatch drm-intel-945gm-stability-fixes.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
 
@@ -1630,6 +1647,16 @@ ApplyPatch ethtool-fix-buffer-overflow.patch
 # BZ#609548
 ApplyPatch x86-debug-clear-reserved-bits-of-dr6.patch
 ApplyPatch x86-debug-send-sigtrap-for-user-icebp.patch
+
+# CVE-2010-2524
+ApplyPatch cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+
+# fix broken oneshot support and missing umount events (#607327)
+ApplyPatch inotify-fix-inotify-oneshot-support.patch
+ApplyPatch inotify-send-IN_UNMOUNT-events.patch
+
+# RHBZ#610911
+ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2279,6 +2306,26 @@ fi
 
 
 %changelog
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.6-147.2.4
+- inotify-fix-inotify-oneshot-support.patch,
+  inotify-send-IN_UNMOUNT-events.patch:
+  Fix broken oneshot support and missing umount events. (#607327)
+
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.6-147.2.3
+- drm-i915-add-reclaimable-to-page-allocations.patch:
+  Additional fix for hibernation memory corruption bugs.
+- drm-intel-945gm-stability-fixes.patch: fix 945GM stability issues
+- drm-i915-make-G4X-style-PLL-search-more-permissive.patch (#572799)
+- drm-radeon-fix-shared-ddc-handling.patch (#593429)
+
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.6-147.2.2
+- kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch:
+  Fix crash in guest Python programs (#610911)
+
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.6-147.2.1
+- cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch:
+  Fix a malicious redirect problem in the DNS lookup code (CVE-2010-2524)
+
 * Tue Jul 06 2010 Jarod Wilson <jarod@redhat.com> 2.6.33.6-147
 - Really make hdpvr i2c IR part register this time, so something can
   actually be bound to it (like, say, lirc_zilog)
