@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2103 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2112 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -692,6 +692,9 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-pciehp-update.patch
 Patch382: linux-2.6-defaults-pciehp.patch
 Patch383: linux-2.6-defaults-aspm.patch
+Patch384: pci-acpi-disable-aspm-if-no-osc.patch
+Patch385: pci-aspm-dont-enable-too-early.patch
+
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -744,7 +747,9 @@ Patch1813: drm-radeon-pm.patch
 Patch1818: drm-i915-resume-force-mode.patch
 Patch1819: drm-intel-big-hammer.patch
 Patch1820: drm-intel-no-tv-hotplug.patch
-#Patch1821: drm-page-flip.patch
+Patch1821: drm-i915-fix-hibernate-memory-corruption.patch
+Patch1822: drm-i915-add-reclaimable-to-page-allocations.patch
+Patch1823: drm-intel-945gm-stability-fixes.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-acpi-populate-didl.patch
@@ -862,6 +867,15 @@ Patch13030: l2tp-fix-oops-in-pppol2tp_xmit.patch
 
 Patch14000: sched-fix-over-scheduling-bug.patch
 Patch14010: ethtool-fix-buffer-overflow.patch
+
+Patch14020: inotify-fix-inotify-oneshot-support.patch
+Patch14030: inotify-send-IN_UNMOUNT-events.patch
+
+Patch14040: crypto-testmgr-add-null-test-for-aesni.patch
+Patch14050: crypto-add-async-hash-testing.patch
+
+Patch14100: cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+Patch14110: ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
 
 # ==============================================================================
 %endif
@@ -1405,6 +1419,10 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 #ApplyPatch linux-2.6-defaults-pciehp.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
+# disable aspm if acpi doesn't provide an _OSC method
+ApplyPatch pci-acpi-disable-aspm-if-no-osc.patch
+# allow drivers to disable aspm at load time
+ApplyPatch pci-aspm-dont-enable-too-early.patch
 
 #
 # SCSI Bits.
@@ -1496,6 +1514,12 @@ ApplyPatch drm-upgrayedd.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-acpi-populate-didl.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+# gm45 stability fixes
+ApplyPatch drm-intel-945gm-stability-fixes.patch
+# hibernation memory corruption fixes
+ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
+ApplyPatch drm-i915-add-reclaimable-to-page-allocations.patch
+
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
 ApplyPatch drm-nouveau-tvout-disable.patch
 ApplyPatch drm-nouveau-safetile-getparam.patch
@@ -1583,6 +1607,20 @@ ApplyPatch sched-fix-over-scheduling-bug.patch
 
 # CVE-2010-2478
 ApplyPatch ethtool-fix-buffer-overflow.patch
+
+# fix broken oneshot support and missing umount events (F13#607327)
+ApplyPatch inotify-fix-inotify-oneshot-support.patch
+ApplyPatch inotify-send-IN_UNMOUNT-events.patch
+
+# add tests for aesni module (#571577)
+ApplyPatch crypto-testmgr-add-null-test-for-aesni.patch
+# add tests for crypto async hashing (#571577)
+ApplyPatch crypto-add-async-hash-testing.patch
+
+# CVE-2010-2524
+ApplyPatch cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+# CVE-2010-2066
+ApplyPatch ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -1907,7 +1945,8 @@ BuildKernel vmlinux vmlinux kdump vmlinux
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+#make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+make -j1 htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -2233,6 +2272,44 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-150
+- drm-intel-945gm-stability-fixes.patch
+- Make doc build single-threaded to prevent build failures.
+
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-149
+- drm-i915-fix-hibernate-memory-corruption.patch,
+  drm-i915-add-reclaimable-to-page-allocations.patch:
+  Fixes for hibernation memory corruption bugs introduced in 2.6.32.8
+
+* Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-148
+- ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
+  (CVE-2010-2066)
+
+* Thu Jul 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-147
+- cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch:
+  Fix a malicious redirect problem in the DNS lookup code (CVE-2010-2524)
+
+* Wed Jul 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-146
+- pci-acpi-disable-aspm-if-no-osc.patch, pci-aspm-dont-enable-too-early.patch
+  PCI layer fixes for problems with hardware that doesn't support ASPM.
+
+* Wed Jul 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-145
+- crypto-add-async-hash-testing.patch: fix the rest of the errors
+  reported during crypto testing (#571577)
+
+* Wed Jul 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-144
+- Fix inotify-oneshot-support patch so it builds.
+- crypto-testmgr-add-null-test-for-aesni.patch:
+  Add tests for aesni crypto module (#571577)
+
+* Fri Jul 16 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-143
+- inotify-fix-inotify-oneshot-support.patch,
+  inotify-send-IN_UNMOUNT-events.patch:
+  Fix broken oneshot support and missing umount events. (F13#607327)
+
+* Wed Jul 14 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.32.16-142
+- Drop Intel Moorestown support.
+
 * Wed Jul 07 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.16-141
 - Really make hdpvr i2c IR part register this time, so something can
   actually be bound to it (like, say, lirc_zilog)
