@@ -49,7 +49,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   1962
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2112 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2116 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -787,6 +787,7 @@ Patch2096: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 # fs fixes
 
 # ext4/quota
+Patch3000: linux-2.6-ext4-quota-metadata-reservation.patch
 
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
@@ -876,6 +877,12 @@ Patch14050: crypto-add-async-hash-testing.patch
 
 Patch14100: cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
 Patch14110: ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
+Patch14115: xfs-prevent-swapext-from-operating-on-write-only-files.patch
+
+Patch14120: usb-obey-the-sysfs-power-wakeup-setting.patch
+
+# Red Hat Bugzilla #610911
+Patch14130: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
 # ==============================================================================
 %endif
@@ -1370,6 +1377,7 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # ext4
+ApplyPatch linux-2.6-ext4-quota-metadata-reservation.patch
 
 # xfs
 
@@ -1621,6 +1629,13 @@ ApplyPatch crypto-add-async-hash-testing.patch
 ApplyPatch cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
 # CVE-2010-2066
 ApplyPatch ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
+# CVE-2010-2266
+ApplyPatch xfs-prevent-swapext-from-operating-on-write-only-files.patch
+
+# fix broken USB device wakeups (#617559)
+ApplyPatch usb-obey-the-sysfs-power-wakeup-setting.patch
+
+ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2272,6 +2287,21 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Jul 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-154
+- xfs-prevent-swapext-from-operating-on-write-only-files.patch:
+  CVE-2010-2266
+
+* Tue Jul 27 2010 Jarod Wilson <jarod@redhat.com> 2.6.32.16-153
+- kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch:
+  Fix crash in guest Python programs (#610911)
+
+* Mon Jul 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-152
+- usb-obey-the-sysfs-power-wakeup-setting.patch:
+  Restore ability of USB devices to wake the machine (F13#617559)
+
+* Mon Jul 26 2010 Eric Sandeen <sandeen@redhat.com> 2.6.32.16-151
+- Fix ext4 metadata vs. quota reservation bug (#608770)
+
 * Fri Jul 23 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-150
 - drm-intel-945gm-stability-fixes.patch
 - Make doc build single-threaded to prevent build failures.
