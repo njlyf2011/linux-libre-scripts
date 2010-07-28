@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # Don't stare at the awk too long, you'll go blind.
 %define fedora_cvs_origin   2084
 %define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2104 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2113 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -731,7 +731,10 @@ Patch1825: drm-intel-make-lvds-work.patch
 Patch1830: drm-i915-fix-hibernate-memory-corruption.patch
 Patch1831: drm-i915-add-reclaimable-to-page-allocations.patch
 Patch1835: drm-i915-make-G4X-style-PLL-search-more-permissive.patch
+Patch1836: drm-intel-945gm-stability-fixes.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
+# radeon
+Patch1910: drm-radeon-fix-shared-ddc-handling.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -794,10 +797,25 @@ Patch12210: ethtool-fix-buffer-overflow.patch
 Patch12220: sched-fix-over-scheduling-bug.patch
 Patch12230: kbuild-fix-modpost-segfault.patch
 
-Patch12240: crypto-aesni-kill-module_alias.patch
-
 Patch12250: inotify-fix-inotify-oneshot-support.patch
 Patch12260: inotify-send-IN_UNMOUNT-events.patch
+
+Patch12270: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
+
+# ACPI GPE enable/disable fixes, needed preparation for the powerdown fix
+Patch12299: acpica-00-linux-2.6.git-0f849d2cc6863c7874889ea60a871fb71399dd3f.patch
+Patch12300: acpica-01-linux-2.6.git-a997ab332832519c2e292db13f509e4360495a5a.patch
+Patch12310: acpica-02-linux-2.6.git-e4e9a735991c80fb0fc1bd4a13a93681c3c17ce0.patch
+Patch12320: acpica-03-linux-2.6.git-fd247447c1d94a79d5cfc647430784306b3a8323.patch
+Patch12330: acpica-04-linux-2.6.git-c9a8bbb7704cbf515c0fc68970abbe4e91d68521.patch
+Patch12340: acpica-05-linux-2.6.git-ce43ace02320a3fb9614ddb27edc3a8700d68b26.patch
+Patch12350: acpica-06-linux-2.6.git-9d3c752de65dbfa6e522f1d666deb0ac152ef367.patch
+# fix system powering back on after shutdown (#613239)
+Patch12360: acpi-pm-do-not-enable-gpes-for-system-wakeup-in-advance.patch
+
+Patch12400: input-synaptics-relax-capability-id-checks-on-new-hardware.patch
+
+Patch12410: cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
 
 %endif
 
@@ -1392,6 +1410,7 @@ ApplyPatch drm-i915-fix-edp-panels.patch
 ApplyPatch i915-fix-crt-hotplug-regression.patch
 # RHBZ#572799
 ApplyPatch drm-i915-make-G4X-style-PLL-search-more-permissive.patch
+ApplyPatch drm-intel-945gm-stability-fixes.patch
 ApplyPatch drm-encoder-disable.patch
 
 # Nouveau DRM + drm fixes
@@ -1400,6 +1419,9 @@ ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+
+# radeon fixes
+ApplyPatch drm-radeon-fix-shared-ddc-handling.patch
 
 # hibernation memory corruption fixes
 ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
@@ -1477,11 +1499,29 @@ ApplyPatch sched-fix-over-scheduling-bug.patch
 # fix modpost segfault during kernel build (#595915)
 ApplyPatch kbuild-fix-modpost-segfault.patch
 
-ApplyPatch crypto-aesni-kill-module_alias.patch
-
 # fix broken oneshot support and missing umount events (#607327)
 ApplyPatch inotify-fix-inotify-oneshot-support.patch
 ApplyPatch inotify-send-IN_UNMOUNT-events.patch
+
+# 610911
+ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
+
+# ACPI GPE enable/disable fixes, needed preparation for the powerdown fix
+ApplyPatch acpica-00-linux-2.6.git-0f849d2cc6863c7874889ea60a871fb71399dd3f.patch
+ApplyPatch acpica-01-linux-2.6.git-a997ab332832519c2e292db13f509e4360495a5a.patch
+ApplyPatch acpica-02-linux-2.6.git-e4e9a735991c80fb0fc1bd4a13a93681c3c17ce0.patch
+ApplyPatch acpica-03-linux-2.6.git-fd247447c1d94a79d5cfc647430784306b3a8323.patch
+ApplyPatch acpica-04-linux-2.6.git-c9a8bbb7704cbf515c0fc68970abbe4e91d68521.patch
+ApplyPatch acpica-05-linux-2.6.git-ce43ace02320a3fb9614ddb27edc3a8700d68b26.patch
+ApplyPatch acpica-06-linux-2.6.git-9d3c752de65dbfa6e522f1d666deb0ac152ef367.patch
+# fix system powering back on after shutdown (#613239)
+ApplyPatch acpi-pm-do-not-enable-gpes-for-system-wakeup-in-advance.patch
+
+# fix newer synaptics touchpads not being recognized
+ApplyPatch input-synaptics-relax-capability-id-checks-on-new-hardware.patch
+
+# CVE-2010-2524
+ApplyPatch cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2102,6 +2142,38 @@ fi
 
 
 %changelog
+* Thu Jul 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-29
+- cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch:
+  Fix a malicious redirect problem in the DNS lookup code (CVE-2010-2524)
+
+* Thu Jul 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-28
+- input-synaptics-relax-capability-id-checks-on-new-hardware.patch:
+  Make mouse driver recognize newer synaptics hardware as touchpad.
+
+* Thu Jul 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-27
+- ACPI GPE enable/disable patches: fix system powering back on
+  after shutdown (#613239) (and possibly #615858)
+
+* Thu Jul 22 2010 Jerome Glisse <jglisse@redhat.com> 2.6.34.1-26
+- radeon fix shared ddc handling (#593429)
+
+* Thu Jul 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-25
+- kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch:
+  Fix crash in guest Python programs (#610911)
+
+* Wed Jul 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-24
+- Drop crypto-aesni-kill-module_alias.patch; bug #571577 should
+  not be present in 2.6.34.
+
+* Wed Jul 21 2010 Dave Airlie <airlied@redhat.com> 2.6.34.1-23
+- drm-intel-945gm-stability-fixes.patch: fix 945GM stability issues
+
+* Wed Jul 21 2010 Dave Airlie <airlied@redhat.com> 2.6.34.1-22
+- double drop: its a revert on top of a revert.
+
+* Tue Jul 20 2010 Dave Airlie <airlied@redhat.com> 2.6.34.1-21
+- drop drm revert, that can't possible cause the bug, but is causing another one.
+
 * Mon Jul 19 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-20
 - pci-fall-back-to-original-bios-bar-addresses.patch:
   Fix 2.6.34 problems with assigning PCI addresses (KORG#16263)
