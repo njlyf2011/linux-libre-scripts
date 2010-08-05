@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index ebc8225..eaa1d9c 100644
+index 3db48a6..7c1f76e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -186,7 +186,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -72,6 +72,19 @@ index 7e6fd1c..87f19ce 100644
  # Timer Interrupt Frequency Configuration
  #
  
+diff --git a/arch/mips/ar7/platform.c b/arch/mips/ar7/platform.c
+index 2fafc78..6731fde 100644
+--- a/arch/mips/ar7/platform.c
++++ b/arch/mips/ar7/platform.c
+@@ -542,7 +542,7 @@ static int __init ar7_register_uarts(void)
+ 	if (IS_ERR(bus_clk))
+ 		panic("unable to get bus clk\n");
+ 
+-	uart_port.type		= PORT_16550A;
++	uart_port.type		= PORT_AR7;
+ 	uart_port.uartclk	= clk_get_rate(bus_clk) / 2;
+ 	uart_port.iotype	= UPIO_MEM32;
+ 	uart_port.regshift	= 2;
 diff --git a/arch/mips/boot/compressed/ld.script b/arch/mips/boot/compressed/ld.script
 index 613a35b..c4b6491 100644
 --- a/arch/mips/boot/compressed/ld.script
@@ -2752,6 +2765,37 @@ index ce35c9a..29d71c0 100644
  #endif /* __ASSEMBLY__ */
  #endif /* CONFIG_FUNCTION_TRACER */
  #endif /* _ASM_MIPS_FTRACE_H */
+diff --git a/arch/mips/include/asm/mach-ar7/ar7.h b/arch/mips/include/asm/mach-ar7/ar7.h
+index f1cf389..483ffea 100644
+--- a/arch/mips/include/asm/mach-ar7/ar7.h
++++ b/arch/mips/include/asm/mach-ar7/ar7.h
+@@ -50,7 +50,7 @@
+ #define UR8_REGS_WDT	(AR7_REGS_BASE + 0x0b00)
+ #define UR8_REGS_UART1	(AR7_REGS_BASE + 0x0f00)
+ 
+-#define AR7_RESET_PEREPHERIAL	0x0
++#define AR7_RESET_PERIPHERAL	0x0
+ #define AR7_RESET_SOFTWARE	0x4
+ #define AR7_RESET_STATUS	0x8
+ 
+@@ -128,7 +128,7 @@ static inline int ar7_has_high_cpmac(void)
+ static inline void ar7_device_enable(u32 bit)
+ {
+ 	void *reset_reg =
+-		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PEREPHERIAL);
++		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
+ 	writel(readl(reset_reg) | (1 << bit), reset_reg);
+ 	msleep(20);
+ }
+@@ -136,7 +136,7 @@ static inline void ar7_device_enable(u32 bit)
+ static inline void ar7_device_disable(u32 bit)
+ {
+ 	void *reset_reg =
+-		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PEREPHERIAL);
++		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
+ 	writel(readl(reset_reg) & ~(1 << bit), reset_reg);
+ 	msleep(20);
+ }
 diff --git a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h b/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
 index 16210ce..675bd86 100644
 --- a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
@@ -3102,6 +3146,32 @@ index fcdbe3a..53d0bef 100644
  /* irq operation functions */
  extern void bonito_irqdispatch(void);
  extern void __init bonito_irq_init(void);
+diff --git a/arch/mips/include/asm/mach-tx49xx/kmalloc.h b/arch/mips/include/asm/mach-tx49xx/kmalloc.h
+index 913ff19..b74caf6 100644
+--- a/arch/mips/include/asm/mach-tx49xx/kmalloc.h
++++ b/arch/mips/include/asm/mach-tx49xx/kmalloc.h
+@@ -1,8 +1,6 @@
+ #ifndef __ASM_MACH_TX49XX_KMALLOC_H
+ #define __ASM_MACH_TX49XX_KMALLOC_H
+ 
+-/*
+- * All happy, no need to define ARCH_KMALLOC_MINALIGN
+- */
++#define ARCH_KMALLOC_MINALIGN	L1_CACHE_BYTES
+ 
+ #endif /* __ASM_MACH_TX49XX_KMALLOC_H */
+diff --git a/arch/mips/include/asm/sn/agent.h b/arch/mips/include/asm/sn/agent.h
+index ac4ea85..dc81114 100644
+--- a/arch/mips/include/asm/sn/agent.h
++++ b/arch/mips/include/asm/sn/agent.h
+@@ -11,7 +11,6 @@
+ #ifndef _ASM_SGI_SN_AGENT_H
+ #define _ASM_SGI_SN_AGENT_H
+ 
+-#include <linux/topology.h>
+ #include <asm/sn/addrs.h>
+ #include <asm/sn/arch.h>
+ 
 diff --git a/arch/mips/kernel/csrc-r4k.c b/arch/mips/kernel/csrc-r4k.c
 index e95a3cd..b5db0c8 100644
 --- a/arch/mips/kernel/csrc-r4k.c
@@ -3633,6 +3703,152 @@ index 6851fc9..9ba0374 100644
  #ifdef CONFIG_64BIT
  	 PTR_LA	a2, PT_SIZE(sp)
  #else
+diff --git a/arch/mips/kernel/mips-mt-fpaff.c b/arch/mips/kernel/mips-mt-fpaff.c
+index cbc6182..2340f11 100644
+--- a/arch/mips/kernel/mips-mt-fpaff.c
++++ b/arch/mips/kernel/mips-mt-fpaff.c
+@@ -3,6 +3,7 @@
+  * Copyright (C) 2005 Mips Technologies, Inc
+  */
+ #include <linux/cpu.h>
++#include <linux/cpuset.h>
+ #include <linux/cpumask.h>
+ #include <linux/delay.h>
+ #include <linux/kernel.h>
+@@ -39,6 +40,21 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
+ 	return pid ? find_task_by_vpid(pid) : current;
+ }
+ 
++/*
++ * check the target process has a UID that matches the current process's
++ */
++static bool check_same_owner(struct task_struct *p)
++{
++	const struct cred *cred = current_cred(), *pcred;
++	bool match;
++
++	rcu_read_lock();
++	pcred = __task_cred(p);
++	match = (cred->euid == pcred->euid ||
++		 cred->euid == pcred->uid);
++	rcu_read_unlock();
++	return match;
++}
+ 
+ /*
+  * mipsmt_sys_sched_setaffinity - set the cpu affinity of a process
+@@ -46,12 +62,10 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
+ asmlinkage long mipsmt_sys_sched_setaffinity(pid_t pid, unsigned int len,
+ 				      unsigned long __user *user_mask_ptr)
+ {
+-	cpumask_t new_mask;
+-	cpumask_t effective_mask;
+-	int retval;
+-	struct task_struct *p;
++	cpumask_var_t cpus_allowed, new_mask, effective_mask;
+ 	struct thread_info *ti;
+-	uid_t euid;
++	struct task_struct *p;
++	int retval;
+ 
+ 	if (len < sizeof(new_mask))
+ 		return -EINVAL;
+@@ -60,53 +74,74 @@ asmlinkage long mipsmt_sys_sched_setaffinity(pid_t pid, unsigned int len,
+ 		return -EFAULT;
+ 
+ 	get_online_cpus();
+-	read_lock(&tasklist_lock);
++	rcu_read_lock();
+ 
+ 	p = find_process_by_pid(pid);
+ 	if (!p) {
+-		read_unlock(&tasklist_lock);
++		rcu_read_unlock();
+ 		put_online_cpus();
+ 		return -ESRCH;
+ 	}
+ 
+-	/*
+-	 * It is not safe to call set_cpus_allowed with the
+-	 * tasklist_lock held.  We will bump the task_struct's
+-	 * usage count and drop tasklist_lock before invoking
+-	 * set_cpus_allowed.
+-	 */
++	/* Prevent p going away */
+ 	get_task_struct(p);
++	rcu_read_unlock();
+ 
+-	euid = current_euid();
++	if (!alloc_cpumask_var(&cpus_allowed, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_put_task;
++	}
++	if (!alloc_cpumask_var(&new_mask, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_free_cpus_allowed;
++	}
++	if (!alloc_cpumask_var(&effective_mask, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_free_new_mask;
++	}
+ 	retval = -EPERM;
+-	if (euid != p->cred->euid && euid != p->cred->uid &&
+-	    !capable(CAP_SYS_NICE)) {
+-		read_unlock(&tasklist_lock);
++	if (!check_same_owner(p) && !capable(CAP_SYS_NICE))
+ 		goto out_unlock;
+-	}
+ 
+ 	retval = security_task_setscheduler(p, 0, NULL);
+ 	if (retval)
+ 		goto out_unlock;
+ 
+ 	/* Record new user-specified CPU set for future reference */
+-	p->thread.user_cpus_allowed = new_mask;
+-
+-	/* Unlock the task list */
+-	read_unlock(&tasklist_lock);
++	cpumask_copy(&p->thread.user_cpus_allowed, new_mask);
+ 
++ again:
+ 	/* Compute new global allowed CPU set if necessary */
+ 	ti = task_thread_info(p);
+ 	if (test_ti_thread_flag(ti, TIF_FPUBOUND) &&
+-	    cpus_intersects(new_mask, mt_fpu_cpumask)) {
+-		cpus_and(effective_mask, new_mask, mt_fpu_cpumask);
+-		retval = set_cpus_allowed(p, effective_mask);
++	    cpus_intersects(*new_mask, mt_fpu_cpumask)) {
++		cpus_and(*effective_mask, *new_mask, mt_fpu_cpumask);
++		retval = set_cpus_allowed_ptr(p, effective_mask);
+ 	} else {
++		cpumask_copy(effective_mask, new_mask);
+ 		clear_ti_thread_flag(ti, TIF_FPUBOUND);
+-		retval = set_cpus_allowed(p, new_mask);
++		retval = set_cpus_allowed_ptr(p, new_mask);
+ 	}
+ 
++	if (!retval) {
++		cpuset_cpus_allowed(p, cpus_allowed);
++		if (!cpumask_subset(effective_mask, cpus_allowed)) {
++			/*
++			 * We must have raced with a concurrent cpuset
++			 * update. Just reset the cpus_allowed to the
++			 * cpuset's cpus_allowed
++			 */
++			cpumask_copy(new_mask, cpus_allowed);
++			goto again;
++		}
++	}
+ out_unlock:
++	free_cpumask_var(effective_mask);
++out_free_new_mask:
++	free_cpumask_var(new_mask);
++out_free_cpus_allowed:
++	free_cpumask_var(cpus_allowed);
++out_put_task:
+ 	put_task_struct(p);
+ 	put_online_cpus();
+ 	return retval;
 diff --git a/arch/mips/kernel/time.c b/arch/mips/kernel/time.c
 index fb74974..ec6bf00 100644
 --- a/arch/mips/kernel/time.c
@@ -3649,6 +3865,36 @@ index fb74974..ec6bf00 100644
  	plat_time_init();
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
+diff --git a/arch/mips/kernel/traps.c b/arch/mips/kernel/traps.c
+index d612c6d..0f813e6 100644
+--- a/arch/mips/kernel/traps.c
++++ b/arch/mips/kernel/traps.c
+@@ -963,7 +963,7 @@ asmlinkage void do_cpu(struct pt_regs *regs)
+ 
+ 	case 2:
+ 		raw_notifier_call_chain(&cu2_chain, CU2_EXCEPTION, regs);
+-		break;
++		return;
+ 
+ 	case 3:
+ 		break;
+diff --git a/arch/mips/kernel/vdso.c b/arch/mips/kernel/vdso.c
+index b773c11..e5cdfd6 100644
+--- a/arch/mips/kernel/vdso.c
++++ b/arch/mips/kernel/vdso.c
+@@ -61,11 +61,9 @@ static int __init init_vdso(void)
+ 
+ 	vunmap(vdso);
+ 
+-	pr_notice("init_vdso successfull\n");
+-
+ 	return 0;
+ }
+-device_initcall(init_vdso);
++subsys_initcall(init_vdso);
+ 
+ static unsigned long vdso_addr(unsigned long start)
+ {
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
 index 7668c4d..a1e7a0b 100644
 --- a/arch/mips/loongson/common/Makefile
@@ -5063,6 +5309,30 @@ index 36020a0..8cff901 100644
  
  static void reset_cpu(void)
  {
+diff --git a/arch/mips/math-emu/dp_simple.c b/arch/mips/math-emu/dp_simple.c
+index d9ae1db..b909742 100644
+--- a/arch/mips/math-emu/dp_simple.c
++++ b/arch/mips/math-emu/dp_simple.c
+@@ -78,6 +78,7 @@ ieee754dp ieee754dp_abs(ieee754dp x)
+ 	DPSIGN(x) = 0;
+ 
+ 	if (xc == IEEE754_CLASS_SNAN) {
++		SETCX(IEEE754_INVALID_OPERATION);
+ 		return ieee754dp_nanxcpt(ieee754dp_indef(), "abs");
+ 	}
+ 
+diff --git a/arch/mips/math-emu/sp_simple.c b/arch/mips/math-emu/sp_simple.c
+index 3175477..2fd53c9 100644
+--- a/arch/mips/math-emu/sp_simple.c
++++ b/arch/mips/math-emu/sp_simple.c
+@@ -78,6 +78,7 @@ ieee754sp ieee754sp_abs(ieee754sp x)
+ 	SPSIGN(x) = 0;
+ 
+ 	if (xc == IEEE754_CLASS_SNAN) {
++		SETCX(IEEE754_INVALID_OPERATION);
+ 		return ieee754sp_nanxcpt(ieee754sp_indef(), "abs");
+ 	}
+ 
 diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
 index 9547bc0..8388428 100644
 --- a/arch/mips/mm/dma-default.c
@@ -43324,10 +43594,10 @@ index 0000000..7d1e92d
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index e9aa814..dad38ca 100644
+index aa13875..342cb31 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -752,9 +752,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -753,9 +753,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME teach the alarm code how to handle binary mode;
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
