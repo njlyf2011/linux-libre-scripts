@@ -1,7 +1,16 @@
 diff --git a/Makefile b/Makefile
-index c2909ba..0690bb9 100644
+index d06f130..4a10c5e 100644
 --- a/Makefile
 +++ b/Makefile
+@@ -186,7 +186,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
+ # Default value for CROSS_COMPILE is not to prefix executables
+ # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
+ export KBUILD_BUILDHOST := $(SUBARCH)
+-ARCH		?= $(SUBARCH)
++ARCH		?= mips
+ CROSS_COMPILE	?=
+ 
+ # Architecture as present in compile.h
 @@ -227,8 +227,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
  
  HOSTCC       = gcc
@@ -23,7 +32,7 @@ index c2909ba..0690bb9 100644
  
  include $(srctree)/arch/$(SRCARCH)/Makefile
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 8b5d174..42500aa 100644
+index 8b5d174..7c2b345 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -180,7 +180,7 @@ config LASAT
@@ -35,7 +44,23 @@ index 8b5d174..42500aa 100644
  	help
  	  This enables the support of Loongson family of machines.
  
-@@ -1073,6 +1073,8 @@ config CPU_LOONGSON2F
+@@ -509,6 +509,7 @@ config SIBYTE_SWARM
+ 	bool "Sibyte BCM91250A-SWARM"
+ 	select BOOT_ELF32
+ 	select DMA_COHERENT
++	select HAVE_PATA_PLATFORM
+ 	select NR_CPUS_DEFAULT_2
+ 	select SIBYTE_SB1250
+ 	select SWAP_IO_SPACE
+@@ -523,6 +524,7 @@ config SIBYTE_LITTLESUR
+ 	depends on EXPERIMENTAL
+ 	select BOOT_ELF32
+ 	select DMA_COHERENT
++	select HAVE_PATA_PLATFORM
+ 	select NR_CPUS_DEFAULT_2
+ 	select SIBYTE_SB1250
+ 	select SWAP_IO_SPACE
+@@ -1073,6 +1075,8 @@ config CPU_LOONGSON2F
  	bool "Loongson 2F"
  	depends on SYS_HAS_CPU_LOONGSON2F
  	select CPU_LOONGSON2
@@ -44,7 +69,7 @@ index 8b5d174..42500aa 100644
  	help
  	  The Loongson 2F processor implements the MIPS III instruction set
  	  with many extensions.
-@@ -1934,6 +1936,18 @@ config NR_CPUS
+@@ -1934,6 +1938,18 @@ config NR_CPUS
  source "kernel/time/Kconfig"
  
  #
@@ -91,7 +116,7 @@ index d2b88a0..6fccbf0 100644
 +
  endmenu
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
-index 1893efd..fca3fad 100644
+index 1893efd..0456838 100644
 --- a/arch/mips/Makefile
 +++ b/arch/mips/Makefile
 @@ -135,7 +135,10 @@ cflags-$(CONFIG_CPU_LOONGSON2)	+= -Wa,--trap
@@ -106,7 +131,23 @@ index 1893efd..fca3fad 100644
  
  cflags-$(CONFIG_CPU_MIPS32_R1)	+= $(call cc-option,-march=mips32,-mips32 -U_MIPS_ISA -D_MIPS_ISA=_MIPS_ISA_MIPS32) \
  			-Wa,-mips32 -Wa,--trap
-@@ -332,11 +335,11 @@ load-$(CONFIG_WR_PPMC)		+= 0xffffffff80100000
+@@ -185,6 +188,15 @@ libs-$(CONFIG_SNIPROM)		+= arch/mips/fw/sni/
+ libs-y				+= arch/mips/fw/lib/
+ 
+ #
++# Kernel compression
++#
++ifdef SYS_SUPPORTS_ZBOOT
++COMPRESSION_FNAME		= vmlinuz
++else
++COMPRESSION_FNAME		= vmlinux
++endif
++
++#
+ # Board-dependent options and extra files
+ #
+ 
+@@ -332,11 +344,11 @@ load-$(CONFIG_WR_PPMC)		+= 0xffffffff80100000
  #
  # Loongson family
  #
@@ -121,6 +162,94 @@ index 1893efd..fca3fad 100644
  
  #
  # MIPS Malta board
+@@ -344,7 +356,7 @@ load-$(CONFIG_LEMOTE_MACH2F) +=0xffffffff80200000
+ core-$(CONFIG_MIPS_MALTA)	+= arch/mips/mti-malta/
+ cflags-$(CONFIG_MIPS_MALTA)	+= -I$(srctree)/arch/mips/include/asm/mach-malta
+ load-$(CONFIG_MIPS_MALTA)	+= 0xffffffff80100000
+-all-$(CONFIG_MIPS_MALTA)	:= vmlinuz.bin
++all-$(CONFIG_MIPS_MALTA)	:= $(COMPRESSION_FNAME).bin
+ 
+ #
+ # MIPS SIM
+@@ -594,7 +606,7 @@ load-$(CONFIG_SNI_RM)		+= 0xffffffff80600000
+ else
+ load-$(CONFIG_SNI_RM)		+= 0xffffffff80030000
+ endif
+-all-$(CONFIG_SNI_RM)		:= vmlinuz.ecoff
++all-$(CONFIG_SNI_RM)		:= $(COMPRESSION_FNAME).ecoff
+ 
+ #
+ # Common TXx9
+diff --git a/arch/mips/ar7/platform.c b/arch/mips/ar7/platform.c
+index f70a10a..76f0d0a 100644
+--- a/arch/mips/ar7/platform.c
++++ b/arch/mips/ar7/platform.c
+@@ -509,7 +509,7 @@ static int __init ar7_register_devices(void)
+ 
+ 	memset(uart_port, 0, sizeof(struct uart_port) * 2);
+ 
+-	uart_port[0].type = PORT_16550A;
++	uart_port[0].type = PORT_AR7;
+ 	uart_port[0].line = 0;
+ 	uart_port[0].irq = AR7_IRQ_UART0;
+ 	uart_port[0].uartclk = ar7_bus_freq() / 2;
+diff --git a/arch/mips/bcm63xx/boards/board_bcm963xx.c b/arch/mips/bcm63xx/boards/board_bcm963xx.c
+index 1fe412c..45b136e 100644
+--- a/arch/mips/bcm63xx/boards/board_bcm963xx.c
++++ b/arch/mips/bcm63xx/boards/board_bcm963xx.c
+@@ -659,6 +659,17 @@ void __init board_prom_init(void)
+ 	}
+ 
+ 	bcm_gpio_writel(val, GPIO_MODE_REG);
++
++	/* Generate MAC address for WLAN and
++	 * register our SPROM */
++#ifdef CONFIG_SSB_PCIHOST
++	if (!board_get_mac_address(bcm63xx_sprom.il0mac)) {
++		memcpy(bcm63xx_sprom.et0mac, bcm63xx_sprom.il0mac, ETH_ALEN);
++		memcpy(bcm63xx_sprom.et1mac, bcm63xx_sprom.il0mac, ETH_ALEN);
++		if (ssb_arch_set_fallback_sprom(&bcm63xx_sprom) < 0)
++			printk(KERN_ERR "failed to register fallback SPROM\n");
++	}
++#endif
+ }
+ 
+ /*
+@@ -806,17 +817,6 @@ int __init board_register_devices(void)
+ 	if (board.has_dsp)
+ 		bcm63xx_dsp_register(&board.dsp);
+ 
+-	/* Generate MAC address for WLAN and
+-	 * register our SPROM */
+-#ifdef CONFIG_SSB_PCIHOST
+-	if (!board_get_mac_address(bcm63xx_sprom.il0mac)) {
+-		memcpy(bcm63xx_sprom.et0mac, bcm63xx_sprom.il0mac, ETH_ALEN);
+-		memcpy(bcm63xx_sprom.et1mac, bcm63xx_sprom.il0mac, ETH_ALEN);
+-		if (ssb_arch_set_fallback_sprom(&bcm63xx_sprom) < 0)
+-			printk(KERN_ERR "failed to register fallback SPROM\n");
+-	}
+-#endif
+-
+ 	/* read base address of boot chip select (0) */
+ 	if (BCMCPU_IS_6345())
+ 		val = 0x1fc00000;
+diff --git a/arch/mips/bcm63xx/gpio.c b/arch/mips/bcm63xx/gpio.c
+index 87ca390..315bc7f 100644
+--- a/arch/mips/bcm63xx/gpio.c
++++ b/arch/mips/bcm63xx/gpio.c
+@@ -125,10 +125,10 @@ static struct gpio_chip bcm63xx_gpio_chip = {
+ 
+ int __init bcm63xx_gpio_init(void)
+ {
++	gpio_out_low = bcm_gpio_readl(GPIO_DATA_LO_REG);
++	gpio_out_high = bcm_gpio_readl(GPIO_DATA_HI_REG);
+ 	bcm63xx_gpio_chip.ngpio = bcm63xx_gpio_count();
+ 	pr_info("registering %d GPIOs\n", bcm63xx_gpio_chip.ngpio);
+ 
+ 	return gpiochip_add(&bcm63xx_gpio_chip);
+ }
+-
+-arch_initcall(bcm63xx_gpio_init);
 diff --git a/arch/mips/boot/compressed/Makefile b/arch/mips/boot/compressed/Makefile
 index 9df903d..10805a3 100644
 --- a/arch/mips/boot/compressed/Makefile
@@ -212,6 +341,150 @@ index 613a35b..5d5b18c 100644
  	_edata  =  .;	/* End of data section */
  
  	/* BSS */
+diff --git a/arch/mips/cavium-octeon/setup.c b/arch/mips/cavium-octeon/setup.c
+index b321d3b..9a06fa9 100644
+--- a/arch/mips/cavium-octeon/setup.c
++++ b/arch/mips/cavium-octeon/setup.c
+@@ -45,9 +45,6 @@ extern struct plat_smp_ops octeon_smp_ops;
+ extern void pci_console_init(const char *arg);
+ #endif
+ 
+-#ifdef CONFIG_CAVIUM_RESERVE32
+-extern uint64_t octeon_reserve32_memory;
+-#endif
+ static unsigned long long MAX_MEMORY = 512ull << 20;
+ 
+ struct octeon_boot_descriptor *octeon_boot_desc_ptr;
+@@ -186,54 +183,6 @@ void octeon_check_cpu_bist(void)
+ 	write_octeon_c0_dcacheerr(0);
+ }
+ 
+-#ifdef CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB
+-/**
+- * Called on every core to setup the wired tlb entry needed
+- * if CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB is set.
+- *
+- */
+-static void octeon_hal_setup_per_cpu_reserved32(void *unused)
+-{
+-	/*
+-	 * The config has selected to wire the reserve32 memory for all
+-	 * userspace applications. We need to put a wired TLB entry in for each
+-	 * 512MB of reserve32 memory. We only handle double 256MB pages here,
+-	 * so reserve32 must be multiple of 512MB.
+-	 */
+-	uint32_t size = CONFIG_CAVIUM_RESERVE32;
+-	uint32_t entrylo0 =
+-		0x7 | ((octeon_reserve32_memory & ((1ul << 40) - 1)) >> 6);
+-	uint32_t entrylo1 = entrylo0 + (256 << 14);
+-	uint32_t entryhi = (0x80000000UL - (CONFIG_CAVIUM_RESERVE32 << 20));
+-	while (size >= 512) {
+-#if 0
+-		pr_info("CPU%d: Adding double wired TLB entry for 0x%lx\n",
+-			smp_processor_id(), entryhi);
+-#endif
+-		add_wired_entry(entrylo0, entrylo1, entryhi, PM_256M);
+-		entrylo0 += 512 << 14;
+-		entrylo1 += 512 << 14;
+-		entryhi += 512 << 20;
+-		size -= 512;
+-	}
+-}
+-#endif /* CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB */
+-
+-/**
+- * Called to release the named block which was used to made sure
+- * that nobody used the memory for something else during
+- * init. Now we'll free it so userspace apps can use this
+- * memory region with bootmem_alloc.
+- *
+- * This function is called only once from prom_free_prom_memory().
+- */
+-void octeon_hal_setup_reserved32(void)
+-{
+-#ifdef CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB
+-	on_each_cpu(octeon_hal_setup_per_cpu_reserved32, NULL, 0, 1);
+-#endif
+-}
+-
+ /**
+  * Reboot Octeon
+  *
+@@ -294,18 +243,6 @@ static void octeon_halt(void)
+ 	octeon_kill_core(NULL);
+ }
+ 
+-#if 0
+-/**
+- * Platform time init specifics.
+- * Returns
+- */
+-void __init plat_time_init(void)
+-{
+-	/* Nothing special here, but we are required to have one */
+-}
+-
+-#endif
+-
+ /**
+  * Handle all the error condition interrupts that might occur.
+  *
+@@ -502,25 +439,13 @@ void __init prom_init(void)
+ 	 * memory when it is getting memory from the
+ 	 * bootloader. Later, after the memory allocations are
+ 	 * complete, the reserve32 will be freed.
+-	 */
+-#ifdef CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB
+-	if (CONFIG_CAVIUM_RESERVE32 & 0x1ff)
+-		pr_err("CAVIUM_RESERVE32 isn't a multiple of 512MB. "
+-		       "This is required if CAVIUM_RESERVE32_USE_WIRED_TLB "
+-		       "is set\n");
+-	else
+-		addr = cvmx_bootmem_phy_named_block_alloc(CONFIG_CAVIUM_RESERVE32 << 20,
+-							0, 0, 512 << 20,
+-							"CAVIUM_RESERVE32", 0);
+-#else
+-	/*
++	 *
+ 	 * Allocate memory for RESERVED32 aligned on 2MB boundary. This
+ 	 * is in case we later use hugetlb entries with it.
+ 	 */
+ 	addr = cvmx_bootmem_phy_named_block_alloc(CONFIG_CAVIUM_RESERVE32 << 20,
+ 						0, 0, 2 << 20,
+ 						"CAVIUM_RESERVE32", 0);
+-#endif
+ 	if (addr < 0)
+ 		pr_err("Failed to allocate CAVIUM_RESERVE32 memory area\n");
+ 	else
+@@ -817,9 +742,4 @@ void prom_free_prom_memory(void)
+ 		panic("Unable to request_irq(OCTEON_IRQ_RML)\n");
+ 	}
+ #endif
+-
+-	/* This call is here so that it is performed after any TLB
+-	   initializations. It needs to be after these in case the
+-	   CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB option is set */
+-	octeon_hal_setup_reserved32();
+ }
+diff --git a/arch/mips/cavium-octeon/smp.c b/arch/mips/cavium-octeon/smp.c
+index c198efd..09c0b46 100644
+--- a/arch/mips/cavium-octeon/smp.c
++++ b/arch/mips/cavium-octeon/smp.c
+@@ -279,14 +279,6 @@ static void octeon_cpu_die(unsigned int cpu)
+ 	uint32_t avail_coremask;
+ 	struct cvmx_bootmem_named_block_desc *block_desc;
+ 
+-#ifdef CONFIG_CAVIUM_OCTEON_WATCHDOG
+-	/* Disable the watchdog */
+-	cvmx_ciu_wdogx_t ciu_wdog;
+-	ciu_wdog.u64 = cvmx_read_csr(CVMX_CIU_WDOGX(cpu));
+-	ciu_wdog.s.mode = 0;
+-	cvmx_write_csr(CVMX_CIU_WDOGX(cpu), ciu_wdog.u64);
+-#endif
+-
+ 	while (per_cpu(cpu_state, cpu) != CPU_DEAD)
+ 		cpu_relax();
+ 
 diff --git a/arch/mips/configs/fuloong2e_defconfig b/arch/mips/configs/fuloong2e_defconfig
 index a09dd03..0b517f8 100644
 --- a/arch/mips/configs/fuloong2e_defconfig
@@ -3750,6 +4023,18 @@ index 664ba53..c39bfdf 100644
 +		void *cpu_addr, dma_addr_t handle, size_t size);
 +
  #endif /* _ASM_DMA_MAPPING_H */
+diff --git a/arch/mips/include/asm/elf.h b/arch/mips/include/asm/elf.h
+index 7a6a35d..66d8fb9 100644
+--- a/arch/mips/include/asm/elf.h
++++ b/arch/mips/include/asm/elf.h
+@@ -310,6 +310,7 @@ do {									\
+ 
+ #endif /* CONFIG_64BIT */
+ 
++struct pt_regs;
+ struct task_struct;
+ 
+ extern void elf_dump_regs(elf_greg_t *, struct pt_regs *regs);
 diff --git a/arch/mips/include/asm/ftrace.h b/arch/mips/include/asm/ftrace.h
 index 3986cd8..6dbfa1e 100644
 --- a/arch/mips/include/asm/ftrace.h
@@ -3790,6 +4075,65 @@ index 3986cd8..6dbfa1e 100644
  #endif /* __ASSEMBLY__ */
  #endif /* CONFIG_FUNCTION_TRACER */
  #endif /* _ASM_MIPS_FTRACE_H */
+diff --git a/arch/mips/include/asm/mach-ar7/ar7.h b/arch/mips/include/asm/mach-ar7/ar7.h
+index 21cbbc7..a140232 100644
+--- a/arch/mips/include/asm/mach-ar7/ar7.h
++++ b/arch/mips/include/asm/mach-ar7/ar7.h
+@@ -50,7 +50,7 @@
+ #define UR8_REGS_WDT	(AR7_REGS_BASE + 0x0b00)
+ #define UR8_REGS_UART1	(AR7_REGS_BASE + 0x0f00)
+ 
+-#define AR7_RESET_PEREPHERIAL	0x0
++#define AR7_RESET_PERIPHERAL	0x0
+ #define AR7_RESET_SOFTWARE	0x4
+ #define AR7_RESET_STATUS	0x8
+ 
+@@ -145,7 +145,7 @@ static inline int ar7_has_high_cpmac(void)
+ static inline void ar7_device_enable(u32 bit)
+ {
+ 	void *reset_reg =
+-		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PEREPHERIAL);
++		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
+ 	writel(readl(reset_reg) | (1 << bit), reset_reg);
+ 	msleep(20);
+ }
+@@ -153,7 +153,7 @@ static inline void ar7_device_enable(u32 bit)
+ static inline void ar7_device_disable(u32 bit)
+ {
+ 	void *reset_reg =
+-		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PEREPHERIAL);
++		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
+ 	writel(readl(reset_reg) & ~(1 << bit), reset_reg);
+ 	msleep(20);
+ }
+diff --git a/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h b/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h
+index 76a0b72..43d4da0 100644
+--- a/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h
++++ b/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h
+@@ -10,6 +10,10 @@ static inline unsigned long bcm63xx_gpio_count(void)
+ 	switch (bcm63xx_get_cpu_id()) {
+ 	case BCM6358_CPU_ID:
+ 		return 40;
++	case BCM6338_CPU_ID:
++		return 8;
++	case BCM6345_CPU_ID:
++		return 16;
+ 	case BCM6348_CPU_ID:
+ 	default:
+ 		return 37;
+diff --git a/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h b/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h
+index 71742ba..f453c01 100644
+--- a/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h
++++ b/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h
+@@ -24,7 +24,7 @@
+ #define cpu_has_smartmips		0
+ #define cpu_has_vtag_icache		0
+ 
+-#if !defined(BCMCPU_RUNTIME_DETECT) && (defined(CONFIG_BCMCPU_IS_6348) || defined(CONFIG_CPU_IS_6338) || defined(CONFIG_CPU_IS_BCM6345))
++#if !defined(BCMCPU_RUNTIME_DETECT) && (defined(CONFIG_BCM63XX_CPU_6348) || defined(CONFIG_BCM63XX_CPU_6345) || defined(CONFIG_BCM63XX_CPU_6338))
+ #define cpu_has_dc_aliases		0
+ #endif
+ 
 diff --git a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h b/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
 index 9947e57..16210ce 100644
 --- a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
@@ -4226,38 +4570,357 @@ index a199a4f..bc99dab 100644
   */
  
  #ifndef __ASM_MACH_LOONGSON_PCI_H_
+diff --git a/arch/mips/include/asm/mach-tx49xx/kmalloc.h b/arch/mips/include/asm/mach-tx49xx/kmalloc.h
+index 913ff19..b74caf6 100644
+--- a/arch/mips/include/asm/mach-tx49xx/kmalloc.h
++++ b/arch/mips/include/asm/mach-tx49xx/kmalloc.h
+@@ -1,8 +1,6 @@
+ #ifndef __ASM_MACH_TX49XX_KMALLOC_H
+ #define __ASM_MACH_TX49XX_KMALLOC_H
+ 
+-/*
+- * All happy, no need to define ARCH_KMALLOC_MINALIGN
+- */
++#define ARCH_KMALLOC_MINALIGN	L1_CACHE_BYTES
+ 
+ #endif /* __ASM_MACH_TX49XX_KMALLOC_H */
+diff --git a/arch/mips/include/asm/page.h b/arch/mips/include/asm/page.h
+index f266295..33ca0d9 100644
+--- a/arch/mips/include/asm/page.h
++++ b/arch/mips/include/asm/page.h
+@@ -200,8 +200,10 @@ typedef struct { unsigned long pgprot; } pgprot_t;
+ #define VM_DATA_DEFAULT_FLAGS	(VM_READ | VM_WRITE | VM_EXEC | \
+ 				 VM_MAYREAD | VM_MAYWRITE | VM_MAYEXEC)
+ 
+-#define UNCAC_ADDR(addr)	((addr) - PAGE_OFFSET + UNCAC_BASE)
+-#define CAC_ADDR(addr)		((addr) - UNCAC_BASE + PAGE_OFFSET)
++#define UNCAC_ADDR(addr)	((addr) - PAGE_OFFSET + UNCAC_BASE + 	\
++								PHYS_OFFSET)
++#define CAC_ADDR(addr)		((addr) - UNCAC_BASE + PAGE_OFFSET -	\
++								PHYS_OFFSET)
+ 
+ #include <asm-generic/memory_model.h>
+ #include <asm-generic/getorder.h>
+diff --git a/arch/mips/include/asm/pgtable-64.h b/arch/mips/include/asm/pgtable-64.h
+index 8eda30b..2d7acd4 100644
+--- a/arch/mips/include/asm/pgtable-64.h
++++ b/arch/mips/include/asm/pgtable-64.h
+@@ -107,9 +107,14 @@
+ #endif
+ #define FIRST_USER_ADDRESS	0UL
+ 
+-#define VMALLOC_START		MAP_BASE
++/*
++ * TLB refill handlers also map the vmalloc area into xuseg.  Avoid
++ * the first couple of pages so NULL pointer dereferences will still
++ * reliably trap.
++ */
++#define VMALLOC_START		(MAP_BASE + (2 * PAGE_SIZE))
+ #define VMALLOC_END	\
+-	(VMALLOC_START + \
++	(MAP_BASE + \
+ 	 min(PTRS_PER_PGD * PTRS_PER_PMD * PTRS_PER_PTE * PAGE_SIZE, \
+ 	     (1UL << cpu_vmbits)) - (1UL << 32))
+ 
+diff --git a/arch/mips/include/asm/ptrace.h b/arch/mips/include/asm/ptrace.h
+index ce47118..cdc6a46 100644
+--- a/arch/mips/include/asm/ptrace.h
++++ b/arch/mips/include/asm/ptrace.h
+@@ -142,9 +142,9 @@ extern int ptrace_set_watch_regs(struct task_struct *child,
+ 
+ extern asmlinkage void do_syscall_trace(struct pt_regs *regs, int entryexit);
+ 
+-extern NORET_TYPE void die(const char *, const struct pt_regs *) ATTRIB_NORET;
++extern NORET_TYPE void die(const char *, struct pt_regs *) ATTRIB_NORET;
+ 
+-static inline void die_if_kernel(const char *str, const struct pt_regs *regs)
++static inline void die_if_kernel(const char *str, struct pt_regs *regs)
+ {
+ 	if (unlikely(!user_mode(regs)))
+ 		die(str, regs);
+diff --git a/arch/mips/include/asm/sn/agent.h b/arch/mips/include/asm/sn/agent.h
+index ac4ea85..dc81114 100644
+--- a/arch/mips/include/asm/sn/agent.h
++++ b/arch/mips/include/asm/sn/agent.h
+@@ -11,7 +11,6 @@
+ #ifndef _ASM_SGI_SN_AGENT_H
+ #define _ASM_SGI_SN_AGENT_H
+ 
+-#include <linux/topology.h>
+ #include <asm/sn/addrs.h>
+ #include <asm/sn/arch.h>
+ 
 diff --git a/arch/mips/include/asm/stackframe.h b/arch/mips/include/asm/stackframe.h
-index 3b6da33..7b2eff0 100644
+index 3b6da33..c841912 100644
 --- a/arch/mips/include/asm/stackframe.h
 +++ b/arch/mips/include/asm/stackframe.h
 @@ -121,6 +121,25 @@
  		.endm
  #else
  		.macro	get_saved_sp	/* Uniprocessor variation */
-+		/*
-+		 * clear BTB(branch target buffer), forbid RAS(row address
-+		 * strobe) to make cpu execute predictively via
-+		 * loongson2-specific 64bit diagnostic register
-+		 */
 +#ifdef CONFIG_CPU_LOONGSON2F
-+		move k0, ra
++		/*
++		 * Clear BTB (branch target buffer), forbid RAS (return address
++		 * stack) to workaround the Out-of-order Issue in Loongson2F
++		 * via its diagnostic register.
++		 */
++		move	k0, ra
 +		jal	1f
-+		nop
++		 nop
 +1:		jal	1f
-+		nop
++		 nop
 +1:		jal	1f
-+		nop
++		 nop
 +1:		jal	1f
-+		nop
++		 nop
 +1:		move	ra, k0
 +		li	k0, 3
 +		mtc0	k0, $22
-+#endif
++#endif /* CONFIG_CPU_LOONGSON2F */
  #if defined(CONFIG_32BIT) || defined(KBUILD_64BIT_SYM32)
  		lui	k1, %hi(kernelsp)
  #else
+diff --git a/arch/mips/include/asm/uasm.h b/arch/mips/include/asm/uasm.h
+new file mode 100644
+index 0000000..f8bb7bb
+--- /dev/null
++++ b/arch/mips/include/asm/uasm.h
+@@ -0,0 +1,210 @@
++/*
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Copyright (C) 2004, 2005, 2006, 2008  Thiemo Seufer
++ * Copyright (C) 2005  Maciej W. Rozycki
++ * Copyright (C) 2006  Ralf Baechle (ralf@linux-mips.org)
++ */
++
++#include <linux/types.h>
++
++#define Ip_u1u2u3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
++
++#define Ip_u2u1u3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
++
++#define Ip_u3u1u2(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
++
++#define Ip_u1u2s3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
++
++#define Ip_u2s3u1(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, signed int b, unsigned int c)
++
++#define Ip_u2u1s3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
++
++#define Ip_u2u1msbu3(op)						\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c,	\
++	   unsigned int d)
++
++#define Ip_u1u2(op)							\
++void __cpuinit uasm_i##op(u32 **buf, unsigned int a, unsigned int b)
++
++#define Ip_u1s2(op)							\
++void __cpuinit uasm_i##op(u32 **buf, unsigned int a, signed int b)
++
++#define Ip_u1(op) void __cpuinit uasm_i##op(u32 **buf, unsigned int a)
++
++#define Ip_0(op) void __cpuinit uasm_i##op(u32 **buf)
++
++Ip_u2u1s3(_addiu);
++Ip_u3u1u2(_addu);
++Ip_u2u1u3(_andi);
++Ip_u3u1u2(_and);
++Ip_u1u2s3(_beq);
++Ip_u1u2s3(_beql);
++Ip_u1s2(_bgez);
++Ip_u1s2(_bgezl);
++Ip_u1s2(_bltz);
++Ip_u1s2(_bltzl);
++Ip_u1u2s3(_bne);
++Ip_u2s3u1(_cache);
++Ip_u1u2u3(_dmfc0);
++Ip_u1u2u3(_dmtc0);
++Ip_u2u1s3(_daddiu);
++Ip_u3u1u2(_daddu);
++Ip_u2u1u3(_dsll);
++Ip_u2u1u3(_dsll32);
++Ip_u2u1u3(_dsra);
++Ip_u2u1u3(_dsrl);
++Ip_u2u1u3(_dsrl32);
++Ip_u2u1u3(_drotr);
++Ip_u3u1u2(_dsubu);
++Ip_0(_eret);
++Ip_u1(_j);
++Ip_u1(_jal);
++Ip_u1(_jr);
++Ip_u2s3u1(_ld);
++Ip_u2s3u1(_ll);
++Ip_u2s3u1(_lld);
++Ip_u1s2(_lui);
++Ip_u2s3u1(_lw);
++Ip_u1u2u3(_mfc0);
++Ip_u1u2u3(_mtc0);
++Ip_u2u1u3(_ori);
++Ip_u3u1u2(_or);
++Ip_u2s3u1(_pref);
++Ip_0(_rfe);
++Ip_u2s3u1(_sc);
++Ip_u2s3u1(_scd);
++Ip_u2s3u1(_sd);
++Ip_u2u1u3(_sll);
++Ip_u2u1u3(_sra);
++Ip_u2u1u3(_srl);
++Ip_u3u1u2(_subu);
++Ip_u2s3u1(_sw);
++Ip_0(_tlbp);
++Ip_0(_tlbwi);
++Ip_0(_tlbwr);
++Ip_u3u1u2(_xor);
++Ip_u2u1u3(_xori);
++Ip_u2u1msbu3(_dins);
++
++/* Handle labels. */
++struct uasm_label {
++	u32 *addr;
++	int lab;
++};
++
++void __cpuinit uasm_build_label(struct uasm_label **lab, u32 *addr, int lid);
++#ifdef CONFIG_64BIT
++int uasm_in_compat_space_p(long addr);
++#endif
++int uasm_rel_hi(long val);
++int uasm_rel_lo(long val);
++void UASM_i_LA_mostly(u32 **buf, unsigned int rs, long addr);
++void UASM_i_LA(u32 **buf, unsigned int rs, long addr);
++
++#define UASM_L_LA(lb)							\
++static inline void __cpuinit uasm_l##lb(struct uasm_label **lab, u32 *addr) \
++{									\
++	uasm_build_label(lab, addr, label##lb);				\
++}
++
++/* convenience macros for instructions */
++#ifdef CONFIG_64BIT
++# define UASM_i_LW(buf, rs, rt, off) uasm_i_ld(buf, rs, rt, off)
++# define UASM_i_SW(buf, rs, rt, off) uasm_i_sd(buf, rs, rt, off)
++# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_dsll(buf, rs, rt, sh)
++# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_dsra(buf, rs, rt, sh)
++# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_dsrl(buf, rs, rt, sh)
++# define UASM_i_MFC0(buf, rt, rd...) uasm_i_dmfc0(buf, rt, rd)
++# define UASM_i_MTC0(buf, rt, rd...) uasm_i_dmtc0(buf, rt, rd)
++# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_daddiu(buf, rs, rt, val)
++# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_daddu(buf, rs, rt, rd)
++# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_dsubu(buf, rs, rt, rd)
++# define UASM_i_LL(buf, rs, rt, off) uasm_i_lld(buf, rs, rt, off)
++# define UASM_i_SC(buf, rs, rt, off) uasm_i_scd(buf, rs, rt, off)
++#else
++# define UASM_i_LW(buf, rs, rt, off) uasm_i_lw(buf, rs, rt, off)
++# define UASM_i_SW(buf, rs, rt, off) uasm_i_sw(buf, rs, rt, off)
++# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_sll(buf, rs, rt, sh)
++# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_sra(buf, rs, rt, sh)
++# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_srl(buf, rs, rt, sh)
++# define UASM_i_MFC0(buf, rt, rd...) uasm_i_mfc0(buf, rt, rd)
++# define UASM_i_MTC0(buf, rt, rd...) uasm_i_mtc0(buf, rt, rd)
++# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_addiu(buf, rs, rt, val)
++# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_addu(buf, rs, rt, rd)
++# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_subu(buf, rs, rt, rd)
++# define UASM_i_LL(buf, rs, rt, off) uasm_i_ll(buf, rs, rt, off)
++# define UASM_i_SC(buf, rs, rt, off) uasm_i_sc(buf, rs, rt, off)
++#endif
++
++#define uasm_i_b(buf, off) uasm_i_beq(buf, 0, 0, off)
++#define uasm_i_beqz(buf, rs, off) uasm_i_beq(buf, rs, 0, off)
++#define uasm_i_beqzl(buf, rs, off) uasm_i_beql(buf, rs, 0, off)
++#define uasm_i_bnez(buf, rs, off) uasm_i_bne(buf, rs, 0, off)
++#define uasm_i_bnezl(buf, rs, off) uasm_i_bnel(buf, rs, 0, off)
++#define uasm_i_move(buf, a, b) UASM_i_ADDU(buf, a, 0, b)
++#define uasm_i_nop(buf) uasm_i_sll(buf, 0, 0, 0)
++#define uasm_i_ssnop(buf) uasm_i_sll(buf, 0, 0, 1)
++#define uasm_i_ehb(buf) uasm_i_sll(buf, 0, 0, 3)
++
++static inline void uasm_i_dsrl_safe(u32 **p, unsigned int a1,
++				    unsigned int a2, unsigned int a3)
++{
++	if (a3 < 32)
++		uasm_i_dsrl(p, a1, a2, a3);
++	else
++		uasm_i_dsrl32(p, a1, a2, a3 - 32);
++}
++
++static inline void uasm_i_dsll_safe(u32 **p, unsigned int a1,
++				    unsigned int a2, unsigned int a3)
++{
++	if (a3 < 32)
++		uasm_i_dsll(p, a1, a2, a3);
++	else
++		uasm_i_dsll32(p, a1, a2, a3 - 32);
++}
++
++/* Handle relocations. */
++struct uasm_reloc {
++	u32 *addr;
++	unsigned int type;
++	int lab;
++};
++
++/* This is zero so we can use zeroed label arrays. */
++#define UASM_LABEL_INVALID 0
++
++void uasm_r_mips_pc16(struct uasm_reloc **rel, u32 *addr, int lid);
++void uasm_resolve_relocs(struct uasm_reloc *rel, struct uasm_label *lab);
++void uasm_move_relocs(struct uasm_reloc *rel, u32 *first, u32 *end, long off);
++void uasm_move_labels(struct uasm_label *lab, u32 *first, u32 *end, long off);
++void uasm_copy_handler(struct uasm_reloc *rel, struct uasm_label *lab,
++	u32 *first, u32 *end, u32 *target);
++int uasm_insn_has_bdelay(struct uasm_reloc *rel, u32 *addr);
++
++/* Convenience functions for labeled branches. */
++void uasm_il_bltz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_b(u32 **p, struct uasm_reloc **r, int lid);
++void uasm_il_beqz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_beqzl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_bne(u32 **p, struct uasm_reloc **r, unsigned int reg1,
++		 unsigned int reg2, int lid);
++void uasm_il_bnez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_bgezl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_bgez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+diff --git a/arch/mips/jazz/setup.c b/arch/mips/jazz/setup.c
+index 7043f6b..0d0f054 100644
+--- a/arch/mips/jazz/setup.c
++++ b/arch/mips/jazz/setup.c
+@@ -76,15 +76,9 @@ void __init plat_mem_setup(void)
+ 
+ #ifdef CONFIG_VT
+ 	screen_info = (struct screen_info) {
+-		0, 0,		/* orig-x, orig-y */
+-		0,		/* unused */
+-		0,		/* orig_video_page */
+-		0,		/* orig_video_mode */
+-		160,		/* orig_video_cols */
+-		0, 0, 0,	/* unused, ega_bx, unused */
+-		64,		/* orig_video_lines */
+-		0,		/* orig_video_isVGA */
+-		16		/* orig_video_points */
++		.orig_video_cols	= 160,
++		.orig_video_lines	= 64,
++		.orig_video_points	= 16,
+ 	};
+ #endif
+ 
 diff --git a/arch/mips/kernel/cpufreq/loongson2_clock.c b/arch/mips/kernel/cpufreq/loongson2_clock.c
-index d7ca256..3eaae1d 100644
+index d7ca256..cefc6e2 100644
 --- a/arch/mips/kernel/cpufreq/loongson2_clock.c
 +++ b/arch/mips/kernel/cpufreq/loongson2_clock.c
 @@ -164,3 +164,7 @@ void loongson2_cpu_wait(void)
@@ -4266,7 +4929,7 @@ index d7ca256..3eaae1d 100644
  EXPORT_SYMBOL_GPL(loongson2_cpu_wait);
 +
 +MODULE_AUTHOR("Yanhua <yanh@lemote.com>");
-+MODULE_DESCRIPTION("cpuclock driver of Loongson2F");
++MODULE_DESCRIPTION("cpufreq driver for Loongson 2F");
 +MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/csrc-r4k.c b/arch/mips/kernel/csrc-r4k.c
 index e95a3cd..b5db0c8 100644
@@ -4745,6 +5408,197 @@ index 0a9cfdb..6851fc9 100644
   */
  
  #include <asm/regdef.h>
+diff --git a/arch/mips/kernel/mips-mt-fpaff.c b/arch/mips/kernel/mips-mt-fpaff.c
+index cbc6182..2340f11 100644
+--- a/arch/mips/kernel/mips-mt-fpaff.c
++++ b/arch/mips/kernel/mips-mt-fpaff.c
+@@ -3,6 +3,7 @@
+  * Copyright (C) 2005 Mips Technologies, Inc
+  */
+ #include <linux/cpu.h>
++#include <linux/cpuset.h>
+ #include <linux/cpumask.h>
+ #include <linux/delay.h>
+ #include <linux/kernel.h>
+@@ -39,6 +40,21 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
+ 	return pid ? find_task_by_vpid(pid) : current;
+ }
+ 
++/*
++ * check the target process has a UID that matches the current process's
++ */
++static bool check_same_owner(struct task_struct *p)
++{
++	const struct cred *cred = current_cred(), *pcred;
++	bool match;
++
++	rcu_read_lock();
++	pcred = __task_cred(p);
++	match = (cred->euid == pcred->euid ||
++		 cred->euid == pcred->uid);
++	rcu_read_unlock();
++	return match;
++}
+ 
+ /*
+  * mipsmt_sys_sched_setaffinity - set the cpu affinity of a process
+@@ -46,12 +62,10 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
+ asmlinkage long mipsmt_sys_sched_setaffinity(pid_t pid, unsigned int len,
+ 				      unsigned long __user *user_mask_ptr)
+ {
+-	cpumask_t new_mask;
+-	cpumask_t effective_mask;
+-	int retval;
+-	struct task_struct *p;
++	cpumask_var_t cpus_allowed, new_mask, effective_mask;
+ 	struct thread_info *ti;
+-	uid_t euid;
++	struct task_struct *p;
++	int retval;
+ 
+ 	if (len < sizeof(new_mask))
+ 		return -EINVAL;
+@@ -60,53 +74,74 @@ asmlinkage long mipsmt_sys_sched_setaffinity(pid_t pid, unsigned int len,
+ 		return -EFAULT;
+ 
+ 	get_online_cpus();
+-	read_lock(&tasklist_lock);
++	rcu_read_lock();
+ 
+ 	p = find_process_by_pid(pid);
+ 	if (!p) {
+-		read_unlock(&tasklist_lock);
++		rcu_read_unlock();
+ 		put_online_cpus();
+ 		return -ESRCH;
+ 	}
+ 
+-	/*
+-	 * It is not safe to call set_cpus_allowed with the
+-	 * tasklist_lock held.  We will bump the task_struct's
+-	 * usage count and drop tasklist_lock before invoking
+-	 * set_cpus_allowed.
+-	 */
++	/* Prevent p going away */
+ 	get_task_struct(p);
++	rcu_read_unlock();
+ 
+-	euid = current_euid();
++	if (!alloc_cpumask_var(&cpus_allowed, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_put_task;
++	}
++	if (!alloc_cpumask_var(&new_mask, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_free_cpus_allowed;
++	}
++	if (!alloc_cpumask_var(&effective_mask, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_free_new_mask;
++	}
+ 	retval = -EPERM;
+-	if (euid != p->cred->euid && euid != p->cred->uid &&
+-	    !capable(CAP_SYS_NICE)) {
+-		read_unlock(&tasklist_lock);
++	if (!check_same_owner(p) && !capable(CAP_SYS_NICE))
+ 		goto out_unlock;
+-	}
+ 
+ 	retval = security_task_setscheduler(p, 0, NULL);
+ 	if (retval)
+ 		goto out_unlock;
+ 
+ 	/* Record new user-specified CPU set for future reference */
+-	p->thread.user_cpus_allowed = new_mask;
+-
+-	/* Unlock the task list */
+-	read_unlock(&tasklist_lock);
++	cpumask_copy(&p->thread.user_cpus_allowed, new_mask);
+ 
++ again:
+ 	/* Compute new global allowed CPU set if necessary */
+ 	ti = task_thread_info(p);
+ 	if (test_ti_thread_flag(ti, TIF_FPUBOUND) &&
+-	    cpus_intersects(new_mask, mt_fpu_cpumask)) {
+-		cpus_and(effective_mask, new_mask, mt_fpu_cpumask);
+-		retval = set_cpus_allowed(p, effective_mask);
++	    cpus_intersects(*new_mask, mt_fpu_cpumask)) {
++		cpus_and(*effective_mask, *new_mask, mt_fpu_cpumask);
++		retval = set_cpus_allowed_ptr(p, effective_mask);
+ 	} else {
++		cpumask_copy(effective_mask, new_mask);
+ 		clear_ti_thread_flag(ti, TIF_FPUBOUND);
+-		retval = set_cpus_allowed(p, new_mask);
++		retval = set_cpus_allowed_ptr(p, new_mask);
+ 	}
+ 
++	if (!retval) {
++		cpuset_cpus_allowed(p, cpus_allowed);
++		if (!cpumask_subset(effective_mask, cpus_allowed)) {
++			/*
++			 * We must have raced with a concurrent cpuset
++			 * update. Just reset the cpus_allowed to the
++			 * cpuset's cpus_allowed
++			 */
++			cpumask_copy(new_mask, cpus_allowed);
++			goto again;
++		}
++	}
+ out_unlock:
++	free_cpumask_var(effective_mask);
++out_free_new_mask:
++	free_cpumask_var(new_mask);
++out_free_cpus_allowed:
++	free_cpumask_var(cpus_allowed);
++out_put_task:
+ 	put_task_struct(p);
+ 	put_online_cpus();
+ 	return retval;
+diff --git a/arch/mips/kernel/process.c b/arch/mips/kernel/process.c
+index f3d73e1..87d19dd 100644
+--- a/arch/mips/kernel/process.c
++++ b/arch/mips/kernel/process.c
+@@ -64,8 +64,13 @@ void __noreturn cpu_idle(void)
+ 
+ 			smtc_idle_loop_hook();
+ #endif
+-			if (cpu_wait)
++
++			if (cpu_wait) {
++				/* Don't trace irqs off for idle */
++				stop_critical_timings();
+ 				(*cpu_wait)();
++				start_critical_timings();
++			}
+ 		}
+ #ifdef CONFIG_HOTPLUG_CPU
+ 		if (!cpu_online(cpu) && !cpu_isset(cpu, cpu_callin_map) &&
+diff --git a/arch/mips/kernel/scall64-n32.S b/arch/mips/kernel/scall64-n32.S
+index 66b5a48..f20ac1a 100644
+--- a/arch/mips/kernel/scall64-n32.S
++++ b/arch/mips/kernel/scall64-n32.S
+@@ -385,7 +385,7 @@ EXPORT(sysn32_call_table)
+ 	PTR	sys_fchmodat
+ 	PTR	sys_faccessat
+ 	PTR	compat_sys_pselect6
+-	PTR	sys_ppoll			/* 6265 */
++	PTR	compat_sys_ppoll		/* 6265 */
+ 	PTR	sys_unshare
+ 	PTR	sys_splice
+ 	PTR	sys_sync_file_range
+diff --git a/arch/mips/kernel/smtc.c b/arch/mips/kernel/smtc.c
+index 23499b5..0a5ad2d 100644
+--- a/arch/mips/kernel/smtc.c
++++ b/arch/mips/kernel/smtc.c
+@@ -181,7 +181,7 @@ static int vpemask[2][8] = {
+ 	{0, 0, 0, 0, 0, 0, 0, 1}
+ };
+ int tcnoprog[NR_CPUS];
+-static atomic_t idle_hook_initialized = {0};
++static atomic_t idle_hook_initialized = ATOMIC_INIT(0);
+ static int clock_hang_reported[NR_CPUS];
+ 
+ #endif /* CONFIG_SMTC_IDLE_HOOK_DEBUG */
 diff --git a/arch/mips/kernel/time.c b/arch/mips/kernel/time.c
 index fb74974..ec6bf00 100644
 --- a/arch/mips/kernel/time.c
@@ -4761,6 +5615,153 @@ index fb74974..ec6bf00 100644
  	plat_time_init();
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
+diff --git a/arch/mips/kernel/traps.c b/arch/mips/kernel/traps.c
+index 31b204b..0f813e6 100644
+--- a/arch/mips/kernel/traps.c
++++ b/arch/mips/kernel/traps.c
+@@ -50,6 +50,7 @@
+ #include <asm/types.h>
+ #include <asm/stacktrace.h>
+ #include <asm/irq.h>
++#include <asm/uasm.h>
+ 
+ extern void check_wait(void);
+ extern asmlinkage void r4k_wait(void);
+@@ -351,9 +352,10 @@ void show_registers(const struct pt_regs *regs)
+ 
+ static DEFINE_SPINLOCK(die_lock);
+ 
+-void __noreturn die(const char * str, const struct pt_regs * regs)
++void __noreturn die(const char * str, struct pt_regs * regs)
+ {
+ 	static int die_counter;
++	int sig = SIGSEGV;
+ #ifdef CONFIG_MIPS_MT_SMTC
+ 	unsigned long dvpret = dvpe();
+ #endif /* CONFIG_MIPS_MT_SMTC */
+@@ -364,6 +366,10 @@ void __noreturn die(const char * str, const struct pt_regs * regs)
+ #ifdef CONFIG_MIPS_MT_SMTC
+ 	mips_mt_regdump(dvpret);
+ #endif /* CONFIG_MIPS_MT_SMTC */
++
++	if (notify_die(DIE_OOPS, str, regs, 0, current->thread.trap_no, SIGSEGV) == NOTIFY_STOP)
++		sig = 0;
++
+ 	printk("%s[#%d]:\n", str, ++die_counter);
+ 	show_registers(regs);
+ 	add_taint(TAINT_DIE);
+@@ -378,7 +384,7 @@ void __noreturn die(const char * str, const struct pt_regs * regs)
+ 		panic("Fatal exception");
+ 	}
+ 
+-	do_exit(SIGSEGV);
++	do_exit(sig);
+ }
+ 
+ extern struct exception_table_entry __start___dbe_table[];
+@@ -957,7 +963,7 @@ asmlinkage void do_cpu(struct pt_regs *regs)
+ 
+ 	case 2:
+ 		raw_notifier_call_chain(&cu2_chain, CU2_EXCEPTION, regs);
+-		break;
++		return;
+ 
+ 	case 3:
+ 		break;
+@@ -1271,21 +1277,25 @@ unsigned long ebase;
+ unsigned long exception_handlers[32];
+ unsigned long vi_handlers[64];
+ 
+-/*
+- * As a side effect of the way this is implemented we're limited
+- * to interrupt handlers in the address range from
+- * KSEG0 <= x < KSEG0 + 256mb on the Nevada.  Oh well ...
+- */
+-void *set_except_vector(int n, void *addr)
++void __init *set_except_vector(int n, void *addr)
+ {
+ 	unsigned long handler = (unsigned long) addr;
+ 	unsigned long old_handler = exception_handlers[n];
+ 
+ 	exception_handlers[n] = handler;
+ 	if (n == 0 && cpu_has_divec) {
+-		*(u32 *)(ebase + 0x200) = 0x08000000 |
+-					  (0x03ffffff & (handler >> 2));
+-		local_flush_icache_range(ebase + 0x200, ebase + 0x204);
++		unsigned long jump_mask = ~((1 << 28) - 1);
++		u32 *buf = (u32 *)(ebase + 0x200);
++		unsigned int k0 = 26;
++		if ((handler & jump_mask) == ((ebase + 0x200) & jump_mask)) {
++			uasm_i_j(&buf, handler & ~jump_mask);
++			uasm_i_nop(&buf);
++		} else {
++			UASM_i_LA(&buf, k0, handler);
++			uasm_i_jr(&buf, k0);
++			uasm_i_nop(&buf);
++		}
++		local_flush_icache_range(ebase + 0x200, (unsigned long)buf);
+ 	}
+ 	return (void *)old_handler;
+ }
+@@ -1552,12 +1562,7 @@ static char panic_null_cerr[] __cpuinitdata =
+ void __cpuinit set_uncached_handler(unsigned long offset, void *addr,
+ 	unsigned long size)
+ {
+-#ifdef CONFIG_32BIT
+-	unsigned long uncached_ebase = KSEG1ADDR(ebase);
+-#endif
+-#ifdef CONFIG_64BIT
+-	unsigned long uncached_ebase = TO_UNCAC(ebase);
+-#endif
++	unsigned long uncached_ebase = CKSEG1ADDR(ebase);
+ 
+ 	if (!addr)
+ 		panic(panic_null_cerr);
+@@ -1594,7 +1599,7 @@ void __init trap_init(void)
+ 		ebase = (unsigned long)
+ 			__alloc_bootmem(size, 1 << fls(size), 0);
+ 	} else {
+-		ebase = CAC_BASE;
++		ebase = CKSEG0;
+ 		if (cpu_has_mips_r2)
+ 			ebase += (read_c0_ebase() & 0x3ffff000);
+ 	}
+diff --git a/arch/mips/lib/delay.c b/arch/mips/lib/delay.c
+index 6b3b1de..5995969 100644
+--- a/arch/mips/lib/delay.c
++++ b/arch/mips/lib/delay.c
+@@ -41,7 +41,7 @@ EXPORT_SYMBOL(__delay);
+ 
+ void __udelay(unsigned long us)
+ {
+-	unsigned int lpj = current_cpu_data.udelay_val;
++	unsigned int lpj = raw_current_cpu_data.udelay_val;
+ 
+ 	__delay((us * 0x000010c7ull * HZ * lpj) >> 32);
+ }
+@@ -49,7 +49,7 @@ EXPORT_SYMBOL(__udelay);
+ 
+ void __ndelay(unsigned long ns)
+ {
+-	unsigned int lpj = current_cpu_data.udelay_val;
++	unsigned int lpj = raw_current_cpu_data.udelay_val;
+ 
+ 	__delay((ns * 0x00000005ull * HZ * lpj) >> 32);
+ }
+diff --git a/arch/mips/lib/libgcc.h b/arch/mips/lib/libgcc.h
+index 3f19d1c..05909d5 100644
+--- a/arch/mips/lib/libgcc.h
++++ b/arch/mips/lib/libgcc.h
+@@ -17,8 +17,7 @@ struct DWstruct {
+ #error I feel sick.
+ #endif
+ 
+-typedef union
+-{
++typedef union {
+ 	struct DWstruct s;
+ 	long long ll;
+ } DWunion;
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
 index 7668c4d..a1e7a0b 100644
 --- a/arch/mips/loongson/common/Makefile
@@ -5581,6 +6582,32 @@ index 23b66a5..7580873 100644
   */
  
  #include <linux/io.h>
+diff --git a/arch/mips/loongson/common/setup.c b/arch/mips/loongson/common/setup.c
+index 4cd2aa9..27d826b 100644
+--- a/arch/mips/loongson/common/setup.c
++++ b/arch/mips/loongson/common/setup.c
+@@ -41,15 +41,12 @@ void __init plat_mem_setup(void)
+ 	conswitchp = &vga_con;
+ 
+ 	screen_info = (struct screen_info) {
+-		0, 25,		/* orig-x, orig-y */
+-		    0,		/* unused */
+-		    0,		/* orig-video-page */
+-		    0,		/* orig-video-mode */
+-		    80,		/* orig-video-cols */
+-		    0, 0, 0,	/* ega_ax, ega_bx, ega_cx */
+-		    25,		/* orig-video-lines */
+-		    VIDEO_TYPE_VGAC,	/* orig-video-isVGA */
+-		    16		/* orig-video-points */
++		.orig_x			= 0,
++		.orig_y			= 25,
++		.orig_video_cols	= 80,
++		.orig_video_lines	= 25,
++		.orig_video_isVGA	= VIDEO_TYPE_VGAC,
++		.orig_video_points	= 16,
+ 	};
+ #elif defined(CONFIG_DUMMY_CONSOLE)
+ 	conswitchp = &dummy_con;
 diff --git a/arch/mips/loongson/common/time.c b/arch/mips/loongson/common/time.c
 index 35f0b66..9fdd01f 100644
 --- a/arch/mips/loongson/common/time.c
@@ -6048,6 +7075,43 @@ index 51d1a60..66e4563 100644
  	 */
  	LOONGSON_CHIPCFG0 |= 0x7;
  }
+diff --git a/arch/mips/math-emu/dp_simple.c b/arch/mips/math-emu/dp_simple.c
+index d9ae1db..b909742 100644
+--- a/arch/mips/math-emu/dp_simple.c
++++ b/arch/mips/math-emu/dp_simple.c
+@@ -78,6 +78,7 @@ ieee754dp ieee754dp_abs(ieee754dp x)
+ 	DPSIGN(x) = 0;
+ 
+ 	if (xc == IEEE754_CLASS_SNAN) {
++		SETCX(IEEE754_INVALID_OPERATION);
+ 		return ieee754dp_nanxcpt(ieee754dp_indef(), "abs");
+ 	}
+ 
+diff --git a/arch/mips/math-emu/sp_simple.c b/arch/mips/math-emu/sp_simple.c
+index 3175477..2fd53c9 100644
+--- a/arch/mips/math-emu/sp_simple.c
++++ b/arch/mips/math-emu/sp_simple.c
+@@ -78,6 +78,7 @@ ieee754sp ieee754sp_abs(ieee754sp x)
+ 	SPSIGN(x) = 0;
+ 
+ 	if (xc == IEEE754_CLASS_SNAN) {
++		SETCX(IEEE754_INVALID_OPERATION);
+ 		return ieee754sp_nanxcpt(ieee754sp_indef(), "abs");
+ 	}
+ 
+diff --git a/arch/mips/mm/cache.c b/arch/mips/mm/cache.c
+index e716caf..feb84dc 100644
+--- a/arch/mips/mm/cache.c
++++ b/arch/mips/mm/cache.c
+@@ -133,7 +133,7 @@ void __update_cache(struct vm_area_struct *vma, unsigned long address,
+ }
+ 
+ unsigned long _page_cachable_default;
+-EXPORT_SYMBOL_GPL(_page_cachable_default);
++EXPORT_SYMBOL(_page_cachable_default);
+ 
+ static inline void setup_protection_map(void)
+ {
 diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
 index 9367e33..0b3f2c5 100644
 --- a/arch/mips/mm/dma-default.c
@@ -6069,6 +7133,502 @@ index 9367e33..0b3f2c5 100644
 +		       size, vma->vm_page_prot);
 +}
 +EXPORT_SYMBOL(dma_mmap_coherent);
+diff --git a/arch/mips/mm/page.c b/arch/mips/mm/page.c
+index f5c7375..36272f7 100644
+--- a/arch/mips/mm/page.c
++++ b/arch/mips/mm/page.c
+@@ -35,7 +35,7 @@
+ #include <asm/sibyte/sb1250_dma.h>
+ #endif
+ 
+-#include "uasm.h"
++#include <asm/uasm.h>
+ 
+ /* Registers used in the assembled routines. */
+ #define ZERO 0
+diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
+index badcf5e..9d9c640 100644
+--- a/arch/mips/mm/tlbex.c
++++ b/arch/mips/mm/tlbex.c
+@@ -29,8 +29,17 @@
+ 
+ #include <asm/mmu_context.h>
+ #include <asm/war.h>
++#include <asm/uasm.h>
++
++/*
++ * TLB load/store/modify handlers.
++ *
++ * Only the fastpath gets synthesized at runtime, the slowpath for
++ * do_page_fault remains normal asm.
++ */
++extern void tlb_do_page_fault_0(void);
++extern void tlb_do_page_fault_1(void);
+ 
+-#include "uasm.h"
+ 
+ static inline int r45k_bvahwbug(void)
+ {
+@@ -82,6 +91,7 @@ enum label_id {
+ 	label_nopage_tlbm,
+ 	label_smp_pgtable_change,
+ 	label_r3000_write_probe_fail,
++	label_large_segbits_fault,
+ #ifdef CONFIG_HUGETLB_PAGE
+ 	label_tlb_huge_update,
+ #endif
+@@ -98,6 +108,7 @@ UASM_L_LA(_nopage_tlbs)
+ UASM_L_LA(_nopage_tlbm)
+ UASM_L_LA(_smp_pgtable_change)
+ UASM_L_LA(_r3000_write_probe_fail)
++UASM_L_LA(_large_segbits_fault)
+ #ifdef CONFIG_HUGETLB_PAGE
+ UASM_L_LA(_tlb_huge_update)
+ #endif
+@@ -154,6 +165,10 @@ static u32 tlb_handler[128] __cpuinitdata;
+ static struct uasm_label labels[128] __cpuinitdata;
+ static struct uasm_reloc relocs[128] __cpuinitdata;
+ 
++#ifdef CONFIG_64BIT
++static int check_for_high_segbits __cpuinitdata;
++#endif
++
+ #ifndef CONFIG_MIPS_PGD_C0_CONTEXT
+ /*
+  * CONFIG_MIPS_PGD_C0_CONTEXT implies 64 bit and lack of pgd_current,
+@@ -505,7 +520,24 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+ 	 * The vmalloc handling is not in the hotpath.
+ 	 */
+ 	uasm_i_dmfc0(p, tmp, C0_BADVADDR);
+-	uasm_il_bltz(p, r, tmp, label_vmalloc);
++
++	if (check_for_high_segbits) {
++		/*
++		 * The kernel currently implicitely assumes that the
++		 * MIPS SEGBITS parameter for the processor is
++		 * (PGDIR_SHIFT+PGDIR_BITS) or less, and will never
++		 * allocate virtual addresses outside the maximum
++		 * range for SEGBITS = (PGDIR_SHIFT+PGDIR_BITS). But
++		 * that doesn't prevent user code from accessing the
++		 * higher xuseg addresses.  Here, we make sure that
++		 * everything but the lower xuseg addresses goes down
++		 * the module_alloc/vmalloc path.
++		 */
++		uasm_i_dsrl_safe(p, ptr, tmp, PGDIR_SHIFT + PGD_ORDER + PAGE_SHIFT - 3);
++		uasm_il_bnez(p, r, ptr, label_vmalloc);
++	} else {
++		uasm_il_bltz(p, r, tmp, label_vmalloc);
++	}
+ 	/* No uasm_i_nop needed here, since the next insn doesn't touch TMP. */
+ 
+ #ifdef CONFIG_MIPS_PGD_C0_CONTEXT
+@@ -556,28 +588,64 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+ 	uasm_i_daddu(p, ptr, ptr, tmp); /* add in pmd offset */
+ }
+ 
++enum vmalloc64_mode {not_refill, refill};
+ /*
+  * BVADDR is the faulting address, PTR is scratch.
+  * PTR will hold the pgd for vmalloc.
+  */
+ static void __cpuinit
+ build_get_pgd_vmalloc64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+-			unsigned int bvaddr, unsigned int ptr)
++			unsigned int bvaddr, unsigned int ptr,
++			enum vmalloc64_mode mode)
+ {
+ 	long swpd = (long)swapper_pg_dir;
++	int single_insn_swpd;
++	int did_vmalloc_branch = 0;
++
++	single_insn_swpd = uasm_in_compat_space_p(swpd) && !uasm_rel_lo(swpd);
+ 
+ 	uasm_l_vmalloc(l, *p);
+ 
+-	if (uasm_in_compat_space_p(swpd) && !uasm_rel_lo(swpd)) {
+-		uasm_il_b(p, r, label_vmalloc_done);
+-		uasm_i_lui(p, ptr, uasm_rel_hi(swpd));
+-	} else {
+-		UASM_i_LA_mostly(p, ptr, swpd);
+-		uasm_il_b(p, r, label_vmalloc_done);
+-		if (uasm_in_compat_space_p(swpd))
+-			uasm_i_addiu(p, ptr, ptr, uasm_rel_lo(swpd));
+-		else
+-			uasm_i_daddiu(p, ptr, ptr, uasm_rel_lo(swpd));
++	if (mode == refill && check_for_high_segbits) {
++		if (single_insn_swpd) {
++			uasm_il_bltz(p, r, bvaddr, label_vmalloc_done);
++			uasm_i_lui(p, ptr, uasm_rel_hi(swpd));
++			did_vmalloc_branch = 1;
++			/* fall through */
++		} else {
++			uasm_il_bgez(p, r, bvaddr, label_large_segbits_fault);
++		}
++	}
++	if (!did_vmalloc_branch) {
++		if (uasm_in_compat_space_p(swpd) && !uasm_rel_lo(swpd)) {
++			uasm_il_b(p, r, label_vmalloc_done);
++			uasm_i_lui(p, ptr, uasm_rel_hi(swpd));
++		} else {
++			UASM_i_LA_mostly(p, ptr, swpd);
++			uasm_il_b(p, r, label_vmalloc_done);
++			if (uasm_in_compat_space_p(swpd))
++				uasm_i_addiu(p, ptr, ptr, uasm_rel_lo(swpd));
++			else
++				uasm_i_daddiu(p, ptr, ptr, uasm_rel_lo(swpd));
++		}
++	}
++	if (mode == refill && check_for_high_segbits) {
++		uasm_l_large_segbits_fault(l, *p);
++		/*
++		 * We get here if we are an xsseg address, or if we are
++		 * an xuseg address above (PGDIR_SHIFT+PGDIR_BITS) boundary.
++		 *
++		 * Ignoring xsseg (assume disabled so would generate
++		 * (address errors?), the only remaining possibility
++		 * is the upper xuseg addresses.  On processors with
++		 * TLB_SEGBITS <= PGDIR_SHIFT+PGDIR_BITS, these
++		 * addresses would have taken an address error. We try
++		 * to mimic that here by taking a load/istream page
++		 * fault.
++		 */
++		UASM_i_LA(p, ptr, (unsigned long)tlb_do_page_fault_0);
++		uasm_i_jr(p, ptr);
++		uasm_i_nop(p);
+ 	}
+ }
+ 
+@@ -741,10 +809,15 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
+ 	 * create the plain linear handler
+ 	 */
+ 	if (bcm1250_m3_war()) {
+-		UASM_i_MFC0(&p, K0, C0_BADVADDR);
+-		UASM_i_MFC0(&p, K1, C0_ENTRYHI);
++		unsigned int segbits = 44;
++
++		uasm_i_dmfc0(&p, K0, C0_BADVADDR);
++		uasm_i_dmfc0(&p, K1, C0_ENTRYHI);
+ 		uasm_i_xor(&p, K0, K0, K1);
+-		UASM_i_SRL(&p, K0, K0, PAGE_SHIFT + 1);
++		uasm_i_dsrl32(&p, K1, K0, 62 - 32);
++		uasm_i_dsrl(&p, K0, K0, 12 + 1);
++		uasm_i_dsll32(&p, K0, K0, 64 + 12 + 1 - segbits - 32);
++		uasm_i_or(&p, K0, K0, K1);
+ 		uasm_il_bnez(&p, &r, K0, label_leave);
+ 		/* No need for uasm_i_nop */
+ 	}
+@@ -773,7 +846,7 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
+ #endif
+ 
+ #ifdef CONFIG_64BIT
+-	build_get_pgd_vmalloc64(&p, &l, &r, K0, K1);
++	build_get_pgd_vmalloc64(&p, &l, &r, K0, K1, refill);
+ #endif
+ 
+ 	/*
+@@ -883,15 +956,6 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
+ }
+ 
+ /*
+- * TLB load/store/modify handlers.
+- *
+- * Only the fastpath gets synthesized at runtime, the slowpath for
+- * do_page_fault remains normal asm.
+- */
+-extern void tlb_do_page_fault_0(void);
+-extern void tlb_do_page_fault_1(void);
+-
+-/*
+  * 128 instructions for the fastpath handler is generous and should
+  * never be exceeded.
+  */
+@@ -1245,7 +1309,7 @@ build_r4000_tlbchange_handler_tail(u32 **p, struct uasm_label **l,
+ 	uasm_i_eret(p); /* return from trap */
+ 
+ #ifdef CONFIG_64BIT
+-	build_get_pgd_vmalloc64(p, l, r, tmp, ptr);
++	build_get_pgd_vmalloc64(p, l, r, tmp, ptr, not_refill);
+ #endif
+ }
+ 
+@@ -1260,10 +1324,15 @@ static void __cpuinit build_r4000_tlb_load_handler(void)
+ 	memset(relocs, 0, sizeof(relocs));
+ 
+ 	if (bcm1250_m3_war()) {
+-		UASM_i_MFC0(&p, K0, C0_BADVADDR);
+-		UASM_i_MFC0(&p, K1, C0_ENTRYHI);
++		unsigned int segbits = 44;
++
++		uasm_i_dmfc0(&p, K0, C0_BADVADDR);
++		uasm_i_dmfc0(&p, K1, C0_ENTRYHI);
+ 		uasm_i_xor(&p, K0, K0, K1);
+-		UASM_i_SRL(&p, K0, K0, PAGE_SHIFT + 1);
++		uasm_i_dsrl32(&p, K1, K0, 62 - 32);
++		uasm_i_dsrl(&p, K0, K0, 12 + 1);
++		uasm_i_dsll32(&p, K0, K0, 64 + 12 + 1 - segbits - 32);
++		uasm_i_or(&p, K0, K0, K1);
+ 		uasm_il_bnez(&p, &r, K0, label_leave);
+ 		/* No need for uasm_i_nop */
+ 	}
+@@ -1402,6 +1471,10 @@ void __cpuinit build_tlb_refill_handler(void)
+ 	 */
+ 	static int run_once = 0;
+ 
++#ifdef CONFIG_64BIT
++	check_for_high_segbits = current_cpu_data.vmbits > (PGDIR_SHIFT + PGD_ORDER + PAGE_SHIFT - 3);
++#endif
++
+ 	switch (current_cpu_type()) {
+ 	case CPU_R2000:
+ 	case CPU_R3000:
+diff --git a/arch/mips/mm/uasm.c b/arch/mips/mm/uasm.c
+index 0a165c5..29bbd10 100644
+--- a/arch/mips/mm/uasm.c
++++ b/arch/mips/mm/uasm.c
+@@ -19,8 +19,7 @@
+ #include <asm/inst.h>
+ #include <asm/elf.h>
+ #include <asm/bugs.h>
+-
+-#include "uasm.h"
++#include <asm/uasm.h>
+ 
+ enum fields {
+ 	RS = 0x001,
+@@ -62,7 +61,7 @@ enum opcode {
+ 	insn_dmtc0, insn_dsll, insn_dsll32, insn_dsra, insn_dsrl,
+ 	insn_dsrl32, insn_drotr, insn_dsubu, insn_eret, insn_j, insn_jal,
+ 	insn_jr, insn_ld, insn_ll, insn_lld, insn_lui, insn_lw, insn_mfc0,
+-	insn_mtc0, insn_ori, insn_pref, insn_rfe, insn_sc, insn_scd,
++	insn_mtc0, insn_or, insn_ori, insn_pref, insn_rfe, insn_sc, insn_scd,
+ 	insn_sd, insn_sll, insn_sra, insn_srl, insn_subu, insn_sw,
+ 	insn_tlbp, insn_tlbwi, insn_tlbwr, insn_xor, insn_xori, insn_dins
+ };
+@@ -117,6 +116,7 @@ static struct insn insn_table[] __cpuinitdata = {
+ 	{ insn_lw,  M(lw_op, 0, 0, 0, 0, 0),  RS | RT | SIMM },
+ 	{ insn_mfc0,  M(cop0_op, mfc_op, 0, 0, 0, 0),  RT | RD | SET},
+ 	{ insn_mtc0,  M(cop0_op, mtc_op, 0, 0, 0, 0),  RT | RD | SET},
++	{ insn_or,  M(spec_op, 0, 0, 0, 0, or_op),  RS | RT | RD },
+ 	{ insn_ori,  M(ori_op, 0, 0, 0, 0, 0),  RS | RT | UIMM },
+ 	{ insn_pref,  M(pref_op, 0, 0, 0, 0, 0),  RS | RT | SIMM },
+ 	{ insn_rfe,  M(cop0_op, cop_op, 0, 0, 0, rfe_op),  0 },
+@@ -371,6 +371,7 @@ I_u2s3u1(_lw)
+ I_u1u2u3(_mfc0)
+ I_u1u2u3(_mtc0)
+ I_u2u1u3(_ori)
++I_u3u1u2(_or)
+ I_u2s3u1(_pref)
+ I_0(_rfe)
+ I_u2s3u1(_sc)
+diff --git a/arch/mips/mm/uasm.h b/arch/mips/mm/uasm.h
+deleted file mode 100644
+index 3d153ed..0000000
+--- a/arch/mips/mm/uasm.h
++++ /dev/null
+@@ -1,191 +0,0 @@
+-/*
+- * This file is subject to the terms and conditions of the GNU General Public
+- * License.  See the file "COPYING" in the main directory of this archive
+- * for more details.
+- *
+- * Copyright (C) 2004, 2005, 2006, 2008  Thiemo Seufer
+- * Copyright (C) 2005  Maciej W. Rozycki
+- * Copyright (C) 2006  Ralf Baechle (ralf@linux-mips.org)
+- */
+-
+-#include <linux/types.h>
+-
+-#define Ip_u1u2u3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
+-
+-#define Ip_u2u1u3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
+-
+-#define Ip_u3u1u2(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
+-
+-#define Ip_u1u2s3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
+-
+-#define Ip_u2s3u1(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, signed int b, unsigned int c)
+-
+-#define Ip_u2u1s3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
+-
+-#define Ip_u2u1msbu3(op)						\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c,	\
+-	   unsigned int d)
+-
+-#define Ip_u1u2(op)							\
+-void __cpuinit uasm_i##op(u32 **buf, unsigned int a, unsigned int b)
+-
+-#define Ip_u1s2(op)							\
+-void __cpuinit uasm_i##op(u32 **buf, unsigned int a, signed int b)
+-
+-#define Ip_u1(op) void __cpuinit uasm_i##op(u32 **buf, unsigned int a)
+-
+-#define Ip_0(op) void __cpuinit uasm_i##op(u32 **buf)
+-
+-Ip_u2u1s3(_addiu);
+-Ip_u3u1u2(_addu);
+-Ip_u2u1u3(_andi);
+-Ip_u3u1u2(_and);
+-Ip_u1u2s3(_beq);
+-Ip_u1u2s3(_beql);
+-Ip_u1s2(_bgez);
+-Ip_u1s2(_bgezl);
+-Ip_u1s2(_bltz);
+-Ip_u1s2(_bltzl);
+-Ip_u1u2s3(_bne);
+-Ip_u2s3u1(_cache);
+-Ip_u1u2u3(_dmfc0);
+-Ip_u1u2u3(_dmtc0);
+-Ip_u2u1s3(_daddiu);
+-Ip_u3u1u2(_daddu);
+-Ip_u2u1u3(_dsll);
+-Ip_u2u1u3(_dsll32);
+-Ip_u2u1u3(_dsra);
+-Ip_u2u1u3(_dsrl);
+-Ip_u2u1u3(_dsrl32);
+-Ip_u2u1u3(_drotr);
+-Ip_u3u1u2(_dsubu);
+-Ip_0(_eret);
+-Ip_u1(_j);
+-Ip_u1(_jal);
+-Ip_u1(_jr);
+-Ip_u2s3u1(_ld);
+-Ip_u2s3u1(_ll);
+-Ip_u2s3u1(_lld);
+-Ip_u1s2(_lui);
+-Ip_u2s3u1(_lw);
+-Ip_u1u2u3(_mfc0);
+-Ip_u1u2u3(_mtc0);
+-Ip_u2u1u3(_ori);
+-Ip_u2s3u1(_pref);
+-Ip_0(_rfe);
+-Ip_u2s3u1(_sc);
+-Ip_u2s3u1(_scd);
+-Ip_u2s3u1(_sd);
+-Ip_u2u1u3(_sll);
+-Ip_u2u1u3(_sra);
+-Ip_u2u1u3(_srl);
+-Ip_u3u1u2(_subu);
+-Ip_u2s3u1(_sw);
+-Ip_0(_tlbp);
+-Ip_0(_tlbwi);
+-Ip_0(_tlbwr);
+-Ip_u3u1u2(_xor);
+-Ip_u2u1u3(_xori);
+-Ip_u2u1msbu3(_dins);
+-
+-/* Handle labels. */
+-struct uasm_label {
+-	u32 *addr;
+-	int lab;
+-};
+-
+-void __cpuinit uasm_build_label(struct uasm_label **lab, u32 *addr, int lid);
+-#ifdef CONFIG_64BIT
+-int uasm_in_compat_space_p(long addr);
+-#endif
+-int uasm_rel_hi(long val);
+-int uasm_rel_lo(long val);
+-void UASM_i_LA_mostly(u32 **buf, unsigned int rs, long addr);
+-void UASM_i_LA(u32 **buf, unsigned int rs, long addr);
+-
+-#define UASM_L_LA(lb)							\
+-static inline void __cpuinit uasm_l##lb(struct uasm_label **lab, u32 *addr) \
+-{									\
+-	uasm_build_label(lab, addr, label##lb);				\
+-}
+-
+-/* convenience macros for instructions */
+-#ifdef CONFIG_64BIT
+-# define UASM_i_LW(buf, rs, rt, off) uasm_i_ld(buf, rs, rt, off)
+-# define UASM_i_SW(buf, rs, rt, off) uasm_i_sd(buf, rs, rt, off)
+-# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_dsll(buf, rs, rt, sh)
+-# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_dsra(buf, rs, rt, sh)
+-# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_dsrl(buf, rs, rt, sh)
+-# define UASM_i_MFC0(buf, rt, rd...) uasm_i_dmfc0(buf, rt, rd)
+-# define UASM_i_MTC0(buf, rt, rd...) uasm_i_dmtc0(buf, rt, rd)
+-# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_daddiu(buf, rs, rt, val)
+-# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_daddu(buf, rs, rt, rd)
+-# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_dsubu(buf, rs, rt, rd)
+-# define UASM_i_LL(buf, rs, rt, off) uasm_i_lld(buf, rs, rt, off)
+-# define UASM_i_SC(buf, rs, rt, off) uasm_i_scd(buf, rs, rt, off)
+-#else
+-# define UASM_i_LW(buf, rs, rt, off) uasm_i_lw(buf, rs, rt, off)
+-# define UASM_i_SW(buf, rs, rt, off) uasm_i_sw(buf, rs, rt, off)
+-# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_sll(buf, rs, rt, sh)
+-# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_sra(buf, rs, rt, sh)
+-# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_srl(buf, rs, rt, sh)
+-# define UASM_i_MFC0(buf, rt, rd...) uasm_i_mfc0(buf, rt, rd)
+-# define UASM_i_MTC0(buf, rt, rd...) uasm_i_mtc0(buf, rt, rd)
+-# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_addiu(buf, rs, rt, val)
+-# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_addu(buf, rs, rt, rd)
+-# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_subu(buf, rs, rt, rd)
+-# define UASM_i_LL(buf, rs, rt, off) uasm_i_ll(buf, rs, rt, off)
+-# define UASM_i_SC(buf, rs, rt, off) uasm_i_sc(buf, rs, rt, off)
+-#endif
+-
+-#define uasm_i_b(buf, off) uasm_i_beq(buf, 0, 0, off)
+-#define uasm_i_beqz(buf, rs, off) uasm_i_beq(buf, rs, 0, off)
+-#define uasm_i_beqzl(buf, rs, off) uasm_i_beql(buf, rs, 0, off)
+-#define uasm_i_bnez(buf, rs, off) uasm_i_bne(buf, rs, 0, off)
+-#define uasm_i_bnezl(buf, rs, off) uasm_i_bnel(buf, rs, 0, off)
+-#define uasm_i_move(buf, a, b) UASM_i_ADDU(buf, a, 0, b)
+-#define uasm_i_nop(buf) uasm_i_sll(buf, 0, 0, 0)
+-#define uasm_i_ssnop(buf) uasm_i_sll(buf, 0, 0, 1)
+-#define uasm_i_ehb(buf) uasm_i_sll(buf, 0, 0, 3)
+-
+-/* Handle relocations. */
+-struct uasm_reloc {
+-	u32 *addr;
+-	unsigned int type;
+-	int lab;
+-};
+-
+-/* This is zero so we can use zeroed label arrays. */
+-#define UASM_LABEL_INVALID 0
+-
+-void uasm_r_mips_pc16(struct uasm_reloc **rel, u32 *addr, int lid);
+-void uasm_resolve_relocs(struct uasm_reloc *rel, struct uasm_label *lab);
+-void uasm_move_relocs(struct uasm_reloc *rel, u32 *first, u32 *end, long off);
+-void uasm_move_labels(struct uasm_label *lab, u32 *first, u32 *end, long off);
+-void uasm_copy_handler(struct uasm_reloc *rel, struct uasm_label *lab,
+-	u32 *first, u32 *end, u32 *target);
+-int uasm_insn_has_bdelay(struct uasm_reloc *rel, u32 *addr);
+-
+-/* Convenience functions for labeled branches. */
+-void uasm_il_bltz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_b(u32 **p, struct uasm_reloc **r, int lid);
+-void uasm_il_beqz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_beqzl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_bne(u32 **p, struct uasm_reloc **r, unsigned int reg1,
+-		 unsigned int reg2, int lid);
+-void uasm_il_bnez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_bgezl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_bgez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+diff --git a/arch/mips/nxp/pnx8550/common/reset.c b/arch/mips/nxp/pnx8550/common/reset.c
+index 7b2cbc5..9dc16ff 100644
+--- a/arch/mips/nxp/pnx8550/common/reset.c
++++ b/arch/mips/nxp/pnx8550/common/reset.c
+@@ -20,6 +20,7 @@
+  * Reset the PNX8550 board.
+  *
+  */
++#include <linux/kernel.h>
+ #include <linux/slab.h>
+ #include <asm/reboot.h>
+ #include <glb.h>
 diff --git a/arch/mips/oprofile/common.c b/arch/mips/oprofile/common.c
 index 7832ad2..ee46c82 100644
 --- a/arch/mips/oprofile/common.c
@@ -6245,7 +7805,7 @@ index caf2ede..4b9768d 100644
  	/* setting the USB2.0 micro frame length */
  	pci_write_config_dword(pdev, PCI_EHCI_FLADJ_REG, 0x2000);
 diff --git a/arch/mips/pci/ops-loongson2.c b/arch/mips/pci/ops-loongson2.c
-index aa5d3da..8ee7fe2 100644
+index aa5d3da..d657ee0 100644
 --- a/arch/mips/pci/ops-loongson2.c
 +++ b/arch/mips/pci/ops-loongson2.c
 @@ -1,13 +1,11 @@
@@ -6263,11 +7823,10 @@ index aa5d3da..8ee7fe2 100644
   *
   *  This program is free software; you can distribute it and/or modify it
   *  under the terms of the GNU General Public License (Version 2) as
-@@ -182,15 +180,22 @@ struct pci_ops loongson_pci_ops = {
+@@ -182,15 +180,21 @@ struct pci_ops loongson_pci_ops = {
  };
  
  #ifdef CONFIG_CS5536
-+
 +DEFINE_RAW_SPINLOCK(msr_lock);
 +
  void _rdmsr(u32 msr, u32 *hi, u32 *lo)
@@ -6286,7 +7845,7 @@ index aa5d3da..8ee7fe2 100644
  }
  EXPORT_SYMBOL(_rdmsr);
  
-@@ -200,9 +205,13 @@ void _wrmsr(u32 msr, u32 hi, u32 lo)
+@@ -200,9 +204,13 @@ void _wrmsr(u32 msr, u32 hi, u32 lo)
  		.number = PCI_BUS_CS5536
  	};
  	u32 devfn = PCI_DEVFN(PCI_IDSEL_CS5536, 0);
@@ -6300,6 +7859,27 @@ index aa5d3da..8ee7fe2 100644
  }
  EXPORT_SYMBOL(_wrmsr);
  #endif
+diff --git a/arch/mips/pci/pci-sb1250.c b/arch/mips/pci/pci-sb1250.c
+index ada24e6..1711e8e 100644
+--- a/arch/mips/pci/pci-sb1250.c
++++ b/arch/mips/pci/pci-sb1250.c
+@@ -37,6 +37,7 @@
+ #include <linux/mm.h>
+ #include <linux/console.h>
+ #include <linux/tty.h>
++#include <linux/vt.h>
+ 
+ #include <asm/io.h>
+ 
+@@ -254,7 +255,7 @@ static int __init sb1250_pcibios_init(void)
+ 	 * XXX ehs: Should this happen in PCI Device mode?
+ 	 */
+ 	io_map_base = ioremap(A_PHYS_LDTPCI_IO_MATCH_BYTES, 1024 * 1024);
+-	sb1250_controller.io_map_base = io_map_base;
++	sb1250_controller.io_map_base = (unsigned long)io_map_base;
+ 	set_io_port_base((unsigned long)io_map_base);
+ 
+ #ifdef CONFIG_SIBYTE_HAS_LDT
 diff --git a/arch/mips/power/cpu.c b/arch/mips/power/cpu.c
 index 7995df4..26a6ef1 100644
 --- a/arch/mips/power/cpu.c
@@ -6332,6 +7912,70 @@ index 0cf86fb..dbb5c7b 100644
   */
  #include <asm/asm-offsets.h>
  #include <asm/page.h>
+diff --git a/arch/mips/sgi-ip22/ip22-berr.c b/arch/mips/sgi-ip22/ip22-berr.c
+index de6a0cc..911d399 100644
+--- a/arch/mips/sgi-ip22/ip22-berr.c
++++ b/arch/mips/sgi-ip22/ip22-berr.c
+@@ -89,7 +89,7 @@ static void print_buserr(void)
+ void ip22_be_interrupt(int irq)
+ {
+ 	const int field = 2 * sizeof(unsigned long);
+-	const struct pt_regs *regs = get_irq_regs();
++	struct pt_regs *regs = get_irq_regs();
+ 
+ 	save_and_clear_buserr();
+ 	print_buserr();
+diff --git a/arch/mips/sgi-ip22/ip28-berr.c b/arch/mips/sgi-ip22/ip28-berr.c
+index 30e12e2..88c684e 100644
+--- a/arch/mips/sgi-ip22/ip28-berr.c
++++ b/arch/mips/sgi-ip22/ip28-berr.c
+@@ -453,7 +453,7 @@ mips_be_fatal:
+ 
+ void ip22_be_interrupt(int irq)
+ {
+-	const struct pt_regs *regs = get_irq_regs();
++	struct pt_regs *regs = get_irq_regs();
+ 
+ 	count_be_interrupt++;
+ 
+diff --git a/arch/mips/sibyte/swarm/setup.c b/arch/mips/sibyte/swarm/setup.c
+index 5277aac..c308989 100644
+--- a/arch/mips/sibyte/swarm/setup.c
++++ b/arch/mips/sibyte/swarm/setup.c
+@@ -145,15 +145,14 @@ void __init plat_mem_setup(void)
+ 
+ #ifdef CONFIG_VT
+ 	screen_info = (struct screen_info) {
+-		0, 0,           /* orig-x, orig-y */
+-		0,              /* unused */
+-		52,             /* orig_video_page */
+-		3,              /* orig_video_mode */
+-		80,             /* orig_video_cols */
+-		4626, 3, 9,     /* unused, ega_bx, unused */
+-		25,             /* orig_video_lines */
+-		0x22,           /* orig_video_isVGA */
+-		16              /* orig_video_points */
++		.orig_video_page	= 52,
++		.orig_video_mode	= 3,
++		.orig_video_cols	= 80,
++		.flags			= 12,
++		.orig_video_ega_bx	= 3,
++		.orig_video_lines	= 25,
++		.orig_video_isVGA	= 0x22,
++		.orig_video_points	= 16,
+        };
+        /* XXXKW for CFE, get lines/cols from environment */
+ #endif
+diff --git a/drivers/dma/txx9dmac.c b/drivers/dma/txx9dmac.c
+index 3ebc610..75fcf1a 100644
+--- a/drivers/dma/txx9dmac.c
++++ b/drivers/dma/txx9dmac.c
+@@ -1359,3 +1359,5 @@ module_exit(txx9dmac_exit);
+ MODULE_LICENSE("GPL");
+ MODULE_DESCRIPTION("TXx9 DMA Controller driver");
+ MODULE_AUTHOR("Atsushi Nemoto <anemo@mba.ocn.ne.jp>");
++MODULE_ALIAS("platform:txx9dmac");
++MODULE_ALIAS("platform:txx9dmac-chan");
 diff --git a/drivers/ide/ide-iops.c b/drivers/ide/ide-iops.c
 index 222c1ef..c8a4456 100644
 --- a/drivers/ide/ide-iops.c
@@ -6355,6 +7999,2864 @@ index 222c1ef..c8a4456 100644
  	for (list = nien_quirk_list; *list != NULL; list++)
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
+diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
+index dd9a09c..7f8ad5d 100644
+--- a/drivers/net/Kconfig
++++ b/drivers/net/Kconfig
+@@ -2413,6 +2413,13 @@ config MV643XX_ETH
+ 	  Some boards that use the Discovery chipset are the Momenco
+ 	  Ocelot C and Jaguar ATX and Pegasos II.
+ 
++config TITAN_GE
++	bool "PMC-Sierra TITAN Gigabit Ethernet Support"
++	depends on PMC_YOSEMITE
++	help
++	  This enables support for the the integrated ethernet of
++	  PMC-Sierra's Titan SoC.
++
+ config XILINX_LL_TEMAC
+ 	tristate "Xilinx LL TEMAC (LocalLink Tri-mode Ethernet MAC) driver"
+ 	select PHYLIB
+diff --git a/drivers/net/Makefile b/drivers/net/Makefile
+index ad1346d..657ccc3 100644
+--- a/drivers/net/Makefile
++++ b/drivers/net/Makefile
+@@ -150,6 +150,8 @@ obj-$(CONFIG_XILINX_EMACLITE) += xilinx_emaclite.o
+ obj-$(CONFIG_QLA3XXX) += qla3xxx.o
+ obj-$(CONFIG_QLGE) += qlge/
+ 
++obj-$(CONFIG_TITAN_GE) += titan_mdio.o titan_ge.o
++
+ obj-$(CONFIG_PPP) += ppp_generic.o
+ obj-$(CONFIG_PPP_ASYNC) += ppp_async.o
+ obj-$(CONFIG_PPP_SYNC_TTY) += ppp_synctty.o
+diff --git a/drivers/net/phy/mdio-octeon.c b/drivers/net/phy/mdio-octeon.c
+index 61a4461..dfaaf30 100644
+--- a/drivers/net/phy/mdio-octeon.c
++++ b/drivers/net/phy/mdio-octeon.c
+@@ -87,6 +87,7 @@ static int octeon_mdiobus_write(struct mii_bus *bus, int phy_id,
+ static int __init octeon_mdiobus_probe(struct platform_device *pdev)
+ {
+ 	struct octeon_mdiobus *bus;
++	union cvmx_smix_en smi_en;
+ 	int i;
+ 	int err = -ENOENT;
+ 
+@@ -102,6 +103,10 @@ static int __init octeon_mdiobus_probe(struct platform_device *pdev)
+ 	if (!bus->mii_bus)
+ 		goto err;
+ 
++	smi_en.u64 = 0;
++	smi_en.s.en = 1;
++	cvmx_write_csr(CVMX_SMIX_EN(bus->unit), smi_en.u64);
++
+ 	/*
+ 	 * Standard Octeon evaluation boards don't support phy
+ 	 * interrupts, we need to poll.
+@@ -132,17 +137,22 @@ err_register:
+ 
+ err:
+ 	devm_kfree(&pdev->dev, bus);
++	smi_en.u64 = 0;
++	cvmx_write_csr(CVMX_SMIX_EN(bus->unit), smi_en.u64);
+ 	return err;
+ }
+ 
+ static int __exit octeon_mdiobus_remove(struct platform_device *pdev)
+ {
+ 	struct octeon_mdiobus *bus;
++	union cvmx_smix_en smi_en;
+ 
+ 	bus = dev_get_drvdata(&pdev->dev);
+ 
+ 	mdiobus_unregister(bus->mii_bus);
+ 	mdiobus_free(bus->mii_bus);
++	smi_en.u64 = 0;
++	cvmx_write_csr(CVMX_SMIX_EN(bus->unit), smi_en.u64);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/net/titan_ge.c b/drivers/net/titan_ge.c
+new file mode 100644
+index 0000000..dc137bf
+--- /dev/null
++++ b/drivers/net/titan_ge.c
+@@ -0,0 +1,2069 @@
++/*
++ * drivers/net/titan_ge.c - Driver for Titan ethernet ports
++ *
++ * Copyright (C) 2003 PMC-Sierra Inc.
++ * Author : Manish Lachwani (lachwani@pmc-sierra.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
++ */
++
++/*
++ * The MAC unit of the Titan consists of the following:
++ *
++ * -> XDMA Engine to move data to from the memory to the MAC packet FIFO
++ * -> FIFO is where the incoming and outgoing data is placed
++ * -> TRTG is the unit that pulls the data from the FIFO for Tx and pushes
++ *    the data into the FIFO for Rx
++ * -> TMAC is the outgoing MAC interface and RMAC is the incoming.
++ * -> AFX is the address filtering block
++ * -> GMII block to communicate with the PHY
++ *
++ * Rx will look like the following:
++ * GMII --> RMAC --> AFX --> TRTG --> Rx FIFO --> XDMA --> CPU memory
++ *
++ * Tx will look like the following:
++ * CPU memory --> XDMA --> Tx FIFO --> TRTG --> TMAC --> GMII
++ *
++ * The Titan driver has support for the following performance features:
++ * -> Rx side checksumming
++ * -> Jumbo Frames
++ * -> Interrupt Coalscing
++ * -> Rx NAPI
++ * -> SKB Recycling
++ * -> Transmit/Receive descriptors in SRAM
++ * -> Fast routing for IP forwarding
++ */
++
++#include <linux/dma-mapping.h>
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/sched.h>
++#include <linux/ioport.h>
++#include <linux/interrupt.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++#include <linux/errno.h>
++#include <linux/ip.h>
++#include <linux/init.h>
++#include <linux/in.h>
++#include <linux/platform_device.h>
++#include <linux/netdevice.h>
++#include <linux/etherdevice.h>
++#include <linux/skbuff.h>
++#include <linux/mii.h>
++#include <linux/delay.h>
++#include <linux/skbuff.h>
++#include <linux/prefetch.h>
++
++/* For MII specifc registers, titan_mdio.h should be included */
++#include <net/ip.h>
++
++#include <asm/bitops.h>
++#include <asm/io.h>
++#include <asm/types.h>
++#include <asm/pgtable.h>
++#include <asm/system.h>
++#include <asm/titan_dep.h>
++
++#include "titan_ge.h"
++#include "titan_mdio.h"
++
++/* Static Function Declarations	 */
++static int titan_ge_eth_open(struct net_device *);
++static void titan_ge_eth_stop(struct net_device *);
++static struct net_device_stats *titan_ge_get_stats(struct net_device *);
++static int titan_ge_init_rx_desc_ring(titan_ge_port_info *, int, int,
++				      unsigned long, unsigned long,
++				      unsigned long);
++static int titan_ge_init_tx_desc_ring(titan_ge_port_info *, int,
++				      unsigned long, unsigned long);
++
++static int titan_ge_open(struct net_device *);
++static int titan_ge_start_xmit(struct sk_buff *, struct net_device *);
++static int titan_ge_stop(struct net_device *);
++
++static unsigned long titan_ge_tx_coal(unsigned long, int);
++
++static void titan_ge_port_reset(unsigned int);
++static int titan_ge_free_tx_queue(titan_ge_port_info *);
++static int titan_ge_rx_task(struct net_device *, titan_ge_port_info *);
++static int titan_ge_port_start(struct net_device *, titan_ge_port_info *);
++
++static int titan_ge_return_tx_desc(titan_ge_port_info *, int);
++
++/*
++ * Some configuration for the FIFO and the XDMA channel needs
++ * to be done only once for all the ports. This flag controls
++ * that
++ */
++static unsigned long config_done;
++
++/*
++ * One time out of memory flag
++ */
++static unsigned int oom_flag;
++
++static int titan_ge_poll(struct net_device *netdev, int *budget);
++
++static int titan_ge_receive_queue(struct net_device *, unsigned int);
++
++static struct platform_device *titan_ge_device[3];
++
++/* MAC Address */
++extern unsigned char titan_ge_mac_addr_base[6];
++
++unsigned long titan_ge_base;
++static unsigned long titan_ge_sram;
++
++static char titan_string[] = "titan";
++
++/*
++ * The Titan GE has two alignment requirements:
++ * -> skb->data to be cacheline aligned (32 byte)
++ * -> IP header alignment to 16 bytes
++ *
++ * The latter is not implemented. So, that results in an extra copy on
++ * the Rx. This is a big performance hog. For the former case, the
++ * dev_alloc_skb() has been replaced with titan_ge_alloc_skb(). The size
++ * requested is calculated:
++ *
++ * Ethernet Frame Size : 1518
++ * Ethernet Header     : 14
++ * Future Titan change for IP header alignment : 2
++ *
++ * Hence, we allocate (1518 + 14 + 2+ 64) = 1580 bytes.  For IP header
++ * alignment, we use skb_reserve().
++ */
++
++#define ALIGNED_RX_SKB_ADDR(addr) \
++	((((unsigned long)(addr) + (64UL - 1UL)) \
++	& ~(64UL - 1UL)) - (unsigned long)(addr))
++
++#define titan_ge_alloc_skb(__length, __gfp_flags) \
++({      struct sk_buff *__skb; \
++	__skb = alloc_skb((__length) + 64, (__gfp_flags)); \
++	if(__skb) { \
++		int __offset = (int) ALIGNED_RX_SKB_ADDR(__skb->data); \
++		if(__offset) \
++			skb_reserve(__skb, __offset); \
++	} \
++	__skb; \
++})
++
++/*
++ * Configure the GMII block of the Titan based on what the PHY tells us
++ */
++static void titan_ge_gmii_config(int port_num)
++{
++	unsigned int reg_data = 0, phy_reg;
++	int err;
++
++	err = titan_ge_mdio_read(port_num, TITAN_GE_MDIO_PHY_STATUS, &phy_reg);
++
++	if (err == TITAN_GE_MDIO_ERROR) {
++		printk(KERN_ERR
++		       "Could not read PHY control register 0x11 \n");
++		printk(KERN_ERR
++			"Setting speed to 1000 Mbps and Duplex to Full \n");
++
++		return;
++	}
++
++	err = titan_ge_mdio_write(port_num, TITAN_GE_MDIO_PHY_IE, 0);
++
++	if (phy_reg & 0x8000) {
++		if (phy_reg & 0x2000) {
++			/* Full Duplex and 1000 Mbps */
++			TITAN_GE_WRITE((TITAN_GE_GMII_CONFIG_MODE +
++					(port_num << 12)), 0x201);
++		}  else {
++			/* Half Duplex and 1000 Mbps */
++			TITAN_GE_WRITE((TITAN_GE_GMII_CONFIG_MODE +
++					(port_num << 12)), 0x2201);
++			}
++	}
++	if (phy_reg & 0x4000) {
++		if (phy_reg & 0x2000) {
++			/* Full Duplex and 100 Mbps */
++			TITAN_GE_WRITE((TITAN_GE_GMII_CONFIG_MODE +
++					(port_num << 12)), 0x100);
++		} else {
++			/* Half Duplex and 100 Mbps */
++			TITAN_GE_WRITE((TITAN_GE_GMII_CONFIG_MODE +
++					(port_num << 12)), 0x2100);
++		}
++	}
++	reg_data = TITAN_GE_READ(TITAN_GE_GMII_CONFIG_GENERAL +
++				(port_num << 12));
++	reg_data |= 0x3;
++	TITAN_GE_WRITE((TITAN_GE_GMII_CONFIG_GENERAL +
++			(port_num << 12)), reg_data);
++}
++
++/*
++ * Enable the TMAC if it is not
++ */
++static void titan_ge_enable_tx(unsigned int port_num)
++{
++	unsigned long reg_data;
++
++	reg_data = TITAN_GE_READ(TITAN_GE_TMAC_CONFIG_1 + (port_num << 12));
++	if (!(reg_data & 0x8000)) {
++		printk("TMAC disabled for port %d!! \n", port_num);
++
++		reg_data |= 0x0001;	/* Enable TMAC */
++		reg_data |= 0x4000;	/* CRC Check Enable */
++		reg_data |= 0x2000;	/* Padding enable */
++		reg_data |= 0x0800;	/* CRC Add enable */
++		reg_data |= 0x0080;	/* PAUSE frame */
++
++		TITAN_GE_WRITE((TITAN_GE_TMAC_CONFIG_1 +
++				(port_num << 12)), reg_data);
++	}
++}
++
++/*
++ * Tx Timeout function
++ */
++static void titan_ge_tx_timeout(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++
++	printk(KERN_INFO "%s: TX timeout  ", netdev->name);
++	printk(KERN_INFO "Resetting card \n");
++
++	/* Do the reset outside of interrupt context */
++	schedule_work(&titan_ge_eth->tx_timeout_task);
++}
++
++/*
++ * Update the AFX tables for UC and MC for slice 0 only
++ */
++static void titan_ge_update_afx(titan_ge_port_info * titan_ge_eth)
++{
++	int port = titan_ge_eth->port_num;
++	unsigned int i;
++	volatile unsigned long reg_data = 0;
++	u8 p_addr[6];
++
++	memcpy(p_addr, titan_ge_eth->port_mac_addr, 6);
++
++	/* Set the MAC address here for TMAC and RMAC */
++	TITAN_GE_WRITE((TITAN_GE_TMAC_STATION_HI + (port << 12)),
++		       ((p_addr[5] << 8) | p_addr[4]));
++	TITAN_GE_WRITE((TITAN_GE_TMAC_STATION_MID + (port << 12)),
++		       ((p_addr[3] << 8) | p_addr[2]));
++	TITAN_GE_WRITE((TITAN_GE_TMAC_STATION_LOW + (port << 12)),
++		       ((p_addr[1] << 8) | p_addr[0]));
++
++	TITAN_GE_WRITE((TITAN_GE_RMAC_STATION_HI + (port << 12)),
++		       ((p_addr[5] << 8) | p_addr[4]));
++	TITAN_GE_WRITE((TITAN_GE_RMAC_STATION_MID + (port << 12)),
++		       ((p_addr[3] << 8) | p_addr[2]));
++	TITAN_GE_WRITE((TITAN_GE_RMAC_STATION_LOW + (port << 12)),
++		       ((p_addr[1] << 8) | p_addr[0]));
++
++	TITAN_GE_WRITE((0x112c | (port << 12)), 0x1);
++	/* Configure the eight address filters */
++	for (i = 0; i < 8; i++) {
++		/* Select each of the eight filters */
++		TITAN_GE_WRITE((TITAN_GE_AFX_ADDRS_FILTER_CTRL_2 +
++				(port << 12)), i);
++
++		/* Configure the match */
++		reg_data = 0x9;	/* Forward Enable Bit */
++		TITAN_GE_WRITE((TITAN_GE_AFX_ADDRS_FILTER_CTRL_0 +
++				(port << 12)), reg_data);
++
++		/* Finally, AFX Exact Match Address Registers */
++		TITAN_GE_WRITE((TITAN_GE_AFX_EXACT_MATCH_LOW + (port << 12)),
++			       ((p_addr[1] << 8) | p_addr[0]));
++		TITAN_GE_WRITE((TITAN_GE_AFX_EXACT_MATCH_MID + (port << 12)),
++			       ((p_addr[3] << 8) | p_addr[2]));
++		TITAN_GE_WRITE((TITAN_GE_AFX_EXACT_MATCH_HIGH + (port << 12)),
++			       ((p_addr[5] << 8) | p_addr[4]));
++
++		/* VLAN id set to 0 */
++		TITAN_GE_WRITE((TITAN_GE_AFX_EXACT_MATCH_VID +
++				(port << 12)), 0);
++	}
++}
++
++/*
++ * Actual Routine to reset the adapter when the timeout occurred
++ */
++static void titan_ge_tx_timeout_task(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	int port = titan_ge_eth->port_num;
++
++	printk("Titan GE: Transmit timed out. Resetting ... \n");
++
++	/* Dump debug info */
++	printk(KERN_ERR "TRTG cause : %x \n",
++			TITAN_GE_READ(0x100c + (port << 12)));
++
++	/* Fix this for the other ports */
++	printk(KERN_ERR "FIFO cause : %x \n", TITAN_GE_READ(0x482c));
++	printk(KERN_ERR "IE cause : %x \n", TITAN_GE_READ(0x0040));
++	printk(KERN_ERR "XDMA GDI ERROR : %x \n",
++			TITAN_GE_READ(0x5008 + (port << 8)));
++	printk(KERN_ERR "CHANNEL ERROR: %x \n",
++			TITAN_GE_READ(TITAN_GE_CHANNEL0_INTERRUPT
++						+ (port << 8)));
++
++	netif_device_detach(netdev);
++	titan_ge_port_reset(titan_ge_eth->port_num);
++	titan_ge_port_start(netdev, titan_ge_eth);
++	netif_device_attach(netdev);
++}
++
++/*
++ * Change the MTU of the Ethernet Device
++ */
++static int titan_ge_change_mtu(struct net_device *netdev, int new_mtu)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned long flags;
++
++	if ((new_mtu > 9500) || (new_mtu < 64))
++		return -EINVAL;
++
++	spin_lock_irqsave(&titan_ge_eth->lock, flags);
++
++	netdev->mtu = new_mtu;
++
++	/* Now we have to reopen the interface so that SKBs with the new
++	 * size will be allocated */
++
++	if (netif_running(netdev)) {
++		titan_ge_eth_stop(netdev);
++
++		if (titan_ge_eth_open(netdev) != TITAN_OK) {
++			printk(KERN_ERR
++			       "%s: Fatal error on opening device\n",
++			       netdev->name);
++			spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++			return -1;
++		}
++	}
++
++	spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++	return 0;
++}
++
++/*
++ * Titan Gbe Interrupt Handler. All the three ports send interrupt to one line
++ * only. Once an interrupt is triggered, figure out the port and then check
++ * the channel.
++ */
++static irqreturn_t titan_ge_int_handler(int irq, void *dev_id)
++{
++	struct net_device *netdev = (struct net_device *) dev_id;
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	unsigned int reg_data;
++	unsigned int eth_int_cause_error = 0, is;
++	unsigned long eth_int_cause1;
++	int err = 0;
++#ifdef CONFIG_SMP
++	unsigned long eth_int_cause2;
++#endif
++
++	/* Ack the CPU interrupt */
++	switch (port_num) {
++	case 0:
++		is = OCD_READ(RM9000x2_OCD_INTP0STATUS1);
++		OCD_WRITE(RM9000x2_OCD_INTP0CLEAR1, is);
++
++#ifdef CONFIG_SMP
++		is = OCD_READ(RM9000x2_OCD_INTP1STATUS1);
++		OCD_WRITE(RM9000x2_OCD_INTP1CLEAR1, is);
++#endif
++		break;
++
++	case 1:
++		is = OCD_READ(RM9000x2_OCD_INTP0STATUS0);
++		OCD_WRITE(RM9000x2_OCD_INTP0CLEAR0, is);
++
++#ifdef CONFIG_SMP
++		is = OCD_READ(RM9000x2_OCD_INTP1STATUS0);
++		OCD_WRITE(RM9000x2_OCD_INTP1CLEAR0, is);
++#endif
++		break;
++
++	case 2:
++		is = OCD_READ(RM9000x2_OCD_INTP0STATUS4);
++		OCD_WRITE(RM9000x2_OCD_INTP0CLEAR4, is);
++
++#ifdef CONFIG_SMP
++		is = OCD_READ(RM9000x2_OCD_INTP1STATUS4);
++		OCD_WRITE(RM9000x2_OCD_INTP1CLEAR4, is);
++#endif
++	}
++
++	eth_int_cause1 = TITAN_GE_READ(TITAN_GE_INTR_XDMA_CORE_A);
++#ifdef CONFIG_SMP
++	eth_int_cause2 = TITAN_GE_READ(TITAN_GE_INTR_XDMA_CORE_B);
++#endif
++
++	/* Spurious interrupt */
++#ifdef CONFIG_SMP
++	if ( (eth_int_cause1 == 0) && (eth_int_cause2 == 0)) {
++#else
++	if (eth_int_cause1 == 0) {
++#endif
++		eth_int_cause_error = TITAN_GE_READ(TITAN_GE_CHANNEL0_INTERRUPT +
++					(port_num << 8));
++
++		if (eth_int_cause_error == 0)
++			return IRQ_NONE;
++	}
++
++	/* Handle Tx first. No need to ack interrupts */
++#ifdef CONFIG_SMP
++	if ( (eth_int_cause1 & 0x20202) ||
++		(eth_int_cause2 & 0x20202) )
++#else
++	if (eth_int_cause1 & 0x20202)
++#endif
++		titan_ge_free_tx_queue(titan_ge_eth);
++
++	/* Handle the Rx next */
++#ifdef CONFIG_SMP
++	if ( (eth_int_cause1 & 0x10101) ||
++		(eth_int_cause2 & 0x10101)) {
++#else
++	if (eth_int_cause1 & 0x10101) {
++#endif
++		if (netif_rx_schedule_prep(netdev)) {
++			unsigned int ack;
++
++			ack = TITAN_GE_READ(TITAN_GE_INTR_XDMA_IE);
++			/* Disable Tx and Rx both */
++			if (port_num == 0)
++				ack &= ~(0x3);
++			if (port_num == 1)
++				ack &= ~(0x300);
++
++			if (port_num == 2)
++				ack &= ~(0x30000);
++
++			/* Interrupts have been disabled */
++			TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_IE, ack);
++
++			__netif_rx_schedule(netdev);
++		}
++	}
++
++	/* Handle error interrupts */
++	if (eth_int_cause_error && (eth_int_cause_error != 0x2)) {
++		printk(KERN_ERR
++			"XDMA Channel Error : %x  on port %d\n",
++			eth_int_cause_error, port_num);
++
++		printk(KERN_ERR
++			"XDMA GDI Hardware error : %x  on port %d\n",
++			TITAN_GE_READ(0x5008 + (port_num << 8)), port_num);
++
++		printk(KERN_ERR
++			"XDMA currently has %d Rx descriptors \n",
++			TITAN_GE_READ(0x5048 + (port_num << 8)));
++
++		printk(KERN_ERR
++			"XDMA currently has prefetcted %d Rx descriptors \n",
++			TITAN_GE_READ(0x505c + (port_num << 8)));
++
++		TITAN_GE_WRITE((TITAN_GE_CHANNEL0_INTERRUPT +
++			       (port_num << 8)), eth_int_cause_error);
++	}
++
++	/*
++	 * PHY interrupt to inform abt the changes. Reading the
++	 * PHY Status register will clear the interrupt
++	 */
++	if ((!(eth_int_cause1 & 0x30303)) &&
++		(eth_int_cause_error == 0)) {
++		err =
++		    titan_ge_mdio_read(port_num,
++			       TITAN_GE_MDIO_PHY_IS, &reg_data);
++
++		if (reg_data & 0x0400) {
++			/* Link status change */
++			titan_ge_mdio_read(port_num,
++				   TITAN_GE_MDIO_PHY_STATUS, &reg_data);
++			if (!(reg_data & 0x0400)) {
++				/* Link is down */
++				netif_carrier_off(netdev);
++				netif_stop_queue(netdev);
++			} else {
++				/* Link is up */
++				netif_carrier_on(netdev);
++				netif_wake_queue(netdev);
++
++				/* Enable the queue */
++				titan_ge_enable_tx(port_num);
++			}
++		}
++	}
++
++	return IRQ_HANDLED;
++}
++
++/*
++ * Multicast and Promiscuous mode set. The
++ * set_multi entry point is called whenever the
++ * multicast address list or the network interface
++ * flags are updated.
++ */
++static void titan_ge_set_multi(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	unsigned long reg_data;
++
++	reg_data = TITAN_GE_READ(TITAN_GE_AFX_ADDRS_FILTER_CTRL_1 +
++				(port_num << 12));
++
++	if (netdev->flags & IFF_PROMISC) {
++		reg_data |= 0x2;
++	}
++	else if (netdev->flags & IFF_ALLMULTI) {
++		reg_data |= 0x01;
++		reg_data |= 0x400; /* Use the 64-bit Multicast Hash bin */
++	}
++	else {
++		reg_data = 0x2;
++	}
++
++	TITAN_GE_WRITE((TITAN_GE_AFX_ADDRS_FILTER_CTRL_1 +
++			(port_num << 12)), reg_data);
++	if (reg_data & 0x01) {
++		TITAN_GE_WRITE((TITAN_GE_AFX_MULTICAST_HASH_LOW +
++				(port_num << 12)), 0xffff);
++		TITAN_GE_WRITE((TITAN_GE_AFX_MULTICAST_HASH_MIDLOW +
++				(port_num << 12)), 0xffff);
++		TITAN_GE_WRITE((TITAN_GE_AFX_MULTICAST_HASH_MIDHI +
++				(port_num << 12)), 0xffff);
++		TITAN_GE_WRITE((TITAN_GE_AFX_MULTICAST_HASH_HI +
++				(port_num << 12)), 0xffff);
++	}
++}
++
++/*
++ * Open the network device
++ */
++static int titan_ge_open(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	unsigned int irq = TITAN_ETH_PORT_IRQ - port_num;
++	int retval;
++
++	retval = request_irq(irq, titan_ge_int_handler,
++		     SA_INTERRUPT | SA_SAMPLE_RANDOM , netdev->name, netdev);
++
++	if (retval != 0) {
++		printk(KERN_ERR "Cannot assign IRQ number to TITAN GE \n");
++		return -1;
++	}
++
++	netdev->irq = irq;
++	printk(KERN_INFO "Assigned IRQ %d to port %d\n", irq, port_num);
++
++	spin_lock_irq(&(titan_ge_eth->lock));
++
++	if (titan_ge_eth_open(netdev) != TITAN_OK) {
++		spin_unlock_irq(&(titan_ge_eth->lock));
++		printk("%s: Error opening interface \n", netdev->name);
++		free_irq(netdev->irq, netdev);
++		return -EBUSY;
++	}
++
++	spin_unlock_irq(&(titan_ge_eth->lock));
++
++	return 0;
++}
++
++/*
++ * Allocate the SKBs for the Rx ring. Also used
++ * for refilling the queue
++ */
++static int titan_ge_rx_task(struct net_device *netdev,
++				titan_ge_port_info *titan_ge_port)
++{
++	struct device *device = &titan_ge_device[titan_ge_port->port_num]->dev;
++	volatile titan_ge_rx_desc *rx_desc;
++	struct sk_buff *skb;
++	int rx_used_desc;
++	int count = 0;
++
++	while (titan_ge_port->rx_ring_skbs < titan_ge_port->rx_ring_size) {
++
++	/* First try to get the skb from the recycler */
++#ifdef TITAN_GE_JUMBO_FRAMES
++		skb = titan_ge_alloc_skb(TITAN_GE_JUMBO_BUFSIZE, GFP_ATOMIC);
++#else
++		skb = titan_ge_alloc_skb(TITAN_GE_STD_BUFSIZE, GFP_ATOMIC);
++#endif
++		if (unlikely(!skb)) {
++			/* OOM, set the flag */
++			printk("OOM \n");
++			oom_flag = 1;
++			break;
++		}
++		count++;
++		skb->dev = netdev;
++
++		titan_ge_port->rx_ring_skbs++;
++
++		rx_used_desc = titan_ge_port->rx_used_desc_q;
++		rx_desc = &(titan_ge_port->rx_desc_area[rx_used_desc]);
++
++#ifdef TITAN_GE_JUMBO_FRAMES
++		rx_desc->buffer_addr = dma_map_single(device, skb->data,
++				TITAN_GE_JUMBO_BUFSIZE - 2, DMA_FROM_DEVICE);
++#else
++		rx_desc->buffer_addr = dma_map_single(device, skb->data,
++				TITAN_GE_STD_BUFSIZE - 2, DMA_FROM_DEVICE);
++#endif
++
++		titan_ge_port->rx_skb[rx_used_desc] = skb;
++		rx_desc->cmd_sts = TITAN_GE_RX_BUFFER_OWNED;
++
++		titan_ge_port->rx_used_desc_q =
++			(rx_used_desc + 1) % TITAN_GE_RX_QUEUE;
++	}
++
++	return count;
++}
++
++/*
++ * Actual init of the Tital GE port. There is one register for
++ * the channel configuration
++ */
++static void titan_port_init(struct net_device *netdev,
++			    titan_ge_port_info * titan_ge_eth)
++{
++	unsigned long reg_data;
++
++	titan_ge_port_reset(titan_ge_eth->port_num);
++
++	/* First reset the TMAC */
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG);
++	reg_data |= 0x80000000;
++	TITAN_GE_WRITE(TITAN_GE_CHANNEL0_CONFIG, reg_data);
++
++	udelay(30);
++
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG);
++	reg_data &= ~(0xc0000000);
++	TITAN_GE_WRITE(TITAN_GE_CHANNEL0_CONFIG, reg_data);
++
++	/* Now reset the RMAC */
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG);
++	reg_data |= 0x00080000;
++	TITAN_GE_WRITE(TITAN_GE_CHANNEL0_CONFIG, reg_data);
++
++	udelay(30);
++
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG);
++	reg_data &= ~(0x000c0000);
++	TITAN_GE_WRITE(TITAN_GE_CHANNEL0_CONFIG, reg_data);
++}
++
++/*
++ * Start the port. All the hardware specific configuration
++ * for the XDMA, Tx FIFO, Rx FIFO, TMAC, RMAC, TRTG and AFX
++ * go here
++ */
++static int titan_ge_port_start(struct net_device *netdev,
++				titan_ge_port_info * titan_port)
++{
++	volatile unsigned long reg_data, reg_data1;
++	int port_num = titan_port->port_num;
++	int count = 0;
++	unsigned long reg_data_1;
++
++	if (config_done == 0) {
++		reg_data = TITAN_GE_READ(0x0004);
++		reg_data |= 0x100;
++		TITAN_GE_WRITE(0x0004, reg_data);
++
++		reg_data &= ~(0x100);
++		TITAN_GE_WRITE(0x0004, reg_data);
++
++		/* Turn on GMII/MII mode and turn off TBI mode */
++		reg_data = TITAN_GE_READ(TITAN_GE_TSB_CTRL_1);
++		reg_data |= 0x00000700;
++		reg_data &= ~(0x00800000); /* Fencing */
++
++		TITAN_GE_WRITE(0x000c, 0x00001100);
++
++		TITAN_GE_WRITE(TITAN_GE_TSB_CTRL_1, reg_data);
++
++		/* Set the CPU Resource Limit register */
++		TITAN_GE_WRITE(0x00f8, 0x8);
++
++		/* Be conservative when using the BIU buffers */
++		TITAN_GE_WRITE(0x0068, 0x4);
++	}
++
++	titan_port->tx_threshold = 0;
++	titan_port->rx_threshold = 0;
++
++	/* We need to write the descriptors for Tx and Rx */
++	TITAN_GE_WRITE((TITAN_GE_CHANNEL0_TX_DESC + (port_num << 8)),
++		       (unsigned long) titan_port->tx_dma);
++	TITAN_GE_WRITE((TITAN_GE_CHANNEL0_RX_DESC + (port_num << 8)),
++		       (unsigned long) titan_port->rx_dma);
++
++	if (config_done == 0) {
++		/* Step 1:  XDMA config	*/
++		reg_data = TITAN_GE_READ(TITAN_GE_XDMA_CONFIG);
++		reg_data &= ~(0x80000000);      /* clear reset */
++		reg_data |= 0x1 << 29;	/* sparse tx descriptor spacing */
++		reg_data |= 0x1 << 28;	/* sparse rx descriptor spacing */
++		reg_data |= (0x1 << 23) | (0x1 << 24);  /* Descriptor Coherency */
++		reg_data |= (0x1 << 21) | (0x1 << 22);  /* Data Coherency */
++		TITAN_GE_WRITE(TITAN_GE_XDMA_CONFIG, reg_data);
++	}
++
++	/* IR register for the XDMA */
++	reg_data = TITAN_GE_READ(TITAN_GE_GDI_INTERRUPT_ENABLE + (port_num << 8));
++	reg_data |= 0x80068000; /* No Rx_OOD */
++	TITAN_GE_WRITE((TITAN_GE_GDI_INTERRUPT_ENABLE + (port_num << 8)), reg_data);
++
++	/* Start the Tx and Rx XDMA controller */
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG + (port_num << 8));
++	reg_data &= 0x4fffffff;     /* Clear tx reset */
++	reg_data &= 0xfff4ffff;     /* Clear rx reset */
++
++#ifdef TITAN_GE_JUMBO_FRAMES
++	reg_data |= 0xa0 | 0x30030000;
++#else
++	reg_data |= 0x40 | 0x20030000;
++#endif
++
++#ifndef CONFIG_SMP
++	reg_data &= ~(0x10);
++	reg_data |= 0x0f; /* All of the packet */
++#endif
++
++	TITAN_GE_WRITE((TITAN_GE_CHANNEL0_CONFIG + (port_num << 8)), reg_data);
++
++	/* Rx desc count */
++	count = titan_ge_rx_task(netdev, titan_port);
++	TITAN_GE_WRITE((0x5048 + (port_num << 8)), count);
++	count = TITAN_GE_READ(0x5048 + (port_num << 8));
++
++	udelay(30);
++
++	/*
++	 * Step 2:  Configure the SDQPF, i.e. FIFO
++	 */
++	if (config_done == 0) {
++		reg_data = TITAN_GE_READ(TITAN_GE_SDQPF_RXFIFO_CTL);
++		reg_data = 0x1;
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_RXFIFO_CTL, reg_data);
++		reg_data &= ~(0x1);
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_RXFIFO_CTL, reg_data);
++		reg_data = TITAN_GE_READ(TITAN_GE_SDQPF_RXFIFO_CTL);
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_RXFIFO_CTL, reg_data);
++
++		reg_data = TITAN_GE_READ(TITAN_GE_SDQPF_TXFIFO_CTL);
++		reg_data = 0x1;
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_TXFIFO_CTL, reg_data);
++		reg_data &= ~(0x1);
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_TXFIFO_CTL, reg_data);
++		reg_data = TITAN_GE_READ(TITAN_GE_SDQPF_TXFIFO_CTL);
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_TXFIFO_CTL, reg_data);
++	}
++	/*
++	 * Enable RX FIFO 0, 4 and 8
++	 */
++	if (port_num == 0) {
++		reg_data = TITAN_GE_READ(TITAN_GE_SDQPF_RXFIFO_0);
++
++		reg_data |= 0x100000;
++		reg_data |= (0xff << 10);
++
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_RXFIFO_0, reg_data);
++		/*
++		 * BAV2,BAV and DAV settings for the Rx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x4844);
++		reg_data1 |= ( (0x10 << 20) | (0x10 << 10) | 0x1);
++		TITAN_GE_WRITE(0x4844, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_RXFIFO_0, reg_data);
++
++		reg_data = TITAN_GE_READ(TITAN_GE_SDQPF_TXFIFO_0);
++		reg_data |= 0x100000;
++
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_TXFIFO_0, reg_data);
++
++		reg_data |= (0xff << 10);
++
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_TXFIFO_0, reg_data);
++
++		/*
++		 * BAV2, BAV and DAV settings for the Tx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x4944);
++		reg_data1 = ( (0x1 << 20) | (0x1 << 10) | 0x10);
++
++		TITAN_GE_WRITE(0x4944, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(TITAN_GE_SDQPF_TXFIFO_0, reg_data);
++
++	}
++
++	if (port_num == 1) {
++		reg_data = TITAN_GE_READ(0x4870);
++
++		reg_data |= 0x100000;
++		reg_data |= (0xff << 10) | (0xff + 1);
++
++		TITAN_GE_WRITE(0x4870, reg_data);
++		/*
++		 * BAV2,BAV and DAV settings for the Rx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x4874);
++		reg_data1 |= ( (0x10 << 20) | (0x10 << 10) | 0x1);
++		TITAN_GE_WRITE(0x4874, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(0x4870, reg_data);
++
++		reg_data = TITAN_GE_READ(0x494c);
++		reg_data |= 0x100000;
++
++		TITAN_GE_WRITE(0x494c, reg_data);
++		reg_data |= (0xff << 10) | (0xff + 1);
++		TITAN_GE_WRITE(0x494c, reg_data);
++
++		/*
++		 * BAV2, BAV and DAV settings for the Tx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x4950);
++		reg_data1 = ( (0x1 << 20) | (0x1 << 10) | 0x10);
++
++		TITAN_GE_WRITE(0x4950, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(0x494c, reg_data);
++	}
++
++	/*
++	 * Titan 1.2 revision does support port #2
++	 */
++	if (port_num == 2) {
++		/*
++		 * Put the descriptors in the SRAM
++		 */
++		reg_data = TITAN_GE_READ(0x48a0);
++
++		reg_data |= 0x100000;
++		reg_data |= (0xff << 10) | (2*(0xff + 1));
++
++		TITAN_GE_WRITE(0x48a0, reg_data);
++		/*
++		 * BAV2,BAV and DAV settings for the Rx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x48a4);
++		reg_data1 |= ( (0x10 << 20) | (0x10 << 10) | 0x1);
++		TITAN_GE_WRITE(0x48a4, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(0x48a0, reg_data);
++
++		reg_data = TITAN_GE_READ(0x4958);
++		reg_data |= 0x100000;
++
++		TITAN_GE_WRITE(0x4958, reg_data);
++		reg_data |= (0xff << 10) | (2*(0xff + 1));
++		TITAN_GE_WRITE(0x4958, reg_data);
++
++		/*
++		 * BAV2, BAV and DAV settings for the Tx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x495c);
++		reg_data1 = ( (0x1 << 20) | (0x1 << 10) | 0x10);
++
++		TITAN_GE_WRITE(0x495c, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(0x4958, reg_data);
++	}
++
++	if (port_num == 2) {
++		reg_data = TITAN_GE_READ(0x48a0);
++
++		reg_data |= 0x100000;
++		reg_data |= (0xff << 10) | (2*(0xff + 1));
++
++		TITAN_GE_WRITE(0x48a0, reg_data);
++		/*
++		 * BAV2,BAV and DAV settings for the Rx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x48a4);
++		reg_data1 |= ( (0x10 << 20) | (0x10 << 10) | 0x1);
++		TITAN_GE_WRITE(0x48a4, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(0x48a0, reg_data);
++
++		reg_data = TITAN_GE_READ(0x4958);
++		reg_data |= 0x100000;
++
++		TITAN_GE_WRITE(0x4958, reg_data);
++		reg_data |= (0xff << 10) | (2*(0xff + 1));
++		TITAN_GE_WRITE(0x4958, reg_data);
++
++		/*
++		 * BAV2, BAV and DAV settings for the Tx FIFO
++		 */
++		reg_data1 = TITAN_GE_READ(0x495c);
++		reg_data1 = ( (0x1 << 20) | (0x1 << 10) | 0x10);
++
++		TITAN_GE_WRITE(0x495c, reg_data1);
++
++		reg_data &= ~(0x00100000);
++		reg_data |= 0x200000;
++
++		TITAN_GE_WRITE(0x4958, reg_data);
++	}
++
++	/*
++	 * Step 3:  TRTG block enable
++	 */
++	reg_data = TITAN_GE_READ(TITAN_GE_TRTG_CONFIG + (port_num << 12));
++
++	/*
++	 * This is the 1.2 revision of the chip. It has fix for the
++	 * IP header alignment. Now, the IP header begins at an
++	 * aligned address and this wont need an extra copy in the
++	 * driver. This performance drawback existed in the previous
++	 * versions of the silicon
++	 */
++	reg_data_1 = TITAN_GE_READ(0x103c + (port_num << 12));
++	reg_data_1 |= 0x40000000;
++	TITAN_GE_WRITE((0x103c + (port_num << 12)), reg_data_1);
++
++	reg_data_1 |= 0x04000000;
++	TITAN_GE_WRITE((0x103c + (port_num << 12)), reg_data_1);
++
++	mdelay(5);
++
++	reg_data_1 &= ~(0x04000000);
++	TITAN_GE_WRITE((0x103c + (port_num << 12)), reg_data_1);
++
++	mdelay(5);
++
++	reg_data |= 0x0001;
++	TITAN_GE_WRITE((TITAN_GE_TRTG_CONFIG + (port_num << 12)), reg_data);
++
++	/*
++	 * Step 4:  Start the Tx activity
++	 */
++	TITAN_GE_WRITE((TITAN_GE_TMAC_CONFIG_2 + (port_num << 12)), 0xe197);
++#ifdef TITAN_GE_JUMBO_FRAMES
++	TITAN_GE_WRITE((0x1258 + (port_num << 12)), 0x4000);
++#endif
++	reg_data = TITAN_GE_READ(TITAN_GE_TMAC_CONFIG_1 + (port_num << 12));
++	reg_data |= 0x0001;	/* Enable TMAC */
++	reg_data |= 0x6c70;	/* PAUSE also set */
++
++	TITAN_GE_WRITE((TITAN_GE_TMAC_CONFIG_1 + (port_num << 12)), reg_data);
++
++	udelay(30);
++
++	/* Destination Address drop bit */
++	reg_data = TITAN_GE_READ(TITAN_GE_RMAC_CONFIG_2 + (port_num << 12));
++	reg_data |= 0x218;        /* DA_DROP bit and pause */
++	TITAN_GE_WRITE((TITAN_GE_RMAC_CONFIG_2 + (port_num << 12)), reg_data);
++
++	TITAN_GE_WRITE((0x1218 + (port_num << 12)), 0x3);
++
++#ifdef TITAN_GE_JUMBO_FRAMES
++	TITAN_GE_WRITE((0x1208 + (port_num << 12)), 0x4000);
++#endif
++	/* Start the Rx activity */
++	reg_data = TITAN_GE_READ(TITAN_GE_RMAC_CONFIG_1 + (port_num << 12));
++	reg_data |= 0x0001;	/* RMAC Enable */
++	reg_data |= 0x0010;	/* CRC Check enable */
++	reg_data |= 0x0040;	/* Min Frame check enable */
++	reg_data |= 0x4400;	/* Max Frame check enable */
++
++	TITAN_GE_WRITE((TITAN_GE_RMAC_CONFIG_1 + (port_num << 12)), reg_data);
++
++	udelay(30);
++
++	/*
++	 * Enable the Interrupts for Tx and Rx
++	 */
++	reg_data1 = TITAN_GE_READ(TITAN_GE_INTR_XDMA_IE);
++
++	if (port_num == 0) {
++		reg_data1 |= 0x3;
++#ifdef CONFIG_SMP
++		TITAN_GE_WRITE(0x0038, 0x003);
++#else
++		TITAN_GE_WRITE(0x0038, 0x303);
++#endif
++	}
++
++	if (port_num == 1) {
++		reg_data1 |= 0x300;
++	}
++
++	if (port_num == 2)
++		reg_data1 |= 0x30000;
++
++	TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_IE, reg_data1);
++	TITAN_GE_WRITE(0x003c, 0x300);
++
++	if (config_done == 0) {
++		TITAN_GE_WRITE(0x0024, 0x04000024);	/* IRQ vector */
++		TITAN_GE_WRITE(0x0020, 0x000fb000);	/* INTMSG base */
++	}
++
++	/* Priority */
++	reg_data = TITAN_GE_READ(0x1038 + (port_num << 12));
++	reg_data &= ~(0x00f00000);
++	TITAN_GE_WRITE((0x1038 + (port_num << 12)), reg_data);
++
++	/* Step 5:  GMII config */
++	titan_ge_gmii_config(port_num);
++
++	if (config_done == 0) {
++		TITAN_GE_WRITE(0x1a80, 0);
++		config_done = 1;
++	}
++
++	return TITAN_OK;
++}
++
++/*
++ * Function to queue the packet for the Ethernet device
++ */
++static void titan_ge_tx_queue(titan_ge_port_info * titan_ge_eth,
++				struct sk_buff * skb)
++{
++	struct device *device = &titan_ge_device[titan_ge_eth->port_num]->dev;
++	unsigned int curr_desc = titan_ge_eth->tx_curr_desc_q;
++	volatile titan_ge_tx_desc *tx_curr;
++	int port_num = titan_ge_eth->port_num;
++
++	tx_curr = &(titan_ge_eth->tx_desc_area[curr_desc]);
++	tx_curr->buffer_addr =
++		dma_map_single(device, skb->data, skb_headlen(skb),
++			       DMA_TO_DEVICE);
++
++	titan_ge_eth->tx_skb[curr_desc] = (struct sk_buff *) skb;
++	tx_curr->buffer_len = skb_headlen(skb);
++
++	/* Last descriptor enables interrupt and changes ownership */
++	tx_curr->cmd_sts = 0x1 | (1 << 15) | (1 << 5);
++
++	/* Kick the XDMA to start the transfer from memory to the FIFO */
++	TITAN_GE_WRITE((0x5044 + (port_num << 8)), 0x1);
++
++	/* Current descriptor updated */
++	titan_ge_eth->tx_curr_desc_q = (curr_desc + 1) % TITAN_GE_TX_QUEUE;
++
++	/* Prefetch the next descriptor */
++	prefetch((const void *)
++		 &titan_ge_eth->tx_desc_area[titan_ge_eth->tx_curr_desc_q]);
++}
++
++/*
++ * Actually does the open of the Ethernet device
++ */
++static int titan_ge_eth_open(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	struct device *device = &titan_ge_device[port_num]->dev;
++	unsigned long reg_data;
++	unsigned int phy_reg;
++	int err = 0;
++
++	/* Stop the Rx activity */
++	reg_data = TITAN_GE_READ(TITAN_GE_RMAC_CONFIG_1 + (port_num << 12));
++	reg_data &= ~(0x00000001);
++	TITAN_GE_WRITE((TITAN_GE_RMAC_CONFIG_1 + (port_num << 12)), reg_data);
++
++	/* Clear the port interrupts */
++	TITAN_GE_WRITE((TITAN_GE_CHANNEL0_INTERRUPT + (port_num << 8)), 0x0);
++
++	if (config_done == 0) {
++		TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_CORE_A, 0);
++		TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_CORE_B, 0);
++	}
++
++	/* Set the MAC Address */
++	memcpy(titan_ge_eth->port_mac_addr, netdev->dev_addr, 6);
++
++	if (config_done == 0)
++		titan_port_init(netdev, titan_ge_eth);
++
++	titan_ge_update_afx(titan_ge_eth);
++
++	/* Allocate the Tx ring now */
++	titan_ge_eth->tx_ring_skbs = 0;
++	titan_ge_eth->tx_ring_size = TITAN_GE_TX_QUEUE;
++
++	/* Allocate space in the SRAM for the descriptors */
++	titan_ge_eth->tx_desc_area = (titan_ge_tx_desc *)
++		(titan_ge_sram + TITAN_TX_RING_BYTES * port_num);
++	titan_ge_eth->tx_dma = TITAN_SRAM_BASE + TITAN_TX_RING_BYTES * port_num;
++
++	if (!titan_ge_eth->tx_desc_area) {
++		printk(KERN_ERR
++		       "%s: Cannot allocate Tx Ring (size %d bytes) for port %d\n",
++		       netdev->name, TITAN_TX_RING_BYTES, port_num);
++		return -ENOMEM;
++	}
++
++	memset(titan_ge_eth->tx_desc_area, 0, titan_ge_eth->tx_desc_area_size);
++
++	/* Now initialize the Tx descriptor ring */
++	titan_ge_init_tx_desc_ring(titan_ge_eth,
++				   titan_ge_eth->tx_ring_size,
++				   (unsigned long) titan_ge_eth->tx_desc_area,
++				   (unsigned long) titan_ge_eth->tx_dma);
++
++	/* Allocate the Rx ring now */
++	titan_ge_eth->rx_ring_size = TITAN_GE_RX_QUEUE;
++	titan_ge_eth->rx_ring_skbs = 0;
++
++	titan_ge_eth->rx_desc_area =
++		(titan_ge_rx_desc *)(titan_ge_sram + 0x1000 + TITAN_RX_RING_BYTES * port_num);
++
++	titan_ge_eth->rx_dma = TITAN_SRAM_BASE + 0x1000 + TITAN_RX_RING_BYTES * port_num;
++
++	if (!titan_ge_eth->rx_desc_area) {
++		printk(KERN_ERR "%s: Cannot allocate Rx Ring (size %d bytes)\n",
++		       netdev->name, TITAN_RX_RING_BYTES);
++
++		printk(KERN_ERR "%s: Freeing previously allocated TX queues...",
++		       netdev->name);
++
++		dma_free_coherent(device, titan_ge_eth->tx_desc_area_size,
++				    (void *) titan_ge_eth->tx_desc_area,
++				    titan_ge_eth->tx_dma);
++
++		return -ENOMEM;
++	}
++
++	memset(titan_ge_eth->rx_desc_area, 0, titan_ge_eth->rx_desc_area_size);
++
++	/* Now initialize the Rx ring */
++#ifdef TITAN_GE_JUMBO_FRAMES
++	if ((titan_ge_init_rx_desc_ring
++	    (titan_ge_eth, titan_ge_eth->rx_ring_size, TITAN_GE_JUMBO_BUFSIZE,
++	     (unsigned long) titan_ge_eth->rx_desc_area, 0,
++	      (unsigned long) titan_ge_eth->rx_dma)) == 0)
++#else
++	if ((titan_ge_init_rx_desc_ring
++	     (titan_ge_eth, titan_ge_eth->rx_ring_size, TITAN_GE_STD_BUFSIZE,
++	      (unsigned long) titan_ge_eth->rx_desc_area, 0,
++	      (unsigned long) titan_ge_eth->rx_dma)) == 0)
++#endif
++		panic("%s: Error initializing RX Ring\n", netdev->name);
++
++	/* Fill the Rx ring with the SKBs */
++	titan_ge_port_start(netdev, titan_ge_eth);
++
++	/*
++	 * Check if Interrupt Coalscing needs to be turned on. The
++	 * values specified in the register is multiplied by
++	 * (8 x 64 nanoseconds) to determine when an interrupt should
++	 * be sent to the CPU.
++	 */
++
++	if (TITAN_GE_TX_COAL) {
++		titan_ge_eth->tx_int_coal =
++		    titan_ge_tx_coal(TITAN_GE_TX_COAL, port_num);
++	}
++
++	err = titan_ge_mdio_read(port_num, TITAN_GE_MDIO_PHY_STATUS, &phy_reg);
++	if (err == TITAN_GE_MDIO_ERROR) {
++		printk(KERN_ERR
++		       "Could not read PHY control register 0x11 \n");
++		return TITAN_ERROR;
++	}
++	if (!(phy_reg & 0x0400)) {
++		netif_carrier_off(netdev);
++		netif_stop_queue(netdev);
++		return TITAN_ERROR;
++	} else {
++		netif_carrier_on(netdev);
++		netif_start_queue(netdev);
++	}
++
++	return TITAN_OK;
++}
++
++/*
++ * Queue the packet for Tx. Currently no support for zero copy,
++ * checksum offload and Scatter Gather. The chip does support
++ * Scatter Gather only. But, that wont help here since zero copy
++ * requires support for Tx checksumming also.
++ */
++int titan_ge_start_xmit(struct sk_buff *skb, struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned long flags;
++	struct net_device_stats *stats;
++//printk("titan_ge_start_xmit\n");
++
++	stats = &titan_ge_eth->stats;
++	spin_lock_irqsave(&titan_ge_eth->lock, flags);
++
++	if ((TITAN_GE_TX_QUEUE - titan_ge_eth->tx_ring_skbs) <=
++	    (skb_shinfo(skb)->nr_frags + 1)) {
++		netif_stop_queue(netdev);
++		spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++		printk(KERN_ERR "Tx OOD \n");
++		return 1;
++	}
++
++	titan_ge_tx_queue(titan_ge_eth, skb);
++	titan_ge_eth->tx_ring_skbs++;
++
++	if (TITAN_GE_TX_QUEUE <= (titan_ge_eth->tx_ring_skbs + 4)) {
++		spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++		titan_ge_free_tx_queue(titan_ge_eth);
++		spin_lock_irqsave(&titan_ge_eth->lock, flags);
++	}
++
++	stats->tx_bytes += skb->len;
++	stats->tx_packets++;
++
++	spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++
++	netdev->trans_start = jiffies;
++
++	return 0;
++}
++
++/*
++ * Actually does the Rx. Rx side checksumming supported.
++ */
++static int titan_ge_rx(struct net_device *netdev, int port_num,
++			titan_ge_port_info * titan_ge_port,
++		       titan_ge_packet * packet)
++{
++	int rx_curr_desc, rx_used_desc;
++	volatile titan_ge_rx_desc *rx_desc;
++
++	rx_curr_desc = titan_ge_port->rx_curr_desc_q;
++	rx_used_desc = titan_ge_port->rx_used_desc_q;
++
++	if (((rx_curr_desc + 1) % TITAN_GE_RX_QUEUE) == rx_used_desc)
++		return TITAN_ERROR;
++
++	rx_desc = &(titan_ge_port->rx_desc_area[rx_curr_desc]);
++
++	if (rx_desc->cmd_sts & TITAN_GE_RX_BUFFER_OWNED)
++		return TITAN_ERROR;
++
++	packet->skb = titan_ge_port->rx_skb[rx_curr_desc];
++	packet->len = (rx_desc->cmd_sts & 0x7fff);
++
++	/*
++	 * At this point, we dont know if the checksumming
++	 * actually helps relieve CPU. So, keep it for
++	 * port 0 only
++	 */
++	packet->checksum = ntohs((rx_desc->buffer & 0xffff0000) >> 16);
++	packet->cmd_sts = rx_desc->cmd_sts;
++
++	titan_ge_port->rx_curr_desc_q = (rx_curr_desc + 1) % TITAN_GE_RX_QUEUE;
++
++	/* Prefetch the next descriptor */
++	prefetch((const void *)
++	       &titan_ge_port->rx_desc_area[titan_ge_port->rx_curr_desc_q + 1]);
++
++	return TITAN_OK;
++}
++
++/*
++ * Free the Tx queue of the used SKBs
++ */
++static int titan_ge_free_tx_queue(titan_ge_port_info *titan_ge_eth)
++{
++	unsigned long flags;
++
++	/* Take the lock */
++	spin_lock_irqsave(&(titan_ge_eth->lock), flags);
++
++	while (titan_ge_return_tx_desc(titan_ge_eth, titan_ge_eth->port_num) == 0)
++		if (titan_ge_eth->tx_ring_skbs != 1)
++			titan_ge_eth->tx_ring_skbs--;
++
++	spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++
++	return TITAN_OK;
++}
++
++/*
++ * Threshold beyond which we do the cleaning of
++ * Tx queue and new allocation for the Rx
++ * queue
++ */
++#define	TX_THRESHOLD	4
++#define	RX_THRESHOLD	10
++
++/*
++ * Receive the packets and send it to the kernel.
++ */
++static int titan_ge_receive_queue(struct net_device *netdev, unsigned int max)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	titan_ge_packet packet;
++	struct net_device_stats *stats;
++	struct sk_buff *skb;
++	unsigned long received_packets = 0;
++	unsigned int ack;
++
++	stats = &titan_ge_eth->stats;
++
++	while ((--max)
++	       && (titan_ge_rx(netdev, port_num, titan_ge_eth, &packet) == TITAN_OK)) {
++		skb = (struct sk_buff *) packet.skb;
++
++		titan_ge_eth->rx_ring_skbs--;
++
++		if (--titan_ge_eth->rx_work_limit < 0)
++			break;
++		received_packets++;
++
++		stats->rx_packets++;
++		stats->rx_bytes += packet.len;
++
++		if ((packet.cmd_sts & TITAN_GE_RX_PERR) ||
++			(packet.cmd_sts & TITAN_GE_RX_OVERFLOW_ERROR) ||
++			(packet.cmd_sts & TITAN_GE_RX_TRUNC) ||
++			(packet.cmd_sts & TITAN_GE_RX_CRC_ERROR)) {
++				stats->rx_dropped++;
++				dev_kfree_skb_any(skb);
++
++				continue;
++		}
++		/*
++		 * Either support fast path or slow path. Decision
++		 * making can really slow down the performance. The
++		 * idea is to cut down the number of checks and improve
++		 * the fastpath.
++		 */
++
++		skb_put(skb, packet.len - 2);
++
++		/*
++		 * Increment data pointer by two since thats where
++		 * the MAC starts
++		 */
++		skb_reserve(skb, 2);
++		skb->protocol = eth_type_trans(skb, netdev);
++		netif_receive_skb(skb);
++
++		if (titan_ge_eth->rx_threshold > RX_THRESHOLD) {
++			ack = titan_ge_rx_task(netdev, titan_ge_eth);
++			TITAN_GE_WRITE((0x5048 + (port_num << 8)), ack);
++			titan_ge_eth->rx_threshold = 0;
++		} else
++			titan_ge_eth->rx_threshold++;
++
++		if (titan_ge_eth->tx_threshold > TX_THRESHOLD) {
++			titan_ge_eth->tx_threshold = 0;
++			titan_ge_free_tx_queue(titan_ge_eth);
++		}
++		else
++			titan_ge_eth->tx_threshold++;
++
++	}
++	return received_packets;
++}
++
++
++/*
++ * Enable the Rx side interrupts
++ */
++static void titan_ge_enable_int(unsigned int port_num,
++			titan_ge_port_info *titan_ge_eth,
++			struct net_device *netdev)
++{
++	unsigned long reg_data = TITAN_GE_READ(TITAN_GE_INTR_XDMA_IE);
++
++	if (port_num == 0)
++		reg_data |= 0x3;
++	if (port_num == 1)
++		reg_data |= 0x300;
++	if (port_num == 2)
++		reg_data |= 0x30000;
++
++	/* Re-enable interrupts */
++	TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_IE, reg_data);
++}
++
++/*
++ * Main function to handle the polling for Rx side NAPI.
++ * Receive interrupts have been disabled at this point.
++ * The poll schedules the transmit followed by receive.
++ */
++static int titan_ge_poll(struct net_device *netdev, int *budget)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	int port_num = titan_ge_eth->port_num;
++	int work_done = 0;
++	unsigned long flags, status;
++
++	titan_ge_eth->rx_work_limit = *budget;
++	if (titan_ge_eth->rx_work_limit > netdev->quota)
++		titan_ge_eth->rx_work_limit = netdev->quota;
++
++	do {
++		/* Do the transmit cleaning work here */
++		titan_ge_free_tx_queue(titan_ge_eth);
++
++		/* Ack the Rx interrupts */
++		if (port_num == 0)
++			TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_CORE_A, 0x3);
++		if (port_num == 1)
++			TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_CORE_A, 0x300);
++		if (port_num == 2)
++			TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_CORE_A, 0x30000);
++
++		work_done += titan_ge_receive_queue(netdev, 0);
++
++		/* Out of quota and there is work to be done */
++		if (titan_ge_eth->rx_work_limit < 0)
++			goto not_done;
++
++		/* Receive alloc_skb could lead to OOM */
++		if (oom_flag == 1) {
++			oom_flag = 0;
++			goto oom;
++		}
++
++		status = TITAN_GE_READ(TITAN_GE_INTR_XDMA_CORE_A);
++	} while (status & 0x30300);
++
++	/* If we are here, then no more interrupts to process */
++	goto done;
++
++not_done:
++	*budget -= work_done;
++	netdev->quota -= work_done;
++	return 1;
++
++oom:
++	printk(KERN_ERR "OOM \n");
++	netif_rx_complete(netdev);
++	return 0;
++
++done:
++	/*
++	 * No more packets on the poll list. Turn the interrupts
++	 * back on and we should be able to catch the new
++	 * packets in the interrupt handler
++	 */
++	if (!work_done)
++		work_done = 1;
++
++	*budget -= work_done;
++	netdev->quota -= work_done;
++
++	spin_lock_irqsave(&titan_ge_eth->lock, flags);
++
++	/* Remove us from the poll list */
++	netif_rx_complete(netdev);
++
++	/* Re-enable interrupts */
++	titan_ge_enable_int(port_num, titan_ge_eth, netdev);
++
++	spin_unlock_irqrestore(&titan_ge_eth->lock, flags);
++
++	return 0;
++}
++
++/*
++ * Close the network device
++ */
++int titan_ge_stop(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++
++	spin_lock_irq(&(titan_ge_eth->lock));
++	titan_ge_eth_stop(netdev);
++	free_irq(netdev->irq, netdev);
++	spin_unlock_irq(&titan_ge_eth->lock);
++
++	return TITAN_OK;
++}
++
++/*
++ * Free the Tx ring
++ */
++static void titan_ge_free_tx_rings(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	unsigned int curr;
++	unsigned long reg_data;
++
++	/* Stop the Tx DMA */
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG +
++				(port_num << 8));
++	reg_data |= 0xc0000000;
++	TITAN_GE_WRITE((TITAN_GE_CHANNEL0_CONFIG +
++			(port_num << 8)), reg_data);
++
++	/* Disable the TMAC */
++	reg_data = TITAN_GE_READ(TITAN_GE_TMAC_CONFIG_1 +
++				(port_num << 12));
++	reg_data &= ~(0x00000001);
++	TITAN_GE_WRITE((TITAN_GE_TMAC_CONFIG_1 +
++			(port_num << 12)), reg_data);
++
++	for (curr = 0;
++	     (titan_ge_eth->tx_ring_skbs) && (curr < TITAN_GE_TX_QUEUE);
++	     curr++) {
++		if (titan_ge_eth->tx_skb[curr]) {
++			dev_kfree_skb(titan_ge_eth->tx_skb[curr]);
++			titan_ge_eth->tx_ring_skbs--;
++		}
++	}
++
++	if (titan_ge_eth->tx_ring_skbs != 0)
++		printk
++		    ("%s: Error on Tx descriptor free - could not free %d"
++		     " descriptors\n", netdev->name,
++		     titan_ge_eth->tx_ring_skbs);
++
++#ifndef TITAN_RX_RING_IN_SRAM
++	dma_free_coherent(&titan_ge_device[port_num]->dev,
++			  titan_ge_eth->tx_desc_area_size,
++			  (void *) titan_ge_eth->tx_desc_area,
++			  titan_ge_eth->tx_dma);
++#endif
++}
++
++/*
++ * Free the Rx ring
++ */
++static void titan_ge_free_rx_rings(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	unsigned int curr;
++	unsigned long reg_data;
++
++	/* Stop the Rx DMA */
++	reg_data = TITAN_GE_READ(TITAN_GE_CHANNEL0_CONFIG +
++				(port_num << 8));
++	reg_data |= 0x000c0000;
++	TITAN_GE_WRITE((TITAN_GE_CHANNEL0_CONFIG +
++			(port_num << 8)), reg_data);
++
++	/* Disable the RMAC */
++	reg_data = TITAN_GE_READ(TITAN_GE_RMAC_CONFIG_1 +
++				(port_num << 12));
++	reg_data &= ~(0x00000001);
++	TITAN_GE_WRITE((TITAN_GE_RMAC_CONFIG_1 +
++			(port_num << 12)), reg_data);
++
++	for (curr = 0;
++	     titan_ge_eth->rx_ring_skbs && (curr < TITAN_GE_RX_QUEUE);
++	     curr++) {
++		if (titan_ge_eth->rx_skb[curr]) {
++			dev_kfree_skb(titan_ge_eth->rx_skb[curr]);
++			titan_ge_eth->rx_ring_skbs--;
++		}
++	}
++
++	if (titan_ge_eth->rx_ring_skbs != 0)
++		printk(KERN_ERR
++		       "%s: Error in freeing Rx Ring. %d skb's still"
++		       " stuck in RX Ring - ignoring them\n", netdev->name,
++		       titan_ge_eth->rx_ring_skbs);
++
++#ifndef TITAN_RX_RING_IN_SRAM
++	dma_free_coherent(&titan_ge_device[port_num]->dev,
++			  titan_ge_eth->rx_desc_area_size,
++			  (void *) titan_ge_eth->rx_desc_area,
++			  titan_ge_eth->rx_dma);
++#endif
++}
++
++/*
++ * Actually does the stop of the Ethernet device
++ */
++static void titan_ge_eth_stop(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++
++	netif_stop_queue(netdev);
++
++	titan_ge_port_reset(titan_ge_eth->port_num);
++
++	titan_ge_free_tx_rings(netdev);
++	titan_ge_free_rx_rings(netdev);
++
++	/* Disable the Tx and Rx Interrupts for all channels */
++	TITAN_GE_WRITE(TITAN_GE_INTR_XDMA_IE, 0x0);
++}
++
++/*
++ * Update the MAC address. Note that we have to write the
++ * address in three station registers, 16 bits each. And this
++ * has to be done for TMAC and RMAC
++ */
++static void titan_ge_update_mac_address(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++	unsigned int port_num = titan_ge_eth->port_num;
++	u8 p_addr[6];
++
++	memcpy(titan_ge_eth->port_mac_addr, netdev->dev_addr, 6);
++	memcpy(p_addr, netdev->dev_addr, 6);
++
++	/* Update the Address Filtering Match tables */
++	titan_ge_update_afx(titan_ge_eth);
++
++	printk("Station MAC : %d %d %d %d %d %d  \n",
++		p_addr[5], p_addr[4], p_addr[3],
++		p_addr[2], p_addr[1], p_addr[0]);
++
++	/* Set the MAC address here for TMAC and RMAC */
++	TITAN_GE_WRITE((TITAN_GE_TMAC_STATION_HI + (port_num << 12)),
++		       ((p_addr[5] << 8) | p_addr[4]));
++	TITAN_GE_WRITE((TITAN_GE_TMAC_STATION_MID + (port_num << 12)),
++		       ((p_addr[3] << 8) | p_addr[2]));
++	TITAN_GE_WRITE((TITAN_GE_TMAC_STATION_LOW + (port_num << 12)),
++		       ((p_addr[1] << 8) | p_addr[0]));
++
++	TITAN_GE_WRITE((TITAN_GE_RMAC_STATION_HI + (port_num << 12)),
++		       ((p_addr[5] << 8) | p_addr[4]));
++	TITAN_GE_WRITE((TITAN_GE_RMAC_STATION_MID + (port_num << 12)),
++		       ((p_addr[3] << 8) | p_addr[2]));
++	TITAN_GE_WRITE((TITAN_GE_RMAC_STATION_LOW + (port_num << 12)),
++		       ((p_addr[1] << 8) | p_addr[0]));
++}
++
++/*
++ * Set the MAC address of the Ethernet device
++ */
++static int titan_ge_set_mac_address(struct net_device *dev, void *addr)
++{
++	titan_ge_port_info *tp = netdev_priv(dev);
++	struct sockaddr *sa = addr;
++
++	memcpy(dev->dev_addr, sa->sa_data, dev->addr_len);
++
++	spin_lock_irq(&tp->lock);
++	titan_ge_update_mac_address(dev);
++	spin_unlock_irq(&tp->lock);
++
++	return 0;
++}
++
++/*
++ * Get the Ethernet device stats
++ */
++static struct net_device_stats *titan_ge_get_stats(struct net_device *netdev)
++{
++	titan_ge_port_info *titan_ge_eth = netdev_priv(netdev);
++
++	return &titan_ge_eth->stats;
++}
++
++/*
++ * Initialize the Rx descriptor ring for the Titan Ge
++ */
++static int titan_ge_init_rx_desc_ring(titan_ge_port_info * titan_eth_port,
++				      int rx_desc_num,
++				      int rx_buff_size,
++				      unsigned long rx_desc_base_addr,
++				      unsigned long rx_buff_base_addr,
++				      unsigned long rx_dma)
++{
++	volatile titan_ge_rx_desc *rx_desc;
++	unsigned long buffer_addr;
++	int index;
++	unsigned long titan_ge_rx_desc_bus = rx_dma;
++
++	buffer_addr = rx_buff_base_addr;
++	rx_desc = (titan_ge_rx_desc *) rx_desc_base_addr;
++
++	/* Check alignment */
++	if (rx_buff_base_addr & 0xF)
++		return 0;
++
++	/* Check Rx buffer size */
++	if ((rx_buff_size < 8) || (rx_buff_size > TITAN_GE_MAX_RX_BUFFER))
++		return 0;
++
++	/* 64-bit alignment
++	if ((rx_buff_base_addr + rx_buff_size) & 0x7)
++		return 0; */
++
++	/* Initialize the Rx desc ring */
++	for (index = 0; index < rx_desc_num; index++) {
++		titan_ge_rx_desc_bus += sizeof(titan_ge_rx_desc);
++		rx_desc[index].cmd_sts = 0;
++		rx_desc[index].buffer_addr = buffer_addr;
++		titan_eth_port->rx_skb[index] = NULL;
++		buffer_addr += rx_buff_size;
++	}
++
++	titan_eth_port->rx_curr_desc_q = 0;
++	titan_eth_port->rx_used_desc_q = 0;
++
++	titan_eth_port->rx_desc_area = (titan_ge_rx_desc *) rx_desc_base_addr;
++	titan_eth_port->rx_desc_area_size =
++	    rx_desc_num * sizeof(titan_ge_rx_desc);
++
++	titan_eth_port->rx_dma = rx_dma;
++
++	return TITAN_OK;
++}
++
++/*
++ * Initialize the Tx descriptor ring. Descriptors in the SRAM
++ */
++static int titan_ge_init_tx_desc_ring(titan_ge_port_info * titan_ge_port,
++				      int tx_desc_num,
++				      unsigned long tx_desc_base_addr,
++				      unsigned long tx_dma)
++{
++	titan_ge_tx_desc *tx_desc;
++	int index;
++	unsigned long titan_ge_tx_desc_bus = tx_dma;
++
++	if (tx_desc_base_addr & 0xF)
++		return 0;
++
++	tx_desc = (titan_ge_tx_desc *) tx_desc_base_addr;
++
++	for (index = 0; index < tx_desc_num; index++) {
++		titan_ge_port->tx_dma_array[index] =
++		    (dma_addr_t) titan_ge_tx_desc_bus;
++		titan_ge_tx_desc_bus += sizeof(titan_ge_tx_desc);
++		tx_desc[index].cmd_sts = 0x0000;
++		tx_desc[index].buffer_len = 0;
++		tx_desc[index].buffer_addr = 0x00000000;
++		titan_ge_port->tx_skb[index] = NULL;
++	}
++
++	titan_ge_port->tx_curr_desc_q = 0;
++	titan_ge_port->tx_used_desc_q = 0;
++
++	titan_ge_port->tx_desc_area = (titan_ge_tx_desc *) tx_desc_base_addr;
++	titan_ge_port->tx_desc_area_size =
++	    tx_desc_num * sizeof(titan_ge_tx_desc);
++
++	titan_ge_port->tx_dma = tx_dma;
++	return TITAN_OK;
++}
++
++/*
++ * Initialize the device as an Ethernet device
++ */
++static int __init titan_ge_probe(struct device *device)
++{
++	titan_ge_port_info *titan_ge_eth;
++	struct net_device *netdev;
++	int port = to_platform_device(device)->id;
++	int err;
++
++	netdev = alloc_etherdev(sizeof(titan_ge_port_info));
++	if (!netdev) {
++		err = -ENODEV;
++		goto out;
++	}
++
++	netdev->open = titan_ge_open;
++	netdev->stop = titan_ge_stop;
++	netdev->hard_start_xmit = titan_ge_start_xmit;
++	netdev->get_stats = titan_ge_get_stats;
++	netdev->set_multicast_list = titan_ge_set_multi;
++	netdev->set_mac_address = titan_ge_set_mac_address;
++
++	/* Tx timeout */
++	netdev->tx_timeout = titan_ge_tx_timeout;
++	netdev->watchdog_timeo = 2 * HZ;
++
++	/* Set these to very high values */
++	netdev->poll = titan_ge_poll;
++	netdev->weight = 64;
++
++	netdev->tx_queue_len = TITAN_GE_TX_QUEUE;
++	netif_carrier_off(netdev);
++	netdev->base_addr = 0;
++
++	netdev->change_mtu = titan_ge_change_mtu;
++
++	titan_ge_eth = netdev_priv(netdev);
++	/* Allocation of memory for the driver structures */
++
++	titan_ge_eth->port_num = port;
++
++	/* Configure the Tx timeout handler */
++	INIT_WORK(&titan_ge_eth->tx_timeout_task,
++		  (void (*)(void *)) titan_ge_tx_timeout_task, netdev);
++
++	spin_lock_init(&titan_ge_eth->lock);
++
++	/* set MAC addresses */
++	memcpy(netdev->dev_addr, titan_ge_mac_addr_base, 6);
++	netdev->dev_addr[5] += port;
++
++	err = register_netdev(netdev);
++
++	if (err)
++		goto out_free_netdev;
++
++	printk(KERN_NOTICE
++	       "%s: port %d with MAC address %02x:%02x:%02x:%02x:%02x:%02x\n",
++	       netdev->name, port, netdev->dev_addr[0],
++	       netdev->dev_addr[1], netdev->dev_addr[2],
++	       netdev->dev_addr[3], netdev->dev_addr[4],
++	       netdev->dev_addr[5]);
++
++	printk(KERN_NOTICE "Rx NAPI supported, Tx Coalescing ON \n");
++
++	return 0;
++
++out_free_netdev:
++	kfree(netdev);
++
++out:
++	return err;
++}
++
++static void __devexit titan_device_remove(struct device *device)
++{
++}
++
++/*
++ * Reset the Ethernet port
++ */
++static void titan_ge_port_reset(unsigned int port_num)
++{
++	unsigned int reg_data;
++
++	/* Stop the Tx port activity */
++	reg_data = TITAN_GE_READ(TITAN_GE_TMAC_CONFIG_1 +
++				(port_num << 12));
++	reg_data &= ~(0x0001);
++	TITAN_GE_WRITE((TITAN_GE_TMAC_CONFIG_1 +
++			(port_num << 12)), reg_data);
++
++	/* Stop the Rx port activity */
++	reg_data = TITAN_GE_READ(TITAN_GE_RMAC_CONFIG_1 +
++				(port_num << 12));
++	reg_data &= ~(0x0001);
++	TITAN_GE_WRITE((TITAN_GE_RMAC_CONFIG_1 +
++			(port_num << 12)), reg_data);
++
++	return;
++}
++
++/*
++ * Return the Tx desc after use by the XDMA
++ */
++static int titan_ge_return_tx_desc(titan_ge_port_info * titan_ge_eth, int port)
++{
++	int tx_desc_used;
++	struct sk_buff *skb;
++
++	tx_desc_used = titan_ge_eth->tx_used_desc_q;
++
++	/* return right away */
++	if (tx_desc_used == titan_ge_eth->tx_curr_desc_q)
++		return TITAN_ERROR;
++
++	/* Now the critical stuff */
++	skb = titan_ge_eth->tx_skb[tx_desc_used];
++
++	dev_kfree_skb_any(skb);
++
++	titan_ge_eth->tx_skb[tx_desc_used] = NULL;
++	titan_ge_eth->tx_used_desc_q =
++	    (tx_desc_used + 1) % TITAN_GE_TX_QUEUE;
++
++	return 0;
++}
++
++/*
++ * Coalescing for the Tx path
++ */
++static unsigned long titan_ge_tx_coal(unsigned long delay, int port)
++{
++	unsigned long rx_delay;
++
++	rx_delay = TITAN_GE_READ(TITAN_GE_INT_COALESCING);
++	delay = (delay << 16) | rx_delay;
++
++	TITAN_GE_WRITE(TITAN_GE_INT_COALESCING, delay);
++	TITAN_GE_WRITE(0x5038, delay);
++
++	return delay;
++}
++
++static struct device_driver titan_soc_driver = {
++	.name   = titan_string,
++	.bus    = &platform_bus_type,
++	.probe  = titan_ge_probe,
++	.remove = __devexit_p(titan_device_remove),
++};
++
++static void titan_platform_release (struct device *device)
++{
++	struct platform_device *pldev;
++
++	/* free device */
++	pldev = to_platform_device (device);
++	kfree (pldev);
++}
++
++/*
++ * Register the Titan GE with the kernel
++ */
++static int __init titan_ge_init_module(void)
++{
++	struct platform_device *pldev;
++	unsigned int version, device;
++	int i;
++
++	printk(KERN_NOTICE
++	       "PMC-Sierra TITAN 10/100/1000 Ethernet Driver \n");
++
++	titan_ge_base = (unsigned long) ioremap(TITAN_GE_BASE, TITAN_GE_SIZE);
++	if (!titan_ge_base) {
++		printk("Mapping Titan GE failed\n");
++		goto out;
++	}
++
++	device = TITAN_GE_READ(TITAN_GE_DEVICE_ID);
++	version = (device & 0x000f0000) >> 16;
++	device &= 0x0000ffff;
++
++	printk(KERN_NOTICE "Device Id : %x,  Version : %x \n", device, version);
++
++#ifdef TITAN_RX_RING_IN_SRAM
++	titan_ge_sram = (unsigned long) ioremap(TITAN_SRAM_BASE,
++						TITAN_SRAM_SIZE);
++	if (!titan_ge_sram) {
++		printk("Mapping Titan SRAM failed\n");
++		goto out_unmap_ge;
++	}
++#endif
++
++	if (driver_register(&titan_soc_driver)) {
++		printk(KERN_ERR "Driver registration failed\n");
++		goto out_unmap_sram;
++	}
++
++	for (i = 0; i < 3; i++) {
++		titan_ge_device[i] = NULL;
++
++		if (!(pldev = kmalloc (sizeof (*pldev), GFP_KERNEL)))
++			continue;
++
++		memset (pldev, 0, sizeof (*pldev));
++		pldev->name		= titan_string;
++		pldev->id		= i;
++		pldev->dev.release	= titan_platform_release;
++		titan_ge_device[i]	= pldev;
++
++		if (platform_device_register (pldev)) {
++			kfree (pldev);
++			titan_ge_device[i] = NULL;
++			continue;
++		}
++
++		if (!pldev->dev.driver) {
++			/*
++			 * The driver was not bound to this device, there was
++			 * no hardware at this address. Unregister it, as the
++			 * release fuction will take care of freeing the
++			 * allocated structure
++			 */
++			titan_ge_device[i] = NULL;
++			platform_device_unregister (pldev);
++		}
++	}
++
++	return 0;
++
++out_unmap_sram:
++	iounmap((void *)titan_ge_sram);
++
++out_unmap_ge:
++	iounmap((void *)titan_ge_base);
++
++out:
++	return -ENOMEM;
++}
++
++/*
++ * Unregister the Titan GE from the kernel
++ */
++static void __exit titan_ge_cleanup_module(void)
++{
++	int i;
++
++	driver_unregister(&titan_soc_driver);
++
++	for (i = 0; i < 3; i++) {
++		if (titan_ge_device[i]) {
++			platform_device_unregister (titan_ge_device[i]);
++			titan_ge_device[i] = NULL;
++		}
++	}
++
++	iounmap((void *)titan_ge_sram);
++	iounmap((void *)titan_ge_base);
++}
++
++MODULE_AUTHOR("Manish Lachwani <lachwani@pmc-sierra.com>");
++MODULE_DESCRIPTION("Titan GE Ethernet driver");
++MODULE_LICENSE("GPL");
++
++module_init(titan_ge_init_module);
++module_exit(titan_ge_cleanup_module);
+diff --git a/drivers/net/titan_ge.h b/drivers/net/titan_ge.h
+new file mode 100644
+index 0000000..3719f78
+--- /dev/null
++++ b/drivers/net/titan_ge.h
+@@ -0,0 +1,415 @@
++#ifndef _TITAN_GE_H_
++#define _TITAN_GE_H_
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/spinlock.h>
++#include <asm/byteorder.h>
++
++/*
++ * These functions should be later moved to a more generic location since there
++ * will be others accessing it also
++ */
++
++/*
++ * This is the way it works: LKB5 Base is at 0x0128. TITAN_BASE is defined in
++ * include/asm/titan_dep.h. TITAN_GE_BASE is the value in the TITAN_GE_LKB5
++ * register.
++ */
++
++#define	TITAN_GE_BASE	0xfe000000UL
++#define	TITAN_GE_SIZE	0x10000UL
++
++extern unsigned long titan_ge_base;
++
++#define	TITAN_GE_WRITE(offset, data) \
++		*(volatile u32 *)(titan_ge_base + (offset)) = (data)
++
++#define TITAN_GE_READ(offset) *(volatile u32 *)(titan_ge_base + (offset))
++
++#ifndef msec_delay
++#define msec_delay(x)   do { if(in_interrupt()) { \
++				/* Don't mdelay in interrupt context! */ \
++				BUG(); \
++			} else { \
++				set_current_state(TASK_UNINTERRUPTIBLE); \
++				schedule_timeout((x * HZ)/1000); \
++			} } while(0)
++#endif
++
++#define TITAN_GE_PORT_0
++
++#define	TITAN_SRAM_BASE		((OCD_READ(RM9000x2_OCD_LKB13) & ~1) << 4)
++#define	TITAN_SRAM_SIZE		0x2000UL
++
++/*
++ * We may need these constants
++ */
++#define TITAN_BIT0    0x00000001
++#define TITAN_BIT1    0x00000002
++#define TITAN_BIT2    0x00000004
++#define TITAN_BIT3    0x00000008
++#define TITAN_BIT4    0x00000010
++#define TITAN_BIT5    0x00000020
++#define TITAN_BIT6    0x00000040
++#define TITAN_BIT7    0x00000080
++#define TITAN_BIT8    0x00000100
++#define TITAN_BIT9    0x00000200
++#define TITAN_BIT10   0x00000400
++#define TITAN_BIT11   0x00000800
++#define TITAN_BIT12   0x00001000
++#define TITAN_BIT13   0x00002000
++#define TITAN_BIT14   0x00004000
++#define TITAN_BIT15   0x00008000
++#define TITAN_BIT16   0x00010000
++#define TITAN_BIT17   0x00020000
++#define TITAN_BIT18   0x00040000
++#define TITAN_BIT19   0x00080000
++#define TITAN_BIT20   0x00100000
++#define TITAN_BIT21   0x00200000
++#define TITAN_BIT22   0x00400000
++#define TITAN_BIT23   0x00800000
++#define TITAN_BIT24   0x01000000
++#define TITAN_BIT25   0x02000000
++#define TITAN_BIT26   0x04000000
++#define TITAN_BIT27   0x08000000
++#define TITAN_BIT28   0x10000000
++#define TITAN_BIT29   0x20000000
++#define TITAN_BIT30   0x40000000
++#define TITAN_BIT31   0x80000000
++
++/* Flow Control */
++#define	TITAN_GE_FC_NONE	0x0
++#define	TITAN_GE_FC_FULL	0x1
++#define	TITAN_GE_FC_TX_PAUSE	0x2
++#define	TITAN_GE_FC_RX_PAUSE	0x3
++
++/* Duplex Settings */
++#define	TITAN_GE_FULL_DUPLEX	0x1
++#define	TITAN_GE_HALF_DUPLEX	0x2
++
++/* Speed settings */
++#define	TITAN_GE_SPEED_1000	0x1
++#define	TITAN_GE_SPEED_100	0x2
++#define	TITAN_GE_SPEED_10	0x3
++
++/* Debugging info only */
++#undef TITAN_DEBUG
++
++/* Keep the rings in the Titan's SSRAM */
++#define TITAN_RX_RING_IN_SRAM
++
++#ifdef CONFIG_64BIT
++#define	TITAN_GE_IE_MASK	0xfffffffffb001b64
++#define	TITAN_GE_IE_STATUS	0xfffffffffb001b60
++#else
++#define	TITAN_GE_IE_MASK	0xfb001b64
++#define	TITAN_GE_IE_STATUS	0xfb001b60
++#endif
++
++/* Support for Jumbo Frames */
++#undef TITAN_GE_JUMBO_FRAMES
++
++/* Rx buffer size */
++#ifdef TITAN_GE_JUMBO_FRAMES
++#define	TITAN_GE_JUMBO_BUFSIZE	9080
++#else
++#define	TITAN_GE_STD_BUFSIZE	1580
++#endif
++
++/*
++ * Tx and Rx Interrupt Coalescing parameter. These values are
++ * for 1 Ghz processor. Rx coalescing can be taken care of
++ * by NAPI. NAPI is adaptive and hence useful. Tx coalescing
++ * is not adaptive. Hence, these values need to be adjusted
++ * based on load, CPU speed etc.
++ */
++#define	TITAN_GE_RX_COAL	150
++#define	TITAN_GE_TX_COAL	300
++
++#if defined(__BIG_ENDIAN)
++
++/* Define the Rx descriptor */
++typedef struct eth_rx_desc {
++	u32     reserved;	/* Unused 		*/
++	u32     buffer_addr;	/* CPU buffer address 	*/
++	u32	cmd_sts;	/* Command and Status	*/
++	u32	buffer;		/* XDMA buffer address	*/
++} titan_ge_rx_desc;
++
++/* Define the Tx descriptor */
++typedef struct eth_tx_desc {
++	u16     cmd_sts;	/* Command, Status and Buffer count */
++	u16	buffer_len;	/* Length of the buffer	*/
++	u32     buffer_addr;	/* Physical address of the buffer */
++} titan_ge_tx_desc;
++
++#elif defined(__LITTLE_ENDIAN)
++
++/* Define the Rx descriptor */
++typedef struct eth_rx_desc {
++	u32	buffer_addr;	/* CPU buffer address   */
++	u32	reserved;	/* Unused               */
++	u32	buffer;		/* XDMA buffer address  */
++	u32	cmd_sts;	/* Command and Status   */
++} titan_ge_rx_desc;
++
++/* Define the Tx descriptor */
++typedef struct eth_tx_desc {
++	u32     buffer_addr;	/* Physical address of the buffer */
++	u16     buffer_len;     /* Length of the buffer */
++	u16     cmd_sts;        /* Command, Status and Buffer count */
++} titan_ge_tx_desc;
++#endif
++
++/* Default Tx Queue Size */
++#define	TITAN_GE_TX_QUEUE	128
++#define TITAN_TX_RING_BYTES	(TITAN_GE_TX_QUEUE * sizeof(struct eth_tx_desc))
++
++/* Default Rx Queue Size */
++#define	TITAN_GE_RX_QUEUE	64
++#define TITAN_RX_RING_BYTES	(TITAN_GE_RX_QUEUE * sizeof(struct eth_rx_desc))
++
++/* Packet Structure */
++typedef struct _pkt_info {
++	unsigned int           len;
++	unsigned int            cmd_sts;
++	unsigned int            buffer;
++	struct sk_buff          *skb;
++	unsigned int		checksum;
++} titan_ge_packet;
++
++
++#define	PHYS_CNT	3
++
++/* Titan Port specific data structure */
++typedef struct _eth_port_ctrl {
++	unsigned int		port_num;
++	u8			port_mac_addr[6];
++
++	/* Rx descriptor pointers */
++	int 			rx_curr_desc_q, rx_used_desc_q;
++
++	/* Tx descriptor pointers */
++	int 			tx_curr_desc_q, tx_used_desc_q;
++
++	/* Rx descriptor area */
++	volatile titan_ge_rx_desc	*rx_desc_area;
++	unsigned int			rx_desc_area_size;
++	struct sk_buff*			rx_skb[TITAN_GE_RX_QUEUE];
++
++	/* Tx Descriptor area */
++	volatile titan_ge_tx_desc	*tx_desc_area;
++	unsigned int                    tx_desc_area_size;
++	struct sk_buff*                 tx_skb[TITAN_GE_TX_QUEUE];
++
++	/* Timeout task */
++	struct work_struct		tx_timeout_task;
++
++	/* DMA structures and handles */
++	dma_addr_t			tx_dma;
++	dma_addr_t			rx_dma;
++	dma_addr_t			tx_dma_array[TITAN_GE_TX_QUEUE];
++
++	/* Device lock */
++	spinlock_t			lock;
++
++	unsigned int			tx_ring_skbs;
++	unsigned int			rx_ring_size;
++	unsigned int			tx_ring_size;
++	unsigned int			rx_ring_skbs;
++
++	struct net_device_stats		stats;
++
++	/* Tx and Rx coalescing */
++	unsigned long			rx_int_coal;
++	unsigned long			tx_int_coal;
++
++	/* Threshold for replenishing the Rx and Tx rings */
++	unsigned int			tx_threshold;
++	unsigned int			rx_threshold;
++
++	/* NAPI work limit */
++	unsigned int			rx_work_limit;
++} titan_ge_port_info;
++
++/* Titan specific constants */
++#define	TITAN_ETH_PORT_IRQ		3
++
++/* Max Rx buffer */
++#define	TITAN_GE_MAX_RX_BUFFER		65536
++
++/* Tx and Rx Error */
++#define	TITAN_GE_ERROR
++
++/* Rx Descriptor Command and Status */
++
++#define	TITAN_GE_RX_CRC_ERROR		TITAN_BIT27	/* crc error */
++#define	TITAN_GE_RX_OVERFLOW_ERROR	TITAN_BIT15	/* overflow */
++#define TITAN_GE_RX_BUFFER_OWNED	TITAN_BIT21	/* buffer ownership */
++#define	TITAN_GE_RX_STP			TITAN_BIT31	/* start of packet */
++#define	TITAN_GE_RX_BAM			TITAN_BIT30	/* broadcast address match */
++#define TITAN_GE_RX_PAM			TITAN_BIT28	/* physical address match */
++#define TITAN_GE_RX_LAFM		TITAN_BIT29	/* logical address filter match */
++#define TITAN_GE_RX_VLAN		TITAN_BIT26	/* virtual lans */
++#define TITAN_GE_RX_PERR		TITAN_BIT19	/* packet error */
++#define TITAN_GE_RX_TRUNC		TITAN_BIT20	/* packet size greater than 32 buffers */
++
++/* Tx Descriptor Command */
++#define	TITAN_GE_TX_BUFFER_OWNED	TITAN_BIT5	/* buffer ownership */
++#define	TITAN_GE_TX_ENABLE_INTERRUPT	TITAN_BIT15	/* Interrupt Enable */
++
++/* Return Status */
++#define	TITAN_OK	0x1	/* Good Status */
++#define	TITAN_ERROR	0x2	/* Error Status */
++
++/* MIB specific register offset */
++#define TITAN_GE_MSTATX_STATS_BASE_LOW       0x0800  /* MSTATX COUNTL[15:0] */
++#define TITAN_GE_MSTATX_STATS_BASE_MID       0x0804  /* MSTATX COUNTM[15:0] */
++#define TITAN_GE_MSTATX_STATS_BASE_HI        0x0808  /* MSTATX COUNTH[7:0] */
++#define TITAN_GE_MSTATX_CONTROL              0x0828  /* MSTATX Control */
++#define TITAN_GE_MSTATX_VARIABLE_SELECT      0x082C  /* MSTATX Variable Select */
++
++/* MIB counter offsets, add to the TITAN_GE_MSTATX_STATS_BASE_XXX */
++#define TITAN_GE_MSTATX_RXFRAMESOK                   0x0040
++#define TITAN_GE_MSTATX_RXOCTETSOK                   0x0050
++#define TITAN_GE_MSTATX_RXFRAMES                     0x0060
++#define TITAN_GE_MSTATX_RXOCTETS                     0x0070
++#define TITAN_GE_MSTATX_RXUNICASTFRAMESOK            0x0080
++#define TITAN_GE_MSTATX_RXBROADCASTFRAMESOK          0x0090
++#define TITAN_GE_MSTATX_RXMULTICASTFRAMESOK          0x00A0
++#define TITAN_GE_MSTATX_RXTAGGEDFRAMESOK             0x00B0
++#define TITAN_GE_MSTATX_RXMACPAUSECONTROLFRAMESOK    0x00C0
++#define TITAN_GE_MSTATX_RXMACCONTROLFRAMESOK         0x00D0
++#define TITAN_GE_MSTATX_RXFCSERROR                   0x00E0
++#define TITAN_GE_MSTATX_RXALIGNMENTERROR             0x00F0
++#define TITAN_GE_MSTATX_RXSYMBOLERROR                0x0100
++#define TITAN_GE_MSTATX_RXLAYER1ERROR                0x0110
++#define TITAN_GE_MSTATX_RXINRANGELENGTHERROR         0x0120
++#define TITAN_GE_MSTATX_RXLONGLENGTHERROR            0x0130
++#define TITAN_GE_MSTATX_RXLONGLENGTHCRCERROR         0x0140
++#define TITAN_GE_MSTATX_RXSHORTLENGTHERROR           0x0150
++#define TITAN_GE_MSTATX_RXSHORTLLENGTHCRCERROR       0x0160
++#define TITAN_GE_MSTATX_RXFRAMES64OCTETS             0x0170
++#define TITAN_GE_MSTATX_RXFRAMES65TO127OCTETS        0x0180
++#define TITAN_GE_MSTATX_RXFRAMES128TO255OCTETS       0x0190
++#define TITAN_GE_MSTATX_RXFRAMES256TO511OCTETS       0x01A0
++#define TITAN_GE_MSTATX_RXFRAMES512TO1023OCTETS      0x01B0
++#define TITAN_GE_MSTATX_RXFRAMES1024TO1518OCTETS     0x01C0
++#define TITAN_GE_MSTATX_RXFRAMES1519TOMAXSIZE        0x01D0
++#define TITAN_GE_MSTATX_RXSTATIONADDRESSFILTERED     0x01E0
++#define TITAN_GE_MSTATX_RXVARIABLE                   0x01F0
++#define TITAN_GE_MSTATX_GENERICADDRESSFILTERED       0x0200
++#define TITAN_GE_MSTATX_UNICASTFILTERED              0x0210
++#define TITAN_GE_MSTATX_MULTICASTFILTERED            0x0220
++#define TITAN_GE_MSTATX_BROADCASTFILTERED            0x0230
++#define TITAN_GE_MSTATX_HASHFILTERED                 0x0240
++#define TITAN_GE_MSTATX_TXFRAMESOK                   0x0250
++#define TITAN_GE_MSTATX_TXOCTETSOK                   0x0260
++#define TITAN_GE_MSTATX_TXOCTETS                     0x0270
++#define TITAN_GE_MSTATX_TXTAGGEDFRAMESOK             0x0280
++#define TITAN_GE_MSTATX_TXMACPAUSECONTROLFRAMESOK    0x0290
++#define TITAN_GE_MSTATX_TXFCSERROR                   0x02A0
++#define TITAN_GE_MSTATX_TXSHORTLENGTHERROR           0x02B0
++#define TITAN_GE_MSTATX_TXLONGLENGTHERROR            0x02C0
++#define TITAN_GE_MSTATX_TXSYSTEMERROR                0x02D0
++#define TITAN_GE_MSTATX_TXMACERROR                   0x02E0
++#define TITAN_GE_MSTATX_TXCARRIERSENSEERROR          0x02F0
++#define TITAN_GE_MSTATX_TXSQETESTERROR               0x0300
++#define TITAN_GE_MSTATX_TXUNICASTFRAMESOK            0x0310
++#define TITAN_GE_MSTATX_TXBROADCASTFRAMESOK          0x0320
++#define TITAN_GE_MSTATX_TXMULTICASTFRAMESOK          0x0330
++#define TITAN_GE_MSTATX_TXUNICASTFRAMESATTEMPTED     0x0340
++#define TITAN_GE_MSTATX_TXBROADCASTFRAMESATTEMPTED   0x0350
++#define TITAN_GE_MSTATX_TXMULTICASTFRAMESATTEMPTED   0x0360
++#define TITAN_GE_MSTATX_TXFRAMES64OCTETS             0x0370
++#define TITAN_GE_MSTATX_TXFRAMES65TO127OCTETS        0x0380
++#define TITAN_GE_MSTATX_TXFRAMES128TO255OCTETS       0x0390
++#define TITAN_GE_MSTATX_TXFRAMES256TO511OCTETS       0x03A0
++#define TITAN_GE_MSTATX_TXFRAMES512TO1023OCTETS      0x03B0
++#define TITAN_GE_MSTATX_TXFRAMES1024TO1518OCTETS     0x03C0
++#define TITAN_GE_MSTATX_TXFRAMES1519TOMAXSIZE        0x03D0
++#define TITAN_GE_MSTATX_TXVARIABLE                   0x03E0
++#define TITAN_GE_MSTATX_RXSYSTEMERROR                0x03F0
++#define TITAN_GE_MSTATX_SINGLECOLLISION              0x0400
++#define TITAN_GE_MSTATX_MULTIPLECOLLISION            0x0410
++#define TITAN_GE_MSTATX_DEFERREDXMISSIONS            0x0420
++#define TITAN_GE_MSTATX_LATECOLLISIONS               0x0430
++#define TITAN_GE_MSTATX_ABORTEDDUETOXSCOLLS          0x0440
++
++/* Interrupt specific defines */
++#define TITAN_GE_DEVICE_ID         0x0000  /* Device ID */
++#define TITAN_GE_RESET             0x0004  /* Reset reg */
++#define TITAN_GE_TSB_CTRL_0        0x000C  /* TSB Control reg 0 */
++#define TITAN_GE_TSB_CTRL_1        0x0010  /* TSB Control reg 1 */
++#define TITAN_GE_INTR_GRP0_STATUS  0x0040  /* General Interrupt Group 0 Status */
++#define TITAN_GE_INTR_XDMA_CORE_A  0x0048  /* XDMA Channel Interrupt Status, Core A*/
++#define TITAN_GE_INTR_XDMA_CORE_B  0x004C  /* XDMA Channel Interrupt Status, Core B*/
++#define	TITAN_GE_INTR_XDMA_IE	   0x0058  /* XDMA Channel Interrupt Enable */
++#define TITAN_GE_SDQPF_ECC_INTR    0x480C  /* SDQPF ECC Interrupt Status */
++#define TITAN_GE_SDQPF_RXFIFO_CTL  0x4828  /* SDQPF RxFifo Control and Interrupt Enb*/
++#define TITAN_GE_SDQPF_RXFIFO_INTR 0x482C  /* SDQPF RxFifo Interrupt Status */
++#define TITAN_GE_SDQPF_TXFIFO_CTL  0x4928  /* SDQPF TxFifo Control and Interrupt Enb*/
++#define TITAN_GE_SDQPF_TXFIFO_INTR 0x492C  /* SDQPF TxFifo Interrupt Status */
++#define	TITAN_GE_SDQPF_RXFIFO_0	   0x4840  /* SDQPF RxFIFO Enable */
++#define	TITAN_GE_SDQPF_TXFIFO_0	   0x4940  /* SDQPF TxFIFO Enable */
++#define TITAN_GE_XDMA_CONFIG       0x5000  /* XDMA Global Configuration */
++#define TITAN_GE_XDMA_INTR_SUMMARY 0x5010  /* XDMA Interrupt Summary */
++#define TITAN_GE_XDMA_BUFADDRPRE   0x5018  /* XDMA Buffer Address Prefix */
++#define TITAN_GE_XDMA_DESCADDRPRE  0x501C  /* XDMA Descriptor Address Prefix */
++#define TITAN_GE_XDMA_PORTWEIGHT   0x502C  /* XDMA Port Weight Configuration */
++
++/* Rx MAC defines */
++#define TITAN_GE_RMAC_CONFIG_1               0x1200  /* RMAC Configuration 1 */
++#define TITAN_GE_RMAC_CONFIG_2               0x1204  /* RMAC Configuration 2 */
++#define TITAN_GE_RMAC_MAX_FRAME_LEN          0x1208  /* RMAC Max Frame Length */
++#define TITAN_GE_RMAC_STATION_HI             0x120C  /* Rx Station Address High */
++#define TITAN_GE_RMAC_STATION_MID            0x1210  /* Rx Station Address Middle */
++#define TITAN_GE_RMAC_STATION_LOW            0x1214  /* Rx Station Address Low */
++#define TITAN_GE_RMAC_LINK_CONFIG            0x1218  /* RMAC Link Configuration */
++
++/* Tx MAC defines */
++#define TITAN_GE_TMAC_CONFIG_1               0x1240  /* TMAC Configuration 1 */
++#define TITAN_GE_TMAC_CONFIG_2               0x1244  /* TMAC Configuration 2 */
++#define TITAN_GE_TMAC_IPG                    0x1248  /* TMAC Inter-Packet Gap */
++#define TITAN_GE_TMAC_STATION_HI             0x124C  /* Tx Station Address High */
++#define TITAN_GE_TMAC_STATION_MID            0x1250  /* Tx Station Address Middle */
++#define TITAN_GE_TMAC_STATION_LOW            0x1254  /* Tx Station Address Low */
++#define TITAN_GE_TMAC_MAX_FRAME_LEN          0x1258  /* TMAC Max Frame Length */
++#define TITAN_GE_TMAC_MIN_FRAME_LEN          0x125C  /* TMAC Min Frame Length */
++#define TITAN_GE_TMAC_PAUSE_FRAME_TIME       0x1260  /* TMAC Pause Frame Time */
++#define TITAN_GE_TMAC_PAUSE_FRAME_INTERVAL   0x1264  /* TMAC Pause Frame Interval */
++
++/* GMII register */
++#define TITAN_GE_GMII_INTERRUPT_STATUS       0x1348  /* GMII Interrupt Status */
++#define TITAN_GE_GMII_CONFIG_GENERAL         0x134C  /* GMII Configuration General */
++#define TITAN_GE_GMII_CONFIG_MODE            0x1350  /* GMII Configuration Mode */
++
++/* Tx and Rx XDMA defines */
++#define	TITAN_GE_INT_COALESCING		     0x5030 /* Interrupt Coalescing */
++#define	TITAN_GE_CHANNEL0_CONFIG	     0x5040 /* Channel 0 XDMA config */
++#define	TITAN_GE_CHANNEL0_INTERRUPT	     0x504c /* Channel 0 Interrupt Status */
++#define	TITAN_GE_GDI_INTERRUPT_ENABLE        0x5050 /* IE for the GDI Errors */
++#define	TITAN_GE_CHANNEL0_PACKET	     0x5060 /* Channel 0 Packet count */
++#define	TITAN_GE_CHANNEL0_BYTE		     0x5064 /* Channel 0 Byte count */
++#define	TITAN_GE_CHANNEL0_TX_DESC	     0x5054 /* Channel 0 Tx first desc */
++#define	TITAN_GE_CHANNEL0_RX_DESC	     0x5058 /* Channel 0 Rx first desc */
++
++/* AFX (Address Filter Exact) register offsets for Slice 0 */
++#define TITAN_GE_AFX_EXACT_MATCH_LOW         0x1100  /* AFX Exact Match Address Low*/
++#define TITAN_GE_AFX_EXACT_MATCH_MID         0x1104  /* AFX Exact Match Address Mid*/
++#define TITAN_GE_AFX_EXACT_MATCH_HIGH        0x1108  /* AFX Exact Match Address Hi */
++#define TITAN_GE_AFX_EXACT_MATCH_VID         0x110C  /* AFX Exact Match VID */
++#define TITAN_GE_AFX_MULTICAST_HASH_LOW      0x1110  /* AFX Multicast HASH Low */
++#define TITAN_GE_AFX_MULTICAST_HASH_MIDLOW   0x1114  /* AFX Multicast HASH MidLow */
++#define TITAN_GE_AFX_MULTICAST_HASH_MIDHI    0x1118  /* AFX Multicast HASH MidHi */
++#define TITAN_GE_AFX_MULTICAST_HASH_HI       0x111C  /* AFX Multicast HASH Hi */
++#define TITAN_GE_AFX_ADDRS_FILTER_CTRL_0     0x1120  /* AFX Address Filter Ctrl 0 */
++#define TITAN_GE_AFX_ADDRS_FILTER_CTRL_1     0x1124  /* AFX Address Filter Ctrl 1 */
++#define TITAN_GE_AFX_ADDRS_FILTER_CTRL_2     0x1128  /* AFX Address Filter Ctrl 2 */
++
++/* Traffic Groomer block */
++#define        TITAN_GE_TRTG_CONFIG	     0x1000  /* TRTG Config */
++
++#endif 				/* _TITAN_GE_H_ */
++
+diff --git a/drivers/net/titan_mdio.c b/drivers/net/titan_mdio.c
+new file mode 100644
+index 0000000..8a8785b
+--- /dev/null
++++ b/drivers/net/titan_mdio.c
+@@ -0,0 +1,217 @@
++/*
++ * drivers/net/titan_mdio.c - Driver for Titan ethernet ports
++ *
++ * Copyright (C) 2003 PMC-Sierra Inc.
++ * Author : Manish Lachwani (lachwani@pmc-sierra.com)
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
++ *
++ * Management Data IO (MDIO) driver for the Titan GMII. Interacts with the Marvel PHY
++ * on the Titan. No support for the TBI as yet.
++ *
++ */
++
++#include	"titan_mdio.h"
++
++#define MDIO_DEBUG
++
++/*
++ * Local constants
++ */
++#define MAX_CLKA            1023
++#define MAX_PHY_DEV         31
++#define MAX_PHY_REG         31
++#define WRITEADDRS_OPCODE   0x0
++#define	READ_OPCODE	    0x2
++#define WRITE_OPCODE        0x1
++#define MAX_MDIO_POLL       100
++
++/*
++ * Titan MDIO and SCMB registers
++ */
++#define TITAN_GE_SCMB_CONTROL                0x01c0  /* SCMB Control */
++#define TITAN_GE_SCMB_CLKA	             0x01c4  /* SCMB Clock A */
++#define TITAN_GE_MDIO_COMMAND                0x01d0  /* MDIO Command */
++#define TITAN_GE_MDIO_DEVICE_PORT_ADDRESS    0x01d4  /* MDIO Device and Port addrs */
++#define TITAN_GE_MDIO_DATA                   0x01d8  /* MDIO Data */
++#define TITAN_GE_MDIO_INTERRUPTS             0x01dC  /* MDIO Interrupts */
++
++/*
++ * Function to poll the MDIO
++ */
++static int titan_ge_mdio_poll(void)
++{
++	int	i, val;
++
++	for (i = 0; i < MAX_MDIO_POLL; i++) {
++		val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_COMMAND);
++
++		if (!(val & 0x8000))
++			return TITAN_GE_MDIO_GOOD;
++	}
++
++	return TITAN_GE_MDIO_ERROR;
++}
++
++
++/*
++ * Initialize and configure the MDIO
++ */
++int titan_ge_mdio_setup(titan_ge_mdio_config *titan_mdio)
++{
++	unsigned long	val;
++
++	/* Reset the SCMB and program into MDIO mode*/
++	TITAN_GE_MDIO_WRITE(TITAN_GE_SCMB_CONTROL, 0x9000);
++	TITAN_GE_MDIO_WRITE(TITAN_GE_SCMB_CONTROL, 0x1000);
++
++	/* CLK A */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_SCMB_CLKA);
++	val = ( (val & ~(0x03ff)) | (titan_mdio->clka & 0x03ff));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_SCMB_CLKA, val);
++
++	/* Preamble Suppresion */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_COMMAND);
++	val = ( (val & ~(0x0001)) | (titan_mdio->mdio_spre & 0x0001));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_COMMAND, val);
++
++	/* MDIO mode */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS);
++	val = ( (val & ~(0x4000)) | (titan_mdio->mdio_mode & 0x4000));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS, val);
++
++	return TITAN_GE_MDIO_GOOD;
++}
++
++/*
++ * Set the PHY address in indirect mode
++ */
++int titan_ge_mdio_inaddrs(int dev_addr, int reg_addr)
++{
++	volatile unsigned long	val;
++
++	/* Setup the PHY device */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS);
++	val = ( (val & ~(0x1f00)) | ( (dev_addr << 8) & 0x1f00));
++	val = ( (val & ~(0x001f)) | ( reg_addr & 0x001f));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS, val);
++
++	/* Write the new address */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_COMMAND);
++	val = ( (val & ~(0x0300)) | ( (WRITEADDRS_OPCODE << 8) & 0x0300));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_COMMAND, val);
++
++	return TITAN_GE_MDIO_GOOD;
++}
++
++/*
++ * Read the MDIO register. This is what the individual parametes mean:
++ *
++ * dev_addr : PHY ID
++ * reg_addr : register offset
++ *
++ * See the spec for the Titan MAC. We operate in the Direct Mode.
++ */
++
++#define MAX_RETRIES	2
++
++int titan_ge_mdio_read(int dev_addr, int reg_addr, unsigned int *pdata)
++{
++	volatile unsigned long	val;
++	int retries = 0;
++
++	/* Setup the PHY device */
++
++again:
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS);
++	val = ( (val & ~(0x1f00)) | ( (dev_addr << 8) & 0x1f00));
++	val = ( (val & ~(0x001f)) | ( reg_addr & 0x001f));
++	val |= 0x4000;
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS, val);
++
++	udelay(30);
++
++	/* Issue the read command */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_COMMAND);
++	val = ( (val & ~(0x0300)) | ( (READ_OPCODE << 8) & 0x0300));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_COMMAND, val);
++
++	udelay(30);
++
++	if (titan_ge_mdio_poll() != TITAN_GE_MDIO_GOOD)
++		return TITAN_GE_MDIO_ERROR;
++
++	*pdata = (unsigned int)TITAN_GE_MDIO_READ(TITAN_GE_MDIO_DATA);
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_INTERRUPTS);
++
++	udelay(30);
++
++	if (val & 0x2) {
++		if (retries == MAX_RETRIES)
++			return TITAN_GE_MDIO_ERROR;
++		else {
++			retries++;
++			goto again;
++		}
++	}
++
++	return TITAN_GE_MDIO_GOOD;
++}
++
++/*
++ * Write to the MDIO register
++ *
++ * dev_addr : PHY ID
++ * reg_addr : register that needs to be written to
++ *
++ */
++int titan_ge_mdio_write(int dev_addr, int reg_addr, unsigned int data)
++{
++	volatile unsigned long	val;
++
++	if (titan_ge_mdio_poll() != TITAN_GE_MDIO_GOOD)
++		return TITAN_GE_MDIO_ERROR;
++
++	/* Setup the PHY device */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS);
++	val = ( (val & ~(0x1f00)) | ( (dev_addr << 8) & 0x1f00));
++	val = ( (val & ~(0x001f)) | ( reg_addr & 0x001f));
++	val |= 0x4000;
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_DEVICE_PORT_ADDRESS, val);
++
++	udelay(30);
++
++	/* Setup the data to write */
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_DATA, data);
++
++	udelay(30);
++
++	/* Issue the write command */
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_COMMAND);
++	val = ( (val & ~(0x0300)) | ( (WRITE_OPCODE << 8) & 0x0300));
++	TITAN_GE_MDIO_WRITE(TITAN_GE_MDIO_COMMAND, val);
++
++	udelay(30);
++
++	if (titan_ge_mdio_poll() != TITAN_GE_MDIO_GOOD)
++		return TITAN_GE_MDIO_ERROR;
++
++	val = TITAN_GE_MDIO_READ(TITAN_GE_MDIO_INTERRUPTS);
++	if (val & 0x2)
++		return TITAN_GE_MDIO_ERROR;
++
++	return TITAN_GE_MDIO_GOOD;
++}
++
+diff --git a/drivers/net/titan_mdio.h b/drivers/net/titan_mdio.h
+new file mode 100644
+index 0000000..5d23344
+--- /dev/null
++++ b/drivers/net/titan_mdio.h
+@@ -0,0 +1,56 @@
++/*
++ * MDIO used to interact with the PHY when using GMII/MII
++ */
++#ifndef _TITAN_MDIO_H
++#define _TITAN_MDIO_H
++
++#include <linux/netdevice.h>
++#include <linux/workqueue.h>
++#include <linux/delay.h>
++#include "titan_ge.h"
++
++
++#define	TITAN_GE_MDIO_ERROR	(-9000)
++#define	TITAN_GE_MDIO_GOOD	0
++
++#define	TITAN_GE_MDIO_BASE		titan_ge_base
++
++#define	TITAN_GE_MDIO_READ(offset)	\
++	*(volatile u32 *)(titan_ge_base + (offset))
++
++#define	TITAN_GE_MDIO_WRITE(offset, data)	\
++	*(volatile u32 *)(titan_ge_base + (offset)) = (data)
++
++
++/* GMII specific registers */
++#define	TITAN_GE_MARVEL_PHY_ID		0x00
++#define	TITAN_PHY_AUTONEG_ADV		0x04
++#define	TITAN_PHY_LP_ABILITY		0x05
++#define	TITAN_GE_MDIO_MII_CTRL		0x09
++#define	TITAN_GE_MDIO_MII_EXTENDED	0x0f
++#define	TITAN_GE_MDIO_PHY_CTRL		0x10
++#define	TITAN_GE_MDIO_PHY_STATUS	0x11
++#define	TITAN_GE_MDIO_PHY_IE		0x12
++#define	TITAN_GE_MDIO_PHY_IS		0x13
++#define	TITAN_GE_MDIO_PHY_LED		0x18
++#define	TITAN_GE_MDIO_PHY_LED_OVER	0x19
++#define	PHY_ANEG_TIME_WAIT		45	/* 45 seconds wait time */
++
++/*
++ * MDIO Config Structure
++ */
++typedef struct {
++	unsigned int		clka;
++	int			mdio_spre;
++	int			mdio_mode;
++} titan_ge_mdio_config;
++
++/*
++ * Function Prototypes
++ */
++int titan_ge_mdio_setup(titan_ge_mdio_config *);
++int titan_ge_mdio_inaddrs(int, int);
++int titan_ge_mdio_read(int, int, unsigned int *);
++int titan_ge_mdio_write(int, int, unsigned int);
++
++#endif /* _TITAN_MDIO_H */
 diff --git a/drivers/net/wireless/Kconfig b/drivers/net/wireless/Kconfig
 index 56dd665..975d187 100644
 --- a/drivers/net/wireless/Kconfig
@@ -41622,10 +46124,10 @@ index 0000000..5858a53
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index e9aa814..dad38ca 100644
+index aa13875..342cb31 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -752,9 +752,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -753,9 +753,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME teach the alarm code how to handle binary mode;
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -41637,6 +46139,25 @@ index e9aa814..dad38ca 100644
  		retval = -ENXIO;
  		goto cleanup1;
  	}
+diff --git a/drivers/staging/octeon/cvmx-helper-board.c b/drivers/staging/octeon/cvmx-helper-board.c
+index 3085e38..00a555b 100644
+--- a/drivers/staging/octeon/cvmx-helper-board.c
++++ b/drivers/staging/octeon/cvmx-helper-board.c
+@@ -153,6 +153,14 @@ int cvmx_helper_board_get_mii_address(int ipd_port)
+ 		 * through switch.
+ 		 */
+ 		return -1;
++
++	case CVMX_BOARD_TYPE_CUST_WSX16:
++		if (ipd_port >= 0 && ipd_port <= 3)
++			return ipd_port;
++		else if (ipd_port >= 16 && ipd_port <= 19)
++			return ipd_port - 16 + 4;
++		else
++			return -1;
+ 	}
+ 
+ 	/* Some unknown board. Somebody forgot to update this function... */
 diff --git a/drivers/staging/sm7xx/Kconfig b/drivers/staging/sm7xx/Kconfig
 index 204dbfc..315102c 100644
 --- a/drivers/staging/sm7xx/Kconfig
@@ -43445,6 +47966,21 @@ index 24eb747..ddbc272 100644
  	}
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
+diff --git a/drivers/video/tdfxfb.c b/drivers/video/tdfxfb.c
+index 9805483..3ee5e63 100644
+--- a/drivers/video/tdfxfb.c
++++ b/drivers/video/tdfxfb.c
+@@ -1571,8 +1571,8 @@ out_err_iobase:
+ 	if (default_par->mtrr_handle >= 0)
+ 		mtrr_del(default_par->mtrr_handle, info->fix.smem_start,
+ 			 info->fix.smem_len);
+-	release_mem_region(pci_resource_start(pdev, 2),
+-			   pci_resource_len(pdev, 2));
++	release_region(pci_resource_start(pdev, 2),
++		       pci_resource_len(pdev, 2));
+ out_err_screenbase:
+ 	if (info->screen_base)
+ 		iounmap(info->screen_base);
 diff --git a/net/rfkill/core.c b/net/rfkill/core.c
 index c218e07..ad83be9 100644
 --- a/net/rfkill/core.c
@@ -43458,3 +47994,21 @@ index c218e07..ad83be9 100644
  module_param_named(default_state, rfkill_default_state, uint, 0444);
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
+diff --git a/sound/soc/txx9/txx9aclc-ac97.c b/sound/soc/txx9/txx9aclc-ac97.c
+index 0f83bdb..ab013d2 100644
+--- a/sound/soc/txx9/txx9aclc-ac97.c
++++ b/sound/soc/txx9/txx9aclc-ac97.c
+@@ -253,3 +253,4 @@ module_exit(txx9aclc_ac97_exit);
+ MODULE_AUTHOR("Atsushi Nemoto <anemo@mba.ocn.ne.jp>");
+ MODULE_DESCRIPTION("TXx9 ACLC AC97 driver");
+ MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:txx9aclc-ac97");
+diff --git a/sound/soc/txx9/txx9aclc-generic.c b/sound/soc/txx9/txx9aclc-generic.c
+index 3175de9..95b17f7 100644
+--- a/sound/soc/txx9/txx9aclc-generic.c
++++ b/sound/soc/txx9/txx9aclc-generic.c
+@@ -96,3 +96,4 @@ module_exit(txx9aclc_generic_exit);
+ MODULE_AUTHOR("Atsushi Nemoto <anemo@mba.ocn.ne.jp>");
+ MODULE_DESCRIPTION("Generic TXx9 ACLC ALSA SoC audio driver");
+ MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:txx9aclc-generic");
