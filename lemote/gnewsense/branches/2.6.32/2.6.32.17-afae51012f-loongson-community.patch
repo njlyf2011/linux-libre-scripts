@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 47866f8..e0c4dc7 100644
+index 2e357ce..8b68c1d 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -313,7 +313,7 @@ index 0000000..a6b299d
 +And an existing issue: The wifi can not survive after resuming from STD, but
 +can survive from STR.
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index fd7620f..34964f6 100644
+index fd7620f..dc503ac 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -5,9 +5,14 @@ config MIPS
@@ -389,7 +389,23 @@ index fd7620f..34964f6 100644
  config SGI_IP22
  	bool "SGI IP22 (Indy/Indigo2)"
  	select ARC
-@@ -679,6 +706,7 @@ source "arch/mips/bcm63xx/Kconfig"
+@@ -501,6 +528,7 @@ config SIBYTE_SWARM
+ 	bool "Sibyte BCM91250A-SWARM"
+ 	select BOOT_ELF32
+ 	select DMA_COHERENT
++	select HAVE_PATA_PLATFORM
+ 	select NR_CPUS_DEFAULT_2
+ 	select SIBYTE_SB1250
+ 	select SWAP_IO_SPACE
+@@ -515,6 +543,7 @@ config SIBYTE_LITTLESUR
+ 	depends on EXPERIMENTAL
+ 	select BOOT_ELF32
+ 	select DMA_COHERENT
++	select HAVE_PATA_PLATFORM
+ 	select NR_CPUS_DEFAULT_2
+ 	select SIBYTE_SB1250
+ 	select SWAP_IO_SPACE
+@@ -679,6 +708,7 @@ source "arch/mips/bcm63xx/Kconfig"
  source "arch/mips/jazz/Kconfig"
  source "arch/mips/lasat/Kconfig"
  source "arch/mips/pmc-sierra/Kconfig"
@@ -397,7 +413,7 @@ index fd7620f..34964f6 100644
  source "arch/mips/sgi-ip27/Kconfig"
  source "arch/mips/sibyte/Kconfig"
  source "arch/mips/txx9/Kconfig"
-@@ -778,6 +806,9 @@ config CSRC_BCM1480
+@@ -778,6 +808,9 @@ config CSRC_BCM1480
  config CSRC_IOASIC
  	bool
  
@@ -407,7 +423,7 @@ index fd7620f..34964f6 100644
  config CSRC_R4K_LIB
  	bool
  
-@@ -807,8 +838,8 @@ config DMA_NEED_PCI_MAP_STATE
+@@ -807,8 +840,8 @@ config DMA_NEED_PCI_MAP_STATE
  	bool
  
  config EARLY_PRINTK
@@ -418,7 +434,7 @@ index fd7620f..34964f6 100644
  	default y
  	help
  	  This option enables special console drivers which allow the kernel
-@@ -1069,6 +1100,23 @@ config CPU_LOONGSON2E
+@@ -1069,6 +1102,23 @@ config CPU_LOONGSON2E
  	  The Loongson 2E processor implements the MIPS III instruction set
  	  with many extensions.
  
@@ -442,7 +458,7 @@ index fd7620f..34964f6 100644
  config CPU_MIPS32_R1
  	bool "MIPS32 Release 1"
  	depends on SYS_HAS_CPU_MIPS32_R1
-@@ -1294,6 +1342,17 @@ config CPU_CAVIUM_OCTEON
+@@ -1294,6 +1344,17 @@ config CPU_CAVIUM_OCTEON
  
  endchoice
  
@@ -460,7 +476,7 @@ index fd7620f..34964f6 100644
  config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
-@@ -1303,6 +1362,12 @@ config CPU_LOONGSON2
+@@ -1303,6 +1364,12 @@ config CPU_LOONGSON2
  config SYS_HAS_CPU_LOONGSON2E
  	bool
  
@@ -473,7 +489,7 @@ index fd7620f..34964f6 100644
  config SYS_HAS_CPU_MIPS32_R1
  	bool
  
-@@ -1411,8 +1476,17 @@ config CPU_SUPPORTS_32BIT_KERNEL
+@@ -1411,8 +1478,17 @@ config CPU_SUPPORTS_32BIT_KERNEL
  	bool
  config CPU_SUPPORTS_64BIT_KERNEL
  	bool
@@ -491,7 +507,7 @@ index fd7620f..34964f6 100644
  
  #
  # Set to y for ptrace access to watch registers.
-@@ -1896,6 +1970,27 @@ config NR_CPUS
+@@ -1896,6 +1972,27 @@ config NR_CPUS
  source "kernel/time/Kconfig"
  
  #
@@ -519,7 +535,7 @@ index fd7620f..34964f6 100644
  # Timer Interrupt Frequency Configuration
  #
  
-@@ -2024,15 +2119,6 @@ config STACKTRACE_SUPPORT
+@@ -2024,15 +2121,6 @@ config STACKTRACE_SUPPORT
  
  source "init/Kconfig"
  
@@ -535,7 +551,7 @@ index fd7620f..34964f6 100644
  source "kernel/Kconfig.freezer"
  
  menu "Bus options (PCI, PCMCIA, EISA, ISA, TC)"
-@@ -2104,6 +2190,7 @@ config MMU
+@@ -2104,6 +2192,7 @@ config MMU
  
  config I8253
  	bool
@@ -543,7 +559,7 @@ index fd7620f..34964f6 100644
  
  config ZONE_DMA32
  	bool
-@@ -2180,6 +2267,8 @@ source "kernel/power/Kconfig"
+@@ -2180,6 +2269,8 @@ source "kernel/power/Kconfig"
  
  endmenu
  
@@ -844,7 +860,7 @@ index b67fb51..abf0eb1 100644
  	sleeper.o dma.o dbdma.o
  
 diff --git a/arch/mips/alchemy/common/dbdma.c b/arch/mips/alchemy/common/dbdma.c
-index 19c1c82..4851308 100644
+index 19c1c82..fc13203 100644
 --- a/arch/mips/alchemy/common/dbdma.c
 +++ b/arch/mips/alchemy/common/dbdma.c
 @@ -30,6 +30,7 @@
@@ -873,7 +889,20 @@ index 19c1c82..4851308 100644
  
  	stp = find_dbdev_id(srcid);
  	if (stp == NULL)
-@@ -569,7 +568,7 @@ EXPORT_SYMBOL(au1xxx_dbdma_ring_alloc);
+@@ -412,8 +411,11 @@ u32 au1xxx_dbdma_ring_alloc(u32 chanid, int entries)
+ 		if (desc_base == 0)
+ 			return 0;
+ 
++		ctp->cdb_membase = desc_base;
+ 		desc_base = ALIGN_ADDR(desc_base, sizeof(au1x_ddma_desc_t));
+-	}
++	} else
++		ctp->cdb_membase = desc_base;
++
+ 	dp = (au1x_ddma_desc_t *)desc_base;
+ 
+ 	/* Keep track of the base descriptor. */
+@@ -569,7 +571,7 @@ EXPORT_SYMBOL(au1xxx_dbdma_ring_alloc);
   * This updates the source pointer and byte count.  Normally used
   * for memory to fifo transfers.
   */
@@ -882,7 +911,7 @@ index 19c1c82..4851308 100644
  {
  	chan_tab_t		*ctp;
  	au1x_ddma_desc_t	*dp;
-@@ -595,7 +594,7 @@ u32 _au1xxx_dbdma_put_source(u32 chanid, void *buf, int nbytes, u32 flags)
+@@ -595,7 +597,7 @@ u32 _au1xxx_dbdma_put_source(u32 chanid, void *buf, int nbytes, u32 flags)
  		return 0;
  
  	/* Load up buffer address and byte count. */
@@ -891,7 +920,7 @@ index 19c1c82..4851308 100644
  	dp->dscr_cmd1 = nbytes;
  	/* Check flags */
  	if (flags & DDMA_FLAGS_IE)
-@@ -622,14 +621,13 @@ u32 _au1xxx_dbdma_put_source(u32 chanid, void *buf, int nbytes, u32 flags)
+@@ -622,14 +624,13 @@ u32 _au1xxx_dbdma_put_source(u32 chanid, void *buf, int nbytes, u32 flags)
  	/* Return something non-zero. */
  	return nbytes;
  }
@@ -908,7 +937,7 @@ index 19c1c82..4851308 100644
  {
  	chan_tab_t		*ctp;
  	au1x_ddma_desc_t	*dp;
-@@ -659,7 +657,7 @@ _au1xxx_dbdma_put_dest(u32 chanid, void *buf, int nbytes, u32 flags)
+@@ -659,7 +660,7 @@ _au1xxx_dbdma_put_dest(u32 chanid, void *buf, int nbytes, u32 flags)
  	if (flags & DDMA_FLAGS_NOIE)
  		dp->dscr_cmd0 &= ~DSCR_CMD0_IE;
  
@@ -917,7 +946,7 @@ index 19c1c82..4851308 100644
  	dp->dscr_cmd1 = nbytes;
  #if 0
  	printk(KERN_DEBUG "cmd0:%x cmd1:%x source0:%x source1:%x dest0:%x dest1:%x\n",
-@@ -685,7 +683,7 @@ _au1xxx_dbdma_put_dest(u32 chanid, void *buf, int nbytes, u32 flags)
+@@ -685,7 +686,7 @@ _au1xxx_dbdma_put_dest(u32 chanid, void *buf, int nbytes, u32 flags)
  	/* Return something non-zero. */
  	return nbytes;
  }
@@ -926,7 +955,16 @@ index 19c1c82..4851308 100644
  
  /*
   * Get a destination buffer into the DMA ring.
-@@ -868,28 +866,6 @@ static irqreturn_t dbdma_interrupt(int irq, void *dev_id)
+@@ -831,7 +832,7 @@ void au1xxx_dbdma_chan_free(u32 chanid)
+ 
+ 	au1xxx_dbdma_stop(chanid);
+ 
+-	kfree((void *)ctp->chan_desc_base);
++	kfree((void *)ctp->cdb_membase);
+ 
+ 	stp->dev_flags &= ~DEV_FLAGS_INUSE;
+ 	dtp->dev_flags &= ~DEV_FLAGS_INUSE;
+@@ -868,28 +869,6 @@ static irqreturn_t dbdma_interrupt(int irq, void *dev_id)
  	return IRQ_RETVAL(1);
  }
  
@@ -955,7 +993,7 @@ index 19c1c82..4851308 100644
  void au1xxx_dbdma_dump(u32 chanid)
  {
  	chan_tab_t	 *ctp;
-@@ -1038,4 +1014,38 @@ void au1xxx_dbdma_resume(void)
+@@ -1038,4 +1017,38 @@ void au1xxx_dbdma_resume(void)
  	}
  }
  #endif	/* CONFIG_PM */
@@ -4766,8 +4804,30 @@ index 0000000..c14dcaa
 +				    ARRAY_SIZE(xxs1500_devs));
 +}
 +device_initcall(xxs1500_dev_init);
+diff --git a/arch/mips/ar7/platform.c b/arch/mips/ar7/platform.c
+index 835f3f0..9a10b27 100644
+--- a/arch/mips/ar7/platform.c
++++ b/arch/mips/ar7/platform.c
+@@ -202,7 +202,7 @@ static struct resource usb_res[] = {
+ 		.name = "mem",
+ 		.flags = IORESOURCE_MEM,
+ 		.start = 0x03400000,
+-		.end = 0x034001fff,
++		.end = 0x03401fff,
+ 	},
+ };
+ 
+@@ -509,7 +509,7 @@ static int __init ar7_register_devices(void)
+ 
+ 	memset(uart_port, 0, sizeof(struct uart_port) * 2);
+ 
+-	uart_port[0].type = PORT_16550A;
++	uart_port[0].type = PORT_AR7;
+ 	uart_port[0].line = 0;
+ 	uart_port[0].irq = AR7_IRQ_UART0;
+ 	uart_port[0].uartclk = ar7_bus_freq() / 2;
 diff --git a/arch/mips/bcm47xx/prom.c b/arch/mips/bcm47xx/prom.c
-index fb284c3..c51405e 100644
+index fb284c3..29d3cbf 100644
 --- a/arch/mips/bcm47xx/prom.c
 +++ b/arch/mips/bcm47xx/prom.c
 @@ -100,11 +100,11 @@ static __init void prom_init_console(void)
@@ -4801,6 +4861,78 @@ index fb284c3..c51405e 100644
  			 arcs_cmdline, buf[4]);
  	}
  }
+@@ -141,6 +141,14 @@ static __init void prom_init_mem(void)
+ 			break;
+ 	}
+ 
++	/* Ignoring the last page when ddr size is 128M. Cached
++	 * accesses to last page is causing the processor to prefetch
++	 * using address above 128M stepping out of the ddr address
++	 * space.
++	 */
++	if (mem == 0x8000000)
++		mem -= 0x1000;
++
+ 	add_memory_region(0, mem, BOOT_MEM_RAM);
+ }
+ 
+diff --git a/arch/mips/bcm63xx/boards/board_bcm963xx.c b/arch/mips/bcm63xx/boards/board_bcm963xx.c
+index 05a35cf..0866540 100644
+--- a/arch/mips/bcm63xx/boards/board_bcm963xx.c
++++ b/arch/mips/bcm63xx/boards/board_bcm963xx.c
+@@ -660,6 +660,17 @@ void __init board_prom_init(void)
+ 	}
+ 
+ 	bcm_gpio_writel(val, GPIO_MODE_REG);
++
++	/* Generate MAC address for WLAN and
++	 * register our SPROM */
++#ifdef CONFIG_SSB_PCIHOST
++	if (!board_get_mac_address(bcm63xx_sprom.il0mac)) {
++		memcpy(bcm63xx_sprom.et0mac, bcm63xx_sprom.il0mac, ETH_ALEN);
++		memcpy(bcm63xx_sprom.et1mac, bcm63xx_sprom.il0mac, ETH_ALEN);
++		if (ssb_arch_set_fallback_sprom(&bcm63xx_sprom) < 0)
++			printk(KERN_ERR "failed to register fallback SPROM\n");
++	}
++#endif
+ }
+ 
+ /*
+@@ -807,17 +818,6 @@ int __init board_register_devices(void)
+ 	if (board.has_dsp)
+ 		bcm63xx_dsp_register(&board.dsp);
+ 
+-	/* Generate MAC address for WLAN and
+-	 * register our SPROM */
+-#ifdef CONFIG_SSB_PCIHOST
+-	if (!board_get_mac_address(bcm63xx_sprom.il0mac)) {
+-		memcpy(bcm63xx_sprom.et0mac, bcm63xx_sprom.il0mac, ETH_ALEN);
+-		memcpy(bcm63xx_sprom.et1mac, bcm63xx_sprom.il0mac, ETH_ALEN);
+-		if (ssb_arch_set_fallback_sprom(&bcm63xx_sprom) < 0)
+-			printk(KERN_ERR "failed to register fallback SPROM\n");
+-	}
+-#endif
+-
+ 	/* read base address of boot chip select (0) */
+ 	if (BCMCPU_IS_6345())
+ 		val = 0x1fc00000;
+diff --git a/arch/mips/bcm63xx/gpio.c b/arch/mips/bcm63xx/gpio.c
+index 87ca390..315bc7f 100644
+--- a/arch/mips/bcm63xx/gpio.c
++++ b/arch/mips/bcm63xx/gpio.c
+@@ -125,10 +125,10 @@ static struct gpio_chip bcm63xx_gpio_chip = {
+ 
+ int __init bcm63xx_gpio_init(void)
+ {
++	gpio_out_low = bcm_gpio_readl(GPIO_DATA_LO_REG);
++	gpio_out_high = bcm_gpio_readl(GPIO_DATA_HI_REG);
+ 	bcm63xx_gpio_chip.ngpio = bcm63xx_gpio_count();
+ 	pr_info("registering %d GPIOs\n", bcm63xx_gpio_chip.ngpio);
+ 
+ 	return gpiochip_add(&bcm63xx_gpio_chip);
+ }
+-
+-arch_initcall(bcm63xx_gpio_init);
 diff --git a/arch/mips/boot/Makefile b/arch/mips/boot/Makefile
 index 2a209d7..094bc84 100644
 --- a/arch/mips/boot/Makefile
@@ -5589,6 +5721,150 @@ index be711dd..cfdb4c2 100644
  MODULE_AUTHOR("David Daney <ddaney@caviumnetworks.com>");
  MODULE_LICENSE("GPL");
  MODULE_DESCRIPTION("Platform driver for Octeon SOC");
+diff --git a/arch/mips/cavium-octeon/setup.c b/arch/mips/cavium-octeon/setup.c
+index b321d3b..9a06fa9 100644
+--- a/arch/mips/cavium-octeon/setup.c
++++ b/arch/mips/cavium-octeon/setup.c
+@@ -45,9 +45,6 @@ extern struct plat_smp_ops octeon_smp_ops;
+ extern void pci_console_init(const char *arg);
+ #endif
+ 
+-#ifdef CONFIG_CAVIUM_RESERVE32
+-extern uint64_t octeon_reserve32_memory;
+-#endif
+ static unsigned long long MAX_MEMORY = 512ull << 20;
+ 
+ struct octeon_boot_descriptor *octeon_boot_desc_ptr;
+@@ -186,54 +183,6 @@ void octeon_check_cpu_bist(void)
+ 	write_octeon_c0_dcacheerr(0);
+ }
+ 
+-#ifdef CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB
+-/**
+- * Called on every core to setup the wired tlb entry needed
+- * if CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB is set.
+- *
+- */
+-static void octeon_hal_setup_per_cpu_reserved32(void *unused)
+-{
+-	/*
+-	 * The config has selected to wire the reserve32 memory for all
+-	 * userspace applications. We need to put a wired TLB entry in for each
+-	 * 512MB of reserve32 memory. We only handle double 256MB pages here,
+-	 * so reserve32 must be multiple of 512MB.
+-	 */
+-	uint32_t size = CONFIG_CAVIUM_RESERVE32;
+-	uint32_t entrylo0 =
+-		0x7 | ((octeon_reserve32_memory & ((1ul << 40) - 1)) >> 6);
+-	uint32_t entrylo1 = entrylo0 + (256 << 14);
+-	uint32_t entryhi = (0x80000000UL - (CONFIG_CAVIUM_RESERVE32 << 20));
+-	while (size >= 512) {
+-#if 0
+-		pr_info("CPU%d: Adding double wired TLB entry for 0x%lx\n",
+-			smp_processor_id(), entryhi);
+-#endif
+-		add_wired_entry(entrylo0, entrylo1, entryhi, PM_256M);
+-		entrylo0 += 512 << 14;
+-		entrylo1 += 512 << 14;
+-		entryhi += 512 << 20;
+-		size -= 512;
+-	}
+-}
+-#endif /* CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB */
+-
+-/**
+- * Called to release the named block which was used to made sure
+- * that nobody used the memory for something else during
+- * init. Now we'll free it so userspace apps can use this
+- * memory region with bootmem_alloc.
+- *
+- * This function is called only once from prom_free_prom_memory().
+- */
+-void octeon_hal_setup_reserved32(void)
+-{
+-#ifdef CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB
+-	on_each_cpu(octeon_hal_setup_per_cpu_reserved32, NULL, 0, 1);
+-#endif
+-}
+-
+ /**
+  * Reboot Octeon
+  *
+@@ -294,18 +243,6 @@ static void octeon_halt(void)
+ 	octeon_kill_core(NULL);
+ }
+ 
+-#if 0
+-/**
+- * Platform time init specifics.
+- * Returns
+- */
+-void __init plat_time_init(void)
+-{
+-	/* Nothing special here, but we are required to have one */
+-}
+-
+-#endif
+-
+ /**
+  * Handle all the error condition interrupts that might occur.
+  *
+@@ -502,25 +439,13 @@ void __init prom_init(void)
+ 	 * memory when it is getting memory from the
+ 	 * bootloader. Later, after the memory allocations are
+ 	 * complete, the reserve32 will be freed.
+-	 */
+-#ifdef CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB
+-	if (CONFIG_CAVIUM_RESERVE32 & 0x1ff)
+-		pr_err("CAVIUM_RESERVE32 isn't a multiple of 512MB. "
+-		       "This is required if CAVIUM_RESERVE32_USE_WIRED_TLB "
+-		       "is set\n");
+-	else
+-		addr = cvmx_bootmem_phy_named_block_alloc(CONFIG_CAVIUM_RESERVE32 << 20,
+-							0, 0, 512 << 20,
+-							"CAVIUM_RESERVE32", 0);
+-#else
+-	/*
++	 *
+ 	 * Allocate memory for RESERVED32 aligned on 2MB boundary. This
+ 	 * is in case we later use hugetlb entries with it.
+ 	 */
+ 	addr = cvmx_bootmem_phy_named_block_alloc(CONFIG_CAVIUM_RESERVE32 << 20,
+ 						0, 0, 2 << 20,
+ 						"CAVIUM_RESERVE32", 0);
+-#endif
+ 	if (addr < 0)
+ 		pr_err("Failed to allocate CAVIUM_RESERVE32 memory area\n");
+ 	else
+@@ -817,9 +742,4 @@ void prom_free_prom_memory(void)
+ 		panic("Unable to request_irq(OCTEON_IRQ_RML)\n");
+ 	}
+ #endif
+-
+-	/* This call is here so that it is performed after any TLB
+-	   initializations. It needs to be after these in case the
+-	   CONFIG_CAVIUM_RESERVE32_USE_WIRED_TLB option is set */
+-	octeon_hal_setup_reserved32();
+ }
+diff --git a/arch/mips/cavium-octeon/smp.c b/arch/mips/cavium-octeon/smp.c
+index c198efd..09c0b46 100644
+--- a/arch/mips/cavium-octeon/smp.c
++++ b/arch/mips/cavium-octeon/smp.c
+@@ -279,14 +279,6 @@ static void octeon_cpu_die(unsigned int cpu)
+ 	uint32_t avail_coremask;
+ 	struct cvmx_bootmem_named_block_desc *block_desc;
+ 
+-#ifdef CONFIG_CAVIUM_OCTEON_WATCHDOG
+-	/* Disable the watchdog */
+-	cvmx_ciu_wdogx_t ciu_wdog;
+-	ciu_wdog.u64 = cvmx_read_csr(CVMX_CIU_WDOGX(cpu));
+-	ciu_wdog.s.mode = 0;
+-	cvmx_write_csr(CVMX_CIU_WDOGX(cpu), ciu_wdog.u64);
+-#endif
+-
+ 	while (per_cpu(cpu_state, cpu) != CPU_DEAD)
+ 		cpu_relax();
+ 
 diff --git a/arch/mips/configs/ar7_defconfig b/arch/mips/configs/ar7_defconfig
 index 3564830..2cb304a 100644
 --- a/arch/mips/configs/ar7_defconfig
@@ -8160,6 +8436,1503 @@ index 0197f0d..14122fc 100644
  
  #
  # Library routines
+diff --git a/arch/mips/configs/ip27_defconfig b/arch/mips/configs/ip27_defconfig
+index 1fc73aa..a0843c2 100644
+--- a/arch/mips/configs/ip27_defconfig
++++ b/arch/mips/configs/ip27_defconfig
+@@ -1,7 +1,7 @@
+ #
+ # Automatically generated make config: don't edit
+-# Linux kernel version: 2.6.23-rc2
+-# Tue Aug  7 13:04:24 2007
++# Linux kernel version: 2.6.32.7
++# Wed Feb 10 13:13:19 2010
+ #
+ CONFIG_MIPS=y
+ 
+@@ -9,21 +9,28 @@ CONFIG_MIPS=y
+ # Machine selection
+ #
+ # CONFIG_MACH_ALCHEMY is not set
++# CONFIG_AR7 is not set
+ # CONFIG_BASLER_EXCITE is not set
++# CONFIG_BCM47XX is not set
++# CONFIG_BCM63XX is not set
+ # CONFIG_MIPS_COBALT is not set
+ # CONFIG_MACH_DECSTATION is not set
+ # CONFIG_MACH_JAZZ is not set
+-# CONFIG_LEMOTE_FULONG is not set
++# CONFIG_LASAT is not set
++# CONFIG_MACH_LOONGSON is not set
+ # CONFIG_MIPS_MALTA is not set
+ # CONFIG_MIPS_SIM is not set
+-# CONFIG_MARKEINS is not set
++# CONFIG_NEC_MARKEINS is not set
+ # CONFIG_MACH_VR41XX is not set
++# CONFIG_NXP_STB220 is not set
++# CONFIG_NXP_STB225 is not set
+ # CONFIG_PNX8550_JBS is not set
+ # CONFIG_PNX8550_STB810 is not set
+ # CONFIG_PMC_MSP is not set
+ # CONFIG_PMC_YOSEMITE is not set
+ # CONFIG_SGI_IP22 is not set
+ CONFIG_SGI_IP27=y
++# CONFIG_SGI_IP28 is not set
+ # CONFIG_SGI_IP32 is not set
+ # CONFIG_SIBYTE_CRHINE is not set
+ # CONFIG_SIBYTE_CARMEL is not set
+@@ -34,10 +41,13 @@ CONFIG_SGI_IP27=y
+ # CONFIG_SIBYTE_SENTOSA is not set
+ # CONFIG_SIBYTE_BIGSUR is not set
+ # CONFIG_SNI_RM is not set
+-# CONFIG_TOSHIBA_JMR3927 is not set
+-# CONFIG_TOSHIBA_RBTX4927 is not set
+-# CONFIG_TOSHIBA_RBTX4938 is not set
++# CONFIG_MACH_TX39XX is not set
++# CONFIG_MACH_TX49XX is not set
++# CONFIG_MIKROTIK_RB532 is not set
+ # CONFIG_WR_PPMC is not set
++# CONFIG_CAVIUM_OCTEON_SIMULATOR is not set
++# CONFIG_CAVIUM_OCTEON_REFERENCE_BOARD is not set
++# CONFIG_ALCHEMY_GPIO_INDIRECT is not set
+ CONFIG_SGI_SN_M_MODE=y
+ # CONFIG_SGI_SN_N_MODE is not set
+ # CONFIG_MAPPED_KERNEL is not set
+@@ -46,11 +56,14 @@ CONFIG_SGI_SN_M_MODE=y
+ CONFIG_RWSEM_GENERIC_SPINLOCK=y
+ # CONFIG_ARCH_HAS_ILOG2_U32 is not set
+ # CONFIG_ARCH_HAS_ILOG2_U64 is not set
++CONFIG_ARCH_SUPPORTS_OPROFILE=y
+ CONFIG_GENERIC_FIND_NEXT_BIT=y
+ CONFIG_GENERIC_HWEIGHT=y
+ CONFIG_GENERIC_CALIBRATE_DELAY=y
++CONFIG_GENERIC_CLOCKEVENTS=y
+ CONFIG_GENERIC_TIME=y
+-CONFIG_SCHED_NO_NO_OMIT_FRAME_POINTER=y
++CONFIG_GENERIC_CMOS_UPDATE=y
++CONFIG_SCHED_OMIT_FRAME_POINTER=y
+ CONFIG_GENERIC_HARDIRQS_NO__DO_IRQ=y
+ CONFIG_ARC=y
+ CONFIG_DMA_COHERENT=y
+@@ -60,6 +73,7 @@ CONFIG_SYS_HAS_EARLY_PRINTK=y
+ CONFIG_CPU_BIG_ENDIAN=y
+ # CONFIG_CPU_LITTLE_ENDIAN is not set
+ CONFIG_SYS_SUPPORTS_BIG_ENDIAN=y
++CONFIG_DEFAULT_SGI_PARTITION=y
+ CONFIG_MIPS_L1_CACHE_SHIFT=7
+ CONFIG_ARC64=y
+ CONFIG_BOOT_ELF64=y
+@@ -67,7 +81,7 @@ CONFIG_BOOT_ELF64=y
+ #
+ # CPU selection
+ #
+-# CONFIG_CPU_LOONGSON2 is not set
++# CONFIG_CPU_LOONGSON2E is not set
+ # CONFIG_CPU_MIPS32_R1 is not set
+ # CONFIG_CPU_MIPS32_R2 is not set
+ # CONFIG_CPU_MIPS64_R1 is not set
+@@ -80,6 +94,7 @@ CONFIG_BOOT_ELF64=y
+ # CONFIG_CPU_TX49XX is not set
+ # CONFIG_CPU_R5000 is not set
+ # CONFIG_CPU_R5432 is not set
++# CONFIG_CPU_R5500 is not set
+ # CONFIG_CPU_R6000 is not set
+ # CONFIG_CPU_NEVADA is not set
+ # CONFIG_CPU_R8000 is not set
+@@ -87,6 +102,7 @@ CONFIG_CPU_R10000=y
+ # CONFIG_CPU_RM7000 is not set
+ # CONFIG_CPU_RM9000 is not set
+ # CONFIG_CPU_SB1 is not set
++# CONFIG_CPU_CAVIUM_OCTEON is not set
+ CONFIG_SYS_HAS_CPU_R10000=y
+ CONFIG_SYS_SUPPORTS_64BIT_KERNEL=y
+ CONFIG_CPU_SUPPORTS_32BIT_KERNEL=y
+@@ -100,6 +116,7 @@ CONFIG_64BIT=y
+ CONFIG_PAGE_SIZE_4KB=y
+ # CONFIG_PAGE_SIZE_8KB is not set
+ # CONFIG_PAGE_SIZE_16KB is not set
++# CONFIG_PAGE_SIZE_32KB is not set
+ # CONFIG_PAGE_SIZE_64KB is not set
+ CONFIG_CPU_HAS_PREFETCH=y
+ CONFIG_MIPS_MT_DISABLED=y
+@@ -111,6 +128,7 @@ CONFIG_GENERIC_IRQ_PROBE=y
+ CONFIG_IRQ_PER_CPU=y
+ CONFIG_CPU_SUPPORTS_HIGHMEM=y
+ CONFIG_ARCH_DISCONTIGMEM_ENABLE=y
++CONFIG_ARCH_POPULATES_NODE_MAP=y
+ CONFIG_NUMA=y
+ CONFIG_SYS_SUPPORTS_NUMA=y
+ CONFIG_NODES_SHIFT=6
+@@ -121,16 +139,24 @@ CONFIG_DISCONTIGMEM_MANUAL=y
+ CONFIG_DISCONTIGMEM=y
+ CONFIG_FLAT_NODE_MEM_MAP=y
+ CONFIG_NEED_MULTIPLE_NODES=y
+-# CONFIG_SPARSEMEM_STATIC is not set
++CONFIG_PAGEFLAGS_EXTENDED=y
+ CONFIG_SPLIT_PTLOCK_CPUS=4
+ CONFIG_MIGRATION=y
+-CONFIG_RESOURCES_64BIT=y
++CONFIG_PHYS_ADDR_T_64BIT=y
+ CONFIG_ZONE_DMA_FLAG=0
+ CONFIG_VIRT_TO_BUS=y
++CONFIG_HAVE_MLOCK=y
++CONFIG_HAVE_MLOCKED_PAGE_BIT=y
++# CONFIG_KSM is not set
++CONFIG_DEFAULT_MMAP_MIN_ADDR=65536
+ CONFIG_SMP=y
+ CONFIG_SYS_SUPPORTS_SMP=y
+ CONFIG_NR_CPUS_DEFAULT_64=y
+ CONFIG_NR_CPUS=64
++CONFIG_TICK_ONESHOT=y
++CONFIG_NO_HZ=y
++CONFIG_HIGH_RES_TIMERS=y
++CONFIG_GENERIC_CLOCKEVENTS_BUILD=y
+ # CONFIG_HZ_48 is not set
+ # CONFIG_HZ_100 is not set
+ # CONFIG_HZ_128 is not set
+@@ -143,13 +169,13 @@ CONFIG_HZ=1000
+ CONFIG_PREEMPT_NONE=y
+ # CONFIG_PREEMPT_VOLUNTARY is not set
+ # CONFIG_PREEMPT is not set
+-CONFIG_PREEMPT_BKL=y
+ # CONFIG_MIPS_INSANE_LARGE is not set
+ # CONFIG_KEXEC is not set
+ CONFIG_SECCOMP=y
+ CONFIG_LOCKDEP_SUPPORT=y
+ CONFIG_STACKTRACE_SUPPORT=y
+ CONFIG_DEFCONFIG_LIST="/lib/modules/$UNAME_RELEASE/.config"
++CONFIG_CONSTRUCTORS=y
+ 
+ #
+ # General setup
+@@ -163,20 +189,40 @@ CONFIG_SWAP=y
+ CONFIG_SYSVIPC=y
+ CONFIG_SYSVIPC_SYSCTL=y
+ CONFIG_POSIX_MQUEUE=y
++CONFIG_POSIX_MQUEUE_SYSCTL=y
+ # CONFIG_BSD_PROCESS_ACCT is not set
+ # CONFIG_TASKSTATS is not set
+-# CONFIG_USER_NS is not set
+ # CONFIG_AUDIT is not set
++
++#
++# RCU Subsystem
++#
++CONFIG_TREE_RCU=y
++# CONFIG_TREE_PREEMPT_RCU is not set
++# CONFIG_RCU_TRACE is not set
++CONFIG_RCU_FANOUT=64
++# CONFIG_RCU_FANOUT_EXACT is not set
++# CONFIG_TREE_RCU_TRACE is not set
+ CONFIG_IKCONFIG=y
+ CONFIG_IKCONFIG_PROC=y
+ CONFIG_LOG_BUF_SHIFT=15
++# CONFIG_GROUP_SCHED is not set
+ CONFIG_CGROUPS=y
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NS is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
+ CONFIG_CPUSETS=y
+-CONFIG_SYSFS_DEPRECATED=y
++CONFIG_PROC_PID_CPUSET=y
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_RESOURCE_COUNTERS is not set
++# CONFIG_SYSFS_DEPRECATED_V2 is not set
+ CONFIG_RELAY=y
++# CONFIG_NAMESPACES is not set
+ # CONFIG_BLK_DEV_INITRD is not set
+ # CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
+ CONFIG_SYSCTL=y
++CONFIG_ANON_INODES=y
+ CONFIG_EMBEDDED=y
+ CONFIG_SYSCTL_SYSCALL=y
+ CONFIG_KALLSYMS=y
+@@ -185,31 +231,49 @@ CONFIG_HOTPLUG=y
+ CONFIG_PRINTK=y
+ CONFIG_BUG=y
+ CONFIG_ELF_CORE=y
++# CONFIG_PCSPKR_PLATFORM is not set
+ CONFIG_BASE_FULL=y
+ CONFIG_FUTEX=y
+-CONFIG_ANON_INODES=y
+ CONFIG_EPOLL=y
+ CONFIG_SIGNALFD=y
+ CONFIG_TIMERFD=y
+ CONFIG_EVENTFD=y
+ CONFIG_SHMEM=y
++CONFIG_AIO=y
++
++#
++# Kernel Performance Events And Counters
++#
+ CONFIG_VM_EVENT_COUNTERS=y
++CONFIG_PCI_QUIRKS=y
++CONFIG_COMPAT_BRK=y
+ CONFIG_SLAB=y
+ # CONFIG_SLUB is not set
+ # CONFIG_SLOB is not set
++# CONFIG_PROFILING is not set
++CONFIG_HAVE_OPROFILE=y
++CONFIG_HAVE_SYSCALL_WRAPPERS=y
++CONFIG_USE_GENERIC_SMP_HELPERS=y
++
++#
++# GCOV-based kernel profiling
++#
++CONFIG_SLOW_WORK=y
++CONFIG_HAVE_GENERIC_DMA_COHERENT=y
++CONFIG_SLABINFO=y
+ CONFIG_RT_MUTEXES=y
+-# CONFIG_TINY_SHMEM is not set
+ CONFIG_BASE_SMALL=0
+ CONFIG_MODULES=y
++# CONFIG_MODULE_FORCE_LOAD is not set
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_MODULE_FORCE_UNLOAD is not set
+ # CONFIG_MODVERSIONS is not set
+ CONFIG_MODULE_SRCVERSION_ALL=y
+-CONFIG_KMOD=y
+ CONFIG_STOP_MACHINE=y
+ CONFIG_BLOCK=y
+-# CONFIG_BLK_DEV_IO_TRACE is not set
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_BLK_DEV_INTEGRITY is not set
++CONFIG_BLOCK_COMPAT=y
+ 
+ #
+ # IO Schedulers
+@@ -218,11 +282,12 @@ CONFIG_IOSCHED_NOOP=y
+ CONFIG_IOSCHED_AS=y
+ CONFIG_IOSCHED_DEADLINE=y
+ CONFIG_IOSCHED_CFQ=y
+-CONFIG_DEFAULT_AS=y
++# CONFIG_DEFAULT_AS is not set
+ # CONFIG_DEFAULT_DEADLINE is not set
+-# CONFIG_DEFAULT_CFQ is not set
++CONFIG_DEFAULT_CFQ=y
+ # CONFIG_DEFAULT_NOOP is not set
+-CONFIG_DEFAULT_IOSCHED="anticipatory"
++CONFIG_DEFAULT_IOSCHED="cfq"
++# CONFIG_FREEZER is not set
+ 
+ #
+ # Bus options (PCI, PCMCIA, EISA, ISA, TC)
+@@ -231,11 +296,10 @@ CONFIG_HW_HAS_PCI=y
+ CONFIG_PCI=y
+ CONFIG_PCI_DOMAINS=y
+ # CONFIG_ARCH_SUPPORTS_MSI is not set
++# CONFIG_PCI_LEGACY is not set
++# CONFIG_PCI_STUB is not set
++# CONFIG_PCI_IOV is not set
+ CONFIG_MMU=y
+-
+-#
+-# PCCARD (PCMCIA/CardBus) support
+-#
+ # CONFIG_PCCARD is not set
+ # CONFIG_HOTPLUG_PCI is not set
+ 
+@@ -243,8 +307,9 @@ CONFIG_MMU=y
+ # Executable file formats
+ #
+ CONFIG_BINFMT_ELF=y
++CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS=y
++# CONFIG_HAVE_AOUT is not set
+ # CONFIG_BINFMT_MISC is not set
+-# CONFIG_BUILD_ELF64 is not set
+ CONFIG_MIPS32_COMPAT=y
+ CONFIG_COMPAT=y
+ CONFIG_SYSVIPC_COMPAT=y
+@@ -256,13 +321,10 @@ CONFIG_BINFMT_ELF32=y
+ # Power management options
+ #
+ CONFIG_PM=y
+-# CONFIG_PM_LEGACY is not set
+ # CONFIG_PM_DEBUG is not set
+-
+-#
+-# Networking
+-#
++# CONFIG_PM_RUNTIME is not set
+ CONFIG_NET=y
++CONFIG_COMPAT_NETLINK_MESSAGES=y
+ 
+ #
+ # Networking options
+@@ -274,6 +336,8 @@ CONFIG_XFRM=y
+ CONFIG_XFRM_USER=m
+ # CONFIG_XFRM_SUB_POLICY is not set
+ CONFIG_XFRM_MIGRATE=y
++CONFIG_XFRM_STATISTICS=y
++CONFIG_XFRM_IPCOMP=m
+ CONFIG_NET_KEY=y
+ CONFIG_NET_KEY_MIGRATE=y
+ CONFIG_INET=y
+@@ -293,19 +357,39 @@ CONFIG_IP_PNP=y
+ # CONFIG_INET_ESP is not set
+ # CONFIG_INET_IPCOMP is not set
+ # CONFIG_INET_XFRM_TUNNEL is not set
+-# CONFIG_INET_TUNNEL is not set
++CONFIG_INET_TUNNEL=m
+ CONFIG_INET_XFRM_MODE_TRANSPORT=m
+ CONFIG_INET_XFRM_MODE_TUNNEL=m
+ CONFIG_INET_XFRM_MODE_BEET=m
++CONFIG_INET_LRO=y
+ CONFIG_INET_DIAG=y
+ CONFIG_INET_TCP_DIAG=y
+ # CONFIG_TCP_CONG_ADVANCED is not set
+ CONFIG_TCP_CONG_CUBIC=y
+ CONFIG_DEFAULT_TCP_CONG="cubic"
+ CONFIG_TCP_MD5SIG=y
+-# CONFIG_IPV6 is not set
+-# CONFIG_INET6_XFRM_TUNNEL is not set
+-# CONFIG_INET6_TUNNEL is not set
++CONFIG_IPV6=y
++CONFIG_IPV6_PRIVACY=y
++CONFIG_IPV6_ROUTER_PREF=y
++CONFIG_IPV6_ROUTE_INFO=y
++CONFIG_IPV6_OPTIMISTIC_DAD=y
++CONFIG_INET6_AH=m
++CONFIG_INET6_ESP=m
++CONFIG_INET6_IPCOMP=m
++CONFIG_IPV6_MIP6=m
++CONFIG_INET6_XFRM_TUNNEL=m
++CONFIG_INET6_TUNNEL=m
++CONFIG_INET6_XFRM_MODE_TRANSPORT=m
++CONFIG_INET6_XFRM_MODE_TUNNEL=m
++CONFIG_INET6_XFRM_MODE_BEET=m
++CONFIG_INET6_XFRM_MODE_ROUTEOPTIMIZATION=m
++CONFIG_IPV6_SIT=m
++CONFIG_IPV6_NDISC_NODETYPE=y
++CONFIG_IPV6_TUNNEL=m
++CONFIG_IPV6_MULTIPLE_TABLES=y
++CONFIG_IPV6_SUBTREES=y
++CONFIG_IPV6_MROUTE=y
++CONFIG_IPV6_PIMSM_V2=y
+ CONFIG_NETWORK_SECMARK=y
+ # CONFIG_NETFILTER is not set
+ # CONFIG_IP_DCCP is not set
+@@ -315,9 +399,11 @@ CONFIG_IP_SCTP=m
+ # CONFIG_SCTP_HMAC_NONE is not set
+ # CONFIG_SCTP_HMAC_SHA1 is not set
+ CONFIG_SCTP_HMAC_MD5=y
++# CONFIG_RDS is not set
+ # CONFIG_TIPC is not set
+ # CONFIG_ATM is not set
+ # CONFIG_BRIDGE is not set
++# CONFIG_NET_DSA is not set
+ # CONFIG_VLAN_8021Q is not set
+ # CONFIG_DECNET is not set
+ # CONFIG_LLC2 is not set
+@@ -327,12 +413,9 @@ CONFIG_SCTP_HMAC_MD5=y
+ # CONFIG_LAPB is not set
+ # CONFIG_ECONET is not set
+ # CONFIG_WAN_ROUTER is not set
+-
+-#
+-# QoS and/or fair queueing
+-#
++# CONFIG_PHONET is not set
++# CONFIG_IEEE802154 is not set
+ CONFIG_NET_SCHED=y
+-CONFIG_NET_SCH_FIFO=y
+ 
+ #
+ # Queueing/Scheduling
+@@ -341,7 +424,7 @@ CONFIG_NET_SCH_CBQ=m
+ CONFIG_NET_SCH_HTB=m
+ CONFIG_NET_SCH_HFSC=m
+ CONFIG_NET_SCH_PRIO=m
+-CONFIG_NET_SCH_RR=m
++CONFIG_NET_SCH_MULTIQ=y
+ CONFIG_NET_SCH_RED=m
+ CONFIG_NET_SCH_SFQ=m
+ CONFIG_NET_SCH_TEQL=m
+@@ -349,6 +432,7 @@ CONFIG_NET_SCH_TBF=m
+ CONFIG_NET_SCH_GRED=m
+ CONFIG_NET_SCH_DSMARK=m
+ CONFIG_NET_SCH_NETEM=m
++# CONFIG_NET_SCH_DRR is not set
+ CONFIG_NET_SCH_INGRESS=m
+ 
+ #
+@@ -365,41 +449,59 @@ CONFIG_NET_CLS_U32=m
+ CONFIG_CLS_U32_MARK=y
+ CONFIG_NET_CLS_RSVP=m
+ CONFIG_NET_CLS_RSVP6=m
++CONFIG_NET_CLS_FLOW=m
++CONFIG_NET_CLS_CGROUP=y
+ # CONFIG_NET_EMATCH is not set
+ CONFIG_NET_CLS_ACT=y
+ CONFIG_NET_ACT_POLICE=y
+ CONFIG_NET_ACT_GACT=m
+ CONFIG_GACT_PROB=y
+ CONFIG_NET_ACT_MIRRED=m
++CONFIG_NET_ACT_NAT=m
+ CONFIG_NET_ACT_PEDIT=m
+ # CONFIG_NET_ACT_SIMP is not set
+-CONFIG_NET_CLS_POLICE=y
++CONFIG_NET_ACT_SKBEDIT=m
+ # CONFIG_NET_CLS_IND is not set
++CONFIG_NET_SCH_FIFO=y
++# CONFIG_DCB is not set
+ 
+ #
+ # Network testing
+ #
+ # CONFIG_NET_PKTGEN is not set
+ # CONFIG_HAMRADIO is not set
++# CONFIG_CAN is not set
+ # CONFIG_IRDA is not set
+ # CONFIG_BT is not set
+ # CONFIG_AF_RXRPC is not set
+-
+-#
+-# Wireless
+-#
++CONFIG_FIB_RULES=y
++CONFIG_WIRELESS=y
+ CONFIG_CFG80211=m
++# CONFIG_NL80211_TESTMODE is not set
++# CONFIG_CFG80211_DEVELOPER_WARNINGS is not set
++# CONFIG_CFG80211_REG_DEBUG is not set
++CONFIG_CFG80211_DEFAULT_PS=y
++CONFIG_CFG80211_DEFAULT_PS_VALUE=1
++# CONFIG_WIRELESS_OLD_REGULATORY is not set
+ CONFIG_WIRELESS_EXT=y
++CONFIG_WIRELESS_EXT_SYSFS=y
++CONFIG_LIB80211=m
++CONFIG_LIB80211_CRYPT_WEP=m
++CONFIG_LIB80211_CRYPT_CCMP=m
++CONFIG_LIB80211_CRYPT_TKIP=m
++# CONFIG_LIB80211_DEBUG is not set
+ CONFIG_MAC80211=m
+-# CONFIG_MAC80211_DEBUG is not set
+-CONFIG_IEEE80211=m
+-# CONFIG_IEEE80211_DEBUG is not set
+-CONFIG_IEEE80211_CRYPT_WEP=m
+-CONFIG_IEEE80211_CRYPT_CCMP=m
+-CONFIG_IEEE80211_CRYPT_TKIP=m
+-CONFIG_IEEE80211_SOFTMAC=m
+-# CONFIG_IEEE80211_SOFTMAC_DEBUG is not set
++CONFIG_MAC80211_RC_PID=y
++CONFIG_MAC80211_RC_MINSTREL=y
++# CONFIG_MAC80211_RC_DEFAULT_PID is not set
++CONFIG_MAC80211_RC_DEFAULT_MINSTREL=y
++CONFIG_MAC80211_RC_DEFAULT="minstrel"
++# CONFIG_MAC80211_MESH is not set
++CONFIG_MAC80211_LEDS=y
++# CONFIG_MAC80211_DEBUG_MENU is not set
++# CONFIG_WIMAX is not set
+ CONFIG_RFKILL=m
++CONFIG_RFKILL_LEDS=y
+ # CONFIG_NET_9P is not set
+ 
+ #
+@@ -409,9 +511,13 @@ CONFIG_RFKILL=m
+ #
+ # Generic Driver Options
+ #
++CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
++# CONFIG_DEVTMPFS is not set
+ CONFIG_STANDALONE=y
+ CONFIG_PREVENT_FIRMWARE_BUILD=y
+ CONFIG_FW_LOADER=y
++CONFIG_FIRMWARE_IN_KERNEL=y
++CONFIG_EXTRA_FIRMWARE=""
+ # CONFIG_SYS_HYPERVISOR is not set
+ CONFIG_CONNECTOR=m
+ # CONFIG_MTD is not set
+@@ -425,13 +531,17 @@ CONFIG_BLK_DEV=y
+ CONFIG_BLK_DEV_LOOP=y
+ CONFIG_BLK_DEV_CRYPTOLOOP=m
+ # CONFIG_BLK_DEV_NBD is not set
++CONFIG_BLK_DEV_OSD=m
+ # CONFIG_BLK_DEV_SX8 is not set
+ # CONFIG_BLK_DEV_RAM is not set
+ CONFIG_CDROM_PKTCDVD=m
+ CONFIG_CDROM_PKTCDVD_BUFFERS=8
+ # CONFIG_CDROM_PKTCDVD_WCACHE is not set
+ CONFIG_ATA_OVER_ETH=m
++# CONFIG_BLK_DEV_HD is not set
+ # CONFIG_MISC_DEVICES is not set
++CONFIG_EEPROM_93CX6=m
++CONFIG_HAVE_IDE=y
+ # CONFIG_IDE is not set
+ 
+ #
+@@ -454,10 +564,6 @@ CONFIG_BLK_DEV_SR=m
+ CONFIG_BLK_DEV_SR_VENDOR=y
+ CONFIG_CHR_DEV_SG=m
+ CONFIG_CHR_DEV_SCH=m
+-
+-#
+-# Some SCSI devices (e.g. CD jukebox) support multiple LUNs
+-#
+ # CONFIG_SCSI_MULTI_LUN is not set
+ CONFIG_SCSI_CONSTANTS=y
+ CONFIG_SCSI_LOGGING=y
+@@ -472,9 +578,14 @@ CONFIG_SCSI_FC_ATTRS=y
+ CONFIG_SCSI_ISCSI_ATTRS=m
+ CONFIG_SCSI_SAS_ATTRS=m
+ CONFIG_SCSI_SAS_LIBSAS=m
++CONFIG_SCSI_SAS_HOST_SMP=y
+ # CONFIG_SCSI_SAS_LIBSAS_DEBUG is not set
++# CONFIG_SCSI_SRP_ATTRS is not set
+ CONFIG_SCSI_LOWLEVEL=y
+ # CONFIG_ISCSI_TCP is not set
++CONFIG_SCSI_CXGB3_ISCSI=m
++CONFIG_SCSI_BNX2_ISCSI=m
++CONFIG_BE2ISCSI=m
+ # CONFIG_BLK_DEV_3W_XXXX_RAID is not set
+ # CONFIG_SCSI_3W_9XXX is not set
+ # CONFIG_SCSI_ACARD is not set
+@@ -484,11 +595,21 @@ CONFIG_SCSI_LOWLEVEL=y
+ # CONFIG_SCSI_AIC79XX is not set
+ CONFIG_SCSI_AIC94XX=m
+ # CONFIG_AIC94XX_DEBUG is not set
++CONFIG_SCSI_MVSAS=m
++# CONFIG_SCSI_MVSAS_DEBUG is not set
++CONFIG_SCSI_DPT_I2O=m
++# CONFIG_SCSI_ADVANSYS is not set
+ # CONFIG_SCSI_ARCMSR is not set
+ # CONFIG_MEGARAID_NEWGEN is not set
+ # CONFIG_MEGARAID_LEGACY is not set
+ # CONFIG_MEGARAID_SAS is not set
++CONFIG_SCSI_MPT2SAS=m
++CONFIG_SCSI_MPT2SAS_MAX_SGE=128
++# CONFIG_SCSI_MPT2SAS_LOGGING is not set
+ # CONFIG_SCSI_HPTIOP is not set
++CONFIG_LIBFC=m
++# CONFIG_LIBFCOE is not set
++# CONFIG_FCOE is not set
+ # CONFIG_SCSI_DMX3191D is not set
+ # CONFIG_SCSI_FUTURE_DOMAIN is not set
+ # CONFIG_SCSI_IPS is not set
+@@ -503,16 +624,30 @@ CONFIG_SCSI_QLOGIC_1280=y
+ # CONFIG_SCSI_DC395x is not set
+ # CONFIG_SCSI_DC390T is not set
+ # CONFIG_SCSI_DEBUG is not set
++CONFIG_SCSI_PMCRAID=m
+ # CONFIG_SCSI_SRP is not set
++CONFIG_SCSI_BFA_FC=m
++CONFIG_SCSI_DH=m
++CONFIG_SCSI_DH_RDAC=m
++CONFIG_SCSI_DH_HP_SW=m
++CONFIG_SCSI_DH_EMC=m
++CONFIG_SCSI_DH_ALUA=m
++CONFIG_SCSI_OSD_INITIATOR=m
++CONFIG_SCSI_OSD_ULD=m
++CONFIG_SCSI_OSD_DPRINT_SENSE=1
++# CONFIG_SCSI_OSD_DEBUG is not set
+ # CONFIG_ATA is not set
+ CONFIG_MD=y
+ CONFIG_BLK_DEV_MD=y
++CONFIG_MD_AUTODETECT=y
+ CONFIG_MD_LINEAR=m
+ CONFIG_MD_RAID0=y
+ CONFIG_MD_RAID1=y
+ CONFIG_MD_RAID10=m
+ CONFIG_MD_RAID456=y
+-CONFIG_MD_RAID5_RESHAPE=y
++# CONFIG_MULTICORE_RAID456 is not set
++CONFIG_MD_RAID6_PQ=y
++# CONFIG_ASYNC_RAID6_TEST is not set
+ CONFIG_MD_MULTIPATH=m
+ CONFIG_MD_FAULTY=m
+ CONFIG_BLK_DEV_DM=m
+@@ -520,36 +655,39 @@ CONFIG_BLK_DEV_DM=m
+ CONFIG_DM_CRYPT=m
+ CONFIG_DM_SNAPSHOT=m
+ CONFIG_DM_MIRROR=m
++CONFIG_DM_LOG_USERSPACE=m
+ CONFIG_DM_ZERO=m
+ CONFIG_DM_MULTIPATH=m
+-CONFIG_DM_MULTIPATH_EMC=m
+-CONFIG_DM_MULTIPATH_RDAC=m
++CONFIG_DM_MULTIPATH_QL=m
++CONFIG_DM_MULTIPATH_ST=m
+ # CONFIG_DM_DELAY is not set
++CONFIG_DM_UEVENT=y
++# CONFIG_FUSION is not set
+ 
+ #
+-# Fusion MPT device support
++# IEEE 1394 (FireWire) support
+ #
+-# CONFIG_FUSION is not set
+-# CONFIG_FUSION_SPI is not set
+-# CONFIG_FUSION_FC is not set
+-# CONFIG_FUSION_SAS is not set
+ 
+ #
+-# IEEE 1394 (FireWire) support
++# You can enable one or both FireWire driver stacks.
++#
++
++#
++# See the help texts for more information.
+ #
+ # CONFIG_FIREWIRE is not set
+ # CONFIG_IEEE1394 is not set
+ # CONFIG_I2O is not set
+ CONFIG_NETDEVICES=y
+-CONFIG_NETDEVICES_MULTIQUEUE=y
+ CONFIG_IFB=m
+ # CONFIG_DUMMY is not set
+ # CONFIG_BONDING is not set
+ CONFIG_MACVLAN=m
+ # CONFIG_EQUALIZER is not set
+ # CONFIG_TUN is not set
++CONFIG_VETH=m
+ # CONFIG_ARCNET is not set
+-CONFIG_PHYLIB=m
++CONFIG_PHYLIB=y
+ 
+ #
+ # MII PHY device drivers
+@@ -563,23 +701,50 @@ CONFIG_VITESSE_PHY=m
+ CONFIG_SMSC_PHY=m
+ # CONFIG_BROADCOM_PHY is not set
+ CONFIG_ICPLUS_PHY=m
++CONFIG_REALTEK_PHY=m
++CONFIG_NATIONAL_PHY=m
++CONFIG_STE10XP=m
++CONFIG_LSI_ET1011C_PHY=m
+ # CONFIG_FIXED_PHY is not set
++CONFIG_MDIO_BITBANG=m
+ CONFIG_NET_ETHERNET=y
+ CONFIG_MII=y
+ CONFIG_AX88796=m
++CONFIG_AX88796_93CX6=y
+ CONFIG_SGI_IOC3_ETH=y
+ # CONFIG_HAPPYMEAL is not set
+ # CONFIG_SUNGEM is not set
+ # CONFIG_CASSINI is not set
+ # CONFIG_NET_VENDOR_3COM is not set
++CONFIG_SMC91X=m
+ # CONFIG_DM9000 is not set
++CONFIG_ETHOC=m
++CONFIG_DNET=m
+ # CONFIG_NET_TULIP is not set
+ # CONFIG_HP100 is not set
++# CONFIG_IBM_NEW_EMAC_ZMII is not set
++# CONFIG_IBM_NEW_EMAC_RGMII is not set
++# CONFIG_IBM_NEW_EMAC_TAH is not set
++# CONFIG_IBM_NEW_EMAC_EMAC4 is not set
++# CONFIG_IBM_NEW_EMAC_NO_FLOW_CTRL is not set
++# CONFIG_IBM_NEW_EMAC_MAL_CLR_ICINTSTAT is not set
++# CONFIG_IBM_NEW_EMAC_MAL_COMMON_ERR is not set
+ # CONFIG_NET_PCI is not set
++CONFIG_B44=m
++CONFIG_B44_PCI_AUTOSELECT=y
++CONFIG_B44_PCICORE_AUTOSELECT=y
++CONFIG_B44_PCI=y
++CONFIG_KS8842=m
++CONFIG_KS8851_MLL=m
++CONFIG_ATL2=m
+ CONFIG_NETDEV_1000=y
+ # CONFIG_ACENIC is not set
+ # CONFIG_DL2K is not set
+ # CONFIG_E1000 is not set
++CONFIG_E1000E=m
++CONFIG_IP1000=m
++CONFIG_IGB=m
++CONFIG_IGBVF=m
+ # CONFIG_NS83820 is not set
+ # CONFIG_HAMACHI is not set
+ # CONFIG_YELLOWFIN is not set
+@@ -589,24 +754,57 @@ CONFIG_NETDEV_1000=y
+ # CONFIG_SKY2 is not set
+ CONFIG_VIA_VELOCITY=m
+ # CONFIG_TIGON3 is not set
+-# CONFIG_BNX2 is not set
++CONFIG_BNX2=m
++CONFIG_CNIC=m
+ CONFIG_QLA3XXX=m
+ # CONFIG_ATL1 is not set
++CONFIG_ATL1E=m
++CONFIG_ATL1C=m
++CONFIG_JME=m
+ CONFIG_NETDEV_10000=y
++CONFIG_MDIO=m
+ # CONFIG_CHELSIO_T1 is not set
++CONFIG_CHELSIO_T3_DEPENDS=y
+ CONFIG_CHELSIO_T3=m
++CONFIG_ENIC=m
++CONFIG_IXGBE=m
+ # CONFIG_IXGB is not set
+ # CONFIG_S2IO is not set
++CONFIG_VXGE=m
++# CONFIG_VXGE_DEBUG_TRACE_ALL is not set
+ # CONFIG_MYRI10GE is not set
+ CONFIG_NETXEN_NIC=m
+-# CONFIG_MLX4_CORE is not set
++CONFIG_NIU=m
++CONFIG_MLX4_EN=m
++CONFIG_MLX4_CORE=m
++# CONFIG_MLX4_DEBUG is not set
++CONFIG_TEHUTI=m
++CONFIG_BNX2X=m
++CONFIG_QLGE=m
++CONFIG_SFC=m
++CONFIG_BE2NET=m
+ # CONFIG_TR is not set
+-
+-#
+-# Wireless LAN
+-#
++CONFIG_WLAN=y
+ # CONFIG_WLAN_PRE80211 is not set
+ CONFIG_WLAN_80211=y
++CONFIG_LIBERTAS=m
++# CONFIG_LIBERTAS_DEBUG is not set
++CONFIG_LIBERTAS_THINFIRM=m
++CONFIG_ATMEL=m
++CONFIG_PCI_ATMEL=m
++CONFIG_PRISM54=m
++CONFIG_RTL8180=m
++CONFIG_ADM8211=m
++# CONFIG_MAC80211_HWSIM is not set
++CONFIG_MWL8K=m
++CONFIG_P54_COMMON=m
++CONFIG_P54_PCI=m
++CONFIG_P54_LEDS=y
++CONFIG_ATH_COMMON=m
++CONFIG_ATH5K=m
++# CONFIG_ATH5K_DEBUG is not set
++CONFIG_ATH9K=m
++# CONFIG_ATH9K_DEBUG is not set
+ CONFIG_IPW2100=m
+ CONFIG_IPW2100_MONITOR=y
+ CONFIG_IPW2100_DEBUG=y
+@@ -616,35 +814,68 @@ CONFIG_IPW2200_RADIOTAP=y
+ CONFIG_IPW2200_PROMISCUOUS=y
+ CONFIG_IPW2200_QOS=y
+ CONFIG_IPW2200_DEBUG=y
+-CONFIG_LIBERTAS=m
+-# CONFIG_LIBERTAS_DEBUG is not set
+-CONFIG_HERMES=m
+-CONFIG_PLX_HERMES=m
+-CONFIG_TMD_HERMES=m
+-CONFIG_NORTEL_HERMES=m
+-CONFIG_PCI_HERMES=m
+-CONFIG_ATMEL=m
+-CONFIG_PCI_ATMEL=m
+-CONFIG_PRISM54=m
++CONFIG_LIBIPW=m
++# CONFIG_LIBIPW_DEBUG is not set
++CONFIG_IWLWIFI=m
++CONFIG_IWLWIFI_LEDS=y
++CONFIG_IWLWIFI_SPECTRUM_MEASUREMENT=y
++# CONFIG_IWLWIFI_DEBUG is not set
++CONFIG_IWLAGN=m
++CONFIG_IWL4965=y
++CONFIG_IWL5000=y
++CONFIG_IWL3945=m
++CONFIG_IWL3945_SPECTRUM_MEASUREMENT=y
+ CONFIG_HOSTAP=m
+ CONFIG_HOSTAP_FIRMWARE=y
+ CONFIG_HOSTAP_FIRMWARE_NVRAM=y
+ CONFIG_HOSTAP_PLX=m
+ CONFIG_HOSTAP_PCI=m
+-CONFIG_BCM43XX=m
+-CONFIG_BCM43XX_DEBUG=y
+-CONFIG_BCM43XX_DMA=y
+-CONFIG_BCM43XX_PIO=y
+-CONFIG_BCM43XX_DMA_AND_PIO_MODE=y
+-# CONFIG_BCM43XX_DMA_MODE is not set
+-# CONFIG_BCM43XX_PIO_MODE is not set
++CONFIG_B43=m
++CONFIG_B43_PCI_AUTOSELECT=y
++CONFIG_B43_PCICORE_AUTOSELECT=y
++CONFIG_B43_PHY_LP=y
++CONFIG_B43_LEDS=y
++CONFIG_B43_HWRNG=y
++# CONFIG_B43_DEBUG is not set
++CONFIG_B43LEGACY=m
++CONFIG_B43LEGACY_PCI_AUTOSELECT=y
++CONFIG_B43LEGACY_PCICORE_AUTOSELECT=y
++CONFIG_B43LEGACY_LEDS=y
++CONFIG_B43LEGACY_HWRNG=y
++# CONFIG_B43LEGACY_DEBUG is not set
++CONFIG_B43LEGACY_DMA=y
++CONFIG_B43LEGACY_PIO=y
++CONFIG_B43LEGACY_DMA_AND_PIO_MODE=y
++# CONFIG_B43LEGACY_DMA_MODE is not set
++# CONFIG_B43LEGACY_PIO_MODE is not set
++CONFIG_RT2X00=m
++CONFIG_RT2400PCI=m
++CONFIG_RT2500PCI=m
++CONFIG_RT61PCI=m
++CONFIG_RT2X00_LIB_PCI=m
++CONFIG_RT2X00_LIB=m
++CONFIG_RT2X00_LIB_FIRMWARE=y
++CONFIG_RT2X00_LIB_CRYPTO=y
++CONFIG_RT2X00_LIB_LEDS=y
++# CONFIG_RT2X00_DEBUG is not set
++CONFIG_HERMES=m
++# CONFIG_HERMES_CACHE_FW_ON_INIT is not set
++CONFIG_PLX_HERMES=m
++CONFIG_TMD_HERMES=m
++CONFIG_NORTEL_HERMES=m
++CONFIG_PCI_HERMES=m
++CONFIG_WL12XX=m
++CONFIG_WL1251=m
++
++#
++# Enable WiMAX (Networking options) to see the WiMAX drivers
++#
+ # CONFIG_WAN is not set
+ # CONFIG_FDDI is not set
+ # CONFIG_HIPPI is not set
+ # CONFIG_PPP is not set
+ # CONFIG_SLIP is not set
+ # CONFIG_NET_FC is not set
+-# CONFIG_SHAPER is not set
+ # CONFIG_NETCONSOLE is not set
+ # CONFIG_NETPOLL is not set
+ # CONFIG_NET_POLL_CONTROLLER is not set
+@@ -671,7 +902,9 @@ CONFIG_SERIO_RAW=m
+ # Character devices
+ #
+ # CONFIG_VT is not set
++CONFIG_DEVKMEM=y
+ # CONFIG_SERIAL_NONSTANDARD is not set
++CONFIG_NOZOMI=m
+ 
+ #
+ # Serial drivers
+@@ -694,95 +927,262 @@ CONFIG_SERIAL_CORE=y
+ CONFIG_SERIAL_CORE_CONSOLE=y
+ # CONFIG_SERIAL_JSM is not set
+ CONFIG_UNIX98_PTYS=y
++CONFIG_DEVPTS_MULTIPLE_INSTANCES=y
+ CONFIG_LEGACY_PTYS=y
+ CONFIG_LEGACY_PTY_COUNT=256
+ # CONFIG_IPMI_HANDLER is not set
+-# CONFIG_WATCHDOG is not set
+ CONFIG_HW_RANDOM=m
+-# CONFIG_RTC is not set
++CONFIG_HW_RANDOM_TIMERIOMEM=m
+ # CONFIG_R3964 is not set
+ # CONFIG_APPLICOM is not set
+-# CONFIG_DRM is not set
+ # CONFIG_RAW_DRIVER is not set
+ # CONFIG_TCG_TPM is not set
+ CONFIG_DEVPORT=y
+-# CONFIG_I2C is not set
++CONFIG_I2C=m
++CONFIG_I2C_BOARDINFO=y
++CONFIG_I2C_COMPAT=y
++CONFIG_I2C_CHARDEV=m
++CONFIG_I2C_HELPER_AUTO=y
++CONFIG_I2C_ALGOBIT=m
++CONFIG_I2C_ALGOPCA=m
++
++#
++# I2C Hardware Bus support
++#
+ 
+ #
+-# SPI support
++# PC SMBus host controller drivers
++#
++CONFIG_I2C_ALI1535=m
++CONFIG_I2C_ALI1563=m
++CONFIG_I2C_ALI15X3=m
++CONFIG_I2C_AMD756=m
++CONFIG_I2C_AMD8111=m
++CONFIG_I2C_I801=m
++CONFIG_I2C_ISCH=m
++CONFIG_I2C_PIIX4=m
++CONFIG_I2C_NFORCE2=m
++CONFIG_I2C_SIS5595=m
++CONFIG_I2C_SIS630=m
++CONFIG_I2C_SIS96X=m
++CONFIG_I2C_VIA=m
++CONFIG_I2C_VIAPRO=m
++
++#
++# I2C system bus drivers (mostly embedded / system-on-chip)
++#
++CONFIG_I2C_OCORES=m
++CONFIG_I2C_SIMTEC=m
++
++#
++# External I2C/SMBus adapter drivers
++#
++CONFIG_I2C_PARPORT_LIGHT=m
++CONFIG_I2C_TAOS_EVM=m
++
++#
++# Graphics adapter I2C/DDC channel drivers
++#
++CONFIG_I2C_VOODOO3=m
++
++#
++# Other I2C/SMBus bus drivers
++#
++CONFIG_I2C_PCA_PLATFORM=m
++CONFIG_I2C_STUB=m
++
+ #
++# Miscellaneous I2C Chip support
++#
++# CONFIG_DS1682 is not set
++CONFIG_SENSORS_TSL2550=m
++# CONFIG_I2C_DEBUG_CORE is not set
++# CONFIG_I2C_DEBUG_ALGO is not set
++# CONFIG_I2C_DEBUG_BUS is not set
++# CONFIG_I2C_DEBUG_CHIP is not set
+ # CONFIG_SPI is not set
+-# CONFIG_SPI_MASTER is not set
++
++#
++# PPS support
++#
++CONFIG_PPS=m
++# CONFIG_PPS_DEBUG is not set
+ # CONFIG_W1 is not set
+ # CONFIG_POWER_SUPPLY is not set
+ # CONFIG_HWMON is not set
++CONFIG_THERMAL=m
++# CONFIG_WATCHDOG is not set
++CONFIG_SSB_POSSIBLE=y
+ 
+ #
+-# Multifunction device drivers
+-#
+-# CONFIG_MFD_SM501 is not set
++# Sonics Silicon Backplane
++#
++CONFIG_SSB=m
++CONFIG_SSB_SPROM=y
++CONFIG_SSB_PCIHOST_POSSIBLE=y
++CONFIG_SSB_PCIHOST=y
++CONFIG_SSB_B43_PCI_BRIDGE=y
++# CONFIG_SSB_SILENT is not set
++# CONFIG_SSB_DEBUG is not set
++CONFIG_SSB_DRIVER_PCICORE_POSSIBLE=y
++CONFIG_SSB_DRIVER_PCICORE=y
++# CONFIG_SSB_DRIVER_MIPS is not set
+ 
+ #
+-# Multimedia devices
++# Multifunction device drivers
+ #
+-# CONFIG_VIDEO_DEV is not set
+-# CONFIG_DVB_CORE is not set
+-# CONFIG_DAB is not set
++# CONFIG_MFD_CORE is not set
++# CONFIG_MFD_SM501 is not set
++# CONFIG_HTC_PASIC3 is not set
++# CONFIG_MFD_TMIO is not set
++# CONFIG_MFD_WM8400 is not set
++# CONFIG_MFD_WM831X is not set
++CONFIG_MFD_WM8350=m
++CONFIG_MFD_WM8350_I2C=m
++CONFIG_MFD_PCF50633=m
++CONFIG_PCF50633_ADC=m
++CONFIG_PCF50633_GPIO=m
++CONFIG_AB3100_CORE=m
++CONFIG_AB3100_OTP=m
++# CONFIG_REGULATOR is not set
++# CONFIG_MEDIA_SUPPORT is not set
+ 
+ #
+ # Graphics support
+ #
+-# CONFIG_BACKLIGHT_LCD_SUPPORT is not set
+-
+-#
+-# Display device support
+-#
+-# CONFIG_DISPLAY_SUPPORT is not set
++# CONFIG_VGA_ARB is not set
++# CONFIG_DRM is not set
+ # CONFIG_VGASTATE is not set
+ # CONFIG_VIDEO_OUTPUT_CONTROL is not set
+ # CONFIG_FB is not set
++# CONFIG_BACKLIGHT_LCD_SUPPORT is not set
+ 
+ #
+-# Sound
++# Display device support
+ #
++# CONFIG_DISPLAY_SUPPORT is not set
+ # CONFIG_SOUND is not set
+ CONFIG_USB_SUPPORT=y
+ CONFIG_USB_ARCH_HAS_HCD=y
+ CONFIG_USB_ARCH_HAS_OHCI=y
+ CONFIG_USB_ARCH_HAS_EHCI=y
+ # CONFIG_USB is not set
++# CONFIG_USB_OTG_WHITELIST is not set
++# CONFIG_USB_OTG_BLACKLIST_HUB is not set
+ 
+ #
+-# NOTE: USB_STORAGE enables SCSI, and 'SCSI disk support'
++# Enable Host or Gadget support to see Inventra options
+ #
+ 
+ #
+-# USB Gadget Support
++# NOTE: USB_STORAGE depends on SCSI but BLK_DEV_SD may
+ #
+ # CONFIG_USB_GADGET is not set
++
++#
++# OTG and related infrastructure
++#
++# CONFIG_UWB is not set
+ # CONFIG_MMC is not set
+-# CONFIG_NEW_LEDS is not set
+-# CONFIG_INFINIBAND is not set
+-# CONFIG_RTC_CLASS is not set
++# CONFIG_MEMSTICK is not set
++CONFIG_NEW_LEDS=y
++CONFIG_LEDS_CLASS=m
+ 
+ #
+-# DMA Engine support
++# LED drivers
+ #
+-# CONFIG_DMA_ENGINE is not set
++CONFIG_LEDS_LP3944=m
++CONFIG_LEDS_PCA955X=m
++CONFIG_LEDS_WM8350=m
++CONFIG_LEDS_BD2802=m
+ 
+ #
+-# DMA Clients
++# LED Triggers
+ #
++CONFIG_LEDS_TRIGGERS=y
++CONFIG_LEDS_TRIGGER_TIMER=m
++CONFIG_LEDS_TRIGGER_HEARTBEAT=m
++CONFIG_LEDS_TRIGGER_BACKLIGHT=m
++CONFIG_LEDS_TRIGGER_DEFAULT_ON=m
+ 
+ #
+-# DMA Devices
++# iptables trigger is under Netfilter config (LED target)
+ #
++# CONFIG_ACCESSIBILITY is not set
++# CONFIG_INFINIBAND is not set
++CONFIG_RTC_LIB=y
++CONFIG_RTC_CLASS=y
++CONFIG_RTC_HCTOSYS=y
++CONFIG_RTC_HCTOSYS_DEVICE="rtc0"
++# CONFIG_RTC_DEBUG is not set
+ 
+ #
+-# Userspace I/O
++# RTC interfaces
+ #
++CONFIG_RTC_INTF_SYSFS=y
++CONFIG_RTC_INTF_PROC=y
++CONFIG_RTC_INTF_DEV=y
++# CONFIG_RTC_INTF_DEV_UIE_EMUL is not set
++# CONFIG_RTC_DRV_TEST is not set
++
++#
++# I2C RTC drivers
++#
++# CONFIG_RTC_DRV_DS1307 is not set
++# CONFIG_RTC_DRV_DS1374 is not set
++# CONFIG_RTC_DRV_DS1672 is not set
++# CONFIG_RTC_DRV_MAX6900 is not set
++# CONFIG_RTC_DRV_RS5C372 is not set
++# CONFIG_RTC_DRV_ISL1208 is not set
++# CONFIG_RTC_DRV_X1205 is not set
++# CONFIG_RTC_DRV_PCF8563 is not set
++# CONFIG_RTC_DRV_PCF8583 is not set
++# CONFIG_RTC_DRV_M41T80 is not set
++# CONFIG_RTC_DRV_S35390A is not set
++# CONFIG_RTC_DRV_FM3130 is not set
++# CONFIG_RTC_DRV_RX8581 is not set
++# CONFIG_RTC_DRV_RX8025 is not set
++
++#
++# SPI RTC drivers
++#
++
++#
++# Platform RTC drivers
++#
++# CONFIG_RTC_DRV_CMOS is not set
++# CONFIG_RTC_DRV_DS1286 is not set
++# CONFIG_RTC_DRV_DS1511 is not set
++# CONFIG_RTC_DRV_DS1553 is not set
++# CONFIG_RTC_DRV_DS1742 is not set
++# CONFIG_RTC_DRV_STK17TA8 is not set
++# CONFIG_RTC_DRV_M48T86 is not set
++CONFIG_RTC_DRV_M48T35=y
++# CONFIG_RTC_DRV_M48T59 is not set
++# CONFIG_RTC_DRV_BQ4802 is not set
++# CONFIG_RTC_DRV_V3020 is not set
++# CONFIG_RTC_DRV_WM8350 is not set
++# CONFIG_RTC_DRV_PCF50633 is not set
++CONFIG_RTC_DRV_AB3100=m
++
++#
++# on-CPU RTC drivers
++#
++# CONFIG_DMADEVICES is not set
++# CONFIG_AUXDISPLAY is not set
+ CONFIG_UIO=y
+ # CONFIG_UIO_CIF is not set
++# CONFIG_UIO_PDRV is not set
++# CONFIG_UIO_PDRV_GENIRQ is not set
++CONFIG_UIO_SMX=m
++CONFIG_UIO_AEC=m
++CONFIG_UIO_SERCOS3=m
++CONFIG_UIO_PCI_GENERIC=m
++
++#
++# TI VLYNQ
++#
++# CONFIG_STAGING is not set
+ 
+ #
+ # File systems
+@@ -793,36 +1193,57 @@ CONFIG_EXT2_FS_POSIX_ACL=y
+ CONFIG_EXT2_FS_SECURITY=y
+ # CONFIG_EXT2_FS_XIP is not set
+ CONFIG_EXT3_FS=y
++# CONFIG_EXT3_DEFAULTS_TO_ORDERED is not set
+ CONFIG_EXT3_FS_XATTR=y
+ CONFIG_EXT3_FS_POSIX_ACL=y
+ CONFIG_EXT3_FS_SECURITY=y
+-# CONFIG_EXT4DEV_FS is not set
++CONFIG_EXT4_FS=y
++CONFIG_EXT4_FS_XATTR=y
++CONFIG_EXT4_FS_POSIX_ACL=y
++CONFIG_EXT4_FS_SECURITY=y
++# CONFIG_EXT4_DEBUG is not set
+ CONFIG_JBD=y
+-CONFIG_JBD_DEBUG=y
++CONFIG_JBD2=y
+ CONFIG_FS_MBCACHE=y
+ # CONFIG_REISERFS_FS is not set
+ # CONFIG_JFS_FS is not set
+ CONFIG_FS_POSIX_ACL=y
+ CONFIG_XFS_FS=m
+ CONFIG_XFS_QUOTA=y
+-CONFIG_XFS_SECURITY=y
+ CONFIG_XFS_POSIX_ACL=y
+ # CONFIG_XFS_RT is not set
++# CONFIG_XFS_DEBUG is not set
+ # CONFIG_GFS2_FS is not set
+ # CONFIG_OCFS2_FS is not set
+-# CONFIG_MINIX_FS is not set
+-# CONFIG_ROMFS_FS is not set
++CONFIG_BTRFS_FS=m
++CONFIG_BTRFS_FS_POSIX_ACL=y
++# CONFIG_NILFS2_FS is not set
++CONFIG_FILE_LOCKING=y
++CONFIG_FSNOTIFY=y
++CONFIG_DNOTIFY=y
+ CONFIG_INOTIFY=y
+ CONFIG_INOTIFY_USER=y
+ # CONFIG_QUOTA is not set
+ CONFIG_QUOTACTL=y
+-CONFIG_DNOTIFY=y
+ CONFIG_AUTOFS_FS=m
+ # CONFIG_AUTOFS4_FS is not set
+ CONFIG_FUSE_FS=m
++CONFIG_CUSE=m
+ CONFIG_GENERIC_ACL=y
+ 
+ #
++# Caches
++#
++CONFIG_FSCACHE=m
++CONFIG_FSCACHE_STATS=y
++# CONFIG_FSCACHE_HISTOGRAM is not set
++# CONFIG_FSCACHE_DEBUG is not set
++# CONFIG_FSCACHE_OBJECT_LIST is not set
++CONFIG_CACHEFILES=m
++# CONFIG_CACHEFILES_DEBUG is not set
++# CONFIG_CACHEFILES_HISTOGRAM is not set
++
++#
+ # CD-ROM/DVD Filesystems
+ #
+ # CONFIG_ISO9660_FS is not set
+@@ -841,16 +1262,13 @@ CONFIG_GENERIC_ACL=y
+ CONFIG_PROC_FS=y
+ CONFIG_PROC_KCORE=y
+ CONFIG_PROC_SYSCTL=y
++CONFIG_PROC_PAGE_MONITOR=y
+ CONFIG_SYSFS=y
+ CONFIG_TMPFS=y
+ CONFIG_TMPFS_POSIX_ACL=y
+ # CONFIG_HUGETLB_PAGE is not set
+-CONFIG_RAMFS=y
+ CONFIG_CONFIGFS_FS=m
+-
+-#
+-# Miscellaneous filesystems
+-#
++CONFIG_MISC_FILESYSTEMS=y
+ # CONFIG_ADFS_FS is not set
+ # CONFIG_AFFS_FS is not set
+ # CONFIG_ECRYPT_FS is not set
+@@ -860,28 +1278,32 @@ CONFIG_CONFIGFS_FS=m
+ # CONFIG_BFS_FS is not set
+ # CONFIG_EFS_FS is not set
+ # CONFIG_CRAMFS is not set
++CONFIG_SQUASHFS=m
++# CONFIG_SQUASHFS_EMBEDDED is not set
++CONFIG_SQUASHFS_FRAGMENT_CACHE_SIZE=3
+ # CONFIG_VXFS_FS is not set
++# CONFIG_MINIX_FS is not set
++CONFIG_OMFS_FS=m
+ # CONFIG_HPFS_FS is not set
+ # CONFIG_QNX4FS_FS is not set
++# CONFIG_ROMFS_FS is not set
+ # CONFIG_SYSV_FS is not set
+ # CONFIG_UFS_FS is not set
+-
+-#
+-# Network File Systems
+-#
++CONFIG_EXOFS_FS=m
++# CONFIG_EXOFS_DEBUG is not set
++CONFIG_NETWORK_FILESYSTEMS=y
+ CONFIG_NFS_FS=y
+ CONFIG_NFS_V3=y
+ # CONFIG_NFS_V3_ACL is not set
+ # CONFIG_NFS_V4 is not set
+-# CONFIG_NFS_DIRECTIO is not set
+-# CONFIG_NFSD is not set
+ # CONFIG_ROOT_NFS is not set
++# CONFIG_NFSD is not set
+ CONFIG_LOCKD=y
+ CONFIG_LOCKD_V4=y
++CONFIG_EXPORTFS=m
+ CONFIG_NFS_COMMON=y
+ CONFIG_SUNRPC=y
+ CONFIG_SUNRPC_GSS=y
+-# CONFIG_SUNRPC_BIND34 is not set
+ CONFIG_RPCSEC_GSS_KRB5=y
+ # CONFIG_RPCSEC_GSS_SPKM3 is not set
+ # CONFIG_SMB_FS is not set
+@@ -911,35 +1333,31 @@ CONFIG_SGI_PARTITION=y
+ # CONFIG_KARMA_PARTITION is not set
+ # CONFIG_EFI_PARTITION is not set
+ # CONFIG_SYSV68_PARTITION is not set
+-
+-#
+-# Native Language Support
+-#
+ # CONFIG_NLS is not set
+-
+-#
+-# Distributed Lock Manager
+-#
+ CONFIG_DLM=m
+ # CONFIG_DLM_DEBUG is not set
+ 
+ #
+-# Profiling support
+-#
+-# CONFIG_PROFILING is not set
+-
+-#
+ # Kernel hacking
+ #
+ CONFIG_TRACE_IRQFLAGS_SUPPORT=y
+ # CONFIG_PRINTK_TIME is not set
++CONFIG_ENABLE_WARN_DEPRECATED=y
+ CONFIG_ENABLE_MUST_CHECK=y
++CONFIG_FRAME_WARN=2048
+ # CONFIG_MAGIC_SYSRQ is not set
++# CONFIG_STRIP_ASM_SYMS is not set
+ # CONFIG_UNUSED_SYMBOLS is not set
+ # CONFIG_DEBUG_FS is not set
+ # CONFIG_HEADERS_CHECK is not set
+ # CONFIG_DEBUG_KERNEL is not set
+-CONFIG_CROSSCOMPILE=y
++# CONFIG_DEBUG_MEMORY_INIT is not set
++# CONFIG_RCU_CPU_STALL_DETECTOR is not set
++# CONFIG_SYSCTL_SYSCALL_CHECK is not set
++CONFIG_TRACING_SUPPORT=y
++# CONFIG_FTRACE is not set
++# CONFIG_SAMPLES is not set
++CONFIG_HAVE_ARCH_KGDB=y
+ CONFIG_CMDLINE=""
+ 
+ #
+@@ -948,65 +1366,136 @@ CONFIG_CMDLINE=""
+ CONFIG_KEYS=y
+ CONFIG_KEYS_DEBUG_PROC_KEYS=y
+ # CONFIG_SECURITY is not set
+-CONFIG_XOR_BLOCKS=m
+-CONFIG_ASYNC_CORE=m
+-CONFIG_ASYNC_MEMCPY=m
+-CONFIG_ASYNC_XOR=m
++CONFIG_SECURITYFS=y
++CONFIG_SECURITY_FILE_CAPABILITIES=y
++CONFIG_XOR_BLOCKS=y
++CONFIG_ASYNC_CORE=y
++CONFIG_ASYNC_MEMCPY=y
++CONFIG_ASYNC_XOR=y
++CONFIG_ASYNC_PQ=y
++CONFIG_ASYNC_RAID6_RECOV=y
+ CONFIG_CRYPTO=y
++
++#
++# Crypto core or helper
++#
++CONFIG_CRYPTO_FIPS=y
+ CONFIG_CRYPTO_ALGAPI=y
+-CONFIG_CRYPTO_ABLKCIPHER=m
++CONFIG_CRYPTO_ALGAPI2=y
++CONFIG_CRYPTO_AEAD=m
++CONFIG_CRYPTO_AEAD2=y
+ CONFIG_CRYPTO_BLKCIPHER=y
++CONFIG_CRYPTO_BLKCIPHER2=y
+ CONFIG_CRYPTO_HASH=y
++CONFIG_CRYPTO_HASH2=y
++CONFIG_CRYPTO_RNG=m
++CONFIG_CRYPTO_RNG2=y
++CONFIG_CRYPTO_PCOMP=y
+ CONFIG_CRYPTO_MANAGER=y
++CONFIG_CRYPTO_MANAGER2=y
++CONFIG_CRYPTO_GF128MUL=m
++CONFIG_CRYPTO_NULL=m
++CONFIG_CRYPTO_WORKQUEUE=y
++CONFIG_CRYPTO_CRYPTD=m
++CONFIG_CRYPTO_AUTHENC=m
++# CONFIG_CRYPTO_TEST is not set
++
++#
++# Authenticated Encryption with Associated Data
++#
++CONFIG_CRYPTO_CCM=m
++CONFIG_CRYPTO_GCM=m
++CONFIG_CRYPTO_SEQIV=m
++
++#
++# Block modes
++#
++CONFIG_CRYPTO_CBC=y
++CONFIG_CRYPTO_CTR=m
++CONFIG_CRYPTO_CTS=m
++CONFIG_CRYPTO_ECB=m
++CONFIG_CRYPTO_LRW=m
++CONFIG_CRYPTO_PCBC=m
++CONFIG_CRYPTO_XTS=m
++
++#
++# Hash modes
++#
+ CONFIG_CRYPTO_HMAC=y
+ CONFIG_CRYPTO_XCBC=m
+-CONFIG_CRYPTO_NULL=m
++CONFIG_CRYPTO_VMAC=m
++
++#
++# Digest
++#
++CONFIG_CRYPTO_CRC32C=m
++CONFIG_CRYPTO_GHASH=m
+ CONFIG_CRYPTO_MD4=m
+ CONFIG_CRYPTO_MD5=y
++CONFIG_CRYPTO_MICHAEL_MIC=m
++CONFIG_CRYPTO_RMD128=m
++CONFIG_CRYPTO_RMD160=m
++CONFIG_CRYPTO_RMD256=m
++CONFIG_CRYPTO_RMD320=m
+ CONFIG_CRYPTO_SHA1=m
+ CONFIG_CRYPTO_SHA256=m
+ CONFIG_CRYPTO_SHA512=m
+-CONFIG_CRYPTO_WP512=m
+ CONFIG_CRYPTO_TGR192=m
+-CONFIG_CRYPTO_GF128MUL=m
+-CONFIG_CRYPTO_ECB=m
+-CONFIG_CRYPTO_CBC=y
+-CONFIG_CRYPTO_PCBC=m
+-CONFIG_CRYPTO_LRW=m
+-CONFIG_CRYPTO_CRYPTD=m
+-CONFIG_CRYPTO_DES=y
+-CONFIG_CRYPTO_FCRYPT=m
+-CONFIG_CRYPTO_BLOWFISH=m
+-CONFIG_CRYPTO_TWOFISH=m
+-CONFIG_CRYPTO_TWOFISH_COMMON=m
+-CONFIG_CRYPTO_SERPENT=m
++CONFIG_CRYPTO_WP512=m
++
++#
++# Ciphers
++#
+ CONFIG_CRYPTO_AES=m
++CONFIG_CRYPTO_ANUBIS=m
++CONFIG_CRYPTO_ARC4=m
++CONFIG_CRYPTO_BLOWFISH=m
++CONFIG_CRYPTO_CAMELLIA=m
+ CONFIG_CRYPTO_CAST5=m
+ CONFIG_CRYPTO_CAST6=m
+-CONFIG_CRYPTO_TEA=m
+-CONFIG_CRYPTO_ARC4=m
++CONFIG_CRYPTO_DES=y
++CONFIG_CRYPTO_FCRYPT=m
+ CONFIG_CRYPTO_KHAZAD=m
+-CONFIG_CRYPTO_ANUBIS=m
++CONFIG_CRYPTO_SALSA20=m
++CONFIG_CRYPTO_SEED=m
++CONFIG_CRYPTO_SERPENT=m
++CONFIG_CRYPTO_TEA=m
++CONFIG_CRYPTO_TWOFISH=m
++CONFIG_CRYPTO_TWOFISH_COMMON=m
++
++#
++# Compression
++#
+ CONFIG_CRYPTO_DEFLATE=m
+-CONFIG_CRYPTO_MICHAEL_MIC=m
+-CONFIG_CRYPTO_CRC32C=m
+-CONFIG_CRYPTO_CAMELLIA=m
+-# CONFIG_CRYPTO_TEST is not set
++CONFIG_CRYPTO_ZLIB=m
++CONFIG_CRYPTO_LZO=m
++
++#
++# Random Number Generation
++#
++CONFIG_CRYPTO_ANSI_CPRNG=m
+ CONFIG_CRYPTO_HW=y
++CONFIG_CRYPTO_DEV_HIFN_795X=m
++# CONFIG_CRYPTO_DEV_HIFN_795X_RNG is not set
++# CONFIG_BINARY_PRINTF is not set
+ 
+ #
+ # Library routines
+ #
+ CONFIG_BITREVERSE=y
++CONFIG_GENERIC_FIND_LAST_BIT=y
+ CONFIG_CRC_CCITT=m
+-# CONFIG_CRC16 is not set
+-# CONFIG_CRC_ITU_T is not set
++CONFIG_CRC16=y
++CONFIG_CRC_T10DIF=m
++CONFIG_CRC_ITU_T=m
+ CONFIG_CRC32=y
+-# CONFIG_CRC7 is not set
++CONFIG_CRC7=m
+ CONFIG_LIBCRC32C=m
+ CONFIG_ZLIB_INFLATE=m
+ CONFIG_ZLIB_DEFLATE=m
+-CONFIG_PLIST=y
++CONFIG_LZO_COMPRESS=m
++CONFIG_LZO_DECOMPRESS=m
+ CONFIG_HAS_IOMEM=y
+ CONFIG_HAS_IOPORT=y
+ CONFIG_HAS_DMA=y
++CONFIG_NLATTR=y
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
 new file mode 100644
 index 0000000..63efdd0
@@ -13487,6 +15260,45 @@ index 0000000..83894aa
 +int clk_set_rate_ex(struct clk *clk, unsigned long rate, int algo_id);
 +
 +#endif				/* __ASM_MIPS_CLOCK_H */
+diff --git a/arch/mips/include/asm/cpu-features.h b/arch/mips/include/asm/cpu-features.h
+index 1f4df64..272c5ef 100644
+--- a/arch/mips/include/asm/cpu-features.h
++++ b/arch/mips/include/asm/cpu-features.h
+@@ -191,6 +191,9 @@
+ # ifndef cpu_has_64bit_addresses
+ # define cpu_has_64bit_addresses	0
+ # endif
++# ifndef cpu_vmbits
++# define cpu_vmbits 31
++# endif
+ #endif
+ 
+ #ifdef CONFIG_64BIT
+@@ -209,6 +212,10 @@
+ # ifndef cpu_has_64bit_addresses
+ # define cpu_has_64bit_addresses	1
+ # endif
++# ifndef cpu_vmbits
++# define cpu_vmbits cpu_data[0].vmbits
++# define __NEED_VMBITS_PROBE
++# endif
+ #endif
+ 
+ #if defined(CONFIG_CPU_MIPSR2_IRQ_VI) && !defined(cpu_has_vint)
+diff --git a/arch/mips/include/asm/cpu-info.h b/arch/mips/include/asm/cpu-info.h
+index 1260443..b39def3 100644
+--- a/arch/mips/include/asm/cpu-info.h
++++ b/arch/mips/include/asm/cpu-info.h
+@@ -58,6 +58,9 @@ struct cpuinfo_mips {
+ 	struct cache_desc	tcache;	/* Tertiary/split secondary cache */
+ 	int			srsets;	/* Shadow register sets */
+ 	int			core;	/* physical core number */
++#ifdef CONFIG_64BIT
++	int			vmbits;	/* Virtual memory size in bits */
++#endif
+ #if defined(CONFIG_MIPS_MT_SMP) || defined(CONFIG_MIPS_MT_SMTC)
+ 	/*
+ 	 * In the MIPS MT "SMTC" model, each TC is considered
 diff --git a/arch/mips/include/asm/cpu.h b/arch/mips/include/asm/cpu.h
 index 4b96d1a..cf373a9 100644
 --- a/arch/mips/include/asm/cpu.h
@@ -13500,6 +15312,18 @@ index 4b96d1a..cf373a9 100644
  
  /*
   * Older processors used to encode processor version and revision in two
+diff --git a/arch/mips/include/asm/elf.h b/arch/mips/include/asm/elf.h
+index 7990694..2d8495e 100644
+--- a/arch/mips/include/asm/elf.h
++++ b/arch/mips/include/asm/elf.h
+@@ -310,6 +310,7 @@ do {									\
+ 
+ #endif /* CONFIG_64BIT */
+ 
++struct pt_regs;
+ struct task_struct;
+ 
+ extern void elf_dump_regs(elf_greg_t *, struct pt_regs *regs);
 diff --git a/arch/mips/include/asm/fpu_emulator.h b/arch/mips/include/asm/fpu_emulator.h
 index e518957..aecada6 100644
 --- a/arch/mips/include/asm/fpu_emulator.h
@@ -13678,6 +15502,37 @@ index 09b08d0..0696036 100644
  
  #endif /* CONFIG_MIPS_MT_SMTC_IRQAFF */
  
+diff --git a/arch/mips/include/asm/mach-ar7/ar7.h b/arch/mips/include/asm/mach-ar7/ar7.h
+index 21cbbc7..a140232 100644
+--- a/arch/mips/include/asm/mach-ar7/ar7.h
++++ b/arch/mips/include/asm/mach-ar7/ar7.h
+@@ -50,7 +50,7 @@
+ #define UR8_REGS_WDT	(AR7_REGS_BASE + 0x0b00)
+ #define UR8_REGS_UART1	(AR7_REGS_BASE + 0x0f00)
+ 
+-#define AR7_RESET_PEREPHERIAL	0x0
++#define AR7_RESET_PERIPHERAL	0x0
+ #define AR7_RESET_SOFTWARE	0x4
+ #define AR7_RESET_STATUS	0x8
+ 
+@@ -145,7 +145,7 @@ static inline int ar7_has_high_cpmac(void)
+ static inline void ar7_device_enable(u32 bit)
+ {
+ 	void *reset_reg =
+-		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PEREPHERIAL);
++		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
+ 	writel(readl(reset_reg) | (1 << bit), reset_reg);
+ 	msleep(20);
+ }
+@@ -153,7 +153,7 @@ static inline void ar7_device_enable(u32 bit)
+ static inline void ar7_device_disable(u32 bit)
+ {
+ 	void *reset_reg =
+-		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PEREPHERIAL);
++		(void *)KSEG1ADDR(AR7_REGS_RESET + AR7_RESET_PERIPHERAL);
+ 	writel(readl(reset_reg) & ~(1 << bit), reset_reg);
+ 	msleep(20);
+ }
 diff --git a/arch/mips/include/asm/mach-au1x00/au1000.h b/arch/mips/include/asm/mach-au1x00/au1000.h
 index 854e95f..e049d15 100644
 --- a/arch/mips/include/asm/mach-au1x00/au1000.h
@@ -14674,10 +16529,18 @@ index 854e95f..e049d15 100644
  
  #endif
 diff --git a/arch/mips/include/asm/mach-au1x00/au1xxx_dbdma.h b/arch/mips/include/asm/mach-au1x00/au1xxx_dbdma.h
-index 06f68f4..c098b45 100644
+index 06f68f4..8c6b110 100644
 --- a/arch/mips/include/asm/mach-au1x00/au1xxx_dbdma.h
 +++ b/arch/mips/include/asm/mach-au1x00/au1xxx_dbdma.h
-@@ -338,8 +338,8 @@ u32 au1xxx_dbdma_set_devwidth(u32 chanid, int bits);
+@@ -305,6 +305,7 @@ typedef struct dbdma_chan_config {
+ 	dbdev_tab_t		*chan_dest;
+ 	au1x_dma_chan_t		*chan_ptr;
+ 	au1x_ddma_desc_t	*chan_desc_base;
++	u32			cdb_membase; /* kmalloc base of above */
+ 	au1x_ddma_desc_t	*get_ptr, *put_ptr, *cur_ptr;
+ 	void			*chan_callparam;
+ 	void			(*chan_callback)(int, void *);
+@@ -338,8 +339,8 @@ u32 au1xxx_dbdma_set_devwidth(u32 chanid, int bits);
  u32 au1xxx_dbdma_ring_alloc(u32 chanid, int entries);
  
  /* Put buffers on source/destination descriptors. */
@@ -14688,7 +16551,7 @@ index 06f68f4..c098b45 100644
  
  /* Get a buffer from the destination descriptor. */
  u32 au1xxx_dbdma_get_dest(u32 chanid, void **buf, int *nbytes);
-@@ -362,25 +362,6 @@ void au1xxx_dbdma_suspend(void);
+@@ -362,25 +363,6 @@ void au1xxx_dbdma_suspend(void);
  void au1xxx_dbdma_resume(void);
  #endif
  
@@ -14887,6 +16750,34 @@ index 91595fa..9cf32d9 100644
  
  /*
   * GPIO1 block macros for common linux gpio functions.
+diff --git a/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h b/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h
+index 76a0b72..43d4da0 100644
+--- a/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h
++++ b/arch/mips/include/asm/mach-bcm63xx/bcm63xx_gpio.h
+@@ -10,6 +10,10 @@ static inline unsigned long bcm63xx_gpio_count(void)
+ 	switch (bcm63xx_get_cpu_id()) {
+ 	case BCM6358_CPU_ID:
+ 		return 40;
++	case BCM6338_CPU_ID:
++		return 8;
++	case BCM6345_CPU_ID:
++		return 16;
+ 	case BCM6348_CPU_ID:
+ 	default:
+ 		return 37;
+diff --git a/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h b/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h
+index 71742ba..f453c01 100644
+--- a/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h
++++ b/arch/mips/include/asm/mach-bcm63xx/cpu-feature-overrides.h
+@@ -24,7 +24,7 @@
+ #define cpu_has_smartmips		0
+ #define cpu_has_vtag_icache		0
+ 
+-#if !defined(BCMCPU_RUNTIME_DETECT) && (defined(CONFIG_BCMCPU_IS_6348) || defined(CONFIG_CPU_IS_6338) || defined(CONFIG_CPU_IS_BCM6345))
++#if !defined(BCMCPU_RUNTIME_DETECT) && (defined(CONFIG_BCM63XX_CPU_6348) || defined(CONFIG_BCM63XX_CPU_6345) || defined(CONFIG_BCM63XX_CPU_6338))
+ #define cpu_has_dc_aliases		0
+ #endif
+ 
 diff --git a/arch/mips/include/asm/mach-db1x00/bcsr.h b/arch/mips/include/asm/mach-db1x00/bcsr.h
 new file mode 100644
 index 0000000..618d2de
@@ -17820,6 +19711,20 @@ index 0000000..7ac05ec
 +#define MIPS34K_MISSED_ITLB_WAR		0
 +
 +#endif /* __ASM_MACH_POWERTV_WAR_H */
+diff --git a/arch/mips/include/asm/mach-tx49xx/kmalloc.h b/arch/mips/include/asm/mach-tx49xx/kmalloc.h
+index 913ff19..b74caf6 100644
+--- a/arch/mips/include/asm/mach-tx49xx/kmalloc.h
++++ b/arch/mips/include/asm/mach-tx49xx/kmalloc.h
+@@ -1,8 +1,6 @@
+ #ifndef __ASM_MACH_TX49XX_KMALLOC_H
+ #define __ASM_MACH_TX49XX_KMALLOC_H
+ 
+-/*
+- * All happy, no need to define ARCH_KMALLOC_MINALIGN
+- */
++#define ARCH_KMALLOC_MINALIGN	L1_CACHE_BYTES
+ 
+ #endif /* __ASM_MACH_TX49XX_KMALLOC_H */
 diff --git a/arch/mips/include/asm/mips-boards/bonito64.h b/arch/mips/include/asm/mips-boards/bonito64.h
 index a576ce0..d14e2ad 100644
 --- a/arch/mips/include/asm/mips-boards/bonito64.h
@@ -19521,6 +21426,48 @@ index 0000000..9ae45fc
 +};
 +
 +#endif
+diff --git a/arch/mips/include/asm/page.h b/arch/mips/include/asm/page.h
+index f266295..33ca0d9 100644
+--- a/arch/mips/include/asm/page.h
++++ b/arch/mips/include/asm/page.h
+@@ -200,8 +200,10 @@ typedef struct { unsigned long pgprot; } pgprot_t;
+ #define VM_DATA_DEFAULT_FLAGS	(VM_READ | VM_WRITE | VM_EXEC | \
+ 				 VM_MAYREAD | VM_MAYWRITE | VM_MAYEXEC)
+ 
+-#define UNCAC_ADDR(addr)	((addr) - PAGE_OFFSET + UNCAC_BASE)
+-#define CAC_ADDR(addr)		((addr) - UNCAC_BASE + PAGE_OFFSET)
++#define UNCAC_ADDR(addr)	((addr) - PAGE_OFFSET + UNCAC_BASE + 	\
++								PHYS_OFFSET)
++#define CAC_ADDR(addr)		((addr) - UNCAC_BASE + PAGE_OFFSET -	\
++								PHYS_OFFSET)
+ 
+ #include <asm-generic/memory_model.h>
+ #include <asm-generic/getorder.h>
+diff --git a/arch/mips/include/asm/pgtable-64.h b/arch/mips/include/asm/pgtable-64.h
+index 9cd5089..2d7acd4 100644
+--- a/arch/mips/include/asm/pgtable-64.h
++++ b/arch/mips/include/asm/pgtable-64.h
+@@ -107,10 +107,17 @@
+ #endif
+ #define FIRST_USER_ADDRESS	0UL
+ 
+-#define VMALLOC_START		MAP_BASE
++/*
++ * TLB refill handlers also map the vmalloc area into xuseg.  Avoid
++ * the first couple of pages so NULL pointer dereferences will still
++ * reliably trap.
++ */
++#define VMALLOC_START		(MAP_BASE + (2 * PAGE_SIZE))
+ #define VMALLOC_END	\
+-	(VMALLOC_START + \
+-	 PTRS_PER_PGD * PTRS_PER_PMD * PTRS_PER_PTE * PAGE_SIZE - (1UL << 32))
++	(MAP_BASE + \
++	 min(PTRS_PER_PGD * PTRS_PER_PMD * PTRS_PER_PTE * PAGE_SIZE, \
++	     (1UL << cpu_vmbits)) - (1UL << 32))
++
+ #if defined(CONFIG_MODULES) && defined(KBUILD_64BIT_SYM32) && \
+ 	VMALLOC_START != CKSSEG
+ /* Load modules into 32bit-compatible segment. */
 diff --git a/arch/mips/include/asm/pgtable.h b/arch/mips/include/asm/pgtable.h
 index d6eb613..1854336 100644
 --- a/arch/mips/include/asm/pgtable.h
@@ -19545,6 +21492,22 @@ index d6eb613..1854336 100644
   * We provide our own get_unmapped area to cope with the virtual aliasing
   * constraints placed on us by the cache architecture.
   */
+diff --git a/arch/mips/include/asm/ptrace.h b/arch/mips/include/asm/ptrace.h
+index ce47118..cdc6a46 100644
+--- a/arch/mips/include/asm/ptrace.h
++++ b/arch/mips/include/asm/ptrace.h
+@@ -142,9 +142,9 @@ extern int ptrace_set_watch_regs(struct task_struct *child,
+ 
+ extern asmlinkage void do_syscall_trace(struct pt_regs *regs, int entryexit);
+ 
+-extern NORET_TYPE void die(const char *, const struct pt_regs *) ATTRIB_NORET;
++extern NORET_TYPE void die(const char *, struct pt_regs *) ATTRIB_NORET;
+ 
+-static inline void die_if_kernel(const char *str, const struct pt_regs *regs)
++static inline void die_if_kernel(const char *str, struct pt_regs *regs)
+ {
+ 	if (unlikely(!user_mode(regs)))
+ 		die(str, regs);
 diff --git a/arch/mips/include/asm/sgialib.h b/arch/mips/include/asm/sgialib.h
 index bfce5c7..63741ca 100644
 --- a/arch/mips/include/asm/sgialib.h
@@ -19559,6 +21522,18 @@ index bfce5c7..63741ca 100644
  extern void prom_init_cmdline(void);
  
  /* Acquiring info about the current time, etc. */
+diff --git a/arch/mips/include/asm/sn/agent.h b/arch/mips/include/asm/sn/agent.h
+index ac4ea85..dc81114 100644
+--- a/arch/mips/include/asm/sn/agent.h
++++ b/arch/mips/include/asm/sn/agent.h
+@@ -11,7 +11,6 @@
+ #ifndef _ASM_SGI_SN_AGENT_H
+ #define _ASM_SGI_SN_AGENT_H
+ 
+-#include <linux/topology.h>
+ #include <asm/sn/addrs.h>
+ #include <asm/sn/arch.h>
+ 
 diff --git a/arch/mips/include/asm/stackframe.h b/arch/mips/include/asm/stackframe.h
 index db0fa7b..7b2eff0 100644
 --- a/arch/mips/include/asm/stackframe.h
@@ -19713,6 +21688,245 @@ index df6a430..a697f7d 100644
  extern void clocksource_set_clock(struct clocksource *cs, unsigned int clock);
  extern void clockevent_set_clock(struct clock_event_device *cd,
  		unsigned int clock);
+diff --git a/arch/mips/include/asm/uasm.h b/arch/mips/include/asm/uasm.h
+new file mode 100644
+index 0000000..f8bb7bb
+--- /dev/null
++++ b/arch/mips/include/asm/uasm.h
+@@ -0,0 +1,210 @@
++/*
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Copyright (C) 2004, 2005, 2006, 2008  Thiemo Seufer
++ * Copyright (C) 2005  Maciej W. Rozycki
++ * Copyright (C) 2006  Ralf Baechle (ralf@linux-mips.org)
++ */
++
++#include <linux/types.h>
++
++#define Ip_u1u2u3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
++
++#define Ip_u2u1u3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
++
++#define Ip_u3u1u2(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
++
++#define Ip_u1u2s3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
++
++#define Ip_u2s3u1(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, signed int b, unsigned int c)
++
++#define Ip_u2u1s3(op)							\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
++
++#define Ip_u2u1msbu3(op)						\
++void __cpuinit								\
++uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c,	\
++	   unsigned int d)
++
++#define Ip_u1u2(op)							\
++void __cpuinit uasm_i##op(u32 **buf, unsigned int a, unsigned int b)
++
++#define Ip_u1s2(op)							\
++void __cpuinit uasm_i##op(u32 **buf, unsigned int a, signed int b)
++
++#define Ip_u1(op) void __cpuinit uasm_i##op(u32 **buf, unsigned int a)
++
++#define Ip_0(op) void __cpuinit uasm_i##op(u32 **buf)
++
++Ip_u2u1s3(_addiu);
++Ip_u3u1u2(_addu);
++Ip_u2u1u3(_andi);
++Ip_u3u1u2(_and);
++Ip_u1u2s3(_beq);
++Ip_u1u2s3(_beql);
++Ip_u1s2(_bgez);
++Ip_u1s2(_bgezl);
++Ip_u1s2(_bltz);
++Ip_u1s2(_bltzl);
++Ip_u1u2s3(_bne);
++Ip_u2s3u1(_cache);
++Ip_u1u2u3(_dmfc0);
++Ip_u1u2u3(_dmtc0);
++Ip_u2u1s3(_daddiu);
++Ip_u3u1u2(_daddu);
++Ip_u2u1u3(_dsll);
++Ip_u2u1u3(_dsll32);
++Ip_u2u1u3(_dsra);
++Ip_u2u1u3(_dsrl);
++Ip_u2u1u3(_dsrl32);
++Ip_u2u1u3(_drotr);
++Ip_u3u1u2(_dsubu);
++Ip_0(_eret);
++Ip_u1(_j);
++Ip_u1(_jal);
++Ip_u1(_jr);
++Ip_u2s3u1(_ld);
++Ip_u2s3u1(_ll);
++Ip_u2s3u1(_lld);
++Ip_u1s2(_lui);
++Ip_u2s3u1(_lw);
++Ip_u1u2u3(_mfc0);
++Ip_u1u2u3(_mtc0);
++Ip_u2u1u3(_ori);
++Ip_u3u1u2(_or);
++Ip_u2s3u1(_pref);
++Ip_0(_rfe);
++Ip_u2s3u1(_sc);
++Ip_u2s3u1(_scd);
++Ip_u2s3u1(_sd);
++Ip_u2u1u3(_sll);
++Ip_u2u1u3(_sra);
++Ip_u2u1u3(_srl);
++Ip_u3u1u2(_subu);
++Ip_u2s3u1(_sw);
++Ip_0(_tlbp);
++Ip_0(_tlbwi);
++Ip_0(_tlbwr);
++Ip_u3u1u2(_xor);
++Ip_u2u1u3(_xori);
++Ip_u2u1msbu3(_dins);
++
++/* Handle labels. */
++struct uasm_label {
++	u32 *addr;
++	int lab;
++};
++
++void __cpuinit uasm_build_label(struct uasm_label **lab, u32 *addr, int lid);
++#ifdef CONFIG_64BIT
++int uasm_in_compat_space_p(long addr);
++#endif
++int uasm_rel_hi(long val);
++int uasm_rel_lo(long val);
++void UASM_i_LA_mostly(u32 **buf, unsigned int rs, long addr);
++void UASM_i_LA(u32 **buf, unsigned int rs, long addr);
++
++#define UASM_L_LA(lb)							\
++static inline void __cpuinit uasm_l##lb(struct uasm_label **lab, u32 *addr) \
++{									\
++	uasm_build_label(lab, addr, label##lb);				\
++}
++
++/* convenience macros for instructions */
++#ifdef CONFIG_64BIT
++# define UASM_i_LW(buf, rs, rt, off) uasm_i_ld(buf, rs, rt, off)
++# define UASM_i_SW(buf, rs, rt, off) uasm_i_sd(buf, rs, rt, off)
++# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_dsll(buf, rs, rt, sh)
++# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_dsra(buf, rs, rt, sh)
++# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_dsrl(buf, rs, rt, sh)
++# define UASM_i_MFC0(buf, rt, rd...) uasm_i_dmfc0(buf, rt, rd)
++# define UASM_i_MTC0(buf, rt, rd...) uasm_i_dmtc0(buf, rt, rd)
++# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_daddiu(buf, rs, rt, val)
++# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_daddu(buf, rs, rt, rd)
++# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_dsubu(buf, rs, rt, rd)
++# define UASM_i_LL(buf, rs, rt, off) uasm_i_lld(buf, rs, rt, off)
++# define UASM_i_SC(buf, rs, rt, off) uasm_i_scd(buf, rs, rt, off)
++#else
++# define UASM_i_LW(buf, rs, rt, off) uasm_i_lw(buf, rs, rt, off)
++# define UASM_i_SW(buf, rs, rt, off) uasm_i_sw(buf, rs, rt, off)
++# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_sll(buf, rs, rt, sh)
++# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_sra(buf, rs, rt, sh)
++# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_srl(buf, rs, rt, sh)
++# define UASM_i_MFC0(buf, rt, rd...) uasm_i_mfc0(buf, rt, rd)
++# define UASM_i_MTC0(buf, rt, rd...) uasm_i_mtc0(buf, rt, rd)
++# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_addiu(buf, rs, rt, val)
++# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_addu(buf, rs, rt, rd)
++# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_subu(buf, rs, rt, rd)
++# define UASM_i_LL(buf, rs, rt, off) uasm_i_ll(buf, rs, rt, off)
++# define UASM_i_SC(buf, rs, rt, off) uasm_i_sc(buf, rs, rt, off)
++#endif
++
++#define uasm_i_b(buf, off) uasm_i_beq(buf, 0, 0, off)
++#define uasm_i_beqz(buf, rs, off) uasm_i_beq(buf, rs, 0, off)
++#define uasm_i_beqzl(buf, rs, off) uasm_i_beql(buf, rs, 0, off)
++#define uasm_i_bnez(buf, rs, off) uasm_i_bne(buf, rs, 0, off)
++#define uasm_i_bnezl(buf, rs, off) uasm_i_bnel(buf, rs, 0, off)
++#define uasm_i_move(buf, a, b) UASM_i_ADDU(buf, a, 0, b)
++#define uasm_i_nop(buf) uasm_i_sll(buf, 0, 0, 0)
++#define uasm_i_ssnop(buf) uasm_i_sll(buf, 0, 0, 1)
++#define uasm_i_ehb(buf) uasm_i_sll(buf, 0, 0, 3)
++
++static inline void uasm_i_dsrl_safe(u32 **p, unsigned int a1,
++				    unsigned int a2, unsigned int a3)
++{
++	if (a3 < 32)
++		uasm_i_dsrl(p, a1, a2, a3);
++	else
++		uasm_i_dsrl32(p, a1, a2, a3 - 32);
++}
++
++static inline void uasm_i_dsll_safe(u32 **p, unsigned int a1,
++				    unsigned int a2, unsigned int a3)
++{
++	if (a3 < 32)
++		uasm_i_dsll(p, a1, a2, a3);
++	else
++		uasm_i_dsll32(p, a1, a2, a3 - 32);
++}
++
++/* Handle relocations. */
++struct uasm_reloc {
++	u32 *addr;
++	unsigned int type;
++	int lab;
++};
++
++/* This is zero so we can use zeroed label arrays. */
++#define UASM_LABEL_INVALID 0
++
++void uasm_r_mips_pc16(struct uasm_reloc **rel, u32 *addr, int lid);
++void uasm_resolve_relocs(struct uasm_reloc *rel, struct uasm_label *lab);
++void uasm_move_relocs(struct uasm_reloc *rel, u32 *first, u32 *end, long off);
++void uasm_move_labels(struct uasm_label *lab, u32 *first, u32 *end, long off);
++void uasm_copy_handler(struct uasm_reloc *rel, struct uasm_label *lab,
++	u32 *first, u32 *end, u32 *target);
++int uasm_insn_has_bdelay(struct uasm_reloc *rel, u32 *addr);
++
++/* Convenience functions for labeled branches. */
++void uasm_il_bltz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_b(u32 **p, struct uasm_reloc **r, int lid);
++void uasm_il_beqz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_beqzl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_bne(u32 **p, struct uasm_reloc **r, unsigned int reg1,
++		 unsigned int reg2, int lid);
++void uasm_il_bnez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_bgezl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
++void uasm_il_bgez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+diff --git a/arch/mips/jazz/setup.c b/arch/mips/jazz/setup.c
+index 7043f6b..0d0f054 100644
+--- a/arch/mips/jazz/setup.c
++++ b/arch/mips/jazz/setup.c
+@@ -76,15 +76,9 @@ void __init plat_mem_setup(void)
+ 
+ #ifdef CONFIG_VT
+ 	screen_info = (struct screen_info) {
+-		0, 0,		/* orig-x, orig-y */
+-		0,		/* unused */
+-		0,		/* orig_video_page */
+-		0,		/* orig_video_mode */
+-		160,		/* orig_video_cols */
+-		0, 0, 0,	/* unused, ega_bx, unused */
+-		64,		/* orig_video_lines */
+-		0,		/* orig_video_isVGA */
+-		16		/* orig_video_points */
++		.orig_video_cols	= 160,
++		.orig_video_lines	= 64,
++		.orig_video_points	= 16,
+ 	};
+ #endif
+ 
 diff --git a/arch/mips/kernel/Makefile b/arch/mips/kernel/Makefile
 index eecd2a9..a6e06c0 100644
 --- a/arch/mips/kernel/Makefile
@@ -19765,7 +21979,7 @@ index eecd2a9..a6e06c0 100644
 +
 +CPPFLAGS_vmlinux.lds		:= $(KBUILD_CFLAGS)
 diff --git a/arch/mips/kernel/cpu-probe.c b/arch/mips/kernel/cpu-probe.c
-index 7a51866..80e202e 100644
+index 7a51866..758ad42 100644
 --- a/arch/mips/kernel/cpu-probe.c
 +++ b/arch/mips/kernel/cpu-probe.c
 @@ -16,6 +16,7 @@
@@ -19784,6 +21998,31 @@ index 7a51866..80e202e 100644
  
  static void r3081_wait(void)
  {
+@@ -282,6 +284,15 @@ static inline int __cpu_has_fpu(void)
+ 	return ((cpu_get_fpu_id() & 0xff00) != FPIR_IMP_NONE);
+ }
+ 
++static inline void cpu_probe_vmbits(struct cpuinfo_mips *c)
++{
++#ifdef __NEED_VMBITS_PROBE
++	write_c0_entryhi(0x3fffffffffffe000ULL);
++	back_to_back_c0_hazard();
++	c->vmbits = fls64(read_c0_entryhi() & 0x3fffffffffffe000ULL);
++#endif
++}
++
+ #define R4K_OPTS (MIPS_CPU_TLB | MIPS_CPU_4KEX | MIPS_CPU_4K_CACHE \
+ 		| MIPS_CPU_COUNTER)
+ 
+@@ -967,6 +978,8 @@ __cpuinit void cpu_probe(void)
+ 		c->srsets = ((read_c0_srsctl() >> 26) & 0x0f) + 1;
+ 	else
+ 		c->srsets = 1;
++
++	cpu_probe_vmbits(c);
+ }
+ 
+ __cpuinit void cpu_report(void)
 diff --git a/arch/mips/kernel/cpufreq/Kconfig b/arch/mips/kernel/cpufreq/Kconfig
 new file mode 100644
 index 0000000..58c601e
@@ -21030,6 +23269,139 @@ index 0000000..0a9cfdb
 +
 +	.set at
 +	.set reorder
+diff --git a/arch/mips/kernel/mips-mt-fpaff.c b/arch/mips/kernel/mips-mt-fpaff.c
+index cbc6182..0fd8b3a 100644
+--- a/arch/mips/kernel/mips-mt-fpaff.c
++++ b/arch/mips/kernel/mips-mt-fpaff.c
+@@ -3,6 +3,7 @@
+  * Copyright (C) 2005 Mips Technologies, Inc
+  */
+ #include <linux/cpu.h>
++#include <linux/cpuset.h>
+ #include <linux/cpumask.h>
+ #include <linux/delay.h>
+ #include <linux/kernel.h>
+@@ -39,6 +40,21 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
+ 	return pid ? find_task_by_vpid(pid) : current;
+ }
+ 
++/*
++ * check the target process has a UID that matches the current process's
++ */
++static bool check_same_owner(struct task_struct *p)
++{
++	const struct cred *cred = current_cred(), *pcred;
++	bool match;
++
++	rcu_read_lock();
++	pcred = __task_cred(p);
++	match = (cred->euid == pcred->euid ||
++		 cred->euid == pcred->uid);
++	rcu_read_unlock();
++	return match;
++}
+ 
+ /*
+  * mipsmt_sys_sched_setaffinity - set the cpu affinity of a process
+@@ -46,12 +62,10 @@ static inline struct task_struct *find_process_by_pid(pid_t pid)
+ asmlinkage long mipsmt_sys_sched_setaffinity(pid_t pid, unsigned int len,
+ 				      unsigned long __user *user_mask_ptr)
+ {
+-	cpumask_t new_mask;
+-	cpumask_t effective_mask;
+-	int retval;
+-	struct task_struct *p;
++	cpumask_var_t cpus_allowed, new_mask, effective_mask;
+ 	struct thread_info *ti;
+-	uid_t euid;
++	struct task_struct *p;
++	int retval;
+ 
+ 	if (len < sizeof(new_mask))
+ 		return -EINVAL;
+@@ -71,42 +85,68 @@ asmlinkage long mipsmt_sys_sched_setaffinity(pid_t pid, unsigned int len,
+ 
+ 	/*
+ 	 * It is not safe to call set_cpus_allowed with the
+-	 * tasklist_lock held.  We will bump the task_struct's
++	 * tasklist_lock held. We will bump the task_struct's
+ 	 * usage count and drop tasklist_lock before invoking
+ 	 * set_cpus_allowed.
+ 	 */
+ 	get_task_struct(p);
++	read_unlock(&tasklist_lock);
+ 
+-	euid = current_euid();
++	if (!alloc_cpumask_var(&cpus_allowed, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_put_task;
++	}
++	if (!alloc_cpumask_var(&new_mask, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_free_cpus_allowed;
++	}
++	if (!alloc_cpumask_var(&effective_mask, GFP_KERNEL)) {
++		retval = -ENOMEM;
++		goto out_free_new_mask;
++	}
+ 	retval = -EPERM;
+-	if (euid != p->cred->euid && euid != p->cred->uid &&
+-	    !capable(CAP_SYS_NICE)) {
+-		read_unlock(&tasklist_lock);
++	if (!check_same_owner(p) && !capable(CAP_SYS_NICE))
+ 		goto out_unlock;
+-	}
+ 
+ 	retval = security_task_setscheduler(p, 0, NULL);
+ 	if (retval)
+ 		goto out_unlock;
+ 
+ 	/* Record new user-specified CPU set for future reference */
+-	p->thread.user_cpus_allowed = new_mask;
+-
+-	/* Unlock the task list */
+-	read_unlock(&tasklist_lock);
++	cpumask_copy(&p->thread.user_cpus_allowed, new_mask);
+ 
++ again:
+ 	/* Compute new global allowed CPU set if necessary */
+ 	ti = task_thread_info(p);
+ 	if (test_ti_thread_flag(ti, TIF_FPUBOUND) &&
+-	    cpus_intersects(new_mask, mt_fpu_cpumask)) {
+-		cpus_and(effective_mask, new_mask, mt_fpu_cpumask);
+-		retval = set_cpus_allowed(p, effective_mask);
++	    cpus_intersects(*new_mask, mt_fpu_cpumask)) {
++		cpus_and(*effective_mask, *new_mask, mt_fpu_cpumask);
++		retval = set_cpus_allowed_ptr(p, effective_mask);
+ 	} else {
++		cpumask_copy(effective_mask, new_mask);
+ 		clear_ti_thread_flag(ti, TIF_FPUBOUND);
+-		retval = set_cpus_allowed(p, new_mask);
++		retval = set_cpus_allowed_ptr(p, new_mask);
+ 	}
+ 
++	if (!retval) {
++		cpuset_cpus_allowed(p, cpus_allowed);
++		if (!cpumask_subset(effective_mask, cpus_allowed)) {
++			/*
++			 * We must have raced with a concurrent cpuset
++			 * update. Just reset the cpus_allowed to the
++			 * cpuset's cpus_allowed
++			 */
++			cpumask_copy(new_mask, cpus_allowed);
++			goto again;
++		}
++	}
+ out_unlock:
++	free_cpumask_var(effective_mask);
++out_free_new_mask:
++	free_cpumask_var(new_mask);
++out_free_cpus_allowed:
++	free_cpumask_var(cpus_allowed);
++out_put_task:
+ 	put_task_struct(p);
+ 	put_online_cpus();
+ 	return retval;
 diff --git a/arch/mips/kernel/mips_ksyms.c b/arch/mips/kernel/mips_ksyms.c
 index 225755d..1d04807 100644
 --- a/arch/mips/kernel/mips_ksyms.c
@@ -21050,6 +23422,19 @@ index 225755d..1d04807 100644
 +/* _mcount is defined in arch/mips/kernel/mcount.S */
 +EXPORT_SYMBOL(_mcount);
 +#endif
+diff --git a/arch/mips/kernel/scall64-n32.S b/arch/mips/kernel/scall64-n32.S
+index 6ebc079..10f3343 100644
+--- a/arch/mips/kernel/scall64-n32.S
++++ b/arch/mips/kernel/scall64-n32.S
+@@ -385,7 +385,7 @@ EXPORT(sysn32_call_table)
+ 	PTR	sys_fchmodat
+ 	PTR	sys_faccessat
+ 	PTR	compat_sys_pselect6
+-	PTR	sys_ppoll			/* 6265 */
++	PTR	compat_sys_ppoll		/* 6265 */
+ 	PTR	sys_unshare
+ 	PTR	sys_splice
+ 	PTR	sys_sync_file_range
 diff --git a/arch/mips/kernel/setup.c b/arch/mips/kernel/setup.c
 index 2b290d7..b1e1272 100644
 --- a/arch/mips/kernel/setup.c
@@ -21116,7 +23501,7 @@ index e72e684..6cdca19 100644
  	irq_enter();
  	generic_smp_call_function_single_interrupt();
 diff --git a/arch/mips/kernel/smtc.c b/arch/mips/kernel/smtc.c
-index 24630fd..75034a8 100644
+index 24630fd..285454f 100644
 --- a/arch/mips/kernel/smtc.c
 +++ b/arch/mips/kernel/smtc.c
 @@ -25,6 +25,7 @@
@@ -21127,6 +23512,15 @@ index 24630fd..75034a8 100644
  
  #include <asm/cpu.h>
  #include <asm/processor.h>
+@@ -180,7 +181,7 @@ static int vpemask[2][8] = {
+ 	{0, 0, 0, 0, 0, 0, 0, 1}
+ };
+ int tcnoprog[NR_CPUS];
+-static atomic_t idle_hook_initialized = {0};
++static atomic_t idle_hook_initialized = ATOMIC_INIT(0);
+ static int clock_hang_reported[NR_CPUS];
+ 
+ #endif /* CONFIG_SMTC_IDLE_HOOK_DEBUG */
 @@ -939,23 +940,29 @@ static void ipi_call_interrupt(void)
  
  DECLARE_PER_CPU(struct clock_event_device, mips_clockevent_device);
@@ -21180,6 +23574,108 @@ index 1f467d5..a4903e4 100644
  	plat_time_init();
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
+diff --git a/arch/mips/kernel/traps.c b/arch/mips/kernel/traps.c
+index 0a18b4c..3943c68 100644
+--- a/arch/mips/kernel/traps.c
++++ b/arch/mips/kernel/traps.c
+@@ -48,6 +48,7 @@
+ #include <asm/types.h>
+ #include <asm/stacktrace.h>
+ #include <asm/irq.h>
++#include <asm/uasm.h>
+ 
+ extern void check_wait(void);
+ extern asmlinkage void r4k_wait(void);
+@@ -353,9 +354,10 @@ void show_registers(const struct pt_regs *regs)
+ 
+ static DEFINE_SPINLOCK(die_lock);
+ 
+-void __noreturn die(const char * str, const struct pt_regs * regs)
++void __noreturn die(const char * str, struct pt_regs * regs)
+ {
+ 	static int die_counter;
++	int sig = SIGSEGV;
+ #ifdef CONFIG_MIPS_MT_SMTC
+ 	unsigned long dvpret = dvpe();
+ #endif /* CONFIG_MIPS_MT_SMTC */
+@@ -366,6 +368,10 @@ void __noreturn die(const char * str, const struct pt_regs * regs)
+ #ifdef CONFIG_MIPS_MT_SMTC
+ 	mips_mt_regdump(dvpret);
+ #endif /* CONFIG_MIPS_MT_SMTC */
++
++	if (notify_die(DIE_OOPS, str, regs, 0, current->thread.trap_no, SIGSEGV) == NOTIFY_STOP)
++		sig = 0;
++
+ 	printk("%s[#%d]:\n", str, ++die_counter);
+ 	show_registers(regs);
+ 	add_taint(TAINT_DIE);
+@@ -380,7 +386,7 @@ void __noreturn die(const char * str, const struct pt_regs * regs)
+ 		panic("Fatal exception");
+ 	}
+ 
+-	do_exit(SIGSEGV);
++	do_exit(sig);
+ }
+ 
+ extern struct exception_table_entry __start___dbe_table[];
+@@ -1243,21 +1249,25 @@ unsigned long ebase;
+ unsigned long exception_handlers[32];
+ unsigned long vi_handlers[64];
+ 
+-/*
+- * As a side effect of the way this is implemented we're limited
+- * to interrupt handlers in the address range from
+- * KSEG0 <= x < KSEG0 + 256mb on the Nevada.  Oh well ...
+- */
+-void *set_except_vector(int n, void *addr)
++void __init *set_except_vector(int n, void *addr)
+ {
+ 	unsigned long handler = (unsigned long) addr;
+ 	unsigned long old_handler = exception_handlers[n];
+ 
+ 	exception_handlers[n] = handler;
+ 	if (n == 0 && cpu_has_divec) {
+-		*(u32 *)(ebase + 0x200) = 0x08000000 |
+-					  (0x03ffffff & (handler >> 2));
+-		local_flush_icache_range(ebase + 0x200, ebase + 0x204);
++		unsigned long jump_mask = ~((1 << 28) - 1);
++		u32 *buf = (u32 *)(ebase + 0x200);
++		unsigned int k0 = 26;
++		if ((handler & jump_mask) == ((ebase + 0x200) & jump_mask)) {
++			uasm_i_j(&buf, handler & ~jump_mask);
++			uasm_i_nop(&buf);
++		} else {
++			UASM_i_LA(&buf, k0, handler);
++			uasm_i_jr(&buf, k0);
++			uasm_i_nop(&buf);
++		}
++		local_flush_icache_range(ebase + 0x200, (unsigned long)buf);
+ 	}
+ 	return (void *)old_handler;
+ }
+@@ -1592,12 +1602,7 @@ static char panic_null_cerr[] __cpuinitdata =
+ void __cpuinit set_uncached_handler(unsigned long offset, void *addr,
+ 	unsigned long size)
+ {
+-#ifdef CONFIG_32BIT
+-	unsigned long uncached_ebase = KSEG1ADDR(ebase);
+-#endif
+-#ifdef CONFIG_64BIT
+-	unsigned long uncached_ebase = TO_UNCAC(ebase);
+-#endif
++	unsigned long uncached_ebase = CKSEG1ADDR(ebase);
+ 
+ 	if (!addr)
+ 		panic(panic_null_cerr);
+@@ -1634,7 +1639,7 @@ void __init trap_init(void)
+ 		ebase = (unsigned long)
+ 			__alloc_bootmem(size, 1 << fls(size), 0);
+ 	} else {
+-		ebase = CAC_BASE;
++		ebase = CKSEG0;
+ 		if (cpu_has_mips_r2)
+ 			ebase += (read_c0_ebase() & 0x3ffff000);
+ 	}
 diff --git a/arch/mips/kernel/vmlinux.lds.S b/arch/mips/kernel/vmlinux.lds.S
 index 162b299..f25df73 100644
 --- a/arch/mips/kernel/vmlinux.lds.S
@@ -21207,6 +23703,42 @@ index 6acc6cb..20fde19 100644
  	}
  
  	/* Set the I/O base address */
+diff --git a/arch/mips/lib/delay.c b/arch/mips/lib/delay.c
+index 6b3b1de..5995969 100644
+--- a/arch/mips/lib/delay.c
++++ b/arch/mips/lib/delay.c
+@@ -41,7 +41,7 @@ EXPORT_SYMBOL(__delay);
+ 
+ void __udelay(unsigned long us)
+ {
+-	unsigned int lpj = current_cpu_data.udelay_val;
++	unsigned int lpj = raw_current_cpu_data.udelay_val;
+ 
+ 	__delay((us * 0x000010c7ull * HZ * lpj) >> 32);
+ }
+@@ -49,7 +49,7 @@ EXPORT_SYMBOL(__udelay);
+ 
+ void __ndelay(unsigned long ns)
+ {
+-	unsigned int lpj = current_cpu_data.udelay_val;
++	unsigned int lpj = raw_current_cpu_data.udelay_val;
+ 
+ 	__delay((ns * 0x00000005ull * HZ * lpj) >> 32);
+ }
+diff --git a/arch/mips/lib/libgcc.h b/arch/mips/lib/libgcc.h
+index 3f19d1c..05909d5 100644
+--- a/arch/mips/lib/libgcc.h
++++ b/arch/mips/lib/libgcc.h
+@@ -17,8 +17,7 @@ struct DWstruct {
+ #error I feel sick.
+ #endif
+ 
+-typedef union
+-{
++typedef union {
+ 	struct DWstruct s;
+ 	long long ll;
+ } DWunion;
 diff --git a/arch/mips/loongson/Kconfig b/arch/mips/loongson/Kconfig
 index d450925..269bf6f 100644
 --- a/arch/mips/loongson/Kconfig
@@ -23901,6 +26433,32 @@ index 0000000..23b66a5
 +}
 +
 +device_initcall(serial_init);
+diff --git a/arch/mips/loongson/common/setup.c b/arch/mips/loongson/common/setup.c
+index 4cd2aa9..27d826b 100644
+--- a/arch/mips/loongson/common/setup.c
++++ b/arch/mips/loongson/common/setup.c
+@@ -41,15 +41,12 @@ void __init plat_mem_setup(void)
+ 	conswitchp = &vga_con;
+ 
+ 	screen_info = (struct screen_info) {
+-		0, 25,		/* orig-x, orig-y */
+-		    0,		/* unused */
+-		    0,		/* orig-video-page */
+-		    0,		/* orig-video-mode */
+-		    80,		/* orig-video-cols */
+-		    0, 0, 0,	/* ega_ax, ega_bx, ega_cx */
+-		    25,		/* orig-video-lines */
+-		    VIDEO_TYPE_VGAC,	/* orig-video-isVGA */
+-		    16		/* orig-video-points */
++		.orig_x			= 0,
++		.orig_y			= 25,
++		.orig_video_cols	= 80,
++		.orig_video_lines	= 25,
++		.orig_video_isVGA	= VIDEO_TYPE_VGAC,
++		.orig_video_points	= 16,
+ 	};
+ #elif defined(CONFIG_DUMMY_CONSOLE)
+ 	conswitchp = &dummy_con;
 diff --git a/arch/mips/loongson/common/time.c b/arch/mips/loongson/common/time.c
 index 6e08c82..35f0b66 100644
 --- a/arch/mips/loongson/common/time.c
@@ -27799,7 +30357,7 @@ index 0000000..b0fd8da
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index 454b539..8f2f8e9 100644
+index c15d94b..f2338d1 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -35,6 +35,7 @@
@@ -27821,7 +30379,7 @@ index 454b539..8f2f8e9 100644
  
  /* Control registers */
  
-@@ -209,7 +212,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -212,7 +215,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  	unsigned int cond;
  
  	if (get_user(ir, (mips_instruction __user *) xcp->cp0_epc)) {
@@ -27830,7 +30388,7 @@ index 454b539..8f2f8e9 100644
  		return SIGBUS;
  	}
  
-@@ -240,7 +243,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -243,7 +246,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  			return SIGILL;
  		}
  		if (get_user(ir, (mips_instruction __user *) emulpc)) {
@@ -27839,7 +30397,7 @@ index 454b539..8f2f8e9 100644
  			return SIGBUS;
  		}
  		/* __compute_return_epc() will have updated cp0_epc */
-@@ -253,16 +256,16 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -256,16 +259,16 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  	}
  
        emul:
@@ -27859,7 +30417,7 @@ index 454b539..8f2f8e9 100644
  			return SIGBUS;
  		}
  		DITOREG(val, MIPSInst_RT(ir));
-@@ -274,10 +277,10 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -277,10 +280,10 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  			MIPSInst_SIMM(ir));
  		u64 val;
  
@@ -27872,7 +30430,7 @@ index 454b539..8f2f8e9 100644
  			return SIGBUS;
  		}
  		break;
-@@ -288,9 +291,9 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -291,9 +294,9 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  			MIPSInst_SIMM(ir));
  		u32 val;
  
@@ -27884,7 +30442,7 @@ index 454b539..8f2f8e9 100644
  			return SIGBUS;
  		}
  		SITOREG(val, MIPSInst_RT(ir));
-@@ -302,10 +305,10 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -305,10 +308,10 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  			MIPSInst_SIMM(ir));
  		u32 val;
  
@@ -27897,7 +30455,7 @@ index 454b539..8f2f8e9 100644
  			return SIGBUS;
  		}
  		break;
-@@ -429,7 +432,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
+@@ -436,7 +439,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
  
  				if (get_user(ir,
  				    (mips_instruction __user *) xcp->cp0_epc)) {
@@ -27906,7 +30464,7 @@ index 454b539..8f2f8e9 100644
  					return SIGBUS;
  				}
  
-@@ -595,7 +598,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -602,7 +605,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  {
  	unsigned rcsr = 0;	/* resulting csr */
  
@@ -27915,7 +30473,7 @@ index 454b539..8f2f8e9 100644
  
  	switch (MIPSInst_FMA_FFMT(ir)) {
  	case s_fmt:{		/* 0 */
-@@ -610,9 +613,9 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -617,9 +620,9 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			va = (void __user *) (xcp->regs[MIPSInst_FR(ir)] +
  				xcp->regs[MIPSInst_FT(ir)]);
  
@@ -27927,7 +30485,7 @@ index 454b539..8f2f8e9 100644
  				return SIGBUS;
  			}
  			SITOREG(val, MIPSInst_FD(ir));
-@@ -622,11 +625,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -629,11 +632,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			va = (void __user *) (xcp->regs[MIPSInst_FR(ir)] +
  				xcp->regs[MIPSInst_FT(ir)]);
  
@@ -27941,7 +30499,7 @@ index 454b539..8f2f8e9 100644
  				return SIGBUS;
  			}
  			break;
-@@ -687,9 +690,9 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -694,9 +697,9 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			va = (void __user *) (xcp->regs[MIPSInst_FR(ir)] +
  				xcp->regs[MIPSInst_FT(ir)]);
  
@@ -27953,7 +30511,7 @@ index 454b539..8f2f8e9 100644
  				return SIGBUS;
  			}
  			DITOREG(val, MIPSInst_FD(ir));
-@@ -699,10 +702,10 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -706,10 +709,10 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			va = (void __user *) (xcp->regs[MIPSInst_FR(ir)] +
  				xcp->regs[MIPSInst_FT(ir)]);
  
@@ -27966,7 +30524,7 @@ index 454b539..8f2f8e9 100644
  				return SIGBUS;
  			}
  			break;
-@@ -769,7 +772,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -776,7 +779,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  #endif
  	} rv;			/* resulting value */
  
@@ -27975,7 +30533,7 @@ index 454b539..8f2f8e9 100644
  	switch (rfmt = (MIPSInst_FFMT(ir) & 0xf)) {
  	case s_fmt:{		/* 0 */
  		union {
-@@ -1240,7 +1243,7 @@ int fpu_emulator_cop1Handler(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1247,7 +1250,7 @@ int fpu_emulator_cop1Handler(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		prevepc = xcp->cp0_epc;
  
  		if (get_user(insn, (mips_instruction __user *) xcp->cp0_epc)) {
@@ -27984,7 +30542,7 @@ index 454b539..8f2f8e9 100644
  			return SIGBUS;
  		}
  		if (insn == 0)
-@@ -1276,33 +1279,50 @@ int fpu_emulator_cop1Handler(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1283,33 +1286,50 @@ int fpu_emulator_cop1Handler(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  }
  
  #ifdef CONFIG_DEBUG_FS
@@ -28052,6 +30610,18 @@ index 454b539..8f2f8e9 100644
  	return 0;
  }
  __initcall(debugfs_fpuemu);
+diff --git a/arch/mips/math-emu/dp_simple.c b/arch/mips/math-emu/dp_simple.c
+index d9ae1db..b909742 100644
+--- a/arch/mips/math-emu/dp_simple.c
++++ b/arch/mips/math-emu/dp_simple.c
+@@ -78,6 +78,7 @@ ieee754dp ieee754dp_abs(ieee754dp x)
+ 	DPSIGN(x) = 0;
+ 
+ 	if (xc == IEEE754_CLASS_SNAN) {
++		SETCX(IEEE754_INVALID_OPERATION);
+ 		return ieee754dp_nanxcpt(ieee754dp_indef(), "abs");
+ 	}
+ 
 diff --git a/arch/mips/math-emu/dsemul.c b/arch/mips/math-emu/dsemul.c
 index df7b9d9..36d975a 100644
 --- a/arch/mips/math-emu/dsemul.c
@@ -28072,6 +30642,18 @@ index df7b9d9..36d975a 100644
 -		fpuemustats.errors++;
 +		MIPS_FPU_EMU_INC_STATS(errors);
  		return 0;
+ 	}
+ 
+diff --git a/arch/mips/math-emu/sp_simple.c b/arch/mips/math-emu/sp_simple.c
+index 3175477..2fd53c9 100644
+--- a/arch/mips/math-emu/sp_simple.c
++++ b/arch/mips/math-emu/sp_simple.c
+@@ -78,6 +78,7 @@ ieee754sp ieee754sp_abs(ieee754sp x)
+ 	SPSIGN(x) = 0;
+ 
+ 	if (xc == IEEE754_CLASS_SNAN) {
++		SETCX(IEEE754_INVALID_OPERATION);
+ 		return ieee754sp_nanxcpt(ieee754sp_indef(), "abs");
  	}
  
 diff --git a/arch/mips/mipssim/sim_cmdline.c b/arch/mips/mipssim/sim_cmdline.c
@@ -28124,6 +30706,50 @@ index 2877675..0824f6a 100644
  	prom_meminit();
  
  #ifdef CONFIG_MIPS_MT_SMP
+diff --git a/arch/mips/mm/c-octeon.c b/arch/mips/mm/c-octeon.c
+index 94e05e5..e06f1af 100644
+--- a/arch/mips/mm/c-octeon.c
++++ b/arch/mips/mm/c-octeon.c
+@@ -174,7 +174,7 @@ static void octeon_flush_cache_page(struct vm_area_struct *vma,
+  * Probe Octeon's caches
+  *
+  */
+-static void __devinit probe_octeon(void)
++static void __cpuinit probe_octeon(void)
+ {
+ 	unsigned long icache_size;
+ 	unsigned long dcache_size;
+@@ -235,7 +235,7 @@ static void __devinit probe_octeon(void)
+  * Setup the Octeon cache flush routines
+  *
+  */
+-void __devinit octeon_cache_init(void)
++void __cpuinit octeon_cache_init(void)
+ {
+ 	extern unsigned long ebase;
+ 	extern char except_vec2_octeon;
+diff --git a/arch/mips/mm/cache.c b/arch/mips/mm/cache.c
+index 694d51f..a396b0b 100644
+--- a/arch/mips/mm/cache.c
++++ b/arch/mips/mm/cache.c
+@@ -133,7 +133,7 @@ void __update_cache(struct vm_area_struct *vma, unsigned long address,
+ }
+ 
+ unsigned long _page_cachable_default;
+-EXPORT_SYMBOL_GPL(_page_cachable_default);
++EXPORT_SYMBOL(_page_cachable_default);
+ 
+ static inline void setup_protection_map(void)
+ {
+@@ -155,7 +155,7 @@ static inline void setup_protection_map(void)
+ 	protection_map[15] = PAGE_SHARED;
+ }
+ 
+-void __devinit cpu_cache_init(void)
++void __cpuinit cpu_cache_init(void)
+ {
+ 	if (cpu_has_3k_cache) {
+ 		extern void __weak r3k_cache_init(void);
 diff --git a/arch/mips/mm/cerr-sb1.c b/arch/mips/mm/cerr-sb1.c
 index 1bd1f18..3571090 100644
 --- a/arch/mips/mm/cerr-sb1.c
@@ -28158,11 +30784,59 @@ index 8d1f4f3..9e8d003 100644
  /*
   * On 64-bit we've got three-level pagetables with a slightly
   * different layout ...
+diff --git a/arch/mips/mm/page.c b/arch/mips/mm/page.c
+index f5c7375..36272f7 100644
+--- a/arch/mips/mm/page.c
++++ b/arch/mips/mm/page.c
+@@ -35,7 +35,7 @@
+ #include <asm/sibyte/sb1250_dma.h>
+ #endif
+ 
+-#include "uasm.h"
++#include <asm/uasm.h>
+ 
+ /* Registers used in the assembled routines. */
+ #define ZERO 0
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index 5adba4f..badcf5e 100644
+index 5adba4f..67ccd00 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
-@@ -154,6 +154,12 @@ static u32 tlb_handler[128] __cpuinitdata;
+@@ -29,8 +29,17 @@
+ 
+ #include <asm/mmu_context.h>
+ #include <asm/war.h>
++#include <asm/uasm.h>
++
++/*
++ * TLB load/store/modify handlers.
++ *
++ * Only the fastpath gets synthesized at runtime, the slowpath for
++ * do_page_fault remains normal asm.
++ */
++extern void tlb_do_page_fault_0(void);
++extern void tlb_do_page_fault_1(void);
+ 
+-#include "uasm.h"
+ 
+ static inline int r45k_bvahwbug(void)
+ {
+@@ -82,6 +91,7 @@ enum label_id {
+ 	label_nopage_tlbm,
+ 	label_smp_pgtable_change,
+ 	label_r3000_write_probe_fail,
++	label_large_segbits_fault,
+ #ifdef CONFIG_HUGETLB_PAGE
+ 	label_tlb_huge_update,
+ #endif
+@@ -98,6 +108,7 @@ UASM_L_LA(_nopage_tlbs)
+ UASM_L_LA(_nopage_tlbm)
+ UASM_L_LA(_smp_pgtable_change)
+ UASM_L_LA(_r3000_write_probe_fail)
++UASM_L_LA(_large_segbits_fault)
+ #ifdef CONFIG_HUGETLB_PAGE
+ UASM_L_LA(_tlb_huge_update)
+ #endif
+@@ -154,6 +165,15 @@ static u32 tlb_handler[128] __cpuinitdata;
  static struct uasm_label labels[128] __cpuinitdata;
  static struct uasm_reloc relocs[128] __cpuinitdata;
  
@@ -28171,11 +30845,14 @@ index 5adba4f..badcf5e 100644
 + * CONFIG_MIPS_PGD_C0_CONTEXT implies 64 bit and lack of pgd_current,
 + * we cannot do r3000 under these circumstances.
 + */
++#ifdef CONFIG_64BIT
++static int check_for_high_segbits __cpuinitdata;
++#endif
 +
  /*
   * The R3000 TLB handler is simple.
   */
-@@ -193,6 +199,7 @@ static void __cpuinit build_r3000_tlb_refill_handler(void)
+@@ -193,6 +213,7 @@ static void __cpuinit build_r3000_tlb_refill_handler(void)
  
  	dump_handler((u32 *)ebase, 32);
  }
@@ -28183,7 +30860,7 @@ index 5adba4f..badcf5e 100644
  
  /*
   * The R4000 TLB handler is much more complicated. We have two
-@@ -491,8 +498,9 @@ static void __cpuinit
+@@ -491,16 +512,42 @@ static void __cpuinit
  build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
  		 unsigned int tmp, unsigned int ptr)
  {
@@ -28194,8 +30871,26 @@ index 5adba4f..badcf5e 100644
  	/*
  	 * The vmalloc handling is not in the hotpath.
  	 */
-@@ -500,7 +508,15 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
- 	uasm_il_bltz(p, r, tmp, label_vmalloc);
+ 	uasm_i_dmfc0(p, tmp, C0_BADVADDR);
+-	uasm_il_bltz(p, r, tmp, label_vmalloc);
++
++	if (check_for_high_segbits) {
++		/*
++		 * The kernel currently implicitely assumes that the
++		 * MIPS SEGBITS parameter for the processor is
++		 * (PGDIR_SHIFT+PGDIR_BITS) or less, and will never
++		 * allocate virtual addresses outside the maximum
++		 * range for SEGBITS = (PGDIR_SHIFT+PGDIR_BITS). But
++		 * that doesn't prevent user code from accessing the
++		 * higher xuseg addresses.  Here, we make sure that
++		 * everything but the lower xuseg addresses goes down
++		 * the module_alloc/vmalloc path.
++		 */
++		uasm_i_dsrl_safe(p, ptr, tmp, PGDIR_SHIFT + PGD_ORDER + PAGE_SHIFT - 3);
++		uasm_il_bnez(p, r, ptr, label_vmalloc);
++	} else {
++		uasm_il_bltz(p, r, tmp, label_vmalloc);
++	}
  	/* No uasm_i_nop needed here, since the next insn doesn't touch TMP. */
  
 -#ifdef CONFIG_SMP
@@ -28211,7 +30906,7 @@ index 5adba4f..badcf5e 100644
  # ifdef  CONFIG_MIPS_MT_SMTC
  	/*
  	 * SMTC uses TCBind value as "CPU" index
-@@ -514,7 +530,7 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+@@ -514,7 +561,7 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
  	 */
  	uasm_i_dmfc0(p, ptr, C0_CONTEXT);
  	uasm_i_dsrl(p, ptr, ptr, 23);
@@ -28220,7 +30915,127 @@ index 5adba4f..badcf5e 100644
  	UASM_i_LA_mostly(p, tmp, pgdc);
  	uasm_i_daddu(p, ptr, ptr, tmp);
  	uasm_i_dmfc0(p, tmp, C0_BADVADDR);
-@@ -1025,6 +1041,7 @@ build_pte_modifiable(u32 **p, struct uasm_reloc **r,
+@@ -540,28 +587,64 @@ build_get_pmde64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+ 	uasm_i_daddu(p, ptr, ptr, tmp); /* add in pmd offset */
+ }
+ 
++enum vmalloc64_mode {not_refill, refill};
+ /*
+  * BVADDR is the faulting address, PTR is scratch.
+  * PTR will hold the pgd for vmalloc.
+  */
+ static void __cpuinit
+ build_get_pgd_vmalloc64(u32 **p, struct uasm_label **l, struct uasm_reloc **r,
+-			unsigned int bvaddr, unsigned int ptr)
++			unsigned int bvaddr, unsigned int ptr,
++			enum vmalloc64_mode mode)
+ {
+ 	long swpd = (long)swapper_pg_dir;
++	int single_insn_swpd;
++	int did_vmalloc_branch = 0;
++
++	single_insn_swpd = uasm_in_compat_space_p(swpd) && !uasm_rel_lo(swpd);
+ 
+ 	uasm_l_vmalloc(l, *p);
+ 
+-	if (uasm_in_compat_space_p(swpd) && !uasm_rel_lo(swpd)) {
+-		uasm_il_b(p, r, label_vmalloc_done);
+-		uasm_i_lui(p, ptr, uasm_rel_hi(swpd));
+-	} else {
+-		UASM_i_LA_mostly(p, ptr, swpd);
+-		uasm_il_b(p, r, label_vmalloc_done);
+-		if (uasm_in_compat_space_p(swpd))
+-			uasm_i_addiu(p, ptr, ptr, uasm_rel_lo(swpd));
+-		else
+-			uasm_i_daddiu(p, ptr, ptr, uasm_rel_lo(swpd));
++	if (mode == refill && check_for_high_segbits) {
++		if (single_insn_swpd) {
++			uasm_il_bltz(p, r, bvaddr, label_vmalloc_done);
++			uasm_i_lui(p, ptr, uasm_rel_hi(swpd));
++			did_vmalloc_branch = 1;
++			/* fall through */
++		} else {
++			uasm_il_bgez(p, r, bvaddr, label_large_segbits_fault);
++		}
++	}
++	if (!did_vmalloc_branch) {
++		if (uasm_in_compat_space_p(swpd) && !uasm_rel_lo(swpd)) {
++			uasm_il_b(p, r, label_vmalloc_done);
++			uasm_i_lui(p, ptr, uasm_rel_hi(swpd));
++		} else {
++			UASM_i_LA_mostly(p, ptr, swpd);
++			uasm_il_b(p, r, label_vmalloc_done);
++			if (uasm_in_compat_space_p(swpd))
++				uasm_i_addiu(p, ptr, ptr, uasm_rel_lo(swpd));
++			else
++				uasm_i_daddiu(p, ptr, ptr, uasm_rel_lo(swpd));
++		}
++	}
++	if (mode == refill && check_for_high_segbits) {
++		uasm_l_large_segbits_fault(l, *p);
++		/*
++		 * We get here if we are an xsseg address, or if we are
++		 * an xuseg address above (PGDIR_SHIFT+PGDIR_BITS) boundary.
++		 *
++		 * Ignoring xsseg (assume disabled so would generate
++		 * (address errors?), the only remaining possibility
++		 * is the upper xuseg addresses.  On processors with
++		 * TLB_SEGBITS <= PGDIR_SHIFT+PGDIR_BITS, these
++		 * addresses would have taken an address error. We try
++		 * to mimic that here by taking a load/istream page
++		 * fault.
++		 */
++		UASM_i_LA(p, ptr, (unsigned long)tlb_do_page_fault_0);
++		uasm_i_jr(p, ptr);
++		uasm_i_nop(p);
+ 	}
+ }
+ 
+@@ -725,10 +808,15 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
+ 	 * create the plain linear handler
+ 	 */
+ 	if (bcm1250_m3_war()) {
+-		UASM_i_MFC0(&p, K0, C0_BADVADDR);
+-		UASM_i_MFC0(&p, K1, C0_ENTRYHI);
++		unsigned int segbits = 44;
++
++		uasm_i_dmfc0(&p, K0, C0_BADVADDR);
++		uasm_i_dmfc0(&p, K1, C0_ENTRYHI);
+ 		uasm_i_xor(&p, K0, K0, K1);
+-		UASM_i_SRL(&p, K0, K0, PAGE_SHIFT + 1);
++		uasm_i_dsrl32(&p, K1, K0, 62 - 32);
++		uasm_i_dsrl(&p, K0, K0, 12 + 1);
++		uasm_i_dsll32(&p, K0, K0, 64 + 12 + 1 - segbits - 32);
++		uasm_i_or(&p, K0, K0, K1);
+ 		uasm_il_bnez(&p, &r, K0, label_leave);
+ 		/* No need for uasm_i_nop */
+ 	}
+@@ -757,7 +845,7 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
+ #endif
+ 
+ #ifdef CONFIG_64BIT
+-	build_get_pgd_vmalloc64(&p, &l, &r, K0, K1);
++	build_get_pgd_vmalloc64(&p, &l, &r, K0, K1, refill);
+ #endif
+ 
+ 	/*
+@@ -867,15 +955,6 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
+ }
+ 
+ /*
+- * TLB load/store/modify handlers.
+- *
+- * Only the fastpath gets synthesized at runtime, the slowpath for
+- * do_page_fault remains normal asm.
+- */
+-extern void tlb_do_page_fault_0(void);
+-extern void tlb_do_page_fault_1(void);
+-
+-/*
+  * 128 instructions for the fastpath handler is generous and should
+  * never be exceeded.
+  */
+@@ -1025,6 +1104,7 @@ build_pte_modifiable(u32 **p, struct uasm_reloc **r,
  	iPTE_LW(p, pte, ptr);
  }
  
@@ -28228,7 +31043,7 @@ index 5adba4f..badcf5e 100644
  /*
   * R3000 style TLB load/store/modify handlers.
   */
-@@ -1176,6 +1193,7 @@ static void __cpuinit build_r3000_tlb_modify_handler(void)
+@@ -1176,6 +1256,7 @@ static void __cpuinit build_r3000_tlb_modify_handler(void)
  
  	dump_handler(handle_tlbm, ARRAY_SIZE(handle_tlbm));
  }
@@ -28236,7 +31051,46 @@ index 5adba4f..badcf5e 100644
  
  /*
   * R4000 style TLB load/store/modify handlers.
-@@ -1392,6 +1410,7 @@ void __cpuinit build_tlb_refill_handler(void)
+@@ -1227,7 +1308,7 @@ build_r4000_tlbchange_handler_tail(u32 **p, struct uasm_label **l,
+ 	uasm_i_eret(p); /* return from trap */
+ 
+ #ifdef CONFIG_64BIT
+-	build_get_pgd_vmalloc64(p, l, r, tmp, ptr);
++	build_get_pgd_vmalloc64(p, l, r, tmp, ptr, not_refill);
+ #endif
+ }
+ 
+@@ -1242,10 +1323,15 @@ static void __cpuinit build_r4000_tlb_load_handler(void)
+ 	memset(relocs, 0, sizeof(relocs));
+ 
+ 	if (bcm1250_m3_war()) {
+-		UASM_i_MFC0(&p, K0, C0_BADVADDR);
+-		UASM_i_MFC0(&p, K1, C0_ENTRYHI);
++		unsigned int segbits = 44;
++
++		uasm_i_dmfc0(&p, K0, C0_BADVADDR);
++		uasm_i_dmfc0(&p, K1, C0_ENTRYHI);
+ 		uasm_i_xor(&p, K0, K0, K1);
+-		UASM_i_SRL(&p, K0, K0, PAGE_SHIFT + 1);
++		uasm_i_dsrl32(&p, K1, K0, 62 - 32);
++		uasm_i_dsrl(&p, K0, K0, 12 + 1);
++		uasm_i_dsll32(&p, K0, K0, 64 + 12 + 1 - segbits - 32);
++		uasm_i_or(&p, K0, K0, K1);
+ 		uasm_il_bnez(&p, &r, K0, label_leave);
+ 		/* No need for uasm_i_nop */
+ 	}
+@@ -1384,6 +1470,10 @@ void __cpuinit build_tlb_refill_handler(void)
+ 	 */
+ 	static int run_once = 0;
+ 
++#ifdef CONFIG_64BIT
++	check_for_high_segbits = current_cpu_data.vmbits > (PGDIR_SHIFT + PGD_ORDER + PAGE_SHIFT - 3);
++#endif
++
+ 	switch (current_cpu_type()) {
+ 	case CPU_R2000:
+ 	case CPU_R3000:
+@@ -1392,6 +1482,7 @@ void __cpuinit build_tlb_refill_handler(void)
  	case CPU_TX3912:
  	case CPU_TX3922:
  	case CPU_TX3927:
@@ -28244,7 +31098,7 @@ index 5adba4f..badcf5e 100644
  		build_r3000_tlb_refill_handler();
  		if (!run_once) {
  			build_r3000_tlb_load_handler();
-@@ -1399,6 +1418,9 @@ void __cpuinit build_tlb_refill_handler(void)
+@@ -1399,6 +1490,9 @@ void __cpuinit build_tlb_refill_handler(void)
  			build_r3000_tlb_modify_handler();
  			run_once++;
  		}
@@ -28255,25 +31109,36 @@ index 5adba4f..badcf5e 100644
  
  	case CPU_R6000:
 diff --git a/arch/mips/mm/uasm.c b/arch/mips/mm/uasm.c
-index f467199..0a165c5 100644
+index f467199..29bbd10 100644
 --- a/arch/mips/mm/uasm.c
 +++ b/arch/mips/mm/uasm.c
-@@ -60,11 +60,11 @@ enum opcode {
+@@ -19,8 +19,7 @@
+ #include <asm/inst.h>
+ #include <asm/elf.h>
+ #include <asm/bugs.h>
+-
+-#include "uasm.h"
++#include <asm/uasm.h>
+ 
+ enum fields {
+ 	RS = 0x001,
+@@ -60,11 +59,11 @@ enum opcode {
  	insn_beql, insn_bgez, insn_bgezl, insn_bltz, insn_bltzl,
  	insn_bne, insn_cache, insn_daddu, insn_daddiu, insn_dmfc0,
  	insn_dmtc0, insn_dsll, insn_dsll32, insn_dsra, insn_dsrl,
 -	insn_dsrl32, insn_dsubu, insn_eret, insn_j, insn_jal, insn_jr,
 -	insn_ld, insn_ll, insn_lld, insn_lui, insn_lw, insn_mfc0,
+-	insn_mtc0, insn_ori, insn_pref, insn_rfe, insn_sc, insn_scd,
 +	insn_dsrl32, insn_drotr, insn_dsubu, insn_eret, insn_j, insn_jal,
 +	insn_jr, insn_ld, insn_ll, insn_lld, insn_lui, insn_lw, insn_mfc0,
- 	insn_mtc0, insn_ori, insn_pref, insn_rfe, insn_sc, insn_scd,
++	insn_mtc0, insn_or, insn_ori, insn_pref, insn_rfe, insn_sc, insn_scd,
  	insn_sd, insn_sll, insn_sra, insn_srl, insn_subu, insn_sw,
 -	insn_tlbp, insn_tlbwi, insn_tlbwr, insn_xor, insn_xori
 +	insn_tlbp, insn_tlbwi, insn_tlbwr, insn_xor, insn_xori, insn_dins
  };
  
  struct insn {
-@@ -104,6 +104,7 @@ static struct insn insn_table[] __cpuinitdata = {
+@@ -104,6 +103,7 @@ static struct insn insn_table[] __cpuinitdata = {
  	{ insn_dsra, M(spec_op, 0, 0, 0, 0, dsra_op), RT | RD | RE },
  	{ insn_dsrl, M(spec_op, 0, 0, 0, 0, dsrl_op), RT | RD | RE },
  	{ insn_dsrl32, M(spec_op, 0, 0, 0, 0, dsrl32_op), RT | RD | RE },
@@ -28281,6 +31146,14 @@ index f467199..0a165c5 100644
  	{ insn_dsubu, M(spec_op, 0, 0, 0, 0, dsubu_op), RS | RT | RD },
  	{ insn_eret,  M(cop0_op, cop_op, 0, 0, 0, eret_op),  0 },
  	{ insn_j,  M(j_op, 0, 0, 0, 0, 0),  JIMM },
+@@ -116,6 +116,7 @@ static struct insn insn_table[] __cpuinitdata = {
+ 	{ insn_lw,  M(lw_op, 0, 0, 0, 0, 0),  RS | RT | SIMM },
+ 	{ insn_mfc0,  M(cop0_op, mfc_op, 0, 0, 0, 0),  RT | RD | SET},
+ 	{ insn_mtc0,  M(cop0_op, mtc_op, 0, 0, 0, 0),  RT | RD | SET},
++	{ insn_or,  M(spec_op, 0, 0, 0, 0, or_op),  RS | RT | RD },
+ 	{ insn_ori,  M(ori_op, 0, 0, 0, 0, 0),  RS | RT | UIMM },
+ 	{ insn_pref,  M(pref_op, 0, 0, 0, 0, 0),  RS | RT | SIMM },
+ 	{ insn_rfe,  M(cop0_op, cop_op, 0, 0, 0, rfe_op),  0 },
 @@ -132,6 +133,7 @@ static struct insn insn_table[] __cpuinitdata = {
  	{ insn_tlbwr,  M(cop0_op, cop_op, 0, 0, 0, tlbwr_op),  0 },
  	{ insn_xor,  M(spec_op, 0, 0, 0, 0, xor_op),  RS | RT | RD },
@@ -28310,7 +31183,15 @@ index f467199..0a165c5 100644
  I_u3u1u2(_dsubu)
  I_0(_eret)
  I_u1(_j)
-@@ -377,6 +386,7 @@ I_0(_tlbwi)
+@@ -362,6 +371,7 @@ I_u2s3u1(_lw)
+ I_u1u2u3(_mfc0)
+ I_u1u2u3(_mtc0)
+ I_u2u1u3(_ori)
++I_u3u1u2(_or)
+ I_u2s3u1(_pref)
+ I_0(_rfe)
+ I_u2s3u1(_sc)
+@@ -377,6 +387,7 @@ I_0(_tlbwi)
  I_0(_tlbwr)
  I_u3u1u2(_xor)
  I_u2u1u3(_xori)
@@ -28319,37 +31200,195 @@ index f467199..0a165c5 100644
  /* Handle labels. */
  void __cpuinit uasm_build_label(struct uasm_label **lab, u32 *addr, int lid)
 diff --git a/arch/mips/mm/uasm.h b/arch/mips/mm/uasm.h
-index c6d1e3d..3d153ed 100644
+deleted file mode 100644
+index c6d1e3d..0000000
 --- a/arch/mips/mm/uasm.h
-+++ b/arch/mips/mm/uasm.h
-@@ -34,6 +34,11 @@ uasm_i##op(u32 **buf, unsigned int a, signed int b, unsigned int c)
- void __cpuinit								\
- uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
- 
-+#define Ip_u2u1msbu3(op)						\
-+void __cpuinit								\
-+uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c,	\
-+	   unsigned int d)
-+
- #define Ip_u1u2(op)							\
- void __cpuinit uasm_i##op(u32 **buf, unsigned int a, unsigned int b)
- 
-@@ -65,6 +70,7 @@ Ip_u2u1u3(_dsll32);
- Ip_u2u1u3(_dsra);
- Ip_u2u1u3(_dsrl);
- Ip_u2u1u3(_dsrl32);
-+Ip_u2u1u3(_drotr);
- Ip_u3u1u2(_dsubu);
- Ip_0(_eret);
- Ip_u1(_j);
-@@ -93,6 +99,7 @@ Ip_0(_tlbwi);
- Ip_0(_tlbwr);
- Ip_u3u1u2(_xor);
- Ip_u2u1u3(_xori);
-+Ip_u2u1msbu3(_dins);
- 
- /* Handle labels. */
- struct uasm_label {
++++ /dev/null
+@@ -1,184 +0,0 @@
+-/*
+- * This file is subject to the terms and conditions of the GNU General Public
+- * License.  See the file "COPYING" in the main directory of this archive
+- * for more details.
+- *
+- * Copyright (C) 2004, 2005, 2006, 2008  Thiemo Seufer
+- * Copyright (C) 2005  Maciej W. Rozycki
+- * Copyright (C) 2006  Ralf Baechle (ralf@linux-mips.org)
+- */
+-
+-#include <linux/types.h>
+-
+-#define Ip_u1u2u3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
+-
+-#define Ip_u2u1u3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
+-
+-#define Ip_u3u1u2(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, unsigned int c)
+-
+-#define Ip_u1u2s3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
+-
+-#define Ip_u2s3u1(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, signed int b, unsigned int c)
+-
+-#define Ip_u2u1s3(op)							\
+-void __cpuinit								\
+-uasm_i##op(u32 **buf, unsigned int a, unsigned int b, signed int c)
+-
+-#define Ip_u1u2(op)							\
+-void __cpuinit uasm_i##op(u32 **buf, unsigned int a, unsigned int b)
+-
+-#define Ip_u1s2(op)							\
+-void __cpuinit uasm_i##op(u32 **buf, unsigned int a, signed int b)
+-
+-#define Ip_u1(op) void __cpuinit uasm_i##op(u32 **buf, unsigned int a)
+-
+-#define Ip_0(op) void __cpuinit uasm_i##op(u32 **buf)
+-
+-Ip_u2u1s3(_addiu);
+-Ip_u3u1u2(_addu);
+-Ip_u2u1u3(_andi);
+-Ip_u3u1u2(_and);
+-Ip_u1u2s3(_beq);
+-Ip_u1u2s3(_beql);
+-Ip_u1s2(_bgez);
+-Ip_u1s2(_bgezl);
+-Ip_u1s2(_bltz);
+-Ip_u1s2(_bltzl);
+-Ip_u1u2s3(_bne);
+-Ip_u2s3u1(_cache);
+-Ip_u1u2u3(_dmfc0);
+-Ip_u1u2u3(_dmtc0);
+-Ip_u2u1s3(_daddiu);
+-Ip_u3u1u2(_daddu);
+-Ip_u2u1u3(_dsll);
+-Ip_u2u1u3(_dsll32);
+-Ip_u2u1u3(_dsra);
+-Ip_u2u1u3(_dsrl);
+-Ip_u2u1u3(_dsrl32);
+-Ip_u3u1u2(_dsubu);
+-Ip_0(_eret);
+-Ip_u1(_j);
+-Ip_u1(_jal);
+-Ip_u1(_jr);
+-Ip_u2s3u1(_ld);
+-Ip_u2s3u1(_ll);
+-Ip_u2s3u1(_lld);
+-Ip_u1s2(_lui);
+-Ip_u2s3u1(_lw);
+-Ip_u1u2u3(_mfc0);
+-Ip_u1u2u3(_mtc0);
+-Ip_u2u1u3(_ori);
+-Ip_u2s3u1(_pref);
+-Ip_0(_rfe);
+-Ip_u2s3u1(_sc);
+-Ip_u2s3u1(_scd);
+-Ip_u2s3u1(_sd);
+-Ip_u2u1u3(_sll);
+-Ip_u2u1u3(_sra);
+-Ip_u2u1u3(_srl);
+-Ip_u3u1u2(_subu);
+-Ip_u2s3u1(_sw);
+-Ip_0(_tlbp);
+-Ip_0(_tlbwi);
+-Ip_0(_tlbwr);
+-Ip_u3u1u2(_xor);
+-Ip_u2u1u3(_xori);
+-
+-/* Handle labels. */
+-struct uasm_label {
+-	u32 *addr;
+-	int lab;
+-};
+-
+-void __cpuinit uasm_build_label(struct uasm_label **lab, u32 *addr, int lid);
+-#ifdef CONFIG_64BIT
+-int uasm_in_compat_space_p(long addr);
+-#endif
+-int uasm_rel_hi(long val);
+-int uasm_rel_lo(long val);
+-void UASM_i_LA_mostly(u32 **buf, unsigned int rs, long addr);
+-void UASM_i_LA(u32 **buf, unsigned int rs, long addr);
+-
+-#define UASM_L_LA(lb)							\
+-static inline void __cpuinit uasm_l##lb(struct uasm_label **lab, u32 *addr) \
+-{									\
+-	uasm_build_label(lab, addr, label##lb);				\
+-}
+-
+-/* convenience macros for instructions */
+-#ifdef CONFIG_64BIT
+-# define UASM_i_LW(buf, rs, rt, off) uasm_i_ld(buf, rs, rt, off)
+-# define UASM_i_SW(buf, rs, rt, off) uasm_i_sd(buf, rs, rt, off)
+-# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_dsll(buf, rs, rt, sh)
+-# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_dsra(buf, rs, rt, sh)
+-# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_dsrl(buf, rs, rt, sh)
+-# define UASM_i_MFC0(buf, rt, rd...) uasm_i_dmfc0(buf, rt, rd)
+-# define UASM_i_MTC0(buf, rt, rd...) uasm_i_dmtc0(buf, rt, rd)
+-# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_daddiu(buf, rs, rt, val)
+-# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_daddu(buf, rs, rt, rd)
+-# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_dsubu(buf, rs, rt, rd)
+-# define UASM_i_LL(buf, rs, rt, off) uasm_i_lld(buf, rs, rt, off)
+-# define UASM_i_SC(buf, rs, rt, off) uasm_i_scd(buf, rs, rt, off)
+-#else
+-# define UASM_i_LW(buf, rs, rt, off) uasm_i_lw(buf, rs, rt, off)
+-# define UASM_i_SW(buf, rs, rt, off) uasm_i_sw(buf, rs, rt, off)
+-# define UASM_i_SLL(buf, rs, rt, sh) uasm_i_sll(buf, rs, rt, sh)
+-# define UASM_i_SRA(buf, rs, rt, sh) uasm_i_sra(buf, rs, rt, sh)
+-# define UASM_i_SRL(buf, rs, rt, sh) uasm_i_srl(buf, rs, rt, sh)
+-# define UASM_i_MFC0(buf, rt, rd...) uasm_i_mfc0(buf, rt, rd)
+-# define UASM_i_MTC0(buf, rt, rd...) uasm_i_mtc0(buf, rt, rd)
+-# define UASM_i_ADDIU(buf, rs, rt, val) uasm_i_addiu(buf, rs, rt, val)
+-# define UASM_i_ADDU(buf, rs, rt, rd) uasm_i_addu(buf, rs, rt, rd)
+-# define UASM_i_SUBU(buf, rs, rt, rd) uasm_i_subu(buf, rs, rt, rd)
+-# define UASM_i_LL(buf, rs, rt, off) uasm_i_ll(buf, rs, rt, off)
+-# define UASM_i_SC(buf, rs, rt, off) uasm_i_sc(buf, rs, rt, off)
+-#endif
+-
+-#define uasm_i_b(buf, off) uasm_i_beq(buf, 0, 0, off)
+-#define uasm_i_beqz(buf, rs, off) uasm_i_beq(buf, rs, 0, off)
+-#define uasm_i_beqzl(buf, rs, off) uasm_i_beql(buf, rs, 0, off)
+-#define uasm_i_bnez(buf, rs, off) uasm_i_bne(buf, rs, 0, off)
+-#define uasm_i_bnezl(buf, rs, off) uasm_i_bnel(buf, rs, 0, off)
+-#define uasm_i_move(buf, a, b) UASM_i_ADDU(buf, a, 0, b)
+-#define uasm_i_nop(buf) uasm_i_sll(buf, 0, 0, 0)
+-#define uasm_i_ssnop(buf) uasm_i_sll(buf, 0, 0, 1)
+-#define uasm_i_ehb(buf) uasm_i_sll(buf, 0, 0, 3)
+-
+-/* Handle relocations. */
+-struct uasm_reloc {
+-	u32 *addr;
+-	unsigned int type;
+-	int lab;
+-};
+-
+-/* This is zero so we can use zeroed label arrays. */
+-#define UASM_LABEL_INVALID 0
+-
+-void uasm_r_mips_pc16(struct uasm_reloc **rel, u32 *addr, int lid);
+-void uasm_resolve_relocs(struct uasm_reloc *rel, struct uasm_label *lab);
+-void uasm_move_relocs(struct uasm_reloc *rel, u32 *first, u32 *end, long off);
+-void uasm_move_labels(struct uasm_label *lab, u32 *first, u32 *end, long off);
+-void uasm_copy_handler(struct uasm_reloc *rel, struct uasm_label *lab,
+-	u32 *first, u32 *end, u32 *target);
+-int uasm_insn_has_bdelay(struct uasm_reloc *rel, u32 *addr);
+-
+-/* Convenience functions for labeled branches. */
+-void uasm_il_bltz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_b(u32 **p, struct uasm_reloc **r, int lid);
+-void uasm_il_beqz(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_beqzl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_bne(u32 **p, struct uasm_reloc **r, unsigned int reg1,
+-		 unsigned int reg2, int lid);
+-void uasm_il_bnez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_bgezl(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
+-void uasm_il_bgez(u32 **p, struct uasm_reloc **r, unsigned int reg, int lid);
 diff --git a/arch/mips/mti-malta/malta-memory.c b/arch/mips/mti-malta/malta-memory.c
 index 9035c64..b27419c 100644
 --- a/arch/mips/mti-malta/malta-memory.c
@@ -28385,6 +31424,18 @@ index 30533ba..3a467c0 100644
  	.startup = pnx833x_startup_gpio_irq,
  	.shutdown = pnx833x_disable_gpio_irq,
  	.enable = pnx833x_enable_gpio_irq,
+diff --git a/arch/mips/nxp/pnx8550/common/reset.c b/arch/mips/nxp/pnx8550/common/reset.c
+index 7b2cbc5..9dc16ff 100644
+--- a/arch/mips/nxp/pnx8550/common/reset.c
++++ b/arch/mips/nxp/pnx8550/common/reset.c
+@@ -20,6 +20,7 @@
+  * Reset the PNX8550 board.
+  *
+  */
++#include <linux/kernel.h>
+ #include <linux/slab.h>
+ #include <asm/reboot.h>
+ #include <glb.h>
 diff --git a/arch/mips/oprofile/common.c b/arch/mips/oprofile/common.c
 index 7832ad2..ee46c82 100644
 --- a/arch/mips/oprofile/common.c
@@ -29007,6 +32058,27 @@ index 0000000..7793efb
 +}
 +EXPORT_SYMBOL(_wrmsr);
 +#endif
+diff --git a/arch/mips/pci/pci-sb1250.c b/arch/mips/pci/pci-sb1250.c
+index ada24e6..1711e8e 100644
+--- a/arch/mips/pci/pci-sb1250.c
++++ b/arch/mips/pci/pci-sb1250.c
+@@ -37,6 +37,7 @@
+ #include <linux/mm.h>
+ #include <linux/console.h>
+ #include <linux/tty.h>
++#include <linux/vt.h>
+ 
+ #include <asm/io.h>
+ 
+@@ -254,7 +255,7 @@ static int __init sb1250_pcibios_init(void)
+ 	 * XXX ehs: Should this happen in PCI Device mode?
+ 	 */
+ 	io_map_base = ioremap(A_PHYS_LDTPCI_IO_MATCH_BYTES, 1024 * 1024);
+-	sb1250_controller.io_map_base = io_map_base;
++	sb1250_controller.io_map_base = (unsigned long)io_map_base;
+ 	set_io_port_base((unsigned long)io_map_base);
+ 
+ #ifdef CONFIG_SIBYTE_HAS_LDT
 diff --git a/arch/mips/powertv/Kconfig b/arch/mips/powertv/Kconfig
 new file mode 100644
 index 0000000..ff0e7e3
@@ -33562,6 +36634,19 @@ index ad5bd10..f4f3f2e 100644
  
  	strcpy(arcs_cmdline, cmd_line);
  }
+diff --git a/arch/mips/sgi-ip22/ip22-berr.c b/arch/mips/sgi-ip22/ip22-berr.c
+index de6a0cc..911d399 100644
+--- a/arch/mips/sgi-ip22/ip22-berr.c
++++ b/arch/mips/sgi-ip22/ip22-berr.c
+@@ -89,7 +89,7 @@ static void print_buserr(void)
+ void ip22_be_interrupt(int irq)
+ {
+ 	const int field = 2 * sizeof(unsigned long);
+-	const struct pt_regs *regs = get_irq_regs();
++	struct pt_regs *regs = get_irq_regs();
+ 
+ 	save_and_clear_buserr();
+ 	print_buserr();
 diff --git a/arch/mips/sgi-ip22/ip22-int.c b/arch/mips/sgi-ip22/ip22-int.c
 index 0ecd5fe..383f11d 100644
 --- a/arch/mips/sgi-ip22/ip22-int.c
@@ -33604,6 +36689,19 @@ index c8f7d23..603fc91 100644
  {
  	int irq = SGI_8254_0_IRQ;
  	ULONG cnt;
+diff --git a/arch/mips/sgi-ip22/ip28-berr.c b/arch/mips/sgi-ip22/ip28-berr.c
+index 30e12e2..88c684e 100644
+--- a/arch/mips/sgi-ip22/ip28-berr.c
++++ b/arch/mips/sgi-ip22/ip28-berr.c
+@@ -453,7 +453,7 @@ mips_be_fatal:
+ 
+ void ip22_be_interrupt(int irq)
+ {
+-	const struct pt_regs *regs = get_irq_regs();
++	struct pt_regs *regs = get_irq_regs();
+ 
+ 	count_be_interrupt++;
+ 
 diff --git a/arch/mips/sibyte/common/cfe.c b/arch/mips/sibyte/common/cfe.c
 index eb5396c..6343011 100644
 --- a/arch/mips/sibyte/common/cfe.c
@@ -33626,6 +36724,34 @@ index eb5396c..6343011 100644
  
  	prom_meminit();
  
+diff --git a/arch/mips/sibyte/swarm/setup.c b/arch/mips/sibyte/swarm/setup.c
+index 5277aac..c308989 100644
+--- a/arch/mips/sibyte/swarm/setup.c
++++ b/arch/mips/sibyte/swarm/setup.c
+@@ -145,15 +145,14 @@ void __init plat_mem_setup(void)
+ 
+ #ifdef CONFIG_VT
+ 	screen_info = (struct screen_info) {
+-		0, 0,           /* orig-x, orig-y */
+-		0,              /* unused */
+-		52,             /* orig_video_page */
+-		3,              /* orig_video_mode */
+-		80,             /* orig_video_cols */
+-		4626, 3, 9,     /* unused, ega_bx, unused */
+-		25,             /* orig_video_lines */
+-		0x22,           /* orig_video_isVGA */
+-		16              /* orig_video_points */
++		.orig_video_page	= 52,
++		.orig_video_mode	= 3,
++		.orig_video_cols	= 80,
++		.flags			= 12,
++		.orig_video_ega_bx	= 3,
++		.orig_video_lines	= 25,
++		.orig_video_isVGA	= 0x22,
++		.orig_video_points	= 16,
+        };
+        /* XXXKW for CFE, get lines/cols from environment */
+ #endif
 diff --git a/arch/mips/sni/a20r.c b/arch/mips/sni/a20r.c
 index 7dd76fb..e698089 100644
 --- a/arch/mips/sni/a20r.c
@@ -33700,6 +36826,16 @@ index d66802e..06e801c 100644
  	char *s;
  
  	strcpy(cmdline, arcs_cmdline);
+diff --git a/drivers/dma/txx9dmac.c b/drivers/dma/txx9dmac.c
+index fb6bb64..b81fc77 100644
+--- a/drivers/dma/txx9dmac.c
++++ b/drivers/dma/txx9dmac.c
+@@ -1359,3 +1359,5 @@ module_exit(txx9dmac_exit);
+ MODULE_LICENSE("GPL");
+ MODULE_DESCRIPTION("TXx9 DMA Controller driver");
+ MODULE_AUTHOR("Atsushi Nemoto <anemo@mba.ocn.ne.jp>");
++MODULE_ALIAS("platform:txx9dmac");
++MODULE_ALIAS("platform:txx9dmac-chan");
 diff --git a/drivers/ide/au1xxx-ide.c b/drivers/ide/au1xxx-ide.c
 index 58121bd..bcf4176 100644
 --- a/drivers/ide/au1xxx-ide.c
@@ -73219,7 +76355,7 @@ index 0000000..4e36930
 +MODULE_DESCRIPTION("PCMCIA Socket Services for MyCable XXS1500 systems");
 +MODULE_AUTHOR("Manuel Lauss");
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 473e5f2..03ac45c 100644
+index 66c2d6a..32558ec 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
 @@ -691,7 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
@@ -73232,7 +76368,7 @@ index 473e5f2..03ac45c 100644
  	address_space = 128;
  #else
  #warning Assuming 128 bytes of RTC+NVRAM address space, not 64 bytes.
-@@ -756,9 +757,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -757,9 +758,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME teach the alarm code how to handle binary mode;
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -76955,3 +80091,21 @@ index 27683eb..0000000
 -MODULE_LICENSE("GPL");
 -MODULE_DESCRIPTION("Au1xxx PSC sample AC97 machine");
 -MODULE_AUTHOR("Manuel Lauss <mano@roarinelk.homelinux.net>");
+diff --git a/sound/soc/txx9/txx9aclc-ac97.c b/sound/soc/txx9/txx9aclc-ac97.c
+index 0f83bdb..ab013d2 100644
+--- a/sound/soc/txx9/txx9aclc-ac97.c
++++ b/sound/soc/txx9/txx9aclc-ac97.c
+@@ -253,3 +253,4 @@ module_exit(txx9aclc_ac97_exit);
+ MODULE_AUTHOR("Atsushi Nemoto <anemo@mba.ocn.ne.jp>");
+ MODULE_DESCRIPTION("TXx9 ACLC AC97 driver");
+ MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:txx9aclc-ac97");
+diff --git a/sound/soc/txx9/txx9aclc-generic.c b/sound/soc/txx9/txx9aclc-generic.c
+index 3175de9..95b17f7 100644
+--- a/sound/soc/txx9/txx9aclc-generic.c
++++ b/sound/soc/txx9/txx9aclc-generic.c
+@@ -96,3 +96,4 @@ module_exit(txx9aclc_generic_exit);
+ MODULE_AUTHOR("Atsushi Nemoto <anemo@mba.ocn.ne.jp>");
+ MODULE_DESCRIPTION("Generic TXx9 ACLC ALSA SoC audio driver");
+ MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:txx9aclc-generic");
