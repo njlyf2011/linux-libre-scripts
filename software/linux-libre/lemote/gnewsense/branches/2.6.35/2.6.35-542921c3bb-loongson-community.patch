@@ -3867,10 +3867,10 @@ index fcdbe3a..0781e1a 100644
  
  /*
 diff --git a/arch/mips/kernel/cpu-probe.c b/arch/mips/kernel/cpu-probe.c
-index 3562b85..014eddf 100644
+index 3562b85..7eaca3c 100644
 --- a/arch/mips/kernel/cpu-probe.c
 +++ b/arch/mips/kernel/cpu-probe.c
-@@ -35,6 +35,39 @@
+@@ -35,6 +35,28 @@
  void (*cpu_wait)(void);
  EXPORT_SYMBOL(cpu_wait);
  
@@ -3883,25 +3883,14 @@ index 3562b85..014eddf 100644
 +
 +static void loongson2_wait(void)
 +{
-+	/*
-+	 * Currently, there is no wait instruction in Loongson platform,
-+	 * herein, we emulate the wait mode via setting the cpu frequency to
-+	 * the 2nd lowest level, which can be waked up by the cpufreq module or
-+	 * by ourself.
-+	 *
-+	 * Herein, we can not put it into the lowest level for that level can
-+	 * only be waked up the external interrupts.
-+	 */
-+	LOONGSON_SET_CPUFREQ(1);
++	u32 cpu_freq;
++	unsigned long flags;
 +
-+	/*
-+	 * While waked up from standby mode, the cpu frequency is set to the
-+	 * second lowest level, about 199M, which is too slow. To make the
-+	 * system run well even if no cpufreq driver started, we just set it as
-+	 * the highest level.
-+	 */
-+	if (!loongson_cpufreq_driver_loaded)
-+		LOONGSON_SET_CPUFREQ(7);
++	raw_spin_lock_irqsave(&loongson_cpufreq_lock, flags);
++	cpu_freq = LOONGSON_CHIPCFG0;
++	LOONGSON_CHIPCFG0 &= ~0x7;      /* Put CPU into wait mode */
++	LOONGSON_CHIPCFG0 = cpu_freq;   /* Restore CPU state */
++	raw_spin_unlock_irqrestore(&loongson_cpufreq_lock, flags);
 +}
 +#else
 +#define loongson2_wait	NULL
@@ -3910,7 +3899,7 @@ index 3562b85..014eddf 100644
  static void r3081_wait(void)
  {
  	unsigned long cfg = read_c0_conf();
-@@ -159,6 +192,9 @@ void __init check_wait(void)
+@@ -159,6 +181,9 @@ void __init check_wait(void)
  	}
  
  	switch (c->cputype) {
@@ -4107,7 +4096,7 @@ index cefc6e2..0000000
 -MODULE_DESCRIPTION("cpufreq driver for Loongson 2F");
 -MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-index ae5db20..6be75f7 100644
+index ae5db20..227584e 100644
 --- a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 +++ b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 @@ -1,10 +1,7 @@
@@ -4207,7 +4196,7 @@ index ae5db20..6be75f7 100644
 -static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
 -				     unsigned int target_freq,
 -				     unsigned int relation)
-+static unsigned int l2_cpufreq_get(unsigned int cpu)
++static inline unsigned int l2_cpufreq_get(unsigned int cpu)
  {
 -	unsigned int cpu = policy->cpu;
 -	unsigned int newstate = 0;
@@ -4222,7 +4211,7 @@ index ae5db20..6be75f7 100644
  
 -	cpus_allowed = current->cpus_allowed;
 -	set_cpus_allowed_ptr(current, cpumask_of(cpu));
-+static void l2_cpufreq_set(unsigned int newstate)
++static inline void l2_cpufreq_set(unsigned int newstate)
 +{
 +	LOONGSON_SET_CPUFREQ(clockmod_table[newstate].index - 1);
 +}
