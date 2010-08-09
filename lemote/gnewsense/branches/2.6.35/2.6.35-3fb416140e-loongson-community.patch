@@ -3805,7 +3805,7 @@ index 0000000..a38cb64
 +
 +#endif /* !_EC_KB3310B_H */
 diff --git a/arch/mips/include/asm/mach-loongson/loongson.h b/arch/mips/include/asm/mach-loongson/loongson.h
-index fcdbe3a..0781e1a 100644
+index fcdbe3a..8c9d304 100644
 --- a/arch/mips/include/asm/mach-loongson/loongson.h
 +++ b/arch/mips/include/asm/mach-loongson/loongson.h
 @@ -42,10 +42,15 @@ static inline void prom_init_uart_base(void)
@@ -3840,7 +3840,7 @@ index fcdbe3a..0781e1a 100644
  #define LOONGSON_FLASH_BASE	0x1c000000
  #define LOONGSON_FLASH_SIZE	0x02000000	/* 32M */
  #define LOONGSON_FLASH_TOP	(LOONGSON_FLASH_BASE+LOONGSON_FLASH_SIZE-1)
-@@ -235,12 +248,21 @@ extern int mach_i8259_irq(void);
+@@ -235,12 +248,19 @@ extern int mach_i8259_irq(void);
  	((((ADDR)>>26) & LOONGSON_PCIMAP_PCIMAP_LO0) << ((WIN)*6))
  
  #ifdef CONFIG_CPU_SUPPORTS_CPUFREQ
@@ -3857,20 +3857,18 @@ index fcdbe3a..0781e1a 100644
 +extern raw_spinlock_t loongson_cpufreq_lock;
 +extern bool loongson_cpufreq_driver_loaded;
 +
-+#define LOONGSON_SET_CPUFREQ(level)	do {				\
-+	unsigned long flags;						\
-+	raw_spin_lock_irqsave(&loongson_cpufreq_lock, flags);		\
-+	LOONGSON_CHIPCFG0 = (LOONGSON_CHIPCFG0 & (~7)) | (level);	\
-+	raw_spin_unlock_irqrestore(&loongson_cpufreq_lock, flags);	\
++#define LOONGSON_SET_CPUFREQ(level)	do { \
++	LOONGSON_CHIPCFG0 = (LOONGSON_CHIPCFG0 & (~7)) | (level); \
 +} while (0)
++
  #endif
  
  /*
 diff --git a/arch/mips/kernel/cpu-probe.c b/arch/mips/kernel/cpu-probe.c
-index 3562b85..7eaca3c 100644
+index 3562b85..5d26909 100644
 --- a/arch/mips/kernel/cpu-probe.c
 +++ b/arch/mips/kernel/cpu-probe.c
-@@ -35,6 +35,28 @@
+@@ -35,6 +35,48 @@
  void (*cpu_wait)(void);
  EXPORT_SYMBOL(cpu_wait);
  
@@ -3883,14 +3881,34 @@ index 3562b85..7eaca3c 100644
 +
 +static void loongson2_wait(void)
 +{
-+	u32 cpu_freq;
-+	unsigned long flags;
++	u32 cpufreq;
 +
-+	raw_spin_lock_irqsave(&loongson_cpufreq_lock, flags);
-+	cpu_freq = LOONGSON_CHIPCFG0;
-+	LOONGSON_CHIPCFG0 &= ~0x7;      /* Put CPU into wait mode */
-+	LOONGSON_CHIPCFG0 = cpu_freq;   /* Restore CPU state */
-+	raw_spin_unlock_irqrestore(&loongson_cpufreq_lock, flags);
++	raw_spin_lock(&loongson_cpufreq_lock);
++
++	/* Record the cpu frequency */
++	cpufreq = LOONGSON_GET_CPUFREQ();
++
++	/*
++	 * Currently, there is no wait instruction in Loongson platform,
++	 * herein, we emulate the wait mode via setting the cpu frequency to
++	 * the lowest level to put it into the standby mode, which can be waked
++	 * up by external interrupts
++	 */
++	LOONGSON_SET_CPUFREQ(0);
++
++	/*
++	 * While waked up from standby mode, the cpu frequency is set to the
++	 * second lowest level, about 199M, which is too slow. To make the
++	 * system run well if no cpufreq driver started, we just set it as the
++	 * highest level. if cpufreq module is loaded, just restore the
++	 * recorded value.
++	 */
++	if (!loongson_cpufreq_driver_loaded)
++		LOONGSON_SET_CPUFREQ(7);
++	else
++		LOONGSON_SET_CPUFREQ(cpufreq);
++
++	raw_spin_unlock(&loongson_cpufreq_lock);
 +}
 +#else
 +#define loongson2_wait	NULL
@@ -3899,7 +3917,7 @@ index 3562b85..7eaca3c 100644
  static void r3081_wait(void)
  {
  	unsigned long cfg = read_c0_conf();
-@@ -159,6 +181,9 @@ void __init check_wait(void)
+@@ -159,6 +201,9 @@ void __init check_wait(void)
  	}
  
  	switch (c->cputype) {
@@ -4096,7 +4114,7 @@ index cefc6e2..0000000
 -MODULE_DESCRIPTION("cpufreq driver for Loongson 2F");
 -MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-index ae5db20..227584e 100644
+index ae5db20..0828c14 100644
 --- a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 +++ b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 @@ -1,10 +1,7 @@
@@ -4112,7 +4130,7 @@ index ae5db20..227584e 100644
   *
   * This file is subject to the terms and conditions of the GNU General Public
   * License.  See the file "COPYING" in the main directory of this archive
-@@ -12,216 +9,173 @@
+@@ -12,216 +9,175 @@
   */
  #include <linux/cpufreq.h>
  #include <linux/module.h>
@@ -4196,7 +4214,7 @@ index ae5db20..227584e 100644
 -static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
 -				     unsigned int target_freq,
 -				     unsigned int relation)
-+static inline unsigned int l2_cpufreq_get(unsigned int cpu)
++static unsigned int l2_cpufreq_get(unsigned int cpu)
  {
 -	unsigned int cpu = policy->cpu;
 -	unsigned int newstate = 0;
@@ -4211,9 +4229,11 @@ index ae5db20..227584e 100644
  
 -	cpus_allowed = current->cpus_allowed;
 -	set_cpus_allowed_ptr(current, cpumask_of(cpu));
-+static inline void l2_cpufreq_set(unsigned int newstate)
++static void l2_cpufreq_set(unsigned int newstate)
 +{
++	raw_spin_lock(&loongson_cpufreq_lock);
 +	LOONGSON_SET_CPUFREQ(clockmod_table[newstate].index - 1);
++	raw_spin_unlock(&loongson_cpufreq_lock);
 +}
  
 -	if (cpufreq_frequency_table_target
@@ -5807,10 +5827,10 @@ index cac4d38..ff0d94a 100644
  	if (irq == I8042_KBD_IRQ)
  		return 1;
 diff --git a/arch/mips/loongson/lemote-2f/reset.c b/arch/mips/loongson/lemote-2f/reset.c
-index 36020a0..431aab5 100644
+index 36020a0..d3bc87e 100644
 --- a/arch/mips/loongson/lemote-2f/reset.c
 +++ b/arch/mips/loongson/lemote-2f/reset.c
-@@ -20,15 +20,14 @@
+@@ -20,15 +20,16 @@
  #include <loongson.h>
  
  #include <cs5536/cs5536.h>
@@ -5825,7 +5845,9 @@ index 36020a0..431aab5 100644
 +	 * reset cpu to full speed
  	 */
 -	LOONGSON_CHIPCFG0 |= 0x7;
++	raw_spin_lock(&loongson_cpufreq_lock);
 +	LOONGSON_SET_CPUFREQ(7);
++	raw_spin_unlock(&loongson_cpufreq_lock);
  }
  
  /* reset support for fuloong2f */
