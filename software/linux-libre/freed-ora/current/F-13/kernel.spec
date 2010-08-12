@@ -38,19 +38,18 @@ Summary: The Linux kernel
 %endif
 %endif
 
-# fedora_build defines which build revision of this kernel version we're
-# building. Rather than incrementing forever, as with the prior versioning
-# setup, we set fedora_cvs_origin to the current cvs revision s/1.// of the
-# kernel spec when the kernel is rebased, so fedora_build automatically
-# works out to the offset from the rebase, so it doesn't get too ginormous.
+# baserelease defines which build revision of this kernel version we're
+# building.  We used to call this fedora_build, but the magical name
+# baserelease is matched by the rpmdev-bumpspec tool, which you should use.
 #
-# If you're building on a branch, the RCS revision will be something like
-# 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
-# from the second number, and then append the rest of the RCS string as is.
-# Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   2084
-%define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2113 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+# We used to have some extra magic weirdness to bump this automatically,
+# but now we don't.  Just use: rpmdev-bumpspec -c 'comment for changelog'
+# When changing base_sublevel below or going from rc to a final kernel,
+# reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
+# scripts/rebase.sh should be made to do that for you, actually.
+#
+%global baserelease 34
+%global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -59,10 +58,10 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -75,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -662,7 +661,6 @@ Patch384: pci-acpi-disable-aspm-if-no-osc.patch
 Patch385: pci-aspm-dont-enable-too-early.patch
 
 # 2.6.34 bugfixes
-Patch386: pci-pm-do-not-use-native-pcie-pme-by-default.patch
 Patch387: pci-fall-back-to-original-bios-bar-addresses.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
@@ -685,19 +683,13 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
-Patch600: linux-2.6-acpi-sleep-live-sci-live.patch
-
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
-Patch681: linux-2.6-mac80211-age-scan-results-on-resume.patch
-
 Patch690: iwlwifi-add-internal-short-scan-support-for-3945.patch
-Patch691: iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch
 Patch692: iwlwifi-move-plcp-check-to-separated-function.patch
 Patch693: iwlwifi-Recover-TX-flow-failure.patch
 Patch694: iwlwifi-code-cleanup-for-connectivity-recovery.patch
 Patch695: iwlwifi-iwl_good_ack_health-only-apply-to-AGN-device.patch
-Patch698: iwlwifi-recover_from_tx_stall.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -721,6 +713,7 @@ Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
 Patch1803: drm-encoder-disable.patch
 # nouveau + drm fixes
 Patch1815: drm-nouveau-updates.patch
+Patch1816: drm-nouveau-race-fix.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1820: drm-i915-fix-edp-panels.patch
@@ -728,13 +721,8 @@ Patch1821: i915-fix-crt-hotplug-regression.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
-Patch1830: drm-i915-fix-hibernate-memory-corruption.patch
-Patch1831: drm-i915-add-reclaimable-to-page-allocations.patch
-Patch1835: drm-i915-make-G4X-style-PLL-search-more-permissive.patch
-Patch1836: drm-intel-945gm-stability-fixes.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 # radeon
-Patch1910: drm-radeon-fix-shared-ddc-handling.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -782,40 +770,22 @@ Patch12030: ssb_check_for_sprom.patch
 Patch12035: quiet-prove_RCU-in-cgroups.patch
 
 Patch12040: iwlwifi-manage-QoS-by-mac-stack.patch
-Patch12041: mac80211-do-not-wipe-out-old-supported-rates.patch
 Patch12042: mac80211-explicitly-disable-enable-QoS.patch
-Patch12043: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
-
-# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
-Patch12050: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
-
-Patch12100: ata-generic-handle-new-mbp-with-mcp89.patch
-Patch12110: ata-generic-implement-ata-gen-flags.patch
-
-Patch12200: x86-debug-send-sigtrap-for-user-icebp.patch
-Patch12210: ethtool-fix-buffer-overflow.patch
-Patch12220: sched-fix-over-scheduling-bug.patch
-Patch12230: kbuild-fix-modpost-segfault.patch
 
 Patch12250: inotify-fix-inotify-oneshot-support.patch
 Patch12260: inotify-send-IN_UNMOUNT-events.patch
 
 Patch12270: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
-# ACPI GPE enable/disable fixes, needed preparation for the powerdown fix
-Patch12299: acpica-00-linux-2.6.git-0f849d2cc6863c7874889ea60a871fb71399dd3f.patch
-Patch12300: acpica-01-linux-2.6.git-a997ab332832519c2e292db13f509e4360495a5a.patch
-Patch12310: acpica-02-linux-2.6.git-e4e9a735991c80fb0fc1bd4a13a93681c3c17ce0.patch
-Patch12320: acpica-03-linux-2.6.git-fd247447c1d94a79d5cfc647430784306b3a8323.patch
-Patch12330: acpica-04-linux-2.6.git-c9a8bbb7704cbf515c0fc68970abbe4e91d68521.patch
-Patch12340: acpica-05-linux-2.6.git-ce43ace02320a3fb9614ddb27edc3a8700d68b26.patch
-Patch12350: acpica-06-linux-2.6.git-9d3c752de65dbfa6e522f1d666deb0ac152ef367.patch
-# fix system powering back on after shutdown (#613239)
-Patch12360: acpi-pm-do-not-enable-gpes-for-system-wakeup-in-advance.patch
-
 Patch12400: input-synaptics-relax-capability-id-checks-on-new-hardware.patch
 
-Patch12410: cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+Patch12410: cifs-fix-dns-resolver.patch
+Patch12420: matroxfb-fix-font-corruption.patch
+Patch12430: cred-dont-resurrect-dead-credentials.patch
+
+Patch12440: direct-io-move-aio_complete-into-end_io.patch
+Patch12450: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
+Patch12460: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
 %endif
 
@@ -1106,16 +1076,23 @@ ApplyOptionalPatch()
 %endif
 %endif
 
-# We can share hardlinked source trees by putting a list of
-# directory names of the CVS checkouts that we want to share
-# with in .shared-srctree. (Full pathnames are required.)
-[ -f .shared-srctree ] && sharedirs=$(cat .shared-srctree)
+# %{vanillaversion} : the full version name, e.g. 2.6.35-rc6-git3
+# %{kversion}       : the base version, e.g. 2.6.34
 
-if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
+# Use kernel-%{kversion}%{?dist} as the top-level directory name
+# so we can prep different trees within a single git directory.
 
-  if [ -d kernel-%{kversion}/vanilla-%{kversion} ]; then
+# Build a list of the other top-level kernel tree directories.
+# This will be used to hardlink identical vanilla subdirs.
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-2.6.*' \
+            | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
-    cd kernel-%{kversion}
+if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
+
+  if [ -d kernel-%{kversion}%{?dist}/vanilla-%{kversion} ]; then
+
+    # The base vanilla version already exists.
+    cd kernel-%{kversion}%{?dist}
 
     # Any vanilla-* directories other than the base one are stale.
     for dir in vanilla-*; do
@@ -1124,18 +1101,18 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
   else
 
-    # Ok, first time we do a make prep.
     rm -f pax_global_header
+    # Look for an identical base vanilla dir that can be hardlinked.
     for sharedir in $sharedirs ; do
-      if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{kversion} ]] ; then
+      if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
         break
       fi
     done
-    if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{kversion} ]] ; then
-%setup -q -n kernel-%{kversion} -c -T
-      cp -rl $sharedir/kernel-%{kversion}/vanilla-%{kversion} .
+    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
+%setup -q -n kernel-%{kversion}%{?dist} -c -T
+      cp -rl $sharedir/vanilla-%{kversion} .
     else
-%setup -q -n kernel-%{kversion} -c
+%setup -q -n kernel-%{kversion}%{?dist} -c
       mv linux-%{kversion} vanilla-%{kversion}
     fi
 
@@ -1146,16 +1123,17 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" vanilla-%{kversion}/Makefile
 %if "%{kversion}" != "%{vanillaversion}"
 
   for sharedir in $sharedirs ; do
-    if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} ]] ; then
+    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
       break
     fi
   done
-  if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} ]] ; then
+  if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
 
-    cp -rl $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} .
+    cp -rl $sharedir/vanilla-%{vanillaversion} .
 
   else
 
+    # Need to apply patches to the base vanilla version.
     cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
     cd vanilla-%{vanillaversion}
 
@@ -1180,10 +1158,13 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" vanilla-%{kversion}/Makefile
 %endif
 
 else
-  # We already have a vanilla dir.
-  cd kernel-%{kversion}
+
+  # We already have all vanilla dirs, just change to the top-level directory.
+  cd kernel-%{kversion}%{?dist}
+
 fi
 
+# Now build the fedora kernel tree.
 if [ -d linux-%{kversion}.%{_target_cpu} ]; then
   # Just in case we ctrl-c'd a prep already
   rm -rf deleteme.%{_target_cpu}
@@ -1330,8 +1311,6 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 ApplyPatch pci-acpi-disable-aspm-if-no-osc.patch
 # allow drivers to disable aspm at load time
 ApplyPatch pci-aspm-dont-enable-too-early.patch
-# stop PCIe hotplug interrupt storm (#613412)
-ApplyPatch pci-pm-do-not-use-native-pcie-pme-by-default.patch
 # fall back to original BIOS address when reassignment fails (KORG#16263)
 ApplyPatch pci-fall-back-to-original-bios-bar-addresses.patch
 
@@ -1340,7 +1319,6 @@ ApplyPatch pci-fall-back-to-original-bios-bar-addresses.patch
 #
 
 # ACPI
-ApplyPatch linux-2.6-acpi-sleep-live-sci-live.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
@@ -1378,10 +1356,6 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
 # Changes to upstream defaults.
 
-
-# back-port scan result aging patches
-#ApplyPatch linux-2.6-mac80211-age-scan-results-on-resume.patch
-
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
@@ -1408,24 +1382,15 @@ ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
 ApplyPatch drm-i915-fix-edp-panels.patch
 ApplyPatch i915-fix-crt-hotplug-regression.patch
-# RHBZ#572799
-ApplyPatch drm-i915-make-G4X-style-PLL-search-more-permissive.patch
-ApplyPatch drm-intel-945gm-stability-fixes.patch
 ApplyPatch drm-encoder-disable.patch
 
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-updates.patch
+ApplyPatch drm-nouveau-race-fix.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
-
-# radeon fixes
-ApplyPatch drm-radeon-fix-shared-ddc-handling.patch
-
-# hibernation memory corruption fixes
-ApplyPatch drm-i915-fix-hibernate-memory-corruption.patch
-ApplyPatch drm-i915-add-reclaimable-to-page-allocations.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
@@ -1461,43 +1426,22 @@ ApplyPatch neuter_intel_microcode_load.patch
 #ApplyPatch coredump-uid-pipe-check.patch
 
 # rhbz#533746
-ApplyPatch ssb_check_for_sprom.patch
+# awful, ugly conflicts between this patch and the 2.6.34.2 patch:
+# ssb-handle-netbook-devices-where-the-sprom-address-is-changed.patch
+#ApplyPatch ssb_check_for_sprom.patch
 
 # iwlwifi fixes from F-13-2.6.33
 ApplyPatch iwlwifi-add-internal-short-scan-support-for-3945.patch
-ApplyPatch iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch
 ApplyPatch iwlwifi-move-plcp-check-to-separated-function.patch
 ApplyPatch iwlwifi-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi-iwl_good_ack_health-only-apply-to-AGN-device.patch
-ApplyPatch iwlwifi-recover_from_tx_stall.patch
 
 # mac80211/iwlwifi fix connections to some APs (rhbz#558002)
 ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
 ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
-ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
-ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
-
-# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
-ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 ApplyPatch quiet-prove_RCU-in-cgroups.patch
-
-# BZ#608034
-ApplyPatch ata-generic-handle-new-mbp-with-mcp89.patch
-ApplyPatch ata-generic-implement-ata-gen-flags.patch
-
-# BZ#609548
-ApplyPatch x86-debug-send-sigtrap-for-user-icebp.patch
-
-# CVE-2010-2478
-ApplyPatch ethtool-fix-buffer-overflow.patch
-
-# fix performance problem with CGROUPS
-ApplyPatch sched-fix-over-scheduling-bug.patch
-
-# fix modpost segfault during kernel build (#595915)
-ApplyPatch kbuild-fix-modpost-segfault.patch
 
 # fix broken oneshot support and missing umount events (#607327)
 ApplyPatch inotify-fix-inotify-oneshot-support.patch
@@ -1506,22 +1450,23 @@ ApplyPatch inotify-send-IN_UNMOUNT-events.patch
 # 610911
 ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
-# ACPI GPE enable/disable fixes, needed preparation for the powerdown fix
-ApplyPatch acpica-00-linux-2.6.git-0f849d2cc6863c7874889ea60a871fb71399dd3f.patch
-ApplyPatch acpica-01-linux-2.6.git-a997ab332832519c2e292db13f509e4360495a5a.patch
-ApplyPatch acpica-02-linux-2.6.git-e4e9a735991c80fb0fc1bd4a13a93681c3c17ce0.patch
-ApplyPatch acpica-03-linux-2.6.git-fd247447c1d94a79d5cfc647430784306b3a8323.patch
-ApplyPatch acpica-04-linux-2.6.git-c9a8bbb7704cbf515c0fc68970abbe4e91d68521.patch
-ApplyPatch acpica-05-linux-2.6.git-ce43ace02320a3fb9614ddb27edc3a8700d68b26.patch
-ApplyPatch acpica-06-linux-2.6.git-9d3c752de65dbfa6e522f1d666deb0ac152ef367.patch
-# fix system powering back on after shutdown (#613239)
-ApplyPatch acpi-pm-do-not-enable-gpes-for-system-wakeup-in-advance.patch
-
 # fix newer synaptics touchpads not being recognized
 ApplyPatch input-synaptics-relax-capability-id-checks-on-new-hardware.patch
 
-# CVE-2010-2524
-ApplyPatch cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+# Remove __init and __exit attributes from resolver code
+ApplyPatch cifs-fix-dns-resolver.patch
+
+# RHBZ #617687
+ApplyPatch matroxfb-fix-font-corruption.patch
+
+# RHBZ #591015
+ApplyPatch cred-dont-resurrect-dead-credentials.patch
+
+# RHBZ #617699
+ApplyPatch direct-io-move-aio_complete-into-end_io.patch
+ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
+ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -2142,6 +2087,80 @@ fi
 
 
 %changelog
+* Thu Aug 12 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Switch to linux-2.6.34-libre1.
+- Adjusted patch-libre-2.6.34.2.
+
+* Fri Aug 06 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.2-35
+- nouveau: fix inter-engine race when under memory pressure (rhbz#602956)
+
+* Thu Aug 05 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.2-34
+- Disable CONFIG_MULTICORE_RAID456
+
+* Tue Aug 03 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.2-33
+- Linux 2.6.34.2
+- Drop commented-out patches.
+- Drop ancient linux-2.6-mac80211-age-scan-results-on-resume.patch
+- Fix matroxfb font corruption (#617687)
+- Don't resurrect dead task credentials (#591015)
+- Fix "ext4 and xfs wrong data returned on read after write if
+  file size was changed with ftruncate" (#617699)
+
+* Sun Aug 01 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.2-32.rc1
+- Linux 2.6.34.2-rc1
+- Comment out upstream merged patches:
+    pci-pm-do-not-use-native-pcie-pme-by-default.patch
+    linux-2.6-acpi-sleep-live-sci-live.patch (slightly different upstream patch)
+    drm-i915-make-G4X-style-PLL-search-more-permissive.patch
+    drm-intel-945gm-stability-fixes.patch
+    drm-radeon-fix-shared-ddc-handling.patch
+    drm-i915-add-reclaimable-to-page-allocations.patch
+    drm-i915-fix-hibernate-memory-corruption.patch
+    iwlwifi-Recover-TX-flow-stall-due-to-stuck-queue.patch
+    iwlwifi-recover_from_tx_stall.patch
+    mac80211-do-not-wipe-out-old-supported-rates.patch
+    mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+    iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
+    ata-generic-handle-new-mbp-with-mcp89.patch
+    ata-generic-implement-ata-gen-flags.patch
+    x86-debug-send-sigtrap-for-user-icebp.patch
+    ethtool-fix-buffer-overflow.patch
+    sched-fix-over-scheduling-bug.patch
+    kbuild-fix-modpost-segfault.patch
+    acpica-00-linux-2.6.git-0f849d2cc6863c7874889ea60a871fb71399dd3f.patch
+    acpica-01-linux-2.6.git-a997ab332832519c2e292db13f509e4360495a5a.patch
+    acpica-02-linux-2.6.git-e4e9a735991c80fb0fc1bd4a13a93681c3c17ce0.patch
+    acpica-03-linux-2.6.git-fd247447c1d94a79d5cfc647430784306b3a8323.patch
+    acpica-04-linux-2.6.git-c9a8bbb7704cbf515c0fc68970abbe4e91d68521.patch
+    acpica-05-linux-2.6.git-ce43ace02320a3fb9614ddb27edc3a8700d68b26.patch
+    acpica-06-linux-2.6.git-9d3c752de65dbfa6e522f1d666deb0ac152ef367.patch
+    acpi-pm-do-not-enable-gpes-for-system-wakeup-in-advance.patch
+    cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+    usb-obey-the-sysfs-power-wakeup-setting.patch
+- Fix up virtqueue-wrappers.patch to apply after 2.6.34.2 due to:
+    virtio_net-fix-oom-handling-on-tx.patch
+- Revert -stable DRM patches already in our drm-next patch:
+    amd64-agp-probe-unknown-agp-devices-the-right-way.patch
+    i915-fix-lock-imbalance-on-error-path.patch
+    drm-i915-hold-the-spinlock-whilst-resetting-unpin_work-along-error-path.patch
+- Fix up drm-next.patch to apply after 2.6.34.2 due to:
+    drm-i915-gen3-page-flipping-fixes.patch
+    drm-i915-don-t-queue-flips-during-a-flip-pending-event.patch
+- Drop patches now upstream from linux-2.6-v4l-dvb-uvcvideo-update.patch:
+    V4L/DVB: uvcvideo: Add support for unbranded Arkmicro 18ec:3290 webcams
+    V4L/DVB: uvcvideo: Add support for V4L2_PIX_FMT_Y16
+- Temporarily comment out ssb_check_for_sprom.patch due to ugly conflicts with:
+    ssb-handle-netbook-devices-where-the-sprom-address-is-changed.patch
+
+* Sun Aug 01 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-31
+- Backport initial dist-git fixes from master (377da6d08)
+- Modify the prep stage so multiple trees can be prepped in a
+  single shared git directory.
+
+* Mon Jul 26 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-30
+- usb-obey-the-sysfs-power-wakeup-setting.patch:
+  Restore ability of USB devices to wake the machine (#617559)
+
 * Thu Jul 22 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.1-29
 - cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch:
   Fix a malicious redirect problem in the DNS lookup code (CVE-2010-2524)
