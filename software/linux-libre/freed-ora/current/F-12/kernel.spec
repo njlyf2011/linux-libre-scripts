@@ -37,19 +37,18 @@ Summary: The Linux kernel
 %endif
 %endif
 
-# fedora_build defines which build revision of this kernel version we're
-# building. Rather than incrementing forever, as with the prior versioning
-# setup, we set fedora_cvs_origin to the current cvs revision s/1.// of the
-# kernel spec when the kernel is rebased, so fedora_build automatically
-# works out to the offset from the rebase, so it doesn't get too ginormous.
+# baserelease defines which build revision of this kernel version we're
+# building.  We used to call this fedora_build, but the magical name
+# baserelease is matched by the rpmdev-bumpspec tool, which you should use.
 #
-# If you're building on a branch, the RCS revision will be something like
-# 1.1205.1.1.  In this case we drop the initial 1, subtract fedora_cvs_origin
-# from the second number, and then append the rest of the RCS string as is.
-# Don't stare at the awk too long, you'll go blind.
-%define fedora_cvs_origin   1962
-%define fedora_cvs_revision() %2
-%global fedora_build %(echo %{fedora_cvs_origin}.%{fedora_cvs_revision $Revision: 1.2116 $} | awk -F . '{ OFS = "."; ORS = ""; print $3 - $1 ; i = 4 ; OFS = ""; while (i <= NF) { print ".", $i ; i++} }')
+# We used to have some extra magic weirdness to bump this automatically,
+# but now we don't.  Just use: rpmdev-bumpspec -c 'comment for changelog'
+# When changing base_sublevel below or going from rc to a final kernel,
+# reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
+# scripts/rebase.sh should be made to do that for you, actually.
+#
+%global baserelease 159
+%global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
@@ -74,7 +73,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 18
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -742,6 +741,7 @@ Patch1700: linux-2.6-x86-64-fbdev-primary.patch
 
 # nouveau + drm fixes
 Patch1810: drm-upgrayedd.patch
+Patch1811: drm-upgrayed-fixes.patch
 Patch1813: drm-radeon-pm.patch
 #Patch1814: drm-nouveau.patch
 Patch1818: drm-i915-resume-force-mode.patch
@@ -762,6 +762,7 @@ Patch1844: drm-nouveau-kconfig.patch
 Patch1845: drm-nouveau-mutex.patch
 Patch1846: drm-nouveau-update.patch
 Patch1847: drm-nouveau-d620.patch
+Patch1848: drm-nouveau-nva3-noaccel.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -787,7 +788,6 @@ Patch2096: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 # fs fixes
 
 # ext4/quota
-Patch3000: linux-2.6-ext4-quota-metadata-reservation.patch
 
 # NFSv4
 Patch3050: linux-2.6-nfsd4-proots.patch
@@ -845,9 +845,6 @@ Patch12414: iwlwifi_-Recover-TX-flow-failure.patch
 Patch12415: iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 Patch12416: iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
-# fix possible corruption with ssd
-Patch12700: ext4-issue-discard-operation-before-releasing-blocks.patch
-
 # iwlwifi: fix scan races
 Patch12910: iwlwifi-fix-scan-races.patch
 # iwlwifi: fix internal scan race
@@ -856,18 +853,10 @@ Patch12911: iwlwifi-fix-internal-scan-race.patch
 Patch12912: iwlwifi-recover_from_tx_stall.patch
 
 Patch12921: iwlwifi-manage-QoS-by-mac-stack.patch
-Patch12922: mac80211-do-not-wipe-out-old-supported-rates.patch
 Patch12923: mac80211-explicitly-disable-enable-QoS.patch
-Patch12924: mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
-
-# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
-Patch13020: iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 # l2tp: fix oops in pppol2tp_xmit (#607054)
 Patch13030: l2tp-fix-oops-in-pppol2tp_xmit.patch
-
-Patch14000: sched-fix-over-scheduling-bug.patch
-Patch14010: ethtool-fix-buffer-overflow.patch
 
 Patch14020: inotify-fix-inotify-oneshot-support.patch
 Patch14030: inotify-send-IN_UNMOUNT-events.patch
@@ -875,14 +864,14 @@ Patch14030: inotify-send-IN_UNMOUNT-events.patch
 Patch14040: crypto-testmgr-add-null-test-for-aesni.patch
 Patch14050: crypto-add-async-hash-testing.patch
 
-Patch14100: cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
 Patch14110: ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
-Patch14115: xfs-prevent-swapext-from-operating-on-write-only-files.patch
-
-Patch14120: usb-obey-the-sysfs-power-wakeup-setting.patch
+Patch14120: ext4-fix-freeze-deadlock-under-io.patch
 
 # Red Hat Bugzilla #610911
 Patch14130: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
+
+Patch14140: hid-01-usbhid-initialize-interface-pointers-early-enough.patch
+Patch14141: hid-02-fix-suspend-crash-by-moving-initializations-earlier.patch
 
 # ==============================================================================
 %endif
@@ -1186,16 +1175,23 @@ ApplyOptionalPatch()
 %endif
 %endif
 
-# We can share hardlinked source trees by putting a list of
-# directory names of the CVS checkouts that we want to share
-# with in .shared-srctree. (Full pathnames are required.)
-[ -f .shared-srctree ] && sharedirs=$(cat .shared-srctree)
+# %{vanillaversion} : the full version name, e.g. 2.6.35-rc6-git3
+# %{kversion}       : the base version, e.g. 2.6.34
 
-if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
+# Use kernel-%{kversion}%{?dist} as the top-level directory name
+# so we can prep different trees within a single git directory.
 
-  if [ -d kernel-%{kversion}/vanilla-%{kversion} ]; then
+# Build a list of the other top-level kernel tree directories.
+# This will be used to hardlink identical vanilla subdirs.
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-2.6.*' \
+            | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
-    cd kernel-%{kversion}
+if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
+
+  if [ -d kernel-%{kversion}%{?dist}/vanilla-%{kversion} ]; then
+
+    # The base vanilla version already exists.
+    cd kernel-%{kversion}%{?dist}
 
     # Any vanilla-* directories other than the base one are stale.
     for dir in vanilla-*; do
@@ -1204,18 +1200,18 @@ if [ ! -d kernel-%{kversion}/vanilla-%{vanillaversion} ]; then
 
   else
 
-    # Ok, first time we do a make prep.
     rm -f pax_global_header
+    # Look for an identical base vanilla dir that can be hardlinked.
     for sharedir in $sharedirs ; do
-      if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{kversion} ]] ; then
+      if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
         break
       fi
     done
-    if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{kversion} ]] ; then
-%setup -q -n kernel-%{kversion} -c -T
-      cp -rl $sharedir/kernel-%{kversion}/vanilla-%{kversion} .
+    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
+%setup -q -n kernel-%{kversion}%{?dist} -c -T
+      cp -rl $sharedir/vanilla-%{kversion} .
     else
-%setup -q -n kernel-%{kversion} -c
+%setup -q -n kernel-%{kversion}%{?dist} -c
       mv linux-%{kversion} vanilla-%{kversion}
     fi
 
@@ -1226,16 +1222,17 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" vanilla-%{kversion}/Makefile
 %if "%{kversion}" != "%{vanillaversion}"
 
   for sharedir in $sharedirs ; do
-    if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} ]] ; then
+    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
       break
     fi
   done
-  if [[ ! -z $sharedir  &&  -d $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} ]] ; then
+  if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
 
-    cp -rl $sharedir/kernel-%{kversion}/vanilla-%{vanillaversion} .
+    cp -rl $sharedir/vanilla-%{vanillaversion} .
 
   else
 
+    # Need to apply patches to the base vanilla version.
     cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
     cd vanilla-%{vanillaversion}
 
@@ -1260,10 +1257,13 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =/" vanilla-%{kversion}/Makefile
 %endif
 
 else
-  # We already have a vanilla dir.
-  cd kernel-%{kversion}
+
+  # We already have all vanilla dirs, just change to the top-level directory.
+  cd kernel-%{kversion}%{?dist}
+
 fi
 
+# Now build the fedora kernel tree.
 if [ -d linux-%{kversion}.%{_target_cpu} ]; then
   # Just in case we ctrl-c'd a prep already
   rm -rf deleteme.%{_target_cpu}
@@ -1377,7 +1377,6 @@ ApplyPatch linux-2.6-execshield.patch
 #
 
 # ext4
-ApplyPatch linux-2.6-ext4-quota-metadata-reservation.patch
 
 # xfs
 
@@ -1517,6 +1516,7 @@ ApplyPatch linux-2.6-phylib-autoload.patch
 ApplyPatch linux-2.6-x86-64-fbdev-primary.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-upgrayedd.patch
+ApplyPatch drm-upgrayed-fixes.patch
 #ApplyPatch drm-intel-big-hammer.patch
 #ApplyPatch drm-intel-no-tv-hotplug.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1534,6 +1534,7 @@ ApplyPatch drm-nouveau-safetile-getparam.patch
 ApplyPatch drm-nouveau-kconfig.patch
 ApplyPatch drm-nouveau-update.patch
 ApplyPatch drm-nouveau-d620.patch
+ApplyPatch drm-nouveau-nva3-noaccel.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1569,7 +1570,7 @@ ApplyPatch ice1712-fix-revo71-mixer-names.patch
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
 # rhbz#533746
-ApplyPatch ssb_check_for_sprom.patch
+#ApplyPatch ssb_check_for_sprom.patch
 
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-reset-card-during-probe.patch
@@ -1588,9 +1589,6 @@ ApplyPatch iwlwifi_-Recover-TX-flow-failure.patch
 ApplyPatch iwlwifi_-code-cleanup-for-connectivity-recovery.patch
 ApplyPatch iwlwifi_-iwl_good_ack_health-only-apply-to-AGN-device.patch
 
-# fix possible corruption with ssd
-ApplyPatch ext4-issue-discard-operation-before-releasing-blocks.patch
-
 # iwlwifi: fix scan races
 ApplyPatch iwlwifi-fix-scan-races.patch
 # iwlwifi: fix internal scan race
@@ -1601,20 +1599,9 @@ ApplyPatch iwlwifi-recover_from_tx_stall.patch
 # mac80211/iwlwifi fix connections to some APs (rhbz#558002)
 ApplyPatch mac80211-explicitly-disable-enable-QoS.patch
 ApplyPatch iwlwifi-manage-QoS-by-mac-stack.patch
-ApplyPatch mac80211-do-not-wipe-out-old-supported-rates.patch
-ApplyPatch mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
-
-# iwlwifi: cancel scan watchdog in iwl_bg_abort_scan
-ApplyPatch iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
 
 # l2tp: fix oops in pppol2tp_xmit (#607054)
 ApplyPatch l2tp-fix-oops-in-pppol2tp_xmit.patch
-
-# fix performance problem with CGROUPS
-ApplyPatch sched-fix-over-scheduling-bug.patch
-
-# CVE-2010-2478
-ApplyPatch ethtool-fix-buffer-overflow.patch
 
 # fix broken oneshot support and missing umount events (F13#607327)
 ApplyPatch inotify-fix-inotify-oneshot-support.patch
@@ -1625,17 +1612,16 @@ ApplyPatch crypto-testmgr-add-null-test-for-aesni.patch
 # add tests for crypto async hashing (#571577)
 ApplyPatch crypto-add-async-hash-testing.patch
 
-# CVE-2010-2524
-ApplyPatch cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
 # CVE-2010-2066
 ApplyPatch ext4-make-sure-the-move_ext-ioctl-can-t-overwrite-append-only-files.patch
-# CVE-2010-2266
-ApplyPatch xfs-prevent-swapext-from-operating-on-write-only-files.patch
-
-# fix broken USB device wakeups (#617559)
-ApplyPatch usb-obey-the-sysfs-power-wakeup-setting.patch
+# Fix deadlock caused by patch in 2.6.32.17
+ApplyPatch ext4-fix-freeze-deadlock-under-io.patch
 
 ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
+
+# RHBZ #592785
+ApplyPatch hid-01-usbhid-initialize-interface-pointers-early-enough.patch
+ApplyPatch hid-02-fix-suspend-crash-by-moving-initializations-earlier.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2287,6 +2273,53 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Tue Aug 10 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.18-159
+- Linux 2.6.32.18
+- Backport nouveau noaccel fix for nva3+ cards from f13.
+- ext4-fix-freeze-deadlock-under-io.patch:
+  Fix deadlock caused by patch in 2.6.32.17
+  (0036-ext4-don-t-return-to-userspace-after-freezing-the-fs.patch)
+
+* Tue Aug 10 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.18-158.rc1
+- Bring back drm-upgrayed-fixes.patch, dropped in the
+  2.6.32.16 update. (#620955)
+- Revert upstream DRM stable fix we already have:
+    drm-i915-give-up-on-8xx-lid-status.patch
+
+* Sat Aug 07 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.32.18-rc1
+- Revert DRM patches from -stable we already have:
+    drm-i915-Fix-LVDS-presence-check
+    drm-i915-parse-child-device-from-vbt.patch
+- Comment out patches merged in -stable:
+    xfs-prevent-swapext-from-operating-on-write-only-files.patch
+    cifs-fix-dns-resolver.patch
+
+* Fri Aug 06 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.17-157
+- Fix USB HID initialization (#592785)
+
+* Mon Aug 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.17-156
+- Linux 2.6.32.17
+- Drop the patches commented out for -rc1 except ssb_check_for_sprom.patch
+
+* Mon Aug 02 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.17-155.rc1
+- Linux 2.6.32.17-rc1
+- Comment out patches merged upstream:
+    linux-2.6-ext4-quota-metadata-reservation.patch
+    ext4-issue-discard-operation-before-releasing-blocks.patch
+    mac80211-do-not-wipe-out-old-supported-rates.patch
+    mac80211-fix-supported-rates-IE-if-AP-doesnt-give-us-its-rates.patch
+    iwlwifi-cancel-scan-watchdog-in-iwl_bg_abort_scan.patch
+    sched-fix-over-scheduling-bug.patch
+    ethtool-fix-buffer-overflow.patch
+    cifs-fix-malicious-redirect-problem-in-the-dns-lookup-code.patch
+    usb-obey-the-sysfs-power-wakeup-setting.patch
+- Revert -stable patches we already have:
+    drm-i915-enable-low-power-render-writes-on-gen3-hardware.patch
+    drm-i915-define-mi_arb_state-bits.patch
+- Comment out due to conflicts with -stable:
+    ssb_check_for_sprom.patch
+
 * Tue Jul 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.16-154
 - xfs-prevent-swapext-from-operating-on-write-only-files.patch:
   CVE-2010-2266
