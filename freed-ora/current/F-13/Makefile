@@ -1,6 +1,4 @@
 # Makefile for source rpm: kernel
-# $Id: Makefile,v 1.124 2010/07/09 09:09:09 cebbert Exp $
-NAME     := kernel
 SPECFILE := kernel.spec
 
 # use noarch for make prep instead of the current CPU
@@ -11,25 +9,12 @@ PREPARCH  = noarch
 # we only check the .sign signatures
 UPSTREAM_CHECKS = sign
 
-# local targets we need to carry around in addition to the default sources
-TARGETS		= download
+.PHONY: help
+help:
+%:
+	@echo "Try fedpkg $@ or something like that"
+	@exit 1
 
-define find-makefile-common
-for d in common ../common ../../common ; do if [ -f $$d/Makefile.common ] ; then if [ -f $$d/CVS/Root -a -w $$d/Makefile.common ] ; then cd $$d ; cvs -Q update >/dev/null ; fi ; echo "$$d/Makefile.common" ; break ; fi ; done
-endef
-
-MAKEFILE_COMMON := $(shell $(find-makefile-common))
-
-ifeq ($(MAKEFILE_COMMON),)
-# attept a checkout
-define checkout-makefile-common
-test -f CVS/Root && { cvs -Q -d $$(cat CVS/Root) checkout common && echo "common/Makefile.common" ; } || { echo "ERROR: I can't figure out how to checkout the 'common' module." ; exit -1 ; } >&2
-endef
-
-MAKEFILE_COMMON := $(shell $(checkout-makefile-common))
-endif
-
-include $(MAKEFILE_COMMON)
 include Makefile.config
 
 ifndef KVERSION
@@ -37,6 +22,9 @@ KVERSION := $(shell awk '$$1 == "%define" && $$2 == "base_sublevel" { \
 				print "2.6." $$3 \
 			 }' $(SPECFILE))
 endif
+
+prep:
+	fedpkg -v prep --arch=$(PREPARCH)
 
 extremedebug:
 	@perl -pi -e 's/# CONFIG_DEBUG_PAGEALLOC is not set/CONFIG_DEBUG_PAGEALLOC=y/' config-nodebug
@@ -96,6 +84,10 @@ debug:
 	@perl -pi -e 's/# CONFIG_DMADEVICES_VDEBUG is not set/CONFIG_DMADEVICES_VDEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_CEPH_FS_PRETTYDEBUG is not set/CONFIG_CEPH_FS_PRETTYDEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_QUOTA_DEBUG is not set/CONFIG_QUOTA_DEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_KGDB_KDB is not set/CONFIG_KGDB_KDB=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_KDB_KEYBOARD is not set/CONFIG_KDB_KEYBOARD=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_CPU_NOTIFIER_ERROR_INJECT is not set/CONFIG_CPU_NOTIFIER_ERROR_INJECT=m/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DEBUG_PER_CPU_MAPS is not set/CONFIG_DEBUG_PER_CPU_MAPS=y/' config-nodebug
 
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
@@ -160,6 +152,10 @@ release:
 	@perl -pi -e 's/CONFIG_DMADEVICES_VDEBUG=y/# CONFIG_DMADEVICES_VDEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_CEPH_FS_PRETTYDEBUG=y/# CONFIG_CEPH_FS_PRETTYDEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_QUOTA_DEBUG=y/# CONFIG_QUOTA_DEBUG is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_CPU_NOTIFIER_ERROR_INJECT=m/# CONFIG_CPU_NOTIFIER_ERROR_INJECT is not set/' config-nodebug
+	#@perl -pi -e 's/CONFIG_KGDB_KDB=y/# CONFIG_KGDB_KDB is not set/' config-nodebug
+	#@perl -pi -e 's/CONFIG_KDB_KEYBOARD=y/# CONFIG_KDB_KEYBOARD is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_DEBUG_PER_CPU_MAPS=y/# CONFIG_DEBUG_PER_CPU_MAPS is not set/' config-nodebug
 
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
@@ -173,9 +169,6 @@ reconfig:
 	@rm -f kernel-*-config
 	@VERSION=$(KVERSION) make -f Makefile.config configs
 	@scripts/reconfig.sh
-
-force-tag: $(SPECFILE) $(COMMON_DIR)/branches
-	@$(MAKE) tag TAG_OPTS="-F $(TAG_OPTS)"
 
 unused-kernel-patches:
 	@for f in *.patch; do if [ -e $$f ]; then (egrep -q "^Patch[[:digit:]]+:[[:space:]]+$$f" $(SPECFILE) || echo "Unused:    $$f") && egrep -q "^ApplyPatch[[:space:]]+$$f|^ApplyOptionalPatch[[:space:]]+$$f" $(SPECFILE) || echo "Unapplied: $$f"; fi; done
