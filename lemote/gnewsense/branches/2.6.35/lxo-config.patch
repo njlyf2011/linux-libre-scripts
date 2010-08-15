@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-08-10 21:40:57.000000000 +0000
-+++ Makefile	2010-08-10 21:41:04.000000000 +0000
+--- Makefile.orig	2010-08-14 05:44:25.000000000 +0000
++++ Makefile	2010-08-14 05:44:27.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 35
--EXTRAVERSION = .1-libre1
-+EXTRAVERSION = .1-libre1-lemote
+-EXTRAVERSION = .2-libre1
++EXTRAVERSION = .2-libre1-lemote
  NAME = Sheep on Meth
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-08-10 21:48:06.000000000 +0000
-@@ -0,0 +1,2610 @@
++++ .config	2010-08-14 05:48:28.000000000 +0000
+@@ -0,0 +1,2611 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.35.1-libre1-lemote
-+# Tue Aug 10 21:48:06 2010
++# Linux kernel version: 2.6.35.2-libre1-lemote
++# Sat Aug 14 05:48:28 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -2511,6 +2511,7 @@ Index: .config
 +CONFIG_CRYPTO_PCOMP=y
 +CONFIG_CRYPTO_MANAGER=m
 +CONFIG_CRYPTO_MANAGER2=y
++CONFIG_CRYPTO_MANAGER_TESTS=y
 +CONFIG_CRYPTO_GF128MUL=m
 +CONFIG_CRYPTO_NULL=m
 +CONFIG_CRYPTO_WORKQUEUE=y
