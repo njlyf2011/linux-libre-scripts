@@ -47,7 +47,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 161
+%global baserelease 163
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -824,9 +824,6 @@ Patch12340: ice1712-fix-revo71-mixer-names.patch
 # rhbz#572653
 Patch12370: linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
-# rhbz#533746
-Patch12380: ssb_check_for_sprom.patch
-
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 Patch12391: iwlwifi-reset-card-during-probe.patch
 
@@ -868,6 +865,8 @@ Patch14130: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 Patch14140: hid-01-usbhid-initialize-interface-pointers-early-enough.patch
 Patch14141: hid-02-fix-suspend-crash-by-moving-initializations-earlier.patch
 
+Patch14150: mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+Patch14160: mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
 # ==============================================================================
 %endif
 
@@ -1563,9 +1562,6 @@ ApplyPatch ice1712-fix-revo71-mixer-names.patch
 # rhbz#572653
 ApplyPatch linux-2.6-b43_-Rewrite-DMA-Tx-status-handling-sanity-checks.patch
 
-# rhbz#533746
-#ApplyPatch ssb_check_for_sprom.patch
-
 # backport iwlwifi fixes (thanks, sgruszka!) -- drop when stable catches-up
 ApplyPatch iwlwifi-reset-card-during-probe.patch
 
@@ -1610,12 +1606,18 @@ ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 ApplyPatch hid-01-usbhid-initialize-interface-pointers-early-enough.patch
 ApplyPatch hid-02-fix-suspend-crash-by-moving-initializations-earlier.patch
 
+# Fix fallout from stack guard page
+ApplyPatch mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+ApplyPatch mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+
 # END OF PATCH APPLICATIONS ====================================================
 %endif
 
 # Any further pre-build tree manipulations happen here.
 
 chmod +x scripts/checkpatch.pl
+
+touch .scmversion
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -2260,6 +2262,20 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Wed Aug 18 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.19-163
+- Bump version.
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- Touch .scmversion in the kernel top level to prevent scripts/setlocalversion
+  from recursing into our fedpkg git tree and trying to decide whether the
+  kernel git is modified (obviously not, since it's a tarball.) Fixes make
+  local.
+
+* Tue Aug 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.32.19-162
+- Fix fallout from the stack guard page fixes.
+  (mm-fix-page-table-unmap-for-stack-guard-page-properly.patch,
+   mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch)
+
 * Sun Aug 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.32.19.
 
