@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 148
+%global baserelease 149
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -877,6 +877,9 @@ Patch13076: inotify-send-IN_UNMOUNT-events.patch
 
 Patch13080: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
+Patch13090: mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+Patch13091: mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1617,6 +1620,10 @@ ApplyPatch inotify-send-IN_UNMOUNT-events.patch
 # RHBZ#610911
 ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
+# fix fallout from stack guard page fixes
+ApplyPatch mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+ApplyPatch mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2265,6 +2272,11 @@ fi
 
 
 %changelog
+* Tue Aug 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.33.8-149
+- Fix fallout from the stack guard page fixes.
+  (mm-fix-page-table-unmap-for-stack-guard-page-properly.patch,
+   mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch)
+
 * Sun Aug 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjust patch-libre-2.6.33.7.
 
