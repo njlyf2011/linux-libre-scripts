@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 39
+%global baserelease 42
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -715,6 +715,7 @@ Patch1803: drm-encoder-disable.patch
 Patch1815: drm-nouveau-updates.patch
 Patch1816: drm-nouveau-race-fix.patch
 Patch1817: drm-nouveau-nva3-noaccel.patch
+Patch1818: drm-nouveau-nv50-crtc-update-delay.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1820: drm-i915-fix-edp-panels.patch
@@ -787,6 +788,9 @@ Patch12430: cred-dont-resurrect-dead-credentials.patch
 Patch12440: direct-io-move-aio_complete-into-end_io.patch
 Patch12450: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 Patch12460: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
+
+Patch12470: mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+Patch12480: mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
 
 %endif
 
@@ -1389,6 +1393,7 @@ ApplyPatch drm-encoder-disable.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
+ApplyPatch drm-nouveau-nv50-crtc-update-delay.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1469,6 +1474,9 @@ ApplyPatch direct-io-move-aio_complete-into-end_io.patch
 ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
+# Fix fallout from stack guard page
+ApplyPatch mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+ApplyPatch mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1477,6 +1485,8 @@ ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 # Any further pre-build tree manipulations happen here.
 
 chmod +x scripts/checkpatch.pl
+
+touch .scmversion
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -2089,6 +2099,30 @@ fi
 
 
 %changelog
+* Wed Aug 18 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.4-42
+- Revert "ata-piix: Detect spurious IRQs and clear them",
+  should be fixed by commit 27943620c upstream.
+
+* Wed Aug 18 2010 Jarod Wilson <jarod@redhat.com>
+- make f13 lirc userspace happy with ioctl defs again (#623770)
+
+* Wed Aug 18 2010 Dave Jones <davej@redhat.com>
+- ata-piix: Detect spurious IRQs and clear them.
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- Touch .scmversion in the kernel top level to prevent scripts/setlocalversion
+  from recursing into our fedpkg git tree and trying to decide whether the
+  kernel git is modified (obviously not, since it's a tarball.) Fixes make
+  local.
+
+* Tue Aug 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.4-41
+- Fix fallout from the stack guard page fixes.
+  (mm-fix-page-table-unmap-for-stack-guard-page-properly.patch,
+   mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch)
+
+* Tue Aug 17 2010 Ben Skeggs <bskeggs@redhat.com>  2.6.34.4-40
+- drm-nouveau-nv50-crtc-update-delay.patch (rhbz#614452)
+
 * Sun Aug 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.34.4.
 
