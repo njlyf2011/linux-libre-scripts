@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 42
+%global baserelease 44
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -765,7 +765,6 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 Patch12018: neuter_intel_microcode_load.patch
 
 Patch12019: linux-2.6-umh-refactor.patch
-Patch12020: coredump-uid-pipe-check.patch
 
 Patch12030: ssb_check_for_sprom.patch
 
@@ -788,9 +787,6 @@ Patch12430: cred-dont-resurrect-dead-credentials.patch
 Patch12440: direct-io-move-aio_complete-into-end_io.patch
 Patch12450: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 Patch12460: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
-
-Patch12470: mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
-Patch12480: mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
 
 %endif
 
@@ -1429,8 +1425,7 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 ApplyPatch neuter_intel_microcode_load.patch
 
 # Refactor UserModeHelper code & satisfy abrt recursion check request
-#ApplyPatch linux-2.6-umh-refactor.patch
-#ApplyPatch coredump-uid-pipe-check.patch
+ApplyPatch linux-2.6-umh-refactor.patch
 
 # rhbz#533746
 # awful, ugly conflicts between this patch and the 2.6.34.2 patch:
@@ -1473,10 +1468,6 @@ ApplyPatch cred-dont-resurrect-dead-credentials.patch
 ApplyPatch direct-io-move-aio_complete-into-end_io.patch
 ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
-
-# Fix fallout from stack guard page
-ApplyPatch mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
-ApplyPatch mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2099,6 +2090,22 @@ fi
 
 
 %changelog
+* Mon Aug 23 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.34.5.
+
+* Mon Aug 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.5-44
+- nouveau: fix eDP panels that flip HPD during link training (rhbz#596562)
+
+* Sat Aug 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.5-43
+- Linux 2.6.34.5
+- Drop merged patches:
+   mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+   mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+
+* Wed Aug 18 2010 Chuck Ebbert <cebbert@redhat.com>
+- Restore linux-2.6-umh-refactor.patch, still needed in 2.6.34 (#625150)
+- Drop coredump-uid-pipe-check.patch, now upstream.
+
 * Wed Aug 18 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.4-42
 - Revert "ata-piix: Detect spurious IRQs and clear them",
   should be fixed by commit 27943620c upstream.
