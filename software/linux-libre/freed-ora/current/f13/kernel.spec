@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 44
+%global baserelease 47
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -781,12 +781,14 @@ Patch12270: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 Patch12400: input-synaptics-relax-capability-id-checks-on-new-hardware.patch
 
 Patch12410: cifs-fix-dns-resolver.patch
-Patch12420: matroxfb-fix-font-corruption.patch
 Patch12430: cred-dont-resurrect-dead-credentials.patch
 
 Patch12440: direct-io-move-aio_complete-into-end_io.patch
 Patch12450: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 Patch12460: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
+
+Patch12470: drivers-hwmon-coretemp-c-detect-the-thermal-sensors-by-cpuid.patch
+Patch12480: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 
 %endif
 
@@ -1458,9 +1460,6 @@ ApplyPatch input-synaptics-relax-capability-id-checks-on-new-hardware.patch
 # Remove __init and __exit attributes from resolver code
 ApplyPatch cifs-fix-dns-resolver.patch
 
-# RHBZ #617687
-ApplyPatch matroxfb-fix-font-corruption.patch
-
 # RHBZ #591015
 ApplyPatch cred-dont-resurrect-dead-credentials.patch
 
@@ -1468,6 +1467,12 @@ ApplyPatch cred-dont-resurrect-dead-credentials.patch
 ApplyPatch direct-io-move-aio_complete-into-end_io.patch
 ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
+
+# bz #625734
+ApplyPatch drivers-hwmon-coretemp-c-detect-the-thermal-sensors-by-cpuid.patch
+
+# bz #610941
+ApplyPatch kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2090,6 +2095,23 @@ fi
 
 
 %changelog
+* Fri Aug 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.34.6.
+
+* Fri Aug 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.6-47
+- Linux 2.6.34.6
+- drivers-hwmon-coretemp-c-detect-the-thermal-sensors-by-cpuid.patch (#625734)
+- kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch (#610941)
+
+* Wed Aug 25 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.6-46.rc1
+- Linux 2.6.34.6-rc1
+- Drop merged patches:
+    matroxfb-fix-font-corruption.patch
+
+* Tue Aug 24 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.5-45
+- Revert commit 3d61510f4ecacfe47c75c0eb51c0659dfa77fb1b from 2.6.34.2;
+  it causes dropped keystrokes (#625758)
+
 * Mon Aug 23 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.34.5.
 
