@@ -1,3 +1,5 @@
+* drivers/gpu/drm/nouveau/nouveau_grctx.c: Adjusted, was already deblobbed.
+
  drivers/gpu/drm/drm_crtc_helper.c           |   22 +-
  drivers/gpu/drm/i2c/ch7006_drv.c            |   22 +-
  drivers/gpu/drm/i2c/ch7006_priv.h           |    2 +-
@@ -2716,8 +2718,8 @@ index f731c5f..0000000
 -		return -ENODEV;
 -
 -	if (!pgraph->ctxprog) {
--		sprintf(name, "nouveau/nv%02x.ctxprog", chipset);
--		ret = request_firmware(&fw, name, &dev->pdev->dev);
+-		sprintf(name, "/*(DEBLOBBED)*/", chipset);
+-		ret = reject_firmware(&fw, name, &dev->pdev->dev);
 -		if (ret) {
 -			NV_ERROR(dev, "No ctxprog for NV%02x\n", chipset);
 -			return ret;
@@ -2743,8 +2745,8 @@ index f731c5f..0000000
 -	}
 -
 -	if (!pgraph->ctxvals) {
--		sprintf(name, "nouveau/nv%02x.ctxvals", chipset);
--		ret = request_firmware(&fw, name, &dev->pdev->dev);
+-		sprintf(name, "/*(DEBLOBBED)*/", chipset);
+-		ret = reject_firmware(&fw, name, &dev->pdev->dev);
 -		if (ret) {
 -			NV_ERROR(dev, "No ctxvals for NV%02x\n", chipset);
 -			nouveau_grctx_fini(dev);

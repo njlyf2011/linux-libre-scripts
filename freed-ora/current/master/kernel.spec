@@ -58,7 +58,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
@@ -1926,10 +1926,11 @@ fi
 #                 ||     ||
 
 %changelog
-* Thu Aug 12 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Deblobbed 2.6.35-libre1.
+* Sat Aug 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed 2.6.35-libre2.
 - Deblobbed lirc-staging-2.6.36.patch.
 - Deblobbed linux-2.6-v4l-dvb-ir-core-update.patch.
+- Adjusted drm-nouveau-updates.patch.
 
 * Wed Aug 04 2010 Kyle McMartin <kyle@redhat.com>
 - Disable %released_kernel.
