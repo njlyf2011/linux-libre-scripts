@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 3
+%global baserelease 9
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -620,8 +620,6 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
 
-Patch21: linux-2.6-tip.git-396e894d289d69bacf5acd983c97cd6e21a14c08.patch
-
 Patch30: git-utrace.patch
 Patch31: utrace-ptrace-fix-build.patch
 Patch32: utrace-remove-use-of-kref_set.patch
@@ -636,6 +634,8 @@ Patch201: linux-2.6-debug-nmi-timeout.patch
 Patch202: linux-2.6-debug-taint-vm.patch
 Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch204: linux-2.6-debug-always-inline-kzalloc.patch
+
+Patch300: create-sys-fs-cgroup-to-mount-cgroupfs-on.patch
 
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch383: linux-2.6-defaults-aspm.patch
@@ -672,8 +672,13 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 # DRM
 Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
+# drm fixes nouveau depends on
+Patch1805: drm-simplify-i2c-config.patch
+Patch1806: drm-sil164-module.patch
+Patch1807: drm-i2c-ch7006-fix.patch
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
+Patch1811: drm-nouveau-race-fix.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -699,13 +704,13 @@ Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 Patch2911: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
 Patch2913: linux-2.6-v4l-dvb-ir-core-memleak-fixes.patch
+Patch2914: linux-2.6-v4l-dvb-ir-core-streamzap.patch
 
 Patch2915: lirc-staging-2.6.36.patch
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
 
 # fs fixes
-Patch3000: linux-2.6-ext4-fix-freeze-deadlock.patch
 
 # NFSv4
 
@@ -727,6 +732,9 @@ Patch12040: only-use-alpha2-regulatory-information-from-country-IE.patch
 Patch12050: direct-io-move-aio_complete-into-end_io.patch
 Patch12060: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 Patch12070: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
+
+Patch12080: mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+Patch12081: mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
 
 %endif
 
@@ -1174,8 +1182,6 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 ApplyPatch linux-2.6-hotfixes.patch
 
-ApplyPatch linux-2.6-tip.git-396e894d289d69bacf5acd983c97cd6e21a14c08.patch
-
 # Roland's utrace ptrace replacement.
 ApplyPatch git-utrace.patch
 ApplyPatch utrace-ptrace-fix-build.patch
@@ -1208,7 +1214,6 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 #
 
 # ext4
-ApplyPatch linux-2.6-ext4-fix-freeze-deadlock.patch
 
 # xfs
 
@@ -1286,6 +1291,7 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 #ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
+ApplyPatch create-sys-fs-cgroup-to-mount-cgroupfs-on.patch
 
 
 # /dev/crash driver.
@@ -1299,8 +1305,12 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 #ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 #ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
 
+ApplyPatch drm-simplify-i2c-config.patch
+ApplyPatch drm-sil164-module.patch
+ApplyPatch drm-i2c-ch7006-fix.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-updates.patch
+ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
@@ -1322,6 +1332,7 @@ ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
 
 ApplyPatch linux-2.6-v4l-dvb-ir-core-update.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-memleak-fixes.patch
+ApplyPatch linux-2.6-v4l-dvb-ir-core-streamzap.patch
 ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 
@@ -1346,6 +1357,10 @@ ApplyPatch direct-io-move-aio_complete-into-end_io.patch
 ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
+# fix fallout from stack guard page patches
+ApplyPatch mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+ApplyPatch mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1369,6 +1384,8 @@ done
 %if !%{debugbuildsenabled}
 rm -f kernel-%{version}-*debug.config
 %endif
+
+touch .scmversion
 
 # now run oldconfig over all the config files
 for i in *.config
@@ -1930,7 +1947,45 @@ fi
 # and build.
 
 %changelog
-* Sat Aug 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Aug 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.2-9
+- Fix fallout from the stack guard page fixes.
+  (mm-fix-page-table-unmap-for-stack-guard-page-properly.patch,
+   mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch)
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- Move cgroup fs to /sys/fs/cgroup instead of /cgroup in accordance with
+  upstream change post 2.6.35.
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- Touch .scmversion in the kernel top level to prevent scripts/setlocalversion
+  from recursing into our fedpkg git tree and trying to decide whether the
+  kernel git is modified (obviously not, since it's a tarball.) Fixes make
+  local.
+
+* Mon Aug 16 2010 Jarod Wilson <jarod@redhat.com>
+- Add ir-core streamzap driver, nuke lirc_streamzap
+
+* Sun Aug 15 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.2-8
+- Linux 2.6.35.2
+
+* Fri Aug 13 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.2-7.rc1
+- Linux 2.6.35.2-rc1
+- Comment out patches merged in -stable:
+    linux-2.6-tip.git-396e894d289d69bacf5acd983c97cd6e21a14c08.patch
+    linux-2.6-ext4-fix-freeze-deadlock.patch
+- New config option:
+    CONFIG_CRYPTO_MANAGER_TESTS=y
+
+* Tue Aug 10 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.1-6
+- Linux 2.6.35.1
+
+* Tue Aug 10 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.1-5.rc1
+- nouveau: bring in patches up to what will be in 2.6.36
+
+* Sat Aug 07 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.1-4.rc1
+- Linux 2.6.35.1-rc1
+
+* Sat Aug 07 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Aug 28
 - Deblobbed 2.6.35-libre2.
 - Deblobbed lirc-staging-2.6.36.patch.
 - Deblobbed linux-2.6-v4l-dvb-ir-core-update.patch.
