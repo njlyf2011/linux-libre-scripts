@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 9
+%global baserelease 12
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -714,8 +714,6 @@ Patch2917: hdpvr-ir-enable.patch
 
 # NFSv4
 
-# VIA Nano / VX8xx updates
-
 # patches headed upstream
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
@@ -724,8 +722,6 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
 
-Patch12030: ssb_check_for_sprom.patch
-
 Patch12040: only-use-alpha2-regulatory-information-from-country-IE.patch
 
 # rhbz #617699
@@ -733,8 +729,7 @@ Patch12050: direct-io-move-aio_complete-into-end_io.patch
 Patch12060: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 Patch12070: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
-Patch12080: mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
-Patch12081: mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+Patch12080: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 
 %endif
 
@@ -1347,9 +1342,6 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
-# rhbz#533746
-#ApplyPatch ssb_check_for_sprom.patch
-
 ApplyPatch only-use-alpha2-regulatory-information-from-country-IE.patch
 
 # rhbz #617699
@@ -1357,9 +1349,8 @@ ApplyPatch direct-io-move-aio_complete-into-end_io.patch
 ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
-# fix fallout from stack guard page patches
-ApplyPatch mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
-ApplyPatch mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+# bz 610941
+ApplyPatch kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1947,6 +1938,23 @@ fi
 # and build.
 
 %changelog
+* Fri Aug 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.4-12
+- Linux 2.6.35.4
+- kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch (#610941)
+
+* Wed Aug 25 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.4-11.rc1
+- Linux 2.6.35.4-rc1
+- Fix up linux-2.6-i386-nx-emulation.patch for 2.6.35.4
+
+* Sat Aug 21 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.3-10
+- Linux 2.6.35.3
+- Drop merged patches:
+   mm-fix-page-table-unmap-for-stack-guard-page-properly.patch
+   mm-fix-up-some-user-visible-effects-of-the-stack-guard-page.patch
+
+* Wed Aug 18 2010 Dave Jones <davej@redhat.com>
+- systemd is dependant upon autofs, so build it in instead of modular.
+
 * Tue Aug 17 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.2-9
 - Fix fallout from the stack guard page fixes.
   (mm-fix-page-table-unmap-for-stack-guard-page-properly.patch,
