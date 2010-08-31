@@ -48,7 +48,10 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 0
+# For non-released -rc kernels, this will be prepended with "0.", so
+# for example a 3 here will become 0.3
+#
+%global baserelease 12
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -62,7 +65,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-#define rcrevlibre -libre
+%define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -93,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 3
 # The git snapshot level
-%define gitrev 1
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -163,7 +166,6 @@ Summary: The Linux kernel
 %define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
-# (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
 
 # pkg_release is what we'll fill in for the rpm Release: field
@@ -387,12 +389,12 @@ Summary: The Linux kernel
 %define vdso_arches ppc ppc64
 %endif
 
+# Should make listnewconfig fail if there's config options
+# printed out?
 %if %{nopatches}%{using_upstream_branch}
-# Ignore unknown options in our config-* files.
-# Some options go with patches we're not applying.
-%define oldconfig_target loose_nonint_oldconfig
+%define listnewconfig_fail 0
 %else
-%define oldconfig_target nonint_oldconfig
+%define listnewconfig_fail 1
 %endif
 
 # To temporarily exclude an architecture from being built, add it to
@@ -512,7 +514,7 @@ BuildRequires: xmlto, asciidoc
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -600,18 +602,18 @@ Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
 
 Patch02: git-linus.diff
 
-# we always need nonintconfig, even for -vanilla kernels
-Patch03: linux-2.6-build-nonintconfig.patch
-
 # we also need compile fixes for -vanilla
 Patch04: linux-2.6-compile-fixes.patch
 
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
-Patch08: freedo.patch
+Patch07: freedo.patch
+
+Patch08: fix-oldnoconfig-to-dtrt.patch
 
 %if !%{nopatches}
+
 
 # revert upstream patches we get via other methods
 Patch09: linux-2.6-upstream-reverts.patch
@@ -621,8 +623,6 @@ Patch09: linux-2.6-upstream-reverts.patch
 Patch20: linux-2.6-hotfixes.patch
 
 Patch30: git-utrace.patch
-Patch31: utrace-ptrace-fix-build.patch
-Patch32: utrace-remove-use-of-kref_set.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -637,8 +637,6 @@ Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch383: linux-2.6-defaults-aspm.patch
-Patch384: pci-acpi-disable-aspm-if-no-osc.patch
-Patch385: pci-aspm-dont-enable-too-early.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -694,16 +692,12 @@ Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2902: linux-2.6-v4l-dvb-uvcvideo-update.patch
 
 Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-Patch2911: linux-2.6-v4l-dvb-add-kworld-a340-support.patch
 Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
-Patch2913: linux-2.6-v4l-dvb-ir-core-memleak-fixes.patch
 
-Patch2915: lirc-staging-2.6.36.patch
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
 
 # fs fixes
-Patch3000: linux-2.6-ext4-fix-freeze-deadlock.patch
 
 # NFSv4
 
@@ -716,10 +710,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
-
-Patch12030: ssb_check_for_sprom.patch
-
-Patch12040: only-use-alpha2-regulatory-information-from-country-IE.patch
 
 %endif
 
@@ -1145,11 +1135,7 @@ make -f %{SOURCE20} VERSION=%{version} configs
 
 ApplyOptionalPatch git-linus.diff
 
-# This patch adds a "make nonint_oldconfig" which is non-interactive and
-# also gives a list of missing options at the end. Useful for automated
-# builds (as used in the buildsystem).
-ApplyPatch linux-2.6-build-nonintconfig.patch
-
+ApplyPatch fix-oldnoconfig-to-dtrt.patch
 ApplyPatch linux-2.6-makefile-after_link.patch
 
 #
@@ -1169,8 +1155,6 @@ ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
 ApplyPatch git-utrace.patch
-ApplyPatch utrace-ptrace-fix-build.patch
-ApplyPatch utrace-remove-use-of-kref_set.patch
 
 # Architecture patches
 # x86(-64)
@@ -1199,7 +1183,6 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 #
 
 # ext4
-ApplyPatch linux-2.6-ext4-fix-freeze-deadlock.patch
 
 # xfs
 
@@ -1224,7 +1207,7 @@ ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
-ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
+###FIX###ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 #
@@ -1234,10 +1217,6 @@ ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
-# disable aspm if acpi doesn't provide an _OSC method
-ApplyPatch pci-acpi-disable-aspm-if-no-osc.patch
-# allow drivers to disable aspm at load time
-ApplyPatch pci-aspm-dont-enable-too-early.patch
 
 #
 # SCSI Bits.
@@ -1291,7 +1270,7 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 #ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
 
 # Nouveau DRM + drm fixes
-ApplyPatch drm-nouveau-updates.patch
+#ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
@@ -1309,15 +1288,12 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
-ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
+#ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
+#ApplyPatch linux-2.6-v4l-dvb-ir-core-update.patch
 
-ApplyPatch linux-2.6-v4l-dvb-ir-core-update.patch
-ApplyPatch linux-2.6-v4l-dvb-ir-core-memleak-fixes.patch
-ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-ApplyPatch linux-2.6-v4l-dvb-add-kworld-a340-support.patch
+###FIX###ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 
 # http://www.lirc.org/
-ApplyPatch lirc-staging-2.6.36.patch
 #ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
@@ -1327,11 +1303,6 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
-# rhbz#533746
-#ApplyPatch ssb_check_for_sprom.patch
-
-ApplyPatch only-use-alpha2-regulatory-information-from-country-IE.patch
-
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1339,6 +1310,8 @@ ApplyPatch only-use-alpha2-regulatory-information-from-country-IE.patch
 # Any further pre-build tree manipulations happen here.
 
 chmod +x scripts/checkpatch.pl
+
+touch .scmversion
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -1361,7 +1334,15 @@ for i in *.config
 do
   mv $i .config
   Arch=`head -1 .config | cut -b 3-`
-  make ARCH=$Arch %{oldconfig_target} > /dev/null
+  make ARCH=$Arch listnewconfig | egrep '^CONFIG_' >.newoptions || true
+%if %{listnewconfig_fail}
+  if [ -s .newoptions ]; then
+    cat .newoptions
+    exit 0
+  fi
+%endif
+  rm -f .newoptions
+  make ARCH=$Arch oldnoconfig
   echo "# $Arch" > configs/$i
   cat .config >> configs/$i
 done
@@ -1438,7 +1419,7 @@ BuildKernel() {
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
 
-    make -s ARCH=$Arch %{oldconfig_target} > /dev/null
+    make -s ARCH=$Arch oldnoconfig >/dev/null
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
     make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
@@ -1526,11 +1507,14 @@ BuildKernel() {
     # Copy .config to include/config/auto.conf so "make prepare" is unnecessary.
     cp $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/config/auto.conf
 
+%if %{fancy_debuginfo}
     if test -s vmlinux.id; then
       cp vmlinux.id $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/vmlinux.id
     else
-      echo >&2 "*** WARNING *** no vmlinux build ID! ***"
+      echo >&2 "*** ERROR *** no vmlinux build ID! ***"
+      exit 1
     fi
+%endif
 
     #
     # save the vmlinux file for kernel debugging into the kernel-debuginfo rpm
@@ -1916,8 +1900,8 @@ fi
 # and build.
 
 #  ___________________________________________________________
-# / This branch is for Fedora 14. You probably want to commit \
-# \ to the F-13 branch instead, or in addition to this one.   /
+# / This branch is for Fedora 15. You probably want to commit \
+# \ to the F-14 branch instead, or in addition to this one.   /
 #  -----------------------------------------------------------
 #         \   ^__^
 #          \  (@@)\_______
@@ -1926,7 +1910,70 @@ fi
 #                 ||     ||
 
 %changelog
-* Sat Aug 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Aug 30 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.36-rc3.
+
+* Mon Aug 30 2010 Kyle McMartin <kyle@redhat.com> - 2.6.36-0.12.rc3.git0
+- Linux 2.6.36-rc3
+
+* Sun Aug 29 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.11.rc2.git5
+- Linux 2.6.36-rc2-git5
+
+* Wed Aug 25 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.10.rc2.git4
+- Linux 2.6.36-rc2-git4
+
+* Tue Aug 24 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.9.rc2.git3
+- Linux 2.6.36-rc2-git3
+
+* Mon Aug 23 2010 Roland McGrath <roland@redhat.com> - 2.6.36-0.8.rc2.git0
+- utrace update
+
+* Sun Aug 22 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.7.rc2.git0
+- Linux 2.6.36-rc2
+
+* Sun Aug 22 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.7.rc1.git4
+- Linux 2.6.36-rc1-git4
+- Fix context in linux-2.6-i386-nx-emulation.patch
+
+* Sat Aug 21 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.6.rc1.git3
+- Drop utrace patch that causes hang on boot.
+
+* Fri Aug 20 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.5.rc1.git3
+- Linux 2.6.36-rc1-git3
+- Drop x86-cpu-fix-regression-in-amd-errata-checking-code.patch, now merged.
+
+* Thu Aug 19 2010 Kyle McMartin <kmcmartin@redhat.com> - 2.6.36-0.4.rc1.git1
+- Run oldnoconfig on the configs during make prep.
+- Make the fix oldnoconfig patch a one liner.
+
+* Wed Aug 18 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.3.rc1.git1
+- Fix hangs on boot with some AMD processors
+  (x86-cpu-fix-regression-in-amd-errata-checking-code.patch)
+- Drop unused ssb_check_for_sprom.patch
+
+* Wed Aug 18 2010 Dave Jones <davej@redhat.com>
+- systemd is dependant upon autofs, so build it in instead of modular.
+
+* Wed Aug 18 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.36-rc1-git1
+
+* Wed Aug 18 2010 Kyle McMartin <kmcmartin@redhat.com> - 2.6.36-0.2.rc1.git0
+- Link perf against libnewt for TUI support.
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com> - 2.6.36-0.1.rc1.git0
+- Fix 'oldnoconfig' to do what nonint_loose_oldconfig did.
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- explicitly set KERNEL_GZIP
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- Linux 2.6.36-rc1
+
+* Tue Aug 17 2010 Kyle McMartin <kyle@redhat.com>
+- Prevent scripts/setlocalversion from mucking with our version
+  numbers.
+
+* Tue Aug 17 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Aug 28
 - Deblobbed 2.6.35-libre2.
 - Deblobbed lirc-staging-2.6.36.patch.
 - Deblobbed linux-2.6-v4l-dvb-ir-core-update.patch.
