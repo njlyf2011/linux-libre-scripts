@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 12
+%global baserelease 13
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -710,7 +710,7 @@ Patch2915: lirc-staging-2.6.36.patch
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
 
-# fs fixes
+Patch3000: linux-2.6-via-velocity-dma-fix.patch
 
 # NFSv4
 
@@ -1337,6 +1337,9 @@ ApplyPatch lirc-staging-2.6.36.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
 
+# Fix DMA bug on via-velocity
+ApplyPatch linux-2.6-via-velocity-dma-fix.patch
+
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
@@ -1938,6 +1941,9 @@ fi
 # and build.
 
 %changelog
+* Tue Aug 31 2010 Dave Jones <davej@redhat.com> 2.6.35.4-13
+- Fix incorrect DMA size freeing error in via-velocity.
+
 * Fri Aug 27 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.4-12
 - Linux 2.6.35.4
 - kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch (#610941)
