@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 14
+%global baserelease 16
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -706,8 +706,6 @@ Patch2917: hdpvr-ir-enable.patch
 
 # NFSv4
 
-# VIA Nano / VX8xx updates
-
 # patches headed upstream
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
@@ -715,6 +713,10 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
+
+Patch12020: alsa-fix-substream-proc-status-read.patch
+
+Patch12030: tpm-fix-stall-on-boot.patch
 
 %endif
 
@@ -1234,6 +1236,8 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
+# patch from alsa list to try to fix bug #628404
+ApplyPatch alsa-fix-substream-proc-status-read.patch
 
 # Networking
 
@@ -1310,6 +1314,9 @@ ApplyPatch hdpvr-ir-enable.patch
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
+
+# try to fix stalls during boot (#530393)
+ApplyPatch tpm-fix-stall-on-boot.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1918,6 +1925,17 @@ fi
 #                 ||     ||
 
 %changelog
+* Fri Sep 03 2010 Dave Jones <davej@redhat.com> 2.6.36-0.16.rc3.git0
+- exec-randomization: brk away from exec rand area (Kees Cook)
+
+* Fri Sep 03 2010 Dave Jones <davej@redhat.com>
+- Remove the execshield boot parameter.
+  Based on a patch from Kees Cook
+
+* Thu Sep 02 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.15.rc3.git0
+- Add patch from ALSA mailing list to try to fix bug #628404
+- tpm-fix-stall-on-boot.patch: attempt to fix stalls during boot (#530393)
+
 * Wed Sep 01 2010 Kyle McMartin <kyle@redhat.com> - 2.6.36-0.14.rc3.git0
 - Fix icebp breakpoints, patch from Frederic Weisbecker.
   (https://bugzilla.kernel.org/show_bug.cgi?id=16315#c26)
