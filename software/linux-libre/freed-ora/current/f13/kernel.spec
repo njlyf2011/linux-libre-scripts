@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 51
+%global baserelease 52
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -654,6 +654,7 @@ Patch305: linux-2.6-fix-btusb-autosuspend.patch
 
 Patch310: linux-2.6-usb-wwan-update.patch
 
+Patch370: linux-2.6-defaults-acpi-pci_no_crs.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 # enable ASPM
 Patch383: linux-2.6-defaults-aspm.patch
@@ -794,6 +795,15 @@ Patch12480: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 Patch12490: dell-wmi-add-support-for-eject-key.patch
 Patch12500: irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
 Patch12510: wireless-extensions-fix-kernel-heap-content-leak.patch
+
+Patch12515: sanity-check-bond-proc_entry.patch
+Patch12516: asix-use-eth_mac_addr.patch
+Patch12517: flexcop-fix-xlate_proc_name-warning.patch
+
+Patch12520: acpi-ec-pm-fix-race-between-ec-transactions-and-system-suspend.patch
+Patch12521: nfs-fix-an-oops-in-the-nfsv4-atomic-open-code.patch
+Patch12522: keys-fix-bug-in-keyctl-session-to-parent-if-parent-has-no-session-keyring.patch
+Patch12523: keys-fix-rcu-no-lock-warning-in-keyctl-session-to-parent.patch
 
 %endif
 
@@ -1311,6 +1321,8 @@ ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 #
 # PCI
 #
+# default to pci=nocrs
+ApplyPatch linux-2.6-defaults-acpi-pci_no_crs.patch
 # make default state of PCI MSI a config option
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 # enable ASPM by default on hardware we expect to work
@@ -1488,6 +1500,25 @@ ApplyPatch irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
 
 # cve-2010-2955
 ApplyPatch wireless-extensions-fix-kernel-heap-content-leak.patch
+
+# bz #604630
+ApplyPatch sanity-check-bond-proc_entry.patch
+
+# bz #629871
+ApplyPatch asix-use-eth_mac_addr.patch
+
+# bz #575873
+ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
+
+# another fix for suspend/resume bugs
+ApplyPatch acpi-ec-pm-fix-race-between-ec-transactions-and-system-suspend.patch
+
+# this went in 2.6.35-stable
+ApplyPatch nfs-fix-an-oops-in-the-nfsv4-atomic-open-code.patch
+
+# CVE-2010-2960
+ApplyPatch keys-fix-bug-in-keyctl-session-to-parent-if-parent-has-no-session-keyring.patch
+ApplyPatch keys-fix-rcu-no-lock-warning-in-keyctl-session-to-parent.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2110,6 +2141,18 @@ fi
 
 
 %changelog
+* Fri Sep 03 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.6-52
+- acpi-ec-pm-fix-race-between-ec-transactions-and-system-suspend.patch:
+  another possible fix for suspend/resume problems.
+- From 2.6.35.4: nfs-fix-an-oops-in-the-nfsv4-atomic-open-code.patch
+- Add fix for CVE-2010-2960: keyctl_session_to_parent NULL deref system crash
+
+* Fri Sep 03 2010 Kyle McMartin <kmcmartin@redhat.com>
+- sanity-check-bond-proc_entry.patch (rhbz#604630)
+- asix.c: stub out set_mac_address in case it's breaking things (rhbz#625479)
+- default to pci=nocrs
+- flexcop: fix registering braindead stupid names (#575873)
+
 * Fri Sep 03 2010 Kyle McMartin <kmcmartin@redhat.com> 2.6.34.6-51
 - lirc_imon: move alloc before use (rhbz#629980)
 
