@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 52
+%global baserelease 54
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -654,10 +654,14 @@ Patch305: linux-2.6-fix-btusb-autosuspend.patch
 
 Patch310: linux-2.6-usb-wwan-update.patch
 
+# disable new features in 2.6.34
 Patch370: linux-2.6-defaults-acpi-pci_no_crs.patch
+Patch371: linux-2.6-defaults-no-pm-async.patch
+
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 # enable ASPM
 Patch383: linux-2.6-defaults-aspm.patch
+# fixes for ASPM
 Patch384: pci-acpi-disable-aspm-if-no-osc.patch
 Patch385: pci-aspm-dont-enable-too-early.patch
 
@@ -804,6 +808,10 @@ Patch12520: acpi-ec-pm-fix-race-between-ec-transactions-and-system-suspend.patch
 Patch12521: nfs-fix-an-oops-in-the-nfsv4-atomic-open-code.patch
 Patch12522: keys-fix-bug-in-keyctl-session-to-parent-if-parent-has-no-session-keyring.patch
 Patch12523: keys-fix-rcu-no-lock-warning-in-keyctl-session-to-parent.patch
+
+Patch12530: pci-msi-remove-unsafe-and-unnecessary-hardware-access.patch
+Patch12531: pci-msi-restore-read_msi_msg_desc-add-get_cached_msi_msg_desc.patch
+Patch12532: x86-tsc-sched-recompute-cyc2ns_offset-s-during-resume-from-sleep-states.patch
 
 %endif
 
@@ -1319,12 +1327,18 @@ ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 #
-# PCI
+# PCI / PM
 #
+
+# new 2.6.34 options
+# default to async suspend disabled
+ApplyPatch linux-2.6-defaults-no-pm-async.patch
 # default to pci=nocrs
 ApplyPatch linux-2.6-defaults-acpi-pci_no_crs.patch
+
 # make default state of PCI MSI a config option
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
+
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
 # disable aspm if acpi doesn't provide an _OSC method
@@ -1519,6 +1533,13 @@ ApplyPatch nfs-fix-an-oops-in-the-nfsv4-atomic-open-code.patch
 # CVE-2010-2960
 ApplyPatch keys-fix-bug-in-keyctl-session-to-parent-if-parent-has-no-session-keyring.patch
 ApplyPatch keys-fix-rcu-no-lock-warning-in-keyctl-session-to-parent.patch
+
+# more suspend/resume fixes form 2.6.32 / 2.6.35 queue
+# Fix unsafe access to MSI registers during suspend
+ApplyPatch pci-msi-remove-unsafe-and-unnecessary-hardware-access.patch
+ApplyPatch pci-msi-restore-read_msi_msg_desc-add-get_cached_msi_msg_desc.patch
+# Fix scheduler load balancing after suspend/resume cycle
+ApplyPatch x86-tsc-sched-recompute-cyc2ns_offset-s-during-resume-from-sleep-states.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2141,6 +2162,17 @@ fi
 
 
 %changelog
+* Sun Sep 05 2010 Jarod Wilson <jarod@redhat.com> 2.6.34.6-54
+- Restore lirc patch from 2.6.33.x F13 kernels, re-fixes multiple issues
+
+* Sat Sep 04 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.6-53
+- Disable asynchronous suspend, a new feature in 2.6.34
+- Fix unsafe access to MSI registers during suspend
+  (pci-msi-remove-unsafe-and-unnecessary-hardware-access.patch,
+   pci-msi-restore-read_msi_msg_desc-add-get_cached_msi_msg_desc.patch)
+- x86-tsc-sched-recompute-cyc2ns_offset-s-during-resume-from-sleep-states.patch
+   Fix load balancing after suspend/resume cycle (taken from 2.6.32 stable queue)
+
 * Fri Sep 03 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.6-52
 - acpi-ec-pm-fix-race-between-ec-transactions-and-system-suspend.patch:
   another possible fix for suspend/resume problems.
