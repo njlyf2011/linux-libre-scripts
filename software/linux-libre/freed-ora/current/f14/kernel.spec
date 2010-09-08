@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 18
+%global baserelease 23
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -724,6 +724,10 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
 
+Patch12019: add-appleir-usb-driver.patch
+
+Patch12020: hid-support-tivo-slide-remote.patch
+
 Patch12040: only-use-alpha2-regulatory-information-from-country-IE.patch
 
 # rhbz #617699
@@ -732,6 +736,14 @@ Patch12060: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
 Patch12070: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
 Patch12080: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
+
+# rhbz #622149
+Patch12085: fix-rcu_deref_check-warning.patch
+
+# rhbz #513530
+Patch12090: dell-wmi-add-support-for-eject-key-studio-1555.patch
+
+Patch12517: flexcop-fix-xlate_proc_name-warning.patch
 
 %endif
 
@@ -1347,6 +1359,10 @@ ApplyPatch linux-2.6-via-velocity-dma-fix.patch
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
+ApplyPatch add-appleir-usb-driver.patch
+
+ApplyPatch hid-support-tivo-slide-remote.patch
+
 ApplyPatch neuter_intel_microcode_load.patch
 
 ApplyPatch only-use-alpha2-regulatory-information-from-country-IE.patch
@@ -1358,6 +1374,15 @@ ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
 
 # bz 610941
 ApplyPatch kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
+
+# bz 622149
+ApplyPatch fix-rcu_deref_check-warning.patch
+
+# bz 513530
+ApplyPatch dell-wmi-add-support-for-eject-key-studio-1555.patch
+
+# bz #575873
+ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1945,6 +1970,33 @@ fi
 # and build.
 
 %changelog
+* Wed Sep 08 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.4-23
+- nouveau: handle certain GPU errors better, AGP + misc fixes
+
+* Tue Sep 07 2010 Dave Jones <davej@redhat.com> 2.6.35.4-22
+- Disable hung task checker, it only ever causes false positives. (#630777)
+
+* Tue Sep 07 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.4-21
+- Enhance HID layer to fully support TiVo Slide remote and dongle
+
+* Mon Sep 06 2010 Kyle McMartin <kyle@redhat.com>
+- Suck in patch from F-13 to add support for the eject key on the
+  Dell Studio 1555. (#513530)
+- flexcop: fix registering braindead stupid names (#575873)
+
+* Mon Sep 06 2010 Kyle McMartin <kyle@redhat.com>
+- Patch from paulmck to fix rcu_dereference_check warning
+  (http://lkml.org/lkml/2010/8/16/258)
+
+* Mon Sep 06 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.4-20
+- Restore the rest of the appleir driver patch
+
+* Mon Sep 06 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.4-19
+- nouveau: misc fixes from upstream + NVAF support
+
+* Fri Sep 03 2010 Kyle McMartin <kyle@redhat.com>
+- Restore appleir driver that got lost in the 2.6.35 rebase.
+
 * Thu Sep 02 2010 Dave Jones <davej@redhat.com> 2.6.35.4-18
 - Scatter-gather on via-velocity is hopelessly broken.
   Just switch it off for now.
