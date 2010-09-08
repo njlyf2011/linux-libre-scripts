@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 16
+%global baserelease 17
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -681,6 +681,7 @@ Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
+Patch1901: revert-drm-i915-enable-rc6-on-ironlake.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -707,6 +708,8 @@ Patch2917: hdpvr-ir-enable.patch
 # NFSv4
 
 # patches headed upstream
+
+Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
@@ -1287,6 +1290,7 @@ ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
+ApplyPatch revert-drm-i915-enable-rc6-on-ironlake.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1312,6 +1316,8 @@ ApplyPatch hdpvr-ir-enable.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
+
+ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
@@ -1925,6 +1931,13 @@ fi
 #                 ||     ||
 
 %changelog
+* Tue Sep 07 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.17.rc3.git0
+- Revert ce171780 which breaks my graphics on resume.
+  (drm/i915: Enable RC6 on Ironlake.)
+
+* Fri Sep 03 2010 Kyle McMartin <kyle@redhat.com>
+- Restore AppleIR USB driver which got lost between F-13 and now.
+
 * Fri Sep 03 2010 Dave Jones <davej@redhat.com> 2.6.36-0.16.rc3.git0
 - exec-randomization: brk away from exec rand area (Kees Cook)
 
