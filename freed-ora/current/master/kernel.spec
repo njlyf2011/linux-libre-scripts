@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 18
+%global baserelease 19
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -641,6 +641,7 @@ Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
@@ -1228,6 +1229,7 @@ ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 #
 # make default state of PCI MSI a config option
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
+ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
 
@@ -1931,6 +1933,17 @@ fi
 #                 ||     ||
 
 %changelog
+* Fri Sep 10 2010 Bastien Nocera <bnocera@redhat.com> - 2.6.36-0.19.rc3.git1
+- Update AppleIR patch to work, and support the enter key on
+  newer remotes
+
+* Wed Sep 08 2010 Kyle McMartin <kyle@redhat.com>
+- Enable GPIO_SYSFS. (#631958)
+
+* Wed Sep 08 2010 Kyle McMartin <kyle@redhat.com>
+- Make pci=use_crs a compile-time config option we can switch the default
+  value of easily.
+
 * Wed Sep 08 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.18.rc3.git1
 - 2.6.36-rc3-git1
 - Set CONFIG_CRYPTO_MANAGER_DISABLE_TESTS for nodebug, and unset for debug.
