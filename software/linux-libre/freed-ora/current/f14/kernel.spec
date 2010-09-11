@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 23
+%global baserelease 25
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -638,6 +638,8 @@ Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 Patch300: create-sys-fs-cgroup-to-mount-cgroupfs-on.patch
 
 Patch380: linux-2.6-defaults-pci_no_msi.patch
+Patch381: linux-2.6-defaults-pci_use_crs.patch
+Patch382: linux-2.6-defaults-no-pm-async.patch
 Patch383: linux-2.6-defaults-aspm.patch
 Patch384: pci-acpi-disable-aspm-if-no-osc.patch
 Patch385: pci-aspm-dont-enable-too-early.patch
@@ -679,6 +681,7 @@ Patch1807: drm-i2c-ch7006-fix.patch
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
 Patch1811: drm-nouveau-race-fix.patch
+Patch1812: drm-nouveau-nva3-noaccel.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -1242,6 +1245,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch linux-2.6-defaults-no-pm-async.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1255,6 +1259,7 @@ ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 #
 # make default state of PCI MSI a config option
 ApplyPatch linux-2.6-defaults-pci_no_msi.patch
+ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
 # disable aspm if acpi doesn't provide an _OSC method
@@ -1320,6 +1325,8 @@ ApplyPatch drm-i2c-ch7006-fix.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
+ApplyPatch drm-nouveau-nva3-noaccel.patch
+
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
@@ -1970,6 +1977,22 @@ fi
 # and build.
 
 %changelog
+* Fri Sep 10 2010 Bastien Nocera <bnocera@redhat.com> - 2.6.35.4-25
+- Update AppleIR patch to work, and support the enter key on
+  newer remotes
+
+* Fri Sep 10 2010 Chuck Ebbert <cebbert@redhat.com>
+- Disable asynchronous suspend by default.
+
+* Fri Sep 10 2010 Ben Skeggs <bskeggs@redhat.com> - 2.6.35.4-23
+- nouveau: disable acceleration on nva3/nva5/nva8
+
+* Wed Sep 08 2010 Kyle McMartin <kyle@redhat.com>
+- Enable GPIO_SYSFS. (#631958)
+
+* Wed Sep 08 2010 Kyle McMartin <kyle@redhat.com>
+- Make pci=use_crs a config option.
+
 * Wed Sep 08 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.4-23
 - nouveau: handle certain GPU errors better, AGP + misc fixes
 
