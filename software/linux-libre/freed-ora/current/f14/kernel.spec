@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 25
+%global baserelease 26
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -682,6 +682,7 @@ Patch1807: drm-i2c-ch7006-fix.patch
 Patch1810: drm-nouveau-updates.patch
 Patch1811: drm-nouveau-race-fix.patch
 Patch1812: drm-nouveau-nva3-noaccel.patch
+Patch1813: drm-nouveau-acpi-edid-fix.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -714,6 +715,7 @@ Patch2914: linux-2.6-v4l-dvb-ir-core-streamzap.patch
 Patch2915: lirc-staging-2.6.36.patch
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
+Patch2918: linux-2.6-v4l-dvb-ir-core-update-2.patch
 
 Patch3000: linux-2.6-via-velocity-dma-fix.patch
 
@@ -1326,6 +1328,7 @@ ApplyPatch drm-i2c-ch7006-fix.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
+ApplyPatch drm-nouveau-acpi-edid-fix.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1359,6 +1362,7 @@ ApplyPatch lirc-staging-2.6.36.patch
 #ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
+ApplyPatch linux-2.6-v4l-dvb-ir-core-update-2.patch
 
 # Fix DMA bug on via-velocity
 ApplyPatch linux-2.6-via-velocity-dma-fix.patch
@@ -1390,7 +1394,6 @@ ApplyPatch dell-wmi-add-support-for-eject-key-studio-1555.patch
 
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
-
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1977,6 +1980,12 @@ fi
 # and build.
 
 %changelog
+* Mon Sep 13 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.4-27
+- nouveau: fix oops in acpi edid support
+
+* Fri Sep 10 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.4-26
+- ir-core rebase to current upstream
+
 * Fri Sep 10 2010 Bastien Nocera <bnocera@redhat.com> - 2.6.35.4-25
 - Update AppleIR patch to work, and support the enter key on
   newer remotes
