@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 54
+%global baserelease 55
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -729,7 +729,9 @@ Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1826: drm-radeon-resume-fixes.patch
+Patch1830: drm-i915-explosion-following-oom-in-do_execbuffer.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
+Patch1901: drm-nouveau-acpi-edid-fix.patch
 # radeon
 
 # linux1394 git patches
@@ -800,8 +802,6 @@ Patch12490: dell-wmi-add-support-for-eject-key.patch
 Patch12500: irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
 Patch12510: wireless-extensions-fix-kernel-heap-content-leak.patch
 
-Patch12515: sanity-check-bond-proc_entry.patch
-Patch12516: asix-use-eth_mac_addr.patch
 Patch12517: flexcop-fix-xlate_proc_name-warning.patch
 
 Patch12520: acpi-ec-pm-fix-race-between-ec-transactions-and-system-suspend.patch
@@ -1423,10 +1423,12 @@ ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
 ApplyPatch drm-nouveau-nv50-crtc-update-delay.patch
+ApplyPatch drm-nouveau-acpi-edid-fix.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch drm-i915-explosion-following-oom-in-do_execbuffer.patch
 
 ApplyPatch drm-radeon-resume-fixes.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
@@ -1514,12 +1516,6 @@ ApplyPatch irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
 
 # cve-2010-2955
 ApplyPatch wireless-extensions-fix-kernel-heap-content-leak.patch
-
-# bz #604630
-ApplyPatch sanity-check-bond-proc_entry.patch
-
-# bz #629871
-ApplyPatch asix-use-eth_mac_addr.patch
 
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
@@ -2162,6 +2158,16 @@ fi
 
 
 %changelog
+* Mon Sep 13 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.6-55
+- nouveau: fix oops in acpi edid support (rhbz#613284)
+
+* Thu Sep 09 2010 Kyle McMartin <kyle@redhat.com>
+- Backport 6f772d7e to hopefully fix #629442,
+  (drm/i915: Explosion following OOM in do_execbuffer.)
+
+* Wed Sep 08 2010 Kyle McMartin <kyle@redhat.com>
+- Enable GPIO_SYSFS. (#631958)
+
 * Sun Sep 05 2010 Jarod Wilson <jarod@redhat.com> 2.6.34.6-54
 - Restore lirc patch from 2.6.33.x F13 kernels, re-fixes multiple issues
 
@@ -2180,8 +2186,6 @@ fi
 - Add fix for CVE-2010-2960: keyctl_session_to_parent NULL deref system crash
 
 * Fri Sep 03 2010 Kyle McMartin <kmcmartin@redhat.com>
-- sanity-check-bond-proc_entry.patch (rhbz#604630)
-- asix.c: stub out set_mac_address in case it's breaking things (rhbz#625479)
 - default to pci=nocrs
 - flexcop: fix registering braindead stupid names (#575873)
 
