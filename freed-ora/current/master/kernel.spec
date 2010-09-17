@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 20
+%global baserelease 22
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 3
+%define rcrev 4
 # The git snapshot level
-%define gitrev 4
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -514,7 +514,7 @@ BuildRequires: xmlto, asciidoc
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed)
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -720,6 +720,17 @@ Patch12018: neuter_intel_microcode_load.patch
 Patch12020: alsa-fix-substream-proc-status-read.patch
 
 Patch12030: tpm-fix-stall-on-boot.patch
+
+# Wacom Bamboo
+Patch12100: wacom-01-add-fuzz-parameters-to-features.patch
+Patch12105: wacom-02-parse-the-bamboo-device-family.patch
+Patch12110: wacom-03-collect-device-quirks-into-single-function.patch
+Patch12115: wacom-04-add-support-for-the-bamboo-touch-trackpad.patch
+Patch12120: wacom-05-add-a-quirk-for-low-resolution-bamboo-devices.patch
+Patch12125: wacom-06-request-tablet-data-for-bamboo-pens.patch
+Patch12130: wacom-07-move-bamboo-touch-irq-to-its-own-function.patch
+Patch12035: wacom-08-add-support-for-bamboo-pen.patch
+Patch12040: wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
 
 %endif
 
@@ -1323,6 +1334,17 @@ ApplyPatch neuter_intel_microcode_load.patch
 
 # try to fix stalls during boot (#530393)
 ApplyPatch tpm-fix-stall-on-boot.patch
+
+# Wacom Bamboo
+ApplyPatch wacom-01-add-fuzz-parameters-to-features.patch
+ApplyPatch wacom-02-parse-the-bamboo-device-family.patch
+ApplyPatch wacom-03-collect-device-quirks-into-single-function.patch
+ApplyPatch wacom-04-add-support-for-the-bamboo-touch-trackpad.patch
+ApplyPatch wacom-05-add-a-quirk-for-low-resolution-bamboo-devices.patch
+ApplyPatch wacom-06-request-tablet-data-for-bamboo-pens.patch
+ApplyPatch wacom-07-move-bamboo-touch-irq-to-its-own-function.patch
+ApplyPatch wacom-08-add-support-for-bamboo-pen.patch
+ApplyPatch wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1931,6 +1953,18 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Sep 16 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.36-rc4.
+
+* Wed Sep 15 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.22.rc4.git2
+- Linux 2.6.36-rc4-git2
+- Fix up add-appleir-usb-driver.patch after HID core changes.
+
+* Mon Sep 13 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.21.rc4.git1
+- Linux 2.6.36-rc4-git1
+- Add preliminary support for Wacom Bamboo pen and touch devices.
+- Require python-devel and perl(ExtUtils::Embed) when building perf package (#632942)
+
 * Sat Sep 11 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.20.rc3.git4
 - Linux 2.6.36-rc3-git4
 - Drop revert-drm-i915-enable-rc6-on-ironlake.patch, now merged
