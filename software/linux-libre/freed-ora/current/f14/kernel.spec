@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 26
+%global baserelease 28
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -511,8 +511,9 @@ BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
 %endif
+# python-devel and perl(ExtUtils::Embed) are required for perf scripting
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel
+BuildRequires: elfutils-devel zlib-devel binutils-devel python-devel perl(ExtUtils::Embed)
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -624,10 +625,16 @@ Patch30: git-utrace.patch
 Patch31: utrace-ptrace-fix-build.patch
 Patch32: utrace-remove-use-of-kref_set.patch
 
+Patch101: 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
+Patch102: 02-compat-test-rax-for-the-system-call-number-not-eax.patch
+Patch103: 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
+
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
+
+Patch180: aio-check-for-multiplication-overflow-in-do_io_submit.patch
 
 Patch200: linux-2.6-debug-sizeof-structs.patch
 Patch201: linux-2.6-debug-nmi-timeout.patch
@@ -749,6 +756,19 @@ Patch12085: fix-rcu_deref_check-warning.patch
 Patch12090: dell-wmi-add-support-for-eject-key-studio-1555.patch
 
 Patch12517: flexcop-fix-xlate_proc_name-warning.patch
+
+# mitigate DOS attack with large argument lists
+Patch12520: execve-improve-interactivity-with-large-arguments.patch
+Patch12521: execve-make-responsive-to-sigkill-with-large-arguments.patch
+Patch12522: setup_arg_pages-diagnose-excessive-argument-size.patch
+
+# CVE-2010-3080
+Patch12530: alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
+# CVE-2010-2954
+Patch12540: irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
+# CVE-2010-2960
+Patch12550: keys-fix-bug-in-keyctl_session_to_parent-if-parent-has-no-session-keyring.patch
+Patch12551: keys-fix-rcu-no-lock-warning-in-keyctl_session_to_parent.patch
 
 %endif
 
@@ -1203,6 +1223,9 @@ ApplyPatch utrace-remove-use-of-kref_set.patch
 
 # Architecture patches
 # x86(-64)
+ApplyPatch 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
+ApplyPatch 02-compat-test-rax-for-the-system-call-number-not-eax.patch
+ApplyPatch 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
 
 #
 # Intel IOMMU
@@ -1226,6 +1249,8 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 #
 # bugfixes to drivers and filesystems
 #
+
+ApplyPatch aio-check-for-multiplication-overflow-in-do_io_submit.patch
 
 # ext4
 
@@ -1394,6 +1419,20 @@ ApplyPatch dell-wmi-add-support-for-eject-key-studio-1555.patch
 
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
+
+# mitigate DOS attack with large argument lists
+ApplyPatch execve-improve-interactivity-with-large-arguments.patch
+ApplyPatch execve-make-responsive-to-sigkill-with-large-arguments.patch
+ApplyPatch setup_arg_pages-diagnose-excessive-argument-size.patch
+
+# CVE-2010-3080
+ApplyPatch alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
+# CVE-2010-2954
+ApplyPatch irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
+# CVE-2010-2960
+ApplyPatch keys-fix-bug-in-keyctl_session_to_parent-if-parent-has-no-session-keyring.patch
+ApplyPatch keys-fix-rcu-no-lock-warning-in-keyctl_session_to_parent.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1980,6 +2019,23 @@ fi
 # and build.
 
 %changelog
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.35.4-28
+- Fix 3 CVEs:
+  /dev/sequencer open failure is not handled correctly (CVE-2010-3080)
+  NULL deref and panic in irda (CVE-2010-2954)
+  keyctl_session_to_parent NULL deref system crash (CVE-2010-2960)
+
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix DOS with large argument lists.
+
+* Tue Sep 14 2010 Kyle McMartin <kyle@redhat.com>
+- x86_64: plug compat syscalls holes. (CVE-2010-3081, CVE-2010-3301)
+  upgrading is highly recommended.
+- aio: check for multiplication overflow in do_io_submit. (CVE-2010-3067)
+
+* Mon Sep 13 2010 Chuck Ebbert <cebbert@redhat.com>
+- Add support for perl and python scripting to perf (#632942)
+
 * Mon Sep 13 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.4-27
 - nouveau: fix oops in acpi edid support
 
