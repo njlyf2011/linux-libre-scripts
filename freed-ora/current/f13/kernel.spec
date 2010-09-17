@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 55
+%global baserelease 56
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -635,6 +635,11 @@ Patch23: linux-2.6-utrace-ptrace.patch
 
 Patch50: linux-2.6-x86-cfi_sections.patch
 
+Patch100: 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
+Patch101: 02-compat-test-rax-for-the-system-call-number-not-eax.patch
+Patch102: 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
+Patch103: aio-check-for-multiplication-overflow-in-do_io_submit.patch
+
 Patch144: linux-2.6-vio-modalias.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
@@ -811,7 +816,21 @@ Patch12523: keys-fix-rcu-no-lock-warning-in-keyctl-session-to-parent.patch
 
 Patch12530: pci-msi-remove-unsafe-and-unnecessary-hardware-access.patch
 Patch12531: pci-msi-restore-read_msi_msg_desc-add-get_cached_msi_msg_desc.patch
+
 Patch12532: x86-tsc-sched-recompute-cyc2ns_offset-s-during-resume-from-sleep-states.patch
+# fix bug caused by above patch
+Patch12533: x86-tsc-fix-a-preemption-leak-in-restore_sched_clock_state.patch
+
+# Mitigate DOS with large argument lists.
+Patch12540: execve-improve-interactivity-with-large-arguments.patch
+Patch12541: execve-make-responsive-to-sigkill-with-large-arguments.patch
+Patch12542: setup_arg_pages-diagnose-excessive-argument-size.patch
+
+# CVE-2010-3080
+Patch12550: alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
+
+# CVE-2010-3079
+Patch12560: tracing-do-not-allow-llseek-to-set_ftrace_filter.patch
 
 %endif
 
@@ -1268,6 +1287,11 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # x86(-64)
 ApplyPatch linux-2.6-x86-cfi_sections.patch
 
+ApplyPatch 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
+ApplyPatch 02-compat-test-rax-for-the-system-call-number-not-eax.patch
+ApplyPatch 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
+
+
 #
 # Intel IOMMU
 #
@@ -1291,6 +1315,7 @@ ApplyPatch linux-2.6-execshield.patch
 #
 # bugfixes to drivers and filesystems
 #
+ApplyPatch aio-check-for-multiplication-overflow-in-do_io_submit.patch
 
 # ext4
 
@@ -1536,6 +1561,19 @@ ApplyPatch pci-msi-remove-unsafe-and-unnecessary-hardware-access.patch
 ApplyPatch pci-msi-restore-read_msi_msg_desc-add-get_cached_msi_msg_desc.patch
 # Fix scheduler load balancing after suspend/resume cycle
 ApplyPatch x86-tsc-sched-recompute-cyc2ns_offset-s-during-resume-from-sleep-states.patch
+# fix bug caused by above patch
+ApplyPatch x86-tsc-fix-a-preemption-leak-in-restore_sched_clock_state.patch
+
+# Mitigate DOS with large argument lists.
+ApplyPatch execve-improve-interactivity-with-large-arguments.patch
+ApplyPatch execve-make-responsive-to-sigkill-with-large-arguments.patch
+ApplyPatch setup_arg_pages-diagnose-excessive-argument-size.patch
+
+# CVE-2010-3080
+ApplyPatch alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
+
+# CVE-2010-3079
+ApplyPatch tracing-do-not-allow-llseek-to-set_ftrace_filter.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2158,6 +2196,29 @@ fi
 
 
 %changelog
+* Thu Sep 16 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.34.7.
+
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.7-57
+- Fix CVE-2010-3079: ftrace NULL pointer dereference
+
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix CVE-2010-3080: /dev/sequencer open failure is not handled correctly
+
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix bug added in 2.6.34.6-53
+
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com>
+- Mitigate DOS with large argument lists.
+
+* Tue Sep 14 2010 Kyle McMartin <kyle@redhat.com>
+- x86_64: plug compat syscalls holes. (CVE-2010-3081, CVE-2010-3301)
+  upgrading is highly recommended.
+- aio: check for multiplication overflow in do_io_submit. (CVE-2010-3067)
+
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.7-56
+- Linux 2.6.34.7, should fix multiple USB HID device issues.
+
 * Mon Sep 13 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.6-55
 - nouveau: fix oops in acpi edid support (rhbz#613284)
 
