@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-08-27 03:49:40.000000000 +0000
-+++ Makefile	2010-08-27 03:49:47.000000000 +0000
+--- Makefile.orig	2010-09-21 02:19:05.000000000 +0000
++++ Makefile	2010-09-21 02:19:08.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 35
--EXTRAVERSION = .4-libre2
-+EXTRAVERSION = .4-libre2-lemote
+-EXTRAVERSION = .5-libre2
++EXTRAVERSION = .5-libre2-lemote
  NAME = Sheep on Meth
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-08-27 03:56:33.000000000 +0000
-@@ -0,0 +1,2611 @@
++++ .config	2010-09-21 02:23:20.000000000 +0000
+@@ -0,0 +1,2718 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.35.4-libre2-lemote
-+# Fri Aug 27 03:56:33 2010
++# Linux kernel version: 2.6.35.5-libre2-lemote
++# Tue Sep 21 02:23:20 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -907,7 +907,90 @@ Index: .config
 +CONFIG_EXTRA_FIRMWARE=""
 +# CONFIG_SYS_HYPERVISOR is not set
 +CONFIG_CONNECTOR=m
-+# CONFIG_MTD is not set
++CONFIG_MTD=m
++# CONFIG_MTD_DEBUG is not set
++# CONFIG_MTD_TESTS is not set
++# CONFIG_MTD_CONCAT is not set
++CONFIG_MTD_PARTITIONS=y
++# CONFIG_MTD_REDBOOT_PARTS is not set
++# CONFIG_MTD_AR7_PARTS is not set
++
++#
++# User Modules And Translation Layers
++#
++# CONFIG_MTD_CHAR is not set
++CONFIG_MTD_BLKDEVS=m
++CONFIG_MTD_BLOCK=m
++CONFIG_MTD_BLOCK_RO=m
++# CONFIG_FTL is not set
++# CONFIG_NFTL is not set
++# CONFIG_INFTL is not set
++# CONFIG_RFD_FTL is not set
++# CONFIG_SSFDC is not set
++# CONFIG_SM_FTL is not set
++# CONFIG_MTD_OOPS is not set
++
++#
++# RAM/ROM/Flash chip drivers
++#
++CONFIG_MTD_CFI=m
++# CONFIG_MTD_JEDECPROBE is not set
++CONFIG_MTD_GEN_PROBE=m
++# CONFIG_MTD_CFI_ADV_OPTIONS is not set
++CONFIG_MTD_MAP_BANK_WIDTH_1=y
++CONFIG_MTD_MAP_BANK_WIDTH_2=y
++CONFIG_MTD_MAP_BANK_WIDTH_4=y
++# CONFIG_MTD_MAP_BANK_WIDTH_8 is not set
++# CONFIG_MTD_MAP_BANK_WIDTH_16 is not set
++# CONFIG_MTD_MAP_BANK_WIDTH_32 is not set
++CONFIG_MTD_CFI_I1=y
++CONFIG_MTD_CFI_I2=y
++# CONFIG_MTD_CFI_I4 is not set
++# CONFIG_MTD_CFI_I8 is not set
++# CONFIG_MTD_CFI_INTELEXT is not set
++CONFIG_MTD_CFI_AMDSTD=m
++# CONFIG_MTD_CFI_STAA is not set
++CONFIG_MTD_CFI_UTIL=m
++# CONFIG_MTD_RAM is not set
++# CONFIG_MTD_ROM is not set
++# CONFIG_MTD_ABSENT is not set
++
++#
++# Mapping drivers for chip access
++#
++# CONFIG_MTD_COMPLEX_MAPPINGS is not set
++CONFIG_MTD_PHYSMAP=m
++# CONFIG_MTD_PHYSMAP_COMPAT is not set
++# CONFIG_MTD_INTEL_VR_NOR is not set
++# CONFIG_MTD_PLATRAM is not set
++
++#
++# Self-contained MTD device drivers
++#
++# CONFIG_MTD_PMC551 is not set
++# CONFIG_MTD_SLRAM is not set
++# CONFIG_MTD_PHRAM is not set
++# CONFIG_MTD_MTDRAM is not set
++# CONFIG_MTD_BLOCK2MTD is not set
++
++#
++# Disk-On-Chip Device Drivers
++#
++# CONFIG_MTD_DOC2000 is not set
++# CONFIG_MTD_DOC2001 is not set
++# CONFIG_MTD_DOC2001PLUS is not set
++# CONFIG_MTD_NAND is not set
++# CONFIG_MTD_ONENAND is not set
++
++#
++# LPDDR flash memory drivers
++#
++# CONFIG_MTD_LPDDR is not set
++
++#
++# UBI - Unsorted block images
++#
++# CONFIG_MTD_UBI is not set
 +# CONFIG_PARPORT is not set
 +# CONFIG_PNP is not set
 +CONFIG_BLK_DEV=y
@@ -2340,6 +2423,7 @@ Index: .config
 +# CONFIG_BEFS_FS is not set
 +# CONFIG_BFS_FS is not set
 +# CONFIG_EFS_FS is not set
++# CONFIG_JFFS2_FS is not set
 +# CONFIG_LOGFS is not set
 +CONFIG_CRAMFS=m
 +CONFIG_SQUASHFS=m
@@ -2395,8 +2479,31 @@ Index: .config
 +#
 +# Partition Types
 +#
-+# CONFIG_PARTITION_ADVANCED is not set
++CONFIG_PARTITION_ADVANCED=y
++CONFIG_ACORN_PARTITION=y
++# CONFIG_ACORN_PARTITION_CUMANA is not set
++# CONFIG_ACORN_PARTITION_EESOX is not set
++CONFIG_ACORN_PARTITION_ICS=y
++# CONFIG_ACORN_PARTITION_ADFS is not set
++# CONFIG_ACORN_PARTITION_POWERTEC is not set
++CONFIG_ACORN_PARTITION_RISCIX=y
++CONFIG_OSF_PARTITION=y
++CONFIG_AMIGA_PARTITION=y
++CONFIG_ATARI_PARTITION=y
++CONFIG_MAC_PARTITION=y
 +CONFIG_MSDOS_PARTITION=y
++CONFIG_BSD_DISKLABEL=y
++CONFIG_MINIX_SUBPARTITION=y
++CONFIG_SOLARIS_X86_PARTITION=y
++CONFIG_UNIXWARE_DISKLABEL=y
++CONFIG_LDM_PARTITION=y
++# CONFIG_LDM_DEBUG is not set
++CONFIG_SGI_PARTITION=y
++CONFIG_ULTRIX_PARTITION=y
++CONFIG_SUN_PARTITION=y
++CONFIG_KARMA_PARTITION=y
++CONFIG_EFI_PARTITION=y
++# CONFIG_SYSV68_PARTITION is not set
 +CONFIG_NLS=y
 +CONFIG_NLS_DEFAULT="utf8"
 +CONFIG_NLS_CODEPAGE_437=m
