@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 22
+%global baserelease 23
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 4
 # The git snapshot level
-%define gitrev 2
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -670,6 +670,7 @@ Patch800: linux-2.6-crash-driver.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
+Patch1556: linux-2.6.35.4-virtio_console-fix-poll.patch
 
 # DRM
 Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
@@ -717,8 +718,6 @@ Patch12017: prevent-runtime-conntrack-changes.patch
 
 Patch12018: neuter_intel_microcode_load.patch
 
-Patch12020: alsa-fix-substream-proc-status-read.patch
-
 Patch12030: tpm-fix-stall-on-boot.patch
 
 # Wacom Bamboo
@@ -731,6 +730,12 @@ Patch12125: wacom-06-request-tablet-data-for-bamboo-pens.patch
 Patch12130: wacom-07-move-bamboo-touch-irq-to-its-own-function.patch
 Patch12035: wacom-08-add-support-for-bamboo-pen.patch
 Patch12040: wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
+
+# Runtime power management
+Patch12200: linux-2.6-bluetooth-autosuspend.patch
+Patch12201: linux-2.6-uvc-autosuspend.patch
+Patch12202: linux-2.6-qcserial-autosuspend.patch
+Patch12203: linux-2.6-usb-pci-autosuspend.patch
 
 %endif
 
@@ -1251,8 +1256,6 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 
 # ALSA
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
-# patch from alsa list to try to fix bug #628404
-ApplyPatch alsa-fix-substream-proc-status-read.patch
 
 # Networking
 
@@ -1292,6 +1295,7 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
+ApplyPatch linux-2.6.35.4-virtio_console-fix-poll.patch
 
 #ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 #ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
@@ -1345,6 +1349,12 @@ ApplyPatch wacom-06-request-tablet-data-for-bamboo-pens.patch
 ApplyPatch wacom-07-move-bamboo-touch-irq-to-its-own-function.patch
 ApplyPatch wacom-08-add-support-for-bamboo-pen.patch
 ApplyPatch wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
+
+# Runtime PM
+ApplyPatch linux-2.6-bluetooth-autosuspend.patch
+ApplyPatch linux-2.6-uvc-autosuspend.patch
+ApplyPatch linux-2.6-qcserial-autosuspend.patch
+ApplyPatch linux-2.6-usb-pci-autosuspend.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1953,7 +1963,24 @@ fi
 #                 ||     ||
 
 %changelog
-* Thu Sep 16 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sun Sep 19 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.23.rc4.git4
+- Linux 2.6.36-rc4-git4
+- Drop alsa-fix-substream-proc-status-read.patch, now merged.
+
+* Fri Sep 17 2010 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-bluetooth-autosuspend.patch
+  linux-2.6-uvc-autosuspend.patch
+  linux-2.6-qcserial-autosuspend.patch
+  linux-2.6-usb-pci-autosuspend.patch - Get some more devices into USB
+  autosuspend by default, and then put unused USB controllers to sleep
+
+* Thu Sep 16 2010 Hans de Goede <hdegoede@redhat.com>
+- Small fix to virtio_console poll fix from upstream review
+
+* Wed Sep 15 2010 Hans de Goede <hdegoede@redhat.com>
+- virtio_console: Fix poll/select blocking even though there is data to read
+
+* Wed Sep 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Sep 16
 - Deblobbed patch-libre-2.6.36-rc4.
 
 * Wed Sep 15 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.22.rc4.git2
