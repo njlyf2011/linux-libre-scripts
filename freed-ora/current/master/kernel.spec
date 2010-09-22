@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 23
+%global baserelease 24
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 4
+%define rcrev 5
 # The git snapshot level
-%define gitrev 4
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1963,6 +1963,12 @@ fi
 #                 ||     ||
 
 %changelog
+* Tue Sep 21 2010 Alexandre Oliva <lxoliva@fsfla.org> - libre
+- Deblobbed patch-libre-2.6.36-rc5.
+
+* Mon Sep 20 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.24.rc5
+- Linux 2.6.36-rc5
+
 * Sun Sep 19 2010 Chuck Ebbert <cebbert@redhat.com> - 2.6.36-0.23.rc4.git4
 - Linux 2.6.36-rc4-git4
 - Drop alsa-fix-substream-proc-status-read.patch, now merged.
