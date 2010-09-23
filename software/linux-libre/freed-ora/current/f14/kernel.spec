@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 28
+%global baserelease 29
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -341,6 +341,10 @@ Summary: The Linux kernel
 %define kernel_image arch/s390/boot/image
 %endif
 
+%ifarch sparcv9
+%define hdrarch sparc
+%endif
+
 %ifarch sparc64
 %define asmarch sparc
 %define all_arch_configs kernel-%{version}-sparc64*.config
@@ -402,7 +406,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 s390 sparc %{arm}
+%define nobuildarches i386 s390 sparc sparcv9 %{arm}
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -491,7 +495,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390 s390x alpha alphaev56 %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparcv9 sparc64 s390 s390x alpha alphaev56 %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -625,10 +629,6 @@ Patch30: git-utrace.patch
 Patch31: utrace-ptrace-fix-build.patch
 Patch32: utrace-remove-use-of-kref_set.patch
 
-Patch101: 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
-Patch102: 02-compat-test-rax-for-the-system-call-number-not-eax.patch
-Patch103: 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
-
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
@@ -677,6 +677,7 @@ Patch800: linux-2.6-crash-driver.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
+Patch1556: linux-2.6.35.4-virtio_console-fix-poll.patch
 
 # DRM
 Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
@@ -742,15 +743,11 @@ Patch12020: hid-support-tivo-slide-remote.patch
 
 Patch12040: only-use-alpha2-regulatory-information-from-country-IE.patch
 
-# rhbz #617699
-Patch12050: direct-io-move-aio_complete-into-end_io.patch
-Patch12060: ext4-move-aio-completion-after-unwritten-extent-conversion.patch
-Patch12070: xfs-move-aio-completion-after-unwritten-extent-conversion.patch
-
 Patch12080: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 
 # rhbz #622149
 Patch12085: fix-rcu_deref_check-warning.patch
+Patch12086: linux-2.6-cgroups-rcu.patch
 
 # rhbz #513530
 Patch12090: dell-wmi-add-support-for-eject-key-studio-1555.patch
@@ -762,13 +759,18 @@ Patch12520: execve-improve-interactivity-with-large-arguments.patch
 Patch12521: execve-make-responsive-to-sigkill-with-large-arguments.patch
 Patch12522: setup_arg_pages-diagnose-excessive-argument-size.patch
 
-# CVE-2010-3080
-Patch12530: alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
 # CVE-2010-2954
 Patch12540: irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
 # CVE-2010-2960
 Patch12550: keys-fix-bug-in-keyctl_session_to_parent-if-parent-has-no-session-keyring.patch
 Patch12551: keys-fix-rcu-no-lock-warning-in-keyctl_session_to_parent.patch
+
+Patch12560: sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit.patch
+Patch12565: sched-05-avoid-side-effect-of-tickless-idle-on-update_cpu_load.patch
+Patch12570: sched-10-change-nohz-idle-load-balancing-logic-to-push-model.patch
+Patch12575: sched-15-update-rq-clock-for-nohz-balanced-cpus.patch
+Patch12580: sched-20-fix-rq-clock-synchronization-when-migrating-tasks.patch
+Patch12585: sched-25-move-sched_avg_update-to-update_cpu_load.patch
 
 %endif
 
@@ -1223,9 +1225,6 @@ ApplyPatch utrace-remove-use-of-kref_set.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
-ApplyPatch 02-compat-test-rax-for-the-system-call-number-not-eax.patch
-ApplyPatch 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
 
 #
 # Intel IOMMU
@@ -1342,6 +1341,7 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
+ApplyPatch linux-2.6.35.4-virtio_console-fix-poll.patch
 
 #ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 #ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
@@ -1403,16 +1403,12 @@ ApplyPatch neuter_intel_microcode_load.patch
 
 ApplyPatch only-use-alpha2-regulatory-information-from-country-IE.patch
 
-# rhbz #617699
-ApplyPatch direct-io-move-aio_complete-into-end_io.patch
-ApplyPatch ext4-move-aio-completion-after-unwritten-extent-conversion.patch
-ApplyPatch xfs-move-aio-completion-after-unwritten-extent-conversion.patch
-
 # bz 610941
 ApplyPatch kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 
 # bz 622149
 ApplyPatch fix-rcu_deref_check-warning.patch
+ApplyPatch linux-2.6-cgroups-rcu.patch
 
 # bz 513530
 ApplyPatch dell-wmi-add-support-for-eject-key-studio-1555.patch
@@ -1425,13 +1421,19 @@ ApplyPatch execve-improve-interactivity-with-large-arguments.patch
 ApplyPatch execve-make-responsive-to-sigkill-with-large-arguments.patch
 ApplyPatch setup_arg_pages-diagnose-excessive-argument-size.patch
 
-# CVE-2010-3080
-ApplyPatch alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
 # CVE-2010-2954
 ApplyPatch irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
 # CVE-2010-2960
 ApplyPatch keys-fix-bug-in-keyctl_session_to_parent-if-parent-has-no-session-keyring.patch
 ApplyPatch keys-fix-rcu-no-lock-warning-in-keyctl_session_to_parent.patch
+
+# Scheduler fixes (#635813 and #633037)
+ApplyPatch sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit.patch
+ApplyPatch sched-05-avoid-side-effect-of-tickless-idle-on-update_cpu_load.patch
+ApplyPatch sched-10-change-nohz-idle-load-balancing-logic-to-push-model.patch
+ApplyPatch sched-15-update-rq-clock-for-nohz-balanced-cpus.patch
+ApplyPatch sched-20-fix-rq-clock-synchronization-when-migrating-tasks.patch
+ApplyPatch sched-25-move-sched_avg_update-to-update_cpu_load.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2019,6 +2021,33 @@ fi
 # and build.
 
 %changelog
+* Tue Sep 21 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.35.5-29
+- Scheduler fixes for Bugzilla #635813 and #633037
+
+* Mon Sep 20 2010 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.35.5
+- Drop merged patches:
+  01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
+  02-compat-test-rax-for-the-system-call-number-not-eax.patch
+  03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
+  direct-io-move-aio_complete-into-end_io.patch
+  ext4-move-aio-completion-after-unwritten-extent-conversion.patch
+  xfs-move-aio-completion-after-unwritten-extent-conversion.patch
+  alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
+
+* Thu Sep 16 2010 Dennis Gilmore <dennis@ausil.us>
+- build sparc headers on sparcv9
+- disable some modules to enable the kernel to build on sparc
+
+* Thu Sep 16 2010 Hans de Goede <hdegoede@redhat.com>
+- Small fix to virtio_console poll fix from upstream review
+
+* Wed Sep 15 2010 Dave Jones <davej@redhat.com>
+- Fix another RCU lockdep warning (cgroups).
+
+* Wed Sep 15 2010 Hans de Goede <hdegoede@redhat.com>
+- virtio_console: Fix poll/select blocking even though there is data to read
+
 * Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.35.4-28
 - Fix 3 CVEs:
   /dev/sequencer open failure is not handled correctly (CVE-2010-3080)
