@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 24
+%global baserelease 25
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -648,6 +648,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
+Patch395: acpi-update-battery-information-on-notification-0x81.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -736,6 +737,9 @@ Patch12200: linux-2.6-bluetooth-autosuspend.patch
 Patch12201: linux-2.6-uvc-autosuspend.patch
 Patch12202: linux-2.6-qcserial-autosuspend.patch
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
+
+Patch12300: btusb-macbookpro-7-1.patch
+Patch12301: btusb-macbookpro-6-2.patch
 
 %endif
 
@@ -1231,6 +1235,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch acpi-update-battery-information-on-notification-0x81.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1355,6 +1360,9 @@ ApplyPatch linux-2.6-bluetooth-autosuspend.patch
 ApplyPatch linux-2.6-uvc-autosuspend.patch
 ApplyPatch linux-2.6-qcserial-autosuspend.patch
 ApplyPatch linux-2.6-usb-pci-autosuspend.patch
+
+ApplyPatch btusb-macbookpro-7-1.patch
+ApplyPatch btusb-macbookpro-6-2.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1963,6 +1971,15 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Sep 23 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.25.rc5
+- Add s390 vdso AFTER_LINK to Roland's linux-2.6-makefile-after_link.patch
+
+* Thu Sep 23 2010 Kyle McMartin <kyle@redhat.com>
+- Snipe ACPI patch from mjg59 to fix battery levels on some laptops.
+
+* Tue Sep 21 2010 Kyle McMartin <kyle@redhat.com>
+- Add new btusb ids for MacBookPro from wwoods@.
+
 * Tue Sep 21 2010 Alexandre Oliva <lxoliva@fsfla.org> - libre
 - Deblobbed patch-libre-2.6.36-rc5.
 
