@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 29
+%global baserelease 30
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -690,7 +690,6 @@ Patch1807: drm-i2c-ch7006-fix.patch
 Patch1810: drm-nouveau-updates.patch
 Patch1811: drm-nouveau-race-fix.patch
 Patch1812: drm-nouveau-nva3-noaccel.patch
-Patch1813: drm-nouveau-acpi-edid-fix.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -771,6 +770,12 @@ Patch12570: sched-10-change-nohz-idle-load-balancing-logic-to-push-model.patch
 Patch12575: sched-15-update-rq-clock-for-nohz-balanced-cpus.patch
 Patch12580: sched-20-fix-rq-clock-synchronization-when-migrating-tasks.patch
 Patch12585: sched-25-move-sched_avg_update-to-update_cpu_load.patch
+Patch12590: sched-30-sched-fix-nohz-balance-kick.patch
+
+Patch13600: btusb-macbookpro-6-2.patch
+Patch13601: btusb-macbookpro-7-1.patch
+
+Patch13610: libata-it821x-dump-stack-on-cache-flush.patch
 
 %endif
 
@@ -1353,7 +1358,6 @@ ApplyPatch drm-i2c-ch7006-fix.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
-ApplyPatch drm-nouveau-acpi-edid-fix.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1434,6 +1438,13 @@ ApplyPatch sched-10-change-nohz-idle-load-balancing-logic-to-push-model.patch
 ApplyPatch sched-15-update-rq-clock-for-nohz-balanced-cpus.patch
 ApplyPatch sched-20-fix-rq-clock-synchronization-when-migrating-tasks.patch
 ApplyPatch sched-25-move-sched_avg_update-to-update_cpu_load.patch
+ApplyPatch sched-30-sched-fix-nohz-balance-kick.patch
+
+ApplyPatch btusb-macbookpro-7-1.patch
+ApplyPatch btusb-macbookpro-6-2.patch
+
+# temporary patch, dump stack on failed it821x commands
+ApplyPatch libata-it821x-dump-stack-on-cache-flush.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2021,6 +2032,17 @@ fi
 # and build.
 
 %changelog
+* Thu Sep 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.5-30
+- nouveau: fix IGP chipsets (rhbz#636326), and some DP boards
+- drm-nouveau-acpi-edid-fix.patch: drop, merged into updates
+
+* Wed Sep 22 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix possible lockup with new scheduler idle balance code.
+- Dump stack on failed ATA commands in pata_it821x driver (#632753)
+
+* Tue Sep 21 2010 Kyle McMartin <kyle@redhat.com>
+- Add new btusb ids for MacBookPro from wwoods@.
+
 * Tue Sep 21 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.35.5-29
 - Scheduler fixes for Bugzilla #635813 and #633037
 
