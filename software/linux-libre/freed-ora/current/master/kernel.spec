@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 25
+%global baserelease 26
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 5
 # The git snapshot level
-%define gitrev 0
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -627,8 +627,6 @@ Patch30: linux-2.6-tracehook.patch
 Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
-Patch100: fix-icebp-breakpoints.patch
-
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
@@ -671,7 +669,6 @@ Patch800: linux-2.6-crash-driver.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
-Patch1556: linux-2.6.35.4-virtio_console-fix-poll.patch
 
 # DRM
 Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
@@ -729,14 +726,20 @@ Patch12115: wacom-04-add-support-for-the-bamboo-touch-trackpad.patch
 Patch12120: wacom-05-add-a-quirk-for-low-resolution-bamboo-devices.patch
 Patch12125: wacom-06-request-tablet-data-for-bamboo-pens.patch
 Patch12130: wacom-07-move-bamboo-touch-irq-to-its-own-function.patch
-Patch12035: wacom-08-add-support-for-bamboo-pen.patch
-Patch12040: wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
+Patch12135: wacom-08-add-support-for-bamboo-pen.patch
+Patch12140: wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
 
 # Runtime power management
 Patch12200: linux-2.6-bluetooth-autosuspend.patch
 Patch12201: linux-2.6-uvc-autosuspend.patch
 Patch12202: linux-2.6-qcserial-autosuspend.patch
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
+
+# PCI patches to fix problems with _CRS
+Patch12221: pci-v2-1-4-resources-ensure-alignment-callback-doesn-t-allocate-below-available-start.patch
+Patch12222: pci-v2-2-4-x86-PCI-allocate-space-from-the-end-of-a-region-not-the-beginning.patch
+Patch12223: pci-v2-3-4-resources-allocate-space-within-a-region-from-the-top-down.patch
+Patch12224: pci-v2-4-4-PCI-allocate-bus-resources-from-the-top-down.patch
 
 Patch12300: btusb-macbookpro-7-1.patch
 Patch12301: btusb-macbookpro-6-2.patch
@@ -1190,7 +1193,6 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch fix-icebp-breakpoints.patch
 
 #
 # Intel IOMMU
@@ -1300,7 +1302,6 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
-ApplyPatch linux-2.6.35.4-virtio_console-fix-poll.patch
 
 #ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 #ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
@@ -1360,6 +1361,13 @@ ApplyPatch linux-2.6-bluetooth-autosuspend.patch
 ApplyPatch linux-2.6-uvc-autosuspend.patch
 ApplyPatch linux-2.6-qcserial-autosuspend.patch
 ApplyPatch linux-2.6-usb-pci-autosuspend.patch
+
+# PCI patches to fix problems with _CRS
+# ( from https://bugzilla.kernel.org/show_bug.cgi?id=16228#c49 )
+ApplyPatch pci-v2-1-4-resources-ensure-alignment-callback-doesn-t-allocate-below-available-start.patch
+ApplyPatch pci-v2-2-4-x86-PCI-allocate-space-from-the-end-of-a-region-not-the-beginning.patch
+ApplyPatch pci-v2-3-4-resources-allocate-space-within-a-region-from-the-top-down.patch
+ApplyPatch pci-v2-4-4-PCI-allocate-bus-resources-from-the-top-down.patch
 
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
@@ -1971,6 +1979,13 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Sep 23 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.36-0.26.rc5.git4
+- Linux 2.6.36-rc5-git4
+- Drop merged patches:
+  fix-icebp-breakpoints.patch
+  linux-2.6.35.4-virtio_console-fix-poll.patch
+- Add patches to fix problems with PCI _CRS
+
 * Thu Sep 23 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.25.rc5
 - Add s390 vdso AFTER_LINK to Roland's linux-2.6-makefile-after_link.patch
 
