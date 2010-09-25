@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 30
+%global baserelease 32
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -139,7 +139,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -160,7 +160,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 # (well, almost none, we need nonintconfig for build purposes). Default to 0 (off).
@@ -747,6 +747,7 @@ Patch12080: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 # rhbz #622149
 Patch12085: fix-rcu_deref_check-warning.patch
 Patch12086: linux-2.6-cgroups-rcu.patch
+Patch12087: fix-unprotected-access-to-task-credentials-in-whatid.patch
 
 # rhbz #513530
 Patch12090: dell-wmi-add-support-for-eject-key-studio-1555.patch
@@ -1413,6 +1414,7 @@ ApplyPatch kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 # bz 622149
 ApplyPatch fix-rcu_deref_check-warning.patch
 ApplyPatch linux-2.6-cgroups-rcu.patch
+ApplyPatch fix-unprotected-access-to-task-credentials-in-whatid.patch
 
 # bz 513530
 ApplyPatch dell-wmi-add-support-for-eject-key-studio-1555.patch
@@ -1747,7 +1749,7 @@ BuildKernel %make_target %kernel_image smp
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+make htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -2032,6 +2034,18 @@ fi
 # and build.
 
 %changelog
+* Thu Sep 23 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.5-32
+- Serialize mandocs/htmldocs build, since otherwise it will constantly
+  fail on the koji builders.
+
+* Thu Sep 23 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.5-31
+- Slay another rcu_dereference_check warning pointed out by
+  rmcgrath@.
+
+* Thu Sep 23 2010 Kyle McMartin <kyle@redhat.com>
+- Enable -debug flavours and switch default image to release builds.
+- Bump NR_CPUS on i686 to 64.
+
 * Thu Sep 23 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.5-30
 - nouveau: fix IGP chipsets (rhbz#636326), and some DP boards
 - drm-nouveau-acpi-edid-fix.patch: drop, merged into updates
