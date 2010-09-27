@@ -6,8 +6,8 @@ Index: Makefile
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 35
--EXTRAVERSION = .5-libre2
-+EXTRAVERSION = .5-libre2-lemote
+-EXTRAVERSION = .6-libre2
++EXTRAVERSION = .6-libre2-lemote
  NAME = Sheep on Meth
  
  # *DOCUMENTATION*
