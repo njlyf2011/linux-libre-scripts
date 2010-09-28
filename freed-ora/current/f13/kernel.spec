@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 56
+%global baserelease 58
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -737,6 +737,8 @@ Patch1826: drm-radeon-resume-fixes.patch
 Patch1830: drm-i915-explosion-following-oom-in-do_execbuffer.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 Patch1901: drm-nouveau-acpi-edid-fix.patch
+Patch1902: agp-intel-use-the-correct-mask-to-detect-i830-aperture-size.patch
+Patch1903: drm-nouveau-pusher-intr.patch
 # radeon
 
 # linux1394 git patches
@@ -831,6 +833,12 @@ Patch12550: alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
 
 # CVE-2010-3079
 Patch12560: tracing-do-not-allow-llseek-to-set_ftrace_filter.patch
+
+Patch12570: sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit.patch
+
+# bz 636534
+Patch12580: xen-handle-events-as-edge-triggered.patch
+Patch12581: xen-use-percpu-interrupts-for-ipis-and-virqs.patch
 
 %endif
 
@@ -1449,11 +1457,14 @@ ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
 ApplyPatch drm-nouveau-nv50-crtc-update-delay.patch
 ApplyPatch drm-nouveau-acpi-edid-fix.patch
+ApplyPatch drm-nouveau-pusher-intr.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-explosion-following-oom-in-do_execbuffer.patch
+# broken in 2.6.35-rc2, fixed in 2.6.35, but our drm-next snapshot has the bug
+ApplyPatch agp-intel-use-the-correct-mask-to-detect-i830-aperture-size.patch
 
 ApplyPatch drm-radeon-resume-fixes.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
@@ -1574,6 +1585,13 @@ ApplyPatch alsa-seq-oss-fix-double-free-at-error-path-of-snd_seq_oss_open.patch
 
 # CVE-2010-3079
 ApplyPatch tracing-do-not-allow-llseek-to-set_ftrace_filter.patch
+
+# BZ 633037
+ApplyPatch sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit.patch
+
+# BZ 636534
+ApplyPatch xen-handle-events-as-edge-triggered.patch
+ApplyPatch xen-use-percpu-interrupts-for-ipis-and-virqs.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2196,6 +2214,21 @@ fi
 
 
 %changelog
+* Mon Sep 27 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.7-58
+- nouveau: better handling of certain GPU errors
+
+* Fri Sep 24 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix typo in previous Xen fix that causes boot failure.
+
+* Wed Sep 22 2010 Chuck Ebbert <cebbert@redhat.com>
+- Copy two Xen fixes from 2.6.35-stable for RHBZ#636534
+
+* Tue Sep 21 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix RHBZ #633037, Process user time incorrectly accounted as system time
+
+* Mon Sep 20 2010 Chuck Ebbert <cebbert@redhat.com>
+- Fix AGP aperture size detection on Intel G33/Q35 chipsets (#629203)
+
 * Thu Sep 16 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.34.7.
 
@@ -2216,7 +2249,7 @@ fi
   upgrading is highly recommended.
 - aio: check for multiplication overflow in do_io_submit. (CVE-2010-3067)
 
-* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.34.7-56
+* Tue Sep 14 2010 Chuck Ebbert <cebbert@redhat.com>
 - Linux 2.6.34.7, should fix multiple USB HID device issues.
 
 * Mon Sep 13 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.6-55
