@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 28
+%global baserelease 30
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -663,6 +663,8 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
+Patch700: linux-2.6-e1000-ich9-montevina.patch
+
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
@@ -743,6 +745,8 @@ Patch12224: pci-v2-4-4-PCI-allocate-bus-resources-from-the-top-down.patch
 
 Patch12300: btusb-macbookpro-7-1.patch
 Patch12301: btusb-macbookpro-6-2.patch
+
+Patch12310: fix-intel_ips-to-work-properly.patch
 
 %endif
 
@@ -1298,6 +1302,9 @@ ApplyPatch linux-2.6-silence-fbcon-logo.patch
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
+# Hack e1000e to work on Montevina SDV
+ApplyPatch linux-2.6-e1000-ich9-montevina.patch
+
 # crypto/
 
 # Assorted Virt Fixes
@@ -1371,6 +1378,8 @@ ApplyPatch pci-v2-4-4-PCI-allocate-bus-resources-from-the-top-down.patch
 
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
+
+ApplyPatch fix-intel_ips-to-work-properly.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1979,6 +1988,15 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Sep 30 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.30.rc6
+- Collection of patches to make intel_ips work properly.
+
+* Wed Sep 29 2010 Dave Jones <davej@redhat.com>
+- Add back an old hack to make an SDV e1000e variant work.
+
+* Wed Sep 29 2010 Dave Jones <davej@redhat.com>
+- Enable IB700 watchdog (used by qemu/kvm). (#637152)
+
 * Tue Sep 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.36-rc6.
 
