@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 34
+%global baserelease 37
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -634,8 +634,6 @@ Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
-Patch180: aio-check-for-multiplication-overflow-in-do_io_submit.patch
-
 Patch200: linux-2.6-debug-sizeof-structs.patch
 Patch201: linux-2.6-debug-nmi-timeout.patch
 Patch202: linux-2.6-debug-taint-vm.patch
@@ -671,13 +669,14 @@ Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
+Patch700: linux-2.6-e1000-ich9-montevina.patch
+
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
-Patch1556: linux-2.6.35.4-virtio_console-fix-poll.patch
 
 # DRM
 Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
@@ -726,6 +725,8 @@ Patch2918: linux-2.6-v4l-dvb-ir-core-update-2.patch
 
 Patch3000: linux-2.6-via-velocity-dma-fix.patch
 
+Patch3010: linux-2.6-rcu-sched-warning.patch
+
 # NFSv4
 
 # patches headed upstream
@@ -747,10 +748,6 @@ Patch12080: kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 # rhbz #622149
 Patch12085: fix-rcu_deref_check-warning.patch
 Patch12086: linux-2.6-cgroups-rcu.patch
-Patch12087: fix-unprotected-access-to-task-credentials-in-whatid.patch
-
-# rhbz #513530
-Patch12090: dell-wmi-add-support-for-eject-key-studio-1555.patch
 
 Patch12517: flexcop-fix-xlate_proc_name-warning.patch
 
@@ -759,13 +756,6 @@ Patch12520: execve-improve-interactivity-with-large-arguments.patch
 Patch12521: execve-make-responsive-to-sigkill-with-large-arguments.patch
 Patch12522: setup_arg_pages-diagnose-excessive-argument-size.patch
 
-# CVE-2010-2954
-Patch12540: irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
-# CVE-2010-2960
-Patch12550: keys-fix-bug-in-keyctl_session_to_parent-if-parent-has-no-session-keyring.patch
-Patch12551: keys-fix-rcu-no-lock-warning-in-keyctl_session_to_parent.patch
-
-Patch12560: sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit.patch
 Patch12565: sched-05-avoid-side-effect-of-tickless-idle-on-update_cpu_load.patch
 Patch12570: sched-10-change-nohz-idle-load-balancing-logic-to-push-model.patch
 Patch12575: sched-15-update-rq-clock-for-nohz-balanced-cpus.patch
@@ -1257,8 +1247,6 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 # bugfixes to drivers and filesystems
 #
 
-#ApplyPatch aio-check-for-multiplication-overflow-in-do_io_submit.patch
-
 # ext4
 
 # xfs
@@ -1345,11 +1333,13 @@ ApplyPatch create-sys-fs-cgroup-to-mount-cgroupfs-on.patch
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
+# Hack e1000e to work on Montevina SDV
+ApplyPatch linux-2.6-e1000-ich9-montevina.patch
+
 # crypto/
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
-#ApplyPatch linux-2.6.35.4-virtio_console-fix-poll.patch
 
 #ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
 #ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
@@ -1399,6 +1389,9 @@ ApplyPatch linux-2.6-v4l-dvb-ir-core-update-2.patch
 # Fix DMA bug on via-velocity
 ApplyPatch linux-2.6-via-velocity-dma-fix.patch
 
+# silence another rcu_reference warning
+ApplyPatch linux-2.6-rcu-sched-warning.patch
+
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
@@ -1416,10 +1409,6 @@ ApplyPatch kprobes-x86-fix-kprobes-to-skip-prefixes-correctly.patch
 # bz 622149
 ApplyPatch fix-rcu_deref_check-warning.patch
 ApplyPatch linux-2.6-cgroups-rcu.patch
-#ApplyPatch fix-unprotected-access-to-task-credentials-in-whatid.patch
-
-# bz 513530
-#ApplyPatch dell-wmi-add-support-for-eject-key-studio-1555.patch
 
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
@@ -1429,14 +1418,7 @@ ApplyPatch execve-improve-interactivity-with-large-arguments.patch
 ApplyPatch execve-make-responsive-to-sigkill-with-large-arguments.patch
 ApplyPatch setup_arg_pages-diagnose-excessive-argument-size.patch
 
-# CVE-2010-2954
-#ApplyPatch irda-correctly-clean-up-self-ias_obj-on-irda_bind-failure.patch
-# CVE-2010-2960
-#ApplyPatch keys-fix-bug-in-keyctl_session_to_parent-if-parent-has-no-session-keyring.patch
-#ApplyPatch keys-fix-rcu-no-lock-warning-in-keyctl_session_to_parent.patch
-
 # Scheduler fixes (#635813 and #633037)
-#ApplyPatch sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit.patch
 ApplyPatch sched-05-avoid-side-effect-of-tickless-idle-on-update_cpu_load.patch
 ApplyPatch sched-10-change-nohz-idle-load-balancing-logic-to-push-model.patch
 ApplyPatch sched-15-update-rq-clock-for-nohz-balanced-cpus.patch
@@ -2040,6 +2022,23 @@ fi
 # and build.
 
 %changelog
+* Fri Oct 01 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.6-37
+- nouveau: DP fixes, nv50+ corruption fix, display fixes
+- drm-nouveau-ibdma-race.patch: removed, in updates now
+
+* Thu Sep 30 2010 Dave Jones <davej@redhat.com>
+- silence another rcu_reference warning
+
+* Thu Sep 30 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.6-36
+- nouveau: fix theoretical race condition which may be the cause of some
+  random hangs people reported.
+
+* Wed Sep 29 2010 Dave Jones <davej@redhat.com> 2.6.35.6-35
+- Add back an old hack to make an SDV e1000e variant work.
+
+* Wed Sep 29 2010 Dave Jones <davej@redhat.com>
+- Enable IB700 watchdog (used by qemu/kvm). (#637152)
+
 * Mon Sep 27 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-34
 - Linux 2.6.35.6
 - bdi-fix-warnings-in-__mark_inode_dirty-for-dev-zero-and-friends.patch was
