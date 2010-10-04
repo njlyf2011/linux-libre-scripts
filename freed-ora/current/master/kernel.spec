@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 30
+%global baserelease 32
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 6
 # The git snapshot level
-%define gitrev 0
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -703,6 +703,8 @@ Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
 
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
+
+Patch3000: linux-2.6-rcu-sched-warning.patch
 
 # fs fixes
 
@@ -1341,6 +1343,9 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
+
+# silence another rcu_reference warning
+ApplyPatch linux-2.6-rcu-sched-warning.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
@@ -1988,6 +1993,15 @@ fi
 #                 ||     ||
 
 %changelog
+* Sun Oct 03 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.32.rc6.git2
+- Enable printk.time by default for more useful logs.
+
+* Sat Oct 02 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.31.rc6.git2
+- Linux 2.6.36-rc6-git2
+
+* Thu Sep 30 2010 Dave Jones <davej@redhat.com>
+- silence another rcu_reference warning
+
 * Thu Sep 30 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.30.rc6
 - Collection of patches to make intel_ips work properly.
 
