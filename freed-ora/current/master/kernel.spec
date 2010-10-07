@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 34
+%global baserelease 35
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
-%define gitrev 3
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1989,6 +1989,15 @@ fi
 #                 ||     ||
 
 %changelog
+* Wed Oct  6 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.36-rc7.
+
+* Wed Oct 06 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.35.rc7.git0
+- Linux 2.6.36-rc7 upstream.
+
+* Wed Oct 06 2010 Dave Jones <davej@redhat.com>
+- Another day, another rcu_dereference warning. (#640673)
+
 * Tue Oct 05 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.34.rc6.git3
 - Linux 2.6.36-rc6-git3
 - Drop intel_ips patches merged upstream.
