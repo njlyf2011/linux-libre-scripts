@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 37
+%global baserelease 39
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -697,6 +697,7 @@ Patch1825: drm-intel-make-lvds-work.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 Patch2000: efifb-add-more-models.patch
+Patch2001: efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -723,9 +724,10 @@ Patch2915: lirc-staging-2.6.36.patch
 Patch2917: hdpvr-ir-enable.patch
 Patch2918: linux-2.6-v4l-dvb-ir-core-update-2.patch
 
-Patch3000: linux-2.6-via-velocity-dma-fix.patch
+Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
-Patch3010: linux-2.6-rcu-sched-warning.patch
+Patch3000: linux-2.6-rcu-sched-warning.patch
+Patch3010: linux-2.6-rcu-netpoll.patch
 
 # NFSv4
 
@@ -1358,6 +1360,7 @@ ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 ApplyPatch efifb-add-more-models.patch
+ApplyPatch efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1391,6 +1394,7 @@ ApplyPatch linux-2.6-via-velocity-dma-fix.patch
 
 # silence another rcu_reference warning
 ApplyPatch linux-2.6-rcu-sched-warning.patch
+ApplyPatch linux-2.6-rcu-netpoll.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
@@ -2022,6 +2026,25 @@ fi
 # and build.
 
 %changelog
+* Fri Oct 08 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-39
+- Push to F-14.
+
+* Wed Oct 06 2010 Dave Jones <davej@redhat.com>
+- Another day, another rcu_dereference warning. (#640673)
+
+* Mon Oct 04 2010 Kyle McMartin <kyle@redhat.com>
+- Build intel_idle into the kernel, so they get loaded by default. In
+  later kernels, it is no longer modular, so it isn't an issue. Noticed
+  by mjg59.
+
+* Mon Oct 04 2010 Kyle McMartin <kyle@redhat.com>
+- Make printk.time=1 the default, use printk.time=0 to turn it off.
+  Results in much more useful traces for us, which is a big win.
+
+* Sun Oct 03 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-38
+- Add more mac models supported by efifb. (#528232)
+- Sanity check base address in efifb on pci systems.
+
 * Fri Oct 01 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.6-37
 - nouveau: DP fixes, nv50+ corruption fix, display fixes
 - drm-nouveau-ibdma-race.patch: removed, in updates now
