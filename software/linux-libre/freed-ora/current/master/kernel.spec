@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 35
+%global baserelease 36
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -610,8 +610,6 @@ Patch05: linux-2.6-makefile-after_link.patch
 
 Patch07: freedo.patch
 
-Patch08: fix-oldnoconfig-to-dtrt.patch
-
 %if !%{nopatches}
 
 
@@ -738,6 +736,7 @@ Patch12200: linux-2.6-bluetooth-autosuspend.patch
 Patch12201: linux-2.6-uvc-autosuspend.patch
 Patch12202: linux-2.6-qcserial-autosuspend.patch
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
+Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 
 # PCI patches to fix problems with _CRS
 Patch12221: pci-v2-1-4-resources-ensure-alignment-callback-doesn-t-allocate-below-available-start.patch
@@ -1172,7 +1171,6 @@ make -f %{SOURCE20} VERSION=%{version} configs
 
 ApplyOptionalPatch git-linus.diff
 
-ApplyPatch fix-oldnoconfig-to-dtrt.patch
 ApplyPatch linux-2.6-makefile-after_link.patch
 
 #
@@ -1371,6 +1369,7 @@ ApplyPatch linux-2.6-bluetooth-autosuspend.patch
 ApplyPatch linux-2.6-uvc-autosuspend.patch
 ApplyPatch linux-2.6-qcserial-autosuspend.patch
 ApplyPatch linux-2.6-usb-pci-autosuspend.patch
+ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
 
 # PCI patches to fix problems with _CRS
 # ( from https://bugzilla.kernel.org/show_bug.cgi?id=16228#c49 )
@@ -1989,6 +1988,13 @@ fi
 #                 ||     ||
 
 %changelog
+* Tue Oct 12 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.36.rc7.git3
+- Linux 2.6.36-rc7-git3
+- Drop fix-oldnoconfig-to-dtrt.patch, nonintconfig patches are upstream!
+
+* Mon Oct 11 2010 Matthew Garrett <mjg@redhat.com> 2.6.36-0.35.rc7.git1
+- linux-2.6-enable-more-pci-autosuspend.patch: Enable more PCI autosuspend
+
 * Wed Oct  6 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.36-rc7.
 
