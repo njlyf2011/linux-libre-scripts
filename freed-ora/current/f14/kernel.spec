@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 39
+%global baserelease 42
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -685,6 +685,7 @@ Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
 Patch1805: drm-simplify-i2c-config.patch
 Patch1806: drm-sil164-module.patch
 Patch1807: drm-i2c-ch7006-fix.patch
+Patch1808: drm-ttm-fix.patch
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
 Patch1811: drm-nouveau-race-fix.patch
@@ -723,6 +724,8 @@ Patch2915: lirc-staging-2.6.36.patch
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
 Patch2918: linux-2.6-v4l-dvb-ir-core-update-2.patch
+Patch2919: linux-2.6-v4l-dvb-ir-core-update-3.patch
+Patch2920: linux-2.6-lirc-ioctl-compat-fixups.patch
 
 Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
@@ -771,6 +774,8 @@ Patch13601: btusb-macbookpro-7-1.patch
 
 Patch13610: libata-it821x-dump-stack-on-cache-flush.patch
 Patch13620: xen-fix-typo-in-xen-irq-fix.patch
+
+Patch13630: dm-allow-setting-of-uuid-via-rename-if-not-already-set.patch
 
 %endif
 
@@ -1349,6 +1354,7 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 ApplyPatch drm-simplify-i2c-config.patch
 ApplyPatch drm-sil164-module.patch
 ApplyPatch drm-i2c-ch7006-fix.patch
+ApplyPatch drm-ttm-fix.patch
 # Nouveau DRM + drm fixes
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
@@ -1388,6 +1394,8 @@ ApplyPatch lirc-staging-2.6.36.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-update-2.patch
+ApplyPatch linux-2.6-v4l-dvb-ir-core-update-3.patch
+ApplyPatch linux-2.6-lirc-ioctl-compat-fixups.patch
 
 # Fix DMA bug on via-velocity
 ApplyPatch linux-2.6-via-velocity-dma-fix.patch
@@ -1439,6 +1447,10 @@ ApplyPatch libata-it821x-dump-stack-on-cache-flush.patch
 
 # temporary fix for typo in Xen -stable patch
 ApplyPatch xen-fix-typo-in-xen-irq-fix.patch
+
+
+# rhbz#641476
+ApplyPatch dm-allow-setting-of-uuid-via-rename-if-not-already-set.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2026,6 +2038,19 @@ fi
 # and build.
 
 %changelog
+* Tue Oct 12 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-42
+- Fix  devicemapper UUID field cannot be assigned after map creation
+  (rhbz#641476) thanks pjones@.
+
+* Mon Oct 11 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.6-40
+- update imon driver to fix issues with key releases and properly
+  auto-configure another 0xffdc device (VFD + MCE IR)
+- add new nuvoton-cir driver (for integrated IR in ASRock ION 330HT)
+- add lirc compat ioctl portability fixups
+
+* Mon Oct 11 2010 Ben Skeggs <bskeggs@redhat.com>
+- fix ttm bug that can cause nouveau to crash
+
 * Fri Oct 08 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-39
 - Push to F-14.
 
