@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 36
+%global baserelease 39
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
-%define gitrev 3
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1365,11 +1365,12 @@ ApplyPatch wacom-08-add-support-for-bamboo-pen.patch
 ApplyPatch wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
 
 # Runtime PM
-ApplyPatch linux-2.6-bluetooth-autosuspend.patch
-ApplyPatch linux-2.6-uvc-autosuspend.patch
-ApplyPatch linux-2.6-qcserial-autosuspend.patch
-ApplyPatch linux-2.6-usb-pci-autosuspend.patch
-ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
+# (there's still dragons here, disabled for now... --kyle)
+#ApplyPatch linux-2.6-bluetooth-autosuspend.patch
+#ApplyPatch linux-2.6-uvc-autosuspend.patch
+#ApplyPatch linux-2.6-qcserial-autosuspend.patch
+#ApplyPatch linux-2.6-usb-pci-autosuspend.patch
+#ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
 
 # PCI patches to fix problems with _CRS
 # ( from https://bugzilla.kernel.org/show_bug.cgi?id=16228#c49 )
@@ -1988,6 +1989,16 @@ fi
 #                 ||     ||
 
 %changelog
+* Fri Oct 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.36-rc8.
+
+* Fri Oct 15 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.39.rc8.git0
+- Linux 2.6.36-rc8.
+
+* Thu Oct 14 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.38.rc7.git5
+- Linux 2.6.36-rc7-git5
+- Disable runtime PM until it can be poked at.
+
 * Tue Oct 12 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.36.rc7.git3
 - Linux 2.6.36-rc7-git3
 - Drop fix-oldnoconfig-to-dtrt.patch, nonintconfig patches are upstream!
