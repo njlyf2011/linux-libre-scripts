@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 39
+%global baserelease 40
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -640,6 +640,8 @@ Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
 
+Patch385: ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch393: acpi-ec-add-delay-before-write.patch
@@ -671,8 +673,7 @@ Patch800: linux-2.6-crash-driver.patch
 Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
-Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
-Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
+
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -746,6 +747,12 @@ Patch12224: pci-v2-4-4-PCI-allocate-bus-resources-from-the-top-down.patch
 
 Patch12300: btusb-macbookpro-7-1.patch
 Patch12301: btusb-macbookpro-6-2.patch
+
+Patch12302: pnpacpi-cope-with-invalid-device-ids.patch
+
+Patch12303: dmar-disable-when-ricoh-multifunction.patch
+
+Patch12305: xhci_hcd-suspend-resume.patch
 
 %endif
 
@@ -1257,6 +1264,8 @@ ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
 
+ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
 #
 # SCSI Bits.
 #
@@ -1308,13 +1317,14 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
-#ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
-#ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
+# DRM core
 
-# Nouveau DRM + drm fixes
-#ApplyPatch drm-nouveau-updates.patch
-ApplyPatch drm-intel-big-hammer.patch
+# Nouveau DRM
+ApplyOptionalPatch drm-nouveau-updates.patch
+
+# Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
@@ -1381,6 +1391,14 @@ ApplyPatch pci-v2-4-4-PCI-allocate-bus-resources-from-the-top-down.patch
 
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
+
+# rhbz#641468
+ApplyPatch pnpacpi-cope-with-invalid-device-ids.patch
+
+# rhbz#605888
+ApplyPatch dmar-disable-when-ricoh-multifunction.patch
+
+ApplyPatch xhci_hcd-suspend-resume.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1989,6 +2007,24 @@ fi
 #                 ||     ||
 
 %changelog
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-0.40.rc8.git0
+- Backport xHCI suspend/resume code from linux-next.
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
+- ima: Default it to off, pass ima=on to enable. Reduce impact of the option
+  when disabled.
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
+- Quirk to disable DMAR with Ricoh card reader/firewire. (rhbz#605888)
+
+* Fri Oct 15 2010 Kyle McMartin <kyle@redhat.com>
+- Switched to pci=use_crs by default (it should have been fixed since
+  cebbert sucked in the patches anyway.)
+
+* Fri Oct 15 2010 Kyle McMartin <kyle@redhat.com>
+- backport pnpacpi-cope-with-invalid-device-ids from linux-next.
+  (rhbz#641468)
+
 * Fri Oct 15 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.36-rc8.
 
