@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 59
+%global baserelease 61
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -635,9 +635,11 @@ Patch23: linux-2.6-utrace-ptrace.patch
 
 Patch50: linux-2.6-x86-cfi_sections.patch
 
+# CVE-2010-3301, CVE-2010-3081
 Patch100: 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
 Patch101: 02-compat-test-rax-for-the-system-call-number-not-eax.patch
 Patch102: 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
+# CVE-2010-3067
 Patch103: aio-check-for-multiplication-overflow-in-do_io_submit.patch
 
 Patch144: linux-2.6-vio-modalias.patch
@@ -840,6 +842,25 @@ Patch12570: sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bi
 # bz 636534
 Patch12580: xen-handle-events-as-edge-triggered.patch
 Patch12581: xen-use-percpu-interrupts-for-ipis-and-virqs.patch
+
+# CVE-2010-3432
+Patch12590: sctp-do-not-reset-the-packet-during-sctp_packet_config.patch
+
+#Bonding sysfs WARN_ON (bz 604630)
+Patch12591: linux-2.6-bonding-sysfs-warning.patch
+
+#twsock rcu warning fix (bz 642905)
+Patch12592: linux-2.6-twsock-rcu-lockdep-warn.patch
+
+Patch13635: r8169-fix-dma-allocations.patch
+Patch13636: skge-quirk-to-4gb-dma.patch
+
+Patch13637: dmar-disable-when-ricoh-multifunction.patch
+
+Patch13640: mmc-SDHCI_INT_DATA_MASK-typo-error.patch
+Patch13641: mmc-add-ricoh-e822-pci-id.patch
+Patch13642: mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
+Patch13643: sdhci-8-bit-data-transfer-width-support.patch
 
 %endif
 
@@ -1296,10 +1317,10 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # x86(-64)
 ApplyPatch linux-2.6-x86-cfi_sections.patch
 
+# CVE-2010-3301, CVE-2010-3081
 ApplyPatch 01-compat-make-compat_alloc_user_space-incorporate-the-access_ok-check.patch
 ApplyPatch 02-compat-test-rax-for-the-system-call-number-not-eax.patch
 ApplyPatch 03-compat-retruncate-rax-after-ia32-syscall-entry-tracing.patch
-
 
 #
 # Intel IOMMU
@@ -1594,6 +1615,28 @@ ApplyPatch sched-00-fix-user-time-incorrectly-accounted-as-system-time-on-32-bit
 # BZ 636534
 ApplyPatch xen-handle-events-as-edge-triggered.patch
 ApplyPatch xen-use-percpu-interrupts-for-ipis-and-virqs.patch
+
+# CVE-2010-3432
+ApplyPatch sctp-do-not-reset-the-packet-during-sctp_packet_config.patch
+
+# BZ 604630
+ApplyPatch linux-2.6-bonding-sysfs-warning.patch
+
+# BZ 642905
+ApplyPatch linux-2.6-twsock-rcu-lockdep-warn.patch
+
+# rhbz#629158
+ApplyPatch r8169-fix-dma-allocations.patch
+# rhbz#447489
+ApplyPatch skge-quirk-to-4gb-dma.patch
+
+# rhbz#605888
+ApplyPatch dmar-disable-when-ricoh-multifunction.patch
+
+ApplyPatch mmc-SDHCI_INT_DATA_MASK-typo-error.patch
+ApplyPatch sdhci-8-bit-data-transfer-width-support.patch
+ApplyPatch mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
+ApplyPatch mmc-add-ricoh-e822-pci-id.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2216,6 +2259,25 @@ fi
 
 
 %changelog
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.34.7-61
+- Add Ricoh e822 support. (rhbz#596475) Thanks to sgruszka@ for
+  sending the patches in.
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.34.7-60
+- Quirk to disable DMAR with Ricoh card reader/firewire. (rhbz#605888)
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
+- Two networking fixes (skge, r8169) from sgruska. (rhbz#447489,629158)
+
+* Thu Oct 14 2010 Neil Horman <nhorman@redhat.com>
+- Fix rcu warning in twsock_net (bz 642905)
+
+* Wed Oct 06 2010 Neil Horman <nhorman@redhat.com>
+- Fix WARN_ON when you try to create an exiting bond in bond_masters
+
+* Thu Sep 30 2010 Chuck Ebbert <cebbert@redhat.com>
+- CVE-2010-3432: sctp-do-not-reset-the-packet-during-sctp_packet_config.patch
+
 * Thu Sep 30 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.34.7-59
 - nouveau: fix theoretical race condition that could be responsible for
   certain random hangs that have been reported.
