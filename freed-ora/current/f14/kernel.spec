@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 44
+%global baserelease 46
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -774,10 +774,23 @@ Patch12595: sched-35-increment-cache_nice_tries-only-on-periodic-lb.patch
 Patch13600: btusb-macbookpro-6-2.patch
 Patch13601: btusb-macbookpro-7-1.patch
 
+Patch13603: pnpacpi-cope-with-invalid-device-ids.patch
+
 Patch13610: libata-it821x-dump-stack-on-cache-flush.patch
 Patch13620: xen-fix-typo-in-xen-irq-fix.patch
 
 Patch13630: dm-allow-setting-of-uuid-via-rename-if-not-already-set.patch
+
+Patch13635: r8169-fix-dma-allocations.patch
+Patch13636: skge-quirk-to-4gb-dma.patch
+
+Patch13637: dmar-disable-when-ricoh-multifunction.patch
+
+Patch13638: ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
+Patch13640: sdhci-8-bit-data-transfer-width-support.patch
+Patch13641: mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
+Patch13642: mmc-add-ricoh-e822-pci-id.patch
 
 %endif
 
@@ -1451,9 +1464,26 @@ ApplyPatch libata-it821x-dump-stack-on-cache-flush.patch
 # temporary fix for typo in Xen -stable patch
 ApplyPatch xen-fix-typo-in-xen-irq-fix.patch
 
+# rhbz#641468
+ApplyPatch pnpacpi-cope-with-invalid-device-ids.patch
 
 # rhbz#641476
 ApplyPatch dm-allow-setting-of-uuid-via-rename-if-not-already-set.patch
+
+# rhbz#629158
+ApplyPatch r8169-fix-dma-allocations.patch
+# rhbz#447489
+ApplyPatch skge-quirk-to-4gb-dma.patch
+
+# rhbz#605888
+ApplyPatch dmar-disable-when-ricoh-multifunction.patch
+
+ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
+# rhbz#596475
+ApplyPatch sdhci-8-bit-data-transfer-width-support.patch
+ApplyPatch mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
+ApplyPatch mmc-add-ricoh-e822-pci-id.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2041,6 +2071,30 @@ fi
 # and build.
 
 %changelog
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-46
+- Add Ricoh e822 support. (rhbz#596475) Thanks to sgruszka@ for
+  sending the patches in.
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-45
+- Print a useful message when disabling IOMMU when a Ricoh cardreader
+  is probed.
+- Disable eDP pipe bringup on i915 since it won't work anyway, and changes
+  away from text-mode, resulting in nothing but a backlight on a lot of
+  laptops. (rhbz#639146)
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
+- ima: Default it to off, pass ima=on to enable. Reduce impact of the option
+  when disabled.
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
+- Quirk to disable DMAR with Ricoh card reader/firewire. (rhbz#605888)
+
+* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
+- Two networking fixes (skge, r8169) from sgruszka@. (rhbz#447489,629158)
+
+* Fri Oct 15 2010 Kyle McMartin <kyle@redhat.com>
+- pnpacpi: cope with invalid device IDs. (rhbz#641468)
+
 * Fri Oct 15 2010 Peter Jones <pjones@redhat.com> 2.6.35.6-44
 - Add a missing dm_put in previous device mapper patch.
 
