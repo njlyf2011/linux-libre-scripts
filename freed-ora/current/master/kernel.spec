@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -51,21 +51,21 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 41
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 35
+%define base_sublevel 36
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 2
+#define librev
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -738,6 +738,7 @@ Patch12201: linux-2.6-uvc-autosuspend.patch
 Patch12202: linux-2.6-qcserial-autosuspend.patch
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
 Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
+Patch12205: runtime_pm_fixups.patch
 
 Patch12225: pci-crs-fixes.patch
 
@@ -1371,12 +1372,12 @@ ApplyPatch wacom-08-add-support-for-bamboo-pen.patch
 ApplyPatch wacom-09-disable-bamboo-touchpad-when-pen-is-being-used.patch
 
 # Runtime PM
-# (there's still dragons here, disabled for now... --kyle)
-#ApplyPatch linux-2.6-bluetooth-autosuspend.patch
-#ApplyPatch linux-2.6-uvc-autosuspend.patch
-#ApplyPatch linux-2.6-qcserial-autosuspend.patch
-#ApplyPatch linux-2.6-usb-pci-autosuspend.patch
-#ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
+ApplyPatch linux-2.6-bluetooth-autosuspend.patch
+ApplyPatch linux-2.6-uvc-autosuspend.patch
+ApplyPatch linux-2.6-qcserial-autosuspend.patch
+ApplyPatch linux-2.6-usb-pci-autosuspend.patch
+ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
+ApplyPatch runtime_pm_fixups.patch
 
 # PCI patches to fix problems with _CRS
 # ( from linux-pci list )
@@ -2000,6 +2001,15 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Oct 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Deblobbed 2.6.36-libre.
+
+* Wed Oct 20 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.36-1
+- Linux 2.6.36
+
+* Wed Oct 20 2010 Matthew Garrett <mjg@redhat.com> 2.6.36-0.42.rc8.git5
+- runtime_pm_fixups.patch: should fix this on Thinkpads
+
 * Tue Oct 19 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.36-0.41.rc8.git5
 - Linux 2.6.36-rc8-git5
 - Update PCI _CRS fixes

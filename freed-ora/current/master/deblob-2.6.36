@@ -45,7 +45,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.35 extra=2
+kver=2.6.36 extra=
 
 case $1 in
 --force)
@@ -445,12 +445,6 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/char/Makefile
 
 # gpu drm
 
-announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
-reject_firmware drivers/gpu/drm/nouveau/nouveau_grctx.c
-clean_blob drivers/gpu/drm/nouveau/nouveau_grctx.c
-clean_kconfig drivers/gpu/drk/nouveau/Kconfig 'DRM_NOUVEAU'
-clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
-
 announce DRM_MGA - "Matrox g200/g400"
 drop_fw_file firmware/matrox/g200_warp.H16 firmware/matrox/g200_warp.fw
 drop_fw_file firmware/matrox/g400_warp.H16 firmware/matrox/g400_warp.fw
@@ -699,10 +693,7 @@ clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_DS3000'
 clean_mk CONFIG_DVB_DS3000 drivers/media/dvb/frontends/Makefile
 
 announce DVB_LGS8GXX - "Legend Silicon LGS8913/LGS8GL5/LGS8GXX DMB-TH demodulator"
-clean_sed '
-/^static int lgs8g75_init_data/i\
-#define lgs8g75_init_data(priv) do { dprintk("lgs8g75: missing Free firmware\\n"); goto error_out; } while(0)
-' drivers/media/dvb/frontends/lgs8gxx.c 'report missing Free firmware'
+reject_firmware drivers/media/dvb/frontends/lgs8gxx.c
 clean_blob drivers/media/dvb/frontends/lgs8gxx.c
 clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_LGS8GXX'
 clean_mk CONFIG_DVB_LGS8GXX drivers/media/dvb/frontends/Makefile
@@ -969,17 +960,17 @@ clean_mk CONFIG_BNX2 drivers/net/Makefile
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
 drop_fw_file firmware/bnx2x-e1-5.2.13.0.fw.ihex firmware/bnx2x-e1-5.2.13.0.fw
 drop_fw_file firmware/bnx2x-e1h-5.2.13.0.fw.ihex firmware/bnx2x-e1h-5.2.13.0.fw
-reject_firmware drivers/net/bnx2x_main.c
+reject_firmware drivers/net/bnx2x/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
   /^$/i\
 #define bnx2x_init_block(bp, start, end) \\\
   return (printk(KERN_ERR "%s: Missing Free firmware\\n", bp->dev->name),\\\
 	  -EINVAL)
-}' drivers/net/bnx2x_main.c 'report missing Free firmware'
-clean_blob drivers/net/bnx2x_main.c
-clean_blob drivers/net/bnx2x_hsi.h
-clean_blob drivers/net/bnx2x_init_ops.h
+}' drivers/net/bnx2x/bnx2x_main.c 'report missing Free firmware'
+clean_blob drivers/net/bnx2x/bnx2x_main.c
+clean_blob drivers/net/bnx2x/bnx2x_hsi.h
+clean_blob drivers/net/bnx2x/bnx2x_init_ops.h
 clean_kconfig drivers/net/Kconfig 'BNX2X'
 clean_mk CONFIG_BNX2X drivers/net/Makefile
 
@@ -993,7 +984,7 @@ clean_mk CONFIG_CASSINI drivers/net/Makefile
 announce CHELSIO_T3 - "Chelsio AEL 2005 support"
 drop_fw_file firmware/cxgb3/t3b_psram-1.1.0.bin.ihex firmware/cxgb3/t3b_psram-1.1.0.bin
 drop_fw_file firmware/cxgb3/t3c_psram-1.1.0.bin.ihex firmware/cxgb3/t3c_psram-1.1.0.bin
-drop_fw_file firmware/cxgb3/t3fw-7.4.0.bin.ihex firmware/cxgb3/t3fw-7.4.0.bin
+drop_fw_file firmware/cxgb3/t3fw-7.10.0.bin.ihex firmware/cxgb3/t3fw-7.10.0.bin
 drop_fw_file firmware/cxgb3/ael2005_opt_edc.bin.ihex firmware/cxgb3/ael2005_opt_edc.bin
 drop_fw_file firmware/cxgb3/ael2005_twx_edc.bin.ihex firmware/cxgb3/ael2005_twx_edc.bin
 drop_fw_file firmware/cxgb3/ael2020_twx_edc.bin.ihex firmware/cxgb3/ael2020_twx_edc.bin
@@ -1641,6 +1632,22 @@ clean_blob drivers/serial/ucc_uart.c
 clean_kconfig drivers/serial/Kconfig 'SERIAL_QE'
 clean_mk CONFIG_SERIAL_QE drivers/serial/Makefile
 
+#########
+# input #
+#########
+
+announce TOUCHSCREEN_QT602240 - "QT602240 I2C Touchscreen"
+reject_firmware drivers/input/touchscreen/qt602240_ts.c
+clean_blob drivers/input/touchscreen/qt602240_ts.c
+clean_kconfig drivers/net/Kconfig 'TOUCHSCREEN_QT602240'
+clean_mk CONFIG_TOUCHSCREEN_QT602240 drivers/input/touchscreen/Makefile
+
+announce LIRC_ZILOG - "Zilog/Hauppauge IR Transmitter"
+reject_firmware drivers/staging/lirc/lirc_zilog.c
+clean_blob drivers/staging/lirc/lirc_zilog.c
+clean_kconfig drivers/staging/lirc/Kconfig 'LIRC_ZILOG'
+clean_mk CONFIG_LIRC_ZILOG drivers/staging/lirc/Makefile
+
 ####################
 # Data acquisition #
 ####################
@@ -2151,16 +2158,6 @@ clean_sed '
   /^	default.*dsp001\.ld/ s,".*","/*(DEBLOBBED)*/",;
 }' sound/oss/Kconfig 'removed default firmware'
 clean_mk CONFIG_SOUND_PSS sound/oss/Makefile
-
-##########
-# Crypto #
-##########
-
-announce DX_SEP - "Discretix SEP driver"
-reject_firmware drivers/staging/sep/sep_driver.c
-clean_blob drivers/staging/sep/sep_driver.c
-clean_kconfig drivers/staging/sep/Kconfig 'DX_SEP'
-clean_mk CONFIG_DX_SEP drivers/staging/sep/Makefile
 
 #################
 # Documentation #
