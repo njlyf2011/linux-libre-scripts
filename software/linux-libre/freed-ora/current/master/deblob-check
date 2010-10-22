@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2010-08-30
+# deblob-check version 2010-10-21
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -1208,7 +1208,7 @@ set_except () {
     blob '\(#ifdef[ ]__\(LITTLE\|BIG\)_ENDIAN[\n]\)\?#define[ ]FW_EXT[ ]["]\(_ecd\)\?\.bin2\?["]\([\n]#else[\n]#define[ ]FW_EXT[ ]["]\(_ecd\)\?\.bin2\?["]\)*\([\n]#endif\)\?' drivers/atm/fore200e.c
     blobna 'sprintf[(][^;]*fore200[^;]*FW_EXT[^;]*[)][;]' drivers/atm/fore200e.c
     blobname '\(pc\|sb\)a200e\(_ecd\)\?\.bin[12]\?' drivers/atm/fore200e.c
-    blobna 'The[ ]supplied[ ]firmware[ ]images.*fore.*Rebuild[ ]and[ ]re-install[^.]*\.' Documentation/networking/fore200e.txt
+    blobna 'The[ ]supplied[ ]firmware[ ]images.*http:[/][/][^\n]*\(fore\|FORE_Systems\).*Rebuild[ ]and[ ]re-install[^.]*\.' Documentation/networking/fore200e.txt
 
     blobname 'intelliport2\.bin' drivers/char/ip2/ip2main.c
 
@@ -2027,7 +2027,7 @@ set_except () {
     initnc 'static[ ]\(const[ ]\)\?unsigned[ ]char[ ]euc2sjisibm_g3upper_map\[\]\[2\][ ]='
     initnc 'static[ ]const[ ]unsigned[ ]char[ ]green\[256\][ ]='
     initnc 'static[ ]const[ ]unsigned[ ]char[ ]hash_table_ops\[64[*]4\][ ]='
-    initnc 'static[ ]const[ ]unsigned[ ]char[ ]hid_keyboard\[256\][ ]='
+    defsnc 'static[ ]const[ ]unsigned[ ]char[ ]hid_keyboard\[256\][ ]=' drivers/hid/hid-input.c
     initnc 'static[ ]const[ ]unsigned[ ]char[ ]mts_direction\[256[/]8\][ ]='
     initnc 'static[ ]const[ ]unsigned[ ]char[ ]red\[256\][ ]='
     initnc 'static[ ]\(const[ ]\)\?unsigned[ ]char[ ]sjisibm2euc_map\[\]\[2\][ ]='
@@ -2572,6 +2572,7 @@ set_except () {
     defsnc '[	][	]degrade_factor\[CPU_LOAD_IDX_MAX\]\[DEGRADE_SHIFT[ ][+][ ]1\][ ]=' kernel/sched.c
     defsnc 'static[ ]const[ ]unsigned[ ]char[ ]expected_result\[FIFO_SIZE\][ ]=' samples/kfifo/bytestream-example.c
     defsnc 'static[ ]const[ ]int[ ]expected_result\[FIFO_SIZE\][ ]=' samples/kfifo/inttype-example.c
+    blobname 'haup-ir-blaster\.bin' drivers/input/lirc/lirc_zilog.c
     ;;
 
   */*freedo*.patch | */*logo*.patch)
@@ -2638,7 +2639,6 @@ set_except () {
     blobname 'iwlwifi-6000g2[ab]-' drivers/net/iwlwifi/iwl-6000.c
     blobname '#api[ ]["]\.ucode["]' 'drivers/net/iwlwifi/iwl-\(3945.h\|\(4965\|[156]000\)\.c\)'
     blobname 'c[tb]fw\(_\(fc\|cna\)\)\?\.bin' drivers/scsi/bfa/bfad_fwimg.c
-    blobname 'haup-ir-blaster\.bin' drivers/input/lirc/lirc_zilog.c
     blobna 'seq_printf[(]seq[,][ ]["][^"]*%s[ ]%s[^"]*["][,][ 	\n]*\(GB_RCV\|MOJAVE_\)UCODE_VERS_STRING[,][ ]\(GB_RCV\|MOJAVE_\)UCODE_VERS_DATE[)][;]\([ 	\n]*seq_printf[(]seq[,][ ]["][^"]*%s[ ]%s[^"]*["][,][ 	\n]*\(GB_RCV\|MOJAVE_\)UCODE_VERS_STRING[,][ ]\(GB_RCV\|MOJAVE_\)UCODE_VERS_DATE[)][;]\)*' drivers/staging/slicoss/slicoss.c
     blobname 'slicoss[/]\(oasis\|gb\)\(rcvucode\|download\)\.sys' drivers/staging/slicoss/slicoss.c
     blobname 'CMV[x9ae][yip]\.bin\(\.v2\)\?' drivers/usb/atm/ueagle-atm.c
@@ -2671,10 +2671,18 @@ set_except () {
     defsnc '[	][	]degrade_factor\[CPU_LOAD_IDX_MAX\]\[DEGRADE_SHIFT[ ][+][ ]1\][ ]=' kernel/sched.c
     defsnc 'static[ ]const[ ]unsigned[ ]char[ ]expected_result\[FIFO_SIZE\][ ]=' samples/kfifo/bytestream-example.c
     defsnc 'static[ ]const[ ]int[ ]expected_result\[FIFO_SIZE\][ ]=' samples/kfifo/inttype-example.c
+    blobname 'haup-ir-blaster\.bin' drivers/input/lirc/lirc_zilog.c
     ;;
 
-  */sched-fix-over-scheduling-bug.patch)
+  */hid-support*.patch)
+    initnc '\([;][/][*]@@[ ]-[0-9]*,[0-9]*[ ][+][0-9]*,[0-9]*[ ]@@[ ]\)\?static[ ]const[ ]unsigned[ ]char[ ]hid_keyboard\[256\][ ]=\([ ][{][*][/][;]\)\?' drivers/hid/hid-input.c
+    ;;
+
+  */sched*)
     accept 'CPU[ ]\+before[ ]\+after[\n]\([\n][01][0-9][ ]\+:[ ][0-9]\+[ ]\+:[ ][67]\)*'
+    defsnc '[	][	]degrade_factor\[CPU_LOAD_IDX_MAX\]\[DEGRADE_SHIFT[ ][+][ ]1\][ ]=' kernel/sched.c
+    accept '\(All[ ]CPUS[ ]idle[ ]for[ ]10[ ]seconds[ ][(]HZ=1000[)]\|One[ ]CPU[ ]busy[ ]rest[ ]idle[ ]for[ ]10[ ]seconds\|All[ ]CPUs[ ]busy[ ]for[ ]10[ ]seconds\)[\n][0-9 \n]*'
+    accept 'domainstats:[ ]*domain0[\n][ ]*cpu[ ]*cnt[ ]*bln[ ]*fld[ ]*imb[ ]*gain[ ]*hgain[ ]*nobusyq[ ]*nobusyg[\n 0-9:]*'    
     ;;
 
   */*-loongson.patch)
