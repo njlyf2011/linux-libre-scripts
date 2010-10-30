@@ -47,7 +47,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 170
+%global baserelease 172
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -73,7 +73,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 23
+%define stable_update 25
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -753,14 +753,16 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-acpi-populate-didl.patch
 Patch1826: drm-intel-make-lvds-work.patch
 #Patch1827: linux-2.6-intel-agp-clear-gtt.patch
-Patch1828: drm-nouveau-g80-ctxprog.patch
-Patch1831: drm-nouveau-tvout-disable.patch
-Patch1832: drm-nouveau-safetile-getparam.patch
-Patch1844: drm-nouveau-kconfig.patch
-Patch1845: drm-nouveau-mutex.patch
-Patch1846: drm-nouveau-update.patch
-Patch1847: drm-nouveau-d620.patch
-Patch1848: drm-nouveau-nva3-noaccel.patch
+Patch1828: drm-i915-sanity-check-pread-pwrite.patch
+
+Patch1850: drm-nouveau-g80-ctxprog.patch
+Patch1851: drm-nouveau-tvout-disable.patch
+Patch1852: drm-nouveau-safetile-getparam.patch
+Patch1853: drm-nouveau-kconfig.patch
+Patch1854: drm-nouveau-mutex.patch
+Patch1855: drm-nouveau-update.patch
+Patch1856: drm-nouveau-d620.patch
+Patch1857: drm-nouveau-nva3-noaccel.patch
 
 # kludge to make ich9 e1000 work
 Patch2000: linux-2.6-e1000-ich9.patch
@@ -801,7 +803,6 @@ Patch11010: via-hwmon-temp-sensor.patch
 
 # patches headed upstream
 Patch12010: linux-2.6-dell-laptop-rfkill-fix.patch
-Patch12011: linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
 Patch12013: linux-2.6-rfkill-all.patch
 Patch12020: linux-2.6-cantiga-iommu-gfx.patch
 
@@ -859,12 +860,8 @@ Patch14130: kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 
 Patch14200: net-do-not-check-capable-if-kernel.patch
 
-# Mitigate DOS with large argument lists
-Patch14210: execve-improve-interactivity-with-large-arguments.patch
-Patch14211: execve-make-responsive-to-sigkill-with-large-arguments.patch
-Patch14212: setup_arg_pages-diagnose-excessive-argument-size.patch
-
-Patch14220: xen-fix-typo-in-xen-irq-fix.patch
+# rhbz#596475
+Patch14226: add-support-for-ricoh-e822-sdhci.patch
 
 # ==============================================================================
 %endif
@@ -1498,9 +1495,6 @@ ApplyPatch crystalhd-2.6.34-staging.patch
 
 # Assorted Virt Fixes
 
-# Fix block I/O errors in KVM
-#ApplyPatch linux-2.6-block-silently-error-unsupported-empty-barriers-too.patch
-
 ApplyPatch linux-2.6-e1000-ich9.patch
 
 ApplyPatch linux-2.6-phylib-autoload.patch
@@ -1516,6 +1510,8 @@ ApplyPatch drm-intel-acpi-populate-didl.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 # gm45 stability fixes
 ApplyPatch drm-intel-945gm-stability-fixes.patch
+# CVE-2010-2962
+ApplyPatch drm-i915-sanity-check-pread-pwrite.patch
 
 #ApplyPatch drm-nouveau-g80-ctxprog.patch
 ApplyPatch drm-nouveau-tvout-disable.patch
@@ -1597,13 +1593,8 @@ ApplyPatch kvm-mmu-fix-conflict-access-permissions-in-direct-sp.patch
 # rhbz #598796
 ApplyPatch net-do-not-check-capable-if-kernel.patch
 
-# Mitigate DOS with large argument lists
-ApplyPatch execve-improve-interactivity-with-large-arguments.patch
-ApplyPatch execve-make-responsive-to-sigkill-with-large-arguments.patch
-ApplyPatch setup_arg_pages-diagnose-excessive-argument-size.patch
-
-# Fix typo in Xen patch from 2.6.22 that causes hang on boot.
-ApplyPatch xen-fix-typo-in-xen-irq-fix.patch
+# rhbz#596475
+ApplyPatch add-support-for-ricoh-e822-sdhci.patch
 
 # END OF PATCH APPLICATIONS ====================================================
 %endif
@@ -2257,6 +2248,29 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Fri Oct 29 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-2.6.32.25.
+
+* Fri Oct 29 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.32.25-172
+- Linux 2.6.32.25
+
+* Fri Oct 22 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.32.25-171.rc1
+- Linux 2.6.32.25-rc1
+- Comment out patches merged upstream:
+   execve-improve-interactivity-with-large-arguments.patch
+   execve-make-responsive-to-sigkill-with-large-arguments.patch
+   setup_arg_pages-diagnose-excessive-argument-size.patch
+   xen-fix-typo-in-xen-irq-fix.patch
+   r8169-fix-dma-allocations.patch
+   skge-quirk-to-4gb-dma.patch
+- drm-i915-sanity-check-pread-pwrite.patch: backport fix for
+   CVE-2010-2962
+
+* Thu Oct 14 2010 Kyle McMartin <kyle@redhat.com>
+- rhbz447489: skge-quirk-to-4gb-dma.patch
+- rhbz629158: r8169-fix-dma-allocations.patch
+- rhbz596475: add-support-for-ricoh-e822-sdhci.patch
+
 * Mon Sep 27 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Adjusted patch-libre-2.6.32.23.
 
