@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 50
+%global baserelease 45
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -692,14 +692,13 @@ Patch1808: drm-ttm-fix.patch
 Patch1810: drm-nouveau-updates.patch
 Patch1811: drm-nouveau-race-fix.patch
 Patch1812: drm-nouveau-nva3-noaccel.patch
-Patch1813: drm-nouveau-nv86-bug.patch
-Patch1814: drm-nouveau-nv50-crtc-update-delay.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
+
 Patch2000: efifb-add-more-models.patch
 Patch2001: efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
 
@@ -729,7 +728,6 @@ Patch2917: hdpvr-ir-enable.patch
 Patch2918: linux-2.6-v4l-dvb-ir-core-update-2.patch
 Patch2919: linux-2.6-v4l-dvb-ir-core-update-3.patch
 Patch2920: linux-2.6-lirc-ioctl-compat-fixups.patch
-Patch2923: linux-2.6-v4l-dvb-ir-core-fix-imon.patch
 
 Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
@@ -789,17 +787,6 @@ Patch13636: skge-quirk-to-4gb-dma.patch
 Patch13637: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13638: ima-allow-it-to-be-completely-disabled-and-default-off.patch
-
-Patch13640: sdhci-8-bit-data-transfer-width-support.patch
-Patch13641: mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
-Patch13642: mmc-add-ricoh-e822-pci-id.patch
-
-Patch13645: tpm-autodetect-itpm-devices.patch
-Patch13646: depessimize-rds_copy_page_user.patch
-
-Patch13650: drm-i915-sanity-check-pread-pwrite.patch
-Patch13651: kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
-Patch13652: v4l1-fix-32-bit-compat-microcode-loading-translation.patch
 
 %endif
 
@@ -1384,8 +1371,6 @@ ApplyPatch drm-ttm-fix.patch
 ApplyPatch drm-nouveau-updates.patch
 ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
-ApplyPatch drm-nouveau-nv86-bug.patch
-ApplyPatch drm-nouveau-nv50-crtc-update-delay.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -1423,7 +1408,6 @@ ApplyPatch hdpvr-ir-enable.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-update-2.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-update-3.patch
 ApplyPatch linux-2.6-lirc-ioctl-compat-fixups.patch
-ApplyPatch linux-2.6-v4l-dvb-ir-core-fix-imon.patch
 
 # Fix DMA bug on via-velocity
 ApplyPatch linux-2.6-via-velocity-dma-fix.patch
@@ -1491,21 +1475,6 @@ ApplyPatch skge-quirk-to-4gb-dma.patch
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
-
-# rhbz#596475
-ApplyPatch sdhci-8-bit-data-transfer-width-support.patch
-ApplyPatch mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
-ApplyPatch mmc-add-ricoh-e822-pci-id.patch
-
-ApplyPatch depessimize-rds_copy_page_user.patch
-ApplyPatch tpm-autodetect-itpm-devices.patch
-
-# CVE-2010-2962
-ApplyPatch drm-i915-sanity-check-pread-pwrite.patch
-# CVE-2010-3698
-ApplyPatch kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
-# CVE-2010-2963
-ApplyPatch v4l1-fix-32-bit-compat-microcode-loading-translation.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2093,31 +2062,6 @@ fi
 # and build.
 
 %changelog
-* Tue Nov 02 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.6-50
-- nouveau: add potential workaround for NV86 hardware quirk
-- fix issue that occurs in certain dual-head configurations (rhbz#641524)
-
-* Sat Oct 23 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.6-49
-- Fix brown paper bag bug in imon driver
-
-* Fri Oct 22 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.35.6-48
-- drm-i915-sanity-check-pread-pwrite.patch;
-   fix CVE-2010-2962, arbitrary kernel memory write via i915 GEM ioctl
-- kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch;
-   fix CVE-2010-3698, kvm: invalid selector in fs/gs causes kernel panic
-- v4l1-fix-32-bit-compat-microcode-loading-translation.patch;
-   fixes CVE-2010-2963, v4l: VIDIOCSMICROCODE arbitrary write
-
-* Fri Oct 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-47
-- tpm-autodetect-itpm-devices.patch: Auto-fix TPM issues on various
-  laptops which prevented suspend/resume.
-- depessimize-rds_copy_page_user.patch: Fix CVE-2010-3904, local
-  privilege escalation via RDS protocol.
-
-* Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-46
-- Add Ricoh e822 support. (rhbz#596475) Thanks to sgruszka@ for
-  sending the patches in.
-
 * Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.6-45
 - Print a useful message when disabling IOMMU when a Ricoh cardreader
   is probed.
@@ -2133,7 +2077,7 @@ fi
 - Quirk to disable DMAR with Ricoh card reader/firewire. (rhbz#605888)
 
 * Mon Oct 18 2010 Kyle McMartin <kyle@redhat.com>
-- Two networking fixes (skge, r8169) from sgruszka@. (rhbz#447489,629158)
+- Two networking fixes (skge, r8169) from sgruska. (rhbz#447489,629158)
 
 * Fri Oct 15 2010 Kyle McMartin <kyle@redhat.com>
 - pnpacpi: cope with invalid device IDs. (rhbz#641468)
