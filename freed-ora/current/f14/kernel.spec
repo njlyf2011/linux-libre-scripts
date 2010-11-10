@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 50
+%global baserelease 51
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -681,8 +681,7 @@ Patch800: linux-2.6-crash-driver.patch
 Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
-Patch1801: drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
-Patch1802: revert-drm-kms-toggle-poll-around-switcheroo.patch
+Patch1801: drm-polling-fixes.patch
 # drm fixes nouveau depends on
 Patch1805: drm-simplify-i2c-config.patch
 Patch1806: drm-sil164-module.patch
@@ -694,6 +693,7 @@ Patch1811: drm-nouveau-race-fix.patch
 Patch1812: drm-nouveau-nva3-noaccel.patch
 Patch1813: drm-nouveau-nv86-bug.patch
 Patch1814: drm-nouveau-nv50-crtc-update-delay.patch
+Patch1815: drm-nouveau-connector-fix.patch
 Patch1819: drm-intel-big-hammer.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -1373,9 +1373,7 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
-#ApplyPatch drm-revert-drm-fbdev-rework-output-polling-to-be-back-in-core.patch
-#ApplyPatch revert-drm-kms-toggle-poll-around-switcheroo.patch
-
+ApplyPatch drm-polling-fixes.patch
 ApplyPatch drm-simplify-i2c-config.patch
 ApplyPatch drm-sil164-module.patch
 ApplyPatch drm-i2c-ch7006-fix.patch
@@ -1386,6 +1384,7 @@ ApplyPatch drm-nouveau-race-fix.patch
 ApplyPatch drm-nouveau-nva3-noaccel.patch
 ApplyPatch drm-nouveau-nv86-bug.patch
 ApplyPatch drm-nouveau-nv50-crtc-update-delay.patch
+ApplyPatch drm-nouveau-connector-fix.patch
 
 ApplyPatch drm-intel-big-hammer.patch
 ApplyOptionalPatch drm-intel-next.patch
@@ -2093,6 +2092,9 @@ fi
 # and build.
 
 %changelog
+* Mon Nov 08 2010 Dave Airlie <airlied@redhat.com> - 2.6.35.6-51
+- Backport polling fixes + radeon hang fixes from upstream
+
 * Tue Nov 02 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.6-50
 - nouveau: add potential workaround for NV86 hardware quirk
 - fix issue that occurs in certain dual-head configurations (rhbz#641524)
