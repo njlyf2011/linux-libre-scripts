@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 1
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -142,7 +142,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -158,12 +158,12 @@ Summary: The Linux kernel
 %define with_dbgonly   %{?_with_dbgonly:      1} %{?!_with_dbgonly:      0}
 
 # should we do C=1 builds with sparse
-%define with_sparse	%{?_with_sparse:      1} %{?!_with_sparse:      0}
+%define with_sparse    %{?_with_sparse:       1} %{?!_with_sparse:       0}
 
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -398,7 +398,7 @@ Summary: The Linux kernel
 %endif
 
 # To temporarily exclude an architecture from being built, add it to
-# %nobuildarches. Do _NOT_ use the ExclusiveArch: line, because if we
+# %%nobuildarches. Do _NOT_ use the ExclusiveArch: line, because if we
 # don't build kernel-headers then the new build system will no longer let
 # us use the previous build of that package -- it'll just be completely AWOL.
 # Which is a BadThing(tm).
@@ -444,7 +444,7 @@ Summary: The Linux kernel
 %define kernel_headers_conflicts libdrm-devel < 2.4.0-0.15
 
 #
-# Packages that need to be installed before the kernel is, because the %post
+# Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
 %define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
@@ -497,10 +497,6 @@ ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 sparc sparc64 s390 s390x 
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
-%ifarch x86_64 sparc64
-Obsoletes: kernel-smp
-%endif
-
 
 #
 # List the packages used during the kernel build
@@ -676,9 +672,8 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
+Patch1811: drm-intel-2.6.37-rc2.patch
 Patch1819: drm-intel-big-hammer.patch
-# intel drm is all merged upstream
-Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
@@ -744,6 +739,7 @@ Patch12225: pci-crs-fixes.patch
 
 Patch12300: btusb-macbookpro-7-1.patch
 Patch12301: btusb-macbookpro-6-2.patch
+Patch12304: add-macbookair3-ids.patch
 
 Patch12302: pnpacpi-cope-with-invalid-device-ids.patch
 
@@ -780,7 +776,7 @@ options that can be passed to Linux kernel modules at load time.
 %package headers
 Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
-Obsoletes: glibc-kernheaders
+Obsoletes: glibc-kernheaders < 3.0-46
 Provides: glibc-kernheaders = 3.0-46
 Provides: kernel-headers = %{rpmversion}-%{pkg_release}
 %description headers
@@ -983,8 +979,8 @@ ApplyPatch()
     exit 1
   fi
 %if !%{using_upstream_branch}
-  if ! egrep "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:10}" != "patch-2.6." ] && 
+  if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
+    if [ "${patch:0:10}" != "patch-2.6." ] &&
        [ "${patch:0:16}" != "patch-libre-2.6." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
@@ -1043,10 +1039,10 @@ ApplyOptionalPatch()
 %endif
 %endif
 
-# %{vanillaversion} : the full version name, e.g. 2.6.35-rc6-git3
-# %{kversion}       : the base version, e.g. 2.6.34
+# %%{vanillaversion} : the full version name, e.g. 2.6.35-rc6-git3
+# %%{kversion}       : the base version, e.g. 2.6.34
 
-# Use kernel-%{kversion}%{?dist} as the top-level directory name
+# Use kernel-%%{kversion}%%{?dist} as the top-level directory name
 # so we can prep different trees within a single git directory.
 
 # Build a list of the other top-level kernel tree directories.
@@ -1320,7 +1316,7 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 ApplyOptionalPatch drm-nouveau-updates.patch
 
 # Intel DRM
-ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-2.6.37-rc2.patch
 ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
@@ -1385,6 +1381,7 @@ ApplyPatch pci-crs-fixes.patch
 
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
+ApplyPatch add-macbookair3-ids.patch
 
 # rhbz#641468
 ApplyPatch pnpacpi-cope-with-invalid-device-ids.patch
@@ -1425,7 +1422,7 @@ for i in *.config
 do
   mv $i .config
   Arch=`head -1 .config | cut -b 3-`
-  make ARCH=$Arch listnewconfig | egrep '^CONFIG_' >.newoptions || true
+  make ARCH=$Arch listnewconfig | grep -E '^CONFIG_' >.newoptions || true
 %if %{listnewconfig_fail}
   if [ -s .newoptions ]; then
     cat .newoptions
@@ -1442,6 +1439,9 @@ done
 
 # get rid of unwanted files resulting from patch fuzz
 find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
+
+# remove unnecessary SCM files
+find . -name .gitignore -exec rm -f {} \; >/dev/null
 
 cd ..
 
@@ -1622,7 +1622,7 @@ BuildKernel() {
 
     # Generate a list of modules for block and networking.
 
-    fgrep /drivers/ modnames | xargs --no-run-if-empty nm -upA |
+    grep -F /drivers/ modnames | xargs --no-run-if-empty nm -upA |
     sed -n 's,^.*/\([^/]*\.ko\):  *U \(.*\)$,\1 \2,p' > drivers.undef
 
     collect_modules_list()
@@ -1648,7 +1648,7 @@ BuildKernel() {
       /sbin/modinfo -l $i >> modinfo
     done < modnames
 
-    egrep -v \
+    grep -E -v \
     	  'GPL( v2)?$|Dual BSD/GPL$|Dual MPL/GPL$|GPL and additional rights$' \
 	  modinfo && exit 1
 
@@ -1706,7 +1706,8 @@ BuildKernel %make_target %kernel_image smp
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+#  %{?_smp_mflags} frequently fails when j>8
+make htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -1781,6 +1782,8 @@ fi
 find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
      	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+
+find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -exec rm -f {} \;
 
 # glibc provides scsi headers for itself, for now
 rm -rf $RPM_BUILD_ROOT/usr/include/scsi
@@ -1929,7 +1932,7 @@ fi
 %{_mandir}/man[1-8]/*
 %endif
 
-# This is %{image_install_path} on an arch where that includes ELF files,
+# This is %%{image_install_path} on an arch where that includes ELF files,
 # or empty otherwise.
 %define elf_image_install_path %{?kernel_image_elf:%{image_install_path}}
 
@@ -2001,6 +2004,21 @@ fi
 #                 ||     ||
 
 %changelog
+* Tue Nov 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-4
+- Disable parallel doc builds, they fail. Constantly.
+
+* Tue Nov 16 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-3
+- Rebase drm/intel to 2.6.37-rc2+edp_fixes, hopefully to sort out most of
+  the issues folks with eDP are having.
+- Switch to release builds and turn on debugging flavours.
+
+* Mon Nov 15 2010 Kyle McMartin <kyle@redhat.com>
+- rhbz#651019: pull in support for MBA3.
+
+* Mon Nov 15 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-2
+- drm-i915-reprogram-power-monitoring-registers-on-resume.patch: fix intel_ips
+  driver.
+
 * Thu Oct 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 * Deblobbed 2.6.36-libre.
 
@@ -2261,7 +2279,7 @@ fi
 - Adjusted drm-nouveau-updates.patch.
 
 * Wed Aug 04 2010 Kyle McMartin <kyle@redhat.com>
-- Disable %released_kernel.
+- Disable %%released_kernel.
 - This is properly 2.6.36-0.git1, unlike the last commit. Had to make
   a mistake sometime, I'm glad it was early.
 
@@ -2305,7 +2323,7 @@ fi
 - Linux 2.6.35-rc5-git7
 
 * Wed Jul 21 2010 Dave Jones <davej@redhat.com>
-- Remove the %verify (no mtime) on kernel-devel's files.
+- Remove the %%verify (no mtime) on kernel-devel's files.
   If they got modified, they should fail rpm verify.
 
 * Wed Jul 21 2010 Dave Jones <davej@redhat.com>
@@ -2487,7 +2505,7 @@ fi
 - Re-enable kernel-libre-firmware.
 
 * Tue Jun 15 2010 Kyle McMartin <kyle@redhat.com> 2.6.34-38
-- Fix build by nuking superfluous "%{expand" which was missing a
+- Fix build by nuking superfluous "%%{expand" which was missing a
   trailing '}'. You may now reward me with an array of alcoholic
   beverages, I so richly deserve for spending roughly a full
   day staring at the diff of the spec.
