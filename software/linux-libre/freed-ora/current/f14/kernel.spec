@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 60
+%global baserelease 62
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -61,7 +61,7 @@ Summary: The Linux kernel
 %define librev 2
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -737,8 +737,9 @@ Patch2918: linux-2.6-v4l-dvb-ir-core-update-2.patch
 Patch2919: linux-2.6-v4l-dvb-ir-core-update-3.patch
 Patch2920: linux-2.6-lirc-ioctl-compat-fixups.patch
 Patch2921: linux-2.6-v4l-dvb-ir-core-update-4.patch
-Patch2922: linux-2.6-v4l-dvb-hdpvr-updates.patch
-Patch2923: linux-2.6-v4l-dvb-ir-core-fix-imon.patch
+Patch2922: linux-2.6-v4l-dvb-ir-core-update-5.patch
+Patch2923: linux-2.6-v4l-dvb-hdpvr-updates.patch
+Patch2924: linux-2.6-v4l-dvb-ir-core-fix-imon.patch
 
 Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
@@ -1370,7 +1371,7 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
-ApplyPatch kvm-fix-regression-with-cmpxchg8b-on-i386-hosts.patch
+#ApplyPatch kvm-fix-regression-with-cmpxchg8b-on-i386-hosts.patch
 
 ApplyPatch drm-polling-fixes.patch
 ApplyPatch drm-edid-invalid.patch
@@ -1427,6 +1428,7 @@ ApplyPatch linux-2.6-v4l-dvb-ir-core-update-2.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-update-3.patch
 ApplyPatch linux-2.6-lirc-ioctl-compat-fixups.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-update-4.patch
+ApplyPatch linux-2.6-v4l-dvb-ir-core-update-5.patch
 ApplyPatch linux-2.6-v4l-dvb-hdpvr-updates.patch
 ApplyPatch linux-2.6-v4l-dvb-ir-core-fix-imon.patch
 
@@ -2083,6 +2085,22 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 23 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.35.9.
+
+* Mon Nov 22 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.9-62
+- Linux 2.6.35.9
+- IR driver fixes from upstream
+  * fix keybounce/buffer parsing oddness w/mceusb
+  * properly wire up sysfs entries for mceusb and streamzap
+  * fix repeat w/streamzap
+  * misc lirc_dev fixes
+
+* Sat Nov 20 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.35.9-61.rc1
+- Linux 2.6.35.9-rc1
+- Comment out upstreamed patches:
+  kvm-fix-regression-with-cmpxchg8b-on-i386-hosts.patch
+
 * Fri Nov 19 2010 Ben Skeggs <bskeggs@redhat.com> 2.6.35.8-60
 - nouveau: add quirk for iMac G4 (rhbz#505161)
 - nouveau: add workaround for display hang on GF8+ (rhbz#537065)
