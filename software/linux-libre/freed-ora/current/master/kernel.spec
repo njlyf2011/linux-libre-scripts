@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 5
+%global baserelease 7
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-#define rcrevlibre -libre
+%define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -77,9 +77,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -747,6 +747,8 @@ Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch12305: xhci_hcd-suspend-resume.patch
 
+Patch12306: secmark-do-not-return-early-if-there-was-no-error.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1128,17 +1130,17 @@ else
 fi
 
 # Now build the fedora kernel tree.
-if [ -d linux-%{kversion}.%{_target_cpu} ]; then
+if [ -d linux-%{KVERREL} ]; then
   # Just in case we ctrl-c'd a prep already
   rm -rf deleteme.%{_target_cpu}
   # Move away the stale away, and delete in background.
-  mv linux-%{kversion}.%{_target_cpu} deleteme.%{_target_cpu}
+  mv linux-%{KVERREL} deleteme.%{_target_cpu}
   rm -rf deleteme.%{_target_cpu} &
 fi
 
-cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
+cp -rl vanilla-%{vanillaversion} linux-%{KVERREL}
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{KVERREL}
 
 # released_kernel with possible stable updates
 %if 0%{?stable_base}
@@ -1390,6 +1392,8 @@ ApplyPatch pnpacpi-cope-with-invalid-device-ids.patch
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch xhci_hcd-suspend-resume.patch
+
+#ApplyPatch secmark-do-not-return-early-if-there-was-no-error.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1675,7 +1679,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/boot
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{KVERREL}
 
 %if %{with_debug}
 BuildKernel %make_target %kernel_image debug
@@ -1741,7 +1745,7 @@ find Documentation -type d | xargs chmod u+w
 
 %install
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{KVERREL}
 
 %if %{with_doc}
 docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
@@ -1903,7 +1907,7 @@ fi
 %files firmware
 %defattr(-,root,root)
 /lib/firmware/*
-%doc linux-%{kversion}.%{_target_cpu}/firmware/WHENCE
+%doc linux-%{KVERREL}/firmware/WHENCE
 %endif
 
 %if %{with_bootwrapper}
@@ -1945,7 +1949,7 @@ fi
 %if %{1}\
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
-%attr(600,root,root) /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
+/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
@@ -2004,6 +2008,27 @@ fi
 #                 ||     ||
 
 %changelog
+* Thu Nov 25 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.36.1-rc1.
+- Adjusted doc in firmware subpackage to work with stable rc.
+
+* Mon Nov 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.36.1-7.rc1
+- Make vmlinuz world readable again.
+
+* Sat Nov 20 2010 Kyle McMartin <kyle@redhat.com>
+- Merge patch from Aris to allow kernel-debuginfo to be multiply-installed
+  (means we had to move the build dir, kind of a bummer, but I verified
+   that a -gitN to -gitN+1 worked.)
+
+* Sat Nov 20 2010 Chuck Ebbert <cebbert@redhat.com> 2.6.36.1-6.rc1
+- Linux 2.6.36.1-rc1
+- Comment out upstreamed patches:
+  secmark-do-not-return-early-if-there-was-no-error.patch
+
+* Sat Nov 20 2010 Kyle McMartin <kyle@redhat.com>
+- secmark-do-not-return-early-if-there-was-no-error.patch: requested
+  by eparis@. (Fixes a BUG when using secmark.)
+
 * Wed Nov 17 2010 Kyle McMartin <kyle@redhat.com> 2.6.36-5
 - Disable drm/intel rebase until it can be fixed.
 
