@@ -1,0 +1,56 @@
+#! /bin/sh
+
+set -e
+
+defines=
+dist=13
+distarch=x86_64
+
+mock="mock $defines -r fedora-$dist-"
+
+ver=`ls freed-ora-*.src.rpm 2>/dev/null | sed s,.src.rpm$,, || :`
+
+if test -n "$ver"; then
+  echo NOT re-creating $ver.src.rpm
+else
+  rpmbuild --define "_sourcedir `pwd`" --define "_srcrpmdir `pwd`" -bs freed-ora.spec
+  ver=`ls freed-ora-*.src.rpm | sed s,.src.rpm$,,`
+fi
+ls $ver.src.rpm
+
+svndir=`svn info | sed -n 's,^URL: ,,p'`
+svnrepo=`echo $svndir | sed -n 's,^\(.*/linux-libre/freed-ora\)/\(freed-ora-pkg\).*,\1,p'`
+
+case `svn info $svnrepo/tags/f$dist/$ver 2>&1` in
+*"$svnrepo/tags/f$dist/$ver:"*"Not a valid URL"*)
+  : ;;
+*)
+  echo $ver already tagged >&2
+  exit 1
+  ;;
+esac
+
+first=:
+
+for arch in noarch; do 
+    if test -d $ver.$arch; then
+      echo NOT building $ver.$arch
+    else
+      xarch=
+      case $arch in
+      i[456]86) distarch=i386 xarch=i386 ;;
+      noarch) ;;
+      *) distarch=$arch;;
+      esac
+      eval $xarch $mock'$distarch init'
+      eval $xarch $mock'$distarch --no-clean --target $arch \
+	--resultdir=`pwd`/$ver.$arch \
+	--enable-plugin=ccache rebuild $ver.src.rpm'
+    fi
+    ls $ver.$arch/*.rpm
+    if $first; then ln -f $ver.$arch/*.src.rpm .; first=false; fi
+done
+
+rpm --resign *.noarch/*.rpm
+svn commit -m "$ver"
+svn cp -m "tag $ver" $svndir $svnrepo/tags/f$dist/$ver
