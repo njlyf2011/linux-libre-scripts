@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 7
+%global baserelease 10
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -64,8 +64,8 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
-%define rcrevlibre -libre
+%define stablelibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -79,7 +79,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 1
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
-%define gitrev 5
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -632,6 +632,8 @@ Patch202: linux-2.6-debug-taint-vm.patch
 Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
 Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 
+Patch210: debug-tty-print-dev-name.patch
+
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
@@ -677,6 +679,8 @@ Patch1819: drm-intel-big-hammer.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1900: linux-2.6-intel-iommu-igfx.patch
+
+Patch1920: radeon-mc-vram-map-needs-to-be-gt-pci-aperture.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -736,6 +740,7 @@ Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 Patch12205: runtime_pm_fixups.patch
 
 Patch12225: pci-crs-fixes.patch
+Patch12226: x86-never-alloc-pci-from-the-last-1M-below-4G.patch
 
 Patch12300: btusb-macbookpro-7-1.patch
 Patch12301: btusb-macbookpro-6-2.patch
@@ -747,7 +752,28 @@ Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch12305: xhci_hcd-suspend-resume.patch
 
-Patch12306: secmark-do-not-return-early-if-there-was-no-error.patch
+Patch12307: tty-restore-tty_ldisc_wait_idle.patch
+
+Patch12308: fix-i8k-inline-asm.patch
+
+Patch12400: ipc-zero-struct-memory-for-compat-fns.patch
+Patch12401: ipc-shm-fix-information-leak-to-user.patch
+
+Patch12405: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+Patch12408: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+
+Patch12406: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+
+Patch12407: hda_realtek-handle-unset-external-amp-bits.patch
+
+Patch12410: tty-make-tiocgicount-a-handler.patch
+Patch12411: tty-icount-changeover-for-other-main-devices.patch
+
+Patch12413: tpm-autodetect-itpm-devices.patch
+
+Patch12415: tty-dont-allow-reopen-when-ldisc-is-changing.patch
+Patch12416: tty-ldisc-fix-open-flag-handling.patch
+Patch12417: tty-open-hangup-race-fixup.patch
 
 %endif
 
@@ -1250,6 +1276,8 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ###FIX###ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
+ApplyPatch debug-tty-print-dev-name.patch
+
 #
 # PCI
 #
@@ -1323,6 +1351,8 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 #ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
+ApplyPatch radeon-mc-vram-map-needs-to-be-gt-pci-aperture.patch
+
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
 #ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
@@ -1380,6 +1410,7 @@ ApplyPatch runtime_pm_fixups.patch
 # PCI patches to fix problems with _CRS
 # ( from linux-pci list )
 ApplyPatch pci-crs-fixes.patch
+ApplyPatch x86-never-alloc-pci-from-the-last-1M-below-4G.patch
 
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
@@ -1393,7 +1424,35 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch xhci_hcd-suspend-resume.patch
 
-#ApplyPatch secmark-do-not-return-early-if-there-was-no-error.patch
+ApplyPatch tty-restore-tty_ldisc_wait_idle.patch
+
+ApplyPatch fix-i8k-inline-asm.patch
+
+# rhbz#648658 (CVE-2010-4073)
+ApplyPatch ipc-zero-struct-memory-for-compat-fns.patch
+
+# rhbz#648656 (CVE-2010-4072)
+ApplyPatch ipc-shm-fix-information-leak-to-user.patch
+
+# rhbz#651264 (CVE-2010-3880)
+ApplyPatch inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+ApplyPatch netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+
+# rhbz#656264
+ApplyPatch posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+
+# rhbz#657388
+ApplyPatch hda_realtek-handle-unset-external-amp-bits.patch
+
+# CVE-2010-4077, CVE-2010-4075 (rhbz#648660, #648663)
+ApplyPatch tty-make-tiocgicount-a-handler.patch
+ApplyPatch tty-icount-changeover-for-other-main-devices.patch
+
+ApplyPatch tpm-autodetect-itpm-devices.patch
+
+ApplyPatch tty-dont-allow-reopen-when-ldisc-is-changing.patch
+ApplyPatch tty-ldisc-fix-open-flag-handling.patch
+ApplyPatch tty-open-hangup-race-fixup.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2008,7 +2067,55 @@ fi
 #                 ||     ||
 
 %changelog
-* Thu Nov 25 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Nov 29 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.36.1.
+
+* Mon Nov 29 2010 Kyle McMartin <kyle@redhat.com> 2.6.36.1-10
+- tpm-autodetect-itpm-devices.patch: Auto-fix TPM issues on various
+  laptops which prevented suspend/resume. (#647132)
+- tty fixes from kernel-git (#630464)
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- Quiet a build warning the previous INET_DIAG fix caused.
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- Plug stack leaks in tty/serial drivers. (#648663, #648660)
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- hda/realtek: handle unset external amp config (#657388)
+
+* Wed Nov 24 2010 Kyle McMartin <kyle@redhat.com>
+- Disable FSCACHE for CIFS until issues are addressed. (#656498)
+
+* Wed Nov 24 2010 Kyle McMartin <kyle@redhat.com>
+- drm/radeon/kms: MC vram map needs to be >= pci aperture size (fdo#28402)
+
+* Wed Nov 24 2010 Kyle McMartin <kyle@redhat.com>
+- Fix graphics on HP 2530p (korg#23542)
+
+* Tue Nov 23 2010 Kyle McMartin <kyle@redhat.com>
+- zero struct memory in ipc compat (CVE-2010-4073) (#648658)
+- zero struct memory in ipc shm (CVE-2010-4072) (#648656)
+- fix logic error in INET_DIAG bytecode auditing (CVE-2010-3880) (#651264)
+- posix-cpu-timers: workaround to suppress the problems with mt exec
+  (rhbz#656264)
+
+* Tue Nov 23 2010 Kyle McMartin <kyle@redhat.com>
+- fix-i8k-inline-asm.patch: backport gcc miscompilation fix from git
+  [22d3243d, 6b4e81db] (rhbz#647677)
+
+* Mon Nov 22 2010 Kyle McMartin <kyle@redhat.com>
+- Add a debugging patch to help track down which tty is being
+  poked by plymouth.
+
+* Mon Nov 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.36.1-9
+- Linux stable 2.6.36.1
+
+* Mon Nov 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.36.1-8.rc1
+- Merge 100eeae2 (TTY: restore tty_ldisc_wait_idle) which should fix the WARN
+  in tty_open in rawhide.
+
+* Mon Nov 22 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Nov 25 2010
 - Deblobbed patch-libre-2.6.36.1-rc1.
 - Adjusted doc in firmware subpackage to work with stable rc.
 
