@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 10
+%global baserelease 11
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -634,6 +634,8 @@ Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 
 Patch210: debug-tty-print-dev-name.patch
 
+Patch300: pnp-log-pnp-resources-as-we-do-for-pci.patch
+
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
@@ -674,7 +676,6 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
-Patch1811: drm-intel-2.6.37-rc2.patch
 Patch1819: drm-intel-big-hammer.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
@@ -774,6 +775,9 @@ Patch12413: tpm-autodetect-itpm-devices.patch
 Patch12415: tty-dont-allow-reopen-when-ldisc-is-changing.patch
 Patch12416: tty-ldisc-fix-open-flag-handling.patch
 Patch12417: tty-open-hangup-race-fixup.patch
+
+Patch12420: mm-page-allocator-adjust-the-per-cpu-counter-threshold-when-memory-is-low.patch
+Patch12421: mm-vmstat-use-a-single-setter-function-and-callback-for-adjusting-percpu-thresholds.patch
 
 %endif
 
@@ -1273,7 +1277,7 @@ ApplyPatch acpi-update-battery-information-on-notification-0x81.patch
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-nmi-timeout.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
-###FIX###ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
+ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 ApplyPatch debug-tty-print-dev-name.patch
@@ -1286,6 +1290,9 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
+
+# helps debug resource conflicts [c1f3f281]
+ApplyPatch pnp-log-pnp-resources-as-we-do-for-pci.patch
 
 ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
@@ -1346,9 +1353,8 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 ApplyOptionalPatch drm-nouveau-updates.patch
 
 # Intel DRM
-#ApplyPatch drm-intel-2.6.37-rc2.patch
-#ApplyPatch drm-intel-big-hammer.patch
-#ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch drm-intel-big-hammer.patch
+ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 ApplyPatch radeon-mc-vram-map-needs-to-be-gt-pci-aperture.patch
@@ -1453,6 +1459,10 @@ ApplyPatch tpm-autodetect-itpm-devices.patch
 ApplyPatch tty-dont-allow-reopen-when-ldisc-is-changing.patch
 ApplyPatch tty-ldisc-fix-open-flag-handling.patch
 ApplyPatch tty-open-hangup-race-fixup.patch
+
+# backport some fixes for kswapd from mmotm, rhbz#649694
+ApplyPatch mm-page-allocator-adjust-the-per-cpu-counter-threshold-when-memory-is-low.patch
+ApplyPatch mm-vmstat-use-a-single-setter-function-and-callback-for-adjusting-percpu-thresholds.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2067,6 +2077,18 @@ fi
 #                 ||     ||
 
 %changelog
+* Fri Dec 03 2010 Kyle McMartin <kyle@redhat.com> 2.6.36.1-11
+- Enable HP ILO on x86_64. (#571329)
+
+* Thu Dec 02 2010 Kyle McMartin <kyle@redhat.com>
+- Grab some of Mel's fixes from -mmotm to hopefully sort out #649694.
+  They've been tested by a few on that bug on 2.6.35, but let's push
+  it out to a bigger audience.
+
+* Mon Nov 29 2010 Kyle McMartin <kyle@redhat.com>
+- PNP: log PNP resources, as we do for PCI [c1f3f281]
+  should help us debug resource conflicts (requested by bjorn.)
+
 * Mon Nov 29 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.36.1.
 
