@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 62
+%global baserelease 64
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -644,6 +644,8 @@ Patch300: create-sys-fs-cgroup-to-mount-cgroupfs-on.patch
 
 Patch360: disable-xhci-by-default.patch
 
+Patch370: pnp-log-pnp-resources-as-we-do-for-pci.patch
+
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch382: linux-2.6-defaults-no-pm-async.patch
@@ -679,8 +681,6 @@ Patch800: linux-2.6-crash-driver.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
-# Already upstream (commit 16518d5ada690643453eb0aef3cc7841d3623c2d)
-Patch1556: kvm-fix-regression-with-cmpxchg8b-on-i386-hosts.patch
 
 # DRM
 Patch1801: drm-polling-fixes.patch
@@ -706,6 +706,9 @@ Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1826: drm-i915-disable-sr-polling.patch
+
+Patch1828: drm-ttm-fix-two-race-conditions-fix-busy-codepaths.patch
+
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 Patch2000: efifb-add-more-models.patch
 Patch2001: efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
@@ -799,6 +802,33 @@ Patch13642: mmc-add-ricoh-e822-pci-id.patch
 Patch13645: tpm-autodetect-itpm-devices.patch
 
 Patch13651: kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
+
+Patch13652: fix-i8k-inline-asm.patch
+
+Patch13700: ipc-zero-struct-memory-for-compat-fns.patch
+Patch13701: ipc-shm-fix-information-leak-to-user.patch
+
+Patch13702: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+Patch13704: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+
+Patch13703: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+
+Patch13660: rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
+Patch13661: rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
+
+#rhbz #502974
+Patch13670: r8169-01-fix-rx-checksum-offload.patch
+Patch13671: r8169-02-_re_init-phy-on-resume.patch
+Patch13672: r8169-03-fix-broken-checksum-for-invalid-sctp_igmp-packets.patch
+
+#rhbz #657388
+Patch13680: hda_realtek-handle-unset-external-amp-bits.patch
+
+Patch13684: tty-make-tiocgicount-a-handler.patch
+Patch13685: tty-icount-changeover-for-other-main-devices.patch
+
+Patch13690: mm-page-allocator-adjust-the-per-cpu-counter-threshold-when-memory-is-low.patch
+Patch13691: mm-vmstat-use-a-single-setter-function-and-callback-for-adjusting-percpu-thresholds.patch
 
 %endif
 
@@ -1307,6 +1337,8 @@ ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
+ApplyPatch pnp-log-pnp-resources-as-we-do-for-pci.patch
+
 #
 # PCI
 #
@@ -1340,7 +1372,7 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
-#ApplyPatch thinkpad-acpi-fix-backlight.patch
+ApplyPatch thinkpad-acpi-fix-backlight.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1371,7 +1403,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
-#ApplyPatch kvm-fix-regression-with-cmpxchg8b-on-i386-hosts.patch
 
 ApplyPatch drm-polling-fixes.patch
 ApplyPatch drm-edid-invalid.patch
@@ -1395,6 +1426,8 @@ ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-disable-sr-polling.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
+
+ApplyPatch drm-ttm-fix-two-race-conditions-fix-busy-codepaths.patch
 
 ApplyPatch efifb-add-more-models.patch
 ApplyPatch efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
@@ -1498,6 +1531,40 @@ ApplyPatch tpm-autodetect-itpm-devices.patch
 
 # CVE-2010-3698
 ApplyPatch kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
+
+ApplyPatch fix-i8k-inline-asm.patch
+
+# rhbz#648658 (CVE-2010-4073)
+ApplyPatch ipc-zero-struct-memory-for-compat-fns.patch
+
+# rhbz#648656 (CVE-2010-4072)
+ApplyPatch ipc-shm-fix-information-leak-to-user.patch
+
+# rhbz#651264 (CVE-2010-3880)
+ApplyPatch inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+ApplyPatch netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+
+# rhbz#656264
+ApplyPatch posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+
+ApplyPatch rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
+ApplyPatch rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
+
+#rhbz #502974
+ApplyPatch r8169-01-fix-rx-checksum-offload.patch
+ApplyPatch r8169-02-_re_init-phy-on-resume.patch
+ApplyPatch r8169-03-fix-broken-checksum-for-invalid-sctp_igmp-packets.patch
+
+#rhbz #657388
+ApplyPatch hda_realtek-handle-unset-external-amp-bits.patch
+
+# CVE-2010-4077, CVE-2010-4075 (rhbz#648660, #648663)
+ApplyPatch tty-make-tiocgicount-a-handler.patch
+ApplyPatch tty-icount-changeover-for-other-main-devices.patch
+
+# backport some fixes for kswapd from mmotm, rhbz#649694
+ApplyPatch mm-page-allocator-adjust-the-per-cpu-counter-threshold-when-memory-is-low.patch
+ApplyPatch mm-vmstat-use-a-single-setter-function-and-callback-for-adjusting-percpu-thresholds.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2085,6 +2152,44 @@ fi
 # and build.
 
 %changelog
+* Fri Dec 03 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.9-64
+- Enable hpilo.ko on x86_64 (#571329)
+
+* Thu Dec 02 2010 Kyle McMartin <kyle@redhat.com>
+- Grab some of Mel's fixes from -mmotm to hopefully sort out #649694.
+
+* Mon Nov 29 2010 Kyle McMartin <kyle@redhat.com>
+- PNP: log PNP resources, as we do for PCI [c1f3f281]
+  should help us debug resource conflicts (requested by bjorn.)
+
+* Mon Nov 29 2010 Kyle McMartin <kyle@redhat.com>
+- drm/ttm: Fix two race conditions + fix busy codepaths [1df6a2eb] (#615505)
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- Quiet a build warning the previous INET_DIAG fix caused.
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- Plug stack leaks in tty/serial drivers. (#648663, #648660)
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- r8169 fixes from sgruszka@redhat.com (#502974)
+- hda/realtek: handle unset external amp bits (#657388)
+
+* Wed Nov 24 2010 John W. Linville <linville@redhat.com>
+- rtl8180: improve signal reporting for rtl8185 hardware
+- rtl8180: improve signal reporting for actual rtl8180 hardware
+
+* Tue Nov 23 2010 Kyle McMartin <kyle@redhat.com>
+- zero struct memory in ipc compat (CVE-2010-4073) (#648658)
+- zero struct memory in ipc shm (CVE-2010-4072) (#648656)
+- fix logic error in INET_DIAG bytecode auditing (CVE-2010-3880) (#651264)
+- posix-cpu-timers: workaround to suppress the problems with mt exec
+  (rhbz#656264)
+
+* Tue Nov 23 2010 Kyle McMartin <kyle@redhat.com>
+- fix-i8k-inline-asm.patch: backport gcc miscompilation fix from git
+  [22d3243d, 6b4e81db] (rhbz#647677)
+
 * Tue Nov 23 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.35.9.
 
