@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 62
+%global baserelease 63
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -868,6 +868,34 @@ Patch13646: tpm-autodetect-itpm-devices.patch
 Patch13647: rt2x00-disable-auto-wakeup-before-waking-up-device.patch
 Patch13648: rt2x00-fix-failed-SLEEP-AWAKE-and-AWAKE-SLEEP-transitions.patch
 
+Patch13700: ipc-zero-struct-memory-for-compat-fns.patch
+Patch13701: ipc-shm-fix-information-leak-to-user.patch
+
+Patch13702: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+Patch13705: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+
+Patch13703: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+
+Patch13704: via-ioctl-prevent-reading-uninit-memory.patch
+
+Patch13710: rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
+Patch13711: rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
+
+# rhbz#502974
+Patch13720: r8169-01-incorrect-identifier-for-a-8168dp.patch
+Patch13721: r8169-02-fix-rx-checksum-offload.patch
+Patch13722: r8169-03-_re_init-phy-on-resume.patch
+Patch13723: r8169-04-fix-broken-checksum-for-invalid-sctp_igmp-packets.patch
+
+Patch13727: tty-make-tiocgicount-a-handler.patch
+Patch13728: tty-icount-changeover-for-other-main-devices.patch
+
+Patch13800: xfs-track-ags-with-reclaimable-inodes-in-per-ag-radix-tree.patch
+Patch13801: xfs-simplify-and-remove-xfs_ireclaim.patch
+Patch13802: xfs-properly-account-for-reclaimed-inodes.patch
+
+Patch13900: ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1650,6 +1678,43 @@ ApplyPatch tpm-autodetect-itpm-devices.patch
 ApplyPatch rt2x00-disable-auto-wakeup-before-waking-up-device.patch
 ApplyPatch rt2x00-fix-failed-SLEEP-AWAKE-and-AWAKE-SLEEP-transitions.patch
 
+# rhbz#648658 (CVE-2010-4073)
+ApplyPatch ipc-zero-struct-memory-for-compat-fns.patch
+
+# rhbz#648656 (CVE-2010-4072)
+ApplyPatch ipc-shm-fix-information-leak-to-user.patch
+
+# rhbz#651264 (CVE-2010-3880)
+ApplyPatch inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+ApplyPatch netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+
+# rhbz#656264
+ApplyPatch posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+
+# rhbz#648671 (CVE-2010-4082)
+ApplyPatch via-ioctl-prevent-reading-uninit-memory.patch
+
+ApplyPatch rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
+ApplyPatch rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
+
+# rhbz#502974
+ApplyPatch r8169-01-incorrect-identifier-for-a-8168dp.patch
+ApplyPatch r8169-02-fix-rx-checksum-offload.patch
+ApplyPatch r8169-03-_re_init-phy-on-resume.patch
+ApplyPatch r8169-04-fix-broken-checksum-for-invalid-sctp_igmp-packets.patch
+
+# CVE-2010-4077, CVE-2010-4075 (rhbz#648660, #648663)
+ApplyPatch tty-make-tiocgicount-a-handler.patch
+ApplyPatch tty-icount-changeover-for-other-main-devices.patch
+
+# the korg bug [4d4e307a]
+ApplyPatch xfs-track-ags-with-reclaimable-inodes-in-per-ag-radix-tree.patch
+ApplyPatch xfs-simplify-and-remove-xfs_ireclaim.patch
+ApplyPatch xfs-properly-account-for-reclaimed-inodes.patch
+
+# disable IMA by default as we did in F-14
+ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2271,6 +2336,38 @@ fi
 
 
 %changelog
+* Fri Dec 03 2010 Kyle McMartin <kyle@redhat.com> 2.6.34.7-63
+- Enable hpilo.ko on x86_64. (#571329)
+
+* Mon Nov 29 2010 Kyle McMartin <kyle@redhat.com>
+- Make ima an opt-in parameter like we did in F-14. Pass ima=on if you want
+  it enabled.
+
+* Mon Nov 29 2010 Kyle McMartin <kyle@redhat.com>
+- Backport XFS fixes for the kernel.org xfs boog. [4d4e307a]
+  Needed two other backports to simplify life.
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- Quiet a netlink build warning the INET_DIAG fix caused.
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- Plug stack leaks in tty/serial drivers. (#648663, #648660)
+
+* Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com>
+- r8169 fixes from sgruszka@redhat.com (#502974)
+
+* Wed Nov 24 2010 John W. Linville <linville@redhat.com>
+- rtl8180: improve signal reporting for rtl8185 hardware
+- rtl8180: improve signal reporting for actual rtl8180 hardware
+
+* Tue Nov 23 2010 Kyle McMartin <kyle@redhat.com>
+- zero struct memory in ipc compat (CVE-2010-4073) (#648658)
+- zero struct memory in ipc shm (CVE-2010-4072) (#648656)
+- fix logic error in INET_DIAG bytecode auditing (CVE-2010-3880) (#651264)
+- posix-cpu-timers: workaround to suppress the problems with mt exec
+  (rhbz#656264)
+- clear memory in viafb ioctl (CVE-2010-4082) (#648671)
+
 * Fri Oct 22 2010 Kyle McMartin <kyle@redhat.cmo> 2.6.34.7-62
 - tpm-autodetect-itpm-devices.patch: Auto-fix TPM issues on various
   laptops which prevented suspend/resume.
