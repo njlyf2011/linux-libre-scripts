@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 64
+%global baserelease 65
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -517,7 +517,7 @@ BuildRequires: sparse >= 0.4.1
 %endif
 # python-devel and perl(ExtUtils::Embed) are required for perf scripting
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel python-devel perl(ExtUtils::Embed)
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed)
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -780,6 +780,8 @@ Patch12580: sched-20-fix-rq-clock-synchronization-when-migrating-tasks.patch
 Patch12585: sched-25-move-sched_avg_update-to-update_cpu_load.patch
 Patch12590: sched-30-sched-fix-nohz-balance-kick.patch
 Patch12595: sched-35-increment-cache_nice_tries-only-on-periodic-lb.patch
+
+Patch12597: sched-cure-more-NO_HZ-load-average-woes.patch
 
 Patch13600: btusb-macbookpro-6-2.patch
 Patch13601: btusb-macbookpro-7-1.patch
@@ -1502,6 +1504,9 @@ ApplyPatch sched-25-move-sched_avg_update-to-update_cpu_load.patch
 ApplyPatch sched-30-sched-fix-nohz-balance-kick.patch
 ApplyPatch sched-35-increment-cache_nice_tries-only-on-periodic-lb.patch
 
+# rhbz#650934
+ApplyPatch sched-cure-more-NO_HZ-load-average-woes.patch
+
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
 
@@ -1859,7 +1864,7 @@ BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 NO_DEMANGLE=1 prefix=%{_prefix}
+  make %{?_smp_mflags} -C tools/perf -s V=1 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
 %if %{with_perf}
 %{perf_make} all
 %{perf_make} man || %{doc_build_fail}
@@ -2152,6 +2157,17 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 09 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.35.9-65
+- Require newt-devel for building perf, to enable the perf TUI (#661180)
+
+* Wed Dec 08 2010 Kyle McMartin <kyle@redhat.com>
+- sched-cure-more-NO_HZ-load-average-woes.patch: fix some of the complaints
+  in 2.6.35+ about load average with dynticks. (rhbz#650934)
+
+* Sat Dec 04 2010 Kyle McMartin <kyle@redhat.com>
+- Enable C++ symbol demangling with perf by linking against libiberty.a,
+  which is LGPL2.
+
 * Fri Dec 03 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.9-64
 - Enable hpilo.ko on x86_64 (#571329)
 
