@@ -1,3 +1,16 @@
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 8dd7248..1e02f1f 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -1610,6 +1610,8 @@ and is between 256 and 4096 characters. It is defined in the file
+ 	noapic		[SMP,APIC] Tells the kernel to not make use of any
+ 			IOAPICs that may be present in the system.
+ 
++	noautogroup	Disable scheduler automatic task group creation.
++
+ 	nobats		[PPC] Do not use BATs for mapping kernel lowmem
+ 			on "Classic" PPC cores.
+ 
 diff --git a/Documentation/scheduler/sched-BFS.txt b/Documentation/scheduler/sched-BFS.txt
 new file mode 100644
 index 0000000..c028200
@@ -414,7 +427,7 @@ index 3894eaa..61e1b65 100644
  
  The file rtsig-max can be used to tune the maximum number
 diff --git a/Makefile b/Makefile
-index 860c26a..468163a 100644
+index dafd22a..deddfc9 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -229,8 +229,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -438,7 +451,7 @@ index 860c26a..468163a 100644
  
  include $(srctree)/arch/$(SRCARCH)/Makefile
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 4c9f402..ce8af84 100644
+index 4c9f402..bf6b304 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -205,7 +205,7 @@ config LASAT
@@ -449,25 +462,6 @@ index 4c9f402..ce8af84 100644
 +	select SYS_SUPPORTS_ZBOOT_UART16550
  	help
  	  This enables the support of Loongson family of machines.
- 
-@@ -2012,6 +2012,18 @@ config NR_CPUS
- source "kernel/time/Kconfig"
- 
- #
-+# High Resolution sched_clock() Configuration
-+#
-+
-+config CPU_HAS_FIXED_C0_COUNT
-+	bool
-+
-+config CPU_SUPPORTS_HR_SCHED_CLOCK
-+	bool
-+	depends on CPU_HAS_FIXED_C0_COUNT || !CPU_FREQ
-+	default y
-+
-+#
- # Timer Interrupt Frequency Configuration
- #
  
 diff --git a/arch/mips/Kconfig.debug b/arch/mips/Kconfig.debug
 index 43dc279..77eba81 100644
@@ -519,12 +513,13 @@ index 63944a1..85558ff 100644
  CONFIG_CRYPTO_AUTHENC=m
  CONFIG_CRYPTO_CCM=m
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
-index f7033f3..0cbdfab 100644
+index f7033f3..4848be65 100644
 --- a/arch/mips/configs/lemote2f_defconfig
 +++ b/arch/mips/configs/lemote2f_defconfig
-@@ -2,26 +2,26 @@ CONFIG_MACH_LOONGSON=y
+@@ -1,27 +1,28 @@
+ CONFIG_MACH_LOONGSON=y
  CONFIG_LEMOTE_MACH2F=y
- CONFIG_CS5536_MFGPT=y
+-CONFIG_CS5536_MFGPT=y
  CONFIG_64BIT=y
 +CONFIG_KSM=y
  CONFIG_NO_HZ=y
@@ -532,6 +527,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_PREEMPT=y
 -CONFIG_KEXEC=y
 -# CONFIG_SECCOMP is not set
++# CONFIG_SCHED_BFS is not set
  CONFIG_EXPERIMENTAL=y
  # CONFIG_LOCALVERSION_AUTO is not set
 +CONFIG_KERNEL_LZMA=y
@@ -547,6 +543,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_IKCONFIG_PROC=y
  CONFIG_LOG_BUF_SHIFT=15
 -CONFIG_SYSFS_DEPRECATED_V2=y
++CONFIG_SCHED_AUTOGROUP=y
  CONFIG_BLK_DEV_INITRD=y
 -CONFIG_RD_BZIP2=y
 -CONFIG_RD_LZMA=y
@@ -555,13 +552,14 @@ index f7033f3..0cbdfab 100644
  CONFIG_PROFILING=y
  CONFIG_OPROFILE=m
  CONFIG_MODULES=y
-@@ -36,18 +36,16 @@ CONFIG_MIPS32_O32=y
+@@ -36,18 +37,17 @@ CONFIG_MIPS32_O32=y
  CONFIG_MIPS32_N32=y
  CONFIG_PM=y
  CONFIG_HIBERNATION=y
 -CONFIG_PM_STD_PARTITION="/dev/hda3"
 +CONFIG_PM_STD_PARTITION="/dev/sda3"
  CONFIG_PM_RUNTIME=y
++CONFIG_R4K_TIMER_FOR_CPUFREQ=y
  CONFIG_CPU_FREQ=y
  CONFIG_CPU_FREQ_DEBUG=y
 -CONFIG_CPU_FREQ_STAT=m
@@ -579,7 +577,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_PACKET=y
  CONFIG_UNIX=y
  CONFIG_XFRM_USER=m
-@@ -79,12 +77,253 @@ CONFIG_IPV6_MULTIPLE_TABLES=y
+@@ -79,12 +79,252 @@ CONFIG_IPV6_MULTIPLE_TABLES=y
  CONFIG_IPV6_SUBTREES=y
  CONFIG_NETWORK_SECMARK=y
  CONFIG_NETFILTER=y
@@ -603,7 +601,6 @@ index f7033f3..0cbdfab 100644
 +CONFIG_NETFILTER_XT_TARGET_CT=m
 +CONFIG_NETFILTER_XT_TARGET_DSCP=m
 +CONFIG_NETFILTER_XT_TARGET_IDLETIMER=m
-+CONFIG_NETFILTER_XT_TARGET_LED=m
 +CONFIG_NETFILTER_XT_TARGET_MARK=m
 +CONFIG_NETFILTER_XT_TARGET_NFLOG=m
 +CONFIG_NETFILTER_XT_TARGET_NFQUEUE=m
@@ -834,7 +831,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_BT=m
  CONFIG_BT_L2CAP=m
  CONFIG_BT_SCO=m
-@@ -95,30 +334,113 @@ CONFIG_BT_BNEP_MC_FILTER=y
+@@ -95,30 +335,113 @@ CONFIG_BT_BNEP_MC_FILTER=y
  CONFIG_BT_BNEP_PROTO_FILTER=y
  CONFIG_BT_HIDP=m
  CONFIG_BT_HCIBTUSB=m
@@ -957,7 +954,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_MD=y
  CONFIG_BLK_DEV_MD=m
  CONFIG_MD_LINEAR=m
-@@ -129,7 +451,6 @@ CONFIG_MD_RAID456=m
+@@ -129,7 +452,6 @@ CONFIG_MD_RAID456=m
  CONFIG_MD_MULTIPATH=m
  CONFIG_MD_FAULTY=m
  CONFIG_BLK_DEV_DM=m
@@ -965,7 +962,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_DM_CRYPT=m
  CONFIG_DM_SNAPSHOT=m
  CONFIG_DM_MIRROR=m
-@@ -140,55 +461,202 @@ CONFIG_DM_MULTIPATH_QL=m
+@@ -140,55 +462,202 @@ CONFIG_DM_MULTIPATH_QL=m
  CONFIG_DM_MULTIPATH_ST=m
  CONFIG_DM_DELAY=m
  CONFIG_DM_UEVENT=y
@@ -1184,7 +1181,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_USB_GSPCA_SN9C20X=m
  CONFIG_USB_GSPCA_SONIXB=m
  CONFIG_USB_GSPCA_SONIXJ=m
-@@ -198,30 +666,77 @@ CONFIG_USB_GSPCA_SPCA505=m
+@@ -198,30 +667,77 @@ CONFIG_USB_GSPCA_SPCA505=m
  CONFIG_USB_GSPCA_SPCA506=m
  CONFIG_USB_GSPCA_SPCA508=m
  CONFIG_USB_GSPCA_SPCA561=m
@@ -1266,7 +1263,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_BACKLIGHT_CLASS_DEVICE=y
  CONFIG_BACKLIGHT_GENERIC=m
  # CONFIG_VGA_CONSOLE is not set
-@@ -238,8 +753,6 @@ CONFIG_FONT_SUN8x16=y
+@@ -238,8 +754,6 @@ CONFIG_FONT_SUN8x16=y
  CONFIG_FONT_SUN12x22=y
  CONFIG_FONT_10x18=y
  CONFIG_LOGO=y
@@ -1275,7 +1272,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_SOUND=m
  CONFIG_SND=m
  CONFIG_SND_SEQUENCER=m
-@@ -255,30 +768,17 @@ CONFIG_SND_MPU401=m
+@@ -255,30 +769,17 @@ CONFIG_SND_MPU401=m
  CONFIG_SND_AC97_POWER_SAVE=y
  CONFIG_SND_AC97_POWER_SAVE_DEFAULT=10
  CONFIG_SND_CS5535AUDIO=m
@@ -1306,7 +1303,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_HID_NTRIG=m
  CONFIG_HID_PANTHERLORD=m
  CONFIG_PANTHERLORD_FF=y
-@@ -296,17 +796,12 @@ CONFIG_THRUSTMASTER_FF=y
+@@ -296,17 +797,12 @@ CONFIG_THRUSTMASTER_FF=y
  CONFIG_HID_WACOM=m
  CONFIG_HID_ZEROPLUS=m
  CONFIG_ZEROPLUS_FF=y
@@ -1327,7 +1324,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_USB_UHCI_HCD=m
  CONFIG_USB_WHCI_HCD=m
  CONFIG_USB_HWA_HCD=m
-@@ -322,20 +817,134 @@ CONFIG_USB_STORAGE_SDDR09=m
+@@ -322,20 +818,132 @@ CONFIG_USB_STORAGE_SDDR09=m
  CONFIG_USB_STORAGE_SDDR55=m
  CONFIG_USB_STORAGE_JUMPSHOT=m
  CONFIG_USB_STORAGE_ALAUDA=m
@@ -1440,10 +1437,9 @@ index f7033f3..0cbdfab 100644
 +CONFIG_NOP_USB_XCEIV=m
 +CONFIG_UWB_WLP=m
  CONFIG_MMC=m
+-CONFIG_LEDS_CLASS=m
 +CONFIG_SDIO_UART=m
 +CONFIG_MMC_SPI=m
- CONFIG_LEDS_CLASS=m
-+CONFIG_LEDS_GPIO=m
 +CONFIG_RTC_CLASS=y
 +CONFIG_RTC_DRV_CMOS=y
  CONFIG_STAGING=y
@@ -1464,7 +1460,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_EXT3_FS_POSIX_ACL=y
  CONFIG_EXT3_FS_SECURITY=y
  CONFIG_EXT4_FS=y
-@@ -347,16 +956,20 @@ CONFIG_JFS_POSIX_ACL=y
+@@ -347,16 +955,20 @@ CONFIG_JFS_POSIX_ACL=y
  CONFIG_XFS_FS=m
  CONFIG_XFS_QUOTA=y
  CONFIG_XFS_POSIX_ACL=y
@@ -1487,7 +1483,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_MSDOS_FS=m
  CONFIG_VFAT_FS=m
  CONFIG_NTFS_FS=m
-@@ -367,12 +980,14 @@ CONFIG_CRAMFS=m
+@@ -367,12 +979,14 @@ CONFIG_CRAMFS=m
  CONFIG_SQUASHFS=m
  CONFIG_SQUASHFS_EMBEDDED=y
  CONFIG_ROMFS_FS=m
@@ -1502,7 +1498,7 @@ index f7033f3..0cbdfab 100644
  CONFIG_NLS_DEFAULT="utf8"
  CONFIG_NLS_CODEPAGE_437=m
  CONFIG_NLS_CODEPAGE_737=m
-@@ -412,11 +1027,12 @@ CONFIG_NLS_ISO8859_15=m
+@@ -412,11 +1026,12 @@ CONFIG_NLS_ISO8859_15=m
  CONFIG_NLS_KOI8_R=m
  CONFIG_NLS_KOI8_U=m
  CONFIG_NLS_UTF8=y
@@ -1517,7 +1513,23 @@ index f7033f3..0cbdfab 100644
  CONFIG_SYSCTL_SYSCALL_CHECK=y
  CONFIG_KEYS=y
  CONFIG_KEYS_DEBUG_PROC_KEYS=y
-@@ -458,4 +1074,3 @@ CONFIG_CRYPTO_TWOFISH=m
+@@ -430,7 +1045,6 @@ CONFIG_CRYPTO_GCM=m
+ CONFIG_CRYPTO_LRW=m
+ CONFIG_CRYPTO_PCBC=m
+ CONFIG_CRYPTO_XTS=m
+-CONFIG_CRYPTO_HMAC=m
+ CONFIG_CRYPTO_XCBC=m
+ CONFIG_CRYPTO_MD4=m
+ CONFIG_CRYPTO_MICHAEL_MIC=m
+@@ -438,7 +1052,6 @@ CONFIG_CRYPTO_RMD128=m
+ CONFIG_CRYPTO_RMD160=m
+ CONFIG_CRYPTO_RMD256=m
+ CONFIG_CRYPTO_RMD320=m
+-CONFIG_CRYPTO_SHA1=m
+ CONFIG_CRYPTO_SHA256=m
+ CONFIG_CRYPTO_SHA512=m
+ CONFIG_CRYPTO_TGR192=m
+@@ -458,4 +1071,3 @@ CONFIG_CRYPTO_TWOFISH=m
  CONFIG_CRYPTO_DEFLATE=m
  CONFIG_CRYPTO_ZLIB=m
  CONFIG_CRYPTO_LZO=m
@@ -1640,6 +1652,160 @@ index 0000000..c512ef8
 +# CONFIG_STAGING_EXCLUDE_BUILD is not set
 +CONFIG_FB_SM7XX=y
 +# CONFIG_MIPS_PLATFORM_DEVICES is not set
++CONFIG_EXT2_FS=y
++CONFIG_EXT2_FS_XATTR=y
++CONFIG_EXT3_FS=y
++# CONFIG_EXT3_DEFAULTS_TO_ORDERED is not set
++CONFIG_EXT4_FS=y
++CONFIG_TMPFS=y
++# CONFIG_MISC_FILESYSTEMS is not set
++# CONFIG_NETWORK_FILESYSTEMS is not set
++CONFIG_NLS_DEFAULT="utf8"
++CONFIG_NLS_ASCII=y
++CONFIG_NLS_UTF8=y
++CONFIG_FRAME_WARN=1024
++CONFIG_STRIP_ASM_SYMS=y
++# CONFIG_RCU_CPU_STALL_DETECTOR is not set
+diff --git a/arch/mips/configs/lemote2f_small_defconfig b/arch/mips/configs/lemote2f_small_defconfig
+new file mode 100644
+index 0000000..f9e8e38
+--- /dev/null
++++ b/arch/mips/configs/lemote2f_small_defconfig
+@@ -0,0 +1,148 @@
++CONFIG_MACH_LOONGSON=y
++CONFIG_LEMOTE_MACH2F=y
++CONFIG_64BIT=y
++CONFIG_NO_HZ=y
++CONFIG_HIGH_RES_TIMERS=y
++CONFIG_PREEMPT=y
++# CONFIG_SCHED_BFS is not set
++CONFIG_EXPERIMENTAL=y
++# CONFIG_LOCALVERSION_AUTO is not set
++CONFIG_KERNEL_LZMA=y
++CONFIG_SYSVIPC=y
++CONFIG_POSIX_MQUEUE=y
++CONFIG_BSD_PROCESS_ACCT=y
++CONFIG_BSD_PROCESS_ACCT_V3=y
++CONFIG_IKCONFIG=y
++CONFIG_IKCONFIG_PROC=y
++CONFIG_LOG_BUF_SHIFT=15
++CONFIG_SCHED_AUTOGROUP=y
++CONFIG_BLK_DEV_INITRD=y
++# CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
++CONFIG_MODULES=y
++CONFIG_MODULE_UNLOAD=y
++# CONFIG_BLK_DEV_BSG is not set
++# CONFIG_IOSCHED_DEADLINE is not set
++# CONFIG_IOSCHED_CFQ is not set
++CONFIG_PCI=y
++CONFIG_MIPS32_COMPAT=y
++CONFIG_MIPS32_O32=y
++CONFIG_MIPS32_N32=y
++CONFIG_PM=y
++CONFIG_HIBERNATION=y
++CONFIG_PM_STD_PARTITION="/dev/sda3"
++CONFIG_PM_RUNTIME=y
++CONFIG_R4K_TIMER_FOR_CPUFREQ=y
++CONFIG_CPU_FREQ=y
++CONFIG_CPU_FREQ_STAT_DETAILS=y
++CONFIG_CPU_FREQ_DEFAULT_GOV_CONSERVATIVE=y
++CONFIG_CPU_FREQ_GOV_POWERSAVE=y
++CONFIG_CPU_FREQ_GOV_USERSPACE=y
++CONFIG_CPU_FREQ_GOV_ONDEMAND=y
++CONFIG_LOONGSON2_CPUFREQ=m
++CONFIG_NET=y
++CONFIG_PACKET=y
++CONFIG_UNIX=y
++CONFIG_INET=y
++# CONFIG_INET_XFRM_MODE_TRANSPORT is not set
++# CONFIG_INET_XFRM_MODE_TUNNEL is not set
++# CONFIG_INET_XFRM_MODE_BEET is not set
++# CONFIG_INET_LRO is not set
++# CONFIG_INET_DIAG is not set
++# CONFIG_IPV6 is not set
++CONFIG_CFG80211=y
++# CONFIG_CFG80211_DEFAULT_PS is not set
++# CONFIG_CFG80211_WEXT is not set
++CONFIG_LIB80211=y
++CONFIG_MAC80211=y
++CONFIG_RFKILL=y
++CONFIG_UEVENT_HELPER_PATH="/sbin/hotplug"
++CONFIG_DEVTMPFS=y
++CONFIG_DEVTMPFS_MOUNT=y
++CONFIG_BLK_DEV_LOOP=y
++CONFIG_BLK_DEV_RAM=y
++CONFIG_BLK_DEV_RAM_SIZE=8192
++# CONFIG_SCSI_PROC_FS is not set
++CONFIG_BLK_DEV_SD=y
++# CONFIG_SCSI_LOWLEVEL is not set
++CONFIG_ATA=y
++# CONFIG_SATA_PMP is not set
++CONFIG_PATA_AMD=y
++CONFIG_NETDEVICES=y
++CONFIG_NET_ETHERNET=y
++CONFIG_NET_PCI=y
++CONFIG_8139TOO=y
++CONFIG_R8169=y
++# CONFIG_NETDEV_10000 is not set
++CONFIG_RTL8187B=m
++# CONFIG_INPUT_MOUSEDEV_PSAUX is not set
++CONFIG_INPUT_EVDEV=y
++# CONFIG_SERIO_SERPORT is not set
++# CONFIG_DEVKMEM is not set
++CONFIG_SERIAL_8250=y
++CONFIG_SERIAL_8250_CONSOLE=y
++CONFIG_LEGACY_PTY_COUNT=16
++# CONFIG_HW_RANDOM is not set
++CONFIG_HWMON=m
++# CONFIG_MFD_SUPPORT is not set
++CONFIG_FB=y
++CONFIG_FB_SIS=y
++CONFIG_FB_SIS_300=y
++CONFIG_FB_SIS_315=y
++# CONFIG_VGA_CONSOLE is not set
++CONFIG_FRAMEBUFFER_CONSOLE=y
++CONFIG_SOUND=y
++CONFIG_SND=y
++CONFIG_SND_CS5535AUDIO=m
++CONFIG_HIDRAW=y
++CONFIG_USB_HIDDEV=y
++CONFIG_HID_DRAGONRISE=y
++CONFIG_DRAGONRISE_FF=y
++CONFIG_HID_GYRATION=y
++CONFIG_HID_TWINHAN=y
++CONFIG_LOGITECH_FF=y
++CONFIG_LOGIRUMBLEPAD2_FF=y
++CONFIG_HID_NTRIG=y
++CONFIG_HID_PANTHERLORD=y
++CONFIG_PANTHERLORD_FF=y
++CONFIG_HID_PETALYNX=y
++CONFIG_HID_SAMSUNG=y
++CONFIG_HID_SONY=y
++CONFIG_HID_SUNPLUS=y
++CONFIG_HID_GREENASIA=y
++CONFIG_GREENASIA_FF=y
++CONFIG_HID_SMARTJOYPLUS=y
++CONFIG_SMARTJOYPLUS_FF=y
++CONFIG_HID_TOPSEED=y
++CONFIG_HID_THRUSTMASTER=y
++CONFIG_THRUSTMASTER_FF=y
++CONFIG_HID_ZEROPLUS=y
++CONFIG_ZEROPLUS_FF=y
++CONFIG_USB=y
++# CONFIG_USB_DEVICE_CLASS is not set
++CONFIG_USB_DYNAMIC_MINORS=y
++CONFIG_USB_MON=y
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_EHCI_ROOT_HUB_TT=y
++# CONFIG_USB_EHCI_TT_NEWSCHED is not set
++CONFIG_USB_OHCI_HCD=y
++CONFIG_USB_STORAGE=y
++CONFIG_USB_LIBUSUAL=y
++CONFIG_RTC_CLASS=y
++CONFIG_RTC_DRV_CMOS=y
++CONFIG_STAGING=y
++# CONFIG_STAGING_EXCLUDE_BUILD is not set
++CONFIG_FB_SM7XX=y
 +CONFIG_EXT2_FS=y
 +CONFIG_EXT2_FS_XATTR=y
 +CONFIG_EXT3_FS=y
@@ -2065,7 +2231,7 @@ index 0000000..2e86905
 +
 +#endif /* !_EC_KB3310B_H */
 diff --git a/arch/mips/include/asm/mach-loongson/loongson.h b/arch/mips/include/asm/mach-loongson/loongson.h
-index cb6985f..8c9d304 100644
+index cb6985f..b61eaf2 100644
 --- a/arch/mips/include/asm/mach-loongson/loongson.h
 +++ b/arch/mips/include/asm/mach-loongson/loongson.h
 @@ -42,6 +42,12 @@ static inline void prom_init_uart_base(void)
@@ -2081,7 +2247,7 @@ index cb6985f..8c9d304 100644
  /* irq operation functions */
  extern void bonito_irqdispatch(void);
  extern void __init bonito_irq_init(void);
-@@ -242,12 +248,19 @@ static inline void do_perfcnt_IRQ(void)
+@@ -242,12 +248,14 @@ static inline void do_perfcnt_IRQ(void)
  	((((ADDR)>>26) & LOONGSON_PCIMAP_PCIMAP_LO0) << ((WIN)*6))
  
  #ifdef CONFIG_CPU_SUPPORTS_CPUFREQ
@@ -2093,11 +2259,6 @@ index cb6985f..8c9d304 100644
  #define LOONGSON_CHIPCFG0		LOONGSON_REG(LOONGSON_REGBASE + 0x80)
 +#define LOONGSON_GET_CPUFREQ()		(LOONGSON_CHIPCFG0 & 7)
 +
-+#include <linux/spinlock_types.h>
-+#include <linux/spinlock.h>
-+extern raw_spinlock_t loongson_cpufreq_lock;
-+extern bool loongson_cpufreq_driver_loaded;
-+
 +#define LOONGSON_SET_CPUFREQ(level)	do { \
 +	LOONGSON_CHIPCFG0 = (LOONGSON_CHIPCFG0 & (~7)) | (level); \
 +} while (0)
@@ -2105,86 +2266,128 @@ index cb6985f..8c9d304 100644
  #endif
  
  /*
-diff --git a/arch/mips/kernel/cpu-probe.c b/arch/mips/kernel/cpu-probe.c
-index b1b304e..614ee1b 100644
---- a/arch/mips/kernel/cpu-probe.c
-+++ b/arch/mips/kernel/cpu-probe.c
-@@ -35,6 +35,65 @@
- void (*cpu_wait)(void);
- EXPORT_SYMBOL(cpu_wait);
+diff --git a/arch/mips/kernel/cevt-r4k.c b/arch/mips/kernel/cevt-r4k.c
+index 2a4d50f..da88d8c 100644
+--- a/arch/mips/kernel/cevt-r4k.c
++++ b/arch/mips/kernel/cevt-r4k.c
+@@ -10,6 +10,8 @@
+ #include <linux/interrupt.h>
+ #include <linux/percpu.h>
+ #include <linux/smp.h>
++#include <linux/irq.h>
++#include <linux/module.h>
  
-+#if defined(CONFIG_CPU_LOONGSON2) && defined(CONFIG_MIPS_CPUFREQ)
+ #include <asm/smtc_ipi.h>
+ #include <asm/time.h>
+@@ -22,6 +24,51 @@
+ 
+ #ifndef CONFIG_MIPS_MT_SMTC
+ 
++#ifdef CONFIG_R4K_TIMER_FOR_CPUFREQ
 +
-+#include <loongson.h>
-+DEFINE_RAW_SPINLOCK(loongson_cpufreq_lock);
-+bool loongson_cpufreq_driver_loaded;
-+EXPORT_SYMBOL(loongson_cpufreq_driver_loaded);
-+EXPORT_SYMBOL(loongson_cpufreq_lock);
++extern cycle_t read_virtual_count(void);
++extern unsigned int scale_shift;
++#define hpt_scale_down(cycle) ((cycle) >> scale_shift)
++#define hpt_scale_down_shift(cycle, shift) ((cycle) >> (shift))
 +
-+static void loongson2_wait(void)
++static u64 last_hpt_target;
++
++static inline void update_virtual_target(u32 delta)
 +{
-+	u32 cpufreq;
-+	ktime_t kt1, kt2;
-+	s64 idle_time_ns;
-+
-+	raw_spin_lock(&loongson_cpufreq_lock);
-+
-+	local_irq_disable();
-+	kt1 = ktime_get_real();
-+	sched_clock_idle_sleep_event();
-+	local_irq_enable();
-+
-+	/* Record the cpu frequency */
-+	cpufreq = LOONGSON_GET_CPUFREQ();
-+
-+	/*
-+	 * Currently, there is no wait instruction in Loongson platform,
-+	 * herein, we emulate the wait mode via setting the cpu frequency to
-+	 * the lowest level to put it into the standby mode, which can be waked
-+	 * up by external interrupts
-+	 */
-+	LOONGSON_SET_CPUFREQ(0);
-+
-+	/*
-+	 * While waked up from standby mode, the cpu frequency is set to the
-+	 * second lowest level, about 199M, which is too slow. To make the
-+	 * system run well if no cpufreq driver started, we just set it as the
-+	 * highest level. if cpufreq module is loaded, just restore the
-+	 * recorded value.
-+	 */
-+	if (likely(loongson_cpufreq_driver_loaded))
-+		LOONGSON_SET_CPUFREQ(cpufreq);
-+	else
-+		LOONGSON_SET_CPUFREQ(7);
-+
-+	/*
-+	 * report back to the scheduler how long we deep-idled
-+	 */
-+	kt2 = ktime_get_real();
-+	idle_time_ns = ktime_to_ns(ktime_sub(kt2, kt1));
-+	local_irq_disable();
-+	sched_clock_idle_wakeup_event(idle_time_ns);
-+	local_irq_enable();
-+
-+	raw_spin_unlock(&loongson_cpufreq_lock);
++	last_hpt_target = read_virtual_count() + delta;
 +}
-+#else
-+#define loongson2_wait	NULL
-+#endif
 +
- static void r3081_wait(void)
++/*
++ * This should be called with irq disabled and spin lock
++ *
++ * We must update the virtual clocksource and the clockevent when prepare or
++ * post change the cpu frequency.
++ */
++
++void notrace update_virtual_count(unsigned int target_scale_shift)
++{
++	u64 now64;
++	/*
++	 * If we want to change the cpufreq before the target timer event is
++	 * met, we must update the delta to the new one.
++	 */
++	now64 = read_virtual_count();
++	if (now64 < last_hpt_target) {
++		unsigned int cnt = read_c0_count();
++		cnt += hpt_scale_down_shift((last_hpt_target - now64),
++				target_scale_shift);
++		write_c0_compare(cnt);
++	}
++}
++EXPORT_SYMBOL(update_virtual_count);
++
++#else
++
++#define hpt_scale_down(cycle) (cycle)
++#define update_virtual_target(delta)
++
++#endif	/* CONFIG_R4K_TIMER_FOR_CPUFREQ */
++
+ static int mips_next_event(unsigned long delta,
+                            struct clock_event_device *evt)
  {
- 	unsigned long cfg = read_c0_conf();
-@@ -159,6 +218,9 @@ void __init check_wait(void)
- 	}
+@@ -29,9 +76,13 @@ static int mips_next_event(unsigned long delta,
+ 	int res;
  
- 	switch (c->cputype) {
-+	case CPU_LOONGSON2:
-+		cpu_wait = loongson2_wait;
-+		break;
- 	case CPU_R3081:
- 	case CPU_R3081E:
- 		cpu_wait = r3081_wait;
+ 	cnt = read_c0_count();
+-	cnt += delta;
++	cnt += hpt_scale_down(delta);
+ 	write_c0_compare(cnt);
+ 	res = ((int)(read_c0_count() - cnt) > 0) ? -ETIME : 0;
++
++	/* Update the virtual counter */
++	update_virtual_target(delta);
++
+ 	return res;
+ }
+ 
+diff --git a/arch/mips/kernel/cpufreq/Kconfig b/arch/mips/kernel/cpufreq/Kconfig
+index 58c601e..f631087 100644
+--- a/arch/mips/kernel/cpufreq/Kconfig
++++ b/arch/mips/kernel/cpufreq/Kconfig
+@@ -4,11 +4,36 @@
+ 
+ config MIPS_EXTERNAL_TIMER
+ 	bool
++	select TIMER_SUPPORTS_CPUFREQ
++
++config R4K_TIMER_FOR_CPUFREQ
++	bool "Enable R4K Timer for CPUFreq Driver"
++	depends on !PREEMPT_RT
++	depends on CSRC_R4K && CEVT_R4K
++	depends on CPU_LOONGSON2F
++	select TIMER_SUPPORTS_CPUFREQ
++	default n
++	help
++	  This option ensures the R4K Timer works normally with the CPUFreq
++	  driver. Currently, It is only designed for Loongson2F with specific
++	  optimization.
++
++	  If no external timer provided by your Loongson2F boards, this is
++	  preferrable.
++
++	  If unsure, say NO, but for Gdium netbook, Say Yes Please to ensure
++	  the netbook is not too hot!
++
++# For PREEMPT_RT need precise time, we must disable TIMER_SUPPORTS_CPUFREQ
++# Exactly, we may need to disable the whole cpu freq support
++config TIMER_SUPPORTS_CPUFREQ
++	bool
++	depends on !PREEMPT_RT
+ 
+ config MIPS_CPUFREQ
+ 	bool
+ 	default y
+-	depends on CPU_SUPPORTS_CPUFREQ && MIPS_EXTERNAL_TIMER
++	depends on CPU_SUPPORTS_CPUFREQ && TIMER_SUPPORTS_CPUFREQ
+ 
+ if MIPS_CPUFREQ
+ 
 diff --git a/arch/mips/kernel/cpufreq/Makefile b/arch/mips/kernel/cpufreq/Makefile
 index c3479a43..05a5715 100644
 --- a/arch/mips/kernel/cpufreq/Makefile
@@ -2372,10 +2575,10 @@ index cefc6e2..0000000
 -MODULE_DESCRIPTION("cpufreq driver for Loongson 2F");
 -MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-index ae5db20..63841c2 100644
+index ae5db20..a097894 100644
 --- a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 +++ b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-@@ -1,187 +1,181 @@
+@@ -1,227 +1,351 @@
  /*
 - * Cpufreq driver for the loongson-2 processors
 + * Cpufreq driver for the loongson-2 (>= 2F) processors
@@ -2403,118 +2606,263 @@ index ae5db20..63841c2 100644
  #include <loongson.h>
  
 -static uint nowait;
--
--static struct clk *cpuclk;
--
--static void (*saved_cpu_wait) (void);
--
--static int loongson2_cpu_freq_notifier(struct notifier_block *nb,
--					unsigned long val, void *data);
-+/*
-+ * Percentages of cpu frequency (total levels = 8)
-+ *    Percentage    = index of clockmod_table[] / total levels
-+ *	25%		2
-+ *	50%		4
-+ *	100%		8
-+ */
 +#define DC_RESV	0
-+#define DC_25PT 2
-+#define DC_50PT 4
-+#define DC_100PT 8
  
--static struct notifier_block loongson2_cpufreq_notifier_block = {
--	.notifier_call = loongson2_cpu_freq_notifier
+-static struct clk *cpuclk;
 +/*
 + * For Loongson's frequency is not high, we set the minimum level as 50% to
 + * avoid spending too much time on freq switching
 + */
 +static struct cpufreq_frequency_table clockmod_table[] = {
 +	{DC_RESV, CPUFREQ_ENTRY_INVALID},
-+	{DC_25PT, 0},
-+	{DC_50PT, 0},
-+	{DC_100PT, 0},
++	{1, 0},
++	{3, 0},
++	{7, 0},
 +	{DC_RESV, CPUFREQ_TABLE_END},
- };
++};
+ 
+-static void (*saved_cpu_wait) (void);
++static unsigned int max_cpufreq_khz;
+ 
+-static int loongson2_cpu_freq_notifier(struct notifier_block *nb,
+-					unsigned long val, void *data);
++static inline unsigned int idx_to_freq(unsigned int idx)
++{
++	/*
++	 * freq = max_cpufreq_khz * ((index + 1) / total levels)
++	 *	= (max_cpufreq_khz * (index + 1)) / 8
++	 *	= (max_cpufreq_khz * (index + 1)) >> 3
++	 */
++	return (max_cpufreq_khz * (idx + 1)) >> 3;
++}
+ 
+-static struct notifier_block loongson2_cpufreq_notifier_block = {
+-	.notifier_call = loongson2_cpu_freq_notifier
+-};
++static inline unsigned int l2_cpufreq_get(unsigned int cpu)
++{
++	return idx_to_freq(LOONGSON_GET_CPUFREQ());
++}
  
 -static int loongson2_cpu_freq_notifier(struct notifier_block *nb,
 -					unsigned long val, void *data)
--{
++static inline unsigned int idx_to_scale_shift(unsigned int newstate)
+ {
 -	if (val == CPUFREQ_POSTCHANGE)
 -		current_cpu_data.udelay_val = loops_per_jiffy;
--
+ 
 -	return 0;
--}
-+static unsigned int max_cpufreq_khz;
++	/*
++	 * newstate the the index of the array clockmod_table, the valid value
++	 * is 1, 2, 3.
++	 *
++	 * The return value is the scale_shift for respective frequency.
++	 *
++	 *  newstate | Freq_scale of CR80 | multiple        | scale_shift
++	 *     1     |        1           | 8 / (1+1) = 4   |  2
++	 *     2     |        3           | 8 / (3+1) = 2   |  1
++	 *     3     |        7           | 8 / (7+1) = 1   |  0
++	 *
++	 *  scale_shift = 3 - newstate
++	 */
++
++	return 3 - newstate;
+ }
  
 -static unsigned int loongson2_cpufreq_get(unsigned int cpu)
-+static inline unsigned int idx_to_freq(unsigned int idx)
++static unsigned long loops_per_jiffy_ref;
++#define hpt_scale_down(x) ((x) >> target_scale_shift)
++static inline void hpt_scale_down_lpj(unsigned int target_scale_shift)
  {
 -	return clk_get_rate(cpuclk);
-+	/*
-+	 * freq = max_cpufreq_khz * (index / total levels)
-+	 *	= (max_cpufreq_khz * index) / 8
-+	 *	= (max_cpufreq_khz * index) >> 3
-+	 */
-+	return (max_cpufreq_khz * idx) >> 3;
++	current_cpu_data.udelay_val = hpt_scale_down(loops_per_jiffy_ref);
++}
++
++#ifdef CONFIG_R4K_TIMER_FOR_CPUFREQ
++extern unsigned int scale_shift;
++extern void update_virtual_count(unsigned int target_scale_shift);
++
++static inline void sync_virtual_count(unsigned int target_scale_shift)
++{
++	update_virtual_count(target_scale_shift);
++	scale_shift = target_scale_shift;
++	hpt_scale_down_lpj(target_scale_shift);
++}
++
++static void notrace l2_cpufreq_set(unsigned int newstate)
++{
++	unsigned long flag;
++	unsigned int target_scale_shift;
++
++	target_scale_shift = idx_to_scale_shift(newstate);
++
++	pr_debug("%s: scale_shift = %d, target_scale_shift = %d, target_set: %d\n",
++			__func__, scale_shift, target_scale_shift,
++			clockmod_table[newstate].index);
++
++	/* For we are UP, Give up the spin lock... */
++	raw_local_irq_save(flag);
++	/* When freq becomes higher ... */
++	if (scale_shift > target_scale_shift)
++		sync_virtual_count(target_scale_shift);
++	/* Set the CR80 register */
++	LOONGSON_SET_CPUFREQ(clockmod_table[newstate].index);
++	/* When freq becomes lower ... */
++	if (scale_shift < target_scale_shift)
++		sync_virtual_count(target_scale_shift);
++	raw_local_irq_restore(flag);
++
++	pr_debug("%s: scale_shift = %d, target_scale_shift = %d, target_set: %d\n",
++			__func__, scale_shift, target_scale_shift,
++			clockmod_table[newstate].index);
  }
  
  /*
 - * Here we notify other drivers of the proposed change and the final change.
-+ * Map from index of clockmod_table to chipcfg:
-+ *	Index	lowest 3bits of Chipcfg
-+ *	8	7
-+ *	4	3
-+ *	2	1
++ * The CPUFreq driver will put the cpu into the lowest level(1), no need to do
++ * it here.  If we do it here, some CPUFreq governors will not function well,
++ * so, disable the cpu_wait() completely when the R4K is used.
   */
 -static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
 -				     unsigned int target_freq,
 -				     unsigned int relation)
-+static unsigned int l2_cpufreq_get(unsigned int cpu)
++
++#if 0
++/*
++ * Put CPU into the 1st level, We have no good method to recover the timesplice
++ * in wait mode, so, we only allow the CPU gointo the 1st level, not the ZERO
++ * level.
++ *
++ * To avoid recording the garbage result in the kernel tracing, we don't call
++ * notifiers when FUNCTION_TRACER is enabled.
++ */
++
++void notrace loongson2_cpu_wait(void)
  {
 -	unsigned int cpu = policy->cpu;
 -	unsigned int newstate = 0;
 -	cpumask_t cpus_allowed;
--	struct cpufreq_freqs freqs;
++#ifdef CONFIG_FUNCTION_TRACER
++	/* If we are already in the 1st level, stop resetting it. */
++	if (LOONGSON_GET_CPUFREQ() != 1)
++		l2_cpufreq_set(1);
++#else
++	{
+ 	struct cpufreq_freqs freqs;
 -	unsigned int freq;
--
+ 
 -	if (!cpu_online(cpu))
 -		return -ENODEV;
-+	return idx_to_freq(LOONGSON_GET_CPUFREQ() + 1);
-+}
++	freqs.old = l2_cpufreq_get(0);
++	freqs.new = idx_to_freq(1);
  
 -	cpus_allowed = current->cpus_allowed;
 -	set_cpus_allowed_ptr(current, cpumask_of(cpu));
-+static void l2_cpufreq_set(unsigned int newstate)
-+{
-+	raw_spin_lock(&loongson_cpufreq_lock);
-+	LOONGSON_SET_CPUFREQ(clockmod_table[newstate].index - 1);
-+	raw_spin_unlock(&loongson_cpufreq_lock);
-+}
++	if (freqs.new == freqs.old)
++		return;
  
 -	if (cpufreq_frequency_table_target
 -	    (policy, &loongson2_clockmod_table[0], target_freq, relation,
 -	     &newstate))
 -		return -EINVAL;
-+static int l2_cpufreq_target(struct cpufreq_policy *policy, unsigned int
-+		target_freq, unsigned int relation)
-+{
-+	unsigned int newstate;
-+	struct cpufreq_freqs freqs;
++	/* notifiers */
++	freqs.cpu = 0;
++	cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
  
 -	freq =
 -	    ((cpu_clock_freq / 1000) *
 -	     loongson2_clockmod_table[newstate].index) / 8;
 -	if (freq < policy->min || freq > policy->max)
-+	if (cpufreq_frequency_table_target(policy, &clockmod_table[0],
-+				target_freq, relation, &newstate))
- 		return -EINVAL;
+-		return -EINVAL;
++	/* setting the cpu frequency as the 1st level */
++	l2_cpufreq_set(1);
++
++	/* notifiers */
++	cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
++	}
++#endif
++}
++#else
++#define loongson2_cpu_wait NULL
++#endif
++
++#else	/* MIPS_EXTERNAL_TIMER */
++
++static void l2_cpufreq_set(unsigned int newstate)
++{
++	unsigned long flags;
++	unsigned int target_scale_shift;
++
++	target_scale_shift = idx_to_scale_shift(newstate);
++
++	local_irq_save(flags);
++	LOONGSON_SET_CPUFREQ(clockmod_table[newstate].index);
++	hpt_scale_down_lpj(target_scale_shift);
++	local_irq_restore(flags);
++}
++
++static void notrace loongson2_cpu_wait(void)
++{
++	u32 cpufreq;
++	ktime_t kt1, kt2;
++	s64 idle_time_ns;
++	unsigned long flags;
++
++	local_irq_save(flags);
++	kt1 = ktime_get_real();
++	sched_clock_idle_sleep_event();
++
++	/* Record the cpu frequency */
++	cpufreq = LOONGSON_CHIPCFG0;
++
++	/*
++	 * Currently, there is no wait instruction in Loongson platform,
++	 * herein, we emulate the wait mode via setting the cpu frequency to
++	 * the lowest level to put it into the standby mode, which can be waked
++	 * up by external interrupts
++	 */
++	LOONGSON_SET_CPUFREQ(0);
++
++	/* Resotore it */
++	LOONGSON_CHIPCFG0 = cpufreq;
++
++	/*
++	 * report back to the scheduler how long we deep-idled
++	 */
++	kt2 = ktime_get_real();
++	idle_time_ns = ktime_to_ns(ktime_sub(kt2, kt1));
++	sched_clock_idle_wakeup_event(idle_time_ns);
++	local_irq_restore(flags);
++
++	raw_spin_unlock(&loongson_cpufreq_lock);
++}
  
 -	pr_debug("cpufreq: requested frequency %u Hz\n", target_freq * 1000);
--
++#endif /* CONFIG_R4K_TIMER_FOR_CPUFREQ */
+ 
 -	freqs.cpu = cpu;
 -	freqs.old = loongson2_cpufreq_get(cpu);
 -	freqs.new = freq;
 -	freqs.flags = 0;
++static inline void register_cpu_wait(void)
++{
++	cpu_wait = loongson2_cpu_wait;
++}
++static inline void unregister_cpu_wait(void)
++{
++	cpu_wait = NULL;
++}
++
++static int l2_cpufreq_target(struct cpufreq_policy *policy, unsigned int
++		target_freq, unsigned int relation)
++{
++	unsigned int newstate;
++	struct cpufreq_freqs freqs;
++
++	if (cpufreq_frequency_table_target(policy, &clockmod_table[0],
++				target_freq, relation, &newstate))
++		return -EINVAL;
++
 +	freqs.old = l2_cpufreq_get(policy->cpu);
 +	freqs.new = idx_to_freq(clockmod_table[newstate].index);
  
@@ -2535,24 +2883,11 @@ index ae5db20..63841c2 100644
  	cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
  
 -	pr_debug("cpufreq: set frequency %u kHz\n", freq);
-+	return 0;
-+}
-+
-+static int l2_cpu_freq_notifier(struct notifier_block *nb,
-+					unsigned long val, void *data)
-+{
-+	/* loops_per_jiffy is updated by adjust_jiffies() */
-+	if (val == CPUFREQ_POSTCHANGE)
-+		current_cpu_data.udelay_val = loops_per_jiffy;
- 
+-
  	return 0;
  }
  
 -static int loongson2_cpufreq_cpu_init(struct cpufreq_policy *policy)
-+static struct notifier_block l2_cpufreq_nb = {
-+	.notifier_call = l2_cpu_freq_notifier
-+};
-+
 +static int l2_cpufreq_cpu_init(struct cpufreq_policy *policy)
  {
  	int i;
@@ -2574,21 +2909,21 @@ index ae5db20..63841c2 100644
 -	cpuclk->rate = cpu_clock_freq / 1000;
 -	if (!cpuclk->rate)
 -		return -EINVAL;
-+	cpufreq_frequency_table_get_attr(clockmod_table, policy->cpu);
- 
+-
 -	/* clock table init */
 -	for (i = 2;
 -	     (loongson2_clockmod_table[i].frequency != CPUFREQ_TABLE_END);
 -	     i++)
 -		loongson2_clockmod_table[i].frequency = (cpuclk->rate * i) / 8;
-+	/* cpuinfo and default policy values */
++	cpufreq_frequency_table_get_attr(clockmod_table, policy->cpu);
  
 -	policy->cur = loongson2_cpufreq_get(policy->cpu);
-+	policy->cur = max_cpufreq_khz;
++	/* cpuinfo and default policy values */
  
 -	cpufreq_frequency_table_get_attr(&loongson2_clockmod_table[0],
 -					 policy->cpu);
--
++	policy->cur = max_cpufreq_khz;
+ 
 -	return cpufreq_frequency_table_cpuinfo(policy,
 -					    &loongson2_clockmod_table[0]);
 +	return cpufreq_frequency_table_cpuinfo(policy, &clockmod_table[0]);
@@ -2659,7 +2994,11 @@ index ae5db20..63841c2 100644
  {
  	int ret;
  
-@@ -190,38 +184,40 @@ static int __init cpufreq_init(void)
++	/* Save the original loops_erf_jiffy for reference */
++	loops_per_jiffy_ref = loops_per_jiffy;
++
+ 	/* Register platform stuff */
+ 	ret = platform_driver_register(&platform_driver);
  	if (ret)
  		return ret;
  
@@ -2669,24 +3008,17 @@ index ae5db20..63841c2 100644
 -				  CPUFREQ_TRANSITION_NOTIFIER);
 -
 -	ret = cpufreq_register_driver(&loongson2_cpufreq_driver);
-+	ret = cpufreq_register_notifier(&l2_cpufreq_nb,
-+			CPUFREQ_TRANSITION_NOTIFIER);
++	ret = cpufreq_register_driver(&l2_cpufreq_driver);
 +	if (ret)
 +		return ret;
  
 -	if (!ret && !nowait) {
 -		saved_cpu_wait = cpu_wait;
 -		cpu_wait = loongson2_cpu_wait;
-+	ret = cpufreq_register_driver(&l2_cpufreq_driver);
-+	if (ret) {
-+		cpufreq_unregister_notifier(&l2_cpufreq_nb,
-+				CPUFREQ_TRANSITION_NOTIFIER);
-+		return ret;
- 	}
+-	}
++	register_cpu_wait();
  
 -	return ret;
-+	loongson_cpufreq_driver_loaded = 1;
-+
 +	return 0;
  }
  
@@ -2698,14 +3030,9 @@ index ae5db20..63841c2 100644
 -	cpufreq_unregister_driver(&loongson2_cpufreq_driver);
 -	cpufreq_unregister_notifier(&loongson2_cpufreq_notifier_block,
 -				    CPUFREQ_TRANSITION_NOTIFIER);
-+	if (!loongson_cpufreq_driver_loaded)
-+		return;
++	unregister_cpu_wait();
 +
-+	loongson_cpufreq_driver_loaded = 0;
 +	cpufreq_unregister_driver(&l2_cpufreq_driver);
-+
-+	cpufreq_unregister_notifier(&l2_cpufreq_nb,
-+			CPUFREQ_TRANSITION_NOTIFIER);
  
  	platform_driver_unregister(&platform_driver);
  }
@@ -2724,20 +3051,81 @@ index ae5db20..63841c2 100644
 +MODULE_DESCRIPTION("cpufreq driver for Loongson-2");
  MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/csrc-r4k.c b/arch/mips/kernel/csrc-r4k.c
-index e95a3cd..b5db0c8 100644
+index e95a3cd..60611fc 100644
 --- a/arch/mips/kernel/csrc-r4k.c
 +++ b/arch/mips/kernel/csrc-r4k.c
-@@ -6,10 +6,66 @@
+@@ -6,20 +6,141 @@
   * Copyright (C) 2007 by Ralf Baechle
   */
  #include <linux/clocksource.h>
 +#include <linux/cnt32_to_63.h>
  #include <linux/init.h>
 +#include <linux/timer.h>
++#include <linux/delay.h>
++#include <linux/module.h>
  
++#include <asm/cpu-features.h>
  #include <asm/time.h>
  
-+#ifdef CONFIG_CPU_SUPPORTS_HR_SCHED_CLOCK
+-static cycle_t c0_hpt_read(struct clocksource *cs)
++#include <loongson.h>
++
++/*
++ * Some MIPS cpu can change their frequency, meaning that read_c0_count doesn't
++ * run at the same speed :(
++ * Have to handle this case.
++ */
++#ifdef CONFIG_R4K_TIMER_FOR_CPUFREQ
++
++unsigned int scale_shift;
++EXPORT_SYMBOL(scale_shift);
++#define hpt_scale_up(cycle) ((cycle) << scale_shift)
++
++/*
++ * read_virtual_count -- read the virtual 64bit count
++ *
++ * This should be called with irq disabled and spin lock
++ *
++ * @now: This should be read from the real count register
++ * Return the virtual but precise 64bit count
++ */
++
++cycle_t notrace read_virtual_count(void)
+ {
+-	return read_c0_count();
++	static u32 hpt_last_read;
++	static u64 hpt_last_cnt;
++	u64 diff;
++	unsigned int now = read_c0_count();
++
++	/*
++	 * The first time c0_hpt_read() is called, no cpufreq driver loaded,
++	 * so, the cycle read from the counter is the real one
++	 */
++	if (unlikely(!hpt_last_read))
++		hpt_last_cnt = hpt_last_read = now;
++
++	/* Get diff and Check for counter overflow */
++	diff = now - hpt_last_read - (now < hpt_last_read);
++	/* Calculate the real cycles */
++	hpt_last_cnt += hpt_scale_up(diff);
++	/* Save for the next access */
++	hpt_last_read = now;
++
++	return hpt_last_cnt;
++}
++
++#define hpt_read() read_virtual_count()
++#else
++#define setup_r4k_for_cpufreq(clock)
++#define hpt_read() read_c0_count()
++#endif	/* CONFIG_R4K_TIMER_FOR_CPUFREQ */
++
++cycle_t notrace c0_hpt_read(struct clocksource *cs)
++{
++	return hpt_read();
++}
++
 +/*
 + * MIPS sched_clock implementation.
 + *
@@ -2751,12 +3139,17 @@ index e95a3cd..b5db0c8 100644
 +
 +static unsigned long clock2ns_scale __read_mostly;
 +
++#ifdef CONFIG_R4K_FOR_CPUFREQ
++#define hpt_read64() read_virtual_count()
++#else
++#define hpt_read64() cnt32_to_63(read_c0_count())
++#endif
 +unsigned long long notrace sched_clock(void)
 +{
-+	unsigned long long v = cnt32_to_63(read_c0_count());
-+	return (v * clock2ns_scale) >> CLOCK2NS_SCALE_FACTOR;
++	return (hpt_read64() * clock2ns_scale) >> CLOCK2NS_SCALE_FACTOR;
 +}
 +
++#ifndef CONFIG_R4K_TIMER_FOR_CPUFREQ
 +static struct timer_list cnt32_to_63_keepwarm_timer;
 +
 +static void cnt32_to_63_keepwarm(unsigned long data)
@@ -2768,9 +3161,10 @@ index e95a3cd..b5db0c8 100644
 +
 +static inline void setup_hres_sched_clock(unsigned long clock)
 +{
-+#ifdef CONFIG_CPU_SUPPORTS_HR_SCHED_CLOCK
 +	unsigned long long v;
++#ifndef CONFIG_R4K_TIMER_FOR_CPUFREQ
 +	unsigned long data;
++#endif
 +
 +	v = NSEC_PER_SEC;
 +	v <<= CLOCK2NS_SCALE_FACTOR;
@@ -2784,17 +3178,27 @@ index e95a3cd..b5db0c8 100644
 +	if (v & 1)
 +		v++;
 +	clock2ns_scale = v;
-+
++#ifndef CONFIG_R4K_TIMER_FOR_CPUFREQ
 +	data = 0x80000000UL / clock * HZ;
 +	setup_timer(&cnt32_to_63_keepwarm_timer, cnt32_to_63_keepwarm, data);
 +	mod_timer(&cnt32_to_63_keepwarm_timer, round_jiffies(jiffies + data));
 +#endif
-+}
-+
- static cycle_t c0_hpt_read(struct clocksource *cs)
- {
- 	return read_c0_count();
-@@ -27,6 +83,8 @@ int __init init_r4k_clocksource(void)
+ }
+ 
+ static struct clocksource clocksource_mips = {
+ 	.name		= "MIPS",
+ 	.read		= c0_hpt_read,
++#ifdef CONFIG_R4K_FOR_CPUFREQ
++	.mask		= CLOCKSOURCE_MASK(64);
++	.flags		= CLOCK_SOURCE_IS_CONTINUOUS | CLOCK_SOURCE_MUST_VERIFY,
++#else
+ 	.mask		= CLOCKSOURCE_MASK(32),
+ 	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
++#endif
+ };
+ 
+ int __init init_r4k_clocksource(void)
+@@ -27,6 +148,8 @@ int __init init_r4k_clocksource(void)
  	if (!cpu_has_counter || !mips_hpt_frequency)
  		return -ENXIO;
  
@@ -2966,6 +3370,32 @@ index fb74974..ec6bf00 100644
  	plat_time_init();
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
+diff --git a/arch/mips/loongson/Kconfig b/arch/mips/loongson/Kconfig
+index c97ca69..658e175 100644
+--- a/arch/mips/loongson/Kconfig
++++ b/arch/mips/loongson/Kconfig
+@@ -66,15 +66,18 @@ config CS5536
+ 
+ config CS5536_MFGPT
+ 	bool "CS5536 MFGPT Timer"
++	depends on BROKEN
+ 	depends on CS5536
+ 	select MIPS_EXTERNAL_TIMER
+ 	help
+ 	  This option enables the mfgpt0 timer of AMD CS5536.
+ 
+-	  If you want to enable the Loongson2 CPUFreq Driver, Please enable
+-	  this option at first, otherwise, You will get wrong system time.
++	  To enable the Loongson2 CPUFreq Driver, this option is a
++	  precondition, but from 2.6.37, we have a better choice, that is
++	  CONFIG_R4K_TIMER_FOR_CPUFREQ=y. To get a good CPUFreq driver, that
++	  option should be enabled with the ondemand governor.
+ 
+-	  If unsure, say Yes.
++	  If unsure, say NO.
+ 
+ config LOONGSON_SUSPEND
+ 	bool
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
 index e526488..e91f12d 100644
 --- a/arch/mips/loongson/common/Makefile
@@ -4573,10 +5003,10 @@ index cac4d38..b82ab17 100644
 +	enable_mfgpt_counter();
  }
 diff --git a/arch/mips/loongson/lemote-2f/reset.c b/arch/mips/loongson/lemote-2f/reset.c
-index 36020a0..66ff3c6 100644
+index 36020a0..039c2ce 100644
 --- a/arch/mips/loongson/lemote-2f/reset.c
 +++ b/arch/mips/loongson/lemote-2f/reset.c
-@@ -20,15 +20,16 @@
+@@ -20,15 +20,14 @@
  #include <loongson.h>
  
  #include <cs5536/cs5536.h>
@@ -4591,13 +5021,11 @@ index 36020a0..66ff3c6 100644
 +	 * reset cpu to full speed
  	 */
 -	LOONGSON_CHIPCFG0 |= 0x7;
-+	raw_spin_lock(&loongson_cpufreq_lock);
-+	LOONGSON_SET_CPUFREQ(7);
-+	raw_spin_unlock(&loongson_cpufreq_lock);
++	LOONGSON_CHIPCFG0 |= 7;
  }
  
  /* reset support for fuloong2f */
-@@ -81,7 +82,7 @@ void ml2f_reboot(void)
+@@ -81,7 +80,7 @@ void ml2f_reboot(void)
  	reset_cpu();
  
  	/* sending an reset signal to EC(embedded controller) */
@@ -8225,10 +8653,10 @@ index 0000000..64bcf15
 +#endif // #ifndef __INC_DOT11D_H
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211.h b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211.h
 new file mode 100644
-index 0000000..01f707a
+index 0000000..e9ea893
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211.h
-@@ -0,0 +1,1903 @@
+@@ -0,0 +1,1904 @@
 +/*
 + * Merged with mainline ieee80211.h in Aug 2004.  Original ieee802_11
 + * remains copyright by the original authors
@@ -8266,6 +8694,7 @@ index 0000000..01f707a
 +#endif
 +#include <linux/timer.h>
 +#include <linux/sched.h>
++#include <linux/semaphore.h>
 +
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,13))
 +#include <linux/wireless.h>
@@ -42917,7 +43346,7 @@ index c3b4ccc..039bd58 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index c46911af..71a1573 100644
+index 51de0dd..bf2d506 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -42939,7 +43368,7 @@ index c46911af..71a1573 100644
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220, 0xff, 0xff, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220BIS, 0xff, 0xff, 0xff) },
 diff --git a/fs/proc/base.c b/fs/proc/base.c
-index 8e4adda..5a99487 100644
+index 8e4adda..7823c34 100644
 --- a/fs/proc/base.c
 +++ b/fs/proc/base.c
 @@ -356,7 +356,7 @@ static int proc_pid_stack(struct seq_file *m, struct pid_namespace *ns,
@@ -42951,6 +43380,99 @@ index 8e4adda..5a99487 100644
  			(unsigned long long)task->sched_info.run_delay,
  			task->sched_info.pcount);
  }
+@@ -1359,6 +1359,82 @@ static const struct file_operations proc_pid_sched_operations = {
+ 
+ #endif
+ 
++#ifdef CONFIG_SCHED_AUTOGROUP
++/*
++ * Print out autogroup related information:
++ */
++static int sched_autogroup_show(struct seq_file *m, void *v)
++{
++	struct inode *inode = m->private;
++	struct task_struct *p;
++
++	p = get_proc_task(inode);
++	if (!p)
++		return -ESRCH;
++	proc_sched_autogroup_show_task(p, m);
++
++	put_task_struct(p);
++
++	return 0;
++}
++
++static ssize_t
++sched_autogroup_write(struct file *file, const char __user *buf,
++	    size_t count, loff_t *offset)
++{
++	struct inode *inode = file->f_path.dentry->d_inode;
++	struct task_struct *p;
++	char buffer[PROC_NUMBUF];
++	long nice;
++	int err;
++
++	memset(buffer, 0, sizeof(buffer));
++	if (count > sizeof(buffer) - 1)
++		count = sizeof(buffer) - 1;
++	if (copy_from_user(buffer, buf, count))
++		return -EFAULT;
++
++	err = strict_strtol(strstrip(buffer), 0, &nice);
++	if (err)
++		return -EINVAL;
++
++	p = get_proc_task(inode);
++	if (!p)
++		return -ESRCH;
++
++	err = nice;
++	err = proc_sched_autogroup_set_nice(p, &err);
++	if (err)
++		count = err;
++
++	put_task_struct(p);
++
++	return count;
++}
++
++static int sched_autogroup_open(struct inode *inode, struct file *filp)
++{
++	int ret;
++
++	ret = single_open(filp, sched_autogroup_show, NULL);
++	if (!ret) {
++		struct seq_file *m = filp->private_data;
++
++		m->private = inode;
++	}
++	return ret;
++}
++
++static const struct file_operations proc_pid_sched_autogroup_operations = {
++	.open		= sched_autogroup_open,
++	.read		= seq_read,
++	.write		= sched_autogroup_write,
++	.llseek		= seq_lseek,
++	.release	= single_release,
++};
++
++#endif /* CONFIG_SCHED_AUTOGROUP */
++
+ static ssize_t comm_write(struct file *file, const char __user *buf,
+ 				size_t count, loff_t *offset)
+ {
+@@ -2679,6 +2755,9 @@ static const struct pid_entry tgid_base_stuff[] = {
+ #ifdef CONFIG_SCHED_DEBUG
+ 	REG("sched",      S_IRUGO|S_IWUSR, proc_pid_sched_operations),
+ #endif
++#ifdef CONFIG_SCHED_AUTOGROUP
++	REG("autogroup",  S_IRUGO|S_IWUSR, proc_pid_sched_autogroup_operations),
++#endif
+ 	REG("comm",      S_IRUGO|S_IWUSR, proc_pid_set_comm_operations),
+ #ifdef CONFIG_HAVE_ARCH_TRACEHOOK
+ 	INF("syscall",    S_IRUSR, proc_pid_syscall),
 diff --git a/include/linux/init_task.h b/include/linux/init_task.h
 index 1f43fa5..4e818d5 100644
 --- a/include/linux/init_task.h
@@ -43048,7 +43570,7 @@ index 76dad48..7232472 100644
  }
  
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 1e2a6db..0d6f75c 100644
+index 1e2a6db..d210ab2 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -36,8 +36,15 @@
@@ -43077,7 +43599,26 @@ index 1e2a6db..0d6f75c 100644
  extern cpumask_var_t nohz_cpu_mask;
  #if defined(CONFIG_SMP) && defined(CONFIG_NO_HZ)
  extern void select_nohz_load_balancer(int stop_tick);
-@@ -1169,17 +1174,31 @@ struct task_struct {
+@@ -506,6 +511,8 @@ struct thread_group_cputimer {
+ 	spinlock_t lock;
+ };
+ 
++struct autogroup;
++
+ /*
+  * NOTE! "signal_struct" does not have it's own
+  * locking, because a shared signal_struct always
+@@ -573,6 +580,9 @@ struct signal_struct {
+ 
+ 	struct tty_struct *tty; /* NULL if no tty */
+ 
++#ifdef CONFIG_SCHED_AUTOGROUP
++	struct autogroup *autogroup;
++#endif
+ 	/*
+ 	 * Cumulative resource counters for dead threads in the group,
+ 	 * and for reaped dead child processes forked by this group.
+@@ -1169,17 +1179,31 @@ struct task_struct {
  
  	int lock_depth;		/* BKL lock depth */
  
@@ -43109,7 +43650,7 @@ index 1e2a6db..0d6f75c 100644
  
  #ifdef CONFIG_PREEMPT_NOTIFIERS
  	/* list of struct preempt_notifier: */
-@@ -1274,6 +1293,9 @@ struct task_struct {
+@@ -1274,6 +1298,9 @@ struct task_struct {
  	int __user *clear_child_tid;		/* CLONE_CHILD_CLEARTID */
  
  	cputime_t utime, stime, utimescaled, stimescaled;
@@ -43119,7 +43660,7 @@ index 1e2a6db..0d6f75c 100644
  	cputime_t gtime;
  #ifndef CONFIG_VIRT_CPU_ACCOUNTING
  	cputime_t prev_utime, prev_stime;
-@@ -1496,6 +1518,53 @@ struct task_struct {
+@@ -1496,6 +1523,53 @@ struct task_struct {
  #endif
  };
  
@@ -43173,7 +43714,7 @@ index 1e2a6db..0d6f75c 100644
  /* Future-safe accessor for struct task_struct's cpus_allowed. */
  #define tsk_cpus_allowed(tsk) (&(tsk)->cpus_allowed)
  
-@@ -1514,9 +1583,19 @@ struct task_struct {
+@@ -1514,9 +1588,19 @@ struct task_struct {
  
  #define MAX_USER_RT_PRIO	100
  #define MAX_RT_PRIO		MAX_USER_RT_PRIO
@@ -43194,7 +43735,7 @@ index 1e2a6db..0d6f75c 100644
  
  static inline int rt_prio(int prio)
  {
-@@ -1831,7 +1910,7 @@ task_sched_runtime(struct task_struct *task);
+@@ -1831,7 +1915,7 @@ task_sched_runtime(struct task_struct *task);
  extern unsigned long long thread_group_sched_runtime(struct task_struct *task);
  
  /* sched_exec is called by processes performing an exec */
@@ -43203,8 +43744,33 @@ index 1e2a6db..0d6f75c 100644
  extern void sched_exec(void);
  #else
  #define sched_exec()   {}
+@@ -1900,6 +1984,24 @@ int sched_rt_handler(struct ctl_table *table, int write,
+ 
+ extern unsigned int sysctl_sched_compat_yield;
+ 
++#ifdef CONFIG_SCHED_AUTOGROUP
++extern unsigned int sysctl_sched_autogroup_enabled;
++
++extern void sched_autogroup_create_attach(struct task_struct *p);
++extern void sched_autogroup_detach(struct task_struct *p);
++extern void sched_autogroup_fork(struct signal_struct *sig);
++extern void sched_autogroup_exit(struct signal_struct *sig);
++#ifdef CONFIG_PROC_FS
++extern void proc_sched_autogroup_show_task(struct task_struct *p, struct seq_file *m);
++extern int proc_sched_autogroup_set_nice(struct task_struct *p, int *nice);
++#endif
++#else
++static inline void sched_autogroup_create_attach(struct task_struct *p) { }
++static inline void sched_autogroup_detach(struct task_struct *p) { }
++static inline void sched_autogroup_fork(struct signal_struct *sig) { }
++static inline void sched_autogroup_exit(struct signal_struct *sig) { }
++#endif
++
+ #ifdef CONFIG_RT_MUTEXES
+ extern int rt_mutex_getprio(struct task_struct *p);
+ extern void rt_mutex_setprio(struct task_struct *p, int prio);
 diff --git a/init/Kconfig b/init/Kconfig
-index 2de5b1c..7549b92 100644
+index 2de5b1c..f29e060 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
 @@ -23,6 +23,19 @@ config CONSTRUCTORS
@@ -43245,6 +43811,27 @@ index 2de5b1c..7549b92 100644
  	default n
  	help
  	  This feature lets CPU scheduler recognize task groups and control CPU
+@@ -652,6 +665,20 @@ config DEBUG_BLK_CGROUP
+ 
+ endif # CGROUPS
+ 
++config SCHED_AUTOGROUP
++	bool "Automatic process group scheduling"
++	depends on !SCHED_BFS
++	select EVENTFD
++	select CGROUPS
++	select CGROUP_SCHED
++	select FAIR_GROUP_SCHED
++	help
++	  This option optimizes the scheduler for common desktop workloads by
++	  automatically creating and populating task groups.  This separation
++	  of workloads isolates aggressive CPU burners (like build jobs) from
++	  desktop applications.  Task group autogeneration is currently based
++	  upon task session.
++
+ config MM_OWNER
+ 	bool
+ 
 diff --git a/init/main.c b/init/main.c
 index 94ab488..40f63e9 100644
 --- a/init/main.c
@@ -43283,6 +43870,30 @@ index 0312022..54349da 100644
  	}
  
  	sig->nr_threads--;
+diff --git a/kernel/fork.c b/kernel/fork.c
+index c445f8c..61f2802 100644
+--- a/kernel/fork.c
++++ b/kernel/fork.c
+@@ -173,8 +173,10 @@ static inline void free_signal_struct(struct signal_struct *sig)
+ 
+ static inline void put_signal_struct(struct signal_struct *sig)
+ {
+-	if (atomic_dec_and_test(&sig->sigcnt))
++	if (atomic_dec_and_test(&sig->sigcnt)) {
++		sched_autogroup_exit(sig);
+ 		free_signal_struct(sig);
++	}
+ }
+ 
+ void __put_task_struct(struct task_struct *tsk)
+@@ -900,6 +902,7 @@ static int copy_signal(unsigned long clone_flags, struct task_struct *tsk)
+ 	posix_cpu_timers_init_group(sig);
+ 
+ 	tty_audit_fork(sig);
++	sched_autogroup_fork(sig);
+ 
+ 	sig->oom_adj = current->signal->oom_adj;
+ 	sig->oom_score_adj = current->signal->oom_score_adj;
 diff --git a/kernel/kthread.c b/kernel/kthread.c
 index 2dc3786..398530b 100644
 --- a/kernel/kthread.c
@@ -43365,7 +43976,7 @@ index 6842eeb..7044ad2 100644
  
  		if (task_cputime_expired(&task_sample, &tsk->cputime_expires))
 diff --git a/kernel/sched.c b/kernel/sched.c
-index dc85ceb..1e7b1ee 100644
+index 3fd774c..a5ef0fd 100644
 --- a/kernel/sched.c
 +++ b/kernel/sched.c
 @@ -1,3 +1,6 @@
@@ -43375,12 +43986,336 @@ index dc85ceb..1e7b1ee 100644
  /*
   *  kernel/sched.c
   *
-@@ -9188,3 +9191,4 @@ void synchronize_sched_expedited(void)
+@@ -78,6 +81,7 @@
+ 
+ #include "sched_cpupri.h"
+ #include "workqueue_sched.h"
++#include "sched_autogroup.h"
+ 
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/sched.h>
+@@ -268,6 +272,10 @@ struct task_group {
+ 	struct task_group *parent;
+ 	struct list_head siblings;
+ 	struct list_head children;
++
++#ifdef CONFIG_SCHED_AUTOGROUP
++	struct autogroup *autogroup;
++#endif
+ };
+ 
+ #define root_task_group init_task_group
+@@ -612,11 +620,14 @@ static inline int cpu_of(struct rq *rq)
+  */
+ static inline struct task_group *task_group(struct task_struct *p)
+ {
++	struct task_group *tg;
+ 	struct cgroup_subsys_state *css;
+ 
+ 	css = task_subsys_state_check(p, cpu_cgroup_subsys_id,
+ 			lockdep_is_held(&task_rq(p)->lock));
+-	return container_of(css, struct task_group, css);
++	tg = container_of(css, struct task_group, css);
++
++	return autogroup_task_group(p, tg);
+ }
+ 
+ /* Change a task's cfs_rq and parent entity if it moves across CPUs/groups */
+@@ -1913,6 +1924,7 @@ static void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
+ #include "sched_idletask.c"
+ #include "sched_fair.c"
+ #include "sched_rt.c"
++#include "sched_autogroup.c"
+ #ifdef CONFIG_SCHED_DEBUG
+ # include "sched_debug.c"
+ #endif
+@@ -7742,7 +7754,7 @@ void __init sched_init(void)
+ #ifdef CONFIG_CGROUP_SCHED
+ 	list_add(&init_task_group.list, &task_groups);
+ 	INIT_LIST_HEAD(&init_task_group.children);
+-
++	autogroup_init(&init_task);
+ #endif /* CONFIG_CGROUP_SCHED */
+ 
+ #if defined CONFIG_FAIR_GROUP_SCHED && defined CONFIG_SMP
+@@ -9181,3 +9193,4 @@ void synchronize_sched_expedited(void)
  EXPORT_SYMBOL_GPL(synchronize_sched_expedited);
  
  #endif /* #else #ifndef CONFIG_SMP */
 +#endif /* CONFIG_SCHED_BFS */
-\ No newline at end of file
+diff --git a/kernel/sched_autogroup.c b/kernel/sched_autogroup.c
+new file mode 100644
+index 0000000..57a7ac2
+--- /dev/null
++++ b/kernel/sched_autogroup.c
+@@ -0,0 +1,229 @@
++#ifdef CONFIG_SCHED_AUTOGROUP
++
++#include <linux/proc_fs.h>
++#include <linux/seq_file.h>
++#include <linux/kallsyms.h>
++#include <linux/utsname.h>
++
++unsigned int __read_mostly sysctl_sched_autogroup_enabled = 1;
++static struct autogroup autogroup_default;
++static atomic_t autogroup_seq_nr;
++
++static void autogroup_init(struct task_struct *init_task)
++{
++	autogroup_default.tg = &init_task_group;
++	init_task_group.autogroup = &autogroup_default;
++	kref_init(&autogroup_default.kref);
++	init_rwsem(&autogroup_default.lock);
++	init_task->signal->autogroup = &autogroup_default;
++}
++
++static inline void autogroup_free(struct task_group *tg)
++{
++	kfree(tg->autogroup);
++}
++
++static inline void autogroup_destroy(struct kref *kref)
++{
++	struct autogroup *ag = container_of(kref, struct autogroup, kref);
++
++	sched_destroy_group(ag->tg);
++}
++
++static inline void autogroup_kref_put(struct autogroup *ag)
++{
++	kref_put(&ag->kref, autogroup_destroy);
++}
++
++static inline struct autogroup *autogroup_kref_get(struct autogroup *ag)
++{
++	kref_get(&ag->kref);
++	return ag;
++}
++
++static inline struct autogroup *autogroup_create(void)
++{
++	struct autogroup *ag = kzalloc(sizeof(*ag), GFP_KERNEL);
++	struct task_group *tg;
++
++	if (!ag)
++		goto out_fail;
++
++	tg = sched_create_group(&init_task_group);
++
++	if (IS_ERR(tg))
++		goto out_free;
++
++	kref_init(&ag->kref);
++	init_rwsem(&ag->lock);
++	ag->id = atomic_inc_return(&autogroup_seq_nr);
++	ag->tg = tg;
++	tg->autogroup = ag;
++
++	return ag;
++
++out_free:
++	kfree(ag);
++out_fail:
++	if (printk_ratelimit()) {
++		printk(KERN_WARNING "autogroup_create: %s failure.\n",
++			ag ? "sched_create_group()" : "kmalloc()");
++	}
++
++	return autogroup_kref_get(&autogroup_default);
++}
++
++static inline bool
++task_wants_autogroup(struct task_struct *p, struct task_group *tg)
++{
++	if (tg != &root_task_group)
++		return false;
++
++	if (p->sched_class != &fair_sched_class)
++		return false;
++
++	/*
++	 * We can only assume the task group can't go away on us if
++	 * autogroup_move_group() can see us on ->thread_group list.
++	 */
++	if (p->flags & PF_EXITING)
++		return false;
++
++	return true;
++}
++
++static inline struct task_group *
++autogroup_task_group(struct task_struct *p, struct task_group *tg)
++{
++	int enabled = ACCESS_ONCE(sysctl_sched_autogroup_enabled);
++
++	if (enabled && task_wants_autogroup(p, tg))
++		return p->signal->autogroup->tg;
++
++	return tg;
++}
++
++static void
++autogroup_move_group(struct task_struct *p, struct autogroup *ag)
++{
++	struct autogroup *prev;
++	struct task_struct *t;
++	unsigned long flags;
++
++	BUG_ON(!lock_task_sighand(p, &flags));
++
++	prev = p->signal->autogroup;
++	if (prev == ag) {
++		unlock_task_sighand(p, &flags);
++		return;
++	}
++
++	p->signal->autogroup = autogroup_kref_get(ag);
++
++	t = p;
++	do {
++		sched_move_task(t);
++	} while_each_thread(p, t);
++
++	unlock_task_sighand(p, &flags);
++	autogroup_kref_put(prev);
++}
++
++/* Allocates GFP_KERNEL, cannot be called under any spinlock */
++void sched_autogroup_create_attach(struct task_struct *p)
++{
++	struct autogroup *ag = autogroup_create();
++
++	autogroup_move_group(p, ag);
++	/* drop extra refrence added by autogroup_create() */
++	autogroup_kref_put(ag);
++}
++EXPORT_SYMBOL(sched_autogroup_create_attach);
++
++/* Cannot be called under siglock.  Currently has no users */
++void sched_autogroup_detach(struct task_struct *p)
++{
++	autogroup_move_group(p, &autogroup_default);
++}
++EXPORT_SYMBOL(sched_autogroup_detach);
++
++void sched_autogroup_fork(struct signal_struct *sig)
++{
++	struct task_struct *p = current;
++
++	spin_lock_irq(&p->sighand->siglock);
++	sig->autogroup = autogroup_kref_get(p->signal->autogroup);
++	spin_unlock_irq(&p->sighand->siglock);
++}
++
++void sched_autogroup_exit(struct signal_struct *sig)
++{
++	autogroup_kref_put(sig->autogroup);
++}
++
++static int __init setup_autogroup(char *str)
++{
++	sysctl_sched_autogroup_enabled = 0;
++
++	return 1;
++}
++
++__setup("noautogroup", setup_autogroup);
++
++#ifdef CONFIG_PROC_FS
++
++/* Called with siglock held. */
++int proc_sched_autogroup_set_nice(struct task_struct *p, int *nice)
++{
++	static unsigned long next = INITIAL_JIFFIES;
++	struct autogroup *ag;
++	int err;
++
++	if (*nice < -20 || *nice > 19)
++		return -EINVAL;
++
++	err = security_task_setnice(current, *nice);
++	if (err)
++		return err;
++
++	if (*nice < 0 && !can_nice(current, *nice))
++		return -EPERM;
++
++	/* this is a heavy operation taking global locks.. */
++	if (!capable(CAP_SYS_ADMIN) && time_before(jiffies, next))
++		return -EAGAIN;
++
++	next = HZ / 10 + jiffies;
++	ag = autogroup_kref_get(p->signal->autogroup);
++
++	down_write(&ag->lock);
++	err = sched_group_set_shares(ag->tg, prio_to_weight[*nice + 20]);
++	if (!err)
++		ag->nice = *nice;
++	up_write(&ag->lock);
++
++	autogroup_kref_put(ag);
++
++	return err;
++}
++
++void proc_sched_autogroup_show_task(struct task_struct *p, struct seq_file *m)
++{
++	struct autogroup *ag = autogroup_kref_get(p->signal->autogroup);
++
++	down_read(&ag->lock);
++	seq_printf(m, "/autogroup-%ld nice %d\n", ag->id, ag->nice);
++	up_read(&ag->lock);
++
++	autogroup_kref_put(ag);
++}
++#endif /* CONFIG_PROC_FS */
++
++#ifdef CONFIG_SCHED_DEBUG
++static inline int autogroup_path(struct task_group *tg, char *buf, int buflen)
++{
++	return snprintf(buf, buflen, "%s-%ld", "/autogroup", tg->autogroup->id);
++}
++#endif /* CONFIG_SCHED_DEBUG */
++
++#endif /* CONFIG_SCHED_AUTOGROUP */
+diff --git a/kernel/sched_autogroup.h b/kernel/sched_autogroup.h
+new file mode 100644
+index 0000000..5358e24
+--- /dev/null
++++ b/kernel/sched_autogroup.h
+@@ -0,0 +1,32 @@
++#ifdef CONFIG_SCHED_AUTOGROUP
++
++struct autogroup {
++	struct kref		kref;
++	struct task_group	*tg;
++	struct rw_semaphore	lock;
++	unsigned long		id;
++	int			nice;
++};
++
++static inline struct task_group *
++autogroup_task_group(struct task_struct *p, struct task_group *tg);
++
++#else /* !CONFIG_SCHED_AUTOGROUP */
++
++static inline void autogroup_init(struct task_struct *init_task) {  }
++static inline void autogroup_free(struct task_group *tg) { }
++
++static inline struct task_group *
++autogroup_task_group(struct task_struct *p, struct task_group *tg)
++{
++	return tg;
++}
++
++#ifdef CONFIG_SCHED_DEBUG
++static inline int autogroup_path(struct task_group *tg, char *buf, int buflen)
++{
++	return 0;
++}
++#endif
++
++#endif /* CONFIG_SCHED_AUTOGROUP */
 diff --git a/kernel/sched_bfs.c b/kernel/sched_bfs.c
 new file mode 100644
 index 0000000..cb94dfc
@@ -50319,8 +51254,110 @@ index 0000000..cb94dfc
 +	return smt_gain;
 +}
 +#endif
+diff --git a/kernel/sched_debug.c b/kernel/sched_debug.c
+index 2e1b0d1..b93560e 100644
+--- a/kernel/sched_debug.c
++++ b/kernel/sched_debug.c
+@@ -54,8 +54,7 @@ static unsigned long nsec_low(unsigned long long nsec)
+ #define SPLIT_NS(x) nsec_high(x), nsec_low(x)
+ 
+ #ifdef CONFIG_FAIR_GROUP_SCHED
+-static void print_cfs_group_stats(struct seq_file *m, int cpu,
+-		struct task_group *tg)
++static void print_cfs_group_stats(struct seq_file *m, int cpu, struct task_group *tg)
+ {
+ 	struct sched_entity *se = tg->se[cpu];
+ 	if (!se)
+@@ -110,16 +109,6 @@ print_task(struct seq_file *m, struct rq *rq, struct task_struct *p)
+ 		0LL, 0LL, 0LL, 0L, 0LL, 0L, 0LL, 0L);
+ #endif
+ 
+-#ifdef CONFIG_CGROUP_SCHED
+-	{
+-		char path[64];
+-
+-		rcu_read_lock();
+-		cgroup_path(task_group(p)->css.cgroup, path, sizeof(path));
+-		rcu_read_unlock();
+-		SEQ_printf(m, " %s", path);
+-	}
+-#endif
+ 	SEQ_printf(m, "\n");
+ }
+ 
+@@ -147,19 +136,6 @@ static void print_rq(struct seq_file *m, struct rq *rq, int rq_cpu)
+ 	read_unlock_irqrestore(&tasklist_lock, flags);
+ }
+ 
+-#if defined(CONFIG_CGROUP_SCHED) && \
+-	(defined(CONFIG_FAIR_GROUP_SCHED) || defined(CONFIG_RT_GROUP_SCHED))
+-static void task_group_path(struct task_group *tg, char *buf, int buflen)
+-{
+-	/* may be NULL if the underlying cgroup isn't fully-created yet */
+-	if (!tg->css.cgroup) {
+-		buf[0] = '\0';
+-		return;
+-	}
+-	cgroup_path(tg->css.cgroup, buf, buflen);
+-}
+-#endif
+-
+ void print_cfs_rq(struct seq_file *m, int cpu, struct cfs_rq *cfs_rq)
+ {
+ 	s64 MIN_vruntime = -1, min_vruntime, max_vruntime = -1,
+@@ -168,16 +144,7 @@ void print_cfs_rq(struct seq_file *m, int cpu, struct cfs_rq *cfs_rq)
+ 	struct sched_entity *last;
+ 	unsigned long flags;
+ 
+-#if defined(CONFIG_CGROUP_SCHED) && defined(CONFIG_FAIR_GROUP_SCHED)
+-	char path[128];
+-	struct task_group *tg = cfs_rq->tg;
+-
+-	task_group_path(tg, path, sizeof(path));
+-
+-	SEQ_printf(m, "\ncfs_rq[%d]:%s\n", cpu, path);
+-#else
+ 	SEQ_printf(m, "\ncfs_rq[%d]:\n", cpu);
+-#endif
+ 	SEQ_printf(m, "  .%-30s: %Ld.%06ld\n", "exec_clock",
+ 			SPLIT_NS(cfs_rq->exec_clock));
+ 
+@@ -217,17 +184,7 @@ void print_cfs_rq(struct seq_file *m, int cpu, struct cfs_rq *cfs_rq)
+ 
+ void print_rt_rq(struct seq_file *m, int cpu, struct rt_rq *rt_rq)
+ {
+-#if defined(CONFIG_CGROUP_SCHED) && defined(CONFIG_RT_GROUP_SCHED)
+-	char path[128];
+-	struct task_group *tg = rt_rq->tg;
+-
+-	task_group_path(tg, path, sizeof(path));
+-
+-	SEQ_printf(m, "\nrt_rq[%d]:%s\n", cpu, path);
+-#else
+ 	SEQ_printf(m, "\nrt_rq[%d]:\n", cpu);
+-#endif
+-
+ 
+ #define P(x) \
+ 	SEQ_printf(m, "  .%-30s: %Ld\n", #x, (long long)(rt_rq->x))
+diff --git a/kernel/sys.c b/kernel/sys.c
+index 7f5a0cd..2745dcd 100644
+--- a/kernel/sys.c
++++ b/kernel/sys.c
+@@ -1080,8 +1080,10 @@ SYSCALL_DEFINE0(setsid)
+ 	err = session;
+ out:
+ 	write_unlock_irq(&tasklist_lock);
+-	if (err > 0)
++	if (err > 0) {
+ 		proc_sid_connector(group_leader);
++		sched_autogroup_create_attach(group_leader);
++	}
+ 	return err;
+ }
+ 
 diff --git a/kernel/sysctl.c b/kernel/sysctl.c
-index 3a45c22..a1c98f8 100644
+index 3a45c22..9b365fb 100644
 --- a/kernel/sysctl.c
 +++ b/kernel/sysctl.c
 @@ -117,7 +117,12 @@ static int zero;
@@ -50354,7 +51391,26 @@ index 3a45c22..a1c98f8 100644
  	{
  		.procname	= "sched_child_runs_first",
  		.data		= &sysctl_sched_child_runs_first,
-@@ -384,6 +390,7 @@ static struct ctl_table kern_table[] = {
+@@ -278,6 +284,18 @@ static struct ctl_table kern_table[] = {
+ 		.mode		= 0644,
+ 		.proc_handler	= proc_dointvec,
+ 	},
++#ifdef CONFIG_SCHED_AUTOGROUP
++	{
++		.procname	= "sched_autogroup_enabled",
++		.data		= &sysctl_sched_autogroup_enabled,
++		.maxlen		= sizeof(unsigned int),
++		.mode		= 0644,
++		.proc_handler	= proc_dointvec,
++		.extra1		= &zero,
++		.extra2		= &one,
++	},
++#endif
++
+ #ifdef CONFIG_SCHED_DEBUG
+ 	{
+ 		.procname	= "sched_min_granularity_ns",
+@@ -384,6 +402,7 @@ static struct ctl_table kern_table[] = {
  		.mode		= 0644,
  		.proc_handler	= proc_dointvec,
  	},
@@ -50362,7 +51418,7 @@ index 3a45c22..a1c98f8 100644
  #ifdef CONFIG_PROVE_LOCKING
  	{
  		.procname	= "prove_locking",
-@@ -808,6 +815,26 @@ static struct ctl_table kern_table[] = {
+@@ -808,6 +827,26 @@ static struct ctl_table kern_table[] = {
  		.proc_handler	= proc_dointvec,
  	},
  #endif
