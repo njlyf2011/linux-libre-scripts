@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-11-23 20:55:30.000000000 +0000
-+++ Makefile	2010-11-23 20:55:41.000000000 +0000
+--- Makefile.orig	2010-12-11 03:44:18.000000000 +0000
++++ Makefile	2010-12-11 03:44:28.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 27
--EXTRAVERSION = .56-libre4
-+EXTRAVERSION = .56-libre4-lemote
+-EXTRAVERSION = .57-libre4
++EXTRAVERSION = .57-libre4-lemote
  NAME = Trembling Tortoise
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-11-23 21:01:16.000000000 +0000
++++ .config	2010-12-11 03:48:42.000000000 +0000
 @@ -0,0 +1,2759 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.27.56-libre4-lemote
-+# Tue Nov 23 21:01:16 2010
++# Linux kernel version: 2.6.27.57-libre4-lemote
++# Sat Dec 11 03:48:42 2010
 +#
 +CONFIG_MIPS=y
 +
