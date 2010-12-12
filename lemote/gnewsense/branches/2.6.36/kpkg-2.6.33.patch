@@ -1,8 +1,8 @@
 Index: debian/ruleset/misc/version_vars.mk
 ===================================================================
---- debian/ruleset/misc/version_vars.mk.orig	2010-04-04 22:44:45.000000000 -0300
-+++ debian/ruleset/misc/version_vars.mk	2010-04-04 22:46:00.000000000 -0300
-@@ -138,7 +138,9 @@ iatv :=
+--- debian/ruleset/misc/version_vars.mk.orig	2008-11-24 17:01:32.000000000 +0000
++++ debian/ruleset/misc/version_vars.mk	2010-12-12 13:57:33.000000000 +0000
+@@ -138,7 +138,9 @@
  EXTRAV_ARG :=
  endif
  
@@ -15,9 +15,9 @@ Index: debian/ruleset/misc/version_vars.mk
                                 echo include/linux/version.h ;              \
 Index: debian/ruleset/targets/common.mk
 ===================================================================
---- debian/ruleset/targets/common.mk.orig	2010-04-04 22:42:45.000000000 -0300
-+++ debian/ruleset/targets/common.mk	2010-04-04 22:43:56.000000000 -0300
-@@ -333,7 +333,7 @@ endif
+--- debian/ruleset/targets/common.mk.orig	2008-11-24 17:01:32.000000000 +0000
++++ debian/ruleset/targets/common.mk	2010-12-12 13:57:33.000000000 +0000
+@@ -333,7 +333,7 @@
  	@echo this was built on a machine with the kernel: >> debian/buildinfo
  	uname -a >> debian/buildinfo
  	echo using the compiler: >> debian/buildinfo

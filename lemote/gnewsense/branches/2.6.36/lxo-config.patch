@@ -1,7 +1,7 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-12-11 03:46:15.000000000 +0000
-+++ Makefile	2010-12-11 03:46:20.000000000 +0000
+--- Makefile.orig	2010-12-12 13:55:35.000000000 +0000
++++ Makefile	2010-12-12 13:55:37.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
@@ -14,12 +14,12 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-12-11 03:55:23.000000000 +0000
-@@ -0,0 +1,2670 @@
++++ .config	2010-12-12 13:59:32.000000000 +0000
+@@ -0,0 +1,2683 @@
 +#
 +# Automatically generated make config: don't edit
 +# Linux kernel version: 2.6.36.2-libre-lemote
-+# Sat Dec 11 03:55:23 2010
++# Sun Dec 12 13:59:32 2010
 +#
 +CONFIG_MIPS=y
 +
@@ -179,7 +179,7 @@ Index: .config
 +#
 +# General setup
 +#
-+CONFIG_SCHED_BFS=y
++# CONFIG_SCHED_BFS is not set
 +CONFIG_EXPERIMENTAL=y
 +CONFIG_BROKEN_ON_SMP=y
 +CONFIG_LOCK_KERNEL=y
@@ -217,7 +217,19 @@ Index: .config
 +CONFIG_IKCONFIG=y
 +CONFIG_IKCONFIG_PROC=y
 +CONFIG_LOG_BUF_SHIFT=15
-+# CONFIG_CGROUPS is not set
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NS is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CPUSETS is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_RESOURCE_COUNTERS is not set
++CONFIG_CGROUP_SCHED=y
++CONFIG_FAIR_GROUP_SCHED=y
++# CONFIG_RT_GROUP_SCHED is not set
++# CONFIG_BLK_CGROUP is not set
++CONFIG_SCHED_AUTOGROUP=y
 +# CONFIG_SYSFS_DEPRECATED_V2 is not set
 +# CONFIG_RELAY is not set
 +# CONFIG_NAMESPACES is not set
@@ -752,6 +764,7 @@ Index: .config
 +# CONFIG_NET_CLS_RSVP is not set
 +# CONFIG_NET_CLS_RSVP6 is not set
 +# CONFIG_NET_CLS_FLOW is not set
++# CONFIG_NET_CLS_CGROUP is not set
 +CONFIG_NET_EMATCH=y
 +CONFIG_NET_EMATCH_STACK=32
 +# CONFIG_NET_EMATCH_CMP is not set
