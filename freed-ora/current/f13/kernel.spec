@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 64
+%global baserelease 65
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -744,6 +744,8 @@ Patch1903: drm-nouveau-pusher-intr.patch
 Patch1904: drm-nouveau-ibdma-race.patch
 # radeon
 Patch1905: drm-radeon-kms-mc-vram-map-needs-to-be-gteq-pci-aperature.patch
+# CVE-2010-2962
+Patch1906: drm-i915-sanity-check-pread-pwrite.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -863,11 +865,14 @@ Patch13641: mmc-add-ricoh-e822-pci-id.patch
 Patch13642: mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
 Patch13643: sdhci-8-bit-data-transfer-width-support.patch
 
+# CVE-2010-3904
 Patch13645: depessimize-rds_copy_page_user.patch
-Patch13646: tpm-autodetect-itpm-devices.patch
 
-Patch13647: rt2x00-disable-auto-wakeup-before-waking-up-device.patch
-Patch13648: rt2x00-fix-failed-SLEEP-AWAKE-and-AWAKE-SLEEP-transitions.patch
+Patch13646: rt2x00-disable-auto-wakeup-before-waking-up-device.patch
+Patch13647: rt2x00-fix-failed-SLEEP-AWAKE-and-AWAKE-SLEEP-transitions.patch
+
+Patch13648: tpm-autodetect-itpm-devices.patch
+Patch13649: tpm-fix-stall-on-boot.patch
 
 Patch13700: ipc-zero-struct-memory-for-compat-fns.patch
 Patch13701: ipc-shm-fix-information-leak-to-user.patch
@@ -875,6 +880,7 @@ Patch13701: ipc-shm-fix-information-leak-to-user.patch
 Patch13702: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
 Patch13705: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
 
+# CVE-2010-4248
 Patch13703: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
 
 Patch13704: via-ioctl-prevent-reading-uninit-memory.patch
@@ -896,6 +902,26 @@ Patch13801: xfs-simplify-and-remove-xfs_ireclaim.patch
 Patch13802: xfs-properly-account-for-reclaimed-inodes.patch
 
 Patch13900: ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
+Patch13901: ioat2-catch-and-recover-from-broken-vtd-configurations.patch
+
+# CVE-2010-2963
+Patch13910: v4l1-fix-32-bit-compat-microcode-loading-translation.patch
+# CVE-2010-3698
+Patch13911: kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
+# CVE-2010-3705
+Patch13912: sctp-fix-out-of-bounds-reading-in-sctp_asoc_get_hmac.patch
+# CVE-2010-3442
+Patch13913: alsa-prevent-heap-corruption-in-snd_ctl_new.patch
+# CVE-2010-4258
+Patch13914: do_exit-make-sure-that-we-run-with-get_fs-user_ds.patch
+# CVE-2010-4169
+Patch13915: perf_events-fix-perf_counter_mmap-hook-in-mprotect.patch
+# CVE-2010-4162
+Patch13916: bio-take-care-not-overflow-page-count-when-mapping-copying-user-data.patch
+# CVE-2010-4249
+Patch13917: af_unix-limit-unix_tot_inflight.patch
+Patch13918: scm-lower-SCM-MAX-FD.patch
 
 %endif
 
@@ -1528,6 +1554,8 @@ ApplyPatch drm-radeon-resume-fixes.patch
 # rhbz#632310
 ApplyPatch drm-radeon-kms-mc-vram-map-needs-to-be-gteq-pci-aperature.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
+# CVE-2010-2962
+ApplyPatch drm-i915-sanity-check-pread-pwrite.patch
 
 # linux1394 git patches
 ApplyOptionalPatch linux-2.6-firewire-git-update.patch
@@ -1676,7 +1704,10 @@ ApplyPatch mmc-make-sdhci-work-with-ricoh-mmc-controller.patch
 ApplyPatch mmc-add-ricoh-e822-pci-id.patch
 
 ApplyPatch depessimize-rds_copy_page_user.patch
+
 ApplyPatch tpm-autodetect-itpm-devices.patch
+# rhbz#530393
+ApplyPatch tpm-fix-stall-on-boot.patch
 
 ApplyPatch rt2x00-disable-auto-wakeup-before-waking-up-device.patch
 ApplyPatch rt2x00-fix-failed-SLEEP-AWAKE-and-AWAKE-SLEEP-transitions.patch
@@ -1691,7 +1722,7 @@ ApplyPatch ipc-shm-fix-information-leak-to-user.patch
 ApplyPatch inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
 ApplyPatch netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
 
-# rhbz#656264
+# rhbz#656264 (CVE-2010-4248)
 ApplyPatch posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
 
 # rhbz#648671 (CVE-2010-4082)
@@ -1706,8 +1737,9 @@ ApplyPatch r8169-02-fix-rx-checksum-offload.patch
 ApplyPatch r8169-03-_re_init-phy-on-resume.patch
 ApplyPatch r8169-04-fix-broken-checksum-for-invalid-sctp_igmp-packets.patch
 
-# CVE-2010-4077, CVE-2010-4075 (rhbz#648660, #648663)
+# CVE-2010-4077 (rhbz#648660)
 ApplyPatch tty-make-tiocgicount-a-handler.patch
+# CVE-2010-4075 (rhbz#648663)
 ApplyPatch tty-icount-changeover-for-other-main-devices.patch
 
 # the korg bug [4d4e307a]
@@ -1717,6 +1749,27 @@ ApplyPatch xfs-properly-account-for-reclaimed-inodes.patch
 
 # disable IMA by default as we did in F-14
 ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
+
+# rhbz605845 [556ab45f]
+ApplyPatch ioat2-catch-and-recover-from-broken-vtd-configurations.patch
+
+# CVE-2010-2963
+ApplyPatch v4l1-fix-32-bit-compat-microcode-loading-translation.patch
+# CVE-2010-3698
+ApplyPatch kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
+# CVE-2010-3705
+ApplyPatch sctp-fix-out-of-bounds-reading-in-sctp_asoc_get_hmac.patch
+# CVE-2010-3442
+ApplyPatch alsa-prevent-heap-corruption-in-snd_ctl_new.patch
+# CVE-2010-4258
+ApplyPatch do_exit-make-sure-that-we-run-with-get_fs-user_ds.patch
+# CVE-2010-4169
+ApplyPatch perf_events-fix-perf_counter_mmap-hook-in-mprotect.patch
+# CVE-2010-4162
+ApplyPatch bio-take-care-not-overflow-page-count-when-mapping-copying-user-data.patch
+# CVE-2010-4249
+ApplyPatch af_unix-limit-unix_tot_inflight.patch
+ApplyPatch scm-lower-SCM-MAX-FD.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2339,6 +2392,26 @@ fi
 
 
 %changelog
+* Tue Dec 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.7-65
+- CVE-2010-4162 bio: integer overflow page count when mapping/copying user data
+- CVE-2010-4249 unix socket local dos
+
+* Fri Dec 10 2010 Chuck Ebbert <cebbert@redhat.com>
+- CVE-2010-2962: arbitrary kernel memory write via i915 GEM ioctl
+- CVE-2010-2963: v4l: VIDIOCSMICROCODE arbitrary write
+- CVE-2010-3698: kvm: invalid selector in fs/gs causes kernel panic
+- CVE-2010-3705: sctp: Fix out-of-bounds reading in sctp_asoc_get_hmac()
+- CVE-2010-3442: ALSA: prevent heap corruption in snd_ctl_new()
+- CVE-2010-4258: failure to revert address limit override in OOPS error path
+- CVE-2010-4169: perf_events: denial-of-service bug
+
+* Thu Dec 09 2010 Kyle McMartin <kyle@redhat.com>
+- ioat2-catch-and-recover-from-broken-vtd-configurations.patch: copy patch
+  from 2.6.35.y (#605845) [556ab45f]
+
+* Thu Dec 09 2010 Kyle McMartin <kyle@redhat.com>
+- Copy tpm-fix-stall-on-boot.patch from rawhide tree. (#530393)
+
 * Thu Dec 09 2010 Kyle McMartin <kyle@redhat.com> 2.6.34.7-64
 - Copy fix for (#632310) from F-14:
   drm/radeon/kms: MC vram map needs to be >= pci aperture size
