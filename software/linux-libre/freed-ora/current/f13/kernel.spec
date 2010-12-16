@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 65
+%global baserelease 66
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -922,6 +922,12 @@ Patch13916: bio-take-care-not-overflow-page-count-when-mapping-copying-user-data
 # CVE-2010-4249
 Patch13917: af_unix-limit-unix_tot_inflight.patch
 Patch13918: scm-lower-SCM-MAX-FD.patch
+# CVE-2010-4157
+Patch13919: gdth-integer-overflow-in-ioctl.patch
+# CVE-2010-4158
+Patch13920: filter-make-sure-filters-dont-read-uninitialized-memory.patch
+# CVE-2010-3874
+Patch13921: can-bcm-fix-minor-heap-overflow.patch
 
 %endif
 
@@ -1770,6 +1776,12 @@ ApplyPatch bio-take-care-not-overflow-page-count-when-mapping-copying-user-data.
 # CVE-2010-4249
 ApplyPatch af_unix-limit-unix_tot_inflight.patch
 ApplyPatch scm-lower-SCM-MAX-FD.patch
+# CVE-2010-4157
+ApplyPatch gdth-integer-overflow-in-ioctl.patch
+# CVE-2010-4158
+ApplyPatch filter-make-sure-filters-dont-read-uninitialized-memory.patch
+# CVE-2010-3874
+ApplyPatch can-bcm-fix-minor-heap-overflow.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2392,9 +2404,14 @@ fi
 
 
 %changelog
+* Tue Dec 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.7-66
+- CVE-2010-4157: gdth: integer overflow in ioc_general()
+- CVE-2010-4158: socket filters infoleak
+- CVE-2010-3874: CAN sockets minor heap overflow
+
 * Tue Dec 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.7-65
-- CVE-2010-4162 bio: integer overflow page count when mapping/copying user data
-- CVE-2010-4249 unix socket local dos
+- CVE-2010-4162: bio: integer overflow page count when mapping/copying user data
+- CVE-2010-4249: unix socket local dos
 
 * Fri Dec 10 2010 Chuck Ebbert <cebbert@redhat.com>
 - CVE-2010-2962: arbitrary kernel memory write via i915 GEM ioctl
