@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 68
+%global baserelease 72
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -710,6 +710,8 @@ Patch1826: drm-i915-disable-sr-polling.patch
 
 Patch1828: drm-ttm-fix-two-race-conditions-fix-busy-codepaths.patch
 
+Patch1830: drm-radeon-r600-cs-checker-fixes.patch
+
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 Patch2000: efifb-add-more-models.patch
 Patch2001: efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
@@ -723,8 +725,8 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
 # media patches
-Patch2899: linux-2.6-v4l-dvb-fixes.patch
-Patch2900: linux-2.6-v4l-dvb-update.patch
+Patch2899: linux-2.6-v4l-dvb-update.patch
+Patch2900: linux-2.6-v4l-dvb-fixes.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2917: hdpvr-ir-enable.patch
 
@@ -810,6 +812,10 @@ Patch13693: ext4-always-journal-quota-file-modifications.patch
 Patch13694: btrfs-fix-error-handling-in-btrfs_get_sub.patch
 Patch13695: btrfs-setup-blank-root-and-fs_info-for-mount-time.patch
 Patch13696: btrfs-fix-race-between-btrfs_get_sb-and-unmount.patch
+
+Patch13697: fs-call-security_d_instantiate-in-d_obtain_alias.patch
+
+Patch13698: net-AF_PACKET-vmalloc.patch
 
 %endif
 
@@ -1288,6 +1294,9 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 # bugfixes to drivers and filesystems
 #
 
+# rhbz#662344,600690
+ApplyPatch fs-call-security_d_instantiate-in-d_obtain_alias.patch
+
 # ext4
 
 # rhbz#578674
@@ -1418,6 +1427,8 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 ApplyPatch drm-ttm-fix-two-race-conditions-fix-busy-codepaths.patch
 
+ApplyPatch drm-radeon-r600-cs-checker-fixes.patch
+
 ApplyPatch efifb-add-more-models.patch
 ApplyPatch efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
 
@@ -1435,8 +1446,8 @@ ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
-ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
+ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 # Fix DMA bug on via-velocity
@@ -1527,6 +1538,9 @@ ApplyPatch mm-vmstat-use-a-single-setter-function-and-callback-for-adjusting-per
 
 # rhbz#657864
 ApplyPatch orinoco-initialise-priv_hw-before-assigning-the-interrupt.patch
+
+# rhbz#637619
+ApplyPatch net-AF_PACKET-vmalloc.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2114,6 +2128,25 @@ fi
 # and build.
 
 %changelog
+* Mon Dec 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.10-72
+- Backport some of the radeon r600_cs.c fixes between .35 and master. (#664206)
+
+* Mon Dec 20 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.10-71
+- Restore v4l/dvb/rc rebase, now with prospective fixes for the bttv and
+  ene_ir issues that showed up in -67 and -68
+
+* Sun Dec 19 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.10-70
+- Revert Jarod's v4l-dvb-ir rebase, due to several issues reported against
+  the 2.6.35.10-68 update.
+  https://admin.fedoraproject.org/updates/kernel-2.6.35.10-68.fc14
+
+* Sat Dec 18 2010 Kyle McMartin <kyle@redhat.com>
+- Patch from nhorman against f13:
+  Enhance AF_PACKET to allow non-contiguous buffer alloc (#637619)
+
+* Sat Dec 18 2010 Kyle McMartin <kyle@redhat.com>
+- Fix SELinux issues with NFS/btrfs and/or xfsdump. (#662344)
+
 * Thu Dec 16 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.10-68
 - Additional mceusb updates just sent upstream, hopefully to fix
   keybounce/excessive buffering issues
