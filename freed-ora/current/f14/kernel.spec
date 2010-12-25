@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 72
+%global baserelease 74
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -658,6 +658,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
+Patch395: acpi-update-battery-information-on-notification-0x81.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -1325,6 +1326,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch acpi-update-battery-information-on-notification-0x81.patch
 ApplyPatch linux-2.6-defaults-no-pm-async.patch
 
 # Various low-impact patches to aid debugging.
@@ -1441,14 +1443,15 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
-# bz #575873
-ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
+
+# bz #575873
+ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
 # Fix DMA bug on via-velocity
 ApplyPatch linux-2.6-via-velocity-dma-fix.patch
@@ -2128,6 +2131,12 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 23 2010 Matthew Garrett <mjg@redhat.com> 2.6.35.10-74
+- Backport the ACPI battery notification patch (#656738)
+
+* Wed Dec 22 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.10-73
+- Fix ene_ir bugs (jumping off a null dev->rdev pointer) (#664145)
+
 * Mon Dec 20 2010 Kyle McMartin <kyle@redhat.com> 2.6.35.10-72
 - Backport some of the radeon r600_cs.c fixes between .35 and master. (#664206)
 
