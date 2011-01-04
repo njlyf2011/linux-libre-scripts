@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -703,6 +703,8 @@ Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
 
 #Patch2916: lirc-staging-2.6.36-fixes.patch
 Patch2917: hdpvr-ir-enable.patch
+
+Patch2918: flexcop-fix-xlate_proc_name-warning.patch
 
 # fs fixes
 
@@ -1342,6 +1344,9 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
 # enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
 ApplyPatch hdpvr-ir-enable.patch
+
+# rhbz#664852
+ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
@@ -1995,7 +2000,17 @@ fi
 #                 ||     ||
 
 %changelog
-* Tue Dec 28 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Jan 03 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.37-rc8.
+
+* Mon Jan 03 2011 Kyle McMartin <kyle@redhat.com> 2.6.37-0.rc8.git3.1
+- Linux 2.6.37-rc8-git3
+- Merged acpi battery notification patch and -rc8.
+
+* Thu Dec 23 2010 Kyle McMartin <kyle@redhat.com>
+- Pull in flexcop procfs rename patch since it's still not upstream. (#664852)
+
+* Tue Dec 21 2010 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Dec 28
 - Deblobbed patch-libre-2.6.37-rc7.
 
 * Tue Dec 21 2010 Kyle McMartin <kyle@redhat.com> 2.6.37.0.rc7.git0.2
