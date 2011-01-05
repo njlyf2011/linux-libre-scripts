@@ -37,15 +37,14 @@
 # See also:
 # http://wiki.debian.org/KernelFirmwareLicensing
 # svn://svn.debian.org/kernel/dists/trunk/linux-2.6/debian/patches/debian/dfsg/files-1
-# http://svn.gnewsense.svnhopper.net/gnewsense/builder/trunk/firmware/firmware-removed
-# http://svn.gnewsense.svnhopper.net/gnewsense/builder/trunk/gen-kernel
+# http://wiki.gnewsense.org/Builder gen-kernel
 
 # Thanks to Brian Brazil @ gnewsense
 
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.36 extra=
+kver=2.6.37 extra=
 
 case $1 in
 --force)
@@ -194,17 +193,17 @@ clean_sed () {
 }
 
 reject_firmware () {
-  #$1 = file
+  #$1 = file $2 = pre sed pattern
   filetest $1 || return
-  clean_sed '
+  clean_sed "$2"'
 s,request\(_ihex\)\?_firmware\(_nowait\)\?,reject_firmware\2,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
 }
 
 maybe_reject_firmware () {
-  #$1 = file
+  #$1 = file $2 = pre sed pattern
   filetest $1 || return
-  clean_sed '
+  clean_sed "$2"'
 s,request_firmware\(_nowait\)\?,maybe_reject_firmware\1,g
 ' "$1" 'retain Free firmware-loading machinery, disabling non-Free one'
 }
@@ -277,6 +276,44 @@ done
 grep -q 'EXTRAVERSION.*-libre' Makefile ||
 clean_sed "s,^EXTRAVERSION.*,&-libre$extra,
 " Makefile 'added -libre to EXTRAVERSION'
+
+grep -q Linux-libre README ||
+clean_sed '
+1,3 s,Linux kernel release.*kernel\.org.*,Linux-libre <http://linux-libre.fsfla.org>,
+2,5 s,Linux version 2.6,Linux-libre,
+1,20 s,\(operating system \)\?Unix,Unix kernel,
+/WHAT IS LINUX/i\
+WHAT IS Linux-libre?\
+\
+  Linux-libre is a Free version of the kernel Linux (see below),\
+  suitable for use with the GNU Operating System in 100% Free\
+  GNU/Linux-libre System Distributions.\
+  http://www.gnu.org/distros/\
+\
+  It removes non-Free components from Linux, that are disguised as\
+  source code or distributed in separate files.  It also disables\
+  run-time requests for non-Free components, shipped separately or as\
+  part of Linux, and documentation pointing to them, so as to avoid\
+  (Free-)baiting users into the trap of non-Free Software.\
+  http://www.fsfla.org/anuncio/2010-11-Linux-2.6.36-libre-debait\
+\
+  Linux-libre started within the gNewSense GNU/Linux distribution.\
+  It was later adopted by Jeff Moe, who coined its name, and in 2008\
+  it became a project maintained by FSF Latin America.\
+\
+  The Linux-libre project takes a minimal-changes approach to cleaning\
+  up Linux, making no effort to substitute components that need to be\
+  removed with functionally equivalent Free ones.  Nevertheless, we\
+  encourage and support efforts towards doing so.\
+  http://libreplanet.org/wiki/LinuxLibre:Devices_that_require_non-free_firmware\
+\
+  Our mascot is Freedo, a light-blue penguin that has just come out\
+  of the the shower.  Although we like penguins, GNU is a much\
+  greater contribution to the entire system, so its mascot deserves\
+  more promotion.  See our web page for their images.\
+  http://linux-libre.fsfla.org/\
+
+' README 'added blurb about Linux-libre'
 
 # Add reject_firmware and maybe_reject_firmware
 grep -q _LINUX_LIBRE_FIRMWARE_H include/linux/firmware.h ||
@@ -387,6 +424,12 @@ clean_blob arch/arm/mach-netx/xc.c
 clean_blob drivers/net/netx-eth.c
 clean_kconfig arch/arm/Kconfig 'ARCH_NETX'
 clean_mk CONFIG_ARCH_NETX arch/arm/Makefile
+
+announce WESTBRIDGE_DEVICE_DRIVER - "West Bridge Device Driver"
+reject_firmware drivers/staging/westbridge/astoria/device/cyasdevice.c
+clean_blob drivers/staging/westbridge/astoria/device/cyasdevice.c
+clean_kconfig drivers/staging/westbridge/astoria/device/Kconfig 'WESTBRIDGE_DEVICE_DRIVER'
+clean_mk 'CONFIG_WESTBRIDGE_DEVICE_DRIVER' drivers/staging/westbridge/astoria/device/Makefile
 
 #######
 # ATM #
@@ -499,6 +542,15 @@ clean_blob drivers/gpu/drm/radeon/r600_cp.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
+#######
+# dma #
+#######
+
+announce IMX_SDMA - "i.MX SDMA support"
+reject_firmware drivers/dma/imx-sdma.c
+clean_blob drivers/dma/imx-sdma.c
+clean_kconfig drivers/dma/Kconfig 'IMX_SDMA'
+clean_mk CONFIG_IMX_SDMA drivers/dma/Makefile
 
 #########
 # Media #
@@ -625,6 +677,13 @@ reject_firmware drivers/media/dvb/dvb-usb/gp8psk.c
 clean_blob drivers/media/dvb/dvb-usb/gp8psk.c
 clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_GP8PSK'
 clean_mk CONFIG_DVB_USB_GP8PSK drivers/media/dvb/dvb-usb/Makefile
+
+announce DVB_USB_LME2510 - "LME DM04/QQBOX DVB-S USB2.0 support"
+reject_firmware drivers/media/dvb/dvb-usb/lmedm04.c
+clean_blob drivers/media/dvb/dvb-usb/lmedm04.c
+clean_file Documentation/dvb/lmedm04.txt
+clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_LME2510'
+clean_mk CONFIG_DVB_USB_LME2510 drivers/media/dvb/dvb-usb/Makefile
 
 announce DVB_USB_M920X - "Uli m920x DVB-T USB2.0 support"
 reject_firmware drivers/media/dvb/dvb-usb/m920x.c
@@ -840,6 +899,12 @@ clean_blob drivers/media/video/cx18/cx18-firmware.c
 clean_kconfig drivers/media/video/cx18/Kconfig 'VIDEO_CX18'
 clean_mk CONFIG_VIDEO_CX18 drivers/media/video/cx18/Makefile
 
+announce VIDEO_CX231XX - "Conexant cx231xx USB video capture support"
+reject_firmware drivers/media/video/cx231xx/cx231xx-417.c
+clean_blob drivers/media/video/cx231xx/cx231xx-417.c
+clean_kconfig drivers/media/video/cx231xx/Kconfig 'VIDEO_CX231XX'
+clean_mk CONFIG_VIDEO_CX231XX drivers/media/video/cx231xx/Makefile
+
 announce VIDEO_CX23885 - "Conexant cx23885 (2388x successor) support"
 reject_firmware drivers/media/video/cx23885/cx23885-417.c
 clean_blob drivers/media/video/cx23885/cx23885-417.c
@@ -946,20 +1011,28 @@ clean_blob drivers/net/starfire.c
 clean_kconfig drivers/net/Kconfig 'ADAPTEC_STARFIRE'
 clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/Makefile
 
+announce CONFIG_BNA - "Brocade 1010/1020 10Gb Ethernet Driver support"
+clean_blob drivers/net/bna/bnad.c
+clean_blob drivers/net/bna/cna.h
+reject_firmware drivers/net/bna/cna_fwimg.c
+clean_kconfig drivers/net/Kconfig 'BNA'
+clean_mk CONFIG_BNA drivers/net/bna/Makefile
+
 announce BNX2 - "Broadcom NetXtremeII"
-drop_fw_file firmware/bnx2/bnx2-mips-09-5.0.0.j15.fw.ihex firmware/bnx2/bnx2-mips-09-5.0.0.j15.fw
-drop_fw_file firmware/bnx2/bnx2-rv2p-09-5.0.0.j10.fw.ihex firmware/bnx2/bnx2-rv2p-09-5.0.0.j10.fw
-drop_fw_file firmware/bnx2/bnx2-rv2p-09ax-5.0.0.j10.fw.ihex firmware/bnx2/bnx2-rv2p-09ax-5.0.0.j10.fw
-drop_fw_file firmware/bnx2/bnx2-mips-06-5.0.0.j6.fw.ihex firmware/bnx2/bnx2-mips-06-5.0.0.j6.fw
-drop_fw_file firmware/bnx2/bnx2-rv2p-06-5.0.0.j3.fw.ihex firmware/bnx2/bnx2-rv2p-06-5.0.0.j3.fw
+drop_fw_file firmware/bnx2/bnx2-mips-09-6.0.17.fw.ihex firmware/bnx2/bnx2-mips-09-6.0.17.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-09-6.0.17.fw.ihex firmware/bnx2/bnx2-rv2p-09-6.0.17.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-09ax-6.0.17.fw.ihex firmware/bnx2/bnx2-rv2p-09ax-6.0.17.fw
+drop_fw_file firmware/bnx2/bnx2-mips-06-6.0.15.fw.ihex firmware/bnx2/bnx2-mips-06-6.0.15.fw
+drop_fw_file firmware/bnx2/bnx2-rv2p-06-6.0.15.fw.ihex firmware/bnx2/bnx2-rv2p-06-6.0.15.fw
 reject_firmware drivers/net/bnx2.c
 clean_blob drivers/net/bnx2.c
 clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
 
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
-drop_fw_file firmware/bnx2x-e1-5.2.13.0.fw.ihex firmware/bnx2x-e1-5.2.13.0.fw
-drop_fw_file firmware/bnx2x-e1h-5.2.13.0.fw.ihex firmware/bnx2x-e1h-5.2.13.0.fw
+drop_fw_file firmware/bnx2x/bnx2x-e1-6.0.34.0.fw.ihex firmware/bnx2x/bnx2x-e1-6.0.34.0.fw
+drop_fw_file firmware/bnx2x/bnx2x-e1h-6.0.34.0.fw.ihex firmware/bnx2x/bnx2x-e1h-6.0.34.0.fw
+drop_fw_file firmware/bnx2x/bnx2x-e2-6.0.34.0.fw.ihex firmware/bnx2x/bnx2x-e2-6.0.34.0.fw
 reject_firmware drivers/net/bnx2x/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
@@ -1011,6 +1084,29 @@ clean_sed '
 clean_blob drivers/net/e100.c
 clean_kconfig drivers/net/Kconfig 'E100'
 clean_mk CONFIG_E100 drivers/net/Makefile
+
+announce FT1000_PCMCIA - "Driver for ft1000 pcmcia device."
+clean_file drivers/staging/ft1000/ft1000-pcmcia/ft1000.img
+reject_firmware drivers/staging/ft1000/TODO
+clean_blob drivers/staging/ft1000/ft1000-pcmcia/boot.h
+clean_sed '
+/^static int ft1000_reset_card/,/^}$/ {
+  /card_bootload/i\
+		return /*(DEBLOBBED)*/ FALSE;
+}
+' drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c \
+  'disabled non-Free firmware-loading machinery'
+reject_firmware drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c
+clean_blob drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c
+clean_kconfig drivers/staging/ft1000/Kconfig 'FT1000_PCMCIA'
+clean_mk CONFIG_FT1000_PCMCIA drivers/staging/ft1000/Makefile
+
+announce FT1000_USB - "Driver for ft1000 USB devices."
+clean_file drivers/staging/ft1000/ft1000-usb/ft3000.img
+reject_firmware drivers/staging/ft1000/ft1000-usb/ft1000_usb.c
+clean_blob drivers/staging/ft1000/ft1000-usb/ft1000_usb.c
+clean_kconfig drivers/staging/ft1000/Kconfig 'FT1000_USB'
+clean_mk CONFIG_FT1000_USB drivers/staging/ft1000/Makefile
 
 announce MYRI_SBUS - "MyriCOM Gigabit Ethernet"
 drop_fw_file firmware/myricom/lanai.bin.ihex firmware/myricom/lanai.bin
@@ -1136,24 +1232,28 @@ clean_blob drivers/net/pcmcia/smc91c92_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_SMC91C92'
 clean_mk CONFIG_PCMCIA_SMC91C92 drivers/net/pcmcia/Makefile
 
-announce PCCARD - "PCCard (PCMCIA/CardBus) support"
-reject_firmware drivers/pcmcia/ds.c
-clean_kconfig drivers/pcmcia/Kconfig 'PCCARD'
-clean_mk CONFIG_PCCARD drivers/pcmcia/Makefile
+# CIS files are not software.
+# announce PCCARD - "PCCard (PCMCIA/CardBus) support"
+# reject_firmware drivers/pcmcia/ds.c
+# clean_kconfig drivers/pcmcia/Kconfig 'PCCARD'
+# clean_mk CONFIG_PCCARD drivers/pcmcia/Makefile
 
 announce PCMCIA_3C574 - "3Com 3c574 PCMCIA support"
+# This is not software; it's Free, but GPLed without in-tree sources.
 drop_fw_file firmware/cis/3CCFEM556.cis.ihex firmware/cis/3CCFEM556.cis
-clean_blob drivers/net/pcmcia/3c574_cs.c
+# clean_blob drivers/net/pcmcia/3c574_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_3C574'
 clean_mk CONFIG_PCMCIA_3C574 drivers/net/pcmcia/Makefile
 
 announce PCMCIA_3C589 - "3Com 3c589 PCMCIA support"
+# This is not software; it's Free, but GPLed without in-tree sources.
 drop_fw_file firmware/cis/3CXEM556.cis.ihex firmware/cis/3CXEM556.cis
-clean_blob drivers/net/pcmcia/3c589_cs.c
+# clean_blob drivers/net/pcmcia/3c589_cs.c
 clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_3C589'
 clean_mk CONFIG_PCMCIA_3C589 drivers/net/pcmcia/Makefile
 
 announce PCMCIA_PCNET - "NE2000 compatible PCMCIA support"
+# These are not software; they're Free, but GPLed without in-tree sources.
 drop_fw_file firmware/cis/LA-PCM.cis.ihex firmware/cis/LA-PCM.cis
 drop_fw_file firmware/cis/PCMLM28.cis.ihex firmware/cis/PCMLM28.cis
 drop_fw_file firmware/cis/DP83903.cis.ihex firmware/cis/DP83903.cis
@@ -1161,9 +1261,9 @@ drop_fw_file firmware/cis/NE2K.cis.ihex firmware/cis/NE2K.cis
 drop_fw_file firmware/cis/tamarack.cis.ihex firmware/cis/tamarack.cis
 drop_fw_file firmware/cis/PE-200.cis.ihex firmware/cis/PE-200.cis
 drop_fw_file firmware/cis/PE520.cis.ihex firmware/cis/PE520.cis
-clean_blob drivers/net/pcmcia/pcnet_cs.c
-clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_PCNET'
-clean_mk CONFIG_PCMCIA_PCNET drivers/net/pcmcia/Makefile
+# clean_blob drivers/net/pcmcia/pcnet_cs.c
+# clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_PCNET'
+# clean_mk CONFIG_PCMCIA_PCNET drivers/net/pcmcia/Makefile
 
 # tokenring
 
@@ -1234,6 +1334,20 @@ reject_firmware drivers/net/wireless/b43legacy/main.c
 clean_blob drivers/net/wireless/b43legacy/main.c
 clean_kconfig drivers/net/wireless/b43legacy/Kconfig 'B43LEGACY'
 clean_mk CONFIG_B43LEGACY drivers/net/wireless/b43legacy/Makefile
+
+announce BRCM80211_PCI - "Broadcom IEEE802.11n PCIe SoftMAC WLAN driver"
+clean_blob drivers/staging/brcm80211/README
+reject_firmware drivers/staging/brcm80211/sys/wl_mac80211.c
+clean_blob drivers/staging/brcm80211/sys/wl_mac80211.c
+clean_kconfig drivers/staging/brcm80211/Kconfig 'BRCM80211_PCI'
+clean_mk CONFIG_BRCM80211_PCI drivers/staging/brcm80211/Makefile
+
+announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
+clean_blob drivers/staging/brcm80211/brcmfmac/README
+reject_firmware drivers/staging/brcm80211/brcmfmac/wl_cfg80211.c
+clean_blob drivers/staging/brcm80211/brcmfmac/wl_cfg80211.c
+clean_kconfig drivers/staging/brcm80211/Kconfig 'BRCMFMAC'
+clean_mk CONFIG_BRCMFMAC drivers/staging/brcm80211/Makefile
 
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
 reject_firmware drivers/net/wireless/orinoco/fw.c
@@ -1313,26 +1427,44 @@ clean_blob drivers/misc/iwmc3200top/main.c
 clean_kconfig drivers/misc/iwmc3200top/Kconfig 'IWMC3200TOP'
 clean_mk CONFIG_IWMC3200TOP drivers/misc/iwmc3200top/Makefile
 
+announce LIBERTAS - "Marvell 8xxx Libertas WLAN driver support"
+reject_firmware drivers/net/wireless/libertas/main.c '
+/Try user-specified firmware first/{
+  :end1
+  /request_firmware(helper, user_helper/! {N; b end1;};
+  :end2
+  /request_firmware(helper, user_helper.*request_firmware(mainfw, user_mainfw/! {N; b end2;};
+  /request_firmware(helper, user_helper.*request_firmware(mainfw, user_mainfw/{
+    /request_firmware.*request_firmware.*request_firmware/!{p; d;};
+  }
+}
+'
+clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS'
+clean_mk CONFIG_LIBERTAS drivers/net/wireless/libertas/Makefile
+
 announce LIBERTAS_CS - "Marvell Libertas 8385 CompactFlash 802.11b/g cards"
-reject_firmware drivers/net/wireless/libertas/if_cs.c
 clean_blob drivers/net/wireless/libertas/if_cs.c
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_CS'
 clean_mk CONFIG_LIBERTAS_CS drivers/net/wireless/libertas/Makefile
 
 announce LIBERTAS_SDIO - "Marvell Libertas 8385 and 8686 SDIO 802.11b/g cards"
-reject_firmware drivers/net/wireless/libertas/if_sdio.c
 clean_blob drivers/net/wireless/libertas/if_sdio.c
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_SDIO'
 clean_mk CONFIG_LIBERTAS_SDIO drivers/net/wireless/libertas/Makefile
 
 announce LIBERTAS_SPI - "Marvell Libertas 8686 SPI 802.11b/g cards"
-reject_firmware drivers/net/wireless/libertas/if_spi.c
 clean_blob drivers/net/wireless/libertas/if_spi.c
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_SPI'
 clean_mk CONFIG_LIBERTAS_SPI drivers/net/wireless/libertas/Makefile
 
 announce LIBERTAS_USB - "Marvell Libertas 8388 USB 802.11b/g cards"
-reject_firmware drivers/net/wireless/libertas/if_usb.c
+reject_firmware drivers/net/wireless/libertas/if_usb.c '
+/Try user-specified firmware first/{
+  /request_firmware/!N;
+  /request_firmware/!N;
+  /request_firmware/{p; d;};
+}
+'
 clean_blob drivers/net/wireless/libertas/if_usb.c
 clean_blob drivers/net/wireless/libertas/README
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_USB'
@@ -1350,41 +1482,23 @@ clean_blob drivers/net/wireless/mwl8k.c
 clean_kconfig drivers/net/wireless/Kconfig 'MWL8K'
 clean_mk CONFIG_MWL8K drivers/net/wireless/Makefile
 
+announce ATH6K_LEGACY - "Atheros AR6003 support (non mac80211)"
+reject_firmware drivers/staging/ath6kl/os/linux/ar6000_android.c
+reject_firmware drivers/staging/ath6kl/os/linux/include/osapi_linux.h
+clean_sed '
+/\*firmware_p = firmware = kzalloc/ i\
+	return -1;
+' drivers/staging/ath6kl/os/linux/ar6000_android.c \
+  'disabled non-Free firmware loading machinery'
+clean_blob drivers/staging/ath6kl/os/linux/include/ar6000_drv.h
+clean_kconfig drivers/staging/ath6kl/Kconfig 'ATH6K_LEGACY'
+clean_mk CONFIG_ATH6K_LEGACY drivers/staging/ath6kl/Makefile
+
 announce ATH9K_HTC - "Atheros HTC based wireless cards support"
 reject_firmware drivers/net/wireless/ath/ath9k/hif_usb.c
 clean_blob drivers/net/wireless/ath/ath9k/hif_usb.c
 clean_kconfig drivers/net/wireless/ath/ath9k/Kconfig 'ATH9K_HTC'
 clean_mk CONFIG_ATH9K_HTC drivers/net/wireless/ath/ath9k/Makefile
-
-announce OTUS - "Atheros OTUS 802.11n USB wireless support"
-clean_blob drivers/staging/otus/hal/hpDKfwu.c
-clean_blob drivers/staging/otus/hal/hpfw2.c
-clean_blob drivers/staging/otus/hal/hpfwbu.c
-clean_blob drivers/staging/otus/hal/hpfwspiu.c
-clean_blob drivers/staging/otus/hal/hpfwu.c
-clean_blob drivers/staging/otus/hal/hpfwu.c.drv_ba_resend
-clean_blob drivers/staging/otus/hal/hpfwu_2k.c
-clean_blob drivers/staging/otus/hal/hpfwu_BA.c
-clean_blob drivers/staging/otus/hal/hpfwu_FB50_mdk.c
-clean_blob drivers/staging/otus/hal/hpfwu_OTUS_RC.c
-clean_blob drivers/staging/otus/hal/hpfwu_txstream.c
-clean_blob drivers/staging/otus/hal/hpfwuinit.c
-clean_sed '
-/^u16_t zfFirmwareDownload\(NotJump\)\?(.*)$/,/^}$/ {
-  /    image = (u8_t\*) fw;/i\
-    zm_msg0_init(ZM_LV_0, "Missing Free firmware");\
-    ret = ZM_ERR_FIRMWARE_WRONG_TYPE;\
-    goto exit;\
-
-}
-' drivers/staging/otus/hal/hpusb.c \
-  'disabled non-Free firmware-loading machinery'
-clean_sed 's/^extern u16_t \(zfFirmwareDownload\(NotJump\)\?\)([^;]*);/&\n#define \1(dev,fw,len,offset) (\1)(dev,NULL,0,offset)/
-' drivers/staging/otus/hal/hpmain.c \
-  'disabled non-Free firmware-loading machinery'
-clean_blob drivers/staging/otus/hal/hpmain.c
-clean_kconfig drivers/staging/otus/Kconfig OTUS
-clean_mk CONFIG_OTUS drivers/staging/otus/Makefile
 
 announce PRISM2_USB - "Prism2.5/3 USB driver"
 reject_firmware drivers/staging/wlan-ng/prism2fw.c
@@ -1475,12 +1589,16 @@ clean_blob drivers/staging/rtl8192u/r819xU_firmware_img.c
 clean_kconfig drivers/staging/rtl8192u/Kconfig 'RTL8192U'
 clean_mk CONFIG_RTL8192U drivers/staging/rtl8192u/Makefile
 
-announce RTL8192SU - "RealTek RTL8192SU Wireless LAN NIC driver"
-reject_firmware drivers/staging/rtl8192su/r8192S_firmware.c
-clean_blob drivers/staging/rtl8192su/r8192S_firmware.c
-clean_blob drivers/staging/rtl8192su/r8192SU_HWImg.c
-clean_kconfig drivers/staging/rtl8192su/Kconfig 'RTL8192SU'
-clean_mk CONFIG_RTL8192SU drivers/staging/rtl8192su/Makefile
+announce R8712U - "RealTek RTL8712U (RTL8192SU) Wireless LAN NIC driver"
+clean_blob drivers/staging/rtl8712/farray.h
+clean_sed '
+/^static u32 rtl871x_open_fw(/i\
+#define rtl871x_open_fw(a,b,c) 0
+' drivers/staging/rtl8712/hal_init.c \
+  'disabling non-Free firmware loading machinery'
+clean_blob drivers/staging/rtl8712/hal_init.c
+clean_kconfig drivers/staging/rtl8712/Kconfig 'R8712U'
+clean_mk CONFIG_R8712U drivers/staging/rtl8712/Makefile
 
 announce VT6656 - "VIA Technologies VT6656 support"
 clean_sed '
@@ -1496,11 +1614,11 @@ clean_kconfig drivers/staging/vt6656/Kconfig 'VT6656'
 clean_mk CONFIG_VT6656 drivers/staging/vt6656/Makefile
 
 announce WL1251 - "TI wl1251 support"
-reject_firmware drivers/net/wireless/wl12xx/wl1251_main.c
-clean_blob drivers/net/wireless/wl12xx/wl1251_main.c
-clean_blob drivers/net/wireless/wl12xx/wl1251.h
-clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL1251'
-clean_mk CONFIG_WL1251 drivers/net/wireless/wl12xx/Makefile
+reject_firmware drivers/net/wireless/wl1251/main.c
+clean_blob drivers/net/wireless/wl1251/main.c
+clean_blob drivers/net/wireless/wl1251/wl1251.h
+clean_kconfig drivers/net/wireless/wl1251/Kconfig 'WL1251'
+clean_mk CONFIG_WL1251 drivers/net/wireless/wl1251/Makefile
 
 announce WL1271 - "TI wl1271 support"
 reject_firmware drivers/net/wireless/wl12xx/wl1271_main.c
@@ -1564,10 +1682,10 @@ clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL_SDIO'
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
 
 announce TI_ST - "Texas Instruments shared transport line discipline"
-reject_firmware drivers/staging/ti-st/st_kim.c
-clean_blob drivers/staging/ti-st/st_kim.c
-clean_kconfig drivers/staging/ti-st/Kconfig 'TI_ST'
-clean_mk CONFIG_TI_ST drivers/staging/ti-st/Makefile
+reject_firmware drivers/misc/ti-st/st_kim.c
+clean_blob drivers/misc/ti-st/st_kim.c
+clean_kconfig drivers/misc/ti-st/Kconfig 'TI_ST'
+clean_mk CONFIG_TI_ST drivers/misc/ti-st/Makefile
 
 # wimax
 
@@ -1576,8 +1694,20 @@ reject_firmware drivers/net/wimax/i2400m/fw.c
 clean_blob drivers/net/wimax/i2400m/sdio.c
 clean_blob drivers/net/wimax/i2400m/usb.c
 clean_blob Documentation/wimax/README.i2400m
-clean_kconfig drivers/net/wimax/i2400m/Kconfig CONFIG_WIMAX_I2400M
+clean_kconfig drivers/net/wimax/i2400m/Kconfig 'WIMAX_I2400M'
 clean_mk CONFIG_WIMAX_I2400M drivers/net/wimax/i2400m/Makefile
+
+announce BCM_WIMAX - "Beceem BCS200/BCS220-3 and BCSM250 wimax support"
+clean_blob drivers/staging/bcm/Macros.h
+# This disables loading of the .cfg file as well, but it's useless without
+# the firmware proper.
+clean_sed '
+/^static inline struct file \*open_firmware_file/,/^}$/ {
+  /oldfs=get_fs();/i\
+    return /*(DEBLOBBED)*/ NULL;
+}' drivers/staging/bcm/Misc.c 'disabled non-Free firmware loading machinery'
+clean_kconfig drivers/staging/bcm/Kconfig 'BCM_WIMAX'
+clean_mk CONFIG_BCM_WIMAX drivers/staging/bcm/Makefile
 
 # infiniband
 
@@ -1609,16 +1739,21 @@ clean_mk CONFIG_MISDN_SPEEDFAX drivers/isdn/hardware/mISDN/Makefile
 ##########
 
 announce SERIAL_8250_CS - "8250/16550 PCMCIA device support"
+# These are not software; they're Free, but GPLed without in-tree sources.
 drop_fw_file firmware/cis/MT5634ZLX.cis.ihex firmware/cis/MT5634ZLX.cis
 drop_fw_file firmware/cis/RS-COM-2P.cis.ihex firmware/cis/RS-COM-2P.cis
 drop_fw_file firmware/cis/COMpad2.cis.ihex firmware/cis/COMpad2.cis
 drop_fw_file firmware/cis/COMpad4.cis.ihex firmware/cis/COMpad4.cis
+# These are not software; they're Free, but GPLed without textual sources.
+# It could be assumed that these binaries *are* sources, since they
+# can be trivially converted back to a textual form, without loss,
+# but we're better off safe than sorry, so remove them from our tree.
 drop_fw_file firmware/cis/SW_555_SER.cis.ihex firmware/cis/SW_555_SER.cis
 drop_fw_file firmware/cis/SW_7xx_SER.cis.ihex firmware/cis/SW_7xx_SER.cis
 drop_fw_file firmware/cis/SW_8xx_SER.cis.ihex firmware/cis/SW_8xx_SER.cis
-clean_blob drivers/serial/serial_cs.c
-clean_kconfig drivers/serial/Kconfig 'SERIAL_8250_CS'
-clean_mk CONFIG_SERIAL_8250_CS drivers/serial/Makefile
+# clean_blob drivers/serial/serial_cs.c
+# clean_kconfig drivers/serial/Kconfig 'SERIAL_8250_CS'
+# clean_mk CONFIG_SERIAL_8250_CS drivers/serial/Makefile
 
 announce SERIAL_ICOM - "IBM Multiport Serial Adapter"
 reject_firmware drivers/serial/icom.c
@@ -1709,8 +1844,9 @@ clean_kconfig drivers/scsi/aic94xx/Kconfig 'SCSI_AIC94XX'
 clean_mk CONFIG_SCSI_AIC94XX drivers/scsi/aic94xx/Makefile
 
 announce SCSI_BFA_FC - "Brocade BFA Fibre Channel Support"
-reject_firmware drivers/scsi/bfa/bfad_fwimg.c
-clean_blob drivers/scsi/bfa/bfad_fwimg.c
+clean_blob drivers/scsi/bfa/bfad_im.h
+reject_firmware drivers/scsi/bfa/bfad.c
+clean_blob drivers/scsi/bfa/bfad.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_BFA_FC'
 clean_mk CONFIG_SCSI_BFA_FC drivers/scsi/bfa/Makefile
 
@@ -1782,6 +1918,19 @@ reject_firmware drivers/usb/misc/isight_firmware.c
 clean_blob drivers/usb/misc/isight_firmware.c
 clean_kconfig drivers/usb/misc/Kconfig 'USB_ISIGHTFW'
 clean_mk CONFIG_USB_ISIGHTFW drivers/usb/misc/Makefile
+
+# storage
+
+announce USB_ENESTORAGE - "USB ENE card reader support"
+clean_blob drivers/staging/keucr/init.h
+clean_sed '
+/^int ENE_LoadBinCode(/,/^}$/ {
+  /kmalloc/i\
+	return /*(DEBLOBBED)*/ USB_STOR_TRANSPORT_ERROR;
+}
+' drivers/staging/keucr/init.c 'disable non-Free firmware loading machinery'
+clean_kconfig drivers/staging/keucr/Kconfig 'USB_ENESTORAGE'
+clean_mk 'CONFIG_USB_ENESTORAGE' drivers/staging/keucr/Makefile
 
 # serial
 
@@ -1904,6 +2053,13 @@ s/cs46xx_dsp_load_module(chip, [&]cwc\(4630\|async\|snoop\)_module)/(snd_printk(
 clean_blob sound/pci/cs46xx/cs46xx_lib.c
 clean_kconfig sound/pci/Kconfig 'SND_CS46XX'
 clean_mk 'CONFIG_SND_CS46XX' sound/pci/cs46xx/Makefile
+
+announce SND_INTEL_SST - "Intel SST (LPE) Driver"
+clean_blob drivers/staging/intel_sst/intel_sst_common.h
+reject_firmware drivers/staging/intel_sst/intel_sst_drv_interface.c
+reject_firmware drivers/staging/intel_sst/intel_sst_dsp.c
+clean_kconfig drivers/staging/intel_sst/Kconfig 'SND_INTEL_SST'
+clean_mk 'CONFIG_SND_INTEL_SST' drivers/staging/intel_sst/Makefile
 
 announce SND_KORG1212 - "Korg 1212 IO"
 drop_fw_file firmware/korg/k1212.dsp.ihex firmware/korg/k1212.dsp
