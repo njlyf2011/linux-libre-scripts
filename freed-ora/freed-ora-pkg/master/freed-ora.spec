@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        3
+Version:        4
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -91,6 +91,7 @@ Conflicts: iwl5000-firmware
 Conflicts: iwl5150-firmware
 Conflicts: iwl6000-firmware
 Conflicts: iwl6000g2a-firmware
+Conflicts: iwl6000g2b-firmware
 Conflicts: iwl6050-firmware
 Conflicts: libertas-sd8686-firmware
 Conflicts: libertas-usb8388-firmware
@@ -149,6 +150,9 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Fri Jan  7 2011 Alexandre Oliva <lxoliva@fsfla.org> - 4-1
+- Conflict with iwl6000g2b-firmware.
+
 * Fri Dec 24 2010 Alexandre Oliva <lxoliva@fsfla.org> - 3-1
 - Conflict with iwl6000g2a-firmware.
 
