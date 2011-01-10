@@ -58,7 +58,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -2404,6 +2404,9 @@ fi
 
 
 %changelog
+* Sun Jan  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+- Respin with 2.6.34-libre2.
+
 * Tue Dec 14 2010 Chuck Ebbert <cebbert@redhat.com>  2.6.34.7-66
 - CVE-2010-4157: gdth: integer overflow in ioc_general()
 - CVE-2010-4158: socket filters infoleak
