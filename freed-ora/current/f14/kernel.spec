@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 76
+%global baserelease 74
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -58,7 +58,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 2
+%define librev 3
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -2131,13 +2131,8 @@ fi
 # and build.
 
 %changelog
-* Wed Jan 05 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-76
-- Restore functional audio on PVR-150 video capture cards (#666456)
-- Fix another mceusb regression cropping up mostly with rc5 signals (#662071)
-- Add back some ir-lirc-codec debug spew
-
-* Thu Dec 30 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.10-75
-- Fix imon 0xffdc device detection and oops on probe
+* Sun Jan  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+- Respin with 2.6.35-libre3.
 
 * Thu Dec 23 2010 Matthew Garrett <mjg@redhat.com> 2.6.35.10-74
 - Backport the ACPI battery notification patch (#656738)
