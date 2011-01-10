@@ -57,7 +57,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+%define librev 2
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
@@ -67,7 +67,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -2271,6 +2271,9 @@ fi
 %kernel_variant_files -k vmlinux %{with_kdump} kdump
 
 %changelog
+* Sun Jan  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+- Respin with 2.6.32-libre2.
+
 * Fri Nov 26 2010 Kyle McMartin <kyle@redhat.com> 2.6.32.26-175
 - netlink-make-nlmsg_find_attr-take-a-const-ptr.patch: quiet build warning
   the INET_DIAG fix caused.
