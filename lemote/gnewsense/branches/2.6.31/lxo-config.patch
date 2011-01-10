@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2010-07-07 17:50:25.000000000 +0000
-+++ Makefile	2010-07-07 17:50:36.000000000 +0000
+--- Makefile.orig	2011-01-09 04:55:53.000000000 +0000
++++ Makefile	2011-01-09 04:55:55.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 31
--EXTRAVERSION = .14-libre3
-+EXTRAVERSION = .14-libre3-lemote
+-EXTRAVERSION = .14-libre4
++EXTRAVERSION = .14-libre4-lemote
  NAME = Man-Eating Seals of Antiquity
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2010-07-07 18:00:26.000000000 +0000
++++ .config	2011-01-09 04:59:05.000000000 +0000
 @@ -0,0 +1,2495 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.31.14-libre3-lemote
-+# Wed Jul  7 18:00:26 2010
++# Linux kernel version: 2.6.31.14-libre4-lemote
++# Sun Jan  9 04:59:05 2011
 +#
 +CONFIG_MIPS=y
 +
@@ -835,9 +835,9 @@ Index: .config
 +CONFIG_CONNECTOR=m
 +CONFIG_MTD=m
 +# CONFIG_MTD_DEBUG is not set
-+# CONFIG_MTD_TESTS is not set
 +# CONFIG_MTD_CONCAT is not set
 +CONFIG_MTD_PARTITIONS=y
++# CONFIG_MTD_TESTS is not set
 +# CONFIG_MTD_REDBOOT_PARTS is not set
 +# CONFIG_MTD_AR7_PARTS is not set
 +
@@ -853,7 +853,6 @@ Index: .config
 +# CONFIG_INFTL is not set
 +# CONFIG_RFD_FTL is not set
 +# CONFIG_SSFDC is not set
-+# CONFIG_SM_FTL is not set
 +# CONFIG_MTD_OOPS is not set
 +
 +#
@@ -2103,6 +2102,7 @@ Index: .config
 +# CONFIG_FB_UDL is not set
 +CONFIG_LOONGSON_PLATFORM_DEVICES=y
 +CONFIG_LEMOTE_YEELOONG2F_PDEV=y
++# CONFIG_LEMOTE_YEELOONG2F_PDEV_ROM is not set
 +
 +#
 +# File systems
