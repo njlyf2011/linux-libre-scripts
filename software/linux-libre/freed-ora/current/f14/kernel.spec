@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 74
+%global baserelease 76
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -2131,8 +2131,16 @@ fi
 # and build.
 
 %changelog
-* Sun Jan  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+* Mon Jan 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
 - Respin with 2.6.35-libre3.
+
+* Wed Jan 05 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-76
+- Restore functional audio on PVR-150 video capture cards (#666456)
+- Fix another mceusb regression cropping up mostly with rc5 signals (#662071)
+- Add back some ir-lirc-codec debug spew
+
+* Thu Dec 30 2010 Jarod Wilson <jarod@redhat.com> 2.6.35.10-75
+- Fix imon 0xffdc device detection and oops on probe
 
 * Thu Dec 23 2010 Matthew Garrett <mjg@redhat.com> 2.6.35.10-74
 - Backport the ACPI battery notification patch (#656738)
