@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 76
+%global baserelease 77
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -114,6 +114,8 @@ Summary: The Linux kernel
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
 # kernel-smp (only valid for ppc 32-bit)
 %define with_smp       %{?_without_smp:       0} %{?!_without_smp:       1}
+# kernel-PAE (only valid for i686)
+%define with_pae       %{?_without_pae:       0} %{?!_without_pae:       1}
 # kernel-debug
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-doc
@@ -151,6 +153,8 @@ Summary: The Linux kernel
 %define with_baseonly  %{?_with_baseonly:     1} %{?!_with_baseonly:     0}
 # Only build the smp kernel (--with smponly):
 %define with_smponly   %{?_with_smponly:      1} %{?!_with_smponly:      0}
+# Only build the pae kernel (--with paeonly):
+%define with_paeonly   %{?_with_paeonly:      1} %{?!_with_paeonly:      0}
 # Only build the debug kernel (--with dbgonly):
 %define with_dbgonly   %{?_with_dbgonly:      1} %{?!_with_dbgonly:      0}
 
@@ -234,21 +238,28 @@ Summary: The Linux kernel
 %define debuginfodir /usr/lib/debug
 
 # kernel-PAE is only built on i686.
-%ifarch i686
-%define with_pae 1
-%else
+%ifnarch i686
 %define with_pae 0
 %endif
 
 # if requested, only build base kernel
 %if %{with_baseonly}
 %define with_smp 0
+%define with_pae 0
 %define with_debug 0
 %endif
 
 # if requested, only build smp kernel
 %if %{with_smponly}
 %define with_up 0
+%define with_pae 0
+%define with_debug 0
+%endif
+
+# if requested, only build pae kernel
+%if %{with_paeonly}
+%define with_up 0
+%define with_smp 0
 %define with_debug 0
 %endif
 
@@ -256,6 +267,7 @@ Summary: The Linux kernel
 %if %{with_dbgonly}
 %if %{debugbuildsenabled}
 %define with_up 0
+%define with_pae 0
 %endif
 %define with_smp 0
 %define with_pae 0
@@ -569,6 +581,10 @@ Source90: config-sparc64-generic
 
 Source100: config-arm
 
+# This file is intentionally left empty in the stock kernel. Its a nicety
+# added for those wanting to do custom rebuilds with altered config opts.
+Source1000: config-local
+
 # Here should be only the patches up to the upstream canonical Linus tree.
 
 # For a stable release kernel
@@ -730,6 +746,7 @@ Patch2899: linux-2.6-v4l-dvb-update.patch
 Patch2900: linux-2.6-v4l-dvb-fixes.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2917: hdpvr-ir-enable.patch
+Patch2918: imon-default-proto-modparam.patch
 
 Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
@@ -792,10 +809,10 @@ Patch13651: kvm-fix-fs-gs-reload-oops-with-invalid-ldt.patch
 
 Patch13652: fix-i8k-inline-asm.patch
 
-Patch13702: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
-Patch13704: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
+Patch13653: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
+Patch13654: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
 
-Patch13703: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+Patch13658: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
 
 Patch13660: rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
 Patch13661: rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
@@ -817,6 +834,15 @@ Patch13696: btrfs-fix-race-between-btrfs_get_sb-and-unmount.patch
 Patch13697: fs-call-security_d_instantiate-in-d_obtain_alias.patch
 
 Patch13698: net-AF_PACKET-vmalloc.patch
+
+Patch13699: mac80211-fix-hard-lockup-in-sta_addba_resp_timer_expired.patch
+
+# rhbz#652744
+Patch13700: e1000e-cleanup-e1000_sw_lcd_config_ich8lan.patch
+Patch13701: e1000e-82566DC-fails-to-get-link.patch
+
+# CVE-2010-4668
+Patch13702: block-check-for-proper-length-of-iov-entries-earlier-in-blk_rq_map_user_iov.patch
 
 %endif
 
@@ -1240,6 +1266,14 @@ make -f %{SOURCE20} VERSION=%{version} configs
   done
 %endif
 
+# Merge in any user-provided local config option changes
+for i in %{all_arch_configs}
+do
+  mv $i $i.tmp
+  ./merge.pl %{SOURCE1000} $i.tmp > $i
+  rm $i.tmp
+done
+
 ApplyOptionalPatch git-linus.diff
 
 # This patch adds a "make nonint_oldconfig" which is non-interactive and
@@ -1450,6 +1484,9 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
+# one-off non-upstream patch, since ir-keytable doesn't work yet
+ApplyPatch imon-default-proto-modparam.patch
+
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
@@ -1544,6 +1581,16 @@ ApplyPatch orinoco-initialise-priv_hw-before-assigning-the-interrupt.patch
 
 # rhbz#637619
 ApplyPatch net-AF_PACKET-vmalloc.patch
+
+# rhbz#667459
+ApplyPatch mac80211-fix-hard-lockup-in-sta_addba_resp_timer_expired.patch
+
+# rhbz#652744
+ApplyPatch e1000e-cleanup-e1000_sw_lcd_config_ich8lan.patch
+ApplyPatch e1000e-82566DC-fails-to-get-link.patch
+
+# CVE-2010-4668
+ApplyPatch block-check-for-proper-length-of-iov-entries-earlier-in-blk_rq_map_user_iov.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1795,7 +1842,7 @@ BuildKernel() {
     rm -f modinfo modnames
 
     # remove files that will be auto generated by depmod at rpm -i time
-    for i in alias alias.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap
+    for i in alias alias.bin builtin.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap
     do
       rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$i
     done
@@ -2131,7 +2178,20 @@ fi
 # and build.
 
 %changelog
-* Mon Jan 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+* Mon Jan 10 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-77
+- Add support for local rebuild config option overrides
+- Add missing --with/--without pae build flag support
+- Restore imon mce default proto modparam, since ir-keytable currently
+  won't work with the 2.6.35.x input layer ioctls
+- mac80211 fix for hard lockup in sta_addba_resp_timer_expired (sgruszka, #667459)
+
+* Mon Jan 10 2011 Chuck Ebbert <cebbert@redhat.com>
+- CVE-2010-4668: kernel panic with 0-length IOV
+
+* Thu Jan 06 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix failure to get link with e1000e model 82576DC (#652744)
+
+* Thu Jan  6 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1 Mon Jan 10
 - Respin with 2.6.35-libre3.
 
 * Wed Jan 05 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-76
