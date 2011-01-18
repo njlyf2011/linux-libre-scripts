@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        4
+Version:        5
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -97,6 +97,7 @@ Conflicts: libertas-sd8686-firmware
 Conflicts: libertas-usb8388-firmware
 Conflicts: linux-firmware
 Conflicts: midisport-firmware
+Conflicts: netxen-firmware
 Conflicts: ql2100-firmware
 Conflicts: ql2200-firmware
 Conflicts: ql23xx-firmware
@@ -150,6 +151,9 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Tue Jan 18 2011 Alexandre Oliva <lxoliva@fsfla.org> - 5-1
+- Conflict with netxen-firmware.
+
 * Fri Jan  7 2011 Alexandre Oliva <lxoliva@fsfla.org> - 4-1
 - Conflict with iwl6000g2b-firmware.
 
