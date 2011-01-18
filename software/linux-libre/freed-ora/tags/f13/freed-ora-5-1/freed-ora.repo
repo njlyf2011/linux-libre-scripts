@@ -1,0 +1,17 @@
+[freed-ora]
+name=Linux-libre Freed-ora $releasever - Released builds
+baseurl=http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/F-$releasever
+	http://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/F-$releasever
+        http://www.lsd.ic.unicamp.br/~oliva/fsfla/linux-libre/freed-ora/F-$releasever
+enabled=1
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-freed-ora-linux-libre
+
+[freed-ora-debuginfo]
+name=Linux-libre Freed-ora $releasever - Released builds - Debug
+baseurl=http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/F-$releasever
+enabled=0
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-freed-ora-linux-libre
