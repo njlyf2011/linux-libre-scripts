@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 77
+%global baserelease 79
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -741,12 +741,15 @@ Patch2201: linux-2.6-firewire-git-pending.patch
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
+# Drop-in backport of upstream vzalloc additions, used by the v4l/dvb bits
+Patch2805: linux-2.6-vzalloc.patch
+
 # media patches
 Patch2899: linux-2.6-v4l-dvb-update.patch
 Patch2900: linux-2.6-v4l-dvb-fixes.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2917: hdpvr-ir-enable.patch
 Patch2918: imon-default-proto-modparam.patch
+Patch2919: linux-2.6-v4l-dvb-build-lirc.patch
 
 Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
@@ -843,6 +846,12 @@ Patch13701: e1000e-82566DC-fails-to-get-link.patch
 
 # CVE-2010-4668
 Patch13702: block-check-for-proper-length-of-iov-entries-earlier-in-blk_rq_map_user_iov.patch
+
+# RHBZ #669511
+Patch13703: btrfs-fix-typo-in-fallocate-to-make-it-honor-actual-size.patch
+
+# rhbz#643758
+Patch13704: hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
 
 %endif
 
@@ -1346,6 +1355,9 @@ ApplyPatch btrfs-fix-error-handling-in-btrfs_get_sub.patch
 ApplyPatch btrfs-setup-blank-root-and-fs_info-for-mount-time.patch
 ApplyPatch btrfs-fix-race-between-btrfs_get_sb-and-unmount.patch
 
+# RHBZ #669511
+ApplyPatch btrfs-fix-typo-in-fallocate-to-make-it-honor-actual-size.patch
+
 # eCryptfs
 
 # NFSv4
@@ -1475,8 +1487,8 @@ ApplyPatch efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 
-# enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
-ApplyPatch hdpvr-ir-enable.patch
+# Backport of upstream vzalloc functions, used by the v4l/dvb bits
+ApplyPatch linux-2.6-vzalloc.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
@@ -1486,6 +1498,10 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 # one-off non-upstream patch, since ir-keytable doesn't work yet
 ApplyPatch imon-default-proto-modparam.patch
+
+# enable building lirc separate from the v4l-dvb update,
+# because I keep forgetting to manually add the bits back
+ApplyPatch linux-2.6-v4l-dvb-build-lirc.patch
 
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
@@ -1591,6 +1607,9 @@ ApplyPatch e1000e-82566DC-fails-to-get-link.patch
 
 # CVE-2010-4668
 ApplyPatch block-check-for-proper-length-of-iov-entries-earlier-in-blk_rq_map_user_iov.patch
+
+# rhbz#643758
+ApplyPatch hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2178,6 +2197,21 @@ fi
 # and build.
 
 %changelog
+* Tue Jan 18 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-79
+- Generally, its a good idea to actually apply the patches you were
+  intending to include in the build, and enable their Kconfig options
+
+* Tue Jan 18 2011 Kyle McMartin <kmcmartin@redhat.com>
+- sgruszka: hostap_cs: fix sleeping function called in invalid
+  context (#643758)
+
+* Tue Jan 18 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-78
+- Rebase v4l/dvb/rc bits to 2.6.38-rc1 code
+- Fix lirc_serial transmit (#658600)
+
+* Sun Jan 16 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix wrong file allocation size in btrfs (#669511)
+
 * Mon Jan 10 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-77
 - Add support for local rebuild config option overrides
 - Add missing --with/--without pae build flag support
