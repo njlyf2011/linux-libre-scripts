@@ -1,0 +1,265 @@
+Not yet upstream, willl send RSN...
+
+--jarod
+
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Wed Jan 19 16:49:19 2011 -0500
+
+    lirc_zilog: wait a bit after firmware upload
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Wed Jan 19 16:10:14 2011 -0500
+
+    hdpvr: fix up i2c device registration
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Tue Jan 18 15:31:24 2011 -0500
+
+    rc/streamzap: timeout needs to be in NS
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Tue Jan 18 00:27:45 2011 -0500
+
+    rc/mce: add mappings for missing keys
+
+    Per http://mediacenterguides.com/book/export/html/31 and investigation
+    by Erin, we were missing these last three mappings to complete the mce
+    key table. Lets remedy that.
+
+    Reported-by: Erin Simonds <fisslefink@gmail.com>
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Wed Jan 5 10:16:13 2011 -0500
+
+    rc/ir-lirc-codec: add back debug spew
+
+    Some occasionally useful debug spew disappeared as part of a feature
+    update a while back, and I'm finding myself in need of it again to help
+    diagnose some issues.
+
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+
+diff --git a/drivers/media/rc/ir-lirc-codec.c b/drivers/media/rc/ir-lirc-codec.c
+index f011c5d..31a98e2 100644
+--- a/drivers/media/rc/ir-lirc-codec.c
++++ b/drivers/media/rc/ir-lirc-codec.c
+@@ -1,4 +1,4 @@
+-/* ir-lirc-codec.c - ir-core to classic lirc interface bridge
++/* ir-lirc-codec.c - rc-core to classic lirc interface bridge
+  *
+  * Copyright (C) 2010 by Jarod Wilson <jarod@redhat.com>
+  *
+@@ -47,6 +47,7 @@ static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 	/* Carrier reports */
+ 	if (ev.carrier_report) {
+ 		sample = LIRC_FREQUENCY(ev.carrier);
++		IR_dprintk(2, "carrier report (freq: %d)\n", sample);
+ 
+ 	/* Packet end */
+ 	} else if (ev.timeout) {
+@@ -62,6 +63,7 @@ static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 			return 0;
+ 
+ 		sample = LIRC_TIMEOUT(ev.duration / 1000);
++		IR_dprintk(2, "timeout report (duration: %d)\n", sample);
+ 
+ 	/* Normal sample */
+ 	} else {
+@@ -85,6 +87,8 @@ static int ir_lirc_decode(struct rc_dev *dev, struct ir_raw_event ev)
+ 
+ 		sample = ev.pulse ? LIRC_PULSE(ev.duration / 1000) :
+ 					LIRC_SPACE(ev.duration / 1000);
++		IR_dprintk(2, "delivering %uus %s to lirc_dev\n",
++			   TO_US(ev.duration), TO_STR(ev.pulse));
+ 	}
+ 
+ 	lirc_buffer_write(dev->raw->lirc.drv->rbuf,
+diff --git a/drivers/media/rc/keymaps/rc-rc6-mce.c b/drivers/media/rc/keymaps/rc-rc6-mce.c
+index 3bf3337..2f5dc06 100644
+--- a/drivers/media/rc/keymaps/rc-rc6-mce.c
++++ b/drivers/media/rc/keymaps/rc-rc6-mce.c
+@@ -3,6 +3,9 @@
+  *
+  * Copyright (c) 2010 by Jarod Wilson <jarod@redhat.com>
+  *
++ * See http://mediacenterguides.com/book/export/html/31 for details on
++ * key mappings.
++ *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation; either version 2 of the License, or
+@@ -60,6 +63,9 @@ static struct rc_map_table rc6_mce[] = {
+ 	{ 0x800f0426, KEY_EPG },		/* Guide */
+ 	{ 0x800f0427, KEY_ZOOM },		/* Aspect */
+ 
++	{ 0x800f0432, KEY_MODE },		/* Visualization */
++	{ 0x800f0433, KEY_PRESENTATION },	/* Slide Show */
++	{ 0x800f0434, KEY_EJECTCD },
+ 	{ 0x800f043a, KEY_BRIGHTNESSUP },
+ 
+ 	{ 0x800f0446, KEY_TV },
+diff --git a/drivers/media/rc/streamzap.c b/drivers/media/rc/streamzap.c
+index 6e2911c..1b013d4 100644
+--- a/drivers/media/rc/streamzap.c
++++ b/drivers/media/rc/streamzap.c
+@@ -430,7 +430,7 @@ static int __devinit streamzap_probe(struct usb_interface *intf,
+ 	sz->decoder_state = PulseSpace;
+ 	/* FIXME: don't yet have a way to set this */
+ 	sz->timeout_enabled = true;
+-	sz->rdev->timeout = (((SZ_TIMEOUT * SZ_RESOLUTION * 1000) &
++	sz->rdev->timeout = ((MS_TO_NS(SZ_TIMEOUT * SZ_RESOLUTION) &
+ 				IR_MAX_DURATION) | 0x03000000);
+ 	#if 0
+ 	/* not yet supported, depends on patches from maxim */
+diff --git a/drivers/media/video/hdpvr/hdpvr-core.c b/drivers/media/video/hdpvr/hdpvr-core.c
+index a6572e5..263e2fa 100644
+--- a/drivers/media/video/hdpvr/hdpvr-core.c
++++ b/drivers/media/video/hdpvr/hdpvr-core.c
+@@ -381,13 +381,21 @@ static int hdpvr_probe(struct usb_interface *interface,
+ #if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
+ 	retval = hdpvr_register_i2c_adapter(dev);
+ 	if (retval < 0) {
+-		v4l2_err(&dev->v4l2_dev, "registering i2c adapter failed\n");
++		v4l2_err(&dev->v4l2_dev, "i2c adapter register failed\n");
+ 		goto error;
+ 	}
+ 
+-	retval = hdpvr_register_i2c_ir(dev);
+-	if (retval < 0)
+-		v4l2_err(&dev->v4l2_dev, "registering i2c IR devices failed\n");
++	hdpvr_register_ir_rx_i2c(dev);
++	if (!dev->i2c_rx) {
++		v4l2_err(&dev->v4l2_dev, "i2c IR RX device register failed\n");
++		goto rx_reg_fail;
++	}
++
++	hdpvr_register_ir_tx_i2c(dev);
++	if (!dev->i2c_tx) {
++		v4l2_err(&dev->v4l2_dev, "i2c IR TX device register failed\n");
++		goto tx_reg_fail;
++	}
+ #endif
+ 
+ 	/* let the user know what node this device is now attached to */
+@@ -395,6 +403,10 @@ static int hdpvr_probe(struct usb_interface *interface,
+ 		  video_device_node_name(dev->video_dev));
+ 	return 0;
+ 
++tx_reg_fail:
++	i2c_unregister_device(dev->i2c_rx);
++rx_reg_fail:
++	i2c_del_adapter(&dev->i2c_adapter);
+ error:
+ 	if (dev) {
+ 		/* Destroy single thread */
+diff --git a/drivers/media/video/hdpvr/hdpvr-i2c.c b/drivers/media/video/hdpvr/hdpvr-i2c.c
+index 89b71fa..e891bb0 100644
+--- a/drivers/media/video/hdpvr/hdpvr-i2c.c
++++ b/drivers/media/video/hdpvr/hdpvr-i2c.c
+@@ -31,26 +31,39 @@
+ #define Z8F0811_IR_RX_I2C_ADDR	0x71
+ 
+ 
+-static struct i2c_board_info hdpvr_i2c_board_info = {
++static struct i2c_board_info hdpvr_ir_tx_i2c_board_info = {
+ 	I2C_BOARD_INFO("ir_tx_z8f0811_hdpvr", Z8F0811_IR_TX_I2C_ADDR),
++};
++
++void hdpvr_register_ir_tx_i2c(struct hdpvr_device *dev)
++{
++	struct IR_i2c_init_data *init_data = &dev->ir_i2c_init_data;
++
++	init_data->name = "HD-PVR";
++	hdpvr_ir_tx_i2c_board_info.platform_data = init_data;
++
++	dev->i2c_tx = i2c_new_device(&dev->i2c_adapter,
++				     &hdpvr_ir_tx_i2c_board_info);
++}
++
++static struct i2c_board_info hdpvr_ir_rx_i2c_board_info = {
+ 	I2C_BOARD_INFO("ir_rx_z8f0811_hdpvr", Z8F0811_IR_RX_I2C_ADDR),
+ };
+ 
+-int hdpvr_register_i2c_ir(struct hdpvr_device *dev)
++void hdpvr_register_ir_rx_i2c(struct hdpvr_device *dev)
+ {
+-	struct i2c_client *c;
+ 	struct IR_i2c_init_data *init_data = &dev->ir_i2c_init_data;
+ 
+ 	/* Our default information for ir-kbd-i2c.c to use */
+ 	init_data->ir_codes = RC_MAP_HAUPPAUGE_NEW;
+ 	init_data->internal_get_key_func = IR_KBD_GET_KEY_HAUP_XVR;
+ 	init_data->type = RC_TYPE_RC5;
+-	init_data->name = "HD PVR";
+-	hdpvr_i2c_board_info.platform_data = init_data;
+-
+-	c = i2c_new_device(&dev->i2c_adapter, &hdpvr_i2c_board_info);
++	init_data->name = "HD-PVR";
++	init_data->polling_interval = 260; /* matches lirc_zilog */
++	hdpvr_ir_rx_i2c_board_info.platform_data = init_data;
+ 
+-	return (c == NULL) ? -ENODEV : 0;
++	dev->i2c_rx = i2c_new_device(&dev->i2c_adapter,
++				     &hdpvr_ir_rx_i2c_board_info);
+ }
+ 
+ static int hdpvr_i2c_read(struct hdpvr_device *dev, int bus,
+diff --git a/drivers/media/video/hdpvr/hdpvr.h b/drivers/media/video/hdpvr/hdpvr.h
+index ee74e3b..29357f0 100644
+--- a/drivers/media/video/hdpvr/hdpvr.h
++++ b/drivers/media/video/hdpvr/hdpvr.h
+@@ -108,6 +108,9 @@ struct hdpvr_device {
+ 
+ 	/* I2C adapter */
+ 	struct i2c_adapter	i2c_adapter;
++	/* I2C clients */
++	struct i2c_client	*i2c_rx;
++	struct i2c_client	*i2c_tx;
+ 	/* I2C lock */
+ 	struct mutex		i2c_mutex;
+ 	/* I2C message buffer space */
+@@ -313,7 +316,8 @@ int hdpvr_cancel_queue(struct hdpvr_device *dev);
+ /* i2c adapter registration */
+ int hdpvr_register_i2c_adapter(struct hdpvr_device *dev);
+ 
+-int hdpvr_register_i2c_ir(struct hdpvr_device *dev);
++void hdpvr_register_ir_rx_i2c(struct hdpvr_device *dev);
++void hdpvr_register_ir_tx_i2c(struct hdpvr_device *dev);
+ 
+ /*========================================================================*/
+ /* buffer management */
+diff --git a/drivers/staging/lirc/lirc_zilog.c b/drivers/staging/lirc/lirc_zilog.c
+index 3fe5f41..6422e26 100644
+--- a/drivers/staging/lirc/lirc_zilog.c
++++ b/drivers/staging/lirc/lirc_zilog.c
+@@ -503,7 +503,7 @@ static int send_boot_data(struct IR_tx *tx)
+ 	if (ret != 0)
+ 		return ret;
+ 
+-	/* kick it off? */
++	/* Hit the go button to activate the new boot data */
+ 	buf[0] = 0x00;
+ 	buf[1] = 0x20;
+ 	ret = i2c_master_send(tx->c, buf, 2);
+@@ -511,6 +511,14 @@ static int send_boot_data(struct IR_tx *tx)
+ 		zilog_error("i2c_master_send failed with %d\n", ret);
+ 		return ret < 0 ? ret : -EFAULT;
+ 	}
++
++	/*
++	 * Wait for zilog to settle after hitting go post boot block upload.
++	 * Without this delay, the HD-PVR and HVR-1950 both return an -EIO
++	 * upon attempting to get firmware revision, and tx probe thus fails.
++	 */
++	mdelay(20);
++
+ 	ret = i2c_master_send(tx->c, buf, 1);
+ 	if (ret != 1) {
+ 		zilog_error("i2c_master_send failed with %d\n", ret);
