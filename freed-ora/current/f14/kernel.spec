@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 80
+%global baserelease 81
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -750,6 +750,7 @@ Patch2900: linux-2.6-v4l-dvb-fixes.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2918: imon-default-proto-modparam.patch
 Patch2919: linux-2.6-v4l-dvb-build-lirc.patch
+Patch2920: linux-2.6-v4l-dvb-backport-reverts.patch
 
 Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
@@ -1503,6 +1504,11 @@ ApplyPatch imon-default-proto-modparam.patch
 # because I keep forgetting to manually add the bits back
 ApplyPatch linux-2.6-v4l-dvb-build-lirc.patch
 
+# A few bits have to be reverted so things actually build,
+# and in order to quit forgetting them, split them into their
+# own patch
+ApplyPatch linux-2.6-v4l-dvb-backport-reverts.patch
+
 # bz #575873
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
@@ -2197,6 +2203,10 @@ fi
 # and build.
 
 %changelog
+* Tue Jan 25 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-81
+- Further improvements to ir-kbd-i2c when used with zilog chips
+- Finally hopefully fix annoying mceusb keybounce issue
+
 * Wed Jan 19 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-80
 - Make lirc_zilog behave correctly with hdpvr again, and for the first
   time ever, with pvrusb2-driven HVR-1950 (#635045)
