@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        5
+Version:        6
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -84,6 +84,7 @@ Conflicts: ipw2100-firmware
 Conflicts: ipw2200-firmware
 Conflicts: iscan-firmware
 Conflicts: ivtv-firmware
+Conflicts: iwl100-firmware
 Conflicts: iwl1000-firmware
 Conflicts: iwl3945-firmware
 Conflicts: iwl4965-firmware
@@ -151,6 +152,9 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Mon Feb  7 2011 Alexandre Oliva <lxoliva@fsfla.org> - 6-1
+- Conflict with iwl100-firmware.
+
 * Tue Jan 18 2011 Alexandre Oliva <lxoliva@fsfla.org> - 5-1
 - Conflict with netxen-firmware.
 
