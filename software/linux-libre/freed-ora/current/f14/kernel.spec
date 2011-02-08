@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 81
+%global baserelease 83
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -74,7 +74,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -788,8 +788,6 @@ Patch12585: sched-25-move-sched_avg_update-to-update_cpu_load.patch
 Patch12590: sched-30-sched-fix-nohz-balance-kick.patch
 Patch12595: sched-35-increment-cache_nice_tries-only-on-periodic-lb.patch
 
-Patch12597: sched-cure-more-NO_HZ-load-average-woes.patch
-
 Patch13600: btusb-macbookpro-6-2.patch
 Patch13601: btusb-macbookpro-7-1.patch
 Patch13602: add-macbookair3-ids.patch
@@ -816,8 +814,6 @@ Patch13652: fix-i8k-inline-asm.patch
 Patch13653: inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
 Patch13654: netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
 
-Patch13658: posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
-
 Patch13660: rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
 Patch13661: rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
 
@@ -839,8 +835,6 @@ Patch13697: fs-call-security_d_instantiate-in-d_obtain_alias.patch
 
 Patch13698: net-AF_PACKET-vmalloc.patch
 
-Patch13699: mac80211-fix-hard-lockup-in-sta_addba_resp_timer_expired.patch
-
 # rhbz#652744
 Patch13700: e1000e-cleanup-e1000_sw_lcd_config_ich8lan.patch
 Patch13701: e1000e-82566DC-fails-to-get-link.patch
@@ -853,6 +847,9 @@ Patch13703: btrfs-fix-typo-in-fallocate-to-make-it-honor-actual-size.patch
 
 # rhbz#643758
 Patch13704: hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
+
+# rhbz #673207
+Patch13705: sunrpc-kernel-panic-when-mount-nfsv4.patch
 
 %endif
 
@@ -1546,9 +1543,6 @@ ApplyPatch sched-25-move-sched_avg_update-to-update_cpu_load.patch
 ApplyPatch sched-30-sched-fix-nohz-balance-kick.patch
 ApplyPatch sched-35-increment-cache_nice_tries-only-on-periodic-lb.patch
 
-# rhbz#650934
-ApplyPatch sched-cure-more-NO_HZ-load-average-woes.patch
-
 ApplyPatch btusb-macbookpro-7-1.patch
 ApplyPatch btusb-macbookpro-6-2.patch
 
@@ -1584,9 +1578,6 @@ ApplyPatch fix-i8k-inline-asm.patch
 ApplyPatch inet_diag-make-sure-we-run-the-same-bytecode-we-audited.patch
 ApplyPatch netlink-make-nlmsg_find_attr-take-a-const-ptr.patch
 
-# rhbz#656264
-ApplyPatch posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
-
 ApplyPatch rtl8180-improve-signal-reporting-for-rtl8185-hardware.patch
 ApplyPatch rtl8180-improve-signal-reporting-for-actual-rtl8180-hardware.patch
 
@@ -1604,9 +1595,6 @@ ApplyPatch orinoco-initialise-priv_hw-before-assigning-the-interrupt.patch
 # rhbz#637619
 ApplyPatch net-AF_PACKET-vmalloc.patch
 
-# rhbz#667459
-ApplyPatch mac80211-fix-hard-lockup-in-sta_addba_resp_timer_expired.patch
-
 # rhbz#652744
 ApplyPatch e1000e-cleanup-e1000_sw_lcd_config_ich8lan.patch
 ApplyPatch e1000e-82566DC-fails-to-get-link.patch
@@ -1616,6 +1604,9 @@ ApplyPatch block-check-for-proper-length-of-iov-entries-earlier-in-blk_rq_map_us
 
 # rhbz#643758
 ApplyPatch hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
+
+# rhbz #673207
+ApplyPatch sunrpc-kernel-panic-when-mount-nfsv4.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2203,6 +2194,25 @@ fi
 # and build.
 
 %changelog
+* Mon Feb  7 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.35.11.
+
+* Sun Feb 06 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.35.11-83
+- Linux 2.6.35.11
+
+* Tue Feb 01 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.35.11-82.rc1
+- Linux 2.6.35.11-rc1
+- Revert patches we already have in the big v4l update:
+    gspca-sonixj-add-a-flag-in-the-driver_info-table.patch
+    gspca-sonixj-set-the-flag-for-some-devices.patch
+- Comment out patches merged upstream:
+    sched-cure-more-NO_HZ-load-average-woes.patch
+    posix-cpu-timers-workaround-to-suppress-problems-with-mt-exec.patch
+    mac80211-fix-hard-lockup-in-sta_addba_resp_timer_expired.patch
+
+* Sun Jan 30 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix oops in sunrpc code (#673207)
+
 * Tue Jan 25 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.10-81
 - Further improvements to ir-kbd-i2c when used with zilog chips
 - Finally hopefully fix annoying mceusb keybounce issue
