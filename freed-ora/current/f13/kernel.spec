@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 67
+%global baserelease 68
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -672,6 +672,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch392: linux-2.6-acpi-video-export-edid.patch
 Patch393: acpi-ec-add-delay-before-write.patch
+Patch394: linux-2.6-acpi-fix-alias.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -739,6 +740,7 @@ Patch1904: drm-nouveau-ibdma-race.patch
 Patch1905: drm-radeon-kms-mc-vram-map-needs-to-be-gteq-pci-aperature.patch
 # CVE-2010-2962
 Patch1906: drm-i915-sanity-check-pread-pwrite.patch
+Patch1907: drm-intel-fix-sandybridge.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -908,6 +910,9 @@ Patch13945: tcp-protect-sysctl_tcp_cookie_size-reads.patch
 
 # rhbz#673207 (f14)
 Patch13950: sunrpc-kernel-panic-when-mount-nfsv4.patch
+
+# rhbz#650151
+Patch13951: bridge-fix-mglist-corruption-that-leads-to-memory-corruption.patch
 
 %endif
 
@@ -1416,6 +1421,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-video-export-edid.patch
 ApplyPatch acpi-ec-add-delay-before-write.patch
+ApplyPatch linux-2.6-acpi-fix-alias.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1531,6 +1537,7 @@ ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-explosion-following-oom-in-do_execbuffer.patch
 # broken in 2.6.35-rc2, fixed in 2.6.35, but our drm-next snapshot has the bug
 ApplyPatch agp-intel-use-the-correct-mask-to-detect-i830-aperture-size.patch
+ApplyPatch drm-intel-fix-sandybridge.patch
 
 ApplyPatch drm-radeon-resume-fixes.patch
 # rhbz#632310
@@ -1731,6 +1738,9 @@ ApplyPatch tcp-protect-sysctl_tcp_cookie_size-reads.patch
 
 # rhbz#673207 (f14)
 ApplyPatch sunrpc-kernel-panic-when-mount-nfsv4.patch
+
+# rhbz#650151
+ApplyPatch bridge-fix-mglist-corruption-that-leads-to-memory-corruption.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2351,8 +2361,20 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 
-
 %changelog
+* Mon Feb 14 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.34.8-68
+- Backport commits from longterm-2.6.35.y to 'fix' Intel Sandy Bridge
+  chipsets. (Requested by Intel folks.)
+
+* Sat Feb 12 2011 Chuck Ebbert <cebbert@redhat.com>
+- bridge: Fix mglist corruption that leads to memory corruption (#650151)
+
+* Wed Feb 09 2011 Matthew Garrett <mjg@redhat.com>
+- linux-2.6-acpi-fix-alias.patch: fix ACPI object aliasing (#608648)
+
+* Mon Feb  7 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.34.8.
+
 * Sat Feb 05 2011 Chuck Ebbert <cebbert@redhat.com>
 - Linux 2.6.34.8
 - Drop merged patches:
