@@ -1,0 +1,14 @@
+diff --git a/kernel/softlockup.c b/kernel/softlockup.c
+index 4b493f6..ada1fcd 100644
+--- a/kernel/softlockup.c
++++ b/kernel/softlockup.c
+@@ -187,7 +187,9 @@ static int watchdog(void *__bind_cpu)
+ {
+ 	struct sched_param param = { .sched_priority = MAX_RT_PRIO-1 };
+ 
++	rcu_read_lock();
+ 	sched_setscheduler(current, SCHED_FIFO, &param);
++	rcu_read_unlock();
+ 
+ 	/* initialize timestamp */
+ 	__touch_softlockup_watchdog();
