@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 6a29b82..422043a 100644
+index 34f5c21..9843b62 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -23704,7 +23704,7 @@ index 6acc6cb..20fde19 100644
  
  	/* Set the I/O base address */
 diff --git a/arch/mips/lib/delay.c b/arch/mips/lib/delay.c
-index 6b3b1de..5995969 100644
+index 6b3b1de9..5995969 100644
 --- a/arch/mips/lib/delay.c
 +++ b/arch/mips/lib/delay.c
 @@ -41,7 +41,7 @@ EXPORT_SYMBOL(__delay);
@@ -26353,10 +26353,10 @@ index 0000000..1f88791
 +device_initcall(rtc_cmos_init);
 diff --git a/arch/mips/loongson/common/serial.c b/arch/mips/loongson/common/serial.c
 new file mode 100644
-index 0000000..23b66a5
+index 0000000..d35512c
 --- /dev/null
 +++ b/arch/mips/loongson/common/serial.c
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,80 @@
 +/*
 + * This file is subject to the terms and conditions of the GNU General Public
 + * License.  See the file "COPYING" in the main directory of this archive
@@ -26433,6 +26433,10 @@ index 0000000..23b66a5
 +}
 +
 +device_initcall(serial_init);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("liu shiwei <liushiwei@anheng.com.cn>");
++MODULE_DESCRIPTION("loongson serial");
 diff --git a/arch/mips/loongson/common/setup.c b/arch/mips/loongson/common/setup.c
 index 4cd2aa9..27d826b 100644
 --- a/arch/mips/loongson/common/setup.c
@@ -76301,10 +76305,10 @@ index 0000000..4e36930
 +MODULE_DESCRIPTION("PCMCIA Socket Services for MyCable XXS1500 systems");
 +MODULE_AUTHOR("Manuel Lauss");
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 66c2d6a..32558ec 100644
+index 2ac43f0..2f96d23 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -691,7 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -692,7 +692,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	 */
  #if	defined(CONFIG_ATARI)
  	address_space = 64;
@@ -76314,7 +76318,7 @@ index 66c2d6a..32558ec 100644
  	address_space = 128;
  #else
  #warning Assuming 128 bytes of RTC+NVRAM address space, not 64 bytes.
-@@ -757,9 +758,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -758,9 +759,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME teach the alarm code how to handle binary mode;
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -76327,10 +76331,10 @@ index 66c2d6a..32558ec 100644
  		goto cleanup1;
  	}
 diff --git a/drivers/serial/8250.c b/drivers/serial/8250.c
-index 5ed1b82..10e33ac 100644
+index 6a451e8..ddd955a 100644
 --- a/drivers/serial/8250.c
 +++ b/drivers/serial/8250.c
-@@ -1217,12 +1217,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
+@@ -1218,12 +1218,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
  	}
  #endif
  
@@ -76343,7 +76347,7 @@ index 5ed1b82..10e33ac 100644
  	serial_outp(up, UART_LCR, save_lcr);
  
  	if (up->capabilities != uart_config[up->port.type].flags) {
-@@ -2428,7 +2422,7 @@ serial8250_pm(struct uart_port *port, unsigned int state,
+@@ -2429,7 +2423,7 @@ serial8250_pm(struct uart_port *port, unsigned int state,
  static unsigned int serial8250_port_size(struct uart_8250_port *pt)
  {
  	if (pt->port.iotype == UPIO_AU)
@@ -76352,7 +76356,7 @@ index 5ed1b82..10e33ac 100644
  #ifdef CONFIG_ARCH_OMAP
  	if (is_omap_port(pt))
  		return 0x16 << pt->port.regshift;
-@@ -2585,6 +2579,13 @@ static void serial8250_config_port(struct uart_port *port, int flags)
+@@ -2586,6 +2580,13 @@ static void serial8250_config_port(struct uart_port *port, int flags)
  
  	if (flags & UART_CONFIG_TYPE)
  		autoconfig(up, probeflags);
@@ -79143,7 +79147,7 @@ index 0000000..9872297
 +	void(*error)(char *x));
 +#endif
 diff --git a/init/Kconfig b/init/Kconfig
-index eb4b337..da6c4dd 100644
+index 0d6388a..190b09d 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
 @@ -115,10 +115,13 @@ config HAVE_KERNEL_BZIP2
