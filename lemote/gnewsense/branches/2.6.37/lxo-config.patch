@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-01-06 06:06:16.000000000 +0000
-+++ Makefile	2011-01-06 06:06:18.000000000 +0000
+--- Makefile.orig	2011-02-18 19:50:55.000000000 +0000
++++ Makefile	2011-02-18 19:50:59.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 37
--EXTRAVERSION =-libre
-+EXTRAVERSION =-libre-lemote
+-EXTRAVERSION = .1-libre
++EXTRAVERSION = .1-libre-lemote
  NAME = Flesh-Eating Bats with Fangs
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-01-06 06:43:39.000000000 +0000
-@@ -0,0 +1,3757 @@
++++ .config	2011-02-18 19:57:16.000000000 +0000
+@@ -0,0 +1,3770 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux/mips 2.6.37-libre-lemote Kernel Configuration
-+# Thu Jan  6 06:43:39 2011
++# Linux/mips 2.6.37.1-libre-lemote Kernel Configuration
++# Fri Feb 18 19:57:16 2011
 +#
 +CONFIG_MIPS=y
 +
@@ -79,7 +79,6 @@ Index: .config
 +CONFIG_CS5536_EHCI=y
 +CONFIG_CS5536_AUDIO=y
 +CONFIG_LOONGSON_SUSPEND=y
-+CONFIG_LOONGSON_UART_BASE=y
 +CONFIG_LOONGSON_MC146818=y
 +CONFIG_RWSEM_GENERIC_SPINLOCK=y
 +# CONFIG_ARCH_HAS_ILOG2_U32 is not set
@@ -187,6 +186,7 @@ Index: .config
 +#
 +# General setup
 +#
++# CONFIG_SCHED_BFS is not set
 +CONFIG_EXPERIMENTAL=y
 +CONFIG_BROKEN_ON_SMP=y
 +CONFIG_LOCK_KERNEL=y
@@ -241,14 +241,25 @@ Index: .config
 +CONFIG_IKCONFIG=y
 +CONFIG_IKCONFIG_PROC=y
 +CONFIG_LOG_BUF_SHIFT=15
-+# CONFIG_CGROUPS is not set
++CONFIG_CGROUPS=y
++# CONFIG_CGROUP_DEBUG is not set
++# CONFIG_CGROUP_NS is not set
++# CONFIG_CGROUP_FREEZER is not set
++# CONFIG_CGROUP_DEVICE is not set
++# CONFIG_CPUSETS is not set
++# CONFIG_CGROUP_CPUACCT is not set
++# CONFIG_RESOURCE_COUNTERS is not set
++CONFIG_CGROUP_SCHED=y
++CONFIG_FAIR_GROUP_SCHED=y
++# CONFIG_RT_GROUP_SCHED is not set
++# CONFIG_BLK_CGROUP is not set
 +CONFIG_NAMESPACES=y
 +CONFIG_UTS_NS=y
 +CONFIG_IPC_NS=y
 +CONFIG_USER_NS=y
 +CONFIG_PID_NS=y
 +CONFIG_NET_NS=y
-+# CONFIG_SCHED_AUTOGROUP is not set
++CONFIG_SCHED_AUTOGROUP=y
 +# CONFIG_SYSFS_DEPRECATED is not set
 +# CONFIG_RELAY is not set
 +CONFIG_BLK_DEV_INITRD=y
@@ -838,6 +849,7 @@ Index: .config
 +CONFIG_NET_CLS_RSVP=m
 +CONFIG_NET_CLS_RSVP6=m
 +CONFIG_NET_CLS_FLOW=m
++# CONFIG_NET_CLS_CGROUP is not set
 +CONFIG_NET_EMATCH=y
 +CONFIG_NET_EMATCH_STACK=32
 +CONFIG_NET_EMATCH_CMP=m
@@ -1968,6 +1980,7 @@ Index: .config
 +# CONFIG_I2C_ELEKTOR is not set
 +# CONFIG_I2C_PCA_ISA is not set
 +# CONFIG_I2C_STUB is not set
++# CONFIG_SCx200_ACB is not set
 +# CONFIG_I2C_DEBUG_CORE is not set
 +# CONFIG_I2C_DEBUG_ALGO is not set
 +# CONFIG_I2C_DEBUG_BUS is not set
