@@ -1,8 +1,8 @@
 diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 8dd7248..1e02f1f 100644
+index 48128ed..3cca190 100644
 --- a/Documentation/kernel-parameters.txt
 +++ b/Documentation/kernel-parameters.txt
-@@ -1610,6 +1610,8 @@ and is between 256 and 4096 characters. It is defined in the file
+@@ -1611,6 +1611,8 @@ and is between 256 and 4096 characters. It is defined in the file
  	noapic		[SMP,APIC] Tells the kernel to not make use of any
  			IOAPICs that may be present in the system.
  
@@ -427,7 +427,7 @@ index 3894eaa..61e1b65 100644
  
  The file rtsig-max can be used to tune the maximum number
 diff --git a/Makefile b/Makefile
-index dafd22a..deddfc9 100644
+index d831b48..f3a3a89 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -229,8 +229,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -513,7 +513,7 @@ index 63944a1..85558ff 100644
  CONFIG_CRYPTO_AUTHENC=m
  CONFIG_CRYPTO_CCM=m
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
-index f7033f3..4848be65 100644
+index f7033f3..a6f7fd6 100644
 --- a/arch/mips/configs/lemote2f_defconfig
 +++ b/arch/mips/configs/lemote2f_defconfig
 @@ -1,27 +1,28 @@
@@ -962,7 +962,7 @@ index f7033f3..4848be65 100644
  CONFIG_DM_CRYPT=m
  CONFIG_DM_SNAPSHOT=m
  CONFIG_DM_MIRROR=m
-@@ -140,55 +462,202 @@ CONFIG_DM_MULTIPATH_QL=m
+@@ -140,55 +462,201 @@ CONFIG_DM_MULTIPATH_QL=m
  CONFIG_DM_MULTIPATH_ST=m
  CONFIG_DM_DELAY=m
  CONFIG_DM_UEVENT=y
@@ -1070,7 +1070,6 @@ index f7033f3..4848be65 100644
 +CONFIG_PHONE=m
 +CONFIG_PHONE_IXJ=m
 +CONFIG_INPUT_EVDEV=m
-+CONFIG_KEYBOARD_ATKBD=m
 +CONFIG_KEYBOARD_LKKBD=m
 +CONFIG_KEYBOARD_GPIO=m
 +CONFIG_KEYBOARD_MATRIX=m
@@ -1181,7 +1180,7 @@ index f7033f3..4848be65 100644
  CONFIG_USB_GSPCA_SN9C20X=m
  CONFIG_USB_GSPCA_SONIXB=m
  CONFIG_USB_GSPCA_SONIXJ=m
-@@ -198,30 +667,77 @@ CONFIG_USB_GSPCA_SPCA505=m
+@@ -198,30 +666,77 @@ CONFIG_USB_GSPCA_SPCA505=m
  CONFIG_USB_GSPCA_SPCA506=m
  CONFIG_USB_GSPCA_SPCA508=m
  CONFIG_USB_GSPCA_SPCA561=m
@@ -1263,7 +1262,7 @@ index f7033f3..4848be65 100644
  CONFIG_BACKLIGHT_CLASS_DEVICE=y
  CONFIG_BACKLIGHT_GENERIC=m
  # CONFIG_VGA_CONSOLE is not set
-@@ -238,8 +754,6 @@ CONFIG_FONT_SUN8x16=y
+@@ -238,8 +753,6 @@ CONFIG_FONT_SUN8x16=y
  CONFIG_FONT_SUN12x22=y
  CONFIG_FONT_10x18=y
  CONFIG_LOGO=y
@@ -1272,7 +1271,7 @@ index f7033f3..4848be65 100644
  CONFIG_SOUND=m
  CONFIG_SND=m
  CONFIG_SND_SEQUENCER=m
-@@ -255,30 +769,17 @@ CONFIG_SND_MPU401=m
+@@ -255,30 +768,17 @@ CONFIG_SND_MPU401=m
  CONFIG_SND_AC97_POWER_SAVE=y
  CONFIG_SND_AC97_POWER_SAVE_DEFAULT=10
  CONFIG_SND_CS5535AUDIO=m
@@ -1303,7 +1302,7 @@ index f7033f3..4848be65 100644
  CONFIG_HID_NTRIG=m
  CONFIG_HID_PANTHERLORD=m
  CONFIG_PANTHERLORD_FF=y
-@@ -296,17 +797,12 @@ CONFIG_THRUSTMASTER_FF=y
+@@ -296,17 +796,12 @@ CONFIG_THRUSTMASTER_FF=y
  CONFIG_HID_WACOM=m
  CONFIG_HID_ZEROPLUS=m
  CONFIG_ZEROPLUS_FF=y
@@ -1324,7 +1323,7 @@ index f7033f3..4848be65 100644
  CONFIG_USB_UHCI_HCD=m
  CONFIG_USB_WHCI_HCD=m
  CONFIG_USB_HWA_HCD=m
-@@ -322,20 +818,132 @@ CONFIG_USB_STORAGE_SDDR09=m
+@@ -322,20 +817,132 @@ CONFIG_USB_STORAGE_SDDR09=m
  CONFIG_USB_STORAGE_SDDR55=m
  CONFIG_USB_STORAGE_JUMPSHOT=m
  CONFIG_USB_STORAGE_ALAUDA=m
@@ -1460,7 +1459,7 @@ index f7033f3..4848be65 100644
  CONFIG_EXT3_FS_POSIX_ACL=y
  CONFIG_EXT3_FS_SECURITY=y
  CONFIG_EXT4_FS=y
-@@ -347,16 +955,20 @@ CONFIG_JFS_POSIX_ACL=y
+@@ -347,16 +954,20 @@ CONFIG_JFS_POSIX_ACL=y
  CONFIG_XFS_FS=m
  CONFIG_XFS_QUOTA=y
  CONFIG_XFS_POSIX_ACL=y
@@ -1483,7 +1482,7 @@ index f7033f3..4848be65 100644
  CONFIG_MSDOS_FS=m
  CONFIG_VFAT_FS=m
  CONFIG_NTFS_FS=m
-@@ -367,12 +979,14 @@ CONFIG_CRAMFS=m
+@@ -367,12 +978,14 @@ CONFIG_CRAMFS=m
  CONFIG_SQUASHFS=m
  CONFIG_SQUASHFS_EMBEDDED=y
  CONFIG_ROMFS_FS=m
@@ -1498,7 +1497,7 @@ index f7033f3..4848be65 100644
  CONFIG_NLS_DEFAULT="utf8"
  CONFIG_NLS_CODEPAGE_437=m
  CONFIG_NLS_CODEPAGE_737=m
-@@ -412,11 +1026,12 @@ CONFIG_NLS_ISO8859_15=m
+@@ -412,11 +1025,12 @@ CONFIG_NLS_ISO8859_15=m
  CONFIG_NLS_KOI8_R=m
  CONFIG_NLS_KOI8_U=m
  CONFIG_NLS_UTF8=y
@@ -1513,7 +1512,7 @@ index f7033f3..4848be65 100644
  CONFIG_SYSCTL_SYSCALL_CHECK=y
  CONFIG_KEYS=y
  CONFIG_KEYS_DEBUG_PROC_KEYS=y
-@@ -430,7 +1045,6 @@ CONFIG_CRYPTO_GCM=m
+@@ -430,7 +1044,6 @@ CONFIG_CRYPTO_GCM=m
  CONFIG_CRYPTO_LRW=m
  CONFIG_CRYPTO_PCBC=m
  CONFIG_CRYPTO_XTS=m
@@ -1521,7 +1520,7 @@ index f7033f3..4848be65 100644
  CONFIG_CRYPTO_XCBC=m
  CONFIG_CRYPTO_MD4=m
  CONFIG_CRYPTO_MICHAEL_MIC=m
-@@ -438,7 +1052,6 @@ CONFIG_CRYPTO_RMD128=m
+@@ -438,7 +1051,6 @@ CONFIG_CRYPTO_RMD128=m
  CONFIG_CRYPTO_RMD160=m
  CONFIG_CRYPTO_RMD256=m
  CONFIG_CRYPTO_RMD320=m
@@ -1529,7 +1528,7 @@ index f7033f3..4848be65 100644
  CONFIG_CRYPTO_SHA256=m
  CONFIG_CRYPTO_SHA512=m
  CONFIG_CRYPTO_TGR192=m
-@@ -458,4 +1071,3 @@ CONFIG_CRYPTO_TWOFISH=m
+@@ -458,4 +1070,3 @@ CONFIG_CRYPTO_TWOFISH=m
  CONFIG_CRYPTO_DEFLATE=m
  CONFIG_CRYPTO_ZLIB=m
  CONFIG_CRYPTO_LZO=m
@@ -3051,7 +3050,7 @@ index ae5db20..a097894 100644
 +MODULE_DESCRIPTION("cpufreq driver for Loongson-2");
  MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/csrc-r4k.c b/arch/mips/kernel/csrc-r4k.c
-index e95a3cd..60611fc 100644
+index e95a3cd..3e218e3 100644
 --- a/arch/mips/kernel/csrc-r4k.c
 +++ b/arch/mips/kernel/csrc-r4k.c
 @@ -6,20 +6,141 @@
@@ -3106,7 +3105,7 @@ index e95a3cd..60611fc 100644
 +		hpt_last_cnt = hpt_last_read = now;
 +
 +	/* Get diff and Check for counter overflow */
-+	diff = now - hpt_last_read - (now < hpt_last_read);
++	diff = (now - hpt_last_read) & CLOCKSOURCE_MASK(32);
 +	/* Calculate the real cycles */
 +	hpt_last_cnt += hpt_scale_up(diff);
 +	/* Save for the next access */
@@ -3208,10 +3207,10 @@ index e95a3cd..60611fc 100644
  	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
  
 diff --git a/arch/mips/kernel/ftrace.c b/arch/mips/kernel/ftrace.c
-index 5a84a1f..5970286 100644
+index 5a84a1f..3fe6385 100644
 --- a/arch/mips/kernel/ftrace.c
 +++ b/arch/mips/kernel/ftrace.c
-@@ -17,21 +17,7 @@
+@@ -17,29 +17,13 @@
  #include <asm/cacheflush.h>
  #include <asm/uasm.h>
  
@@ -3234,7 +3233,15 @@ index 5a84a1f..5970286 100644
  
  #ifdef CONFIG_DYNAMIC_FTRACE
  
-@@ -69,6 +55,20 @@ static inline void ftrace_dyn_arch_init_insns(void)
+ #define JAL 0x0c000000		/* jump & link: ip --> ra, jump to target */
+ #define ADDR_MASK 0x03ffffff	/*  op_code|addr : 31...26|25 ....0 */
+ 
+-#define INSN_B_1F_4 0x10000004	/* b 1f; offset = 4 */
+-#define INSN_B_1F_5 0x10000005	/* b 1f; offset = 5 */
+ #define INSN_NOP 0x00000000	/* nop */
+ #define INSN_JAL(addr)	\
+ 	((unsigned int)(JAL | (((addr) >> 2) & ADDR_MASK)))
+@@ -69,6 +53,20 @@ static inline void ftrace_dyn_arch_init_insns(void)
  #endif
  }
  
@@ -3255,7 +3262,50 @@ index 5a84a1f..5970286 100644
  static int ftrace_modify_code(unsigned long ip, unsigned int new_code)
  {
  	int faulted;
-@@ -91,10 +91,16 @@ int ftrace_make_nop(struct module *mod,
+@@ -84,6 +82,42 @@ static int ftrace_modify_code(unsigned long ip, unsigned int new_code)
+ 	return 0;
+ }
+ 
++/*
++ * Instructions about the calling site of mcount for kernel, modules on MIPS.
++ *
++ * 1. For kernel:
++ *
++ * move at, ra
++ * jal _mcount		--> nop
++ *
++ * 2. For modules:
++ *
++ * 2.1 For KBUILD_MCOUNT_RA_ADDRESS and CONFIG_32BIT
++ *
++ * lui v1, hi_16bit_of_mcount        --> b 1f (0x10000005)
++ * addiu v1, v1, low_16bit_of_mcount
++ * move at, ra
++ * move $12, ra_address
++ * jalr v1
++ *  sub sp, sp, 8
++ *                                  1: offset = 5 instructions
++ * 2.2 Other situations
++ *
++ * lui v1, hi_16bit_of_mcount        --> b 1f (0x10000004)
++ * addiu v1, v1, low_16bit_of_mcount
++ * move at, ra
++ * jalr v1
++ *  nop | move $12, ra_address | sub sp, sp, 8
++ *                                  1: offset = 4 instructions
++ */
++
++#if defined(KBUILD_MCOUNT_RA_ADDRESS) && defined(CONFIG_32BIT)
++#define	OFFSET_INSNS		5
++#else
++#define	OFFSET_INSNS		4
++#endif
++#define INSN_B_1F_OFFSET	(0x10000000 | OFFSET_INSNS)
++
+ int ftrace_make_nop(struct module *mod,
+ 		    struct dyn_ftrace *rec, unsigned long addr)
+ {
+@@ -91,39 +125,11 @@ int ftrace_make_nop(struct module *mod,
  	unsigned long ip = rec->ip;
  
  	/*
@@ -3265,30 +3315,41 @@ index 5a84a1f..5970286 100644
 +	 * needed.
  	 */
 -	if (in_module(ip)) {
-+	if (in_kernel_space(ip)) {
-+		/*
-+		 * move at, ra
-+		 * jal _mcount		--> nop
-+		 */
-+		new = INSN_NOP;
-+	} else {
- #if defined(KBUILD_MCOUNT_RA_ADDRESS) && defined(CONFIG_32BIT)
- 		/*
- 		 * lui v1, hi_16bit_of_mcount        --> b 1f (0x10000005)
-@@ -117,12 +123,6 @@ int ftrace_make_nop(struct module *mod,
- 		 */
- 		new = INSN_B_1F_4;
- #endif
+-#if defined(KBUILD_MCOUNT_RA_ADDRESS) && defined(CONFIG_32BIT)
+-		/*
+-		 * lui v1, hi_16bit_of_mcount        --> b 1f (0x10000005)
+-		 * addiu v1, v1, low_16bit_of_mcount
+-		 * move at, ra
+-		 * move $12, ra_address
+-		 * jalr v1
+-		 *  sub sp, sp, 8
+-		 *                                  1: offset = 5 instructions
+-		 */
+-		new = INSN_B_1F_5;
+-#else
+-		/*
+-		 * lui v1, hi_16bit_of_mcount        --> b 1f (0x10000004)
+-		 * addiu v1, v1, low_16bit_of_mcount
+-		 * move at, ra
+-		 * jalr v1
+-		 *  nop | move $12, ra_address | sub sp, sp, 8
+-		 *                                  1: offset = 4 instructions
+-		 */
+-		new = INSN_B_1F_4;
+-#endif
 -	} else {
 -		/*
 -		 * move at, ra
 -		 * jal _mcount		--> nop
 -		 */
 -		new = INSN_NOP;
- 	}
+-	}
++	new = in_kernel_space(ip) ? INSN_NOP : INSN_B_1F_OFFSET;
++
  	return ftrace_modify_code(ip, new);
  }
-@@ -132,8 +132,8 @@ int ftrace_make_call(struct dyn_ftrace *rec, unsigned long addr)
+ 
+@@ -132,8 +138,8 @@ int ftrace_make_call(struct dyn_ftrace *rec, unsigned long addr)
  	unsigned int new;
  	unsigned long ip = rec->ip;
  
@@ -3299,19 +3360,32 @@ index 5a84a1f..5970286 100644
  
  	return ftrace_modify_code(ip, new);
  }
-@@ -200,19 +200,17 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+@@ -190,29 +196,25 @@ int ftrace_disable_ftrace_graph_caller(void)
+ #define S_R_SP	(0xafb0 << 16)  /* s{d,w} R, offset(sp) */
+ #define OFFSET_MASK	0xffff	/* stack offset range: 0 ~ PT_SIZE */
+ 
+-unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+-				     unsigned long parent,
+-				     unsigned long parent_addr,
+-				     unsigned long fp)
++unsigned long ftrace_get_parent_ra_addr(unsigned long self_ra, unsigned long
++		old_parent_ra, unsigned long parent_ra_addr, unsigned long fp)
+ {
+-	unsigned long sp, ip, ra;
++	unsigned long sp, ip, tmp;
+ 	unsigned int code;
  	int faulted;
  
  	/*
 -	 * For module, move the ip from calling site of mcount to the
 -	 * instruction "lui v1, hi_16bit_of_mcount"(offset is 20), but for
 -	 * kernel, move to the instruction "move ra, at"(offset is 12)
-+	 * For module, move the ip from calling site of mcount after the
++	 * For module, move the ip from the return address after the
 +	 * instruction "lui v1, hi_16bit_of_mcount"(offset is 24), but for
 +	 * kernel, move after the instruction "move ra, at"(offset is 16)
  	 */
 -	ip = self_addr - (in_module(self_addr) ? 20 : 12);
-+	ip = self_addr - (in_kernel_space(self_addr) ? 16 : 24);
++	ip = self_ra - (in_kernel_space(self_ra) ? 16 : 24);
  
  	/*
  	 * search the text until finding the non-store instruction or "s{d,w}
@@ -3323,9 +3397,12 @@ index 5a84a1f..5970286 100644
  		/* get the code at "ip": code = *(unsigned int *)ip; */
  		safe_load_code(code, ip, faulted);
  
-@@ -226,7 +224,9 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+@@ -224,18 +226,20 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+ 		 * store the ra on the stack
+ 		 */
  		if ((code & S_R_SP) != S_R_SP)
- 			return parent_addr;
+-			return parent_addr;
++			return parent_ra_addr;
  
 -	} while (((code & S_RA_SP) != S_RA_SP));
 +		/* Move to the next instruction */
@@ -3334,6 +3411,106 @@ index 5a84a1f..5970286 100644
  
  	sp = fp + (code & OFFSET_MASK);
  
+-	/* ra = *(unsigned long *)sp; */
+-	safe_load_stack(ra, sp, faulted);
++	/* tmp = *(unsigned long *)sp; */
++	safe_load_stack(tmp, sp, faulted);
+ 	if (unlikely(faulted))
+ 		return 0;
+ 
+-	if (ra == parent)
++	if (tmp == old_parent_ra)
+ 		return sp;
+ 	return 0;
+ }
+@@ -246,21 +250,21 @@ unsigned long ftrace_get_parent_addr(unsigned long self_addr,
+  * Hook the return address and push it in the stack of return addrs
+  * in current thread info.
+  */
+-void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
++void prepare_ftrace_return(unsigned long *parent_ra_addr, unsigned long self_ra,
+ 			   unsigned long fp)
+ {
+-	unsigned long old;
++	unsigned long old_parent_ra;
+ 	struct ftrace_graph_ent trace;
+ 	unsigned long return_hooker = (unsigned long)
+ 	    &return_to_handler;
+-	int faulted;
++	int faulted, insns, flags;
+ 
+ 	if (unlikely(atomic_read(&current->tracing_graph_pause)))
+ 		return;
+ 
+ 	/*
+-	 * "parent" is the stack address saved the return address of the caller
+-	 * of _mcount.
++	 * "parent_ra_addr" is the stack address saved the return address of
++	 * the caller of _mcount.
+ 	 *
+ 	 * if the gcc < 4.5, a leaf function does not save the return address
+ 	 * in the stack address, so, we "emulate" one in _mcount's stack space,
+@@ -275,38 +279,48 @@ void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
+ 	 * do it in ftrace_graph_caller of mcount.S.
+ 	 */
+ 
+-	/* old = *parent; */
+-	safe_load_stack(old, parent, faulted);
++	/* old_parent_ra = *parent_ra_addr; */
++	safe_load_stack(old_parent_ra, parent_ra_addr, faulted);
+ 	if (unlikely(faulted))
+ 		goto out;
+ #ifndef KBUILD_MCOUNT_RA_ADDRESS
+-	parent = (unsigned long *)ftrace_get_parent_addr(self_addr, old,
+-			(unsigned long)parent, fp);
++	parent_ra_addr = (unsigned long *)ftrace_get_parent_ra_addr(self_ra,
++			old_parent_ra, (unsigned long)parent_ra_addr, fp);
+ 	/*
+ 	 * If fails when getting the stack address of the non-leaf function's
+ 	 * ra, stop function graph tracer and return
+ 	 */
+-	if (parent == 0)
++	if (parent_ra_addr == 0)
+ 		goto out;
+ #endif
+-	/* *parent = return_hooker; */
+-	safe_store_stack(return_hooker, parent, faulted);
++	/* *parent_ra_addr = return_hooker; */
++	safe_store_stack(return_hooker, parent_ra_addr, faulted);
+ 	if (unlikely(faulted))
+ 		goto out;
+ 
+-	if (ftrace_push_return_trace(old, self_addr, &trace.depth, fp) ==
+-	    -EBUSY) {
+-		*parent = old;
++	raw_local_irq_save(flags);
++	if (ftrace_push_return_trace(old_parent_ra, self_ra, &trace.depth, fp)
++	    == -EBUSY) {
++		*parent_ra_addr = old_parent_ra;
++		raw_local_irq_restore(flags);
+ 		return;
+ 	}
+ 
+-	trace.func = self_addr;
++	/*
++	 * Get the recorded ip in __mcount_loc section, which will be used to
++	 * match the input of set_graph_function to filter the entries of
++	 * function graph tracer.
++	 */
++	insns = (in_kernel_space(self_ra)) ? 1 : OFFSET_INSNS;
++	/* MIPS instructions has the same length of encoding */
++	trace.func = self_ra - (MCOUNT_INSN_SIZE * (insns + 1));
+ 
+ 	/* Only trace if the calling function expects to */
+ 	if (!ftrace_graph_entry(&trace)) {
+ 		current->curr_ret_stack--;
+-		*parent = old;
++		*parent_ra_addr = old_parent_ra;
+ 	}
++	raw_local_irq_restore(flags);
+ 	return;
+ out:
+ 	ftrace_graph_stop();
 diff --git a/arch/mips/kernel/process.c b/arch/mips/kernel/process.c
 index 9996094..d9c2e08 100644
 --- a/arch/mips/kernel/process.c
@@ -4650,6 +4827,18 @@ index ed007a2..a84e335 100644
  	.id = -1,
  };
  
+diff --git a/arch/mips/loongson/common/serial.c b/arch/mips/loongson/common/serial.c
+index 7580873..d1d99b6 100644
+--- a/arch/mips/loongson/common/serial.c
++++ b/arch/mips/loongson/common/serial.c
+@@ -74,3 +74,7 @@ static int __init serial_init(void)
+ }
+ 
+ device_initcall(serial_init);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("liu shiwei <liushiwei@anheng.com.cn>");
++MODULE_DESCRIPTION("loongson serial");
 diff --git a/arch/mips/loongson/lemote-2f/Makefile b/arch/mips/loongson/lemote-2f/Makefile
 index 8699a53..10e9eb7 100644
 --- a/arch/mips/loongson/lemote-2f/Makefile
@@ -43289,10 +43478,10 @@ index 0000000..f05edec
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 5856167..bfa7aec 100644
+index dd8242d..5725c17 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -753,8 +753,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -754,8 +754,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME:
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -43346,7 +43535,7 @@ index c3b4ccc..039bd58 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 51de0dd..bf2d506 100644
+index 0dbcf12..d828e7c 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -43359,7 +43548,7 @@ index 51de0dd..bf2d506 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E600			0x1001
  #define HUAWEI_PRODUCT_E220			0x1003
-@@ -443,6 +446,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -452,6 +455,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
@@ -43368,7 +43557,7 @@ index 51de0dd..bf2d506 100644
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220, 0xff, 0xff, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220BIS, 0xff, 0xff, 0xff) },
 diff --git a/fs/proc/base.c b/fs/proc/base.c
-index 8e4adda..7823c34 100644
+index 632b907..c170239 100644
 --- a/fs/proc/base.c
 +++ b/fs/proc/base.c
 @@ -356,7 +356,7 @@ static int proc_pid_stack(struct seq_file *m, struct pid_namespace *ns,
@@ -43570,7 +43759,7 @@ index 76dad48..7232472 100644
  }
  
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 1e2a6db..d210ab2 100644
+index c821609..76af516 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -36,8 +36,15 @@
@@ -43858,10 +44047,10 @@ index ead9b61..44cc3d7 100644
  	d->cpu_count += t1;
  
 diff --git a/kernel/exit.c b/kernel/exit.c
-index 0312022..54349da 100644
+index abc46d9..7745174 100644
 --- a/kernel/exit.c
 +++ b/kernel/exit.c
-@@ -123,7 +123,7 @@ static void __exit_signal(struct task_struct *tsk)
+@@ -131,7 +131,7 @@ static void __exit_signal(struct task_struct *tsk)
  		sig->inblock += task_io_get_inblock(tsk);
  		sig->oublock += task_io_get_oublock(tsk);
  		task_io_accounting_add(&sig->ioac, &tsk->ioac);
@@ -43871,7 +44060,7 @@ index 0312022..54349da 100644
  
  	sig->nr_threads--;
 diff --git a/kernel/fork.c b/kernel/fork.c
-index c445f8c..61f2802 100644
+index a576b98..4000742 100644
 --- a/kernel/fork.c
 +++ b/kernel/fork.c
 @@ -173,8 +173,10 @@ static inline void free_signal_struct(struct signal_struct *sig)
@@ -43886,7 +44075,7 @@ index c445f8c..61f2802 100644
  }
  
  void __put_task_struct(struct task_struct *tsk)
-@@ -900,6 +902,7 @@ static int copy_signal(unsigned long clone_flags, struct task_struct *tsk)
+@@ -901,6 +903,7 @@ static int copy_signal(unsigned long clone_flags, struct task_struct *tsk)
  	posix_cpu_timers_init_group(sig);
  
  	tty_audit_fork(sig);
@@ -43976,7 +44165,7 @@ index 6842eeb..7044ad2 100644
  
  		if (task_cputime_expired(&task_sample, &tsk->cputime_expires))
 diff --git a/kernel/sched.c b/kernel/sched.c
-index 3fd774c..a5ef0fd 100644
+index 92c5b60..1e23302 100644
 --- a/kernel/sched.c
 +++ b/kernel/sched.c
 @@ -1,3 +1,6 @@
@@ -44029,7 +44218,7 @@ index 3fd774c..a5ef0fd 100644
  #ifdef CONFIG_SCHED_DEBUG
  # include "sched_debug.c"
  #endif
-@@ -7742,7 +7754,7 @@ void __init sched_init(void)
+@@ -7882,7 +7894,7 @@ void __init sched_init(void)
  #ifdef CONFIG_CGROUP_SCHED
  	list_add(&init_task_group.list, &task_groups);
  	INIT_LIST_HEAD(&init_task_group.children);
@@ -44038,7 +44227,7 @@ index 3fd774c..a5ef0fd 100644
  #endif /* CONFIG_CGROUP_SCHED */
  
  #if defined CONFIG_FAIR_GROUP_SCHED && defined CONFIG_SMP
-@@ -9181,3 +9193,4 @@ void synchronize_sched_expedited(void)
+@@ -9321,3 +9333,4 @@ void synchronize_sched_expedited(void)
  EXPORT_SYMBOL_GPL(synchronize_sched_expedited);
  
  #endif /* #else #ifndef CONFIG_SMP */
@@ -44318,7 +44507,7 @@ index 0000000..5358e24
 +#endif /* CONFIG_SCHED_AUTOGROUP */
 diff --git a/kernel/sched_bfs.c b/kernel/sched_bfs.c
 new file mode 100644
-index 0000000..cb94dfc
+index 0000000..a73a4bc
 --- /dev/null
 +++ b/kernel/sched_bfs.c
 @@ -0,0 +1,6932 @@
@@ -46259,7 +46448,7 @@ index 0000000..cb94dfc
 +/*
 + * calc_load - update the avenrun load estimates every LOAD_FREQ seconds.
 + */
-+void calc_global_load(void)
++void calc_global_load(unsigned long ticks)
 +{
 +	long active;
 +
@@ -51341,7 +51530,7 @@ index 2e1b0d1..b93560e 100644
  #define P(x) \
  	SEQ_printf(m, "  .%-30s: %Ld\n", #x, (long long)(rt_rq->x))
 diff --git a/kernel/sys.c b/kernel/sys.c
-index 7f5a0cd..2745dcd 100644
+index 66136ca..479abcb 100644
 --- a/kernel/sys.c
 +++ b/kernel/sys.c
 @@ -1080,8 +1080,10 @@ SYSCALL_DEFINE0(setsid)
