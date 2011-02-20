@@ -1,7 +1,7 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-02-18 19:46:44.000000000 +0000
-+++ Makefile	2011-02-18 19:46:50.000000000 +0000
+--- Makefile.orig	2011-02-19 15:42:44.000000000 +0000
++++ Makefile	2011-02-19 15:42:48.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
@@ -14,12 +14,12 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-02-18 19:51:47.000000000 +0000
++++ .config	2011-02-19 15:46:47.000000000 +0000
 @@ -0,0 +1,2683 @@
 +#
 +# Automatically generated make config: don't edit
 +# Linux kernel version: 2.6.36.4-libre1-lemote
-+# Fri Feb 18 19:51:47 2011
++# Sat Feb 19 15:46:47 2011
 +#
 +CONFIG_MIPS=y
 +
@@ -191,9 +191,9 @@ Index: .config
 +CONFIG_HAVE_KERNEL_BZIP2=y
 +CONFIG_HAVE_KERNEL_LZMA=y
 +CONFIG_HAVE_KERNEL_LZO=y
-+CONFIG_KERNEL_GZIP=y
++# CONFIG_KERNEL_GZIP is not set
 +# CONFIG_KERNEL_BZIP2 is not set
-+# CONFIG_KERNEL_LZMA is not set
++CONFIG_KERNEL_LZMA=y
 +# CONFIG_KERNEL_LZO is not set
 +CONFIG_SWAP=y
 +CONFIG_SYSVIPC=y
