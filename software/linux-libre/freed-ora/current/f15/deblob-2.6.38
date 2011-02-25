@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#    Copyright (C) 2008, 2009, 2010 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008, 2009, 2010, 2011 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -44,7 +44,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.37 extra=
+kver=2.6.38 extra=0-
 
 case $1 in
 --force)
@@ -488,6 +488,12 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/char/Makefile
 
 # gpu drm
 
+announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
+reject_firmware drivers/gpu/drm/nouveau/nvc0_graph.c
+clean_blob drivers/gpu/drm/nouveau/nvc0_graph.c
+clean_kconfig drivers/gpu/drm/nouveau/Kconfig 'DRM_NOUVEAU'
+clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
+
 announce DRM_MGA - "Matrox g200/g400"
 drop_fw_file firmware/matrox/g200_warp.H16 firmware/matrox/g200_warp.fw
 drop_fw_file firmware/matrox/g400_warp.H16 firmware/matrox/g400_warp.fw
@@ -539,6 +545,8 @@ reject_firmware drivers/gpu/drm/radeon/r600.c
 clean_blob drivers/gpu/drm/radeon/r600.c
 reject_firmware drivers/gpu/drm/radeon/r600_cp.c
 clean_blob drivers/gpu/drm/radeon/r600_cp.c
+reject_firmware drivers/gpu/drm/radeon/ni.c
+clean_blob drivers/gpu/drm/radeon/ni.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
@@ -972,10 +980,10 @@ clean_mk CONFIG_VIDEO_TLG2300 drivers/media/video/tlg2300/Makefile
 announce USB_DABUSB - "DABUSB driver"
 clean_fw firmware/dabusb/bitstream.bin.ihex firmware/dabusb/bitstream.bin
 clean_fw firmware/dabusb/firmware.HEX firmware/dabusb/firmware.fw
-reject_firmware drivers/media/video/dabusb.c
-clean_blob drivers/media/video/dabusb.c
-clean_kconfig drivers/media/Kconfig 'USB_DABUSB'
-clean_mk CONFIG_USB_DABUSB drivers/media/video/Makefile
+reject_firmware drivers/staging/dabusb/dabusb.c
+clean_blob drivers/staging/dabusb/dabusb.c
+clean_kconfig drivers/staging/dabusb/Kconfig 'USB_DABUSB'
+clean_mk CONFIG_USB_DABUSB drivers/staging/dabusb/Makefile
 
 announce USB_S2255 - "USB Sensoray 2255 video capture device"
 reject_firmware drivers/media/video/s2255drv.c
@@ -985,11 +993,18 @@ clean_mk CONFIG_USB_S2255 drivers/media/video/Makefile
 
 announce USB_VICAM - "USB 3com HomeConnect, AKA vicam"
 drop_fw_file firmware/vicam/firmware.H16 firmware/vicam/firmware.fw
-reject_firmware drivers/media/video/usbvideo/vicam.c
-clean_blob drivers/media/video/usbvideo/vicam.c
-clean_kconfig drivers/media/video/usbvideo/Kconfig 'USB_VICAM'
-clean_mk CONFIG_USB_VICAM drivers/media/video/usbvideo/Makefile
+reject_firmware drivers/staging/usbvideo/vicam.c
+clean_blob drivers/staging/usbvideo/vicam.c
+clean_kconfig drivers/staging/usbvideo/Kconfig 'USB_VICAM'
+clean_mk CONFIG_USB_VICAM drivers/staging/usbvideo/Makefile
 
+# radio
+
+announce RADIO_WL1273 - "Texas Instruments WL1273 I2C FM Radio"
+reject_firmware drivers/media/radio/radio-wl1273.c
+clean_blob drivers/media/radio/radio-wl1273.c
+clean_kconfig drivers/media/radio/Kconfig 'RADIO_WL1273'
+clean_mk CONFIG_RADIO_WL1273 drivers/media/radio/Makefile
 
 #######
 # net #
@@ -1019,10 +1034,10 @@ clean_kconfig drivers/net/Kconfig 'BNA'
 clean_mk CONFIG_BNA drivers/net/bna/Makefile
 
 announce BNX2 - "Broadcom NetXtremeII"
-drop_fw_file firmware/bnx2/bnx2-mips-09-6.0.17.fw.ihex firmware/bnx2/bnx2-mips-09-6.0.17.fw
+drop_fw_file firmware/bnx2/bnx2-mips-09-6.2.1.fw.ihex firmware/bnx2/bnx2-mips-09-6.2.1.fw
 drop_fw_file firmware/bnx2/bnx2-rv2p-09-6.0.17.fw.ihex firmware/bnx2/bnx2-rv2p-09-6.0.17.fw
 drop_fw_file firmware/bnx2/bnx2-rv2p-09ax-6.0.17.fw.ihex firmware/bnx2/bnx2-rv2p-09ax-6.0.17.fw
-drop_fw_file firmware/bnx2/bnx2-mips-06-6.0.15.fw.ihex firmware/bnx2/bnx2-mips-06-6.0.15.fw
+drop_fw_file firmware/bnx2/bnx2-mips-06-6.2.1.fw.ihex firmware/bnx2/bnx2-mips-06-6.2.1.fw
 drop_fw_file firmware/bnx2/bnx2-rv2p-06-6.0.15.fw.ihex firmware/bnx2/bnx2-rv2p-06-6.0.15.fw
 reject_firmware drivers/net/bnx2.c
 clean_blob drivers/net/bnx2.c
@@ -1030,9 +1045,9 @@ clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
 
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
-drop_fw_file firmware/bnx2x/bnx2x-e1-6.0.34.0.fw.ihex firmware/bnx2x/bnx2x-e1-6.0.34.0.fw
-drop_fw_file firmware/bnx2x/bnx2x-e1h-6.0.34.0.fw.ihex firmware/bnx2x/bnx2x-e1h-6.0.34.0.fw
-drop_fw_file firmware/bnx2x/bnx2x-e2-6.0.34.0.fw.ihex firmware/bnx2x/bnx2x-e2-6.0.34.0.fw
+drop_fw_file firmware/bnx2x/bnx2x-e1-6.2.5.0.fw.ihex firmware/bnx2x/bnx2x-e1-6.2.5.0.fw
+drop_fw_file firmware/bnx2x/bnx2x-e1h-6.2.5.0.fw.ihex firmware/bnx2x/bnx2x-e1h-6.2.5.0.fw
+drop_fw_file firmware/bnx2x/bnx2x-e2-6.2.5.0.fw.ihex firmware/bnx2x/bnx2x-e2-6.2.5.0.fw
 reject_firmware drivers/net/bnx2x/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
@@ -1140,12 +1155,7 @@ clean_kconfig drivers/net/Kconfig 'QLCNIC'
 clean_mk CONFIG_QLCNIC drivers/net/qlcnic/Makefile
 
 announce R8169 - "Realtek 8169 gigabit ethernet support"
-clean_sed '
-/^static void rtl_hw_phy_config(.*)$/,/^}$/{
-  /rtl8168d_[12]_hw_phy_config([^,)]*);$/i\
-		printk(KERN_ERR PFX "%s: Missing Free firmware\\n", dev->name);
-}
-' drivers/net/r8169.c 'report missing Free firmware'
+reject_firmware drivers/net/r8169.c
 clean_blob drivers/net/r8169.c
 clean_kconfig drivers/net/Kconfig R8169
 clean_mk CONFIG_R8169 drivers/net/Makefile
@@ -1187,6 +1197,12 @@ reject_firmware drivers/net/typhoon.c
 clean_blob drivers/net/typhoon.c
 clean_kconfig drivers/net/Kconfig 'TYPHOON'
 clean_mk CONFIG_TYPHOON drivers/net/Makefile
+
+announce VXGE - "Exar X3100 Series 10GbE PCIe Server Adapter"
+reject_firmware drivers/net/vxge/vxge-main.c
+clean_blob drivers/net/vxge/vxge-main.c
+clean_kconfig drivers/net/Kconfig 'VXGE'
+clean_mk CONFIG_VXGE drivers/net/vxge/Makefile
 
 # appletalk
 
@@ -1269,6 +1285,7 @@ drop_fw_file firmware/cis/PE520.cis.ihex firmware/cis/PE520.cis
 
 announce 3C359 - "3Com 3C359 Token Link Velocity XL adapter"
 drop_fw_file firmware/3com/3C359.bin.ihex firmware/3com/3C359.bin
+reject_firmware drivers/net/tokenring/3c359.c
 clean_blob drivers/net/tokenring/3c359.c
 clean_kconfig drivers/net/tokenring/Kconfig '3C359'
 clean_mk CONFIG_3C359 drivers/net/tokenring/Makefile
@@ -1576,6 +1593,12 @@ announce RT2870 - "Ralink 2870/3070 wireless support"
 clean_kconfig drivers/staging/rt2870/Kconfig RT2870
 clean_mk CONFIG_RT2870 drivers/staging/rt2870/Makefile
 
+announce RTL8192CE - "Realtek RTL8192CE/RTL8188SE Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8192ce/fw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi RTL8192CE
+clean_mk CONFIG_RTL8192CE drivers/net/wireless/rtlwifi/rtl8192ce/Makefile
+
 announce RTL8192E - "RealTek RTL8192E Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192e/r819xE_firmware.c
 clean_blob drivers/staging/rtl8192e/r819xE_firmware.c
@@ -1620,21 +1643,26 @@ clean_blob drivers/net/wireless/wl1251/wl1251.h
 clean_kconfig drivers/net/wireless/wl1251/Kconfig 'WL1251'
 clean_mk CONFIG_WL1251 drivers/net/wireless/wl1251/Makefile
 
-announce WL1271 - "TI wl1271 support"
-reject_firmware drivers/net/wireless/wl12xx/wl1271_main.c
-clean_blob drivers/net/wireless/wl12xx/wl1271.h
-clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL1271'
-clean_mk CONFIG_WL1271 drivers/net/wireless/wl12xx/Makefile
+announce WL12XX - "TI wl12xx support"
+reject_firmware drivers/net/wireless/wl12xx/main.c
+clean_blob drivers/net/wireless/wl12xx/wl12xx.h
+clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX'
+clean_mk CONFIG_WL12XX drivers/net/wireless/wl12xx/Makefile
 
-announce WL1271_SDIO - "TI wl1271 SDIO support"
-clean_blob drivers/net/wireless/wl12xx/wl1271_sdio.c
-clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL1271_SDIO'
-clean_mk CONFIG_WL1271_SDIO drivers/net/wireless/wl12xx/Makefile
+announce WL12XX_SDIO - "TI wl12xx SDIO support"
+clean_blob drivers/net/wireless/wl12xx/sdio.c
+clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX_SDIO'
+clean_mk CONFIG_WL12XX_SDIO drivers/net/wireless/wl12xx/Makefile
 
-announce WL1271_SPI - "TI wl1271 SPI support"
-clean_blob drivers/net/wireless/wl12xx/wl1271_spi.c
-clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL1271_SPI'
-clean_mk CONFIG_WL1271_SPI drivers/net/wireless/wl12xx/Makefile
+announce WL12XX_SDIO_TEST - "TI wl12xx SDIO testing support"
+reject_firmware drivers/net/wireless/wl12xx/sdio_test.c
+clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX_SDIO_TEST'
+clean_mk CONFIG_WL12XX_SDIO_TEST drivers/net/wireless/wl12xx/Makefile
+
+announce WL12XX_SPI - "TI wl12xx SPI support"
+clean_blob drivers/net/wireless/wl12xx/spi.c
+clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX_SPI'
+clean_mk CONFIG_WL12XX_SPI drivers/net/wireless/wl12xx/Makefile
 
 announce USB_ZD1201 - "USB ZD1201 based Wireless device support"
 reject_firmware drivers/net/wireless/zd1201.c
@@ -1702,7 +1730,7 @@ clean_blob drivers/staging/bcm/Macros.h
 # This disables loading of the .cfg file as well, but it's useless without
 # the firmware proper.
 clean_sed '
-/^static inline struct file \*open_firmware_file/,/^}$/ {
+/^static \(inline \)\?struct file \*open_firmware_file/,/^}$/ {
   /oldfs=get_fs();/i\
     return /*(DEBLOBBED)*/ NULL;
 }' drivers/staging/bcm/Misc.c 'disabled non-Free firmware loading machinery'
@@ -1717,6 +1745,25 @@ reject_firmware drivers/infiniband/hw/qib/qib_sd7220.c
 clean_blob drivers/infiniband/hw/qib/qib_sd7220.c
 clean_kconfig drivers/infiniband/hw/qib/Kconfig 'INFINIBAND_QIB'
 clean_mk CONFIG_INFINIBAND_QIB drivers/infiniband/hw/qib/Makefile
+
+# CAN
+
+announce CAN_SOFTING - "Softing Gmbh CAN generic support"
+reject_firmware drivers/net/can/softing/softing_fw.c
+clean_kconfig drivers/net/can/softing/Kconfig 'CAN_SOFTING'
+clean_mk CONFIG_CAN_SOFTING drivers/net/can/softing/Makefile
+
+announce CAN_SOFTING_CS - "Softing Gmbh CAN pcmcia cards"
+clean_blob drivers/net/can/softing/softing_cs.c
+clean_blob drivers/net/can/softing/softing_platform.h
+clean_sed '
+/^config CAN_SOFTING_CS$/,${
+  /You need firmware/i\
+	  /*(DEBLOBBED)*/
+  /You need firmware/,/softing-fw.*tar\.gz/d
+}' drivers/net/can/softing/Kconfig 'removed firmware notes'
+clean_kconfig drivers/net/can/softing/Kconfig 'CAN_SOFTING_CS'
+clean_mk CONFIG_CAN_SOFTING_CS drivers/net/can/softing/Makefile
 
 ########
 # ISDN #
@@ -1751,21 +1798,21 @@ drop_fw_file firmware/cis/COMpad4.cis.ihex firmware/cis/COMpad4.cis
 drop_fw_file firmware/cis/SW_555_SER.cis.ihex firmware/cis/SW_555_SER.cis
 drop_fw_file firmware/cis/SW_7xx_SER.cis.ihex firmware/cis/SW_7xx_SER.cis
 drop_fw_file firmware/cis/SW_8xx_SER.cis.ihex firmware/cis/SW_8xx_SER.cis
-# clean_blob drivers/serial/serial_cs.c
-# clean_kconfig drivers/serial/Kconfig 'SERIAL_8250_CS'
-# clean_mk CONFIG_SERIAL_8250_CS drivers/serial/Makefile
+# clean_blob drivers/tty/serial/serial_cs.c
+# clean_kconfig drivers/tty/serial/Kconfig 'SERIAL_8250_CS'
+# clean_mk CONFIG_SERIAL_8250_CS drivers/tty/serial/Makefile
 
 announce SERIAL_ICOM - "IBM Multiport Serial Adapter"
-reject_firmware drivers/serial/icom.c
-clean_blob drivers/serial/icom.c
-clean_kconfig drivers/serial/Kconfig 'SERIAL_ICOM'
-clean_mk CONFIG_SERIAL_ICOM drivers/serial/Makefile
+reject_firmware drivers/tty/serial/icom.c
+clean_blob drivers/tty/serial/icom.c
+clean_kconfig drivers/tty/serial/Kconfig 'SERIAL_ICOM'
+clean_mk CONFIG_SERIAL_ICOM drivers/tty/serial/Makefile
 
 announce SERIAL_QE - "Freescale QUICC Engine serial port support"
-reject_firmware drivers/serial/ucc_uart.c
-clean_blob drivers/serial/ucc_uart.c
-clean_kconfig drivers/serial/Kconfig 'SERIAL_QE'
-clean_mk CONFIG_SERIAL_QE drivers/serial/Makefile
+reject_firmware drivers/tty/serial/ucc_uart.c
+clean_blob drivers/tty/serial/ucc_uart.c
+clean_kconfig drivers/tty/serial/Kconfig 'SERIAL_QE'
+clean_mk CONFIG_SERIAL_QE drivers/tty/serial/Makefile
 
 #########
 # input #
@@ -2055,8 +2102,8 @@ clean_kconfig sound/pci/Kconfig 'SND_CS46XX'
 clean_mk 'CONFIG_SND_CS46XX' sound/pci/cs46xx/Makefile
 
 announce SND_INTEL_SST - "Intel SST (LPE) Driver"
-clean_blob drivers/staging/intel_sst/intel_sst_common.h
 reject_firmware drivers/staging/intel_sst/intel_sst_drv_interface.c
+clean_blob drivers/staging/intel_sst/intel_sst_drv_interface.c
 reject_firmware drivers/staging/intel_sst/intel_sst_dsp.c
 clean_kconfig drivers/staging/intel_sst/Kconfig 'SND_INTEL_SST'
 clean_mk 'CONFIG_SND_INTEL_SST' drivers/staging/intel_sst/Makefile
@@ -2314,6 +2361,16 @@ clean_sed '
   /^	default.*dsp001\.ld/ s,".*","/*(DEBLOBBED)*/",;
 }' sound/oss/Kconfig 'removed default firmware'
 clean_mk CONFIG_SOUND_PSS sound/oss/Makefile
+
+##########
+# Crypto #
+##########
+
+announce DX_SEP - "Discretix SEP driver"
+reject_firmware drivers/staging/sep/sep_driver.c
+clean_blob drivers/staging/sep/sep_driver.c
+clean_kconfig drivers/staging/sep/Kconfig 'DX_SEP'
+clean_mk CONFIG_DX_SEP drivers/staging/sep/Makefile
 
 #################
 # Documentation #
