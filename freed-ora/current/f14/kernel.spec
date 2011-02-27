@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -851,6 +851,10 @@ Patch13704: hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
 # rhbz #673207
 Patch13705: sunrpc-kernel-panic-when-mount-nfsv4.patch
 
+# Linux-libre-specific, added by Koko's request for BLAG.
+Patch71801: blag-squashfs-lzma.patch
+
+# 
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1608,6 +1612,9 @@ ApplyPatch hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
 # rhbz #673207
 ApplyPatch sunrpc-kernel-panic-when-mount-nfsv4.patch
 
+# Linux-libre-specific, added by Koko's request for BLAG.
+ApplyPatch blag-squashfs-lzma.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2194,6 +2201,10 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 26 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Add blag-squashfs-lzma.patch.
+- Enable CONFIG_SQUASHFS_LZMA in config-generic.
+
 * Mon Feb  7 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.35.11.
 
