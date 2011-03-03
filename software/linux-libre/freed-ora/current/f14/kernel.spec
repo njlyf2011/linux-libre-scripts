@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 83
+%global baserelease 85
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -634,6 +634,9 @@ Patch08: freedo.patch
 
 %if !%{nopatches}
 
+# Linux-libre-specific, added by Koko's request for BLAG.
+Patch71801: blag-squashfs-lzma.patch
+
 # revert upstream patches we get via other methods
 Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
@@ -675,6 +678,7 @@ Patch391: linux-2.6-acpi-video-dos.patch
 Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
 Patch395: acpi-update-battery-information-on-notification-0x81.patch
+Patch396: linux-2.6-acpi-fix-alias.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -851,10 +855,24 @@ Patch13704: hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
 # rhbz #673207
 Patch13705: sunrpc-kernel-panic-when-mount-nfsv4.patch
 
-# Linux-libre-specific, added by Koko's request for BLAG.
-Patch71801: blag-squashfs-lzma.patch
+# rhbz #650151 (F13)
+Patch13706: bridge-fix-mglist-corruption-that-leads-to-memory-corruption.patch
 
-# 
+# Fix 32-bit guest hang on 32-bit PAE host (#677167)
+Patch13707: kvm-mmu-fix-32-bit-legacy-paging-with-npt.patch
+
+# rhbz#676860
+Patch13708: hid-force-feedback-support-for-logitech-rumblepad-gamepad.patch
+
+# rhbz#654599
+Patch13709: iwl3945-remove-plcp-check.patch
+
+# rhbz#604630
+Patch13710: linux-2.6-bonding-sysfs-warning.patch
+
+# rhbz#680791
+Patch13711: md-fix-regression-resulting-in-delays-in-clearing-bits-in-a-bitmap.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1267,6 +1285,7 @@ cp %{SOURCE15} .
 # Dynamically generate kernel .config files from config-* files
 make -f %{SOURCE20} VERSION=%{version} configs
 
+%if %{?all_arch_configs:1}%{!?all_arch_configs:0}
 #if a rhel kernel, apply the rhel config options
 %if 0%{?rhel}
   for i in %{all_arch_configs}
@@ -1284,6 +1303,7 @@ do
   ./merge.pl %{SOURCE1000} $i.tmp > $i
   rm $i.tmp
 done
+%endif
 
 ApplyOptionalPatch git-linus.diff
 
@@ -1376,6 +1396,7 @@ ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 ApplyPatch acpi-update-battery-information-on-notification-0x81.patch
 ApplyPatch linux-2.6-defaults-no-pm-async.patch
+ApplyPatch linux-2.6-acpi-fix-alias.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1612,10 +1633,28 @@ ApplyPatch hostap_cs-fix-sleeping-function-called-from-invalid-context.patch
 # rhbz #673207
 ApplyPatch sunrpc-kernel-panic-when-mount-nfsv4.patch
 
-# Linux-libre-specific, added by Koko's request for BLAG.
-ApplyPatch blag-squashfs-lzma.patch
+# rhbz #650151 (F13)
+ApplyPatch bridge-fix-mglist-corruption-that-leads-to-memory-corruption.patch
+
+# Fix 32-bit guest hang on 32-bit PAE host (#677167)
+ApplyPatch kvm-mmu-fix-32-bit-legacy-paging-with-npt.patch
+
+# rhbz#676860
+ApplyPatch hid-force-feedback-support-for-logitech-rumblepad-gamepad.patch
+
+# rhbz#654599
+ApplyPatch iwl3945-remove-plcp-check.patch
+
+# rhbz#604630
+ApplyPatch linux-2.6-bonding-sysfs-warning.patch
+
+# rhbz#680791
+ApplyPatch md-fix-regression-resulting-in-delays-in-clearing-bits-in-a-bitmap.patch
 
 # END OF PATCH APPLICATIONS
+
+# Linux-libre-specific, added by Koko's request for BLAG.
+ApplyPatch blag-squashfs-lzma.patch
 
 %endif
 
@@ -2201,7 +2240,33 @@ fi
 # and build.
 
 %changelog
-* Sat Feb 26 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Mar 01 2011 Jarod Wilson <jarod@redhat.com> 2.6.35.11-85
+- Fix IR wakeup on nuvoton-cir-driven hardware
+- Make mceusb only bind to the IR interface on Realtek multifuction thingy
+- Kill the crappy old lirc_it* drivers, add new ite_cir driver
+- Fix HVR-1950 (and possibly other) device bring-up (#680450)
+
+* Mon Feb 28 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix stuck bits in md bitmaps (#680791)
+
+* Thu Feb 24 2011 Chuck Ebbert <cebbert@redhat.com>
+- iwl3945-remove-plcp-check.patch: fix slow speed on some iwl3945
+  (#654599)
+- Copy fix for bonding error message from F13 (#604630)
+
+* Wed Feb 16 2011 Chuck Ebbert <cebbert@redhat.com>
+- Add support for additional Logitech Rumblepad model (#676577)
+
+* Sat Feb 12 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix 32-bit guest hang on 32-bit PAE host (#677167)
+
+* Sat Feb 12 2011 Chuck Ebbert <cebbert@redhat.com>
+- bridge: Fix mglist corruption that leads to memory corruption (F13#650151)
+
+* Wed Feb 11 2011 Matthew Garrett <mjg@redhat.com> 2.6.35.11-84
+- linux-2.6-acpi-fix-alias.patch: Fix ACPI object aliasing (#608648)
+
+* Fri Feb 11 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Feb 26
 - Add blag-squashfs-lzma.patch.
 - Enable CONFIG_SQUASHFS_LZMA in config-generic.
 
