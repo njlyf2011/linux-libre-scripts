@@ -828,12 +828,12 @@ License: GPLv2
 %description -n perf-libre
 This package provides the perf tool and the supporting documentation.
 
-%package -n perf-debuginfo
+%package -n perf-libre-debuginfo
 Summary: Debug information for package perf
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description -n perf-debuginfo
+%description -n perf-libre-debuginfo
 This package provides debug information for package perf.
 
 # Note that this pattern only works right to match the .build-id
@@ -1962,7 +1962,7 @@ fi
 %{_mandir}/man[1-8]/*
 
 %if %{with_debuginfo}
-%files -f perf-debuginfo.list -n perf-debuginfo
+%files -f perf-debuginfo.list -n perf-libre-debuginfo
 %defattr(-,root,root)
 %endif
 %endif
