@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
-%define gitrev 4
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -644,6 +644,7 @@ Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
+Patch151: sparc64_fix_build_errors_with_gcc460.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
@@ -1251,6 +1252,7 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
+ApplyPatch sparc64_fix_build_errors_with_gcc460.patch
 
 #
 # Exec shield
@@ -2029,6 +2031,24 @@ fi
 # and build.
 
 %changelog
+* Thu Mar 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Created patch-libre-2.6.38-rc8 by diffing deblobbed trees.
+
+* Thu Mar 10 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git2.1
+- Linux 2.6.38-rc8-git2
+
+* Wed Mar 09 2011 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.38-rc8-git1
+
+* Wed Mar 09 2011 Dennis Gilmore <dennis@ausil.us>
+- apply sparc64 gcc-4.6.0 buildfix patch
+
+* Wed Mar 09 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-0.rc8.git0.2
+- nouveau: allow max clients on nv4x (679629), better error reporting
+
+* Tue Mar 08 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git0.1
+- Linux 2.6.38-rc8
+
 * Mon Mar  7 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Created patch-libre-2.6.38-rc7 by diffing deblobbed trees.
 
