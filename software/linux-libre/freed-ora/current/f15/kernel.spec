@@ -66,7 +66,7 @@ Summary: The Linux kernel
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
 %define rcrevlibre -libre
-#define gitrevlibre -libre
+%define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 8
 # The git snapshot level
-%define gitrev 2
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -1132,19 +1132,15 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/
 %endif
     ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-%if "%{rcrevlibre}" != "%{gitrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
-%endif
     ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
-%if 0%{?gitrev}
-%if "%{stablerevlibre}" != "%{gitrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
+%if "%{?stablelibre}" != "%{?gitrevlibre}"
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
 %endif
     ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
-%endif
 %endif
 
     cd ..
@@ -2031,6 +2027,15 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 14 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.38-rc8-git4 by hand.
+
+* Mon Mar 13 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git4.1
+- Linux 2.6.38-rc8-git4
+
+* Thu Mar 10 2011 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.38-rc8-git3
+
 * Thu Mar 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Created patch-libre-2.6.38-rc8 by diffing deblobbed trees.
 
