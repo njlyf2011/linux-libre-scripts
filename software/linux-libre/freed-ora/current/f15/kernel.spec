@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 37
+%define base_sublevel 38
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -65,8 +65,8 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre
-%define gitrevlibre -libre
+#define rcrevlibre -libre
+#define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
@@ -550,7 +550,6 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kver
 Source3: deblob-main
 Source4: deblob-%{kversion}
 Source5: deblob-check
-Source6: deblob-2.6.%{upstream_sublevel}
 
 Source11: genkey
 Source14: find-provides
@@ -1737,7 +1736,7 @@ BuildKernel %make_target %kernel_image smp
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+make htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -2027,6 +2026,12 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 16 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed to 2.6.38-libre.
+
+* Tue Mar 15 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-1
+- Linux 2.6.38
+
 * Mon Mar 14 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.38-rc8-git4 by hand.
 
