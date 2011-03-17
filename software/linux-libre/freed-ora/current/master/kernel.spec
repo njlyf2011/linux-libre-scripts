@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 37
+%define base_sublevel 38
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -libre
-%define rcrevlibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -96,9 +96,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 8
 # The git snapshot level
-%define gitrev 2
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -550,7 +550,6 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kver
 Source3: deblob-main
 Source4: deblob-%{kversion}
 Source5: deblob-check
-Source6: deblob-2.6.%{upstream_sublevel}
 
 Source11: genkey
 Source14: find-provides
@@ -638,12 +637,13 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
 
-
+Patch29: linux-2.6-utrace-revert-make-ptrace-functions-static.patch
 Patch30: linux-2.6-tracehook.patch
 Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
+Patch151: sparc64_fix_build_errors_with_gcc460.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
@@ -699,6 +699,7 @@ Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1826: drm-intel-edp-fixes.patch
+Patch1827: drm-i915-gen4-has-non-power-of-two-strides.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -754,8 +755,6 @@ Patch12205: runtime_pm_fixups.patch
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch12421: fs-call-security_d_instantiate-in-d_obtain_alias.patch
-
-Patch12438: ath5k-fix-fast-channel-change.patch
 
 %endif
 
@@ -828,6 +827,20 @@ Group: Development/System
 License: GPLv2
 %description -n perf-libre
 This package provides the perf tool and the supporting documentation.
+
+%package -n perf-libre-debuginfo
+Summary: Debug information for package perf
+Group: Development/Debug
+Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
+AutoReqProv: no
+%description -n perf-libre-debuginfo
+This package provides debug information for package perf.
+
+# Note that this pattern only works right to match the .build-id
+# symlinks because of the trailing nonmatching alternation and
+# the leading .*, because of find-debuginfo.sh's buggy handling
+# of matching the pattern against the symlinks file.
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|XXX' -o perf-debuginfo.list}
 %endif
 
 
@@ -1118,19 +1131,15 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/
 %endif
     ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-%if "%{rcrevlibre}" != "%{gitrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
-%endif
     ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
-%if 0%{?gitrev}
-%if "%{stablerevlibre}" != "%{gitrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
+%if "%{?stablelibre}" != "%{?gitrevlibre}"
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
 %endif
     ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
-%endif
 %endif
 
     cd ..
@@ -1218,6 +1227,7 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch linux-2.6-hotfixes.patch
 
 # Roland's utrace ptrace replacement.
+ApplyPatch linux-2.6-utrace-revert-make-ptrace-functions-static.patch
 ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ptrace.patch
@@ -1237,6 +1247,7 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
+ApplyPatch sparc64_fix_build_errors_with_gcc460.patch
 
 #
 # Exec shield
@@ -1350,6 +1361,9 @@ ApplyPatch drm-intel-big-hammer.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 ApplyPatch drm-intel-edp-fixes.patch
+# rhbz#681285 (i965: crash in brw_wm_surface_state.c::prepare_wm_surfaces()
+#  where intelObj->mt == NULL)
+#ApplyPatch drm-i915-gen4-has-non-power-of-two-strides.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1403,9 +1417,6 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 # rhbz#662344,600690
 ApplyPatch fs-call-security_d_instantiate-in-d_obtain_alias.patch
-
-# rhbz#672778
-ApplyPatch ath5k-fix-fast-channel-change.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1725,7 +1736,7 @@ BuildKernel %make_target %kernel_image smp
 
 %if %{with_doc}
 # Make the HTML and man pages.
-make %{?_smp_mflags} htmldocs mandocs || %{doc_build_fail}
+make htmldocs mandocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -1946,6 +1957,11 @@ fi
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/*
+
+%if %{with_debuginfo}
+%files -f perf-debuginfo.list -n perf-libre-debuginfo
+%defattr(-,root,root)
+%endif
 %endif
 
 # This is %%{image_install_path} on an arch where that includes ELF files,
@@ -2010,11 +2026,80 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 16 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed to 2.6.38-libre.
+
+* Tue Mar 15 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-1
+- Linux 2.6.38
+
+* Mon Mar 14 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed patch-libre-2.6.38-rc8-git4 by hand.
+
+* Mon Mar 13 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git4.1
+- Linux 2.6.38-rc8-git4
+
+* Thu Mar 10 2011 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.38-rc8-git3
+
+* Thu Mar 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Created patch-libre-2.6.38-rc8 by diffing deblobbed trees.
+
+* Thu Mar 10 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git2.1
+- Linux 2.6.38-rc8-git2
+
+* Wed Mar 09 2011 Chuck Ebbert <cebbert@redhat.com>
+- Linux 2.6.38-rc8-git1
+
+* Wed Mar 09 2011 Dennis Gilmore <dennis@ausil.us>
+- apply sparc64 gcc-4.6.0 buildfix patch
+
+* Wed Mar 09 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-0.rc8.git0.2
+- nouveau: allow max clients on nv4x (679629), better error reporting
+
+* Tue Mar 08 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git0.1
+- Linux 2.6.38-rc8
+
+* Mon Mar  7 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Created patch-libre-2.6.38-rc7 by diffing deblobbed trees.
+
+* Sat Mar 05 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc7.git4.1
+- Linux 2.6.38-rc7-git4
+- Revert upstream commit e3e89cc535223433a619d0969db3fa05cdd946b8
+  for now to fix utrace build.
+
+* Fri Mar 04 2011 Roland McGrath <roland@redhat.com> - 2.6.38-0.rc7.git2.3
+- Split out perf-debuginfo subpackage.
+
+* Fri Mar 04 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc7.git2.2
+- Disable drm-i915-gen4-has-non-power-of-two-strides.patch for now, breaks
+  my mutter.
+
+* Fri Mar 04 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc7.git2.1
+- Linux 2.6.38-rc7-git2
+- drm-i915-gen4-has-non-power-of-two-strides.patch (#681285)
+
+* Thu Mar 03 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc7.git1.1
+- Linux 2.6.38-rc7-git1
+
+* Tue Mar 01 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc7.git0.1
+- Linux 2.6.38-rc7
+
+* Fri Feb 25 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc6.git6.1
+- Linux 2.6.38-rc6-git6
+- Build in virtio_pci driver so virtio_console will be built-in (#677713)
+
+* Thu Feb 24 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc6.git4.1
+- Linux 2.6.38-rc6-git4
+
+* Thu Feb 24 2011 Matthew Garrett <mjg@redhat.com> 2.6.38-0.rc6.git2.2
+- linux-2.6-acpi-fix-implicit-notify.patch: Fix implicit notify when there's
+  more than one device per GPE
+
 * Wed Feb 23 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc6.git2.1
 - Linux 2.6.38-rc6-git2
 
 * Wed Feb 23 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Feb 24
-- Deblobbed patch-libre-2.6.38-rc6.
+- Created patch-libre-2.6.38-rc6 by diffing deblobbed trees.
 
 * Wed Feb 23 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-0.rc6.git0.2
 - nouveau: nv4x pciegart fixes, nvc0 accel improvements
