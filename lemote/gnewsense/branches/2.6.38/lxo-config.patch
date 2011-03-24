@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-03-15 21:40:33.000000000 +0000
-+++ Makefile	2011-03-15 21:40:35.000000000 +0000
+--- Makefile.orig	2011-03-24 09:51:46.000000000 +0000
++++ Makefile	2011-03-24 09:53:13.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 38
--EXTRAVERSION =-libre
-+EXTRAVERSION =-libre-lemote
+-EXTRAVERSION = .1-libre
++EXTRAVERSION = .1-libre-lemote
  NAME = Flesh-Eating Bats with Fangs
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-03-15 21:42:42.000000000 +0000
-@@ -0,0 +1,4445 @@
++++ .config	2011-03-24 09:56:27.000000000 +0000
+@@ -0,0 +1,4448 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux/mips 2.6.38-libre-lemote Kernel Configuration
-+# Tue Mar 15 21:42:42 2011
++# Linux/mips 2.6.38.1-libre-lemote Kernel Configuration
++# Thu Mar 24 09:56:27 2011
 +#
 +CONFIG_MIPS=y
 +
@@ -3139,7 +3139,7 @@ Index: .config
 +CONFIG_FB=y
 +CONFIG_FIRMWARE_EDID=y
 +# CONFIG_FB_DDC is not set
-+# CONFIG_FB_BOOT_VESA_SUPPORT is not set
++CONFIG_FB_BOOT_VESA_SUPPORT=y
 +CONFIG_FB_CFB_FILLRECT=y
 +CONFIG_FB_CFB_COPYAREA=y
 +CONFIG_FB_CFB_IMAGEBLIT=y
@@ -3175,7 +3175,9 @@ Index: .config
 +# CONFIG_FB_ATY is not set
 +# CONFIG_FB_S3 is not set
 +# CONFIG_FB_SAVAGE is not set
-+# CONFIG_FB_SIS is not set
++CONFIG_FB_SIS=y
++CONFIG_FB_SIS_300=y
++CONFIG_FB_SIS_315=y
 +# CONFIG_FB_NEOMAGIC is not set
 +# CONFIG_FB_KYRO is not set
 +# CONFIG_FB_3DFX is not set
@@ -3400,6 +3402,7 @@ Index: .config
 +#
 +CONFIG_HID_3M_PCT=m
 +CONFIG_HID_A4TECH=m
++CONFIG_HID_ACRUX=m
 +CONFIG_HID_ACRUX_FF=m
 +CONFIG_HID_APPLE=m
 +CONFIG_HID_BELKIN=m
