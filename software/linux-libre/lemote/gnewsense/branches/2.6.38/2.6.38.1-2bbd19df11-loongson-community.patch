@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index d6592b6..0052ab6 100644
+index 167ef45..29d565c 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -233,8 +233,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -4281,10 +4281,10 @@ index 2adead5..a039fc6 100644
  obj-$(CONFIG_PCI)	+= iomap-pci.o
  
 diff --git a/arch/mips/loongson/Kconfig b/arch/mips/loongson/Kconfig
-index aca93ee..1e15891 100644
+index aca93ee..421ae85 100644
 --- a/arch/mips/loongson/Kconfig
 +++ b/arch/mips/loongson/Kconfig
-@@ -32,61 +32,122 @@ config LEMOTE_FULOONG2E
+@@ -32,61 +32,121 @@ config LEMOTE_FULOONG2E
  
  config LEMOTE_MACH2F
  	bool "Lemote Loongson 2F family machines"
@@ -4418,7 +4418,6 @@ index aca93ee..1e15891 100644
 +	  I have no information about how to determine which version your board
 +	  is, If the default config doesn't work for it, please change it to
 +	  smaller ones.
-+
  endif # MACH_LOONGSON
 diff --git a/arch/mips/loongson/Makefile b/arch/mips/loongson/Makefile
 index 2b76cb0..1c3ae7c 100644
@@ -8158,10 +8157,10 @@ index 628c8fa..a6e6c96 100644
  #define wrmsr(x, y, z) do { } while (0)
  #define use_msr 0
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 2560f01..fe41383 100644
+index ae445b1..4da72b6 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -549,6 +549,13 @@ config HID_ZYDACRON
+@@ -555,6 +555,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -8176,7 +8175,7 @@ index 2560f01..fe41383 100644
  
  endif # HID_SUPPORT
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index 6efc2a0..265a0fa 100644
+index 13e6248..a5aa3ec 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
 @@ -73,6 +73,7 @@ obj-$(CONFIG_HID_ZEROPLUS)	+= hid-zpff.o
@@ -8404,10 +8403,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 92a0d61..80ef68d 100644
+index 090bf48..4160064 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -595,4 +595,6 @@
+@@ -599,4 +599,6 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -47989,7 +47988,7 @@ index 4c502c8..e6b59fe 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 5f46838..5983a7e 100644
+index 75c7f45..809b072 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
