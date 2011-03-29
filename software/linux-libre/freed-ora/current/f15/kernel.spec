@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 6
+%global baserelease 8
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -77,7 +77,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -656,7 +656,6 @@ Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
-Patch386: pci-_osc-supported-field-should-contain-supported-features-not-enabled-ones.patch
 
 Patch385: ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
@@ -669,7 +668,6 @@ Patch399: acpi_battery-fribble-sysfs-files-from-a-resume-notifier.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
-Patch454: thinkpad-acpi-fix-backlight.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -725,7 +723,6 @@ Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
 Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
 
 #Patch2916: lirc-staging-2.6.36-fixes.patch
-#Patch2917: hdpvr-ir-enable.patch
 
 Patch2918: flexcop-fix-xlate_proc_name-warning.patch
 
@@ -753,13 +750,10 @@ Patch12200: acpi_reboot.patch
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
 Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 Patch12205: runtime_pm_fixups.patch
+Patch12206: pci-acpi-report-aspm-support-to-bios-if-not-disabled-from-command-line.patch
+Patch12207: pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
-
-Patch12421: fs-call-security_d_instantiate-in-d_obtain_alias.patch
-
-# Fix possible memory corruption on Dell HW
-Patch12430: dcdbas-force-smi-to-happen-when-expected.patch
 
 %endif
 
@@ -1300,8 +1294,10 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
-# rhbz#638912
-#ApplyPatch pci-_osc-supported-field-should-contain-supported-features-not-enabled-ones.patch
+# rhbz #683156
+ApplyPatch pci-acpi-report-aspm-support-to-bios-if-not-disabled-from-command-line.patch
+#
+ApplyPatch pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
 
 #ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
@@ -1324,8 +1320,6 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 ApplyPatch die-floppy-die.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
-
-#ApplyPatch thinkpad-acpi-fix-backlight.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1391,8 +1385,6 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 # http://www.lirc.org/
 #ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
-# enable IR receiver on Hauppauge HD PVR (v4l-dvb merge pending)
-#ApplyPatch hdpvr-ir-enable.patch
 
 # rhbz#664852
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
@@ -1419,12 +1411,6 @@ ApplyPatch acpi_reboot.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
-
-# rhbz#662344,600690
-ApplyPatch fs-call-security_d_instantiate-in-d_obtain_alias.patch
-
-# Fix possible memory corruption on Dell HW
-ApplyPatch dcdbas-force-smi-to-happen-when-expected.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2034,6 +2020,25 @@ fi
 # and build.
 
 %changelog
+* Sun Mar 27 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.2-8
+- Linux 2.6.38.2
+- Drop patches merged in 2.6.38.2:
+   dcdbas-force-smi-to-happen-when-expected.patch
+   fs-call-security_d_instantiate-in-d_obtain_alias.patch
+   prevent-rt_sigqueueinfo-and-rt_tgsigqueueinfo-from-spoofing-the-signal-code.patch
+- Fix more PCIe ASPM bugs:
+   kworker task over 65% after resume (#683156)
+   ASPM powersave mode does not get enabled
+
+* Sat Mar 26 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.2-7.rc1
+- Linux 2.6.38.2-rc1
+
+* Fri Mar 25 2011 Chuck Ebbert <cebbert@redhat.com>
+- CVE-2011-1182: kernel signal spoofing issue
+- Drop unused patches already applied upstream:
+  hdpvr-ir-enable.patch
+  thinkpad-acpi-fix-backlight.patch
+
 * Wed Mar 23 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.1-6
 - Linux 2.6.38.1
 - Drop linux-2.6-ehci-check-port-status.patch, merged in .38.1
