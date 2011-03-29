@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-03-24 09:51:46.000000000 +0000
-+++ Makefile	2011-03-24 09:53:13.000000000 +0000
+--- Makefile.orig	2011-03-28 20:01:43.000000000 +0000
++++ Makefile	2011-03-28 20:01:49.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 38
--EXTRAVERSION = .1-libre
-+EXTRAVERSION = .1-libre-lemote
+-EXTRAVERSION = .2-libre
++EXTRAVERSION = .2-libre-lemote
  NAME = Flesh-Eating Bats with Fangs
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-03-24 09:56:27.000000000 +0000
-@@ -0,0 +1,4448 @@
++++ .config	2011-03-28 20:07:59.000000000 +0000
+@@ -0,0 +1,4449 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux/mips 2.6.38.1-libre-lemote Kernel Configuration
-+# Thu Mar 24 09:56:27 2011
++# Linux/mips 2.6.38.2-libre-lemote Kernel Configuration
++# Mon Mar 28 20:07:59 2011
 +#
 +CONFIG_MIPS=y
 +
@@ -1844,8 +1844,9 @@ Index: .config
 +CONFIG_USB_ZD1201=m
 +CONFIG_USB_NET_RNDIS_WLAN=m
 +CONFIG_RTL8180=m
-+# CONFIG_RTL8187 is not set
-+CONFIG_RTL8187B=m
++CONFIG_RTL8187=m
++CONFIG_RTL8187_LEDS=y
++# CONFIG_RTL8187B is not set
 +CONFIG_ADM8211=m
 +CONFIG_MAC80211_HWSIM=m
 +CONFIG_MWL8K=m
