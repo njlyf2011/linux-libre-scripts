@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 8
+%global baserelease 10
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -738,8 +738,6 @@ Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12017: prevent-runtime-conntrack-changes.patch
-
 Patch12018: neuter_intel_microcode_load.patch
 
 Patch12101: apple_backlight.patch
@@ -754,6 +752,9 @@ Patch12206: pci-acpi-report-aspm-support-to-bios-if-not-disabled-from-command-li
 Patch12207: pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
+
+Patch12305: printk-do-not-mangle-valid-userspace-syslog-prefixes.patch
+Patch12306: scsi-sd-downgrade-caching-printk-from-error-to-notice.patch
 
 %endif
 
@@ -1412,6 +1413,11 @@ ApplyPatch acpi_reboot.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
+# rhbz#691888
+ApplyPatch printk-do-not-mangle-valid-userspace-syslog-prefixes.patch
+
+ApplyPatch scsi-sd-downgrade-caching-printk-from-error-to-notice.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2020,6 +2026,28 @@ fi
 # and build.
 
 %changelog
+* Thu Mar 31 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-2.10
+- nouveau: nva3+ stability improvements
+- nouveau: nvc0 "stutter" fixes
+- nouveau: nv50/nvc0 page flipping
+- nouveau: nv50 z compression
+
+* Wed Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38.2-9
+- Downgrade SCSI sd printk's about disk caching from KERN_ERR to KERN_NOTICE
+  so they don't show up in our pretty quiet boot. Ray noticed them when
+  booting from a USB stick which doesn't have a cache page returned in the
+  sense buffer.
+
+* Tue Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Disable CONFIG_IMA, CONFIG_TCG_TPM on powerpc (#689468)
+
+* Tue Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com>
+- printk: do not mangle valid userspace syslog prefixes with
+  /dev/kmsg (#691888)
+  - The patch is upstream in 2.6.39, and Lennart tells me the patch has been
+    backported for the next Suse release as well.
+- Disable qla4xxx (CONFIG_SCSI_QLA_ISCSI) driver on powerpc32 (#686199)
+
 * Sun Mar 27 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.2-8
 - Linux 2.6.38.2
 - Drop patches merged in 2.6.38.2:
