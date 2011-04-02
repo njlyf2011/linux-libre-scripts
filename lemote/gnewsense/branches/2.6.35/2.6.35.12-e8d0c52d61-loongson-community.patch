@@ -1,5 +1,5 @@
 diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index c74ff6f..dc501ba 100644
+index 713c589..a2104fc 100644
 --- a/Documentation/kernel-parameters.txt
 +++ b/Documentation/kernel-parameters.txt
 @@ -1679,6 +1679,8 @@ and is between 256 and 4096 characters. It is defined in the file
@@ -427,7 +427,7 @@ index 3894eaa..ebfbce0 100644
  
  The file rtsig-max can be used to tune the maximum number
 diff --git a/Makefile b/Makefile
-index 78daa86..cea7264 100644
+index 92b2538..035ed26 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -188,7 +188,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -10072,15 +10072,17 @@ index ed007a2..a84e335 100644
  };
  
 diff --git a/arch/mips/loongson/common/serial.c b/arch/mips/loongson/common/serial.c
-index 7580873..6ab8a62 100644
+index 7580873..d1d99b6 100644
 --- a/arch/mips/loongson/common/serial.c
 +++ b/arch/mips/loongson/common/serial.c
-@@ -74,3 +74,5 @@ static int __init serial_init(void)
+@@ -74,3 +74,7 @@ static int __init serial_init(void)
  }
  
  device_initcall(serial_init);
 +
 +MODULE_LICENSE("GPL");
++MODULE_AUTHOR("liu shiwei <liushiwei@anheng.com.cn>");
++MODULE_DESCRIPTION("loongson serial");
 diff --git a/arch/mips/loongson/fuloong-2e/irq.c b/arch/mips/loongson/fuloong-2e/irq.c
 index 320e937..d61a042 100644
 --- a/arch/mips/loongson/fuloong-2e/irq.c
@@ -48734,10 +48736,10 @@ index 0000000..40f4c4e
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 11b8ea2..fd231dd 100644
+index bf588d9..0817aef 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -753,8 +753,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -754,8 +754,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME:
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -48800,7 +48802,7 @@ index fc57655..437da2f 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index ba23c21..d2d8f02 100644
+index a0f46c4..ff5085b 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -48813,7 +48815,7 @@ index ba23c21..d2d8f02 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E600			0x1001
  #define HUAWEI_PRODUCT_E220			0x1003
-@@ -423,6 +426,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -432,6 +435,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
@@ -49039,7 +49041,7 @@ index 76dad48..7232472 100644
  }
  
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 1272de4..ed54852 100644
+index fc531a7..9b8933f 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -36,8 +36,15 @@
@@ -49087,7 +49089,7 @@ index 1272de4..ed54852 100644
  	/*
  	 * Cumulative resource counters for dead threads in the group,
  	 * and for reaped dead child processes forked by this group.
-@@ -1173,17 +1183,36 @@ struct task_struct {
+@@ -1174,17 +1184,36 @@ struct task_struct {
  
  	int lock_depth;		/* BKL lock depth */
  
@@ -49124,7 +49126,7 @@ index 1272de4..ed54852 100644
  
  #ifdef CONFIG_PREEMPT_NOTIFIERS
  	/* list of struct preempt_notifier: */
-@@ -1278,6 +1307,9 @@ struct task_struct {
+@@ -1279,6 +1308,9 @@ struct task_struct {
  	int __user *clear_child_tid;		/* CLONE_CHILD_CLEARTID */
  
  	cputime_t utime, stime, utimescaled, stimescaled;
@@ -49134,7 +49136,7 @@ index 1272de4..ed54852 100644
  	cputime_t gtime;
  #ifndef CONFIG_VIRT_CPU_ACCOUNTING
  	cputime_t prev_utime, prev_stime;
-@@ -1500,6 +1532,67 @@ struct task_struct {
+@@ -1501,6 +1533,67 @@ struct task_struct {
  #endif
  };
  
@@ -49202,7 +49204,7 @@ index 1272de4..ed54852 100644
  /* Future-safe accessor for struct task_struct's cpus_allowed. */
  #define tsk_cpus_allowed(tsk) (&(tsk)->cpus_allowed)
  
-@@ -1518,9 +1611,19 @@ struct task_struct {
+@@ -1519,9 +1612,19 @@ struct task_struct {
  
  #define MAX_USER_RT_PRIO	100
  #define MAX_RT_PRIO		MAX_USER_RT_PRIO
@@ -49223,7 +49225,7 @@ index 1272de4..ed54852 100644
  
  static inline int rt_prio(int prio)
  {
-@@ -1829,7 +1932,7 @@ task_sched_runtime(struct task_struct *task);
+@@ -1842,7 +1945,7 @@ task_sched_runtime(struct task_struct *task);
  extern unsigned long long thread_group_sched_runtime(struct task_struct *task);
  
  /* sched_exec is called by processes performing an exec */
@@ -49232,7 +49234,7 @@ index 1272de4..ed54852 100644
  extern void sched_exec(void);
  #else
  #define sched_exec()   {}
-@@ -1898,6 +2001,24 @@ int sched_rt_handler(struct ctl_table *table, int write,
+@@ -1911,6 +2014,24 @@ int sched_rt_handler(struct ctl_table *table, int write,
  
  extern unsigned int sysctl_sched_compat_yield;
  
@@ -49257,7 +49259,7 @@ index 1272de4..ed54852 100644
  #ifdef CONFIG_RT_MUTEXES
  extern int rt_mutex_getprio(struct task_struct *p);
  extern void rt_mutex_setprio(struct task_struct *p, int prio);
-@@ -1993,6 +2114,9 @@ extern void wake_up_new_task(struct task_struct *tsk,
+@@ -2006,6 +2127,9 @@ extern void wake_up_new_task(struct task_struct *tsk,
   static inline void kick_process(struct task_struct *tsk) { }
  #endif
  extern void sched_fork(struct task_struct *p, int clone_flags);
@@ -49474,7 +49476,7 @@ index 9829646..505f4d8 100644
  
  		if (task_cputime_expired(&task_sample, &tsk->cputime_expires))
 diff --git a/kernel/sched.c b/kernel/sched.c
-index d4f71b0..3c23573 100644
+index d40d662..4e10a56 100644
 --- a/kernel/sched.c
 +++ b/kernel/sched.c
 @@ -1,3 +1,6 @@
@@ -49503,7 +49505,7 @@ index d4f71b0..3c23573 100644
  };
  
  #define root_task_group init_task_group
-@@ -610,11 +618,14 @@ static inline int cpu_of(struct rq *rq)
+@@ -615,11 +623,14 @@ static inline int cpu_of(struct rq *rq)
   */
  static inline struct task_group *task_group(struct task_struct *p)
  {
@@ -49519,7 +49521,7 @@ index d4f71b0..3c23573 100644
  }
  
  /* Change a task's cfs_rq and parent entity if it moves across CPUs/groups */
-@@ -1885,6 +1896,7 @@ static void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
+@@ -1993,6 +2004,7 @@ static void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
  #include "sched_idletask.c"
  #include "sched_fair.c"
  #include "sched_rt.c"
@@ -49527,7 +49529,7 @@ index d4f71b0..3c23573 100644
  #ifdef CONFIG_SCHED_DEBUG
  # include "sched_debug.c"
  #endif
-@@ -7681,7 +7693,7 @@ void __init sched_init(void)
+@@ -7796,7 +7808,7 @@ void __init sched_init(void)
  #ifdef CONFIG_CGROUP_SCHED
  	list_add(&init_task_group.list, &task_groups);
  	INIT_LIST_HEAD(&init_task_group.children);
@@ -49536,7 +49538,7 @@ index d4f71b0..3c23573 100644
  #endif /* CONFIG_CGROUP_SCHED */
  
  #if defined CONFIG_FAIR_GROUP_SCHED && defined CONFIG_SMP
-@@ -9110,3 +9122,4 @@ void synchronize_sched_expedited(void)
+@@ -9225,3 +9237,4 @@ void synchronize_sched_expedited(void)
  EXPORT_SYMBOL_GPL(synchronize_sched_expedited);
  
  #endif /* #else #ifndef CONFIG_SMP */
