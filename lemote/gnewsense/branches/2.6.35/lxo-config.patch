@@ -1,7 +1,7 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-03-31 23:13:50.000000000 +0000
-+++ Makefile	2011-03-31 23:13:52.000000000 +0000
+--- Makefile.orig	2011-04-02 07:38:40.000000000 +0000
++++ Makefile	2011-04-02 07:38:42.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
@@ -14,12 +14,12 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-04-01 20:23:46.000000000 +0000
-@@ -0,0 +1,4240 @@
++++ .config	2011-04-02 07:44:38.000000000 +0000
+@@ -0,0 +1,4313 @@
 +#
 +# Automatically generated make config: don't edit
 +# Linux kernel version: 2.6.35.12-libre3-lemote
-+# Fri Apr  1 20:23:46 2011
++# Sat Apr  2 07:44:38 2011
 +#
 +CONFIG_MIPS=y
 +
@@ -1316,7 +1316,79 @@ Index: .config
 +# CONFIG_IWMC3200TOP_DEBUG is not set
 +# CONFIG_IWMC3200TOP_DEBUGFS is not set
 +CONFIG_HAVE_IDE=y
-+# CONFIG_IDE is not set
++CONFIG_IDE=y
++
++#
++# Please see Documentation/ide/ide.txt for help/info on IDE drives
++#
++CONFIG_IDE_XFER_MODE=y
++CONFIG_IDE_TIMINGS=y
++CONFIG_IDE_ATAPI=y
++CONFIG_IDE_LEGACY=y
++# CONFIG_BLK_DEV_IDE_SATA is not set
++CONFIG_IDE_GD=y
++CONFIG_IDE_GD_ATA=y
++# CONFIG_IDE_GD_ATAPI is not set
++CONFIG_BLK_DEV_IDECD=m
++CONFIG_BLK_DEV_IDECD_VERBOSE_ERRORS=y
++CONFIG_BLK_DEV_IDETAPE=m
++# CONFIG_IDE_TASK_IOCTL is not set
++CONFIG_IDE_PROC_FS=y
++
++#
++# IDE chipset support/bugfixes
++#
++CONFIG_IDE_GENERIC=m
++CONFIG_BLK_DEV_PLATFORM=m
++CONFIG_BLK_DEV_IDEDMA_SFF=y
++
++#
++# PCI IDE chipsets support
++#
++CONFIG_BLK_DEV_IDEPCI=y
++CONFIG_IDEPCI_PCIBUS_ORDER=y
++# CONFIG_BLK_DEV_OFFBOARD is not set
++CONFIG_BLK_DEV_GENERIC=m
++CONFIG_BLK_DEV_OPTI621=m
++CONFIG_BLK_DEV_IDEDMA_PCI=y
++CONFIG_BLK_DEV_AEC62XX=m
++CONFIG_BLK_DEV_ALI15X3=m
++CONFIG_BLK_DEV_AMD74XX=m
++CONFIG_BLK_DEV_CMD64X=m
++CONFIG_BLK_DEV_TRIFLEX=m
++CONFIG_BLK_DEV_CS5520=m
++CONFIG_BLK_DEV_CS5530=m
++CONFIG_BLK_DEV_HPT366=m
++CONFIG_BLK_DEV_JMICRON=m
++CONFIG_BLK_DEV_SC1200=m
++CONFIG_BLK_DEV_PIIX=m
++CONFIG_BLK_DEV_IT8172=m
++CONFIG_BLK_DEV_IT8213=m
++CONFIG_BLK_DEV_IT821X=m
++CONFIG_BLK_DEV_NS87415=m
++CONFIG_BLK_DEV_PDC202XX_OLD=m
++CONFIG_BLK_DEV_PDC202XX_NEW=m
++CONFIG_BLK_DEV_SVWKS=m
++CONFIG_BLK_DEV_SIIMAGE=m
++CONFIG_BLK_DEV_SLC90E66=m
++CONFIG_BLK_DEV_TRM290=m
++CONFIG_BLK_DEV_VIA82CXXX=m
++CONFIG_BLK_DEV_TC86C001=m
++
++#
++# Other IDE chipsets support
++#
++
++#
++# Note: most of these also require special kernel boot parameters
++#
++CONFIG_BLK_DEV_4DRIVES=m
++CONFIG_BLK_DEV_ALI14XX=m
++CONFIG_BLK_DEV_DTC2278=m
++CONFIG_BLK_DEV_HT6560B=m
++CONFIG_BLK_DEV_QD65XX=m
++CONFIG_BLK_DEV_UMC8672=m
++CONFIG_BLK_DEV_IDEDMA=y
 +
 +#
 +# SCSI device support
@@ -3559,6 +3631,7 @@ Index: .config
 +# LED Triggers
 +#
 +CONFIG_LEDS_TRIGGER_TIMER=m
++# CONFIG_LEDS_TRIGGER_IDE_DISK is not set
 +CONFIG_LEDS_TRIGGER_HEARTBEAT=m
 +CONFIG_LEDS_TRIGGER_BACKLIGHT=m
 +CONFIG_LEDS_TRIGGER_GPIO=m
