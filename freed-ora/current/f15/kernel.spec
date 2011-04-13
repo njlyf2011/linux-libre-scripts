@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 13
+%global baserelease 14
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -642,6 +642,8 @@ Patch30: linux-2.6-tracehook.patch
 Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
+Patch60: linux-2.6-x86-fix-mtrr-resume.patch
+
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 Patch151: sparc64_fix_build_errors_with_gcc460.patch
 
@@ -692,6 +694,7 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 # DRM
 
 # nouveau + drm fixes
+Patch1809: drm-nouveau-fixes.patch
 Patch1810: drm-nouveau-updates.patch
 Patch1811: drm-ttm-move-notify.patch
 Patch1819: drm-intel-big-hammer.patch
@@ -1236,6 +1239,7 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
+ApplyPatch linux-2.6-x86-fix-mtrr-resume.patch
 
 #
 # Intel IOMMU
@@ -1357,6 +1361,7 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # Nouveau DRM
 ApplyPatch drm-ttm-move-notify.patch
+ApplyOptionalPatch drm-nouveau-fixes.patch
 ApplyOptionalPatch drm-nouveau-updates.patch
 
 # Intel DRM
@@ -2030,6 +2035,12 @@ fi
 # and build.
 
 %changelog
+* Tue Apr 12 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-2.14
+- nouveau: correct lock ordering problem
+
+* Mon Apr 11 2011 Dave Airlie <airlied@redhat.com>
+- x86: add upstream patch to fix MTRR on resume - will come via stable later.
+
 * Fri Apr 08 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-2.13
 - nouveau: fix pcie nv3x (rhbz#692588)
 
