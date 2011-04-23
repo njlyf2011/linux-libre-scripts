@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 14
+%global baserelease 18
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -77,7 +77,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -642,8 +642,6 @@ Patch30: linux-2.6-tracehook.patch
 Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
-Patch60: linux-2.6-x86-fix-mtrr-resume.patch
-
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 Patch151: sparc64_fix_build_errors_with_gcc460.patch
 
@@ -705,7 +703,6 @@ Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
 Patch1826: drm-intel-edp-fixes.patch
-Patch1827: drm-i915-gen4-has-non-power-of-two-strides.patch
 Patch1828: drm-intel-eeebox-eb1007-quirk.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
@@ -722,12 +719,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2902: linux-2.6-v4l-dvb-uvcvideo-update.patch
-
-Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
-
-#Patch2916: lirc-staging-2.6.36-fixes.patch
 
 Patch2918: flexcop-fix-xlate_proc_name-warning.patch
 
@@ -752,14 +743,14 @@ Patch12200: acpi_reboot.patch
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
 Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
-Patch12205: runtime_pm_fixups.patch
-Patch12206: pci-acpi-report-aspm-support-to-bios-if-not-disabled-from-command-line.patch
 Patch12207: pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch12305: printk-do-not-mangle-valid-userspace-syslog-prefixes.patch
 Patch12306: scsi-sd-downgrade-caching-printk-from-error-to-notice.patch
+
+Patch12307: iwlwifi-do-not-set-tx-power-when-channel-is-changing.patch
 
 %endif
 
@@ -1239,7 +1230,6 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-x86-fix-mtrr-resume.patch
 
 #
 # Intel IOMMU
@@ -1301,8 +1291,6 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
-# rhbz #683156
-ApplyPatch pci-acpi-report-aspm-support-to-bios-if-not-disabled-from-command-line.patch
 #
 ApplyPatch pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
 
@@ -1318,6 +1306,9 @@ ApplyPatch pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.p
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
+
+# rhbz#688252
+ApplyPatch iwlwifi-do-not-set-tx-power-when-channel-is-changing.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1371,9 +1362,6 @@ ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 ApplyPatch drm-intel-edp-fixes.patch
 ApplyPatch drm-i915-fix-pipelined-fencing.patch
-# rhbz#681285 (i965: crash in brw_wm_surface_state.c::prepare_wm_surfaces()
-#  where intelObj->mt == NULL)
-#ApplyPatch drm-i915-gen4-has-non-power-of-two-strides.patch
 ApplyPatch drm-intel-eeebox-eb1007-quirk.patch
 
 # linux1394 git patches
@@ -1388,13 +1376,6 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
-#ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
-#ApplyPatch linux-2.6-v4l-dvb-ir-core-update.patch
-
-###FIX###ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-
-# http://www.lirc.org/
-#ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
 
 # rhbz#664852
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
@@ -1417,7 +1398,6 @@ ApplyPatch acpi_reboot.patch
 #ApplyPatch linux-2.6-usb-pci-autosuspend.patch
 ### Broken by implicit notify support & ACPICA rebase
 ###ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
-#ApplyPatch runtime_pm_fixups.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -2035,6 +2015,44 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 22 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed linux-2.6-v4l-dvb-update.patch.
+
+* Fri Apr 22 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38.3-18
+- iwlwifi: fix scanning when channel changing (#688252)
+
+* Tue Apr 19 2011 Jarod Wilson <jarod@redhat.com>
+- Add basic support for full 32-bit NEC IR scancodes
+- Add latest patches sent upstream for hid layer expansion and full
+  support for the TiVo Slide bluetooth/hid remote
+- Add a TiVo IR remote keymap, use it by default with TiVo mceusb device
+- Add ite-cir driver, nuke crappy old lirc_it* drivers
+- Add an initial Apple remote keymap
+- Add support for more Nuvoton IR hardware variants
+- Overhaul lirc_zilog refcounting so it doesn't suck so badly anymore
+- Clean up myriad of Hauppauge keymaps
+- Make ir-kbd-i2c pass full rc5 scancodes when it can
+- Misc minor v4l/dvb fixes
+
+* Fri Apr 15 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Drop x86-hibernate-initialize-mmu_cr4_features-during-boot.patch, 
+  e5f15b45 was reverted in stable.
+
+* Thu Apr 14 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.3-16
+- Linux 2.6.38.3
+- Drop merged patches:
+    linux-2.6-x86-fix-mtrr-resume.patch
+    pci-acpi-report-aspm-support-to-bios-if-not-disabled-from-command-line.patch
+- Drop some obsolete patches:
+    runtime_pm_fixups.patch
+    drm-i915-gen4-has-non-power-of-two-strides.patch'
+
+* Wed Apr 13 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.3-15.rc1
+- Linux 2.6.38.3-rc1
+
+* Tue Apr 12 2011 Kyle McMartin <kmcmartin@redhat.com>
+- fix hibernate which was broken by 2.6.38.y (korg#32222)
+
 * Tue Apr 12 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-2.14
 - nouveau: correct lock ordering problem
 
