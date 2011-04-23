@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2011-03-31
+# deblob-check version 2011-04-22.1
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -2742,6 +2742,8 @@ set_except () {
     blobname 'rpm_firmware\(_rev11\)\?\.bin' sound/pci/rme9652/hdsp.c
     blobname 'mwl8k[/]fmimage_8366_ap-["][ ][#]api[ ]["]\.fw' drivers/net/wireless/mwl8k.c
     blobname 'rtl_nic[/]rtl8168d-[12]\.fw' drivers/net/r8169.c
+    # New in 2.6.38.4
+    defsnc '[	]static[ ]DEFINE_TEST_\(OK\|FAIL\)[(][^)]*[)][ ]=' lib/test-kstrtox.c
     ;;
 
   */*freedo*.patch | */*logo*.patch)
@@ -2836,6 +2838,11 @@ set_except () {
     defsnc '[	]\(static[ ]const[ ]\)\?u32[ ]reg_boundaries\[\][ ]=' drivers/net/bnx2.c
     initnc 'static[ ]const[ ]struct[ ]ath5k_ini_mode[ ]rf\(5413\|24\(13\|25\)\)_ini_mode_end\[\][ ]=' drivers/net/wireless/ath5k/initvals.c
     defsnc 'static[ ]u32[ ]\(h_prescale\|v_gain\)\[64\][ ]=' drivers/staging/stradis/stradis.c
+    ;;
+
+  */patch*-2.6.38*)
+    # New in 2.6.38.4
+    defsnc '[	]static[ ]DEFINE_TEST_\(OK\|FAIL\)[(][^)]*[)][ ]=' lib/test-kstrtox.c
     ;;
 
   */patch*-2.6.37-rc*) # up to -rc8-git3
@@ -3614,6 +3621,7 @@ set_except () {
     accept '[(]at[ ]which[ ]point[ ]it[ ]should[ ]use[ ]request_firmware'
     ;;
   */linux-2.6-v4l-dvb*.patch)
+    initnc '\([;][/][*]@@[ ]-[0-9]*,[0-9]*[ ][+][0-9]*,[0-9]*[ ]@@[ ]\)\?static[ ]const[ ]unsigned[ ]char[ ]hid_keyboard\[256\][ ]=\([ ][{][*][/][;]\)\?' drivers/hid/hid-input.c
   # post 2.6.37 fixes start here
     defsnc 'static[ ]const[ ]struct[ ]dib0090_pll[ ]dib0090_p1g_pll_table\[\][ ]=' drivers/media/dvb/frontends/dib0090.c
     defsnc '[	]static[ ]u8[ ]sine\[\][ ]=' drivers/media/dvb/frontends/dib7000p.c
