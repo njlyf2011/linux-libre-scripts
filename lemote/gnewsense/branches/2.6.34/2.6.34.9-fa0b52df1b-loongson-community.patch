@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 3db48a6..7c1f76e 100644
+index 6300664..bbb94f8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -186,7 +186,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -72,6 +72,22 @@ index 7e6fd1c..87f19ce 100644
  # Timer Interrupt Frequency Configuration
  #
  
+diff --git a/arch/mips/Kconfig.debug b/arch/mips/Kconfig.debug
+index 43dc279..77eba81 100644
+--- a/arch/mips/Kconfig.debug
++++ b/arch/mips/Kconfig.debug
+@@ -7,9 +7,9 @@ config TRACE_IRQFLAGS_SUPPORT
+ source "lib/Kconfig.debug"
+ 
+ config EARLY_PRINTK
+-	bool "Early printk" if EMBEDDED
++	bool "Early printk"
+ 	depends on SYS_HAS_EARLY_PRINTK
+-	default y
++	default y if EMBEDDED
+ 	help
+ 	  This option enables special console drivers which allow the kernel
+ 	  to print messages very early in the bootup process.
 diff --git a/arch/mips/ar7/platform.c b/arch/mips/ar7/platform.c
 index 2fafc78..6731fde 100644
 --- a/arch/mips/ar7/platform.c
@@ -2810,7 +2826,7 @@ index 16210ce..675bd86 100644
  #define cpu_has_watch		1
  
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
-index 021f77c..44ae97c 100644
+index 021f77ca..44ae97c 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
 +++ b/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
 @@ -255,21 +255,12 @@ extern void _wrmsr(u32 msr, u32 hi, u32 lo);
@@ -4975,6 +4991,18 @@ index 0000000..858ee53
 +}
 +
 +device_initcall(rtc_cmos_init);
+diff --git a/arch/mips/loongson/common/serial.c b/arch/mips/loongson/common/serial.c
+index 7580873..d1d99b6 100644
+--- a/arch/mips/loongson/common/serial.c
++++ b/arch/mips/loongson/common/serial.c
+@@ -74,3 +74,7 @@ static int __init serial_init(void)
+ }
+ 
+ device_initcall(serial_init);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("liu shiwei <liushiwei@anheng.com.cn>");
++MODULE_DESCRIPTION("loongson serial");
 diff --git a/arch/mips/loongson/lemote-2f/Makefile b/arch/mips/loongson/lemote-2f/Makefile
 index 8699a53..10e9eb7 100644
 --- a/arch/mips/loongson/lemote-2f/Makefile
@@ -42389,10 +42417,10 @@ index 0000000..2f4d8fe
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..7d1e92d
+index 0000000..d35dbc7
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1200 @@
+@@ -0,0 +1,1206 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -43492,10 +43520,16 @@ index 0000000..7d1e92d
 +
 +static int yeeloong_resume(struct device *dev)
 +{
++	int ret;
++
 +	if (ec_version_before("EC_VER=PQ1D27"))
 +		yeeloong_lcd_vo_set(BIT_DISPLAY_LCD_ON);
 +	yeeloong_crt_vo_set(BIT_CRT_DETECT_PLUG);
 +	usb_ports_set(BIT_USB_FLAG_ON);
++
++	ret = sci_irq_init();
++	if (ret)
++		return -EFAULT;
 +
 +	return 0;
 +}
