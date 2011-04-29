@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 18
+%global baserelease 20
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -77,7 +77,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -643,7 +643,6 @@ Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
-Patch151: sparc64_fix_build_errors_with_gcc460.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
@@ -655,9 +654,13 @@ Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
-Patch383: linux-2.6-defaults-aspm.patch
 
-Patch385: ima-allow-it-to-be-completely-disabled-and-default-off.patch
+# ASPM: enable powersave by default
+Patch383: linux-2.6-defaults-aspm.patch
+Patch384: pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
+Patch385: pci-enable-aspm-state-clearing-regardless-of-policy.patch
+
+Patch389: ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -728,8 +731,6 @@ Patch2918: flexcop-fix-xlate_proc_name-warning.patch
 
 # patches headed upstream
 
-Patch12001: perf-gcc460-build-fixes.patch
-
 Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
@@ -743,14 +744,19 @@ Patch12200: acpi_reboot.patch
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
 Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
-Patch12207: pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch12305: printk-do-not-mangle-valid-userspace-syslog-prefixes.patch
 Patch12306: scsi-sd-downgrade-caching-printk-from-error-to-notice.patch
 
-Patch12307: iwlwifi-do-not-set-tx-power-when-channel-is-changing.patch
+Patch12310: iwlwifi-do-not-set-tx-power-when-channel-is-changing.patch
+Patch12311: iwl3945-do-not-deprecate-software-scan.patch
+Patch12312: iwl3945-disable-hw-scan-by-default.patch
+Patch12313: iwlwifi-fix-tx_power-initialization.patch
+
+#netconsole fixes
+Patch12400: linux-2.6-netconsole-deadlock.patch
 
 %endif
 
@@ -1243,7 +1249,6 @@ ApplyPatch linux-2.6-utrace-ptrace.patch
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
-ApplyPatch sparc64_fix_build_errors_with_gcc460.patch
 
 #
 # Exec shield
@@ -1291,8 +1296,9 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
-#
+# fixes for ASPM powersave mode
 ApplyPatch pci-pcie-links-may-not-get-configured-for-aspm-under-powersave-mode.patch
+ApplyPatch pci-enable-aspm-state-clearing-regardless-of-policy.patch
 
 #ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
@@ -1309,6 +1315,9 @@ ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # rhbz#688252
 ApplyPatch iwlwifi-do-not-set-tx-power-when-channel-is-changing.patch
+ApplyPatch iwl3945-do-not-deprecate-software-scan.patch
+ApplyPatch iwl3945-disable-hw-scan-by-default.patch
+ApplyPatch iwlwifi-fix-tx_power-initialization.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1381,7 +1390,6 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch flexcop-fix-xlate_proc_name-warning.patch
 
 # Patches headed upstream
-ApplyPatch perf-gcc460-build-fixes.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
@@ -1406,6 +1414,9 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 ApplyPatch printk-do-not-mangle-valid-userspace-syslog-prefixes.patch
 
 ApplyPatch scsi-sd-downgrade-caching-printk-from-error-to-notice.patch
+
+#rhbz 668231
+ApplyPatch linux-2.6-netconsole-deadlock.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2015,6 +2026,27 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 28 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38.4-20
+- [sgruszka@] Upstream fixes for iwl3945 bugs (#683571, #688252, #671366)
+
+* Tue Apr 26 2011 Chuck Ebbert <cebbert@redhat.com>
+- Another fix for ASPM powersave mode
+
+* Mon Apr 25 2011 Jarod Wilson <jarod@redhat.com>
+- ite-cir: fix modular build on powerpc (#698378)
+- mceusb: add Dell-branded transceiver device ID
+- nuvoton-cir: improve compatibility with lirc raw IR mode
+
+* Mon Apr 25 2011 Neil Horman <nhorman@redhat.com>
+- netconsole: fix deadlock in netdev notifier handler
+
+* Sun Apr 24 2011 Kyle McMartin <kmcmartin@redhat.com>
+- ppc64: disable TUNE_CELL, which causes problems with illegal instuctions
+  being generated on non-Cell PPC machines. (#698256)
+
+* Fri Apr 22 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38.4-19
+- Update to 2.6.38.4
+
 * Fri Apr 22 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed linux-2.6-v4l-dvb-update.patch.
 
