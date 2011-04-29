@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-04-02 07:47:36.000000000 +0000
-+++ Makefile	2011-04-02 07:47:38.000000000 +0000
+--- Makefile.orig	2011-04-28 21:04:40.000000000 +0000
++++ Makefile	2011-04-28 21:04:42.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 35
--EXTRAVERSION = .12-libre3
-+EXTRAVERSION = .12-libre3-lemote
+-EXTRAVERSION = .13-libre3
++EXTRAVERSION = .13-libre3-lemote
  NAME = Yokohama
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-04-03 01:30:57.000000000 +0000
++++ .config	2011-04-28 21:07:16.000000000 +0000
 @@ -0,0 +1,4311 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.35.12-libre3-lemote
-+# Sun Apr  3 01:30:57 2011
++# Linux kernel version: 2.6.35.13-libre3-lemote
++# Thu Apr 28 21:07:16 2011
 +#
 +CONFIG_MIPS=y
 +
