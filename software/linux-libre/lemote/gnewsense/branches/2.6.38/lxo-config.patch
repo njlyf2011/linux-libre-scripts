@@ -6,8 +6,8 @@ Index: Makefile
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 38
--EXTRAVERSION = .4-libre
-+EXTRAVERSION = .4-libre-lemote
+-EXTRAVERSION = .5-libre
++EXTRAVERSION = .5-libre-lemote
  NAME = Flesh-Eating Bats with Fangs
  
  # *DOCUMENTATION*
