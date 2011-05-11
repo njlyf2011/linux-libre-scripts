@@ -1,25 +1,25 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-04-22 09:24:04.000000000 +0000
-+++ Makefile	2011-04-22 09:24:06.000000000 +0000
+--- Makefile.orig	2011-05-10 04:37:39.000000000 +0000
++++ Makefile	2011-05-10 04:37:43.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 2
  PATCHLEVEL = 6
  SUBLEVEL = 38
--EXTRAVERSION = .5-libre
-+EXTRAVERSION = .5-libre-lemote
+-EXTRAVERSION = .6-libre
++EXTRAVERSION = .6-libre-lemote
  NAME = Flesh-Eating Bats with Fangs
  
  # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-04-22 09:56:12.000000000 +0000
++++ .config	2011-05-10 04:41:46.000000000 +0000
 @@ -0,0 +1,4450 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux/mips 2.6.38.4-libre-lemote Kernel Configuration
-+# Fri Apr 22 09:56:12 2011
++# Linux/mips 2.6.38.6-libre-lemote Kernel Configuration
++# Tue May 10 04:41:46 2011
 +#
 +CONFIG_MIPS=y
 +
