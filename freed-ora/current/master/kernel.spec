@@ -96,7 +96,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -637,11 +637,6 @@ Patch09: linux-2.6-upstream-reverts.patch
 
 # Standalone patches
 Patch20: linux-2.6-hotfixes.patch
-
-Patch29: linux-2.6-utrace-revert-make-ptrace-functions-static.patch
-Patch30: linux-2.6-tracehook.patch
-Patch31: linux-2.6-utrace.patch
-Patch32: linux-2.6-utrace-ptrace.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -1209,12 +1204,6 @@ ApplyPatch freedo.patch
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 ApplyPatch linux-2.6-hotfixes.patch
-
-# Roland's utrace ptrace replacement.
-#ApplyPatch linux-2.6-utrace-revert-make-ptrace-functions-static.patch
-#ApplyPatch linux-2.6-tracehook.patch
-#ApplyPatch linux-2.6-utrace.patch
-#ApplyPatch linux-2.6-utrace-ptrace.patch
 
 # Architecture patches
 # x86(-64)
@@ -1991,7 +1980,25 @@ fi
 # and build.
 
 %changelog
-* Thu May  5 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue May 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed 2.6.39-libre-rc7.
+
+* Tue May 09 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git0.0
+- Linux 2.6.39-rc7
+
+* Mon May 09 2011 Dave Jones <davej@redhat.com>
+- Remove remnants of non-upstreamed utrace bits.
+
+* Mon May 08 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.39-0.rc6.git6.0
+- Enable CONFIG_FB_UDL (#634636)
+
+* Sat May 07 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Update to snapshot 2.6.39-rc6-git5
+
+* Wed May 04 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Update to snapshot 2.6.39-rc6-git2
+
+* Wed May  4 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu May  5
 - Deblobbed 2.6.39-libre-rc6.
 
 * Tue May 03 2011 Kyle McMartin <kmcmartin@redhat.com>

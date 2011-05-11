@@ -4163,8 +4163,6 @@ CONFIG_ASYNC_TX_DMA=y
 
 CONFIG_UNUSED_SYMBOLS=y
 
-CONFIG_UTRACE=y
-
 CONFIG_FTRACE=y
 CONFIG_DYNAMIC_FTRACE=y
 # CONFIG_IRQSOFF_TRACER is not set
@@ -4486,7 +4484,7 @@ CONFIG_NTP_PPS=y
 
 # CONFIG_USB_SERIAL_QUATECH2 is not set
 # CONFIG_VT6655 is not set
-# CONFIG_FB_UDL is not set
+CONFIG_FB_UDL=m
 
 # DEBUG options that don't get enabled/disabled with 'make debug/release'
 #
