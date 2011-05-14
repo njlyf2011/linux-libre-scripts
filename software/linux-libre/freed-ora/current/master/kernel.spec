@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -144,7 +144,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -167,7 +167,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -734,6 +734,10 @@ Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 Patch12205: runtime_pm_fixups.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
+
+Patch12400: mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
+Patch12401: mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
+Patch12402: mm-slub-default-slub_max_order-to-0.patch
 
 %endif
 
@@ -1372,6 +1376,10 @@ ApplyPatch acpi_reboot.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
+ApplyPatch mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
+ApplyPatch mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
+ApplyPatch mm-slub-default-slub_max_order-to-0.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1980,6 +1988,13 @@ fi
 # and build.
 
 %changelog
+* Thu May 12 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git3.0
+- Switch on release builds until 2.6.39 releases and we branch off 2.6.40-git.
+
+* Wed May 11 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 2.6.39-rc7-git3
+- Pull in some SLUB fixes from Mel Gorman for testing.
+
 * Tue May 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed 2.6.39-libre-rc7.
 
