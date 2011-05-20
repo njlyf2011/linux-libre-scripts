@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 38
+%define base_sublevel 39
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 3
+%define gitrev 6
 # Set rpm version accordingly
 %define rpmversion 2.6.%{upstream_sublevel}
 %endif
@@ -144,7 +144,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 0
+%define rawhide_skip_docs 1
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -550,7 +550,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kver
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-%{rpmversion}
+# Source6: deblob-%{rpmversion}
 
 Source11: genkey
 Source14: find-provides
@@ -643,6 +643,8 @@ Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
+Patch170: tmpfs-implement-generic-xattr-support.patch
+
 Patch200: linux-2.6-debug-sizeof-structs.patch
 Patch202: linux-2.6-debug-taint-vm.patch
 Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
@@ -651,8 +653,6 @@ Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 Patch380: linux-2.6-defaults-pci_no_msi.patch
 Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
-
-Patch385: ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -735,9 +735,12 @@ Patch12205: runtime_pm_fixups.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
-Patch12400: mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
-Patch12401: mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
-Patch12402: mm-slub-default-slub_max_order-to-0.patch
+Patch12400: mm-vmscan-correct-use-pgdat_balanced-in-sleeping_prematurely.patch
+Patch12401: mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
+Patch12402: mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
+Patch12403: mm-vmscan-if-kswapd-has-been-running-too-long-allow-it-to-sleep.patch
+
+Patch12500: x86-amd-fix-another-erratum-400-bug.patch
 
 %endif
 
@@ -1234,6 +1237,7 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 #
 # bugfixes to drivers and filesystems
 #
+ApplyPatch tmpfs-implement-generic-xattr-support.patch
 
 # ext4
 
@@ -1270,8 +1274,6 @@ ApplyPatch linux-2.6-defaults-pci_no_msi.patch
 ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
-
-#ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
 #
 # SCSI Bits.
@@ -1376,9 +1378,12 @@ ApplyPatch acpi_reboot.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
+ApplyPatch mm-vmscan-correct-use-pgdat_balanced-in-sleeping_prematurely.patch
 ApplyPatch mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
 ApplyPatch mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
-ApplyPatch mm-slub-default-slub_max_order-to-0.patch
+ApplyPatch mm-vmscan-if-kswapd-has-been-running-too-long-allow-it-to-sleep.patch
+
+ApplyPatch x86-amd-fix-another-erratum-400-bug.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1988,6 +1993,29 @@ fi
 # and build.
 
 %changelog
+* Thu May 19 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed to 2.6.39-libre.
+
+* Thu May 19 2011 Dave Jones <davej@redhat.com>
+- Update to 2.6.39 final.
+
+* Sat May 14 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Update to v2 of Mel Gorman's SLUB patchset
+
+* Sat May 14 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git6.1
+- tmpfs: implement generic xattr support
+  Merge Eric Paris' patch to add xattr support to tmpfs, so that it can be
+  used to host mockroots for mass rebuilds.
+- Drop IMA disabling patch, which is no longer necessary since it's run time
+  (but unused) cost is now minimized.
+- Switch NF_CONNTRACK to modular, it'll get autoloaded where necessary.
+
+* Sat May 14 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git6.0
+- Update to 2.6.39-rc7-git6
+
+* Thu May 12 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix yet another bug in AMD erratum checking (#704059)
+
 * Thu May 12 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git3.0
 - Switch on release builds until 2.6.39 releases and we branch off 2.6.40-git.
 
