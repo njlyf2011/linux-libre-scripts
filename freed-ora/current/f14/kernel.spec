@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 91
+%global baserelease 92
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -869,6 +869,21 @@ Patch13960: scsi-mpt2sas-prevent-heap-overflows-and-unchecked-reads.patch
 Patch13961: revert-incomplete-af_netlink-add-needed-scm-destroy-after-scm-send.patch
 Patch13962: af_netlink-add-needed-scm_destroy-after-scm_send.patch
 
+# fix regression causing stalls on AMD processors in 2.6.35.13
+Patch13963: x86-amd-fix-arat-feature-setting-again.patch
+Patch13964: x86-amd-arat-bug-on-sempron-workaround.patch
+
+Patch13969: scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
+
+# fix bug in 2.6.35.13 with old windows servers
+Patch13970: cifs-add-fallback-in-is_path_accessible-for-old-servers.patch
+
+# cve-2011-1770
+Patch13980: dccp-handle-invalid-feature-options-length.patch
+
+# the rest of the pgoff wrap fix
+Patch13990: vm-fix-vm_pgoff-wrap-in-stack-expansion.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1637,6 +1652,21 @@ ApplyPatch scsi-mpt2sas-prevent-heap-overflows-and-unchecked-reads.patch
 ApplyPatch revert-incomplete-af_netlink-add-needed-scm-destroy-after-scm-send.patch
 ApplyPatch af_netlink-add-needed-scm_destroy-after-scm_send.patch
 
+# fix regression causing stalls on AMD processors in 2.6.35.13
+ApplyPatch x86-amd-fix-arat-feature-setting-again.patch
+ApplyPatch x86-amd-arat-bug-on-sempron-workaround.patch
+
+ApplyPatch scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
+
+# fix bug in 2.6.35.13 with old windows servers
+ApplyPatch cifs-add-fallback-in-is_path_accessible-for-old-servers.patch
+
+# cve-2011-1770
+ApplyPatch dccp-handle-invalid-feature-options-length.patch
+
+# the rest of the pgoff wrap fix
+ApplyPatch vm-fix-vm_pgoff-wrap-in-stack-expansion.patch
+
 # END OF PATCH APPLICATIONS
 
 # Linux-libre-specific, added by Koko's request for BLAG.
@@ -2226,6 +2256,22 @@ fi
 # and build.
 
 %changelog
+* Fri May 20 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.35.13-92
+- Add the rest of the fix for bug #704059
+- dccp: handle invalid feature options length (CVE-2011-1770)
+- Fix address wrapping in stack expansion code.
+
+* Wed May 18 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix cifs bug in 2.6.35.13 with old Windows servers (#704125)
+- Revert broken fixes for #704059, add proper partial fix.
+
+* Fri May 13 2011 Kyle McMartin <kmcmartin@redhat.com>
+- [fabbione@] Fix a deadlock when using hp_sw with an HP san.
+  (7a1e9d82 upstream)
+
+* Thu May 12 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix stalls on AMD machines with C1E caused by 2.6.35.13 (#704059)
+
 * Wed May  4 2011  <lxoliva@fsfla.org> -libre
 - Deblobbed patch-libre-2.6.35.13.
 
