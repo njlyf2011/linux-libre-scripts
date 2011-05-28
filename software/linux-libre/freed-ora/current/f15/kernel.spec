@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 28
+%global baserelease 30
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -79,7 +79,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 7
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -710,6 +710,7 @@ Patch1829: drm-intel-restore-mode.patch
 # radeon - new hw + fixes for fusion and t500 regression
 Patch1839: drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch
 Patch1840: drm-radeon-update.patch
+Patch1841: drm-radeon-update2.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -771,6 +772,14 @@ Patch12407: scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
 # temporary fix for Sempron machines stalling (#704059)
 Patch12408: x86-amd-arat-bug-on-sempron-workaround.patch
+
+# Eliminate hangs when using frequent high-order allocations V4
+# (will be in 2.6.38.8)
+Patch12410: mm-vmscan-correct-use-of-pgdat_balanced-in-sleeping_prematurely.patch
+Patch12411: mm-vmscan-correctly-check-if-reclaimer-should-schedule-during-shrink_slab.patch
+
+Patch12415: hid-multitouch-add-support-for-elo-touchsystems.patch
+Patch12416: bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
 
 %endif
 
@@ -1390,6 +1399,7 @@ ApplyPatch drm-intel-restore-mode.patch
 # radeon DRM (add cayman support)
 ApplyPatch drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch -R
 ApplyPatch drm-radeon-update.patch
+ApplyPatch drm-radeon-update2.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1444,6 +1454,14 @@ ApplyPatch scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
 # temporary fix for Sempron machines stalling (#704059)
 ApplyPatch x86-amd-arat-bug-on-sempron-workaround.patch
+
+# Eliminate hangs when using frequent high-order allocations V4
+# (will be in 2.6.38.8)
+ApplyPatch mm-vmscan-correct-use-of-pgdat_balanced-in-sleeping_prematurely.patch
+ApplyPatch mm-vmscan-correctly-check-if-reclaimer-should-schedule-during-shrink_slab.patch
+
+ApplyPatch hid-multitouch-add-support-for-elo-touchsystems.patch
+ApplyPatch bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2053,6 +2071,24 @@ fi
 # and build.
 
 %changelog
+* Fri May 27 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38.7-30
+- nouveau: minor fixes for various issues from upstream
+- nv40 modesetting fix (rhbz#708235)
+- nv50+ support for LVDS panels using SPWG spec (blank/corrupt screen fixes)
+- nva3+ pm clock get/set fixes
+
+* Wed May 25 2011 Dave Airlie <airlied@redhat.com>
+- drm-radeon-update2.patch: more radeon updates + cayman accel support
+
+* Tue May 24 2011 Kyle McMartin <kmcmartin@redhat.com>
+- hid-multitouch: add support for elo touchsystems panels (requested
+  by hadess, backported from hid-next)
+- bluetooth: add support for more ath3k devices (Ditto.)
+
+* Mon May 23 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.7-29
+- Linux 2.6.38.7
+- Eliminate hangs when using frequent high-order allocations
+
 * Fri May 20 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.7-28.rc1
 - Linux 2.6.38.7-rc1
 - Fix up context in utrace-ptrace.patch
