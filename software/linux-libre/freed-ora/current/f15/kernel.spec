@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 30
+%global baserelease 31
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -77,7 +77,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -691,7 +691,6 @@ Patch800: linux-2.6-crash-driver.patch
 Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
-Patch1800: drm-vblank-events-fix-hangs.patch
 
 # nouveau + drm fixes
 Patch1809: drm-nouveau-fixes.patch
@@ -711,6 +710,7 @@ Patch1829: drm-intel-restore-mode.patch
 Patch1839: drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch
 Patch1840: drm-radeon-update.patch
 Patch1841: drm-radeon-update2.patch
+Patch1842: drm-radeon-pageflip-oops-fix.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -765,18 +765,7 @@ Patch12403: x86-dumpstack-correct-stack-dump-info-when-frame-pointer-is-availabl
 # Fix breakage of PCI network adapter names on older Dell systems
 Patch12404: x86-pci-preserve-existing-pci-bfsort-whitelist-for-dell-systems.patch
 
-# intel_ips driver bug (#703511) causes cooling fan to run
-Patch12406: ips-use-interruptible-waits-in-ips-monitor.patch
-
 Patch12407: scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
-
-# temporary fix for Sempron machines stalling (#704059)
-Patch12408: x86-amd-arat-bug-on-sempron-workaround.patch
-
-# Eliminate hangs when using frequent high-order allocations V4
-# (will be in 2.6.38.8)
-Patch12410: mm-vmscan-correct-use-of-pgdat_balanced-in-sleeping_prematurely.patch
-Patch12411: mm-vmscan-correctly-check-if-reclaimer-should-schedule-during-shrink_slab.patch
 
 Patch12415: hid-multitouch-add-support-for-elo-touchsystems.patch
 Patch12416: bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
@@ -1379,7 +1368,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # DRM core
-ApplyPatch drm-vblank-events-fix-hangs.patch
 
 # Nouveau DRM
 ApplyPatch drm-ttm-move-notify.patch
@@ -1400,6 +1388,7 @@ ApplyPatch drm-intel-restore-mode.patch
 ApplyPatch drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch -R
 ApplyPatch drm-radeon-update.patch
 ApplyPatch drm-radeon-update2.patch
+ApplyPatch drm-radeon-pageflip-oops-fix.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1447,18 +1436,7 @@ ApplyPatch linux-2.6-netconsole-deadlock.patch
 # CVE-2011-1581
 ApplyPatch bonding-incorrect-tx-queue-offset.patch
 
-# intel_ips driver bug (#703511) causes cooling fan to run
-ApplyPatch ips-use-interruptible-waits-in-ips-monitor.patch
-
 ApplyPatch scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
-
-# temporary fix for Sempron machines stalling (#704059)
-ApplyPatch x86-amd-arat-bug-on-sempron-workaround.patch
-
-# Eliminate hangs when using frequent high-order allocations V4
-# (will be in 2.6.38.8)
-ApplyPatch mm-vmscan-correct-use-of-pgdat_balanced-in-sleeping_prematurely.patch
-ApplyPatch mm-vmscan-correctly-check-if-reclaimer-should-schedule-during-shrink_slab.patch
 
 ApplyPatch hid-multitouch-add-support-for-elo-touchsystems.patch
 ApplyPatch bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
@@ -2071,6 +2049,21 @@ fi
 # and build.
 
 %changelog
+* Sat Jun 04 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.8-31
+- Linux 2.6.38.8
+- Revert radeon patches we already have:
+   drm/radeon/kms: add wait idle ioctl for eg->cayman
+   drm/radeon/evergreen/btc/fusion: setup hdp to invalidate and flush when asked
+- Drop individual patches we have:
+   ips-use-interruptible-waits-in-ips-monitor.patch
+   drm-vblank-events-fix-hangs.patch
+   mm-vmscan-correct-use-of-pgdat_balanced-in-sleeping_prematurely.patch
+   mm-vmscan-correctly-check-if-reclaimer-should-schedule-during-shrink_slab.patch
+- Drop x86-amd-arat-bug-on-sempron-workaround.patch; the proper fix is in 2.6.38.8
+
+* Sun May 29 2011 Dave Airlie <airlied@redhat.com>
+- fix oops on pageflipping sometimes (#680651)
+
 * Fri May 27 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38.7-30
 - nouveau: minor fixes for various issues from upstream
 - nv40 modesetting fix (rhbz#708235)

@@ -4,3 +4,4 @@ patch-*.bz2
 clog
 *.rpm
 kernel-2.6.*/
+kernel-3.*/
