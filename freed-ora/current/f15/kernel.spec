@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 31
+%global baserelease 32
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -679,6 +679,8 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
+Patch600: block-queue-refcount.patch
+
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
@@ -769,6 +771,8 @@ Patch12407: scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
 Patch12415: hid-multitouch-add-support-for-elo-touchsystems.patch
 Patch12416: bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
+
+Patch12418: ath5k-disable-fast-channel-switching-by-default.patch
 
 %endif
 
@@ -1321,6 +1325,7 @@ ApplyPatch x86-pci-preserve-existing-pci-bfsort-whitelist-for-dell-systems.patch
 #
 # SCSI Bits.
 #
+ApplyPatch block-queue-refcount.patch
 
 # ACPI
 
@@ -1440,6 +1445,9 @@ ApplyPatch scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
 ApplyPatch hid-multitouch-add-support-for-elo-touchsystems.patch
 ApplyPatch bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
+
+# rhbz#709122
+ApplyPatch ath5k-disable-fast-channel-switching-by-default.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2049,6 +2057,13 @@ fi
 # and build.
 
 %changelog
+* Thu Jun 09 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38.8-32
+- ath5k-disable-fast-channel-switching-by-default.patch (rhbz#709122)
+  (korgbz#34992) [a99168ee in wireless-next]
+
+* Tue Jun 07 2011 Dave Jones <davej@redhat.com>
+- [SCSI] Fix oops caused by queue refcounting failure.
+
 * Sat Jun 04 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38.8-31
 - Linux 2.6.38.8
 - Revert radeon patches we already have:
