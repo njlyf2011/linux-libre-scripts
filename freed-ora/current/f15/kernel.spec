@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 33
+%global baserelease 34
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -708,11 +708,13 @@ Patch1825: drm-intel-make-lvds-work.patch
 Patch1826: drm-intel-edp-fixes.patch
 Patch1828: drm-intel-eeebox-eb1007-quirk.patch
 Patch1829: drm-intel-restore-mode.patch
+Patch1830: drm-i915-snb-irq-stalls-fix.patch
 # radeon - new hw + fixes for fusion and t500 regression
 Patch1839: drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch
 Patch1840: drm-radeon-update.patch
 Patch1841: drm-radeon-update2.patch
 Patch1842: drm-radeon-pageflip-oops-fix.patch
+Patch1843: drm-radeon-update3.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -769,8 +771,11 @@ Patch12404: x86-pci-preserve-existing-pci-bfsort-whitelist-for-dell-systems.patc
 
 Patch12407: scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
+Patch12410: hid-ntrig-deref-unclaimed-input.patch
+
 Patch12415: hid-multitouch-add-support-for-elo-touchsystems.patch
 Patch12416: bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
+
 
 Patch12418: ath5k-disable-fast-channel-switching-by-default.patch
 Patch12419: iwlagn-use-cts-to-self-protection-on-5000-adapters-series.patch
@@ -1391,12 +1396,14 @@ ApplyPatch drm-intel-edp-fixes.patch
 ApplyPatch drm-i915-fix-pipelined-fencing.patch
 ApplyPatch drm-intel-eeebox-eb1007-quirk.patch
 ApplyPatch drm-intel-restore-mode.patch
+ApplyPatch drm-i915-snb-irq-stalls-fix.patch
 
 # radeon DRM (add cayman support)
 ApplyPatch drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch -R
 ApplyPatch drm-radeon-update.patch
 ApplyPatch drm-radeon-update2.patch
 ApplyPatch drm-radeon-pageflip-oops-fix.patch
+ApplyPatch drm-radeon-update3.patch
 
 # linux1394 git patches
 #ApplyPatch linux-2.6-firewire-git-update.patch
@@ -1445,6 +1452,8 @@ ApplyPatch linux-2.6-netconsole-deadlock.patch
 ApplyPatch bonding-incorrect-tx-queue-offset.patch
 
 ApplyPatch scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
+
+ApplyPatch hid-ntrig-deref-unclaimed-input.patch
 
 ApplyPatch hid-multitouch-add-support-for-elo-touchsystems.patch
 ApplyPatch bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
@@ -2066,6 +2075,15 @@ fi
 # and build.
 
 %changelog
+* Thu Jun 23 2011 Dave Airlie <airlied@redhat.com> 2.6.38.8-34
+- drm-i915-snb-irq-stalls-fix.patch: fix Sandybridge IRQ stalls
+
+* Thu Jun 23 2011 Dave Airlie <airlied@redhat.com> 
+- drm-radeon-update3.patch: more radeon fixes backport
+
+* Tue Jun 21 2011 Dave Jones <davej@redhat.com>
+- HID: ntrig don't dereference unclaimed hidinput (rhbz#714827)
+
 * Mon Jun 20 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38.8-33
 - [sgruszka@] iwlwifi: fix general 11n instability (rhbz#648732)
 
