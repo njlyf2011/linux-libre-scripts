@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 123d858..53be87f 100644
+index eb39aac..665056f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -237,8 +237,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -8471,7 +8471,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index df3702c..e566784 100644
+index df3702c..7242f3a 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -8506,23 +8506,22 @@ index df3702c..e566784 100644
  #else
  static inline int sm501_register_gpio(struct sm501_devdata *sm)
  {
-@@ -1162,7 +1178,14 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
+@@ -1162,7 +1178,13 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
  {
  	return 0;
  }
 -#endif
 +
-+int sm501_configure_gpio(struct device *dev, unsigned int gpio,
++void sm501_configure_gpio(struct device *dev, unsigned int gpio,
 +			 unsigned char mode)
 +{
-+	return -1;
 +}
 +#endif	/* CONFIG_MFD_SM501_GPIO */
 +EXPORT_SYMBOL_GPL(sm501_configure_gpio);
  
  static int sm501_register_gpio_i2c_instance(struct sm501_devdata *sm,
  					    struct sm501_platdata_gpio_i2c *iic)
-@@ -1217,6 +1240,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
+@@ -1217,6 +1239,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
  	return 0;
  }
  
@@ -8543,7 +8542,7 @@ index df3702c..e566784 100644
  /* sm501_dbg_regs
   *
   * Debug attribute to attach to parent device to show core registers
-@@ -1375,6 +1412,8 @@ static int __devinit sm501_init_dev(struct sm501_devdata *sm)
+@@ -1375,6 +1411,8 @@ static int __devinit sm501_init_dev(struct sm501_devdata *sm)
  			sm501_register_uart(sm, idata->devices);
  		if (idata->devices & SM501_USE_GPIO)
  			sm501_register_gpio(sm);
@@ -8552,7 +8551,7 @@ index df3702c..e566784 100644
  	}
  
  	if (pdata && pdata->gpio_i2c != NULL && pdata->gpio_i2c_nr > 0) {
-@@ -1561,10 +1600,15 @@ static struct sm501_initdata sm501_pci_initdata = {
+@@ -1561,10 +1599,15 @@ static struct sm501_initdata sm501_pci_initdata = {
  	.devices	= SM501_USE_ALL,
  
  	/* Errata AB-3 says that 72MHz is the fastest available
@@ -47932,10 +47931,10 @@ index 3e2230f..7c81380 100644
  	{"0x317", 1024, 768,	16},
  	{"0x31A", 1280, 1024, 16},
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index d557235..9a5e16c 100644
+index c001fff..6d3cd11 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
-@@ -829,9 +829,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+@@ -831,9 +831,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
  	}
  
  	if (ints & OHCI_INTR_WDH) {
@@ -48054,7 +48053,7 @@ index 9b166d7..2b263d0 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index d77ff04..22f3ae1 100644
+index 60b25d8..0ce054b 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -48067,7 +48066,7 @@ index d77ff04..22f3ae1 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E600			0x1001
  #define HUAWEI_PRODUCT_E220			0x1003
-@@ -462,6 +465,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -477,6 +480,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
@@ -48088,174 +48087,6 @@ index 2ea44b6..5e2f2cc 100644
  obj-$(CONFIG_XEN_FBDEV_FRONTEND)  += xen-fbfront.o
  obj-$(CONFIG_FB_CARMINE)          += carminefb.o
  obj-$(CONFIG_FB_MB862XX)	  += mb862xx/
-diff --git a/drivers/video/sm501fb.c b/drivers/video/sm501fb.c
-index 56ef6b3..2d3b391 100644
---- a/drivers/video/sm501fb.c
-+++ b/drivers/video/sm501fb.c
-@@ -63,6 +63,37 @@ static struct fb_videomode __devinitdata sm501_default_mode = {
- 
- #define NR_PALETTE	256
- 
-+static char *mode_option;
-+module_param_named(mode, mode_option, charp, 0);
-+MODULE_PARM_DESC(mode, "Initial mode");
-+
-+/*
-+ * SM501 Mode
-+ *    1024X600 is not defined in default mode(modedb.c).
-+ */
-+static const struct fb_videomode sm501_modedb[] __initdata = {
-+ {
-+	/* 1024x600-60 */
-+	NULL,  60, 1024, 600, 20423, 144,  40, 18, 1, 104, 3,
-+  FB_SYNC_HOR_HIGH_ACT | FB_SYNC_VERT_HIGH_ACT, FB_VMODE_NONINTERLACED
-+ },
-+ {
-+	 /* 1024x600-70 */
-+	 NULL,  70, 1024, 600, 17211, 152,  48, 21, 1, 104, 3,
-+  FB_SYNC_HOR_HIGH_ACT | FB_SYNC_VERT_HIGH_ACT, FB_VMODE_NONINTERLACED
-+ },
-+ {
-+	 /* 1024x600-75 */
-+	 NULL,  75, 1024, 600, 15822, 160,  56, 23, 1, 104, 3,
-+  FB_SYNC_HOR_HIGH_ACT | FB_SYNC_VERT_HIGH_ACT, FB_VMODE_NONINTERLACED
-+ },
-+ {
-+	 /* 1024x600-85 */
-+	 NULL,  85, 1024, 600, 13730, 168,  56, 26, 1, 112, 3,
-+  FB_SYNC_HOR_HIGH_ACT | FB_SYNC_VERT_HIGH_ACT, FB_VMODE_NONINTERLACED
-+ }
-+};
-+
- enum sm501_controller {
- 	HEAD_CRT	= 0,
- 	HEAD_PANEL	= 1,
-@@ -1774,7 +1805,14 @@ static int sm501fb_init_fb(struct fb_info *fb,
- 			fb->var.xres_virtual = fb->var.xres;
- 			fb->var.yres_virtual = fb->var.yres;
- 		} else {
--			if (info->edid_data) {
-+			if (mode_option) {
-+				dev_info(info->dev, "using user defined mode:"
-+					" %s\n", mode_option);
-+				ret = fb_find_mode(&fb->var, fb,
-+					mode_option, sm501_modedb,
-+					ARRAY_SIZE(sm501_modedb),
-+					NULL, fb->var.bits_per_pixel);
-+			} else if (info->edid_data) {
- 				ret = fb_find_mode(&fb->var, fb, fb_mode,
- 					fb->monspecs.modedb,
- 					fb->monspecs.modedb_len,
-@@ -1926,7 +1964,11 @@ static int __devinit sm501fb_probe(struct platform_device *pdev)
- {
- 	struct sm501fb_info *info;
- 	struct device *dev = &pdev->dev;
-+	unsigned int panel_enabled, head[2];
-+	char *driver_name[2];
-+	unsigned long ctrl;
- 	int ret;
-+	int i;
- 
- 	/* allocate our framebuffers */
- 
-@@ -2001,23 +2043,37 @@ static int __devinit sm501fb_probe(struct platform_device *pdev)
- 		goto err_probed_panel;
- 	}
- 
--	ret = sm501fb_start_one(info, HEAD_CRT, driver_name_crt);
--	if (ret) {
--		dev_err(dev, "failed to start CRT\n");
--		goto err_started;
-+	ctrl = readl(info->regs + SM501_DC_PANEL_CONTROL);
-+	panel_enabled = (ctrl & SM501_DC_PANEL_CONTROL_EN) ? 1 : 0;
-+	if (panel_enabled) {
-+		head[0] = HEAD_PANEL;
-+		driver_name[0] = driver_name_pnl;
-+		head[1] = HEAD_CRT;
-+		driver_name[1] = driver_name_crt;
-+	} else {
-+		head[0] = HEAD_CRT;
-+		driver_name[0] = driver_name_crt;
-+		head[1] = HEAD_PANEL;
-+		driver_name[1] = driver_name_pnl;
- 	}
- 
--	ret = sm501fb_start_one(info, HEAD_PANEL, driver_name_pnl);
--	if (ret) {
--		dev_err(dev, "failed to start Panel\n");
--		goto err_started_crt;
-+	for (i = 0; i < ARRAY_SIZE(head); i++) {
-+		ret = sm501fb_start_one(info, head[i], driver_name[i]);
-+		if (ret) {
-+			dev_err(dev, "failed to start %s\n", driver_name[i]);
-+			if (i == 1) {
-+				unregister_framebuffer(info->fb[head[0]]);
-+				sm501_free_init_fb(info, head[0]);
-+			}
-+			goto err_start_one;
-+		}
- 	}
- 
- 	/* create device files */
- 
- 	ret = device_create_file(dev, &dev_attr_crt_src);
- 	if (ret)
--		goto err_started_panel;
-+		goto err_started;
- 
- 	ret = device_create_file(dev, &dev_attr_fbregs_pnl);
- 	if (ret)
-@@ -2036,15 +2092,13 @@ err_attached_pnlregs_file:
- err_attached_crtsrc_file:
- 	device_remove_file(dev, &dev_attr_crt_src);
- 
--err_started_panel:
-+err_started:
- 	unregister_framebuffer(info->fb[HEAD_PANEL]);
- 	sm501_free_init_fb(info, HEAD_PANEL);
--
--err_started_crt:
- 	unregister_framebuffer(info->fb[HEAD_CRT]);
- 	sm501_free_init_fb(info, HEAD_CRT);
- 
--err_started:
-+err_start_one:
- 	sm501fb_stop(info);
- 
- err_probed_panel:
-@@ -2230,8 +2284,32 @@ static struct platform_driver sm501fb_driver = {
- 	},
- };
- 
-+#ifndef MODULE
-+static int  __devinit sm501fb_setup(char *options)
-+{
-+	char *this_opt;
-+
-+	if (!options || !*options)
-+		return 0;
-+
-+	while ((this_opt = strsep(&options, ",")) != NULL) {
-+		if (!*this_opt)
-+			continue;
-+		mode_option = this_opt;
-+	}
-+	return 0;
-+}
-+#endif
-+
- static int __devinit sm501fb_init(void)
- {
-+#ifndef MODULE
-+	char *option = NULL;
-+
-+	if (fb_get_options("sm501fb", &option))
-+		return -ENODEV;
-+	sm501fb_setup(option);
-+#endif
- 	return platform_driver_register(&sm501fb_driver);
- }
- 
 diff --git a/include/linux/sm501.h b/include/linux/sm501.h
 index 02fde50..a8677f0 100644
 --- a/include/linux/sm501.h
