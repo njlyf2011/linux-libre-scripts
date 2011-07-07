@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 34
+%global baserelease 35
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -642,6 +642,9 @@ Patch30: linux-2.6-tracehook.patch
 Patch31: linux-2.6-utrace.patch
 Patch32: linux-2.6-utrace-ptrace.patch
 
+# CVE-2011-2183
+Patch80: ksm-fix-null-pointer-dereference-in-scan-get-next-rmap-item.patch
+
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
@@ -669,6 +672,10 @@ Patch394: linux-2.6-acpi-debug-infinite-loop.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch453: revert-hid-magicmouse-ignore-ivalid-report-id-while-switching.patch
+Patch454: input-wacom-add-support-for-lenovo-tablet-id-0xe6.patch
+Patch455: hid-ntrig-deref-unclaimed-input.patch
+Patch456: hid-multitouch-add-support-for-elo-touchsystems.patch
 
 Patch460: linux-2.6-serial-460800.patch
 
@@ -679,9 +686,17 @@ Patch530: linux-2.6-silence-fbcon-logo.patch
 Patch570: linux-2.6-selinux-mprotect-checks.patch
 Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
-Patch600: block-queue-refcount.patch
+# scsi / block
+Patch600: revert-fix-oops-in-scsi_run_queue.patch
+Patch601: revert-put-stricter-guards-on-queue-dead-checks.patch
+Patch602: block-blkdev_get-should-access-bd_disk-only-after.patch
+Patch603: cfq-iosched-fix-locking-around-ioc-ioc-data-assignment.patch
 
-Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
+# libata
+Patch620: ahci-add-another-pci-id-for-marvell.patch
+Patch621: libata-sas-only-set-frozen-flag-if-new-eh-is-supported.patch
+
+Patch650: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
 
@@ -709,6 +724,7 @@ Patch1826: drm-intel-edp-fixes.patch
 Patch1828: drm-intel-eeebox-eb1007-quirk.patch
 Patch1829: drm-intel-restore-mode.patch
 Patch1830: drm-i915-snb-irq-stalls-fix.patch
+Patch1831: drm-i915-apply-hwstam-workaround-for-bsd-ring-on-sandybridge.patch
 # radeon - new hw + fixes for fusion and t500 regression
 Patch1839: drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch
 Patch1840: drm-radeon-update.patch
@@ -717,6 +733,14 @@ Patch1842: drm-radeon-pageflip-oops-fix.patch
 Patch1843: drm-radeon-update3.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
+Patch1901: intel-iommu-flush-unmaps-at-domain_exit.patch
+Patch1902: intel-iommu-only-unlink-device-domains-from-iommu.patch
+Patch1903: intel-iommu-check-for-identity-mapping-candidate-using.patch
+Patch1904: intel-iommu-speed-up-processing-of-the-identity_mapping.patch
+Patch1905: intel-iommu-dont-cache-iova-above-32bit.patch
+Patch1906: intel-iommu-use-coherent-dma-mask-when-requested.patch
+Patch1907: intel-iommu-remove-host-bridge-devices-from-identity.patch
+Patch1908: intel-iommu-add-domain-check-in-domain_remove_one_dev_info.patch
 
 # linux1394 git patches
 Patch2200: linux-2.6-firewire-git-update.patch
@@ -771,16 +795,16 @@ Patch12404: x86-pci-preserve-existing-pci-bfsort-whitelist-for-dell-systems.patc
 
 Patch12407: scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
-Patch12410: hid-ntrig-deref-unclaimed-input.patch
-
-Patch12415: hid-multitouch-add-support-for-elo-touchsystems.patch
 Patch12416: bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
-
+Patch12417: bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
 
 Patch12418: ath5k-disable-fast-channel-switching-by-default.patch
 Patch12419: iwlagn-use-cts-to-self-protection-on-5000-adapters-series.patch
 
 Patch12420: crypto-aesni_intel-merge-with-fpu_ko.patch
+
+Patch12430: nl80211-fix-check-for-valid-ssid-size-in-scan-operations.patch
+Patch12431: nl80211-fix-overflow-in-ssid_len.patch.patch
 
 %endif
 
@@ -1258,6 +1282,10 @@ ApplyPatch linux-2.6-tracehook.patch
 ApplyPatch linux-2.6-utrace.patch
 ApplyPatch linux-2.6-utrace-ptrace.patch
 
+# mm patches
+# CVE-2011-2183
+ApplyPatch ksm-fix-null-pointer-dereference-in-scan-get-next-rmap-item.patch
+
 # Architecture patches
 # x86(-64)
 # Restore reliable stack backtraces, and hopefully
@@ -1267,6 +1295,15 @@ ApplyPatch x86-dumpstack-correct-stack-dump-info-when-frame-pointer-is-available
 #
 # Intel IOMMU
 #
+# from 2.6.39.2
+ApplyPatch intel-iommu-flush-unmaps-at-domain_exit.patch
+ApplyPatch intel-iommu-only-unlink-device-domains-from-iommu.patch
+ApplyPatch intel-iommu-check-for-identity-mapping-candidate-using.patch
+ApplyPatch intel-iommu-speed-up-processing-of-the-identity_mapping.patch
+ApplyPatch intel-iommu-dont-cache-iova-above-32bit.patch
+ApplyPatch intel-iommu-use-coherent-dma-mask-when-requested.patch
+ApplyPatch intel-iommu-remove-host-bridge-devices-from-identity.patch
+ApplyPatch intel-iommu-add-domain-check-in-domain_remove_one_dev_info.patch
 
 #
 # PowerPC
@@ -1331,9 +1368,20 @@ ApplyPatch x86-pci-preserve-existing-pci-bfsort-whitelist-for-dell-systems.patch
 #ApplyPatch ima-allow-it-to-be-completely-disabled-and-default-off.patch
 
 #
-# SCSI Bits.
+# SCSI / block Bits.
 #
-ApplyPatch block-queue-refcount.patch
+# Revert SCSI patches from 2.6.38.6 that cause more problems thatn they solve
+ApplyPatch revert-fix-oops-in-scsi_run_queue.patch
+ApplyPatch revert-put-stricter-guards-on-queue-dead-checks.patch
+# Fix potential NULL deref in 2.6.38.8
+ApplyPatch block-blkdev_get-should-access-bd_disk-only-after.patch
+# rhbz#577968
+ApplyPatch cfq-iosched-fix-locking-around-ioc-ioc-data-assignment.patch
+
+# libata
+ApplyPatch ahci-add-another-pci-id-for-marvell.patch
+# Fix drive detection failure on mvsas (rhbz#705019)
+ApplyPatch libata-sas-only-set-frozen-flag-if-new-eh-is-supported.patch
 
 # ACPI
 
@@ -1341,15 +1389,24 @@ ApplyPatch block-queue-refcount.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
+ApplyPatch bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
+# CVE-2011-2497
+ApplyPatch bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
+# CVE-2011-2517
+ApplyPatch nl80211-fix-check-for-valid-ssid-size-in-scan-operations.patch
+ApplyPatch nl80211-fix-overflow-in-ssid_len.patch.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
 ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
+ApplyPatch revert-hid-magicmouse-ignore-ivalid-report-id-while-switching.patch
+ApplyPatch input-wacom-add-support-for-lenovo-tablet-id-0xe6.patch
+ApplyPatch hid-ntrig-deref-unclaimed-input.patch
+ApplyPatch hid-multitouch-add-support-for-elo-touchsystems.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
-
-ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
 ApplyPatch linux-2.6-serial-460800.patch
@@ -1397,6 +1454,7 @@ ApplyPatch drm-i915-fix-pipelined-fencing.patch
 ApplyPatch drm-intel-eeebox-eb1007-quirk.patch
 ApplyPatch drm-intel-restore-mode.patch
 ApplyPatch drm-i915-snb-irq-stalls-fix.patch
+ApplyPatch drm-i915-apply-hwstam-workaround-for-bsd-ring-on-sandybridge.patch
 
 # radeon DRM (add cayman support)
 ApplyPatch drm-radeon-fix-regression-on-atom-cards-with-hardcoded-EDID-record.patch -R
@@ -1453,10 +1511,6 @@ ApplyPatch bonding-incorrect-tx-queue-offset.patch
 
 ApplyPatch scsi_dh_hp_sw-fix-deadlock-in-start_stop_endio.patch
 
-ApplyPatch hid-ntrig-deref-unclaimed-input.patch
-
-ApplyPatch hid-multitouch-add-support-for-elo-touchsystems.patch
-ApplyPatch bluetooth-device-ids-for-ath3k-on-pegatron-lucid-tablets.patch
 
 # rhbz#709122
 ApplyPatch ath5k-disable-fast-channel-switching-by-default.patch
@@ -2075,6 +2129,31 @@ fi
 # and build.
 
 %changelog
+* Wed Jul 06 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38.8-35
+- Revert SCSI/block patches from 2.6.38.6 that caused more problems
+  than they fixed; drop band-aid patch attempting to fix the fix.
+- CVE-2011-2497: kernel: bluetooth: buffer overflow in l2cap config request
+- CVE-2011-2517: kernel: nl80211: missing check for valid SSID size in scan operations
+
+* Mon Jun 27 2011 Dave Jones <davej@redhat.com>
+- Disable CONFIG_CRYPTO_MANAGER_DISABLE_TESTS, as this also disables FIPS (rhbz 716942)
+
+* Sat Jun 25 2011 Chuck Ebbert <cebbert@redhat.com>
+- Intel IOMMU fixes from 2.6.39.2
+- drm-i915-apply-hwstam-workaround-for-bsd-ring-on-sandybridge.patch:
+  Another fix for Sandybridge stalls
+
+* Fri Jun 24 2011 Chuck Ebbert <cebbert@redhat.com>
+- Minor cleanup: use upstream patch to export block_{get,put}_queue
+- block-blkdev_get-should-access-bd_disk-only-after.patch:
+  fix potential oops introduced in 2.6.38.8
+- ahci-add-another-pci-id-for-marvell.patch (rhbz#705960)
+- CVE-2011-2183: ksm: race between ksmd and exiting task
+- Revert 2.6.38.8 patch that broke magicmouse (rhbz#714381)
+- Fix drive detection failure on mvsas (rhbz#705019)
+- Fix oopses in the CFQ disk scheduler (rhbz#577968)
+- Support Wacom touchscreen 00e6 in Thinkpad x220 (rhbz#708307)
+
 * Thu Jun 23 2011 Dave Airlie <airlied@redhat.com> 2.6.38.8-34
 - drm-i915-snb-irq-stalls-fix.patch: fix Sandybridge IRQ stalls
 
