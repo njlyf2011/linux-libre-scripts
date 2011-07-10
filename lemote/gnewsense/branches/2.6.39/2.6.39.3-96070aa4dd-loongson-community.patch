@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index eb39aac..665056f 100644
+index 2abc88e..d43d509 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -237,8 +237,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -48123,7 +48123,7 @@ index e538172..8087ff2 100644
  extern void usb_ep_autoconfig_reset(struct usb_gadget *) __devinit;
  
 diff --git a/init/calibrate.c b/init/calibrate.c
-index 76ac9194..534db11 100644
+index 30a44cd..cecaa44 100644
 --- a/init/calibrate.c
 +++ b/init/calibrate.c
 @@ -20,6 +20,7 @@ static int __init lpj_setup(char *str)
@@ -48134,46 +48134,35 @@ index 76ac9194..534db11 100644
  #ifdef ARCH_HAS_READ_CURRENT_TIMER
  
  /* This routine uses the read_current_timer() routine and gets the
-@@ -107,6 +108,7 @@ static unsigned long __cpuinit calibrate_delay_direct(void)
- #else
- static unsigned long __cpuinit calibrate_delay_direct(void) {return 0;}
- #endif
-+#endif	/* ARCH_HAS_PREPARED_LPJ */
+@@ -182,6 +183,7 @@ recalibrate:
  
- /*
-  * This is the number of bits of precision for the loops_per_jiffy.  Each
-@@ -185,6 +187,10 @@ recalibrate:
+ 	return lpj;
+ }
++#endif	/* ARCH_HAS_PREPARED_LPJ */
  
  void __cpuinit calibrate_delay(void)
  {
-+#ifndef ARCH_HAS_PREPARED_LPJ
-+	unsigned long ticks, loopbit;
-+	int lps_precision = LPS_PREC;
-+#endif
- 	static bool printed;
- 
- 	if (preset_lpj) {
-@@ -196,7 +202,10 @@ void __cpuinit calibrate_delay(void)
- 		loops_per_jiffy = lpj_fine;
+@@ -197,6 +199,7 @@ void __cpuinit calibrate_delay(void)
+ 		lpj = lpj_fine;
  		pr_info("Calibrating delay loop (skipped), "
  			"value calculated using timer frequency.. ");
--	} else if ((loops_per_jiffy = calibrate_delay_direct()) != 0) {
-+	}
-+
 +#ifndef ARCH_HAS_PREPARED_LPJ
-+	else if ((loops_per_jiffy = calibrate_delay_direct()) != 0) {
+ 	} else if ((lpj = calibrate_delay_direct()) != 0) {
  		if (!printed)
  			pr_info("Calibrating delay using timer "
- 				"specific routine.. ");
-@@ -205,6 +214,8 @@ void __cpuinit calibrate_delay(void)
+@@ -205,7 +208,12 @@ void __cpuinit calibrate_delay(void)
+ 		if (!printed)
  			pr_info("Calibrating delay loop... ");
- 		loops_per_jiffy = calibrate_delay_converge();
- 	}
+ 		lpj = calibrate_delay_converge();
++#else
++	} else {
++		lpj = loops_per_jiffy;
 +#endif	/* ARCH_HAS_PREPARED_LPJ */
+ 	}
 +
  	if (!printed)
  		pr_cont("%lu.%02lu BogoMIPS (lpj=%lu)\n",
- 			loops_per_jiffy/(500000/HZ),
+ 			lpj/(500000/HZ),
 diff --git a/net/rfkill/core.c b/net/rfkill/core.c
 index 0198191..414f547 100644
 --- a/net/rfkill/core.c

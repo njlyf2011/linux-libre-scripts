@@ -1,4 +1,4 @@
-2.6.39.2-c995a34dab-loongson-community.patch -p1 # loongson-community patches
+2.6.39.3-96070aa4dd-loongson-community.patch -p1 # loongson-community patches
 gnewsense-binutils-flag.patch -p0
 100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
 lxo-config.patch -p0 # config file
