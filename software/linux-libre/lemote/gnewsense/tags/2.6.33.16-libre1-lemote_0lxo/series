@@ -1,0 +1,6 @@
+2.6.33.8-ac3814ff2a-loongson-community.patch -p1 # lemote's patches
+gnewsense-binutils-flag.patch -p0
+100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
+lxo-config.patch -p0 # config file
+kpkg-mipsel.patch -p0 # use vmlinuz
+kpkg-2.6.33.patch -p0 # adjust for 2.6.33
