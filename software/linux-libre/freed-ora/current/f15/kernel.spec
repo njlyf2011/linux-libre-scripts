@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 35
+%global baserelease 36
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -806,6 +806,8 @@ Patch12420: crypto-aesni_intel-merge-with-fpu_ko.patch
 Patch12430: nl80211-fix-check-for-valid-ssid-size-in-scan-operations.patch
 Patch12431: nl80211-fix-overflow-in-ssid_len.patch.patch
 
+Patch12440: linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1395,6 +1397,8 @@ ApplyPatch bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
 # CVE-2011-2517
 ApplyPatch nl80211-fix-check-for-valid-ssid-size-in-scan-operations.patch
 ApplyPatch nl80211-fix-overflow-in-ssid_len.patch.patch
+
+ApplyPatch linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -2129,6 +2133,9 @@ fi
 # and build.
 
 %changelog
+* Tue Jul 12 2011 John W. Linville <linville@redhat.com> - 2.6.38.8-36
+- zd1211rw: fix invalid signal values from device (rhbz 720093)
+
 * Wed Jul 06 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38.8-35
 - Revert SCSI/block patches from 2.6.38.6 that caused more problems
   than they fixed; drop band-aid patch attempting to fix the fix.
