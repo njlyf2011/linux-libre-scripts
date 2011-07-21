@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 39
+%define base_sublevel 0
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -89,18 +89,19 @@ Summary: The Linux kernel
 %define stable_base %(echo $((%{stable_update} - 1)))
 %endif
 %endif
-%define rpmversion 2.6.%{base_sublevel}%{?stablerev}
+%define rpmversion 3.%{base_sublevel}%{?stablerev}
 
 ## The not-released-kernel case ##
 %else
 # The next upstream release sublevel (base_sublevel+1)
-%define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
+# % define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
+%define upstream_sublevel 0
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 6
+%define gitrev 3
 # Set rpm version accordingly
-%define rpmversion 2.6.%{upstream_sublevel}
+%define rpmversion 3.%{upstream_sublevel}
 %endif
 # Nb: The above rcrev and gitrev values automagically define Patch00 and Patch01 below.
 
@@ -167,7 +168,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -198,7 +199,8 @@ Summary: The Linux kernel
 %endif
 
 # The kernel tarball/base version
-%define kversion 2.6.%{base_sublevel}
+# % define kversion 3.%{base_sublevel}
+%define kversion 3.%{base_sublevel}-rc%rcrev
 
 %define make_target bzImage
 
@@ -446,7 +448,7 @@ Summary: The Linux kernel
 # First the general kernel 2.6 required versions as per
 # Documentation/Changes
 #
-%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2
+%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, module-init-tools < 3.13-1, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
 
 #
 # Then a series of requirements that are distribution specific, either
@@ -549,8 +551,8 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kver
 # For documentation purposes only.
 Source3: deblob-main
 Source4: deblob-check
-Source5: deblob-%{kversion}
-# Source6: deblob-%{rpmversion}
+#Source5: deblob-%{kversion}
+Source6: deblob-%{rpmversion}
 
 Source11: genkey
 Source14: find-provides
@@ -589,11 +591,11 @@ Source1000: config-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-2.6.%{base_sublevel}.%{stable_base}.bz2
+%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}.bz2
 Patch00: %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-2.6.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
+%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
 Patch01: %{stable_patch_01}
 %endif
 
@@ -602,14 +604,15 @@ Patch01: %{stable_patch_01}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00: patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+### HAX we're using -rc$x tarballs to make transitioning easier
+# Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
-Patch01: patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Patch00: patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
+Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}.bz2
 %endif
 %endif
 %endif
@@ -636,22 +639,15 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Git trees.
 
 # Standalone patches
-Patch20: linux-2.6-hotfixes.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
-Patch170: tmpfs-implement-generic-xattr-support.patch
-
-Patch200: linux-2.6-debug-sizeof-structs.patch
 Patch202: linux-2.6-debug-taint-vm.patch
 Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
-Patch204: linux-2.6-debug-always-inline-kzalloc.patch
 
-Patch380: linux-2.6-defaults-pci_no_msi.patch
-Patch381: linux-2.6-defaults-pci_use_crs.patch
 Patch383: linux-2.6-defaults-aspm.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
@@ -668,8 +664,6 @@ Patch470: die-floppy-die.patch
 
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
-Patch570: linux-2.6-selinux-mprotect-checks.patch
-Patch580: linux-2.6-sparc-selinux-mprotect-checks.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
@@ -690,15 +684,8 @@ Patch1810: drm-nouveau-updates.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
-Patch1826: drm-intel-edp-fixes.patch
-Patch1827: drm-i915-gen4-has-non-power-of-two-strides.patch
-Patch1828: drm-intel-eeebox-eb1007-quirk.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
-
-# linux1394 git patches
-Patch2200: linux-2.6-firewire-git-update.patch
-Patch2201: linux-2.6-firewire-git-pending.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -709,11 +696,6 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2902: linux-2.6-v4l-dvb-uvcvideo-update.patch
-
-Patch2910: linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-Patch2912: linux-2.6-v4l-dvb-ir-core-update.patch
-
-#Patch2916: lirc-staging-2.6.36-fixes.patch
 
 # fs fixes
 
@@ -726,7 +708,9 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12018: neuter_intel_microcode_load.patch
 
-Patch12200: acpi_reboot.patch
+Patch12019: linux-2.6-rt2x00-Add-device-ID-for-RT539F-device.patch
+
+Patch12020: linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
 
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
@@ -735,12 +719,7 @@ Patch12205: runtime_pm_fixups.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
-Patch12400: mm-vmscan-correct-use-pgdat_balanced-in-sleeping_prematurely.patch
-Patch12401: mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
-Patch12402: mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
-Patch12403: mm-vmscan-if-kswapd-has-been-running-too-long-allow-it-to-sleep.patch
-
-Patch12500: x86-amd-fix-another-erratum-400-bug.patch
+Patch20000: utrace.patch
 
 %endif
 
@@ -989,8 +968,8 @@ ApplyPatch()
   fi
 %if !%{using_upstream_branch}
   if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:10}" != "patch-2.6." ] &&
-       [ "${patch:0:16}" != "patch-libre-2.6." ] ; then
+    if [ "${patch:0:8}" != "patch-3." ] &&
+       [ "${patch:0:14}" != "patch-libre-3." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
@@ -1030,20 +1009,20 @@ ApplyOptionalPatch()
 
 # Update to latest upstream.
 %if 0%{?released_kernel}
-%define vanillaversion 2.6.%{base_sublevel}
+%define vanillaversion 3.%{base_sublevel}
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-%define vanillaversion 2.6.%{upstream_sublevel}-rc%{rcrev}
+%define vanillaversion 3.%{upstream_sublevel}-rc%{rcrev}
 %if 0%{?gitrev}
-%define vanillaversion 2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
+%define vanillaversion 3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-%define vanillaversion 2.6.%{base_sublevel}-git%{gitrev}
+%define vanillaversion 3.%{base_sublevel}-git%{gitrev}
 %else
-%define vanillaversion 2.6.%{base_sublevel}
+%define vanillaversion 3.%{base_sublevel}
 %endif
 %endif
 %endif
@@ -1056,7 +1035,7 @@ ApplyOptionalPatch()
 
 # Build a list of the other top-level kernel tree directories.
 # This will be used to hardlink identical vanilla subdirs.
-sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-2.6.*' \
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-3.*' \
             | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
 if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
@@ -1115,17 +1094,19 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
 %endif
-    ApplyPatch patch%{?rcrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}.bz2
+    # ApplyPatch patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}.bz2
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
-    ApplyPatch patch%{?gitrevlibre}-2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+    ApplyPatch patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if "%{?stablelibre}" != "%{?gitrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
 %endif
-    ApplyPatch patch%{?gitrevlibre}-2.6.%{base_sublevel}-git%{gitrev}.bz2
+%if 0%{?gitrev}
+    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}.bz2
+%endif
 %endif
 
     cd ..
@@ -1210,7 +1191,6 @@ ApplyPatch freedo.patch
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
-ApplyPatch linux-2.6-hotfixes.patch
 
 # Architecture patches
 # x86(-64)
@@ -1237,7 +1217,6 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 #
 # bugfixes to drivers and filesystems
 #
-ApplyPatch tmpfs-implement-generic-xattr-support.patch
 
 # ext4
 
@@ -1261,17 +1240,12 @@ ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 
 # Various low-impact patches to aid debugging.
-ApplyPatch linux-2.6-debug-sizeof-structs.patch
 ApplyPatch linux-2.6-debug-taint-vm.patch
 ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
-ApplyPatch linux-2.6-debug-always-inline-kzalloc.patch
 
 #
 # PCI
 #
-# make default state of PCI MSI a config option
-ApplyPatch linux-2.6-defaults-pci_no_msi.patch
-ApplyPatch linux-2.6-defaults-pci_use_crs.patch
 # enable ASPM by default on hardware we expect to work
 ApplyPatch linux-2.6-defaults-aspm.patch
 
@@ -1285,6 +1259,8 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
+
+ApplyPatch linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1303,12 +1279,6 @@ ApplyPatch linux-2.6-silence-noise.patch
 
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
-
-# Fix the SELinux mprotect checks on executable mappings
-#ApplyPatch linux-2.6-selinux-mprotect-checks.patch
-# Fix SELinux for sparc
-# FIXME: Can we drop this now? See updated linux-2.6-selinux-mprotect-checks.patch
-#ApplyPatch linux-2.6-sparc-selinux-mprotect-checks.patch
 
 # Changes to upstream defaults.
 
@@ -1333,15 +1303,6 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
-#ApplyPatch drm-intel-edp-fixes.patch
-# rhbz#681285 (i965: crash in brw_wm_surface_state.c::prepare_wm_surfaces()
-#  where intelObj->mt == NULL)
-#ApplyPatch drm-i915-gen4-has-non-power-of-two-strides.patch
-ApplyPatch drm-intel-eeebox-eb1007-quirk.patch
-
-# linux1394 git patches
-#ApplyPatch linux-2.6-firewire-git-update.patch
-#ApplyOptionalPatch linux-2.6-firewire-git-pending.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
@@ -1352,12 +1313,6 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 #ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
-#ApplyPatch linux-2.6-v4l-dvb-ir-core-update.patch
-
-###FIX###ApplyPatch linux-2.6-v4l-dvb-add-lgdt3304-support.patch
-
-# http://www.lirc.org/
-#ApplyOptionalPatch lirc-staging-2.6.36-fixes.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
@@ -1366,8 +1321,7 @@ ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
-# various fixes for Apple and EFI
-ApplyPatch acpi_reboot.patch
+ApplyPatch linux-2.6-rt2x00-Add-device-ID-for-RT539F-device.patch
 
 # Runtime PM
 #ApplyPatch linux-2.6-usb-pci-autosuspend.patch
@@ -1378,12 +1332,8 @@ ApplyPatch acpi_reboot.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
-ApplyPatch mm-vmscan-correct-use-pgdat_balanced-in-sleeping_prematurely.patch
-ApplyPatch mm-slub-do-not-wake-kswapd-for-slubs-speculative-high-order-allocations.patch
-ApplyPatch mm-slub-do-not-take-expensive-steps-for-slubs-speculative-high-order-allocations.patch
-ApplyPatch mm-vmscan-if-kswapd-has-been-running-too-long-allow-it-to-sleep.patch
-
-ApplyPatch x86-amd-fix-another-erratum-400-bug.patch
+# utrace.
+ApplyPatch utrace.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1488,8 +1438,10 @@ BuildKernel() {
 
     # make sure EXTRAVERSION says what we want it to say
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+    perl -p -i -e 's/^SUBLEVEL.*/SUBLEVEL = /' Makefile
 
     # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
+    ### XXX this will probably be dead code in 3.0 --kyle
     %if !0%{?rcrev}
     %if 0%{?gitrev}
     perl -p -i -e 's/^SUBLEVEL.*/SUBLEVEL = %{upstream_sublevel}/' Makefile
@@ -1993,379 +1945,138 @@ fi
 # and build.
 
 %changelog
-* Fri May 20 2011 Dave Jones <davej@redhat.com>
-- Rebuild to fix versioning.
+* Thu Jul 21 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed 3.0-rc7-libre.
 
-* Thu May 19 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Deblobbed to 2.6.39-libre.
+* Fri Jul 15 2011 Dave Jones <davej@redhat.com> 3.0-0.rc7.git3.1
+- 3.0-rc7-git3
+
+* Fri Jul 15 2011 Dave Jones <davej@redhat.com>
+- Bring back utrace until uprobes gets merged upstream.
+
+* Wed Jul 13 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc7.git1.1
+- Update to snapshot 3.0-rc7-git1 for intel drm fixes.
+
+* Tue Jul 12 2011 John W. Linville <linville@redhat.com>
+- zd1211rw: fix invalid signal values from device (rhbz 720093)
+
+* Tue Jul 12 2011 John W. Linville <linville@redhat.com>
+- rt2x00: Add device ID for RT539F device. (rhbz 720594)
+
+* Tue Jul 12 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc7.git0.1
+- Linux 3.0-rc7, hopefully the last before the Great Renumbering becomes
+  official.
+
+* Mon Jul 11 2011 Dave Jones <davej@redhat.com>
+- Change BINFMT_MISC to be modular. (rhbz 695415)
+
+* Sun Jul 10 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc6.git6.1
+- Linux 3.0-rc6-git6
+- iwlagn-fix-dma-direction.patch: drop.
+- Revert CONFIG_X86_RESERVE_LOW=640, it breaks booting on x86_64.
+
+* Thu Jul 07 2011 Dave Jones <davej@redhat.com>
+- Centralise CPU_FREQ options into config-generic.
+  Switch to using ondemand by default. (rhbz 713572)
 
-* Thu May 19 2011 Dave Jones <davej@redhat.com>
-- Update to 2.6.39 final.
+* Wed Jul 06 2011 Chuck Ebbert <cebbert@redhat.com>
+- Set CONFIG_X86_RESERVE_LOW=640 as requested by mjg
 
-* Sat May 14 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Update to v2 of Mel Gorman's SLUB patchset
+* Mon Jul 04 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc6.git0.1
+- Linux 3.0-rc6
+- [generic] SCSI_ISCI=m, because why not
 
-* Sat May 14 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git6.1
-- tmpfs: implement generic xattr support
-  Merge Eric Paris' patch to add xattr support to tmpfs, so that it can be
-  used to host mockroots for mass rebuilds.
-- Drop IMA disabling patch, which is no longer necessary since it's run time
-  (but unused) cost is now minimized.
-- Switch NF_CONNTRACK to modular, it'll get autoloaded where necessary.
+* Sat Jul 02 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc5.git5.1
+- Linux 3.0-rc5-git5
 
-* Sat May 14 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git6.0
-- Update to 2.6.39-rc7-git6
+* Mon Jun 27 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc5.git0.1
+- Linux 3.0-rc5
 
-* Thu May 12 2011 Chuck Ebbert <cebbert@redhat.com>
-- Fix yet another bug in AMD erratum checking (#704059)
+* Mon Jun 27 2011 Dave Jones <davej@redhat.com>
+- Disable CONFIG_CRYPTO_MANAGER_DISABLE_TESTS, as this also disables FIPS (rhbz 716942)
 
-* Thu May 12 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git3.0
-- Switch on release builds until 2.6.39 releases and we branch off 2.6.40-git.
+* Thu Jun 23 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc4.git3.1
+- Linux 3.0-rc4-git3
+- Drop linux-3.0-fix-uts-release.patch, and instead just perl the Makefile
+- linux-2.6-silence-noise.patch: fix context
+- iwlagn-fix-dma-direction.patch: fix DMAR errors (for me at least)
 
-* Wed May 11 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Linux 2.6.39-rc7-git3
-- Pull in some SLUB fixes from Mel Gorman for testing.
+* Wed Jun 22 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc4.git0.2
+- Re-enable debuginfo generation. Thanks to Richard Jones for noticing... no
+  wonder builds had been so quick lately.
 
-* Tue May 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Deblobbed 2.6.39-libre-rc7.
+* Tue Jun 21 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc4.git0.1
+- Linux 3.0-rc4 (getting closer...)
 
-* Tue May 09 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc7.git0.0
-- Linux 2.6.39-rc7
+* Fri Jun 17 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc3.git6.1
+- Update to 3.0-rc3-git6
 
-* Mon May 09 2011 Dave Jones <davej@redhat.com>
-- Remove remnants of non-upstreamed utrace bits.
+* Fri Jun 17 2011 Dave Jones <davej@redhat.com>
+- drop qcserial 'compile fix' that was just duplicating an include.
+- drop struct sizeof debug patch. (no real value. not upstreamable)
+- drop linux-2.6-debug-always-inline-kzalloc.patch.
+  Can't recall why this was added. Can easily re-add if deemed necessary.
 
-* Mon May 08 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.39-0.rc6.git6.0
-- Enable CONFIG_FB_UDL (#634636)
+* Fri Jun 17 2011 Kyle McMartin <kmcmartin@redhat.com>
+- linux-2.6-defaults-pci_no_msi.patch: drop, haven't toggled the default
+  in many moons.
+- linux-2.6-defaults-pci_use_crs.patch: ditto.
+- linux-2.6-selinux-mprotect-checks.patch: upstream a while ago.
+- drm-i915-gen4-has-non-power-of-two-strides.patch: drop buggy bugfix
+- drop some more unapplied crud.
+- We haven't applied firewire patches in a dogs age.
 
-* Sat May 07 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Update to snapshot 2.6.39-rc6-git5
+* Fri Jun 17 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc3.git5.1
+- Try updating to a git snapshot for the first time in 3.0-rc,
+  update to 3.0-rc3-git5
+- Fix a subtle bug I introduced in 3.0-rc1, "patch-3." is 9 letters, not 10.
 
-* Wed May 04 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Update to snapshot 2.6.39-rc6-git2
+* Thu Jun 16 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Disable mm patches which had been submitted against 2.6.39, as Rik reports
+  they seem to aggravate a VM_BUG_ON. More investigation is necessary.
 
-* Wed May  4 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu May  5
-- Deblobbed 2.6.39-libre-rc6.
+* Wed Jun 15 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Conflict with pre-3.2.1-5 versions of mdadm. (#710646)
 
-* Tue May 03 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Linux 2.6.39-rc6
+* Wed Jun 15 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Build in aesni-intel on i686 for symmetry with 64-bit.
 
-* Sun May 01 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Update to snapshot 2.6.39-rc5-git5
+* Tue Jun 14 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc3.git0.3
+- Fix libdm conflict (whose bright idea was it to give subpackages differing
+  version numbers?)
 
-* Thu Apr 28 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc5.git1.0
-- Update to snapshot 2.6.39-rc5-git1
-- Edit scripts/rebase.sh to not keep appending to .gitignore when the new
-  .bz2 files are covered by wildcards.
-
-* Wed Apr 27 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Linux 2.6.39-rc5
-
-* Tue Apr 26 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Update to 2.6.39-rc4-git8
-
-* Sun Apr 24 2011 Kyle McMartin <kmcmartin@redhat.com>
-- ppc64: disable TUNE_CELL, which causes problems with illegal instuctions
-  being generated on non-Cell PPC machines. (#698256)
-
-* Wed Apr 20 2011 Dave Jones <davej@redhat.com> 2.6.39-0.rc4.git2.0
-- Update to 2.6.39-rc4-git2
-
-* Tue Apr 19 2011 Dave Jones <davej@redhat.com>
-- Build USB_SERIAL in instead of modular.
-  Enable USB_SERIAL_CONSOLE.
-
-* Wed Apr 13 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc3.git2.0
-- Update to snapshot 2.6.39-rc3-git2
-
-* Mon Apr 11 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc2.git3.0
-- Update to git snapshot 2.6.39-rc2-git3
-- efifb_update.patch: drop, upstream.
-
-* Thu Apr 07 2011 Hans de Goede <hdegoede@redhat.com>
-- Add a no lvds quirk for the Asus EB1007 to the i915 drm driver,
-  this fixes gnome-shell not working on it
-
-* Wed Apr 06 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc2.git0.0
-- Update to 2.6.39-rc2
-
-* Tue Apr 05 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc1.git5.0
-- Update to git snapshot 2.6.39-rc1-git5
-- (Not test-built before commit since my rawr box is down atm.)
-
-* Sat Apr 02 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc1.git3.0
-- Update to snapshot 2.6.39-rc1-git3
-- generic: CONFIG_USB_VL600=m
-
-* Thu Mar 31 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc1.git1.0
-- Update to snapshot 2.6.39-rc1-git1
-
-* Tue Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Disable CONFIG_IMA, CONFIG_TCG_TPM on powerpc (#689468)
-
-* Tue Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Disable qla4xxx (CONFIG_SCSI_QLA_ISCSI) driver on powerpc32 (#686199)
-
-* Tue Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc1.git0.0
-- ... and then 2.6.39-rc1
-
-* Tue Mar 29 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc0.git21.0
-- Update to snapshot 2.6.38-git21
-- Enable some new x86{_64} platform drivers.
-
-* Mon Mar 28 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc0.git19.0
-- Update to snapshot 2.6.38-git19
-- Drop upstream patches:
-  - acpi_battery-fribble-sysfs-files-from-a-resume-notifier.patch
-  - apple_backlight.patch
-- Rebased:
-  - acpi_reboot.patch
-  - linux-2.6-acpi-debug-infinite-loop.patch
-  - linux-2.6-debug-sizeof-structs.patch
-  - linux-2.6-i386-nx-emulation.patch
-- Disabled:
-  - utrace.
-
-* Fri Mar 25 2011 Chuck Ebbert <cebbert@redhat.com>
-- Drop unused patches already applied upstream:
-  hdpvr-ir-enable.patch
-  thinkpad-acpi-fix-backlight.patch
-
-* Wed Mar 23 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Re-create ACPI battery sysfs files on resume from suspend, fixes the
-  upstream changes to the dropped
-  acpi-update-battery-information-on-notification-0x81.patch.
-
-* Wed Mar 23 2011 Kyle McMartin <kmcmartin@redhat.com>
-- Update to 2.6.38-git12
-- Enable I2C_DIOLAN_U2C USB i2c adapter [all], I2C_PXA [i686].
-
-* Tue Mar 22 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc0.git11.0
-- Update to 2.6.38-git11
-- Drop merged fs-call-security_d_instantiate-in-d_obtain_alias.patch
-- Fix context in add-appleir-usb-driver.patch
-- Enable firewire ALSA modules, HP accelerometer driver.
-- Re-enable PSTORE, seems to be fixed.
-- Fix utrace-ptrace for upstream smp_lock removal.
-
-* Fri Mar 18 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc0.git6.0
-- Update to 2.6.38-git6
-- CONFIG_IP_SET modules and associated netfilter goo.
-- New network packet scheduler modules (sch, choke, mqprio.)
-- Enable DMI sysfs interface (built-in) on ia64, x86_64, i386.
-- Explicitly set USB storage goo as modular.
-- Drop merged patches, nil-ify drm-nouveau-updates, fix context in crash.ko
-  Kconfig diff.
-
-* Thu Mar 17 2011 Matthew Garrett <mjg@redhat.com>
-- drop efi_default_physical.patch - it's actually setting up something that's
-  neither physical nor virtual, and it's probably breaking EFI boots
-
-* Wed Mar 16 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.39-0.rc0.git1.1
-- Test out scripts/rebase.sh on 2.6.38-git1.
-- Enable fhandle syscalls (ugh. conditional syscalls... update
-  CONFIG_EXPORTFS to =y, since it's now a bool.)
-- CONFIG_XEN_DEBUG [i386,x86_64] =n, but possibly should be -debug
-  conditional. Needs a xen user to benchmark and see how bad the overhead
-  is.
-
-* Tue Mar 15 2011 Adam Jackson <ajax@redhat.com>
-- drm-intel-big-hammer.patch: Drop.
-
-* Tue Mar 15 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Mar 16 
-- Deblobbed to 2.6.38-libre.
-
-* Tue Mar 15 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-1
-- Linux 2.6.38
-
-* Mon Mar 14 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Deblobbed patch-libre-2.6.38-rc8-git4 by hand.
-
-* Mon Mar 13 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git4.1
-- Linux 2.6.38-rc8-git4
-
-* Thu Mar 10 2011 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.38-rc8-git3
-
-* Thu Mar 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Created patch-libre-2.6.38-rc8 by diffing deblobbed trees.
-
-* Thu Mar 10 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git2.1
-- Linux 2.6.38-rc8-git2
-
-* Wed Mar 09 2011 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.38-rc8-git1
-
-* Wed Mar 09 2011 Dennis Gilmore <dennis@ausil.us>
-- apply sparc64 gcc-4.6.0 buildfix patch
-
-* Wed Mar 09 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-0.rc8.git0.2
-- nouveau: allow max clients on nv4x (679629), better error reporting
-
-* Tue Mar 08 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc8.git0.1
-- Linux 2.6.38-rc8
-
-* Mon Mar  7 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- Created patch-libre-2.6.38-rc7 by diffing deblobbed trees.
-
-* Sat Mar 05 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc7.git4.1
-- Linux 2.6.38-rc7-git4
-- Revert upstream commit e3e89cc535223433a619d0969db3fa05cdd946b8
-  for now to fix utrace build.
-
-* Fri Mar 04 2011 Roland McGrath <roland@redhat.com> - 2.6.38-0.rc7.git2.3
-- Split out perf-debuginfo subpackage.
-
-* Fri Mar 04 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc7.git2.2
-- Disable drm-i915-gen4-has-non-power-of-two-strides.patch for now, breaks
-  my mutter.
-
-* Fri Mar 04 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc7.git2.1
-- Linux 2.6.38-rc7-git2
-- drm-i915-gen4-has-non-power-of-two-strides.patch (#681285)
-
-* Thu Mar 03 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc7.git1.1
-- Linux 2.6.38-rc7-git1
-
-* Tue Mar 01 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc7.git0.1
-- Linux 2.6.38-rc7
-
-* Fri Feb 25 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc6.git6.1
-- Linux 2.6.38-rc6-git6
-- Build in virtio_pci driver so virtio_console will be built-in (#677713)
-
-* Thu Feb 24 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc6.git4.1
-- Linux 2.6.38-rc6-git4
-
-* Thu Feb 24 2011 Matthew Garrett <mjg@redhat.com> 2.6.38-0.rc6.git2.2
-- linux-2.6-acpi-fix-implicit-notify.patch: Fix implicit notify when there's
-  more than one device per GPE
-
-* Wed Feb 23 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc6.git2.1
-- Linux 2.6.38-rc6-git2
-
-* Wed Feb 23 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Feb 24
-- Created patch-libre-2.6.38-rc6 by diffing deblobbed trees.
-
-* Wed Feb 23 2011 Ben Skeggs <bskeggs@redhat.com> 2.6.38-0.rc6.git0.2
-- nouveau: nv4x pciegart fixes, nvc0 accel improvements
-
-* Tue Feb 22 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc6.git0.1
-- Linux 2.6.38-rc6
-
-* Tue Feb 22 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc5.git7.1
-- Linux 2.6.38-rc5-git7
-
-* Mon Feb 21 2011 Dave Jones <davej@redhat.com> 2.6.38-0.rc5.git6.1
-- Linux 2.6.38-rc5-git6
-
-* Sat Feb 19 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38-0.rc5.git5.1
-- Linux 2.6.38-rc5-git5
-
-* Wed Feb 16 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38-0.rc5.git1.1
-- Linux 2.6.38-rc5-git1
-- Add support for Airprime/Sierra USB IP modem (#676860)
-- Make virtio_console built-in on x86_64 (#677713)
-- Revert check for read-only block device added in .38 (#672265)
-
-* Tue Feb 15 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc5.git0.1
-- Linux 2.6.38-rc5 (81 minutes later...)
-
-* Sun Feb 13 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38-0.rc4.git7.1
-- Linux 2.6.38-rc4-git7
-
-* Sat Feb 12 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38-0.rc4.git6.1
-- Linux 2.6.38-rc4-git6
-- Fix memory corruption caused by bug in bridge code.
-
-* Thu Feb 10 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38-0.rc4.git3.1
-- Linux 2.6.38-rc4-git3
-
-* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.6.38-0.rc4.git0.2
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
-
-* Mon Feb 07 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc4.git0.1
-- Linux 2.6.38-rc4
-
-* Fri Feb 04 2011 Chuck Ebbert <cebbert@redhat.com>  2.6.38-0.rc3.git4.1
-- Linux 2.6.38-rc3-git4
-
-* Thu Feb 03 2011 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.38-rc3-git3
-- Enable Advansys SCSI driver on x86_64 (#589115)
-
-* Thu Feb 03 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc3.git2.1
-- Linux 2.6.38-rc3-git2 snapshot
-- [sgruszka] ath5k: fix fast channel change (#672778)
-
-* Wed Feb 02 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc3.git1.1
-- Linux 2.6.38-rc3-git1 snapshot.
-
-* Wed Feb 02 2011 Chuck Ebbert <cebbert@redhat.com>
-- Fix autoload of atl1c driver for latest hardware (#607499)
-
-* Tue Feb 01 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc3.git0.1
-- Linux 2.6.38-rc3
-- Try to fix some obvious bugs in hfsplus mount failure handling (#673857)
-
-* Mon Jan 31 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc2.git9.1
-- Linux 2.6.38-rc2-git9
-
-* Mon Jan 31 2011 Kyle McMartin <kmcmartin@redhat.com>
-- disable CONFIG_SERIAL_8250_DETECT_IRQ (from mschmidt@redhat.com)
-
-* Mon Jan 31 2011 Chuck Ebbert <cebbert@redhat.com>
-- Linux 2.6.38-rc2-git8
-- Add Trond's NFS bugfixes branch from git.linux-nfs.org
-
-* Mon Jan 31 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc2.git7.2
-- Fix build failure on s390.
-
-* Fri Jan 28 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.38-0.rc2.git7.1
-- Linux 2.6.38-rc2-git7
-
-* Wed Jan 26 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc2.git5.1
-- Linux 2.6.38-rc2-git5
-- [x86] Re-enable TRANSPARENT_HUGEPAGE, should be fixed by cacf061c.
-
-* Tue Jan 25 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc2.git3.2
-- [x86] Disable TRANSPARENT_HUGEPAGE for now, there be dragons there.
-
-* Tue Jan 25 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc2.git3.1
-- Linux 2.6.38-rc2-git3
-- perf-gcc460-build-fixes.patch: fix context from [9486aa38]
-
-* Mon Jan 24 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc2.git1.3
-- Disable usb/pci/acpi autosuspend goo until it can be checked.
-
-* Mon Jan 24 2011 Kyle McMartin <kmcmartin@redhat.com>
-- debug-tty-print-dev-name.patch: drop, haven't seen any warnings recently.
-- runtime_pm_fixups.patch: rebase and re-enable, make acpi_power_transition
-   in pci_bind actually do the right thing instead of (likely) always
-   trying to transition to D0.
-
-* Mon Jan 24 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc2.git1.1
-- Linux 2.6.38-rc2-git1
-- [e5cce6c1] tpm: fix panic caused by "tpm: Autodetect itpm devices"
-  may fix some boot issues people were having.
-- tpm-fix-stall-on-boot.patch: upstream.
-- perf-gcc460-build-fixes.patch: fix build issues with warn-unused-but-set
-  in gcc 4.6.0
-
-* Sat Jan 22 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc2.git0.1
-- Linux 2.6.38-rc2
-- linux-2.6-serial-460800.patch, drivers/serial => drivers/tty/serial
-
-* Thu Jan 20 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc1.git1.1
-- Linux 2.6.38-rc1-git1, should fix boot failure in -rc1.
-
-* Wed Jan 19 2011 Roland McGrath <roland@redhat.com>
-- utrace update
-
-* Wed Jan 19 2011 Kyle McMartin <kmcmartin@redhat.com> 2.6.38-0.rc1.git0.1
-- Linux 2.6.38-rc1
-
-* Wed Jan 19 2011 Kyle McMartin <kyle@redhat.com>
+* Tue Jun 14 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Update to 3.0-rc3, add another conflicts to deal with 2 digit
+  versions (libdm.)
+- Simplify linux-3.0-fix-uts-release.patch now that SUBLEVEL is optional.
+- revert-ftrace-remove-unnecessary-disabling-of-irqs.patch: drop upstreamed
+  patch.
+- drm-intel-eeebox-eb1007-quirk.patch: ditto.
+- ath5k-disable-fast-channel-switching-by-default.patch: ditto.
+
+* Thu Jun 09 2011 Kyle McMartin <kmcmartin@redhat.com>
+- ath5k-disable-fast-channel-switching-by-default.patch (rhbz#709122)
+  (korgbz#34992) [a99168ee in wireless-next]
+
+* Thu Jun 09 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc2.git0.2
+- rhbz#710921: revert-ftrace-remove-unnecessary-disabling-of-irqs.patch
+
+* Wed Jun 08 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc2.git0.1
+- Update to 3.0-rc2, rebase utsname fix.
+- Build IPv6 into the kernel for a variety of reasons
+  (http://lists.fedoraproject.org/pipermail/kernel/2011-June/003105.html)
+
+* Mon Jun 06 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc1.git0.3
+- Conflict with module-init-tools older than 3.13 to ensure the
+  3.0 transition is handled correctly.
+
+* Wed Jun 01 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc1.git0.2
+- Fix utsname for 3.0-rc1
+
+* Mon May 30 2011 Kyle McMartin <kmcmartin@redhat.com> 3.0-0.rc1.git0.1
+- Linux 3.0-rc1 (won't build until module-init-tools gets an update.)
+
+* Mon May 30 2011 Kyle McMartin <kyle@redhat.com>
 - Trimmed changelog, see fedpkg git for earlier history.
 
 ###
