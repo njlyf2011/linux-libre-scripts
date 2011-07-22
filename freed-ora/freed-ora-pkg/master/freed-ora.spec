@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        6
+Version:        7
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -152,6 +152,9 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Fri Jul 22 2011 Alexandre Oliva <lxoliva@fsfla.org> - 7-1
+- Added linux.org.tr mirror.
+
 * Mon Feb  7 2011 Alexandre Oliva <lxoliva@fsfla.org> - 6-1
 - Conflict with iwl100-firmware.
 

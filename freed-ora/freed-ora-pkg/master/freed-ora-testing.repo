@@ -1,6 +1,7 @@
 [freed-ora-testing]
 name=Linux-libre Freed-ora $releasever - Test builds
 baseurl=http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/F-$releasever-testing
+	http://ftp.linux.org.tr/linux-libre/freed-ora/F-$releasever-testing
 	http://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/F-$releasever-testing
         http://www.lsd.ic.unicamp.br/~oliva/fsfla/linux-libre/freed-ora/F-$releasever-testing
 enabled=0
@@ -11,6 +12,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-freed-ora-linux-libre
 [freed-ora-testing-debuginfo]
 name=Linux-libre Freed-ora $releasever - Test builds - Debug
 baseurl=http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/F-$releasever-testing
+	http://ftp.linux.org.tr/linux-libre/freed-ora/debuginfo/F-$releasever-testing
 enabled=0
 metadata_expire=7d
 gpgcheck=1
