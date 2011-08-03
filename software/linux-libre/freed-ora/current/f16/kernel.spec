@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -145,7 +145,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 0
+%define rawhide_skip_docs 1
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -168,7 +168,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -447,7 +447,7 @@ Summary: The Linux kernel
 # First the general kernel 2.6 required versions as per
 # Documentation/Changes
 #
-%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, module-init-tools < 3.13-1, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
+%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
 
 #
 # Then a series of requirements that are distribution specific, either
@@ -465,7 +465,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
+%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
 %define initrd_prereq  dracut >= 001-7
 
 #
@@ -718,6 +718,9 @@ Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 Patch12205: runtime_pm_fixups.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
+
+Patch13000: fix-scsi_dispatch_cmd.patch
+Patch13001: epoll-fix-spurious-lockdep-warnings.patch
 
 Patch20000: utrace.patch
 
@@ -1334,6 +1337,9 @@ ApplyPatch udlfb-bind-framebuffer-to-interface.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
+ApplyPatch fix-scsi_dispatch_cmd.patch
+ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
+
 # utrace.
 ApplyPatch utrace.patch
 
@@ -1579,7 +1585,7 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt2x00(pci|usb)_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -1946,6 +1952,20 @@ fi
 # and build.
 
 %changelog
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Fix epoll recursive lockdep warnings (rhbz 722472)
+- Turn debug builds back on
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Add change from Yanko Kaneti to get the rt2x00 drivers in modules.networking
+  (rhbz 708314)
+
+* Fri Jul 29 2011 Dave Jones <davej@redhat.com>
+- Fix scsi_dispatch_cmd oops (USB eject problems, etc).
+
+* Thu Jul 28 2011 Dave Jones <davej@redhat.com>
+- module-init-tools needs to be a prereq, not a conflict.
+
 * Thu Jul 28 2011 Josh Boyer <jwboyer@redhat.com>
 - Backport patch to correct udlfb removal events (rhbz 726163)
 
