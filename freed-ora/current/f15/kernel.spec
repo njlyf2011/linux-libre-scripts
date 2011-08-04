@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 4
+%global baserelease 0
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,7 +78,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -576,39 +576,7 @@ Source1000: config-local
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
-# For a stable release kernel
-%if 0%{?stable_update}
-%if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}.bz2
-Patch00: %{stable_patch_00}
-%endif
-%if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
-Patch01: %{stable_patch_01}
-%endif
-
-# non-released_kernel case
-# These are automagically defined by the rcrev and gitrev values set up
-# near the top of this spec file.
-%else
-%if 0%{?rcrev}
-Patch00: patch%{?rcrevlibre}-3.0-rc%{rcrev}.bz2
-%if 0%{?gitrev}
-Patch01: patch%{?gitrevlibre}-3.0-rc%{rcrev}-git%{gitrev}.bz2
-%endif
-%else
-# pre-{base_sublevel+1}-rc1 case
-%if 0%{?gitrev}
-Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}.bz2
-%endif
-%endif
-%endif
-
-%if %{using_upstream_branch}
-### BRANCH PATCH ###
-%endif
-
-Patch03: git-linus.diff
+Patch01: patch-3.0.1-rc1.bz2
 
 # we also need compile fixes for -vanilla
 Patch04: linux-2.6-compile-fixes.patch
@@ -694,13 +662,17 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12018: neuter_intel_microcode_load.patch
 
+Patch12022: fix-cdc-ncm-dma-stack-vars.patch
+Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
+
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
 Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
-Patch13000: fix-scsi_dispatch_cmd.patch
+Patch13001: epoll-fix-spurious-lockdep-warnings.patch
+Patch13002: hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
 
 Patch20000: utrace.patch
 
@@ -1069,33 +1041,6 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/
 
     # Need to apply patches to the base vanilla version.
     cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
-    cd vanilla-%{vanillaversion}
-
-   if [[ `expr %{vanillaversion} : '^2\.6\.4\(.*\)'` != `expr %{kversion} : '^3\.\(.*\)'` ]]; then
-
-# Update vanilla to the latest upstream.
-# (non-released_kernel case only)
-%if 0%{?rcrev}
-%if "%{?stablelibre}" != "%{?rcrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
-%endif
-    ApplyPatch patch%{?rcrevlibre}-3.0-rc%{rcrev}.bz2
-%if 0%{?gitrev}
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
-    ApplyPatch patch%{?gitrevlibre}-3.0-rc%{rcrev}-git%{gitrev}.bz2
-%endif
-%else
-# pre-{base_sublevel+1}-rc1 case
-%if "%{?stablelibre}" != "%{?gitrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
-%endif
-    ApplyPatch patch%{?gitrevlibre}-3.0-git%{gitrev}.bz2
-%endif
-
-   fi
-
-    cd ..
-
   fi
 
 %endif
@@ -1119,14 +1064,6 @@ fi
 cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
 
 cd linux-%{kversion}.%{_target_cpu}
-
-# released_kernel with possible stable updates
-%if 0%{?stable_base}
-ApplyPatch %{stable_patch_00}
-%endif
-%if 0%{?stable_rc}
-ApplyPatch %{stable_patch_01}
-%endif
 
 %if %{using_upstream_branch}
 ### BRANCH APPLY ###
@@ -1159,7 +1096,7 @@ do
 done
 %endif
 
-ApplyOptionalPatch git-linus.diff
+ApplyPatch patch-3.0.1-rc1.bz2
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
@@ -1303,10 +1240,15 @@ ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch neuter_intel_microcode_load.patch
 
+ApplyPatch fix-cdc-ncm-dma-stack-vars.patch
+ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
+
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
-ApplyPatch fix-scsi_dispatch_cmd.patch
+ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
+
+ApplyPatch hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
 
 ApplyPatch utrace.patch
 
@@ -1555,7 +1497,7 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt2x00(pci|usb)_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -1922,6 +1864,30 @@ fi
 # and build.
 
 %changelog
+* Wed Aug 03 2011 Dave Jones <davej@redhat.com>
+- Apply patches from patch-3.0.1-rc1
+
+* Wed Aug 03 2011 John W. Linville <linville@redhat.com>
+- Disable CONFIG_BCMA since no driver currently uses it (rhbz 727796)
+
+* Wed Aug 03 2011 Josh Boyer <jwboyer@redhat.com>
+- rt2x00: Add device ID for RT539F device. (rhbz 720594)
+- Add patch to fix backtrace in cdc_ncm driver (rhbz 720128)
+- Add patch to fix backtrace in usm-realtek driver (rhbz 720054)
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Fix epoll recursive lockdep warnings (rhbz 722472)
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix HFSPlus filesystem mounting (rhbz 720771)
+
+* Tue Aug 02 2011 Dave Jones <davej@redhat.com>
+- Change USB_SERIAL_OPTION back to modular. (rhbz 727680)
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40-5
+- Add change from Yanko Kaneti to get the rt2x00 drivers in modules.networking
+  (rhbz 708314)
+
 * Sat Jul 30 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - 3.0-libre (munged to 2.6.40-libre).
 
