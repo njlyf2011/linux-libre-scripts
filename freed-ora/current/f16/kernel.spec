@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -77,7 +77,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -704,13 +704,12 @@ Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12018: neuter_intel_microcode_load.patch
-
-Patch12019: linux-2.6-rt2x00-Add-device-ID-for-RT539F-device.patch
-
 Patch12020: linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
 
 Patch12021: udlfb-bind-framebuffer-to-interface.patch
+
+Patch12022: fix-cdc-ncm-dma-stack-vars.patch
+Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
@@ -719,9 +718,10 @@ Patch12205: runtime_pm_fixups.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
-Patch13000: fix-scsi_dispatch_cmd.patch
 Patch13001: epoll-fix-spurious-lockdep-warnings.patch
+Patch13002: hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
 
+Patch13003: efi-dont-map-boot-services-on-32bit.patch
 Patch20000: utrace.patch
 
 %endif
@@ -1322,11 +1322,9 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch add-appleir-usb-driver.patch
 
-ApplyPatch neuter_intel_microcode_load.patch
-
-ApplyPatch linux-2.6-rt2x00-Add-device-ID-for-RT539F-device.patch
-
 ApplyPatch udlfb-bind-framebuffer-to-interface.patch
+ApplyPatch fix-cdc-ncm-dma-stack-vars.patch
+ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
 
 # Runtime PM
 #ApplyPatch linux-2.6-usb-pci-autosuspend.patch
@@ -1337,8 +1335,10 @@ ApplyPatch udlfb-bind-framebuffer-to-interface.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
-ApplyPatch fix-scsi_dispatch_cmd.patch
 ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
+ApplyPatch hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
+
+ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 # utrace.
 ApplyPatch utrace.patch
@@ -1952,6 +1952,28 @@ fi
 # and build.
 
 %changelog
+* Fri Aug 05 2011 Josh Boyer <jwboyer@redhat.com>
+- 3.0.1
+
+* Fri Aug 05 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch for rhbz 726701 from Matthew Garrett
+
+* Thu Aug 04 2011 Dave Jones <davej@redhat.com>
+- Drop neuter_intel_microcode_load.patch (rhbz 690930)
+
+* Wed Aug 03 2011 John W. Linville <linville@redhat.com>
+- Disable CONFIG_BCMA since no driver currently uses it (rhbz 727796)
+
+* Wed Aug 03 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix backtrace in cdc_ncm driver (rhbz 720128)
+- Add patch to fix backtrace in usm-realtek driver (rhbz 720054)
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix HFSPlus filesystem mounting (rhbz 720771)
+
+* Tue Aug 02 2011 Dave Jones <davej@redhat.com>
+- Change USB_SERIAL_OPTION back to modular. (rhbz 727680)
+
 * Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
 - Fix epoll recursive lockdep warnings (rhbz 722472)
 - Turn debug builds back on
