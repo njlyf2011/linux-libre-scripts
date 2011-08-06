@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -82,7 +82,7 @@ Summary: The Linux kernel
 %define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
-%define stablerev .%{stable_update}
+%define stablerev %{stable_update}
 %define stable_base %{stable_update}
 %if 0%{?stable_rc}
 # stable RCs are incremental patches, so we need the previous stable patch
@@ -1444,14 +1444,18 @@ BuildKernel() {
     KernelVer=%{version}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}
     echo BUILDING A KERNEL FOR ${Flavour} %{_target_cpu}...
 
-    # make sure EXTRAVERSION says what we want it to say
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre-%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+    %if 0%{?stable_update}
+    # make sure SUBLEVEL is incremented on a stable release.  Sigh 3.x.
+    perl -p -i -e "s/^SUBLEVEL.*/SUBLEVEL = %{?stablerev}/" Makefile
+    %endif
 
-    # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
-    ### XXX this will probably be dead code in 3.0 --kyle
+    # make sure EXTRAVERSION says what we want it to say
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre-%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+
+    # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
     %if !0%{?rcrev}
     %if 0%{?gitrev}
-    perl -p -i -e 's/^SUBLEVEL.*/SUBLEVEL = %{upstream_sublevel}/' Makefile
+    perl -p -i -e 's/^PATCHLEVEL.*/PATCHLEVEL = %{upstream_sublevel}/' Makefile
     %endif
     %endif
 
@@ -1952,6 +1956,12 @@ fi
 # and build.
 
 %changelog
+* Fri Aug 05 2011 Josh Boyer <jwboyer@redhat.com>
+- Adjust Makefile munging for new 3.x numbering scheme
+
+* Fri Aug 05 2011 Dave Jones <davej@redhat.com>
+- Deselect CONFIG_DECNET. Unmaintained, and rubbish.
+
 * Fri Aug 05 2011 Josh Boyer <jwboyer@redhat.com>
 - 3.0.1
 
