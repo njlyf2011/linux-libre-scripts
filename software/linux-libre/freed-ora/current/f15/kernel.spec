@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 0
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -576,7 +576,7 @@ Source1000: config-local
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
-Patch01: patch-3.0.1-rc1.bz2
+Patch01: patch-3.0.1.bz2
 
 # we also need compile fixes for -vanilla
 Patch04: linux-2.6-compile-fixes.patch
@@ -660,8 +660,6 @@ Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12018: neuter_intel_microcode_load.patch
-
 Patch12022: fix-cdc-ncm-dma-stack-vars.patch
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 
@@ -673,6 +671,8 @@ Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13001: epoll-fix-spurious-lockdep-warnings.patch
 Patch13002: hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
+
+Patch13010: iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
 
 Patch20000: utrace.patch
 
@@ -1096,7 +1096,7 @@ do
 done
 %endif
 
-ApplyPatch patch-3.0.1-rc1.bz2
+ApplyPatch patch-3.0.1.bz2
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
@@ -1238,8 +1238,6 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch add-appleir-usb-driver.patch
 
-ApplyPatch neuter_intel_microcode_load.patch
-
 ApplyPatch fix-cdc-ncm-dma-stack-vars.patch
 ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
 
@@ -1249,6 +1247,8 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
 
 ApplyPatch hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
+
+ApplyPatch iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
 
 ApplyPatch utrace.patch
 
@@ -1864,6 +1864,18 @@ fi
 # and build.
 
 %changelog
+* Fri Aug 05 2011 Dave Jones <davej@redhat.com>  2.6.40.1-1
+- Revert f16-only change that made IPV6 built-in.
+
+* Fri Aug 05 2011 Dave Jones <davej@redhat.com>
+- Final 3.0.1 diff.
+
+* Thu Aug 04 2011 Dave Jones <davej@redhat.com>
+- Drop neuter_intel_microcode_load.patch (rhbz 690930)
+
+* Wed Aug 03 2011 Dave Jones <davej@redhat.com>
+- iwlagn: check for !priv->txq in iwlagn_wait_tx_queue_empty (rhbz 728044)
+
 * Wed Aug 03 2011 Dave Jones <davej@redhat.com>
 - Apply patches from patch-3.0.1-rc1
 
