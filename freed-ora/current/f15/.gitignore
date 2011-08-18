@@ -5,3 +5,5 @@ clog
 *.rpm
 kernel-2.6.*/
 kernel-3.*/
+/patch-3.0.2-rc1.gz
+/patch-3.0.3-rc1.gz
