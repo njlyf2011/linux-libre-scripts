@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 2
+%global baserelease 0
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,7 +78,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -126,6 +126,10 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
+# ARM OMAP (Beagle/Panda Board)
+%define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
+# kernel-tegra (only valid for arm)
+%define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
@@ -233,6 +237,12 @@ Summary: The Linux kernel
 # kernel-PAE is only built on i686.
 %ifnarch i686
 %define with_pae 0
+%endif
+
+# kernel-tegra and omap is only built on armv7 hard and softfp
+%ifnarch armv7hl armv7l
+%define with_tegra 0
+%define with_omap 0
 %endif
 
 # if requested, only build base kernel
@@ -387,9 +397,20 @@ Summary: The Linux kernel
 %ifarch %{arm}
 %define all_arch_configs kernel-%{version}-arm*.config
 %define image_install_path boot
+%define asmarch arm
 %define hdrarch arm
-%define make_target vmlinux
-%define kernel_image vmlinux
+%define make_target bzImage
+%define kernel_image arch/arm/boot/zImage
+# we build a up kernel on armv5tel. its used for qemu.
+%ifnarch armv5tel
+%define with_up 0
+%endif
+# we only build headers on the base arm arches
+# just like we used to only build them on i386 for x86
+%ifnarch armv5tel armv7hl
+%define with_headers 0
+%endif
+%define with_perf 0
 %endif
 
 %if %{nopatches}
@@ -412,7 +433,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 s390 sparc sparcv9 %{arm}
+%define nobuildarches i386 s390 sparc sparcv9
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -568,7 +589,9 @@ Source70: config-s390x
 
 Source90: config-sparc64-generic
 
-Source100: config-arm
+Source100: config-arm-generic
+Source110: config-arm-omap-generic
+Source111: config-arm-tegra
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -576,7 +599,8 @@ Source1000: config-local
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
-Patch01: patch-3.0.1.bz2
+Patch01: patch-3.0.2.bz2
+Patch02: patch-libre-3.0.3-rc1.bz2
 
 # we also need compile fixes for -vanilla
 Patch04: linux-2.6-compile-fixes.patch
@@ -588,12 +612,12 @@ Patch07: freedo.patch
 
 %if !%{nopatches}
 
-
 # revert upstream patches we get via other methods
 Patch09: linux-2.6-upstream-reverts.patch
-# Git trees.
 
 # Standalone patches
+
+Patch100: perf-check-ownership.patch
 
 Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
 
@@ -629,7 +653,8 @@ Patch800: linux-2.6-crash-driver.patch
 # crypto/
 
 # virt + ksm patches
-Patch1555: fix_xen_guest_on_old_EC2.patch
+Patch1500: fix_xen_guest_on_old_EC2.patch
+Patch1501: xen-blkfront-name-adjust.patch
 
 # DRM
 
@@ -664,6 +689,7 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12022: fix-cdc-ncm-dma-stack-vars.patch
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
+Patch12024: usb-add-quirk-for-logitech-webcams.patch
 
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
@@ -678,6 +704,9 @@ Patch13010: iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
 
 Patch20000: utrace.patch
 
+# Flattened devicetree support
+Patch21000: arm-omap-dt-compat.patch
+Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -889,6 +918,19 @@ The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
 
+%define variant_summary The Linux kernel compiled for TI-OMAP boards
+%kernel_variant_package omap
+%description omap
+This package includes a version of the Linux kernel with support for
+TI-OMAP based systems, i.e., BeagleBoard-xM.
+
+%define variant_summary The Linux kernel compiled for tegra boards
+%kernel_variant_package tegra
+%description tegra
+This package includes a version of the Linux kernel with support for
+nvidia tegra based systems, i.e., trimslice, ac-100.
+
+
 %prep
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
@@ -1098,7 +1140,8 @@ do
 done
 %endif
 
-ApplyPatch patch-3.0.1.bz2
+ApplyPatch patch-3.0.2.bz2
+ApplyPatch patch-libre-3.0.3-rc1.bz2
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
@@ -1116,21 +1159,18 @@ ApplyPatch freedo.patch
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 
-# Architecture patches
-# x86(-64)
-
-#
-# Intel IOMMU
-#
-
-#
-# PowerPC
-#
+ApplyPatch perf-check-ownership.patch
 
 #
 # SPARC64
 #
 ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
+
+#
+# ARM
+#
+ApplyPatch arm-omap-dt-compat.patch
+ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 
 #
 # Exec shield
@@ -1215,6 +1255,7 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
+ApplyPatch xen-blkfront-name-adjust.patch
 
 # DRM core
 
@@ -1244,6 +1285,7 @@ ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch fix-cdc-ncm-dma-stack-vars.patch
 ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
+ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1561,6 +1603,14 @@ BuildKernel %make_target %kernel_image PAEdebug
 BuildKernel %make_target %kernel_image PAE
 %endif
 
+%if %{with_omap}
+BuildKernel %make_target %kernel_image omap
+%endif
+
+%if %{with_tegra}
+BuildKernel %make_target %kernel_image tegra
+%endif
+
 %if %{with_up}
 BuildKernel %make_target %kernel_image
 %endif
@@ -1753,6 +1803,12 @@ fi}\
 %kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
 %kernel_variant_preun PAEdebug
 
+%kernel_variant_preun omap
+%kernel_variant_post -v omap
+
+%kernel_variant_preun tegra
+%kernel_variant_post -v tegra
+
 if [ -x /sbin/ldconfig ]
 then
     /sbin/ldconfig -X || exit $?
@@ -1863,11 +1919,49 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
+%kernel_variant_files %{with_omap} omap
+%kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 
 %changelog
+* Wed Aug 17 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblobbed 3.0.3-rc1.
+
+* Mon Aug 15 2011 Dave Jones <davej@redhat.com> 2.6.40.3-0
+- Apply patches from 3.0.3-rc1
+
+* Mon Aug 15 2011 Dave Jones <davej@redhat.com>
+- Apply patches from 3.0.2
+
+* Mon Aug 15 2011 Dave Jones <davej@redhat.com>
+- CVE-2011-2905 perf tools may parse user-controlled config file. (rhbz 729809)
+
+* Sat Aug 13 2011 Dave Jones <davej@redhat.com>
+- Apply patches from 3.0.2rc1
+
+* Thu Aug 11 2011 Dennis Gilmore <dennis@ausil.us>
+- add config for arm tegra devices
+- setup kernel to build omap image (patch from David Marlin)
+- setup kernel to build tegra image based on omap work
+- add arm device tree patches
+
+* Thu Aug 11 2011 Josh Boyer <jwboyer@redhat.com>
+- Add munged together patch for rhbz 729269
+
+* Thu Aug 11 2011 Dave Jones <davej@redhat.com>
+- Fix Xen blk device naming (rhbz 729340)
+
+* Tue Aug 09 2011 Josh Boyer <jwboyer@redhat.com>
+- Add Makefile.config and ARM config changes from David Marlin
+
+* Tue Aug 09 2011 Dave Jones <davej@redhat.com>
+- ptrace_report_syscall: check if TIF_SYSCALL_EMU is defined
+
+* Tue Aug 09 2011 Dave Jones <davej@redhat.com>
+- Enable CONFIG_SAMSUNG_LAPTOP (rhbz 729363)
+
 * Tue Aug 09 2011 Dave Jones <davej@redhat.com>  2.6.40.1-2
 - Fix stray block put after queue teardown (rhbz 728872)
 
