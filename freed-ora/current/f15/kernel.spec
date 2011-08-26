@@ -3,11 +3,6 @@
 
 Summary: The Linux kernel
 
-# For a stable, released kernel, released_kernel should be 1. For rawhide
-# and/or a kernel built from an rc or git snapshot, released_kernel should
-# be 0.
-%global released_kernel 1
-
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
 %global orig_buildid %{buildid}
@@ -44,28 +39,23 @@ Summary: The Linux kernel
 #
 # We used to have some extra magic weirdness to bump this automatically,
 # but now we don't.  Just use: rpmdev-bumpspec -c 'comment for changelog'
-# When changing base_sublevel below or going from rc to a final kernel,
-# reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
-# scripts/rebase.sh should be made to do that for you, actually.
+# When changing real_sublevel below, reset this by hand to 1
+# (or to 0 and then use rpmdev-bumpspec).
 #
-# For non-released -rc kernels, this will be prepended with "0.", so
-# for example a 3 here will become 0.3
-#
-%global baserelease 0
+%global baserelease 2
 %global fedora_build %{baserelease}
 
-# base_sublevel is the kernel version we're starting with and patching
-# on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
-# which yields a base_sublevel of 21.
-%define base_sublevel 0
-%define fake_sublevel 40
+# real_sublevel is the 3.x kernel version we're starting with
+%define real_sublevel 0
+# fake_sublevel is the 2.6.x version we're faking
+%define fake_sublevel %(echo $((40 + %{real_sublevel})))
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -73,9 +63,6 @@ Summary: The Linux kernel
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
 #define libres .
-
-## If this is a released kernel ##
-%if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
 %define stable_update 3
@@ -91,9 +78,6 @@ Summary: The Linux kernel
 %endif
 %endif
 %define rpmversion 2.6.%{fake_sublevel}%{?stablerev}
-
-%endif
-# Nb: The above rcrev and gitrev values automagically define Patch00 and Patch01 below.
 
 # What parts do we want to build?  We must build at least one kernel.
 # These are the kernels that are built IF the architecture allows it.
@@ -133,11 +117,7 @@ Summary: The Linux kernel
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
-%if 0%{?released_kernel}
 %define doc_build_fail false
-%else
-%define doc_build_fail true
-%endif
 
 %define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
@@ -168,32 +148,15 @@ Summary: The Linux kernel
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
 
 # pkg_release is what we'll fill in for the rpm Release: field
-%if 0%{?released_kernel}
 
 %if 0%{?stable_rc}
 %define stable_rctag .rc%{stable_rc}
 %endif
 %define pkg_release %{fedora_build}%{?stable_rctag}%{?buildid}%{?dist}%{?libres}
 
-%else
-
-# non-released_kernel
-%if 0%{?rcrev}
-%define rctag .rc%rcrev
-%else
-%define rctag .rc0
-%endif
-%if 0%{?gitrev}
-%define gittag .git%gitrev
-%else
-%define gittag .git0
-%endif
-%define pkg_release 0%{?rctag}%{?gittag}.%{fedora_build}%{?buildid}%{?dist}%{?libres}
-
-%endif
-
 # The kernel tarball/base version
-%define kversion 3.%{base_sublevel}
+%define realversion 3.%{real_sublevel}
+%define fakeversion 2.6.%{fake_sublevel}
 
 %define make_target bzImage
 
@@ -556,12 +519,12 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{realversion}-libre%{?librev}.tar.bz2
 
 # For documentation purposes only.
 Source3: deblob-main
 Source4: deblob-check
-Source5: deblob-%{kversion}
+Source5: deblob-%{realversion}
 
 Source11: genkey
 Source14: find-provides
@@ -599,8 +562,20 @@ Source1000: config-local
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
-Patch01: patch-3.0.2.bz2
-Patch02: patch-libre-3.0.3-rc1.bz2
+# For a stable release kernel
+%if 0%{?stable_update}
+%if 0%{?stable_base}
+%define    stable_patch_00  patch%{stablelibre}-3.%{real_sublevel}.%{stable_base}.bz2
+Patch00: %{stable_patch_00}
+%endif
+%if 0%{?stable_rc}
+%define    stable_patch_01  patch%{rcrevlibre}-3.%{real_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
+Patch01: %{stable_patch_01}
+%endif
+%endif
+
+# Patches from git://git.kernel.org/pub/scm/linux/kernel/git/stable/stable-queue.git
+Patch02: stable-queue.patch
 
 # we also need compile fixes for -vanilla
 Patch04: linux-2.6-compile-fixes.patch
@@ -660,6 +635,7 @@ Patch1501: xen-blkfront-name-adjust.patch
 
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
+Patch1811: drm-ttm-nouveau-oops-fix.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
@@ -678,6 +654,8 @@ Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 
+Patch3000: rcutree-avoid-false-quiescent-states.patch
+
 # fs fixes
 
 # NFSv4
@@ -690,6 +668,7 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12022: fix-cdc-ncm-dma-stack-vars.patch
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: usb-add-quirk-for-logitech-webcams.patch
+Patch12025: crypto-register-cryptd-first.patch
 
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
@@ -701,12 +680,25 @@ Patch13001: epoll-fix-spurious-lockdep-warnings.patch
 Patch13002: hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
 
 Patch13010: iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
+Patch13011: iwlagn-revert-max-aggregate-size.patch
 
 Patch20000: utrace.patch
 
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+
+# workaround for issue with gcc-4.6.x
+# http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45819
+# http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45704
+# patch from http://www.delorie.com/tmp/arm-readl.patch
+Patch21002: arm-readl.patch
+
+Patch21003: TEGRA-2.6.40.2-enable-USB-ports.patch
+
+# rhbz#719607
+Patch21004: vfs-fix-automount-for-negative-autofs-dentries.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -832,7 +824,8 @@ AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 Requires: perl\
 %description -n kernel%{?variant}%{?1:-%{1}}-devel\
-This package provides kernel headers and makefiles sufficient to build modules\
+This package provides kernel headers and 
+makefiles sufficient to build modules\
 against the %{?2:%{2} }kernel package.\
 %{nil}
 
@@ -1007,46 +1000,24 @@ ApplyOptionalPatch()
 # which speeds things up quite a bit.
 
 # Update to latest upstream.
-%if 0%{?released_kernel}
-%define vanillaversion 2.6.%{fake_sublevel}
-# non-released_kernel case
-%else
-%if 0%{?rcrev}
-%define vanillaversion 2.6.%{upstream_sublevel}-rc%{rcrev}
-%if 0%{?gitrev}
-%define vanillaversion 2.6.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
-%endif
-%else
-# pre-{base_sublevel+1}-rc1 case
-%if 0%{?gitrev}
-%define vanillaversion 2.6.%{base_sublevel}-git%{gitrev}
-%else
-%define vanillaversion 2.6.%{base_sublevel}
-%endif
-%endif
-%endif
-
-# %%{vanillaversion} : the full version name, e.g. 2.6.35-rc6-git3
-# %%{kversion}       : the base version, e.g. 2.6.34
-
-# Use kernel-%%{kversion}%%{?dist} as the top-level directory name
+# Use kernel-%%{fakeversion}%%{?dist} as the top-level directory name
 # so we can prep different trees within a single git directory.
 
 # Build a list of the other top-level kernel tree directories.
 # This will be used to hardlink identical vanilla subdirs.
 sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-3.*' \
-            | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
+            | grep -x -v "$PWD"/kernel-%{fakeversion}%{?dist}) ||:
 
-if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
+if [ ! -d kernel-%{fakeversion}%{?dist}/vanilla-%{realversion} ]; then
 
-  if [ -d kernel-%{kversion}%{?dist}/vanilla-%{kversion} ]; then
+  if [ -d kernel-%{fakeversion}%{?dist}/vanilla-%{realversion} ]; then
 
     # The base vanilla version already exists.
-    cd kernel-%{kversion}%{?dist}
+    cd kernel-%{fakeversion}%{?dist}
 
     # Any vanilla-* directories other than the base one are stale.
     for dir in vanilla-*; do
-      [ "$dir" = vanilla-%{kversion} ] || rm -rf $dir &
+      [ "$dir" = vanilla-%{realversion} ] || rm -rf $dir &
     done
 
   else
@@ -1054,60 +1025,39 @@ if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
     rm -f pax_global_header
     # Look for an identical base vanilla dir that can be hardlinked.
     for sharedir in $sharedirs ; do
-      if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
+      if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{realversion} ]] ; then
         break
       fi
     done
-    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
-%setup -q -n kernel-%{kversion}%{?dist} -c -T
-      cp -rl $sharedir/vanilla-%{kversion} .
+    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{realversion} ]] ; then
+%setup -q -n kernel-%{fakeversion}%{?dist} -c -T
+      cp -rl $sharedir/vanilla-%{realversion} .
     else
-%setup -q -n kernel-%{kversion}%{?dist} -c
-      mv linux-%{kversion} vanilla-%{kversion}
+%setup -q -n kernel-%{fakeversion}%{?dist} -c
+      mv linux-%{realversion} vanilla-%{realversion}
     fi
 
   fi
-
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/" vanilla-%{kversion}/Makefile
-
-%if "%{kversion}" != "%{vanillaversion}"
-
-  for sharedir in $sharedirs ; do
-    if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
-      break
-    fi
-  done
-  if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
-
-    cp -rl $sharedir/vanilla-%{vanillaversion} .
-
-  else
-
-    # Need to apply patches to the base vanilla version.
-    cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
-  fi
-
-%endif
 
 else
 
   # We already have all vanilla dirs, just change to the top-level directory.
-  cd kernel-%{kversion}%{?dist}
+  cd kernel-%{fakeversion}%{?dist}
 
 fi
 
 # Now build the fedora kernel tree.
-if [ -d linux-%{kversion}.%{_target_cpu} ]; then
+if [ -d linux-%{fakeversion}.%{_target_cpu} ]; then
   # Just in case we ctrl-c'd a prep already
   rm -rf deleteme.%{_target_cpu}
   # Move away the stale away, and delete in background.
-  mv linux-%{kversion}.%{_target_cpu} deleteme.%{_target_cpu}
+  mv linux-%{fakeversion}.%{_target_cpu} deleteme.%{_target_cpu}
   rm -rf deleteme.%{_target_cpu} &
 fi
 
-cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
+cp -rl vanilla-%{realversion} linux-%{fakeversion}.%{_target_cpu}
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{fakeversion}.%{_target_cpu}
 
 %if %{using_upstream_branch}
 ### BRANCH APPLY ###
@@ -1140,8 +1090,17 @@ do
 done
 %endif
 
-ApplyPatch patch-3.0.2.bz2
-ApplyPatch patch-libre-3.0.3-rc1.bz2
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/" Makefile
+
+# released_kernel with possible stable updates
+%if 0%{?stable_base}
+ApplyPatch %{stable_patch_00}
+%endif
+%if 0%{?stable_rc}
+ApplyPatch %{stable_patch_01}
+%endif
+
+ApplyOptionalPatch stable-queue.patch
 
 ApplyPatch linux-2.6-makefile-after_link.patch
 
@@ -1171,6 +1130,8 @@ ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
 #
 ApplyPatch arm-omap-dt-compat.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
+ApplyPatch arm-readl.patch
+ApplyPatch TEGRA-2.6.40.2-enable-USB-ports.patch
 
 #
 # Exec shield
@@ -1255,9 +1216,10 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
-ApplyPatch xen-blkfront-name-adjust.patch
+#ApplyPatch xen-blkfront-name-adjust.patch
 
 # DRM core
+ApplyPatch drm-ttm-nouveau-oops-fix.patch
 
 # Nouveau DRM
 ApplyOptionalPatch drm-nouveau-updates.patch
@@ -1278,6 +1240,9 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
+# Avoid false quiescent states in rcu.
+ApplyPatch rcutree-avoid-false-quiescent-states.patch
+
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
@@ -1286,6 +1251,7 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch fix-cdc-ncm-dma-stack-vars.patch
 ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
+ApplyPatch crypto-register-cryptd-first.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1295,8 +1261,12 @@ ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
 ApplyPatch hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
 
 ApplyPatch iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
+ApplyPatch iwlagn-revert-max-aggregate-size.patch
 
 ApplyPatch utrace.patch
+
+# rhbz#719607
+ApplyPatch vfs-fix-automount-for-negative-autofs-dentries.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1404,14 +1374,6 @@ BuildKernel() {
     perl -p -i -e 's/^VERSION.*/VERSION = 2/' Makefile
     perl -p -i -e 's/^PATCHLEVEL.*/PATCHLEVEL = 6/' Makefile
     perl -p -i -e 's/^SUBLEVEL.*/SUBLEVEL = %{fake_sublevel}/' Makefile
-
-    # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
-    ### XXX this will probably be dead code in 3.0 --kyle
-    %if !0%{?rcrev}
-    %if 0%{?gitrev}
-    perl -p -i -e 's/^SUBLEVEL.*/SUBLEVEL = %{upstream_sublevel}/' Makefile
-    %endif
-    %endif
 
     # and now to start the build process
 
@@ -1589,7 +1551,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/boot
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{fakeversion}.%{_target_cpu}
 
 %if %{with_debug}
 BuildKernel %make_target %kernel_image debug
@@ -1662,7 +1624,7 @@ find Documentation -type d | xargs chmod u+w
 
 %install
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{fakeversion}.%{_target_cpu}
 
 %if %{with_doc}
 docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
@@ -1828,7 +1790,7 @@ fi
 %files firmware
 %defattr(-,root,root)
 /lib/firmware/*
-%doc linux-%{kversion}.%{_target_cpu}/firmware/WHENCE
+%doc linux-%{fakeversion}.%{_target_cpu}/firmware/WHENCE
 %endif
 
 %if %{with_bootwrapper}
@@ -1926,7 +1888,45 @@ fi
 # and build.
 
 %changelog
-* Wed Aug 17 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Aug 26 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use deblobbed patch from 3.0.3-libre release.
+
+* Thu Aug 25 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.40.3-2
+- Add patches queued for 3.0.4
+- Comment out xen-blkfront-name-adjust.patch, now queued for -stable
+
+* Thu Aug 25 2011 Chuck Ebbert <cebbert@redhat.com>
+- VFS: Fix automount for negative autofs dentries (rhbz#719607)
+
+* Thu Aug 25 2011 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: add patch fixing ttm issues that lead to oopses/corruption (rhbz#699551)
+
+* Wed Aug 24 2011 Chuck Ebbert <cebbert@redhat.com>
+- Automate the kernel version faking.
+
+* Tue Aug 23 2011 Ben Skeggs <bskeggs@redhat.com>
+- nouveau: pull patches from 3.1 to fix some suspend/hibernate problems (rhbz#730582)
+
+* Mon Aug 22 2011 Dave Jones <davej@redhat.com>
+- Revert 'iwlwifi: advertise max aggregate size'. (rhbz 708747)
+
+* Mon Aug 22 2011 Chuck Ebbert <cebbert@redhat.com>
+- Update to 3.0.3-final
+
+* Mon Aug 22 2011 Dave Jones <davej@redhat.com>
+- Avoid false quiescent states in rcutree with CONFIG_RCU_FAST_NO_HZ. (rhbz 577968)
+
+* Fri Aug 19 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix race between cryptd and aesni (rhbz 721002)
+
+* Wed Aug 17 2011 Dennis Gilmore <dennis@ausil.us>
+- add patch to correctly initialise usb on trimslice systems
+- build in usb-storage on tegra, internal ssd on trimslice is connected to usb
+
+* Tue Aug 16 2011 Dennis Gilmore <dennis@ausil.us>
+- add patch to work around gcc bug on arm
+
+* Tue Aug 16 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Aug 17
 - Deblobbed 3.0.3-rc1.
 
 * Mon Aug 15 2011 Dave Jones <davej@redhat.com> 2.6.40.3-0
