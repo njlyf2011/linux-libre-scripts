@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 95
+%global baserelease 96
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -761,6 +761,8 @@ Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
 Patch3010: linux-2.6-rcu-netpoll.patch
 
+Patch4000: rcutree-avoid-false-quiescent-states.patch
+
 # NFSv4
 
 # patches headed upstream
@@ -872,6 +874,18 @@ Patch14012: bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
 Patch14013: nl80211-fix-overflow-in-ssid_len.patch.patch
 # CVE-2011-2699
 Patch14014: ipv6-make-fragment-identifications-less-predictable.patch
+
+# RHBZ #699684
+Patch14020: x86-mm-fix-pgd_lock-deadlock.patch
+
+# RHBZ #573210
+Patch14030: utrace-use-task_pid_vnr-in-ptrace_report_clone.patch
+
+# RHBZ #672056
+Patch14040: asix-add-USB-ID-for-Logitec-LAN-GTJ-U2A.patch
+
+# RHBZ #665109
+Patch14050: x86-PCI-don-t-use-native-Broadcom-CNB20LE-driver-whe.patch
 
 %endif
 
@@ -1535,6 +1549,8 @@ ApplyPatch linux-2.6-via-velocity-dma-fix.patch
 # silence another rcu_reference warning
 ApplyPatch linux-2.6-rcu-netpoll.patch
 
+ApplyPatch rcutree-avoid-false-quiescent-states.patch
+
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
@@ -1644,6 +1660,18 @@ ApplyPatch bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
 ApplyPatch nl80211-fix-overflow-in-ssid_len.patch.patch
 # CVE-2011-2699
 ApplyPatch ipv6-make-fragment-identifications-less-predictable.patch
+
+# RHBZ #699684
+ApplyPatch x86-mm-fix-pgd_lock-deadlock.patch
+
+# RHBZ #573210
+ApplyPatch utrace-use-task_pid_vnr-in-ptrace_report_clone.patch
+
+# RHBZ #672056
+ApplyPatch asix-add-USB-ID-for-Logitec-LAN-GTJ-U2A.patch
+
+# RHBZ #665109
+ApplyPatch x86-PCI-don-t-use-native-Broadcom-CNB20LE-driver-whe.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2234,6 +2262,19 @@ fi
 # and build.
 
 %changelog
+* Wed Aug 31 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-96
+- Add patch to fix RHBZ #665109
+
+* Mon Aug 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Add fix from Oleg Nesterov for RHBZ #573210
+- Add patch for RHBZ #672056
+
+* Wed Aug 24 2011 Chuck Ebbert <cebbert@redhat.com>
+- Add fix for RHBZ #699684: System freeze with 2.6.35.12-*.fc14.i686.PAE
+
+* Mon Aug 22 2011 Dave Jones <davej@redhat.com>
+- Avoid false quiescent states in rcutree with CONFIG_RCU_FAST_NO_HZ. (rhbz 577968)
+
 * Tue Aug 16 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Linux 2.6.35.14-libre3.
 
