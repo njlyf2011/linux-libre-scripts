@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -608,6 +608,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
+Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -618,6 +619,8 @@ Patch470: die-floppy-die.patch
 
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
+# from 3.1
+Patch540: x86-pci-reduce-severity-of-host-bridge-window-conflict-warnings.patch
 
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
@@ -629,7 +632,6 @@ Patch800: linux-2.6-crash-driver.patch
 
 # virt + ksm patches
 Patch1500: fix_xen_guest_on_old_EC2.patch
-Patch1501: xen-blkfront-name-adjust.patch
 
 # DRM
 
@@ -698,6 +700,12 @@ Patch21003: TEGRA-2.6.40.2-enable-USB-ports.patch
 
 # rhbz#719607
 Patch21004: vfs-fix-automount-for-negative-autofs-dentries.patch
+
+# rhbz#727927 rhbz#731278 rhbz#732934
+Patch21005: cifs-fix-ERR_PTR-dereference-in-cifs_get_root.patch
+
+# from 3.0.5 patch queue
+Patch21006: sendmmsg-sendmsg-fix-unsafe-user-pointer-access.patch
 
 %endif
 
@@ -1163,6 +1171,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-taint-vm.patch
@@ -1203,6 +1212,9 @@ ApplyPatch linux-2.6-silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
+# Get rid of useless bridge window conflict warnings
+ApplyPatch x86-pci-reduce-severity-of-host-bridge-window-conflict-warnings.patch
+
 # Changes to upstream defaults.
 
 
@@ -1216,7 +1228,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
-#ApplyPatch xen-blkfront-name-adjust.patch
 
 # DRM core
 ApplyPatch drm-ttm-nouveau-oops-fix.patch
@@ -1267,6 +1278,13 @@ ApplyPatch utrace.patch
 
 # rhbz#719607
 ApplyPatch vfs-fix-automount-for-negative-autofs-dentries.patch
+
+# rhbz#727927 rhbz#731278 rhbz#732934
+# cifs-possible-memory-corruption-on-mount.patch is already queued for 3.0.4
+ApplyPatch cifs-fix-ERR_PTR-dereference-in-cifs_get_root.patch
+
+# from 3.0.5 patch queue
+ApplyPatch sendmmsg-sendmsg-fix-unsafe-user-pointer-access.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1888,7 +1906,31 @@ fi
 # and build.
 
 %changelog
-* Fri Aug 26 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Sep  1 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use deblobbed patch from 3.0.4-libre release.
+
+* Tue Aug 30 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.4-5
+- Fix kconfig error in patch for rhbz 606017
+
+* Tue Aug 30 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.40.4-4
+- Fix unsafe pointer access in sendmsg/sendmmsg
+
+* Tue Aug 30 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix rhbz 606017
+
+* Mon Aug 29 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.40.4-3
+- Linux 3.0.4
+
+* Sat Aug 27 2011 Dave Jones <davej@redhat.com>
+- Fix get_gate_vma usage in 32bit NX emulation.
+
+* Fri Aug 26 2011 Chuck Ebbert <cebbert@redhat.com>
+- Add fixes for cifs mount oopses (rhbz#727927 rhbz#731278 rhbz#732934)
+
+* Thu Aug 25 2011 Chuck Ebbert <cebbert@redhat.com>
+- Reduce severity of host bridge window conflict warnings (rhbz#729652)
+
+* Thu Aug 25 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Aug 26
 - Use deblobbed patch from 3.0.3-libre release.
 
 * Thu Aug 25 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.40.3-2
