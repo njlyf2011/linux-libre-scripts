@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 96
+%global baserelease 97
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -887,6 +887,28 @@ Patch14040: asix-add-USB-ID-for-Logitec-LAN-GTJ-U2A.patch
 # RHBZ #665109
 Patch14050: x86-PCI-don-t-use-native-Broadcom-CNB20LE-driver-whe.patch
 
+# RHBZ #648571
+Patch14051: modules-Fix-module_bug_list-list-corruption-race.patch
+
+# CVE-2011-2723
+Patch14052: gro-Only-reset-frag0-when-skb-can-be-pulled.patch
+
+# CVE-2011-2928
+Patch14053: befs-Validate-length-of-long-symbolic-links.patch
+
+# CVE-2011-3191
+Patch14054: cifs-fix-possible-memory-corruption-in-CIFSFindNext.patch
+
+# CVE-2011-1833
+Patch14055: Ecryptfs-Add-mount-option-to-check-uid-of-device-bei.patch
+
+# CVE-2011-2918
+Patch14056: perf-Fix-software-event-overflow.patch
+
+# CVE-2011-3188
+Patch14057: crypto-Move-md5_transform-to-lib-md5.c.patch
+Patch14058: net-Compute-protocol-sequence-numbers-and-fragment-I.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1673,6 +1695,28 @@ ApplyPatch asix-add-USB-ID-for-Logitec-LAN-GTJ-U2A.patch
 # RHBZ #665109
 ApplyPatch x86-PCI-don-t-use-native-Broadcom-CNB20LE-driver-whe.patch
 
+# RHBZ #648571
+ApplyPatch modules-Fix-module_bug_list-list-corruption-race.patch
+
+# CVE-2011-2723
+ApplyPatch gro-Only-reset-frag0-when-skb-can-be-pulled.patch
+
+# CVE-2011-2928
+ApplyPatch befs-Validate-length-of-long-symbolic-links.patch
+
+# CVE-2011-3191
+ApplyPatch cifs-fix-possible-memory-corruption-in-CIFSFindNext.patch
+
+# CVE-2011-1833
+ApplyPatch Ecryptfs-Add-mount-option-to-check-uid-of-device-bei.patch
+
+# CVE-2011-2918
+ApplyPatch perf-Fix-software-event-overflow.patch
+
+# CVE-2011-3188
+ApplyPatch crypto-Move-md5_transform-to-lib-md5.c.patch
+ApplyPatch net-Compute-protocol-sequence-numbers-and-fragment-I.patch
+
 # END OF PATCH APPLICATIONS
 
 # Linux-libre-specific, added by Koko's request for BLAG.
@@ -2262,6 +2306,19 @@ fi
 # and build.
 
 %changelog
+* Fri Sep 16 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-97
+- CVE-2011-2918: perf: Fix software event overflow
+- CVE-2011-3188: net: improve sequence number generation
+
+* Thu Sep 15 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-2723: gro: Only reset frag0 when skb can be pulled
+- CVE-2011-2928: befs: Validate length of long symbolic links
+- CVE-2011-3191: cifs: fix possible memory corruption in CIFSFindNext
+- CVE-2011-1833: ecryptfs: mount source TOCTOU race
+
+* Mon Sep 12 2011 Josh Boyer <jwboyer@redhat.com>
+- Backport 5336377d to fix RHBZ #648571
+
 * Wed Aug 31 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-96
 - Add patch to fix RHBZ #665109
 
