@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 5
+%global baserelease 6
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -323,8 +323,8 @@ Summary: The Linux kernel
 %ifarch sparc64
 %define asmarch sparc
 %define all_arch_configs kernel-%{version}-sparc64*.config
-%define make_target image
-%define kernel_image arch/sparc/boot/image
+%define make_target vmlinux
+%define kernel_image vmlinux
 %define image_install_path boot
 %define with_perf 0
 %endif
@@ -421,7 +421,7 @@ Summary: The Linux kernel
 # First the general kernel 2.6 required versions as per
 # Documentation/Changes
 #
-%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2
+%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
 
 #
 # Then a series of requirements that are distribution specific, either
@@ -706,6 +706,34 @@ Patch21005: cifs-fix-ERR_PTR-dereference-in-cifs_get_root.patch
 
 # from 3.0.5 patch queue
 Patch21006: sendmmsg-sendmsg-fix-unsafe-user-pointer-access.patch
+
+# rhbz #735437
+Patch21007: ucvideo-fix-crash-when-linking-entities.patch
+
+# CVE-2011-3192
+Patch21008: cifs-fix-possible-memory-corruption-in-CIFSFindNext.patch
+
+# CVE-2011-1161 CVE-2011-1162
+Patch21009: TPM-Call-tpm_transmit-with-correct-size.patch
+Patch21010: TPM-Zero-buffer-after-copying-to-userspace.patch
+
+# rhbz #740645
+Patch21011: md-dont-delay-reboot-by-1-second-if-no-MD-devices.patch
+
+# rhbz #714381
+Patch21012: hid-magicmouse-ignore-ivalid-report-id-while-switching-modes-v2.patch
+
+# rhbz #496975
+Patch21013: Platform-fix-samsung-laptop-DMI-identification-for-N.patch
+
+Patch21014: block-Free-queue-resources-at-blk_release_queue.patch
+
+# rhbz #700718
+Patch21015: x86-Save-stack-pointer-in-perf-live-regs-savings.patch
+Patch21016: x86-Fetch-stack-from-regs-when-possible-in-dump_trac.patch
+
+#rhbz #708563
+Patch21017: binfmt_elf-fix-PIE-execution-with-random-disabled.patch
 
 %endif
 
@@ -1285,6 +1313,34 @@ ApplyPatch cifs-fix-ERR_PTR-dereference-in-cifs_get_root.patch
 
 # from 3.0.5 patch queue
 ApplyPatch sendmmsg-sendmsg-fix-unsafe-user-pointer-access.patch
+
+#rhbz 735437
+ApplyPatch ucvideo-fix-crash-when-linking-entities.patch
+
+# CVE-2011-3191
+ApplyPatch cifs-fix-possible-memory-corruption-in-CIFSFindNext.patch
+
+# CVE-2011-1161 CVE-2011-1162
+ApplyPatch TPM-Call-tpm_transmit-with-correct-size.patch
+ApplyPatch TPM-Zero-buffer-after-copying-to-userspace.patch
+
+#rhbz 740645
+ApplyPatch md-dont-delay-reboot-by-1-second-if-no-MD-devices.patch
+
+# rhbz #714381
+ApplyPatch hid-magicmouse-ignore-ivalid-report-id-while-switching-modes-v2.patch
+
+# rhbz #496675
+ApplyPatch Platform-fix-samsung-laptop-DMI-identification-for-N.patch
+
+ApplyPatch block-Free-queue-resources-at-blk_release_queue.patch
+
+# rhbz #700718
+ApplyPatch x86-Save-stack-pointer-in-perf-live-regs-savings.patch
+ApplyPatch x86-Fetch-stack-from-regs-when-possible-in-dump_trac.patch
+
+#rhbz #708563
+ApplyPatch binfmt_elf-fix-PIE-execution-with-random-disabled.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1906,7 +1962,40 @@ fi
 # and build.
 
 %changelog
-* Thu Sep  1 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Oct 04 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.4-6
+- Add patch to fix PIE execution when ASLR is disabled at runtime (rhbz 708563)
+
+* Thu Sep 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Backport two upstream patches to fix rhbz 700718
+
+* Wed Sep 28 2011 Josh Boyer <jwboyer@redhat.com>
+- Backport upstream block patch to try and fix a number of oopses we're seeing
+  with USB drive removals
+- Update usb-add-quirk-for-logitech-webcams.patch (rhbz 742010)
+
+* Tue Sep 27 2011 Josh Boyer <jwboyer@redhat.com>
+- Backport support for Samsung n150 class machines (rhbz 496975)
+
+* Mon Sep 26 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix breakage of Apple MagicMouse/Trackpad (rhbz #714381)
+
+* Fri Sep 23 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix 1 second delay from MD driver during shutdown (rhbz 740645)
+- CVE-2011-1161 CVE-2011-1162: tpm: infoleaks
+
+* Thu Sep 22 2011 Dennis Gilmore <dennis@ausil.us>
+- build a vmlinux image on sparc64 
+
+* Thu Sep 15 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-3191: cifs: fix possible memory corruption in CIFSFindNext
+
+* Wed Sep 07 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix oops when linking entities in ucvideo (rhbz 735437)
+
+* Wed Aug 31 2011 Dave Jones <davej@redhat.com>
+- Reinstate some conflicts: that disappeared during the rebase (rhbz 710646)
+
+* Wed Aug 31 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Sep  1
 - Use deblobbed patch from 3.0.4-libre release.
 
 * Tue Aug 30 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.4-5
