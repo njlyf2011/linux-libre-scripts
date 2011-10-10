@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 1
+%global baserelease 0
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -82,7 +82,7 @@ Summary: The Linux kernel
 %define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
-%define stablerev .%{stable_update}
+%define stablerev %{stable_update}
 %define stable_base %{stable_update}
 %if 0%{?stable_rc}
 # stable RCs are incremental patches, so we need the previous stable patch
@@ -94,10 +94,9 @@ Summary: The Linux kernel
 ## The not-released-kernel case ##
 %else
 # The next upstream release sublevel (base_sublevel+1)
-# % define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
-%define upstream_sublevel 0
+%define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 9
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -128,14 +127,18 @@ Summary: The Linux kernel
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-firmware
 %define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
-# tools/perf
-%define with_perf      %{?_without_perf:      0} %{?!_without_perf:      1}
+# tools
+%define with_tools     %{?_without_tools:     0} %{?!_without_tools:     1}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
+# ARM OMAP (Beagle/Panda Board)
+%define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
+# kernel-tegra (only valid for arm)
+%define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
@@ -245,6 +248,12 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
+# kernel-tegra and omap is only built on armv7 hard and softfp
+%ifnarch armv7hl armv7l
+%define with_tegra 0
+%define with_omap 0
+%endif
+
 # if requested, only build base kernel
 %if %{with_baseonly}
 %define with_smp 0
@@ -274,7 +283,7 @@ Summary: The Linux kernel
 %endif
 %define with_smp 0
 %define with_pae 0
-%define with_perf 0
+%define with_tools 0
 %endif
 
 %define all_x86 i386 i686
@@ -305,7 +314,7 @@ Summary: The Linux kernel
 %ifarch noarch
 %define with_up 0
 %define with_headers 0
-%define with_perf 0
+%define with_tools 0
 %define all_arch_configs kernel-%{version}-*.config
 %define with_firmware  %{?_without_firmware:     0} %{?!_without_firmware:     1}
 %endif
@@ -354,16 +363,16 @@ Summary: The Linux kernel
 %define image_install_path boot
 %define make_target image
 %define kernel_image arch/s390/boot/image
-%define with_perf 0
+%define with_tools 0
 %endif
 
 %ifarch sparc64
 %define asmarch sparc
 %define all_arch_configs kernel-%{version}-sparc64*.config
-%define make_target image
-%define kernel_image arch/sparc/boot/image
+%define make_target vmlinux
+%define kernel_image vmlinux
 %define image_install_path boot
-%define with_perf 0
+%define with_tools 0
 %endif
 
 %ifarch sparcv9
@@ -397,9 +406,20 @@ Summary: The Linux kernel
 %ifarch %{arm}
 %define all_arch_configs kernel-%{version}-arm*.config
 %define image_install_path boot
+%define asmarch arm
 %define hdrarch arm
-%define make_target vmlinux
-%define kernel_image vmlinux
+%define make_target bzImage
+%define kernel_image arch/arm/boot/zImage
+# we build a up kernel on armv5tel. its used for qemu.
+%ifnarch armv5tel
+%define with_up 0
+%endif
+# we only build headers on the base arm arches
+# just like we used to only build them on i386 for x86
+%ifnarch armv5tel armv7hl
+%define with_headers 0
+%endif
+%define with_perf 0
 %endif
 
 %if %{nopatches}
@@ -422,14 +442,14 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 s390 sparc sparcv9 %{arm}
+%define nobuildarches i386 s390 sparc sparcv9
 
 %ifarch %nobuildarches
 %define with_up 0
 %define with_smp 0
 %define with_pae 0
 %define with_debuginfo 0
-%define with_perf 0
+%define with_tools 0
 %define _enable_debug_packages 0
 %endif
 
@@ -437,6 +457,9 @@ Summary: The Linux kernel
 %if %{with_pae}
 %define with_pae_debug %{with_debug}
 %endif
+
+# Architectures we build tools/cpupower on
+%define cpupowerarchs %{ix86} x86_64 ppc ppc64
 
 #
 # Three sets of minimum package version requirements in the form of Conflicts:
@@ -447,7 +470,7 @@ Summary: The Linux kernel
 # First the general kernel 2.6 required versions as per
 # Documentation/Changes
 #
-%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, module-init-tools < 3.13-1, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
+%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.0.7-12, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
 
 #
 # Then a series of requirements that are distribution specific, either
@@ -465,7 +488,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
+%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
 %define initrd_prereq  dracut >= 001-7
 
 #
@@ -527,8 +550,8 @@ BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
 %endif
-%if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed)
+%if %{with_tools}
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) pciutils-devel gettext
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -551,7 +574,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kver
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-%{rpmversion}
+Source6: deblob-3.%{upstream_sublevel}
 
 Source11: genkey
 Source14: find-provides
@@ -565,6 +588,7 @@ Source24: config-rhel-generic
 
 Source30: config-x86-generic
 Source31: config-i686-PAE
+Source32: config-x86-32-generic
 
 Source40: config-x86_64-generic
 
@@ -579,11 +603,17 @@ Source70: config-s390x
 
 Source90: config-sparc64-generic
 
-Source100: config-arm
+Source100: config-arm-generic
+Source110: config-arm-omap-generic
+Source111: config-arm-tegra
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
 Source1000: config-local
+
+# Sources for kernel-libre-tools
+Source2000: cpupower.service
+Source2001: cpupower.config
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
@@ -638,20 +668,17 @@ Patch09: linux-2.6-upstream-reverts.patch
 
 # Standalone patches
 
-Patch150: linux-2.6.29-sparc-IOC_TYPECHECK.patch
-
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
 Patch202: linux-2.6-debug-taint-vm.patch
-Patch203: linux-2.6-debug-vm-would-have-oomkilled.patch
 
 Patch383: linux-2.6-defaults-aspm.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
-Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
+Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -662,8 +689,6 @@ Patch470: die-floppy-die.patch
 
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
-
-Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
 
@@ -693,7 +718,8 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
-Patch2902: linux-2.6-v4l-dvb-uvcvideo-update.patch
+
+Patch3000: rcutree-avoid-false-quiescent-states.patch
 
 # fs fixes
 
@@ -704,21 +730,31 @@ Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12018: neuter_intel_microcode_load.patch
+Patch12021: udlfb-bind-framebuffer-to-interface.patch
 
-Patch12019: linux-2.6-rt2x00-Add-device-ID-for-RT539F-device.patch
-
-Patch12020: linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
-
-# Runtime power management
-Patch12203: linux-2.6-usb-pci-autosuspend.patch
-Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
-Patch12205: runtime_pm_fixups.patch
+Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
+Patch12024: epoll-fix-spurious-lockdep-warnings.patch
+Patch12025: rcu-avoid-just-onlined-cpu-resched.patch
+Patch12026: block-stray-block-put-after-teardown.patch
+Patch12027: usb-add-quirk-for-logitech-webcams.patch
+Patch12029: crypto-register-cryptd-first.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
+Patch13002: revert-efi-rtclock.patch
+Patch13003: efi-dont-map-boot-services-on-32bit.patch
+
+Patch13007: add-macbookair41-keyboard.patch
+
+Patch13009: hvcs_pi_buf_alloc.patch
+
+Patch13013: powerpc-Fix-deadlock-in-icswx-code.patch
+
 Patch20000: utrace.patch
 
+# Flattened devicetree support
+Patch21000: arm-omap-dt-compat.patch
+Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -770,7 +806,7 @@ operate.
 %package bootwrapper
 Summary: Boot wrapper files for generating combined kernel + initrd images
 Group: Development/System
-Requires: gzip
+Requires: gzip binutils
 %description bootwrapper
 Kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
 files combining both kernel and initial ramdisk.
@@ -782,28 +818,51 @@ Group: Development/Debug
 This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
 
-%if %{with_perf}
-%package -n perf-libre
-Provides: perf = %{rpmversion}-%{pkg_release}
-Summary: Performance monitoring for the Linux kernel
+%if %{with_tools}
+%package -n kernel-libre-tools
+Provides: kernel-tools = %{rpmversion}-%{pkg_release}
+Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
-%description -n perf-libre
-This package provides the perf tool and the supporting documentation.
+Obsoletes: perf
+Provides:  perf
+Provides:  cpupowerutils = 1:009-0.6.p1
+Obsoletes: cpupowerutils < 1:009-0.6.p1
+Provides:  cpufreq-utils = 1:009-0.6.p1
+Provides:  cpufrequtils = 1:009-0.6.p1
+Obsoletes: cpufreq-utils < 1:009-0.6.p1
+Obsoletes: cpufrequtils < 1:009-0.6.p1
+Obsoletes: cpuspeed < 1:1.5-16
+%description -n kernel-libre-tools
+This package contains the tools/ directory from the kernel source
+- the perf tool and the supporting documentation.
 
-%package -n perf-libre-debuginfo
-Summary: Debug information for package perf
+%package -n kernel-libre-tools-devel
+Provides: kernel-tools-devel = %{rpmversion}-%{pkg_release}
+Summary: Assortment of tools for the Linux kernel
+Group: Development/System
+License: GPLv2
+Requires: kernel-libre-tools = %{version}-%{release}
+Provides:  cpupowerutils-devel = 1:009-0.6.p1
+Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
+%description -n kernel-libre-tools-devel
+This package contains the development files for the tools/ directory from
+the kernel source.
+
+%package -n kernel-libre-tools-debuginfo
+Provides: kernel-tools-debuginfo = %{rpmversion}-%{pkg_release}
+Summary: Debug information for package kernel-libre-tools
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description -n perf-libre-debuginfo
-This package provides debug information for package perf.
+%description -n kernel-libre-tools-debuginfo
+This package provides debug information for package kernel-libre-tools.
 
 # Note that this pattern only works right to match the .build-id
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|XXX' -o perf-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|XXX' -o kernel-libre-tools-debuginfo.list}
 %endif
 
 
@@ -928,6 +987,19 @@ on kernel bugs, as some of these options impact performance noticably.
 
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
+
+
+%define variant_summary The Linux kernel compiled for TI-OMAP boards
+%kernel_variant_package omap
+%description omap
+This package includes a version of the Linux kernel with support for
+TI-OMAP based systems, i.e., BeagleBoard-xM.
+
+%define variant_summary The Linux kernel compiled for tegra boards
+%kernel_variant_package tegra
+%description tegra
+This package includes a version of the Linux kernel with support for
+nvidia tegra based systems, i.e., trimslice, ac-100.
 
 
 %prep
@@ -1192,25 +1264,14 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 # Architecture patches
 # x86(-64)
-
-#
-# Intel IOMMU
-#
-
-#
-# PowerPC
-#
-
-#
-# SPARC64
-#
-ApplyPatch linux-2.6.29-sparc-IOC_TYPECHECK.patch
-
-#
-# Exec shield
-#
-ApplyPatch linux-2.6-i386-nx-emulation.patch
 ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
+ApplyPatch linux-2.6-i386-nx-emulation.patch
+
+#
+# ARM
+#
+ApplyPatch arm-omap-dt-compat.patch
+ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1234,12 +1295,11 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 # ACPI
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-taint-vm.patch
-ApplyPatch linux-2.6-debug-vm-would-have-oomkilled.patch
 
 #
 # PCI
@@ -1254,11 +1314,8 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 # ACPI
 
 # ALSA
-ApplyPatch hda_intel-prealloc-4mb-dmabuffer.patch
 
 # Networking
-
-ApplyPatch linux-2.6-zd1211rw-fix-invalid-signal-values-from-device.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
@@ -1310,25 +1367,34 @@ ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
-#ApplyPatch linux-2.6-v4l-dvb-uvcvideo-update.patch
 
 # Patches headed upstream
+ApplyPatch rcutree-avoid-false-quiescent-states.patch
+
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch add-appleir-usb-driver.patch
 
-ApplyPatch neuter_intel_microcode_load.patch
+ApplyPatch udlfb-bind-framebuffer-to-interface.patch
+ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
+ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
+ApplyPatch rcu-avoid-just-onlined-cpu-resched.patch
+ApplyPatch block-stray-block-put-after-teardown.patch
+ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 
-ApplyPatch linux-2.6-rt2x00-Add-device-ID-for-RT539F-device.patch
-
-# Runtime PM
-#ApplyPatch linux-2.6-usb-pci-autosuspend.patch
-### Broken by implicit notify support & ACPICA rebase
-###ApplyPatch linux-2.6-enable-more-pci-autosuspend.patch
-#ApplyPatch runtime_pm_fixups.patch
+ApplyPatch crypto-register-cryptd-first.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
+
+ApplyPatch revert-efi-rtclock.patch
+ApplyPatch efi-dont-map-boot-services-on-32bit.patch
+
+ApplyPatch add-macbookair41-keyboard.patch
+
+ApplyPatch hvcs_pi_buf_alloc.patch
+
+ApplyPatch powerpc-Fix-deadlock-in-icswx-code.patch
 
 # utrace.
 ApplyPatch utrace.patch
@@ -1341,6 +1407,7 @@ ApplyPatch utrace.patch
 
 chmod +x scripts/checkpatch.pl
 
+# This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
 
 # only deal with configs if we are going to build for the arch
@@ -1434,14 +1501,18 @@ BuildKernel() {
     KernelVer=%{version}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}
     echo BUILDING A KERNEL FOR ${Flavour} %{_target_cpu}...
 
-    # make sure EXTRAVERSION says what we want it to say
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablerev}-libre-%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+    %if 0%{?stable_update}
+    # make sure SUBLEVEL is incremented on a stable release.  Sigh 3.x.
+    perl -p -i -e "s/^SUBLEVEL.*/SUBLEVEL = %{?stablerev}/" Makefile
+    %endif
 
-    # if pre-rc1 devel kernel, must fix up SUBLEVEL for our versioning scheme
-    ### XXX this will probably be dead code in 3.0 --kyle
+    # make sure EXTRAVERSION says what we want it to say
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre-%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+
+    # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
     %if !0%{?rcrev}
     %if 0%{?gitrev}
-    perl -p -i -e 's/^SUBLEVEL.*/SUBLEVEL = %{upstream_sublevel}/' Makefile
+    perl -p -i -e 's/^PATCHLEVEL.*/PATCHLEVEL = %{upstream_sublevel}/' Makefile
     %endif
     %endif
 
@@ -1575,7 +1646,7 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt2x00(pci|usb)_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -1635,6 +1706,14 @@ BuildKernel %make_target %kernel_image PAEdebug
 BuildKernel %make_target %kernel_image PAE
 %endif
 
+%if %{with_omap}
+BuildKernel %make_target %kernel_image omap
+%endif
+
+%if %{with_tegra}
+BuildKernel %make_target %kernel_image tegra
+%endif
+
 %if %{with_up}
 BuildKernel %make_target %kernel_image
 %endif
@@ -1643,11 +1722,27 @@ BuildKernel %make_target %kernel_image
 BuildKernel %make_target %kernel_image smp
 %endif
 
-%global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
-%if %{with_perf}
-%{perf_make} all
-%{perf_make} man || %{doc_build_fail}
+%if %{with_tools}
+# perf
+make %{?_smp_mflags} -C tools/perf -s V=1 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix} all
+make %{?_smp_mflags} -C tools/perf -s V=1 prefix=%{_prefix} man || %{doc_build_fail}
+
+%ifarch %{cpupowerarchs}
+# cpupower
+# make sure version-gen.sh is executable.
+chmod +x tools/power/cpupower/utils/version-gen.sh
+make %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
+%ifarch %{ix86}
+    cd tools/power/cpupower/debug/i386
+    make %{?_smp_mflags} centrino-decode powernow-k8-decode
+    cd -
+%endif
+%ifarch x86_64
+    cd tools/power/cpupower/debug/x86_64
+    make %{?_smp_mflags} centrino-decode powernow-k8-decode
+    cd -
+%endif
+%endif
 %endif
 
 %if %{with_doc}
@@ -1703,13 +1798,9 @@ xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
 ls $man9dir | grep -q '' || > $man9dir/BROKEN
 %endif # with_doc
 
-%if %{with_perf}
-# perf tool binary and supporting scripts/binaries
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install
-
-# perf man pages (note: implicit rpm magic compresses them later)
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install-man || %{doc_build_fail}
-%endif
+# We have to do the headers install before the tools install because the
+# kernel headers_install will remove any header files in /usr/include that
+# it doesn't install itself.
 
 %if %{with_headers}
 # Install kernel headers
@@ -1735,6 +1826,38 @@ rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
 rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
 %endif
 
+%if %{with_tools}
+# perf tool binary and supporting scripts/binaries
+make -C tools/perf -s V=1 DESTDIR=$RPM_BUILD_ROOT HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix} install
+
+# perf man pages (note: implicit rpm magic compresses them later)
+make -C tools/perf  -s V=1 DESTDIR=$RPM_BUILD_ROOT HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix} install-man || %{doc_build_fail}
+
+%ifarch %{cpupowerarchs}
+make -C tools/power/cpupower DESTDIR=$RPM_BUILD_ROOT libdir=%{_libdir} mandir=%{_mandir} CPUFREQ_BENCH=false install
+rm -f %{buildroot}%{_libdir}/*.{a,la}
+%find_lang cpupower
+mv cpupower.lang ../
+%ifarch %{ix86}
+    cd tools/power/cpupower/debug/i386
+    install -m755 centrino-decode %{buildroot}%{_bindir}/centrino-decode
+    install -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
+    cd -
+%endif
+%ifarch x86_64
+    cd tools/power/cpupower/debug/x86_64
+    install -m755 centrino-decode %{buildroot}%{_bindir}/centrino-decode
+    install -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
+    cd -
+%endif
+chmod 0755 %{buildroot}%{_libdir}/libcpupower.so*
+mkdir -p %{buildroot}%{_unitdir} %{buildroot}%{_sysconfdir}/sysconfig
+install -m644 %{SOURCE2000} %{buildroot}%{_unitdir}/cpupower.service
+install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
+%endif
+
+%endif
+
 %if %{with_firmware}
 %{build_firmware}
 %endif
@@ -1755,6 +1878,14 @@ rm -rf $RPM_BUILD_ROOT
 ### scripts
 ###
 
+%if %{with_tools}
+%post -n kernel-libre-tools
+/sbin/ldconfig
+
+%postun -n kernel-libre-tools
+/sbin/ldconfig
+%endif
+
 #
 # This macro defines a %%post script for a kernel*-devel package.
 #	%%kernel_devel_post [<subpackage>]
@@ -1773,6 +1904,7 @@ then\
      done)\
 fi\
 %{nil}
+
 
 # This macro defines a %%posttrans script for a kernel package.
 #	%%kernel_variant_posttrans [<subpackage>]
@@ -1827,6 +1959,12 @@ fi}\
 %kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
 %kernel_variant_preun PAEdebug
 
+%kernel_variant_preun omap
+%kernel_variant_post -v omap
+
+%kernel_variant_preun tegra
+%kernel_variant_post -v tegra
+
 if [ -x /sbin/ldconfig ]
 then
     /sbin/ldconfig -X || exit $?
@@ -1866,17 +2004,33 @@ fi
 %{_datadir}/man/man9/*
 %endif
 
-%if %{with_perf}
-%files -n perf-libre
+%if %{with_tools}
+%files -n kernel-libre-tools -f cpupower.lang
 %defattr(-,root,root)
 %{_bindir}/perf
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/*
 
+%ifarch %{cpupowerarchs}
+%{_bindir}/cpupower
+%{_bindir}/centrino-decode
+%{_bindir}/powernow-k8-decode
+%{_libdir}/libcpupower.so.0
+%{_libdir}/libcpupower.so.0.0.0
+%{_unitdir}/cpupower.service
+%config(noreplace) %{_sysconfdir}/sysconfig/cpupower
+%endif
+
 %if %{with_debuginfo}
-%files -f perf-debuginfo.list -n perf-libre-debuginfo
+%files -f kernel-libre-tools-debuginfo.list -n kernel-libre-tools-debuginfo
 %defattr(-,root,root)
+%endif
+
+%ifarch %{cpupowerarchs}
+%files -n kernel-libre-tools-devel
+%{_libdir}/libcpupower.so
+%{_includedir}/cpufreq.h
 %endif
 %endif
 
@@ -1937,11 +2091,256 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
+%kernel_variant_files %{with_omap} omap
+%kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 
+#  ___________________________________________________________
+# / This branch is for Fedora 17. You probably want to commit \
+# \ to the F-16 branch instead, or in addition to this one.   /
+#  -----------------------------------------------------------
+#         \   ^__^
+#          \  (@@)\_______
+#             (__)\       )\/\
+#                 ||----w |
+#                 ||     ||
 %changelog
+* Sun Oct  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.1-rc9-libre
+- Renamed kernel-tools to kernel-libre-tools.
+
+* Wed Oct 05 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc9
+
+* Thu Sep 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Update logitech USB quirk patch
+
+* Tue Sep 27 2011 Chuck Ebbert <cebbert@redhat.com>
+- Linux 3.1-rc8
+- New option: CONFIG_ARM_ERRATA_764369 is not set
+- Fix up utrace.patch to apply after commit f9d81f61c
+
+* Thu Sep 22 2011 Dave Jones <davej@redhat.com>
+- Make CONFIG_XEN_PLATFORM_PCI=y (rhbz 740664)
+
+* Thu Sep 22 2011 Dennis Gilmore <dennis@ausil.us>
+- build a vmlinux image on sparc64 
+
+* Wed Sep 21 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc7
+
+* Tue Sep 20 2011 Dave Jones <davej@redhat.com>
+- Limit 32-bit x86 kernels to 32 processors.
+
+* Mon Sep 19 2011 Dave Jones <davej@redhat.com>
+- Merge some improvements to the 32bit mmap randomisation from Kees Cook.
+
+* Wed Sep 14 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix deadlock in ppc64 icswx (rhbz 737984)
+
+* Wed Sep 14 2011 Neil Horman <nhorman@redhat.com>
+- Enable CONFIG_IP_VS_IPV6 (bz 738194)
+
+* Wed Sep 14 2011 Josh Boyer <jwboyer@redhat.com>
+- Add support for Macbook Air 4,1 keyboard, trackpad, and bluetooth
+- Add patch to fix HVCS on ppc64 (rhbz 738096)
+- Add various ibmveth driver fixes (rhbz 733766)
+
+* Mon Sep 12 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc6
+- Avoid false quiescent states in rcutree with CONFIG_RCU_FAST_NO_HZ. (rhbz 577968)
+
+* Fri Sep 09 2011 Josh Boyer <jwboyer@redhat.com>
+- Change to 64K page size for ppc64 kernels (rhbz 736751)
+
+* Wed Sep 07 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc5 (locally generated patch from git as kernel.org is down)
+- Add patch to fix oops when linking entities in ucvideo (rhbz 735437)
+
+* Fri Sep 02 2011 Dave Jones <davej@redhat.com>
+- utrace: s390: fix the compile problem with traps.c (rhbz 735118)
+
+* Tue Aug 30 2011 Dave Jones <davej@redhat.com>
+- Revert "x86: Serialize EFI time accesses on rtc_lock" (rhbz 732755)
+
+* Tue Aug 30 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix rhbz 606017
+
+* Mon Aug 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc4
+
+* Sat Aug 27 2011 Dave Jones <davej@redhat.com>
+- Fix get_gate_vma usage in i386 NX emulation
+- Bring back the 32bit mmap randomization patch for now.
+  NX emulation is still too dependant upon it.
+
+* Sat Aug 27 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc3-git6
+
+* Fri Aug 26 2011 Dave Jones <davej@redhat.com>
+- Enable CONFIG_DETECT_HUNG_TASK for debug builds & rawhide.
+
+* Fri Aug 26 2011 Dave Jones <davej@redhat.com>
+- Drop linux-2.6-debug-vm-would-have-oomkilled.patch
+  The oom-killer heuristics have improved enough that this should
+  never be necessary (and it probably doesn't dtrt any more)
+
+* Fri Aug 26 2011 Dave Jones <davej@redhat.com>
+- Drop linux-2.6-32bit-mmap-exec-randomization.patch
+  Outlived it's usefulness (and made of ugly)
+
+* Fri Aug 26 2011 Dave Jones <davej@redhat.com>
+- Drop acpi-ec-add-delay-before-write.patch (rhbz 733690)
+
+* Fri Aug 26 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc3-git5
+
+* Thu Aug 25 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc3-git3
+
+* Wed Aug 24 2011 Josh Boyer <jwboyer@redhat.com>
+- Revert 'iwlwifi: advertise max aggregate size'. (rhbz 708747)
+
+* Mon Aug 22 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc3
+- Add patch to fix duplicate backlight registration (rhbz 732202)
+
+* Mon Aug 22 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc2-git9
+
+* Sat Aug 20 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc2-git8
+
+* Sat Aug 20 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc2-git7
+- Add a provides/obsoletes for cpupowerutils-devel
+
+* Fri Aug 19 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch from upstream to fix 64-bit divide error in btrfs
+
+* Fri Aug 19 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc2-git5
+- Change XHCI to builtin (rhbz 731706)
+- Add patch to fix race between cryptd and aesni (rhbz 721002)
+
+* Thu Aug 18 2011 Josh Boyer <jwboyer@redhat.com>
+- Adjust provides/obsoletes to replace the cpupowerutils package
+
+* Thu Aug 18 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix perf build against rawhide glibc
+- Add BR for gettext for cpupower translations
+
+* Wed Aug 17 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.1-rc2-git4
+- Create the kernel-tools subpackages based on a start by davej
+
+* Tue Aug 16 2011 Dave Jones <davej@redhat.com>
+- Prepare for packaging more of tools/ by renaming 'perf' subpackage
+  to kernel-tools
+
+* Tue Aug 16 2011 Dennis Gilmore <dennis@ausil.us>
++- add config for arm tegra devices
++- setup kernel to build omap image (patch from David Marlin)
++- setup kernel to build tegra image based on omap work
++- add arm device tree patches
+
+* Tue Aug 16 2011 Josh Boyer <jwboyer@redhat.com>
+- Bring ARM config changes from David Marlin forward
+- Sync a handful of patches from f16
+
+* Mon Aug 15 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.1-rc2
+- Replace trial patch for rhbz 726877 with a better fix
+
+* Thu Aug 11 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.1-rc1-git6
+- Make ide_pmac a module (rhbz 730039)
+
+* Thu Aug 11 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.1-rc1-git3
+
+* Wed Aug 10 2011 Josh Boyer <jwboyer@redhat.com>
+- Make sure all the config-* files are in Sources
+
+* Wed Aug 10 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.1-rc1-git2
+
+* Tue Aug 09 2011 Dave Jones <davej@redhat.com>
+- ptrace_report_syscall: check if TIF_SYSCALL_EMU is defined
+
+* Tue Aug 09 2011 Dave Jones <davej@redhat.com>
+- Enable CONFIG_SAMSUNG_LAPTOP (rhbz 729363)
+
+* Mon Aug 08 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.1-rc1-git1
+
+* Mon Aug 08 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.1-rc1
+- Adjust Makefile munging for new 3.x numbering scheme
+
+* Fri Aug 05 2011 Dave Jones <davej@redhat.com>
+- Deselect CONFIG_DECNET. Unmaintained, and rubbish.
+
+* Fri Aug 05 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux-3.0-git21
+
+* Thu Aug 04 2011 Dave Jones <davej@redhat.com>
+- Drop neuter_intel_microcode_load.patch (rhbz 690930)
+
+* Thu Aug 04 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git19
+- Add patch to fix epoll backtrace (rhbz 722472)
+- Add trial patch to fix rhbz 726877
+
+* Wed Aug 03 2011 Dave Jones <davej@redhat.com>
+- Re-apply the rebased utrace
+
+* Wed Aug 03 2011 John W. Linville <linville@redhat.com>
+- Disable CONFIG_BCMA since no driver currently uses it (rhbz 727796)
+
+* Tue Aug 02 2011 Dave Jones <davej@redhat.com>
+- Change USB_SERIAL_OPTION back to modular. (rhbz 727680)
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git17
+- Add patch to fix backtrace in cdc_ncm driver (rhbz 720128)
+- Add patch to fix backtrace in usm-realtek driver (rhbz 720054)
+- Add change from Yanko Kaneti to get the rt2x00 drivers in modules.networking
+  (rhbz 708314)
+
+* Tue Aug 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git16
+
+* Mon Aug 01 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git14
+
+* Sat Jul 30 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git12
+
+* Fri Jul 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Adjust Makefile sedding to account for 3.x release style
+
+* Fri Jul 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git11
+- Backport patch to correct udlfb removal events (rhbz 726163)
+
+* Thu Jul 28 2011 Dave Jones <davej@redhat.com>
+- module-init-tools needs to be a prereq not a conflict.
+
+* Wed Jul 27 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0-git9
+- Move CONFIG_JUMP_LABEL to config-generic now that powerpc has it too
+
+* Mon Jul 25 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Linux 3.0-git3
+- Drop hda_intel-prealloc-4mb-dmabuffer.patch, set new
+  CONFIG_SND_HDA_PREALLOC_SIZE=4096 for similar effect.
+
+* Fri Jul 22 2011 Dave Jones <davej@redhat.com>
+- bootwrapper needs objcopy. Add it to requires: (wwoods)
+
 * Fri Jul 22 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Deblobbed 3.0-libre.
 
