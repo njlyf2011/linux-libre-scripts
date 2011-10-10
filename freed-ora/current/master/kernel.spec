@@ -71,7 +71,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-#define libres .
+%define libres .1
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -1507,7 +1507,7 @@ BuildKernel() {
     %endif
 
     # make sure EXTRAVERSION says what we want it to say
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre-%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
 
     # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -2107,6 +2107,9 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Oct 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+- Replaced libre- with libre. in EXTRAVERSION.
+
 * Sun Oct  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Linux-libre 3.1-rc9-libre
 - Renamed kernel-tools to kernel-libre-tools.
