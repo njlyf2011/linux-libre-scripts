@@ -4,7 +4,6 @@
 	Empty
 
 * linux-2.6-debug-taint-vm.patch
-* linux-2.6-debug-vm-would-have-oomkilled.patch
 	TODO: Push upstream
 
 * linux-2.6-acpi-video-dos.patch
@@ -23,9 +22,6 @@
   Rolandware that is used by the debuginfo generation.
   Possibly upstreamable ?
 
-* linux-2.6.29-sparc-IOC_TYPECHECK.patch
-  Responsible: Spot/Dennis.
-
 * linux-2.6-v4l-dvb-uvcvideo-update.patch
   Responsible: Hans.
 
@@ -43,11 +39,7 @@
   One half of the remaining exec-shield diff.
   davej bugged Ingo again on Jun 17 2011 about upstreaming.
 
-* runtime_pm_fixups.patch
-* linux-2.6-usb-pci-autosuspend.patch
-* linux-2.6-enable-more-pci-autosuspend.patch
 * linux-2.6-acpi-debug-infinite-loop.patch
-* acpi-ec-add-delay-before-write.patch
   Responsible: mjg59
 
 * linux-2.6-v4l-dvb-experimental.patch
