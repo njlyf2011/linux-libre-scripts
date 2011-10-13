@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 97
+%global baserelease 98
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -699,6 +699,8 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
+Patch1000: usb-wwan-ioctls.patch
+
 # crypto/
 
 # virt + ksm patches
@@ -763,7 +765,7 @@ Patch3010: linux-2.6-rcu-netpoll.patch
 
 Patch4000: rcutree-avoid-false-quiescent-states.patch
 
-# NFSv4
+Patch5000: acer-wmi-modalias.patch
 
 # patches headed upstream
 
@@ -908,6 +910,13 @@ Patch14056: perf-Fix-software-event-overflow.patch
 # CVE-2011-3188
 Patch14057: crypto-Move-md5_transform-to-lib-md5.c.patch
 Patch14058: net-Compute-protocol-sequence-numbers-and-fragment-I.patch
+
+# CVE-2011-3353
+Patch14059: fuse-check-size-of-FUSE_NOTIFY_INVAL_ENTRY-message.patch
+
+# CVE-2011-1161 CVE-2011-1162
+Patch14060: TPM-Call-tpm_transmit-with-correct-size.patch
+Patch14061: TPM-Zero-buffer-after-copying-to-userspace.patch
 
 %endif
 
@@ -1498,6 +1507,9 @@ ApplyPatch create-sys-fs-cgroup-to-mount-cgroupfs-on.patch
 # /dev/crash driver.
 ApplyPatch linux-2.6-crash-driver.patch
 
+# usb-wwan: implement TIOCGSERIAL and TIOCSSERIAL to avoid blocking close(2)
+ApplyPatch usb-wwan-ioctls.patch
+
 # Hack e1000e to work on Montevina SDV
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
@@ -1572,6 +1584,9 @@ ApplyPatch linux-2.6-via-velocity-dma-fix.patch
 ApplyPatch linux-2.6-rcu-netpoll.patch
 
 ApplyPatch rcutree-avoid-false-quiescent-states.patch
+
+# acer-wmi: Fix capitalisation of GUID in module alias
+ApplyPatch acer-wmi-modalias.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
@@ -1716,6 +1731,13 @@ ApplyPatch perf-Fix-software-event-overflow.patch
 # CVE-2011-3188
 ApplyPatch crypto-Move-md5_transform-to-lib-md5.c.patch
 ApplyPatch net-Compute-protocol-sequence-numbers-and-fragment-I.patch
+
+# CVE-2011-3353
+ApplyPatch fuse-check-size-of-FUSE_NOTIFY_INVAL_ENTRY-message.patch
+
+# CVE-2011-1161 CVE-2011-1162
+ApplyPatch TPM-Call-tpm_transmit-with-correct-size.patch
+ApplyPatch TPM-Zero-buffer-after-copying-to-userspace.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2306,6 +2328,18 @@ fi
 # and build.
 
 %changelog
+* Tue Oct 11 2011 Dave Jones <davej@redhat.com>
+- acer-wmi: Fix capitalisation of GUID in module alias (rhbz 661322)
+
+* Tue Oct 11 2011 Dave Jones <davej@redhat.com>
+- usb-wwan: implement TIOCGSERIAL and TIOCSSERIAL to avoid blocking close(2) (rhbz 725724)
+
+* Fri Sep 23 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-98
+- CVE-2011-1161 CVE-2011-1161: tpm: infoleaks
+
+* Tue Sep 20 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-3353: fuse: check size of FUSE_NOTIFY_INVAL_ENTRY message
+
 * Fri Sep 16 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-97
 - CVE-2011-2918: perf: Fix software event overflow
 - CVE-2011-3188: net: improve sequence number generation
