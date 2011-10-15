@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 0
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -625,6 +625,7 @@ Patch540: x86-pci-reduce-severity-of-host-bridge-window-conflict-warnings.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
+Patch701: net-3-4-e1000e-workaround-for-packet-drop-on-82579-at-100Mbps.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -642,6 +643,8 @@ Patch1811: drm-ttm-nouveau-oops-fix.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
+# rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
+Patch1827: drm-i915-sdvo-lvds-is-digital.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -720,6 +723,12 @@ Patch21016: x86-Fetch-stack-from-regs-when-possible-in-dump_trac.patch
 
 #rhbz #708563
 Patch21017: binfmt_elf-fix-PIE-execution-with-random-disabled.patch
+
+#rhbz #722509
+Patch21018: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+
+#rhbz #745241
+Patch21019: fuse-fix-memory-leak.patch
 
 %endif
 
@@ -1237,6 +1246,7 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Hack e1000e to work on Montevina SDV
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
+ApplyPatch net-3-4-e1000e-workaround-for-packet-drop-on-82579-at-100Mbps.patch
 
 # crypto/
 
@@ -1252,6 +1262,7 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 ApplyPatch block-stray-block-put-after-teardown.patch
@@ -1313,6 +1324,12 @@ ApplyPatch x86-Fetch-stack-from-regs-when-possible-in-dump_trac.patch
 
 #rhbz #708563
 ApplyPatch binfmt_elf-fix-PIE-execution-with-random-disabled.patch
+
+#rhbz #722509
+ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+
+#rhbz #745241
+ApplyPatch fuse-fix-memory-leak.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1934,6 +1951,21 @@ fi
 # and build.
 
 %changelog
+* Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
+- Update usb-add-quirk-for-logitech-webcams.patch with C600 ID (rhbz 742010)
+
+* Thu Oct 13 2011 Adam Jackson <ajax@redhat.com>
+- drm/i915: Treat SDVO LVDS as digital when parsing EDID (#729882)
+
+* Tue Oct 11 2011 Josh Boyer <jwboyer@redhat.com>
+- fix memory leak in fuse (rhbz 745241)
+
+* Tue Oct 11 2011 Dave Jones <davej@redhat.com>
+- add e1000e workaround for packet drop on 82579 at 100Mbps (rhbz 713315)
+
+* Thu Oct 06 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix base frequency check for Ricoh e823 devices (rhbz 722509)
+
 * Thu Oct 06 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch betweem 3.0-libre and 3.0.6-libre.
 - Updated deblob-check to accept false positives in it.
