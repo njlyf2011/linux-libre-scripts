@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 0
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -71,7 +71,7 @@ Summary: The Linux kernel
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
 # It is appended after dist.
-%define libres .1
+#define libres .
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
@@ -668,6 +668,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 
 # Standalone patches
 
+Patch100: taint-vbox.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
@@ -707,6 +708,8 @@ Patch1810: drm-nouveau-updates.patch
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
 Patch1825: drm-intel-make-lvds-work.patch
+# rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
+Patch1826: drm-i915-sdvo-lvds-is-digital.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -750,11 +753,17 @@ Patch13009: hvcs_pi_buf_alloc.patch
 
 Patch13013: powerpc-Fix-deadlock-in-icswx-code.patch
 
+Patch13014: iwlagn-fix-ht_params-NULL-pointer-dereference.patch
+
 Patch20000: utrace.patch
 
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+
+#rhbz #722509
+Patch21002: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1262,6 +1271,8 @@ ApplyPatch freedo.patch
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 
+ApplyPatch taint-vbox.patch
+
 # Architecture patches
 # x86(-64)
 ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
@@ -1357,6 +1368,7 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
+ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
@@ -1395,6 +1407,11 @@ ApplyPatch add-macbookair41-keyboard.patch
 ApplyPatch hvcs_pi_buf_alloc.patch
 
 ApplyPatch powerpc-Fix-deadlock-in-icswx-code.patch
+
+ApplyPatch iwlagn-fix-ht_params-NULL-pointer-dereference.patch
+
+#rhbz #722509
+ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
 # utrace.
 ApplyPatch utrace.patch
@@ -2107,10 +2124,28 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
-* Mon Oct 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1
+* Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
+- Update usb-add-quirk-for-logitech-webcams.patch with C600 ID (rhbz 742010)
+
+* Thu Oct 13 2011 Adam Jackson <ajax@redhat.com>
+- drm/i915: Treat SDVO LVDS as digital when parsing EDID (#729882)
+
+* Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Stanislaw Gruszka to fix iwlagn NULL dereference (rhbz 744155)
+
+* Tue Oct 11 2011 Josh Boyer <jwboyer@redhat.com>
+- Disable CONFIG_XEN_BALLOON_MEMORY_HOTPLUG (rhbz 744408)
+
+* Thu Oct 06 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix base frequency check for Ricoh e823 devices (rhbz 722509)
+
+* Thu Oct 06 2011 Dave Jones <davej@redhat.com>
+- Taint if virtualbox modules have been loaded.
+
+* Thu Oct  6 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre.1 Mon Oct 10
 - Replaced libre- with libre. in EXTRAVERSION.
 
-* Sun Oct  9 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Oct  5 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Oct  9
 - Linux-libre 3.1-rc9-libre
 - Renamed kernel-tools to kernel-libre-tools.
 
