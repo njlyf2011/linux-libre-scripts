@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 0
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -625,7 +625,6 @@ Patch540: x86-pci-reduce-severity-of-host-bridge-window-conflict-warnings.patch
 Patch610: hda_intel-prealloc-4mb-dmabuffer.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
-Patch701: net-3-4-e1000e-workaround-for-packet-drop-on-82579-at-100Mbps.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
@@ -729,6 +728,10 @@ Patch21018: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
 #rhbz #745241
 Patch21019: fuse-fix-memory-leak.patch
+
+#rhbz #735946
+Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
+Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
 
 %endif
 
@@ -1246,7 +1249,6 @@ ApplyPatch linux-2.6-crash-driver.patch
 
 # Hack e1000e to work on Montevina SDV
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
-ApplyPatch net-3-4-e1000e-workaround-for-packet-drop-on-82579-at-100Mbps.patch
 
 # crypto/
 
@@ -1330,6 +1332,10 @@ ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
 #rhbz #745241
 ApplyPatch fuse-fix-memory-leak.patch
+
+#rhbz #735946
+ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
+ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1951,6 +1957,13 @@ fi
 # and build.
 
 %changelog
+* Mon Oct 17 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch betweem 3.0-libre and 3.0.7-libre.
+
+* Mon Oct 17 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.7-0
+- Linux 3.0.7 stable release
+- Add two patches to fix stalls in khugepaged (rhbz 735946)
+
 * Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
 - Update usb-add-quirk-for-logitech-webcams.patch with C600 ID (rhbz 742010)
 
