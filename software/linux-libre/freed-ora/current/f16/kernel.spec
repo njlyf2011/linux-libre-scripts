@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 0
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,7 +96,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 9
+%define rcrev 10
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -668,6 +668,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 
 # Standalone patches
 
+Patch100: taint-vbox.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
@@ -709,6 +710,8 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-make-lvds-work.patch
 # hush the i915 fbc noise
 Patch1826: drm-i915-fbc-stfu.patch
+# rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
+Patch1827: drm-i915-sdvo-lvds-is-digital.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -734,6 +737,7 @@ Patch12010: add-appleir-usb-driver.patch
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12021: udlfb-bind-framebuffer-to-interface.patch
+Patch12022: x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: epoll-fix-spurious-lockdep-warnings.patch
@@ -753,11 +757,23 @@ Patch13009: hvcs_pi_buf_alloc.patch
 
 Patch13013: powerpc-Fix-deadlock-in-icswx-code.patch
 
+Patch13014: iwlagn-fix-ht_params-NULL-pointer-dereference.patch
+
 Patch20000: utrace.patch
 
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+
+#rhbz #722509
+Patch21002: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+
+#rhbz #735946
+Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
+Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+
+# rhbz #746485
+Patch21030: cputimer-cure-lock-inversion.patch
 
 %endif
 
@@ -1275,6 +1291,7 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch arm-omap-dt-compat.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 
+ApplyPatch taint-vbox.patch
 #
 # NX Emulation
 #
@@ -1367,6 +1384,7 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-fbc-stfu.patch
+ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
@@ -1395,6 +1413,8 @@ ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 
 ApplyPatch crypto-register-cryptd-first.patch
 
+ApplyPatch x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
+
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
@@ -1407,8 +1427,20 @@ ApplyPatch hvcs_pi_buf_alloc.patch
 
 ApplyPatch powerpc-Fix-deadlock-in-icswx-code.patch
 
+ApplyPatch iwlagn-fix-ht_params-NULL-pointer-dereference.patch
+
+#rhbz #722509
+ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+
 # utrace.
 ApplyPatch utrace.patch
+
+#rhbz #735946
+ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
+ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+
+# rhbz #746485
+ApplyPatch cputimer-cure-lock-inversion.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2111,7 +2143,42 @@ fi
 # and build.
 
 %changelog
-* Mon Oct 10 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Oct 19 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.1-rc10-libre
+- Adjusted drm-nouveau-updates.patch to deblobbed sources.
+
+* Wed Oct 19 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.0-0.rc10.git0.1
+- Fix divide-by-zero in nouveau driver (rhbz #747129)
+
+* Tue Oct 18 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix lock inversion causing hangs in 3.1-rc9 (rhbz #746485)
+- Linux 3.1-rc10
+
+* Tue Oct 18 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix invalid EFI remap calls from Matt Fleming
+
+* Mon Oct 17 2011 Josh Boyer <jwboyer@redhat.com>
+- Add two patches to fix stalls in khugepaged (rhbz 735946)
+
+* Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
+- Update usb-add-quirk-for-logitech-webcams.patch with C600 ID (rhbz 742010)
+
+* Thu Oct 13 2011 Adam Jackson <ajax@redhat.com>
+- drm/i915: Treat SDVO LVDS as digital when parsing EDID (#729882)
+
+* Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Stanislaw Gruszka to fix iwlagn NULL dereference (rhbz 744155)
+
+* Tue Oct 11 2011 Josh Boyer <jwboyer@redhat.com>
+- Disable CONFIG_XEN_BALLOON_MEMORY_HOTPLUG (rhbz 744408)
+
+* Thu Oct 06 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix base frequency check for Ricoh e823 devices (rhbz 722509)
+
+* Thu Oct 06 2011 Dave Jones <davej@redhat.com>
+- Taint if virtualbox modules have been loaded.
+
+* Wed Oct  5 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Oct 10
 - Linux-libre 3.1-rc9-libre
 - Renamed kernel-tools to kernel-libre-tools.
 - Adjusted drm-nouveau-updates.patch to deblobbed sources.
