@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -96,7 +96,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 9
+%define rcrev 10
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -734,6 +734,7 @@ Patch12010: add-appleir-usb-driver.patch
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12021: udlfb-bind-framebuffer-to-interface.patch
+Patch12022: x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: epoll-fix-spurious-lockdep-warnings.patch
@@ -763,6 +764,13 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 
 #rhbz #722509
 Patch21002: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+
+#rhbz #735946
+Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
+Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+
+# rhbz #746485
+Patch21030: cputimer-cure-lock-inversion.patch
 
 %endif
 
@@ -1396,6 +1404,8 @@ ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 
 ApplyPatch crypto-register-cryptd-first.patch
 
+ApplyPatch x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
+
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
@@ -1415,6 +1425,13 @@ ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
 # utrace.
 ApplyPatch utrace.patch
+
+#rhbz #735946
+ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
+ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+
+# rhbz #746485
+ApplyPatch cputimer-cure-lock-inversion.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2124,6 +2141,25 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Oct 19 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.1-rc10-libre
+- Adjusted drm-nouveau-updates.patch to deblobbed sources.
+
+* Wed Oct 19 2011 Chuck Ebbert <cebbert@redhat.com>
+- Sync with F16
+- Linux 3.1-rc10
+- Copy nouveau updates patch from F16
+- Fix deadlock in POSIX cputimer code (rhbz #746485)
+
+* Tue Oct 18 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix invalid EFI remap calls from Matt Fleming
+
+* Mon Oct 17 2011 Josh Boyer <jwboyer@redhat.com>
+- Add two patches to fix stalls in khugepaged (rhbz 735946)
+
+* Fri Oct 14 2011 Dave Jones <davej@redhat.com>
+- Disable CONFIG_ACPI_PROCFS_POWER which is supposed to be going away soon.
+
 * Thu Oct 13 2011 Josh Boyer <jwboyer@redhat.com>
 - Update usb-add-quirk-for-logitech-webcams.patch with C600 ID (rhbz 742010)
 
