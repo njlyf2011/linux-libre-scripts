@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 98
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -679,6 +679,7 @@ Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
 Patch395: acpi-update-battery-information-on-notification-0x81.patch
 Patch396: linux-2.6-acpi-fix-alias.patch
+Patch397: acpi-sony-nonvs-blacklist.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -735,6 +736,7 @@ Patch1826: drm-i915-disable-sr-polling.patch
 Patch1828: drm-ttm-fix-two-race-conditions-fix-busy-codepaths.patch
 
 Patch1830: drm-radeon-r600-cs-checker-fixes.patch
+Patch1850: drm-lower-severity-radeon-lockup.diff
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 Patch2000: efifb-add-more-models.patch
@@ -917,6 +919,13 @@ Patch14059: fuse-check-size-of-FUSE_NOTIFY_INVAL_ENTRY-message.patch
 # CVE-2011-1161 CVE-2011-1162
 Patch14060: TPM-Call-tpm_transmit-with-correct-size.patch
 Patch14061: TPM-Zero-buffer-after-copying-to-userspace.patch
+
+# RHBZ #663186
+Patch14062: 0001-EHCI-don-t-rescan-interrupt-QHs-needlessly.patch
+Patch14063: 0002-USB-EHCI-go-back-to-using-the-system-clock-for-QH-un.patch
+
+#rhbz 747948
+Patch14064: ext4-fix-BUG_ON-in-ext4_ext_insert_extent.patch
 
 %endif
 
@@ -1439,6 +1448,7 @@ ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 ApplyPatch acpi-update-battery-information-on-notification-0x81.patch
 ApplyPatch linux-2.6-defaults-no-pm-async.patch
 ApplyPatch linux-2.6-acpi-fix-alias.patch
+ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-sizeof-structs.patch
@@ -1545,6 +1555,8 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 ApplyPatch drm-ttm-fix-two-race-conditions-fix-busy-codepaths.patch
 
 ApplyPatch drm-radeon-r600-cs-checker-fixes.patch
+
+ApplyPatch drm-lower-severity-radeon-lockup.diff
 
 ApplyPatch efifb-add-more-models.patch
 ApplyPatch efifb-check-that-the-base-addr-is-plausible-on-pci-systems.patch
@@ -1738,6 +1750,13 @@ ApplyPatch fuse-check-size-of-FUSE_NOTIFY_INVAL_ENTRY-message.patch
 # CVE-2011-1161 CVE-2011-1162
 ApplyPatch TPM-Call-tpm_transmit-with-correct-size.patch
 ApplyPatch TPM-Zero-buffer-after-copying-to-userspace.patch
+
+# RHBZ #663186
+ApplyPatch 0001-EHCI-don-t-rescan-interrupt-QHs-needlessly.patch
+ApplyPatch 0002-USB-EHCI-go-back-to-using-the-system-clock-for-QH-un.patch
+
+#rhbz 747948
+ApplyPatch ext4-fix-BUG_ON-in-ext4_ext_insert_extent.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2328,6 +2347,18 @@ fi
 # and build.
 
 %changelog
+* Fri Oct 21 2011 Dave Jones <davej@redhat.com>
+- Lower severity of Radeon lockup messages.
+
+* Fri Oct 20 2011 Josh Boyer <jwboyer@redhat.com>
+- Add fix for ext4 BUG_ON backtrace (rhbz 747948)
+
+* Wed Oct 19 2011 Dave Jones <davej@redhat.com>
+- Add Sony VGN-FW21E to nonvs blacklist. (rhbz 641789)
+
+* Fri Oct 14 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patches to fix RHBZ #663186
+
 * Tue Oct 11 2011 Dave Jones <davej@redhat.com>
 - acer-wmi: Fix capitalisation of GUID in module alias (rhbz 661322)
 
