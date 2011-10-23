@@ -98,7 +98,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 10
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -488,7 +488,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 7.0.10-1
+%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.3-1
 %define initrd_prereq  dracut >= 001-7
 
 #
@@ -680,6 +680,7 @@ Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
 Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
+Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -710,6 +711,8 @@ Patch1824: drm-intel-next.patch
 Patch1825: drm-intel-make-lvds-work.patch
 # rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
 Patch1826: drm-i915-sdvo-lvds-is-digital.patch
+
+Patch1850: drm-lower-severity-radeon-lockup.diff
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -768,9 +771,6 @@ Patch21002: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 #rhbz #735946
 Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
-
-# rhbz #746485
-Patch21030: cputimer-cure-lock-inversion.patch
 
 %endif
 
@@ -1316,6 +1316,7 @@ ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
+ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-taint-vm.patch
@@ -1377,6 +1378,9 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
+
+ApplyPatch drm-lower-severity-radeon-lockup.diff
+
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
@@ -1429,9 +1433,6 @@ ApplyPatch utrace.patch
 #rhbz #735946
 ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
-
-# rhbz #746485
-ApplyPatch cputimer-cure-lock-inversion.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2141,6 +2142,16 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Oct 21 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.0-0.rc10.git1.1
+- Require grubby >= 8.3-1 like F16 does.
+- Update to upstream HEAD (v3.1-rc10-42-g2efd7c0).
+
+* Fri Oct 21 2011 Dave Jones <davej@redhat.com>
+- Lower severity of Radeon lockup messages.
+
+* Wed Oct 19 2011 Dave Jones <davej@redhat.com>
+- Add Sony VGN-FW21E to nonvs blacklist. (rhbz 641789)
+
 * Wed Oct 19 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Linux-libre 3.1-rc10-libre
 - Adjusted drm-nouveau-updates.patch to deblobbed sources.
