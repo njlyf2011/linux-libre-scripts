@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 6a5bdad..cb29238 100644
+index 11c4249..8ae1bdb 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -8577,7 +8577,7 @@ index 93359fa..79c2a43 100644
  	tristate "Xilinx LL TEMAC (LocalLink Tri-mode Ethernet MAC) driver"
  	depends on PPC || MICROBLAZE
 diff --git a/drivers/net/Makefile b/drivers/net/Makefile
-index 776a478..3f63f43 100644
+index d5ce011..b77a26a 100644
 --- a/drivers/net/Makefile
 +++ b/drivers/net/Makefile
 @@ -159,6 +159,8 @@ obj-$(CONFIG_QLA3XXX) += qla3xxx.o
@@ -47941,10 +47941,10 @@ index f9cf3f0..5fc952d 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index fd93061..4f35b34 100644
+index 629a968..dc80087 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
-@@ -53,6 +53,16 @@
+@@ -55,6 +55,16 @@
  #define EHCI_USBLEGCTLSTS	4		/* legacy control/status */
  #define EHCI_USBLEGCTLSTS_SOOE	(1 << 13)	/* SMI on ownership change */
  
@@ -47961,7 +47961,7 @@ index fd93061..4f35b34 100644
  /* AMD quirk use */
  #define	AB_REG_BAR_LOW		0xe0
  #define	AB_REG_BAR_HIGH		0xe1
-@@ -346,6 +356,12 @@ void usb_amd_dev_put(void)
+@@ -348,6 +358,12 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -47974,7 +47974,7 @@ index fd93061..4f35b34 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -427,15 +443,6 @@ reset_needed:
+@@ -429,15 +445,6 @@ reset_needed:
  }
  EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
  
@@ -47990,7 +47990,7 @@ index fd93061..4f35b34 100644
  static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  {
  	unsigned long base = 0;
-@@ -453,12 +460,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -455,12 +462,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -48007,7 +48007,7 @@ index fd93061..4f35b34 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -506,7 +512,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -534,7 +540,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -48016,10 +48016,10 @@ index fd93061..4f35b34 100644
 +#endif /* CONFIG_USB_OHCI_HCD* */
  
 +#if defined(CONFIG_USB_EHCI_HCD) || defined(CONFIG_USB_EHCI_HCD_MODULE)
- static void __devinit ehci_bios_handoff(struct pci_dev *pdev,
- 					void __iomem *op_reg_base,
- 					u32 cap, u8 offset)
-@@ -646,6 +656,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+ static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
+ 	{
+ 		/*  Pegatron Lucid (ExoPC) */
+@@ -688,6 +698,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -48029,7 +48029,7 @@ index fd93061..4f35b34 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -734,6 +747,7 @@ void usb_enable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -776,6 +789,7 @@ void usb_enable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_enable_xhci_ports);
  
@@ -48037,7 +48037,7 @@ index fd93061..4f35b34 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -828,6 +842,9 @@ hc_init:
+@@ -870,6 +884,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -48048,7 +48048,7 @@ index fd93061..4f35b34 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 60b25d8..0ce054b 100644
+index fe22e90..5534ed6 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -48061,7 +48061,7 @@ index 60b25d8..0ce054b 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E600			0x1001
  #define HUAWEI_PRODUCT_E220			0x1003
-@@ -477,6 +480,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -533,6 +536,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
