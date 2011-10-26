@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 0
+%define base_sublevel 1
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -574,7 +574,6 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kver
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-3.%{upstream_sublevel}
 
 Source11: genkey
 Source14: find-provides
@@ -2144,6 +2143,12 @@ fi
 # and build.
 
 %changelog
+* Mon Oct 24 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.1-libre
+
+* Mon Oct 24 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.0-1
+- Linux 3.1
+
 * Fri Oct 21 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.0-0.rc10.git1.1
 - Update to upstream HEAD (v3.1-rc10-42-g2efd7c0)
 
