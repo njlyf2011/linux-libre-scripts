@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 0
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -609,6 +609,7 @@ Patch391: linux-2.6-acpi-video-dos.patch
 Patch393: acpi-ec-add-delay-before-write.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
 Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
+Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
 Patch452: linux-2.6.30-no-pcspkr-modalias.patch
@@ -645,6 +646,8 @@ Patch1825: drm-intel-make-lvds-work.patch
 # rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
 Patch1827: drm-i915-sdvo-lvds-is-digital.patch
 
+Patch1850: drm-lower-severity-radeon-lockup.diff
+
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 Patch2000: block-stray-block-put-after-teardown.patch
@@ -657,6 +660,10 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 Patch2899: linux-2.6-v4l-dvb-fixes.patch
 Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
+
+Patch2902: media-DiBcom-protect-the-I2C-bufer-access.patch
+Patch2903: media-dib0700-protect-the-dib0700-buffer-access.patch
+Patch2904: media-dib0700-correct-error-message.patch
 
 Patch3000: rcutree-avoid-false-quiescent-states.patch
 
@@ -672,6 +679,9 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: usb-add-quirk-for-logitech-webcams.patch
 Patch12025: crypto-register-cryptd-first.patch
+Patch12026: cputimer-Cure-lock-inversion.patch
+Patch12027: x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
+Patch12028: x86-p4-make-watchdog-and-perf-work-together.patch
 
 # Runtime power management
 Patch12203: linux-2.6-usb-pci-autosuspend.patch
@@ -1198,6 +1208,7 @@ ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch acpi-ec-add-delay-before-write.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
+ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 # Various low-impact patches to aid debugging.
 ApplyPatch linux-2.6-debug-taint-vm.patch
@@ -1265,6 +1276,9 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
+
+ApplyPatch drm-lower-severity-radeon-lockup.diff
+
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 ApplyPatch block-stray-block-put-after-teardown.patch
@@ -1278,6 +1292,10 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
+ApplyPatch media-DiBcom-protect-the-I2C-bufer-access.patch
+ApplyPatch media-dib0700-protect-the-dib0700-buffer-access.patch
+ApplyPatch media-dib0700-correct-error-message.patch
+
 # Avoid false quiescent states in rcu.
 ApplyPatch rcutree-avoid-false-quiescent-states.patch
 
@@ -1289,6 +1307,9 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 ApplyPatch crypto-register-cryptd-first.patch
+ApplyPatch cputimer-Cure-lock-inversion.patch
+ApplyPatch x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
+ApplyPatch x86-p4-make-watchdog-and-perf-work-together.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1957,6 +1978,22 @@ fi
 # and build.
 
 %changelog
+* Mon Oct 24 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.7-3
+- Backport 3 fixed from linux-next to fix dib0700 playback (rhbz 733827)
+
+* Fri Oct 21 2011 Dave Jones <davej@redhat.com>
+- Lower severity of Radeon lockup messages.
+
+* Thu Oct 20 2011 Josh Boyer <jwboyer@redhat.com>
+- Add backport for P4 watchdog and perf support from Don Zickus (rhbz 713675)
+
+* Wed Oct 19 2011 Dave Jones <davej@redhat.com>
+- Add Sony VGN-FW21E to nonvs blacklist. (rhbz 641789)
+
+* Tue Oct 18 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix invalid EFI remap calls from Matt Fleming
+- Add patch to fix lock inversion introduced in 3.0.7
+
 * Mon Oct 17 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch betweem 3.0-libre and 3.0.7-libre.
 
