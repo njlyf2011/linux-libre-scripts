@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 100
+%global baserelease 103
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -878,6 +878,8 @@ Patch14012: bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
 Patch14013: nl80211-fix-overflow-in-ssid_len.patch.patch
 # CVE-2011-2699
 Patch14014: ipv6-make-fragment-identifications-less-predictable.patch
+# fix possible null dereference in above fix
+Patch14015: ipv6-fix-null-dereference-in-udp6_ufo_fragment.patch
 
 # RHBZ #699684
 Patch14020: x86-mm-fix-pgd_lock-deadlock.patch
@@ -926,6 +928,16 @@ Patch14063: 0002-USB-EHCI-go-back-to-using-the-system-clock-for-QH-un.patch
 
 #rhbz 747948
 Patch14064: ext4-fix-BUG_ON-in-ext4_ext_insert_extent.patch
+
+#rhbz 748668
+Patch14065: epoll-fix-spurious-lockdep-warnings.patch
+Patch14066: epoll-limit-paths.patch
+
+#rhbz 749166
+Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
+
+#rhbz 749484
+Patch21060: crypto-ghash-Avoid-null-pointer-dereference-if-no-ke.patch
 
 %endif
 
@@ -1420,6 +1432,7 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 ApplyPatch ext4-always-journal-quota-file-modifications.patch
 
 # xfs
+ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 # btrfs
 
@@ -1709,6 +1722,7 @@ ApplyPatch bluetooth-prevent-buffer-overflow-in-l2cap-config-request.patch
 ApplyPatch nl80211-fix-overflow-in-ssid_len.patch.patch
 # CVE-2011-2699
 ApplyPatch ipv6-make-fragment-identifications-less-predictable.patch
+ApplyPatch ipv6-fix-null-dereference-in-udp6_ufo_fragment.patch
 
 # RHBZ #699684
 ApplyPatch x86-mm-fix-pgd_lock-deadlock.patch
@@ -1757,6 +1771,13 @@ ApplyPatch 0002-USB-EHCI-go-back-to-using-the-system-clock-for-QH-un.patch
 
 #rhbz 747948
 ApplyPatch ext4-fix-BUG_ON-in-ext4_ext_insert_extent.patch
+
+#rhbz 748668
+ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
+ApplyPatch epoll-limit-paths.patch
+
+#rhbz 749484
+ApplyPatch crypto-ghash-Avoid-null-pointer-dereference-if-no-ke.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2347,7 +2368,21 @@ fi
 # and build.
 
 %changelog
-* Fri Oct 21 2011 Dave Jones <davej@redhat.com>
+* Thu Oct 27 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-103
+- Fix backport of xfs patch
+- CVE-2011-4081 crypto: ghash: null pointer deref if no key is set (rhbz 749484)
+
+* Wed Oct 26 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4077: Add patch to fix XFS memory corruption (rhbz 749166)
+
+* Tue Oct 25 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-1083: excessive in kernel CPU consumption when creating large nested epoll structures (rhbz 748668)
+
+* Tue Oct 25 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix NULL dereference in udp6_ufo_fragment(), caused by
+  fix for CVE-2011-2699.
+
+* Fri Oct 21 2011 Dave Jones <davej@redhat.com> 2.6.35.14-100
 - Lower severity of Radeon lockup messages.
 
 * Fri Oct 20 2011 Josh Boyer <jwboyer@redhat.com>
