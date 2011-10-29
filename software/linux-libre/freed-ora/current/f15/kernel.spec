@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 3
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -638,7 +638,6 @@ Patch1500: fix_xen_guest_on_old_EC2.patch
 
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
-Patch1811: drm-ttm-nouveau-oops-fix.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 # make sure the lvds comes back on lid open
@@ -679,7 +678,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: usb-add-quirk-for-logitech-webcams.patch
 Patch12025: crypto-register-cryptd-first.patch
-Patch12026: cputimer-Cure-lock-inversion.patch
 Patch12027: x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 Patch12028: x86-p4-make-watchdog-and-perf-work-together.patch
 
@@ -690,7 +688,7 @@ Patch12204: linux-2.6-enable-more-pci-autosuspend.patch
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13001: epoll-fix-spurious-lockdep-warnings.patch
-Patch13002: hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
+Patch13002: epoll-limit-paths.patch
 
 Patch13010: iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
 
@@ -711,17 +709,8 @@ Patch21003: TEGRA-2.6.40.2-enable-USB-ports.patch
 # rhbz#719607
 Patch21004: vfs-fix-automount-for-negative-autofs-dentries.patch
 
-# rhbz#727927 rhbz#731278 rhbz#732934
-Patch21005: cifs-fix-ERR_PTR-dereference-in-cifs_get_root.patch
-
-# rhbz #735437
-Patch21007: ucvideo-fix-crash-when-linking-entities.patch
-
 # rhbz #740645
 Patch21011: md-dont-delay-reboot-by-1-second-if-no-MD-devices.patch
-
-# rhbz #714381
-Patch21012: hid-magicmouse-ignore-ivalid-report-id-while-switching-modes-v2.patch
 
 # rhbz #496975
 Patch21013: Platform-fix-samsung-laptop-DMI-identification-for-N.patch
@@ -736,12 +725,20 @@ Patch21017: binfmt_elf-fix-PIE-execution-with-random-disabled.patch
 #rhbz #722509
 Patch21018: mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
-#rhbz #745241
-Patch21019: fuse-fix-memory-leak.patch
-
 #rhbz #735946
 Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+
+#rhbz 737108
+Patch21030: platform-fix-samsung-brightness-min-max-calculations.patch
+
+#rhbz 748691
+Patch21040: be2net-move-to-new-vlan-model.patch
+Patch21041: be2net-non-member-vlan-pkts-not-received-in-promisco.patch
+Patch21042: benet-remove-bogus-unlikely-on-vlan-check.patch
+
+#rhbz 749166
+Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 %endif
 
@@ -1190,6 +1187,7 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 # ext4
 
 # xfs
+ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 # btrfs
 
@@ -1267,7 +1265,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # DRM core
-ApplyPatch drm-ttm-nouveau-oops-fix.patch
 
 # Nouveau DRM
 ApplyOptionalPatch drm-nouveau-updates.patch
@@ -1307,7 +1304,6 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 ApplyPatch crypto-register-cryptd-first.patch
-ApplyPatch cputimer-Cure-lock-inversion.patch
 ApplyPatch x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 ApplyPatch x86-p4-make-watchdog-and-perf-work-together.patch
 
@@ -1315,8 +1311,7 @@ ApplyPatch x86-p4-make-watchdog-and-perf-work-together.patch
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
-
-ApplyPatch hfsplus-ensure-bio-requests-are-not-smaller-than-the.patch
+ApplyPatch epoll-limit-paths.patch
 
 ApplyPatch iwlagn-check-for-priv--txq-in-iwlagn_wait_tx_queue_empty.patch
 
@@ -1325,18 +1320,8 @@ ApplyPatch utrace.patch
 # rhbz#719607
 ApplyPatch vfs-fix-automount-for-negative-autofs-dentries.patch
 
-# rhbz#727927 rhbz#731278 rhbz#732934
-# cifs-possible-memory-corruption-on-mount.patch is already queued for 3.0.4
-ApplyPatch cifs-fix-ERR_PTR-dereference-in-cifs_get_root.patch
-
-#rhbz 735437
-ApplyPatch ucvideo-fix-crash-when-linking-entities.patch
-
 #rhbz 740645
 ApplyPatch md-dont-delay-reboot-by-1-second-if-no-MD-devices.patch
-
-# rhbz #714381
-ApplyPatch hid-magicmouse-ignore-ivalid-report-id-while-switching-modes-v2.patch
 
 # rhbz #496675
 ApplyPatch Platform-fix-samsung-laptop-DMI-identification-for-N.patch
@@ -1351,12 +1336,17 @@ ApplyPatch binfmt_elf-fix-PIE-execution-with-random-disabled.patch
 #rhbz #722509
 ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
-#rhbz #745241
-ApplyPatch fuse-fix-memory-leak.patch
-
 #rhbz #735946
 ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+
+#rhbz 737108
+ApplyPatch platform-fix-samsung-brightness-min-max-calculations.patch
+
+#rhbz 748691
+ApplyPatch be2net-move-to-new-vlan-model.patch
+ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
+ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1978,6 +1968,22 @@ fi
 # and build.
 
 %changelog
+* Wed Oct 26 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.8-2
+- CVE-2011-4077: xfs: potential buffer overflow in xfs_readlink() (rhbz 749166)
+
+* Tue Oct 25 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-3347: be2net: promiscuous mode and non-member VLAN packets DoS (rhbz 748691)
+- CVE-2011-1083: excessive in kernel CPU consumption when creating large nested epoll structures (rhbz 748668)
+
+* Tue Oct 25 2011 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.0.8 stable release
+
+* Mon Oct 24 2011 Chuck Ebbert <cebbert@redhat.com>
+- Add patch from LKML to fix Samsung notebook brightness flicker (rhbz 737108)
+
+* Mon Oct 24 2011 Dave Jones <davej@redhat.com>
+- Print modules list from bad_page()
+
 * Mon Oct 24 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.7-3
 - Backport 3 fixed from linux-next to fix dib0700 playback (rhbz 733827)
 
