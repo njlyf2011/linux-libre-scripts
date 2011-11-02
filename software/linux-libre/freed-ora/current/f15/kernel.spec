@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -617,6 +617,7 @@ Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch460: linux-2.6-serial-460800.patch
 
 Patch470: die-floppy-die.patch
+Patch471: floppy-drop-disable_hlt-warning.patch
 
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -678,7 +679,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: usb-add-quirk-for-logitech-webcams.patch
 Patch12025: crypto-register-cryptd-first.patch
-Patch12027: x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 Patch12028: x86-p4-make-watchdog-and-perf-work-together.patch
 
 # Runtime power management
@@ -739,6 +739,8 @@ Patch21042: benet-remove-bogus-unlikely-on-vlan-check.patch
 
 #rhbz 749166
 Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
+
+Patch21070: oom-fix-integer-overflow-of-points.patch
 
 %endif
 
@@ -1235,6 +1237,7 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
+ApplyPatch floppy-drop-disable_hlt-warning.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
@@ -1304,7 +1307,6 @@ ApplyPatch add-appleir-usb-driver.patch
 ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 ApplyPatch crypto-register-cryptd-first.patch
-ApplyPatch x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 ApplyPatch x86-p4-make-watchdog-and-perf-work-together.patch
 
 # rhbz#605888
@@ -1347,6 +1349,9 @@ ApplyPatch platform-fix-samsung-brightness-min-max-calculations.patch
 ApplyPatch be2net-move-to-new-vlan-model.patch
 ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
 ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
+
+#rhbz 750402
+ApplyPatch oom-fix-integer-overflow-of-points.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1968,6 +1973,18 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 01 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.8-4
+- Drop x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid (rhbz 748516)
+
+* Tue Nov 01 2011 Dave Jones <davej@redhat.com>
+- Add another Sony laptop to the nonvs blacklist. (rhbz 641789)
+
+* Mon Oct 31 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4097: oom_badness() integer overflow (rhbz 750402)
+
+* Fri Oct 28 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to prevent tracebacks on a warning in floppy.c (rhbz 749887)
+
 * Wed Oct 26 2011 Josh Boyer <jwboyer@redhat.com> 2.6.40.8-2
 - CVE-2011-4077: xfs: potential buffer overflow in xfs_readlink() (rhbz 749166)
 
