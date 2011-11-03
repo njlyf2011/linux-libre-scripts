@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 5
+%global baserelease 7
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -687,6 +687,7 @@ Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch460: linux-2.6-serial-460800.patch
 
 Patch470: die-floppy-die.patch
+Patch471: floppy-drop-disable_hlt-warning.patch
 
 Patch510: linux-2.6-silence-noise.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
@@ -743,7 +744,6 @@ Patch12010: add-appleir-usb-driver.patch
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12021: udlfb-bind-framebuffer-to-interface.patch
-Patch12022: x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
 
 Patch12023: ums-realtek-driver-uses-stack-memory-for-DMA.patch
 Patch12024: epoll-fix-spurious-lockdep-warnings.patch
@@ -785,6 +785,8 @@ Patch21031: benet-remove-bogus-unlikely-on-vlan-check.patch
 
 #rhbz 749166
 Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
+
+Patch21070: oom-fix-integer-overflow-of-points.patch
 
 %endif
 
@@ -1362,6 +1364,7 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
+ApplyPatch floppy-drop-disable_hlt-warning.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
@@ -1430,8 +1433,6 @@ ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 
 ApplyPatch crypto-register-cryptd-first.patch
 
-ApplyPatch x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch
-
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
@@ -1463,6 +1464,9 @@ ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
 #rhbz 748691
 ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
 ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
+
+#rhbz 750402
+ApplyPatch oom-fix-integer-overflow-of-points.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2165,6 +2169,15 @@ fi
 # and build.
 
 %changelog
+* Tue Nov  1 2011 Josh Boyer <jwboyer@redhat.com> 3.1.0-7
+- Drop x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid (rhbz 748516)
+
+* Mon Oct 31 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4097: oom_badness() integer overflow (rhbz 750402)
+
+* Fri Oct 28 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to prevent tracebacks on a warning in floppy.c (rhbz 749887)
+
 * Wed Oct 26 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.1.0-5
 - Rebuilt for glibc bug#747377
 
