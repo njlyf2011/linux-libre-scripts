@@ -1,11 +1,11 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-10-25 19:41:01.000000000 +0000
-+++ Makefile	2011-10-25 19:41:03.000000000 +0000
+--- Makefile.orig	2011-11-12 17:11:59.000000000 +0000
++++ Makefile	2011-11-12 17:12:09.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 3
  PATCHLEVEL = 1
- SUBLEVEL = 0
+ SUBLEVEL = 1
 -EXTRAVERSION =-libre
 +EXTRAVERSION =-libre-lemote
  NAME = "Divemaster Edition"
@@ -14,11 +14,11 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-10-25 19:43:14.000000000 +0000
-@@ -0,0 +1,4660 @@
++++ .config	2011-11-12 17:28:18.000000000 +0000
+@@ -0,0 +1,4661 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.1.0-libre-lemote Kernel Configuration
++# Linux/mips 3.1.1-libre-lemote Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -3587,7 +3587,7 @@ Index: .config
 +#
 +CONFIG_HID_A4TECH=m
 +CONFIG_HID_ACRUX=m
-+CONFIG_HID_ACRUX_FF=m
++CONFIG_HID_ACRUX_FF=y
 +CONFIG_HID_APPLE=m
 +CONFIG_HID_BELKIN=m
 +CONFIG_HID_CHERRY=m
@@ -3717,6 +3717,7 @@ Index: .config
 +CONFIG_USB_STORAGE=m
 +# CONFIG_USB_STORAGE_DEBUG is not set
 +CONFIG_USB_STORAGE_REALTEK=m
++CONFIG_REALTEK_AUTOPM=y
 +CONFIG_USB_STORAGE_DATAFAB=m
 +CONFIG_USB_STORAGE_FREECOM=m
 +CONFIG_USB_STORAGE_ISD200=m
