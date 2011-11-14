@@ -51,7 +51,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be prepended with "0.", so
 # for example a 3 here will become 0.3
 #
-%global baserelease 7
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -64,7 +64,7 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 %define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -77,9 +77,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -413,13 +413,13 @@ Summary: The Linux kernel
 # we build a up kernel on armv5tel. its used for qemu.
 %ifnarch armv5tel
 %define with_up 0
+%define with_perf 0
 %endif
 # we only build headers on the base arm arches
 # just like we used to only build them on i386 for x86
 %ifnarch armv5tel armv7hl
 %define with_headers 0
 %endif
-%define with_perf 0
 %endif
 
 %if %{nopatches}
@@ -788,6 +788,24 @@ Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 Patch21070: oom-fix-integer-overflow-of-points.patch
 
+#rhbz 706574
+Patch21071: WMI-properly-cleanup-devices-to-avoid-crashes.patch
+
+#rhbz 728607
+Patch21060: elantech.patch
+
+#rhbz 748210
+Patch21061: ideapad-Check-if-acpi-already-handle-backlight.patch
+
+#rhbz 731365
+Patch21062: mac80211-fix-remain_off_channel-regression.patch
+Patch21063: mac80211-config-hw-when-going-back-on-channel.patch
+
+#rhbz752176
+Patch21080: sysfs-msi-irq-per-device.patch
+
+#backport brcm80211 from 3.2-rc1
+Patch21090: brcm80211.patch
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1424,14 +1442,14 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 ApplyPatch add-appleir-usb-driver.patch
 
 ApplyPatch udlfb-bind-framebuffer-to-interface.patch
-ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
-ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
+#ApplyPatch ums-realtek-driver-uses-stack-memory-for-DMA.patch
+#ApplyPatch epoll-fix-spurious-lockdep-warnings.patch
 ApplyPatch epoll-limit-paths.patch
 ApplyPatch rcu-avoid-just-onlined-cpu-resched.patch
 ApplyPatch block-stray-block-put-after-teardown.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 
-ApplyPatch crypto-register-cryptd-first.patch
+#ApplyPatch crypto-register-cryptd-first.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1439,19 +1457,19 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 ApplyPatch revert-efi-rtclock.patch
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
-ApplyPatch add-macbookair41-keyboard.patch
+#ApplyPatch add-macbookair41-keyboard.patch
 
 ApplyPatch hvcs_pi_buf_alloc.patch
 
-ApplyPatch powerpc-Fix-deadlock-in-icswx-code.patch
+#ApplyPatch powerpc-Fix-deadlock-in-icswx-code.patch
 
-ApplyPatch iwlagn-fix-ht_params-NULL-pointer-dereference.patch
+#ApplyPatch iwlagn-fix-ht_params-NULL-pointer-dereference.patch
 
 #rhbz #722509
-ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+#ApplyPatch mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
 
-ApplyPatch media-DiBcom-protect-the-I2C-bufer-access.patch
-ApplyPatch media-dib0700-protect-the-dib0700-buffer-access.patch
+#ApplyPatch media-DiBcom-protect-the-I2C-bufer-access.patch
+#ApplyPatch media-dib0700-protect-the-dib0700-buffer-access.patch
 ApplyPatch media-dib0700-correct-error-message.patch
 
 # utrace.
@@ -1467,6 +1485,25 @@ ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
 
 #rhbz 750402
 ApplyPatch oom-fix-integer-overflow-of-points.patch
+
+#rhbz 706574
+#ApplyPatch WMI-properly-cleanup-devices-to-avoid-crashes.patch
+
+#rhbz 728607
+ApplyPatch elantech.patch
+
+#rhbz 748210
+ApplyPatch ideapad-Check-if-acpi-already-handle-backlight.patch
+
+#rhbz 731365
+#ApplyPatch mac80211-fix-remain_off_channel-regression.patch
+#ApplyPatch mac80211-config-hw-when-going-back-on-channel.patch
+
+#rhbz 752176
+ApplyPatch sysfs-msi-irq-per-device.patch
+
+#backport brcm80211 from 3.2-rc1
+ApplyPatch brcm80211.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2169,6 +2206,48 @@ fi
 # and build.
 
 %changelog
+* Sat Nov  12 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Adjusted patch-libre-3.1.1-rc1.
+- Deblobbed brcm80211.patch.
+
+* Wed Nov 09 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.1-1.rc1
+- Linux 3.1.1-rc1
+- Comment out merged patches, will drop when release is final:
+   ums-realtek-driver-uses-stack-memory-for-DMA.patch
+   epoll-fix-spurious-lockdep-warnings.patch
+   crypto-register-cryptd-first.patch
+   add-macbookair41-keyboard.patch
+   powerpc-Fix-deadlock-in-icswx-code.patch
+   iwlagn-fix-ht_params-NULL-pointer-dereference.patch
+   mmc-Always-check-for-lower-base-frequency-quirk-for-.patch
+   media-DiBcom-protect-the-I2C-bufer-access.patch
+   media-dib0700-protect-the-dib0700-buffer-access.patch
+   WMI-properly-cleanup-devices-to-avoid-crashes.patch
+   mac80211-fix-remain_off_channel-regression.patch
+   mac80211-config-hw-when-going-back-on-channel.patch
+
+* Wed Nov 09 2011 John W. Linville <linville@redhat.com>
+- Backport brcm80211 from 3.2-rc1
+
+* Tue Nov 08 2011 Neil Horman <nhorman@redhat.com>
+- Add msi irq ennumeration per device in sysfs (rhbz 752176)
+
+* Mon Nov 07 2011 Josh Boyer <jwboyer@redhat.com>
+- Add two patches to fix mac80211 issues (rhbz 731365)
+
+* Thu Nov 03 2011 Josh Boyer <jwboyer@redhat.com>
+- Add commits queued for 3.2 for elantech driver (rhbz 728607)
+- Fix crash when setting brightness via Fn keys on ideapads (rhbz 748210)
+
+* Wed Nov 02 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix oops when removing wmi module (rhbz 706574)
+
+* Tue Nov 01 2011 Dave Jones <davej@redhat.com> 3.1.0-8
+- allow building the perf rpm for ARM (rhbz 741325)
+
+* Tue Nov 01 2011 Dave Jones <davej@redhat.com> 3.1.0-8
+- Add another Sony laptop to the nonvs blacklist. (rhbz 641789)
+
 * Tue Nov  1 2011 Josh Boyer <jwboyer@redhat.com> 3.1.0-7
 - Drop x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid (rhbz 748516)
 
