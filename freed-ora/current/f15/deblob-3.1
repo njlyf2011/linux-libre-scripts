@@ -44,7 +44,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.0 extra=
+kver=3.1 extra=
 
 case $1 in
 --force)
@@ -240,6 +240,10 @@ for f in \
     drivers/gpu/drm/nouveau/nva3_copy.fuc \
   drivers/gpu/drm/nouveau/nvc0_copy.fuc.h \
     drivers/gpu/drm/nouveau/nva3_copy.fuc \
+  drivers/gpu/drm/nouveau/nvc0_grgpc.fuc.h \
+    drivers/gpu/drm/nouveau/nvc0_grgpc.fuc \
+  drivers/gpu/drm/nouveau/nvc0_grhub.fuc.h \
+    drivers/gpu/drm/nouveau/nvc0_grhub.fuc \
   drivers/net/ixp2000/ixp2400_rx.ucode \
     drivers/net/ixp2000/ixp2400_rx.uc \
   drivers/net/ixp2000/ixp2400_tx.ucode \
@@ -431,12 +435,6 @@ clean_blob drivers/net/netx-eth.c
 clean_kconfig arch/arm/Kconfig 'ARCH_NETX'
 clean_mk CONFIG_ARCH_NETX arch/arm/Makefile
 
-announce WESTBRIDGE_DEVICE_DRIVER - "West Bridge Device Driver"
-reject_firmware drivers/staging/westbridge/astoria/device/cyasdevice.c
-clean_blob drivers/staging/westbridge/astoria/device/cyasdevice.c
-clean_kconfig drivers/staging/westbridge/astoria/device/Kconfig 'WESTBRIDGE_DEVICE_DRIVER'
-clean_mk 'CONFIG_WESTBRIDGE_DEVICE_DRIVER' drivers/staging/westbridge/astoria/device/Makefile
-
 #######
 # ATM #
 #######
@@ -469,10 +467,6 @@ clean_mk CONFIG_ATM_SOLOS drivers/atm/Makefile
 
 announce COMPUTONE - "Computone IntelliPort Plus serial"
 drop_fw_file firmware/intelliport2.bin.ihex firmware/intelliport2.bin
-reject_firmware drivers/staging/tty/ip2/ip2main.c
-clean_blob drivers/staging/tty/ip2/ip2main.c
-clean_kconfig drivers/staging/tty/Kconfig 'COMPUTONE'
-clean_mk CONFIG_COMPUTONE drivers/staging/tty/Makefile
 
 announce CYCLADES - "Cyclades async mux support"
 reject_firmware drivers/tty/cyclades.c
@@ -562,7 +556,11 @@ clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
 announce IMX_SDMA - "i.MX SDMA support"
 reject_firmware drivers/dma/imx-sdma.c
-clean_blob drivers/dma/imx-sdma.c
+clean_blob arch/arm/mach-imx/mm-imx25.c
+clean_blob arch/arm/mach-imx/mm-imx31.c
+clean_blob arch/arm/mach-imx/mm-imx35.c
+clean_blob arch/arm/mach-mx5/mm.c
+clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
 clean_kconfig drivers/dma/Kconfig 'IMX_SDMA'
 clean_mk CONFIG_IMX_SDMA drivers/dma/Makefile
 
@@ -594,6 +592,12 @@ announce VIDEO_TM6000_DVB - "DVB Support for tm6000 based TV cards"
 clean_blob drivers/staging/tm6000/tm6000-cards.c
 clean_kconfig drivers/staging/tm6000/Kconfig 'VIDEO_TM6000_DVB'
 clean_mk CONFIG_VIDEO_TM6000_DVB drivers/staging/tm6000/Makefile
+
+announce MEDIA_TUNER_XC4000 - "Xceive XC4000 silicon tuner"
+undefault_firmware 'XC4000' drivers/media/common/tuners/xc4000.c
+maybe_reject_firmware drivers/media/common/tuners/xc4000.c
+clean_kconfig drivers/media/common/tuners/Kconfig 'MEDIA_TUNER_XC4000'
+clean_mk CONFIG_MEDIA_TUNER_XC4000 drivers/media/common/tuners/Makefile
 
 announce MEDIA_TUNER_XC5000 - "Xceive XC5000 silicon tuner"
 undefine_macro 'XC5000_DEFAULT_FIRMWARE_SIZE' 0 \
@@ -860,6 +864,11 @@ clean_blob drivers/media/dvb/frontends/drxd_hard.c
 clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_DRXD'
 clean_mk CONFIG_DVB_DRXD drivers/media/dvb/frontends/Makefile
 
+announce DVB_DRXK - "Micronas DRXK based"
+reject_firmware drivers/media/dvb/frontends/drxk_hard.c
+clean_kconfig drivers/media/dvb/frontends/Kconfig 'DVB_DRXK'
+clean_mk CONFIG_DVB_DRXK drivers/media/dvb/frontends/Makefile
+
 announce DVB_NGENE - "Micronas nGene support"
 reject_firmware drivers/media/dvb/ngene/ngene-core.c
 clean_blob drivers/media/dvb/ngene/ngene-core.c
@@ -944,6 +953,11 @@ reject_firmware drivers/media/video/cx88/cx88-blackbird.c
 clean_kconfig drivers/media/video/cx88/Kconfig 'VIDEO_CX88_BLACKBIRD'
 clean_mk CONFIG_VIDEO_CX88_BLACKBIRD drivers/media/video/cx88/Makefile
 
+announce VIDEO_EM28XX_DVB - "DVB/ATSC Support for em28xx based TV cards"
+clean_blob drivers/media/video/em28xx/em28xx-dvb.c
+clean_kconfig drivers/media/video/em28xx/Kconfig 'VIDEO_EM28XX_DVB'
+clean_mk CONFIG_VIDEO_EM28XX_DVB drivers/media/video/em28xx/Makefile
+
 announce VIDEO_IVTV - "Conexant cx23416/cx23415 MPEG encoder/decoder support"
 reject_firmware drivers/media/video/ivtv/ivtv-firmware.c
 clean_blob drivers/media/video/ivtv/ivtv-firmware.c
@@ -990,6 +1004,12 @@ reject_firmware drivers/media/video/tlg2300/pd-main.c
 clean_blob drivers/media/video/tlg2300/pd-main.c
 clean_kconfig drivers/media/video/tlg2300/Kconfig 'VIDEO_TLG2300'
 clean_mk CONFIG_VIDEO_TLG2300 drivers/media/video/tlg2300/Makefile
+
+announce VIDEO_SAMSUNG_S5P_MFC - "Samsung S5P MFC 5.1 Video Codec"
+reject_firmware drivers/media/video/s5p-mfc/s5p_mfc_ctrl.c
+clean_blob drivers/media/video/s5p-mfc/s5p_mfc_ctrl.c
+clean_kconfig drivers/media/video/Kconfig 'VIDEO_SAMSUNG_S5P_MFC'
+clean_mk CONFIG_VIDEO_SAMSUNG_S5P_MFC drivers/media/video/s5p-mfc/Makefile
 
 announce USB_DABUSB - "left-over DABUSB firmware"
 clean_fw firmware/dabusb/bitstream.bin.ihex firmware/dabusb/bitstream.bin
@@ -1043,7 +1063,7 @@ clean_blob drivers/net/starfire.c
 clean_kconfig drivers/net/Kconfig 'ADAPTEC_STARFIRE'
 clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/Makefile
 
-announce CONFIG_BNA - "Brocade 1010/1020 10Gb Ethernet Driver support"
+announce BNA - "Brocade 1010/1020 10Gb Ethernet Driver support"
 clean_blob drivers/net/bna/bnad.c
 clean_blob drivers/net/bna/cna.h
 reject_firmware drivers/net/bna/cna_fwimg.c
@@ -1124,7 +1144,7 @@ clean_blob drivers/staging/ft1000/ft1000-pcmcia/boot.h
 clean_sed '
 /^static int ft1000_reset_card/,/^}$/ {
   /card_bootload/i\
-		return /*(DEBLOBBED)*/ FALSE;
+		return /*(DEBLOBBED)*/ false;
 }
 ' drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c \
   'disabled non-Free firmware-loading machinery'
@@ -1142,10 +1162,6 @@ clean_mk CONFIG_FT1000_USB drivers/staging/ft1000/Makefile
 
 announce MYRI_SBUS - "MyriCOM Gigabit Ethernet"
 drop_fw_file firmware/myricom/lanai.bin.ihex firmware/myricom/lanai.bin
-reject_firmware drivers/net/myri_sbus.c
-clean_blob drivers/net/myri_sbus.c
-clean_kconfig drivers/net/Kconfig 'MYRI_SBUS'
-clean_mk CONFIG_MYRI_SBUS drivers/net/Makefile
 
 announce MYRI10GE - "Myricom Myri-10G Ethernet support"
 reject_firmware drivers/net/myri10ge/myri10ge.c
@@ -1369,16 +1385,16 @@ clean_blob drivers/net/wireless/b43legacy/main.c
 clean_kconfig drivers/net/wireless/b43legacy/Kconfig 'B43LEGACY'
 clean_mk CONFIG_B43LEGACY drivers/net/wireless/b43legacy/Makefile
 
-announce BRCMSMAC_PCI - "Broadcom IEEE802.11n PCIe SoftMAC WLAN driver"
-clean_blob drivers/staging/brcm80211/README
-reject_firmware drivers/staging/brcm80211/brcmsmac/wl_mac80211.c
-clean_blob drivers/staging/brcm80211/brcmsmac/wl_mac80211.c
+announce BRCMSMAC - "Broadcom IEEE802.11n PCIe SoftMAC WLAN driver"
+reject_firmware drivers/staging/brcm80211/brcmsmac/mac80211_if.c
+clean_blob drivers/staging/brcm80211/brcmsmac/mac80211_if.c
 clean_kconfig drivers/staging/brcm80211/Kconfig 'BRCMSMAC'
 clean_mk CONFIG_BRCMSMAC drivers/staging/brcm80211/Makefile
 
 announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
-reject_firmware drivers/staging/brcm80211/brcmfmac/wl_cfg80211.c
-clean_blob drivers/staging/brcm80211/brcmfmac/wl_cfg80211.c
+reject_firmware drivers/staging/brcm80211/brcmfmac/dhd_sdio.c
+clean_blob drivers/staging/brcm80211/brcmfmac/dhd_sdio.c
+clean_blob drivers/staging/brcm80211/brcmfmac/bcmchip.h
 clean_kconfig drivers/staging/brcm80211/Kconfig 'BRCMFMAC'
 clean_mk CONFIG_BRCMFMAC drivers/staging/brcm80211/Makefile
 
@@ -1520,7 +1536,7 @@ clean_mk CONFIG_LIBERTAS_THINFIRM_USB drivers/net/wireless/libertas_tf/Makefile
 announce MWIFIEX_SDIO - "Marvell WiFi-Ex Driver"
 clean_blob drivers/net/wireless/mwifiex/README
 reject_firmware drivers/net/wireless/mwifiex/main.c
-clean_blob drivers/net/wireless/mwifiex/main.h
+clean_blob drivers/net/wireless/mwifiex/sdio.h
 clean_blob drivers/net/wireless/mwifiex/sdio.c
 clean_kconfig drivers/net/wireless/mwifiex/Kconfig 'MWIFIEX_SDIO'
 clean_mk CONFIG_MWIFIEX_SDIO drivers/net/wireless/mwifiex/Makefile
@@ -1618,6 +1634,12 @@ reject_firmware drivers/net/wireless/rtlwifi/rtl8192cu/sw.c
 clean_blob drivers/net/wireless/rtlwifi/rtl8192cu/sw.c
 clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192CU
 clean_mk CONFIG_RTL8192CU drivers/net/wireless/rtlwifi/rtl8192cu/Makefile
+
+announce RTL8192DE - "Realtek RTL8192DE/RTL8188DE PCIe Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8192de/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8192de/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192DE
+clean_mk CONFIG_RTL8192DE drivers/net/wireless/rtlwifi/rtl8192de/Makefile
 
 announce RTL8192SE - "Realtek RTL8192SE/RTL8191SE PCIe Wireless Network Adapter"
 reject_firmware drivers/net/wireless/rtlwifi/rtl8192se/sw.c
@@ -2364,6 +2386,14 @@ clean_sed '
 }' sound/isa/Kconfig 'removed firmware names'
 clean_kconfig sound/isa/Kconfig 'SND_SSCAPE'
 clean_mk CONFIG_SND_SSCAPE sound/isa/Makefile
+
+announce SND_SOC_ADAU1701 - "ADAU1701 SigmaDSP processor"
+clean_blob sound/soc/codecs/adau1701.c
+clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_ADAU1701'
+clean_mk CONFIG_SND_SOC_ADAU1701 sound/soc/codecs/Makefile
+
+announce SIGMA - "SigmaStudio firmware loader"
+maybe_reject_firmware drivers/firmware/sigma.c
 
 # It's not clear that wm2000_anc.bin is pure data.
 # Check with developer, clean up for now.
