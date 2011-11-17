@@ -48,10 +48,13 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-# For non-released -rc kernels, this will be prepended with "0.", so
-# for example a 3 here will become 0.3
+# NOTE: baserelease must be > 0 or bad things will happen if you switch
+#       to a released kernel (released version will be < rc version)
 #
-%global baserelease 1
+# For non-released -rc kernels, this will be appended after the rcX and
+# gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
+#
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -181,8 +184,10 @@ Summary: The Linux kernel
 
 %if 0%{?stable_rc}
 %define stable_rctag .rc%{stable_rc}
+%define pkg_release 0%{stable_rctag}.%{fedora_build}%{?buildid}%{?dist}%{?libres}
+%else
+%define pkg_release %{fedora_build}%{?buildid}%{?dist}%{?libres}
 %endif
-%define pkg_release %{fedora_build}%{?stable_rctag}%{?buildid}%{?dist}%{?libres}
 
 %else
 
@@ -737,7 +742,13 @@ Patch3000: rcutree-avoid-false-quiescent-states.patch
 
 # fs fixes
 
+#rhbz 753346
+Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
+
 # NFSv4
+
+#rhbz 753236
+Patch4000: nfsv4-include-bitmap-in-nfsv4_get_acl_data.patch
 
 # patches headed upstream
 Patch12010: add-appleir-usb-driver.patch
@@ -1053,6 +1064,11 @@ exit 1
 %endif
 %endif
 
+%if !%{baserelease}
+echo "baserelease must be greater than zero"
+exit 1
+%endif
+
 # more sanity checking; do it quietly
 if [ "%{patches}" != "%%{patches}" ] ; then
   for patch in %{patches} ; do
@@ -1318,6 +1334,8 @@ ApplyPatch linux-2.6-i386-nx-emulation.patch
 #
 
 # ext4
+#rhbz 753346
+ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # xfs
 ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
@@ -1328,6 +1346,7 @@ ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 # eCryptfs
 
 # NFSv4
+ApplyPatch nfsv4-include-bitmap-in-nfsv4_get_acl_data.patch
 
 # USB
 
@@ -2172,7 +2191,15 @@ fi
 # and build.
 
 %changelog
-* Mon Nov 14 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Nov 14 2011 Josh Boyer <jwboyer@redhat.com> 3.1.1-2
+- CVE-2011-4131: nfs4_getfacl decoding kernel oops (rhbz 753236)
+- CVE-2011-4132: jbd/jbd2: invalid value of first log block leads to oops (rhbz 753346)
+
+* Fri Nov 11 2011 Chuck Ebbert <cebbert@redhat.com>
+- Use the same naming scheme as rawhide for -stable RC kernels
+  (e.g. 3.1.1-0.rc1.1 instead of 3.1.1-1.rc1)
+
+* Fri Nov 11 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Nov 14
 - Use patch-3.1-libre-3.1.1-libre as patch-libre-3.1.1.
 
 * Fri Nov 11 2011 Josh Boyer <jwboyer@redhat.com> 3.1.1-1
