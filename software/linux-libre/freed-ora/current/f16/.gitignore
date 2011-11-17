@@ -3,4 +3,5 @@ linux-*.tar.bz2
 patch-*.bz2
 clog
 *.rpm
+*.orig
 kernel-[23].*/
