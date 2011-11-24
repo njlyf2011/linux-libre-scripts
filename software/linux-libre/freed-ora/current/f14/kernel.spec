@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 103
+%global baserelease 105
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -765,6 +765,9 @@ Patch2950: linux-2.6-via-velocity-dma-fix.patch
 
 Patch3010: linux-2.6-rcu-netpoll.patch
 
+#rhbz 753346
+Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
+
 Patch4000: rcutree-avoid-false-quiescent-states.patch
 
 Patch5000: acer-wmi-modalias.patch
@@ -938,6 +941,9 @@ Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 #rhbz 749484
 Patch21060: crypto-ghash-Avoid-null-pointer-dereference-if-no-ke.patch
+
+#rhbz 755590
+Patch21061: ipv6-udp-fix-the-wrong-headroom-check.patch
 
 %endif
 
@@ -1427,6 +1433,8 @@ ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 #
 
 # ext4
+#rhbz 753346
+ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # rhbz#578674
 ApplyPatch ext4-always-journal-quota-file-modifications.patch
@@ -1778,6 +1786,9 @@ ApplyPatch epoll-limit-paths.patch
 
 #rhbz 749484
 ApplyPatch crypto-ghash-Avoid-null-pointer-dereference-if-no-ke.patch
+
+#rhbz 755590
+ApplyPatch ipv6-udp-fix-the-wrong-headroom-check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2368,6 +2379,15 @@ fi
 # and build.
 
 %changelog
+* Mon Nov 21 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-105
+- CVE-2011-4326: wrong headroom check in udp6_ufo_fragment() (rhbz 755590)
+
+* Mon Nov 14 2011 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4132: jbd/jbd2: invalid value of first log block leads to oops (rhbz 753346)
+
+* Tue Nov 01 2011 Dave Jones <davej@redhat.com>
+- Add another Sony laptop to the nonvs blacklist. (rhbz 641789)
+
 * Thu Oct 27 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-103
 - Fix backport of xfs patch
 - CVE-2011-4081 crypto: ghash: null pointer deref if no key is set (rhbz 749484)
