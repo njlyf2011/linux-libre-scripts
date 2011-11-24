@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -56,7 +56,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
-%define rcrevlibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -65,9 +65,9 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -319,7 +319,6 @@ Summary: The Linux kernel
 %define image_install_path boot
 %define make_target image
 %define kernel_image arch/s390/boot/image
-%define with_perf 0
 %endif
 
 %ifarch sparc64
@@ -552,11 +551,11 @@ Source1000: config-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{stablelibre}-3.%{real_sublevel}.%{stable_base}.bz2
+%define    stable_patch_00  patch%{?stablelibre}-3.%{real_sublevel}.%{stable_base}.bz2
 Patch00: %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-%define    stable_patch_01  patch%{rcrevlibre}-3.%{real_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
+%define    stable_patch_01  patch%{?rcrevlibre}-3.%{real_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
 Patch01: %{stable_patch_01}
 %endif
 %endif
@@ -604,6 +603,7 @@ Patch470: die-floppy-die.patch
 Patch471: floppy-drop-disable_hlt-warning.patch
 
 Patch510: linux-2.6-silence-noise.patch
+Patch520: quite-apm.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
@@ -669,6 +669,7 @@ Patch12025: rcu-avoid-just-onlined-cpu-resched.patch
 Patch12026: block-stray-block-put-after-teardown.patch
 Patch12027: usb-add-quirk-for-logitech-webcams.patch
 Patch12030: epoll-limit-paths.patch
+Patch12031: HID-wacom-Set-input-bits-before-registration.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
@@ -676,6 +677,9 @@ Patch13002: revert-efi-rtclock.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch13009: hvcs_pi_buf_alloc.patch
+
+#rhbz 751165
+Patch13010: ip6_tunnel-copy-parms.name-after-register_netdevice.patch
 
 Patch20000: utrace.patch
 
@@ -686,6 +690,7 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 #rhbz #735946
 Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 
 #rhbz 748691
 Patch21030: be2net-non-member-vlan-pkts-not-received-in-promisco.patch
@@ -1108,6 +1113,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/
 ApplyPatch %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
 ApplyPatch %{stable_patch_01}
 %endif
 
@@ -1245,6 +1251,7 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
+ApplyPatch quite-apm.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
@@ -1267,6 +1274,7 @@ ApplyPatch epoll-limit-paths.patch
 ApplyPatch rcu-avoid-just-onlined-cpu-resched.patch
 ApplyPatch block-stray-block-put-after-teardown.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
+ApplyPatch HID-wacom-Set-input-bits-before-registration.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1276,6 +1284,9 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch hvcs_pi_buf_alloc.patch
 
+#rhbz 751165
+ApplyPatch ip6_tunnel-copy-parms.name-after-register_netdevice.patch
+
 ApplyPatch media-dib0700-correct-error-message.patch
 
 # utrace.
@@ -1284,6 +1295,7 @@ ApplyPatch utrace.patch
 #rhbz #735946
 ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+ApplyPatch mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 
 #rhbz 748691
 ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
@@ -1540,7 +1552,7 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt2x00(pci|usb)_probe'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -1617,7 +1629,7 @@ BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
+  make %{?_smp_mflags} -C tools/perf -s V=1 HAVE_CPLUS_DEMANGLE=1 EXTRA_CFLAGS="-Wno-error=array-bounds" prefix=%{_prefix}
 %if %{with_perf}
 %{perf_make} all
 %{perf_make} man || %{doc_build_fail}
@@ -1923,6 +1935,24 @@ fi
 # and build.
 
 %changelog
+* Sat Nov 19 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.41.2-0.rc1.1
+- Linux 3.1.2-rc1 (Fedora 2.6.41.2-rc1)
+
+* Fri Nov 18 2011 Dennis Gilmore <dennis@ausil.us>
+- enable selinux to work on arm
+
+* Wed Nov 16 2011 Kyle McMartin <kmcmartin@redhat.com>
+- Work around #663080 on s390x and restore building perf there.
+
+* Tue Nov 15 2011 Dave Jones <davej@redhat.com>
+- mm: Do not stall in synchronous compaction for THP allocations
+
+* Mon Nov 14 2011 Josh Boyer <jwboyer@redhat.com>
+- Patch from Joshua Roys to add rtl8192* to modules.networking (rhbz 753645)
+- Add patch for wacom tablets for Bastien Nocera (upstream 3797ef6b6)
+- Add patch to fix ip6_tunnel naming (rhbz 751165)
+- Quite warning in apm_cpu_idle (rhbz 753776)
+
 * Mon Nov 14 2011 Josh Boyer <jwboyer@redhat.com> 2.6.41.1-2
 - CVE-2011-4131: nfs4_getfacl decoding kernel oops (rhbz 753236)
 - CVE-2011-4132: jbd/jbd2: invalid value of first log block leads to oops (rhbz 753346)
