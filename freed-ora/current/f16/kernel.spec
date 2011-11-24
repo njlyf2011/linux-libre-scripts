@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -68,7 +68,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -libre
-%define rcrevlibre -libre
+#define rcrevlibre -libre
 #define gitrevlibre -libre
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
@@ -80,9 +80,9 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
-%define stable_rc 0
+%define stable_rc 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -171,6 +171,9 @@ Summary: The Linux kernel
 # should we do C=1 builds with sparse
 %define with_sparse    %{?_with_sparse:       1} %{?!_with_sparse:       0}
 
+# Include driver backports (e.g. compat-wireless) in the kernel build.
+%define with_backports %{?_with_backports:    1} %{?!_with_backports:    0}
+
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
@@ -208,6 +211,10 @@ Summary: The Linux kernel
 
 # The kernel tarball/base version
 %define kversion 3.%{base_sublevel}
+
+# The compat-wireless version
+# (If this is less than kversion, make sure with_backports is turned-off.)
+%define cwversion 3.2-rc1-1
 
 %define make_target bzImage
 
@@ -574,6 +581,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %endif
 
 Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.bz2
+# Source1: compat-wireless-%{cwversion}.tar.bz2
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -695,6 +703,7 @@ Patch470: die-floppy-die.patch
 Patch471: floppy-drop-disable_hlt-warning.patch
 
 Patch510: linux-2.6-silence-noise.patch
+Patch520: quite-apm.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
@@ -703,6 +712,7 @@ Patch800: linux-2.6-crash-driver.patch
 
 # Platform
 Patch900: samsung-laptop-brightness-fixes-3.2.patch
+Patch901: asus-laptop-3.2-backport.patch
 
 # crypto/
 
@@ -761,6 +771,7 @@ Patch12025: rcu-avoid-just-onlined-cpu-resched.patch
 Patch12026: block-stray-block-put-after-teardown.patch
 Patch12027: usb-add-quirk-for-logitech-webcams.patch
 Patch12030: epoll-limit-paths.patch
+Patch12031: HID-wacom-Set-input-bits-before-registration.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
@@ -768,6 +779,9 @@ Patch13002: revert-efi-rtclock.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch13009: hvcs_pi_buf_alloc.patch
+
+#rhbz 751165
+Patch13010: ip6_tunnel-copy-parms.name-after-register_netdevice.patch
 
 Patch20000: utrace.patch
 
@@ -778,6 +792,7 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 #rhbz #735946
 Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 
 #rhbz 748691
 Patch21030: be2net-non-member-vlan-pkts-not-received-in-promisco.patch
@@ -1261,6 +1276,7 @@ cd linux-%{kversion}.%{_target_cpu}
 ApplyPatch %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
 ApplyPatch %{stable_patch_01}
 %endif
 
@@ -1429,6 +1445,7 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
+ApplyPatch quite-apm.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
@@ -1438,6 +1455,7 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 # Platform fixes not sent for -stable
 ApplyPatch samsung-laptop-brightness-fixes-3.2.patch
+ApplyPatch asus-laptop-3.2-backport.patch
 
 # Patches headed upstream
 ApplyPatch rcutree-avoid-false-quiescent-states.patch
@@ -1451,6 +1469,7 @@ ApplyPatch epoll-limit-paths.patch
 ApplyPatch rcu-avoid-just-onlined-cpu-resched.patch
 ApplyPatch block-stray-block-put-after-teardown.patch
 ApplyPatch usb-add-quirk-for-logitech-webcams.patch
+ApplyPatch HID-wacom-Set-input-bits-before-registration.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1460,6 +1479,9 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch hvcs_pi_buf_alloc.patch
 
+#rhbz 751165
+ApplyPatch ip6_tunnel-copy-parms.name-after-register_netdevice.patch
+
 ApplyPatch media-dib0700-correct-error-message.patch
 
 # utrace.
@@ -1468,6 +1490,7 @@ ApplyPatch utrace.patch
 #rhbz #735946
 ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
+ApplyPatch mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 
 #rhbz 748691
 ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
@@ -1544,6 +1567,13 @@ find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
 find . -name .gitignore -exec rm -f {} \; >/dev/null
 
 cd ..
+
+%if %{with_backports}
+
+# Extract the compat-wireless bits
+%setup -q -n kernel-%{kversion}%{?dist} -T -D -a 1
+
+%endif
 
 ###
 ### build
@@ -1667,6 +1697,9 @@ BuildKernel() {
     # dirs for additional modules per module-init-tools, kbuild/modules.txt
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/extra
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/updates
+%if %{with_backports}
+    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/backports
+%endif
     # first copy everything
     cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp Module.symvers $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -1737,7 +1770,7 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt2x00(pci|usb)_probe'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe'
     collect_modules_list block \
     			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
     collect_modules_list drm \
@@ -1772,6 +1805,23 @@ BuildKernel() {
 
     # prune junk from kernel-devel
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -exec rm -f {} \;
+
+%if %{with_backports}
+
+    cd ../compat-wireless-%{cwversion}/
+    make clean
+
+    make KLIB_BUILD=../linux-%{kversion}.%{_target_cpu} \
+	KMODPATH_ARG="INSTALL_MOD_PATH=$RPM_BUILD_ROOT" \
+	KMODDIR="backports" install-modules
+
+    # mark modules executable so that strip-to-file can strip them
+    find $RPM_BUILD_ROOT/lib/modules/$KernelVer/backports -name "*.ko" \
+	-type f | xargs --no-run-if-empty chmod u+x
+
+    cd -
+
+%endif
 }
 
 ###
@@ -2149,6 +2199,9 @@ fi
 /lib/modules/%{KVERREL}%{?2:.%{2}}/source\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/extra\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/updates\
+%if %{with_backports}\
+/lib/modules/%{KVERREL}%{?2:.%{2}}/backports\
+%endif\
 %ifarch %{vdso_arches}\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
 /etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:.%{2}}.conf\
@@ -2191,6 +2244,24 @@ fi
 # and build.
 
 %changelog
+* Sat Nov 19 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.2-0.rc1.1
+- Linux 3.1.2-rc1
+
+* Wed Nov 16 2011 John W. Linville <linville@redhat.com>
+- Add compat-wireless as an option for kernel build
+
+* Tue Nov 15 2011 Dave Jones <davej@redhat.com>
+- mm: Do not stall in synchronous compaction for THP allocations
+
+* Tue Nov 15 2011 Dave Jones <davej@redhat.com>
+- Backport asus-laptop changes from 3.2 (rhbz 754214)
+
+* Mon Nov 14 2011 Josh Boyer <jwboyer@redhat.com>
+- Patch from Joshua Roys to add rtl8192* to modules.networking (rhbz 753645)
+- Add patch for wacom tablets for Bastien Nocera (upstream 3797ef6b6)
+- Add patch to fix ip6_tunnel naming (rhbz 751165)
+- Quite warning in apm_cpu_idle (rhbz 753776)
+
 * Mon Nov 14 2011 Josh Boyer <jwboyer@redhat.com> 3.1.1-2
 - CVE-2011-4131: nfs4_getfacl decoding kernel oops (rhbz 753236)
 - CVE-2011-4132: jbd/jbd2: invalid value of first log block leads to oops (rhbz 753346)
