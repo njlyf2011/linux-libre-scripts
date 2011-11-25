@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # reset this by hand to 1 (or to 0 and then use rpmdev-bumpspec).
 # scripts/rebase.sh should be made to do that for you, actually.
 #
-%global baserelease 105
+%global baserelease 106
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -945,6 +945,9 @@ Patch21060: crypto-ghash-Avoid-null-pointer-dereference-if-no-ke.patch
 #rhbz 755590
 Patch21061: ipv6-udp-fix-the-wrong-headroom-check.patch
 
+#rhbz 756168
+Patch21062: KEYS-Fix-a-NULL-pointer-deref-in-the-user-defined-ke.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1790,6 +1793,9 @@ ApplyPatch crypto-ghash-Avoid-null-pointer-dereference-if-no-ke.patch
 #rhbz 755590
 ApplyPatch ipv6-udp-fix-the-wrong-headroom-check.patch
 
+#rhbz 756168
+ApplyPatch KEYS-Fix-a-NULL-pointer-deref-in-the-user-defined-ke.patch
+
 # END OF PATCH APPLICATIONS
 
 # Linux-libre-specific, added by Koko's request for BLAG.
@@ -2379,6 +2385,9 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 22 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-106
+- CVE-2011-4110 keys: NULL pointer deref in the user-defined key type
+
 * Mon Nov 21 2011 Josh Boyer <jwboyer@redhat.com> 2.6.35.14-105
 - CVE-2011-4326: wrong headroom check in udp6_ufo_fragment() (rhbz 755590)
 
