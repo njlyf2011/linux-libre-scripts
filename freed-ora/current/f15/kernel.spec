@@ -67,7 +67,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 2
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev .%{stable_update}
@@ -1935,6 +1935,12 @@ fi
 # and build.
 
 %changelog
+* Thu Nov 24 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.2-libre as patch-libre-3.1.2.
+
+* Tue Nov 22 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.41.2-1
+- Linux 3.1.2 (Fedora 2.6.41.2)
+
 * Sat Nov 19 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.41.2-0.rc1.1
 - Linux 3.1.2-rc1 (Fedora 2.6.41.2-rc1)
 
