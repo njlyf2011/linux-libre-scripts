@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -769,7 +769,6 @@ Patch12021: udlfb-bind-framebuffer-to-interface.patch
 
 Patch12025: rcu-avoid-just-onlined-cpu-resched.patch
 Patch12026: block-stray-block-put-after-teardown.patch
-Patch12027: usb-add-quirk-for-logitech-webcams.patch
 Patch12030: epoll-limit-paths.patch
 Patch12031: HID-wacom-Set-input-bits-before-registration.patch
 
@@ -779,9 +778,6 @@ Patch13002: revert-efi-rtclock.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch13009: hvcs_pi_buf_alloc.patch
-
-#rhbz 751165
-Patch13010: ip6_tunnel-copy-parms.name-after-register_netdevice.patch
 
 Patch20000: utrace.patch
 
@@ -1079,7 +1075,7 @@ exit 1
 %endif
 %endif
 
-%if !%{baserelease}
+%if "%{baserelease}" == "0"
 echo "baserelease must be greater than zero"
 exit 1
 %endif
@@ -1468,7 +1464,6 @@ ApplyPatch udlfb-bind-framebuffer-to-interface.patch
 ApplyPatch epoll-limit-paths.patch
 ApplyPatch rcu-avoid-just-onlined-cpu-resched.patch
 ApplyPatch block-stray-block-put-after-teardown.patch
-ApplyPatch usb-add-quirk-for-logitech-webcams.patch
 ApplyPatch HID-wacom-Set-input-bits-before-registration.patch
 
 # rhbz#605888
@@ -1478,9 +1473,6 @@ ApplyPatch revert-efi-rtclock.patch
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch hvcs_pi_buf_alloc.patch
-
-#rhbz 751165
-ApplyPatch ip6_tunnel-copy-parms.name-after-register_netdevice.patch
 
 ApplyPatch media-dib0700-correct-error-message.patch
 
@@ -2244,7 +2236,22 @@ fi
 # and build.
 
 %changelog
-* Thu Nov 24 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Nov 28 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.3-libre as patch-libre-3.1.3.
+
+* Mon Nov 28 2011 Ben Skeggs <bskeggs@redhat.com> 3.1.3-2
+- nouveau: fix two instances of an oops in ttm clear() (rhbz#751753)
+
+* Sun Nov 26 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.3-1
+- Linux 3.1.3
+
+* Wed Nov 23 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.3-0.rc1.1
+- Linux 3.1.3-rc1
+- Comment out merged patches:
+  usb-add-quirk-for-logitech-webcams.patch
+  ip6_tunnel-copy-parms.name-after-register_netdevice.patch
+
+* Tue Nov 22 2011 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Nov 24
 - Use patch-3.1-libre-3.1.2-libre as patch-libre-3.1.2.
 
 * Tue Nov 22 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.2-1
