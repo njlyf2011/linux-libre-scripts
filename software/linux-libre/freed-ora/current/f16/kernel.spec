@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -812,6 +812,10 @@ Patch21080: sysfs-msi-irq-per-device.patch
 Patch21090: brcm80211.patch
 Patch21091: bcma-brcmsmac-compat.patch
 
+# rhbz 754907
+Patch21100: cciss-fix-irqf-shared.patch
+Patch21101: hpsa-add-irqf-shared.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1504,6 +1508,10 @@ ApplyPatch sysfs-msi-irq-per-device.patch
 ApplyPatch brcm80211.patch
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
+
+# rhbz 754907
+ApplyPatch cciss-fix-irqf-shared.patch
+ApplyPatch hpsa-add-irqf-shared.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2236,13 +2244,22 @@ fi
 # and build.
 
 %changelog
+* Tue Nov 29 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.4-libre as patch-libre-3.1.4.
+
+* Mon Nov 28 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.4-1
+- Linux 3.1.4
+
+* Mon Nov 28 2011 Chuck Ebbert <cebbert@redhat.com>
+- Fix IRQ error preventing load of cciss module (rhbz#754907)
+
 * Mon Nov 28 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.3-libre as patch-libre-3.1.3.
 
 * Mon Nov 28 2011 Ben Skeggs <bskeggs@redhat.com> 3.1.3-2
 - nouveau: fix two instances of an oops in ttm clear() (rhbz#751753)
 
-* Sun Nov 26 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.3-1
+* Sun Nov 27 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.3-1
 - Linux 3.1.3
 
 * Wed Nov 23 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.3-0.rc1.1
