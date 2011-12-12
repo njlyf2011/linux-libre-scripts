@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -82,7 +82,7 @@ Summary: The Linux kernel
 # Do we have a -stable update to apply?
 %define stable_update 5
 # Is it a -stable RC?
-%define stable_rc 1
+%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -99,9 +99,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 10
+%define rcrev 0
 # The git snapshot level
-%define gitrev 1
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -823,6 +823,9 @@ Patch21220: mac80211_offchannel_rework_revert.patch
 
 Patch21225: pci-Rework-ASPM-disable-code.patch
 
+#rhbz #757839
+Patch21230: net-sky2-88e8059-fix-link-speed.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1527,6 +1530,9 @@ ApplyPatch hpsa-add-irqf-shared.patch
 ApplyPatch mac80211_offchannel_rework_revert.patch
 
 ApplyPatch pci-Rework-ASPM-disable-code.patch
+
+#rhbz #757839
+ApplyPatch net-sky2-88e8059-fix-link-speed.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2259,10 +2265,22 @@ fi
 # and build.
 
 %changelog
+* Sun Dec 11 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.5-libre as patch-libre-3.1.5.
+
+* Fri Dec 09 2011 Josh Boyer <jwboyer@redhat.com> 3.1.5-1
+- Linux 3.1.5
+
+* Thu Dec 08 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.5-0.rc2.1
+- Linux 3.1.5-rc2
+- Drop obsolete changelog, set rcrev and gitrev to 0 so they're
+  less distracting.
+- Fix wrong link speed on some sky2 network adapters (rhbz #757839)
+
 * Thu Dec 08 2011 Ben Skeggs <bskeggs@redhat.com> 3.1.5-0.rc1.2
 - nouveau: fix accel on GF108 and enable on GF108/GF110
 
-* Wed Dec 07 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.5-0.rc1.1
+* Wed Dec 07 2011 Chuck Ebbert <cebbert@redhat.com>
 - Linux 3.1.5-rc1
 - Comment out merged patches:
   xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
