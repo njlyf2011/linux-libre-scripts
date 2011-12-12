@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -626,8 +626,6 @@ Patch1500: fix_xen_guest_on_old_EC2.patch
 Patch1810: drm-nouveau-updates.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
-# make sure the lvds comes back on lid open
-Patch1825: drm-intel-make-lvds-work.patch
 # hush the i915 fbc noise
 Patch1826: drm-i915-fbc-stfu.patch
 # rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
@@ -712,6 +710,17 @@ Patch21091: bcma-brcmsmac-compat.patch
 # rhbz 754907
 Patch21100: cciss-fix-irqf-shared.patch
 Patch21101: hpsa-add-irqf-shared.patch
+
+#rhbz 755154
+Patch21200: rtlwifi-fix-lps_lock-deadlock.patch
+
+#rhbz 731365
+Patch21220: mac80211_offchannel_rework_revert.patch
+
+Patch21225: pci-Rework-ASPM-disable-code.patch
+
+#rhbz #757839
+Patch21230: net-sky2-88e8059-fix-link-speed.patch
 
 %endif
 
@@ -1162,7 +1171,7 @@ ApplyPatch linux-2.6-i386-nx-emulation.patch
 ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # xfs
-ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
+#ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 # btrfs
 
@@ -1246,7 +1255,6 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
-ApplyPatch drm-intel-make-lvds-work.patch
 ApplyPatch drm-i915-fbc-stfu.patch
 ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
 
@@ -1319,6 +1327,17 @@ ApplyPatch bcma-brcmsmac-compat.patch
 # rhbz 754907
 ApplyPatch cciss-fix-irqf-shared.patch
 ApplyPatch hpsa-add-irqf-shared.patch
+
+#rhbz 755154
+#ApplyPatch rtlwifi-fix-lps_lock-deadlock.patch
+
+#rhbz 731365
+ApplyPatch mac80211_offchannel_rework_revert.patch
+
+ApplyPatch pci-Rework-ASPM-disable-code.patch
+
+#rhbz #757839
+ApplyPatch net-sky2-88e8059-fix-link-speed.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1937,11 +1956,53 @@ fi
 # and build.
 
 %changelog
+* Sun Dec 11 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.5-libre as patch-libre-3.1.5.
+
+* Fri Dec 09 2011 Josh Boyer <jwboyer@redhat.com> 2.6.41.5-1
+- Linux 3.1.5 (Fedora 2.6.41.5)
+
+* Thu Dec 08 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.41.5-0.rc2.1
+- Linux 3.1.5-rc2 (Fedora 2.6.41.5-rc2)
+- Fix wrong link speed on some sky2 network adapters (rhbz #757839)
+
+* Wed Dec 07 2011 Chuck Ebbert <cebbert@redhat.com>
+- Linux 3.1.5-rc1 (Fedora 2.6.41.5-rc1)
+- Comment out merged patches:
+  xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
+  rtlwifi-fix-lps_lock-deadlock.patch
+
+* Tue Dec 06 2011 Chuck Ebbert <cebbert@redhat.com>
+- Disable uas until someone can fix it (rhbz #717633)
+
+* Tue Dec 06 2011 Josh Boyer <jwboyer@redhat.com>
+- Add reworked pci ASPM patch from Matthew Garrett
+
+* Mon Dec 05 2011 Josh Boyer <jwboyer@redhat.com>
+- Only print the apm_cpu_idle message once (rhbz #760341)
+
+* Mon Dec 05 2011 Dave Jones <davej@redhat.com>
+- Switch from -Os to -O2
+
+* Thu Dec 01 2011 Josh Boyer <jwboyer@redhat.com>
+- Apply patch to revert mac80211 scan optimizations (rhbz #731365)
+- Disable the existing brcm80211 staging drivers (rhbz #759109)
+
+* Wed Nov 30 2011 Josh Boyer <jwboyer@redhat.com>
+- Include commit 3940d6185 from JJ Ding in elantech.patch
+
+* Tue Nov 29 2011 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix deadlock in rtlwifi (rhbz #755154)
+- Drop drm-intel-make-lvds-work.patch (rhbz #731296)
+
 * Tue Nov 29 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.4-libre as patch-libre-3.1.4.
 
 * Mon Nov 28 2011 Chuck Ebbert <cebbert@redhat.com> 2.6.41.4-1
 - Linux 3.1.4 (Fedora 2.6.41.4)
+
+* Mon Nov 28 2011 Chuck Ebbert <cebbert@redhat.com> 3.1.4-1
+- Linux 3.1.4
 
 * Mon Nov 28 2011 Chuck Ebbert <cebbert@redhat.com>
 - Fix IRQ error preventing load of cciss module (rhbz#754907)
