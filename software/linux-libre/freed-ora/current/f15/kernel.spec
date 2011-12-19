@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 1
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -114,6 +114,12 @@ Summary: The Linux kernel
 %define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
 # kernel-tegra (only valid for arm)
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
+# kernel-kirkwood (only valid for arm)
+%define with_kirkwood       %{?_without_kirkwood:       0} %{?!_without_kirkwood:       1}
+# kernel-imx (only valid for arm)
+%define with_imx       %{?_without_imx:       0} %{?!_without_imx:       1}
+# kernel-highbank (only valid for arm)
+%define with_highbank       %{?_without_highbank:       0} %{?!_without_highbank:       1}
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
@@ -204,10 +210,17 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel-tegra and omap is only built on armv7 hard and softfp
+# kernel-tegra, omap, imx and highbank are only built on armv7 hard and softfp
 %ifnarch armv7hl armv7l
 %define with_tegra 0
 %define with_omap 0
+%define with_imx 0
+%define with_highbank 0
+%endif
+
+# kernel-kirkwood is only built for armv5
+%ifnarch armv5tel
+%define with_kirkwood 0
 %endif
 
 # if requested, only build base kernel
@@ -541,6 +554,9 @@ Source90: config-sparc64-generic
 Source100: config-arm-generic
 Source110: config-arm-omap-generic
 Source111: config-arm-tegra
+Source112: config-arm-kirkwood
+Source113: config-arm-imx
+Source114: config-arm-highbank
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -692,9 +708,6 @@ Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 Patch21030: be2net-non-member-vlan-pkts-not-received-in-promisco.patch
 Patch21031: benet-remove-bogus-unlikely-on-vlan-check.patch
 
-#rhbz 749166
-Patch21050: xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
-
 Patch21070: oom-fix-integer-overflow-of-points.patch
 
 #rhbz 728607
@@ -711,9 +724,6 @@ Patch21091: bcma-brcmsmac-compat.patch
 Patch21100: cciss-fix-irqf-shared.patch
 Patch21101: hpsa-add-irqf-shared.patch
 
-#rhbz 755154
-Patch21200: rtlwifi-fix-lps_lock-deadlock.patch
-
 #rhbz 731365
 Patch21220: mac80211_offchannel_rework_revert.patch
 
@@ -721,6 +731,15 @@ Patch21225: pci-Rework-ASPM-disable-code.patch
 
 #rhbz #757839
 Patch21230: net-sky2-88e8059-fix-link-speed.patch
+
+#rhbz 717735
+Patch21045: nfs-client-freezer.patch
+
+#rhbz 590880
+Patch21046: alps.patch
+
+#rhbz 767173
+Patch21047: iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
 
 %endif
 
@@ -932,6 +951,23 @@ on kernel bugs, as some of these options impact performance noticably.
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
+%define variant_summary The Linux kernel compiled for marvell kirkwood boards
+%kernel_variant_package kirkwood
+%description kirkwood
+This package includes a version of the Linux kernel with support for
+marvell kirkwood based systems, i.e., guruplug, sheevaplug
+
+%define variant_summary The Linux kernel compiled for freescale boards
+%kernel_variant_package imx
+%description imx
+This package includes a version of the Linux kernel with support for
+freescale based systems, i.e., efika smartbook.
+
+%define variant_summary The Linux kernel compiled for Calxeda boards
+%kernel_variant_package highbank
+%description highbank
+This package includes a version of the Linux kernel with support for
+Calxeda based systems, i.e., HP arm servers.
 
 %define variant_summary The Linux kernel compiled for TI-OMAP boards
 %kernel_variant_package omap
@@ -1171,7 +1207,6 @@ ApplyPatch linux-2.6-i386-nx-emulation.patch
 ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # xfs
-#ApplyPatch xfs-Fix-possible-memory-corruption-in-xfs_readlink.patch
 
 # btrfs
 
@@ -1328,9 +1363,6 @@ ApplyPatch bcma-brcmsmac-compat.patch
 ApplyPatch cciss-fix-irqf-shared.patch
 ApplyPatch hpsa-add-irqf-shared.patch
 
-#rhbz 755154
-#ApplyPatch rtlwifi-fix-lps_lock-deadlock.patch
-
 #rhbz 731365
 ApplyPatch mac80211_offchannel_rework_revert.patch
 
@@ -1338,6 +1370,15 @@ ApplyPatch pci-Rework-ASPM-disable-code.patch
 
 #rhbz #757839
 ApplyPatch net-sky2-88e8059-fix-link-speed.patch
+
+#rhbz 717735
+ApplyPatch nfs-client-freezer.patch
+
+#rhbz 590880
+ApplyPatch alps.patch
+
+#rhbz 767173
+ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1530,6 +1571,12 @@ BuildKernel() {
     if [ -d arch/%{asmarch}/include ]; then
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
+    # include the machine specific headers for ARM variants, if available.
+%ifarch %{arm}
+    if [ -d arch/%{asmarch}/mach-${Flavour}/include ]; then
+      cp -a --parents arch/%{asmarch}/mach-${Flavour}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
+%endif
     cp -a include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
 
     # Make sure the Makefile and version.h have a matching timestamp so that
@@ -1631,6 +1678,18 @@ BuildKernel %make_target %kernel_image PAEdebug
 
 %if %{with_pae}
 BuildKernel %make_target %kernel_image PAE
+%endif
+
+%if %{with_kirkwood}
+BuildKernel %make_target %kernel_image kirkwood
+%endif
+
+%if %{with_imx}
+BuildKernel %make_target %kernel_image imx
+%endif
+
+%if %{with_highbank}
+BuildKernel %make_target %kernel_image highbank
 %endif
 
 %if %{with_omap}
@@ -1833,6 +1892,15 @@ fi}\
 %kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
 %kernel_variant_preun PAEdebug
 
+%kernel_variant_preun kirkwood
+%kernel_variant_post -v kirkwood
+
+%kernel_variant_preun imx
+%kernel_variant_post -v imx
+
+%kernel_variant_preun highbank
+%kernel_variant_post -v highbank
+
 %kernel_variant_preun omap
 %kernel_variant_post -v omap
 
@@ -1949,6 +2017,9 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
+%kernel_variant_files %{with_kirkwood} kirkwood
+%kernel_variant_files %{with_imx} imx
+%kernel_variant_files %{with_highbank} highbank
 %kernel_variant_files %{with_omap} omap
 %kernel_variant_files %{with_tegra} tegra
 
@@ -1956,6 +2027,14 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 15 2011 Josh Boyer <jwboyer@redhat.com> - 2.6.41.5-4
+- Add patch to fix Intel wifi regression in 3.1.5 (rhbz 767173)
+- Add patch from Jeff Layton to fix suspend with NFS (rhbz #717735)
+- Backport ALPS touchpad patches from input/next branch (rhbz #590880)
+
+* Thu Dec 15 2011 Dave Jones <davej@redhat.com> - 2.6.41.5-3
+- Disable Intel IOMMU by default.
+
 * Sun Dec 11 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.5-libre as patch-libre-3.1.5.
 
