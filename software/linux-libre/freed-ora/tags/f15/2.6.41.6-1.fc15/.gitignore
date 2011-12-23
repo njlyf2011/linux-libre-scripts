@@ -1,0 +1,6 @@
+.svn
+clog
+*.bz2
+*.rpm
+*.orig
+kernel-[23].*/
