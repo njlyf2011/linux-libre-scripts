@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 34f5c21..9843b62 100644
+index 1c640ea..15d2b9b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -180,7 +180,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
@@ -1972,7 +1972,7 @@ index 730f9f2..ecbd37f 100644
 +EXTRA_CFLAGS += -Werror
 diff --git a/arch/mips/alchemy/devboards/bcsr.c b/arch/mips/alchemy/devboards/bcsr.c
 new file mode 100644
-index 0000000..3bc4fd2
+index 0000000..3bc4fd215
 --- /dev/null
 +++ b/arch/mips/alchemy/devboards/bcsr.c
 @@ -0,0 +1,148 @@
@@ -4679,7 +4679,7 @@ index 456fa14..15125c2 100644
 +}
 diff --git a/arch/mips/alchemy/xxs1500/irqmap.c b/arch/mips/alchemy/xxs1500/irqmap.c
 deleted file mode 100644
-index 0f0f301..0000000
+index 0f0f3012..0000000
 --- a/arch/mips/alchemy/xxs1500/irqmap.c
 +++ /dev/null
 @@ -1,52 +0,0 @@
@@ -23689,7 +23689,7 @@ index 162b299..f25df73 100644
  		*(.fixup)
  		*(.gnu.warning)
 diff --git a/arch/mips/lasat/prom.c b/arch/mips/lasat/prom.c
-index 6acc6cb..20fde19 100644
+index 6acc6cb8..20fde19 100644
 --- a/arch/mips/lasat/prom.c
 +++ b/arch/mips/lasat/prom.c
 @@ -100,8 +100,8 @@ void __init prom_init(void)
@@ -24051,7 +24051,7 @@ index 75f1b24..62fb52e 100644
  }
 diff --git a/arch/mips/loongson/common/cs5536/Makefile b/arch/mips/loongson/common/cs5536/Makefile
 new file mode 100644
-index 0000000..510d4cd
+index 0000000..510d4cdc
 --- /dev/null
 +++ b/arch/mips/loongson/common/cs5536/Makefile
 @@ -0,0 +1,13 @@
@@ -36001,7 +36001,7 @@ index 0000000..726bc2e
 +EXPORT_SYMBOL(asic_pcie_map_irq);
 diff --git a/arch/mips/powertv/pci/powertv-pci.h b/arch/mips/powertv/pci/powertv-pci.h
 new file mode 100644
-index 0000000..1b5886b
+index 0000000..1b5886bb
 --- /dev/null
 +++ b/arch/mips/powertv/pci/powertv-pci.h
 @@ -0,0 +1,31 @@
@@ -36598,7 +36598,7 @@ index de6a0cc..911d399 100644
  	save_and_clear_buserr();
  	print_buserr();
 diff --git a/arch/mips/sgi-ip22/ip22-int.c b/arch/mips/sgi-ip22/ip22-int.c
-index 0ecd5fe..383f11d 100644
+index 0ecd5fe9..383f11d 100644
 --- a/arch/mips/sgi-ip22/ip22-int.c
 +++ b/arch/mips/sgi-ip22/ip22-int.c
 @@ -13,6 +13,7 @@
@@ -36675,7 +36675,7 @@ index eb5396c..6343011 100644
  	prom_meminit();
  
 diff --git a/arch/mips/sibyte/swarm/setup.c b/arch/mips/sibyte/swarm/setup.c
-index 5277aac..c308989 100644
+index 5277aac9..c308989 100644
 --- a/arch/mips/sibyte/swarm/setup.c
 +++ b/arch/mips/sibyte/swarm/setup.c
 @@ -145,15 +145,14 @@ void __init plat_mem_setup(void)
@@ -37129,7 +37129,7 @@ index b2f71f7..357b569 100644
  	tristate "Xilinx LL TEMAC (LocalLink Tri-mode Ethernet MAC) driver"
  	select PHYLIB
 diff --git a/drivers/net/Makefile b/drivers/net/Makefile
-index 246323d..657ccc3 100644
+index 6a793ae..1e17225 100644
 --- a/drivers/net/Makefile
 +++ b/drivers/net/Makefile
 @@ -150,6 +150,8 @@ obj-$(CONFIG_XILINX_EMACLITE) += xilinx_emaclite.o
@@ -39233,7 +39233,7 @@ index 0000000..61a4461
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/net/titan_ge.c b/drivers/net/titan_ge.c
 new file mode 100644
-index 0000000..dc137bf
+index 0000000..dc137bf8
 --- /dev/null
 +++ b/drivers/net/titan_ge.c
 @@ -0,0 +1,2069 @@
@@ -76331,7 +76331,7 @@ index 2ac43f0..2f96d23 100644
  		goto cleanup1;
  	}
 diff --git a/drivers/serial/8250.c b/drivers/serial/8250.c
-index 6a451e8..ddd955a 100644
+index 6a451e8a..ddd955a 100644
 --- a/drivers/serial/8250.c
 +++ b/drivers/serial/8250.c
 @@ -1218,12 +1218,6 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
@@ -76391,7 +76391,7 @@ index 76cbc1a..c343f00 100644
  		dev_err(hw->dev, "tx dma put source error\n");
  
 diff --git a/drivers/staging/Kconfig b/drivers/staging/Kconfig
-index b926b00..82084f2 100644
+index b926b00..82084f2b 100644
 --- a/drivers/staging/Kconfig
 +++ b/drivers/staging/Kconfig
 @@ -123,5 +123,7 @@ source "drivers/staging/sep/Kconfig"
@@ -79026,10 +79026,10 @@ index 0000000..7f2c341
 +
 +#define numVGAModes		(sizeof(VGAMode) / sizeof(struct ModeInit))
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index 24eb747..ddbc272 100644
+index 48418f2..e5c3804 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
-@@ -832,9 +832,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+@@ -839,9 +839,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
  	}
  
  	if (ints & OHCI_INTR_WDH) {
@@ -79147,7 +79147,7 @@ index 0000000..9872297
 +	void(*error)(char *x));
 +#endif
 diff --git a/init/Kconfig b/init/Kconfig
-index 0d6388a..190b09d 100644
+index d72691b..9c34a4c 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
 @@ -115,10 +115,13 @@ config HAVE_KERNEL_BZIP2
@@ -79452,7 +79452,7 @@ index a001f7c..f5c3704 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/Makefile.build b/scripts/Makefile.build
-index 341b589..0b94d2f 100644
+index 341b589..0b94d2fa 100644
 --- a/scripts/Makefile.build
 +++ b/scripts/Makefile.build
 @@ -207,6 +207,7 @@ endif
