@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 4
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -698,6 +698,7 @@ Patch20000: utrace.patch
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+Patch21002: arm-tegra-usb-no-reset.patch
 
 #rhbz #735946
 Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
@@ -707,6 +708,8 @@ Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 #rhbz 748691
 Patch21030: be2net-non-member-vlan-pkts-not-received-in-promisco.patch
 Patch21031: benet-remove-bogus-unlikely-on-vlan-check.patch
+
+Patch21040: x86-code-dump-fix-truncation.patch
 
 Patch21070: oom-fix-integer-overflow-of-points.patch
 
@@ -740,6 +743,11 @@ Patch21046: alps.patch
 
 #rhbz 767173
 Patch21047: iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
+
+#rhbz 741117
+Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
+
+Patch22000: route-cache-garbage-collector.patch
 
 %endif
 
@@ -1190,6 +1198,7 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 #
 ApplyPatch arm-omap-dt-compat.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
+ApplyPatch arm-tegra-usb-no-reset.patch
 
 ApplyPatch taint-vbox.patch
 #
@@ -1345,6 +1354,9 @@ ApplyPatch mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
 ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
 
+#rhbz 736815
+ApplyPatch x86-code-dump-fix-truncation.patch
+
 #rhbz 750402
 ApplyPatch oom-fix-integer-overflow-of-points.patch
 
@@ -1379,6 +1391,11 @@ ApplyPatch alps.patch
 
 #rhbz 767173
 ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
+
+#rhbz 741117
+ApplyPatch b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
+
+ApplyPatch route-cache-garbage-collector.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2027,6 +2044,27 @@ fi
 # and build.
 
 %changelog
+* Wed Dec 21 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.6-libre as patch-libre-3.1.6.
+
+* Wed Dec 21 2011 Dave Jones <davej@redhat.com> 2.6.41.6-1
+- Linux 3.1.6 (Fedora 2.6.31.6)
+
+* Wed Dec 21 2011 Dave Jones <davej@redhat.com> 2.6.41.5-5
+- Reinstate the route cache garbage collector.
+
+* Tue Dec 20 2011 Josh Boyer <jwboyer@redhat.com>
+- Fix config options in arm configs after latest commits
+- Backport upstream fix for b44_poll oops (rhbz #741117)
+
+* Mon Dec 19 2011 Dave Jones <davej@redhat.com>
+- x86, dumpstack: Fix code bytes breakage due to missing KERN_CONT
+
+* Thu Dec 15 2011 Dennis Gilmore <dennis@ausil.us>
+- build imx highbank and kirkwood kernel variants on arm
+- add patch for tegra usb storage resets
+- omap config cleanups from dmarlin
+
 * Thu Dec 15 2011 Josh Boyer <jwboyer@redhat.com> - 2.6.41.5-4
 - Add patch to fix Intel wifi regression in 3.1.5 (rhbz 767173)
 - Add patch from Jeff Layton to fix suspend with NFS (rhbz #717735)
