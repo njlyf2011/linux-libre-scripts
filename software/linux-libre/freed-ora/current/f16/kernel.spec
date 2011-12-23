@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 8
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -213,8 +213,18 @@ Summary: The Linux kernel
 %define kversion 3.%{base_sublevel}
 
 # The compat-wireless version
-# (If this is less than kversion, make sure with_backports is turned-off.)
-%define cwversion 3.2-rc1-1
+%define cwversion 3.2-rc6-3
+
+#######################################################################
+# If cwversion is less than kversion, make sure with_backports is
+# turned-off.
+#
+# For rawhide, disable with_backports immediately after a rebase...
+#
+# (Uncomment the '#' and both spaces below to disable with_backports.)
+#
+# % define with_backports 0
+#######################################################################
 
 %define make_target bzImage
 
@@ -376,6 +386,7 @@ Summary: The Linux kernel
 %define make_target image
 %define kernel_image arch/s390/boot/image
 %define with_tools 0
+%define with_backports 0
 %endif
 
 %ifarch sparc64
@@ -500,7 +511,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools >= 3.16-2, initscripts >= 8.11.1-1, grubby >= 8.3-1
+%define kernel_prereq  fileutils, module-init-tools >= 3.16-5, initscripts >= 8.11.1-1, grubby >= 8.3-1
 %define initrd_prereq  dracut >= 001-7
 
 #
@@ -619,6 +630,8 @@ Source100: config-arm-generic
 Source110: config-arm-omap-generic
 Source111: config-arm-tegra
 
+Source200: config-backports
+
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
 Source1000: config-local
@@ -720,7 +733,7 @@ Patch901: asus-laptop-3.2-backport.patch
 Patch1500: fix_xen_guest_on_old_EC2.patch
 
 # DRM
-Patch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
+#atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 
 # nouveau + drm fixes
 Patch1810: drm-nouveau-updates.patch
@@ -831,6 +844,19 @@ Patch21046: alps.patch
 
 #rhbz 767173
 Patch21047: iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
+
+#rhbz 741117
+Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
+
+#rhbz 746097
+Patch21049: tpm_tis-delay-after-aborting-cmd.patch
+
+# compat-wireless patches
+Patch50000: compat-wireless-config-fixups.patch
+Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
+Patch50100: iwlwifi-tx_sync-only-on-PAN-context.patch
+
+Patch22000: route-cache-garbage-collector.patch
 
 %endif
 
@@ -1307,6 +1333,16 @@ cp %{SOURCE15} .
 # Dynamically generate kernel .config files from config-* files
 make -f %{SOURCE20} VERSION=%{version} configs
 
+%if %{with_backports}
+# Turn-off bits provided by compat-wireless
+for i in %{all_arch_configs}
+do
+  mv $i $i.tmp
+  ./merge.pl %{SOURCE200} $i.tmp > $i
+  rm $i.tmp
+done
+%endif
+
 %if %{?all_arch_configs:1}%{!?all_arch_configs:0}
 #if a rhel kernel, apply the rhel config options
 %if 0%{?rhel}
@@ -1444,7 +1480,7 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # DRM core
-ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
+#ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 
 # Nouveau DRM
 ApplyOptionalPatch drm-nouveau-updates.patch
@@ -1523,10 +1559,12 @@ ApplyPatch ideapad-Check-if-acpi-already-handle-backlight.patch
 #rhbz 752176
 ApplyPatch sysfs-msi-irq-per-device.patch
 
+%if !%{with_backports}
 #backport brcm80211 from 3.2-rc1
 ApplyPatch brcm80211.patch
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
+%endif
 
 # rhbz 754907
 ApplyPatch cciss-fix-irqf-shared.patch
@@ -1548,6 +1586,14 @@ ApplyPatch alps.patch
 
 #rhbz 767173
 ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
+
+#rhbz 741117
+ApplyPatch b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
+
+#rhbz 746097
+ApplyPatch tpm_tis-delay-after-aborting-cmd.patch
+
+ApplyPatch route-cache-garbage-collector.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1606,8 +1652,25 @@ cd ..
 
 %if %{with_backports}
 
+# Always start fresh
+rm -rf compat-wireless-%{cwversion}
+
 # Extract the compat-wireless bits
 %setup -q -n kernel-%{kversion}%{?dist} -T -D -a 1
+
+cd compat-wireless-%{cwversion}
+
+ApplyPatch compat-wireless-config-fixups.patch
+ApplyPatch compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
+
+# Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
+ApplyPatch bcma-brcmsmac-compat.patch
+
+# Apply some iwlwifi regression fixes not in the 3.2-rc6 wireless snapshot
+ApplyPatch iwlwifi-tx_sync-only-on-PAN-context.patch
+ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
+
+cd ..
 
 %endif
 
@@ -1757,7 +1820,7 @@ BuildKernel() {
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
-%ifarch ppc
+%ifarch ppc ppc64
     cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     if [ -d arch/%{asmarch}/include ]; then
@@ -1845,7 +1908,6 @@ BuildKernel() {
 %if %{with_backports}
 
     cd ../compat-wireless-%{cwversion}/
-    make clean
 
     make KLIB_BUILD=../linux-%{kversion}.%{_target_cpu} \
 	KMODPATH_ARG="INSTALL_MOD_PATH=$RPM_BUILD_ROOT" \
@@ -2280,6 +2342,33 @@ fi
 # and build.
 
 %changelog
+* Wed Dec 21 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.6-libre as patch-libre-3.1.6.
+- Disable backports by default.
+
+* Wed Dec 21 2011 Dave Jones <davej@redhat.com> 3.1.6-1
+- Linux 3.1.6
+
+* Wed Dec 21 2011 John W. Linville <linville@redhat.com> 
+- Apply some iwlwifi regression fixes not in the 3.2-rc6 wireless snapshot
+- Turn-off with_backports for s390x
+
+* Wed Dec 21 2011 Dave Jones <davej@redhat.com> 3.1.5-11
+- Reinstate the route cache garbage collector.
+
+* Wed Dec 21 2011 John W. Linville <linville@redhat.com> 
+- Revise compat-wireless configuration
+- Enable with-backports by default
+- Update compat-wireless snaptshot from verstion 3.2-rc6-3
+
+* Tue Dec 20 2011 Dave Jones <davej@redhat.com> 3.1.5-10
+- Delay after aborting command in tpm_tis (rhbz #746097)
+
+* Tue Dec 20 2011 Josh Boyer <jwboyer@redhat.com>
+- Backport upstream fix for b44_poll oops (rhbz #741117)
+- Include crtsaves.o for ppc64 as well (rhbz #769415)
+- Drop EDID headers patch from 751589 for now (rhbz #769103)
+
 * Mon Dec 19 2011 Kyle McMartin <kyle@redhat.com> - 3.1.5-8
 - Add versioned Obsoletes and Provides for kernel-tools -> perf, hopefully
   this should allow upgrades from kernel-tools to perf+kernel-tools in rawhide
