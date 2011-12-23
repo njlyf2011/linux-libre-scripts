@@ -1,11 +1,11 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2011-12-11 05:21:21.000000000 +0000
-+++ Makefile	2011-12-11 05:21:27.000000000 +0000
+--- Makefile.orig	2011-12-22 06:37:01.000000000 +0000
++++ Makefile	2011-12-22 06:37:06.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 3
  PATCHLEVEL = 0
- SUBLEVEL = 13
+ SUBLEVEL = 14
 -EXTRAVERSION =-libre
 +EXTRAVERSION =-libre-lemote
  NAME = Sneaky Weasel
@@ -14,11 +14,11 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-12-11 05:27:34.000000000 +0000
++++ .config	2011-12-22 06:43:09.000000000 +0000
 @@ -0,0 +1,4596 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux/mips 3.0.13-libre-lemote Kernel Configuration
++# Linux/mips 3.0.14-libre-lemote Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
