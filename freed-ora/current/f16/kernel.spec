@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -142,6 +142,12 @@ Summary: The Linux kernel
 %define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
 # kernel-tegra (only valid for arm)
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
+# kernel-kirkwood (only valid for arm)
+%define with_kirkwood       %{?_without_kirkwood:       0} %{?!_without_kirkwood:       1}
+# kernel-imx (only valid for arm)
+%define with_imx       %{?_without_imx:       0} %{?!_without_imx:       1}
+# kernel-highbank (only valid for arm)
+%define with_highbank       %{?_without_highbank:       0} %{?!_without_highbank:       1}
 
 # Build the kernel-doc package, but don't fail the build if it botches.
 # Here "true" means "continue" and "false" means "fail the build".
@@ -270,10 +276,17 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel-tegra and omap is only built on armv7 hard and softfp
+# kernel-tegra, omap, imx and highbank are only built on armv7 hard and softfp
 %ifnarch armv7hl armv7l
 %define with_tegra 0
 %define with_omap 0
+%define with_imx 0
+%define with_highbank 0
+%endif
+
+# kernel-kirkwood is only built for armv5
+%ifnarch armv5tel
+%define with_kirkwood 0
 %endif
 
 # if requested, only build base kernel
@@ -629,6 +642,9 @@ Source90: config-sparc64-generic
 Source100: config-arm-generic
 Source110: config-arm-omap-generic
 Source111: config-arm-tegra
+Source112: config-arm-kirkwood
+Source113: config-arm-imx
+Source114: config-arm-highbank
 
 Source200: config-backports
 
@@ -833,6 +849,8 @@ Patch21220: mac80211_offchannel_rework_revert.patch
 
 Patch21225: pci-Rework-ASPM-disable-code.patch
 
+Patch21226: pci-crs-blacklist.patch
+
 #rhbz #757839
 Patch21230: net-sky2-88e8059-fix-link-speed.patch
 
@@ -855,6 +873,10 @@ Patch21049: tpm_tis-delay-after-aborting-cmd.patch
 Patch50000: compat-wireless-config-fixups.patch
 Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 Patch50100: iwlwifi-tx_sync-only-on-PAN-context.patch
+Patch50101: ath9k-fix-max-phy-rate-at-rate-control-init.patch
+Patch50102: iwlwifi-do-not-set-the-sequence-control-bit-is-not-n.patch
+Patch50103: iwlwifi-update-SCD-BC-table-for-all-SCD-queues.patch
+Patch50104: mwifiex-avoid-double-list_del-in-command-cancel-path.patch
 
 Patch22000: route-cache-garbage-collector.patch
 
@@ -1091,6 +1113,23 @@ on kernel bugs, as some of these options impact performance noticably.
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
+%define variant_summary The Linux kernel compiled for marvell kirkwood boards
+%kernel_variant_package kirkwood
+%description kirkwood
+This package includes a version of the Linux kernel with support for
+marvell kirkwood based systems, i.e., guruplug, sheevaplug
+
+%define variant_summary The Linux kernel compiled for freescale boards
+%kernel_variant_package imx
+%description imx
+This package includes a version of the Linux kernel with support for
+freescale based systems, i.e., efika smartbook.
+
+%define variant_summary The Linux kernel compiled for Calxeda boards
+%kernel_variant_package highbank
+%description highbank
+This package includes a version of the Linux kernel with support for
+Calxeda based systems, i.e., HP arm servers.
 
 %define variant_summary The Linux kernel compiled for TI-OMAP boards
 %kernel_variant_package omap
@@ -1575,6 +1614,8 @@ ApplyPatch mac80211_offchannel_rework_revert.patch
 
 ApplyPatch pci-Rework-ASPM-disable-code.patch
 
+ApplyPatch pci-crs-blacklist.patch
+
 #rhbz #757839
 ApplyPatch net-sky2-88e8059-fix-link-speed.patch
 
@@ -1667,8 +1708,12 @@ ApplyPatch compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 ApplyPatch bcma-brcmsmac-compat.patch
 
 # Apply some iwlwifi regression fixes not in the 3.2-rc6 wireless snapshot
+ApplyPatch iwlwifi-do-not-set-the-sequence-control-bit-is-not-n.patch
+ApplyPatch ath9k-fix-max-phy-rate-at-rate-control-init.patch
+ApplyPatch mwifiex-avoid-double-list_del-in-command-cancel-path.patch
 ApplyPatch iwlwifi-tx_sync-only-on-PAN-context.patch
 ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
+ApplyPatch iwlwifi-update-SCD-BC-table-for-all-SCD-queues.patch
 
 cd ..
 
@@ -1945,6 +1990,18 @@ BuildKernel %make_target %kernel_image PAEdebug
 BuildKernel %make_target %kernel_image PAE
 %endif
 
+%if %{with_kirkwood}
+BuildKernel %make_target %kernel_image kirkwood
+%endif
+
+%if %{with_imx}
+BuildKernel %make_target %kernel_image imx
+%endif
+
+%if %{with_highbank}
+BuildKernel %make_target %kernel_image highbank
+%endif
+
 %if %{with_omap}
 BuildKernel %make_target %kernel_image omap
 %endif
@@ -2198,6 +2255,15 @@ fi}\
 %kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
 %kernel_variant_preun PAEdebug
 
+%kernel_variant_preun kirkwood
+%kernel_variant_post -v kirkwood
+
+%kernel_variant_preun imx
+%kernel_variant_post -v imx
+
+%kernel_variant_preun highbank
+%kernel_variant_post -v highbank
+
 %kernel_variant_preun omap
 %kernel_variant_post -v omap
 
@@ -2335,6 +2401,9 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
+%kernel_variant_files %{with_kirkwood} kirkwood
+%kernel_variant_files %{with_imx} imx
+%kernel_variant_files %{with_highbank} highbank
 %kernel_variant_files %{with_omap} omap
 %kernel_variant_files %{with_tegra} tegra
 
@@ -2342,6 +2411,19 @@ fi
 # and build.
 
 %changelog
+* Thu Dec 29 2011 Dave Jones <davej@redhat.com> 3.1.6-2
+- Create a blacklist for pci=nocrs
+  Add Dell Studio 1536 to it.
+
+* Fri Dec 23 2011 Dennis Gilmore <dennis@ausil.us>
+- build imx highbank and kirkwood kernels for arm
+
+* Thu Dec 22 2011 John W. Linville <linville@redhat.com> 
+- iwlwifi: do not set the sequence control bit is not needed
+- ath9k: fix max phy rate at rate control init
+- mwifiex: avoid double list_del in command cancel path
+- iwlwifi: update SCD BC table for all SCD queues
+
 * Wed Dec 21 2011 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.6-libre as patch-libre-3.1.6.
 - Disable backports by default.
