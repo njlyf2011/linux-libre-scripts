@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -869,6 +869,15 @@ Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 #rhbz 746097
 Patch21049: tpm_tis-delay-after-aborting-cmd.patch
 
+#rhbz 771006
+Patch21050: thp-reduce-khugepaged-freezing-latency.patch
+
+#rhbz 771387
+Patch21055: KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
+
+#rhbz 770233
+Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
+
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
 Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
@@ -1634,7 +1643,16 @@ ApplyPatch b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 #rhbz 746097
 ApplyPatch tpm_tis-delay-after-aborting-cmd.patch
 
+#rhbz 771006
+ApplyPatch thp-reduce-khugepaged-freezing-latency.patch
+
 ApplyPatch route-cache-garbage-collector.patch
+
+#rhbz 771387
+ApplyPatch KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
+
+#rhbz 770233
+ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2411,6 +2429,28 @@ fi
 # and build.
 
 %changelog
+* Wed Jan 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.7-libre as patch-libre-3.1.7.
+
+* Tue Jan 03 2012 Josh Boyer <jwboyer@redhat.com> 3.1.7-1
+- Linux 3.1.7
+
+* Tue Jan 03 2012 John W. Linville <linville@redhat.com> 
+- Avoid unnecessary modprobe invocations during compat-wireless build
+
+* Tue Jan 03 2012 Dave Jones <davej@redhat.com>
+- Add Thinkpad SL510 to the pci=nocrs blacklist.
+
+* Tue Jan 03 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4622 kvm: pit timer with no irqchip crashes the system (rhbz 771387)
+- Add bluetooth support for BCM20102A0 (rhbz 770233)
+
+* Tue Jan 03 2012 Dave Jones <davej@redhat.com>
+- thp: reduce khugepaged freezing latency (rhbz 771006)
+
+* Tue Jan  3 2012 John W. Linville <linville@redhat.com> 
+- Re-enable CONFIG_RT2800PCI_RT53XX in compat-wireless build (rhbz #720594)
+
 * Thu Dec 29 2011 Dave Jones <davej@redhat.com> 3.1.6-2
 - Create a blacklist for pci=nocrs
   Add Dell Studio 1536 to it.
