@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -850,6 +850,7 @@ Patch21220: mac80211_offchannel_rework_revert.patch
 Patch21225: pci-Rework-ASPM-disable-code.patch
 
 Patch21226: pci-crs-blacklist.patch
+Patch21227: dell-mmconfig-quirk.patch
 
 #rhbz #757839
 Patch21230: net-sky2-88e8059-fix-link-speed.patch
@@ -875,6 +876,9 @@ Patch21050: thp-reduce-khugepaged-freezing-latency.patch
 #rhbz 771387
 Patch21055: KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
 
+#rhbz 771678
+Patch21056: KVM-fix-device-assignment-permissions.patch
+
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
 
@@ -888,6 +892,9 @@ Patch50103: iwlwifi-update-SCD-BC-table-for-all-SCD-queues.patch
 Patch50104: mwifiex-avoid-double-list_del-in-command-cancel-path.patch
 
 Patch22000: route-cache-garbage-collector.patch
+
+#rhbz 771058
+Patch22100: msi-irq-sysfs-warning.patch
 
 %endif
 
@@ -1623,7 +1630,8 @@ ApplyPatch mac80211_offchannel_rework_revert.patch
 
 ApplyPatch pci-Rework-ASPM-disable-code.patch
 
-ApplyPatch pci-crs-blacklist.patch
+#ApplyPatch pci-crs-blacklist.patch
+ApplyPatch dell-mmconfig-quirk.patch
 
 #rhbz #757839
 ApplyPatch net-sky2-88e8059-fix-link-speed.patch
@@ -1653,6 +1661,12 @@ ApplyPatch KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
 
 #rhbz 770233
 ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
+
+#rhbz 771678
+ApplyPatch KVM-fix-device-assignment-permissions.patch
+
+#rhbz 771058
+ApplyPatch msi-irq-sysfs-warning.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2429,6 +2443,20 @@ fi
 # and build.
 
 %changelog
+* Wed Jan 04 2012 Neil Horman <nhorman@redhat.com>
+- Fix warning about msi sysfs refcount (bz 771058)
+
+* Wed Jan 04 2012 Dave Jones <davej@redhat.com>
+- Disable PCI CRS blacklist patch
+- Try alternative approach from Bjorn Helgaas to work around
+  MCFG quirks on some laptops.
+
+* Wed Jan 04 2012 Dave Jones <davej@redhat.com>
+- Add Dell Studio 1557 to pci=nocrs blacklist. (rhbz 769657)
+
+* Wed Jan 04 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4347 kvm: device assignment DoS (rhbz 771678)
+
 * Wed Jan 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.7-libre as patch-libre-3.1.7.
 
