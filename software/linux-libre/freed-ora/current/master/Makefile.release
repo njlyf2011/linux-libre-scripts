@@ -22,6 +22,7 @@ config-release:
 	@perl -pi -e 's/CONFIG_FAIL_PAGE_ALLOC=y/# CONFIG_FAIL_PAGE_ALLOC is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAIL_IO_TIMEOUT=y/# CONFIG_FAIL_IO_TIMEOUT is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAIL_MAKE_REQUEST=y/# CONFIG_FAIL_MAKE_REQUEST is not set/' config-nodebug
+	@perl -pi -e 's/CONFIG_FAIL_MMC_REQUEST=y/# CONFIG_FAIL_MMC_REQUEST is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAULT_INJECTION_DEBUG_FS=y/# CONFIG_FAULT_INJECTION_DEBUG_FS is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_FAULT_INJECTION_STACKTRACE_FILTER=y/# CONFIG_FAULT_INJECTION_STACKTRACE_FILTER is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DEBUG_SG=y/# CONFIG_DEBUG_SG is not set/' config-nodebug
@@ -55,7 +56,6 @@ config-release:
 	@perl -pi -e 's/CONFIG_ATH_DEBUG=y/# CONFIG_ATH_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_CARL9170_DEBUGFS=y/# CONFIG_CARL9170_DEBUGFS is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_IWLWIFI_DEVICE_TRACING=y/# CONFIG_IWLWIFI_DEVICE_TRACING is not set/' config-nodebug
-	@perl -pi -e 's/CONFIG_DEBUG_STRICT_USER_COPY_CHECKS=y/# CONFIG_DEBUG_STRICT_USER_COPY_CHECKS is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DMADEVICES_DEBUG=y/# CONFIG_DMADEVICES_DEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_DMADEVICES_VDEBUG=y/# CONFIG_DMADEVICES_VDEBUG is not set/' config-nodebug
 	@perl -pi -e 's/CONFIG_CEPH_LIB_PRETTYDEBUG=y/# CONFIG_CEPH_LIB_PRETTYDEBUG is not set/' config-nodebug

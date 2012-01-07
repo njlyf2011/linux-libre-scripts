@@ -1,26 +1,14 @@
 **** Queued for 3.2 ***********************************************************************************
 
-* linux-2.6-debug-taint-vm.patch
-* epoll-fix-spurious-lockdep-warnings.patch
-* hvcs_pi_buf_alloc.patch
 * acpi-ensure-thermal-limits-match-cpu-freq.patch
-* rcu-avoid-just-onlined-cpu-resched.patch
-* rcutree-avoid-false-quiescent-states.patch
 * revert-efi-rtclock.patch
 * block-stray-block-put-after-teardown.patch
-* crypto-register-cryptd-first.patch
 * efi-dont-map-boot-services-on-32bit.patch
-* powerpc-Fix-deadlock-in-icswx-code.patch
-* udlfb-bind-framebuffer-to-interface.patch
-* ums-realtek-driver-uses-stack-memory-for-DMA.patch
-* usb-add-quirk-for-logitech-webcams.patch
-* add-macbookair41-keyboard.patch
-* ucvideo-fix-crash-when-linking-entities.patch
-* mmc-Always-check-for-lower-base-frequency-quirk-for-.patch (also CC'd stable)
-* 000[12]-mm-*
-* x86-efi-Calling-__pa-with-an-ioremap-address-is-invalid.patch (also CC'd to
- stable)
 * epoll-limit-paths.patch (in linux-next via -mm tree)
+
+**** Queued for 3.3 ***********************************************************************************
+drm-edid-try-harder-to-fix-up-broken-headers.patch
+Bluetooth-Add-support-for-BCM20702A0-0a5c-21e3.patch
 
 **** Other stuff that should go upstream (in decreasing likelyhood) ************************************
 
@@ -67,9 +55,6 @@
 * dmar-disable-when-ricoh-multifunction.patch
   Added October 2010
 
-* drm-intel-make-lvds-work.patch
-  Around since forever. Wtf ?
-
 * linux-2.6-intel-iommu-igfx.patch
   Invert igfx_off/igfx_on option. Around since forever. Upstreamable ?
   Mustard ? Config option ?
@@ -115,8 +100,11 @@
 
 Spec file/config todos/cleanups
 
-* Remove all of the RHEL stuff.  It isn't maintained in fedora at all and is
-just cruft
+* modules-extra: Do a few more things to make it a bit more robust.
+  - Allow for comments in the mod-extra.list file.
+  - Don't fail the build if a module is listed but not built (maybe).
+  - See if it can be tied into Kconfig instead of module names.
 
-* Drop all the with_firmware stuff in the spec.  All releases should be using
-the linux-firmware package by now
+* investigate gzip modules. Everything should support this now?
+  Looks like about 70M savings per kernel installed.
+
