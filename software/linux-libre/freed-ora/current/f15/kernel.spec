@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -711,8 +711,6 @@ Patch21031: benet-remove-bogus-unlikely-on-vlan-check.patch
 
 Patch21040: x86-code-dump-fix-truncation.patch
 
-Patch21070: oom-fix-integer-overflow-of-points.patch
-
 #rhbz 728607
 Patch21060: elantech.patch
 
@@ -741,9 +739,6 @@ Patch21045: nfs-client-freezer.patch
 #rhbz 590880
 Patch21046: alps.patch
 
-#rhbz 767173
-Patch21047: iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
-
 #rhbz 741117
 Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 
@@ -753,10 +748,11 @@ Patch21050: thp-reduce-khugepaged-freezing-latency.patch
 #rhbz 770102
 Patch21055: KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
 
+#rhbz 770096
+Patch21056: KVM-fix-device-assignment-permissions.patch
+
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
-
-Patch22000: route-cache-garbage-collector.patch
 
 %endif
 
@@ -1366,9 +1362,6 @@ ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
 #rhbz 736815
 ApplyPatch x86-code-dump-fix-truncation.patch
 
-#rhbz 750402
-ApplyPatch oom-fix-integer-overflow-of-points.patch
-
 #rhbz 728607
 ApplyPatch elantech.patch
 
@@ -1398,22 +1391,20 @@ ApplyPatch nfs-client-freezer.patch
 #rhbz 590880
 ApplyPatch alps.patch
 
-#rhbz 767173
-ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
-
 #rhbz 741117
 ApplyPatch b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 
 #rhbz 771006
 ApplyPatch thp-reduce-khugepaged-freezing-latency.patch
 
-ApplyPatch route-cache-garbage-collector.patch
-
 #rhbz 770102
 ApplyPatch KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
 
 #rhbz 770233
 ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
+
+#rhbz 770096
+ApplyPatch KVM-fix-device-assignment-permissions.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2062,6 +2053,15 @@ fi
 # and build.
 
 %changelog
+* Sat Jan  7 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.8-libre as patch-libre-3.1.8.
+
+* Fri Jan 06 2012 Josh Boyer <jwboyer@redhat.com> 2.6.41.8-1
+- Linux 3.1.8
+
+* Wed Jan 04 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4347 kvm: device assignment DoS (rhbz 770096)
+
 * Wed Jan 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.7-libre as patch-libre-3.1.7.
 
