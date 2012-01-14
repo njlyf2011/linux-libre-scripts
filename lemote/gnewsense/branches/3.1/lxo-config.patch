@@ -1,11 +1,11 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2012-01-07 15:47:11.000000000 +0000
-+++ Makefile	2012-01-07 15:47:17.000000000 +0000
+--- Makefile.orig	2012-01-12 23:24:37.000000000 +0000
++++ Makefile	2012-01-12 23:24:44.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 3
  PATCHLEVEL = 1
- SUBLEVEL = 8
+ SUBLEVEL = 9
 -EXTRAVERSION =-libre
 +EXTRAVERSION =-libre-lemote
  NAME = "Divemaster Edition"
@@ -14,11 +14,11 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2012-01-07 15:53:20.000000000 +0000
++++ .config	2012-01-12 23:32:55.000000000 +0000
 @@ -0,0 +1,4661 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.1.8-libre-lemote Kernel Configuration
++# Linux/mips 3.1.9-libre-lemote Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
