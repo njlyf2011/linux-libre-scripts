@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -754,6 +754,16 @@ Patch21056: KVM-fix-device-assignment-permissions.patch
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
 
+Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
+Patch21072: ext3-Fix-error-handling-on-inode-bitmap-corruption.patch
+
+#rhbz 769766
+Patch21073: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+
+#rhbz 773392
+Patch21074: KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
+Patch21075: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1406,6 +1416,15 @@ ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
 #rhbz 770096
 ApplyPatch KVM-fix-device-assignment-permissions.patch
 
+ApplyPatch ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
+ApplyPatch ext3-Fix-error-handling-on-inode-bitmap-corruption.patch
+
+ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+
+#rhbz 773392
+ApplyPatch KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
+ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2053,6 +2072,19 @@ fi
 # and build.
 
 %changelog
+* Sat Jan 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.9-libre as patch-libre-3.1.9.
+
+* Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com> 2.6.41.9-1
+- Linux 3.1.9
+- CVE-2012-0045 kvm: syscall instruction induced guest panic (rhbz 773392)
+
+* Wed Jan 11 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch from Stanislaw Gruszka to fix NULL ptr deref in mac80211 (rhbz 769766)
+
+* Tue Jan 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix ext3/ext4 corrupted bitmap error path (pointed out by Eric Sandeen)
+
 * Sat Jan  7 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.8-libre as patch-libre-3.1.8.
 
