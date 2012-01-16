@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -219,7 +219,7 @@ Summary: The Linux kernel
 %define kversion 3.%{base_sublevel}
 
 # The compat-wireless version
-%define cwversion 3.2-rc6-3
+%define cwversion 3.2-1
 
 #######################################################################
 # If cwversion is less than kversion, make sure with_backports is
@@ -878,16 +878,21 @@ Patch21056: KVM-fix-device-assignment-permissions.patch
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
 
+Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
+Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
+
+#rhbz 769766
+Patch21072: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+
+#rhbz 773392
+Patch21073: KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
+Patch21074: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
+
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
 Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 Patch50002: compat-wireless-pr_fmt-warning-avoidance.patch
-Patch50100: iwlwifi-tx_sync-only-on-PAN-context.patch
-Patch50101: ath9k-fix-max-phy-rate-at-rate-control-init.patch
-Patch50102: iwlwifi-do-not-set-the-sequence-control-bit-is-not-n.patch
-Patch50103: iwlwifi-update-SCD-BC-table-for-all-SCD-queues.patch
-Patch50104: mwifiex-avoid-double-list_del-in-command-cancel-path.patch
-Patch50105: iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
 
 #rhbz 771058
 Patch22100: msi-irq-sysfs-warning.patch
@@ -1656,6 +1661,16 @@ ApplyPatch KVM-fix-device-assignment-permissions.patch
 #rhbz 771058
 ApplyPatch msi-irq-sysfs-warning.patch
 
+ApplyPatch ext4-Support-check-none-nocheck-mount-options.patch
+
+ApplyPatch ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
+
+ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+
+#rhbz 773392
+ApplyPatch KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
+ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1724,14 +1739,6 @@ ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
-
-# Apply some iwlwifi regression fixes not in the 3.2-rc6 wireless snapshot
-ApplyPatch iwlwifi-do-not-set-the-sequence-control-bit-is-not-n.patch
-ApplyPatch ath9k-fix-max-phy-rate-at-rate-control-init.patch
-ApplyPatch mwifiex-avoid-double-list_del-in-command-cancel-path.patch
-ApplyPatch iwlwifi-tx_sync-only-on-PAN-context.patch
-ApplyPatch iwlwifi-allow-to-switch-to-HT40-if-not-associated.patch
-ApplyPatch iwlwifi-update-SCD-BC-table-for-all-SCD-queues.patch
 
 cd ..
 
@@ -2433,6 +2440,23 @@ fi
 # and build.
 
 %changelog
+* Sat Jan 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.9-libre as patch-libre-3.1.9.
+
+* Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com> 3.1.9-1
+- Linux 3.1.9
+- CVE-2012-0045 kvm: syscall instruction induced guest panic (rhbz 773392)
+
+* Wed Jan 11 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch from Stanislaw Gruszka to fix NULL ptr deref in mac80211 (rhbz 769766)
+
+* Tue Jan 10 2012 John W. Linville <linville@redhat.com>
+- Update compat-wireless snapshot to version 3.2-1
+
+* Tue Jan 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix ext4 compatibility with ext2 mount option (rhbz 770172)
+- Fix ext4 corrupted bitmap error path (pointed out by Eric Sandeen)
+
 * Sat Jan  7 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.8-libre as patch-libre-3.1.8.
 
