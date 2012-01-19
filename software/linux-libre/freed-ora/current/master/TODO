@@ -1,5 +1,5 @@
 Config TODOs:
-* At some point disable CONFIG_ISA everywhere. F17 ?
+* review & disable a bunch of the I2C, RTC, DVB, SOUND options.
 
 
 Spec file TODOs:

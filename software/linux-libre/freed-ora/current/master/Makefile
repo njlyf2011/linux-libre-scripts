@@ -93,11 +93,15 @@ debug:
 	@perl -pi -e 's/# CONFIG_DEBUG_ATOMIC_SLEEP is not set/CONFIG_DEBUG_ATOMIC_SLEEP=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DETECT_HUNG_TASK is not set/CONFIG_DETECT_HUNG_TASK=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_X86_BOOTPARAM_MEMORY_CORRUPTION_CHECK is not set/CONFIG_X86_BOOTPARAM_MEMORY_CORRUPTION_CHECK=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_DEBUG_KMEMLEAK is not set/CONFIG_DEBUG_KMEMLEAK=y/' config-nodebug
 
 	@# just in case we're going from extremedebug -> debug
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 
-	@perl -pi -e 's/CONFIG_NR_CPUS=256/CONFIG_NR_CPUS=512/' config-x86_64-generic
+	@perl -pi -e 's/# CONFIG_MAXSMP is not set/CONFIG_MAXSMP=y/' config-x86-generic
+
+	# Try out UAS in rawhide builds.
+	@perl -pi -e 's/# CONFIG_USB_UAS is not set/CONFIG_USB_UAS=m/' config-generic
 
 	@perl -pi -e 's/^%define debugbuildsenabled 1/%define debugbuildsenabled 0/' kernel.spec
 	@perl -pi -e 's/^%define rawhide_skip_docs 0/%define rawhide_skip_docs 1/' kernel.spec
