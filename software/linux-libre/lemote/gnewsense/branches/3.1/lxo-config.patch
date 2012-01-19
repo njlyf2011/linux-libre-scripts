@@ -5,7 +5,7 @@ Index: Makefile
 @@ -1,7 +1,7 @@
  VERSION = 3
  PATCHLEVEL = 1
- SUBLEVEL = 9
+ SUBLEVEL = 10
 -EXTRAVERSION =-libre
 +EXTRAVERSION =-libre-lemote
  NAME = "Divemaster Edition"
