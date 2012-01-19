@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 4
+%global baserelease 8
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -682,7 +682,6 @@ Patch04: linux-2.6-compile-fixes.patch
 Patch05: linux-2.6-makefile-after_link.patch
 
 Patch07: freedo.patch
-Patch08: linux-3.2-brcmfmac-gcc47.patch
 
 %if !%{nopatches}
 
@@ -798,11 +797,24 @@ Patch21074: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
 #rhbz 728740
 Patch21076: rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
+#rhbz 782686
+Patch21082: procfs-parse-mount-options.patch
+Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
+Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
+
+#rhbz 782681
+Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 782696
+Patch21086: Unused-iocbs-in-a-batch-should-not-be-accounted-as-a.patch
+
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
 Patch50001: compat-wireless-pr_fmt-warning-avoidance.patch
 Patch50002: compat-wireless-integrated-build.patch
 Patch50003: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+Patch50100: brcmfmac-gcc47.patch
 
 %endif
 
@@ -1409,7 +1421,6 @@ ApplyOptionalPatch linux-2.6-compile-fixes.patch
 
 # Freedo logo.
 ApplyPatch freedo.patch
-ApplyPatch linux-3.2-brcmfmac-gcc47.patch
 
 %if !%{nopatches}
 
@@ -1581,6 +1592,17 @@ ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
 #rhbz 728740
 ApplyPatch rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
+#rhbz 782686
+ApplyPatch procfs-parse-mount-options.patch
+ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
+ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
+
+#rhbz 782681
+ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 782696
+ApplyPatch Unused-iocbs-in-a-batch-should-not-be-accounted-as-a.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1647,6 +1669,9 @@ ApplyPatch compat-wireless-config-fixups.patch
 ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
 ApplyPatch compat-wireless-integrated-build.patch
 ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+
+ApplyPatch brcmfmac-gcc47.patch
 
 cd ..
 
@@ -2072,7 +2097,7 @@ man9dir=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
 # copy the source over
 mkdir -p $docdir
-tar -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
+tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
 # Install man pages for the kernel API.
 mkdir -p $man9dir
@@ -2427,6 +2452,33 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com> 3.2.1-8
+- Fix broken procfs backport (rhbz 782961)
+
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com> 3.2.1-7
+- /proc/pid/* information leak (rhbz 782686)
+- CVE-2012-0056 proc: clean up and fix /proc/<pid>/mem (rhbz 782681)
+- CVE-2012-0058 Unused iocbs in a batch should not be accounted as active
+  (rhbz 782696)
+
+* Tue Jan 17 2012 Dave Jones <davej@redhat.com>
+- Rawhide builds now use MAXSMP on x86.
+- For release builds, set x86-64 to support 64 CPUs.
+  If larger systems become widespread, we can increase in an update.
+
+* Tue Jan 17 2012 Dave Jones <davej@redhat.com> 3.2.1-5
+- Give KMEMLEAK a try again.
+
+* Mon Jan 16 2012 Dave Jones <davej@redhat.com>
+- Disable ISA
+
+* Mon Jan 16 2012 John W. Linville <linville@redhat.com>
+- Re-enable CONFIG_BRCMFMAC builds (found work-around for GCC 4.7 builds)
+
+* Sun Jan 15 2012 Josh Boyer <jwboyer@redhat.com>
+- Avoid packaging symlinks for kernel-doc files (rhbz 767351)
+- Apply mac80211 NULL ptr deref fix to compat-wireless too (rhbz 769766)
+
 * Sat Jan 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Linux-libre 3.2.1.
 - Adjusted rtl8192cu patches for deblobbed sources.
@@ -2461,7 +2513,7 @@ fi
 - CVE-2012-0045 kvm: syscall instruction induced guest panic (rhbz 773392)
 
 * Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com> 3.2.1-1
-- Linux 3.1.2
+- Linux 3.2.1
 - Change stable patch compression format to xz
 
 * Wed Jan 11 2012 Josh Boyer <jwboyer@redhat.com>
