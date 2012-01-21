@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -369,6 +369,9 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_perf 0
 %endif
+%ifarch armv7hl
+%define with_perf 1
+%endif
 # we only build headers on the base arm arches
 # just like we used to only build them on i386 for x86
 %ifnarch armv5tel armv7hl
@@ -671,9 +674,6 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # NFSv4
 
-#rhbz 753236
-Patch4000: nfsv4-include-bitmap-in-nfsv4_get_acl_data.patch
-
 # patches headed upstream
 Patch12010: add-appleir-usb-driver.patch
 
@@ -714,9 +714,6 @@ Patch21040: x86-code-dump-fix-truncation.patch
 #rhbz 728607
 Patch21060: elantech.patch
 
-#rhbz 748210
-Patch21061: ideapad-Check-if-acpi-already-handle-backlight.patch
-
 #backport brcm80211 from 3.2-rc1
 Patch21090: brcm80211.patch
 Patch21091: bcma-brcmsmac-compat.patch
@@ -745,12 +742,6 @@ Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 #rhbz 771006
 Patch21050: thp-reduce-khugepaged-freezing-latency.patch
 
-#rhbz 770102
-Patch21055: KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
-
-#rhbz 770096
-Patch21056: KVM-fix-device-assignment-permissions.patch
-
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
 
@@ -763,6 +754,24 @@ Patch21073: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
 #rhbz 773392
 Patch21074: KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
 Patch21075: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
+#rhbz 728740
+Patch21076: rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+Patch21077: 01-block-add-and-use-scsi_blk_cmd_ioctl.patch
+Patch21078: 02-block-fail-SCSI-passthrough-ioctls-on-partition-devs.patch
+Patch21079: 03-dm-dont-fwd-ioctls-from-LVs-to-underlying-dev.patch
+
+#rhbz 782686
+Patch21082: procfs-parse-mount-options.patch
+Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
+Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
+
+#rhbz 782681
+Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 782687
+Patch21086: loop-prevent-information-leak-after-failed-read.patch
 
 %endif
 
@@ -1238,7 +1247,6 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # eCryptfs
 
 # NFSv4
-ApplyPatch nfsv4-include-bitmap-in-nfsv4_get_acl_data.patch
 
 # USB
 
@@ -1375,9 +1383,6 @@ ApplyPatch x86-code-dump-fix-truncation.patch
 #rhbz 728607
 ApplyPatch elantech.patch
 
-#rhbz 748210
-ApplyPatch ideapad-Check-if-acpi-already-handle-backlight.patch
-
 #backport brcm80211 from 3.2-rc1
 ApplyPatch brcm80211.patch
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
@@ -1407,23 +1412,34 @@ ApplyPatch b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 #rhbz 771006
 ApplyPatch thp-reduce-khugepaged-freezing-latency.patch
 
-#rhbz 770102
-ApplyPatch KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
-
 #rhbz 770233
 ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
-
-#rhbz 770096
-ApplyPatch KVM-fix-device-assignment-permissions.patch
 
 ApplyPatch ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
 ApplyPatch ext3-Fix-error-handling-on-inode-bitmap-corruption.patch
 
-ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
-
 #rhbz 773392
 ApplyPatch KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
 ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
+#rhbz 728740
+ApplyPatch rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+#rhbz 769911
+ApplyPatch 01-block-add-and-use-scsi_blk_cmd_ioctl.patch
+ApplyPatch 02-block-fail-SCSI-passthrough-ioctls-on-partition-devs.patch
+ApplyPatch 03-dm-dont-fwd-ioctls-from-LVs-to-underlying-dev.patch
+
+#rhbz 782686
+ApplyPatch procfs-parse-mount-options.patch
+ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
+ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
+
+#rhbz 782681
+ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 782687
+ApplyPatch loop-prevent-information-leak-after-failed-read.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1804,7 +1820,7 @@ man9dir=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
 # copy the source over
 mkdir -p $docdir
-tar -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
+tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
 # Install man pages for the kernel API.
 mkdir -p $man9dir
@@ -2072,7 +2088,33 @@ fi
 # and build.
 
 %changelog
-* Sat Jan 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Jan 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.10-libre as patch-libre-3.1.10.
+
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com> 2.6.41.10-2
+- Fix broken procfs backport (rhbz 782961)
+
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com> 2.6.41.10-1
+- Linux 3.1.10
+- /proc/pid/* information leak (rhbz 782686)
+
+* Wed Jan 18 2012 Dennis Gilmore <dennis@ausil.us>
+- build perf on armv7hl
+
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-0056 proc: clean up and fix /proc/<pid>/mem (rhbz 782681)
+- loop: prevent information leak after failed read (rhbz 782687)
+
+* Tue Jan 17 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4127 possible privilege escalation via SG_IO ioctl (rhbz 769911)
+
+* Sun Jan 15 2012 Josh Boyer <jwboyer@redhat.com>
+- Avoid packaging symlinks for kernel-doc files (rhbz 767351)
+
+* Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix verbose logging messages in the rtl8192cu driver (rhbz 728740)
+
+* Fri Jan 13 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Jan 14
 - Use patch-3.1-libre-3.1.9-libre as patch-libre-3.1.9.
 
 * Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com> 2.6.41.9-1
