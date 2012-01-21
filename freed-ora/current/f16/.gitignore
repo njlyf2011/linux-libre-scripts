@@ -1,5 +1,6 @@
 .svn
 clog
+*.xz
 *.bz2
 *.rpm
 *.orig

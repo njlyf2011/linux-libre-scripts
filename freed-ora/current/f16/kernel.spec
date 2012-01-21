@@ -54,20 +54,20 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 1
+%define base_sublevel 2
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -libre
+#define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -229,7 +229,7 @@ Summary: The Linux kernel
 #
 # (Uncomment the '#' and both spaces below to disable with_backports.)
 #
-# % define with_backports 0
+%define with_backports 0
 #######################################################################
 
 %define make_target bzImage
@@ -425,13 +425,6 @@ Summary: The Linux kernel
 %define kernel_image_elf 1
 %endif
 
-%ifarch ia64
-%define all_arch_configs kernel-%{version}-ia64*.config
-%define image_install_path boot/efi/EFI/redhat
-%define make_target compressed
-%define kernel_image vmlinux.gz
-%endif
-
 %ifarch alpha alphaev56
 %define all_arch_configs kernel-%{version}-alpha*.config
 %define image_install_path boot
@@ -571,7 +564,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ia64 %{sparc} s390 s390x alpha alphaev56 %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 %{sparc} s390 s390x alpha alphaev56 %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -580,7 +573,7 @@ ExclusiveOS: Linux
 # List the packages used during the kernel build
 #
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
-BuildRequires: bzip2, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
 BuildRequires: net-tools
 BuildRequires: xmlto, asciidoc
@@ -634,8 +627,6 @@ Source51: config-powerpc32-generic
 Source52: config-powerpc32-smp
 Source53: config-powerpc64
 
-Source60: config-ia64-generic
-
 Source70: config-s390x
 
 Source90: config-sparc64-generic
@@ -662,11 +653,11 @@ Source2001: cpupower.config
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}.bz2
+%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}.xz
 Patch00: %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.bz2
+%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.xz
 Patch01: %{stable_patch_01}
 %endif
 
@@ -675,9 +666,9 @@ Patch01: %{stable_patch_01}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}.bz2
+Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}.xz
 %if 0%{?gitrev}
-Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
@@ -714,8 +705,6 @@ Patch100: taint-vbox.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 
-Patch202: linux-2.6-debug-taint-vm.patch
-
 Patch383: linux-2.6-defaults-aspm.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
@@ -740,10 +729,6 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 
 Patch800: linux-2.6-crash-driver.patch
 
-# Platform
-Patch900: samsung-laptop-brightness-fixes-3.2.patch
-Patch901: asus-laptop-3.2-backport.patch
-
 # crypto/
 
 # virt + ksm patches
@@ -752,17 +737,10 @@ Patch1500: fix_xen_guest_on_old_EC2.patch
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 
-# nouveau + drm fixes
-Patch1810: drm-nouveau-updates.patch
-Patch1811: drm-nouveau-gf108.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 # hush the i915 fbc noise
 Patch1826: drm-i915-fbc-stfu.patch
-# rhbz#729882, https://bugs.freedesktop.org/attachment.cgi?id=49069
-Patch1827: drm-i915-sdvo-lvds-is-digital.patch
-
-Patch1850: drm-lower-severity-radeon-lockup.diff
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -776,10 +754,6 @@ Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 Patch2902: linux-2.6-v4l-dvb-uvcvideo-update.patch
 
-Patch2905: media-dib0700-correct-error-message.patch
-
-Patch3000: rcutree-avoid-false-quiescent-states.patch
-
 # fs fixes
 
 #rhbz 753346
@@ -788,23 +762,16 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # NFSv4
 
 # patches headed upstream
-Patch12010: add-appleir-usb-driver.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12021: udlfb-bind-framebuffer-to-interface.patch
-
-Patch12025: rcu-avoid-just-onlined-cpu-resched.patch
 Patch12026: block-stray-block-put-after-teardown.patch
 Patch12030: epoll-limit-paths.patch
-Patch12031: HID-wacom-Set-input-bits-before-registration.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13002: revert-efi-rtclock.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
-
-Patch13009: hvcs_pi_buf_alloc.patch
 
 Patch20000: utrace.patch
 
@@ -812,29 +779,14 @@ Patch20000: utrace.patch
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 
-#rhbz #735946
-Patch21020: 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
 Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
 Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
-
-#rhbz 748691
-Patch21030: be2net-non-member-vlan-pkts-not-received-in-promisco.patch
-Patch21031: benet-remove-bogus-unlikely-on-vlan-check.patch
-
-Patch21040: x86-code-dump-fix-truncation.patch
-
-#rhbz 728607
-Patch21060: elantech.patch
 
 #rhbz752176
 Patch21080: sysfs-msi-irq-per-device.patch
 
-#backport brcm80211 from 3.2-rc1
-Patch21090: brcm80211.patch
-Patch21091: bcma-brcmsmac-compat.patch
 
 # rhbz 754907
-Patch21100: cciss-fix-irqf-shared.patch
 Patch21101: hpsa-add-irqf-shared.patch
 
 #rhbz 731365
@@ -844,26 +796,14 @@ Patch21225: pci-Rework-ASPM-disable-code.patch
 
 Patch21226: pci-crs-blacklist.patch
 
-#rhbz #757839
-Patch21230: net-sky2-88e8059-fix-link-speed.patch
-
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
 
 #rhbz 590880
 Patch21046: alps.patch
 
-#rhbz 741117
-Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
-
 #rhbz 746097
 Patch21049: tpm_tis-delay-after-aborting-cmd.patch
-
-#rhbz 771006
-Patch21050: thp-reduce-khugepaged-freezing-latency.patch
-
-#rhbz 770233
-Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
 
 Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
 Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
@@ -888,10 +828,6 @@ Patch22100: msi-irq-sysfs-warning.patch
 #rhbz 728740
 Patch21076: rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
-Patch21077: 01-block-add-and-use-scsi_blk_cmd_ioctl.patch
-Patch21078: 02-block-fail-SCSI-passthrough-ioctls-on-partition-devs.patch
-Patch21079: 03-dm-dont-fwd-ioctls-from-LVs-to-underlying-dev.patch
-
 #rhbz 782686
 Patch21082: procfs-parse-mount-options.patch
 Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
@@ -899,9 +835,6 @@ Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
 #rhbz 782681
 Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
-
-#rhbz 782687
-Patch21086: loop-prevent-information-leak-after-failed-read.patch
 
 %endif
 
@@ -1218,7 +1151,8 @@ ApplyPatch()
 %endif
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *.gz) gunzip < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
+  *.gz)  gunzip  < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
+  *.xz)  unxz    < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
   *) $patch_command ${1+"$@"} < "$RPM_SOURCE_DIR/$patch" ;;
   esac
 }
@@ -1487,9 +1421,6 @@ ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
 ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
-# Various low-impact patches to aid debugging.
-ApplyPatch linux-2.6-debug-taint-vm.patch
-
 #
 # PCI
 #
@@ -1543,16 +1474,9 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 
-# Nouveau DRM
-ApplyOptionalPatch drm-nouveau-updates.patch
-ApplyPatch drm-nouveau-gf108.patch
-
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-fbc-stfu.patch
-ApplyPatch drm-i915-sdvo-lvds-is-digital.patch
-
-ApplyPatch drm-lower-severity-radeon-lockup.diff
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
@@ -1566,22 +1490,12 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
-# Platform fixes not sent for -stable
-ApplyPatch samsung-laptop-brightness-fixes-3.2.patch
-ApplyPatch asus-laptop-3.2-backport.patch
-
 # Patches headed upstream
-ApplyPatch rcutree-avoid-false-quiescent-states.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
-ApplyPatch add-appleir-usb-driver.patch
-
-ApplyPatch udlfb-bind-framebuffer-to-interface.patch
 ApplyPatch epoll-limit-paths.patch
-ApplyPatch rcu-avoid-just-onlined-cpu-resched.patch
 ApplyPatch block-stray-block-put-after-teardown.patch
-ApplyPatch HID-wacom-Set-input-bits-before-registration.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1589,40 +1503,13 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 ApplyPatch revert-efi-rtclock.patch
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
-ApplyPatch hvcs_pi_buf_alloc.patch
-
-ApplyPatch media-dib0700-correct-error-message.patch
-
 # utrace.
 ApplyPatch utrace.patch
-
-#rhbz #735946
-ApplyPatch 0001-mm-vmscan-Limit-direct-reclaim-for-higher-order-allo.patch
-ApplyPatch 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
-ApplyPatch mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
-
-#rhbz 748691
-ApplyPatch be2net-non-member-vlan-pkts-not-received-in-promisco.patch
-ApplyPatch benet-remove-bogus-unlikely-on-vlan-check.patch
-
-#rhbz 736815
-ApplyPatch x86-code-dump-fix-truncation.patch
-
-#rhbz 728607
-ApplyPatch elantech.patch
 
 #rhbz 752176
 ApplyPatch sysfs-msi-irq-per-device.patch
 
-%if !%{with_backports}
-#backport brcm80211 from 3.2-rc1
-ApplyPatch brcm80211.patch
-# Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
-ApplyPatch bcma-brcmsmac-compat.patch
-%endif
-
 # rhbz 754907
-ApplyPatch cciss-fix-irqf-shared.patch
 ApplyPatch hpsa-add-irqf-shared.patch
 
 #rhbz 731365
@@ -1632,26 +1519,14 @@ ApplyPatch pci-Rework-ASPM-disable-code.patch
 
 #ApplyPatch pci-crs-blacklist.patch
 
-#rhbz #757839
-ApplyPatch net-sky2-88e8059-fix-link-speed.patch
-
 #rhbz 717735
 ApplyPatch nfs-client-freezer.patch
 
 #rhbz 590880
 ApplyPatch alps.patch
 
-#rhbz 741117
-ApplyPatch b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
-
 #rhbz 746097
 ApplyPatch tpm_tis-delay-after-aborting-cmd.patch
-
-#rhbz 771006
-ApplyPatch thp-reduce-khugepaged-freezing-latency.patch
-
-#rhbz 770233
-ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
 
 #rhbz 771058
 ApplyPatch msi-irq-sysfs-warning.patch
@@ -1667,11 +1542,6 @@ ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
 #rhbz 728740
 ApplyPatch rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
-#rhbz 769911
-ApplyPatch 01-block-add-and-use-scsi_blk_cmd_ioctl.patch
-ApplyPatch 02-block-fail-SCSI-passthrough-ioctls-on-partition-devs.patch
-ApplyPatch 03-dm-dont-fwd-ioctls-from-LVs-to-underlying-dev.patch
-
 #rhbz 782686
 ApplyPatch procfs-parse-mount-options.patch
 ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
@@ -1679,9 +1549,6 @@ ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
 #rhbz 782681
 ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
-
-#rhbz 782687
-ApplyPatch loop-prevent-information-leak-after-failed-read.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1993,9 +1860,10 @@ BuildKernel() {
 
     cd ../compat-wireless-%{cwversion}/
 
-    make KLIB_BUILD=../linux-%{kversion}.%{_target_cpu} \
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} \
+	KLIB_BUILD=../linux-%{kversion}.%{_target_cpu} \
 	KMODPATH_ARG="INSTALL_MOD_PATH=$RPM_BUILD_ROOT" \
-	KMODDIR="backports" install-modules
+	KMODDIR="backports" install-modules %{?sparse_mflags}
 
     # mark modules executable so that strip-to-file can strip them
     find $RPM_BUILD_ROOT/lib/modules/$KernelVer/backports -name "*.ko" \
@@ -2457,6 +2325,15 @@ fi
 # and build.
 
 %changelog
+* Sat Jan 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.2-libre, with upstream patch-3.2.1.
+
+* Thu Jan 19 2012 Dave Jones <davej@redhat.com> 3.2.1-1
+- Rebase to Linux 3.2.1
+
+* Thu Jan 19 2012 John W. Linville <linville@redhat.com>
+- Pass the same make options to compat-wireless as to the base kernel
+
 * Thu Jan 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.10-libre as patch-libre-3.1.10.
 
