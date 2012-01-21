@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -787,9 +787,6 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # NFSv4
 
-#rhbz 753236
-Patch4000: nfsv4-include-bitmap-in-nfsv4_get_acl_data.patch
-
 # patches headed upstream
 Patch12010: add-appleir-usb-driver.patch
 
@@ -829,9 +826,6 @@ Patch21040: x86-code-dump-fix-truncation.patch
 #rhbz 728607
 Patch21060: elantech.patch
 
-#rhbz 748210
-Patch21061: ideapad-Check-if-acpi-already-handle-backlight.patch
-
 #rhbz752176
 Patch21080: sysfs-msi-irq-per-device.patch
 
@@ -849,7 +843,6 @@ Patch21220: mac80211_offchannel_rework_revert.patch
 Patch21225: pci-Rework-ASPM-disable-code.patch
 
 Patch21226: pci-crs-blacklist.patch
-Patch21227: dell-mmconfig-quirk.patch
 
 #rhbz #757839
 Patch21230: net-sky2-88e8059-fix-link-speed.patch
@@ -869,12 +862,6 @@ Patch21049: tpm_tis-delay-after-aborting-cmd.patch
 #rhbz 771006
 Patch21050: thp-reduce-khugepaged-freezing-latency.patch
 
-#rhbz 771387
-Patch21055: KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
-
-#rhbz 771678
-Patch21056: KVM-fix-device-assignment-permissions.patch
-
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
 
@@ -893,9 +880,28 @@ Patch21074: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
 Patch50000: compat-wireless-config-fixups.patch
 Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 Patch50002: compat-wireless-pr_fmt-warning-avoidance.patch
+Patch50003: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
 #rhbz 771058
 Patch22100: msi-irq-sysfs-warning.patch
+
+#rhbz 728740
+Patch21076: rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+Patch21077: 01-block-add-and-use-scsi_blk_cmd_ioctl.patch
+Patch21078: 02-block-fail-SCSI-passthrough-ioctls-on-partition-devs.patch
+Patch21079: 03-dm-dont-fwd-ioctls-from-LVs-to-underlying-dev.patch
+
+#rhbz 782686
+Patch21082: procfs-parse-mount-options.patch
+Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
+Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
+
+#rhbz 782681
+Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 782687
+Patch21086: loop-prevent-information-leak-after-failed-read.patch
 
 %endif
 
@@ -1469,7 +1475,6 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # eCryptfs
 
 # NFSv4
-ApplyPatch nfsv4-include-bitmap-in-nfsv4_get_acl_data.patch
 
 # USB
 
@@ -1606,9 +1611,6 @@ ApplyPatch x86-code-dump-fix-truncation.patch
 #rhbz 728607
 ApplyPatch elantech.patch
 
-#rhbz 748210
-ApplyPatch ideapad-Check-if-acpi-already-handle-backlight.patch
-
 #rhbz 752176
 ApplyPatch sysfs-msi-irq-per-device.patch
 
@@ -1629,7 +1631,6 @@ ApplyPatch mac80211_offchannel_rework_revert.patch
 ApplyPatch pci-Rework-ASPM-disable-code.patch
 
 #ApplyPatch pci-crs-blacklist.patch
-ApplyPatch dell-mmconfig-quirk.patch
 
 #rhbz #757839
 ApplyPatch net-sky2-88e8059-fix-link-speed.patch
@@ -1649,14 +1650,8 @@ ApplyPatch tpm_tis-delay-after-aborting-cmd.patch
 #rhbz 771006
 ApplyPatch thp-reduce-khugepaged-freezing-latency.patch
 
-#rhbz 771387
-ApplyPatch KVM-x86-Prevent-starting-PIT-timers-in-the-absence-of.patch
-
 #rhbz 770233
 ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
-
-#rhbz 771678
-ApplyPatch KVM-fix-device-assignment-permissions.patch
 
 #rhbz 771058
 ApplyPatch msi-irq-sysfs-warning.patch
@@ -1665,11 +1660,28 @@ ApplyPatch ext4-Support-check-none-nocheck-mount-options.patch
 
 ApplyPatch ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
 
-ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
-
 #rhbz 773392
 ApplyPatch KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
 ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
+
+#rhbz 728740
+ApplyPatch rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+#rhbz 769911
+ApplyPatch 01-block-add-and-use-scsi_blk_cmd_ioctl.patch
+ApplyPatch 02-block-fail-SCSI-passthrough-ioctls-on-partition-devs.patch
+ApplyPatch 03-dm-dont-fwd-ioctls-from-LVs-to-underlying-dev.patch
+
+#rhbz 782686
+ApplyPatch procfs-parse-mount-options.patch
+ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
+ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
+
+#rhbz 782681
+ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 782687
+ApplyPatch loop-prevent-information-leak-after-failed-read.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1736,6 +1748,11 @@ cd compat-wireless-%{cwversion}
 ApplyPatch compat-wireless-config-fixups.patch
 ApplyPatch compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
+ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+
+#rhbz 731365, 773271
+ApplyPatch mac80211_offchannel_rework_revert.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
@@ -2114,7 +2131,7 @@ man9dir=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
 # copy the source over
 mkdir -p $docdir
-tar -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
+tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
 # Install man pages for the kernel API.
 mkdir -p $man9dir
@@ -2440,7 +2457,32 @@ fi
 # and build.
 
 %changelog
-* Sat Jan 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Jan 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.1-libre-3.1.10-libre as patch-libre-3.1.10.
+
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com> 3.1.10-2
+- Fix broken procfs backport (rhbz 782961)
+
+* Wed Jan 18 2012 Josh Boyer <jwboyer@redhat.com> 3.1.10-1
+- Linux 3.1.10
+- /proc/pid/* information leak (rhbz 782686)
+- CVE-2012-0056 proc: clean up and fix /proc/<pid>/mem (rhbz 782681)
+- loop: prevent information leak after failed read (rhbz 782687)
+
+* Tue Jan 17 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4127 possible privilege escalation via SG_IO ioctl (rhbz 769911)
+
+* Mon Jan 16 2012 John W. Linville <linville@redhat.com>
+- Re-apply patch to revert mac80211 scan optimizations (rhbz #731365, #773271)
+
+* Sun Jan 15 2012 Josh Boyer <jwboyer@redhat.com>
+- Avoid packaging symlinks for kernel-doc files (rhbz 767351)
+- Apply mac80211 NULL ptr deref fix to compat-wireless too (rhbz 769766)
+
+* Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix verbose logging messages in the rtl8192cu driver (rhbz 728740)
+
+* Fri Jan 13 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Jan 14
 - Use patch-3.1-libre-3.1.9-libre as patch-libre-3.1.9.
 
 * Fri Jan 13 2012 Josh Boyer <jwboyer@redhat.com> 3.1.9-1
