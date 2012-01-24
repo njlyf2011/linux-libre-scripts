@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -782,20 +782,6 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
 Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
 
-#rhbz752176
-Patch21080: sysfs-msi-irq-per-device.patch
-
-
-# rhbz 754907
-Patch21101: hpsa-add-irqf-shared.patch
-
-#rhbz 731365
-Patch21220: mac80211_offchannel_rework_revert.patch
-
-Patch21225: pci-Rework-ASPM-disable-code.patch
-
-Patch21226: pci-crs-blacklist.patch
-
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
 
@@ -815,18 +801,11 @@ Patch21072: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
 Patch21073: KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
 Patch21074: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
 
-
-# compat-wireless patches
-Patch50000: compat-wireless-config-fixups.patch
-Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
-Patch50002: compat-wireless-pr_fmt-warning-avoidance.patch
-Patch50003: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-
-#rhbz 771058
-Patch22100: msi-irq-sysfs-warning.patch
-
 #rhbz 728740
 Patch21076: rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+#rhbz752176
+Patch21080: sysfs-msi-irq-per-device.patch
 
 #rhbz 782686
 Patch21082: procfs-parse-mount-options.patch
@@ -835,6 +814,36 @@ Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
 #rhbz 782681
 Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
+
+#rhbz 771058
+Patch22100: msi-irq-sysfs-warning.patch
+
+# rhbz 754907
+Patch21101: hpsa-add-irqf-shared.patch
+
+#rhbz 731365
+Patch21220: mac80211_offchannel_rework_revert.patch
+
+Patch21225: pci-Rework-ASPM-disable-code.patch
+
+Patch21226: pci-crs-blacklist.patch
+
+Patch21227: mac80211-fix-work-removal-on-deauth-request.patch
+
+#rhbz 781625
+Patch21228: SCSI-sym53c8xx-Fix-NULL-pointer-dereference-in-slave.patch
+
+#rhbz 766071
+Patch21229: iwlagn-check-for-SMPS-mode.patch
+
+Patch22000: rcu-reintroduce-missing-calls.patch
+
+
+# compat-wireless patches
+Patch50000: compat-wireless-config-fixups.patch
+Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
+Patch50002: compat-wireless-pr_fmt-warning-avoidance.patch
+Patch50003: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
 %endif
 
@@ -1550,6 +1559,16 @@ ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 #rhbz 782681
 ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
 
+ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
+
+#rhbz 781625
+ApplyPatch SCSI-sym53c8xx-Fix-NULL-pointer-dereference-in-slave.patch
+
+#rhbz 766071
+ApplyPatch iwlagn-check-for-SMPS-mode.patch
+
+ApplyPatch rcu-reintroduce-missing-calls.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1617,6 +1636,7 @@ ApplyPatch compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
 ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
+ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
 
 #rhbz 731365, 773271
 ApplyPatch mac80211_offchannel_rework_revert.patch
@@ -2325,7 +2345,17 @@ fi
 # and build.
 
 %changelog
-* Sat Jan 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Jan 23 2012 Josh Boyer <jwboyer@redhat.com> 3.2.1-3
+- Fix oops in iwlwifi/iwlagn driver (rhbz 766071)
+- Fix NULL pointer dereference in sym53c8xx module (rhbz 781625)
+
+* Fri Jan 20 2012 Dave Jones <davej@redhat.com>
+- net: reintroduce missing rcu_assign_pointer() calls
+
+* Fri Jan 20 2012 Josh Boyer <jwboyer@redhat.com>
+- Add mac80211 deauth fix pointed out by Stanislaw Gruszka
+
+* Fri Jan 20 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Jan 21
 - Linux-libre 3.2-libre, with upstream patch-3.2.1.
 
 * Thu Jan 19 2012 Dave Jones <davej@redhat.com> 3.2.1-1
