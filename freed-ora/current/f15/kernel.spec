@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -711,25 +711,6 @@ Patch21031: benet-remove-bogus-unlikely-on-vlan-check.patch
 
 Patch21040: x86-code-dump-fix-truncation.patch
 
-#rhbz 728607
-Patch21060: elantech.patch
-
-#backport brcm80211 from 3.2-rc1
-Patch21090: brcm80211.patch
-Patch21091: bcma-brcmsmac-compat.patch
-
-# rhbz 754907
-Patch21100: cciss-fix-irqf-shared.patch
-Patch21101: hpsa-add-irqf-shared.patch
-
-#rhbz 731365
-Patch21220: mac80211_offchannel_rework_revert.patch
-
-Patch21225: pci-Rework-ASPM-disable-code.patch
-
-#rhbz #757839
-Patch21230: net-sky2-88e8059-fix-link-speed.patch
-
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
 
@@ -741,6 +722,9 @@ Patch21048: b44-Use-dev_kfree_skb_irq-in-b44_tx.patch
 
 #rhbz 771006
 Patch21050: thp-reduce-khugepaged-freezing-latency.patch
+
+#rhbz 728607
+Patch21060: elantech.patch
 
 #rhbz 770233
 Patch21065: Bluetooth-Add-support-for-BCM20702A0.patch
@@ -772,6 +756,27 @@ Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
 
 #rhbz 782687
 Patch21086: loop-prevent-information-leak-after-failed-read.patch
+
+#backport brcm80211 from 3.2-rc1
+Patch21090: brcm80211.patch
+Patch21091: bcma-brcmsmac-compat.patch
+
+# rhbz 754907
+Patch21100: cciss-fix-irqf-shared.patch
+Patch21101: hpsa-add-irqf-shared.patch
+
+#rhbz 731365
+Patch21220: mac80211_offchannel_rework_revert.patch
+
+Patch21225: pci-Rework-ASPM-disable-code.patch
+
+Patch21227: mac80211-fix-work-removal-on-deauth-request.patch
+
+#rhbz 781625
+Patch21228: SCSI-sym53c8xx-Fix-NULL-pointer-dereference-in-slave.patch
+
+#rhbz #757839
+Patch21230: net-sky2-88e8059-fix-link-speed.patch
 
 %endif
 
@@ -1397,6 +1402,8 @@ ApplyPatch mac80211_offchannel_rework_revert.patch
 
 ApplyPatch pci-Rework-ASPM-disable-code.patch
 
+ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
+
 #rhbz #757839
 ApplyPatch net-sky2-88e8059-fix-link-speed.patch
 
@@ -1440,6 +1447,9 @@ ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
 
 #rhbz 782687
 ApplyPatch loop-prevent-information-leak-after-failed-read.patch
+
+#rhbz 781625
+ApplyPatch SCSI-sym53c8xx-Fix-NULL-pointer-dereference-in-slave.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2088,6 +2098,12 @@ fi
 # and build.
 
 %changelog
+* Mon Jan 23 2012 Josh Boyer <jwboyer@redhat.com> 2.6.41.10-3
+- Fix NULL pointer dereference in sym53c8xx module (rhbz 781625)
+
+* Fri Jan 20 2012 Josh Boyer <jwboyer@redhat.com>
+- Add mac80211 deauth fix pointed out by Stanislaw Gruszka
+
 * Thu Jan 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.1-libre-3.1.10-libre as patch-libre-3.1.10.
 
