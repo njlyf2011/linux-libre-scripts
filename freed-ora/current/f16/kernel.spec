@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -219,7 +219,7 @@ Summary: The Linux kernel
 %define kversion 3.%{base_sublevel}
 
 # The compat-wireless version
-%define cwversion 3.2-1
+%define cwversion 3.3-rc1-2
 
 #######################################################################
 # If cwversion is less than kversion, make sure with_backports is
@@ -229,7 +229,7 @@ Summary: The Linux kernel
 #
 # (Uncomment the '#' and both spaces below to disable with_backports.)
 #
-%define with_backports 0
+# % define with_backports 0
 #######################################################################
 
 %define make_target bzImage
@@ -724,6 +724,7 @@ Patch471: floppy-drop-disable_hlt-warning.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch520: quite-apm.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
+Patch540: modpost-add-option-to-allow-external-modules-to-avoi.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
 
@@ -812,8 +813,8 @@ Patch21082: procfs-parse-mount-options.patch
 Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
 Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-#rhbz 782681
-Patch21085: proc-clean-up-and-fix-proc-pid-mem-handling.patch
+#rhbz 783211
+Patch21087: fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
 
 #rhbz 771058
 Patch22100: msi-irq-sysfs-warning.patch
@@ -821,29 +822,30 @@ Patch22100: msi-irq-sysfs-warning.patch
 # rhbz 754907
 Patch21101: hpsa-add-irqf-shared.patch
 
-#rhbz 731365
-Patch21220: mac80211_offchannel_rework_revert.patch
-
 Patch21225: pci-Rework-ASPM-disable-code.patch
 
 Patch21226: pci-crs-blacklist.patch
 
 Patch21227: mac80211-fix-work-removal-on-deauth-request.patch
 
-#rhbz 781625
-Patch21228: SCSI-sym53c8xx-Fix-NULL-pointer-dereference-in-slave.patch
+#rhbz 718790
+Patch21230: rds-Make-rds_sock_lock-BH-rather-than-IRQ-safe.patch
 
-#rhbz 766071
-Patch21229: iwlagn-check-for-SMPS-mode.patch
+#rhbz 784345
+Patch21231: realtek_async_autopm.patch
 
 Patch22000: rcu-reintroduce-missing-calls.patch
 
-
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
-Patch50001: compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
-Patch50002: compat-wireless-pr_fmt-warning-avoidance.patch
-Patch50003: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+Patch50001: compat-wireless-pr_fmt-warning-avoidance.patch
+Patch50002: compat-wireless-integrated-build.patch
+
+Patch50100: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+# Remove overlapping hardware support between b43 and brcmsmac
+Patch50101: b43-add-option-to-avoid-duplicating-device-support-w.patch
+
 
 %endif
 
@@ -1466,6 +1468,11 @@ ApplyPatch linux-2.6-silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
+%if %{with_backports}
+# modpost: add option to allow external modules to avoid taint
+ApplyPatch modpost-add-option-to-allow-external-modules-to-avoi.patch
+%endif
+
 # Changes to upstream defaults.
 
 
@@ -1521,9 +1528,6 @@ ApplyPatch sysfs-msi-irq-per-device.patch
 # rhbz 754907
 ApplyPatch hpsa-add-irqf-shared.patch
 
-#rhbz 731365
-ApplyPatch mac80211_offchannel_rework_revert.patch
-
 ApplyPatch pci-Rework-ASPM-disable-code.patch
 
 #ApplyPatch pci-crs-blacklist.patch
@@ -1556,18 +1560,18 @@ ApplyPatch procfs-parse-mount-options.patch
 ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
 ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-#rhbz 782681
-ApplyPatch proc-clean-up-and-fix-proc-pid-mem-handling.patch
-
 ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
 
-#rhbz 781625
-ApplyPatch SCSI-sym53c8xx-Fix-NULL-pointer-dereference-in-slave.patch
-
-#rhbz 766071
-ApplyPatch iwlagn-check-for-SMPS-mode.patch
-
 ApplyPatch rcu-reintroduce-missing-calls.patch
+
+#rhbz 718790
+ApplyPatch rds-Make-rds_sock_lock-BH-rather-than-IRQ-safe.patch
+
+#rhbz 783211
+ApplyPatch fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
+
+#rhbz 784345
+ApplyPatch realtek_async_autopm.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1632,17 +1636,12 @@ rm -rf compat-wireless-%{cwversion}
 cd compat-wireless-%{cwversion}
 
 ApplyPatch compat-wireless-config-fixups.patch
-ApplyPatch compat-wireless-change-CONFIG_IWLAGN-CONFIG_IWLWIFI.patch
 ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
 ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-ApplyPatch mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
 ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
 
-#rhbz 731365, 773271
-ApplyPatch mac80211_offchannel_rework_revert.patch
-
-# Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
-ApplyPatch bcma-brcmsmac-compat.patch
+# Remove overlapping hardware support between b43 and brcmsmac
+ApplyPatch b43-add-option-to-avoid-duplicating-device-support-w.patch
 
 cd ..
 
@@ -2345,6 +2344,27 @@ fi
 # and build.
 
 %changelog
+* Wed Jan 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.2.2-1
+- Linux 3.2.2
+- Add patch to invalidate parent cache when fsync is called on a partition 
+  (rhbz 783211)
+- Test fix for realtek_async_autopm oops from Stanislaw Gruszka (rhbz 784345)
+
+* Wed Jan 25 2012 John W. Linville <linville@redhat.com>
+- modpost: add option to allow external modules to avoid taint
+- Make integrated compat-wireless take advantage of the above
+
+* Wed Jan 25 2012 Josh Boyer <jwboyer@redhat.com>
+- Backport patch to fix oops in rds (rhbz 718790)
+
+* Tue Jan 24 2012 John W. Linville <linville@redhat.com>
+- Update compat-wireless snapshot to version 3.3-rc1-2
+
+* Tue Jan 24 2012 Josh Boyer <jwboyer@redhat.com>
+- Re-enable the ARCMSR module (rhbz 784287)
+- Add back a set of patches that were erroneously dropped during the rebase
+- Re-enable the LIRC_STAGING drivers (rhbz 784398)
+
 * Mon Jan 23 2012 Josh Boyer <jwboyer@redhat.com> 3.2.1-3
 - Fix oops in iwlwifi/iwlagn driver (rhbz 766071)
 - Fix NULL pointer dereference in sym53c8xx module (rhbz 781625)
