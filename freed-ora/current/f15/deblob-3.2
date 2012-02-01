@@ -1,6 +1,7 @@
 #!/bin/sh
 
-#    Copyright (C) 2008, 2009, 2010, 2011 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008, 2009, 2010, 2011, 2012
+#      Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -44,7 +45,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.1 extra=
+kver=3.2 extra=
 
 case $1 in
 --force)
@@ -431,7 +432,7 @@ clean_sed '
 s,\([" ]\)request_firmware(,\1reject_firmware(,
 ' arch/arm/mach-netx/xc.c 'disabled non-Free firmware-loading machinery'
 clean_blob arch/arm/mach-netx/xc.c
-clean_blob drivers/net/netx-eth.c
+clean_blob drivers/net/ethernet/netx-eth.c
 clean_kconfig arch/arm/Kconfig 'ARCH_NETX'
 clean_mk CONFIG_ARCH_NETX arch/arm/Makefile
 
@@ -557,9 +558,13 @@ clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 announce IMX_SDMA - "i.MX SDMA support"
 reject_firmware drivers/dma/imx-sdma.c
 clean_blob arch/arm/mach-imx/mm-imx25.c
-clean_blob arch/arm/mach-imx/mm-imx31.c
-clean_blob arch/arm/mach-imx/mm-imx35.c
+clean_blob arch/arm/mach-imx/mm-imx3.c
 clean_blob arch/arm/mach-mx5/mm.c
+clean_blob arch/arm/boot/dts/imx51-babbage.dts
+clean_blob arch/arm/boot/dts/imx53-ard.dts
+clean_blob arch/arm/boot/dts/imx53-evk.dts
+clean_blob arch/arm/boot/dts/imx53-qsb.dts
+clean_blob arch/arm/boot/dts/imx53-smd.dts
 clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
 clean_kconfig drivers/dma/Kconfig 'IMX_SDMA'
 clean_mk CONFIG_IMX_SDMA drivers/dma/Makefile
@@ -589,9 +594,9 @@ clean_kconfig drivers/media/common/tuners/Kconfig 'MEDIA_TUNER_XC2028'
 clean_mk CONFIG_MEDIA_TUNER_XC2028 drivers/media/common/tuners/Makefile
 
 announce VIDEO_TM6000_DVB - "DVB Support for tm6000 based TV cards"
-clean_blob drivers/staging/tm6000/tm6000-cards.c
-clean_kconfig drivers/staging/tm6000/Kconfig 'VIDEO_TM6000_DVB'
-clean_mk CONFIG_VIDEO_TM6000_DVB drivers/staging/tm6000/Makefile
+clean_blob drivers/media/video/tm6000/tm6000-cards.c
+clean_kconfig drivers/media/video/tm6000/Kconfig 'VIDEO_TM6000_DVB'
+clean_mk CONFIG_VIDEO_TM6000_DVB drivers/media/video/tm6000/Makefile
 
 announce MEDIA_TUNER_XC4000 - "Xceive XC4000 silicon tuner"
 undefault_firmware 'XC4000' drivers/media/common/tuners/xc4000.c
@@ -696,6 +701,12 @@ reject_firmware drivers/media/dvb/dvb-usb/gp8psk.c
 clean_blob drivers/media/dvb/dvb-usb/gp8psk.c
 clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_GP8PSK'
 clean_mk CONFIG_DVB_USB_GP8PSK drivers/media/dvb/dvb-usb/Makefile
+
+announce DVB_USB_IT913X - "it913x driver"
+clean_blob drivers/media/dvb/dvb-usb/it913x.c
+clean_file Documentation/dvb/it9137.txt
+clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_IT913X'
+clean_mk CONFIG_DVB_USB_IT913X drivers/media/dvb/dvb-usb/Makefile
 
 announce DVB_USB_LME2510 - "LME DM04/QQBOX DVB-S USB2.0 support"
 reject_firmware drivers/media/dvb/dvb-usb/lmedm04.c
@@ -840,7 +851,20 @@ clean_blob drivers/media/dvb/frontends/tda1004x.c
 clean_kconfig drivers/media/dvb/frontends 'DVB_TDA1004X'
 clean_mk CONFIG_DVB_TDA1004X drivers/media/dvb/frontends/Makefile
 
+announce DVB_TDA10071 - "NXP TDA10071"
+undefault_firmware 'TDA10071' drivers/media/dvb/frontends/tda10071_priv.h
+undefault_firmware 'TDA10071' drivers/media/dvb/frontends/tda10071.c
+reject_firmware drivers/media/dvb/frontends/tda10071.c
+clean_kconfig drivers/media/dvb/frontends 'DVB_TDA10071'
+clean_mk CONFIG_DVB_TDA10071 drivers/media/dvb/frontends/Makefile
+
 # dvb
+
+announce DVB_AS102 - "Abilis AS102 DVB receiver"
+reject_firmware drivers/staging/media/as102/as102_fw.c
+clean_blob drivers/staging/media/as102/as102_fw.c
+clean_kconfig drivers/staging/media/as102/Kconfig 'DVB_AS102'
+clean_mk CONFIG_DVB_AS102 drivers/staging/media/as102/Makefile
 
 announce DVB_AV7110 - "AV7110 cards"
 reject_firmware drivers/media/dvb/ttpci/av7110.c
@@ -901,6 +925,7 @@ clean_mk CONFIG_DVB_TTUSB_BUDGET drivers/media/dvb/ttusb-budget/Makefile
 announce DVB_TTUSB_DEC - "Technotrend/Hauppauge USB DEC devices"
 reject_firmware drivers/media/dvb/ttusb-dec/ttusb_dec.c
 clean_blob drivers/media/dvb/ttusb-dec/ttusb_dec.c
+clean_blob Documentation/dvb/ttusb-dec.txt
 clean_kconfig drivers/media/dvb/ttusb-dec/Kconfig 'DVB_TTUSB_DEC'
 clean_mk CONFIG_DVB_TTUSB_DEC drivers/media/dvb/ttusb-dec/Makefile
 
@@ -908,6 +933,8 @@ clean_mk CONFIG_DVB_TTUSB_DEC drivers/media/dvb/ttusb-dec/Makefile
 
 announce VIDEO_BT848 - "BT848 Video For Linux"
 reject_firmware drivers/media/video/bt8xx/bttv-cards.c
+clean_blob drivers/media/video/bt8xx/bttv-cards.c
+clean_blob Documentation/video4linux/bttv/README
 clean_kconfig drivers/media/video/bt8xx/Kconfig 'VIDEO_BT848'
 clean_mk CONFIG_VIDEO_BT848 drivers/media/video/bt8xx/Makefile
 
@@ -974,19 +1001,19 @@ announce "VIDEO_CX23885, VIDEO_CX88_BLACKBIRD, VIDEO_IVTV, VIDEO_PVRUSB2" - "See
 clean_blob include/media/cx2341x.h
 
 announce VIDEO_GO7007 - "Go 7007 support"
-reject_firmware drivers/staging/go7007/go7007-driver.c
-clean_blob drivers/staging/go7007/go7007-driver.c
-reject_firmware drivers/staging/go7007/go7007-fw.c
-clean_blob drivers/staging/go7007/go7007-usb.c
-clean_blob drivers/staging/go7007/saa7134-go7007.c
-clean_kconfig drivers/staging/go7007/Kconfig 'VIDEO_GO7007'
-clean_mk CONFIG_VIDEO_GO7007 drivers/staging/go7007/Makefile
+reject_firmware drivers/staging/media/go7007/go7007-driver.c
+clean_blob drivers/staging/media/go7007/go7007-driver.c
+reject_firmware drivers/staging/media/go7007/go7007-fw.c
+clean_blob drivers/staging/media/go7007/go7007-usb.c
+clean_blob drivers/staging/media/go7007/saa7134-go7007.c
+clean_kconfig drivers/staging/media/go7007/Kconfig 'VIDEO_GO7007'
+clean_mk CONFIG_VIDEO_GO7007 drivers/staging/media/go7007/Makefile
 
 announce VIDEO_GO7007_USB_S2250_BOARD - "Sensoray 2250/2251 support"
-reject_firmware drivers/staging/go7007/s2250-loader.c
-clean_blob drivers/staging/go7007/s2250-loader.c
-clean_kconfig drivers/staging/go7007/Kconfig 'VIDEO_GO7007_USB_S2250_BOARD'
-clean_mk CONFIG_VIDEO_GO7007_USB_S2250_BOARD drivers/staging/go7007/Makefile
+reject_firmware drivers/staging/media/go7007/s2250-loader.c
+clean_blob drivers/staging/media/go7007/s2250-loader.c
+clean_kconfig drivers/staging/media/go7007/Kconfig 'VIDEO_GO7007_USB_S2250_BOARD'
+clean_mk CONFIG_VIDEO_GO7007_USB_S2250_BOARD drivers/staging/media/go7007/Makefile
 
 announce VIDEO_SAA7134_DVB - "DVB/ATSC Support for saa7134 based TV cards"
 reject_firmware drivers/media/video/saa7134/saa7134-dvb.c
@@ -1050,25 +1077,25 @@ clean_mk CONFIG_RADIO_WL128X drivers/media/radio/Makefile
 announce ACENIC - "Alteon AceNIC/3Com 3C985/NetGear GA620 Gigabit"
 drop_fw_file firmware/acenic/tg1.bin.ihex firmware/acenic/tg1.bin
 drop_fw_file firmware/acenic/tg2.bin.ihex firmware/acenic/tg2.bin
-reject_firmware drivers/net/acenic.c
-clean_blob drivers/net/acenic.c
-clean_kconfig drivers/net/Kconfig 'ACENIC'
-clean_mk CONFIG_ACENIC drivers/net/Makefile
+reject_firmware drivers/net/ethernet/alteon/acenic.c
+clean_blob drivers/net/ethernet/alteon/acenic.c
+clean_kconfig drivers/net/ethernet/alteon/Kconfig 'ACENIC'
+clean_mk CONFIG_ACENIC drivers/net/ethernet/alteon/Makefile
 
 announce ADAPTEC_STARFIRE - "Adaptec Starfire/DuraLAN support"
 clean_fw firmware/adaptec/starfire_rx.bin.ihex firmware/adaptec/starfire_rx.bin
 clean_fw firmware/adaptec/starfire_tx.bin.ihex firmware/adaptec/starfire_tx.bin
-reject_firmware drivers/net/starfire.c
-clean_blob drivers/net/starfire.c
-clean_kconfig drivers/net/Kconfig 'ADAPTEC_STARFIRE'
-clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/Makefile
+reject_firmware drivers/net/ethernet/adaptec/starfire.c
+clean_blob drivers/net/ethernet/adaptec/starfire.c
+clean_kconfig drivers/net/ethernet/adaptec/Kconfig 'ADAPTEC_STARFIRE'
+clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/ethernet/adaptec/Makefile
 
 announce BNA - "Brocade 1010/1020 10Gb Ethernet Driver support"
-clean_blob drivers/net/bna/bnad.c
-clean_blob drivers/net/bna/cna.h
-reject_firmware drivers/net/bna/cna_fwimg.c
-clean_kconfig drivers/net/Kconfig 'BNA'
-clean_mk CONFIG_BNA drivers/net/bna/Makefile
+clean_blob drivers/net/ethernet/brocade/bna/bnad.c
+clean_blob drivers/net/ethernet/brocade/bna/cna.h
+reject_firmware drivers/net/ethernet/brocade/bna/cna_fwimg.c
+clean_kconfig drivers/net/ethernet/brocade/bna/Kconfig 'BNA'
+clean_mk CONFIG_BNA drivers/net/ethernet/brocade/bna/Makefile
 
 announce BNX2 - "Broadcom NetXtremeII"
 drop_fw_file firmware/bnx2/bnx2-mips-09-6.2.1a.fw.ihex firmware/bnx2/bnx2-mips-09-6.2.1a.fw
@@ -1076,35 +1103,35 @@ drop_fw_file firmware/bnx2/bnx2-rv2p-09-6.0.17.fw.ihex firmware/bnx2/bnx2-rv2p-0
 drop_fw_file firmware/bnx2/bnx2-rv2p-09ax-6.0.17.fw.ihex firmware/bnx2/bnx2-rv2p-09ax-6.0.17.fw
 drop_fw_file firmware/bnx2/bnx2-mips-06-6.2.1.fw.ihex firmware/bnx2/bnx2-mips-06-6.2.1.fw
 drop_fw_file firmware/bnx2/bnx2-rv2p-06-6.0.15.fw.ihex firmware/bnx2/bnx2-rv2p-06-6.0.15.fw
-reject_firmware drivers/net/bnx2.c
-clean_blob drivers/net/bnx2.c
-clean_kconfig drivers/net/Kconfig 'BNX2'
-clean_mk CONFIG_BNX2 drivers/net/Makefile
+reject_firmware drivers/net/ethernet/broadcom/bnx2.c
+clean_blob drivers/net/ethernet/broadcom/bnx2.c
+clean_kconfig drivers/net/ethernet/broadcom/Kconfig 'BNX2'
+clean_mk CONFIG_BNX2 drivers/net/ethernet/broadcom/Makefile
 
 announce BNX2X - "Broadcom NetXtremeII 10Gb support"
 drop_fw_file firmware/bnx2x/bnx2x-e1-6.2.9.0.fw.ihex firmware/bnx2x/bnx2x-e1-6.2.9.0.fw
 drop_fw_file firmware/bnx2x/bnx2x-e1h-6.2.9.0.fw.ihex firmware/bnx2x/bnx2x-e1h-6.2.9.0.fw
 drop_fw_file firmware/bnx2x/bnx2x-e2-6.2.9.0.fw.ihex firmware/bnx2x/bnx2x-e2-6.2.9.0.fw
-reject_firmware drivers/net/bnx2x/bnx2x_main.c
+reject_firmware drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
 clean_sed '
 /^#include "bnx2x_init\.h"/,/^$/{
   /^$/i\
 #define bnx2x_init_block(bp, start, end) \\\
   return (printk(KERN_ERR "%s: Missing Free firmware\\n", bp->dev->name),\\\
 	  -EINVAL)
-}' drivers/net/bnx2x/bnx2x_main.c 'report missing Free firmware'
-clean_blob drivers/net/bnx2x/bnx2x_main.c
-clean_blob drivers/net/bnx2x/bnx2x_hsi.h
-clean_blob drivers/net/bnx2x/bnx2x_init_ops.h
-clean_kconfig drivers/net/Kconfig 'BNX2X'
-clean_mk CONFIG_BNX2X drivers/net/Makefile
+}' drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c 'report missing Free firmware'
+clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
+clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_hsi.h
+clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_init_ops.h
+clean_kconfig drivers/net/ethernet/broadcom/Kconfig 'BNX2X'
+clean_mk CONFIG_BNX2X drivers/net/ethernet/broadcom/bnx2x/Makefile
 
 announce CASSINI - "Sun Cassini"
 drop_fw_file firmware/sun/cassini.bin.ihex firmware/sun/cassini.bin
-reject_firmware drivers/net/cassini.c
-clean_blob drivers/net/cassini.c
-clean_kconfig drivers/net/Kconfig 'CASSINI'
-clean_mk CONFIG_CASSINI drivers/net/Makefile
+reject_firmware drivers/net/ethernet/sun/cassini.c
+clean_blob drivers/net/ethernet/sun/cassini.c
+clean_kconfig drivers/net/ethernet/sun/Kconfig 'CASSINI'
+clean_mk CONFIG_CASSINI drivers/net/ethernet/sun/Makefile
 
 announce CHELSIO_T3 - "Chelsio AEL 2005 support"
 drop_fw_file firmware/cxgb3/t3b_psram-1.1.0.bin.ihex firmware/cxgb3/t3b_psram-1.1.0.bin
@@ -1113,29 +1140,29 @@ drop_fw_file firmware/cxgb3/t3fw-7.10.0.bin.ihex firmware/cxgb3/t3fw-7.10.0.bin
 drop_fw_file firmware/cxgb3/ael2005_opt_edc.bin.ihex firmware/cxgb3/ael2005_opt_edc.bin
 drop_fw_file firmware/cxgb3/ael2005_twx_edc.bin.ihex firmware/cxgb3/ael2005_twx_edc.bin
 drop_fw_file firmware/cxgb3/ael2020_twx_edc.bin.ihex firmware/cxgb3/ael2020_twx_edc.bin
-reject_firmware drivers/net/cxgb3/cxgb3_main.c
-clean_blob drivers/net/cxgb3/cxgb3_main.c
-clean_kconfig drivers/net/Kconfig 'CHELSIO_T3'
-clean_mk CONFIG_CHELSIO_T3 drivers/net/cxgb3/Makefile
+reject_firmware drivers/net/ethernet/chelsio/cxgb3/cxgb3_main.c
+clean_blob drivers/net/ethernet/chelsio/cxgb3/cxgb3_main.c
+clean_kconfig drivers/net/ethernet/chelsio/Kconfig 'CHELSIO_T3'
+clean_mk CONFIG_CHELSIO_T3 drivers/net/ethernet/chelsio/cxgb3/Makefile
 
 announce CHELSIO_T4 - "Chelsio Communications T4 Ethernet support"
-reject_firmware drivers/net/cxgb4/cxgb4_main.c
-clean_blob drivers/net/cxgb4/cxgb4_main.c
-clean_kconfig drivers/net/Kconfig 'CHELSIO_T4'
-clean_mk CONFIG_CHELSIO_T4 drivers/net/cxgb4/Makefile
+reject_firmware drivers/net/ethernet/chelsio/cxgb4/cxgb4_main.c
+clean_blob drivers/net/ethernet/chelsio/cxgb4/cxgb4_main.c
+clean_kconfig drivers/net/ethernet/chelsio/Kconfig 'CHELSIO_T4'
+clean_mk CONFIG_CHELSIO_T4 drivers/net/ethernet/chelsio/cxgb4/Makefile
 
 announce E100 - "Intel PRO/100+"
 drop_fw_file firmware/e100/d101m_ucode.bin.ihex firmware/e100/d101m_ucode.bin
 drop_fw_file firmware/e100/d101s_ucode.bin.ihex firmware/e100/d101s_ucode.bin
 drop_fw_file firmware/e100/d102e_ucode.bin.ihex firmware/e100/d102e_ucode.bin
-reject_firmware drivers/net/e100.c
+reject_firmware drivers/net/ethernet/intel/e100.c
 clean_sed '
 /^static const struct firmware \*e100_\(reject\|request\)_firmware(/,/^}$/{
   s:^\(.*\)return ERR_PTR(err);$:\1netif_err(nic, probe, nic->netdev, "Proceeding without firmware\\n");\n\1return NULL;:
-}' drivers/net/e100.c 'proceed without firmware'
-clean_blob drivers/net/e100.c
-clean_kconfig drivers/net/Kconfig 'E100'
-clean_mk CONFIG_E100 drivers/net/Makefile
+}' drivers/net/ethernet/intel/e100.c 'proceed without firmware'
+clean_blob drivers/net/ethernet/intel/e100.c
+clean_kconfig drivers/net/ethernet/intel/Kconfig 'E100'
+clean_mk CONFIG_E100 drivers/net/ethernet/intel/Makefile
 
 announce FT1000_PCMCIA - "Driver for ft1000 pcmcia device."
 clean_file drivers/staging/ft1000/ft1000-pcmcia/ft1000.img
@@ -1164,34 +1191,34 @@ announce MYRI_SBUS - "MyriCOM Gigabit Ethernet"
 drop_fw_file firmware/myricom/lanai.bin.ihex firmware/myricom/lanai.bin
 
 announce MYRI10GE - "Myricom Myri-10G Ethernet support"
-reject_firmware drivers/net/myri10ge/myri10ge.c
-clean_blob drivers/net/myri10ge/myri10ge.c
-clean_kconfig drivers/net/Kconfig 'MYRI10GE'
-clean_mk CONFIG_MYRI10GE drivers/net/myri10ge/Makefile
+reject_firmware drivers/net/ethernet/myricom/myri10ge/myri10ge.c
+clean_blob drivers/net/ethernet/myricom/myri10ge/myri10ge.c
+clean_kconfig drivers/net/ethernet/myricom/Kconfig 'MYRI10GE'
+clean_mk CONFIG_MYRI10GE drivers/net/ethernet/myricom/myri10ge/Makefile
 
 announce NETXEN_NIC - "NetXen Multi port (1/10) Gigabit Ethernet NIC"
-reject_firmware drivers/net/netxen/netxen_nic.h
-reject_firmware drivers/net/netxen/netxen_nic_main.c
-reject_firmware drivers/net/netxen/netxen_nic_init.c
-clean_blob drivers/net/netxen/netxen_nic.h
-clean_blob drivers/net/netxen/netxen_nic_main.c
-clean_kconfig drivers/net/Kconfig 'NETXEN_NIC'
-clean_mk CONFIG_NETXEN_NIC drivers/net/Makefile
+reject_firmware drivers/net/ethernet/qlogic/netxen/netxen_nic.h
+reject_firmware drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c
+reject_firmware drivers/net/ethernet/qlogic/netxen/netxen_nic_init.c
+clean_blob drivers/net/ethernet/qlogic/netxen/netxen_nic.h
+clean_blob drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c
+clean_kconfig drivers/net/ethernet/qlogic/Kconfig 'NETXEN_NIC'
+clean_mk CONFIG_NETXEN_NIC drivers/net/ethernet/qlogic/Makefile
 
 announce QLCNIC - "QLOGIC QLCNIC 1/10Gb Converged Ethernet NIC Support"
-reject_firmware drivers/net/qlcnic/qlcnic.h
-reject_firmware drivers/net/qlcnic/qlcnic_init.c
-reject_firmware drivers/net/qlcnic/qlcnic_main.c
-clean_blob drivers/net/qlcnic/qlcnic.h
-clean_blob drivers/net/qlcnic/qlcnic_main.c
-clean_kconfig drivers/net/Kconfig 'QLCNIC'
-clean_mk CONFIG_QLCNIC drivers/net/qlcnic/Makefile
+reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic.h
+reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_init.c
+reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c
+clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic.h
+clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c
+clean_kconfig drivers/net/ethernet/qlogic/Kconfig 'QLCNIC'
+clean_mk CONFIG_QLCNIC drivers/net/ethernet/qlogic/qlcnic/Makefile
 
 announce R8169 - "Realtek 8169 gigabit ethernet support"
-reject_firmware drivers/net/r8169.c
-clean_blob drivers/net/r8169.c
-clean_kconfig drivers/net/Kconfig R8169
-clean_mk CONFIG_R8169 drivers/net/Makefile
+reject_firmware drivers/net/ethernet/realtek/r8169.c
+clean_blob drivers/net/ethernet/realtek/r8169.c
+clean_kconfig drivers/net/ethernet/realtek/Kconfig R8169
+clean_mk CONFIG_R8169 drivers/net/ethernet/realtek/Makefile
 
 announce SLICOSS - "Alacritech Gigabit IS-NIC cards"
 reject_firmware drivers/staging/slicoss/slicoss.c
@@ -1200,42 +1227,42 @@ clean_kconfig drivers/staging/slicoss/Kconfig 'SLICOSS'
 clean_mk CONFIG_SLICOSS drivers/staging/slicoss/Makefile
 
 announce SPIDER_NET - "Spider Gigabit Ethernet driver"
-reject_firmware drivers/net/spider_net.c
+reject_firmware drivers/net/ethernet/toshiba/spider_net.c
 clean_sed 's,spider_fw\.bin,DEBLOBBED.bin,g' \
-  drivers/net/spider_net.c 'removed non-Free firmware notes'
-clean_blob drivers/net/spider_net.c
-clean_blob drivers/net/spider_net.h
-clean_kconfig drivers/net/Kconfig 'SPIDER_NET'
-clean_mk CONFIG_SPIDER_NET drivers/net/Makefile
+  drivers/net/ethernet/toshiba/spider_net.c 'removed non-Free firmware notes'
+clean_blob drivers/net/ethernet/toshiba/spider_net.c
+clean_blob drivers/net/ethernet/toshiba/spider_net.h
+clean_kconfig drivers/net/ethernet/toshiba/Kconfig 'SPIDER_NET'
+clean_mk CONFIG_SPIDER_NET drivers/net/ethernet/toshiba/Makefile
 
 announce TEHUTI - "Tehuti Networks 10G Ethernet"
 drop_fw_file firmware/tehuti/bdx.bin.ihex firmware/tehuti/bdx.bin
-reject_firmware drivers/net/tehuti.c
-clean_blob drivers/net/tehuti.c
-clean_kconfig drivers/net/Kconfig 'TEHUTI'
-clean_mk CONFIG_TEHUTI drivers/net/Makefile
+reject_firmware drivers/net/ethernet/tehuti/tehuti.c
+clean_blob drivers/net/ethernet/tehuti/tehuti.c
+clean_kconfig drivers/net/ethernet/tehuti/Kconfig 'TEHUTI'
+clean_mk CONFIG_TEHUTI drivers/net/ethernet/tehuti/Makefile
 
 announce TIGON3 - "Broadcom Tigon3"
 drop_fw_file firmware/tigon/tg3.bin.ihex firmware/tigon/tg3.bin
 drop_fw_file firmware/tigon/tg3_tso.bin.ihex firmware/tigon/tg3_tso.bin
 drop_fw_file firmware/tigon/tg3_tso5.bin.ihex firmware/tigon/tg3_tso5.bin
-reject_firmware drivers/net/tg3.c
-clean_blob drivers/net/tg3.c
-clean_kconfig drivers/net/Kconfig 'TIGON3'
-clean_mk CONFIG_TIGON3 drivers/net/Makefile
+reject_firmware drivers/net/ethernet/broadcom/tg3.c
+clean_blob drivers/net/ethernet/broadcom/tg3.c
+clean_kconfig drivers/net/ethernet/broadcom/Kconfig 'TIGON3'
+clean_mk CONFIG_TIGON3 drivers/net/ethernet/broadcom/Makefile
 
 announce TYPHOON - "3cr990 series Typhoon"
 drop_fw_file firmware/3com/typhoon.bin.ihex firmware/3com/typhoon.bin
-reject_firmware drivers/net/typhoon.c
-clean_blob drivers/net/typhoon.c
-clean_kconfig drivers/net/Kconfig 'TYPHOON'
-clean_mk CONFIG_TYPHOON drivers/net/Makefile
+reject_firmware drivers/net/ethernet/3com/typhoon.c
+clean_blob drivers/net/ethernet/3com/typhoon.c
+clean_kconfig drivers/net/ethernet/3com/Kconfig 'TYPHOON'
+clean_mk CONFIG_TYPHOON drivers/net/ethernet/3com/Makefile
 
 announce VXGE - "Exar X3100 Series 10GbE PCIe Server Adapter"
-reject_firmware drivers/net/vxge/vxge-main.c
-clean_blob drivers/net/vxge/vxge-main.c
-clean_kconfig drivers/net/Kconfig 'VXGE'
-clean_mk CONFIG_VXGE drivers/net/vxge/Makefile
+reject_firmware drivers/net/ethernet/neterion/vxge/vxge-main.c
+clean_blob drivers/net/ethernet/neterion/vxge/vxge-main.c
+clean_kconfig drivers/net/ethernet/neterion/Kconfig 'VXGE'
+clean_mk CONFIG_VXGE drivers/net/ethernet/neterion/vxge/Makefile
 
 # appletalk
 
@@ -1272,14 +1299,16 @@ clean_blob drivers/net/irda/irda-usb.c
 clean_kconfig drivers/net/irda/Kconfig 'USB_IRDA'
 clean_mk CONFIG_USB_IRDA drivers/net/irda/Makefile
 
-# pcmcia
+# smsc
 
 announce PCMCIA_SMC91C92 - "SMC 91Cxx PCMCIA"
 drop_fw_file firmware/ositech/Xilinx7OD.bin.ihex firmware/ositech/Xilinx7OD.bin
-reject_firmware drivers/net/pcmcia/smc91c92_cs.c
-clean_blob drivers/net/pcmcia/smc91c92_cs.c
-clean_kconfig drivers/net/pcmcia/Kconfig 'PCMCIA_SMC91C92'
-clean_mk CONFIG_PCMCIA_SMC91C92 drivers/net/pcmcia/Makefile
+reject_firmware drivers/net/ethernet/smsc/smc91c92_cs.c
+clean_blob drivers/net/ethernet/smsc/smc91c92_cs.c
+clean_kconfig drivers/net/ethernet/smsc/Kconfig 'PCMCIA_SMC91C92'
+clean_mk CONFIG_PCMCIA_SMC91C92 drivers/net/ethernet/smsc/Makefile
+
+# pcmcia
 
 # CIS files are not software.
 # announce PCCARD - "PCCard (PCMCIA/CardBus) support"
@@ -1386,17 +1415,17 @@ clean_kconfig drivers/net/wireless/b43legacy/Kconfig 'B43LEGACY'
 clean_mk CONFIG_B43LEGACY drivers/net/wireless/b43legacy/Makefile
 
 announce BRCMSMAC - "Broadcom IEEE802.11n PCIe SoftMAC WLAN driver"
-reject_firmware drivers/staging/brcm80211/brcmsmac/mac80211_if.c
-clean_blob drivers/staging/brcm80211/brcmsmac/mac80211_if.c
-clean_kconfig drivers/staging/brcm80211/Kconfig 'BRCMSMAC'
-clean_mk CONFIG_BRCMSMAC drivers/staging/brcm80211/Makefile
+reject_firmware drivers/net/wireless/brcm80211/brcmsmac/mac80211_if.c
+clean_blob drivers/net/wireless/brcm80211/brcmsmac/mac80211_if.c
+clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMSMAC'
+clean_mk CONFIG_BRCMSMAC drivers/net/wireless/brcm80211/Makefile
 
 announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
-reject_firmware drivers/staging/brcm80211/brcmfmac/dhd_sdio.c
-clean_blob drivers/staging/brcm80211/brcmfmac/dhd_sdio.c
-clean_blob drivers/staging/brcm80211/brcmfmac/bcmchip.h
-clean_kconfig drivers/staging/brcm80211/Kconfig 'BRCMFMAC'
-clean_mk CONFIG_BRCMFMAC drivers/staging/brcm80211/Makefile
+reject_firmware drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+clean_blob drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+clean_blob drivers/net/wireless/brcm80211/brcmfmac/bcmchip.h
+clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC'
+clean_mk CONFIG_BRCMFMAC drivers/net/wireless/brcm80211/Makefile
 
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
 reject_firmware drivers/net/wireless/orinoco/fw.c
@@ -1453,15 +1482,15 @@ clean_blob drivers/net/wireless/iwlegacy/iwl-3945.h
 clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL3945'
 clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 
-announce IWLAGN - "Intel Wireless WiFi Next Gen AGN"
+announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/iwlwifi/iwl-agn.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-agn.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
-clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLAGN'
-clean_mk CONFIG_IWLAGN drivers/net/wireless/iwlwifi/Makefile
+clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
+clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
 announce IWL4965 - "Intel Wireless WiFi 4965AGN"
 reject_firmware drivers/net/wireless/iwlegacy/iwl4965-base.c
@@ -1533,13 +1562,23 @@ clean_blob drivers/net/wireless/libertas_tf/if_usb.c
 clean_kconfig drivers/net/wireless/Kconfig 'LIBERTAS_THINFIRM_USB'
 clean_mk CONFIG_LIBERTAS_THINFIRM_USB drivers/net/wireless/libertas_tf/Makefile
 
-announce MWIFIEX_SDIO - "Marvell WiFi-Ex Driver"
+announce MWIFIEX - "Marvell WiFi-Ex Driver"
 clean_blob drivers/net/wireless/mwifiex/README
 reject_firmware drivers/net/wireless/mwifiex/main.c
+clean_kconfig drivers/net/wireless/mwifiex/Kconfig 'MWIFIEX'
+clean_mk CONFIG_MWIFIEX drivers/net/wireless/mwifiex/Makefile
+
+announce MWIFIEX_SDIO - "Marvell WiFi-Ex Driver for SD8787"
 clean_blob drivers/net/wireless/mwifiex/sdio.h
 clean_blob drivers/net/wireless/mwifiex/sdio.c
 clean_kconfig drivers/net/wireless/mwifiex/Kconfig 'MWIFIEX_SDIO'
 clean_mk CONFIG_MWIFIEX_SDIO drivers/net/wireless/mwifiex/Makefile
+
+announce MWIFIEX_PCIE - "Marvell WiFi-Ex Driver for PCI 8766"
+clean_blob drivers/net/wireless/mwifiex/pcie.h
+clean_blob drivers/net/wireless/mwifiex/pcie.c
+clean_kconfig drivers/net/wireless/mwifiex/Kconfig 'MWIFIEX_PCIE'
+clean_mk CONFIG_MWIFIEX_PCIE drivers/net/wireless/mwifiex/Makefile
 
 announce MWL8K - "Marvell 88W8xxx PCI/PCIe Wireless support"
 reject_firmware drivers/net/wireless/mwl8k.c
@@ -1547,11 +1586,13 @@ clean_blob drivers/net/wireless/mwl8k.c
 clean_kconfig drivers/net/wireless/Kconfig 'MWL8K'
 clean_mk CONFIG_MWL8K drivers/net/wireless/Makefile
 
-announce ATH6K_LEGACY - "Atheros AR6003 support (non mac80211)"
-reject_firmware drivers/staging/ath6kl/os/linux/include/osapi_linux.h
-clean_blob drivers/staging/ath6kl/os/linux/include/ar6000_drv.h
-clean_kconfig drivers/staging/ath6kl/Kconfig 'ATH6K_LEGACY'
-clean_mk CONFIG_ATH6K_LEGACY drivers/staging/ath6kl/Makefile
+announce ATH6KL - "Atheros ath6kl support"
+reject_firmware drivers/net/wireless/ath/ath6kl/init.c
+clean_blob drivers/net/wireless/ath/ath6kl/init.c
+clean_blob drivers/net/wireless/ath/ath6kl/core.h
+clean_blob drivers/net/wireless/ath/ath6kl/sdio.c
+clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL'
+clean_mk CONFIG_ATH6KL drivers/net/wireless/ath/ath6kl/Makefile
 
 announce ATH9K_HTC - "Atheros HTC based wireless cards support"
 reject_firmware drivers/net/wireless/ath/ath9k/hif_usb.c
@@ -1648,8 +1689,9 @@ clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192SE
 clean_mk CONFIG_RTL8192SE drivers/net/wireless/rtlwifi/rtl8192se/Makefile
 
 announce RTL8192E - "RealTek RTL8192E Wireless LAN NIC driver"
-reject_firmware drivers/staging/rtl8192e/r819xE_firmware.c
-clean_blob drivers/staging/rtl8192e/r819xE_firmware.c
+reject_firmware drivers/staging/rtl8192e/r8192E_firmware.c
+clean_blob drivers/staging/rtl8192e/r8192E_firmware.c
+clean_blob drivers/staging/rtl8192e/r8192E_hwimg.c
 clean_kconfig drivers/staging/rtl8192e/Kconfig RTL8192E
 clean_mk CONFIG_RTL8192E drivers/staging/rtl8192e/Makefile
 
@@ -1766,8 +1808,8 @@ clean_blob drivers/staging/bcm/Macros.h
 # the firmware proper.
 clean_sed '
 /^static \(inline \)\?struct file \*open_firmware_file/,/^}$/ {
-  /oldfs=get_fs();/i\
-    return /*(DEBLOBBED)*/ NULL;
+  /oldfs *= *get_fs();/i\
+	return /*(DEBLOBBED)*/ NULL;
 }' drivers/staging/bcm/Misc.c 'disabled non-Free firmware loading machinery'
 clean_kconfig drivers/staging/bcm/Kconfig 'BCM_WIMAX'
 clean_mk CONFIG_BCM_WIMAX drivers/staging/bcm/Makefile
@@ -1860,10 +1902,10 @@ clean_kconfig drivers/input/touchscreen/Kconfig 'TOUCHSCREEN_ATMEL_MXT'
 clean_mk CONFIG_TOUCHSCREEN_ATMEL_MXT drivers/input/touchscreen/Makefile
 
 announce LIRC_ZILOG - "Zilog/Hauppauge IR Transmitter"
-reject_firmware drivers/staging/lirc/lirc_zilog.c
-clean_blob drivers/staging/lirc/lirc_zilog.c
-clean_kconfig drivers/staging/lirc/Kconfig 'LIRC_ZILOG'
-clean_mk CONFIG_LIRC_ZILOG drivers/staging/lirc/Makefile
+reject_firmware drivers/staging/media/lirc/lirc_zilog.c
+clean_blob drivers/staging/media/lirc/lirc_zilog.c
+clean_kconfig drivers/staging/media/lirc/Kconfig 'LIRC_ZILOG'
+clean_mk CONFIG_LIRC_ZILOG drivers/staging/media/lirc/Makefile
 
 ####################
 # Data acquisition #
@@ -1886,6 +1928,12 @@ reject_firmware drivers/staging/comedi/drivers/usbduxfast.c
 clean_blob drivers/staging/comedi/drivers/usbduxfast.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUXFAST'
 clean_mk CONFIG_COMEDI_USBDUXFAST drivers/staging/comedi/drivers/Makefile
+
+announce COMEDI_USBDUXSIGMA - "ITL USB-DUXsigma support"
+reject_firmware drivers/staging/comedi/drivers/usbduxsigma.c
+clean_blob drivers/staging/comedi/drivers/usbduxsigma.c
+clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUXSIGMA'
+clean_mk CONFIG_COMEDI_USBDUXSIGMA drivers/staging/comedi/drivers/Makefile
 
 
 #######
@@ -2456,7 +2504,6 @@ clean_mk 'CONFIG_SND_USB_6FIRE' sound/usb/6fire/Makefile
 announce Documentation - "non-Free firmware scripts and documentation"
 clean_blob Documentation/dvb/avermedia.txt
 clean_blob Documentation/dvb/opera-firmware.txt
-clean_blob Documentation/dvb/ttusb-dec.txt
 clean_blob Documentation/sound/alsa/ALSA-Configuration.txt
 clean_blob Documentation/sound/oss/MultiSound
 clean_blob Documentation/sound/oss/PSS
