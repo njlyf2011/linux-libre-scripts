@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -67,7 +67,7 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -780,17 +780,11 @@ Patch20000: utrace.patch
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 
-Patch21021: 0002-mm-Abort-reclaim-compaction-if-compaction-can-procee.patch
-Patch21022: mm-do-not-stall-in-synchronous-compaction-for-THP-allocations.patch
-
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
 
 #rhbz 590880
 Patch21046: alps.patch
-
-#rhbz 746097
-Patch21049: tpm_tis-delay-after-aborting-cmd.patch
 
 Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
 Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
@@ -813,9 +807,6 @@ Patch21082: procfs-parse-mount-options.patch
 Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
 Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-#rhbz 783211
-Patch21087: fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
-
 #rhbz 771058
 Patch22100: msi-irq-sysfs-warning.patch
 
@@ -826,15 +817,8 @@ Patch21225: pci-Rework-ASPM-disable-code.patch
 
 Patch21226: pci-crs-blacklist.patch
 
-Patch21227: mac80211-fix-work-removal-on-deauth-request.patch
-
-#rhbz 718790
-Patch21230: rds-Make-rds_sock_lock-BH-rather-than-IRQ-safe.patch
-
-#rhbz 784345
-Patch21231: realtek_async_autopm.patch
-
-Patch22000: rcu-reintroduce-missing-calls.patch
+#rhbz 772772
+Patch21232: rt2x00_fix_MCU_request_failures.patch
 
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
@@ -843,9 +827,22 @@ Patch50002: compat-wireless-integrated-build.patch
 
 Patch50100: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
-# Remove overlapping hardware support between b43 and brcmsmac
-Patch50101: b43-add-option-to-avoid-duplicating-device-support-w.patch
+# Pending upstream fixes
+Patch50101: mac80211-fix-debugfs-key-station-symlink.patch
+Patch50102: brcmsmac-fix-tx-queue-flush-infinite-loop.patch
+Patch50103: mac80211-Use-the-right-headroom-size-for-mesh-mgmt-f.patch
+Patch50105: b43-add-option-to-avoid-duplicating-device-support-w.patch
+Patch50106: mac80211-update-oper_channel-on-ibss-join.patch
+Patch50107: mac80211-set-bss_conf.idle-when-vif-is-connected.patch
+Patch50108: iwlwifi-fix-PCI-E-transport-inta-race.patch
+Patch50109: bcma-Fix-mem-leak-in-bcma_bus_scan.patch
+Patch50110: rt2800lib-fix-wrong-128dBm-when-signal-is-stronger-t.patch
+Patch50111: iwlwifi-make-Tx-aggregation-enabled-on-ra-be-at-DEBU.patch
+Patch50112: ssb-fix-cardbus-slot-in-hostmode.patch
+Patch50113: iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
+Patch50114: mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
 
+Patch50200: ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
 
 %endif
 
@@ -1538,9 +1535,6 @@ ApplyPatch nfs-client-freezer.patch
 #rhbz 590880
 ApplyPatch alps.patch
 
-#rhbz 746097
-ApplyPatch tpm_tis-delay-after-aborting-cmd.patch
-
 #rhbz 771058
 ApplyPatch msi-irq-sysfs-warning.patch
 
@@ -1560,18 +1554,8 @@ ApplyPatch procfs-parse-mount-options.patch
 ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
 ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
-
-ApplyPatch rcu-reintroduce-missing-calls.patch
-
-#rhbz 718790
-ApplyPatch rds-Make-rds_sock_lock-BH-rather-than-IRQ-safe.patch
-
-#rhbz 783211
-ApplyPatch fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
-
-#rhbz 784345
-ApplyPatch realtek_async_autopm.patch
+#rhbz 772772
+ApplyPatch rt2x00_fix_MCU_request_failures.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1637,11 +1621,28 @@ cd compat-wireless-%{cwversion}
 
 ApplyPatch compat-wireless-config-fixups.patch
 ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
-ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
+ApplyPatch compat-wireless-integrated-build.patch
 
-# Remove overlapping hardware support between b43 and brcmsmac
+ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
+
+# Pending upstream fixes
+ApplyPatch mac80211-fix-debugfs-key-station-symlink.patch
+ApplyPatch brcmsmac-fix-tx-queue-flush-infinite-loop.patch
+ApplyPatch mac80211-Use-the-right-headroom-size-for-mesh-mgmt-f.patch
 ApplyPatch b43-add-option-to-avoid-duplicating-device-support-w.patch
+ApplyPatch mac80211-update-oper_channel-on-ibss-join.patch
+ApplyPatch mac80211-set-bss_conf.idle-when-vif-is-connected.patch
+ApplyPatch iwlwifi-fix-PCI-E-transport-inta-race.patch
+ApplyPatch bcma-Fix-mem-leak-in-bcma_bus_scan.patch
+ApplyPatch rt2800lib-fix-wrong-128dBm-when-signal-is-stronger-t.patch
+ApplyPatch iwlwifi-make-Tx-aggregation-enabled-on-ra-be-at-DEBU.patch
+ApplyPatch ssb-fix-cardbus-slot-in-hostmode.patch
+ApplyPatch iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
+ApplyPatch mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
+
+ApplyPatch ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
+
+ApplyPatch rt2x00_fix_MCU_request_failures.patch
 
 cd ..
 
@@ -1878,6 +1879,9 @@ BuildKernel() {
 %if %{with_backports}
 
     cd ../compat-wireless-%{cwversion}/
+
+    install -m 644 config.mk \
+	$RPM_BUILD_ROOT/boot/config.mk-compat-wireless-%{cwversion}-$KernelVer
 
     make -s ARCH=$Arch V=1 %{?_smp_mflags} \
 	KLIB_BUILD=../linux-%{kversion}.%{_target_cpu} \
@@ -2297,6 +2301,7 @@ fi
 /lib/modules/%{KVERREL}%{?2:.%{2}}/extra\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/updates\
 %if %{with_backports}\
+/boot/config.mk-compat-wireless-%{cwversion}-%{KVERREL}%{?2:.%{2}}\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/backports\
 %endif\
 %ifarch %{vdso_arches}\
@@ -2344,6 +2349,54 @@ fi
 # and build.
 
 %changelog
+* Sat Feb 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.3-libre as patch-libre-3.2.3.
+
+* Fri Feb 03 2012 Josh Boyer <jwboyer@redhat.com> 3.2.3-2
+- Drop patch that was NAKed upstream (rhbz 783211)
+
+* Fri Feb  3 2012 John W. Linville <linville@redhat.com>
+- bcma: Fix mem leak in bcma_bus_scan()
+- rt2800lib: fix wrong -128dBm when signal is stronger than -12dBm
+- iwlwifi: make "Tx aggregation enabled on ra =" be at DEBUG level
+- ssb: fix cardbus slot in hostmode
+- mac80211: timeout a single frame in the rx reorder buffer
+
+* Fri Feb 03 2012 Dave Jones <davej@redhat.com> 3.2.3-1
+- Linux 3.2.3
+
+* Fri Feb 03 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch from Jakub Kicinski to fix rt2x00 MCU requests (rhbz 772772)
+
+* Wed Feb  1 2012 John W. Linville <linville@redhat.com>
+- Use "iwlwifi: don't mess up QoS counters with non-QoS frames" (rhbz 785239)
+- Actually apply patch to make integrated compat-wireless avoid taint...
+
+* Tue Jan 31 2012 John W. Linville <linville@redhat.com>
+- Apply iwlwifi patch for TID issue (rhbz 785239)
+
+* Mon Jan 30 2012 Dave Jones <davej@redhat.com>
+- Enable kmemleak (off by default) in kernel-debug (rhbz 782419)
+
+* Mon Jan 30 2012 Dave Jones <davej@redhat.com>
+- Restore the Savage DRM and several others that were accidentally
+  early-deprecated.
+
+* Mon Jan 30 2012 John W. Linville <linville@redhat.com>
+- Use the eeprom_93cx6 driver from the compat-wireless package
+- mac80211: fix debugfs key->station symlink
+- brcmsmac: fix tx queue flush infinite loop
+- mac80211: Use the right headroom size for mesh mgmt frames
+- mac80211: fix work removal on deauth request
+- b43: add option to avoid duplicating device support with brcmsmac
+- mac80211: update oper_channel on ibss join
+- mac80211: set bss_conf.idle when vif is connected
+- iwlwifi: fix PCI-E transport "inta" race
+- ath9k: use WARN_ON_ONCE in ath_rc_get_highest_rix
+
+* Fri Jan 27 2012 John W. Linville <linville@redhat.com>
+- Include config.mk from compat-wireless build in files for installation
+
 * Wed Jan 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.2.2-1
 - Linux 3.2.2
 - Add patch to invalidate parent cache when fsync is called on a partition 
