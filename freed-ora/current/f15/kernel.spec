@@ -55,7 +55,7 @@ Summary: The Linux kernel
 #define librev
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -libre
+%define stablelibre -libre
 #define rcrevlibre -libre
 #define gitrevlibre -libre
 
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -678,15 +678,15 @@ Patch20000: utrace.patch
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+Patch21002: arm-build-bug-on.patch
+Patch21003: arm-stmmac-mmc-core.patch
+Patch21004: arm-tegra-nvec-kconfig.patch
 
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
 
 #rhbz 590880
 Patch21046: alps.patch
-
-#rhbz 746097
-Patch21049: tpm_tis-delay-after-aborting-cmd.patch
 
 Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
 Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
@@ -713,6 +713,9 @@ Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 #rhbz 783211
 Patch21087: fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
 
+# Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
+Patch21091: bcma-brcmsmac-compat.patch
+
 #rhbz 771058
 Patch21100: msi-irq-sysfs-warning.patch
 
@@ -720,13 +723,6 @@ Patch21100: msi-irq-sysfs-warning.patch
 Patch21101: hpsa-add-irqf-shared.patch
 
 Patch21225: pci-Rework-ASPM-disable-code.patch
-
-Patch21227: mac80211-fix-work-removal-on-deauth-request.patch
-
-#rhbz 718790
-Patch21230: rds-Make-rds_sock_lock-BH-rather-than-IRQ-safe.patch
-
-Patch22000: rcu-reintroduce-missing-calls.patch
 
 %endif
 
@@ -1178,6 +1174,9 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 #
 ApplyPatch arm-omap-dt-compat.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
+ApplyPatch arm-build-bug-on.patch
+ApplyPatch arm-stmmac-mmc-core.patch
+ApplyPatch arm-tegra-nvec-kconfig.patch
 
 ApplyPatch taint-vbox.patch
 #
@@ -1312,16 +1311,11 @@ ApplyPatch hpsa-add-irqf-shared.patch
 
 ApplyPatch pci-Rework-ASPM-disable-code.patch
 
-ApplyPatch mac80211-fix-work-removal-on-deauth-request.patch
-
 #rhbz 717735
 ApplyPatch nfs-client-freezer.patch
 
 #rhbz 590880
 ApplyPatch alps.patch
-
-#rhbz 746097
-ApplyPatch tpm_tis-delay-after-aborting-cmd.patch
 
 #rhbz 771058
 ApplyPatch msi-irq-sysfs-warning.patch
@@ -1342,13 +1336,11 @@ ApplyPatch procfs-parse-mount-options.patch
 ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
 ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-ApplyPatch rcu-reintroduce-missing-calls.patch
-
-#rhbz 718790
-ApplyPatch rds-Make-rds_sock_lock-BH-rather-than-IRQ-safe.patch
-
 #rhbz 783211
 ApplyPatch fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
+
+# Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
+ApplyPatch bcma-brcmsmac-compat.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1997,7 +1989,42 @@ fi
 # and build.
 
 %changelog
-* Tue Jan 31 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Feb 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.3-libre as patch-libre-3.2.3.
+
+* Fri Feb 03 2012 Dave Jones <davej@redhat.com>
+- Linux 3.2.3
+
+* Thu Feb 02 2012 Dennis Gilmore <dennis@ausil.us>
+- add patch to ensure that mfd-core is builtin when building nvec on tegra
+- build nvec-leds on tegra kernel
+
+* Wed Feb 01 2012 Dave Jones <davej@redhat.com>
+- Revert more f16 config changes that shouldn't be in f15.
+
+* Wed Feb 01 2012 Dave Jones <davej@redhat.com>
+- Revert the f16 use-ext4-for-ext2/ext3 change.
+
+* Tue Jan 31 2012 Dennis Gilmore <dennis@ausil.us>
+- diable TOUCHSCREEN_EETI on all arm arches 
+- add patch for arm mtd
+- add patch for stmmac on arm
+- disable USB_IMX21_HCD pn imx
+- enable CACHE_L2X0 on imx
+
+* Mon Jan 30 2012 Dave Jones <davej@redhat.com>
+- Enable kmemleak (off by default) in kernel-debug (rhbz 782419)
+
+* Mon Jan 30 2012 Dave Jones <davej@redhat.com>
+- Test fix for realtek_async_autopm oops from Stanislaw Gruszka (rhbz 784345)
+
+* Mon Jan 30 2012 Dave Jones <davej@redhat.com>
+- Restore the Savage DRM and several others that were accidentally early-deprecated.
+
+* Mon Jan 30 2012 John W. Linville <linville@redhat.com>
+- Reinstate patch to remove overlap between bcma/b43 and brcmsmac
+
+* Mon Jan 30 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan 31
 - Linux 3.2.2-libre
 
 * Mon Jan 30 2012 Dave Jones <davej@redhat.com> 2.6.42.2-1
