@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -766,7 +766,8 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12026: block-stray-block-put-after-teardown.patch
+Patch12025: block-readahead-block-plug.patch
+
 Patch12030: epoll-limit-paths.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
@@ -813,12 +814,16 @@ Patch22100: msi-irq-sysfs-warning.patch
 # rhbz 754907
 Patch21101: hpsa-add-irqf-shared.patch
 
-Patch21225: pci-Rework-ASPM-disable-code.patch
-
 Patch21226: pci-crs-blacklist.patch
 
 #rhbz 772772
 Patch21232: rt2x00_fix_MCU_request_failures.patch
+
+#rhbz 788260
+Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
+
+#rhbz 785806
+Patch21234: e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
@@ -843,6 +848,8 @@ Patch50113: iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
 Patch50114: mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
 
 Patch50200: ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
+Patch50201: ath9k-fix-a-WEP-crypto-related-regression.patch
+Patch50202: ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
 
 %endif
 
@@ -1508,7 +1515,7 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch epoll-limit-paths.patch
-ApplyPatch block-stray-block-put-after-teardown.patch
+ApplyPatch block-readahead-block-plug.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1524,8 +1531,6 @@ ApplyPatch sysfs-msi-irq-per-device.patch
 
 # rhbz 754907
 ApplyPatch hpsa-add-irqf-shared.patch
-
-ApplyPatch pci-Rework-ASPM-disable-code.patch
 
 #ApplyPatch pci-crs-blacklist.patch
 
@@ -1556,6 +1561,12 @@ ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
 #rhbz 772772
 ApplyPatch rt2x00_fix_MCU_request_failures.patch
+
+#rhbz 788269
+ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
+
+#rhbz 785806
+ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1641,6 +1652,8 @@ ApplyPatch iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
 ApplyPatch mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
 
 ApplyPatch ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
+ApplyPatch ath9k-fix-a-WEP-crypto-related-regression.patch
+ApplyPatch ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
 
 ApplyPatch rt2x00_fix_MCU_request_failures.patch
 
@@ -1871,7 +1884,12 @@ BuildKernel() {
     # Move the devel headers out of the root file system
     mkdir -p $RPM_BUILD_ROOT/usr/src/kernels
     mv $RPM_BUILD_ROOT/lib/modules/$KernelVer/build $RPM_BUILD_ROOT/$DevelDir
-    ln -sf ../../..$DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
+
+    # This is going to create a broken link during the build, but we don't use
+    # it after this point.  We need the link to actually point to something
+    # when kernel-devel is installed, and a relative link doesn't work across
+    # the F17 UsrMove feature.
+    ln -sf $DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
 
     # prune junk from kernel-devel
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -exec rm -f {} \;
@@ -2349,6 +2367,28 @@ fi
 # and build.
 
 %changelog
+* Thu Feb 09 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.5-libre as patch-libre-3.2.5.
+
+* Wed Feb 08 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix e1000e Tx hang check (rhbz 785806)
+- CVE-2011-4086 jbd2: unmapped buffer with _Unwritten or _Delay flags set can
+  lead to DoS (rhbz 788260)
+
+* Tue Feb 07 2012 Josh Boyer <jwboyer@redhat.com>
+- Make build/ point to /usr/src/kernels instead of being relative (rhbz 788125)
+
+* Mon Feb 06 2012 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.2.5.  Happy Birthday
+
+* Mon Feb 06 2012 John W. Linville <linville@redhat.com>
+- ath9k: fix a WEP crypto related regression
+- ath9k_hw: fix a RTS/CTS timeout regression
+
+* Sun Feb 05 2012 Dave Jones <davej@redhat.com>
+- Remove unnecessary block-stray-block-put-after-teardown.patch
+- readahead: fix pipeline break caused by block plug
+
 * Sat Feb 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.2-libre-3.2.3-libre as patch-libre-3.2.3.
 
