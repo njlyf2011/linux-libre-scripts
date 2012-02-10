@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -665,7 +665,8 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12026: block-stray-block-put-after-teardown.patch
+Patch12025: block-readahead-block-plug.patch
+
 Patch12030: epoll-limit-paths.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
@@ -710,11 +711,14 @@ Patch21082: procfs-parse-mount-options.patch
 Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
 Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-#rhbz 783211
-Patch21087: fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
+#rhbz 788260
+Patch21085: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 Patch21091: bcma-brcmsmac-compat.patch
+
+#rhbz 785806
+Patch21092: e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 #rhbz 771058
 Patch21100: msi-irq-sysfs-warning.patch
@@ -1292,7 +1296,7 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch epoll-limit-paths.patch
-ApplyPatch block-stray-block-put-after-teardown.patch
+ApplyPatch block-readahead-block-plug.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1336,8 +1340,11 @@ ApplyPatch procfs-parse-mount-options.patch
 ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
 ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
-#rhbz 783211
-ApplyPatch fs-Inval-cache-for-parent-block-device-if-fsync-called-on-part.patch
+#rhbz 788260
+ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
+
+#rhbz 785806
+ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
@@ -1989,6 +1996,16 @@ fi
 # and build.
 
 %changelog
+* Wed Feb 08 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2011-4086: jbd2: unmapped buffer with _Unwritten or _Delay flags
+  set can lead to DoS (rhbz 788260)
+- Drop patch that was NAKd upstream (rhbz 783211)
+- Fix e1000e Tx hang check (rhbz 785806)
+
+* Sun Feb 05 2012 Dave Jones <davej@redhat.com>
+- Remove unnecessary block-stray-block-put-after-teardown.patch
+- readahead: fix pipeline break caused by block plug
+
 * Sat Feb 04 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.2-libre-3.2.3-libre as patch-libre-3.2.3.
 
