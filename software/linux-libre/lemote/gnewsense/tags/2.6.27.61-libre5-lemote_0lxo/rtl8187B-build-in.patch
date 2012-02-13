@@ -1,0 +1,269 @@
+Index: linux-2.6.27.43/drivers/net/wireless/Kconfig
+===================================================================
+--- linux-2.6.27.43.orig/drivers/net/wireless/Kconfig	2010-01-09 04:37:28.000000000 +0000
++++ linux-2.6.27.43/drivers/net/wireless/Kconfig	2010-01-09 04:42:09.000000000 +0000
+@@ -627,6 +627,13 @@
+ 
+ 	  Thanks to Realtek for their support!
+ 
++config RTL8187B
++	tristate "Realtek 8187B support"
++	depends on USB
++	---help---
++	   This is a driver for RTL8187B cards, like the one
++	   on Lemote Yeeloong 8089 notebooks.
++
+ config RTL8187
+ 	tristate "Realtek 8187 and 8187B USB support"
+ 	depends on MAC80211 && USB && WLAN_80211 && EXPERIMENTAL
+Index: linux-2.6.27.43/drivers/net/wireless/rtl8187B/Makefile
+===================================================================
+--- linux-2.6.27.43.orig/drivers/net/wireless/rtl8187B/Makefile	2010-01-09 04:42:06.000000000 +0000
++++ linux-2.6.27.43/drivers/net/wireless/rtl8187B/Makefile	2010-01-09 04:42:09.000000000 +0000
+@@ -1,30 +1 @@
+-LINUX_KSRC_MODULE = /lib/modules/$(shell uname -r)/kernel/drivers/net/wireless/
+-RTL8187B_DIR = $(shell pwd)
+-KVER  = $(shell uname -r)
+-#KSRC = ~/lemote/linux_loongson
+-KSRC = /lib/modules/$(KVER)/build
+-#KSRC = /home/yh/linux-2.6.27.1-lemote
+-HAL_SUB_DIR = rtl8187
+-
+-#export CROSS_COMPILE=mipsel-linux-
+-all: 
+-ifeq ($(shell uname -r|cut -d. -f1,2), 2.4)
+-	@make -C $(RTL8187B_DIR)/ieee80211
+-	@make -C $(RTL8187B_DIR)/rtl8187 
+-else	
+-	@make -C $(KSRC) SUBDIRS=$(RTL8187B_DIR)/ieee80211 modules 
+-	@cp $(RTL8187B_DIR)/ieee80211/Module.symvers $(RTL8187B_DIR)/rtl8187 
+-	@make -C $(KSRC) SUBDIRS=$(RTL8187B_DIR)/rtl8187 modules 
+-endif
+-install:
+-	@grep rtl8187.ko /lib/modules/$(shell uname -r)/modules.dep && rm -fr $(LINUX_KSRC_MODULE)/rtl8187.ko || echo > /dev/null 
+-	@cp $(RTL8187B_DIR)/RadioPower.sh /etc/acpi/events/
+-	@make -C ieee80211/ install
+-	@make -C rtl8187/ install
+-uninstall:
+-	@make -C ieee80211/ uninstall
+-	@make -C rtl8187/ uninstall
+-clean:
+-	@make -C rtl8187/ clean
+-	@make -C ieee80211/ clean
+-	@rm -rf *~
++obj-$(CONFIG_RTL8187B) += ieee80211/ rtl8187/
+Index: linux-2.6.27.43/drivers/net/wireless/rtl8187B/ieee80211/Makefile
+===================================================================
+--- linux-2.6.27.43.orig/drivers/net/wireless/rtl8187B/ieee80211/Makefile	2010-01-09 04:42:06.000000000 +0000
++++ linux-2.6.27.43/drivers/net/wireless/rtl8187B/ieee80211/Makefile	2010-01-09 08:36:43.000000000 +0000
+@@ -1,14 +1,5 @@
+-NIC_SELECT = RTL8187B
+-
+-#CC = mipsel-linux-gcc
+-#LD = mipsel-linux-ld
+-CC = gcc
+-KVER  := $(shell uname -r)
+-PWD = $(shell pwd)
+-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/$(NIC_SELECT)
+-
+ EXTRA_CFLAGS += -I$(TOPDIR)/drivers/net/wireless
+-EXTRA_CFLAGS += -O2 
++# EXTRA_CFLAGS += -O2
+ EXTRA_CFLAGS += -DJACKSON_NEW_8187 -DJACKSON_NEW_RX
+ #CFLAGS += -DJOHN_HWSEC -DJOHN_TKIP -DJOHN_CCMP
+ EXTRA_CFLAGS += -DTHOMAS_TURBO
+@@ -19,18 +10,10 @@
+ #CFLAGS += -DJOHN_DUMP
+ #EXTRA_CFLAGS += -DJUST_FOR_87SEMESH -D_RTL8187_EXT_PATCH_
+ #EXTRA_CFLAGS += -D_RTL8187_EXT_PATCH_
+-
+-#FOR QMI 2.6.26.6
+ #EXTRA_CFLAGS += -DQMI_26_6
+-
+-#for IPS
+ EXTRA_CFLAGS += -DCONFIG_IPS
+-
+-#for dot11d
+ EXTRA_CFLAGS += -DENABLE_DOT11D
+ 
+-ifneq ($(shell uname -r|cut -d. -f1,2), 2.4)
+-
+ ieee80211-rtl-objs := ieee80211_softmac.o dot11d.o ieee80211_rx.o ieee80211_tx.o ieee80211_wx.o ieee80211_module.o ieee80211_softmac_wx.o
+ 
+ ieee80211_crypt-rtl-objs := ieee80211_crypt.o
+@@ -38,77 +21,8 @@
+ ieee80211_crypt_ccmp-rtl-objs := ieee80211_crypt_ccmp.o
+ ieee80211_crypt_wep-rtl-objs := ieee80211_crypt_wep.o
+ 
+-obj-m +=ieee80211-rtl.o
+-obj-m +=ieee80211_crypt-rtl.o
+-obj-m +=ieee80211_crypt_wep-rtl.o
+-obj-m +=ieee80211_crypt_tkip-rtl.o
+-obj-m +=ieee80211_crypt_ccmp-rtl.o
+-
+-KVER  := $(shell uname -r)
+-#KSRC := ~/lemote/linux_loongson
+-#KSRC :=  /home/yh/linux-2.6.27.1-lemote
+-KSRC := /lib/modules/$(KVER)/build
+-INSTALL_PREFIX :=
+-
+-all: modules
+-
+-modules:
+-	$(MAKE) -C $(KSRC) M=$(PWD) CC=$(CC) modules
+-
+-
+-install: modules
+-	rm -fr $(MODDESTDIR)
+-	mkdir -p $(MODDESTDIR)
+-	@install -p -m 644 ieee80211_crypt-rtl.ko $(MODDESTDIR)
+-	@install -p -m 644 ieee80211_crypt_wep-rtl.ko $(MODDESTDIR)
+-	@install -p -m 644 ieee80211_crypt_tkip-rtl.ko $(MODDESTDIR)
+-	@install -p -m 644 ieee80211_crypt_ccmp-rtl.ko $(MODDESTDIR)
+-	@install -p -m 644 ieee80211-rtl.ko $(MODDESTDIR)
+-	depmod -a
+-uninstall:
+-	rm -fr $(MODDESTDIR)
+-	depmod -a 
+-
+-else
+-
+-#WARN := -W -Wall -Wstrict-prototypes -Wmissing-prototypes
+-WARN := -W
+-INCLUDE := -isystem /lib/modules/`uname -r`/build/include
+-CFLAGS := -O2 -DMODULE -D__KERNEL__ -DEXPORT_SYMTAB -D__NO_VERSION__ ${WARN} ${INCLUDE}
+-ifdef CONFIG_SMP
+-CFLAGS += -D__SMP__ -DSMP
+-endif
+-
+-OBJS := ${patsubst %.c, %.o, ${wildcard *.c}}
+-
+-all:${OBJS} ieee80211_crypt-rtl.o michael_mic-rtl.o aes-rtl.o ieee80211_crypt_wep-rtl.o ieee80211_crypt_tkip-rtl.o ieee80211_crypt_ccmp-rtl.o crypto-rtl.o ieee80211-rtl.o
+-
+-ieee80211_crypt-rtl.o: ieee80211_crypt.o
+-	mv $^ $@	
+-
+-michael_mic-rtl.o: michael_mic.o
+-	mv $^ $@
+-
+-aes-rtl.o: aes.o
+-	mv $^ $@
+-
+-ieee80211_crypt_wep-rtl.o: ieee80211_crypt_wep.o
+-	mv $^ $@
+-
+-ieee80211_crypt_tkip-rtl.o: ieee80211_crypt_tkip.o
+-	mv $^ $@
+-
+-ieee80211_crypt_ccmp-rtl.o: ieee80211_crypt_ccmp.o
+-	mv $^ $@
+-
+-crypto-rtl.o: arc4.o api.o autoload.o cipher.o compress.o digest.o scatterwalk.o proc.o
+-	$(LD) -r $^ -o $@
+-
+-ieee80211-rtl.o: ieee80211_rx.o ieee80211_tx.o ieee80211_wx.o ieee80211_module.o ieee80211_softmac_wx.o ieee80211_softmac.o
+-	$(LD) -r $^ -o $@
+-endif
+-
+-.PHONY:clean
+-clean:
+-	rm -f *.mod.c *.mod *.o .*.cmd *.ko *~
+-	rm -rf $(PWD)/tmp
++obj-$(CONFIG_RTL8187B) += ieee80211-rtl.o
++obj-$(CONFIG_RTL8187B) += ieee80211_crypt-rtl.o
++obj-$(CONFIG_RTL8187B) += ieee80211_crypt_wep-rtl.o
++obj-$(CONFIG_RTL8187B) += ieee80211_crypt_tkip-rtl.o
++obj-$(CONFIG_RTL8187B) += ieee80211_crypt_ccmp-rtl.o
+Index: linux-2.6.27.43/drivers/net/wireless/rtl8187B/rtl8187/Makefile
+===================================================================
+--- linux-2.6.27.43.orig/drivers/net/wireless/rtl8187B/rtl8187/Makefile	2010-01-09 04:42:07.000000000 +0000
++++ linux-2.6.27.43/drivers/net/wireless/rtl8187B/rtl8187/Makefile	2010-01-09 07:11:18.000000000 +0000
+@@ -1,11 +1,3 @@
+-NIC_SELECT = RTL8187B
+-
+-#CC = mipsel-linux-gcc
+-#LD = mipsel-linux-ld
+-CC = gcc
+-KVER  := $(shell uname -r)
+-MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/$(NIC_SELECT)
+-
+ #EXTRA_CFLAGS += -DCONFIG_IEEE80211_NOWEP=y
+ #EXTRA_CFLAGS += -DCONFIG_RTL8180_IOMAP
+ EXTRA_CFLAGS += -I$(TOPDIR)/drivers/net/wireless
+@@ -22,62 +14,10 @@
+ #EXTRA_CFLAGS += -DSW_ANTE_DIVERSITY
+ EXTRA_CFLAGS += -DCPU_64BIT
+ EXTRA_CFLAGS += -DCONFIG_IPS
+-#CFLAGS += -DJOHN_HWSEC -DJOHN_TKIP
+-#CFLAGS += -DJOHN_DUMP_TX
+ #EXTRA_CFLAGS += -DJOHN_DUMP_TXPKT
+-
+-#Radio On/Off debug
+ EXTRA_CFLAGS += -DCONFIG_RADIO_DEBUG
+-
+-#for dot11d
+ EXTRA_CFLAGS += -DENABLE_DOT11D
+-
+-#for Toshiba
+ #EXTRA_CFLAGS += -DENABLE_TOSHIBA_CONFIG
+ 
+-ifneq ($(shell uname -r|cut -d. -f1,2), 2.4)
+-
+-r8187-objs := r8187_core.o r8180_93cx6.o r8180_wx.o r8180_rtl8225.o r8180_rtl8225z2.o r8180_pm.o r8180_dm.o r8187_led.o
+-
+-obj-m := r8187.o
+-
+-KVER  := $(shell uname -r)
+-#KSRC := ~/lemote/linux_loongson
+-#KSRC := /home/yh/linux-2.6.27.1-lemote
+-KSRC := /lib/modules/$(KVER)/build
+-PWD = $(shell pwd)
+-INSTALL_PREFIX :=
+-
+-all: modules
+-
+-modules:
+-	$(MAKE) -C $(KSRC) M=$(PWD) CC=$(CC) modules
+-
+-install: modules
+-	install -p -m 644 r8187.ko $(MODDESTDIR)
+-	depmod -a
+-
+-uninstall:
+-	$(shell [ -d $(MODDESTDIR) ] && rm -fr $(MODDESTDIR))
+-	depmod -a
+-else
+-
+-WARN := -W
+-INCLUDE := -isystem /lib/modules/`uname -r`/build/include
+-CFLAGS := -O2 -DMODULE -D__KERNEL__ ${WARN} ${INCLUDE}
+-ifdef CONFIG_SMP
+-CFLAGS += -D__SMP__ -DSMP
+-endif
+-OBJS := ${patsubst %.c, %.o, ${wildcard *.c}}
+-                                                                                
+-all:r8187.o
+-                                                                                
+-r8187.o:${OBJS}
+-	$(LD) -r $^ -o $@
+-endif
+-
+-.PHONY:clean
+-clean:
+-	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
+-	rm -fr .tmp_versions
+-
++rtl8187b-objs := r8187_core.o r8180_93cx6.o r8180_wx.o r8180_rtl8225.o r8180_rtl8225z2.o r8180_pm.o r8180_dm.o r8187_led.o
++obj-$(CONFIG_RTL8187B) = rtl8187b.o
+Index: linux-2.6.27.43/drivers/net/wireless/Makefile
+===================================================================
+--- linux-2.6.27.43.orig/drivers/net/wireless/Makefile	2010-01-09 06:56:23.000000000 +0000
++++ linux-2.6.27.43/drivers/net/wireless/Makefile	2010-01-09 06:57:07.000000000 +0000
+@@ -53,6 +53,7 @@
+ 
+ obj-$(CONFIG_RTL8180)	+= rtl8180.o
+ obj-$(CONFIG_RTL8187)	+= rtl8187.o
++obj-$(CONFIG_RTL8187B)  += rtl8187B/
+ 
+ obj-$(CONFIG_ADM8211)	+= adm8211.o
+ 
