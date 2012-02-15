@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -766,7 +766,7 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12025: block-readahead-block-plug.patch
+Patch12026: bsg-fix-sysfs-link-remove-warning.patch
 
 Patch12030: epoll-limit-paths.patch
 
@@ -825,11 +825,13 @@ Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 #rhbz 785806
 Patch21234: e1000e-Avoid-wrong-check-on-TX-hang.patch
 
+#rhbz 754518
+Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
 Patch50001: compat-wireless-pr_fmt-warning-avoidance.patch
 Patch50002: compat-wireless-integrated-build.patch
-
 Patch50100: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
 
 # Pending upstream fixes
@@ -846,10 +848,16 @@ Patch50111: iwlwifi-make-Tx-aggregation-enabled-on-ra-be-at-DEBU.patch
 Patch50112: ssb-fix-cardbus-slot-in-hostmode.patch
 Patch50113: iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
 Patch50114: mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
-
-Patch50200: ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
-Patch50201: ath9k-fix-a-WEP-crypto-related-regression.patch
-Patch50202: ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
+Patch50115: ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
+Patch50116: mwifiex-handle-association-failure-case-correctly.patch
+Patch50117: ath9k-Fix-kernel-panic-during-driver-initilization.patch
+Patch50118: mwifiex-add-NULL-checks-in-driver-unload-path.patch
+Patch50119: ath9k-fix-a-WEP-crypto-related-regression.patch
+Patch50120: ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
+Patch50121: bcma-don-t-fail-for-bad-SPROM-CRC.patch
+Patch50122: zd1211rw-firmware-needs-duration_id-set-to-zero-for-.patch
+Patch50123: mac80211-Fix-a-rwlock-bad-magic-bug.patch
+Patch50124: rtlwifi-Modify-rtl_pci_init-to-return-0-on-success.patch
 
 %endif
 
@@ -1515,7 +1523,8 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch epoll-limit-paths.patch
-ApplyPatch block-readahead-block-plug.patch
+
+ApplyPatch bsg-fix-sysfs-link-remove-warning.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1567,6 +1576,9 @@ ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 #rhbz 785806
 ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
+
+#rhbz 754518
+ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1650,10 +1662,16 @@ ApplyPatch iwlwifi-make-Tx-aggregation-enabled-on-ra-be-at-DEBU.patch
 ApplyPatch ssb-fix-cardbus-slot-in-hostmode.patch
 ApplyPatch iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
 ApplyPatch mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
-
 ApplyPatch ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
+ApplyPatch mwifiex-handle-association-failure-case-correctly.patch
+ApplyPatch ath9k-Fix-kernel-panic-during-driver-initilization.patch
+ApplyPatch mwifiex-add-NULL-checks-in-driver-unload-path.patch
 ApplyPatch ath9k-fix-a-WEP-crypto-related-regression.patch
 ApplyPatch ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
+ApplyPatch bcma-don-t-fail-for-bad-SPROM-CRC.patch
+ApplyPatch zd1211rw-firmware-needs-duration_id-set-to-zero-for-.patch
+ApplyPatch mac80211-Fix-a-rwlock-bad-magic-bug.patch
+ApplyPatch rtlwifi-Modify-rtl_pci_init-to-return-0-on-success.patch
 
 ApplyPatch rt2x00_fix_MCU_request_failures.patch
 
@@ -2367,6 +2385,27 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.6-libre as patch-libre-3.2.6.
+
+* Mon Feb 13 2012 Dave Jones <davej@redhat.com> 3.2.6-3
+- Linux 3.2.6
+
+* Mon Feb 13 2012 John W. Linville <linville@redhat.com>
+- mwifiex: handle association failure case correctly
+- ath9k: Fix kernel panic during driver initilization
+- mwifiex: add NULL checks in driver unload path
+- bcma: don't fail for bad SPROM CRC
+- zd1211rw: firmware needs duration_id set to zero for non-pspoll frames
+- mac80211: Fix a rwlock bad magic bug
+- rtlwifi: Modify rtl_pci_init to return 0 on success
+
+* Fri Feb 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch to prevent NULL pointer dereference in sd_revalidate_disk (rhbz 754518)
+
+* Thu Feb 09 2012 Dave Jones <davej@redhat.com>
+- bsg: fix sysfs link remove warning (#787862)
+
 * Thu Feb 09 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.2-libre-3.2.5-libre as patch-libre-3.2.5.
 
