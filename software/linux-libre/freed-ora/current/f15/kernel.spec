@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -65,7 +65,7 @@ Summary: The Linux kernel
 #define libres .
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -665,7 +665,7 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12025: block-readahead-block-plug.patch
+Patch12026: bsg-fix-sysfs-link-remove-warning.patch
 
 Patch12030: epoll-limit-paths.patch
 
@@ -673,6 +673,8 @@ Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13002: revert-efi-rtclock.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
+
+Patch14000: cdc-acm-tiocgserial.patch
 
 Patch20000: utrace.patch
 
@@ -720,13 +722,14 @@ Patch21091: bcma-brcmsmac-compat.patch
 #rhbz 785806
 Patch21092: e1000e-Avoid-wrong-check-on-TX-hang.patch
 
+#rhbz 754518
+Patch21093: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+
 #rhbz 771058
 Patch21100: msi-irq-sysfs-warning.patch
 
 # rhbz 754907
 Patch21101: hpsa-add-irqf-shared.patch
-
-Patch21225: pci-Rework-ASPM-disable-code.patch
 
 %endif
 
@@ -1296,13 +1299,17 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch epoll-limit-paths.patch
-ApplyPatch block-readahead-block-plug.patch
+
+ApplyPatch bsg-fix-sysfs-link-remove-warning.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch revert-efi-rtclock.patch
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=787607
+ApplyPatch cdc-acm-tiocgserial.patch
 
 # utrace.
 ApplyPatch utrace.patch
@@ -1312,8 +1319,6 @@ ApplyPatch sysfs-msi-irq-per-device.patch
 
 # rhbz 754907
 ApplyPatch hpsa-add-irqf-shared.patch
-
-ApplyPatch pci-Rework-ASPM-disable-code.patch
 
 #rhbz 717735
 ApplyPatch nfs-client-freezer.patch
@@ -1345,6 +1350,9 @@ ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 #rhbz 785806
 ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
+
+#rhbz 754518
+ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
@@ -1996,7 +2004,22 @@ fi
 # and build.
 
 %changelog
-* Wed Feb 08 2012 Josh Boyer <jwboyer@redhat.com>
+* Tue Feb 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.6-libre as patch-libre-3.2.6.
+
+* Mon Feb 13 2012 Dave Jones <davej@redhat.com> 2.6.42.6-3
+- Linux 3.2.6
+
+* Fri Feb 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch to prevent NULL pointer dereference in sd_revalidate_disk (rhbz 754518)
+
+* Fri Feb 10 2012 Dave Jones <davej@redhat.com>
+- Implement TIOCGSERIAL for acm_tty_ioctl (rhbz 787607)
+
+* Thu Feb 09 2012 Dave Jones <davej@redhat.com>
+- bsg: fix sysfs link remove warning (#787862)
+
+* Wed Feb 08 2012 Josh Boyer <jwboyer@redhat.com> 2.6.42.3-2.fc15
 - CVE-2011-4086: jbd2: unmapped buffer with _Unwritten or _Delay flags
   set can lead to DoS (rhbz 788260)
 - Drop patch that was NAKd upstream (rhbz 783211)
