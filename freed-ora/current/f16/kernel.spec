@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 4
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -777,6 +777,8 @@ Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14000: hibernate-freeze-filesystems.patch
 
+Patch14010: lis3-improve-handling-of-null-rate.patch
+
 Patch20000: utrace.patch
 
 # Flattened devicetree support
@@ -786,8 +788,10 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
 
+Patch21046: nfs-oops-getacl.patch
+
 #rhbz 590880
-Patch21046: alps.patch
+Patch21050: alps.patch
 
 Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
 Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
@@ -828,7 +832,8 @@ Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 Patch21234: e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 #rhbz 754518
-Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+#Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+Patch21235: scsi-fix-sd_revalidate_disk-oops.patch
 
 #rhbz 790367
 Patch21239: s390x-enable-keys-compat.patch
@@ -1539,6 +1544,8 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch hibernate-freeze-filesystems.patch
 
+ApplyPatch lis3-improve-handling-of-null-rate.patch
+
 # utrace.
 ApplyPatch utrace.patch
 
@@ -1552,6 +1559,8 @@ ApplyPatch hpsa-add-irqf-shared.patch
 
 #rhbz 717735
 ApplyPatch nfs-client-freezer.patch
+
+ApplyPatch nfs-oops-getacl.patch
 
 #rhbz 590880
 ApplyPatch alps.patch
@@ -1585,7 +1594,8 @@ ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 #rhbz 754518
-ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+#ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+ApplyPatch scsi-fix-sd_revalidate_disk-oops.patch
 
 #rhbz 790367
 ApplyPatch s390x-enable-keys-compat.patch
@@ -2395,6 +2405,24 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.7-libre as patch-libre-3.2.7.
+
+* Mon Feb 20 2012 Dave Jones <davej@redhat.com> 3.2.7-1
+- Do not call drivers when invalidating partitions for -ENOMEDIUM
+
+* Mon Feb 20 2012 Dave Jones <davej@redhat.com>
+- Linux 3.2.7
+
+* Mon Feb 20 2012 Dave Jones <davej@redhat.com>
+- NFSv4: Fix an Oops in the NFSv4 getacl code
+
+* Fri Feb 17 2012 Dave Jones <davej@redhat.com>
+- improve handling of null rate in LIS3LV02Dx accelerometer driver. (rhbz 785814)
+
+* Fri Feb 17 2012 Dave Jones <davej@redhat.com>
+- Reenable radio drivers. (rhbz 784824)
+
 * Thu Feb 16 2012 Dave Jones <davej@redhat.com> 3.2.6-4
 - Freeze all filesystems during system suspend/hibernate.
 
