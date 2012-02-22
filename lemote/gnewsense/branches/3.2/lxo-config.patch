@@ -1,11 +1,11 @@
 Index: Makefile
 ===================================================================
---- Makefile.orig	2012-02-13 21:42:45.000000000 +0000
-+++ Makefile	2012-02-13 21:42:52.000000000 +0000
+--- Makefile.orig	2012-02-21 04:53:43.000000000 +0000
++++ Makefile	2012-02-21 04:53:48.000000000 +0000
 @@ -1,7 +1,7 @@
  VERSION = 3
  PATCHLEVEL = 2
- SUBLEVEL = 6
+ SUBLEVEL = 7
 -EXTRAVERSION =-libre
 +EXTRAVERSION =-libre-lemote
  NAME = Saber-toothed Squirrel
@@ -14,11 +14,11 @@ Index: Makefile
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2012-02-13 21:52:08.000000000 +0000
-@@ -0,0 +1,4754 @@
++++ .config	2012-02-21 05:00:02.000000000 +0000
+@@ -0,0 +1,4756 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.2.6-libre-lemote Kernel Configuration
++# Linux/mips 3.2.7-libre-lemote Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1930,6 +1930,8 @@ Index: .config
 +CONFIG_TEHUTI=m
 +CONFIG_NET_VENDOR_TI=y
 +CONFIG_TLAN=m
++CONFIG_NET_VENDOR_TOSHIBA=y
++CONFIG_TC35815=m
 +CONFIG_NET_VENDOR_VIA=y
 +CONFIG_VIA_RHINE=m
 +# CONFIG_VIA_RHINE_MMIO is not set
