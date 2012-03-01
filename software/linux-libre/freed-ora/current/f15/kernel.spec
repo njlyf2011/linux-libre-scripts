@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -738,6 +738,12 @@ Patch21100: msi-irq-sysfs-warning.patch
 # rhbz 754907
 Patch21101: hpsa-add-irqf-shared.patch
 
+#rhbz 727865 730007
+Patch21102: ACPICA-Fix-regression-in-FADT-revision-checks.patch
+
+# rhbz 798296
+Patch21103: cifs-fix-dentry-refcount-leak-when-opening-a-FIFO.patch
+
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -1370,6 +1376,12 @@ ApplyPatch scsi-fix-sd_revalidate_disk-oops.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
+
+#rhbz 727865 730007
+ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
+
+# rhbz 798296
+ApplyPatch cifs-fix-dentry-refcount-leak-when-opening-a-FIFO.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2018,6 +2030,12 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 28 2012 Justin M. Forbes <jforbes@redhat.com> 2.6.42.7-3
+- CVE-2012-1090 CIFS: fix dentry refcount leak when opening a FIFO on lookup (rhbz 798296)
+
+* Mon Feb 27 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix regression in FADT revision checks (rhbz 730007 727865)
+
 * Tue Feb 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.2-libre-3.2.7-libre as patch-libre-3.2.7.
 
