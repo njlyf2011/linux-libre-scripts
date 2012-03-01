@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -80,7 +80,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -768,8 +768,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12026: bsg-fix-sysfs-link-remove-warning.patch
 
-Patch12030: epoll-limit-paths.patch
-
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13002: revert-efi-rtclock.patch
@@ -787,8 +785,6 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 
 #rhbz 717735
 Patch21045: nfs-client-freezer.patch
-
-Patch21046: nfs-oops-getacl.patch
 
 #rhbz 590880
 Patch21050: alps.patch
@@ -1552,8 +1548,6 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
-ApplyPatch epoll-limit-paths.patch
-
 ApplyPatch bsg-fix-sysfs-link-remove-warning.patch
 
 # rhbz#605888
@@ -1579,8 +1573,6 @@ ApplyPatch hpsa-add-irqf-shared.patch
 
 #rhbz 717735
 ApplyPatch nfs-client-freezer.patch
-
-ApplyPatch nfs-oops-getacl.patch
 
 #rhbz 590880
 ApplyPatch alps.patch
@@ -2445,6 +2437,12 @@ fi
 # and build.
 
 %changelog
+* Thu Mar  1 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Use patch-3.2-libre-3.2.9-libre as patch-libre-3.2.9.
+
+* Wed Feb 29 2012 Josh Boyer <jwboyer@redhat.com> 3.2.9-1
+- Linux 3.2.9
+
 * Tue Feb 28 2012 Josh Boyer <jwboyer@redhat.com> 3.2.8-3
 - Add patch to enable keyboard backlight on Sony laptops (rhbz 728478)
 
