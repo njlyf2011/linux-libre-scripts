@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -640,6 +640,7 @@ Patch1500: fix_xen_guest_on_old_EC2.patch
 Patch1810: drm-nouveau-updates.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
+Patch1825: drm-intel-crtc-dpms-fix.patch
 # hush the i915 fbc noise
 Patch1826: drm-i915-fbc-stfu.patch
 
@@ -742,6 +743,16 @@ Patch21103: cifs-fix-dentry-refcount-leak-when-opening-a-FIFO.patch
 
 #rhbz 728478
 Patch21104: sony-laptop-Enable-keyboard-backlight-by-default.patch
+
+# Disable threading in hibernate compression
+Patch21105: disable-threading-in-compression-for-hibernate.patch
+
+#rhbz 799782 CVE-2012-1097
+Patch21106: regset-Prevent-null-pointer-reference-on-readonly-re.patch
+Patch21107: regset-Return-EFAULT-not-EIO-on-host-side-memory-fau.patch
+
+#rhbz 786632
+Patch21108: mm-thp-fix-BUG-on-mm-nr_ptes.patch
 
 Patch21200: unhandled-irqs-switch-to-polling.patch
 
@@ -1294,6 +1305,7 @@ ApplyOptionalPatch drm-nouveau-updates.patch
 
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-intel-crtc-dpms-fix.patch
 ApplyPatch drm-i915-fbc-stfu.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
@@ -1383,7 +1395,16 @@ ApplyPatch cifs-fix-dentry-refcount-leak-when-opening-a-FIFO.patch
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
 
+#Disable threading in hibernate compression
+ApplyPatch disable-threading-in-compression-for-hibernate.patch
+
+#rhbz 799782 CVE-2012-1097
+ApplyPatch regset-Prevent-null-pointer-reference-on-readonly-re.patch
+ApplyPatch regset-Return-EFAULT-not-EIO-on-host-side-memory-fau.patch
+
 ApplyPatch unhandled-irqs-switch-to-polling.patch
+
+ApplyPatch mm-thp-fix-BUG-on-mm-nr_ptes.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2032,6 +2053,19 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 05 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-1097 regset: Prevent null pointer reference on readonly regsets
+- Add patch to fix BUG_ON mm->nr_ptes (rhbz 786632)
+
+* Fri Mar 02 2012 Dave Jones <davej@redhat.com>
+- Enable VM debugging in non-debug kernels too.
+
+* Fri Mar 02 2012 Justin M. Forbes <jforbes@redhat.com> 
+- Disable threading in hibernate compression/decompression
+
+* Fri Mar 02 2012 Adam Jackson <ajax@redhat.com>
+- drm-intel-crtc-dpms-fix.patch: Fix system hang on gen2 kit on DPMS (#730853)
+
 * Thu Mar  2 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Use patch-3.2-libre-3.2.9-libre as patch-libre-3.2.9.
 
