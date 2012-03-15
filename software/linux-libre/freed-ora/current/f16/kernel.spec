@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -66,10 +66,35 @@ Summary: The Linux kernel
 # changes.  This is only used to determine which tarball to use.
 #define librev
 
+#define baselibre -libre
+%define basegnu -libre%{?librev}
+
+%define rcrevgnux %{basegnu}
+
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -libre
-#define rcrevlibre -libre
-#define gitrevlibre -libre
+%define stablelibre -3.2%{?stablegnux}
+#define rcrevlibre -3.2%{?rcrevgnux}
+#define gitrevlibre -3.2%{?gitrevgnux}
+
+%if 0%{?stablelibre:1}
+%define stablegnu -libre%{?librev}
+%endif
+%if 0%{?rcrevlibre:1}
+%define rcrevgnu -libre%{?librev}
+%endif
+%if 0%{?gitrevlibre:1}
+%define gitrevgnu -libre%{?librev}
+%endif
+
+%if !0%{?stablegnux:1}
+%define stablegnux %{?stablegnu}
+%endif
+%if !0%{?rcrevgnux:1}
+%define rcrevgnux %{?rcrevgnu}
+%endif
+%if !0%{?gitrevgnux:1}
+%define gitrevgnux %{?gitrevgnu}
+%endif
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
 # change but fedora_build doesn't.  Make sure it starts with a dot.
@@ -80,7 +105,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -653,11 +678,11 @@ Source2001: cpupower.config
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}.xz
+%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Patch00: %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}.xz
+%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}%{?rcrevgnu}.xz
 Patch01: %{stable_patch_01}
 %endif
 
@@ -666,14 +691,14 @@ Patch01: %{stable_patch_01}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}.xz
+Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
-Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.xz
+Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}.bz2
+Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.bz2
 %endif
 %endif
 %endif
@@ -740,7 +765,7 @@ Patch1500: fix_xen_guest_on_old_EC2.patch
 
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
-Patch1825: drm-intel-crtc-dpms-fix.patch
+
 # hush the i915 fbc noise
 Patch1826: drm-i915-fbc-stfu.patch
 
@@ -766,8 +791,6 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # patches headed upstream
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
-
-Patch12026: bsg-fix-sysfs-link-remove-warning.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
@@ -832,13 +855,8 @@ Patch21234: e1000e-Avoid-wrong-check-on-TX-hang.patch
 #Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 Patch21235: scsi-fix-sd_revalidate_disk-oops.patch
 
-#rhbz 790367
-Patch21239: s390x-enable-keys-compat.patch
-
 #rhbz 727865 730007
 Patch21240: ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
-Patch21241: cifs-fix-dentry-refcount-leak-when-opening-a-FIFO.patch
 
 #rhbz 728478
 Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
@@ -846,14 +864,11 @@ Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
 # Disable threading in hibernate compression
 Patch21243: disable-threading-in-compression-for-hibernate.patch
 
-#rhbz 799782 CVE-2012-1097
-Patch21244: regset-Prevent-null-pointer-reference-on-readonly-re.patch
-Patch21245: regset-Return-EFAULT-not-EIO-on-host-side-memory-fau.patch
-
-#rhbz 786632
-Patch21246: mm-thp-fix-BUG-on-mm-nr_ptes.patch
-
 Patch21300: unhandled-irqs-switch-to-polling.patch
+
+Patch21350: x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
+
+Patch22000: weird-root-dentry-name-debug.patch
 
 # compat-wireless patches
 Patch50000: compat-wireless-config-fixups.patch
@@ -1305,7 +1320,7 @@ if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
 
   fi
 
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/" vanilla-%{kversion}/Makefile
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversion}/Makefile
 
 %if "%{kversion}" != "%{vanillaversion}"
 
@@ -1328,20 +1343,20 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre:-libre%{?librev}}/
 # (non-released_kernel case only)
 %if 0%{?rcrev}
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
 %endif
-    ApplyPatch patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}.bz2
+    ApplyPatch patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevlibre:-libre%{?librev}}/" Makefile
-    ApplyPatch patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}.bz2
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
+    ApplyPatch patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if "%{?stablelibre}" != "%{?gitrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
-    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}.bz2
+    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.bz2
 %endif
 %endif
 
@@ -1359,24 +1374,24 @@ else
 fi
 
 # Now build the fedora kernel tree.
-if [ -d linux-%{kversion}.%{_target_cpu} ]; then
+if [ -d linux-%{KVERREL} ]; then
   # Just in case we ctrl-c'd a prep already
   rm -rf deleteme.%{_target_cpu}
   # Move away the stale away, and delete in background.
-  mv linux-%{kversion}.%{_target_cpu} deleteme.%{_target_cpu}
+  mv linux-%{KVERREL} deleteme.%{_target_cpu}
   rm -rf deleteme.%{_target_cpu} &
 fi
 
-cp -rl vanilla-%{vanillaversion} linux-%{kversion}.%{_target_cpu}
+cp -rl vanilla-%{vanillaversion} linux-%{KVERREL}
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{KVERREL}
 
 # released_kernel with possible stable updates
 %if 0%{?stable_base}
 ApplyPatch %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre:-libre%{?librev}}/" Makefile
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
 ApplyPatch %{stable_patch_01}
 %endif
 
@@ -1543,7 +1558,6 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
-ApplyPatch drm-intel-crtc-dpms-fix.patch
 ApplyPatch drm-i915-fbc-stfu.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
@@ -1561,8 +1575,6 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 # Patches headed upstream
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
-
-ApplyPatch bsg-fix-sysfs-link-remove-warning.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
@@ -1623,14 +1635,8 @@ ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 ApplyPatch scsi-fix-sd_revalidate_disk-oops.patch
 
-#rhbz 790367
-ApplyPatch s390x-enable-keys-compat.patch
-
 #rhbz 727865 730007
 ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
-#rhbz 798296
-ApplyPatch cifs-fix-dentry-refcount-leak-when-opening-a-FIFO.patch
 
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
@@ -1638,14 +1644,11 @@ ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
 #Disable threading in hibernate compression
 ApplyPatch disable-threading-in-compression-for-hibernate.patch
 
-#rhbz 799782 CVE-2012-1097
-ApplyPatch regset-Prevent-null-pointer-reference-on-readonly-re.patch
-ApplyPatch regset-Return-EFAULT-not-EIO-on-host-side-memory-fau.patch
-
-#rhbz 786632
-ApplyPatch mm-thp-fix-BUG-on-mm-nr_ptes.patch
-
 ApplyPatch unhandled-irqs-switch-to-polling.patch
+
+ApplyPatch weird-root-dentry-name-debug.patch
+
+ApplyPatch x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1998,7 +2001,7 @@ BuildKernel() {
 	$RPM_BUILD_ROOT/boot/config.mk-compat-wireless-%{cwversion}-$KernelVer
 
     make -s ARCH=$Arch V=1 %{?_smp_mflags} \
-	KLIB_BUILD=../linux-%{kversion}.%{_target_cpu} \
+	KLIB_BUILD=../linux-%{KVERREL} \
 	KMODPATH_ARG="INSTALL_MOD_PATH=$RPM_BUILD_ROOT" \
 	KMODDIR="backports" install-modules %{?sparse_mflags}
 
@@ -2027,7 +2030,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/boot
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{KVERREL}
 
 %if %{with_debug}
 BuildKernel %make_target %kernel_image debug
@@ -2128,7 +2131,7 @@ find Documentation -type d | xargs chmod u+w
 
 %install
 
-cd linux-%{kversion}.%{_target_cpu}
+cd linux-%{KVERREL}
 
 %if %{with_doc}
 docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
@@ -2340,7 +2343,7 @@ fi
 %files firmware
 %defattr(-,root,root)
 /lib/firmware/*
-%doc linux-%{kversion}.%{_target_cpu}/firmware/WHENCE
+%doc linux-%{KVERREL}/firmware/WHENCE
 %endif
 
 %if %{with_bootwrapper}
@@ -2463,6 +2466,22 @@ fi
 # and build.
 
 %changelog
+* Tue Mar 13 2012 Josh Boyer <jwboyer@redhat.com> -libre
+- Linux-libre 3.2.10-libre
+
+* Mon Mar 12 2012 Josh Boyer <jwboyer@redhat.com> - 3.2.10-1
+- Linux 3.2.10
+
+* Mon Mar 12 2012 Josh Boyer <jwboyer@redhat.com> - 3.2.9-4
+- Add patch to ignore bogus io-apic entries (rhbz 801501)
+
+* Wed Mar 07 2012 Dave Jones <davej@redhat.com>
+- Add debug patch for bugs 787171/766277
+
+* Wed Mar 07 2012 Josh Boye <jwboyer@redhat.com>
+- CVE-2012-1146: memcg: unregister events attached to the same eventfd can
+  oops (rhbz 800817)
+
 * Mon Mar 05 2012 Josh Boyer <jwboyer@redhat.com>
 - CVE-2012-1097 regset: Prevent null pointer reference on readonly regsets
 - Add patch to fix BUG_ON mm->nr_ptes (rhbz 786632)
