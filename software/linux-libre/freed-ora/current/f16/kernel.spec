@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -787,6 +787,8 @@ Patch2902: linux-2.6-v4l-dvb-uvcvideo-update.patch
 Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # NFSv4
+Patch4000: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
+Patch4001: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 
 # patches headed upstream
 
@@ -863,6 +865,9 @@ Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
 # Disable threading in hibernate compression
 Patch21243: disable-threading-in-compression-for-hibernate.patch
+
+#rhbz 803809 CVE-2012-1179
+Patch21244: mm-thp-fix-pmd_bad-triggering.patch
 
 Patch21300: unhandled-irqs-switch-to-polling.patch
 
@@ -1486,6 +1491,8 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # eCryptfs
 
 # NFSv4
+ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
+ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 
 # USB
 
@@ -1644,11 +1651,14 @@ ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
 #Disable threading in hibernate compression
 ApplyPatch disable-threading-in-compression-for-hibernate.patch
 
-ApplyPatch unhandled-irqs-switch-to-polling.patch
+# ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
 
 ApplyPatch x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
+
+#rhbz 803809 CVE-2012-1179
+ApplyPatch mm-thp-fix-pmd_bad-triggering.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2466,7 +2476,16 @@ fi
 # and build.
 
 %changelog
-* Tue Mar 13 2012 Josh Boyer <jwboyer@redhat.com> -libre
+* Thu Mar 15 2012 Justin M. Forbes <jforbes@redhat.com> - 3.2.10-3
+- CVE-2012-1179 fix pmd_bad() triggering in code paths holding mmap_sem read mode (rhbz 803809)
+
+* Wed Mar 14 2012 Josh Boyer <jwboyer@redhat.com>
+- Fixup irqpoll patch to only activate on machines with ASM108x PCI bridge
+
+* Wed Mar 14 2012 Steve Dickson <steved@redhat.com>
+- Reduce the foot print of the NFSv4 idmapping coda (bz 593035)
+
+* Tue Mar 13 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Linux-libre 3.2.10-libre
 
 * Mon Mar 12 2012 Josh Boyer <jwboyer@redhat.com> - 3.2.10-1
@@ -2478,7 +2497,7 @@ fi
 * Wed Mar 07 2012 Dave Jones <davej@redhat.com>
 - Add debug patch for bugs 787171/766277
 
-* Wed Mar 07 2012 Josh Boye <jwboyer@redhat.com>
+* Wed Mar 07 2012 Josh Boyer <jwboyer@redhat.com>
 - CVE-2012-1146: memcg: unregister events attached to the same eventfd can
   oops (rhbz 800817)
 
