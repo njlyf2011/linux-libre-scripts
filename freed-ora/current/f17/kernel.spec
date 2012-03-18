@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -127,7 +127,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 1
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -197,7 +197,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -210,7 +210,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -742,6 +742,7 @@ Patch1800: drm-vgem.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
+Patch1825: drm-i915-dp-stfu.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -803,7 +804,6 @@ Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-Patch21236: scsi-fix-sd_revalidate_disk-oops.patch
 
 Patch21250: mcelog-rcu-splat.patch
 Patch21270: x86-Avoid-invoking-RCU-when-CPU-is-idle.patch
@@ -817,8 +817,8 @@ Patch21300: ACPICA-Fix-regression-in-FADT-revision-checks.patch
 #rhbz 728478
 Patch21302: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
-# Disable threading in hibernate compression
-Patch21303: disable-threading-in-compression-for-hibernate.patch
+#rhbz 803809 CVE-2012-1179
+Patch21304: mm-thp-fix-pmd_bad-triggering.patch
 
 Patch21400: unhandled-irqs-switch-to-polling.patch
 
@@ -1530,6 +1530,7 @@ ApplyPatch drm-vgem.patch
 
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-i915-dp-stfu.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
@@ -1576,7 +1577,6 @@ ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-ApplyPatch scsi-fix-sd_revalidate_disk-oops.patch
 
 ApplyPatch mcelog-rcu-splat.patch
 
@@ -1589,12 +1589,12 @@ ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
 
-#Disable threading in hibernate compression
-ApplyPatch disable-threading-in-compression-for-hibernate.patch
-
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
+
+#rhbz 803809 CVE-2012-1179
+ApplyPatch mm-thp-fix-pmd_bad-triggering.patch
 
 #Highbank clock functions
 ApplyPatch highbank-export-clock-functions.patch 
@@ -2443,6 +2443,28 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri Mar 16 2012 Adam Jackson <ajax@redhat.com> - 3.3.0-0.rc7.git2.3
+- drm-i915-dp-stfu.patch: Muzzle a bunch of DP WARN()s.  They're not wrong,
+  but they're not helpful at this point.
+
+* Fri Mar 16 2012 Dave Jones <davej@redhat.com> - 3.3.0-0.rc7.git2.2
+- Disable debugging options.
+
+* Fri Mar 16 2012 Dave Jones <davej@redhat.com> - 3.3.0-0.rc7.git2.1
+- Linux v3.3-rc7-103-g0c4d067
+
+* Fri Mar 16 2012 Justin M. Forbes <jforbes@redhat.com>
+- re-enable threading on hibernate compression/decompression
+
+* Fri Mar 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix irqpoll patch to really only apply for ASM108x machines (rhbz 800520)
+
+* Thu Mar 15 2012 Justin M. Forbes <jforbes@redhat.com>
+- CVE-2012-1179 fix pmd_bad() triggering in code paths holding mmap_sem read mode (rhbz 803809)
+
+* Wed Mar 14 2012 Josh Boyer <jwboyer@redhat.com>
+- Fixup irqpoll patch to only activate on machines with ASM108x PCI bridge
+
 * Wed Mar 14 2012 Steve Dickson <steved@redhat.com> - 3.3.0-0.rc7.git1.2
 - Reduce the foot print of the NFSv4 idmapping coda (bz 593035)
 
