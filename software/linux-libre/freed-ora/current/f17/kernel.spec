@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Save original buildid for later if it's defined
 %if 0%{?buildid:1}
@@ -54,27 +54,25 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 2
+%define base_sublevel 3
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
 #define librev
 
-#define baselibre -libre
-%define basegnu -libre%{?librev}
-
-%define rcrevgnux %{basegnu}
+%define baselibre -libre
+%define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.2%{?stablegnux}
-%define rcrevlibre -3.2%{?rcrevgnux}
-#define gitrevlibre -3.2%{?gitrevgnux}
+#define stablelibre -3.3%{?stablegnux}
+#define rcrevlibre -3.3%{?rcrevgnux}
+#define gitrevlibre -3.3%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -125,9 +123,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 0
 # The git snapshot level
-%define gitrev 2
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -609,7 +607,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-3.%{upstream_sublevel}
+# Source6: deblob-3.%{upstream_sublevel}
 
 Source15: merge.pl
 Source16: mod-extra.list
@@ -659,7 +657,7 @@ Source2001: cpupower.config
 Patch00: %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}%{?rcrevgnu}.bz2
+%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}%{?rcrevgnu}.xz
 Patch01: %{stable_patch_01}
 %endif
 
@@ -1333,7 +1331,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 %endif
     ApplyPatch patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnu}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
     ApplyPatch patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
@@ -2443,6 +2441,12 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon Mar 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3-gnu
+
+* Sun Mar 18 2012 Dave Jones <davej@redhat.com>
+- Linux 3.3
+
 * Fri Mar 16 2012 Adam Jackson <ajax@redhat.com> - 3.3.0-0.rc7.git2.3
 - drm-i915-dp-stfu.patch: Muzzle a bunch of DP WARN()s.  They're not wrong,
   but they're not helpful at this point.
