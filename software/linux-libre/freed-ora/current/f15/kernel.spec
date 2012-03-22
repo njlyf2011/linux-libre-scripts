@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -54,10 +54,8 @@ Summary: The Linux kernel
 # changes.  This is only used to determine which tarball to use.
 #define librev
 
-#define baselibre -libre
-%define basegnu -libre%{?librev}
-
-%define rcrevgnux %{basegnu}
+%define baselibre -libre
+%define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
 %define stablelibre -3.2%{?stablegnux}
@@ -65,13 +63,13 @@ Summary: The Linux kernel
 #define gitrevlibre -3.2%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
-%define stablegnu -libre%{?librev}
+%define stablegnu -gnu%{?librev}
 %endif
 %if 0%{?rcrevlibre:1}
-%define rcrevgnu -libre%{?librev}
+%define rcrevgnu -gnu%{?librev}
 %endif
 %if 0%{?gitrevlibre:1}
-%define gitrevgnu -libre%{?librev}
+%define gitrevgnu -gnu%{?librev}
 %endif
 
 %if !0%{?stablegnux:1}
@@ -85,12 +83,13 @@ Summary: The Linux kernel
 %endif
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
-# change but fedora_build doesn't.  Make sure it starts with a dot.
-# It is appended after dist.
-#define libres .
+# change but fedora_build doesn't.  Make sure there's a dot after
+# librev if a libre build count is to follow.  It is appended after
+# dist.
+%define libres .gnu%{?librev}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -482,8 +481,11 @@ Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
+Provides: kernel-libre-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 16\
+Provides: kernel-libre-drm-nouveau = 16\
 Provides: kernel-modeset = 1\
+Provides: kernel-libre-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
@@ -547,7 +549,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{realversion}-libre%{?librev}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{realversion}%{basegnu}.tar.xz
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -687,6 +689,7 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # NFSv4
 Patch4000: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 Patch4001: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
+Patch4003: NFSv4-Save-the-owner-group-name-string-when-doing-op.patch
 
 # patches headed upstream
 
@@ -751,7 +754,6 @@ Patch21092: e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 #rhbz 754518
 #Patch21093: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-Patch21093: scsi-fix-sd_revalidate_disk-oops.patch
 
 #rhbz 771058
 Patch21100: msi-irq-sysfs-warning.patch
@@ -765,15 +767,18 @@ Patch21102: ACPICA-Fix-regression-in-FADT-revision-checks.patch
 #rhbz 728478
 Patch21104: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
-# Disable threading in hibernate compression
-Patch21105: disable-threading-in-compression-for-hibernate.patch
-
 #rhbz 803809 CVE-2012-1179
 Patch21106: mm-thp-fix-pmd_bad-triggering.patch
+
+#rhbz 804947 CVE-2012-1568
+Patch21107: SHLIB_BASE-randomization.patch
 
 Patch21110: x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
 
 Patch21200: unhandled-irqs-switch-to-polling.patch
+
+#rhbz 804007
+Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
@@ -1256,6 +1261,7 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # NFSv4
 ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
+ApplyPatch NFSv4-Save-the-owner-group-name-string-when-doing-op.patch
  
 # USB
 
@@ -1401,7 +1407,6 @@ ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
 
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-ApplyPatch scsi-fix-sd_revalidate_disk-oops.patch
 
 # Remove overlap between bcma/b43 and brcmsmac and reenable bcm4331
 ApplyPatch bcma-brcmsmac-compat.patch
@@ -1412,10 +1417,10 @@ ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
 
-#Disable threading in hibernate compression
-ApplyPatch disable-threading-in-compression-for-hibernate.patch
+#rhbz 804007
+ApplyPatch mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
-# ApplyPatch unhandled-irqs-switch-to-polling.patch
+ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
 
@@ -1423,6 +1428,9 @@ ApplyPatch x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
 
 #rhbz 803809 CVE-2012-1179
 ApplyPatch mm-thp-fix-pmd_bad-triggering.patch
+
+#rhbz 804947 CVE-2012-1568
+ApplyPatch SHLIB_BASE-randomization.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2071,6 +2079,26 @@ fi
 # and build.
 
 %changelog
+* Wed Mar 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.2.12-gnu
+
+* Tue Mar 20 2012 Justin M. Forbes <jforbes@redhat.com> 2.6.42.12-1
+- Linux 3.2.10
+- CVE-2012-1568 SHLIB_BASE randomization (rhbz 804947)
+
+* Tue Mar 20 2012 Steve Dickson <steved@redhat.com>
+- NFSv4: Save the owner/group name string when doing open (bz 794780)
+
+* Tue Mar 20 2012 Josh Boyer <jwboyer@redhat.com>
+- mac80211: fix possible tid_rx->reorder_timer use after free
+  from Stanislaw Gruska (rhbz 804007)
+
+* Fri Mar 16 2012 Justin M. Forbes <jforbes@redhat.com>
+- re-enable threading on hibernate compression/decompression
+
+* Fri Mar 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix irqpoll patch to really only apply for ASM108x machines (rhbz 800520)
+
 * Thu Mar 15 2012 Justin M. Forbes <jforbes@redhat.com> - 2.6.42.10-3
 - CVE-2012-1179 fix pmd_bad() triggering in code paths holding mmap_sem read mode (rhbz 803809)
 
