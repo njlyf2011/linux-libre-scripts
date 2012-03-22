@@ -10,9 +10,9 @@ until $enough; do
   -p | --prep) prep=:; shift;;
   -r | --release) rel=:; shift;;
   "") cat >&2 << EOF
-usage: branch [extra [libre     [rel]]]
- as in 2.6.31  .10      2        0
- for   2.6.31  .10-libre2-lemote_0lxo
+usage: branch [extra [gnu [rel]]]
+ as in 2.6.31    .10    2 0
+ for   2.6.31    .10-gnu2_0loongsonlibre
 
 args may be preceded by --prep, --force, and/or --release
 EOF
@@ -25,13 +25,13 @@ done
 branch=$1
 extra=$2
 libre=$3
-rev=${4-0}lxo
+rev=${4-0}loongsonlibre
 
 branchdir=$1
-librebase=$branch$extra-libre$libre
-srcbase=linux-$librebase.tar.bz2
+librebase=$branch$extra-gnu$libre
+srcbase=linux-libre-$librebase.tar.bz2
 pub=../pool
-buildnorev=$librebase-lemote
+buildnorev=$branch${extra:-.0}-gnu$libre
 buildid=${buildnorev}_${rev}
 srctree=linux-$buildid
 xsrctree=linux-$branch$extra
@@ -85,7 +85,7 @@ fi
 
 ln -s .patches $srctree/patches
 cd $srctree
-quilt push lxo-config.patch
+quilt push config.patch
 make-kpkg --rootcmd fakeroot --initrd --revision $rev debian
 if quilt next; then
   quilt push -a
