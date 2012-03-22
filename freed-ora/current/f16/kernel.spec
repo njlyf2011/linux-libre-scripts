@@ -54,36 +54,34 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 2
+%define base_sublevel 3
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
 #define librev
 
-#define baselibre -libre
-%define basegnu -libre%{?librev}
-
-%define rcrevgnux %{basegnu}
+%define baselibre -libre
+%define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.2%{?stablegnux}
-#define rcrevlibre -3.2%{?rcrevgnux}
-#define gitrevlibre -3.2%{?gitrevgnux}
+#define stablelibre -3.3%{?stablegnux}
+#define rcrevlibre -3.3%{?rcrevgnux}
+#define gitrevlibre -3.3%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
-%define stablegnu -libre%{?librev}
+%define stablegnu -gnu%{?librev}
 %endif
 %if 0%{?rcrevlibre:1}
-%define rcrevgnu -libre%{?librev}
+%define rcrevgnu -gnu%{?librev}
 %endif
 %if 0%{?gitrevlibre:1}
-%define gitrevgnu -libre%{?librev}
+%define gitrevgnu -gnu%{?librev}
 %endif
 
 %if !0%{?stablegnux:1}
@@ -97,15 +95,16 @@ Summary: The Linux kernel
 %endif
 
 # libres (s for suffix) may be bumped for rebuilds in which patches
-# change but fedora_build doesn't.  Make sure it starts with a dot.
-# It is appended after dist.
-#define libres .
+# change but fedora_build doesn't.  Make sure there's a dot after
+# librev if a libre build count is to follow.  It is appended after
+# dist.
+%define libres .gnu%{?librev}
 
 ## If this is a released kernel ##
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 0
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -202,9 +201,6 @@ Summary: The Linux kernel
 # should we do C=1 builds with sparse
 %define with_sparse    %{?_with_sparse:       1} %{?!_with_sparse:       0}
 
-# Include driver backports (e.g. compat-wireless) in the kernel build.
-%define with_backports %{?_with_backports:    1} %{?!_with_backports:    0}
-
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
@@ -242,20 +238,6 @@ Summary: The Linux kernel
 
 # The kernel tarball/base version
 %define kversion 3.%{base_sublevel}
-
-# The compat-wireless version
-%define cwversion 3.3-rc1-2
-
-#######################################################################
-# If cwversion is less than kversion, make sure with_backports is
-# turned-off.
-#
-# For rawhide, disable with_backports immediately after a rebase...
-#
-# (Uncomment the '#' and both spaces below to disable with_backports.)
-#
-# % define with_backports 0
-#######################################################################
 
 %define make_target bzImage
 
@@ -424,7 +406,6 @@ Summary: The Linux kernel
 %define make_target image
 %define kernel_image arch/s390/boot/image
 %define with_tools 0
-%define with_backports 0
 %endif
 
 %ifarch sparc64
@@ -504,7 +485,6 @@ Summary: The Linux kernel
 %define with_pae 0
 %define with_debuginfo 0
 %define with_tools 0
-%define with_backports 0
 %define _enable_debug_packages 0
 %endif
 
@@ -558,8 +538,11 @@ Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
 Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
 Provides: kernel-drm = 4.3.0\
+Provides: kernel-libre-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 16\
+Provides: kernel-libre-drm-nouveau = 16\
 Provides: kernel-modeset = 1\
+Provides: kernel-libre-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
@@ -623,8 +606,7 @@ BuildRequires: rpm-build >= 4.4.2.1-4
 %define debuginfo_args --strict-build-id
 %endif
 
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux-%{kversion}-libre%{?librev}.tar.xz
-# Source1: compat-wireless-%{cwversion}.tar.bz2
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -662,8 +644,6 @@ Source111: config-arm-tegra
 Source112: config-arm-kirkwood
 Source113: config-arm-imx
 Source114: config-arm-highbank
-
-Source200: config-backports
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -749,7 +729,6 @@ Patch471: floppy-drop-disable_hlt-warning.patch
 Patch510: linux-2.6-silence-noise.patch
 Patch520: quite-apm.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
-Patch540: modpost-add-option-to-allow-external-modules-to-avoi.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
 
@@ -765,6 +744,7 @@ Patch1500: fix_xen_guest_on_old_EC2.patch
 
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
+Patch1825: drm-i915-dp-stfu.patch
 
 # hush the i915 fbc noise
 Patch1826: drm-i915-fbc-stfu.patch
@@ -796,7 +776,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
-Patch13002: revert-efi-rtclock.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14000: hibernate-freeze-filesystems.patch
@@ -809,38 +788,10 @@ Patch20000: utrace.patch
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 
-#rhbz 717735
-Patch21045: nfs-client-freezer.patch
-
-#rhbz 590880
-Patch21050: alps.patch
-
 Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
-Patch21071: ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
 
 #rhbz 769766
 Patch21072: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
-
-#rhbz 773392
-Patch21073: KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
-Patch21074: KVM-x86-fix-missing-checks-in-syscall-emulation.patch
-
-#rhbz 728740
-Patch21076: rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-
-#rhbz752176
-Patch21080: sysfs-msi-irq-per-device.patch
-
-#rhbz 782686
-Patch21082: procfs-parse-mount-options.patch
-Patch21083: procfs-add-hidepid-and-gid-mount-options.patch
-Patch21084: proc-fix-null-pointer-deref-in-proc_pid_permission.patch
-
-#rhbz 771058
-Patch22100: msi-irq-sysfs-warning.patch
-
-# rhbz 754907
-Patch21101: hpsa-add-irqf-shared.patch
 
 Patch21226: pci-crs-blacklist.patch
 
@@ -850,21 +801,14 @@ Patch21232: rt2x00_fix_MCU_request_failures.patch
 #rhbz 788260
 Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
-#rhbz 785806
-Patch21234: e1000e-Avoid-wrong-check-on-TX-hang.patch
-
 #rhbz 754518
 #Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-Patch21235: scsi-fix-sd_revalidate_disk-oops.patch
 
 #rhbz 727865 730007
 Patch21240: ACPICA-Fix-regression-in-FADT-revision-checks.patch
 
 #rhbz 728478
 Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
-
-# Disable threading in hibernate compression
-Patch21243: disable-threading-in-compression-for-hibernate.patch
 
 #rhbz 803809 CVE-2012-1179
 Patch21244: mm-thp-fix-pmd_bad-triggering.patch
@@ -874,49 +818,6 @@ Patch21300: unhandled-irqs-switch-to-polling.patch
 Patch21350: x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
-
-# compat-wireless patches
-Patch50000: compat-wireless-config-fixups.patch
-Patch50001: compat-wireless-pr_fmt-warning-avoidance.patch
-Patch50002: compat-wireless-integrated-build.patch
-Patch50100: compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-
-# Pending upstream fixes
-Patch50101: mac80211-fix-debugfs-key-station-symlink.patch
-Patch50102: brcmsmac-fix-tx-queue-flush-infinite-loop.patch
-Patch50103: mac80211-Use-the-right-headroom-size-for-mesh-mgmt-f.patch
-Patch50105: b43-add-option-to-avoid-duplicating-device-support-w.patch
-Patch50106: mac80211-update-oper_channel-on-ibss-join.patch
-Patch50107: mac80211-set-bss_conf.idle-when-vif-is-connected.patch
-Patch50108: iwlwifi-fix-PCI-E-transport-inta-race.patch
-Patch50109: bcma-Fix-mem-leak-in-bcma_bus_scan.patch
-Patch50110: rt2800lib-fix-wrong-128dBm-when-signal-is-stronger-t.patch
-Patch50111: iwlwifi-make-Tx-aggregation-enabled-on-ra-be-at-DEBU.patch
-Patch50112: ssb-fix-cardbus-slot-in-hostmode.patch
-Patch50113: iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
-Patch50114: mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
-Patch50115: ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
-Patch50116: mwifiex-handle-association-failure-case-correctly.patch
-Patch50117: ath9k-Fix-kernel-panic-during-driver-initilization.patch
-Patch50118: mwifiex-add-NULL-checks-in-driver-unload-path.patch
-Patch50119: ath9k-fix-a-WEP-crypto-related-regression.patch
-Patch50120: ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
-Patch50121: bcma-don-t-fail-for-bad-SPROM-CRC.patch
-Patch50122: zd1211rw-firmware-needs-duration_id-set-to-zero-for-.patch
-Patch50123: mac80211-Fix-a-rwlock-bad-magic-bug.patch
-Patch50124: rtlwifi-Modify-rtl_pci_init-to-return-0-on-success.patch
-Patch50125: mac80211-call-rate-control-only-after-init.patch
-Patch50126: mac80211-do-not-call-rate-control-.tx_status-before-.patch
-Patch50127: mwifiex-clear-previous-security-setting-during-assoc.patch
-Patch50128: ath9k-stop-on-rates-with-idx-1-in-ath9k-rate-control.patch
-Patch50129: ath9k_hw-prevent-writes-to-const-data-on-AR9160.patch
-Patch50130: rt2x00-fix-a-possible-NULL-pointer-dereference.patch
-Patch50131: iwlwifi-fix-key-removal.patch
-Patch50132: mac80211-zero-initialize-count-field-in-ieee80211_tx.patch
-Patch50133: mac80211-Fix-a-warning-on-changing-to-monitor-mode-f.patch
-Patch50134: brcm80211-smac-fix-endless-retry-of-A-MPDU-transmiss.patch
-Patch50135: brcm80211-smac-only-print-block-ack-timeout-message-.patch
-
 
 %endif
 
@@ -1411,16 +1312,6 @@ cp %{SOURCE15} .
 # Dynamically generate kernel .config files from config-* files
 make -f %{SOURCE20} VERSION=%{version} configs
 
-%if %{with_backports}
-# Turn-off bits provided by compat-wireless
-for i in %{all_arch_configs}
-do
-  mv $i $i.tmp
-  ./merge.pl %{SOURCE200} $i.tmp > $i
-  rm $i.tmp
-done
-%endif
-
 %if %{?all_arch_configs:1}%{!?all_arch_configs:0}
 #if a rhel kernel, apply the rhel config options
 %if 0%{?rhel}
@@ -1465,7 +1356,7 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 #
 # ARM
 #
-ApplyPatch arm-omap-dt-compat.patch
+# ApplyPatch arm-omap-dt-compat.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 
 ApplyPatch taint-vbox.patch
@@ -1541,11 +1432,6 @@ ApplyPatch linux-2.6-silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
-%if %{with_backports}
-# modpost: add option to allow external modules to avoid taint
-ApplyPatch modpost-add-option-to-allow-external-modules-to-avoi.patch
-%endif
-
 # Changes to upstream defaults.
 
 
@@ -1565,6 +1451,7 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
+ApplyPatch drm-i915-dp-stfu.patch
 ApplyPatch drm-i915-fbc-stfu.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
@@ -1586,7 +1473,6 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
-ApplyPatch revert-efi-rtclock.patch
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch hibernate-freeze-filesystems.patch
@@ -1596,38 +1482,9 @@ ApplyPatch lis3-improve-handling-of-null-rate.patch
 # utrace.
 ApplyPatch utrace.patch
 
-#rhbz 752176
-ApplyPatch sysfs-msi-irq-per-device.patch
-
-# rhbz 754907
-ApplyPatch hpsa-add-irqf-shared.patch
-
 #ApplyPatch pci-crs-blacklist.patch
 
-#rhbz 717735
-ApplyPatch nfs-client-freezer.patch
-
-#rhbz 590880
-ApplyPatch alps.patch
-
-#rhbz 771058
-ApplyPatch msi-irq-sysfs-warning.patch
-
 ApplyPatch ext4-Support-check-none-nocheck-mount-options.patch
-
-ApplyPatch ext4-Fix-error-handling-on-inode-bitmap-corruption.patch
-
-#rhbz 773392
-ApplyPatch KVM-x86-extend-struct-x86_emulate_ops-with-get_cpuid.patch
-ApplyPatch KVM-x86-fix-missing-checks-in-syscall-emulation.patch
-
-#rhbz 728740
-ApplyPatch rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-
-#rhbz 782686
-ApplyPatch procfs-parse-mount-options.patch
-ApplyPatch procfs-add-hidepid-and-gid-mount-options.patch
-ApplyPatch proc-fix-null-pointer-deref-in-proc_pid_permission.patch
 
 #rhbz 772772
 ApplyPatch rt2x00_fix_MCU_request_failures.patch
@@ -1635,12 +1492,8 @@ ApplyPatch rt2x00_fix_MCU_request_failures.patch
 #rhbz 788269
 ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
-#rhbz 785806
-ApplyPatch e1000e-Avoid-wrong-check-on-TX-hang.patch
-
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-ApplyPatch scsi-fix-sd_revalidate_disk-oops.patch
 
 #rhbz 727865 730007
 ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
@@ -1648,10 +1501,7 @@ ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
 
-#Disable threading in hibernate compression
-ApplyPatch disable-threading-in-compression-for-hibernate.patch
-
-# ApplyPatch unhandled-irqs-switch-to-polling.patch
+ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
 
@@ -1707,71 +1557,13 @@ done
 # end of kernel config
 %endif
 
+# get rid of unwanted files resulting from patch fuzz
+find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
+
 # remove unnecessary SCM files
 find . -name .gitignore -exec rm -f {} \; >/dev/null
 
 cd ..
-
-%if %{with_backports}
-
-# Always start fresh
-rm -rf compat-wireless-%{cwversion}
-
-# Extract the compat-wireless bits
-%setup -q -n kernel-%{kversion}%{?dist} -T -D -a 1
-
-cd compat-wireless-%{cwversion}
-
-ApplyPatch compat-wireless-config-fixups.patch
-ApplyPatch compat-wireless-pr_fmt-warning-avoidance.patch
-ApplyPatch compat-wireless-integrated-build.patch
-
-ApplyPatch compat-wireless-rtl8192cu-Fix-WARNING-on-suspend-resume.patch
-
-# Pending upstream fixes
-ApplyPatch mac80211-fix-debugfs-key-station-symlink.patch
-ApplyPatch brcmsmac-fix-tx-queue-flush-infinite-loop.patch
-ApplyPatch mac80211-Use-the-right-headroom-size-for-mesh-mgmt-f.patch
-ApplyPatch b43-add-option-to-avoid-duplicating-device-support-w.patch
-ApplyPatch mac80211-update-oper_channel-on-ibss-join.patch
-ApplyPatch mac80211-set-bss_conf.idle-when-vif-is-connected.patch
-ApplyPatch iwlwifi-fix-PCI-E-transport-inta-race.patch
-ApplyPatch bcma-Fix-mem-leak-in-bcma_bus_scan.patch
-ApplyPatch rt2800lib-fix-wrong-128dBm-when-signal-is-stronger-t.patch
-ApplyPatch iwlwifi-make-Tx-aggregation-enabled-on-ra-be-at-DEBU.patch
-ApplyPatch ssb-fix-cardbus-slot-in-hostmode.patch
-ApplyPatch iwlwifi-don-t-mess-up-QoS-counters-with-non-QoS-fram.patch
-ApplyPatch mac80211-timeout-a-single-frame-in-the-rx-reorder-bu.patch
-ApplyPatch ath9k-use-WARN_ON_ONCE-in-ath_rc_get_highest_rix.patch
-ApplyPatch mwifiex-handle-association-failure-case-correctly.patch
-ApplyPatch ath9k-Fix-kernel-panic-during-driver-initilization.patch
-ApplyPatch mwifiex-add-NULL-checks-in-driver-unload-path.patch
-ApplyPatch ath9k-fix-a-WEP-crypto-related-regression.patch
-ApplyPatch ath9k_hw-fix-a-RTS-CTS-timeout-regression.patch
-ApplyPatch bcma-don-t-fail-for-bad-SPROM-CRC.patch
-ApplyPatch zd1211rw-firmware-needs-duration_id-set-to-zero-for-.patch
-ApplyPatch mac80211-Fix-a-rwlock-bad-magic-bug.patch
-ApplyPatch rtlwifi-Modify-rtl_pci_init-to-return-0-on-success.patch
-ApplyPatch mac80211-call-rate-control-only-after-init.patch
-ApplyPatch mac80211-do-not-call-rate-control-.tx_status-before-.patch
-ApplyPatch mwifiex-clear-previous-security-setting-during-assoc.patch
-ApplyPatch ath9k-stop-on-rates-with-idx-1-in-ath9k-rate-control.patch
-ApplyPatch ath9k_hw-prevent-writes-to-const-data-on-AR9160.patch
-ApplyPatch rt2x00-fix-a-possible-NULL-pointer-dereference.patch
-ApplyPatch iwlwifi-fix-key-removal.patch
-ApplyPatch mac80211-zero-initialize-count-field-in-ieee80211_tx.patch
-ApplyPatch mac80211-Fix-a-warning-on-changing-to-monitor-mode-f.patch
-ApplyPatch brcm80211-smac-fix-endless-retry-of-A-MPDU-transmiss.patch
-ApplyPatch brcm80211-smac-only-print-block-ack-timeout-message-.patch
-
-ApplyPatch rt2x00_fix_MCU_request_failures.patch
-
-cd ..
-
-%endif
-
-# get rid of unwanted files resulting from patch fuzz
-find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
 
 ###
 ### build
@@ -1895,9 +1687,7 @@ BuildKernel() {
     # dirs for additional modules per module-init-tools, kbuild/modules.txt
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/extra
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/updates
-%if %{with_backports}
-    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/backports
-%endif
+
     # first copy everything
     cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp Module.symvers $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -1990,6 +1780,12 @@ BuildKernel() {
 
     rm -f modinfo modnames
 
+    # remove files that will be auto generated by depmod at rpm -i time
+    for i in alias alias.bin builtin.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap
+    do
+      rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$i
+    done
+
     # Move the devel headers out of the root file system
     mkdir -p $RPM_BUILD_ROOT/usr/src/kernels
     mv $RPM_BUILD_ROOT/lib/modules/$KernelVer/build $RPM_BUILD_ROOT/$DevelDir
@@ -2002,32 +1798,6 @@ BuildKernel() {
 
     # prune junk from kernel-devel
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -exec rm -f {} \;
-
-%if %{with_backports}
-
-    cd ../compat-wireless-%{cwversion}/
-
-    install -m 644 config.mk \
-	$RPM_BUILD_ROOT/boot/config.mk-compat-wireless-%{cwversion}-$KernelVer
-
-    make -s ARCH=$Arch V=1 %{?_smp_mflags} \
-	KLIB_BUILD=../linux-%{KVERREL} \
-	KMODPATH_ARG="INSTALL_MOD_PATH=$RPM_BUILD_ROOT" \
-	KMODDIR="backports" install-modules %{?sparse_mflags}
-
-    # mark modules executable so that strip-to-file can strip them
-    find $RPM_BUILD_ROOT/lib/modules/$KernelVer/backports -name "*.ko" \
-	-type f | xargs --no-run-if-empty chmod u+x
-
-    cd -
-
-%endif
-
-    # remove files that will be auto generated by depmod at rpm -i time
-    for i in alias alias.bin builtin.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap
-    do
-      rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$i
-    done
 
 }
 
@@ -2427,10 +2197,6 @@ fi
 /lib/modules/%{KVERREL}%{?2:.%{2}}/source\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/extra\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/updates\
-%if %{with_backports}\
-/boot/config.mk-compat-wireless-%{cwversion}-%{KVERREL}%{?2:.%{2}}\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/backports\
-%endif\
 %ifarch %{vdso_arches}\
 /lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
 /etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:.%{2}}.conf\
@@ -2476,6 +2242,23 @@ fi
 # and build.
 
 %changelog
+* Tue Mar 20 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3-gnu
+
+* Mon Mar 19 2012 Adam Jackson <ajax@redhat.com> - 3.3.0-2
+- drm-i915-dp-stfu.patch: Muzzle a bunch of DP WARN()s.  They're not wrong,
+  but they're not helpful at this point.
+
+* Mon Mar 19 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.0-1
+- Linux 3.3
+- Drop compat-wireless infrastructure in preparation for 3.3 rebase
+
+* Fri Mar 16 2012 Justin M. Forbes <jforbes@redhat.com>
+- re-enable threading on hibernate compression/decompression
+
+* Fri Mar 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix irqpoll patch to really only apply for ASM108x machines (rhbz 800520)
+
 * Thu Mar 15 2012 Justin M. Forbes <jforbes@redhat.com> - 3.2.10-3
 - CVE-2012-1179 fix pmd_bad() triggering in code paths holding mmap_sem read mode (rhbz 803809)
 
