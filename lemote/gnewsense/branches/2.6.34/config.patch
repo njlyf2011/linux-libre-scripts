@@ -1,25 +1,12 @@
-Index: Makefile
-===================================================================
---- Makefile.orig	2011-06-26 21:45:29.000000000 +0000
-+++ Makefile	2011-06-26 21:45:34.000000000 +0000
-@@ -1,7 +1,7 @@
- VERSION = 2
- PATCHLEVEL = 6
- SUBLEVEL = 34
--EXTRAVERSION = .10-libre2
-+EXTRAVERSION = .10-libre2-lemote
- NAME = Sheep on Meth
- 
- # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2011-06-26 21:47:49.000000000 +0000
++++ .config	2012-03-23 17:58:26.000000000 +0000
 @@ -0,0 +1,4195 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.34.10-libre2-lemote
-+# Sun Jun 26 21:47:49 2011
++# Linux kernel version: 2.6.34.11-gnu
++# Fri Mar 23 17:58:26 2012
 +#
 +CONFIG_MIPS=y
 +
