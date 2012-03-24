@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -579,7 +579,7 @@ ExclusiveOS: Linux
 #
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
-BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
+BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
@@ -775,6 +775,10 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
+Patch15000: bluetooth-use-after-free.patch
+
+Patch19000: ips-noirq.patch
+
 Patch20000: utrace.patch
 
 # Flattened devicetree support
@@ -817,6 +821,12 @@ Patch21302: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
 #rhbz 803809 CVE-2012-1179
 Patch21304: mm-thp-fix-pmd_bad-triggering.patch
+
+#rhbz 804007
+Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
+
+#rhbz 804957 CVE-2012-1568
+Patch21306: shlib_base_randomize.patch
 
 Patch21400: unhandled-irqs-switch-to-polling.patch
 
@@ -1555,6 +1565,10 @@ ApplyPatch hibernate-freeze-filesystems.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
+ApplyPatch bluetooth-use-after-free.patch
+
+ApplyPatch ips-noirq.patch
+
 # utrace.
 ApplyPatch utrace.patch
 
@@ -1586,6 +1600,12 @@ ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
 
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
+
+#rhbz 804007
+ApplyPatch mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
+
+#rhbz 804957 CVE-2012-1568
+ApplyPatch shlib_base_randomize.patch
 
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
@@ -1745,6 +1765,11 @@ BuildKernel() {
     $CopyKernel $KernelImage \
     		$RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+
+    # hmac sign the kernel for FIPS
+    echo "Creating hmac file: $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac"
+    ls -l $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+    sha512hmac $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer | sed -e "s,$RPM_BUILD_ROOT,," > $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac;
 
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
     # Override $(mod-fw) because we don't want it to install any firmware
@@ -2378,6 +2403,7 @@ fi
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
+/%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:.%{2}}.hmac \
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
@@ -2441,6 +2467,20 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri Mar 23 2012 Dave Jones <davej@redhat.com> 3.3.0-5
+- Apply patches that should solve the bluetooth use-after-free oopses. (rhbz 806033)
+
+* Wed Mar 21 2012 Josh Boyer <jwboyer@redhat.com>
+- Ship hmac file for vmlinuz for FIPS-140 (rhbz 805538)
+
+* Tue Mar 20 2012 Dave Jones <davej@redhat.com>
+- Don't bind the IPS driver if no irq is assigned (typically BIOS bug). (rhbz 804353)
+
+* Tue Mar 20 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-1568: execshield: predictable ascii armour base address (rhbz 804957)
+- mac80211: fix possible tid_rx->reorder_timer use after free
+  from Stanislaw Gruska (rhbz 804007)
+
 * Mon Mar 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3-gnu
 
