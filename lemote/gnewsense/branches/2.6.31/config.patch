@@ -1,16 +1,3 @@
-Index: Makefile
-===================================================================
---- Makefile.orig	2011-01-09 04:55:53.000000000 +0000
-+++ Makefile	2011-01-09 04:55:55.000000000 +0000
-@@ -1,7 +1,7 @@
- VERSION = 2
- PATCHLEVEL = 6
- SUBLEVEL = 31
--EXTRAVERSION = .14-libre4
-+EXTRAVERSION = .14-libre4-lemote
- NAME = Man-Eating Seals of Antiquity
- 
- # *DOCUMENTATION*
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
@@ -2213,8 +2200,8 @@ Index: .config
 +# CONFIG_ADFS_FS is not set
 +# CONFIG_AFFS_FS is not set
 +CONFIG_ECRYPT_FS=m
-+# CONFIG_HFS_FS is not set
-+# CONFIG_HFSPLUS_FS is not set
++CONFIG_HFS_FS=m
++CONFIG_HFSPLUS_FS=m
 +# CONFIG_BEFS_FS is not set
 +# CONFIG_BFS_FS is not set
 +# CONFIG_EFS_FS is not set
