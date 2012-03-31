@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2079,6 +2079,12 @@ fi
 # and build.
 
 %changelog
+* Fri Mar 30 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Linux-libre 3.2.13-gnu
+
+* Mon Mar 26 2012 Dave Jones <davej@redhat.com>
+- Linux 3.2.13
+
 * Wed Mar 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - Linux-libre 3.2.12-gnu
 
