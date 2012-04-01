@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 4
+%global baserelease 8
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -582,7 +582,7 @@ ExclusiveOS: Linux
 #
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
-BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
+BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
@@ -709,6 +709,7 @@ Patch09: linux-2.6-upstream-reverts.patch
 Patch100: taint-vbox.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
+Patch162: nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
 Patch383: linux-2.6-defaults-aspm.patch
 
@@ -782,6 +783,10 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
+Patch15000: bluetooth-use-after-free.patch
+
+Patch19000: ips-noirq.patch
+
 Patch20000: utrace.patch
 
 # Flattened devicetree support
@@ -804,6 +809,9 @@ Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 #rhbz 754518
 #Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
+#rhbz 789644
+Patch21237: mcelog-rcu-splat.patch
+
 #rhbz 727865 730007
 Patch21240: ACPICA-Fix-regression-in-FADT-revision-checks.patch
 
@@ -822,6 +830,17 @@ Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 Patch21306: shlib_base_randomize.patch
 
 Patch21350: x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
+
+#rhbz 804347
+Patch21351: x86-add-io_apic_ops-to-allow-interception.patch
+Patch21352: x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
+Patch21353: xen-x86-Implement-x86_apic_ops.patch
+
+#rhbz 770476
+Patch21370: iwlegacy-do-not-nulify-il-vif-on-reset.patch
+Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
+
+Patch21500: ASPM-Fix-pcie-devs-with-non-pcie-children.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
@@ -1371,6 +1390,7 @@ ApplyPatch taint-vbox.patch
 #
 ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 ApplyPatch linux-2.6-i386-nx-emulation.patch
+ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1485,6 +1505,10 @@ ApplyPatch hibernate-freeze-filesystems.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
+ApplyPatch bluetooth-use-after-free.patch
+
+ApplyPatch ips-noirq.patch
+
 # utrace.
 ApplyPatch utrace.patch
 
@@ -1500,6 +1524,9 @@ ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
+
+#rhbz 789644
+ApplyPatch mcelog-rcu-splat.patch
 
 #rhbz 727865 730007
 ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
@@ -1519,8 +1546,19 @@ ApplyPatch weird-root-dentry-name-debug.patch
 
 ApplyPatch x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
 
+#rhbz 804347
+ApplyPatch x86-add-io_apic_ops-to-allow-interception.patch
+ApplyPatch x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
+ApplyPatch xen-x86-Implement-x86_apic_ops.patch
+
+#rhbz 770476
+ApplyPatch iwlegacy-do-not-nulify-il-vif-on-reset.patch
+ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
+
 #rhbz 803809 CVE-2012-1179
 ApplyPatch mm-thp-fix-pmd_bad-triggering.patch
+
+ApplyPatch ASPM-Fix-pcie-devs-with-non-pcie-children.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1670,6 +1708,11 @@ BuildKernel() {
     $CopyKernel $KernelImage \
     		$RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+
+    # hmac sign the kernel for FIPS
+    echo "Creating hmac file: $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac"
+    ls -l $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+    sha512hmac $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer | sed -e "s,$RPM_BUILD_ROOT,," > $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac;
 
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
     # Override $(mod-fw) because we don't want it to install any firmware
@@ -2201,6 +2244,7 @@ fi
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
+/%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:.%{2}}.hmac \
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
@@ -2254,6 +2298,27 @@ fi
 # and build.
 
 %changelog
+* Thu Mar 29 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.0-8
+- Drop __cpuinitdata on disable_nx for x86_32 (rhbz 808075)
+- iwl{wifi,legacy}: Fix warnings on remove interface from Stanislaw Gruszka
+  (rhbz 770467)
+
+* Wed Mar 28 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix disabled ASPM regression
+
+* Wed Mar 28 2012 Dave Jones <davej@redhat.com>
+- Don't bind the IPS driver if no irq is assigned (typically BIOS bug). (rhbz 804353)
+
+* Tue Mar 27 2012 Josh Boyer <jwboyer@redhat.com>
+- Implement xen apic_ops to fix early crash in Xen Dom0 (rhbz 804347)
+- Apply patch to fix MCE rcu splat (rhbz 789644)
+
+* Fri Mar 23 2012 Dave Jones <davej@redhat.com>
+- Apply patches that should solve the bluetooth use-after-free oopses. (rhbz 806033)
+
+* Wed Mar 21 2012 Josh Boyer <jwboyer@redhat.com>
+- Ship hmac file for vmlinuz for FIPS-140 (rhbz 805538)
+
 * Tue Mar 20 2012 Josh Boyer <jwboyer@redhat.com>
 - CVE-2012-1568: execshield: predictable ascii armour base address (rhbz 804957)
 - mac80211: fix possible tid_rx->reorder_timer use after free
