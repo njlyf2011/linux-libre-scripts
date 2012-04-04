@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.2 extra=
+kver=3.3 extra=
 
 case $1 in
 --force)
@@ -563,7 +563,7 @@ announce IMX_SDMA - "i.MX SDMA support"
 reject_firmware drivers/dma/imx-sdma.c
 clean_blob arch/arm/mach-imx/mm-imx25.c
 clean_blob arch/arm/mach-imx/mm-imx3.c
-clean_blob arch/arm/mach-mx5/mm.c
+clean_blob arch/arm/mach-imx/mm-imx5.c
 clean_blob arch/arm/boot/dts/imx51-babbage.dts
 clean_blob arch/arm/boot/dts/imx53-ard.dts
 clean_blob arch/arm/boot/dts/imx53-evk.dts
@@ -666,6 +666,7 @@ clean_mk CONFIG_DVB_USB_CXUSB drivers/media/dvb/dvb-usb/Makefile
 announce DVB_USB_DIB0700 - "DiBcom DiB0700 USB DVB devices"
 reject_firmware drivers/media/dvb/dvb-usb/dib0700_devices.c
 clean_blob drivers/media/dvb/dvb-usb/dib0700_devices.c
+clean_blob drivers/media/dvb/dvb-usb/dib0700_core.c
 clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_DIB0700'
 clean_mk CONFIG_DVB_USB_DIB0700 drivers/media/dvb/dvb-usb/Makefile
 
@@ -1427,7 +1428,6 @@ clean_mk CONFIG_BRCMSMAC drivers/net/wireless/brcm80211/Makefile
 announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
 reject_firmware drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
 clean_blob drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
-clean_blob drivers/net/wireless/brcm80211/brcmfmac/bcmchip.h
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC'
 clean_mk CONFIG_BRCMFMAC drivers/net/wireless/brcm80211/Makefile
 
@@ -1480,9 +1480,9 @@ clean_kconfig drivers/net/wireless/Kconfig 'IPW2200'
 clean_mk CONFIG_IPW2200 drivers/net/wireless/ipw2x00/Makefile
 
 announce IWL3945 - "Intel PRO/Wireless 3945ABG/BG Network Connection"
-reject_firmware drivers/net/wireless/iwlegacy/iwl3945-base.c
-clean_blob drivers/net/wireless/iwlegacy/iwl3945-base.c
-clean_blob drivers/net/wireless/iwlegacy/iwl-3945.h
+reject_firmware drivers/net/wireless/iwlegacy/3945-mac.c
+clean_blob drivers/net/wireless/iwlegacy/3945-mac.c
+clean_blob drivers/net/wireless/iwlegacy/3945.h
 clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL3945'
 clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 
@@ -1497,9 +1497,9 @@ clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
 clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
 announce IWL4965 - "Intel Wireless WiFi 4965AGN"
-reject_firmware drivers/net/wireless/iwlegacy/iwl4965-base.c
-clean_blob drivers/net/wireless/iwlegacy/iwl4965-base.c
-clean_blob drivers/net/wireless/iwlegacy/iwl-4965.c
+reject_firmware drivers/net/wireless/iwlegacy/4965-mac.c
+clean_blob drivers/net/wireless/iwlegacy/4965-mac.c
+clean_blob drivers/net/wireless/iwlegacy/4965.c
 clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL4965'
 clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlegacy/Makefile
 
@@ -1693,9 +1693,9 @@ clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192SE
 clean_mk CONFIG_RTL8192SE drivers/net/wireless/rtlwifi/rtl8192se/Makefile
 
 announce RTL8192E - "RealTek RTL8192E Wireless LAN NIC driver"
-reject_firmware drivers/staging/rtl8192e/r8192E_firmware.c
-clean_blob drivers/staging/rtl8192e/r8192E_firmware.c
-clean_blob drivers/staging/rtl8192e/r8192E_hwimg.c
+reject_firmware drivers/staging/rtl8192e/rtl8192e/r8192E_firmware.c
+clean_blob drivers/staging/rtl8192e/rtl8192e/r8192E_firmware.c
+clean_blob drivers/staging/rtl8192e/rtl8192e/r8192E_hwimg.c
 clean_kconfig drivers/staging/rtl8192e/Kconfig RTL8192E
 clean_mk CONFIG_RTL8192E drivers/staging/rtl8192e/Makefile
 
@@ -1734,11 +1734,6 @@ announce WL12XX_SDIO - "TI wl12xx SDIO support"
 clean_blob drivers/net/wireless/wl12xx/sdio.c
 clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX_SDIO'
 clean_mk CONFIG_WL12XX_SDIO drivers/net/wireless/wl12xx/Makefile
-
-announce WL12XX_SDIO_TEST - "TI wl12xx SDIO testing support"
-reject_firmware drivers/net/wireless/wl12xx/sdio_test.c
-clean_kconfig drivers/net/wireless/wl12xx/Kconfig 'WL12XX_SDIO_TEST'
-clean_mk CONFIG_WL12XX_SDIO_TEST drivers/net/wireless/wl12xx/Makefile
 
 announce WL12XX_SPI - "TI wl12xx SPI support"
 clean_blob drivers/net/wireless/wl12xx/spi.c
@@ -2220,13 +2215,6 @@ clean_blob sound/pci/cs46xx/cs46xx_lib.c
 clean_kconfig sound/pci/Kconfig 'SND_CS46XX'
 clean_mk 'CONFIG_SND_CS46XX' sound/pci/cs46xx/Makefile
 
-announce SND_INTEL_SST - "Intel SST (LPE) Driver"
-reject_firmware drivers/staging/intel_sst/intel_sst_drv_interface.c
-clean_blob drivers/staging/intel_sst/intel_sst_drv_interface.c
-reject_firmware drivers/staging/intel_sst/intel_sst_dsp.c
-clean_kconfig drivers/staging/intel_sst/Kconfig 'SND_INTEL_SST'
-clean_mk 'CONFIG_SND_INTEL_SST' drivers/staging/intel_sst/Makefile
-
 announce SND_KORG1212 - "Korg 1212 IO"
 drop_fw_file firmware/korg/k1212.dsp.ihex firmware/korg/k1212.dsp
 reject_firmware sound/pci/korg1212/korg1212.c
@@ -2444,8 +2432,8 @@ clean_blob sound/soc/codecs/adau1701.c
 clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_ADAU1701'
 clean_mk CONFIG_SND_SOC_ADAU1701 sound/soc/codecs/Makefile
 
-announce SIGMA - "SigmaStudio firmware loader"
-maybe_reject_firmware drivers/firmware/sigma.c
+announce SND_SOC_SIGMADSP - "SigmaStudio firmware loader"
+maybe_reject_firmware sound/soc/codecs/sigmadsp.c
 
 # It's not clear that wm2000_anc.bin is pure data.
 # Check with developer, clean up for now.
