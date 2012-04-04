@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 8
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -70,7 +70,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.3%{?stablegnux}
+%define stablelibre -3.3%{?stablegnux}
 #define rcrevlibre -3.3%{?rcrevgnux}
 #define gitrevlibre -3.3%{?gitrevgnux}
 
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -728,6 +728,7 @@ Patch470: die-floppy-die.patch
 Patch471: floppy-drop-disable_hlt-warning.patch
 
 Patch510: linux-2.6-silence-noise.patch
+Patch511: silence-timekeeping-spew.patch
 Patch520: quite-apm.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 
@@ -803,9 +804,6 @@ Patch21226: pci-crs-blacklist.patch
 #rhbz 772772
 Patch21232: rt2x00_fix_MCU_request_failures.patch
 
-#rhbz 788260
-Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
-
 #rhbz 754518
 #Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -818,9 +816,6 @@ Patch21240: ACPICA-Fix-regression-in-FADT-revision-checks.patch
 #rhbz 728478
 Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
-#rhbz 803809 CVE-2012-1179
-Patch21244: mm-thp-fix-pmd_bad-triggering.patch
-
 Patch21300: unhandled-irqs-switch-to-polling.patch
 
 #rhbz 804007
@@ -828,8 +823,6 @@ Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
-
-Patch21350: x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
 
 #rhbz 804347
 Patch21351: x86-add-io_apic_ops-to-allow-interception.patch
@@ -840,7 +833,10 @@ Patch21353: xen-x86-Implement-x86_apic_ops.patch
 Patch21370: iwlegacy-do-not-nulify-il-vif-on-reset.patch
 Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 
-Patch21500: ASPM-Fix-pcie-devs-with-non-pcie-children.patch
+Patch21501: nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
+
+#rhbz 808207 CVE-2012-1601
+Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
@@ -1455,6 +1451,8 @@ ApplyPatch linux-2.6-serial-460800.patch
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
 
+ApplyPatch silence-timekeeping-spew.patch
+
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
@@ -1501,7 +1499,8 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
-ApplyPatch hibernate-freeze-filesystems.patch
+# FIXME
+#ApplyPatch hibernate-freeze-filesystems.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
@@ -1518,9 +1517,6 @@ ApplyPatch ext4-Support-check-none-nocheck-mount-options.patch
 
 #rhbz 772772
 ApplyPatch rt2x00_fix_MCU_request_failures.patch
-
-#rhbz 788269
-ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
 
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1544,8 +1540,6 @@ ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
 
-ApplyPatch x86-ioapic-add-register-checks-for-bogus-io-apic-entries.patch
-
 #rhbz 804347
 ApplyPatch x86-add-io_apic_ops-to-allow-interception.patch
 ApplyPatch x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
@@ -1555,10 +1549,10 @@ ApplyPatch xen-x86-Implement-x86_apic_ops.patch
 ApplyPatch iwlegacy-do-not-nulify-il-vif-on-reset.patch
 ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 
-#rhbz 803809 CVE-2012-1179
-ApplyPatch mm-thp-fix-pmd_bad-triggering.patch
+ApplyPatch nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
-ApplyPatch ASPM-Fix-pcie-devs-with-non-pcie-children.patch
+#rhbz 808207 CVE-2012-1601
+ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2298,6 +2292,21 @@ fi
 # and build.
 
 %changelog
+* Mon Apr  2 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.1-gnu.
+
+* Mon Apr 02 2012 Dave Jones <davej@redhat.com> 3.3.1-1
+- Linux 3.3.1
+
+* Fri Mar 30 2012 Dave Jones <davej@redhat.com>
+- Silence the timekeeping "Adjusting tsc more then 11%" spew. (rhbz 798600)
+
+* Fri Mar 30 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix i915 fbdev cursor blink around suspend/hibernate from Dave Airlied
+- CVE-2012-1601: kvm: NULL dereference from irqchip_in_kernel and
+  vcpu->arch.apic inconsistency (rhbz 808207)
+- Add patch to fix incorrect buffer length in __nfs4_get_acl_uncached
+
 * Thu Mar 29 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.0-8
 - Drop __cpuinitdata on disable_nx for x86_32 (rhbz 808075)
 - iwl{wifi,legacy}: Fix warnings on remove interface from Stanislaw Gruszka
