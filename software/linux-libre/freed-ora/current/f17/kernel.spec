@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -747,6 +747,9 @@ Patch1825: drm-i915-dp-stfu.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
+Patch1950: drm-i915-allow-to-select-rc6-modes-via-kernel-parame.patch
+Patch1951: drm-i915-enable-plain-RC6-on-Sandy-Bridge-by-default.patch
+
 # Quiet boot fixes
 # silence the ACPI blacklist code
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
@@ -825,9 +828,18 @@ Patch21351: x86-add-io_apic_ops-to-allow-interception.patch
 Patch21352: x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
 Patch21353: xen-x86-Implement-x86_apic_ops.patch
 
+#rhbz 806433
+Patch21360: uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
+
 #rhbz 770476
 Patch21370: iwlegacy-do-not-nulify-il-vif-on-reset.patch
 Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
+
+#rhbz 808603
+Patch21380: wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
+
+#rhbz 806676 807632
+Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
 
 Patch21400: unhandled-irqs-switch-to-polling.patch
 
@@ -1551,6 +1563,9 @@ ApplyPatch drm-i915-dp-stfu.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
+ApplyPatch drm-i915-allow-to-select-rc6-modes-via-kernel-parame.patch
+ApplyPatch drm-i915-enable-plain-RC6-on-Sandy-Bridge-by-default.patch
+
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch quite-apm.patch
@@ -1629,6 +1644,15 @@ ApplyPatch nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
 #rhbz 808207 CVE-2012-1601
 ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
+
+#rhbz 806433
+ApplyPatch uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
+
+#rhbz 808603
+ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
+
+#rhbz 806676 807632
+ApplyPatch libata-disable-runtime-pm-for-hotpluggable-port.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2480,6 +2504,17 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Wed Apr 04 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.1-3
+- Backport upstream patches to enable i915 RC6 by default on SNB
+
+* Wed Apr 04 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable runtime PM for hotpluggable ATA ports (rhbz 806676 807632)
+- Disable MID_PTI driver (rhbz 783561)
+- Fix NULL pointer dereference in i2400m (rhbz 808603)
+
+* Tue Apr 03 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix crash in uvc_video_clock_update from Laurent Pinchart (rhbz 806433)
+
 * Mon Apr  2 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.1-gnu.
 
