@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 2
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -679,9 +679,8 @@ Patch1900: linux-2.6-intel-iommu-igfx.patch
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
 # media patches
-Patch2899: linux-2.6-v4l-dvb-fixes.patch
-Patch2900: linux-2.6-v4l-dvb-update.patch
-Patch2901: linux-2.6-v4l-dvb-experimental.patch
+Patch2900: add-poll-requested-events.patch
+Patch2901: drivers-media-update.patch
 
 # fs fixes
 
@@ -701,10 +700,12 @@ Patch12303: dmar-disable-when-ricoh-multifunction.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14000: hibernate-freeze-filesystems.patch
+Patch14001: hibernate-watermark.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch15000: bluetooth-use-after-free.patch
+Patch15001: Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 Patch20000: utrace.patch
 
@@ -740,6 +741,23 @@ Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
+
+#rhbz 806433
+Patch21360: uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
+
+#rhbz 770476
+Patch21370: iwlegacy-do-not-nulify-il-vif-on-reset.patch
+Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
+
+#rhbz 808603
+Patch21380: wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
+
+#rhbz 806676 807632
+Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
+
+#rhbz 809014
+Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
+Patch21391: x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 Patch21501: nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
@@ -1306,11 +1324,10 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch quite-apm.patch
 
-# V4L/DVB updates/fixes/experimental drivers
+# Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
-ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
-ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
-ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
+ApplyPatch add-poll-requested-events.patch
+ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
 
@@ -1323,10 +1340,12 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 # FIXME
 #ApplyPatch hibernate-freeze-filesystems.patch
+ApplyPatch hibernate-watermark.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 ApplyPatch bluetooth-use-after-free.patch
+ApplyPatch Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 # utrace.
 ApplyPatch utrace.patch
@@ -1362,6 +1381,23 @@ ApplyPatch nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
 #rhbz 808207 CVE-2012-1601
 ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
+
+#rhbz 770476
+ApplyPatch iwlegacy-do-not-nulify-il-vif-on-reset.patch
+ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
+
+#rhbz 806433
+ApplyPatch uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
+
+#rhbz 808603
+ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
+
+#rhbz 806676 807632
+ApplyPatch libata-disable-runtime-pm-for-hotpluggable-port.patch
+
+#rhbz 809014
+ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
+ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2010,6 +2046,28 @@ fi
 # and build.
 
 %changelog
+* Sat Apr 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblob and adjust drivers-media-update.patch.
+
+* Tue Apr 10 2012 Mauro Carvalho Chehab <mchehab@redhat.com> 3.3.1-5
+- Backport dvb-core and a few driver fixes from media tree (rhbz808871)
+
+* Tue Apr 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Apply upstream patch to add USB device 13d3:3375 (rhbz 811087)
+- Backport fixes for correct register constraints in cmpxchg.h (rhbz 809014)
+
+* Thu Apr 05 2012 Dave Jones <davej@redhat.com>
+- Better watermark the number of pages used by hibernation I/O (Bojan Smojver) (rhbz 785384)
+
+* Wed Apr 04 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable runtime PM for hotpluggable ATA ports (rhbz 806676 807632)
+- Fix NULL pointer dereference in i2400m (rhbz 808603)
+
+* Tue Apr 03 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix crash in uvc_video_clock_update from Laurent Pinchart (rhbz 806433)
+- iwl{wifi,legacy}: Fix warnings on remove interface from Stanislaw Gruszka
+  (rhbz 770467)
+
 * Tue Apr 03 2012 Dave Jones <davej@redhat.com> 2.6.43.1-2
 - Disable CONFIG_DEBUG_PAGEALLOC in -debug builds again.
 
