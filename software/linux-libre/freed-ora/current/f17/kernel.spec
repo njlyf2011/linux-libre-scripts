@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -755,9 +755,8 @@ Patch1951: drm-i915-enable-plain-RC6-on-Sandy-Bridge-by-default.patch
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
 # media patches
-Patch2899: linux-2.6-v4l-dvb-fixes.patch
-Patch2900: linux-2.6-v4l-dvb-update.patch
-Patch2901: linux-2.6-v4l-dvb-experimental.patch
+Patch2900: add-poll-requested-events.patch
+Patch2901: drivers-media-update.patch
 
 # fs fixes
 Patch4000: ext4-fix-resize-when-resizing-within-single-group.patch
@@ -778,10 +777,12 @@ Patch12303: dmar-disable-when-ricoh-multifunction.patch
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14000: hibernate-freeze-filesystems.patch
+Patch14001: hibernate-watermark.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch15000: bluetooth-use-after-free.patch
+Patch15001: Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 Patch19000: ips-noirq.patch
 
@@ -840,6 +841,10 @@ Patch21380: wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
 
 #rhbz 806676 807632
 Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
+
+#rhbz 809014
+Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
+Patch21391: x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 Patch21400: unhandled-irqs-switch-to-polling.patch
 
@@ -1570,11 +1575,10 @@ ApplyPatch drm-i915-enable-plain-RC6-on-Sandy-Bridge-by-default.patch
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
 ApplyPatch quite-apm.patch
 
-# V4L/DVB updates/fixes/experimental drivers
+# Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
-ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
-ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
-ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
+ApplyPatch add-poll-requested-events.patch
+ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
@@ -1587,10 +1591,12 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 #FIXME
 #ApplyPatch hibernate-freeze-filesystems.patch
+ApplyPatch hibernate-watermark.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 ApplyPatch bluetooth-use-after-free.patch
+ApplyPatch Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 ApplyPatch ips-noirq.patch
 
@@ -1653,6 +1659,10 @@ ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
 
 #rhbz 806676 807632
 ApplyPatch libata-disable-runtime-pm-for-hotpluggable-port.patch
+
+#rhbz 809014
+ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
+ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2504,6 +2514,20 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Sat Apr 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- Deblob and adjust drivers-media-update.patch.
+
+* Tue Apr 10 2012 Mauro Carvalho Chehab <mchehab@redhat.com> 3.3.1-5
+- Backport dvb-core and a few driver fixes from media tree (rhbz808871)
+
+* Tue Apr 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Apply upstream patch to add USB device 13d3:3375 (rhbz 811087)
+- Disable the PMAC ide driver.  PATA_MACIO seems to work (rhbz 810579)
+- Backport fixes for correct register constraints in cmpxchg.h (rhbz 809014)
+
+* Thu Apr 05 2012 Dave Jones <davej@redhat.com>
+- Better watermark the number of pages used by hibernation I/O (Bojan Smojver) (rhbz 785384)
+
 * Wed Apr 04 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.1-3
 - Backport upstream patches to enable i915 RC6 by default on SNB
 
