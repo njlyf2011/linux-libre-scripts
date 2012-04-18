@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 5
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -638,7 +638,6 @@ Patch383: linux-2.6-defaults-aspm.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
-Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -728,25 +727,15 @@ Patch21232: rt2x00_fix_MCU_request_failures.patch
 #rhbz 789644
 Patch21237: mcelog-rcu-splat.patch
 
-#rhbz 727865 730007
-Patch21240: ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
 #rhbz 728478
 Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
 Patch21300: unhandled-irqs-switch-to-polling.patch
 
-#rhbz 804007
-Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
-
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
 
-#rhbz 806433
-Patch21360: uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
-
 #rhbz 770476
-Patch21370: iwlegacy-do-not-nulify-il-vif-on-reset.patch
 Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 
 #rhbz 808603
@@ -758,8 +747,6 @@ Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
 #rhbz 809014
 Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
 Patch21391: x86-Use-correct-byte-sized-register-constraint-in-__add.patch
-
-Patch21501: nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
 #rhbz 808207 CVE-2012-1601
 Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
@@ -1253,7 +1240,6 @@ ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
-ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 # force UTSNAME to show version 2.6.4X
@@ -1361,14 +1347,8 @@ ApplyPatch bcma-brcmsmac-compat.patch
 #rhbz 789644
 ApplyPatch mcelog-rcu-splat.patch
 
-#rhbz 727865 730007
-ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
-
-#rhbz 804007
-ApplyPatch mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
 #rhbz 804957 CVE-2012-1568
 ApplyPatch shlib_base_randomize.patch
@@ -1377,17 +1357,11 @@ ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
 
-ApplyPatch nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
-
 #rhbz 808207 CVE-2012-1601
 ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
 #rhbz 770476
-ApplyPatch iwlegacy-do-not-nulify-il-vif-on-reset.patch
 ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
-
-#rhbz 806433
-ApplyPatch uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
 
 #rhbz 808603
 ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
@@ -1512,7 +1486,12 @@ BuildKernel() {
     echo USING ARCH=$Arch
 
     make -s ARCH=$Arch oldnoconfig >/dev/null
+%ifarch %{arm}
+    # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} KALLSYMS_EXTRA_PASS=1
+%else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
+%endif
     make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
@@ -2046,10 +2025,22 @@ fi
 # and build.
 
 %changelog
-* Sat Apr 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Apr 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.2-gnu.
+
+* Fri Apr 13 2012 Josh Boyer <jwboyer@redhat.com>
+- Reapply rebased drivers-media-update.patch
+
+* Fri Apr 13 2012 Dave Jones <davej@redhat.com> 2.6.43.2-1
+- Linux 3.3.2
+
+* Thu Apr 12 2012 Dennis Gilmore <dennis@ausil.us>
+- KALLSYMS_EXTRA_PASS=1 has to be passed in on the command line so do so only for arm
+
+* Tue Apr 10 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Apr 14
 - Deblob and adjust drivers-media-update.patch.
 
-* Tue Apr 10 2012 Mauro Carvalho Chehab <mchehab@redhat.com> 3.3.1-5
+* Tue Apr 10 2012 Mauro Carvalho Chehab <mchehab@redhat.com>
 - Backport dvb-core and a few driver fixes from media tree (rhbz808871)
 
 * Tue Apr 10 2012 Josh Boyer <jwboyer@redhat.com>
