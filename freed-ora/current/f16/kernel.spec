@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 5
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -716,7 +716,6 @@ Patch383: linux-2.6-defaults-aspm.patch
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
-Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -785,6 +784,7 @@ Patch14001: hibernate-watermark.patch
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch15000: bluetooth-use-after-free.patch
+Patch15001: Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 Patch19000: ips-noirq.patch
 
@@ -810,16 +810,10 @@ Patch21232: rt2x00_fix_MCU_request_failures.patch
 #rhbz 789644
 Patch21237: mcelog-rcu-splat.patch
 
-#rhbz 727865 730007
-Patch21240: ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
 #rhbz 728478
 Patch21242: sony-laptop-Enable-keyboard-backlight-by-default.patch
 
 Patch21300: unhandled-irqs-switch-to-polling.patch
-
-#rhbz 804007
-Patch21305: mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
@@ -829,11 +823,7 @@ Patch21351: x86-add-io_apic_ops-to-allow-interception.patch
 Patch21352: x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
 Patch21353: xen-x86-Implement-x86_apic_ops.patch
 
-#rhbz 806433
-Patch21360: uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
-
 #rhbz 770476
-Patch21370: iwlegacy-do-not-nulify-il-vif-on-reset.patch
 Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 
 #rhbz 808603
@@ -845,8 +835,6 @@ Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
 #rhbz 809014
 Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
 Patch21391: x86-Use-correct-byte-sized-register-constraint-in-__add.patch
-
-Patch21501: nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
 #rhbz 808207 CVE-2012-1601
 Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
@@ -1430,7 +1418,6 @@ ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
-ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
@@ -1520,6 +1507,7 @@ ApplyPatch hibernate-watermark.patch
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 ApplyPatch bluetooth-use-after-free.patch
+ApplyPatch Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 ApplyPatch ips-noirq.patch
 
@@ -1539,14 +1527,8 @@ ApplyPatch rt2x00_fix_MCU_request_failures.patch
 #rhbz 789644
 ApplyPatch mcelog-rcu-splat.patch
 
-#rhbz 727865 730007
-ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
 #rhbz 728478
 ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
-
-#rhbz 804007
-ApplyPatch mac80211-fix-possible-tid_rx-reorder_timer-use-after-free.patch
 
 #rhbz 804957 CVE-2012-1568
 ApplyPatch shlib_base_randomize.patch
@@ -1563,16 +1545,10 @@ ApplyPatch x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
 ApplyPatch xen-x86-Implement-x86_apic_ops.patch
 
 #rhbz 770476
-ApplyPatch iwlegacy-do-not-nulify-il-vif-on-reset.patch
 ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
-
-ApplyPatch nfs-Fix-length-of-buffer-copied-in-__nfs4_get_acl_uncached.patch
 
 #rhbz 808207 CVE-2012-1601
 ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
-
-#rhbz 806433
-ApplyPatch uvcvideo-Fix-race-induced-crash-in-uvc_video_clock_update.patch
 
 #rhbz 808603
 ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
@@ -2322,7 +2298,16 @@ fi
 # and build.
 
 %changelog
-* Sat Apr 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Apr 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.2-gnu.
+
+* Fri Apr 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.2-1
+- Linux 3.3.2
+
+* Tue Apr 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Apply upstream patch to add USB device 13d3:3375 (rhbz 811087)
+
+* Tue Apr 10 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Apr 14
 - Deblob and adjust drivers-media-update.patch.
 
 * Tue Apr 10 2012 Mauro Carvalho Chehab <mchehab@redhat.com>
