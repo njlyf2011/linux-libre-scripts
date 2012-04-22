@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -760,6 +760,7 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 #   add-poll-requested-events.patch was added for 3.4
 Patch2900: add-poll-requested-events.patch
 Patch2901: drivers-media-update.patch
+Patch2902: dvb_frontend_switch_regression_fix.patch
 
 # fs fixes
 
@@ -769,6 +770,7 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # NFSv4
 Patch4000: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 Patch4001: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
+Patch4107: NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 
 # patches headed upstream
 
@@ -829,8 +831,8 @@ Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 #rhbz 808603
 Patch21380: wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
 
-#rhbz 806676 807632
-Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
+#rhbz 807632
+Patch21385: libata-forbid-port-runtime-pm-by-default.patch
 
 #rhbz 809014
 Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
@@ -839,9 +841,26 @@ Patch21391: x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 #rhbz 808207 CVE-2012-1601
 Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
+#rhbz 808559
+Patch21530: ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
+
+Patch21700: x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
+Patch21701: x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
+
+#rhbz 806295
+Patch21710: disable-hid-battery.patch
+
 # Debug patches
 Patch30000: weird-root-dentry-name-debug.patch
 Patch30010: debug-808990.patch
+
+#rhbz 814149 814155 CVE-2012-2121
+Patch22006: KVM-unmap-pages-from-the-iommu-when-slots-are-removed.patch
+
+#rhbz 814278 814289 CVE-2012-2119
+Patch22007: macvtap-zerocopy-validate-vector-length.patch
+
+# END OF PATCH DEFINITIONS
 
 %endif
 
@@ -1409,6 +1428,7 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # NFSv4
 ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
+ApplyPatch NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 
 # USB
 
@@ -1433,6 +1453,9 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 # ACPI
 
 # ALSA
+
+#rhbz 808559
+ApplyPatch ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
 
 # Networking
 
@@ -1490,6 +1513,7 @@ ApplyPatch quite-apm.patch
 #  apply if non-empty
 ApplyPatch add-poll-requested-events.patch
 ApplyOptionalPatch drivers-media-update.patch
+ApplyPatch dvb_frontend_switch_regression_fix.patch
 
 # Patches headed upstream
 
@@ -1553,12 +1577,25 @@ ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 #rhbz 808603
 ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
 
-#rhbz 806676 807632
-ApplyPatch libata-disable-runtime-pm-for-hotpluggable-port.patch
+#rhbz 807632
+ApplyPatch libata-forbid-port-runtime-pm-by-default.patch
 
 #rhbz 809014
 ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
 ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__add.patch
+
+#rhbz 797559
+ApplyPatch x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
+ApplyPatch x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
+
+#rhbz 806295
+ApplyPatch disable-hid-battery.patch
+
+#rhbz 814149 814155 CVE-2012-2121
+ApplyPatch KVM-unmap-pages-from-the-iommu-when-slots-are-removed.patch
+
+#rhbz 814278 814289 CVE-2012-2119
+ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2298,7 +2335,28 @@ fi
 # and build.
 
 %changelog
-* Mon Apr 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com> - 3.3.2-4
+- CVE-2012-2119 macvtap: zerocopy: vector length is not validated before
+  pinning user pages (rhbz 814278 814289)
+
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com>
+- Fix KVM device assignment page leak (rhbz 814149 814155)
+
+* Wed Apr 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Change patch to resolve libata hotplug (rhbz 807632)
+- Disable CONFIG_HID_BATTERY_STRENGTH (rhbz 806295)
+
+* Tue Apr 17 2012 Mauro Carvalho Chehab <mchehab@redhat.com>
+- Fix DVB-S2->DVB-S switch regression (rhbz 812895)
+
+* Tue Apr 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix oops in nfs_have_delegation (rhbz 811138)
+- Fix oops on invalid AMD microcode load (rhbz 797559)
+
+* Sat Apr 14 2012 Josh Boyer <jwboyer@redhat.com>
+- Add ALSA quirk for MacPro 5,1 machines (rhbz 808559)
+
+* Fri Apr 13 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Apr 16
 - GNU Linux-libre 3.3.2-gnu.
 
 * Fri Apr 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.2-1
