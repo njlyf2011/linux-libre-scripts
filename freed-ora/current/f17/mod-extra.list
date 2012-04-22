@@ -146,8 +146,8 @@ uio_aec.ko
 uio_pci_generic.ko
 gfs2.ko
 ocfs2.ko
-ocfs2_stackglue.ko
 ocfs2_dlm.ko
+ocfs2_stackglue.ko
 cuse.ko
 affs.ko
 befs.ko

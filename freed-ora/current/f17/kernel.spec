@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -767,6 +767,7 @@ Patch4103: linux-3.3-newidmapper-02.patch
 Patch4104: linux-3.3-newidmapper-03.patch
 Patch4105: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 Patch4106: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
+Patch4107: NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 
 # patches headed upstream
 Patch12016: disable-i8042-check-on-apple-mac.patch
@@ -804,6 +805,8 @@ Patch21094: power-x86-destdir.patch
 
 Patch21095: hfsplus-Change-finder_info-to-u32.patch
 Patch21096: hfsplus-Add-an-ioctl-to-bless-files.patch
+Patch21097: hfsplus-initialise-userflags.patch
+Patch21098: hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -828,8 +831,8 @@ Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 #rhbz 808603
 Patch21380: wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
 
-#rhbz 806676 807632
-Patch21385: libata-disable-runtime-pm-for-hotpluggable-port.patch
+#rhbz 807632
+Patch21385: libata-forbid-port-runtime-pm-by-default.patch
 
 #rhbz 809014
 Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
@@ -840,10 +843,29 @@ Patch21400: unhandled-irqs-switch-to-polling.patch
 #rhbz 808207 CVE-2012-1601
 Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
+#rhbz 808559
+Patch21530: ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
+
+Patch21600: apple_bl-Add-register-unregister-functions.patch
+Patch21601: platform-x86-Add-driver-for-Apple-gmux-device.patch
+
+Patch21620: vgaarb-vga_default_device.patch
+
+Patch21700: x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
+Patch21701: x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
+
 Patch22000: weird-root-dentry-name-debug.patch
 
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
+
+#rhbz 814149 814155 CVE-2012-2121
+Patch22006: KVM-unmap-pages-from-the-iommu-when-slots-are-removed.patch
+
+#rhbz 814278 814289 CVE-2012-2119
+Patch22007: macvtap-zerocopy-validate-vector-length.patch
+
+# END OF PATCH DEFINITIONS
 
 %endif
 
@@ -1483,6 +1505,7 @@ ApplyPatch linux-3.3-newidmapper-02.patch
 ApplyPatch linux-3.3-newidmapper-03.patch
 ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
+ApplyPatch NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 
 # USB
 
@@ -1507,6 +1530,9 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 # ACPI
 
 # ALSA
+
+#rhbz 808559
+ApplyPatch ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
 
 # Networking
 
@@ -1601,6 +1627,8 @@ ApplyPatch power-x86-destdir.patch
 
 ApplyPatch hfsplus-Change-finder_info-to-u32.patch
 ApplyPatch hfsplus-Add-an-ioctl-to-bless-files.patch
+ApplyPatch hfsplus-initialise-userflags.patch
+ApplyPatch hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1634,8 +1662,8 @@ ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 #rhbz 808603
 ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
 
-#rhbz 806676 807632
-ApplyPatch libata-disable-runtime-pm-for-hotpluggable-port.patch
+#rhbz 807632
+ApplyPatch libata-forbid-port-runtime-pm-by-default.patch
 
 #rhbz 809014
 ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
@@ -1643,6 +1671,23 @@ ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
+
+#apple gmux.  blame mjg59
+ApplyPatch apple_bl-Add-register-unregister-functions.patch
+ApplyPatch platform-x86-Add-driver-for-Apple-gmux-device.patch
+
+#vgaarb patches.  blame mjg59
+ApplyPatch vgaarb-vga_default_device.patch
+
+#rhbz 797559
+ApplyPatch x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
+ApplyPatch x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
+
+#rhbz 814149 814155 CVE-2012-2121
+ApplyPatch KVM-unmap-pages-from-the-iommu-when-slots-are-removed.patch
+
+#rhbz 814278 814289 CVE-2012-2119
+ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2499,7 +2544,32 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Mon Apr 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com>
+- CVE-2012-2119 macvtap: zerocopy: vector length is not validated before
+  pinning user pages (rhbz 814278 814289)
+- Back out dlm module move (rhbz 811547)
+
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com>
+- Fix KVM device assignment page leak (rhbz 814149 814155)
+
+* Wed Apr 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix hfsplus bless ioctl with hardlinks (from Matthew Garrett)
+- Make sure userflags is initialized in hfsplus files (from Matthew Garrett)
+- Change patch to resolve libata hotplug (rhbz 807632)
+
+* Tue Apr 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Move the dlm module to modules-extra (rhbz 811547)
+- Fix oops in nfs_have_delegation (rhbz 811138)
+- Fix oops on invalid AMD microcode load (rhbz 797559)
+
+* Mon Apr 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Add and use vga_default_device patches (requested by Matthew Garrett)
+- Add platform driver for Apple GMUX device (requested by Matthew Garrett)
+
+* Sat Apr 14 2012 Josh Boyer <jwboyer@redhat.com>
+- Add ALSA quirk for MacPro 5,1 machines (rhbz 808559)
+
+* Fri Apr 13 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Apr 16
 - GNU Linux-libre 3.3.2-gnu.
 
 * Fri Apr 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.2-1
