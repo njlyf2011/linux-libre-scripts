@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 5
+%global baserelease 6
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -773,6 +773,9 @@ Patch22007: macvtap-zerocopy-validate-vector-length.patch
 Patch22008: fcaps-clear-the-same-personality-flags-as-suid-when-.patch
 Patch22009: security-fix-compile-error-in-commoncap.c.patch
 
+#rhbz 811225
+Patch22010: memblock-memblock-should-be-able-to-handle-zero-leng.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1415,6 +1418,9 @@ ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 #rhbz 814523 806722 CVE-2012-2123
 ApplyPatch fcaps-clear-the-same-personality-flags-as-suid-when-.patch
 ApplyPatch security-fix-compile-error-in-commoncap.c.patch
+
+#rhbz 811225
+ApplyPatch memblock-memblock-should-be-able-to-handle-zero-leng.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2068,6 +2074,9 @@ fi
 # and build.
 
 %changelog
+* Sat Apr 21 2012 Josh Boyer <jwboyer@redhat.com> - 2.6.43.2-6
+- Fix error check in memblock that prevented boot on various Dells (rhbz 811225)
+
 * Fri Apr 20 2012 Josh Boyer <jwboyer@redhat.com>
 - CVE-2012-2123 fcaps: clear the same personality flags as suid when fcaps
   are used (rhbz 814523 806722)
