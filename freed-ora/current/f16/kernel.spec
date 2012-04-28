@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 6
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -760,7 +760,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 #   add-poll-requested-events.patch was added for 3.4
 Patch2900: add-poll-requested-events.patch
 Patch2901: drivers-media-update.patch
-Patch2902: dvb_frontend_switch_regression_fix.patch
 
 # fs fixes
 
@@ -786,7 +785,6 @@ Patch14001: hibernate-watermark.patch
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch15000: bluetooth-use-after-free.patch
-Patch15001: Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 Patch19000: ips-noirq.patch
 
@@ -828,15 +826,8 @@ Patch21353: xen-x86-Implement-x86_apic_ops.patch
 #rhbz 770476
 Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 
-#rhbz 808603
-Patch21380: wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
-
 #rhbz 807632
 Patch21385: libata-forbid-port-runtime-pm-by-default.patch
-
-#rhbz 809014
-Patch21390: x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
-Patch21391: x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 #rhbz 808207 CVE-2012-1601
 Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
@@ -854,18 +845,13 @@ Patch21710: disable-hid-battery.patch
 Patch30000: weird-root-dentry-name-debug.patch
 Patch30010: debug-808990.patch
 
-#rhbz 814149 814155 CVE-2012-2121
-Patch22006: KVM-unmap-pages-from-the-iommu-when-slots-are-removed.patch
-
 #rhbz 814278 814289 CVE-2012-2119
 Patch22007: macvtap-zerocopy-validate-vector-length.patch
 
-#rhbz 814523 806722 CVE-2012-2123
-Patch22008: fcaps-clear-the-same-personality-flags-as-suid-when-.patch
-Patch22009: security-fix-compile-error-in-commoncap.c.patch
+Patch22011: input-synaptics-fix-regression-with-image-sensor-trackpads.patch
 
-#rhbz 811225
-Patch22010: memblock-memblock-should-be-able-to-handle-zero-leng.patch
+#rhbz 783708 
+Patch22012: ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1520,7 +1506,6 @@ ApplyPatch quite-apm.patch
 #  apply if non-empty
 ApplyPatch add-poll-requested-events.patch
 ApplyOptionalPatch drivers-media-update.patch
-ApplyPatch dvb_frontend_switch_regression_fix.patch
 
 # Patches headed upstream
 
@@ -1538,7 +1523,6 @@ ApplyPatch hibernate-watermark.patch
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 ApplyPatch bluetooth-use-after-free.patch
-ApplyPatch Bluetooth-Adding-USB-device-13d3-3375-as-an-Atheros-.patch
 
 ApplyPatch ips-noirq.patch
 
@@ -1581,15 +1565,8 @@ ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
 #rhbz 808207 CVE-2012-1601
 ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
-#rhbz 808603
-ApplyPatch wimax-i2400m-prevent-a-possible-kernel-bug-due-to-mi.patch
-
 #rhbz 807632
 ApplyPatch libata-forbid-port-runtime-pm-by-default.patch
-
-#rhbz 809014
-ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__xchg_op.patch
-ApplyPatch x86-Use-correct-byte-sized-register-constraint-in-__add.patch
 
 #rhbz 797559
 ApplyPatch x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
@@ -1598,18 +1575,13 @@ ApplyPatch x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPU
 #rhbz 806295
 ApplyPatch disable-hid-battery.patch
 
-#rhbz 814149 814155 CVE-2012-2121
-ApplyPatch KVM-unmap-pages-from-the-iommu-when-slots-are-removed.patch
-
 #rhbz 814278 814289 CVE-2012-2119
 ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 
-#rhbz 814523 806722 CVE-2012-2123
-ApplyPatch fcaps-clear-the-same-personality-flags-as-suid-when-.patch
-ApplyPatch security-fix-compile-error-in-commoncap.c.patch
+ApplyPatch input-synaptics-fix-regression-with-image-sensor-trackpads.patch
 
-#rhbz 811225
-ApplyPatch memblock-memblock-should-be-able-to-handle-zero-leng.patch
+#rhbz 783708
+ApplyPatch ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2349,6 +2321,22 @@ fi
 # and build.
 
 %changelog
+* Fri Apr 27 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.4-gnu.
+
+* Fri Apr 27 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.4-1
+- Linux 3.3.4
+
+* Tue Apr 24 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix perf build due to incorrect cherry-pick in 3.3.3
+- Add patch to fix ipw2200 (rhbz 783708)
+
+* Mon Apr 23 2012 Peter Hutterer <peter.hutterer@redhat.com>
+- Fix regression on clickpads
+
+* Mon Apr 23 2012 Josh Boyer <jwboyer@redhat.com>
+- Linux 3.3.3
+
 * Sat Apr 21 2012 Josh Boyer <jwboyer@redhat.com> - 3.3.2-6
 - Fix error check in memblock that prevented boot on various Dells (rhbz 811225)
 
