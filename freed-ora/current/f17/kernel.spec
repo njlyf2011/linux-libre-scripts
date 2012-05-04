@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -769,6 +769,10 @@ Patch4105: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 Patch4106: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 Patch4107: NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 
+# NFS Client Patch set from Upstream
+Patch4113: NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
+Patch4114: NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
+
 # patches headed upstream
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
@@ -843,9 +847,6 @@ Patch21601: platform-x86-Add-driver-for-Apple-gmux-device.patch
 
 Patch21620: vgaarb-vga_default_device.patch
 
-Patch21700: x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
-Patch21701: x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
-
 Patch22000: weird-root-dentry-name-debug.patch
 
 #selinux ptrace child permissions
@@ -854,12 +855,16 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 814278 814289 CVE-2012-2119
 Patch22007: macvtap-zerocopy-validate-vector-length.patch
 
-Patch22011: input-synaptics-fix-regression-with-image-sensor-trackpads.patch
-
 #rhbz 802106
 Patch22012: ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
 
+#rhbz 817298
+Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
+
 Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
+
+#Lots of fixes from 3.3.5 stable queue
+Patch22015: stable-queue-3.3.5-0502.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1464,7 +1469,6 @@ ApplyPatch freedo.patch
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
-
 ApplyPatch taint-vbox.patch
 
 # Architecture patches
@@ -1502,6 +1506,10 @@ ApplyPatch linux-3.3-newidmapper-03.patch
 ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
+
+# NFS Client Patch set from Upstream
+ApplyPatch NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
+ApplyPatch NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
 
 # USB
 
@@ -1667,19 +1675,19 @@ ApplyPatch platform-x86-Add-driver-for-Apple-gmux-device.patch
 #vgaarb patches.  blame mjg59
 ApplyPatch vgaarb-vga_default_device.patch
 
-#rhbz 797559
-ApplyPatch x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
-ApplyPatch x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
-
 #rhbz 814278 814289 CVE-2012-2119
 ApplyPatch macvtap-zerocopy-validate-vector-length.patch
-
-ApplyPatch input-synaptics-fix-regression-with-image-sensor-trackpads.patch
 
 #rhbz 802106
 ApplyPatch ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
 
+#rhbz 817298
+ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
+
 ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
+
+#Lots of fixes from 3.3.5 stable queue
+ApplyPatch stable-queue-3.3.5-0502.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2546,6 +2554,18 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Wed May 02 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.4-3
+- Many patches from 3.3.5 stable queue
+
+* Tue May 01 2012 Justin M. Forbes <jforbes@redhat.com>
+- NFS Bugfixes from upstream
+
+* Mon Apr 30 2012 Josh Boyer <jwboyer@redhat.com>
+- Backport ipw2x00 nl80211 cipher suite reporting (rhbz 817298)
+
+* Mon Apr 30 2012 Dave Jones <davej@redhat.com>
+- Disable CONFIG_RCU_FAST_NO_HZ for now. (rhbz 806548)
+
 * Fri Apr 27 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.4-gnu.
 
