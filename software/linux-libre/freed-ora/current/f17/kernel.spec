@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -791,12 +791,16 @@ Patch19000: ips-noirq.patch
 
 Patch20000: utrace.patch
 
+# ARM
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
-Patch21004: arm-tegra-nvec-kconfig.patch
 
-# highbank patches
+# ARM tegra
+Patch21004: arm-tegra-nvec-kconfig.patch
+Patch21005: arm-tegra-usb-no-reset-linux33.patch
+
+# ARM highbank patches
 # Highbank clock functions need to be EXPORT for module builds
 Patch21010: highbank-export-clock-functions.patch
 
@@ -865,6 +869,12 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 
 #Lots of fixes from 3.3.5 stable queue
 Patch22015: stable-queue-3.3.5-0502.patch
+
+#rhbz 818820
+Patch22016: dl2k-Clean-up-rio_ioctl.patch
+
+#rhbz 726143
+Patch22017: 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1483,6 +1493,7 @@ ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 #pplyPatch arm-omap-dt-compat.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
+ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1688,6 +1699,12 @@ ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 
 #Lots of fixes from 3.3.5 stable queue
 ApplyPatch stable-queue-3.3.5-0502.patch
+
+#rhbz 818820
+ApplyPatch dl2k-Clean-up-rio_ioctl.patch
+
+#rhbz 726143
+ApplyPatch 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2554,6 +2571,24 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri May 04 2012 Justin M. Forbes <jforbes@redhat.com>
+- drm/radeon: don't mess with hot plug detect for eDP or LVDS (rhbz 726143)
+
+* Fri May 04 2012 Josh Boyer <jwboyer@redhat.com>
+- unfiltered netdev rio_ioctl access by users (rhbz 818820)
+
+* Thu May 03 2012 Dennis Gilmore <dennis@ausil.us>
+- enable the kms omap driver
+
+* Thu May  3 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Patch for disconnect issues with storage attached to a tegra-ehci controller
+
+* Thu May 03 2012 Justin M. Forbes <jforbes@redhat.com>
+- Reenable slip and add to module-extras (rhbz 818308)
+
+* Wed May 02 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable PCIEPORTBUS on ppc64 per IBM request
+
 * Wed May 02 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.4-3
 - Many patches from 3.3.5 stable queue
 
