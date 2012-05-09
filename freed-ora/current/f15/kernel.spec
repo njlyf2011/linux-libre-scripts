@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -690,6 +690,7 @@ Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 Patch4000: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 Patch4001: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 Patch4107: NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
+Patch4115: NFSv4-Rate-limit-the-state-manager-for-lock-reclaim-.patch
 
 # patches headed upstream
 
@@ -698,9 +699,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
-
-Patch14000: hibernate-freeze-filesystems.patch
-Patch14001: hibernate-watermark.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
@@ -735,9 +733,6 @@ Patch21300: unhandled-irqs-switch-to-polling.patch
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
 
-#rhbz 770476
-Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
-
 #rhbz 807632
 Patch21385: libata-forbid-port-runtime-pm-by-default.patch
 
@@ -747,9 +742,6 @@ Patch21520: KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 #rhbz 808559
 Patch21530: ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
 
-Patch21700: x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
-Patch21701: x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
-
 #rhbz 806295
 Patch21710: disable-hid-battery.patch
 
@@ -758,10 +750,11 @@ Patch22000: weird-root-dentry-name-debug.patch
 #rhbz 814278 814289 CVE-2012-2119
 Patch22007: macvtap-zerocopy-validate-vector-length.patch
 
-Patch22011: input-synaptics-fix-regression-with-image-sensor-trackpads.patch
+#rhbz 817298
+Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
-#rhbz 783708 
-Patch22012: ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
+#rhbz 818820
+Patch22016: dl2k-Clean-up-rio_ioctl.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1244,6 +1237,7 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
 ApplyPatch NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
+ApplyPatch NFSv4-Rate-limit-the-state-manager-for-lock-reclaim-.patch
 
 # USB
 
@@ -1340,10 +1334,6 @@ ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
-# FIXME
-#ApplyPatch hibernate-freeze-filesystems.patch
-ApplyPatch hibernate-watermark.patch
-
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 ApplyPatch bluetooth-use-after-free.patch
@@ -1375,15 +1365,8 @@ ApplyPatch weird-root-dentry-name-debug.patch
 #rhbz 808207 CVE-2012-1601
 ApplyPatch KVM-Ensure-all-vcpus-are-consistent-with-in-kernel-i.patch
 
-#rhbz 770476
-ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
-
 #rhbz 807632
 ApplyPatch libata-forbid-port-runtime-pm-by-default.patch
-
-#rhbz 797559
-ApplyPatch x86-microcode-Fix-sysfs-warning-during-module-unload-on-unsupported-CPUs.patch
-ApplyPatch x86-microcode-Ensure-that-module-is-only-loaded-for-supported-AMD-CPUs.patch
 
 #rhbz 806295
 ApplyPatch disable-hid-battery.patch
@@ -1391,10 +1374,11 @@ ApplyPatch disable-hid-battery.patch
 #rhbz 814278 814289 CVE-2012-2119
 ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 
-ApplyPatch input-synaptics-fix-regression-with-image-sensor-trackpads.patch
+#rhbz 817298
+ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
-#rhbz 783708
-ApplyPatch ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
+#rhbz 818820
+ApplyPatch dl2k-Clean-up-rio_ioctl.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2048,7 +2032,23 @@ fi
 # and build.
 
 %changelog
-* Tue May  1 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon May  7 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.5-gnu.
+
+* Mon May 07 2012 Josh Boyer <jwboyer@redhat.com> 2.6.43.5-1
+- Linux 3.3.5
+- Add patch to rate limit NFSv4 message (rhbz 732748)
+
+* Fri May 04 2012 Josh Boyer <jwboyer@redhat.com>
+- unfiltered netdev rio_ioctl access by users (rhbz 818820)
+
+* Mon Apr 30 2012 Josh Boyer <jwboyer@redhat.com>
+- Backport ipw2x00 nl80211 cipher suite reporting (rhbz 817298)
+
+* Mon Apr 30 2012 Dave Jones <davej@redhat.com>
+- Disable CONFIG_RCU_FAST_NO_HZ for now. (rhbz 806548)
+
+* Mon Apr 30 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue May  1
 - GNU Linux-libre 3.3.4-gnu.
 
 * Mon Apr 30 2012 Justin M. Forbes <jforbes@redhat.com> 2.6.43.4-1
