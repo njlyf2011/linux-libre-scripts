@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 4
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -774,6 +774,8 @@ Patch4113: NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
 Patch4114: NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
 
 # patches headed upstream
+Patch10000: fs-proc-devtree-remove_proc_entry.patch
+
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
@@ -1611,6 +1613,8 @@ ApplyPatch add-poll-requested-events.patch
 ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
+ApplyPatch fs-proc-devtree-remove_proc_entry.patch
+
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 ApplyPatch linux-3.3-virtio-scsi.patch
 
@@ -2571,6 +2575,9 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon May 07 2012 Dave Jones <davej@redhat.com> 3.3.4-5
+- Remove /proc/device-tree when openfirmware init fails. (rhbz 818378)
+
 * Fri May 04 2012 Justin M. Forbes <jforbes@redhat.com>
 - drm/radeon: don't mess with hot plug detect for eDP or LVDS (rhbz 726143)
 
