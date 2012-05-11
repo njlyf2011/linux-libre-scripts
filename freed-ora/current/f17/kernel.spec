@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 5
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -756,6 +756,7 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 # media patches
 Patch2900: add-poll-requested-events.patch
 Patch2901: drivers-media-update.patch
+Patch2902: dvbs-fix-zigzag.patch
 
 # fs fixes
 Patch4000: ext4-fix-resize-when-resizing-within-single-group.patch
@@ -772,6 +773,7 @@ Patch4107: NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 # NFS Client Patch set from Upstream
 Patch4113: NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
 Patch4114: NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
+Patch4115: NFSv4-Rate-limit-the-state-manager-for-lock-reclaim-.patch
 
 # patches headed upstream
 Patch10000: fs-proc-devtree-remove_proc_entry.patch
@@ -781,9 +783,6 @@ Patch12016: disable-i8042-check-on-apple-mac.patch
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
-
-Patch14000: hibernate-freeze-filesystems.patch
-Patch14001: hibernate-watermark.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
@@ -834,9 +833,6 @@ Patch21351: x86-add-io_apic_ops-to-allow-interception.patch
 Patch21352: x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
 Patch21353: xen-x86-Implement-x86_apic_ops.patch
 
-#rhbz 770476
-Patch21371: iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
-
 #rhbz 807632
 Patch21385: libata-forbid-port-runtime-pm-by-default.patch
 
@@ -861,16 +857,10 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 814278 814289 CVE-2012-2119
 Patch22007: macvtap-zerocopy-validate-vector-length.patch
 
-#rhbz 802106
-Patch22012: ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
-
 #rhbz 817298
 Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
 Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
-
-#Lots of fixes from 3.3.5 stable queue
-Patch22015: stable-queue-3.3.5-0502.patch
 
 #rhbz 818820
 Patch22016: dl2k-Clean-up-rio_ioctl.patch
@@ -1523,6 +1513,7 @@ ApplyPatch NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
 # NFS Client Patch set from Upstream
 ApplyPatch NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
 ApplyPatch NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
+ApplyPatch NFSv4-Rate-limit-the-state-manager-for-lock-reclaim-.patch
 
 # USB
 
@@ -1610,6 +1601,7 @@ ApplyPatch quite-apm.patch
 # Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
 ApplyPatch add-poll-requested-events.patch
+ApplyPatch dvbs-fix-zigzag.patch
 ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
@@ -1622,10 +1614,6 @@ ApplyPatch linux-3.3-virtio-scsi.patch
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
-
-#FIXME
-#ApplyPatch hibernate-freeze-filesystems.patch
-ApplyPatch hibernate-watermark.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
@@ -1668,9 +1656,6 @@ ApplyPatch x86-add-io_apic_ops-to-allow-interception.patch
 ApplyPatch x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
 ApplyPatch xen-x86-Implement-x86_apic_ops.patch
 
-#rhbz 770476
-ApplyPatch iwlwifi-do-not-nulify-ctx-vif-on-reset.patch
-
 #Highbank clock functions
 ApplyPatch highbank-export-clock-functions.patch 
 
@@ -1693,16 +1678,10 @@ ApplyPatch vgaarb-vga_default_device.patch
 #rhbz 814278 814289 CVE-2012-2119
 ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 
-#rhbz 802106
-ApplyPatch ipw2200-Fix-race-condition-in-the-command-completion-acknowledge.patch
-
 #rhbz 817298
 ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
 ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
-
-#Lots of fixes from 3.3.5 stable queue
-ApplyPatch stable-queue-3.3.5-0502.patch
 
 #rhbz 818820
 ApplyPatch dl2k-Clean-up-rio_ioctl.patch
@@ -2575,6 +2554,16 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon May 10 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.5-gnu.
+
+* Mon May 07 2012 Mauro Carvalho Chehab <mchehab@redhat.com> 3.3.5-2
+- Add patch to fix DVB-S zigzag (rhbz 814404)
+
+* Mon May 07 2012 Josh Boyer <jwboyer@redat.com> 3.3.5-1
+- Linux 3.3.5
+- Add patch to rate limit NFSv4 message (rhbz 732748)
+
 * Mon May 07 2012 Dave Jones <davej@redhat.com> 3.3.4-5
 - Remove /proc/device-tree when openfirmware init fails. (rhbz 818378)
 
