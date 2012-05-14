@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2012-05-07 21:13:44.000000000 +0000
-@@ -0,0 +1,4786 @@
++++ .config	2012-05-14 04:52:36.000000000 +0000
+@@ -0,0 +1,4787 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.3.5-gnu Kernel Configuration
++# Linux/mips 3.3.6-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1322,6 +1322,7 @@ Index: .config
 +CONFIG_PARIDE_KTTI=m
 +CONFIG_PARIDE_ON20=m
 +CONFIG_PARIDE_ON26=m
++# CONFIG_BLK_DEV_PCIESSD_MTIP32XX is not set
 +# CONFIG_BLK_CPQ_DA is not set
 +CONFIG_BLK_CPQ_CISS_DA=m
 +CONFIG_CISS_SCSI_TAPE=y
