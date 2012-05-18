@@ -1,11 +1,6 @@
 # Makefile for source rpm: kernel
 SPECFILE := kernel.spec
 
-# use noarch for make prep instead of the current CPU
-# noarch creates and checks all config files not just the current one,
-# in addition "i386" isn't a valid kernel target
-PREPARCH  = noarch
-
 # we only check the .sign signatures
 UPSTREAM_CHECKS = sign
 
@@ -18,7 +13,7 @@ help:
 include Makefile.config
 
 prep:
-	fedpkg -v prep --arch=$(PREPARCH)
+	fedpkg -v prep
 
 noarch:
 	fedpkg -v local --arch=noarch
@@ -76,6 +71,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_EXT4_DEBUG is not set/CONFIG_EXT4_DEBUG=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_PERF_USE_VMALLOC is not set/CONFIG_DEBUG_PERF_USE_VMALLOC=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_JBD2_DEBUG is not set/CONFIG_JBD2_DEBUG=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_NFSD_FAULT_INJECTION is not set/CONFIG_NFSD_FAULT_INJECTION=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_BLK_CGROUP is not set/CONFIG_DEBUG_BLK_CGROUP=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DRBD_FAULT_INJECTION is not set/CONFIG_DRBD_FAULT_INJECTION=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_ATH_DEBUG is not set/CONFIG_ATH_DEBUG=y/' config-nodebug

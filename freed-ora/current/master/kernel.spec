@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,8 +78,8 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.3%{?stablegnux}
-#define rcrevlibre -3.3%{?rcrevgnux}
+%define stablelibre -3.3%{?stablegnux}
+%define rcrevlibre -3.3%{?rcrevgnux}
 #define gitrevlibre -3.3%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -203,7 +203,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -216,7 +216,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 0
+%define rawhide_skip_docs 1
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -296,12 +296,12 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel-tegra, omap, imx and highbank are only built on armv7 hard and softfp
+# kernel up (versatile express), tegra, omap, imx and highbank are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
-%define with_tegra 0
-%define with_omap 0
 %define with_imx 0
 %define with_highbank 0
+%define with_omap 0
+%define with_tegra 0
 %endif
 
 # kernel-kirkwood is only built for armv5
@@ -453,25 +453,16 @@ Summary: The Linux kernel
 %define hdrarch arm
 %define make_target bzImage
 %define kernel_image arch/arm/boot/zImage
-# we build a up kernel on base softfp/hardfp platforms. its used for qemu.
-%ifnarch armv5tel armv7hl
-%define with_up 0
-%endif
 # we only build headers/perf/tools on the base arm arches
 # just like we used to only build them on i386 for x86
+%ifarch armv5tel
+%define with_up 0
+%endif
 %ifnarch armv5tel armv7hl
 %define with_headers 0
 %define with_perf 0
 %define with_tools 0
 %endif
-%endif
-
-# Should make listnewconfig fail if there's config options
-# printed out?
-%if %{nopatches}%{using_upstream_branch}
-%define listnewconfig_fail 0
-%else
-%define listnewconfig_fail 1
 %endif
 
 # To temporarily exclude an architecture from being built, add it to
@@ -587,14 +578,14 @@ ExclusiveOS: Linux
 #
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
-BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config
+BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed)
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison
 %endif
 %if %{with_tools}
 BuildRequires: pciutils-devel gettext
@@ -619,7 +610,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 %if %{signmodules}
 Source11: genkey
@@ -650,11 +641,12 @@ Source70: config-s390x
 Source90: config-sparc64-generic
 
 Source100: config-arm-generic
-Source110: config-arm-omap-generic
+Source110: config-arm-omap
 Source111: config-arm-tegra
 Source112: config-arm-kirkwood
 Source113: config-arm-imx
 Source114: config-arm-highbank
+Source115: config-arm-versatile
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -689,7 +681,7 @@ Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?g
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.bz2
+Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 %endif
@@ -718,13 +710,11 @@ Patch09: linux-2.6-upstream-reverts.patch
 Patch100: taint-vbox.patch
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
-
-Patch383: linux-2.6-defaults-aspm.patch
+Patch162: nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
-Patch395: acpi-ensure-thermal-limits-match-cpu-freq.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: linux-2.6-input-kill-stupid-messages.patch
@@ -733,7 +723,6 @@ Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch460: linux-2.6-serial-460800.patch
 
 Patch470: die-floppy-die.patch
-Patch471: floppy-Remove-_hlt-related-functions.patch
 
 Patch510: linux-2.6-silence-noise.patch
 Patch520: quite-apm.patch
@@ -748,7 +737,6 @@ Patch900: modsign-20111207.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
-Patch1556: linux-3.3-virtio-scsi.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -771,15 +759,12 @@ Patch2900: linux-2.6-v4l-dvb-update.patch
 Patch2901: linux-2.6-v4l-dvb-experimental.patch
 
 # fs fixes
-Patch4000: ext4-fix-resize-when-resizing-within-single-group.patch
 
 # NFSv4
-Patch1101: linux-3.1-keys-remove-special-keyring.patch
-Patch1102: linux-3.3-newidmapper-01.patch
-Patch1103: linux-3.3-newidmapper-02.patch
-Patch1104: linux-3.3-newidmapper-03.patch
 
 # patches headed upstream
+Patch10000: fs-proc-devtree-remove_proc_entry.patch
+
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch12303: dmar-disable-when-ricoh-multifunction.patch
@@ -790,52 +775,50 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
-Patch20000: utrace.patch
-
+# ARM
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
-Patch21004: arm-tegra-nvec-kconfig.patch
 
-# highbank patches
+# ARM tegra
+Patch21004: arm-tegra-nvec-kconfig.patch
+Patch21005: arm-tegra-usb-no-reset-linux33.patch
+
+# ARM highbank patches
 # Highbank clock functions need to be EXPORT for module builds
 Patch21010: highbank-export-clock-functions.patch
 
-Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
-
-Patch21092: udlfb-remove-sysfs-framebuffer-device-with-USB-disconnect.patch
-
-Patch21093: rt2x00_fix_MCU_request_failures.patch
-
 Patch21094: power-x86-destdir.patch
 
-Patch21095: hfsplus-Change-finder_info-to-u32.patch
-Patch21096: hfsplus-Add-an-ioctl-to-bless-files.patch
-
-#rhbz 788260
-Patch21233: jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
+Patch21098: hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
-Patch21250: mcelog-rcu-splat.patch
 Patch21260: x86-Avoid-invoking-RCU-when-CPU-is-idle.patch
 
-#rhbz 795544
-Patch21280: ums_realtek-do-not-use-stack-memory-for-DMA-in-__do_.patch
-
-#rhbz 727865 730007
-Patch21300: ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
-#rhbz 728478
-Patch21302: sony-laptop-Enable-keyboard-backlight-by-default.patch
-
-#rhbz 803809 CVE-2012-1179
-Patch21304: mm-thp-fix-pmd_bad-triggering.patch
+#rhbz 804957 CVE-2012-1568
+Patch21306: shlib_base_randomize.patch
 
 Patch21400: unhandled-irqs-switch-to-polling.patch
 
+Patch21620: vgaarb-vga_default_device.patch
+
 Patch22000: weird-root-dentry-name-debug.patch
+
+#selinux ptrace child permissions
+Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
+
+#rhbz 814278 814289 CVE-2012-2119
+Patch22007: macvtap-zerocopy-validate-vector-length.patch
+
+#rhbz 817298
+Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
+
+#rhbz 749276
+Patch22018: atl1c_net_next_update-3.4.patch
+
+# END OF PATCH DEFINITIONS
 
 %endif
 
@@ -1249,9 +1232,7 @@ ApplyOptionalPatch()
 
 # we don't want a .config file when building firmware: it just confuses the build system
 %define build_firmware \
-   mv .config .config.firmware_save \
    make INSTALL_FW_PATH=$RPM_BUILD_ROOT/lib/firmware firmware_install \
-   mv .config.firmware_save .config
 
 # First we unpack the kernel tarball.
 # If this isn't the first make prep, we use links to the existing clean tarball
@@ -1288,6 +1269,23 @@ ApplyOptionalPatch()
 sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-3.*' \
             | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
+# Delete all old stale trees.
+if [ -d kernel-%{kversion}%{?dist} ]; then
+  cd kernel-%{kversion}%{?dist}
+  for i in linux-*
+  do
+     if [ -d $i ]; then
+       # Just in case we ctrl-c'd a prep already
+       rm -rf deleteme.%{_target_cpu}
+       # Move away the stale away, and delete in background.
+       mv $i deleteme-$i
+       rm -rf deleteme* &
+     fi
+  done
+  cd ..
+fi
+
+# Generate new tree
 if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
 
   if [ -d kernel-%{kversion}%{?dist}/vanilla-%{kversion} ]; then
@@ -1355,7 +1353,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
-    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.bz2
+    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 
@@ -1373,14 +1371,6 @@ else
 fi
 
 # Now build the fedora kernel tree.
-if [ -d linux-%{KVERREL} ]; then
-  # Just in case we ctrl-c'd a prep already
-  rm -rf deleteme.%{_target_cpu}
-  # Move away the stale away, and delete in background.
-  mv linux-%{KVERREL} deleteme.%{_target_cpu}
-  rm -rf deleteme.%{_target_cpu} &
-fi
-
 cp -rl vanilla-%{vanillaversion} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
@@ -1445,33 +1435,29 @@ ApplyPatch taint-vbox.patch
 # x86(-64)
 ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
 ApplyPatch linux-2.6-i386-nx-emulation.patch
+ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
 #
 # ARM
 #
-#pplyPatch arm-omap-dt-compat.patch
-ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
+#ApplyPatch arm-omap-dt-compat.patch
+#ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
+ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 
 #
 # bugfixes to drivers and filesystems
 #
 
 # ext4
-ApplyPatch ext4-fix-resize-when-resizing-within-single-group.patch
 
 # xfs
 
 # btrfs
 
-
 # eCryptfs
 
 # NFSv4
-ApplyPatch linux-3.1-keys-remove-special-keyring.patch
-ApplyPatch linux-3.3-newidmapper-01.patch
-ApplyPatch linux-3.3-newidmapper-02.patch
-ApplyPatch linux-3.3-newidmapper-03.patch
 
 # USB
 
@@ -1481,14 +1467,11 @@ ApplyPatch linux-3.3-newidmapper-03.patch
 ApplyPatch linux-2.6-defaults-acpi-video.patch
 ApplyPatch linux-2.6-acpi-video-dos.patch
 ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
-ApplyPatch acpi-ensure-thermal-limits-match-cpu-freq.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
 # PCI
 #
-# enable ASPM by default on hardware we expect to work
-ApplyPatch linux-2.6-defaults-aspm.patch
 
 #
 # SCSI Bits.
@@ -1506,7 +1489,6 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
-ApplyPatch floppy-Remove-_hlt-related-functions.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
@@ -1557,59 +1539,51 @@ ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
 ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
 
 # Patches headed upstream
+ApplyPatch fs-proc-devtree-remove_proc_entry.patch
+
 ApplyPatch disable-i8042-check-on-apple-mac.patch
-ApplyPatch linux-3.3-virtio-scsi.patch
 
 # rhbz#605888
 ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
-ApplyPatch hibernate-freeze-filesystems.patch
+# FIXME: REBASE
+#ApplyPatch hibernate-freeze-filesystems.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
-# utrace.
-ApplyPatch utrace.patch
-
-ApplyPatch ext4-Support-check-none-nocheck-mount-options.patch
-
-ApplyPatch udlfb-remove-sysfs-framebuffer-device-with-USB-disconnect.patch
-
-#rhbz 772772
-ApplyPatch rt2x00_fix_MCU_request_failures.patch
-
 ApplyPatch power-x86-destdir.patch
 
-ApplyPatch hfsplus-Change-finder_info-to-u32.patch
-ApplyPatch hfsplus-Add-an-ioctl-to-bless-files.patch
-
-#rhbz 788269
-ApplyPatch jbd2-clear-BH_Delay-and-BH_Unwritten-in-journal_unmap_buf.patch
+ApplyPatch hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
-ApplyPatch mcelog-rcu-splat.patch
-
-#rhbz 795544
-ApplyPatch ums_realtek-do-not-use-stack-memory-for-DMA-in-__do_.patch
-
-#rhbz 727865 730007
-ApplyPatch ACPICA-Fix-regression-in-FADT-revision-checks.patch
-
-#rhbz 728478
-ApplyPatch sony-laptop-Enable-keyboard-backlight-by-default.patch
+#rhbz 804957 CVE-2012-1568
+ApplyPatch shlib_base_randomize.patch
 
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
 
-#rhbz 803809 CVE-2012-1179
-ApplyPatch mm-thp-fix-pmd_bad-triggering.patch
+#selinux ptrace child permissions
+ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
 #Highbank clock functions
 ApplyPatch highbank-export-clock-functions.patch 
+
+#vgaarb patches.  blame mjg59
+ApplyPatch vgaarb-vga_default_device.patch
+
+#rhbz 814278 814289 CVE-2012-2119
+ApplyPatch macvtap-zerocopy-validate-vector-length.patch
+
+#rhbz 817298
+ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
+
+#rhbz 749276
+ApplyPatch atl1c_net_next_update-3.4.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1638,23 +1612,17 @@ done
 rm -f kernel-%{version}-*debug.config
 %endif
 
-# now run oldconfig over all the config files
-for i in *.config
-do
-  mv $i .config
-  Arch=`head -1 .config | cut -b 3-`
-  make ARCH=$Arch listnewconfig | grep -E '^CONFIG_' >.newoptions || true
-%if %{listnewconfig_fail}
-  if [ -s .newoptions ]; then
-    cat .newoptions
-    exit 1
-  fi
-%endif
-  rm -f .newoptions
-  make ARCH=$Arch oldnoconfig
-  echo "# $Arch" > configs/$i
-  cat .config >> configs/$i
-done
+# run oldconfig over the config files (except when noarch)
+if [ "%{_target_cpu}" != "noarch" ]; then
+  for i in kernel-*-%{_target_cpu}*.config
+  do
+    mv $i .config
+    Arch=`head -1 .config | cut -b 3-`
+    make ARCH=$Arch oldnoconfig
+    echo "# $Arch" > configs/$i
+    cat .config >> configs/$i
+  done
+fi
 # end of kernel config
 %endif
 
@@ -1761,7 +1729,12 @@ BuildKernel() {
     echo USING ARCH=$Arch
 
     make -s ARCH=$Arch oldnoconfig >/dev/null
+%ifarch %{arm}
+    # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} KALLSYMS_EXTRA_PASS=1
+%else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
+%endif
     make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
@@ -1783,6 +1756,11 @@ BuildKernel() {
     $CopyKernel $KernelImage \
     		$RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+
+    # hmac sign the kernel for FIPS
+    echo "Creating hmac file: $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac"
+    ls -l $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+    sha512hmac $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer | sed -e "s,$RPM_BUILD_ROOT,," > $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac;
 
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
     # Override $(mod-fw) because we don't want it to install any firmware
@@ -1929,7 +1907,17 @@ BuildKernel() {
         then
           continue
         else
-          echo $mod.ko >> req.list
+          # check if the module we're looking at is in mod-extra too.  if so
+          # we don't need to mark the dep as required
+          mod2=`basename $dep`
+          match2=`grep "^$mod2" mod-extra.list` ||:
+          if [ -n "$match2" ]
+          then
+            continue
+            #echo $mod2 >> notreq.list
+          else
+            echo $mod.ko >> req.list
+          fi
         fi
       done
     done
@@ -2032,7 +2020,7 @@ BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 EXTRA_CFLAGS="-Wno-error=array-bounds" HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
+  make %{?_smp_mflags} -C tools/perf -s V=1 WERROR=0 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} all
@@ -2424,6 +2412,7 @@ fi
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
+/%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:.%{2}}.hmac \
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
@@ -2477,6 +2466,292 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed May 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4-rc7-gnu
+- Fix kernel-libre-firmware build
+
+* Wed May 16 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc7.git2.1
+- Linux v3.4-rc7-24-g568b445
+
+* Tue May 15 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable Nilfs2 and put it in modules-extra (rhbz 821702)
+
+* Tue May 15 2012 Dennis Gilmore <dennis@ausil.us> 
+- dont build a up kernel on armv5tel
+
+* Tue May 15 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc7.git1.1
+- Fixup atl1c register programming (rhbz 749276)
+- Linux v3.4-rc7-21-gb6255ee
+
+* Tue May 15 2012 Dennis Gilmore <dennis@ausil.us> 
+- make sure smp is on in generic arm config
+- tweak vexpress config
+
+* Mon May 14 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable DRM_VIA again per Adam Jackson
+
+* Mon May 14 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc7.git0.2
+- Reenable debugging options.
+
+* Sun May 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc7.git0.1
+- Linux v3.4-rc7
+- Disable debugging options.
+
+* Fri May 11 2012 Josh Boyer <jwboyer@redaht.com>
+- Enable CONFIG_NFSD_FAULT_INJECTION on debug builds (suggested by Jeff Layton)
+- Enable CONFIG_SUNRPC_DEBUG (pointed out by Jeff Layton)
+
+* Fri May 11 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc6.git3.1
+- Linux v3.4-rc6-76-gd60b9c1
+
+* Thu May 10 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc6.git2.2
+- Fix normal kernel builds
+
+* Thu May 10 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc6.git2.1
+- Linux v3.4-rc6-41-g7ee94d9
+
+* Thu May 10 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build in MMC on VExpress so we can boot using qemu
+
+* Tue May  8 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Restructure ARM configs to minimise duplication and pull all generic options
+- Spilt Versatile config and use Express chip into dedicated config for qemu
+
+* Tue May 08 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc6.git1.1
+- Linux v3.4-rc6-20-g789505b
+
+* Tue May 08 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc6.git0.2
+- Reenable debugging options.
+
+* Mon May 07 2012 Dave Jones <davej@redhat.com>
+- Remove /proc/device-tree when openfirmware init fails. (rhbz 818378)
+
+* Mon May 07 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc6.git0.1
+- Linux v3.4-rc6
+- Disable debugging options.
+
+* Sat May 05 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git5.1
+- Linux v3.4-rc5-208-g6f24f89
+
+* Fri May 04 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git4.1
+- Linux v3.4-rc5-183-g0a6ba09
+
+* Thu May 03 2012 Dennis Gilmore <dennis@ausil.us>
+- enable omap KMS driver
+
+* Thu May  3 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Patch for disconnect issues with storage attached to a tegra-ehci controller
+
+* Thu May 03 2012 Justin M. Forbes <jforbes@redhat.com>
+- Reenable slip and add to module-extras (rhbz 818308)
+
+* Wed May 02 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable PCIEPORTBUS on ppc64 per IBM request
+
+* Wed May 02 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git3.1
+- Linux v3.4-rc5-62-g529acf5
+
+* Tue May 01 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git2.1
+- Drop merged patch.  Drink coffee before doing build.
+- Linux v3.4-rc5-34-g655861e
+
+* Mon Apr 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git1.1
+- Linux v3.4-rc5-8-g8a7dc4b
+
+* Mon Apr 30 2012 Josh Boyer <jwboyer@redhat.com>
+- Backport ipw2x00 nl80211 cipher suite reporting (rhbz 817298)
+
+* Mon Apr 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git0.3
+- Reenable debugging options.
+
+* Mon Apr 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc5.git0.2
+- Linux v3.4-rc5
+- Disable debugging options.
+
+* Sat Apr 28 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc4.git4.1
+- Linux v3.4-rc4-308-gf7b0069
+
+* Fri Apr 27 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc4.git3.1
+- Linux v3.4-rc4-180-g82b7690
+
+* Thu Apr 26 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc4.git2.1
+- Linux v3.4-rc4-135-g2300fd6
+
+* Tue Apr 24 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc4.git1.1
+- Linux v3.4-rc4-95-g95f7147
+
+* Tue Apr 24 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix ipw2200 (rhbz 802106)
+
+* Mon Apr 23 2012 Peter Hutterer <peter.hutterer@redhat.com>
+- Fix regression on clickpads
+
+* Mon Apr 23 2012 Josh Boyer <jwboyer@gmail.com> - 3.4.0-0.rc4.git0.2
+- Add GMA3600 (Cedarview) support (rhbz 810686) 
+- Reenable debugging options.
+
+* Mon Apr 23 2012 Josh Boyer <jwboyer@gmail.com> - 3.4.0-0.rc4.git0.1
+- Disable debugging options.
+- Linux v3.4-rc4
+
+* Fri Apr 20 2012 Josh Boyer <jwboyer@redhat.com>
+- Move the dlm module to modules-extra and do additional cleanup (rhbz 811547)
+
+* Fri Apr 20 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc3.git4.1
+- Linux v3.4-rc3-89-gc6f5c93
+
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc3.git3.1
+- Linux v3.4-rc3-65-g9b7f43a
+
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com>
+- CVE-2012-2119 macvtap: zerocopy: vector length is not validated before
+  pinning user pages (rhbz 814278 814289)
+
+* Thu Apr 19 2012 Justin M. Forbes <jforbes@redhat.com>
+- CVE-2012-2121: Fix KVM device assignment page leak (rhbz 814149 814155)
+
+* Wed Apr 18 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc3.git2.1
+- Linux v3.4-rc3-36-g592fe89
+
+* Wed Apr 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix hfsplus bless ioctl with hardlinks (from Matthew Garrett)
+- Change patch to resolve libata hotplug (rhbz 807632)
+
+* Tue Apr 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Move the dlm module to modules-extra (rhbz 811547)
+
+* Tue Apr 17 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc3.git1.1
+- Linux v3.4-rc3-17-g4643b05
+
+* Tue Apr 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix oops on invalid AMD microcode load (rhbz 797559)
+
+* Mon Apr 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Add and use vga_default_device patches (requested by Matthew Garrett)
+- Enable Apple gmux driver
+
+* Mon Apr 16 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc3.git0.2
+- Reenable debugging options.
+
+* Mon Apr 16 2012 John W. Linville <linville@redhat.com>
+- Disable CONFIG_WIRELESS_EXT_SYSFS (long deprecated upstream)
+
+* Mon Apr 16 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc3.git0.1
+- Linux v3.4-rc3
+- Disable debugging options.
+
+* Fri Apr 13 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc2.git3.1
+- Linux v3.4-rc2-269-g4166fb6
+
+* Thu Apr 12 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc2.git2.1
+- Linux v3.4-rc2-174-gecca5c3
+
+* Thu Apr 12 2012 Dennis Gilmore <dennis@ausil.us>
+- KALLSYMS_EXTRA_PASS=1 has to be passed in on the command line so do so only for arm
+
+* Wed Apr 11 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- update ARM configs, rename arm-omap
+
+* Wed Apr 11 2012 Dennis Gilmore <dennis@ausil.us>
+- set KALLSYMS_EXTRA_PASS=1 on arm arches
+
+* Wed Apr 11 2012 Justin M. Forbes <jforbes@redhat.com>
+- enable HyperV drivers
+
+* Wed Apr 11 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc2.git1.1
+- Linux v3.4-rc2-23-g923e9a1
+
+* Tue Apr 10 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable the PMAC ide driver.  PATA_MACIO seems to work (rhbz 810579)
+- Backport fixes for correct register constraints in cmpxchg.h (rhbz 809014)
+
+* Mon Apr 09 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc2.git0.3
+- Reenable debugging options.
+
+* Mon Apr 09 2012 Justin M. Forbes <jforbes@redhat.com>
+- SELinux apply a different permission to ptrace a child vs non-child
+
+* Mon Apr 09 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc2.git0.2
+- Disable debugging options.
+
+* Mon Apr 09 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc2
+- Linux v3.4-rc2
+
+* Fri Apr 06 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git3.1
+- Linux v3.4-rc1-349-g314489b
+
+* Thu Apr 05 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git2.1
+- Linux v3.4-rc1-246-g6c216ec
+- Turn off CONFIG_RCU_FAST_NO_HZ until it is fixed upstream
+
+* Thu Apr 05 2012 Dave Jones <davej@redhat.com>
+- Better watermark the number of pages used by hibernation I/O (Bojan Smojver) (rhbz 785384)
+
+* Wed Apr 04 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable runtime PM for hotpluggable ATA ports (rhbz 806676 807632)
+
+* Tue Apr 03 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git1.2
+- BTRFS use after free patch
+
+* Tue Apr 03 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git1.2
+- Reenable debugging options.
+
+* Tue Apr 03 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git1.1
+- Linux v3.4-rc1-144-g01627d9
+
+* Tue Apr 03 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix crash in uvc_video_clock_update from Laurent Pinchart (rhbz 806433)
+
+* Mon Apr 02 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git0.2
+- Fix config since koji preps as noarch
+
+* Mon Apr 02 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1.git0.2
+- Disable debugging options.
+
+* Mon Apr 02 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc1
+- Linux v3.4-rc1
+
+* Fri Mar 30 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc0.git5.1
+- Linux v3.3-9295-gf52b69f
+
+* Fri Mar 30 2012 Dave Jones <davej@redhat.com>
+- Change config parsing to use {_target_cpu} (From Niels de Vos)
+
+* Thu Mar 29 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc0.git4.1
+- Linux v3.3-8839-gb5174fa
+
+* Thu Mar 29 2012 Josh Boyer <jwboyer@redhat.com>
+- Drop __cpuinitdata on disable_nx for x86_32 (rhbz 808075)
+
+* Wed Mar 28 2012 Josh Boyer <jwboyer@redhat.com>
+- Move 9p modules back to main package for KVM (rhbz 807733)
+
+* Wed Mar 28 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc0.git3.1
+- Linux v3.3-7919-g6658a69
+
+* Mon Mar 26 2012 Justin M. Forbes <jforbes@redhat.com> - 3.4.0-0.rc0.git2.1
+- Linux v3.3-6972-ge22057c
+
+* Thu Mar 22 2012 Dave Jones <davej@redhat.com> 3.4.0-0.rc0.git1.2
+- Fix occasional EBADMSG from signed modules. (rhbz 804345)
+
+* Thu Mar 22 2012 Dave Jones <davej@redhat.com>
+- Fix dentry hash collisions that prevented boot with selinux enabled (rhbz 805371)
+
+* Thu Mar 22 2012 Dave Jones <davej@redhat.com> 3.4.0-0.rc0.git1.1
+- Linux v3.3-4074-g5375871
+
+* Wed Mar 21 2012 Josh Boyer <jwboyer@redhat.com>
+- Ship hmac file for vmlinuz for FIPS-140 (rhbz 805538)
+
+* Tue Mar 20 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-1568: execshield: predictable ascii armour base address (rhbz 804957)
+- mac80211: fix possible tid_rx->reorder_timer use after free
+  from Stanislaw Gruska (rhbz 804007)
+
+* Mon Mar 19 2012 Dave Jones <davej@redhat.com> - 3.3.0-3
+- Reenable debugging options.
+
 * Mon Mar 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3-gnu
 
