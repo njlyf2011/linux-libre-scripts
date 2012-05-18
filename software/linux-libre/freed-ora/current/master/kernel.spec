@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 2
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -2466,6 +2466,15 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu May 17 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-0.rc7.git3.1
+- Linux v3.4-rc7-53-g0e93b4b
+
+* Thu May 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable cpu_idle drivers for ppc64/pseries (requested by Ben Herrenschmidt)
+
+* Wed May 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Update the vgaarb patches to pick up a small switcheroo fix from airlied
+
 * Wed May 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4-rc7-gnu
 - Fix kernel-libre-firmware build
