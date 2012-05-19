@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -800,6 +800,7 @@ Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
+Patch21006: arm-beagle-usb-init.patch
 
 # ARM highbank patches
 # Highbank clock functions need to be EXPORT for module builds
@@ -861,6 +862,12 @@ Patch22016: dl2k-Clean-up-rio_ioctl.patch
 
 #rhbz 726143
 Patch22017: 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
+
+#rhbz 749276
+Patch22018: atl1c_net_next_update-3.3.patch
+
+#rhbz 795176
+Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1480,6 +1487,7 @@ ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
+ApplyPatch arm-beagle-usb-init.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1676,6 +1684,12 @@ ApplyPatch dl2k-Clean-up-rio_ioctl.patch
 
 #rhbz 726143
 ApplyPatch 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
+
+#rhbz 749276
+ApplyPatch atl1c_net_next_update-3.3.patch
+
+#rhbz 795176
+ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2542,6 +2556,19 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Wed May 16 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.6-3
+- fix rtl8187: ->brightness_set can not sleep (rhbz 795176)
+
+* Wed May 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Update the vgaarb patches to pick up a small switcheroo fix from airlied
+
+* Tue May 15 2012 Dennis Gilmore <dennis@ausil.us>
+- add patch to setup usb correctly on beagleboards
+- allows networking to work
+
+* Tue May 15 2012 Josh Boyer <jwboyer@redhat.com>
+- Fixup atl1c register programming (rhbz 749276)
+
 * Mon May 14 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.6-gnu.
 
