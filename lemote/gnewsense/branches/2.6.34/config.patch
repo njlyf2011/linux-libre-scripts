@@ -1,12 +1,12 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2012-03-23 17:58:26.000000000 +0000
++++ .config	2012-05-19 03:27:57.000000000 +0000
 @@ -0,0 +1,4195 @@
 +#
 +# Automatically generated make config: don't edit
-+# Linux kernel version: 2.6.34.11-gnu
-+# Fri Mar 23 17:58:26 2012
++# Linux kernel version: 2.6.34.12-gnu
++# Sat May 19 03:27:57 2012
 +#
 +CONFIG_MIPS=y
 +
