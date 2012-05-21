@@ -109,6 +109,7 @@ read proceed
 
 rm -f $pub/*$buildid*.deb $pub/*$buildid*.tar.bz2 $srclink || :
 ln -s $srcbase $pub/$srclink
+mv $buildtb $pub/debuginfo/
 mv *$buildid*.deb *$buildid*.tar.bz2 $pub
 
 cd $branchdir &&
