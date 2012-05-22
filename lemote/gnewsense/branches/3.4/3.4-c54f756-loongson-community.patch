@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 1932984..3990b6d 100644
+index a687963..9349523 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -35,7 +35,7 @@ index 5ce8029..d64786d 100644
  platforms += mti-malta
  platforms += netlogic
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 5ab6e89..5137acd 100644
+index ce30e2f..c22d7c8 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -19,12 +19,12 @@ config MIPS
@@ -2297,7 +2297,7 @@ index f9fa2a4..930a6e5 100644
 -
  #endif /* _ASM_CPU_H */
 diff --git a/arch/mips/include/asm/dma-mapping.h b/arch/mips/include/asm/dma-mapping.h
-index 7aa37dd..655f849 100644
+index be39a12..7126f5f 100644
 --- a/arch/mips/include/asm/dma-mapping.h
 +++ b/arch/mips/include/asm/dma-mapping.h
 @@ -5,9 +5,7 @@
@@ -3389,10 +3389,10 @@ index 51095dd9..a46f2d3 100644
  }
  
 diff --git a/arch/mips/kernel/cpu-probe.c b/arch/mips/kernel/cpu-probe.c
-index 0bab464..d9c766f 100644
+index 5099201..2fdd835 100644
 --- a/arch/mips/kernel/cpu-probe.c
 +++ b/arch/mips/kernel/cpu-probe.c
-@@ -38,6 +38,8 @@
+@@ -37,6 +37,8 @@
  void (*cpu_wait)(void);
  EXPORT_SYMBOL(cpu_wait);
  
@@ -3401,7 +3401,7 @@ index 0bab464..d9c766f 100644
  static void r3081_wait(void)
  {
  	unsigned long cfg = read_c0_conf();
-@@ -153,14 +155,12 @@ __setup("nodsp", dsp_disable);
+@@ -152,14 +154,12 @@ __setup("nodsp", dsp_disable);
  
  void __init check_wait(void)
  {
@@ -3417,7 +3417,7 @@ index 0bab464..d9c766f 100644
  	case CPU_R3081:
  	case CPU_R3081E:
  		cpu_wait = r3081_wait;
-@@ -193,6 +193,7 @@ void __init check_wait(void)
+@@ -192,6 +192,7 @@ void __init check_wait(void)
  	case CPU_JZRISC:
  	case CPU_XLR:
  	case CPU_XLP:
@@ -3425,7 +3425,7 @@ index 0bab464..d9c766f 100644
  		cpu_wait = r4k_wait;
  		break;
  
-@@ -210,7 +211,7 @@ void __init check_wait(void)
+@@ -209,7 +210,7 @@ void __init check_wait(void)
  
  	case CPU_74K:
  		cpu_wait = r4k_wait;
@@ -3434,7 +3434,7 @@ index 0bab464..d9c766f 100644
  			cpu_wait = r4k_wait_irqoff;
  		break;
  
-@@ -226,7 +227,7 @@ void __init check_wait(void)
+@@ -225,7 +226,7 @@ void __init check_wait(void)
  		 * WAIT on Rev2.0 and Rev3.0 has E16.
  		 * Rev3.1 WAIT is nop, why bother
  		 */
@@ -3443,7 +3443,7 @@ index 0bab464..d9c766f 100644
  			break;
  
  		/*
-@@ -239,7 +240,7 @@ void __init check_wait(void)
+@@ -238,7 +239,7 @@ void __init check_wait(void)
  		 */
  		break;
  	case CPU_RM9000:
@@ -3452,7 +3452,7 @@ index 0bab464..d9c766f 100644
  			cpu_wait = r4k_wait;
  		break;
  	default:
-@@ -249,16 +250,14 @@ void __init check_wait(void)
+@@ -248,16 +249,14 @@ void __init check_wait(void)
  
  static inline void check_errata(void)
  {
@@ -3471,7 +3471,7 @@ index 0bab464..d9c766f 100644
  			write_c0_config7(read_c0_config7() | MIPS_CONF7_RPS);
  		break;
  	default:
-@@ -335,7 +334,7 @@ static inline void cpu_probe_vmbits(struct cpuinfo_mips *c)
+@@ -334,7 +333,7 @@ static inline void cpu_probe_vmbits(struct cpuinfo_mips *c)
  
  static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  {
@@ -3480,7 +3480,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_R2000:
  		c->cputype = CPU_R2000;
  		__cpu_name[cpu] = "R2000";
-@@ -347,7 +346,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -346,7 +345,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  		c->tlbsize = 64;
  		break;
  	case PRID_IMP_R3000:
@@ -3489,7 +3489,7 @@ index 0bab464..d9c766f 100644
  			if (cpu_has_confreg()) {
  				c->cputype = CPU_R3081E;
  				__cpu_name[cpu] = "R3081";
-@@ -369,7 +368,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -368,7 +367,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  		break;
  	case PRID_IMP_R4000:
  		if (read_c0_config() & CONF_SC) {
@@ -3498,7 +3498,7 @@ index 0bab464..d9c766f 100644
  				c->cputype = CPU_R4400PC;
  				__cpu_name[cpu] = "R4400PC";
  			} else {
-@@ -377,7 +376,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -376,7 +375,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  				__cpu_name[cpu] = "R4000PC";
  			}
  		} else {
@@ -3507,7 +3507,7 @@ index 0bab464..d9c766f 100644
  				c->cputype = CPU_R4400SC;
  				__cpu_name[cpu] = "R4400SC";
  			} else {
-@@ -393,7 +392,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -392,7 +391,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  		c->tlbsize = 48;
  		break;
  	case PRID_IMP_VR41XX:
@@ -3516,7 +3516,7 @@ index 0bab464..d9c766f 100644
  		case PRID_REV_VR4111:
  			c->cputype = CPU_VR4111;
  			__cpu_name[cpu] = "NEC VR4111";
-@@ -403,7 +402,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -402,7 +401,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  			__cpu_name[cpu] = "NEC VR4121";
  			break;
  		case PRID_REV_VR4122:
@@ -3525,7 +3525,7 @@ index 0bab464..d9c766f 100644
  				c->cputype = CPU_VR4122;
  				__cpu_name[cpu] = "NEC VR4122";
  			} else {
-@@ -412,7 +411,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -411,7 +410,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  			}
  			break;
  		case PRID_REV_VR4130:
@@ -3534,7 +3534,7 @@ index 0bab464..d9c766f 100644
  				c->cputype = CPU_VR4131;
  				__cpu_name[cpu] = "NEC VR4131";
  			} else {
-@@ -465,12 +464,12 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -464,12 +463,12 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  		c->isa_level = MIPS_CPU_ISA_I;
  		c->options = MIPS_CPU_TLB | MIPS_CPU_TX39_CACHE;
  
@@ -3549,7 +3549,7 @@ index 0bab464..d9c766f 100644
  			case PRID_REV_TX3912:
  				c->cputype = CPU_TX3912;
  				__cpu_name[cpu] = "TX3912";
-@@ -497,7 +496,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -496,7 +495,7 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  		__cpu_name[cpu] = "R49XX";
  		c->isa_level = MIPS_CPU_ISA_III;
  		c->options = R4K_OPTS | MIPS_CPU_LLSC;
@@ -3558,7 +3558,7 @@ index 0bab464..d9c766f 100644
  			c->options |= MIPS_CPU_FPU | MIPS_CPU_32FPR;
  		c->tlbsize = 48;
  		break;
-@@ -638,6 +637,18 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -637,6 +636,18 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
  			     MIPS_CPU_32FPR;
  		c->tlbsize = 64;
  		break;
@@ -3577,7 +3577,7 @@ index 0bab464..d9c766f 100644
  	}
  }
  
-@@ -792,7 +803,7 @@ static void __cpuinit decode_configs(struct cpuinfo_mips *c)
+@@ -791,7 +802,7 @@ static void __cpuinit decode_configs(struct cpuinfo_mips *c)
  static inline void cpu_probe_mips(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
@@ -3586,7 +3586,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_4KC:
  		c->cputype = CPU_4KC;
  		__cpu_name[cpu] = "MIPS 4Kc";
-@@ -844,11 +855,11 @@ static inline void cpu_probe_mips(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -843,11 +854,11 @@ static inline void cpu_probe_mips(struct cpuinfo_mips *c, unsigned int cpu)
  static inline void cpu_probe_alchemy(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
@@ -3600,7 +3600,7 @@ index 0bab464..d9c766f 100644
  		case 0:
  			__cpu_name[cpu] = "Au1000";
  			break;
-@@ -863,7 +874,7 @@ static inline void cpu_probe_alchemy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -862,7 +873,7 @@ static inline void cpu_probe_alchemy(struct cpuinfo_mips *c, unsigned int cpu)
  			break;
  		case 4:
  			__cpu_name[cpu] = "Au1200";
@@ -3609,7 +3609,7 @@ index 0bab464..d9c766f 100644
  				__cpu_name[cpu] = "Au1250";
  			break;
  		case 5:
-@@ -881,12 +892,12 @@ static inline void cpu_probe_sibyte(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -880,12 +891,12 @@ static inline void cpu_probe_sibyte(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
  
@@ -3624,7 +3624,7 @@ index 0bab464..d9c766f 100644
  			c->options &= ~(MIPS_CPU_FPU | MIPS_CPU_32FPR);
  		break;
  	case PRID_IMP_SB1A:
-@@ -899,7 +910,7 @@ static inline void cpu_probe_sibyte(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -898,7 +909,7 @@ static inline void cpu_probe_sibyte(struct cpuinfo_mips *c, unsigned int cpu)
  static inline void cpu_probe_sandcraft(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
@@ -3633,7 +3633,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_SR71000:
  		c->cputype = CPU_SR71000;
  		__cpu_name[cpu] = "Sandcraft SR71000";
-@@ -912,7 +923,7 @@ static inline void cpu_probe_sandcraft(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -911,7 +922,7 @@ static inline void cpu_probe_sandcraft(struct cpuinfo_mips *c, unsigned int cpu)
  static inline void cpu_probe_nxp(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
@@ -3642,7 +3642,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_PR4450:
  		c->cputype = CPU_PR4450;
  		__cpu_name[cpu] = "Philips PR4450";
-@@ -924,7 +935,7 @@ static inline void cpu_probe_nxp(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -923,7 +934,7 @@ static inline void cpu_probe_nxp(struct cpuinfo_mips *c, unsigned int cpu)
  static inline void cpu_probe_broadcom(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
@@ -3651,7 +3651,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_BMIPS32_REV4:
  	case PRID_IMP_BMIPS32_REV8:
  		c->cputype = CPU_BMIPS32;
-@@ -939,7 +950,7 @@ static inline void cpu_probe_broadcom(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -938,7 +949,7 @@ static inline void cpu_probe_broadcom(struct cpuinfo_mips *c, unsigned int cpu)
  		set_elf_platform(cpu, "bmips3300");
  		break;
  	case PRID_IMP_BMIPS43XX: {
@@ -3660,7 +3660,7 @@ index 0bab464..d9c766f 100644
  
  		if (rev >= PRID_REV_BMIPS4380_LO &&
  				rev <= PRID_REV_BMIPS4380_HI) {
-@@ -965,7 +976,7 @@ static inline void cpu_probe_broadcom(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -964,7 +975,7 @@ static inline void cpu_probe_broadcom(struct cpuinfo_mips *c, unsigned int cpu)
  static inline void cpu_probe_cavium(struct cpuinfo_mips *c, unsigned int cpu)
  {
  	decode_configs(c);
@@ -3669,7 +3669,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_CAVIUM_CN38XX:
  	case PRID_IMP_CAVIUM_CN31XX:
  	case PRID_IMP_CAVIUM_CN30XX:
-@@ -1001,7 +1012,7 @@ static inline void cpu_probe_ingenic(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -1000,7 +1011,7 @@ static inline void cpu_probe_ingenic(struct cpuinfo_mips *c, unsigned int cpu)
  	decode_configs(c);
  	/* JZRISC does not implement the CP0 counter. */
  	c->options &= ~MIPS_CPU_COUNTER;
@@ -3678,7 +3678,7 @@ index 0bab464..d9c766f 100644
  	case PRID_IMP_JZRISC:
  		c->cputype = CPU_JZRISC;
  		__cpu_name[cpu] = "Ingenic JZRISC";
-@@ -1104,7 +1115,7 @@ __cpuinit void cpu_probe(void)
+@@ -1103,7 +1114,7 @@ __cpuinit void cpu_probe(void)
  	c->cputype	= CPU_UNKNOWN;
  
  	c->processor_id = read_c0_prid();
@@ -3687,7 +3687,7 @@ index 0bab464..d9c766f 100644
  	case PRID_COMP_LEGACY:
  		cpu_probe_legacy(c, cpu);
  		break;
-@@ -1183,7 +1194,7 @@ __cpuinit void cpu_report(void)
+@@ -1182,7 +1193,7 @@ __cpuinit void cpu_report(void)
  	struct cpuinfo_mips *c = &current_cpu_data;
  
  	printk(KERN_INFO "CPU revision is: %08x (%s)\n",
@@ -4632,10 +4632,10 @@ index decd1fa..154744c 100644
  	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
  
 diff --git a/arch/mips/kernel/perf_event_mipsxx.c b/arch/mips/kernel/perf_event_mipsxx.c
-index e3b897a..6d09b96 100644
+index 811084f..821b46f 100644
 --- a/arch/mips/kernel/perf_event_mipsxx.c
 +++ b/arch/mips/kernel/perf_event_mipsxx.c
-@@ -1567,6 +1567,12 @@ init_hw_perf_events(void)
+@@ -1571,6 +1571,12 @@ init_hw_perf_events(void)
  		mipspmu.cache_event_map = &octeon_cache_map;
  		mipspmu.map_raw_event = octeon_pmu_map_raw_event;
  		break;
@@ -4649,10 +4649,10 @@ index e3b897a..6d09b96 100644
  		pr_cont("Either hardware does not support performance "
  			"counters, or not yet implemented.\n");
 diff --git a/arch/mips/kernel/process.c b/arch/mips/kernel/process.c
-index 7955409..b9a3252 100644
+index e9a5fd7..4a6d640 100644
 --- a/arch/mips/kernel/process.c
 +++ b/arch/mips/kernel/process.c
-@@ -65,12 +65,12 @@ void __noreturn cpu_idle(void)
+@@ -64,12 +64,12 @@ void __noreturn cpu_idle(void)
  			smtc_idle_loop_hook();
  #endif
  
@@ -4692,10 +4692,10 @@ index 5422855..50ba267 100644
  	SAVE_SOME
  	TRACE_IRQS_ON_RELOAD
 diff --git a/arch/mips/kernel/spram.c b/arch/mips/kernel/spram.c
-index 1821d12..5146254 100644
+index 6af08d8..4be9669 100644
 --- a/arch/mips/kernel/spram.c
 +++ b/arch/mips/kernel/spram.c
-@@ -199,10 +199,9 @@ static __cpuinit void probe_spram(char *type,
+@@ -198,10 +198,9 @@ static __cpuinit void probe_spram(char *type,
  }
  void __cpuinit spram_config(void)
  {
@@ -4733,10 +4733,10 @@ index 99d73b7..9930bfe 100644
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
 diff --git a/arch/mips/kernel/traps.c b/arch/mips/kernel/traps.c
-index d79ae54..82a0716 100644
+index cfdaaa4..7aec48d 100644
 --- a/arch/mips/kernel/traps.c
 +++ b/arch/mips/kernel/traps.c
-@@ -616,14 +616,14 @@ static int simulate_rdhwr(struct pt_regs *regs, unsigned int opcode)
+@@ -615,14 +615,14 @@ static int simulate_rdhwr(struct pt_regs *regs, unsigned int opcode)
  			regs->regs[rt] = smp_processor_id();
  			return 0;
  		case 1:		/* SYNCI length */
@@ -4754,7 +4754,7 @@ index d79ae54..82a0716 100644
  			case CPU_20KC:
  			case CPU_25KF:
  				regs->regs[rt] = 1;
-@@ -1249,6 +1249,7 @@ static inline void parity_protection_init(void)
+@@ -1248,6 +1248,7 @@ static inline void parity_protection_init(void)
  		break;
  
  	case CPU_5KC:
@@ -9211,10 +9211,10 @@ index a03bf00..40b8e56 100644
  		return SIGILL;
  	}
 diff --git a/arch/mips/mm/c-octeon.c b/arch/mips/mm/c-octeon.c
-index cf7895d..4035eba 100644
+index 47037ec..35d5f08 100644
 --- a/arch/mips/mm/c-octeon.c
 +++ b/arch/mips/mm/c-octeon.c
-@@ -186,7 +186,7 @@ static void __cpuinit probe_octeon(void)
+@@ -185,7 +185,7 @@ static void __cpuinit probe_octeon(void)
  	struct cpuinfo_mips *c = &current_cpu_data;
  
  	config1 = read_c0_config1();
@@ -9224,10 +9224,10 @@ index cf7895d..4035eba 100644
  	case CPU_CAVIUM_OCTEON_PLUS:
  		c->icache.linesz = 2 << ((config1 >> 19) & 7);
 diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
-index 4f9eb0b..67dc1a6 100644
+index bda8eb2..df5cde1 100644
 --- a/arch/mips/mm/c-r4k.c
 +++ b/arch/mips/mm/c-r4k.c
-@@ -799,7 +799,7 @@ static void __cpuinit probe_pcache(void)
+@@ -798,7 +798,7 @@ static void __cpuinit probe_pcache(void)
  	unsigned long config1;
  	unsigned int lsize;
  
@@ -9236,7 +9236,7 @@ index 4f9eb0b..67dc1a6 100644
  	case CPU_R4600:			/* QED style two way caches? */
  	case CPU_R4700:
  	case CPU_R5000:
-@@ -887,10 +887,10 @@ static void __cpuinit probe_pcache(void)
+@@ -886,10 +886,10 @@ static void __cpuinit probe_pcache(void)
  		write_c0_config(config & ~VR41_CONF_P4K);
  	case CPU_VR4131:
  		/* Workaround for cache instruction bug of VR4131 */
@@ -9250,7 +9250,7 @@ index 4f9eb0b..67dc1a6 100644
  				config |= VR41_CONF_BP;
  			write_c0_config(config);
  		} else
-@@ -1038,7 +1038,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1037,7 +1037,7 @@ static void __cpuinit probe_pcache(void)
  	 * normally they'd suffer from aliases but magic in the hardware deals
  	 * with that for us so we don't need to take care ourselves.
  	 */
@@ -9259,7 +9259,7 @@ index 4f9eb0b..67dc1a6 100644
  	case CPU_20KC:
  	case CPU_25KF:
  	case CPU_SB1:
-@@ -1067,7 +1067,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1066,7 +1066,7 @@ static void __cpuinit probe_pcache(void)
  			c->dcache.flags |= MIPS_CACHE_ALIASES;
  	}
  
@@ -9268,7 +9268,7 @@ index 4f9eb0b..67dc1a6 100644
  	case CPU_20KC:
  		/*
  		 * Some older 20Kc chips doesn't have the 'VI' bit in
-@@ -1196,7 +1196,7 @@ static void __cpuinit setup_scache(void)
+@@ -1195,7 +1195,7 @@ static void __cpuinit setup_scache(void)
  	 * processors don't have a S-cache that would be relevant to the
  	 * Linux memory management.
  	 */
@@ -9277,7 +9277,7 @@ index 4f9eb0b..67dc1a6 100644
  	case CPU_R4000SC:
  	case CPU_R4000MC:
  	case CPU_R4400SC:
-@@ -1394,7 +1394,7 @@ void __cpuinit r4k_cache_init(void)
+@@ -1393,7 +1393,7 @@ void __cpuinit r4k_cache_init(void)
  	extern char __weak except_vec2_sb1;
  	struct cpuinfo_mips *c = &current_cpu_data;
  
@@ -9287,7 +9287,7 @@ index 4f9eb0b..67dc1a6 100644
  	case CPU_SB1A:
  		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
 diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
-index 4608491..1e20758 100644
+index 3fab204..562ae3f 100644
 --- a/arch/mips/mm/dma-default.c
 +++ b/arch/mips/mm/dma-default.c
 @@ -310,7 +310,7 @@ int mips_dma_supported(struct device *dev, u64 mask)
@@ -9306,13 +9306,13 @@ index 4608491..1e20758 100644
 -EXPORT_SYMBOL(dma_cache_sync);
 -
  static struct dma_map_ops mips_default_dma_map_ops = {
- 	.alloc_coherent = mips_dma_alloc_coherent,
- 	.free_coherent = mips_dma_free_coherent,
+ 	.alloc = mips_dma_alloc_coherent,
+ 	.free = mips_dma_free_coherent,
 diff --git a/arch/mips/mm/page.c b/arch/mips/mm/page.c
-index 36272f7..24cdc98 100644
+index cc0b626..30c9fe9 100644
 --- a/arch/mips/mm/page.c
 +++ b/arch/mips/mm/page.c
-@@ -212,7 +212,7 @@ static void __cpuinit set_prefetch_parameters(void)
+@@ -211,7 +211,7 @@ static void __cpuinit set_prefetch_parameters(void)
  			 * hints are broken.
  			 */
  			if (current_cpu_type() == CPU_SB1 &&
@@ -9322,10 +9322,10 @@ index 36272f7..24cdc98 100644
  				pref_dst_mode = Pref_Store;
  			} else {
 diff --git a/arch/mips/mm/sc-mips.c b/arch/mips/mm/sc-mips.c
-index 9cca8de..0e633db 100644
+index 93d937b..c0d6b19 100644
 --- a/arch/mips/mm/sc-mips.c
 +++ b/arch/mips/mm/sc-mips.c
-@@ -72,7 +72,7 @@ static inline int mips_sc_is_activated(struct cpuinfo_mips *c)
+@@ -71,7 +71,7 @@ static inline int mips_sc_is_activated(struct cpuinfo_mips *c)
  	unsigned int tmp;
  
  	/* Check the bypass bit (L2B) */
@@ -9335,10 +9335,10 @@ index 9cca8de..0e633db 100644
  	case CPU_74K:
  	case CPU_1004K:
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index e06370f..ef36dcf 100644
+index 0bc485b..8db3c40 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
-@@ -136,7 +136,7 @@ static int scratchpad_offset(int i)
+@@ -137,7 +137,7 @@ static int scratchpad_offset(int i)
   */
  static int __cpuinit m4kc_tlbp_war(void)
  {
@@ -9347,7 +9347,7 @@ index e06370f..ef36dcf 100644
  	       (PRID_COMP_MIPS | PRID_IMP_4KC);
  }
  
-@@ -575,7 +575,7 @@ static void __cpuinit build_tlb_write_entry(u32 **p, struct uasm_label **l,
+@@ -576,7 +576,7 @@ static void __cpuinit build_tlb_write_entry(u32 **p, struct uasm_label **l,
  
  	default:
  		panic("No TLB refill handler yet (CPU type: %d)",
@@ -9554,10 +9554,10 @@ index 7a402c7..bab3a2c 100644
  #define wrmsr(x, y, z) do { } while (0)
  #define use_msr 0
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index a421abd..49498da 100644
+index ffddcba..cdb0909 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -669,6 +669,13 @@ config HID_ZYDACRON
+@@ -644,6 +644,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -9572,10 +9572,10 @@ index a421abd..49498da 100644
  
  endif # HID_SUPPORT
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index 8aefdc9..b7f1f2c 100644
+index 22f1d16..cd67b60 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
-@@ -86,6 +86,7 @@ obj-$(CONFIG_HID_ZEROPLUS)	+= hid-zpff.o
+@@ -83,6 +83,7 @@ obj-$(CONFIG_HID_ZEROPLUS)	+= hid-zpff.o
  obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
  obj-$(CONFIG_HID_WACOM)		+= hid-wacom.o
  obj-$(CONFIG_HID_WALTOP)	+= hid-waltop.o
@@ -9800,10 +9800,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 63552e3..51afee3 100644
+index e39aecb..3c291b1 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -749,6 +749,9 @@
+@@ -791,6 +791,9 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -9814,10 +9814,10 @@ index 63552e3..51afee3 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index 3101dd5..f02fd30 100644
+index d2c5095..56d6d1c 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -876,7 +876,7 @@ config SCx200_I2C_SDA
+@@ -897,7 +897,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -9854,7 +9854,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index f4d8611..a911638 100644
+index d927dd4..3eb2b80 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -9866,7 +9866,7 @@ index f4d8611..a911638 100644
  
  struct sm501_devdata {
  	spinlock_t			 reg_lock;
-@@ -1143,6 +1143,22 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
+@@ -1135,6 +1135,22 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
  {
  	return sm->gpio.registered;
  }
@@ -9889,7 +9889,7 @@ index f4d8611..a911638 100644
  #else
  static inline int sm501_register_gpio(struct sm501_devdata *sm)
  {
-@@ -1162,7 +1178,13 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
+@@ -1154,7 +1170,13 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
  {
  	return 0;
  }
@@ -9904,7 +9904,7 @@ index f4d8611..a911638 100644
  
  static int sm501_register_gpio_i2c_instance(struct sm501_devdata *sm,
  					    struct sm501_platdata_gpio_i2c *iic)
-@@ -1217,6 +1239,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
+@@ -1209,6 +1231,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
  	return 0;
  }
  
@@ -9925,7 +9925,7 @@ index f4d8611..a911638 100644
  /* sm501_dbg_regs
   *
   * Debug attribute to attach to parent device to show core registers
-@@ -1375,6 +1411,8 @@ static int __devinit sm501_init_dev(struct sm501_devdata *sm)
+@@ -1367,6 +1403,8 @@ static int __devinit sm501_init_dev(struct sm501_devdata *sm)
  			sm501_register_uart(sm, idata->devices);
  		if (idata->devices & SM501_USE_GPIO)
  			sm501_register_gpio(sm);
@@ -9934,7 +9934,7 @@ index f4d8611..a911638 100644
  	}
  
  	if (pdata && pdata->gpio_i2c != NULL && pdata->gpio_i2c_nr > 0) {
-@@ -1561,10 +1599,15 @@ static struct sm501_initdata sm501_pci_initdata = {
+@@ -1553,10 +1591,15 @@ static struct sm501_initdata sm501_pci_initdata = {
  	.devices	= SM501_USE_ALL,
  
  	/* Errata AB-3 says that 72MHz is the fastest available
@@ -12843,10 +12843,10 @@ index 98db761..a1b1a35 100644
  # 16-bit wireless PCMCIA client drivers
  obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
 diff --git a/drivers/net/wireless/rtl818x/rtl8187/dev.c b/drivers/net/wireless/rtl818x/rtl8187/dev.c
-index 638fbef..ea2ce81 100644
+index cf53ac9..de19893 100644
 --- a/drivers/net/wireless/rtl818x/rtl8187/dev.c
 +++ b/drivers/net/wireless/rtl818x/rtl8187/dev.c
-@@ -1006,6 +1006,9 @@ static void rtl8187_stop(struct ieee80211_hw *dev)
+@@ -1012,6 +1012,9 @@ static void rtl8187_stop(struct ieee80211_hw *dev)
  	u32 reg;
  
  	mutex_lock(&priv->conf_mutex);
@@ -12856,7 +12856,7 @@ index 638fbef..ea2ce81 100644
  	rtl818x_iowrite16(priv, &priv->map->INT_MASK, 0);
  
  	reg = rtl818x_ioread8(priv, &priv->map->CMD);
-@@ -1066,10 +1069,7 @@ exit:
+@@ -1131,10 +1134,7 @@ exit:
  static void rtl8187_remove_interface(struct ieee80211_hw *dev,
  				     struct ieee80211_vif *vif)
  {
@@ -16750,7 +16750,7 @@ index 0000000..f2d2c0c
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index 3a125b8..8c95650 100644
+index 8c8377d..23b1c40 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
 @@ -481,6 +481,7 @@ comment "Platform RTC drivers"
@@ -16762,7 +16762,7 @@ index 3a125b8..8c95650 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index d7782aa..f27b9aa 100644
+index 7d5f56e..9f302c2 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
 @@ -691,8 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
@@ -16777,7 +16777,7 @@ index d7782aa..f27b9aa 100644
  		goto cleanup1;
  	}
 diff --git a/drivers/staging/sm7xx/smtcfb.c b/drivers/staging/sm7xx/smtcfb.c
-index ae0035f..23e6dd8 100644
+index 83c582e..216c533 100644
 --- a/drivers/staging/sm7xx/smtcfb.c
 +++ b/drivers/staging/sm7xx/smtcfb.c
 @@ -15,6 +15,8 @@
@@ -16789,7 +16789,7 @@ index ae0035f..23e6dd8 100644
   * Version 0.10.26192.21.01
   *	- Add PowerPC/Big endian support
   *	- Verified on 2.6.19.2
-@@ -108,6 +110,7 @@ static struct vesa_mode_table vesa_mode[] = {
+@@ -107,6 +109,7 @@ static struct vesa_mode_table vesa_mode[] = {
  	{"0x307", 1280, 1024, 8},
  
  	{"0x311", 640,  480,  16},
@@ -16798,10 +16798,10 @@ index ae0035f..23e6dd8 100644
  	{"0x317", 1024, 768,  16},
  	{"0x31A", 1280, 1024, 16},
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index 34b9edd..675c1f4 100644
+index 235171f..0157357 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
-@@ -830,9 +830,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+@@ -829,9 +829,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
  	}
  
  	if (ints & OHCI_INTR_WDH) {
@@ -16819,7 +16819,7 @@ index 34b9edd..675c1f4 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 7732d69..3be2d9c 100644
+index 32dada8..081a30d 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -57,6 +57,16 @@
@@ -16915,7 +16915,7 @@ index 7732d69..3be2d9c 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -864,6 +878,9 @@ hc_init:
+@@ -868,6 +882,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -16926,7 +16926,7 @@ index 7732d69..3be2d9c 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index b54afce..cbb875f 100644
+index f4465cc..c9d2464 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -16939,7 +16939,7 @@ index b54afce..cbb875f 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E600			0x1001
  #define HUAWEI_PRODUCT_E220			0x1003
-@@ -584,6 +587,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -590,6 +593,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
@@ -16948,10 +16948,10 @@ index b54afce..cbb875f 100644
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220, 0xff, 0xff, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220BIS, 0xff, 0xff, 0xff) },
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
-index 1426068..796877d 100644
+index 9356add..b04d39d 100644
 --- a/drivers/video/Makefile
 +++ b/drivers/video/Makefile
-@@ -135,7 +135,7 @@ obj-$(CONFIG_FB_SH_MOBILE_HDMI)	  += sh_mobile_hdmi.o
+@@ -138,7 +138,7 @@ obj-$(CONFIG_FB_SH_MOBILE_HDMI)	  += sh_mobile_hdmi.o
  obj-$(CONFIG_FB_SH_MOBILE_MERAM)  += sh_mobile_meram.o
  obj-$(CONFIG_FB_SH_MOBILE_LCDC)	  += sh_mobile_lcdcfb.o
  obj-$(CONFIG_FB_OMAP)             += omap/
@@ -16983,7 +16983,7 @@ index 02fde50..a8677f0 100644
  #define SM501_USE_ALL		(0xffffffff)
  
 diff --git a/init/calibrate.c b/init/calibrate.c
-index 5f117ca..5efe46d 100644
+index fda0a7b..7b5b4e5 100644
 --- a/init/calibrate.c
 +++ b/init/calibrate.c
 @@ -21,6 +21,7 @@ static int __init lpj_setup(char *str)
@@ -17002,7 +17002,7 @@ index 5f117ca..5efe46d 100644
  
  /*
   * This is the number of bits of precision for the loops_per_jiffy.  Each
-@@ -278,6 +280,7 @@ void __cpuinit calibrate_delay(void)
+@@ -279,6 +281,7 @@ void __cpuinit calibrate_delay(void)
  		lpj = lpj_fine;
  		pr_info("Calibrating delay loop (skipped), "
  			"value calculated using timer frequency.. ");
@@ -17010,7 +17010,7 @@ index 5f117ca..5efe46d 100644
  	} else if ((lpj = calibrate_delay_is_known())) {
  		;
  	} else if ((lpj = calibrate_delay_direct()) != 0) {
-@@ -288,7 +291,9 @@ void __cpuinit calibrate_delay(void)
+@@ -289,7 +292,9 @@ void __cpuinit calibrate_delay(void)
  		if (!printed)
  			pr_info("Calibrating delay loop... ");
  		lpj = calibrate_delay_converge();
@@ -17021,10 +17021,10 @@ index 5f117ca..5efe46d 100644
  	if (!printed)
  		pr_cont("%lu.%02lu BogoMIPS (lpj=%lu)\n",
 diff --git a/net/rfkill/core.c b/net/rfkill/core.c
-index 354760e..255e840 100644
+index f974961..b40b225 100644
 --- a/net/rfkill/core.c
 +++ b/net/rfkill/core.c
-@@ -112,7 +112,7 @@ static LIST_HEAD(rfkill_list);	/* list of registered rf switches */
+@@ -113,7 +113,7 @@ static LIST_HEAD(rfkill_list);	/* list of registered rf switches */
  static DEFINE_MUTEX(rfkill_global_mutex);
  static LIST_HEAD(rfkill_fds);	/* list of open fds of /dev/rfkill */
  
