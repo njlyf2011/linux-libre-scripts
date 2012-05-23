@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -756,7 +756,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 # media patches
 Patch2900: add-poll-requested-events.patch
 Patch2901: drivers-media-update.patch
-Patch2902: dvbs-fix-zigzag.patch
 
 # fs fixes
 Patch4000: ext4-fix-resize-when-resizing-within-single-group.patch
@@ -857,9 +856,6 @@ Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
 Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 
-#rhbz 818820
-Patch22016: dl2k-Clean-up-rio_ioctl.patch
-
 #rhbz 726143
 Patch22017: 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
 
@@ -868,6 +864,9 @@ Patch22018: atl1c_net_next_update-3.3.patch
 
 #rhbz 795176
 Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
+
+#rhbz 822120
+Patch22020: rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1603,7 +1602,6 @@ ApplyPatch quite-apm.patch
 # Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
 ApplyPatch add-poll-requested-events.patch
-ApplyPatch dvbs-fix-zigzag.patch
 ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
@@ -1679,9 +1677,6 @@ ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
 ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 
-#rhbz 818820
-ApplyPatch dl2k-Clean-up-rio_ioctl.patch
-
 #rhbz 726143
 ApplyPatch 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
 
@@ -1690,6 +1685,9 @@ ApplyPatch atl1c_net_next_update-3.3.patch
 
 #rhbz 795176
 ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
+
+#rhbz 822120
+ApplyPatch rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2556,6 +2554,24 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon May 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.7-gnu.
+
+* Mon May 21 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.7-1
+- Linux 3.3.7
+- Disable CONFIG_RELOCATABLE for 32bit builds. Turn back on for 3.4
+
+* Fri May 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Additional fixes for CVE-2011-4131 (rhbz 822874 822869)
+
+* Thu May 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix rtlwifi async firmware load race condition (rhbz 822120)
+- Enable cpu_idle drivers for ppc64/pseries (requested by Ben Herrenschmidt)
+
+* Wed May 16 2012 Dennis Gilmore <dennis@ausil.us>
+- set arch for arm kernel to VEXPRESS allows v7 emulation
+- enable SMP everywhere but disable on kirkwood as its up only
+
 * Wed May 16 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.6-3
 - fix rtl8187: ->brightness_set can not sleep (rhbz 795176)
 
