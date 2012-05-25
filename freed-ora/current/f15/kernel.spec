@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -680,7 +680,6 @@ Patch2802: linux-2.6-silence-acpi-blacklist.patch
 # media patches
 Patch2900: add-poll-requested-events.patch
 Patch2901: drivers-media-update.patch
-Patch2902: dvbs-fix-zigzag.patch
 
 # fs fixes
 
@@ -748,14 +747,14 @@ Patch22007: macvtap-zerocopy-validate-vector-length.patch
 #rhbz 817298
 Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
-#rhbz 818820
-Patch22016: dl2k-Clean-up-rio_ioctl.patch
-
 #rhbz 749276
 Patch22018: atl1c_net_next_update-3.3.patch
 
 #rhbz 795176
 Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
+
+#rhbz 822120
+Patch22020: rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1324,7 +1323,6 @@ ApplyPatch quite-apm.patch
 # Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
 ApplyPatch add-poll-requested-events.patch
-ApplyPatch dvbs-fix-zigzag.patch
 ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
@@ -1373,14 +1371,14 @@ ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 #rhbz 817298
 ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
-#rhbz 818820
-ApplyPatch dl2k-Clean-up-rio_ioctl.patch
-
 #rhbz 749276
 ApplyPatch atl1c_net_next_update-3.3.patch
 
 #rhbz 795176
 ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
+
+#rhbz 822120
+ApplyPatch rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2034,6 +2032,18 @@ fi
 # and build.
 
 %changelog
+* Tue May 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.7-gnu.
+
+* Mon May 21 2012 Justin M. Forbes <jforbes@redhat.com> 3.3.7-1
+- Linux 3.3.7
+
+* Fri May 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Additional fixes for CVE-2011-4131 (rhbz 822874 822869)
+
+* Thu May 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix rtlwifi async firmware load race condition (rhbz 822120)
+
 * Wed May 16 2012 Justin M. Forbes <jforbes@redhat.com> 2.6.43.6-3
 - fix rtl8187: ->brightness_set can not sleep (rhbz 795176)
 
