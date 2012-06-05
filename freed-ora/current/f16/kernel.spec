@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -850,6 +850,12 @@ Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 #rhbz 822120
 Patch22020: rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
+#rhbz 822825 822821 CVE-2012-2372
+Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
+
+#rhbz 824352 824345 CVE-2012-2390
+Patch22022: hugetlb-fix-resv_map-leak-in-error-path.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1574,6 +1580,12 @@ ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 #rhbz 822120
 ApplyPatch rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
+
+#rhbz 822825 822821 CVE-2012-2372
+ApplyPatch mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
+
+#rhbz 824352 824345 CVE-2012-2390
+ApplyPatch hugetlb-fix-resv_map-leak-in-error-path.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2313,6 +2325,15 @@ fi
 # and build.
 
 %changelog
+* Wed May 30 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2390 huge pages: memory leak on mmap failure (rhbz 824352 824345)
+
+* Fri May 25 2012 Mauro      Carvalho Chehab <mchehab@redhat.com>
+- Don't      manually customise tuners/frontends (rhbz 825203)
+
+* Thu May 24 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2372 mm: 32bit PAE pmd walk vs populate SMP race (rhbz 822821 822825)
+
 * Tue May 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.7-gnu.
 
