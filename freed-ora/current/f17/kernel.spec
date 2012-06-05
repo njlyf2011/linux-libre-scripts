@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -748,6 +748,7 @@ Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 Patch1950: drm-i915-allow-to-select-rc6-modes-via-kernel-parame.patch
 Patch1951: drm-i915-enable-plain-RC6-on-Sandy-Bridge-by-default.patch
+Patch1952: drm-i915-lvds-dual-channel.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -867,6 +868,12 @@ Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 #rhbz 822120
 Patch22020: rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
+
+#rhbz 822825 822821 CVE-2012-2372
+Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
+
+#rhbz 824352 824345 CVE-2012-2390
+Patch22022: hugetlb-fix-resv_map-leak-in-error-path.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1594,6 +1601,7 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 ApplyPatch drm-i915-allow-to-select-rc6-modes-via-kernel-parame.patch
 ApplyPatch drm-i915-enable-plain-RC6-on-Sandy-Bridge-by-default.patch
+ApplyPatch drm-i915-lvds-dual-channel.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
@@ -1688,6 +1696,12 @@ ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 #rhbz 822120
 ApplyPatch rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
+
+#rhbz 822825 822821 CVE-2012-2372
+ApplyPatch mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
+
+#rhbz 824352 824345 CVE-2012-2390
+ApplyPatch hugetlb-fix-resv_map-leak-in-error-path.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2554,6 +2568,19 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Wed May 30 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2390 huge pages: memory leak on mmap failure (rhbz 824352 824345)
+
+* Fri May 25 2012 Mauro	Carvalho Chehab	<mchehab@redhat.com>
+- Don't	manually customise tuners/frontends (rhbz 825203)
+
+* Thu May 24 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2372 mm: 32bit PAE pmd walk vs populate SMP race (rhbz 822821 822825)
+
+* Wed May 23 2012 Adam Jackson <ajax@redhat.com>
+- drm-i915-lvds-dual-channel.patch: Scrape dual-channel-ness for LVDS out
+  of the VBT, rather than just making things up. (#819343)
+
 * Mon May 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.7-gnu.
 
