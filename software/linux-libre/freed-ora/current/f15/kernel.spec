@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -756,6 +756,12 @@ Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 #rhbz 822120
 Patch22020: rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
+#rhbz 822825 822821 CVE-2012-2372
+Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
+
+#rhbz 824352 824345 CVE-2012-2390
+Patch22022: hugetlb-fix-resv_map-leak-in-error-path.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1379,6 +1385,12 @@ ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 #rhbz 822120
 ApplyPatch rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
+
+#rhbz 822825 822821 CVE-2012-2372
+ApplyPatch mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
+
+#rhbz 824352 824345 CVE-2012-2390
+ApplyPatch hugetlb-fix-resv_map-leak-in-error-path.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2032,6 +2044,12 @@ fi
 # and build.
 
 %changelog
+* Wed May 30 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2390 huge pages: memory leak on mmap failure (rhbz 824352 824345)
+
+* Thu May 24 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2372 mm: 32bit PAE pmd walk vs populate SMP race (rhbz 822821 822825)
+
 * Tue May 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.7-gnu.
 
