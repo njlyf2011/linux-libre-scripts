@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -825,9 +825,6 @@ Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-c
 #rhbz 824352 824345 CVE-2012-2390
 Patch22022: hugetlb-fix-resv_map-leak-in-error-path.patch
 
-#Stable Queue for 3.4.1
-Patch22023: 3.4.1-stable-queue.patch.xz
-
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1433,14 +1430,14 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 ApplyPatch taint-vbox.patch
 
-#Stable Queue for 3.4.1
-ApplyPatch 3.4.1-stable-queue.patch.xz
-
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
-ApplyPatch linux-2.6-i386-nx-emulation.patch
-ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
+#ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
+#ApplyPatch linux-2.6-i386-nx-emulation.patch
+#ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
+#rhbz 804957 CVE-2012-1568
+#ApplyPatch shlib_base_randomize.patch
+
 
 #
 # ARM
@@ -1564,9 +1561,6 @@ ApplyPatch hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-
-#rhbz 804957 CVE-2012-1568
-ApplyPatch shlib_base_randomize.patch
 
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
@@ -2469,7 +2463,16 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Tue Jun  5 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Jun  6 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.1
+
+* Mon Jun 04 2012 Josh Boyer <jwboyer@redhat.com> 3.4.1-1
+- Linux v3.4.1
+
+* Mon Jun 04 2012 Dave Jones <davej@redhat.com>
+- Disable 32bit NX emulation.
+
+* Mon Jun  4 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jun  5
 - GNU Linux-libre 3.4
 
 * Sun Jun 02 2012 Justin M. Forbes <jforbes@redhat.com> 3.4.0-1
