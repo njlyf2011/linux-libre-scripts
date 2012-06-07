@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # When changing real_sublevel below, reset this by hand to 1
 # (or to 0 and then use rpmdev-bumpspec).
 #
-%global baserelease 3
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # real_sublevel is the 3.x kernel version we're starting with
@@ -89,7 +89,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -730,9 +730,6 @@ Patch21300: unhandled-irqs-switch-to-polling.patch
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
 
-#rhbz 807632
-Patch21385: libata-forbid-port-runtime-pm-by-default.patch
-
 #rhbz 808559
 Patch21530: ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
 
@@ -752,9 +749,6 @@ Patch22018: atl1c_net_next_update-3.3.patch
 
 #rhbz 795176
 Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
-
-#rhbz 822120
-Patch22020: rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
 #rhbz 822825 822821 CVE-2012-2372
 Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
@@ -1220,9 +1214,12 @@ ApplyPatch taint-vbox.patch
 #
 # NX Emulation
 #
-ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
-ApplyPatch linux-2.6-i386-nx-emulation.patch
-ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
+#ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
+#ApplyPatch linux-2.6-i386-nx-emulation.patch
+#ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
+#rhbz 804957 CVE-2012-1568
+#ApplyPatch shlib_base_randomize.patch
+
 
 #
 # bugfixes to drivers and filesystems
@@ -1358,15 +1355,9 @@ ApplyPatch bcma-brcmsmac-compat.patch
 #rhbz 789644
 ApplyPatch mcelog-rcu-splat.patch
 
-#rhbz 804957 CVE-2012-1568
-ApplyPatch shlib_base_randomize.patch
-
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
-
-#rhbz 807632
-ApplyPatch libata-forbid-port-runtime-pm-by-default.patch
 
 #rhbz 806295
 ApplyPatch disable-hid-battery.patch
@@ -1382,9 +1373,6 @@ ApplyPatch atl1c_net_next_update-3.3.patch
 
 #rhbz 795176
 ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
-
-#rhbz 822120
-ApplyPatch rtlwifi-fix-for-race-condition-when-firmware-is-cach.patch
 
 #rhbz 822825 822821 CVE-2012-2372
 ApplyPatch mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
@@ -2044,6 +2032,15 @@ fi
 # and build.
 
 %changelog
+* Wed Jun 06 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.3.8-gnu.
+
+* Mon Jun 04 2012 Josh Boyer <jwboyer@redhat.com> 2.6.43.8-1
+- Linux v3.3.8
+
+* Mon Jun 04 2012 Dave Jones <davej@redhat.com>
+- Disable 32bit NX emulation.
+
 * Wed May 30 2012 Josh Boyer <jwboyer@redhat.com>
 - CVE-2012-2390 huge pages: memory leak on mmap failure (rhbz 824352 824345)
 
