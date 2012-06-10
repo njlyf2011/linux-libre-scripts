@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -733,6 +733,7 @@ Patch1555: fix_xen_guest_on_old_EC2.patch
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 Patch1800: drm-vgem.patch
+Patch1810: drm-edid-Make-the-header-fixup-threshold-tunable.patch
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
@@ -771,6 +772,8 @@ Patch19000: ips-noirq.patch
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+# drm register derived from http://www.digipedia.pl/usenet/thread/19013/36923/ 
+Patch21002: arm-omap-drm-register.patch
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
@@ -780,6 +783,8 @@ Patch21006: arm-beagle-usb-init.patch
 # ARM highbank patches
 # Highbank clock functions need to be EXPORT for module builds
 Patch21010: highbank-export-clock-functions.patch
+# http://lists.arm.linux.org.uk/lurker/message/20120605.031140.e7d9b601.en.html
+Patch21011: highbank-secure-smc.patch
 
 Patch21094: power-x86-destdir.patch
 
@@ -821,9 +826,6 @@ Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 #rhbz 822825 822821 CVE-2012-2372
 Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
-
-#rhbz 824352 824345 CVE-2012-2390
-Patch22022: hugetlb-fix-resv_map-leak-in-error-path.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1447,6 +1449,7 @@ ApplyPatch taint-vbox.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-beagle-usb-init.patch
+ApplyPatch arm-omap-drm-register.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1522,6 +1525,7 @@ ApplyPatch fix_xen_guest_on_old_EC2.patch
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 ApplyPatch drm-vgem.patch
+ApplyPatch drm-edid-Make-the-header-fixup-threshold-tunable.patch
 
 # Nouveau DRM
 
@@ -1568,6 +1572,7 @@ ApplyPatch weird-root-dentry-name-debug.patch
 
 #Highbank clock functions
 ApplyPatch highbank-export-clock-functions.patch 
+ApplyPatch highbank-secure-smc.patch
 
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
@@ -1594,9 +1599,6 @@ ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 
 #rhbz 822825 822821 CVE-2012-2372
 ApplyPatch mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
-
-#rhbz 824352 824345 CVE-2012-2390
-ApplyPatch hugetlb-fix-resv_map-leak-in-error-path.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2463,7 +2465,31 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Wed Jun  6 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Jun  9 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.2
+
+* Sat Jun 09 2012 Josh Boyer <jwboyer@redhat.com> 3.4.2-1
+- Linux v3.4.2
+
+* Fri Jun 08 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable HV assisted KVM on ppc64
+
+* Fri Jun 08 2012 Josh Boyer <jwboyer@redhat.com>
+- Backport edid header fixup threashold patch from Adam Jackson (rhbz 582559)
+
+* Wed Jun 06 2012 Dennis Gilmore <dennis@ausil.us> 3.4.1-2
+- add patch from calxeda to enable the highbank kernel to boot
+- on real hardware
+
+* Tue Jun 05 2012 Dennis Gilmore <dennis@ausil.us>
+- add patch to register omapdrm to the platforms so that we get
+- working console framebuffer and X on panda and beagle boards
+
+* Tue Jun  5 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config options for 3.4
+- Enable MTD/UBI/JFFS2 on ARM platforms
+
+* Tue Jun  5 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Jun  6
 - GNU Linux-libre 3.4.1
 
 * Mon Jun 04 2012 Josh Boyer <jwboyer@redhat.com> 3.4.1-1
