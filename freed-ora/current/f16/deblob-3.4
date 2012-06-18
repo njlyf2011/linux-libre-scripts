@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.3 extra=
+kver=3.4 extra=
 
 case $1 in
 --force)
@@ -552,6 +552,8 @@ reject_firmware drivers/gpu/drm/radeon/r600_cp.c
 clean_blob drivers/gpu/drm/radeon/r600_cp.c
 reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
+reject_firmware drivers/gpu/drm/radeon/si.c
+clean_blob drivers/gpu/drm/radeon/si.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
@@ -609,12 +611,10 @@ clean_kconfig drivers/media/common/tuners/Kconfig 'MEDIA_TUNER_XC4000'
 clean_mk CONFIG_MEDIA_TUNER_XC4000 drivers/media/common/tuners/Makefile
 
 announce MEDIA_TUNER_XC5000 - "Xceive XC5000 silicon tuner"
-undefine_macro 'XC5000_DEFAULT_FIRMWARE_SIZE' 0 \
-  'removed non-Free firmware size' drivers/media/common/tuners/xc5000.c
 undefault_firmware 'XC5000' \
-  drivers/media/common/tuners/xc5000.c \
   drivers/media/video/cx231xx/cx231xx-cards.c
 reject_firmware drivers/media/common/tuners/xc5000.c
+clean_blob drivers/media/common/tuners/xc5000.c
 clean_kconfig drivers/media/common/tuners/Kconfig 'MEDIA_TUNER_XC5000'
 clean_mk CONFIG_MEDIA_TUNER_XC5000 drivers/media/common/tuners/Makefile
 
@@ -652,6 +652,11 @@ announce DVB_USB_AF9015 - "Afatech AF9015 DVB-T USB2.0 support"
 clean_blob drivers/media/dvb/dvb-usb/af9015.c
 clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_AF9015'
 clean_mk CONFIG_DVB_USB_AF9015 drivers/media/dvb/dvb-usb/Makefile
+
+announce DVB_USB_AZ6007 - "Azurewave 6007 and clones DVB-T/C USB2.0 support"
+clean_blob drivers/media/dvb/dvb-usb/az6007.c
+clean_kconfig drivers/media/dvb/dvb-usb/Kconfig 'DVB_USB_AZ6007'
+clean_mk CONFIG_DVB_USB_AZ6007 drivers/media/dvb/dvb-usb/Makefile
 
 announce DVB_USB_AZ6027 - "Azurewave DVB-S/S2 USB2.0 AZ6027 support"
 clean_blob drivers/media/dvb/dvb-usb/az6027.c
@@ -1098,6 +1103,7 @@ clean_mk CONFIG_ADAPTEC_STARFIRE drivers/net/ethernet/adaptec/Makefile
 announce BNA - "Brocade 1010/1020 10Gb Ethernet Driver support"
 clean_blob drivers/net/ethernet/brocade/bna/bnad.c
 clean_blob drivers/net/ethernet/brocade/bna/cna.h
+reject_firmware drivers/net/ethernet/brocade/bna/bnad_ethtool.c
 reject_firmware drivers/net/ethernet/brocade/bna/cna_fwimg.c
 clean_kconfig drivers/net/ethernet/brocade/bna/Kconfig 'BNA'
 clean_mk CONFIG_BNA drivers/net/ethernet/brocade/bna/Makefile
@@ -1126,7 +1132,23 @@ clean_sed '
 	  -EINVAL)
 }' drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c 'report missing Free firmware'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
+clean_sed '
+/^bool bnx2x_test_firmware_version/,/^}$/{
+  /^	u32 my_fw = /i\
+	/*(DEBLOBBED)*/
+  /^	u32 my_fw = /,/<< 24);/d;
+  /^	u32 loaded_fw = /,/^$/{
+    /^$/i\
+\
+	u32 my_fw = ~loaded_fw;
+  }
+}' drivers/net/ethernet/broadcom/bnx2x/bnx2x_cmn.c 'fail already-loaded test'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_hsi.h
+clean_sed '
+/static void bnx2x_init_wr_wb/{
+  i\
+extern void bnx2x_init_wr_wb(struct bnx2x *, u32, const u32 *, u32);
+}' drivers/net/ethernet/broadcom/bnx2x/bnx2x_init_ops.h 'declare removed function'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_init_ops.h
 clean_kconfig drivers/net/ethernet/broadcom/Kconfig 'BNX2X'
 clean_mk CONFIG_BNX2X drivers/net/ethernet/broadcom/bnx2x/Makefile
@@ -1313,6 +1335,14 @@ clean_blob drivers/net/ethernet/smsc/smc91c92_cs.c
 clean_kconfig drivers/net/ethernet/smsc/Kconfig 'PCMCIA_SMC91C92'
 clean_mk CONFIG_PCMCIA_SMC91C92 drivers/net/ethernet/smsc/Makefile
 
+# near-field communication
+
+announce NFC_WILINK - "Texas Instruments NFC WiLink driver"
+reject_firmware drivers/nfc/nfcwilink.c
+clean_blob drivers/nfc/nfcwilink.c
+clean_kconfig drivers/nfc/Kconfig 'NFC_WILINK'
+clean_mk CONFIG_NFC_WILINK drivers/nfc/Makefile
+
 # pcmcia
 
 # CIS files are not software.
@@ -1425,11 +1455,17 @@ clean_blob drivers/net/wireless/brcm80211/brcmsmac/mac80211_if.c
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMSMAC'
 clean_mk CONFIG_BRCMSMAC drivers/net/wireless/brcm80211/Makefile
 
-announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
+announce BRCMFMAC_SDIO - "Broadcom IEEE802.11n SDIO FullMAC WLAN driver"
 reject_firmware drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
 clean_blob drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
-clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC'
-clean_mk CONFIG_BRCMFMAC drivers/net/wireless/brcm80211/Makefile
+clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC_SDIO'
+clean_mk CONFIG_BRCMFMAC_SDIO drivers/net/wireless/brcm80211/brcmfmac/Makefile
+
+announce BRCMFMAC_USB - "Broadcom IEEE802.11n USB FullMAC WLAN driver"
+reject_firmware drivers/net/wireless/brcm80211/brcmfmac/usb.c
+clean_blob drivers/net/wireless/brcm80211/brcmfmac/usb.c
+clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC_USB'
+clean_mk CONFIG_BRCMFMAC_USB drivers/net/wireless/brcm80211/brcmfmac/Makefile
 
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
 reject_firmware drivers/net/wireless/orinoco/fw.c
@@ -1487,8 +1523,8 @@ clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL3945'
 clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
-reject_firmware drivers/net/wireless/iwlwifi/iwl-agn.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-agn.c
+reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
@@ -1594,9 +1630,18 @@ announce ATH6KL - "Atheros ath6kl support"
 reject_firmware drivers/net/wireless/ath/ath6kl/init.c
 clean_blob drivers/net/wireless/ath/ath6kl/init.c
 clean_blob drivers/net/wireless/ath/ath6kl/core.h
-clean_blob drivers/net/wireless/ath/ath6kl/sdio.c
 clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL'
 clean_mk CONFIG_ATH6KL drivers/net/wireless/ath/ath6kl/Makefile
+
+announce ATH6KL_SDIO - "Atheros ath6kl SDIO support"
+clean_blob drivers/net/wireless/ath/ath6kl/sdio.c
+clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL_SDIO'
+clean_mk CONFIG_ATH6KL_SDIO drivers/net/wireless/ath/ath6kl/Makefile
+
+announce ATH6KL_USB - "Atheros ath6kl USB support"
+clean_blob drivers/net/wireless/ath/ath6kl/usb.c
+clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL_USB'
+clean_mk CONFIG_ATH6KL_USB drivers/net/wireless/ath/ath6kl/Makefile
 
 announce ATH9K_HTC - "Atheros HTC based wireless cards support"
 reject_firmware drivers/net/wireless/ath/ath9k/hif_usb.c

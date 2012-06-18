@@ -60,7 +60,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 3
+%define base_sublevel 4
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -70,9 +70,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.3%{?stablegnux}
-#define rcrevlibre -3.3%{?rcrevgnux}
-#define gitrevlibre -3.3%{?gitrevgnux}
+#define stablelibre -3.4%{?stablegnux}
+#define rcrevlibre -3.4%{?rcrevgnux}
+#define gitrevlibre -3.4%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -448,12 +448,13 @@ Summary: The Linux kernel
 # we build a up kernel on armv5tel. its used for qemu.
 %ifnarch armv5tel
 %define with_up 0
-%define with_perf 0
 %endif
 # we only build headers on the base arm arches
 # just like we used to only build them on i386 for x86
 %ifnarch armv5tel armv7hl
 %define with_headers 0
+%define with_perf 0
+%define with_tools 0
 %endif
 %endif
 
@@ -589,7 +590,7 @@ BuildRequires: xmlto, asciidoc
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_tools}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) pciutils-devel gettext
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) pciutils-devel gettext bison
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 
@@ -711,8 +712,6 @@ Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 Patch162: nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
-Patch383: linux-2.6-defaults-aspm.patch
-
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
@@ -724,10 +723,8 @@ Patch452: linux-2.6.30-no-pcspkr-modalias.patch
 Patch460: linux-2.6-serial-460800.patch
 
 Patch470: die-floppy-die.patch
-Patch471: floppy-drop-disable_hlt-warning.patch
 
 Patch510: linux-2.6-silence-noise.patch
-Patch511: silence-timekeeping-spew.patch
 Patch520: quite-apm.patch
 Patch530: linux-2.6-silence-fbcon-logo.patch
 
@@ -757,8 +754,6 @@ Patch1900: linux-2.6-intel-iommu-igfx.patch
 Patch2802: linux-2.6-silence-acpi-blacklist.patch
 
 # media patches
-#   add-poll-requested-events.patch was added for 3.4
-Patch2900: add-poll-requested-events.patch
 Patch2901: drivers-media-update.patch
 
 # fs fixes
@@ -767,14 +762,6 @@ Patch2901: drivers-media-update.patch
 Patch3500: jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 
 # NFSv4
-Patch4000: NFSv4-Reduce-the-footprint-of-the-idmapper.patch
-Patch4001: NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
-Patch4107: NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
-
-# NFS Client Patch set from Upstream
-Patch4113: NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
-Patch4114: NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
-Patch4115: NFSv4-Rate-limit-the-state-manager-for-lock-reclaim-.patch
 
 # patches headed upstream
 
@@ -786,47 +773,24 @@ Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
-Patch15000: bluetooth-use-after-free.patch
-
 Patch19000: ips-noirq.patch
-
-Patch20000: utrace.patch
 
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
-
-Patch21070: ext4-Support-check-none-nocheck-mount-options.patch
 
 #rhbz 769766
 Patch21072: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
 
 Patch21226: pci-crs-blacklist.patch
 
-#rhbz 772772
-Patch21232: rt2x00_fix_MCU_request_failures.patch
-
 #rhbz 754518
 #Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-
-#rhbz 789644
-Patch21237: mcelog-rcu-splat.patch
 
 Patch21300: unhandled-irqs-switch-to-polling.patch
 
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
-
-#rhbz 804347
-Patch21351: x86-add-io_apic_ops-to-allow-interception.patch
-Patch21352: x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
-Patch21353: xen-x86-Implement-x86_apic_ops.patch
-
-#rhbz 808559
-Patch21530: ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
-
-#rhbz 806295
-Patch21710: disable-hid-battery.patch
 
 # Debug patches
 Patch30000: weird-root-dentry-name-debug.patch
@@ -839,7 +803,7 @@ Patch22007: macvtap-zerocopy-validate-vector-length.patch
 Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
 #rhbz 749276
-Patch22018: atl1c_net_next_update-3.3.patch
+Patch22018: atl1c_net_next_update-3.4.patch
 
 #rhbz 795176
 Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
@@ -847,8 +811,16 @@ Patch22019: rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 #rhbz 822825 822821 CVE-2012-2372
 Patch22021: mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
 
-#rhbz 824352 824345 CVE-2012-2390
-Patch22022: hugetlb-fix-resv_map-leak-in-error-path.patch
+#rhbz 829016
+Patch22022: thp-avoid-atomic64_read-in-pmd_read_atomic-for-32bit-PAE.patch
+
+#rhbz 825491
+Patch22023: iwlwifi-disable-the-buggy-chain-extension-feature-in-HW.patch
+Patch22024: iwlwifi-dont-mess-up-the-SCD-when-removing-a-key.patch
+
+#rhbz 830862
+Patch22030: SUNRPC-new-svc_bind-routine-introduced.patch
+Patch22031: SUNRPC-move-per-net-operations-from-svc_destroy.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1390,7 +1362,7 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 # ARM
 #
 # ApplyPatch arm-omap-dt-compat.patch
-ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
+# ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 
 ApplyPatch taint-vbox.patch
 #
@@ -1419,14 +1391,6 @@ ApplyPatch jbd-jbd2-validate-sb-s_first-in-journal_get_superblo.patch
 # eCryptfs
 
 # NFSv4
-ApplyPatch NFSv4-Reduce-the-footprint-of-the-idmapper.patch
-ApplyPatch NFSv4-Further-reduce-the-footprint-of-the-idmapper.patch
-ApplyPatch NFSv4-Minor-cleanups-for-nfs4_handle_exception-and-n.patch
-
-# NFS Client Patch set from Upstream
-ApplyPatch NFS-optimise-away-unnecessary-setattrs-for-open-O_TRUNC.patch
-ApplyPatch NFSv4-fix-open-O_TRUNC-and-ftruncate-error-handling.patch
-ApplyPatch NFSv4-Rate-limit-the-state-manager-for-lock-reclaim-.patch
 
 # USB
 
@@ -1441,8 +1405,6 @@ ApplyPatch acpi-sony-nonvs-blacklist.patch
 #
 # PCI
 #
-# enable ASPM by default on hardware we expect to work
-ApplyPatch linux-2.6-defaults-aspm.patch
 
 #
 # SCSI Bits.
@@ -1451,9 +1413,6 @@ ApplyPatch linux-2.6-defaults-aspm.patch
 # ACPI
 
 # ALSA
-
-#rhbz 808559
-ApplyPatch ALSA-hda-realtek-Add-quirk-for-Mac-Pro-5-1-machines.patch
 
 # Networking
 
@@ -1464,7 +1423,6 @@ ApplyPatch linux-2.6-input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
-ApplyPatch floppy-drop-disable_hlt-warning.patch
 
 ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
 
@@ -1473,8 +1431,6 @@ ApplyPatch linux-2.6-serial-460800.patch
 
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch linux-2.6-silence-noise.patch
-
-ApplyPatch silence-timekeeping-spew.patch
 
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
@@ -1509,7 +1465,6 @@ ApplyPatch quite-apm.patch
 
 # Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
-ApplyPatch add-poll-requested-events.patch
 ApplyOptionalPatch drivers-media-update.patch
 
 # Patches headed upstream
@@ -1523,39 +1478,18 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
-ApplyPatch bluetooth-use-after-free.patch
-
 ApplyPatch ips-noirq.patch
-
-# utrace.
-ApplyPatch utrace.patch
 
 #ApplyPatch pci-crs-blacklist.patch
 
-ApplyPatch ext4-Support-check-none-nocheck-mount-options.patch
-
-#rhbz 772772
-ApplyPatch rt2x00_fix_MCU_request_failures.patch
-
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-
-#rhbz 789644
-ApplyPatch mcelog-rcu-splat.patch
 
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
 # debug patches
 ApplyPatch weird-root-dentry-name-debug.patch
 ApplyPatch debug-808990.patch
-
-#rhbz 804347
-ApplyPatch x86-add-io_apic_ops-to-allow-interception.patch
-ApplyPatch x86-apic_ops-Replace-apic_ops-with-x86_apic_ops.patch
-ApplyPatch xen-x86-Implement-x86_apic_ops.patch
-
-#rhbz 806295
-ApplyPatch disable-hid-battery.patch
 
 #rhbz 814278 814289 CVE-2012-2119
 ApplyPatch macvtap-zerocopy-validate-vector-length.patch
@@ -1564,7 +1498,7 @@ ApplyPatch macvtap-zerocopy-validate-vector-length.patch
 ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
 
 #rhbz 749276
-ApplyPatch atl1c_net_next_update-3.3.patch
+ApplyPatch atl1c_net_next_update-3.4.patch
 
 #rhbz 795176
 ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
@@ -1572,8 +1506,15 @@ ApplyPatch rtl818x-fix-sleeping-function-called-from-invalid-context.patch
 #rhbz 822825 822821 CVE-2012-2372
 ApplyPatch mm-pmd_read_atomic-fix-32bit-PAE-pmd-walk-vs-pmd_populate-SMP-race-condition.patch
 
-#rhbz 824352 824345 CVE-2012-2390
-ApplyPatch hugetlb-fix-resv_map-leak-in-error-path.patch
+ApplyPatch thp-avoid-atomic64_read-in-pmd_read_atomic-for-32bit-PAE.patch
+
+#rhbz 825491
+ApplyPatch iwlwifi-disable-the-buggy-chain-extension-feature-in-HW.patch
+ApplyPatch iwlwifi-dont-mess-up-the-SCD-when-removing-a-key.patch
+
+#rhbz 830862
+ApplyPatch SUNRPC-new-svc_bind-routine-introduced.patch
+ApplyPatch SUNRPC-move-per-net-operations-from-svc_destroy.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2313,6 +2254,12 @@ fi
 # and build.
 
 %changelog
+* Sat Jun 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.2-gnu.
+
+* Thu Jun 14 2012 Justin M. Forbes <jforbes@redhat.com> 3.4.2-1
+- Linux 3.4.2
+
 * Wed Jun 06 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.3.8-gnu.
 
