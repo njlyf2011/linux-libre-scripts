@@ -70,7 +70,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.4%{?stablegnux}
+%define stablelibre -3.4%{?stablegnux}
 #define rcrevlibre -3.4%{?rcrevgnux}
 #define gitrevlibre -3.4%{?gitrevgnux}
 
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -775,6 +775,10 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch19000: ips-noirq.patch
 
+# Uprobes (rhbz 832083)
+Patch20000: uprobes-3.4-backport.patch
+Patch20001: uprobes-3.4-tip.patch
+
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
 Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
@@ -821,8 +825,8 @@ Patch22031: SUNRPC-move-per-net-operations-from-svc_destroy.patch
 #rhbz 832741
 Patch22032: cifs-fix-parsing-of-password-mount-option.patch
 
-#rhbz 832188
-Patch22033: udl-bind-fix.patch
+#rhbz 831807
+Patch22034: usb-storage-try-read_capacity-10-first.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1484,6 +1488,10 @@ ApplyPatch ips-noirq.patch
 
 #ApplyPatch pci-crs-blacklist.patch
 
+# Uprobes (rhbz 832083)
+ApplyPatch uprobes-3.4-backport.patch
+ApplyPatch uprobes-3.4-tip.patch
+
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -1517,8 +1525,8 @@ ApplyPatch SUNRPC-move-per-net-operations-from-svc_destroy.patch
 #rhbz 832741
 ApplyPatch cifs-fix-parsing-of-password-mount-option.patch
 
-#rhbz 832188
-ApplyPatch udl-bind-fix.patch
+#rhbz 831807
+ApplyPatch usb-storage-try-read_capacity-10-first.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2258,6 +2266,22 @@ fi
 # and build.
 
 %changelog
+* Sat Jun 23 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.4-gnu.  Switched to -gnu patch.
+
+* Fri Jun 22 2012 Justin M. Forbes <jforbes@redhat.com> 3.4.4-1
+- Linux 3.4.4
+
+* Fri Jun 22 2012 Josh Boyer <jwboyer@redhat.com>
+- Add uprobe backports from Anton Arapov (rhbz 832083)
+- Disable UDL DRM driver per Dave Airlie
+
+* Wed Jun 20 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix incorrect logic in irqpoll patch
+
+* Tue Jun 19 2012 Josh Boyer <jwboyer@redhat.com>
+- Add proposed patch to fix READ_CAPACITY command on usb keys (rhbz 831807)
+
 * Mon Jun 18 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.3-gnu
 
