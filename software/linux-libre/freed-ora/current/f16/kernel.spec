@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -778,6 +778,7 @@ Patch19000: ips-noirq.patch
 # Uprobes (rhbz 832083)
 Patch20000: uprobes-3.4-backport.patch
 Patch20001: uprobes-3.4-tip.patch
+Patch20002: uprobes-task_work_add-generic-process-context-callbacks.patch
 
 # Flattened devicetree support
 Patch21000: arm-omap-dt-compat.patch
@@ -827,6 +828,15 @@ Patch22032: cifs-fix-parsing-of-password-mount-option.patch
 
 #rhbz 831807
 Patch22034: usb-storage-try-read_capacity-10-first.patch
+
+#rhbz 828731
+Patch22035: ath9k_htc-configure-bssid-on-ASSOC-IBSS-change.patch
+
+#rhbz 835019
+Patch22036: block-fix-infinite-loop-in-__getblk_slow.patch
+
+#rhbz 832867
+Patch22040: mm-correctly-synchronize-rss-counters-at-exit-exec.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1491,6 +1501,7 @@ ApplyPatch ips-noirq.patch
 # Uprobes (rhbz 832083)
 ApplyPatch uprobes-3.4-backport.patch
 ApplyPatch uprobes-3.4-tip.patch
+ApplyPatch uprobes-task_work_add-generic-process-context-callbacks.patch
 
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1527,6 +1538,15 @@ ApplyPatch cifs-fix-parsing-of-password-mount-option.patch
 
 #rhbz 831807
 ApplyPatch usb-storage-try-read_capacity-10-first.patch
+
+#rhbz 828731
+ApplyPatch ath9k_htc-configure-bssid-on-ASSOC-IBSS-change.patch
+
+#rhbz 835019
+ApplyPatch block-fix-infinite-loop-in-__getblk_slow.patch
+
+#rhbz 832867
+ApplyPatch mm-correctly-synchronize-rss-counters-at-exit-exec.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2266,6 +2286,16 @@ fi
 # and build.
 
 %changelog
+* Tue Jun 26 2012 Dave Jones <davej@redhat.com> 3.4.4-3
+- Add mm-correctly-synchronize-rss-counters-at-exit-exec.patch (rhbz 832867)
+
+* Tue Jun 26 2012 Josh Boyer <jwboyer@redhat.com>
+- Add task_work_add backport from Anton Arapov
+- Add patch to fix mount hangs (rhbz 835019)
+
+* Tue Jun 26 2012 John W. Linville <linville@redhat.com>
+- ath9k_htc: configure bssid on ASSOC/IBSS change (rhbz 828731)
+
 * Sat Jun 23 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.4-gnu.  Switched to -gnu patch.
 
