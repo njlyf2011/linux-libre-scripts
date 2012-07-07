@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -768,6 +768,8 @@ Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
+Patch14015: team-update-from-net-next.patch
+
 Patch19000: ips-noirq.patch
 
 # Uprobes (rhbz 832083)
@@ -853,6 +855,26 @@ Patch22036: block-fix-infinite-loop-in-__getblk_slow.patch
 
 #rhbz 832867
 Patch22040: mm-correctly-synchronize-rss-counters-at-exit-exec.patch
+
+#rhbz 832927
+Patch22041: ath9k-fix-panic-caused-by-returning-a-descriptor-we-.patch
+
+#rhbz 834910
+Patch22042: ACPI-video-Still-use-ACPI-backlight-control-if-_DOS-doesnt-exist.patch
+
+#rhbz 828824
+Patch22043: rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
+
+#rhbz 825123
+Patch22044: tg3-Apply-short-DMA-frag-workaround-to-5906.patch
+
+#rhbz 830359
+Patch22045: drm-nouveau-fbcon-using-nv_two_heads-is-not-a-good-i.patch
+
+#rhbz 829880
+Patch22046: USB-qmi_wwan-Make-forced-int-4-whitelist-generic.patch
+Patch22047: USB-qmi_wwan-Add-ZTE-Vodafone-K3520-Z.patch
+Patch22048: net-qmi_wwan-fix-Gobi-device-probing.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1586,6 +1608,8 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
+ApplyPatch team-update-from-net-next.patch
+
 ApplyPatch ips-noirq.patch
 
 # Uprobes (rhbz 832083)
@@ -1651,6 +1675,26 @@ ApplyPatch block-fix-infinite-loop-in-__getblk_slow.patch
 
 #rhbz 832867
 ApplyPatch mm-correctly-synchronize-rss-counters-at-exit-exec.patch
+
+#rhbz 832927
+ApplyPatch ath9k-fix-panic-caused-by-returning-a-descriptor-we-.patch
+
+#rhbz 834910
+ApplyPatch ACPI-video-Still-use-ACPI-backlight-control-if-_DOS-doesnt-exist.patch
+
+#rhbz 828824
+ApplyPatch rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
+
+#rhbz 825123
+ApplyPatch tg3-Apply-short-DMA-frag-workaround-to-5906.patch
+
+#rhbz 830359
+ApplyPatch drm-nouveau-fbcon-using-nv_two_heads-is-not-a-good-i.patch
+
+#rhbz 829880
+ApplyPatch USB-qmi_wwan-Make-forced-int-4-whitelist-generic.patch
+ApplyPatch USB-qmi_wwan-Add-ZTE-Vodafone-K3520-Z.patch
+ApplyPatch net-qmi_wwan-fix-Gobi-device-probing.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1866,6 +1910,12 @@ BuildKernel() {
     if [ -d arch/%{asmarch}/include ]; then
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
+    # include the machine specific headers for ARM variants, if available.
+%ifarch %{arm}
+    if [ -d arch/%{asmarch}/mach-${Flavour}/include ]; then
+      cp -a --parents arch/%{asmarch}/mach-${Flavour}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
+%endif
     cp -a include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
 
     # Make sure the Makefile and version.h have a matching timestamp so that
@@ -2517,6 +2567,31 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Thu Jul 05 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix device misprobe for Gobi devices (rhbz 829880)
+- Fix breakage in nouveau with nv_two_heads (rhbz 830359)
+- Apply patch to fix tg3 watchdog hangs on BCM5906 devices (rhbz 825123)
+- Move sch_htb module into main kernel package (rhbz 836185)
+
+* Thu Jul  5 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable OMAP freq scaling driver
+- Initial support for Beaglebone in OMAP kernel
+
+* Wed Jul 4 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch from Stanislaw Gruszka to fix rt2x00 USB access point (rhbz 828824)
+
+* Tue Jul 3 2012 Josh Boyer <jwboyer@redhat.com>
+- Allow ACPI backlight to still work if _DOS isn't present (rhbz 834910)
+
+* Fri Jun 29 2012 John W. Linville <linville@redhat.com>
+- ath9k: fix panic caused by returning a descriptor we have... (rhbz 832927)
+
+* Thu Jun 28 2012 Dennis Gilmore <dennis@ausil.us>
+- include the mach- headers on arm arches if they are available
+
+* Thu Jun 28 2012 Justin M. Forbes <jforbes@redhat.com>
+- Team driver update
+
 * Tue Jun 26 2012 Dave Jones <davej@redhat.com> 3.4.4-3
 - Add mm-correctly-synchronize-rss-counters-at-exit-exec.patch (rhbz 832867)
 
