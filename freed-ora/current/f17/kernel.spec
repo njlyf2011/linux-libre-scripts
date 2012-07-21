@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -822,18 +822,12 @@ Patch22017: 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
 #rhbz 749276
 Patch22018: atl1c_net_next_update-3.4.patch
 
-#rhbz 835019
-Patch22036: block-fix-infinite-loop-in-__getblk_slow.patch
-
-#rhbz 828824
-Patch22043: rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
-
 #Fix FIPS for aesni hardare
 Patch22055: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
-#rhbz 834318
-Patch22057: ACPICA-Fix-possible-fault-in-return-package-object-repair-code.patch
+#rhbz 772730
+Patch22058: ACPI-AC-check-the-return-value-of-power_supply_register.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1603,18 +1597,12 @@ ApplyPatch 0001-drm-radeon-don-t-mess-with-hot-plug-detect-for-eDP-o.patch
 #rhbz 749276
 ApplyPatch atl1c_net_next_update-3.4.patch
 
-#rhbz 835019
-ApplyPatch block-fix-infinite-loop-in-__getblk_slow.patch
-
-#rhbz 828824
-ApplyPatch rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
-
 #Fix FIPS for aesni hardare
 ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
-#rhbz 834318
-ApplyPatch ACPICA-Fix-possible-fault-in-return-package-object-repair-code.patch
+#rhbz 772730
+ApplyPatch ACPI-AC-check-the-return-value-of-power_supply_register.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2487,6 +2475,15 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri Jul 20 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.6
+
+* Thu Jul 19 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.6-2
+- Linux v3.4.6
+
+* Wed Jul 18 2012 Josh Boyer <jwboyer@redhat.com>
+- check return value of power_supply_register from Lan Tianyu (rhbz 772730)
+
 * Tue Jul 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.5
 
