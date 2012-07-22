@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.4%{?stablegnux}
-#define rcrevlibre -3.4%{?rcrevgnux}
-#define gitrevlibre -3.4%{?gitrevgnux}
+#define stablelibre -3.5%{?stablegnux}
+%define rcrevlibre -3.4%{?rcrevgnux}
+#define gitrevlibre -3.5%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -131,7 +131,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -203,7 +203,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -216,7 +216,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -610,7 +610,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 %if %{signmodules}
 Source11: genkey
@@ -708,9 +708,6 @@ Patch09: linux-2.6-upstream-reverts.patch
 # Standalone patches
 
 Patch100: taint-vbox.patch
-Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
-Patch161: linux-2.6-i386-nx-emulation.patch
-Patch162: nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -733,7 +730,8 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
-Patch900: modsign-20111207.patch
+Patch900: modsign-20120510.patch
+Patch901: modsign-fix-elf-rel.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
@@ -746,8 +744,6 @@ Patch1800: drm-vgem.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-i915-dp-stfu.patch
-
-Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -775,14 +771,18 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
+Patch14015: team-update-from-net-next.patch
+
+Patch20000: uprobes-3.5-tip.patch
+
+
 # ARM
-# Flattened devicetree support
-Patch21000: arm-omap-dt-compat.patch
-Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
+# OMAP
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
+Patch21006: arm-tegra-sdhci-module-fix.patch
 
 # ARM highbank patches
 # Highbank clock functions need to be EXPORT for module builds
@@ -790,33 +790,22 @@ Patch21010: highbank-export-clock-functions.patch
 
 Patch21094: power-x86-destdir.patch
 
-Patch21098: hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
-
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
-Patch21260: x86-Avoid-invoking-RCU-when-CPU-is-idle.patch
-
-#rhbz 804957 CVE-2012-1568
-Patch21306: shlib_base_randomize.patch
-
 Patch21400: unhandled-irqs-switch-to-polling.patch
-
-Patch21620: vgaarb-vga_default_device.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 814278 814289 CVE-2012-2119
-Patch22007: macvtap-zerocopy-validate-vector-length.patch
+#rhbz 828824
+Patch22043: rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
 
-#rhbz 817298
-Patch22013: ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
-
-#rhbz 749276
-Patch22018: atl1c_net_next_update-3.4.patch
+#Fix FIPS for aesni hardare
+Patch22050: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
+Patch22051: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1036,6 +1025,7 @@ Provides: kernel-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}
 Provides: kernel-libre-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-modules-extra = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-libre-modules-extra = %{version}-%{release}%{?1:.%{1}}\
+Provides: installonlypkg(kernel-module)\
 Provides: kernel-modules-extra-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-modules-extra-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
@@ -1433,17 +1423,13 @@ ApplyPatch taint-vbox.patch
 
 # Architecture patches
 # x86(-64)
-ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
-ApplyPatch linux-2.6-i386-nx-emulation.patch
-ApplyPatch nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
 
 #
 # ARM
 #
-#ApplyPatch arm-omap-dt-compat.patch
-#ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
+ApplyPatch arm-tegra-sdhci-module-fix.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1511,7 +1497,8 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # crypto/
-ApplyPatch modsign-20111207.patch
+ApplyPatch modsign-20120510.patch
+ApplyPatch modsign-fix-elf-rel.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
@@ -1525,8 +1512,6 @@ ApplyPatch drm-vgem.patch
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-dp-stfu.patch
-
-ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
@@ -1553,15 +1538,14 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
-ApplyPatch power-x86-destdir.patch
+ApplyPatch team-update-from-net-next.patch
 
-ApplyPatch hfsplus-Fix-bless-ioctl-when-used-with-hardlinks.patch
+ApplyPatch uprobes-3.5-tip.patch
+
+ApplyPatch power-x86-destdir.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-
-#rhbz 804957 CVE-2012-1568
-ApplyPatch shlib_base_randomize.patch
 
 ApplyPatch unhandled-irqs-switch-to-polling.patch
 
@@ -1573,17 +1557,12 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #Highbank clock functions
 ApplyPatch highbank-export-clock-functions.patch 
 
-#vgaarb patches.  blame mjg59
-ApplyPatch vgaarb-vga_default_device.patch
+#rhbz 828824
+ApplyPatch rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
 
-#rhbz 814278 814289 CVE-2012-2119
-ApplyPatch macvtap-zerocopy-validate-vector-length.patch
-
-#rhbz 817298
-ApplyPatch ipw2x00-add-supported-cipher-suites-to-wiphy-initialization.patch
-
-#rhbz 749276
-ApplyPatch atl1c_net_next_update-3.4.patch
+#Fix FIPS for aesni hardare
+ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
+ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1633,27 +1612,7 @@ find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
 find . -name .gitignore -exec rm -f {} \; >/dev/null
 
 %if %{signmodules}
-cat <<EOF
-###
-### Now generating a PGP key pair to be used for signing modules.
-###
-### If this takes a long time, you might wish to run rngd in the background to
-### keep the supply of entropy topped up.  It needs to be run as root, and
-### should use a hardware random number generator if one is available, eg:
-###
-###     rngd -r /dev/hwrandom
-###
-### If one isn't available, the pseudo-random number generator can be used:
-###
-###     rngd -r /dev/urandom
-###
-EOF
-gpg --homedir . --batch --gen-key %{SOURCE11}
-cat <<EOF
-###
-### Key pair generated.
-###
-EOF
+cp %{SOURCE11} .
 %endif
 
 cd ..
@@ -1825,6 +1784,12 @@ BuildKernel() {
     if [ -d arch/%{asmarch}/include ]; then
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
+    # include the machine specific headers for ARM variants, if available.
+%ifarch %{arm}
+    if [ -d arch/%{asmarch}/mach-${Flavour}/include ]; then
+      cp -a --parents arch/%{asmarch}/mach-${Flavour}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
+%endif
     cp -a include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
 
     # Make sure the Makefile and version.h have a matching timestamp so that
@@ -1949,7 +1914,7 @@ BuildKernel() {
     popd
 
     # remove files that will be auto generated by depmod at rpm -i time
-    for i in alias alias.bin builtin.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap
+    for i in alias alias.bin builtin.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap devname softdep
     do
       rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$i
     done
@@ -2466,6 +2431,218 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sat Jul 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.5-rc7
+
+* Mon Jul 16 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git0.1
+- Linux v3.5-rc7
+- Disable debugging options.
+
+* Fri Jul 13 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc6.git4.1
+- Linux v3.5-rc6-186-gac7d181
+
+* Fri Jul 13 2012 Josh Boyer <jwboyer@redhat.com>
+- Build CONFIG_HID and CONFIG_HID_GENERIC in
+
+* Thu Jul 12 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc6.git3.1
+- Linux v3.5-rc6-117-g918227b
+
+* Wed Jul 11 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc6.git2.1
+- Linux v3.5-rc6-40-g055c9fa
+- Fix FIPS for aesni hardware (rhbz 839239)
+
+* Tue Jul 10 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc6.git1.1
+- Linux v3.5-rc6-22-g2437fcc
+
+* Mon Jul 09 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc6.git0.3
+- Reenable debugging options.
+
+* Mon Jul 09 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc6.git0.2
+- Linux v3.5-rc6
+- Disable debugging options.
+
+* Fri Jul 06 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc5.git3.1
+- Linux v3.5-rc5-149-gc4aed35
+
+* Thu Jul 05 2012 Josh Boyer <jwboyer@redhat.com>
+- Move sch_htb module into main kernel package (rhbz 836185)
+
+* Thu Jul 05 2012 Dennis Gilmore <dennis@ausil.us>
+- enable cpu frequency scaling on omap systems
+
+* Thu Jul 05 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc5.git2.1
+- Linux v3.5-rc5-98-g9e85a6f
+
+* Wed Jul 4 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch from Stanislaw Gruszka to fix rt2x00 USB access point (rhbz 828824)
+
+* Tue Jul 03 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc5.git1.1
+- Linux v3.5-rc5-6-g9d4056a
+
+* Tue Jul 03 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc5.git0.3
+- Reenable debugging options.
+
+* Mon Jul 02 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc5.git0.2
+- Linux 3.5-rc5
+- Disable debugging options.
+
+* Fri Jun 29 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc4.git4.1
+- Linux v3.5-rc4-211-g9acc7bd
+
+* Thu Jun 28 2012 Dennis Gilmore <dennis@ausil.us>
+- include the mach- headers on arm arches if they are available
+
+* Thu Jun 28 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc4.git3.1
+- Linux v3.5-rc4-98-g47b514c
+- Team driver update
+
+* Wed Jun 27 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc4.git2.1
+- Linux v3.5-rc4-59-gd1346a6
+
+* Tue Jun 26 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc4.git1.2
+- Reenable debugging options.
+
+* Tue Jun 26 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc4.git1.1
+- Linux v3.5-rc4-52-gaace99e
+
+* Mon Jun 25 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix ARM OMAP build
+- re-enable IMX kernel now it builds again
+
+* Mon Jun 25 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc4.git0.1
+- Disable debugging options.
+
+* Mon Jun 25 2012 Justin M. Forbes <jforbes@redhat.com>
+- Linux 3.5-rc4
+
+* Fri Jun 22 2012 Josh Boyer <jwboyer@redhat.com>
+- Add uprobe backports from -tip from Anton Arapov
+
+* Wed Jun 20 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix incorrect logic in irqpoll patch
+
+* Mon Jun 18 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc3.git0.2
+- Disable debugging options.
+
+* Mon Jun 18 2012 Josh Boyer <jwboyer@redhat.com> - -3.5.0-0.rc3.git0.1
+- Linux v3.5-rc3
+
+* Tue Jun 12 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM: build in rtc modules so time gets set right on boot
+
+* Mon Jun 11 2012 Josh Boyer <jwboyer@redhat.com> 
+- Add virtual provides for kernel-module to kernel-modules-extra (rhbz 770444)
+
+* Mon Jun 11 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc2.git0.3
+- Add patch to fix xen domU 32bit (rhbz 829016)
+- Reenable debugging options.
+
+* Mon Jun 11 2012 Josh Boyer <jwboyer@redhat.com>
+- Add two upstream commits to fix flaky iwlwifi (rhbz 825491)
+
+* Sun Jun 10 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Temporarily disable ARM imx kernel due to missing clk patches
+- Add patch to fix OMAP build
+- Drop DTB mac patches as rejected upstream
+- General ARM cleanups
+
+* Sat Jun 09 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc2.git0.1
+- Linux v3.5-rc2
+
+* Fri Jun 08 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable HV assisted KVM on ppc64
+
+* Tue Jun 05 2012 Josh Boyer <jwboyer@redhat.com>
+- Disable MV643XX on ppc32 because ARM broke it (rhbz 828776)
+
+* Tue Jun 05 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config options for 3.5
+- Enable MTD/UBI/JFFS2 on ARM platforms
+
+* Mon Jun 04 2012 Dave Jones <davej@redhat.com>
+- Remove 32bit NX emulation.
+
+* Mon Jun 04 2012 Josh Boyer <jwboyer@redhat.com>
+- Remove modules.{devname,softdep} to prevent RPM verify errors (rhbz 650807)
+
+* Sun Jun 03 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc1.git0.1
+- Linux v3.5-rc1
+- Disable debugging options.
+
+* Sat Jun 02 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM OMAP updates
+
+* Sat Jun 02 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git12.1
+- Linux v3.4-10115-g829f51d
+
+* Fri Jun 01 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git11.1
+- Linux v3.4-9547-gfb21aff
+
+* Thu May 31 2012 Josh Boyer <jwboyer@redhat.com>
+- Per Adam Jackson, drop linux-2.6-intel-iommu-igfx.patch
+
+* Thu May 31 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git10.2
+- Fix crash in cirrus qemu driver from Dave Airlie (rhbz 826983)
+
+* Thu May 31 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git10.1
+- Linux v3.4-9208-gaf56e0a
+
+* Wed May 30 2012 Josh Boyer <jwboyer@redhat.com>
+- modsign: Fix 32bit ELF table interpretation from David Howells (rhbz 825944)
+
+* Tue May 29 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git9.1
+- Linux v3.4-8261-ga01ee16
+
+* Sun May 27 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git8.1
+- Linux v3.4-8215-g1e2aec8
+
+* Fri May 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git7.1
+- Linux v3.4-7644-g07acfc2
+
+* Fri May 25 2012 Mauro Carvalho Chehab <mchehab@redhat.com>
+- Don't manually customise tuners/frontends (rhbz 825203)
+
+* Thu May 24 2012 Dennis Gilmore <dennis@ausil.us>
+- enable XGI_FB on kirkwood for openrd
+- enable DeviceTree support on kirkwood
+- enable dreamplug support on kerkwood 
+
+* Thu May 24 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git6.1
+- Linux v3.4-5722-gf936991
+
+* Thu May 24 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-2372 mm: 32bit PAE pmd walk vs populate SMP race (rhbz 822821 822825)
+
+* Thu May 24 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Don't build Nokia ARM device support
+
+* Wed May 23 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git5.1
+- Linux v3.4-5161-g56edab3
+
+* Wed May 23 2012 Adam Jackson <ajax@redhat.com>
+- drm-i915-lvds-dual-channel.patch: Scrape LVDS dual-channel-ness from the
+  VBT instead of just making things up. (#819343)
+
+* Wed May 23 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git4.1
+- Add patch to fix perf build
+- Linux v3.4-4842-g61011677
+
+* Wed May 23 2012 Dennis Gilmore <dennis@ausil.us> 
+- add patch to fix ftbfs on tegra due to sdhci MODULE_DEVICE_TABLE mismatch
+- dont make a arm config file we do not use it anywhere 
+
+* Tue May 22 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git3.1
+- Linux v3.4-2580-g72c04af
+
+* Tue May 22 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git2.1
+- Linux v3.4-2285-g2e32180
+
+* Mon May 21 2012 Josh Boyer <jwboyer@redhat.com>
+- Update the modsign patchset to the most recent version
+
+* Mon May 21 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-0.rc0.git1.2
+- Linux v3.4-1622-g31a6710
+
 * Mon May 21 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.0-2
 - Reenable debugging options.
 
