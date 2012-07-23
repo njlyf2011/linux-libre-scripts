@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -203,7 +203,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -216,7 +216,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 0
+%define rawhide_skip_docs 1
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -730,8 +730,7 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
-Patch900: modsign-20120510.patch
-Patch901: modsign-fix-elf-rel.patch
+Patch900: modsign-20120718.patch
 
 # virt + ksm patches
 Patch1555: fix_xen_guest_on_old_EC2.patch
@@ -800,12 +799,12 @@ Patch22000: weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 828824
-Patch22043: rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
-
 #Fix FIPS for aesni hardare
 Patch22050: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 Patch22051: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
+
+#rhbz 772730
+Patch22058: ACPI-AC-check-the-return-value-of-power_supply_register.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1497,8 +1496,7 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # crypto/
-ApplyPatch modsign-20120510.patch
-ApplyPatch modsign-fix-elf-rel.patch
+ApplyPatch modsign-20120718.patch
 
 # Assorted Virt Fixes
 ApplyPatch fix_xen_guest_on_old_EC2.patch
@@ -1557,12 +1555,12 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #Highbank clock functions
 ApplyPatch highbank-export-clock-functions.patch 
 
-#rhbz 828824
-ApplyPatch rt2x00usb-fix-indexes-ordering-on-RX-queue-kick.patch
-
 #Fix FIPS for aesni hardare
 ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
+
+#rhbz 772730
+ApplyPatch ACPI-AC-check-the-return-value-of-power_supply_register.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2431,7 +2429,28 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
-* Sat Jul 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Jul 20 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git4.1
+- Linux v3.5-rc7-141-g85efc72
+
+* Thu Jul 19 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git3.1
+- Linux v3.5-rc7-124-g8a7298b
+
+* Wed Jul 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Update modsign patch to latest upstream
+
+* Wed Jul 18 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git2.1
+- Linux v3.5-rc7-81-ga018540
+
+* Wed Jul 18 2012 Josh Boyer <jwboyer@redhat.com>
+- check return value of power_supply_register from Lan Tianyu (rhbz 772730)
+
+* Tue Jul 17 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git1.2
+- Reenable debugging options.
+
+* Tue Jul 17 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git1.1
+- Linux v3.5-rc7-25-ge5254a6
+
+* Tue Jul 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Jul 21
 - GNU Linux-libre 3.5-rc7
 
 * Mon Jul 16 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-0.rc7.git0.1
