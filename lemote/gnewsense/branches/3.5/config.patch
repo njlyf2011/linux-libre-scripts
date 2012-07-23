@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2012-07-22 04:43:58.000000000 +0000
++++ .config	2012-07-22 15:40:18.000000000 +0000
 @@ -0,0 +1,4935 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.5.0-rc7-gnu Kernel Configuration
++# Linux/mips 3.5.0-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -58,7 +58,6 @@ Index: .config
 +# CONFIG_NLM_XLR_BOARD is not set
 +# CONFIG_NLM_XLP_BOARD is not set
 +# CONFIG_ALCHEMY_GPIO_INDIRECT is not set
-+CONFIG_ARCH_SPARSEMEM_ENABLE=y
 +# CONFIG_LEMOTE_FULOONG2E is not set
 +CONFIG_LEMOTE_MACH2F=y
 +# CONFIG_DEXXON_GDIUM is not set
@@ -127,6 +126,7 @@ Index: .config
 +CONFIG_CPU_HAS_SYNC=y
 +CONFIG_CPU_SUPPORTS_HIGHMEM=y
 +CONFIG_SYS_SUPPORTS_HIGHMEM=y
++CONFIG_ARCH_SPARSEMEM_ENABLE=y
 +CONFIG_SELECT_MEMORY_MODEL=y
 +CONFIG_SPARSEMEM_MANUAL=y
 +CONFIG_SPARSEMEM=y
