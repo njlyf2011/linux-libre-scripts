@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -828,6 +828,15 @@ Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
 #rhbz 772730
 Patch22058: ACPI-AC-check-the-return-value-of-power_supply_register.patch
+
+#rhbz 836742
+Patch22059: uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
+
+#rhbz 714271
+Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
+
+#rhbz 820039 843554
+Patch22061: rds-set-correct-msg_namelen.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1604,6 +1613,15 @@ ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 #rhbz 772730
 ApplyPatch ACPI-AC-check-the-return-value-of-power_supply_register.patch
 
+#rhbz 836742
+ApplyPatch uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
+
+#rhbz 714271
+ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
+
+#rhbz 820039 843554
+ApplyPatch rds-set-correct-msg_namelen.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1894,6 +1912,7 @@ BuildKernel() {
     # our list into the list as well.
     rm -rf dep.list dep2.list
     rm -rf req.list req2.list
+    touch dep.list req.list
     cp %{SOURCE16} .
     for dep in `cat modnames`
     do
@@ -2475,6 +2494,17 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Thu Jul 26 2012 Josh Boyer <jwboyer@redhat.com>
+- kernel: recv{from,msg}() on an rds socket can leak kernel
+  memory (rhbz 820039 843554)
+- Apply patch to fix uvcvideo crash (rhbz 836742)
+
+* Wed Jul 25 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix cpu pinning after suspend/resume (rhbz 714271)
+
+* Fri Jul 20 2012 Josh Boyer <jwboyer@redhat.com>
+- Update vga_default_device.patch to fix build failures (rhbz 830446)
+
 * Fri Jul 20 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.6
 
