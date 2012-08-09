@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -702,6 +702,8 @@ Patch09: linux-2.6-upstream-reverts.patch
 Patch100: taint-vbox.patch
 Patch101: taint-rss.patch
 
+Patch110: vmbugon-warnon.patch
+
 Patch160: linux-2.6-32bit-mmap-exec-randomization.patch
 Patch161: linux-2.6-i386-nx-emulation.patch
 Patch162: nx-emu-remove-cpuinitdata-for-disable_nx-on-x86_32.patch
@@ -770,7 +772,7 @@ Patch14015: team-update-from-net-next.patch
 Patch19000: ips-noirq.patch
 
 # Uprobes (rhbz 832083)
-Patch20001: uprobes-3.4-tip.patch
+Patch20001: uprobes-backport.patch
 
 # ARM
 # Flattened devicetree support
@@ -811,9 +813,6 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 Patch22055: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
-#rhbz 772730
-Patch22058: ACPI-AC-check-the-return-value-of-power_supply_register.patch
-
 #rhbz 836742
 Patch22059: uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
@@ -823,8 +822,13 @@ Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 #rhbz 820039 843554
 Patch22061: rds-set-correct-msg_namelen.patch
 
+#rhbz 845558 844714
+Patch22070: net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
+Patch22071: sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
+Patch22072: tcp-Apply-device-TSO-segment-limit-earlier.patch
+
 # 3.5 stable patches
-Patch23000: 3.5-git-stable.patch
+Patch23000: patch-3.5.1-rc1.gz
 
 # END OF PATCH DEFINITIONS
 
@@ -1433,6 +1437,8 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 ApplyPatch taint-vbox.patch
 ApplyPatch taint-rss.patch
 
+ApplyPatch vmbugon-warnon.patch
+
 # Architecture patches
 # x86(-64)
 #ApplyPatch linux-2.6-32bit-mmap-exec-randomization.patch
@@ -1560,7 +1566,7 @@ ApplyPatch team-update-from-net-next.patch
 ApplyPatch ips-noirq.patch
 
 # Uprobes (rhbz 832083)
-ApplyPatch uprobes-3.4-tip.patch
+ApplyPatch uprobes-backport.patch
 
 ApplyPatch power-x86-destdir.patch
 
@@ -1583,9 +1589,6 @@ ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
-#rhbz 772730
-ApplyPatch ACPI-AC-check-the-return-value-of-power_supply_register.patch
-
 #rhbz 836742
 ApplyPatch uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
@@ -1595,7 +1598,12 @@ ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 #rhbz 820039 843554
 ApplyPatch rds-set-correct-msg_namelen.patch
 
-ApplyPatch 3.5-git-stable.patch
+ApplyPatch patch-3.5.1-rc1.gz
+
+#rhbz 845558 844714
+ApplyPatch net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
+ApplyPatch sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
+ApplyPatch tcp-Apply-device-TSO-segment-limit-earlier.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2013,7 +2021,7 @@ BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 EXTRA_CFLAGS="-Wno-error=array-bounds" HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
+  make %{?_smp_mflags} -C tools/perf -s V=1 WERROR=0 EXTRA_CFLAGS="-Wno-error=array-bounds" HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} all
@@ -2469,7 +2477,25 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Wed Aug  1 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Aug 07 2012 Dave Jones <davej@redhat.com> 3.5.0-4
+- Update to 3.5.1-rc1
+
+* Tue Aug 07 2012 Dave Jones <davej@redhat.com>
+- Update the uprobes backport. (Anton Arapov)
+
+* Mon Aug 06 2012 Dave Jones <davej@redhat.com>
+- Don't treat warnings as errors when building perf. (rhbz 845758)
+
+* Fri Aug 03 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-3412 sfc: potential rDOS through TCP MSS option (rhbz 844714 845558)
+
+* Tue Jul 31 2012 Dave Jones <davej@redhat.com>
+- Change VM_BUG_ON's to be WARN_ONs instead.
+
+* Tue Jul 31 2012 Josh Boyer <jwboyer@redhat.com>
+- Move modules needed by Shorewall back to main kernel package (rhbz 844436)
+
+* Tue Jul 31 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Aug  1
 - Adjusted 3.5-git-stable.patch
 
 * Thu Jul 26 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.0-2

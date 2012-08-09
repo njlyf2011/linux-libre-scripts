@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2012-07-21
+# deblob-check version 2012-08-08
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -253,7 +253,8 @@
 # This makes it much faster, and mostly immune to non-ASCII stuff, as
 # long as a 8-bit-safe sed is used.  Probably a safe assumption these
 # days.
-case ${LANG+set} in set) LANG=C; export LANG;; esac
+LC_ALL=C; export LC_ALL
+LANGUAGE=C; export LANGUAGE
 
 rm="rm -f"
 
@@ -2802,8 +2803,8 @@ set_except () {
     accept 'resume[/]restore[,][ ]but[ ]they[ ]cannot[ ]do[ ]it[ ]by[ ]calling[ ]request_firmware[(][)]' Documentation/power/notifiers.txt
     accept '[	][	][	]interrupts[ ]=[ ]<\([\n][	][	][	][	]0xe[0-7][ ]0[ ]0[ ]0\)*>[;]' arch/powerpc/boot/dts/p1022ds.dts
     accept '[ ][ ][ ][ ]gzip[ ]-n[ ]--force[ ]-9[ ]--stdout[ ]["][$]ofile\.bin["][ ]>[ ]["][$]odir[/]otheros\.bld["]' arch/powerpc/boot/wrapper
-    defsnc 'uint32_t[ ]nva3_pcopy_\(data\|code\)\[\][ ]=' drivers/gpu/drm/nouveau/nva3_copy.fuc.h
-    defsnc 'uint32_t[ ]nvc0_pcopy_\(data\|code\)\[\][ ]=' drivers/gpu/drm/nouveau/nvc0_copy.fuc.h
+    defsnc '\(uint32_t\|u32\)[ ]nva3_pcopy_\(data\|code\)\[\][ ]=' drivers/gpu/drm/nouveau/nva3_copy.fuc.h
+    defsnc '\(uint32_t\|u32\)[ ]nvc0_pcopy_\(data\|code\)\[\][ ]=' drivers/gpu/drm/nouveau/nvc0_copy.fuc.h
     accept '[	]struct[ ]nvc0_graph_fuc[ ]fuc4\(09\|1a\)[cd]' drivers/gpu/drm/nouveau/nvc0_graph.h
     defsnc 'static[ ]const[ ]u8[ ]sht15_crc8_table\[\][ ]=' drivers/hwmon/sht15.c
     defsnc 'static[ ]u8[ ]stv0288_bsbe1_d01a_inittab\[\][ ]=' drivers/media/dvb/frontends/bsbe1-d01a.h
@@ -3116,6 +3117,10 @@ set_except () {
 
   */*freedo*.patch | */*logo*.patch)
     accept 'P[13]\([\n]#[^\n]*\)*[\n]*\([\n][0-9 ]*\)\+' drivers/video/logo/logo_libre_clut224.ppm
+    ;;
+
+  */patch-3.5*)
+    accept '[;][/][*]@@[ ]-[0-9]*,[0-9]*[ ][+][0-9]*,[0-9]*[ ]@@[ ]static[ ]void[ ]b43_request_firmware[(]' drivers/net/wireless/b43/main.c
     ;;
 
   */patch-3.4*gnu*3.5*)
