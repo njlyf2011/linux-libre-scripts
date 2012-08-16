@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -754,9 +754,6 @@ Patch22018: atl1c_net_next_update-3.4.patch
 Patch22055: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
-#rhbz 772730
-Patch22058: ACPI-AC-check-the-return-value-of-power_supply_register.patch
-
 #rhbz 836742
 Patch22059: uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
@@ -765,6 +762,11 @@ Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 
 #rhbz 820039 843554
 Patch22061: rds-set-correct-msg_namelen.patch
+
+#rhbz 845558 844714
+Patch22070: net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
+Patch22071: sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
+Patch22072: tcp-Apply-device-TSO-segment-limit-earlier.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1410,9 +1412,6 @@ ApplyPatch atl1c_net_next_update-3.4.patch
 ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
-#rhbz 772730
-ApplyPatch ACPI-AC-check-the-return-value-of-power_supply_register.patch
-
 #rhbz 836742
 ApplyPatch uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
@@ -1421,6 +1420,11 @@ ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 
 #rhbz 820039 843554
 ApplyPatch rds-set-correct-msg_namelen.patch
+
+#rhbz 845558 844714
+ApplyPatch net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
+ApplyPatch sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
+ApplyPatch tcp-Apply-device-TSO-segment-limit-earlier.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2120,6 +2124,15 @@ fi
 # and build.
 
 %changelog
+* Wed Aug 15 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.8
+
+* Tue Aug 14 2012 Justin M. Forbes <jforbes@redhat.com> 3.4.8-1
+- Linux 3.4.8
+
+* Fri Aug 03 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-3412 sfc: potential rDOS through TCP MSS option (rhbz 844714 845558)
+
 * Mon Jul 30 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.7
 
