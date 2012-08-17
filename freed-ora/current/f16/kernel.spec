@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2124,6 +2124,12 @@ fi
 # and build.
 
 %changelog
+* Thu Aug 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.9
+
+* Wed Aug 15 2012 Justin M. Forbes <jforbes@redhat.com> 3.4.9-1
+- Linux 3.4.9
+
 * Wed Aug 15 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.8
 
