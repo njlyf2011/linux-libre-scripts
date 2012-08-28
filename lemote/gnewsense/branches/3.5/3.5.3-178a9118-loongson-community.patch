@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 4bb09e1..1b6ff7a 100644
+index c901aae..9b7e097 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -9792,10 +9792,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 3203923..9adcfcf 100644
+index 9d9bb9a..e7bf758 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -814,6 +814,9 @@
+@@ -819,6 +819,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -16805,7 +16805,7 @@ index e0adf5c..2a8c8dc 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index df0828c..e09819b 100644
+index c5e9e4a..86b20b2 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -16893,15 +16893,15 @@ index df0828c..e09819b 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -800,6 +813,7 @@ void usb_enable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -807,6 +820,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
- EXPORT_SYMBOL_GPL(usb_enable_xhci_ports);
+ EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
 +#if defined(CONFIG_USB_XHCI_HCD) || defined(CONFIG_USB_XHCI_HCD_MODULE)
  /**
   * PCI Quirks for xHCI.
   *
-@@ -898,6 +912,9 @@ hc_init:
+@@ -905,6 +919,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -16912,7 +16912,7 @@ index df0828c..e09819b 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 417ab1b..816d843 100644
+index d2c2698..f067fec 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -16923,16 +16923,16 @@ index 417ab1b..816d843 100644
 +#define HUAWO_PRODUCT_E1621			0x2008
 +
  #define HUAWEI_VENDOR_ID			0x12D1
- #define HUAWEI_PRODUCT_E600			0x1001
- #define HUAWEI_PRODUCT_E220			0x1003
-@@ -615,6 +618,7 @@ static const struct usb_device_id option_ids[] = {
+ #define HUAWEI_PRODUCT_K4505			0x1464
+ #define HUAWEI_PRODUCT_K3765			0x1465
+@@ -539,6 +542,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E600, 0xff, 0xff, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220, 0xff, 0xff, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220BIS, 0xff, 0xff, 0xff) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K4505, 0xff, 0xff, 0xff),
+ 		.driver_info = (kernel_ulong_t) &huawei_cdc12_blacklist },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K3765, 0xff, 0xff, 0xff),
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
 index ee8dafb..eb7ebb0 100644
 --- a/drivers/video/Makefile
