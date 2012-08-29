@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index f4f577b..ae63338 100644
+index d863aa0..20a7f4e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -7606,7 +7606,7 @@ index cac4d38..b82ab17 100644
 +	enable_mfgpt_counter();
  }
 diff --git a/arch/mips/loongson/lemote-2f/reset.c b/arch/mips/loongson/lemote-2f/reset.c
-index 36020a0..039c2ce 100644
+index 36020a07..039c2ce 100644
 --- a/arch/mips/loongson/lemote-2f/reset.c
 +++ b/arch/mips/loongson/lemote-2f/reset.c
 @@ -20,15 +20,14 @@
@@ -8867,10 +8867,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 206f750..c3b0720 100644
+index 08cc68b..dbf5b29 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -691,4 +691,6 @@
+@@ -699,4 +699,6 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -9017,7 +9017,7 @@ index df3702c..7242f3a 100644
  
  static struct sm501_platdata_fbsub sm501_pdata_fbsub = {
 diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
-index 93359fa..79c2a43 100644
+index 0c3f234..a9339f3 100644
 --- a/drivers/net/Kconfig
 +++ b/drivers/net/Kconfig
 @@ -2466,6 +2466,13 @@ config MV643XX_ETH
@@ -45507,7 +45507,7 @@ index 0000000..41a65ad
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/lynloong_pc.c b/drivers/platform/mips/lynloong_pc.c
 new file mode 100644
-index 0000000..e55fc63
+index 0000000..e36add3
 --- /dev/null
 +++ b/drivers/platform/mips/lynloong_pc.c
 @@ -0,0 +1,514 @@
@@ -45985,24 +45985,24 @@ index 0000000..e55fc63
 +{
 +	int ret;
 +
-+	pr_info("Load LynLoong Platform Specific Driver.\n");
++	pr_info("LynLoong platform specific driver loaded.\n");
 +
 +	/* Register platform stuff */
 +	ret = platform_driver_register(&platform_driver);
 +	if (ret) {
-+		pr_err("Fail to register lynloong platform driver.\n");
++		pr_err("Failed to register LynLoong platform driver.\n");
 +		return ret;
 +	}
 +
 +	ret = lynloong_backlight_init();
 +	if (ret) {
-+		pr_err("Fail to register lynloong backlight driver.\n");
++		pr_err("Failed to register LynLoong backlight driver.\n");
 +		return ret;
 +	}
 +
 +	ret = lynloong_vo_init();
 +	if (ret) {
-+		pr_err("Fail to register lynloong backlight driver.\n");
++		pr_err("Failed to register LynLoong backlight driver.\n");
 +		lynloong_vo_exit();
 +		return ret;
 +	}
@@ -46016,7 +46016,7 @@ index 0000000..e55fc63
 +	lynloong_backlight_exit();
 +	platform_driver_unregister(&platform_driver);
 +
-+	pr_info("Unload LynLoong Platform Specific Driver.\n");
++	pr_info("LynLoong platform specific driver unloaded.\n");
 +}
 +
 +module_init(lynloong_init);
@@ -46976,7 +46976,7 @@ index 0000000..2f4d8fe
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..c0fd248
+index 0000000..f2d2c0c
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
 @@ -0,0 +1,1349 @@
@@ -48130,26 +48130,26 @@ index 0000000..c0fd248
 +
 +	ret = register_reboot_notifier(&reboot_notifier);
 +	if (ret) {
-+		pr_err("can't register reboot notifier\n");
++		pr_err("Can't register reboot notifier\n");
 +		goto end;
 +	}
 +
 +	ret = register_pm_notifier(&pm_notifier);
 +	if (ret) {
-+		pr_err("can't register pm notifier\n");
++		pr_err("Can't register pm notifier\n");
 +		goto free_reboot_notifier;
 +	}
 +
 +	ret = sci_irq_init();
 +	if (ret) {
-+		pr_err("can't init SCI interrupt\n");
++		pr_err("Can't init SCI interrupt\n");
 +		goto free_pm_notifier;
 +	}
 +
 +	ret = request_threaded_irq(SCI_IRQ_NUM, NULL, &sci_irq_handler,
 +			IRQF_ONESHOT, "sci", NULL);
 +	if (ret) {
-+		pr_err("can't thread SCI interrupt handler\n");
++		pr_err("Can't thread SCI interrupt handler\n");
 +		goto free_pm_notifier;
 +	}
 +
@@ -48167,7 +48167,7 @@ index 0000000..c0fd248
 +
 +	ret = sparse_keymap_setup(yeeloong_hotkey_dev, yeeloong_keymap, NULL);
 +	if (ret) {
-+		pr_err("Fail to setup input device keymap\n");
++		pr_err("Failed to setup input device keymap\n");
 +		goto free_dev;
 +	}
 +
@@ -48281,20 +48281,20 @@ index 0000000..c0fd248
 +{
 +	int ret;
 +
-+	pr_info("Load YeeLoong Laptop Platform Specific Driver.\n");
++	pr_info("YeeLoong Laptop platform specific driver loaded.\n");
 +
 +	/* Register platform stuff */
 +	ret = platform_driver_register(&platform_driver);
 +	if (ret) {
-+		pr_err("Fail to register yeeloong platform driver.\n");
++		pr_err("Failed to register YeeLoong platform driver.\n");
 +		return ret;
 +	}
 +
 +#define yeeloong_init_drv(drv, alias) do {			\
-+	pr_info("Register yeeloong " alias " driver.\n");	\
++	pr_info("Registered YeeLoong " alias " driver.\n");	\
 +	ret = yeeloong_ ## drv ## _init();			\
 +	if (ret) {						\
-+		pr_err("Fail to register yeeloong " alias " driver.\n");	\
++		pr_err("Failed to register YeeLoong " alias " driver.\n");	\
 +		yeeloong_ ## drv ## _exit();			\
 +		return ret;					\
 +	}							\
@@ -48320,7 +48320,7 @@ index 0000000..c0fd248
 +	yeeloong_backlight_exit();
 +	platform_driver_unregister(&platform_driver);
 +
-+	pr_info("Unload YeeLoong Platform Specific Driver.\n");
++	pr_info("YeeLoong platform specific driver unloaded.\n");
 +}
 +
 +module_init(yeeloong_init);
@@ -48378,10 +48378,10 @@ index a164fc4..f3043cc 100644
  	{"0x317", 1024, 768,  16},
  	{"0x31A", 1280, 1024, 16},
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index f9cf3f0..5fc952d 100644
+index 23107e2..43ae966 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
-@@ -833,9 +833,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+@@ -830,9 +830,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
  	}
  
  	if (ints & OHCI_INTR_WDH) {
@@ -48399,10 +48399,10 @@ index f9cf3f0..5fc952d 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index a495d48..33d3f2fe 100644
+index efba0188..57a78fc 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
-@@ -55,6 +55,16 @@
+@@ -56,6 +56,16 @@
  #define EHCI_USBLEGCTLSTS	4		/* legacy control/status */
  #define EHCI_USBLEGCTLSTS_SOOE	(1 << 13)	/* SMI on ownership change */
  
@@ -48419,7 +48419,7 @@ index a495d48..33d3f2fe 100644
  /* AMD quirk use */
  #define	AB_REG_BAR_LOW		0xe0
  #define	AB_REG_BAR_HIGH		0xe1
-@@ -348,6 +358,12 @@ void usb_amd_dev_put(void)
+@@ -349,6 +359,12 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -48432,7 +48432,7 @@ index a495d48..33d3f2fe 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -429,15 +445,6 @@ reset_needed:
+@@ -430,15 +446,6 @@ reset_needed:
  }
  EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
  
@@ -48448,7 +48448,7 @@ index a495d48..33d3f2fe 100644
  static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  {
  	unsigned long base = 0;
-@@ -455,12 +462,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -456,12 +463,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -48465,8 +48465,8 @@ index a495d48..33d3f2fe 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -534,7 +540,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
- 
+@@ -528,7 +534,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+ 	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
 +#else
@@ -48477,7 +48477,7 @@ index a495d48..33d3f2fe 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -687,6 +697,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -681,6 +691,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -48487,15 +48487,15 @@ index a495d48..33d3f2fe 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -775,6 +788,7 @@ void usb_enable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -805,6 +818,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
- EXPORT_SYMBOL_GPL(usb_enable_xhci_ports);
+ EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
 +#if defined(CONFIG_USB_XHCI_HCD) || defined(CONFIG_USB_XHCI_HCD_MODULE)
  /**
   * PCI Quirks for xHCI.
   *
-@@ -869,6 +883,9 @@ hc_init:
+@@ -903,6 +917,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -48506,10 +48506,10 @@ index a495d48..33d3f2fe 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index d2becb9..abcf8d7 100644
+index d8851d0..9d86a48 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
-@@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
+@@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
  #define OPTION_PRODUCT_ETNA_KOI_MODEM		0x7100
  #define OPTION_PRODUCT_GTM380_MODEM		0x7201
  
@@ -48517,16 +48517,16 @@ index d2becb9..abcf8d7 100644
 +#define HUAWO_PRODUCT_E1621			0x2008
 +
  #define HUAWEI_VENDOR_ID			0x12D1
- #define HUAWEI_PRODUCT_E600			0x1001
- #define HUAWEI_PRODUCT_E220			0x1003
-@@ -572,6 +575,7 @@ static const struct usb_device_id option_ids[] = {
+ #define HUAWEI_PRODUCT_K4505			0x1464
+ #define HUAWEI_PRODUCT_K3765			0x1465
+@@ -539,6 +542,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E600, 0xff, 0xff, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220, 0xff, 0xff, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E220BIS, 0xff, 0xff, 0xff) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K4505, 0xff, 0xff, 0xff),
+ 		.driver_info = (kernel_ulong_t) &huawei_cdc12_blacklist },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K3765, 0xff, 0xff, 0xff),
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
 index 8b83129..a19e44e 100644
 --- a/drivers/video/Makefile
