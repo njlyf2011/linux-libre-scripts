@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2012-08-28 19:50:12.000000000 +0000
-@@ -0,0 +1,4845 @@
++++ .config	2012-09-15 12:38:45.000000000 +0000
+@@ -0,0 +1,4846 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.4.10-gnu Kernel Configuration
++# Linux/mips 3.4.11-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -2604,6 +2604,7 @@ Index: .config
 +#
 +# I2C system bus drivers (mostly embedded / system-on-chip)
 +#
++CONFIG_I2C_DESIGNWARE_CORE=m
 +CONFIG_I2C_DESIGNWARE_PCI=m
 +# CONFIG_I2C_EG20T is not set
 +# CONFIG_I2C_INTEL_MID is not set
