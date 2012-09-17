@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -685,7 +685,6 @@ Patch800: linux-2.6-crash-driver.patch
 # crypto/
 
 # virt + ksm patches
-Patch1500: fix_xen_guest_on_old_EC2.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -753,9 +752,6 @@ Patch22018: atl1c_net_next_update-3.4.patch
 #Fix FIPS for aesni hardare
 Patch22055: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
-
-#rhbz 836742
-Patch22059: uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
 #rhbz 714271
 Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
@@ -1358,7 +1354,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 # crypto/
 
 # Assorted Virt Fixes
-ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -1413,9 +1408,6 @@ ApplyPatch atl1c_net_next_update-3.4.patch
 #Fix FIPS for aesni hardare
 ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
-
-#rhbz 836742
-ApplyPatch uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
 #rhbz 714271
 ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
@@ -2128,6 +2120,15 @@ fi
 # and build.
 
 %changelog
+* Sun Sep 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.11
+
+* Sun Sep 16 2012 Josh Boyer <jwboyer@redhat.com> 3.4.11-1
+- Linux v3.4.11
+
+* Tue Sep 11 2012 Josh Boyer <jwboyer@redhat.com> 3.4.10-2
+- Drop old Xen EC2 patch.  It is no longer needed per Matt Wilson
+
 * Thu Sep  6 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.10
 
