@@ -70,7 +70,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.5%{?stablegnux}
+%define stablelibre -3.5%{?stablegnux}
 #define rcrevlibre -3.5%{?rcrevgnux}
 #define gitrevlibre -3.5%{?gitrevgnux}
 
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -728,7 +728,6 @@ Patch800: linux-2.6-crash-driver.patch
 # crypto/
 
 # virt + ksm patches
-Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -805,9 +804,6 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 #Fix FIPS for aesni hardare
 Patch22055: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
-
-#rhbz 836742
-Patch22059: uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
 #rhbz 714271
 Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
@@ -1515,7 +1511,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 # crypto/
 
 # Assorted Virt Fixes
-ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -1576,9 +1571,6 @@ ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 #Fix FIPS for aesni hardare
 ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
 ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
-
-#rhbz 836742
-ApplyPatch uvcvideo-Reset-bytesused-field-when-recycling-erroneous-buffer.patch
 
 #rhbz 714271
 ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
@@ -2467,6 +2459,15 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon Sep 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.5.4-gnu.
+
+* Mon Sep 17 2012 Justin M. Forbes <jforbes@redhat.com>
+- Linux 3.5.4
+
+* Tue Sep 11 2012 Justin M. Forbes <jforbes@redhat.com> 
+- Drop xen EC2 work around, it is no longer needed.
+
 * Mon Aug 27 2012 Justin M. Forbes <jforbes@redhat.com> 3.5.3-1
 - Linux 3.5.3
 
