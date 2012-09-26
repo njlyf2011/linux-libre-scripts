@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -79,7 +79,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -3.5%{?stablegnux}
-#define rcrevlibre -3.5%{?rcrevgnux}
+%define rcrevlibre -3.5%{?rcrevgnux}
 #define gitrevlibre -3.5%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -131,7 +131,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -346,7 +346,7 @@ Summary: The Linux kernel
 
 %if %{with_vdso_install}
 # These arches install vdso/ directories.
-%define vdso_arches %{all_x86} x86_64 ppc ppc64 s390 s390x
+%define vdso_arches %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x
 %endif
 
 # Overrides for generic default options
@@ -377,12 +377,12 @@ Summary: The Linux kernel
 %endif
 
 # bootwrapper is only on ppc
-%ifnarch ppc ppc64
+%ifnarch ppc ppc64 ppc64p7
 %define with_bootwrapper 0
 %endif
 
 # sparse blows up on ppc64 and sparc64
-%ifarch ppc64 ppc sparc64
+%ifarch ppc64 ppc sparc64 ppc64p7
 %define with_sparse 0
 %endif
 
@@ -403,7 +403,7 @@ Summary: The Linux kernel
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
-%ifarch ppc64
+%ifarch ppc64 ppc64p7
 %define asmarch powerpc
 %define hdrarch powerpc
 %define all_arch_configs kernel-%{version}-ppc64*.config
@@ -490,7 +490,7 @@ Summary: The Linux kernel
 %endif
 
 # Architectures we build tools/cpupower on
-%define cpupowerarchs %{ix86} x86_64 ppc ppc64 %{arm}
+%define cpupowerarchs %{ix86} x86_64 ppc ppc64 ppc64p7 %{arm}
 
 #
 # Three sets of minimum package version requirements in the form of Conflicts:
@@ -568,7 +568,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 %{sparc} s390 s390x %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 %{sparc} s390 s390x %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -602,6 +602,7 @@ BuildRequires: rpm-build >= 4.9.0-1, elfutils >= elfutils-0.153-1
 
 %if %{signmodules}
 BuildRequires: gnupg
+BuildRequires: pesign >= 0.10-4
 %endif
 
 Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
@@ -610,7 +611,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 %if %{signmodules}
 Source11: genkey
@@ -635,6 +636,7 @@ Source50: config-powerpc-generic
 Source51: config-powerpc32-generic
 Source52: config-powerpc32-smp
 Source53: config-powerpc64
+Source54: config-powerpc64p7
 
 Source70: config-s390x
 
@@ -709,6 +711,10 @@ Patch09: linux-2.6-upstream-reverts.patch
 
 Patch100: taint-vbox.patch
 
+Patch110: vmbugon-warnon.patch
+
+Patch150: team-net-next-20120808.patch
+
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
@@ -730,10 +736,15 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
-Patch900: modsign-20120718.patch
+Patch900: modsign-20120816.patch
+
+# secure boot
+Patch1000: secure-boot-20120809.patch
+
+# Improve PCI support on UEFI
+Patch1100: handle-efi-roms.patch
 
 # virt + ksm patches
-Patch1555: fix_xen_guest_on_old_EC2.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -770,12 +781,11 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
-Patch14015: team-update-from-net-next.patch
-
-Patch20000: uprobes-3.5-tip.patch
-
 
 # ARM
+Patch21000: arm-read_current_timer.patch
+Patch21001: arm-fix-omapdrm.patch
+Patch21002: arm-fix_radio_shark.patch
 # OMAP
 
 # ARM tegra
@@ -784,8 +794,6 @@ Patch21005: arm-tegra-usb-no-reset-linux33.patch
 Patch21006: arm-tegra-sdhci-module-fix.patch
 
 # ARM highbank patches
-# Highbank clock functions need to be EXPORT for module builds
-Patch21010: highbank-export-clock-functions.patch
 
 Patch21094: power-x86-destdir.patch
 
@@ -799,12 +807,11 @@ Patch22000: weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 
-#Fix FIPS for aesni hardare
-Patch22050: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
-Patch22051: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
+#rhbz 847548
+Patch22066: virtio-scsi-Initialize-scatterlist-structure.patch
 
-#rhbz 772730
-Patch22058: ACPI-AC-check-the-return-value-of-power_supply_register.patch
+#rhbz 846037
+Patch22067: selinux-Fix-sel_netnode_insert-suspicious-rcu-dereference.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1420,12 +1427,19 @@ ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
 
 ApplyPatch taint-vbox.patch
 
+ApplyPatch vmbugon-warnon.patch
+
+ApplyPatch team-net-next-20120808.patch
+
 # Architecture patches
 # x86(-64)
 
 #
 # ARM
 #
+ApplyPatch arm-read_current_timer.patch
+ApplyPatch arm-fix-omapdrm.patch
+ApplyPatch arm-fix_radio_shark.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-sdhci-module-fix.patch
@@ -1496,10 +1510,15 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # crypto/
-ApplyPatch modsign-20120718.patch
+ApplyPatch modsign-20120816.patch
+
+# secure boot
+ApplyPatch secure-boot-20120809.patch
+
+# Improved PCI support for UEFI
+ApplyPatch handle-efi-roms.patch
 
 # Assorted Virt Fixes
-ApplyPatch fix_xen_guest_on_old_EC2.patch
 
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -1536,10 +1555,6 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
-ApplyPatch team-update-from-net-next.patch
-
-ApplyPatch uprobes-3.5-tip.patch
-
 ApplyPatch power-x86-destdir.patch
 
 #rhbz 754518
@@ -1552,15 +1567,11 @@ ApplyPatch weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
-#Highbank clock functions
-ApplyPatch highbank-export-clock-functions.patch 
+#rhbz 847548
+ApplyPatch virtio-scsi-Initialize-scatterlist-structure.patch
 
-#Fix FIPS for aesni hardare
-ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
-ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
-
-#rhbz 772730
-ApplyPatch ACPI-AC-check-the-return-value-of-power_supply_register.patch
+#rhbz 846037
+ApplyPatch selinux-Fix-sel_netnode_insert-suspicious-rcu-dereference.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1710,6 +1721,11 @@ BuildKernel() {
     if [ -f arch/$Arch/boot/zImage.stub ]; then
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
     fi
+    %if %{signmodules}
+    # Sign the image if we're using EFI
+    %pesign -s -i $KernelImage -o vmlinuz.signed
+    mv vmlinuz.signed $KernelImage
+    %endif
     $CopyKernel $KernelImage \
     		$RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
@@ -1776,7 +1792,7 @@ BuildKernel() {
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
-%ifarch ppc ppc64
+%ifarch ppc ppc64 ppc64p7
     cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     if [ -d arch/%{asmarch}/include ]; then
@@ -1793,7 +1809,7 @@ BuildKernel() {
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
-    touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/autoconf.h
+
     # Copy .config to include/config/auto.conf so "make prepare" is unnecessary.
     cp $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/config/auto.conf
 
@@ -2430,6 +2446,236 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Sep 25 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6-rc7-gnu
+
+* Mon Sep 24 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git1.1
+- Linux v3.6-rc7
+- Disable debugging options.
+
+* Thu Sep 20 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc6.git2.1
+- Linux v3.6-rc6-52-gc46de22
+
+* Tue Sep 18 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc6.git1.1
+- Linux v3.6-rc6-25-g4651afb
+- Enable POWER7+ crypto modules (rhbz 857971)
+
+* Mon Sep 17 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc6.git0.2
+- Reenable debugging options.
+
+* Mon Sep 17 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc6.git0.1
+- Linux v3.6-rc6
+- Disable debugging options.
+
+* Sun Sep 16 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc5.git3.1
+- Linux v3.6-rc5-315-g3f0c3c8
+
+* Fri Sep 14 2012 Dave Jones <davej@redhat.com>
+- Enable CONFIG_DRM_LOAD_EDID_FIRMWARE (rhbz 857511)
+
+* Fri Sep 14 2012 Dave Jones <davej@redhat.com>
+- Reenable UBIFS (rhbz 823238)
+
+* Fri Sep 14 2012 Dave Jones <davej@redhat.com>
+- Fix license tag. (rhbz 450492)
+
+* Wed Sep 12 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc5.git2.1
+- Linux v3.6-rc5-44-g0bd1189
+
+* Tue Sep 11 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc5.git1.2
+- Drop old Xen EC2 patch.  It is no longer needed per Matt Wilson
+
+* Tue Sep 11 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc5.git1.1
+- Linux v3.6-rc5-32-g1a95620
+- Reenable debugging options.
+
+* Tue Sep 11 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc5.git0.1
+- Linux v3.6-rc5
+- Disable debugging options.
+
+* Fri Sep 07 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc4.git2.2
+- Re-enable BTRFS on ppc.  Brent Baude says it works now.
+
+* Fri Sep 07 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc4.git2.1
+- Linux v3.6-rc4-128-geeea3ac
+
+* Wed Sep 05 2012 Dave Jones <davej@redhat.com>
+- Don't create empty include/linux/autoconf.h in kernel-devel (rhbz 854689)
+
+* Wed Sep 05 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc4.git1.1
+- Linux v3.6-rc4-53-g5b716ac
+- Add patch to fix ibmveth issue from Santiago Leon (rhbz 852842)
+
+* Wed Sep 05 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc4.git0.2
+- Reenable debugging options.
+
+* Tue Sep  4 2012 Matthew Garrett <mjg@redhat.com>
+- handle-efi-roms.patch: Improve PCI support on UEFI systems
+
+* Tue Sep  4 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Tweak OMAP options
+
+* Mon Sep 03 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc4.git0.1
+- Linux v3.6-rc4
+- Disable debugging options.
+
+* Thu Aug 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git4.1
+- Linux v3.6-rc3-230-g155e36d
+
+* Wed Aug 29 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git3.2
+- Add patch to fix USB audio regression (rhbz 851619)
+
+* Wed Aug 29 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git3.1
+- Linux v3.6-rc3-207-g318e151
+
+* Tue Aug 28 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patches to fix OMAP drm, radio shark
+- Tweak ARM config
+
+* Mon Aug 27 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git2.1
+- Linux v3.6-rc3-177-gc182ae4
+
+* Sat Aug 25 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix build on ARM
+- Enable USB ULPI driver to fix some USB ports
+
+* Fri Aug 24 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git1.1
+- Linux v3.6-rc3-37-g2d809dc
+
+* Thu Aug 23 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git0.2
+- Reenable debugging options.
+
+* Wed Aug 22 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc3.git0.1
+- Linux v3.6-rc3
+- Disable debugging options.
+
+* Wed Aug 22 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc2.git2.1
+- Linux v3.6-rc2-400-g23dcfa6
+- CVE-2012-3520: af_netlink: invalid handling of SCM_CREDENTIALS passing
+
+* Tue Aug 21 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Dave Jones to fix suspicious RCU usage in SELinux (rhbz 846037)
+- Add patch from Richard W.M. Jones to fix virtio scsi oops (rhbz 847548)
+- Add patch from Dave Airlie to fix fb cursor vs grub2 gfxterm hang
+
+* Mon Aug 20 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc2.git1.1
+- Linux v3.6-rc2-206-g10c63c9
+
+* Mon Aug 20 2012 Dave Jones <davej@redhat.com>
+- Reenable W1 drivers. (rhbz 849430)
+
+* Fri Aug 17 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc2.git0.2
+- Reenable debugging options.
+
+* Thu Aug 16 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc2.git0.1
+- Linux v3.6-rc2
+- Disable debugging options.
+
+* Tue Aug 14 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git6.1
+- Linux v3.6-rc1-355-gddf343f
+
+* Mon Aug 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git5.2
+- Fix VFS file creation bugs (rhbz 844485)
+
+* Mon Aug 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git5.1
+- Linux v3.6-rc1-312-g3bf671a
+
+* Sun Aug 12 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git4.1
+- Linux v3.6-rc1-268-g21d2f8d
+
+* Fri Aug 10 2012 Dennis Gilmore <dennis@ausil.us>
+- disable some options on highbank at calxeda's request
+- enable the PL011 serial console on highbank
+- enable ARM architected timer on all arm arches
+
+* Thu Aug 09 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git3.2
+- Update secure-boot patch to pass correct CFLAGS to EFI stub
+
+* Thu Aug 09 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git3.1
+- Linux v3.6-rc1-207-gf4ba394
+
+* Wed Aug 08 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git2.2
+- Update team driver from net-next from Jiri Pirko
+
+* Tue Aug 07 2012 Josh Boyer <jwboyer@redhat.com>
+- Add support for ppc64p7 subarch
+
+* Mon Aug 06 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git2.1
+- Linux v3.6-rc1-133-g42a579a
+
+* Sat Aug 04 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git1.2
+- Reenable debugging options.
+
+* Sat Aug 04 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git1.1
+- Linux v3.6-rc1-112-ge7882d6
+
+* Fri Aug 03 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git0.2
+- CVE-2012-3412 sfc: potential rDOS through TCP MSS option (rhbz 844714 845558)
+
+* Fri Aug 03 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc1.git0.1
+- Linux v3.6-rc1
+- Disable debugging options.
+
+* Thu Aug 02 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git9.3
+- Update modsign and secure-boot patch sets
+
+* Thu Aug 02 2012 Josh Boyer <jwboyer@redhat.com>
+- Reenable cgroups memory controller (rhbz 845285)
+- Add two patches from Seth Forshee to fix brcmsmac backtrace
+
+* Thu Aug 02 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git9.1
+- Linux v3.5-9139-g1a9b499
+
+* Wed Aug 01 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git8.1
+- Linux v3.5-8833-g2d53492
+
+* Wed Aug 01 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git7.1
+- Linux v3.5-8367-g08843b7
+
+* Tue Jul 31 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git6.1
+- Linux v3.5-8197-g2e3ee61
+
+* Wed Jul 31 2012 John W. Linville <linville@redhat.com>
+- Enable batman-adv and add it to the list of "extra" modules
+
+* Tue Jul 31 2012 Dave Jones <davej@redhat.com>
+- Change VM_BUG_ON's to be WARN_ONs instead.
+
+* Tue Jul 31 2012 Josh Boyer <jwboyer@redhat.com>
+- Move modules needed by Shorewall back to main kernel package (rhbz 844436)
+
+* Mon Jul 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git5.2
+- Update config options
+
+* Mon Jul 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git5.1
+- Linux v3.5-7815-g37cd960
+
+* Mon Jul 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc0.git4.1
+- Linux v3.5-7078-gf7da9cd
+
+* Mon Jul 30 2012 Josh Boyer <jwboyer@redhat.com>
+- Fixup patches
+
+* Fri Jul 27 2012 Justin M. Forbes <jforbes@redhat.com> - 3.6.0-0.rc0.git3.1
+- Linux v3.5-6982-gb387e41
+
+* Thu Jul 26 2012 Josh Boyer <jwboyer@redhat.com>
+- Apply patch to fix uvcvideo crash (rhbz 836742)
+- Enable Intel MEI driver (rhbz 842444)
+
+* Wed Jul 25 2012 Justin M. Forbes <jforbes@redhat.com> - 3.6.0-0.rc0.git2.1
+- Linux v3.5-4773-gbdc0077
+
+* Tue Jul 24 2012 Josh Boyer <jwboyer@redhat.com>
+- Update modsign patch to latest upstream
+- Add initial UEFI Secure Boot patchset.  Work in progress.
+
+* Tue Jul 24 2012 Justin M. Forbes <jforbes@redhat.com> - 3.6.0-0.rc0.git1.1
+- Linux v3.5-1643-gf0a08fc
+
+* Mon Jul 23 2012 Justin M. Forbes <jforbes@redhat.com> - 3.5.0-2
+- Reenable debugging options.
+
 * Mon Jul 23 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.5-gnu
 
