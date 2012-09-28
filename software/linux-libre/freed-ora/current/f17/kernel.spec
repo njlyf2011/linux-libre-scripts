@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -731,6 +731,8 @@ Patch800: linux-2.6-crash-driver.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
+Patch1701: drm-radeon-force-dma32-to-fix-regression-rs4xx-rs6xx.patch
+
 Patch1800: drm-vgem.patch
 
 # nouveau + drm fixes
@@ -811,14 +813,16 @@ Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 #rhbz 820039 843554
 Patch22061: rds-set-correct-msg_namelen.patch
 
-#rhbz 845558 844714
-Patch22070: net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
-Patch22071: sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
-Patch22072: tcp-Apply-device-TSO-segment-limit-earlier.patch
-
 Patch23000: fbcon-fix-race-condition-between-console-lock-and-cursor-timer.patch
 
-Patch24000: af_netlink-credentials-cve-2012-3520.patch
+#rhbz 850350
+Patch24050: xen-pciback-restore-pci-config-space-after-FLR.patch
+
+#rhbz 846505 845639
+Patch24055: drm-radeon-make-64bit-fences-more-robust.patch
+
+#3.5.5 stable queue
+Patch25000: linux-3.5.5-stable-queue.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1514,6 +1518,7 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
+ApplyPatch drm-radeon-force-dma32-to-fix-regression-rs4xx-rs6xx.patch
 ApplyPatch drm-vgem.patch
 
 # Nouveau DRM
@@ -1578,14 +1583,16 @@ ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 #rhbz 820039 843554
 ApplyPatch rds-set-correct-msg_namelen.patch
 
-#rhbz 845558 844714
-ApplyPatch net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
-ApplyPatch sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
-ApplyPatch tcp-Apply-device-TSO-segment-limit-earlier.patch
-
 ApplyPatch fbcon-fix-race-condition-between-console-lock-and-cursor-timer.patch
 
-ApplyPatch af_netlink-credentials-cve-2012-3520.patch
+#rhbz 850350
+ApplyPatch xen-pciback-restore-pci-config-space-after-FLR.patch
+
+#rhbz 846505 845639
+ApplyPatch drm-radeon-make-64bit-fences-more-robust.patch
+
+# 3.5.5 stable queue
+ApplyPatch linux-3.5.5-stable-queue.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2459,10 +2466,21 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Wed Sep 26 2012 Justin M. Forbes <jforbes@redhat.com> 3.5.4-2
+- xen Restore the PCI config space after an FLR (rhbz 850350)
+- drm/radeon make 64bit fences more robust (rhbz 846505 845639)
+- Apply current 3.5.5 stable queue
+
+* Fri Sep 21 2012 Josh Boyer <jwboyer@redhat.com> 3.4.11-2
+- Add patch to fix radeon regression from Jerome Glisse (rhbz 785375)
+
+* Tue Sep 18 2012 Justin M. Forbes <jforbes@redhat.com>
+- Enable POWER7+ crypto modules (rhbz 857971)
+
 * Mon Sep 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.5.4-gnu.
 
-* Mon Sep 17 2012 Justin M. Forbes <jforbes@redhat.com>
+* Mon Sep 17 2012 Justin M. Forbes <jforbes@redhat.com> 3.5.4-1
 - Linux 3.5.4
 
 * Tue Sep 11 2012 Justin M. Forbes <jforbes@redhat.com> 
