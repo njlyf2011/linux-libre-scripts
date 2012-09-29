@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 1
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -601,7 +601,7 @@ BuildRequires: rpm-build >= 4.9.0-1, elfutils >= elfutils-0.153-1
 %endif
 
 %if %{signmodules}
-BuildRequires: gnupg
+BuildRequires: openssl
 BuildRequires: pesign >= 0.10-4
 %endif
 
@@ -614,11 +614,13 @@ Source5: deblob-%{kversion}
 Source6: deblob-3.%{upstream_sublevel}
 
 %if %{signmodules}
-Source11: genkey
+Source11: x509.genkey
 %endif
 
 Source15: merge.pl
 Source16: mod-extra.list
+Source17: mod-extra.sh
+Source18: mod-extra-sign.sh
 
 Source19: Makefile.release
 Source20: Makefile.config
@@ -714,6 +716,7 @@ Patch100: taint-vbox.patch
 Patch110: vmbugon-warnon.patch
 
 Patch150: team-net-next-20120808.patch
+Patch151: team-net-next-update-20120924.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -736,10 +739,10 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
-Patch900: modsign-20120816.patch
+Patch900: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-20120809.patch
+Patch1000: secure-boot-20120924.patch
 
 # Improve PCI support on UEFI
 Patch1100: handle-efi-roms.patch
@@ -1430,6 +1433,7 @@ ApplyPatch taint-vbox.patch
 ApplyPatch vmbugon-warnon.patch
 
 ApplyPatch team-net-next-20120808.patch
+ApplyPatch team-net-next-update-20120924.patch
 
 # Architecture patches
 # x86(-64)
@@ -1510,10 +1514,10 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # crypto/
-ApplyPatch modsign-20120816.patch
+ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
-ApplyPatch secure-boot-20120809.patch
+ApplyPatch secure-boot-20120924.patch
 
 # Improved PCI support for UEFI
 ApplyPatch handle-efi-roms.patch
@@ -1740,13 +1744,6 @@ BuildKernel() {
     # we'll get it from the linux-firmware package and we don't want conflicts
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 
-%if %{signmodules}
-        if [ -z "$(readelf -n $(find fs/ -name \*.ko | head -n 1) | grep module.sig)" ]; then
-            echo "ERROR: modules are NOT signed" >&2;
-            exit 1;
-        fi
-%endif
-
 %ifarch %{vdso_arches}
     make -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
     if [ ! -s ldconfig-kernel.conf ]; then
@@ -1867,66 +1864,14 @@ BuildKernel() {
 
     rm -f modinfo modnames
 
-    pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/
-    rm -rf modnames
-    find . -name "*.ko" -type f > modnames
-    # Look through all of the modules, and throw any that have a dependency in
-    # our list into the list as well.
-    rm -rf dep.list dep2.list
-    rm -rf req.list req2.list
-    touch dep.list req.list
-    cp %{SOURCE16} .
-    for dep in `cat modnames`
-    do
-      depends=`modinfo $dep | grep depends| cut -f2 -d":" | sed -e 's/^[ \t]*//'`
-      [ -z "$depends" ] && continue;
-      for mod in `echo $depends | sed -e 's/,/ /g'`
-      do
-        match=`grep "^$mod.ko" mod-extra.list` ||:
-        if [ -z "$match" ]
-        then
-          continue
-        else
-          # check if the module we're looking at is in mod-extra too.  if so
-          # we don't need to mark the dep as required
-          mod2=`basename $dep`
-          match2=`grep "^$mod2" mod-extra.list` ||:
-          if [ -n "$match2" ]
-          then
-            continue
-            #echo $mod2 >> notreq.list
-          else
-            echo $mod.ko >> req.list
-          fi
-        fi
-      done
-    done
+    # Call the modules-extra script to move things around
+    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
 
-    sort -u req.list > req2.list
-    sort -u mod-extra.list > mod-extra2.list
-    join -v 1 mod-extra2.list req2.list > mod-extra3.list
-
-    for mod in `cat mod-extra3.list`
-    do
-      # get the path for the module
-      modpath=`grep /$mod modnames` ||:
-      [ -z "$modpath" ]  && continue;
-      echo $modpath >> dep.list
-    done
-
-    sort -u dep.list > dep2.list
-
-    # now move the modules into the extra/ directory
-    for mod in `cat dep2.list`
-    do
-      newpath=`dirname $mod | sed -e 's/kernel\//extra\//'`
-      mkdir -p $newpath
-      mv $mod $newpath
-    done
-
-    rm modnames dep.list dep2.list req.list req2.list
-    rm mod-extra.list mod-extra2.list mod-extra3.list
-    popd
+%if %{signmodules}
+    # Save off the .tmp_versions/ directory.  We'll use it in the 
+    # __debug_install_post macro below to sign the right things
+    cp -r .tmp_versions .tmp_versions.sign${Flavour:+.${Flavour}}
+%endif
 
     # remove files that will be auto generated by depmod at rpm -i time
     for i in alias alias.bin builtin.bin ccwmap dep dep.bin ieee1394map inputmap isapnpmap ofmap pcimap seriomap symbols symbols.bin usbmap devname softdep
@@ -2050,9 +1995,56 @@ find Documentation -type d | xargs chmod u+w
 # This macro is used by %%install, so we must redefine it before that.
 %define debug_package %{nil}
 
+# In the modsign case, we do 3 things.  1) We check the "flavour" and hard
+# code the value in the following invocations.  This is somewhat sub-optimal
+# but we're doing this inside of an RPM macro and it isn't as easy as it
+# could be because of that.  2) We restore the .tmp_versions/ directory from
+# the one we saved off in BuildKernel above.  This is to make sure we're
+# signing the modules we actually built/installed in that flavour.  3) We
+# grab the arch and invoke 'make modules_sign' and the mod-extra-sign.sh
+# commands to actually sign the modules.
+#
+# We have to do all of those things _after_ find-debuginfo runs, otherwise
+# that will strip the signature off of the modules.
+
 %if %{with_debuginfo}
 %define __debug_install_post \
   /usr/lib/rpm/find-debuginfo.sh %{debuginfo_args} %{_builddir}/%{?buildsubdir}\
+  if [ "%{signmodules}" == "1" ]; \
+  then \
+    if [ "%{with_pae}" != "0" ]; \
+    then \
+      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}-PAE.config | cut -b 3-` \
+      rm -rf .tmp_versions \
+      mv .tmp_versions.sign.PAE .tmp_versions \
+      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL}.PAE \
+      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAE/extra/ \
+    fi \
+    if [ "%{with_debug}" != "0" ]; \
+    then \
+      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}-debug.config | cut -b 3-` \
+      rm -rf .tmp_versions \
+      mv .tmp_versions.sign.debug .tmp_versions \
+      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL}.debug \
+      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/extra/ \
+    fi \
+    if [ "%{with_pae_debug}" != "0" ]; \
+    then \
+      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}-PAEdebug.config | cut -b 3-` \
+      rm -rf .tmp_versions \
+      mv .tmp_versions.sign.PAEdebug .tmp_versions \
+      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL}.PAEdebug \
+      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAEdebug/extra/ \
+    fi \
+    if [ "%{with_up}" != "0" ]; \
+    then \
+      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}.config | cut -b 3-` \
+      rm -rf .tmp_versions \
+      mv .tmp_versions.sign .tmp_versions \
+      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL} \
+      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/extra/ \
+    fi \
+  fi \
 %{nil}
 
 %ifnarch noarch
@@ -2446,6 +2438,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Sep 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git1.4
+- Move the modules-extra processing to a script
+- Prep mod-extra.sh for signed modules
+- Switch to using modsign-post-KS upstream with x509 certs
+
+* Tue Sep 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git1.2
+- Update team driver from net-next from Jiri Pirko
+
+* Tue Sep 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git1.1
+- Linux v3.6-rc7-10-g56d27ad
+
 * Tue Sep 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git0.2
 - Reenable debugging options.
 
