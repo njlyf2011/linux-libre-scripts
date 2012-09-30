@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 4
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 1
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -716,7 +716,7 @@ Patch100: taint-vbox.patch
 Patch110: vmbugon-warnon.patch
 
 Patch150: team-net-next-20120808.patch
-Patch151: team-net-next-update-20120924.patch
+Patch151: team-net-next-update-20120927.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -918,7 +918,7 @@ to manipulate perf events.
 %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 %package -n python-perf-libre-debuginfo
-Provides: python-perf = %{rpmversion}-%{pkg_release}
+Provides: python-perf-debuginfo = %{rpmversion}-%{pkg_release}
 Summary: Debug information for package perf python bindings
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
@@ -945,19 +945,30 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
+Requires: kernel-libre-tools-libs = %{version}-%{release}
 %description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
 
-%package -n kernel-libre-tools-devel
-Provides: kernel-tools-devel = %{rpmversion}-%{pkg_release}
+%package -n kernel-libre-tools-libs
+Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
+Summary: Libraries for the kernels-tools
+Group: Development/System
+License: GPLv2
+%description -n kernel-libre-tools-libs
+This package contains the libraries built from the tools/ directory
+from the kernel source.
+
+%package -n kernel-libre-tools-libs-devel
+Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
 Requires: kernel-libre-tools = %{version}-%{release}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
-%description -n kernel-libre-tools-devel
+Requires: kernel-libre-tools-libs = %{version}-%{release}
+%description -n kernel-libre-tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
 
@@ -1433,7 +1444,7 @@ ApplyPatch taint-vbox.patch
 ApplyPatch vmbugon-warnon.patch
 
 ApplyPatch team-net-next-20120808.patch
-ApplyPatch team-net-next-update-20120924.patch
+ApplyPatch team-net-next-update-20120927.patch
 
 # Architecture patches
 # x86(-64)
@@ -2345,8 +2356,6 @@ fi
 %{_bindir}/centrino-decode
 %{_bindir}/powernow-k8-decode
 %endif
-%{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.0
 %{_unitdir}/cpupower.service
 %{_mandir}/man[1-8]/cpupower*
 %config(noreplace) %{_sysconfdir}/sysconfig/cpupower
@@ -2364,7 +2373,11 @@ fi
 %endif
 
 %ifarch %{cpupowerarchs}
-%files -n kernel-libre-tools-devel
+%files -n kernel-libre-tools-libs
+%{_libdir}/libcpupower.so.0
+%{_libdir}/libcpupower.so.0.0.0
+
+%files -n kernel-libre-tools-libs-devel
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
@@ -2438,6 +2451,12 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Sep 28 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git2.2
+- Split out kernel-tools-libs (rhbz 859943)
+
+* Fri Sep 28 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git2.1
+- Linux v3.6-rc7-71-g6399413
+
 * Tue Sep 25 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git1.4
 - Move the modules-extra processing to a script
 - Prep mod-extra.sh for signed modules
