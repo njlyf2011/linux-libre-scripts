@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -731,7 +731,6 @@ Patch800: linux-2.6-crash-driver.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
-Patch1701: drm-radeon-force-dma32-to-fix-regression-rs4xx-rs6xx.patch
 
 Patch1800: drm-vgem.patch
 
@@ -810,19 +809,11 @@ Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 #rhbz 714271
 Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 
-#rhbz 820039 843554
-Patch22061: rds-set-correct-msg_namelen.patch
-
-Patch23000: fbcon-fix-race-condition-between-console-lock-and-cursor-timer.patch
+#rhbz 857324
+Patch22070: net-tcp-bz857324.patch
 
 #rhbz 850350
 Patch24050: xen-pciback-restore-pci-config-space-after-FLR.patch
-
-#rhbz 846505 845639
-Patch24055: drm-radeon-make-64bit-fences-more-robust.patch
-
-#3.5.5 stable queue
-Patch25000: linux-3.5.5-stable-queue.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -953,19 +944,30 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
+Requires: kernel-libre-tools-libs = %{version}-%{release}
 %description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
 
-%package -n kernel-libre-tools-devel
-Provides: kernel-tools-devel = %{rpmversion}-%{pkg_release}
+%package -n kernel-libre-tools-libs
+Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
+Summary: Libraries for the kernels-tools
+Group: Development/System
+License: GPLv2
+%description -n kernel-libre-tools-libs
+This package contains the libraries built from the tools/ directory
+from the kernel source.
+
+%package -n kernel-libre-tools-libs-devel
+Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
 Requires: kernel-libre-tools = %{version}-%{release}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
-%description -n kernel-libre-tools-devel
+Requires: kernel-libre-tools-libs = %{version}-%{release}
+%description -n kernel-libre-tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
 
@@ -1518,7 +1520,6 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
-ApplyPatch drm-radeon-force-dma32-to-fix-regression-rs4xx-rs6xx.patch
 ApplyPatch drm-vgem.patch
 
 # Nouveau DRM
@@ -1580,19 +1581,11 @@ ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 #rhbz 714271
 ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 
-#rhbz 820039 843554
-ApplyPatch rds-set-correct-msg_namelen.patch
-
-ApplyPatch fbcon-fix-race-condition-between-console-lock-and-cursor-timer.patch
+#rhbz 857324
+ApplyPatch net-tcp-bz857324.patch
 
 #rhbz 850350
 ApplyPatch xen-pciback-restore-pci-config-space-after-FLR.patch
-
-#rhbz 846505 845639
-ApplyPatch drm-radeon-make-64bit-fences-more-robust.patch
-
-# 3.5.5 stable queue
-ApplyPatch linux-3.5.5-stable-queue.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2363,8 +2356,6 @@ fi
 %{_bindir}/centrino-decode
 %{_bindir}/powernow-k8-decode
 %endif
-%{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.0
 %{_unitdir}/cpupower.service
 %{_mandir}/man[1-8]/cpupower*
 %config(noreplace) %{_sysconfdir}/sysconfig/cpupower
@@ -2382,7 +2373,11 @@ fi
 %endif
 
 %ifarch %{cpupowerarchs}
-%files -n kernel-libre-tools-devel
+%files -n kernel-libre-tools-libs
+%{_libdir}/libcpupower.so.0
+%{_libdir}/libcpupower.so.0.0.0
+
+%files -n kernel-libre-tools-libs-devel
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
@@ -2466,12 +2461,24 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Tue Oct  2 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.5.5-gnu.
+
+* Tue Oct 02 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.5-1
+- Linux v3.5.5
+
+* Fri Sep 28 2012 Dave Jones <davej@redhat.com>
+- Apply potential fix for bogus WARN_ON in tcp. (rhbz 857324)
+
+* Fri Sep 28 2012 Josh Boyer <jwboyer@redhat.com> - 3.5.4-3
+- Split out kernel-tools-libs (rhbz 859943)
+
 * Wed Sep 26 2012 Justin M. Forbes <jforbes@redhat.com> 3.5.4-2
 - xen Restore the PCI config space after an FLR (rhbz 850350)
 - drm/radeon make 64bit fences more robust (rhbz 846505 845639)
 - Apply current 3.5.5 stable queue
 
-* Fri Sep 21 2012 Josh Boyer <jwboyer@redhat.com> 3.4.11-2
+* Fri Sep 21 2012 Josh Boyer <jwboyer@redhat.com>
 - Add patch to fix radeon regression from Jerome Glisse (rhbz 785375)
 
 * Tue Sep 18 2012 Justin M. Forbes <jforbes@redhat.com>
