@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -756,16 +756,6 @@ Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 #rhbz 714271
 Patch22060: CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
 
-#rhbz 820039 843554
-Patch22061: rds-set-correct-msg_namelen.patch
-
-#rhbz 845558 844714
-Patch22070: net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
-Patch22071: sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
-Patch22072: tcp-Apply-device-TSO-segment-limit-earlier.patch
-
-Patch22075: af_netlink-credentials-cve-2012-3520.patch
-
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -846,19 +836,30 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
+Requires: kernel-libre-tools-libs = %{version}-%{release}
 %description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 - the perf tool and the supporting documentation.
 
-%package -n kernel-libre-tools-devel
-Provides: kernel-tools-devel = %{rpmversion}-%{pkg_release}
+%package -n kernel-libre-tools-libs
+Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
+Summary: Libraries for the kernels-tools
+Group: Development/System
+License: GPLv2
+%description -n kernel-libre-tools-libs
+This package contains the libraries built from the tools/ directory
+from the kernel source.
+
+%package -n kernel-libre-tools-libs-devel
+Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
 Requires: kernel-libre-tools = %{version}-%{release}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
-%description -n kernel-libre-tools-devel
+Requires: kernel-libre-tools-libs = %{version}-%{release}
+%description -n kernel-libre-tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
 
@@ -1411,16 +1412,6 @@ ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
 #rhbz 714271
 ApplyPatch CPU-hotplug-cpusets-suspend-Dont-modify-cpusets-during.patch
-
-#rhbz 820039 843554
-ApplyPatch rds-set-correct-msg_namelen.patch
-
-#rhbz 845558 844714
-ApplyPatch net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
-ApplyPatch sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
-ApplyPatch tcp-Apply-device-TSO-segment-limit-earlier.patch
-
-ApplyPatch af_netlink-credentials-cve-2012-3520.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2039,8 +2030,6 @@ fi
 %{_bindir}/centrino-decode
 %{_bindir}/powernow-k8-decode
 %endif
-%{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.0
 %{_unitdir}/cpupower.service
 %config(noreplace) %{_sysconfdir}/sysconfig/cpupower
 %endif
@@ -2051,7 +2040,11 @@ fi
 %endif
 
 %ifarch %{cpupowerarchs}
-%files -n kernel-libre-tools-devel
+%files -n kernel-libre-tools-libs
+%{_libdir}/libcpupower.so.0
+%{_libdir}/libcpupower.so.0.0.0
+
+%files -n kernel-libre-tools-libs-devel
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
@@ -2120,6 +2113,24 @@ fi
 # and build.
 
 %changelog
+* Tue Oct  2 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.12
+
+* Tue Oct 02 2012 Dave Jones <davej@redhat.com> 3.4.12-1
+- Linux v3.4.12
+  merged: drm-radeon-force-dma32-to-fix-regression-rs4xx-rs6xx.patch
+  merged: rds-set-correct-msg_namelen.patch
+  merged: net-Allow-driver-to-limit-number-of-GSO-segments-per-skb.patch
+  merged: sfc-Fix-maximum-number-of-TSO-segments-and-minimum-TX-queue-size.patch
+  merged: tcp-Apply-device-TSO-segment-limit-earlier.patch
+  merged: af_netlink-credentials-cve-2012-3520.patch
+
+* Fri Sep 28 2012 Josh Boyer <jwboyer@redhat.com> - 3.4.11-3
+- Split out kernel-tools-libs (rhbz 859943)
+
+* Fri Sep 21 2012 Josh Boyer <jwboyer@redhat.com> 3.4.11-2
+- Add patch to fix radeon regression from Jerome Glisse (rhbz 785375)
+
 * Sun Sep 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.11
 
