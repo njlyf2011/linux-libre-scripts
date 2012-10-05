@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -797,6 +797,7 @@ Patch21005: arm-tegra-usb-no-reset-linux33.patch
 Patch21006: arm-tegra-sdhci-module-fix.patch
 
 # ARM highbank patches
+Patch21010: arm-highbank-sata-fix.patch
 
 Patch21094: power-x86-destdir.patch
 
@@ -815,6 +816,9 @@ Patch22066: virtio-scsi-Initialize-scatterlist-structure.patch
 
 #rhbz 846037
 Patch22067: selinux-Fix-sel_netnode_insert-suspicious-rcu-dereference.patch
+
+#rhbz 862420
+Patch22068: powerpc-fix-VMX-fix-for-memcpy-case.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1587,6 +1591,9 @@ ApplyPatch virtio-scsi-Initialize-scatterlist-structure.patch
 
 #rhbz 846037
 ApplyPatch selinux-Fix-sel_netnode_insert-suspicious-rcu-dereference.patch
+
+#rhbz 862420
+ApplyPatch powerpc-fix-VMX-fix-for-memcpy-case.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2451,6 +2458,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Oct 02 2012 Justin M. Forbes <jforbes@redhat.com> - 3.6.0-2
+- Power: Fix VMX fix for memcpy case (rhbz 862420)
+
+* Tue Oct 02 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch from David Howells to fix overflow on 32-bit X.509 certs (rhbz 861322)
+
+* Tue Oct  2 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM configs for 3.6 final
+- Add highbank SATA driver for stability
+- Build in OMAP MMC and DMA drivers to fix borkage for now
+
 * Mon Oct  1 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6-gnu
 
