@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -751,7 +751,7 @@ Patch1100: handle-efi-roms.patch
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
-Patch1800: drm-vgem.patch
+#Patch1800: drm-vgem.patch
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
@@ -1543,7 +1543,7 @@ ApplyPatch handle-efi-roms.patch
 
 # DRM core
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
-ApplyPatch drm-vgem.patch
+#ApplyPatch drm-vgem.patch
 
 # Nouveau DRM
 
@@ -2460,6 +2460,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sat Oct 06 2012 Josh Boyer <jwboyer@redhat.com>
+- secure boot modsign depends on CONFIG_MODULE_SIG not CONFIG_MODULES
+
+* Fri Oct 05 2012 Josh Boyer <jwboyer@redhat.com>
+- Adjust secure boot modsign patch
+
+* Fri Oct  5 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build MMC in on OMAP and Tegra until we work out why modules don't work
+
+* Wed Oct 03 2012 Adam Jackson <ajax@redhat.com>
+- Drop vgem patches, not doing anything yet.
+
 * Wed Oct 03 2012 Josh Boyer <jwboyer@redhat.com>
 - Make sure kernel-tools-libs-devel provides kernel-tools-devel
 
