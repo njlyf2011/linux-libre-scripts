@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 5
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,7 +78,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.6%{?stablegnux}
+%define stablelibre -3.6%{?stablegnux}
 #define rcrevlibre -3.6%{?rcrevgnux}
 #define gitrevlibre -3.6%{?gitrevgnux}
 
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2460,6 +2460,12 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Oct  9 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.1-gnu.
+
+* Mon Oct 08 2012 Justin M. Forbes <jforbes@redhat.com> 3.6.1-1
+- Linux 3.6.1
+
 * Sat Oct 06 2012 Josh Boyer <jwboyer@redhat.com>
 - secure boot modsign depends on CONFIG_MODULE_SIG not CONFIG_MODULES
 
