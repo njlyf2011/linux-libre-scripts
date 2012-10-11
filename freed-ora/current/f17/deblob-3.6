@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.5 extra=
+kver=3.6 extra=
 
 case $1 in
 --force)
@@ -598,6 +598,7 @@ undefault_firmware 'XC\(2028\|3028L\)' \
   drivers/media/dvb/dvb-usb/dib0700_devices.c \
   drivers/media/dvb/dvb-usb/cxusb.c
 reject_firmware drivers/media/common/tuners/tuner-xc2028.c
+clean_blob drivers/media/common/tuners/tuner-xc2028.c
 clean_kconfig drivers/media/common/tuners/Kconfig 'MEDIA_TUNER_XC2028'
 clean_mk CONFIG_MEDIA_TUNER_XC2028 drivers/media/common/tuners/Makefile
 
@@ -1448,6 +1449,15 @@ clean_blob drivers/net/wireless/brcm80211/brcmfmac/usb.c
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC_USB'
 clean_mk CONFIG_BRCMFMAC_USB drivers/net/wireless/brcm80211/brcmfmac/Makefile
 
+announce CSR_WIFI - "CSR wireless driver"
+reject_firmware drivers/staging/csr/unifi_priv.h
+reject_firmware drivers/staging/csr/firmware.c
+reject_firmware drivers/staging/csr/putest.c
+reject_firmware drivers/staging/csr/sme_native.c
+reject_firmware drivers/staging/csr/sme_sys.c
+clean_kconfig drivers/staging/csr/Kconfig 'CSR_WIFI'
+clean_mk CONFIG_CSR_WIFI drivers/staging/csr/Makefile
+
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
 reject_firmware drivers/net/wireless/orinoco/fw.c
 clean_blob drivers/net/wireless/orinoco/fw.c
@@ -1506,10 +1516,10 @@ clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
+clean_blob drivers/net/wireless/iwlwifi/pcie/5000.c
+clean_blob drivers/net/wireless/iwlwifi/pcie/6000.c
+clean_blob drivers/net/wireless/iwlwifi/pcie/1000.c
+clean_blob drivers/net/wireless/iwlwifi/pcie/2000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
 clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
@@ -1519,20 +1529,6 @@ clean_blob drivers/net/wireless/iwlegacy/4965-mac.c
 clean_blob drivers/net/wireless/iwlegacy/4965.c
 clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL4965'
 clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlegacy/Makefile
-
-announce IWM - "Intel Wireless Multicomm 3200 WiFi driver"
-reject_firmware drivers/net/wireless/iwmc3200wifi/fw.c
-clean_blob drivers/net/wireless/iwmc3200wifi/sdio.c
-clean_kconfig drivers/net/wireless/iwmc3200wifi/Kconfig 'IWM'
-clean_mk CONFIG_IWM drivers/net/wireless/iwmc3200wifi/Makefile
-
-announce IWMC3200TOP - "Intel Wireless MultiCom Top Driver"
-reject_firmware drivers/misc/iwmc3200top/fw-download.c
-undefine_macro '_FW_NAME(api)' '"/*(DEBLOBBED)*/"' \
-  'removed non-Free firmware name' drivers/misc/iwmc3200top/iwmc3200top.h
-clean_blob drivers/misc/iwmc3200top/main.c
-clean_kconfig drivers/misc/iwmc3200top/Kconfig 'IWMC3200TOP'
-clean_mk CONFIG_IWMC3200TOP drivers/misc/iwmc3200top/Makefile
 
 announce LIBERTAS - "Marvell 8xxx Libertas WLAN driver support"
 reject_firmware drivers/net/wireless/libertas/firmware.c
@@ -1744,21 +1740,17 @@ clean_blob drivers/net/wireless/ti/wl12xx/main.c
 clean_kconfig drivers/net/wireless/ti/wl12xx/Kconfig 'WL12XX'
 clean_mk CONFIG_WL12XX drivers/net/wireless/ti/wl12xx/Makefile
 
+announce WL18XX - "TI wl18xx support"
+reject_firmware drivers/net/wireless/ti/wl18xx/main.c
+clean_blob drivers/net/wireless/ti/wl18xx/main.c
+clean_kconfig drivers/net/wireless/ti/wl18xx/Kconfig 'WL18XX'
+clean_mk CONFIG_WL18XX drivers/net/wireless/ti/wl18xx/Makefile
+
 announce WLCORE - "TI wlcore support"
-clean_blob drivers/net/wireless/ti/wlcore/wl12xx.h
 reject_firmware drivers/net/wireless/ti/wlcore/main.c
+clean_blob drivers/net/wireless/ti/wlcore/wlcore_i.h
 clean_kconfig drivers/net/wireless/ti/wlcore/Kconfig 'WLCORE'
 clean_mk CONFIG_WLCORE drivers/net/wireless/ti/wlcore/Makefile
-
-announce WLCORE_SDIO - "TI wlcore SDIO support"
-clean_blob drivers/net/wireless/ti/wlcore/sdio.c
-clean_kconfig drivers/net/wireless/ti/wlcore/Kconfig 'WLCORE_SDIO'
-clean_mk CONFIG_WLCORE_SDIO drivers/net/wireless/ti/wlcore/Makefile
-
-announce WLCORE_SPI - "TI wlcore SPI support"
-clean_blob drivers/net/wireless/ti/wlcore/spi.c
-clean_kconfig drivers/net/wireless/ti/wlcore/Kconfig 'WLCORE_SPI'
-clean_mk CONFIG_WLCORE_SPI drivers/net/wireless/ti/wlcore/Makefile
 
 announce USB_ZD1201 - "USB ZD1201 based Wireless device support"
 reject_firmware drivers/net/wireless/zd1201.c
@@ -1815,7 +1807,6 @@ clean_mk CONFIG_TI_ST drivers/misc/ti-st/Makefile
 
 announce WIMAX_I2400M - "Intel Wireless WiMAX Connection 2400"
 reject_firmware drivers/net/wimax/i2400m/fw.c
-clean_blob drivers/net/wimax/i2400m/sdio.c
 clean_blob drivers/net/wimax/i2400m/usb.c
 clean_blob Documentation/wimax/README.i2400m
 clean_kconfig drivers/net/wimax/i2400m/Kconfig 'WIMAX_I2400M'
@@ -1827,8 +1818,7 @@ clean_blob drivers/staging/bcm/Macros.h
 # the firmware proper.
 clean_sed '
 /^static \(inline \)\?struct file \*open_firmware_file/,/^}$/ {
-  /oldfs *= *get_fs();/i\
-	return /*(DEBLOBBED)*/ NULL;
+  s,\(flp *= *\)filp_open[^;]*,\1/*(DEBLOBBED)*/(void*)-ENOENT,
 }' drivers/staging/bcm/Misc.c 'disabled non-Free firmware loading machinery'
 clean_kconfig drivers/staging/bcm/Kconfig 'BCM_WIMAX'
 clean_mk CONFIG_BCM_WIMAX drivers/staging/bcm/Makefile
@@ -1952,11 +1942,11 @@ clean_mk CONFIG_LIRC_ZILOG drivers/staging/media/lirc/Makefile
 # Data acquisition #
 ####################
 
-announce COMEDI_PCI_DRIVERS - "Data acquisition support Comedi PCI drivers"
+announce COMEDI_JR3_PCI - "JR3/PCI force sensor board support"
 reject_firmware drivers/staging/comedi/drivers/jr3_pci.c
 clean_blob drivers/staging/comedi/drivers/jr3_pci.c
-clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_PCI_DRIVERS'
-clean_mk CONFIG_COMEDI_PCI_DRIVERS drivers/staging/comedi/drivers/Makefile
+clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_JR3_PCI'
+clean_mk CONFIG_COMEDI_JR3_PCI drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_USBDUX - "ITL USBDUX support"
 reject_firmware drivers/staging/comedi/drivers/usbdux.c
