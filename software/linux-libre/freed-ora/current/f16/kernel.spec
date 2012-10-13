@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -859,6 +859,8 @@ Requires: kernel-libre-tools = %{version}-%{release}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
 Requires: kernel-libre-tools-libs = %{version}-%{release}
+Provides: kernel-libre-tools-devel
+Provides: kernel-tools-devel
 %description -n kernel-libre-tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
@@ -2113,6 +2115,15 @@ fi
 # and build.
 
 %changelog
+* Thu Oct 11 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.4.13
+
+* Thu Oct 11 2012 Dave Jones <davej@redhat.com> 3.4.13-1
+- Linux 3.4.13
+
+* Wed Oct 03 2012 Josh Boyer <jwboyer@redhat.com>
+- Make sure kernel-tools-libs-devel provides kernel-tools-devel
+
 * Tue Oct  2 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.4.12
 
