@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -782,6 +782,10 @@ Patch21005: arm-tegra-usb-no-reset-linux33.patch
 # Highbank clock functions need to be EXPORT for module builds
 #atch21010: highbank-export-clock-functions.patch
 
+# ARM exynos4
+Patch21020: arm-smdk310-regulator-fix.patch
+Patch21021: arm-origen-regulator-fix.patch
+
 Patch21094: power-x86-destdir.patch
 
 #rhbz 754518
@@ -799,7 +803,7 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 #rhbz 857324
 Patch22070: net-tcp-bz857324.patch
 
-Patch22071: 3.6.2-stable-queue.patch
+Patch22072: linux-3.6-arm-build-fixup.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1429,12 +1433,16 @@ ApplyPatch vmbugon-warnon.patch
 #
 # ARM
 #
+ApplyPatch linux-3.6-arm-build-fixup.patch
 #pplyPatch arm-omap-dt-compat.patch
 # ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 #pplyPatch arm-beagle-usb-init.patch
 #pplyPatch arm-omap-drm-register.patch
+
+ApplyPatch arm-smdk310-regulator-fix.patch
+ApplyPatch arm-origen-regulator-fix.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1557,8 +1565,6 @@ ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 
 #rhbz 857324
 ApplyPatch net-tcp-bz857324.patch
-
-ApplyPatch 3.6.2-stable-queue.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2434,6 +2440,13 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon Oct 15 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.2-gnu.
+
+* Sat Oct 13 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.2-2
+- Linux v3.6.2
+- Fix whitespace corruption in linux-3.6-arm-build-fixup.patch
+
 * Thu Oct 11 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6.1-gnu.
 
