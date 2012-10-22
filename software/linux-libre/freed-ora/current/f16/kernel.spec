@@ -60,7 +60,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 5
+%define base_sublevel 6
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -70,9 +70,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.5%{?stablegnux}
-#define rcrevlibre -3.5%{?rcrevgnux}
-#define gitrevlibre -3.5%{?gitrevgnux}
+%define stablelibre -3.6%{?stablegnux}
+#define rcrevlibre -3.6%{?rcrevgnux}
+#define gitrevlibre -3.6%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 0
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -718,9 +718,6 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch19000: ips-noirq.patch
 
-# Uprobes (rhbz 832083)
-Patch20000: uprobes-backport.patch
-
 #rhbz 769766
 Patch21072: mac80211-fix-rx-key-NULL-ptr-deref-in-promiscuous-mode.patch
 
@@ -737,10 +734,6 @@ Patch21306: shlib_base_randomize.patch
 # Debug patches
 Patch30000: weird-root-dentry-name-debug.patch
 Patch30010: debug-808990.patch
-
-#Fix FIPS for aesni hardare
-Patch22055: crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
-Patch22056: crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1372,9 +1365,6 @@ ApplyPatch ips-noirq.patch
 
 #ApplyPatch pci-crs-blacklist.patch
 
-# Uprobes (rhbz 832083)
-ApplyPatch uprobes-backport.patch
-
 #rhbz 754518
 #ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -1383,10 +1373,6 @@ ApplyPatch unhandled-irqs-switch-to-polling.patch
 # debug patches
 ApplyPatch weird-root-dentry-name-debug.patch
 ApplyPatch debug-808990.patch
-
-#Fix FIPS for aesni hardare
-ApplyPatch crypto-testmgr-allow-aesni-intel-and-ghash_clmulni-intel.patch
-ApplyPatch crypto-aesni-intel-fix-wrong-kfree-pointer.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2088,7 +2074,13 @@ fi
 # and build.
 
 %changelog
-* Fri Oct 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sun Oct 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.
+
+* Tue Oct 16 2012 Dave Jones <davej@redhat.com>
+- Linux 3.6
+
+* Tue Oct 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Oct 19
 - GNU Linux-libre 3.5.7.
 
 * Tue Oct 16 2012 Dave Jones <davej@redhat.com> 3.5.7-1
