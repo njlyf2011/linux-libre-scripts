@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2074,10 +2074,16 @@ fi
 # and build.
 
 %changelog
-* Sun Oct 21 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Oct 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.2.
+
+* Tue Oct 16 2012 Dave Jones <davej@redhat.com> 3.6.2-1
+- Linux 3.6.2
+
+* Tue Oct 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Oct 21
 - GNU Linux-libre 3.6.
 
-* Tue Oct 16 2012 Dave Jones <davej@redhat.com>
+* Tue Oct 16 2012 Dave Jones <davej@redhat.com> 3.6.0-1
 - Linux 3.6
 
 * Tue Oct 16 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Oct 19
