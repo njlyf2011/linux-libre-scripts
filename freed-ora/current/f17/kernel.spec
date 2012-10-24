@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 4
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -770,10 +770,7 @@ Patch19001: i82975x-edac-fix.patch
 
 # ARM
 # Flattened devicetree support
-Patch21000: arm-omap-dt-compat.patch
-Patch21001: arm-smsc-support-reading-mac-address-from-device-tree.patch
-# drm register derived from http://www.digipedia.pl/usenet/thread/19013/36923/ 
-#atch21002: arm-omap-drm-register.patch
+Patch21003: arm-linux-3.6-revert-missaligned-access-check-on-put_user.patch
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
@@ -782,7 +779,7 @@ Patch21005: arm-tegra-usb-no-reset-linux33.patch
 
 # ARM highbank patches
 # Highbank clock functions need to be EXPORT for module builds
-#atch21010: highbank-export-clock-functions.patch
+Patch21010: arm-highbank-sata-fix.patch
 
 # ARM exynos4
 Patch21020: arm-smdk310-regulator-fix.patch
@@ -804,6 +801,21 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 
 #rhbz 857324
 Patch22070: net-tcp-bz857324.patch
+
+#rhbz 770484
+Patch22071: iwlwifi-fix-6000-ch-switch.patch
+
+#rhbz 862168
+Patch22073: mac80211_local_deauth_v3.6.patch
+
+#rhbz 866013
+Patch22074: mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
+
+#rhbz 856863
+Patch22075: rt2x00-usb-fix-reset-resume.patch
+
+#rhbz 862877 864824 CVE-2012-0957
+Patch22076: fix-stack-memory-content-leak-via-UNAME26.patch
 
 Patch22072: linux-3.6-arm-build-fixup.patch
 
@@ -1436,12 +1448,10 @@ ApplyPatch vmbugon-warnon.patch
 # ARM
 #
 ApplyPatch linux-3.6-arm-build-fixup.patch
-#pplyPatch arm-omap-dt-compat.patch
-# ApplyPatch arm-smsc-support-reading-mac-address-from-device-tree.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-#pplyPatch arm-beagle-usb-init.patch
-#pplyPatch arm-omap-drm-register.patch
+ApplyPatch arm-highbank-sata-fix.patch
+ApplyPatch arm-linux-3.6-revert-missaligned-access-check-on-put_user.patch
 
 ApplyPatch arm-smdk310-regulator-fix.patch
 ApplyPatch arm-origen-regulator-fix.patch
@@ -1569,6 +1579,21 @@ ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 
 #rhbz 857324
 ApplyPatch net-tcp-bz857324.patch
+
+#rhbz 770484
+ApplyPatch iwlwifi-fix-6000-ch-switch.patch
+
+#rhbz 862168
+ApplyPatch mac80211_local_deauth_v3.6.patch
+
+#rhbz 866013
+ApplyPatch mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
+
+#rhbz 856863
+ApplyPatch rt2x00-usb-fix-reset-resume.patch
+
+#rhbz 862877 864824 CVE-2012-0957
+ApplyPatch fix-stack-memory-content-leak-via-UNAME26.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2444,6 +2469,31 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon Oct 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.3-gnu.
+
+* Mon Oct 22 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.3-1
+- CVE-2012-0957: uts: stack memory leak in UNAME26 (rhbz 862877 864824)
+- Fix rt2x00 usb reset resume (rhbz 856863)
+- Linux v3.6.3
+
+* Mon Oct 22 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Cleanup ARM patches
+- Add highbank sata patch
+- add patch to revert ARM misaligned access check to stop kernel OOPS
+
+* Sun Oct 21 2012 Josh Boyer <jwboyer@redhat.com>
+- Don't enable UDL per Dave Airlie
+
+* Thu Oct 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch to have mac80211 connect with HT20 if HT40 is not allowed (rhbz 866013)
+- Enable VFIO (rhbz 867152)
+- Apply patch from Stanislaw Gruszka to fix mac80211 issue (rhbz 862168)
+- Apply patch to fix iwlwifi crash (rhbz 770484)
+
+* Wed Oct 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable TCM_VHOST module (rhbz 866984)
+
 * Mon Oct 15 2012 Mauro Carvalho Chehab <mchehab@redhat.com> - 3.6.2-4
 - Fix i82975x_edac driver by rewriting most of the logic there
 
