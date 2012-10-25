@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -833,6 +833,9 @@ Patch22075: rt2x00-usb-fix-reset-resume.patch
 
 #rhbz 862877 864824 CVE-2012-0957
 Patch22076: fix-stack-memory-content-leak-via-UNAME26.patch
+
+#rhbz 867344
+Patch22077: dont-call-cifs_lookup-on-hashed-negative-dentry.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1623,6 +1626,9 @@ ApplyPatch rt2x00-usb-fix-reset-resume.patch
 
 #rhbz 862877 864824 CVE-2012-0957
 ApplyPatch fix-stack-memory-content-leak-via-UNAME26.patch
+
+#rhbz 867344
+ApplyPatch dont-call-cifs_lookup-on-hashed-negative-dentry.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2487,10 +2493,14 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
-* Tue Oct 23 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Oct 22 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- VIFO fails on ARM at the moment so disable it for the time being
+
+* Mon Oct 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Oct 23
 - GNU Linux-libre 3.6.3-gnu.
 
 * Mon Oct 22 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix CIFS oops from Jeff Layton (rhbz 867344)
 - CVE-2012-0957: uts: stack memory leak in UNAME26 (rhbz 862877 864824)
 - Fix rt2x00 usb reset resume (rhbz 856863)
 
