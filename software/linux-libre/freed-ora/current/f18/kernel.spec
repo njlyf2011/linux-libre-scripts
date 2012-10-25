@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -791,6 +791,7 @@ Patch19001: i82975x-edac-fix.patch
 Patch21000: arm-read_current_timer.patch
 Patch21001: arm-fix-omapdrm.patch
 Patch21002: arm-fix_radio_shark.patch
+Patch21003: arm-linux-3.6-revert-missaligned-access-check-on-put_user.patch
 # OMAP
 
 # ARM tegra
@@ -800,6 +801,10 @@ Patch21006: arm-tegra-sdhci-module-fix.patch
 
 # ARM highbank patches
 Patch21010: arm-highbank-sata-fix.patch
+
+# ARM exynos4
+Patch21020: arm-smdk310-regulator-fix.patch
+Patch21021: arm-origen-regulator-fix.patch
 
 Patch21094: power-x86-destdir.patch
 
@@ -811,11 +816,23 @@ Patch22000: weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 847548
-Patch22066: virtio-scsi-Initialize-scatterlist-structure.patch
-
 #rhbz 846037
 Patch22067: selinux-Fix-sel_netnode_insert-suspicious-rcu-dereference.patch
+
+#rhbz 770484
+Patch22071: iwlwifi-fix-6000-ch-switch.patch
+
+#rhbz 862168
+Patch22073: mac80211_local_deauth_v3.6.patch
+
+#rhbz 866013
+Patch22074: mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
+
+#rhbz 856863
+Patch22075: rt2x00-usb-fix-reset-resume.patch
+
+#rhbz 862877 864824 CVE-2012-0957
+Patch22076: fix-stack-memory-content-leak-via-UNAME26.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1461,6 +1478,10 @@ ApplyPatch arm-fix_radio_shark.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-sdhci-module-fix.patch
+ApplyPatch arm-highbank-sata-fix.patch
+ApplyPatch arm-linux-3.6-revert-missaligned-access-check-on-put_user.patch
+ApplyPatch arm-smdk310-regulator-fix.patch
+ApplyPatch arm-origen-regulator-fix.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1585,11 +1606,23 @@ ApplyPatch weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 847548
-ApplyPatch virtio-scsi-Initialize-scatterlist-structure.patch
-
 #rhbz 846037
 ApplyPatch selinux-Fix-sel_netnode_insert-suspicious-rcu-dereference.patch
+
+#rhbz 770484
+ApplyPatch iwlwifi-fix-6000-ch-switch.patch
+
+#rhbz 862168
+ApplyPatch mac80211_local_deauth_v3.6.patch
+
+#rhbz 866013
+ApplyPatch mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
+
+#rhbz 856863
+ApplyPatch rt2x00-usb-fix-reset-resume.patch
+
+#rhbz 862877 864824 CVE-2012-0957
+ApplyPatch fix-stack-memory-content-leak-via-UNAME26.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2454,6 +2487,26 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Oct 23 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.3-gnu.
+
+* Mon Oct 22 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-0957: uts: stack memory leak in UNAME26 (rhbz 862877 864824)
+- Fix rt2x00 usb reset resume (rhbz 856863)
+
+* Mon Oct 22 2012 Justin M. Forbes <jforbes@linuxtx.org> - 3.6.3-1
+- Linux 3.6.3
+
+* Mon Oct 22 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Revert ARM misaligned access check to stop kernel OOPS
+- Actually apply highbank sata patch
+
+* Thu Oct 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch to have mac80211 connect with HT20 if HT40 is not allowed (rhbz 866013)
+- Enable VFIO (rhbz 867152)
+- Apply patch from Stanislaw Gruszka to fix mac80211 issue (rhbz 862168)
+- Apply patch to fix iwlwifi crash (rhbz 770484)
+
 * Tue Oct 16 2012 Mauro Carvalho Chehab <mchehab@redhat.com> - 3.6.2-2
 - Fix i82975x_edac OOPS
 
