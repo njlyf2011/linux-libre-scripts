@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -730,6 +730,26 @@ Patch21300: unhandled-irqs-switch-to-polling.patch
 
 #rhbz 804957 CVE-2012-1568
 Patch21306: shlib_base_randomize.patch
+
+#rhbz 867344
+Patch22077: dont-call-cifs_lookup-on-hashed-negative-dentry.patch
+
+#rhbz 869904 869909 CVE-2012-4508
+Patch22080: 0001-ext4-ext4_inode_info-diet.patch
+Patch22081: 0002-ext4-give-i_aiodio_unwritten-a-more-appropriate-name.patch
+Patch22082: 0003-ext4-fix-unwritten-counter-leakage.patch
+Patch22083: 0004-ext4-completed_io-locking-cleanup.patch
+Patch22084: 0005-ext4-serialize-dio-nonlocked-reads-with-defrag-worke.patch
+Patch22085: 0006-ext4-serialize-unlocked-dio-reads-with-truncate.patch
+Patch22086: 0007-ext4-endless-truncate-due-to-nonlocked-dio-readers.patch
+Patch22087: 0008-ext4-serialize-truncate-with-owerwrite-DIO-workers.patch
+Patch22088: 0009-ext4-punch_hole-should-wait-for-DIO-writers.patch
+Patch22089: 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
+Patch22090: 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
+Patch22091: 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
+
+#rhbz 871923 871848 CVE-2012-4565
+Patch22092: net-fix-divide-by-zero-in-tcp-algorithm-illinois.patch
 
 # Debug patches
 Patch30000: weird-root-dentry-name-debug.patch
@@ -1373,6 +1393,26 @@ ApplyPatch unhandled-irqs-switch-to-polling.patch
 # debug patches
 ApplyPatch weird-root-dentry-name-debug.patch
 ApplyPatch debug-808990.patch
+
+#rhbz 867344
+ApplyPatch dont-call-cifs_lookup-on-hashed-negative-dentry.patch
+
+#rhbz 869904 869909 CVE-2012-4508
+ApplyPatch 0001-ext4-ext4_inode_info-diet.patch
+ApplyPatch 0002-ext4-give-i_aiodio_unwritten-a-more-appropriate-name.patch
+ApplyPatch 0003-ext4-fix-unwritten-counter-leakage.patch
+ApplyPatch 0004-ext4-completed_io-locking-cleanup.patch
+ApplyPatch 0005-ext4-serialize-dio-nonlocked-reads-with-defrag-worke.patch
+ApplyPatch 0006-ext4-serialize-unlocked-dio-reads-with-truncate.patch
+ApplyPatch 0007-ext4-endless-truncate-due-to-nonlocked-dio-readers.patch
+ApplyPatch 0008-ext4-serialize-truncate-with-owerwrite-DIO-workers.patch
+ApplyPatch 0009-ext4-punch_hole-should-wait-for-DIO-writers.patch
+ApplyPatch 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
+ApplyPatch 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
+ApplyPatch 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
+
+#rhbz 871923 871848 CVE-2012-4565
+ApplyPatch net-fix-divide-by-zero-in-tcp-algorithm-illinois.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2074,7 +2114,36 @@ fi
 # and build.
 
 %changelog
-* Mon Oct 22 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Oct 31 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.5-gnu.
+
+* Wed Oct 30 2012 Justin M. Forbes <jforbes@redhat.com> 3.6.5-1
+- Linux 3.6.5
+
+* Wed Oct 30 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-4565 net: divide by zero in tcp algorithm illinois (rhbz 871848 871923)
+
+* Mon Oct 29 2012 Justin M. Forbes <jforbes@redhat.com> 3.6.4-1
+- Linux 3.6.4
+
+* Thu Oct 25 2012 Justin M. Forbes <jforbes@redhat.com>
+- CVE-2012-4508: ext4: AIO vs fallocate stale data exposure (rhbz 869904 869909)
+
+* Wed Oct 24 2012 Josh Boyer <jwboyer@redhat.com>
+- Remove patch added for rhbz 856863
+- Add patch to fix corrupted text with i915 (rhbz 852210)
+
+* Mon Oct 22 2012 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix CIFS oops from Jeff Layton (rhbz 867344)
+- CVE-2012-0957: uts: stack memory leak in UNAME26 (rhbz 862877 864824)
+- Fix rt2x00 usb reset resume (rhbz 856863)
+
+* Thu Oct 18 2012 Josh Boyer <jwboyer@redhat.com>
+- Patch to have mac80211 connect with HT20 if HT40 is not allowed (rhbz 866013)
+- Apply patch from Stanislaw Gruszka to fix mac80211 issue (rhbz 862168)
+- Apply patch to fix iwlwifi crash (rhbz 770484)
+
+* Wed Oct 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Oct 22
 - GNU Linux-libre 3.6.2.
 
 * Tue Oct 16 2012 Dave Jones <davej@redhat.com> 3.6.2-1
