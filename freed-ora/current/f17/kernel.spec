@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -689,6 +689,8 @@ Patch04: linux-2.6-compile-fixes.patch
 # build tweak for build ID magic, even for -vanilla
 Patch05: linux-2.6-makefile-after_link.patch
 
+Patch06: power-x86-destdir.patch
+
 Patch07: freedo.patch
 
 %if !%{nopatches}
@@ -785,8 +787,6 @@ Patch21010: arm-highbank-sata-fix.patch
 Patch21020: arm-smdk310-regulator-fix.patch
 Patch21021: arm-origen-regulator-fix.patch
 
-Patch21094: power-x86-destdir.patch
-
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -802,16 +802,7 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 #rhbz 857324
 Patch22070: net-tcp-bz857324.patch
 
-#rhbz 770484
-Patch22071: iwlwifi-fix-6000-ch-switch.patch
-
 Patch22072: linux-3.6-arm-build-fixup.patch
-
-#rhbz 862168
-Patch22073: mac80211_local_deauth_v3.6.patch
-
-#rhbz 866013
-Patch22074: mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
 
 #rhbz 867344
 Patch22077: dont-call-cifs_lookup-on-hashed-negative-dentry.patch
@@ -829,6 +820,11 @@ Patch22088: 0009-ext4-punch_hole-should-wait-for-DIO-writers.patch
 Patch22089: 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
 Patch22090: 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
 Patch22091: 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
+
+#rhbz 871923 871848 CVE-2012-4565
+Patch22092: net-fix-divide-by-zero-in-tcp-algorithm-illinois.patch
+
+Patch22100: uprobes-upstream-backport.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1439,6 +1435,8 @@ ApplyPatch linux-2.6-makefile-after_link.patch
 #
 ApplyOptionalPatch linux-2.6-compile-fixes.patch
 
+ApplyPatch power-x86-destdir.patch
+
 # Freedo logo.
 ApplyPatch freedo.patch
 
@@ -1573,8 +1571,6 @@ ApplyPatch ips-noirq.patch
 
 ApplyPatch i82975x-edac-fix.patch
 
-ApplyPatch power-x86-destdir.patch
-
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -1590,15 +1586,6 @@ ApplyPatch efifb-skip-DMI-checks-if-bootloader-knows.patch
 
 #rhbz 857324
 ApplyPatch net-tcp-bz857324.patch
-
-#rhbz 770484
-ApplyPatch iwlwifi-fix-6000-ch-switch.patch
-
-#rhbz 862168
-ApplyPatch mac80211_local_deauth_v3.6.patch
-
-#rhbz 866013
-ApplyPatch mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
 
 #rhbz 867344
 ApplyPatch dont-call-cifs_lookup-on-hashed-negative-dentry.patch
@@ -1616,6 +1603,11 @@ ApplyPatch 0009-ext4-punch_hole-should-wait-for-DIO-writers.patch
 ApplyPatch 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
 ApplyPatch 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
 ApplyPatch 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
+
+#rhbz 871923 871848 CVE-2012-4565
+ApplyPatch net-fix-divide-by-zero-in-tcp-algorithm-illinois.patch
+
+ApplyPatch uprobes-upstream-backport.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2491,7 +2483,29 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Tue Oct 30 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Oct 31 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.5-gnu.
+
+* Wed Oct 31 2012 Dave Jones <davej@redhat.com> 3.6.5-1
+- Linux 3.6.5
+  Merged upstream:
+  - iwlwifi-fix-6000-ch-switch.patch
+  - mac80211_local_deauth_v3.6.patch
+  - mac80211-connect-with-HT20-if-HT40-is-not-permitted.patch
+
+* Wed Oct 30 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-4565 net: divide by zero in tcp algorithm illinois (rhbz 871848 871923)
+
+* Tue Oct 30 2012 Mauro Carvalho Chehab <mchehab@redhat.com>
+- Fix EDAC memory filling for csrow-based memory controllers
+
+* Tue Oct 30 2012 Josh Boyer <jwboyer@redhat.com>
+- Move power-x86-destdir.patch to apply on vanilla kernels (thanks knurd)
+
+* Mon Oct 29 2012 Justin M. Forbes <jforbes@redhat.com>
+- Uprobes backports from upstream
+
+* Mon Oct 29 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Oct 30
 - GNU Linux-libre 3.6.4-gnu.
 
 * Mon Oct 29 2012 Justin M. Forbes <jforbes@redhat.com> 3.6.4-1
