@@ -1,0 +1,111 @@
+From f1fa90d02f50078a89da602d73dc9ab7743439ba Mon Sep 17 00:00:00 2001
+From: Josh Boyer <jwboyer@redhat.com>
+Date: Mon, 24 Sep 2012 10:46:36 -0400
+Subject: [PATCH 2/2] MODSIGN: Add modules_sign make target
+
+If CONFIG_MODULE_SIG is set, and 'make modules_sign' is called then this
+patch will cause the modules to get a signature installed.  The make target
+is intended to be run after 'make modules_install', and will modify the
+modules in-place in the installed location.
+
+The signature will be appended to the module, along with some information
+about the signature size and a magic string that indicates the presence of
+the signature.  This requires private and public keys to be available.  By
+default these are expected to be found in files:
+
+    signing_key.priv
+    signing_key.x509
+
+in the base directory of the build.  The first is the private key in PEM
+form and the second is the X.509 certificate in DER form as can be generated
+from openssl:
+
+    openssl req \
+            -new -x509 -outform PEM -out signing_key.x509 \
+            -keyout signing_key.priv -nodes \
+            -subj "/CN=H2G2/O=Magrathea/CN=Slartibartfast"
+
+If the secret key is not found then signing will be skipped and the unsigned
+module from (1) will just be copied to foo.ko.
+
+If signing occurs, lines like the following will be seen:
+
+        SIGN [M] <install path>/fs/foo/foo.ko
+
+will appear in the build log.  If the signature step will be skipped and the
+following will be seen:
+
+        NO SIGN [M] <install path>/fs/foo/foo.ko
+
+NOTE!  After the signature step, the signed module must not be passed through
+strip.  If you wish to strip or otherwise modify the kernel modules, use the
+built-in stripping capabilities with 'make modules_install' or perform said
+modifications before calling this make target.  This restriction may affect
+packaging tools (such as rpmbuild) and initramfs composition tools.
+
+Based heavily on work by: David Howells <dhowells@redhat.com>
+Signed-off-by: Josh Boyer <jwboyer@redhat.com>
+---
+ Makefile                 |  6 ++++++
+ scripts/Makefile.modsign | 32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 38 insertions(+)
+ create mode 100644 scripts/Makefile.modsign
+
+diff --git a/Makefile b/Makefile
+index 89a2e2c..ac04c11 100644
+--- a/Makefile
++++ b/Makefile
+@@ -981,6 +981,12 @@ _modinst_post: _modinst_
+ 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.fwinst obj=firmware __fw_modinst
+ 	$(call cmd,depmod)
+ 
++ifeq ($(CONFIG_MODULE_SIG), y)
++PHONY += modules_sign
++modules_sign:
++	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modsign
++endif
++
+ else # CONFIG_MODULES
+ 
+ # Modules not configured
+diff --git a/scripts/Makefile.modsign b/scripts/Makefile.modsign
+new file mode 100644
+index 0000000..670d5dc
+--- /dev/null
++++ b/scripts/Makefile.modsign
+@@ -0,0 +1,32 @@
++# ==========================================================================
++# Signing modules
++# ==========================================================================
++
++PHONY := __modsign
++__modsign:
++
++include scripts/Kbuild.include
++
++__modules := $(sort $(shell grep -h '\.ko' /dev/null $(wildcard $(MODVERDIR)/*.mod)))
++modules := $(patsubst %.o,%.ko,$(wildcard $(__modules:.ko=.o)))
++
++PHONY += $(modules)
++__modsign: $(modules)
++	@:
++
++quiet_cmd_sign_ko = SIGN [M] $(2)/$(notdir $@)
++        cmd_sign_ko = $(mod_sign_cmd) $(2)/$(notdir $@)
++
++# Modules built outside the kernel source tree go into extra by default
++INSTALL_MOD_DIR ?= extra
++ext-mod-dir = $(INSTALL_MOD_DIR)$(subst $(patsubst %/,%,$(KBUILD_EXTMOD)),,$(@D))
++
++modinst_dir = $(if $(KBUILD_EXTMOD),$(ext-mod-dir),kernel/$(@D))
++
++$(modules):
++	$(call cmd,sign_ko,$(MODLIB)/$(modinst_dir))
++
++# Declare the contents of the .PHONY variable as phony.  We keep that
++# # information in a variable se we can use it in if_changed and friends.
++
++.PHONY: $(PHONY)
+-- 
+1.7.11.7
+
