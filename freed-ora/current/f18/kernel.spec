@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -741,10 +741,11 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
-Patch900: modsign-post-KS-jwb.patch
+Patch900: modsign-upstream-3.7.patch
+Patch901: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-20120924.patch
+Patch1000: secure-boot-20121026.patch
 
 # Improve PCI support on UEFI
 Patch1100: handle-efi-roms.patch
@@ -1558,10 +1559,11 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # crypto/
+ApplyPatch modsign-upstream-3.7.patch
 ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
-ApplyPatch secure-boot-20120924.patch
+ApplyPatch secure-boot-20121026.patch
 
 # Improved PCI support for UEFI
 ApplyPatch handle-efi-roms.patch
@@ -1685,10 +1687,6 @@ find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
 # remove unnecessary SCM files
 find . -name .gitignore -exec rm -f {} \; >/dev/null
 
-%if %{signmodules}
-cp %{SOURCE11} .
-%endif
-
 cd ..
 
 ###
@@ -1757,6 +1755,12 @@ BuildKernel() {
 
     make -s mrproper
     cp configs/$Config .config
+
+    %if %{signmodules}
+    cp %{SOURCE11} .
+    %endif
+
+    chmod +x scripts/sign-file
 
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
@@ -2501,10 +2505,14 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Oct 31 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.5-2
+- Update modsign to what is currently in 3.7-rc2
+- Update secure boot support for UEFI cert importing.
+
 * Wed Oct 31 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6.5-gnu.
 
-* Wed Oct 30 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.5-1
+* Wed Oct 31 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.5-1
 - Linux v3.6.5
 - CVE-2012-4565 net: divide by zero in tcp algorithm illinois (rhbz 871848 871923)
 
