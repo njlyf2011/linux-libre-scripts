@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -745,7 +745,8 @@ Patch900: modsign-upstream-3.7.patch
 Patch901: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-20121026.patch
+Patch1000: secure-boot-20121105.patch
+Patch1001: efivarfs-3.6.patch
 
 # Improve PCI support on UEFI
 Patch1100: handle-efi-roms.patch
@@ -789,6 +790,9 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 
 
 Patch19001: i82975x-edac-fix.patch
+
+Patch20000: 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
+Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 # ARM
 Patch21000: arm-read_current_timer.patch
@@ -1563,7 +1567,8 @@ ApplyPatch modsign-upstream-3.7.patch
 ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
-ApplyPatch secure-boot-20121026.patch
+ApplyPatch efivarfs-3.6.patch
+ApplyPatch secure-boot-20121105.patch
 
 # Improved PCI support for UEFI
 ApplyPatch handle-efi-roms.patch
@@ -1606,6 +1611,9 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 ApplyPatch i82975x-edac-fix.patch
+
+ApplyPatch 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
+ApplyPatch 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -2505,6 +2513,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Nov  5 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.6-gnu.
+
+* Mon Nov 05 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.6-3
+- Backport efivarfs from efi/next for moktools
+- Fix build break without CONFIG_EFI set (reported by Peter W. Bowey)
+- Linux v3.6.6
+
+* Mon Nov 05 2012 David Woodhouse <David.Woodhouse@intel.com> - 3.6.5-3
+- Fix EFI framebuffer handling
+
 * Wed Oct 31 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.5-2
 - Update modsign to what is currently in 3.7-rc2
 - Update secure boot support for UEFI cert importing.
