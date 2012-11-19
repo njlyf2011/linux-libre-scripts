@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -748,12 +748,23 @@ Patch22089: 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
 Patch22090: 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
 Patch22091: 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
 
-#rhbz 871923 871848 CVE-2012-4565
-Patch22092: net-fix-divide-by-zero-in-tcp-algorithm-illinois.patch
-
 # Debug patches
 Patch30000: weird-root-dentry-name-debug.patch
 Patch30010: debug-808990.patch
+
+#rhbz 871078
+Patch22110: usb-audio-fix-crash-at-re-preparing-the-PCM-stream.patch
+Patch22111: USB-EHCI-urb-hcpriv-should-not-be-NULL.patch
+Patch22112: USB-report-submission-of-active-URBs.patch
+
+#rhbz 869341
+Patch22113: smp_irq_move_cleanup_interrupt.patch
+
+#rhbz 873001
+Patch22114: iwlwifi-remove-queue-empty-warn-3.6.patch
+
+#rhbz 870562
+Patch22115: keyspan.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1411,8 +1422,19 @@ ApplyPatch 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
 ApplyPatch 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
 ApplyPatch 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
 
-#rhbz 871923 871848 CVE-2012-4565
-ApplyPatch net-fix-divide-by-zero-in-tcp-algorithm-illinois.patch
+#rhbz 871078
+ApplyPatch usb-audio-fix-crash-at-re-preparing-the-PCM-stream.patch
+ApplyPatch USB-EHCI-urb-hcpriv-should-not-be-NULL.patch
+ApplyPatch USB-report-submission-of-active-URBs.patch
+
+#rhbz 869341
+ApplyPatch smp_irq_move_cleanup_interrupt.patch
+
+#rhbz 873001
+ApplyPatch iwlwifi-remove-queue-empty-warn-3.6.patch
+
+#rhbz 870562
+ApplyPatch keyspan.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2114,6 +2136,22 @@ fi
 # and build.
 
 %changelog
+* Mon Nov 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.7-gnu.
+
+* Sat Nov 17 2012 Justin M. Forbes <jforbes@linuxtx.org> - 3.6.7-1
+- linux 3.6.7
+
+* Fri Nov 16 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix oops causing typo in keyspan driver (rhbz 870562)
+- Don't WARN_ON empty queues in iwlwifi (rhbz 873001)
+
+* Thu Nov 15 2012 Justin M. Forbes <jforbes@redhat.com>
+- Fix panic in  panic in smp_irq_move_cleanup_interrupt (rhbz 869341)
+
+* Mon Nov 12 2012 Justin M. Forbes <jforbes@redhat.com>
+- fix list_del corruption warning on USB audio with twinkle (rhbz 871078)
+
 * Mon Nov  5 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6.6-gnu.
 
