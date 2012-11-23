@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -859,6 +859,20 @@ Patch22114: iwlwifi-remove-queue-empty-warn-3.6.patch
 
 #rhbz 870562
 Patch22115: keyspan.patch
+
+#rhbz 812129
+Patch22120: block-fix-a-crash-when-block-device-is.patch
+Patch22121: blockdev-turn-a-rw-semaphore-into-a-percpu-rw-sem.patch
+Patch22122: fs-lock-splice_read-and-splice_write-functions.patch
+
+#rhbz 874791
+Patch22125: Bluetooth-Add-support-for-BCM20702A0.patch
+
+#rhbz 859485
+Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
+
+#rhbz CVE-2012-4461 862900 878518
+Patch21227: KVM-x86-invalid-opcode-oops-on-SET_SREGS-with-OSXSAV.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1672,6 +1686,20 @@ ApplyPatch iwlwifi-remove-queue-empty-warn-3.6.patch
 
 #rhbz 870562
 ApplyPatch keyspan.patch
+
+#rhbz 812129
+ApplyPatch block-fix-a-crash-when-block-device-is.patch
+ApplyPatch blockdev-turn-a-rw-semaphore-into-a-percpu-rw-sem.patch
+ApplyPatch fs-lock-splice_read-and-splice_write-functions.patch
+
+#rhbz 874791
+ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
+
+#rhbz 859485
+ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
+
+#rhbz CVE-2012-4461 862900 878518
+ApplyPatch KVM-x86-invalid-opcode-oops-on-SET_SREGS-with-OSXSAV.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2549,6 +2577,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Nov 20 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.7-5
+- CVE-2012-4461: kvm: invalid opcode oops on SET_SREGS with OSXSAVE bit set (rhbz 878518 862900)
+- Add VC_MUTE ioctl (rhbz 859485)
+- Add support for BCM20702A0 (rhbz 874791)
+
+* Tue Nov 20 2012 Peter Robinson <pbrobinson@fedoraproject.org>
+- Change the minimum mmap address back to 32768 on ARM systems (thanks to Jon Masters)
+
+* Mon Nov 19 2012 Josh Boyer <jwboyer@redhat.com>
+- Apply patches from Jeff Moyer to fix direct-io oops (rhbz 812129)
+
 * Mon Nov 19 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6.7-gnu.
 
