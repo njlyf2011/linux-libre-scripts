@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 4
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -841,6 +841,12 @@ Patch22115: keyspan.patch
 Patch22120: block-fix-a-crash-when-block-device-is.patch
 Patch22121: blockdev-turn-a-rw-semaphore-into-a-percpu-rw-sem.patch
 Patch22122: fs-lock-splice_read-and-splice_write-functions.patch
+
+#rhbz 874791
+Patch22125: Bluetooth-Add-support-for-BCM20702A0.patch
+
+#rhbz CVE-2012-4461 862900 878518
+Patch21227: KVM-x86-invalid-opcode-oops-on-SET_SREGS-with-OSXSAV.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1640,6 +1646,12 @@ ApplyPatch keyspan.patch
 ApplyPatch block-fix-a-crash-when-block-device-is.patch
 ApplyPatch blockdev-turn-a-rw-semaphore-into-a-percpu-rw-sem.patch
 ApplyPatch fs-lock-splice_read-and-splice_write-functions.patch
+
+#rhbz 874791
+ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
+
+#rhbz CVE-2012-4461 862900 878518
+ApplyPatch KVM-x86-invalid-opcode-oops-on-SET_SREGS-with-OSXSAV.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2515,6 +2527,10 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Tue Nov 20 2012 Josh Boyer <jwboyer@redhat.com>
+- CVE-2012-4461: kvm: invalid opcode oops on SET_SREGS with OSXSAVE bit set (rhbz 878518 862900)
+- Add support for BCM20702A0 (rhbz 874791)
+
 * Mon Nov 19 2012 Josh Boyer <jwboyer@redhat.com>
 - Apply patches from Jeff Moyer to fix direct-io oops (rhbz 812129)
 
