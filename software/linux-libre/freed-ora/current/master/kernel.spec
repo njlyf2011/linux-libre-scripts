@@ -131,9 +131,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
-%define gitrev 4
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -203,7 +203,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -216,7 +216,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 1
+%define rawhide_skip_docs 0
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -589,9 +589,6 @@ BuildRequires: sparse >= 0.4.1
 %if %{with_perf}
 BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison
 BuildRequires: audit-libs-devel
-%ifnarch s390 s390x
-BuildRequires: libunwind-devel
-%endif
 %endif
 %if %{with_tools}
 BuildRequires: pciutils-devel gettext
@@ -830,6 +827,10 @@ Patch22125: Bluetooth-Add-support-for-BCM20702A0.patch
 
 #rhbz 859485
 Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
+
+#rhbz CVE-2012-4530 868285 880147
+Patch21228: exec-do-not-leave-bprm-interp-on-stack.patch
+Patch21229: exec-use-eloop-for-max-recursion-depth.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1607,6 +1608,10 @@ ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
 #rhbz 859485
 ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 
+#rhbz CVE-2012-4530 868285 880147
+ApplyPatch exec-do-not-leave-bprm-interp-on-stack.patch
+ApplyPatch exec-use-eloop-for-max-recursion-depth.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -1981,7 +1986,7 @@ BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 WERROR=0 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
+  make %{?_smp_mflags} -C tools/perf -s V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} all
@@ -2485,6 +2490,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Nov 27 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7-rc7-gnu
+
+* Mon Nov 26 2012 Josh Boyer <jwboyer@redhat.com> - 3.7.0-0.rc7.git0.1
+- Linux v3.7-rc7
+- Disable debugging options.
+
+* Mon Nov 26 2012 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_UIO_PDRV on ppc64 (rhbz 878180)
+- Disable perf libunwind support.  Revisit in 3.8 when elf-utils has unwind
+- CVE-2012-4530: stack disclosure binfmt_script load_script (rhbz 868285 880147)
+
 * Mon Nov 26 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7-rc6-gnu
 
