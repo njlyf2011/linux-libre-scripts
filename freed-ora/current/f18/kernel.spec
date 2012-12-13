@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -722,6 +722,7 @@ Patch110: vmbugon-warnon.patch
 
 Patch150: team-net-next-20120808.patch
 Patch151: team-net-next-update-20120927.patch
+Patch152: team-net-next-20121205.patch
 
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
@@ -748,7 +749,7 @@ Patch900: modsign-upstream-3.7.patch
 Patch901: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-20121105.patch
+Patch1000: secure-boot-20121210.patch
 Patch1001: efivarfs-3.6.patch
 
 # Improve PCI support on UEFI
@@ -866,11 +867,12 @@ Patch21229: exec-use-eloop-for-max-recursion-depth.patch
 Patch21230: SCSI-mvsas-Fix-oops-when-ata-commond-timeout.patch
 
 #rhbz 851278
+Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
 Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
 Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 855275
-Patch21236: radeon-evergreen-3.6.9-fixes.mbox
+#rhbz 883414
+Patch21234: mac80211-fix-ibss-scanning.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1505,6 +1507,7 @@ ApplyPatch vmbugon-warnon.patch
 
 ApplyPatch team-net-next-20120808.patch
 ApplyPatch team-net-next-update-20120927.patch
+ApplyPatch team-net-next-20121205.patch
 
 # Architecture patches
 # x86(-64)
@@ -1594,7 +1597,7 @@ ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
 ApplyPatch efivarfs-3.6.patch
-ApplyPatch secure-boot-20121105.patch
+ApplyPatch secure-boot-20121210.patch
 
 # Improved PCI support for UEFI
 ApplyPatch handle-efi-roms.patch
@@ -1691,11 +1694,13 @@ ApplyPatch exec-use-eloop-for-max-recursion-depth.patch
 ApplyPatch SCSI-mvsas-Fix-oops-when-ata-commond-timeout.patch
 
 #rhbz 851278
+ApplyPatch 8139cp-revert-set-ring-address-before-enabling-receiver.patch -R
 ApplyPatch 8139cp-set-ring-address-after-enabling-C-mode.patch
 ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 855275
-ApplyPatch radeon-evergreen-3.6.9-fixes.mbox
+#rhbz 883414
+ApplyPatch mac80211-fix-ibss-scanning.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -2573,6 +2578,19 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Dec 11 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.10-gnu
+
+* Tue Dec 11 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.10-4
+- Update secure boot patches to include MoK support
+- Fix IBSS scanning in mac80211 (rhbz 883414)
+
+* Tue Dec 11 2012 Justin M. Forbes <jforbes@redhat.com> 3.6.10-1
+- Linux 3.6.10
+
+* Wed Dec 05 2012 Dave Jones <davej@redhat.com>
+- Team driver updates (Jiri Pirko)
+
 * Mon Dec 03 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.9-2
 - Backport 3 upstream fixes to resolve radeon schedule IB errors (rhbz 855275)
 
