@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -772,11 +772,12 @@ Patch21229: exec-use-eloop-for-max-recursion-depth.patch
 Patch21230: SCSI-mvsas-Fix-oops-when-ata-commond-timeout.patch
 
 #rhbz 851278
+Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
 Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
 Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 855275
-Patch21235: radeon-evergreen-3.6.9-fixes.mbox
+#rhbz 883414
+Patch21234: mac80211-fix-ibss-scanning.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1454,11 +1455,13 @@ ApplyPatch exec-use-eloop-for-max-recursion-depth.patch
 ApplyPatch SCSI-mvsas-Fix-oops-when-ata-commond-timeout.patch
 
 #rhbz 851278
+ApplyPatch 8139cp-revert-set-ring-address-before-enabling-receiver.patch -R
 ApplyPatch 8139cp-set-ring-address-after-enabling-C-mode.patch
 ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 855275
-ApplyPatch radeon-evergreen-3.6.9-fixes.mbox
+#rhbz 883414
+ApplyPatch mac80211-fix-ibss-scanning.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -2160,6 +2163,15 @@ fi
 # and build.
 
 %changelog
+* Tue Dec 11 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.10-gnu
+
+* Tue Dec 11 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix IBSS scanning in mac80211 (rhbz 883414)
+
+* Tue Dec 11 2012 Justin M. Forbes <jforbes@redhat.com> 3.6.10-1
+- Linux 3.6.10
+
 * Mon Dec 03 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.9-2
 - Backport 3 upstream fixes to resolve radeon schedule IB errors (rhbz 855275)
 
