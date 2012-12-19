@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index d863aa0..20a7f4e 100644
+index cc6805f..19d0586 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -150,7 +150,7 @@ index 83ed00a..bdb259d 100644
  	  This option enables special console drivers which allow the kernel
  	  to print messages very early in the bootup process.
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
-index 884819c..ee586cf 100644
+index 9aa60f6..564e215 100644
 --- a/arch/mips/Makefile
 +++ b/arch/mips/Makefile
 @@ -268,18 +268,19 @@ endif
@@ -8593,7 +8593,7 @@ index 5652571..94056bb 100644
  		pciu_write(PCICLKSELREG, ONE_THIRD_VTCLOCK);
  	else if ((vtclock / 4) < pci_clock_max)
 diff --git a/arch/mips/vr41xx/common/init.c b/arch/mips/vr41xx/common/init.c
-index 2391632..aca5c76 100644
+index 23916321..aca5c76 100644
 --- a/arch/mips/vr41xx/common/init.c
 +++ b/arch/mips/vr41xx/common/init.c
 @@ -43,8 +43,8 @@ void __init plat_time_init(void)
@@ -44423,7 +44423,7 @@ index 0000000..4438d2a
 +If you have some question/comments please feel free to write me.
 +
 diff --git a/drivers/net/wireless/rtl818x/rtl8187/dev.c b/drivers/net/wireless/rtl818x/rtl8187/dev.c
-index 1e0be14..b6f6f52 100644
+index bf01d21..6af95a5 100644
 --- a/drivers/net/wireless/rtl818x/rtl8187/dev.c
 +++ b/drivers/net/wireless/rtl818x/rtl8187/dev.c
 @@ -1005,6 +1005,9 @@ static void rtl8187_stop(struct ieee80211_hw *dev)
@@ -48399,7 +48399,7 @@ index 23107e2..43ae966 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index efba0188..57a78fc 100644
+index 3f623fb..0bb35c1 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -56,6 +56,16 @@
@@ -48419,7 +48419,7 @@ index efba0188..57a78fc 100644
  /* AMD quirk use */
  #define	AB_REG_BAR_LOW		0xe0
  #define	AB_REG_BAR_HIGH		0xe1
-@@ -349,6 +359,12 @@ void usb_amd_dev_put(void)
+@@ -351,6 +361,12 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -48432,7 +48432,7 @@ index efba0188..57a78fc 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -430,15 +446,6 @@ reset_needed:
+@@ -432,15 +448,6 @@ reset_needed:
  }
  EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
  
@@ -48448,7 +48448,7 @@ index efba0188..57a78fc 100644
  static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  {
  	unsigned long base = 0;
-@@ -456,12 +463,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -458,12 +465,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -48465,7 +48465,7 @@ index efba0188..57a78fc 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -528,7 +534,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -530,7 +536,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -48477,7 +48477,7 @@ index efba0188..57a78fc 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -681,6 +691,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -690,6 +700,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -48487,7 +48487,7 @@ index efba0188..57a78fc 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -805,6 +818,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -831,6 +844,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -48495,7 +48495,7 @@ index efba0188..57a78fc 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -903,6 +917,9 @@ hc_init:
+@@ -938,6 +952,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -48506,7 +48506,7 @@ index efba0188..57a78fc 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index d8851d0..9d86a48 100644
+index 872807b..1b69254 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -48517,16 +48517,16 @@ index d8851d0..9d86a48 100644
 +#define HUAWO_PRODUCT_E1621			0x2008
 +
  #define HUAWEI_VENDOR_ID			0x12D1
+ #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_K4505			0x1464
- #define HUAWEI_PRODUCT_K3765			0x1465
-@@ -539,6 +542,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -553,6 +556,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E173, 0xff, 0xff, 0xff),
+ 		.driver_info = (kernel_ulong_t) &net_intf1_blacklist },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K4505, 0xff, 0xff, 0xff),
- 		.driver_info = (kernel_ulong_t) &huawei_cdc12_blacklist },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K3765, 0xff, 0xff, 0xff),
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
 index 8b83129..a19e44e 100644
 --- a/drivers/video/Makefile
