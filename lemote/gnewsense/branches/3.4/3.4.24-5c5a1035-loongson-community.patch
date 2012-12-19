@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index a1624b9..81ff5af 100644
+index a3e12e6..3a5bcc3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -225,7 +225,7 @@ index 83ed00a..bdb259d 100644
  	  This option enables special console drivers which allow the kernel
  	  to print messages very early in the bootup process.
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
-index 4fedf5a..f1c340e 100644
+index 5c1e75d..0177492 100644
 --- a/arch/mips/Makefile
 +++ b/arch/mips/Makefile
 @@ -257,18 +257,19 @@ endif
@@ -9526,7 +9526,7 @@ index 444b8d8..e105c49 100644
  		pciu_write(PCICLKSELREG, ONE_THIRD_VTCLOCK);
  	else if ((vtclock / 4) < pci_clock_max)
 diff --git a/arch/mips/vr41xx/common/init.c b/arch/mips/vr41xx/common/init.c
-index 2391632..aca5c76 100644
+index 23916321..aca5c76 100644
 --- a/arch/mips/vr41xx/common/init.c
 +++ b/arch/mips/vr41xx/common/init.c
 @@ -43,8 +43,8 @@ void __init plat_time_init(void)
@@ -9814,10 +9814,10 @@ index 41ad6ff..3c6e4c9 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index d2c5095..56d6d1c 100644
+index ea8736b..04976d69 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -897,7 +897,7 @@ config SCx200_I2C_SDA
+@@ -903,7 +903,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -12843,7 +12843,7 @@ index 98db761..a1b1a35 100644
  # 16-bit wireless PCMCIA client drivers
  obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
 diff --git a/drivers/net/wireless/rtl818x/rtl8187/dev.c b/drivers/net/wireless/rtl818x/rtl8187/dev.c
-index cf53ac9..de19893 100644
+index 86467a2..b5a5622 100644
 --- a/drivers/net/wireless/rtl818x/rtl8187/dev.c
 +++ b/drivers/net/wireless/rtl818x/rtl8187/dev.c
 @@ -1012,6 +1012,9 @@ static void rtl8187_stop(struct ieee80211_hw *dev)
@@ -16819,7 +16819,7 @@ index 235171f..0157357 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index c5e9e4a..86b20b2 100644
+index 39f9e4a..08ba14b 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -16839,7 +16839,7 @@ index c5e9e4a..86b20b2 100644
  /* AMD quirk use */
  #define	AB_REG_BAR_LOW		0xe0
  #define	AB_REG_BAR_HIGH		0xe1
-@@ -351,6 +361,12 @@ void usb_amd_dev_put(void)
+@@ -353,6 +363,12 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -16852,7 +16852,7 @@ index c5e9e4a..86b20b2 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -432,15 +448,6 @@ reset_needed:
+@@ -434,15 +450,6 @@ reset_needed:
  }
  EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
  
@@ -16868,7 +16868,7 @@ index c5e9e4a..86b20b2 100644
  static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  {
  	unsigned long base = 0;
-@@ -458,12 +465,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -460,12 +467,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -16885,7 +16885,7 @@ index c5e9e4a..86b20b2 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -530,7 +536,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -532,7 +538,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -16897,7 +16897,7 @@ index c5e9e4a..86b20b2 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -683,6 +693,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -692,6 +702,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -16907,7 +16907,7 @@ index c5e9e4a..86b20b2 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -807,6 +820,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -833,6 +846,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -16915,7 +16915,7 @@ index c5e9e4a..86b20b2 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -905,6 +919,9 @@ hc_init:
+@@ -940,6 +954,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -16926,7 +16926,7 @@ index c5e9e4a..86b20b2 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index ee693cc..0473a5a 100644
+index 0c3d290..cbaa22c 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -16937,16 +16937,16 @@ index ee693cc..0473a5a 100644
 +#define HUAWO_PRODUCT_E1621			0x2008
 +
  #define HUAWEI_VENDOR_ID			0x12D1
+ #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_K4505			0x1464
- #define HUAWEI_PRODUCT_K3765			0x1465
-@@ -539,6 +542,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -553,6 +556,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E173, 0xff, 0xff, 0xff),
+ 		.driver_info = (kernel_ulong_t) &net_intf1_blacklist },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K4505, 0xff, 0xff, 0xff),
- 		.driver_info = (kernel_ulong_t) &huawei_cdc12_blacklist },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K3765, 0xff, 0xff, 0xff),
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
 index 9356add..b04d39d 100644
 --- a/drivers/video/Makefile
