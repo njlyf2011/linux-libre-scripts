@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 5
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -793,8 +793,6 @@ Patch14000: hibernate-freeze-filesystems.patch
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
 
-Patch19001: i82975x-edac-fix.patch
-
 Patch20000: 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
 Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
@@ -842,7 +840,6 @@ Patch22091: 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
 Patch22100: uprobes-upstream-backport.patch
 
 #rhbz 871078
-Patch22111: USB-EHCI-urb-hcpriv-should-not-be-NULL.patch
 Patch22112: USB-report-submission-of-active-URBs.patch
 
 #rhbz 869341
@@ -873,6 +870,9 @@ Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 883414
 Patch21234: mac80211-fix-ibss-scanning.patch
+
+#rhbz 873107
+Patch21237: 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1639,8 +1639,6 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
-ApplyPatch i82975x-edac-fix.patch
-
 ApplyPatch 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
 ApplyPatch 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
@@ -1669,7 +1667,6 @@ ApplyPatch 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
 ApplyPatch uprobes-upstream-backport.patch
 
 #rhbz 871078
-ApplyPatch USB-EHCI-urb-hcpriv-should-not-be-NULL.patch
 ApplyPatch USB-report-submission-of-active-URBs.patch
 
 #rhbz 869341
@@ -1700,6 +1697,9 @@ ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 883414
 ApplyPatch mac80211-fix-ibss-scanning.patch
+
+#rhbz 873107
+ApplyPatch 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2578,6 +2578,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Dec 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.6.11-gnu
+
+* Mon Dec 17 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.11-3
+- Linux v3.6.11
+
+* Mon Dec 17 2012 Dennis Gilmore <dennis@ausil.us>
+- disable gpiolib on vexpress
+
+* Mon Dec 17 2012 Josh Boyer <jwboyer@redhat.com>
+- Fix oops in sony-laptop setup (rhbz 873107)
+
 * Wed Dec 12 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.10-5
 - Fix infinite loop in efi signature parser
 - Don't error out if db doesn't exist
