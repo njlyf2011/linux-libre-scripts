@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index d96fc2a..a734cd1 100644
+index 2052c29..03bc358 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -225,7 +225,7 @@ index 83ed00a..bdb259d 100644
  	  This option enables special console drivers which allow the kernel
  	  to print messages very early in the bootup process.
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
-index 0be3186..9764d822 100644
+index aaf7444..ceb2dc2 100644
 --- a/arch/mips/Makefile
 +++ b/arch/mips/Makefile
 @@ -256,18 +256,19 @@ endif
@@ -4649,7 +4649,7 @@ index 315fc0b..7871e52 100644
  		pr_cont("Either hardware does not support performance "
  			"counters, or not yet implemented.\n");
 diff --git a/arch/mips/kernel/process.c b/arch/mips/kernel/process.c
-index c47f96e..ae73e1c 100644
+index bf128d7..a3a766fa 100644
 --- a/arch/mips/kernel/process.c
 +++ b/arch/mips/kernel/process.c
 @@ -64,12 +64,12 @@ void __noreturn cpu_idle(void)
@@ -4667,7 +4667,7 @@ index c47f96e..ae73e1c 100644
 +			start_critical_timings();
  		}
  #ifdef CONFIG_HOTPLUG_CPU
- 		if (!cpu_online(cpu) && !cpu_isset(cpu, cpu_callin_map) &&
+ 		if (!cpu_online(cpu) && !cpu_isset(cpu, cpu_callin_map))
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
 index 5422855..50ba267 100644
 --- a/arch/mips/kernel/scall64-o32.S
@@ -9526,7 +9526,7 @@ index 444b8d8..e105c49 100644
  		pciu_write(PCICLKSELREG, ONE_THIRD_VTCLOCK);
  	else if ((vtclock / 4) < pci_clock_max)
 diff --git a/arch/mips/vr41xx/common/init.c b/arch/mips/vr41xx/common/init.c
-index 2391632..aca5c76 100644
+index 23916321..aca5c76 100644
 --- a/arch/mips/vr41xx/common/init.c
 +++ b/arch/mips/vr41xx/common/init.c
 @@ -43,8 +43,8 @@ void __init plat_time_init(void)
@@ -9554,10 +9554,10 @@ index 628c8fa..a6e6c96 100644
  #define wrmsr(x, y, z) do { } while (0)
  #define use_msr 0
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index d21f6d0..34d7a97 100644
+index b5cc078..a675d47 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -646,6 +646,13 @@ config HID_ZYDACRON
+@@ -647,6 +647,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -9800,10 +9800,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index e4317a2..830112d 100644
+index 2d41336..f522147 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -748,6 +748,9 @@
+@@ -757,6 +757,9 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -9814,10 +9814,10 @@ index e4317a2..830112d 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index a3afac4..8ce6833 100644
+index 60f593c..6c01f01 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -876,7 +876,7 @@ config SCx200_I2C_SDA
+@@ -883,7 +883,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -49304,7 +49304,7 @@ index b263919..d4b05d1 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 833b3c6..a6d61cc 100644
+index 5cc401b..f143868 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -49324,7 +49324,7 @@ index 833b3c6..a6d61cc 100644
  /* AMD quirk use */
  #define	AB_REG_BAR_LOW		0xe0
  #define	AB_REG_BAR_HIGH		0xe1
-@@ -351,6 +361,12 @@ void usb_amd_dev_put(void)
+@@ -353,6 +363,12 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -49337,7 +49337,7 @@ index 833b3c6..a6d61cc 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -432,15 +448,6 @@ reset_needed:
+@@ -434,15 +450,6 @@ reset_needed:
  }
  EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
  
@@ -49353,7 +49353,7 @@ index 833b3c6..a6d61cc 100644
  static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  {
  	unsigned long base = 0;
-@@ -458,12 +465,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -460,12 +467,11 @@ static void __devinit quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -49370,7 +49370,7 @@ index 833b3c6..a6d61cc 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -530,7 +536,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -532,7 +538,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -49382,7 +49382,7 @@ index 833b3c6..a6d61cc 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -683,6 +693,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -692,6 +702,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -49392,15 +49392,15 @@ index 833b3c6..a6d61cc 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -800,6 +813,7 @@ void usb_enable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -835,6 +848,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
- EXPORT_SYMBOL_GPL(usb_enable_xhci_ports);
+ EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
 +#if defined(CONFIG_USB_XHCI_HCD) || defined(CONFIG_USB_XHCI_HCD_MODULE)
  /**
   * PCI Quirks for xHCI.
   *
-@@ -898,6 +912,9 @@ hc_init:
+@@ -942,6 +956,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -49411,7 +49411,7 @@ index 833b3c6..a6d61cc 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 113560d..08c3633 100644
+index 872807b..1b69254 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -49422,16 +49422,16 @@ index 113560d..08c3633 100644
 +#define HUAWO_PRODUCT_E1621			0x2008
 +
  #define HUAWEI_VENDOR_ID			0x12D1
+ #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_K4505			0x1464
- #define HUAWEI_PRODUCT_K3765			0x1465
-@@ -539,6 +542,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -553,6 +556,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLX) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GKE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E173, 0xff, 0xff, 0xff),
+ 		.driver_info = (kernel_ulong_t) &net_intf1_blacklist },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K4505, 0xff, 0xff, 0xff),
- 		.driver_info = (kernel_ulong_t) &huawei_cdc12_blacklist },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_K3765, 0xff, 0xff, 0xff),
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
 index 9b9d8ff..63a833a 100644
 --- a/drivers/video/Makefile
