@@ -62,13 +62,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 3
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 6
+%define base_sublevel 7
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.6%{?stablegnux}
-#define rcrevlibre -3.6%{?rcrevgnux}
-#define gitrevlibre -3.6%{?gitrevgnux}
+#define stablelibre -3.7%{?stablegnux}
+#define rcrevlibre -3.7%{?rcrevgnux}
+#define gitrevlibre -3.7%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -468,6 +468,14 @@ Summary: The Linux kernel
 %endif
 %endif
 
+# Should make listnewconfig fail if there's config options
+# printed out?
+%if %{nopatches}%{using_upstream_branch}
+%define listnewconfig_fail 0
+%else
+%define listnewconfig_fail 1
+%endif
+
 # To temporarily exclude an architecture from being built, add it to
 # %%nobuildarches. Do _NOT_ use the ExclusiveArch: line, because if we
 # don't build kernel-headers then the new build system will no longer let
@@ -582,7 +590,7 @@ ExclusiveOS: Linux
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools
+BuildRequires: net-tools, hostname
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
@@ -720,10 +728,6 @@ Patch100: taint-vbox.patch
 
 Patch110: vmbugon-warnon.patch
 
-Patch150: team-net-next-20120808.patch
-Patch151: team-net-next-update-20120927.patch
-Patch152: team-net-next-20121205.patch
-
 Patch390: linux-2.6-defaults-acpi-video.patch
 Patch391: linux-2.6-acpi-video-dos.patch
 Patch394: linux-2.6-acpi-debug-infinite-loop.patch
@@ -745,12 +749,11 @@ Patch700: linux-2.6-e1000-ich9-montevina.patch
 Patch800: linux-2.6-crash-driver.patch
 
 # crypto/
-Patch900: modsign-upstream-3.7.patch
 Patch901: modsign-post-KS-jwb.patch
 
 # secure boot
 Patch1000: secure-boot-20121212.patch
-Patch1001: efivarfs-3.6.patch
+Patch1001: efivarfs-3.7.patch
 
 # Improve PCI support on UEFI
 Patch1100: handle-efi-roms.patch
@@ -799,7 +802,6 @@ Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 # ARM
 Patch21000: arm-read_current_timer.patch
 Patch21001: arm-fix-omapdrm.patch
-Patch21002: arm-fix_radio_shark.patch
 Patch21003: arm-alignment-faults.patch
 # OMAP
 
@@ -809,7 +811,6 @@ Patch21005: arm-tegra-usb-no-reset-linux33.patch
 Patch21006: arm-tegra-sdhci-module-fix.patch
 
 # ARM highbank patches
-Patch21010: arm-highbank-sata-fix.patch
 
 # ARM exynos4
 Patch21020: arm-smdk310-regulator-fix.patch
@@ -823,32 +824,8 @@ Patch22000: weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 869904 869909 CVE-2012-4508
-Patch22080: 0001-ext4-ext4_inode_info-diet.patch
-Patch22081: 0002-ext4-give-i_aiodio_unwritten-a-more-appropriate-name.patch
-Patch22082: 0003-ext4-fix-unwritten-counter-leakage.patch
-Patch22083: 0004-ext4-completed_io-locking-cleanup.patch
-Patch22084: 0005-ext4-serialize-dio-nonlocked-reads-with-defrag-worke.patch
-Patch22085: 0006-ext4-serialize-unlocked-dio-reads-with-truncate.patch
-Patch22086: 0007-ext4-endless-truncate-due-to-nonlocked-dio-readers.patch
-Patch22087: 0008-ext4-serialize-truncate-with-owerwrite-DIO-workers.patch
-Patch22088: 0009-ext4-punch_hole-should-wait-for-DIO-writers.patch
-Patch22089: 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
-Patch22090: 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
-Patch22091: 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
-
-Patch22100: uprobes-upstream-backport.patch
-
 #rhbz 871078
 Patch22112: USB-report-submission-of-active-URBs.patch
-
-#rhbz 869341
-Patch22113: smp_irq_move_cleanup_interrupt.patch
-
-#rhbz 812129
-Patch22120: block-fix-a-crash-when-block-device-is.patch
-Patch22121: blockdev-turn-a-rw-semaphore-into-a-percpu-rw-sem.patch
-Patch22122: fs-lock-splice_read-and-splice_write-functions.patch
 
 #rhbz 874791
 Patch22125: Bluetooth-Add-support-for-BCM20702A0.patch
@@ -859,9 +836,6 @@ Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
 #rhbz CVE-2012-4530 868285 880147
 Patch21228: exec-do-not-leave-bprm-interp-on-stack.patch
 Patch21229: exec-use-eloop-for-max-recursion-depth.patch
-
-#rhbz 869629
-Patch21230: SCSI-mvsas-Fix-oops-when-ata-commond-timeout.patch
 
 #rhbz 851278
 Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
@@ -1505,23 +1479,17 @@ ApplyPatch taint-vbox.patch
 
 ApplyPatch vmbugon-warnon.patch
 
-ApplyPatch team-net-next-20120808.patch
-ApplyPatch team-net-next-update-20120927.patch
-ApplyPatch team-net-next-20121205.patch
-
 # Architecture patches
 # x86(-64)
 
 #
 # ARM
 #
-ApplyPatch arm-read_current_timer.patch
-ApplyPatch arm-fix-omapdrm.patch
-ApplyPatch arm-fix_radio_shark.patch
+#ApplyPatch arm-read_current_timer.patch
+#ApplyPatch arm-fix-omapdrm.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-sdhci-module-fix.patch
-ApplyPatch arm-highbank-sata-fix.patch
 ApplyPatch arm-alignment-faults.patch
 ApplyPatch arm-smdk310-regulator-fix.patch
 ApplyPatch arm-origen-regulator-fix.patch
@@ -1592,11 +1560,10 @@ ApplyPatch linux-2.6-crash-driver.patch
 ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 
 # crypto/
-ApplyPatch modsign-upstream-3.7.patch
 ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
-ApplyPatch efivarfs-3.6.patch
+ApplyPatch efivarfs-3.7.patch
 ApplyPatch secure-boot-20121212.patch
 
 # Improved PCI support for UEFI
@@ -1639,8 +1606,8 @@ ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
-ApplyPatch 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
-ApplyPatch 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
+#ApplyPatch 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
+#ApplyPatch 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1650,32 +1617,8 @@ ApplyPatch weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 869904 869909 CVE-2012-4508
-ApplyPatch 0001-ext4-ext4_inode_info-diet.patch
-ApplyPatch 0002-ext4-give-i_aiodio_unwritten-a-more-appropriate-name.patch
-ApplyPatch 0003-ext4-fix-unwritten-counter-leakage.patch
-ApplyPatch 0004-ext4-completed_io-locking-cleanup.patch
-ApplyPatch 0005-ext4-serialize-dio-nonlocked-reads-with-defrag-worke.patch
-ApplyPatch 0006-ext4-serialize-unlocked-dio-reads-with-truncate.patch
-ApplyPatch 0007-ext4-endless-truncate-due-to-nonlocked-dio-readers.patch
-ApplyPatch 0008-ext4-serialize-truncate-with-owerwrite-DIO-workers.patch
-ApplyPatch 0009-ext4-punch_hole-should-wait-for-DIO-writers.patch
-ApplyPatch 0010-ext4-fix-ext_remove_space-for-punch_hole-case.patch
-ApplyPatch 0011-ext4-fix-ext4_flush_completed_IO-wait-semantics.patch
-ApplyPatch 0012-ext4-serialize-fallocate-with-ext4_convert_unwritten.patch
-
-ApplyPatch uprobes-upstream-backport.patch
-
 #rhbz 871078
 ApplyPatch USB-report-submission-of-active-URBs.patch
-
-#rhbz 869341
-ApplyPatch smp_irq_move_cleanup_interrupt.patch
-
-#rhbz 812129
-ApplyPatch block-fix-a-crash-when-block-device-is.patch
-ApplyPatch blockdev-turn-a-rw-semaphore-into-a-percpu-rw-sem.patch
-ApplyPatch fs-lock-splice_read-and-splice_write-functions.patch
 
 #rhbz 874791
 ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
@@ -1686,9 +1629,6 @@ ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 #rhbz CVE-2012-4530 868285 880147
 ApplyPatch exec-do-not-leave-bprm-interp-on-stack.patch
 ApplyPatch exec-use-eloop-for-max-recursion-depth.patch
-
-#rhbz 869629
-ApplyPatch SCSI-mvsas-Fix-oops-when-ata-commond-timeout.patch
 
 #rhbz 851278
 ApplyPatch 8139cp-revert-set-ring-address-before-enabling-receiver.patch -R
@@ -1729,17 +1669,23 @@ done
 rm -f kernel-%{version}-*debug.config
 %endif
 
-# run oldconfig over the config files (except when noarch)
-if [ "%{_target_cpu}" != "noarch" ]; then
-  for i in kernel-*-%{_target_cpu}*.config
-  do
-    mv $i .config
-    Arch=`head -1 .config | cut -b 3-`
-    make ARCH=$Arch oldnoconfig
-    echo "# $Arch" > configs/$i
-    cat .config >> configs/$i
-  done
-fi
+# now run oldconfig over all the config files
+for i in *.config
+do
+  mv $i .config
+  Arch=`head -1 .config | cut -b 3-`
+  make ARCH=$Arch listnewconfig | grep -E '^CONFIG_' >.newoptions || true
+%if %{listnewconfig_fail}
+  if [ -s .newoptions ]; then
+    cat .newoptions
+    exit 1
+  fi
+%endif
+  rm -f .newoptions
+  make ARCH=$Arch oldnoconfig
+  echo "# $Arch" > configs/$i
+  cat .config >> configs/$i
+done
 # end of kernel config
 %endif
 
@@ -2459,6 +2405,7 @@ fi
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/perf*
+%{_sysconfdir}/bash_completion.d/perf
 %doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
 
 %files -n python-perf-libre
@@ -2578,6 +2525,20 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Jan  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.1
+
+* Thu Jan 03 2013 Josh Boyer <jwboyer@redhat.com> - 3.7.1-2
+- Fixup secure boot patchset for 3.7 rebase
+- Package bash completion script for perf
+
+* Thu Jan 03 2013 Dave Jones <davej@redhat.com>
+- Rebase to 3.7.1
+
+* Wed Jan 02 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix autofs issue in 3.6 (rhbz 874372)
+- BR the hostname package (rhbz 886113)
+
 * Mon Dec 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6.11-gnu
 
@@ -2799,6 +2760,7 @@ fi
 - Linux 3.6.0
 - Disable debugging options.
 
+<<<<<<< HEAD
 * Fri Sep 28 2012 Josh Boyer <jwboyer@redhat.com> - 3.6.0-0.rc7.git3.1
 - Linux v3.6-rc7-103-g6672d90
 
@@ -4866,6 +4828,8 @@ fi
 * Mon May 30 2011 Kyle McMartin <kyle@redhat.com>
 - Trimmed changelog, see fedpkg git for earlier history.
 
+=======
+>>>>>>> 1c6f1e3
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
