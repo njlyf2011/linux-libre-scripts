@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -847,6 +847,12 @@ Patch21234: mac80211-fix-ibss-scanning.patch
 
 #rhbz 873107
 Patch21237: 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
+
+#rhbz 853064
+Patch21239: aoe-remove-vestigial-request-queue-allocation.patch
+
+#rhbz 890547
+Patch21240: ACPI-do-not-use-Lid-and-Sleep-button-for-S5-wakeup.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1641,6 +1647,12 @@ ApplyPatch mac80211-fix-ibss-scanning.patch
 #rhbz 873107
 ApplyPatch 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
 
+#rhbz 853064
+ApplyPatch aoe-remove-vestigial-request-queue-allocation.patch
+
+#rhbz 890547
+ApplyPatch ACPI-do-not-use-Lid-and-Sleep-button-for-S5-wakeup.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -1877,7 +1889,7 @@ BuildKernel() {
 
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
-    touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/linux/version.h
+    touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/generated/uapi/linux/version.h
 
     # Copy .config to include/config/auto.conf so "make prepare" is unnecessary.
     cp $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/.config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/config/auto.conf
@@ -2525,6 +2537,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Jan 08 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix shutdown on some machines (rhbz 890547)
+
+* Mon Jan 07 2013 Josh Boyer <jwboyer@redhat.com>
+- Patch to fix efivarfs underflow from Lingzhu Xiang (rhbz 888163)
+
+* Sun Jan 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix version.h include due to UAPI change in 3.7 (rhbz 892373)
+
+* Fri Jan 04 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix oops on aoe module removal (rhbz 853064)
+
 * Fri Jan  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.1
 
