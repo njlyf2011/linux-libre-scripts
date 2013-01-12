@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 5
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -579,7 +579,7 @@ ExclusiveOS: Linux
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools
+BuildRequires: net-tools, hostname
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
@@ -844,6 +844,15 @@ Patch21234: mac80211-fix-ibss-scanning.patch
 
 #rhbz 873107
 Patch21237: 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
+
+#rhbz 874372
+Patch21238: don-t-do-blind-d_drop-in-nfs_prime_dcache.patch
+
+#rhbz 853064
+Patch21239: aoe-remove-extra-bdi_init.patch
+
+#rhbz 890547
+Patch21240: ACPI-do-not-use-Lid-and-Sleep-button-for-S5-wakeup.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1651,6 +1660,15 @@ ApplyPatch mac80211-fix-ibss-scanning.patch
 
 #rhbz 873107
 ApplyPatch 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
+
+#rhbz 874372
+ApplyPatch don-t-do-blind-d_drop-in-nfs_prime_dcache.patch
+
+#rhbz 853064
+ApplyPatch aoe-remove-extra-bdi_init.patch
+
+#rhbz 890547
+ApplyPatch ACPI-do-not-use-Lid-and-Sleep-button-for-S5-wakeup.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2527,6 +2545,16 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Tue Jan 08 2013 Josh Boyer <jwboyer@redhat.com> - 3.6.11-5
+- Add patch to fix shutdown on some machines (rhbz 890547)
+
+* Fri Jan 04 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix oops on aoe module removal (rhbz 853064)
+
+* Wed Jan 02 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix autofs issue in 3.6 (rhbz 874372)
+- BR the hostname package (rhbz 886113)
+
 * Mon Dec 17 2012 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.6.11-gnu
 
