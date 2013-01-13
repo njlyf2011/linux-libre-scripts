@@ -1,0 +1,51 @@
+commit 034b4c38bbb0208d63e5409c3575774949854153
+Author: Zhang Le <r0bertz@gentoo.org>
+Date:   Thu Mar 12 18:00:50 2009 +0800
+
+    MIPS: compat: Move TIF_32BIT definition.
+    
+    This will prevent a build error after the merge with v2.6.27.20.
+    
+    Signed-off-by: Zhang Le <r0bertz@gentoo.org>
+    Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+    (cherry picked from commit 85f3112271a8b4b4d987335f6f28652dd432542f)
+
+Index: linux-2.6.27.43/include/asm-mips/seccomp.h
+===================================================================
+--- linux-2.6.27.43.orig/include/asm-mips/seccomp.h	2010-01-09 04:17:58.000000000 +0000
++++ linux-2.6.27.43/include/asm-mips/seccomp.h	2010-01-09 04:18:21.000000000 +0000
+@@ -15,8 +15,6 @@
+  */
+ #ifdef CONFIG_MIPS32_O32
+ 
+-#define TIF_32BIT TIF_32BIT_REGS
+-
+ #define __NR_seccomp_read_32		4003
+ #define __NR_seccomp_write_32		4004
+ #define __NR_seccomp_exit_32		4001
+@@ -24,8 +22,6 @@
+ 
+ #elif defined(CONFIG_MIPS32_N32)
+ 
+-#define TIF_32BIT _TIF_32BIT_ADDR
+-
+ #define __NR_seccomp_read_32		6000
+ #define __NR_seccomp_write_32		6001
+ #define __NR_seccomp_exit_32		6058
+Index: linux-2.6.27.43/include/asm-mips/thread_info.h
+===================================================================
+--- linux-2.6.27.43.orig/include/asm-mips/thread_info.h	2010-01-09 04:18:05.000000000 +0000
++++ linux-2.6.27.43/include/asm-mips/thread_info.h	2010-01-09 04:18:51.000000000 +0000
+@@ -126,6 +126,12 @@
+ #define TIF_FPUBOUND		24	/* thread bound to FPU-full CPU set */
+ #define TIF_SYSCALL_TRACE	31	/* syscall trace active */
+ 
++#ifdef CONFIG_MIPS32_O32
++#define TIF_32BIT TIF_32BIT_REGS
++#elif defined(CONFIG_MIPS32_N32)
++#define TIF_32BIT _TIF_32BIT_ADDR
++#endif /* CONFIG_MIPS32_O32 */
++
+ #define _TIF_SYSCALL_TRACE	(1<<TIF_SYSCALL_TRACE)
+ #define _TIF_SIGPENDING		(1<<TIF_SIGPENDING)
+ #define _TIF_NEED_RESCHED	(1<<TIF_NEED_RESCHED)
