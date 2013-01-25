@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 203
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -801,9 +801,12 @@ Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 # ARM
 Patch21000: arm-read_current_timer.patch
-Patch21001: arm-fix-omapdrm.patch
-Patch21003: arm-alignment-faults.patch
+# http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/137164.html
+Patch21001: arm-l2x0-only-set-set_debug-on-pl310-r3p0-and-earlier.patch
+Patch21002: arm-alignment-faults.patch
+
 # OMAP
+Patch21003: arm-fix-omapdrm.patch
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
@@ -834,6 +837,12 @@ Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 886946
 Patch21234: iwlegacy-fix-IBSS-cleanup.patch
+
+#rhbz 902523
+Patch21236: libata-replace-sata_settings-with-devslp_timing.patch
+
+# i915 hang fixes
+Patch21237: drm-invalidate-relocation-presumed_offsets-along-slow-patch.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1462,6 +1471,8 @@ ApplyPatch vmbugon-warnon.patch
 #
 #ApplyPatch arm-read_current_timer.patch
 #ApplyPatch arm-fix-omapdrm.patch
+
+ApplyPatch arm-l2x0-only-set-set_debug-on-pl310-r3p0-and-earlier.patch
 ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-sdhci-module-fix.patch
@@ -1606,6 +1617,12 @@ ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 886948
 ApplyPatch iwlegacy-fix-IBSS-cleanup.patch
+
+#rhbz 902523
+ApplyPatch libata-replace-sata_settings-with-devslp_timing.patch
+
+#i915
+ApplyPatch drm-invalidate-relocation-presumed_offsets-along-slow-patch.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2474,6 +2491,16 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Jan 22 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.4-203
+- Add i915 bugfix from airlied
+
+* Tue Jan 22 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Apply ARM errata fix
+- disable HVC_DCC and VIRTIO_CONSOLE on ARM
+
+* Tue Jan 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix libata settings bug (rhbz 902523)
+
 * Tue Jan 22 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.4-gnu
 
