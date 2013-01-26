@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 104
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -717,6 +717,7 @@ Patch510: linux-2.6-silence-noise.patch
 Patch520: quite-apm.patch
 
 Patch530: linux-2.6-silence-fbcon-logo.patch
+Patch540: silence-empty-ipi-mask-warning.patch
 
 Patch700: linux-2.6-e1000-ich9-montevina.patch
 
@@ -803,6 +804,15 @@ Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 886946
 Patch21241: iwlegacy-fix-IBSS-cleanup.patch
+
+#rhbz 902523
+Patch21236: libata-replace-sata_settings-with-devslp_timing.patch
+
+#i915 hang fixes
+Patch21237: drm-invalidate-relocation-presumed_offsets-along-slow-patch.patch
+
+#rhbz 892428
+Patch21238: brcmsmac-updates-rhbz892428.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1486,6 +1496,9 @@ ApplyPatch linux-2.6-silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch linux-2.6-silence-fbcon-logo.patch
 
+# No-one cares about these warnings
+ApplyPatch silence-empty-ipi-mask-warning.patch
+
 # Changes to upstream defaults.
 
 
@@ -1562,6 +1575,15 @@ ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 886946
 ApplyPatch iwlegacy-fix-IBSS-cleanup.patch
+
+#rhbz 902523
+ApplyPatch libata-replace-sata_settings-with-devslp_timing.patch
+
+#i915
+ApplyPatch drm-invalidate-relocation-presumed_offsets-along-slow-patch.patch
+
+#rhbz 892428
+ApplyPatch brcmsmac-updates-rhbz892428.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2422,6 +2444,18 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Wed Jan 23 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.4-104
+- brcmsmac fixes from upstream (rhbz 892428)
+
+* Wed Jan 23 2013 Dave Jones <davej@redhat.com>
+- Remove empty IPI mask warnings.
+
+* Tue Jan 22 2013 Justin M. Forbes <jforbes@redhat.com>
+- Add i915 bugfix from airlied
+
+* Tue Jan 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix libata settings bug (rhbz 902523)
+
 * Tue Jan 22 2013 Alexandre Oliva <lxoliva@fsfla.org>
 - GNU Linux-libre 3.7.4-gnu
 
