@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 104
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -805,14 +805,11 @@ Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 #rhbz 886946
 Patch21241: iwlegacy-fix-IBSS-cleanup.patch
 
-#rhbz 902523
-Patch21236: libata-replace-sata_settings-with-devslp_timing.patch
-
-#i915 hang fixes
-Patch21237: drm-invalidate-relocation-presumed_offsets-along-slow-patch.patch
-
 #rhbz 892428
 Patch21238: brcmsmac-updates-rhbz892428.patch
+
+#rhbz 863424
+Patch21239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1576,14 +1573,11 @@ ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 #rhbz 886946
 ApplyPatch iwlegacy-fix-IBSS-cleanup.patch
 
-#rhbz 902523
-ApplyPatch libata-replace-sata_settings-with-devslp_timing.patch
-
-#i915
-ApplyPatch drm-invalidate-relocation-presumed_offsets-along-slow-patch.patch
-
 #rhbz 892428
 ApplyPatch brcmsmac-updates-rhbz892428.patch
+
+#rhbz 863424
+ApplyPatch Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1714,6 +1708,10 @@ BuildKernel() {
 %ifarch %{arm}
     # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} KALLSYMS_EXTRA_PASS=1
+
+    make -s ARCH=$Arch V=1 dtbs
+    mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
+    install -m 644 arch/arm/boot/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
 %else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
@@ -2383,6 +2381,9 @@ fi
 %defattr(-,root,root)\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
 /%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:.%{2}}.hmac \
+%ifarch %{arm}\
+/%{image_install_path}/dtb-%{KVERREL}%{?2:.%{2}} \
+%endif\
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
@@ -2444,6 +2445,22 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon Jan 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.5-gnu.
+
+* Mon Jan 28 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.5-101
+- Linux v3.7.5
+
+* Mon Jan 28 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix iwlwifi issues (rhbz 863424)
+
+* Sun Jan 27 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build and package dtbs on ARM
+- Enable FB options for qemu vexpress on unified
+
+* Fri Jan 25 2013 Justin M. Forbes <jforbes@redhat.com>
+- Turn off THP for 32bit
+
 * Wed Jan 23 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.4-104
 - brcmsmac fixes from upstream (rhbz 892428)
 
