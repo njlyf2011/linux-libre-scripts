@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -748,7 +748,7 @@ Patch800: linux-2.6-crash-driver.patch
 Patch901: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-20121212.patch
+Patch1000: secure-boot-3.7-20130204.patch
 Patch1001: efivarfs-3.7.patch
 
 # Improve PCI support on UEFI
@@ -831,14 +831,18 @@ Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
 Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
 Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 886946
-Patch21234: iwlegacy-fix-IBSS-cleanup.patch
-
 #rhbz 892428
 Patch21238: brcmsmac-updates-rhbz892428.patch
 
 #rhbz 863424
 Patch21239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
+
+#rhbz 799564
+Patch21240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+Patch21241: Input-add-support-for-Cypress-PS2-Trackpads.patch
+
+#rhbz 903881
+Patch21246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1547,7 +1551,7 @@ ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
 ApplyPatch efivarfs-3.7.patch
-ApplyPatch secure-boot-20121212.patch
+ApplyPatch secure-boot-3.7-20130204.patch
 
 # Improved PCI support for UEFI
 ApplyPatch handle-efi-roms.patch
@@ -1614,14 +1618,18 @@ ApplyPatch 8139cp-revert-set-ring-address-before-enabling-receiver.patch -R
 ApplyPatch 8139cp-set-ring-address-after-enabling-C-mode.patch
 ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 886948
-ApplyPatch iwlegacy-fix-IBSS-cleanup.patch
-
 #rhbz 892428
 ApplyPatch brcmsmac-updates-rhbz892428.patch
 
 #rhbz 863424
 ApplyPatch Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
+
+#rhbz 799564
+ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
+
+#rhbz 903881
+ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2497,6 +2505,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Feb  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.6-gnu.
+
+* Mon Feb 04 2013 Josh Boyer <jwboyer@redhat.com>
+- Linux v3.7.6
+- Update secure-boot patchset
+- Fix rtlwifi scheduling while atomic from Larry Finger (rhbz 903881)
+
+* Tue Jan 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Backport driver for Cypress PS/2 trackpad (rhbz 799564)
+
 * Mon Jan 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.5-gnu.
 
