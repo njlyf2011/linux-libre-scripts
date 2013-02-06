@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 102
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -802,14 +802,18 @@ Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
 Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
 Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 886946
-Patch21241: iwlegacy-fix-IBSS-cleanup.patch
-
 #rhbz 892428
 Patch21238: brcmsmac-updates-rhbz892428.patch
 
 #rhbz 863424
 Patch21239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
+
+#rhbz 799564
+Patch21240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+Patch21242: Input-add-support-for-Cypress-PS2-Trackpads.patch
+
+#rhbz 903881
+Patch21246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1570,14 +1574,18 @@ ApplyPatch 8139cp-revert-set-ring-address-before-enabling-receiver.patch -R
 ApplyPatch 8139cp-set-ring-address-after-enabling-C-mode.patch
 ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
-#rhbz 886946
-ApplyPatch iwlegacy-fix-IBSS-cleanup.patch
-
 #rhbz 892428
 ApplyPatch brcmsmac-updates-rhbz892428.patch
 
 #rhbz 863424
 ApplyPatch Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
+
+#rhbz 799564
+ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
+
+#rhbz 903881
+ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2445,6 +2453,18 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Mon Feb  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.6-gnu.
+
+* Mon Feb 04 2013 Josh Boyer <jwboyer@redhat.com> - 3.7.6-102
+- Fix rtlwifi scheduling while atomic from Larry Finger (rhbz 903881)
+
+* Mon Feb 04 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.6-101
+- Linux v3.7.6
+
+* Tue Jan 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Backport driver for Cypress PS/2 trackpad (rhbz 799564)
+
 * Mon Jan 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.5-gnu.
 
