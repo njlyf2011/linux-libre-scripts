@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 6
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.7%{?stablegnux}
-%define rcrevlibre -3.6%{?rcrevgnux}
-#define gitrevlibre -3.7%{?gitrevgnux}
+#define stablelibre -3.8%{?stablegnux}
+%define rcrevlibre -3.7%{?rcrevgnux}
+#define gitrevlibre -3.8%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -131,9 +131,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 6
 # The git snapshot level
-%define gitrev 0
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -178,8 +178,6 @@ Summary: The Linux kernel
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 # kernel-kirkwood (only valid for arm)
 %define with_kirkwood       %{?_without_kirkwood:       0} %{?!_without_kirkwood:       1}
-# kernel-imx (only valid for arm)
-%define with_imx       %{?_without_imx:       0} %{?!_without_imx:       1}
 #
 # Additional options for user-friendly one-off kernel building:
 #
@@ -294,9 +292,8 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel up (unified kernel target), tegra, omap and imx are only built on armv7 hfp/sfp
+# kernel up (unified kernel target), tegra and omap are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
-%define with_imx 0
 %define with_omap 0
 %define with_tegra 0
 %endif
@@ -379,7 +376,7 @@ Summary: The Linux kernel
 %endif
 
 # sparse blows up on ppc64 and sparc64
-%ifarch ppc64 ppc sparc64 ppc64p7
+%ifarch ppc64 ppc ppc64p7
 %define with_sparse 0
 %endif
 
@@ -420,19 +417,6 @@ Summary: The Linux kernel
 %define with_tools 0
 %endif
 
-%ifarch sparc64
-%define asmarch sparc
-%define all_arch_configs kernel-%{version}-sparc64*.config
-%define make_target vmlinux
-%define kernel_image vmlinux
-%define image_install_path boot
-%define with_tools 0
-%endif
-
-%ifarch sparcv9
-%define hdrarch sparc
-%endif
-
 %ifarch ppc
 %define asmarch powerpc
 %define hdrarch powerpc
@@ -460,8 +444,6 @@ Summary: The Linux kernel
 %define with_perf 0
 %define with_tools 0
 %endif
-# TEMPORARY until perf build fixed on ARM to get a new 3.7rc kernel
-%define with_perf 0
 %endif
 
 # Should make listnewconfig fail if there's config options
@@ -479,7 +461,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 s390 sparc sparcv9
+%define nobuildarches i386 s390
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -575,7 +557,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 %{sparc} s390 s390x %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -586,7 +568,7 @@ ExclusiveOS: Linux
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools
+BuildRequires: net-tools, hostname
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
@@ -601,9 +583,9 @@ BuildRequires: pciutils-devel gettext
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
 # Fancy new debuginfo generation introduced in Fedora 8/RHEL 6.
-# The -r flag to find-debuginfo.sh to invoke eu-strip --reloc-debug-sections
-# reduces the number of relocations in kernel module .ko.debug files and was
-# introduced with rpm 4.9 and elfutils 0.153.
+# The -r flag to find-debuginfo.sh invokes eu-strip --reloc-debug-sections
+# which reduces the number of relocations in kernel module .ko.debug files and
+# was introduced with rpm 4.9 and elfutils 0.153.
 BuildRequires: rpm-build >= 4.9.0-1, elfutils >= elfutils-0.153-1
 %define debuginfo_args --strict-build-id -r
 %endif
@@ -619,7 +601,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 %if %{signmodules}
 Source11: x509.genkey
@@ -628,7 +610,8 @@ Source11: x509.genkey
 Source15: merge.pl
 Source16: mod-extra.list
 Source17: mod-extra.sh
-Source18: mod-extra-sign.sh
+Source18: mod-sign.sh
+%define modsign_cmd %{SOURCE18}
 
 Source19: Makefile.release
 Source20: Makefile.config
@@ -650,8 +633,6 @@ Source54: config-powerpc64p7
 
 Source70: config-s390x
 
-Source90: config-sparc64-generic
-
 # Unified ARM kernels
 Source100: config-armv7
 
@@ -660,7 +641,6 @@ Source105: config-arm-generic
 Source110: config-arm-omap
 Source111: config-arm-tegra
 Source112: config-arm-kirkwood
-Source113: config-arm-imx
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -705,12 +685,10 @@ Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 
 # we also need compile fixes for -vanilla
-Patch04: linux-2.6-compile-fixes.patch
+Patch04: compile-fixes.patch
 
 # build tweak for build ID magic, even for -vanilla
-Patch05: linux-2.6-makefile-after_link.patch
-
-Patch06: power-x86-destdir.patch
+Patch05: makefile-after_link.patch
 
 Patch07: freedo.patch
 
@@ -718,7 +696,7 @@ Patch07: freedo.patch
 
 
 # revert upstream patches we get via other methods
-Patch09: linux-2.6-upstream-reverts.patch
+Patch09: upstream-reverts.patch
 # Git trees.
 
 # Standalone patches
@@ -727,35 +705,29 @@ Patch100: taint-vbox.patch
 
 Patch110: vmbugon-warnon.patch
 
-Patch390: linux-2.6-defaults-acpi-video.patch
-Patch391: linux-2.6-acpi-video-dos.patch
-Patch394: linux-2.6-acpi-debug-infinite-loop.patch
+Patch390: defaults-acpi-video.patch
+Patch391: acpi-video-dos.patch
+Patch394: acpi-debug-infinite-loop.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
-Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch450: input-kill-stupid-messages.patch
+Patch452: no-pcspkr-modalias.patch
 
-Patch460: linux-2.6-serial-460800.patch
+Patch460: serial-460800.patch
 
 Patch470: die-floppy-die.patch
 
-Patch510: linux-2.6-silence-noise.patch
-Patch520: quite-apm.patch
-Patch530: linux-2.6-silence-fbcon-logo.patch
+Patch510: silence-noise.patch
+Patch520: quiet-apm.patch
+Patch530: silence-fbcon-logo.patch
+Patch540: silence-empty-ipi-mask-warning.patch
 
-Patch700: linux-2.6-e1000-ich9-montevina.patch
-
-Patch800: linux-2.6-crash-driver.patch
+Patch800: crash-driver.patch
 
 # crypto/
-Patch900: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-20121212.patch
-Patch1001: efivarfs-3.7.patch
-
-# Improve PCI support on UEFI
-Patch1100: handle-efi-roms.patch
+Patch1000: secure-boot-20130131.patch
 
 # virt + ksm patches
 
@@ -770,12 +742,14 @@ Patch1825: drm-i915-dp-stfu.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
-Patch2802: linux-2.6-silence-acpi-blacklist.patch
+Patch2802: silence-acpi-blacklist.patch
 
 # media patches
-Patch2899: linux-2.6-v4l-dvb-fixes.patch
-Patch2900: linux-2.6-v4l-dvb-update.patch
-Patch2901: linux-2.6-v4l-dvb-experimental.patch
+Patch2899: v4l-dvb-fixes.patch
+Patch2900: v4l-dvb-update.patch
+Patch2901: v4l-dvb-experimental.patch
+
+Patch3000: brcmsmac-double-timeout.patch
 
 # fs fixes
 
@@ -799,16 +773,14 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 Patch21000: arm-export-read_current_timer.patch
 Patch21001: arm-allnoconfig-error-__LINUX_ARM_ARCH__-undeclared.patch
 
-# OMAP
-Patch21003: arm-omapdrm-fixinc.patch
+# IMX
+Patch21003: arm-imx-fixdrm.patch
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
-Patch21006: arm-tegra-sdhci-module-fix.patch
 
-# ARM imx
-Patch21008: arm-imx-fixdrm.patch
+# versatile
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -821,26 +793,25 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 # Build patch, should go away
 Patch22070: irqnr-build.patch
 
-#rhbz 874791
-Patch22125: Bluetooth-Add-support-for-BCM20702A0.patch
-
 #rhbz 859485
 Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
 
-#rhbz CVE-2012-4530 868285 880147
-Patch21228: exec-do-not-leave-bprm-interp-on-stack.patch
-Patch21229: exec-use-eloop-for-max-recursion-depth.patch
+#rhbz 863424
+Patch21229: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
 
-#rhbz 851278
-Patch21234: Revert-8139cp-revert-set-ring-address-before-enabling.patch
-Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
-Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
+#rhbz 799564
+Patch21240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+Patch21241: Input-add-support-for-Cypress-PS2-Trackpads.patch
 
-#rhbz 883414
-Patch21236: mac80211-fix-ibss-scanning.patch
+# https://fedoraproject.org/wiki/Features/Checkpoint_Restore
+Patch21242: criu-no-expert.patch
 
-#rhbz 873107
-Patch21237: 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
+#rhbz 830151
+Patch21243: mac80211-improve-latency-and-throughput-while-software.patch
+Patch21244: iwlegacy-add-flush-callback.patch
+
+#rhbz 903881
+Patch21246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1171,12 +1142,6 @@ non-Free blobs it includes by default.
 This package includes a version of the Linux kernel with support for
 marvell kirkwood based systems, i.e., guruplug, sheevaplug
 
-%define variant_summary The Linux kernel compiled for freescale boards
-%kernel_variant_package imx
-%description imx
-This package includes a version of the Linux kernel with support for
-freescale based systems, i.e., efika smartbook.
-
 %define variant_summary The Linux kernel compiled for TI-OMAP boards
 %kernel_variant_package omap
 %description omap
@@ -1444,14 +1409,12 @@ do
 done
 %endif
 
-ApplyPatch linux-2.6-makefile-after_link.patch
+ApplyPatch makefile-after_link.patch
 
 #
 # misc small stuff to make things compile
 #
-ApplyOptionalPatch linux-2.6-compile-fixes.patch
-
-ApplyPatch power-x86-destdir.patch
+ApplyOptionalPatch compile-fixes.patch
 
 # Freedo logo.
 ApplyPatch freedo.patch
@@ -1459,7 +1422,7 @@ ApplyPatch freedo.patch
 %if !%{nopatches}
 
 # revert patches from upstream that conflict or that we get via other means
-ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
+ApplyOptionalPatch upstream-reverts.patch -R
 
 ApplyPatch taint-vbox.patch
 
@@ -1473,11 +1436,9 @@ ApplyPatch vmbugon-warnon.patch
 #
 ApplyPatch arm-export-read_current_timer.patch
 ApplyPatch arm-allnoconfig-error-__LINUX_ARM_ARCH__-undeclared.patch
-ApplyPatch arm-omapdrm-fixinc.patch
-ApplyPatch arm-imx-fixdrm.patch
-ApplyPatch arm-tegra-nvec-kconfig.patch
+# ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-tegra-sdhci-module-fix.patch
+ApplyPatch arm-imx-fixdrm.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1498,9 +1459,9 @@ ApplyPatch arm-tegra-sdhci-module-fix.patch
 # WMI
 
 # ACPI
-ApplyPatch linux-2.6-defaults-acpi-video.patch
-ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch defaults-acpi-video.patch
+ApplyPatch acpi-video-dos.patch
+ApplyPatch acpi-debug-infinite-loop.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
@@ -1519,40 +1480,35 @@ ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
-ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+ApplyPatch input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
 
-ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
+ApplyPatch no-pcspkr-modalias.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
-ApplyPatch linux-2.6-serial-460800.patch
+ApplyPatch serial-460800.patch
 
 # Silence some useless messages that still get printed with 'quiet'
-ApplyPatch linux-2.6-silence-noise.patch
+ApplyPatch silence-noise.patch
 
 # Make fbcon not show the penguins with 'quiet'
-ApplyPatch linux-2.6-silence-fbcon-logo.patch
+ApplyPatch silence-fbcon-logo.patch
+
+# no-one cares about these warnings.
+ApplyPatch silence-empty-ipi-mask-warning.patch
 
 # Changes to upstream defaults.
 
 
 # /dev/crash driver.
-ApplyPatch linux-2.6-crash-driver.patch
-
-# Hack e1000e to work on Montevina SDV
-ApplyPatch linux-2.6-e1000-ich9-montevina.patch
+ApplyPatch crash-driver.patch
 
 # crypto/
-ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
-ApplyPatch efivarfs-3.7.patch
-ApplyPatch secure-boot-20121212.patch
-
-# Improved PCI support for UEFI
-ApplyPatch handle-efi-roms.patch
+ApplyPatch secure-boot-20130131.patch
 
 # Assorted Virt Fixes
 
@@ -1567,14 +1523,17 @@ ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-dp-stfu.patch
 
 # silence the ACPI blacklist code
-ApplyPatch linux-2.6-silence-acpi-blacklist.patch
-ApplyPatch quite-apm.patch
+ApplyPatch silence-acpi-blacklist.patch
+ApplyPatch quiet-apm.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
-ApplyOptionalPatch linux-2.6-v4l-dvb-fixes.patch
-ApplyOptionalPatch linux-2.6-v4l-dvb-update.patch
-ApplyOptionalPatch linux-2.6-v4l-dvb-experimental.patch
+ApplyOptionalPatch v4l-dvb-fixes.patch
+ApplyOptionalPatch v4l-dvb-update.patch
+ApplyOptionalPatch v4l-dvb-experimental.patch
+
+# Experiment: Double the length of the brcmsmac transmit timeout.
+ApplyPatch brcmsmac-double-timeout.patch
 
 # Patches headed upstream
 ApplyPatch fs-proc-devtree-remove_proc_entry.patch
@@ -1602,27 +1561,25 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #Build patch, should go away
 ApplyPatch irqnr-build.patch
 
-#rhbz 874791
-ApplyPatch Bluetooth-Add-support-for-BCM20702A0.patch
-
 #rhbz 859485
 ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 
-#rhbz CVE-2012-4530 868285 880147
-ApplyPatch exec-do-not-leave-bprm-interp-on-stack.patch
-ApplyPatch exec-use-eloop-for-max-recursion-depth.patch
+#rhbz 863424
+ApplyPatch Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
 
-#rhbz 851278
-ApplyPatch Revert-8139cp-revert-set-ring-address-before-enabling.patch
-ApplyPatch 8139cp-set-ring-address-after-enabling-C-mode.patch
-ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
+#rhbz 799564
+ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
 
-#rhbz 883414
-ApplyPatch mac80211-fix-ibss-scanning.patch
+# https://fedoraproject.org/wiki/Features/Checkpoint_Restore
+ApplyPatch criu-no-expert.patch
 
-#rhbz 873107
-ApplyPatch 0001-ACPI-sony-laptop-do-proper-memcpy-for-ACPI_TYPE_INTE.patch
+#rhbz 830151
+ApplyPatch mac80211-improve-latency-and-throughput-while-software.patch
+ApplyPatch iwlegacy-add-flush-callback.patch
 
+#rhbz 903881
+ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1709,11 +1666,12 @@ BuildKernel() {
     MakeTarget=$1
     KernelImage=$2
     Flavour=$3
+    Flav=${Flavour:+.${Flavour}}
     InstallName=${4:-vmlinuz}
 
     # Pick the right config file for the kernel we're building
     Config=kernel-%{version}-%{_target_cpu}${Flavour:+-${Flavour}}.config
-    DevelDir=/usr/src/kernels/%{KVERREL}${Flavour:+.${Flavour}}
+    DevelDir=/usr/src/kernels/%{KVERREL}${Flav}
 
     # When the bootable image is just the ELF kernel, strip it.
     # We already copy the unstripped file into the debuginfo package.
@@ -1723,7 +1681,7 @@ BuildKernel() {
       CopyKernel=cp
     fi
 
-    KernelVer=%{version}-libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}
+    KernelVer=%{version}-libre.%{release}.%{_target_cpu}${Flav}
     echo BUILDING A KERNEL FOR ${Flavour} %{_target_cpu}...
 
     %if 0%{?stable_update}
@@ -1732,7 +1690,7 @@ BuildKernel() {
     %endif
 
     # make sure EXTRAVERSION says what we want it to say
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre.%{release}.%{_target_cpu}${Flavour:+.${Flavour}}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre.%{release}.%{_target_cpu}${Flav}/" Makefile
 
     # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -1759,6 +1717,10 @@ BuildKernel() {
 %ifarch %{arm}
     # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} KALLSYMS_EXTRA_PASS=1
+
+    make -s ARCH=$Arch V=1 dtbs
+    mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
+    install -m 644 arch/arm/boot/dts/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
 %else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
@@ -1923,13 +1885,9 @@ BuildKernel() {
     %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
 
 %if %{signmodules}
-    # Save off the .tmp_versions/ directory.  We'll use it in the 
-    # __debug_install_post macro below to sign the right things
-    # Also save the signing keys so we actually sign the modules with the
-    # right key.
-    cp -r .tmp_versions .tmp_versions.sign${Flavour:+.${Flavour}}
-    cp signing_key.priv signing_key.priv.sign${Flavour:+.${Flavour}}
-    cp signing_key.x509 signing_key.x509.sign${Flavour:+.${Flavour}}
+    # Save the signing keys so we can sign the modules in __modsign_install_post
+    cp signing_key.priv signing_key.priv.sign${Flav}
+    cp signing_key.x509 signing_key.x509.sign${Flav}
 %endif
 
     # remove files that will be auto generated by depmod at rpm -i time
@@ -1979,10 +1937,6 @@ BuildKernel %make_target %kernel_image PAE
 BuildKernel %make_target %kernel_image kirkwood
 %endif
 
-%if %{with_imx}
-BuildKernel %make_target %kernel_image imx
-%endif
-
 %if %{with_omap}
 BuildKernel %make_target %kernel_image omap
 %endif
@@ -2014,22 +1968,22 @@ BuildKernel %make_target %kernel_image smp
 chmod +x tools/power/cpupower/utils/version-gen.sh
 make %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
 %ifarch %{ix86}
-    cd tools/power/cpupower/debug/i386
+    pushd tools/power/cpupower/debug/i386
     make %{?_smp_mflags} centrino-decode powernow-k8-decode
-    cd -
+    popd
 %endif
 %ifarch x86_64
-    cd tools/power/cpupower/debug/x86_64
+    pushd tools/power/cpupower/debug/x86_64
     make %{?_smp_mflags} centrino-decode powernow-k8-decode
-    cd -
+    popd
 %endif
 %ifarch %{ix86} x86_64
-   cd tools/power/x86/x86_energy_perf_policy/
+   pushd tools/power/x86/x86_energy_perf_policy/
    make
-   cd -
-   cd tools/power/x86/turbostat
+   popd
+   pushd tools/power/x86/turbostat
    make
-   cd -
+   popd
 %endif #turbostat/x86_energy_perf_policy
 %endif
 %endif
@@ -2043,6 +1997,42 @@ chmod -R a=rX Documentation
 find Documentation -type d | xargs chmod u+w
 %endif
 
+# In the modsign case, we do 3 things.  1) We check the "flavour" and hard
+# code the value in the following invocations.  This is somewhat sub-optimal
+# but we're doing this inside of an RPM macro and it isn't as easy as it
+# could be because of that.  2) We restore the .tmp_versions/ directory from
+# the one we saved off in BuildKernel above.  This is to make sure we're
+# signing the modules we actually built/installed in that flavour.  3) We
+# grab the arch and invoke mod-sign.sh command to actually sign the modules.
+#
+# We have to do all of those things _after_ find-debuginfo runs, otherwise
+# that will strip the signature off of the modules.
+
+%define __modsign_install_post \
+  if [ "%{signmodules}" == "1" ]; then \
+    if [ "%{with_pae}" != "0" ]; then \
+      mv signing_key.priv.sign.PAE signing_key.priv \
+      mv signing_key.x509.sign.PAE signing_key.x509 \
+      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAE/ \
+    fi \
+    if [ "%{with_debug}" != "0" ]; then \
+      mv signing_key.priv.sign.debug signing_key.priv \
+      mv signing_key.x509.sign.debug signing_key.x509 \
+      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
+    fi \
+    if [ "%{with_pae_debug}" != "0" ]; then \
+      mv signing_key.priv.sign.PAEdebug signing_key.priv \
+      mv signing_key.x509.sign.PAEdebug signing_key.x509 \
+      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAEdebug/ \
+    fi \
+    if [ "%{with_up}" != "0" ]; then \
+      mv signing_key.priv.sign signing_key.priv \
+      mv signing_key.x509.sign signing_key.x509 \
+      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
+    fi \
+  fi \
+%{nil}
+
 ###
 ### Special hacks for debuginfo subpackages.
 ###
@@ -2050,64 +2040,10 @@ find Documentation -type d | xargs chmod u+w
 # This macro is used by %%install, so we must redefine it before that.
 %define debug_package %{nil}
 
-# In the modsign case, we do 3 things.  1) We check the "flavour" and hard
-# code the value in the following invocations.  This is somewhat sub-optimal
-# but we're doing this inside of an RPM macro and it isn't as easy as it
-# could be because of that.  2) We restore the .tmp_versions/ directory from
-# the one we saved off in BuildKernel above.  This is to make sure we're
-# signing the modules we actually built/installed in that flavour.  3) We
-# grab the arch and invoke 'make modules_sign' and the mod-extra-sign.sh
-# commands to actually sign the modules.
-#
-# We have to do all of those things _after_ find-debuginfo runs, otherwise
-# that will strip the signature off of the modules.
-
 %if %{with_debuginfo}
+
 %define __debug_install_post \
   /usr/lib/rpm/find-debuginfo.sh %{debuginfo_args} %{_builddir}/%{?buildsubdir}\
-  if [ "%{signmodules}" == "1" ]; \
-  then \
-    if [ "%{with_pae}" != "0" ]; \
-    then \
-      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}-PAE.config | cut -b 3-` \
-      rm -rf .tmp_versions \
-      mv .tmp_versions.sign.PAE .tmp_versions \
-      mv signing_key.priv.sign.PAE signing_key.priv \
-      mv signing_key.x509.sign.PAE signing_key.x509 \
-      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL}.PAE \
-      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAE/extra/ \
-    fi \
-    if [ "%{with_debug}" != "0" ]; \
-    then \
-      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}-debug.config | cut -b 3-` \
-      rm -rf .tmp_versions \
-      mv .tmp_versions.sign.debug .tmp_versions \
-      mv signing_key.priv.sign.debug signing_key.priv \
-      mv signing_key.x509.sign.debug signing_key.x509 \
-      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL}.debug \
-      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/extra/ \
-    fi \
-    if [ "%{with_pae_debug}" != "0" ]; \
-    then \
-      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}-PAEdebug.config | cut -b 3-` \
-      rm -rf .tmp_versions \
-      mv .tmp_versions.sign.PAEdebug .tmp_versions \
-      mv signing_key.priv.sign.PAEdebug signing_key.priv \
-      mv signing_key.x509.sign.PAEdebug signing_key.x509 \
-      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL}.PAEdebug \
-      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAEdebug/extra/ \
-    fi \
-    if [ "%{with_up}" != "0" ]; \
-    then \
-      Arch=`head -1 configs/kernel-%{version}-%{_target_cpu}.config | cut -b 3-` \
-      rm -rf .tmp_versions \
-      mv .tmp_versions.sign .tmp_versions \
-      mv signing_key.priv.sign signing_key.priv \
-      mv signing_key.x509.sign signing_key.x509 \
-      make -s ARCH=$Arch V=1 INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_sign KERNELRELEASE=%{KVERREL} \
-      %{SOURCE18} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/extra/ \
-    fi \
-  fi \
 %{nil}
 
 %ifnarch noarch
@@ -2115,7 +2051,19 @@ find Documentation -type d | xargs chmod u+w
 %files -f debugfiles.list debuginfo-common-%{_target_cpu}
 %defattr(-,root,root)
 %endif
+
 %endif
+
+#
+# Disgusting hack alert! We need to ensure we sign modules *after* all
+# invocations of strip occur, which is in __debug_install_post if
+# find-debuginfo.sh runs, and __os_install_post if not.
+#
+%define __spec_install_post \
+  %{?__debug_package:%{__debug_install_post}}\
+  %{__arch_install_post}\
+  %{__os_install_post}\
+  %{__modsign_install_post}
 
 ###
 ### install
@@ -2186,16 +2134,16 @@ rm -f %{buildroot}%{_libdir}/*.{a,la}
 %find_lang cpupower
 mv cpupower.lang ../
 %ifarch %{ix86}
-    cd tools/power/cpupower/debug/i386
+    pushd tools/power/cpupower/debug/i386
     install -m755 centrino-decode %{buildroot}%{_bindir}/centrino-decode
     install -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
-    cd -
+    popd
 %endif
 %ifarch x86_64
-    cd tools/power/cpupower/debug/x86_64
+    pushd tools/power/cpupower/debug/x86_64
     install -m755 centrino-decode %{buildroot}%{_bindir}/centrino-decode
     install -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
-    cd -
+    popd
 %endif
 chmod 0755 %{buildroot}%{_libdir}/libcpupower.so*
 mkdir -p %{buildroot}%{_unitdir} %{buildroot}%{_sysconfdir}/sysconfig
@@ -2204,12 +2152,12 @@ install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
 %endif
 %ifarch %{ix86} x86_64
    mkdir -p %{buildroot}%{_mandir}/man8
-   cd tools/power/x86/x86_energy_perf_policy
+   pushd tools/power/x86/x86_energy_perf_policy
    make DESTDIR=%{buildroot} install
-   cd -
-   cd tools/power/x86/turbostat
+   popd
+   pushd tools/power/x86/turbostat
    make DESTDIR=%{buildroot} install
-   cd -
+   popd
 %endif #turbostat/x86_energy_perf_policy
 %endif
 
@@ -2325,9 +2273,6 @@ fi}\
 
 %kernel_variant_preun kirkwood
 %kernel_variant_post -v kirkwood
-
-%kernel_variant_preun imx
-%kernel_variant_post -v imx
 
 %kernel_variant_preun omap
 %kernel_variant_post -v omap
@@ -2448,6 +2393,9 @@ fi
 %defattr(-,root,root)\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
 /%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:.%{2}}.hmac \
+%ifarch %{arm}\
+/%{image_install_path}/dtb-%{KVERREL}%{?2:.%{2}} \
+%endif\
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
 /boot/config-%{KVERREL}%{?2:.%{2}}\
 %dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
@@ -2483,7 +2431,6 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files %{with_kirkwood} kirkwood
-%kernel_variant_files %{with_imx} imx
 %kernel_variant_files %{with_omap} omap
 %kernel_variant_files %{with_tegra} tegra
 
@@ -2500,6 +2447,178 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Feb  6 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8-rc6-gnu.
+
+* Tue Feb 05 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc6.git2.1
+- Linux v3.8-rc6-62-gfe547d7
+- Enable CONFIG_DRM_VMWGFX_FBCON (rhbz 907620)
+- Enable CONFIG_DETECT_HUNG_TASK
+
+* Mon Feb 04 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc6.git1.1
+- Linux v3.8-rc6-22-g6edacf0
+- Enable CONFIG_EXT4_DEBUG
+- Fix rtlwifi scheduling while atomic from Larry Finger (rhbz 903881)
+
+* Fri Feb 01 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc6.git0.1
+- Linux v3.8-rc6
+- Enable CONFIG_DMA_API_DEBUG
+- Add patches to improve mac80211 latency and throughput (rhbz 830151)
+
+* Thu Jan 31 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc5.git3.1
+- Linux v3.8-rc5-245-g04c2eee
+- Enable CONFIG_DEBUG_STACK_USAGE
+
+* Wed Jan 30 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc5.git2.1
+- Linux v3.8-rc5-218-ga56e160
+- Enable NAMESPACES and CHECKPOINT_RESTORE on x86_64 for F19 CRIU feature
+- Enable CONFIG_DEBUG_ATOMIC_SLEEP
+
+* Tue Jan 29 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc5.git1.1
+- Linux v3.8-rc5-150-g6abb7c2
+
+* Tue Jan 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Backport driver for Cypress PS/2 trackpad (rhbz 799564)
+
+* Mon Jan 28 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc5.git0.1
+- Linux v3.8-rc5
+- Add patches to fix issues with iwlwifi (rhbz 863424)
+- Enable CONFIG_PROVE_RCU
+
+* Sun Jan 27 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Reenable perf on ARM (was suppose to be temporary)
+- Build and package dtbs on ARM
+- Enable FB options for qemu vexpress on unified
+
+* Fri Jan 25 2013 Kyle McMartin <kmcmarti@redhat.com>
+- Sign all modules with the mod-extra-sign.sh script, ensures nothing gets
+  missed because of .config differences between invocations of BuildKernel.
+
+* Fri Jan 25 2013 Justin M. Forbes <jforbes@redhat.com>
+- Turn off THP for 32bit
+
+* Fri Jan 25 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc4.git5.1
+- Linux v3.8-rc4-277-g66e2d3e
+- Enable slub debug
+
+* Thu Jan 24 2013 Josh Boyer <jwboyer@redhat.com>
+- Update secure-boot patchset
+
+* Thu Jan 24 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc4.git4.1
+- Linux v3.8-rc4-183-gff7532c
+- Enable lockdep
+
+* Wed Jan 23 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc4.git3.1
+- Linux v3.8-rc4-139-g1d85490
+- Enable debug spinlocks
+
+* Wed Jan 23 2013 Dave Jones <davej@redhat.com>
+- Remove warnings about empty IPI masks.
+
+* Sun Jan 20 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Remove obsolete ARM configs
+- Update OMAP config for TI AM35XX SoCs
+- Add patch to fix versatile build failure
+
+* Sat Jan 19 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc4.git1.1
+- Linux v3.8-rc4-42-g5da1f88
+
+* Fri Jan 18 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc4.git0.1
+- Linux v3.8-rc4
+- Disable debugging options.
+
+* Fri Jan 18 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable problematic PL310 ARM errata
+- Minor ARM config tweaks
+- OMAP DRM driver to fix OMAP kernel build
+
+* Wed Jan 16 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix power management sysfs on non-secure boot machines (rhbz 896243)
+
+* Wed Jan 16 2013 Dave Jones <davej@redhat.com>
+- Experiment: Double the length of the brcmsmac transmit timeout.
+
+* Wed Jan 16 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Stanislaw Gruszka to fix iwlegacy IBSS cleanup (rhbz 886946)
+
+* Tue Jan 15 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc3.git2.1
+- Linux v3.8-rc3-293-g406089d
+
+* Tue Jan 15 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_DVB_USB_V2 (rhbz 895460)
+
+* Mon Jan 14 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable Orinoco drivers in kernel-modules-extra (rhbz 894069)
+
+* Mon Jan 14 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc3.git1.1
+- Linux v3.8-rc3-74-gb719f43
+
+* Fri Jan 11 2013 Josh Boyer <jwboyer@redhat.com>
+- Update secure-boot patchset
+
+* Thu Jan 10 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc3.git0.2
+- Reenable debugging options.
+
+* Thu Jan 10 2013 Dave Jones <davej@redhat.com>
+- Drop old Montevina era E1000 workaround.
+
+* Thu Jan 10 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc3.git0.1
+- Linux v3.8-rc3
+- Disable debugging options.
+
+* Wed Jan 09 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc2.git4.1
+- Linux v3.8-rc2-370-g57a0c1e
+
+* Wed Jan  9 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM mvebu config
+
+* Wed Jan 09 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_CIFS_DEBUG as it was on before it was split out
+
+* Tue Jan 08 2013 Kyle McMartin <kmcmarti@redhat.com>
+- Ensure modules are signed even if *-debuginfo rpms are not produced by
+  re-defining __spec_install_post and adding a hook after all strip
+  invocations. Ideally, in the future, we could patch the rpm macro and
+  remove the re-define from kernel.spec, but that's another windmill to tilt
+  at.
+
+* Tue Jan 08 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc2.git3.1
+- Linux v3.8-rc2-222-g2a893f9
+
+* Mon Jan 07 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc2.git2.1
+- Linux v3.8-rc2-191-gd287b87
+- remove the namei-include.patch, it's upstream now
+
+* Mon Jan 07 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc2.git1.2
+- Reenable debugging options.
+
+* Mon Jan  7 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Further ARM config updates
+- Add patch to fix building omapdrm
+
+* Mon Jan 07 2013 Justin M. Forbes <jforbes@redhat.com>
+- Bye sparc
+
+* Mon Jan 07 2013 Justin M. Forbes <jforbes@redhat.com>
+- Fix up configs for build
+
+* Mon Jan 07 2013 Josh Boyer <jwboyer@redhat.com>
+- Patch to fix efivarfs underflow from Lingzhu Xiang (rhbz 888163)
+
+* Sat Jan  5 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial update of ARM configs for 3.8
+- Enable DRM driver for tegra
+- Drop separate imx kernel. Will be reintroduced soon in unified
+
+* Fri Jan 04 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.0-0.rc2.git1.1
+- Linux v3.8-rc2-116-g5f243b9
+
+* Thu Jan 03 2013 Justin M. Forbes <jforbes@redhat.com>
+- Initial 3.8-rc2 rebase
+
+* Wed Jan 02 2013 Josh Boyer <jwboyer@redhat.com>
+- BR the hostname package (rhbz 886113)
+
 * Tue Dec 18 2012 Dave Jones <davej@redhat.com>
 - On rebases, list new config options.
   (Revert to pre-18 behaviour)
