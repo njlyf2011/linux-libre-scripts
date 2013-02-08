@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 3
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 6
 # The git snapshot level
-%define gitrev 2
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -727,7 +727,7 @@ Patch800: crash-driver.patch
 # crypto/
 
 # secure boot
-Patch1000: secure-boot-20130131.patch
+Patch1000: secure-boot-20130206.patch
 
 # virt + ksm patches
 
@@ -812,6 +812,9 @@ Patch21244: iwlegacy-add-flush-callback.patch
 
 #rhbz 903881
 Patch21246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
+
+#rhbz 892811
+Patch21247: ath9k_rx_dma_stop_check.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1508,7 +1511,7 @@ ApplyPatch crash-driver.patch
 # crypto/
 
 # secure boot
-ApplyPatch secure-boot-20130131.patch
+ApplyPatch secure-boot-20130206.patch
 
 # Assorted Virt Fixes
 
@@ -1580,6 +1583,9 @@ ApplyPatch iwlegacy-add-flush-callback.patch
 
 #rhbz 903881
 ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
+
+#rhbz 892811
+ApplyPatch ath9k_rx_dma_stop_check.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2447,6 +2453,14 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Feb 06 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc6.git3.3
+- Enable CONFIG_NAMESPACES everywhere (rhbz 907576)
+- Add patch to fix ath9k dma stop checks (rhbz 892811)
+
+* Wed Feb 06 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc6.git3.1
+- Linux v3.8-rc6-98-g1589a3e
+- Add patch to honor MokSBState (rhbz 907406)
+
 * Wed Feb  6 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8-rc6-gnu.
 
