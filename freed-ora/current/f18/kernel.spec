@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -821,28 +821,37 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 Patch22112: USB-report-submission-of-active-URBs.patch
 
 #rhbz 859485
-Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
+Patch22226: vt-Drop-K_OFF-for-VC_MUTE.patch
 
 #rhbz CVE-2012-4530 868285 880147
-Patch21229: exec-use-eloop-for-max-recursion-depth.patch
+Patch22229: exec-use-eloop-for-max-recursion-depth.patch
 
 #rhbz 851278
-Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
-Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
-Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
+Patch22231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
+Patch22232: 8139cp-set-ring-address-after-enabling-C-mode.patch
+Patch22233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 892428
-Patch21238: brcmsmac-updates-rhbz892428.patch
+Patch22238: brcmsmac-updates-rhbz892428.patch
 
 #rhbz 863424
-Patch21239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
+Patch22239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
 
 #rhbz 799564
-Patch21240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-Patch21241: Input-add-support-for-Cypress-PS2-Trackpads.patch
+Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+Patch22241: Input-add-support-for-Cypress-PS2-Trackpads.patch
 
 #rhbz 903881
-Patch21246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
+Patch22246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
+
+#rhbz 892811
+Patch22247: ath9k_rx_dma_stop_check.patch
+
+Patch23000: silence-brcmsmac-warning.patch
+
+Patch23100: validate-pud-largepage.patch
+
+Patch23200: net_37.mbox
 
 # END OF PATCH DEFINITIONS
 
@@ -1630,6 +1639,15 @@ ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
 
 #rhbz 903881
 ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
+
+#rhbz 892811
+ApplyPatch ath9k_rx_dma_stop_check.patch
+
+ApplyPatch silence-brcmsmac-warning.patch
+
+ApplyPatch validate-pud-largepage.patch
+
+ApplyPatch net_37.mbox
 
 # END OF PATCH APPLICATIONS
 
@@ -2505,6 +2523,31 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Feb 12 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.7-gnu.
+
+* Tue Feb 12 2013 Dave Jones <davej@redhat.com>
+- Add networking queue for next stable release.
+
+* Tue Feb 12 2013 Dave Jones <davej@redhat.com>
+- mm: Check if PUD is large when validating a kernel address
+
+* Tue Feb 12 2013 Dave Jones <davej@redhat.com>
+- Silence brcmsmac warnings. (Fixed in 3.8, but not backporting to 3.7)
+
+* Tue Feb 12 2013 Justin M. Forbes <jforbes@redhat.com>
+- Linux v3.7.7
+
+* Mon Feb 11 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Kees Cook to restrict MSR writting in secure boot mode
+- Add patch to honor MokSBState (rhbz 907406)
+
+* Thu Feb  7 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM build fixes
+
+* Wed Feb 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix ath9k dma stop checks (rhbz 892811)
+
 * Mon Feb  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.6-gnu.
 
