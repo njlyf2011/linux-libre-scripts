@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 102
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -736,6 +736,11 @@ Patch1800: drm-vgem.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-i915-dp-stfu.patch
+# mustard patch to shut abrt up. please drop (and notify ajax) whenever it
+# fails to apply
+Patch1826: drm-i915-tv-detect-hush.patch
+# d-i-n backport for https://bugzilla.redhat.com/show_bug.cgi?id=901951
+Patch1827: drm-i915-lvds-reclock-fix.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
@@ -795,25 +800,32 @@ Patch22070: net-tcp-bz857324.patch
 Patch22112: USB-report-submission-of-active-URBs.patch
 
 #rhbz CVE-2012-4530 868285 880147
-Patch21229: exec-use-eloop-for-max-recursion-depth.patch
+Patch22229: exec-use-eloop-for-max-recursion-depth.patch
 
 #rhbz 851278
-Patch21231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
-Patch21232: 8139cp-set-ring-address-after-enabling-C-mode.patch
-Patch21233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
+Patch22231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
+Patch22232: 8139cp-set-ring-address-after-enabling-C-mode.patch
+Patch22233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 
 #rhbz 892428
-Patch21238: brcmsmac-updates-rhbz892428.patch
-
-#rhbz 863424
-Patch21239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
+Patch22238: brcmsmac-updates-rhbz892428.patch
 
 #rhbz 799564
-Patch21240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-Patch21242: Input-add-support-for-Cypress-PS2-Trackpads.patch
+Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+Patch22242: Input-add-support-for-Cypress-PS2-Trackpads.patch
 
-#rhbz 903881
-Patch21246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
+#rhbz 892811
+Patch22247: ath9k_rx_dma_stop_check.patch
+
+#rhbz 906309 910848 CVE-2013-0228
+Patch22254: xen-dont-assume-ds-is-usable-in-xen_iret-for-32-bit-PVOPS.patch
+
+#rhbz 909591
+Patch22255: usb-cypress-supertop.patch
+
+Patch23000: silence-brcmsmac-warning.patch
+
+Patch23100: validate-pud-largepage.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1522,6 +1534,8 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-dp-stfu.patch
+ApplyPatch drm-i915-tv-detect-hush.patch
+ApplyPatch drm-i915-lvds-reclock-fix.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
@@ -1577,15 +1591,22 @@ ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 #rhbz 892428
 ApplyPatch brcmsmac-updates-rhbz892428.patch
 
-#rhbz 863424
-ApplyPatch Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
-
 #rhbz 799564
 ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
 
-#rhbz 903881
-ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
+#rhbz 892811
+ApplyPatch ath9k_rx_dma_stop_check.patch
+
+ApplyPatch silence-brcmsmac-warning.patch
+
+ApplyPatch validate-pud-largepage.patch
+
+#rhbz 906309 910848 CVE-2013-0228
+ApplyPatch xen-dont-assume-ds-is-usable-in-xen_iret-for-32-bit-PVOPS.patch
+
+#rhbz 909591
+ApplyPatch usb-cypress-supertop.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2453,6 +2474,39 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri Feb 15 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.8-gnu.
+
+* Thu Feb 14 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.8-101
+- Linux v3.7.8
+
+* Thu Feb 14 2013 Adam Jackson <ajax@redhat.com>
+- i915: Hush asserts during TV detection, just useless noise
+- i915: Fix LVDS downclock to not cripple performance (#901951)
+
+* Thu Feb 14 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.7-102
+- Fix patch numbering
+
+* Thu Feb 14 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix corruption on newer M6116 SATA bridges (rhbz 909591)
+- CVE-2013-0228 xen: xen_iret() invalid %ds local DoS (rhbz 910848 906309)
+- CVE-2013-0216/0127 xen: netback DoS via malicious guest ring (rhbz 910886)
+
+* Tue Feb 12 2013 Dave Jones <davej@redhat.com>
+- mm: Check if PUD is large when validating a kernel address
+
+* Tue Feb 12 2013 Dave Jones <davej@redhat.com>
+- Silence brcmsmac warnings. (Fixed in 3.8, but not backporting to 3.7)
+
+* Mon Feb 11 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.7-101
+- Linux v3.7.7
+
+* Thu Feb  7 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM build fixes
+
+* Wed Feb 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix ath9k dma stop checks (rhbz 892811)
+
 * Mon Feb  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.6-gnu.
 
