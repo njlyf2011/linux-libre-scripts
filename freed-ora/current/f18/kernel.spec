@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 202
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -764,6 +764,11 @@ Patch1100: handle-efi-roms.patch
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-i915-dp-stfu.patch
+# mustard patch to shut abrt up. please drop (and notify ajax) whenever it
+# fails to apply
+Patch1826: drm-i915-tv-detect-hush.patch
+# d-i-n backport for https://bugzilla.redhat.com/show_bug.cgi?id=901951
+Patch1827: drm-i915-lvds-reclock-fix.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -834,24 +839,25 @@ Patch22233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
 #rhbz 892428
 Patch22238: brcmsmac-updates-rhbz892428.patch
 
-#rhbz 863424
-Patch22239: Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
-
 #rhbz 799564
 Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 Patch22241: Input-add-support-for-Cypress-PS2-Trackpads.patch
 
-#rhbz 903881
-Patch22246: rtlwifi-Fix-scheduling-while-atomic-bug.patch
-
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
+
+#rhbz 906309 910848 CVE-2013-0228
+Patch21248: xen-dont-assume-ds-is-usable-in-xen_iret-for-32-bit-PVOPS.patch
+
+#rhbz 911479 911473 CVE-2013-0290
+Patch22256: net-fix-infinite-loop-in-__skb_recv_datagram.patch
 
 Patch23000: silence-brcmsmac-warning.patch
 
 Patch23100: validate-pud-largepage.patch
 
-Patch23200: net_37.mbox
+#rhbz 909591
+Patch21255: usb-cypress-supertop.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1576,6 +1582,8 @@ ApplyPatch handle-efi-roms.patch
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-dp-stfu.patch
+ApplyPatch drm-i915-tv-detect-hush.patch
+ApplyPatch drm-i915-lvds-reclock-fix.patch
 
 # silence the ACPI blacklist code
 ApplyPatch linux-2.6-silence-acpi-blacklist.patch
@@ -1630,15 +1638,9 @@ ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
 #rhbz 892428
 ApplyPatch brcmsmac-updates-rhbz892428.patch
 
-#rhbz 863424
-ApplyPatch Revert-iwlwifi-fix-the-reclaimed-packet-tracking-upon.patch
-
 #rhbz 799564
 ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
-
-#rhbz 903881
-ApplyPatch rtlwifi-Fix-scheduling-while-atomic-bug.patch
 
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
@@ -1647,7 +1649,14 @@ ApplyPatch silence-brcmsmac-warning.patch
 
 ApplyPatch validate-pud-largepage.patch
 
-ApplyPatch net_37.mbox
+#rhbz 906309 910848 CVE-2013-0228
+ApplyPatch xen-dont-assume-ds-is-usable-in-xen_iret-for-32-bit-PVOPS.patch
+
+#rhbz 909591
+ApplyPatch usb-cypress-supertop.patch
+
+#rhbz 911479 911473 CVE-2013-0290
+ApplyPatch net-fix-infinite-loop-in-__skb_recv_datagram.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2523,6 +2532,23 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sat Feb 16 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.7.8-gnu.
+
+* Fri Feb 15 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-0290 net: infinite loop in __skb_recv_datagram (rhbz 911479 911473)
+
+* Thu Feb 14 2013 Justin M. Forbes <jforbes@redhat.com> - 3.7.8-201
+- Linux v3.7.8
+
+* Thu Feb 14 2013 Adam Jackson <ajax@redhat.com>
+- i915: Hush asserts during TV detection, just useless noise
+- i915: Fix LVDS downclock to not cripple performance (#901951)
+
+* Thu Feb 14 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix corruption on newer M6116 SATA bridges (rhbz 909591)
+- CVE-2013-0228 xen: xen_iret() invalid %ds local DoS (rhbz 910848 906309)
+
 * Tue Feb 12 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.7-gnu.
 
