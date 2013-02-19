@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 1
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -783,14 +783,6 @@ Patch21005: arm-tegra-usb-no-reset-linux33.patch
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
-Patch22000: weird-root-dentry-name-debug.patch
-
-#selinux ptrace child permissions
-Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
-
-# Build patch, should go away
-Patch22070: irqnr-build.patch
-
 #rhbz 859485
 Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
 
@@ -808,7 +800,22 @@ Patch21244: iwlegacy-add-flush-callback.patch
 #rhbz 892811
 Patch21247: ath9k_rx_dma_stop_check.patch
 
-Patch21248: pid-unlock_irq-when-alloc_pid-fails-because-init.patch
+#rhbz 910126
+Patch21249: pstore-Create-a-convenient-mount-point-for-pstore.patch
+
+#rhbz 909591
+Patch21255: usb-cypress-supertop.patch
+
+#rhbz 906309 910848 CVE-2013-0228
+Patch21260: xen-dont-assume-ds-is-usable-in-xen_iret-for-32-bit-PVOPS.patch
+
+Patch22000: weird-root-dentry-name-debug.patch
+
+#selinux ptrace child permissions
+Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
+
+# Build patch, should go away
+Patch22070: irqnr-build.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1572,7 +1579,14 @@ ApplyPatch iwlegacy-add-flush-callback.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-ApplyPatch pid-unlock_irq-when-alloc_pid-fails-because-init.patch
+#rhbz 910126
+ApplyPatch pstore-Create-a-convenient-mount-point-for-pstore.patch
+
+#rhbz 906309 910848 CVE-2013-0228
+ApplyPatch xen-dont-assume-ds-is-usable-in-xen_iret-for-32-bit-PVOPS.patch
+
+#rhbz 909591
+ApplyPatch usb-cypress-supertop.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2440,6 +2454,22 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Feb 14 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc7.git3.1
+- Linux v3.8-rc7-73-g323a72d
+
+* Thu Feb 14 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix corruption on newer M6116 SATA bridges (rhbz 909591)
+- CVE-2013-0228 xen: xen_iret() invalid %ds local DoS (rhbz 910848 906309)
+
+* Wed Feb 13 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable tegra30
+
+* Wed Feb 13 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc7.git2.1
+- Linux v3.8-rc7-32-gecf223f
+
+* Tue Feb 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to create a convenient mount point for pstore (rhbz 910126)
+
 * Tue Feb 12 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-0.rc7.git1.1
 - Linux v3.8-rc7-6-g211b0cd
 - Reenable debugging options.
