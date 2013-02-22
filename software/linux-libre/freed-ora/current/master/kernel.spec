@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -727,7 +727,7 @@ Patch800: crash-driver.patch
 # crypto/
 
 # secure boot
-Patch1000: secure-boot-20130218.patch
+Patch1000: devel-pekey-secure-boot-20130219.patch
 
 # virt + ksm patches
 
@@ -803,8 +803,14 @@ Patch21247: ath9k_rx_dma_stop_check.patch
 #rhbz 910126
 Patch21249: pstore-Create-a-convenient-mount-point-for-pstore.patch
 
+#rhbz 844750
+Patch21250: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
 #rhbz 909591
 Patch21255: usb-cypress-supertop.patch
+
+#rhbz 812111
+Patch21260: alps-v2.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
@@ -1506,7 +1512,7 @@ ApplyPatch crash-driver.patch
 # crypto/
 
 # secure boot
-ApplyPatch secure-boot-20130218.patch
+ApplyPatch devel-pekey-secure-boot-20130219.patch
 
 # Assorted Virt Fixes
 
@@ -1575,6 +1581,12 @@ ApplyPatch pstore-Create-a-convenient-mount-point-for-pstore.patch
 
 #rhbz 909591
 ApplyPatch usb-cypress-supertop.patch
+
+#rhbz 844750
+ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 812111
+ApplyPatch alps-v2.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2442,6 +2454,12 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Feb 19 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-2
+- Add pekey support from David Howells and rework secure-boot patchset on top
+- Add support for Atheros 04ca:3004 bluetooth devices (rhbz 844750)
+- Backport support for newer ALPS touchpads (rhbz 812111)
+- Enable CONFIG_AUDIT_LOGINUID_IMMUTABLE
+
 * Tue Feb 19 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8-gnu.
 
