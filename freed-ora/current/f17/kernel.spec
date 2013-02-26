@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 104
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -825,7 +825,19 @@ Patch22255: usb-cypress-supertop.patch
 #rhbz 911479 911473 CVE-2013-0290
 Patch22256: net-fix-infinite-loop-in-__skb_recv_datagram.patch
 
+#rhbz 844750
+Patch22257: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 906055
+Patch22258: perf-hists-Fix-period-symbol_conf.field_sep-display.patch
+
+#CVE-2013-1763 rhbz 915052,915057
+Patch22259: sock_diag-Fix-out-of-bounds-access-to-sock_diag_handlers.patch
+
 Patch23000: silence-brcmsmac-warning.patch
+
+#rhbz 812111
+Patch24000: alps-v2-3.7.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1606,6 +1618,18 @@ ApplyPatch usb-cypress-supertop.patch
 
 #rhbz 911479 911473 CVE-2013-0290
 ApplyPatch net-fix-infinite-loop-in-__skb_recv_datagram.patch
+
+#rhbz 844750
+ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 906055
+ApplyPatch perf-hists-Fix-period-symbol_conf.field_sep-display.patch
+
+#rhbz 812111
+ApplyPatch alps-v2-3.7.patch
+
+#CVE-2013-1763 rhbz 915052,915057
+ApplyPatch sock_diag-Fix-out-of-bounds-access-to-sock_diag_handlers.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2473,6 +2497,16 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Sun Feb 24 2013 Josh Boyer <jwboyer@redhat.com> - 3.7.9-104
+- CVE-2013-1763 sock_diag: out-of-bounds access to sock_diag_handlers (rhbz 915052,915057)
+
+* Wed Feb 20 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix perf report field separator issue (rhbz 906055)
+ 
+* Tue Feb 19 2013 Josh Boyer <jwboyer@redhat.com>
+- Add support for Atheros 04ca:3004 bluetooth devices (rhbz 844750)
+- Backport support for newer ALPS touchpads (rhbz 812111)
+
 * Tue Feb 19 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.9-gnu.
 
