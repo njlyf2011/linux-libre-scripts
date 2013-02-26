@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 205
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -748,7 +748,7 @@ Patch800: linux-2.6-crash-driver.patch
 Patch901: modsign-post-KS-jwb.patch
 
 # secure boot
-Patch1000: secure-boot-3.7-20130204.patch
+Patch1000: secure-boot-3.7-20130219.patch
 Patch1001: efivarfs-3.7.patch
 
 # Improve PCI support on UEFI
@@ -851,10 +851,28 @@ Patch22247: ath9k_rx_dma_stop_check.patch
 #rhbz 911479 911473 CVE-2013-0290
 Patch22256: net-fix-infinite-loop-in-__skb_recv_datagram.patch
 
+#rhbz 909591
+Patch22255: usb-cypress-supertop.patch
+
+#rhbz 844750
+Patch22257: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 906055
+Patch22258: perf-hists-Fix-period-symbol_conf.field_sep-display.patch
+
+#rhbz 879408
+Patch22259: Bluetooth-Add-support-for-Foxconn-Hon-Hai-0489-e056.patch
+
+#CVE-2013-1763 rhbz 915052,915057
+Patch22260: sock_diag-Fix-out-of-bounds-access-to-sock_diag_handlers.patch
+
 Patch23000: silence-brcmsmac-warning.patch
 
-#rhbz 909591
-Patch21255: usb-cypress-supertop.patch
+#rhbz 812111
+Patch24000: alps-v2-3.7.patch
+
+#rhbz 892060
+Patch24001: ipv6-dst-from-ptr-race.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1563,7 +1581,7 @@ ApplyPatch modsign-post-KS-jwb.patch
 
 # secure boot
 ApplyPatch efivarfs-3.7.patch
-ApplyPatch secure-boot-3.7-20130204.patch
+ApplyPatch secure-boot-3.7-20130219.patch
 
 # Improved PCI support for UEFI
 ApplyPatch handle-efi-roms.patch
@@ -1650,6 +1668,24 @@ ApplyPatch usb-cypress-supertop.patch
 
 #rhbz 911479 911473 CVE-2013-0290
 ApplyPatch net-fix-infinite-loop-in-__skb_recv_datagram.patch
+
+#rhbz 844750
+ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 906055
+ApplyPatch perf-hists-Fix-period-symbol_conf.field_sep-display.patch
+
+#rhbz 812111
+ApplyPatch alps-v2-3.7.patch
+
+#rhbz 892060
+ApplyPatch ipv6-dst-from-ptr-race.patch
+
+#rhbz 879408
+ApplyPatch Bluetooth-Add-support-for-Foxconn-Hon-Hai-0489-e056.patch
+
+#CVE-2013-1763 rhbz 915052,915057
+ApplyPatch sock_diag-Fix-out-of-bounds-access-to-sock_diag_handlers.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2525,6 +2561,26 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sun Feb 24 2013 Josh Boyer <jwboyer@redhat.com> - 3.7.9-205
+- CVE-2013-1763 sock_diag: out-of-bounds access to sock_diag_handlers (rhbz 915052,915057)
+
+* Fri Feb 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Add support for bluetooth in Acer Aspire S7 (rhbz 879408)
+
+* Thu Feb 21 2013 Neil Horman <nhorman@redhat.com>
+- Fix crash from race in ipv6 dst entries (rhbz 892060)
+
+* Wed Feb 20 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix perf report field separator issue (rhbz 906055)
+- Fix oops from acpi_rsdp setup in secure-boot patchset (rhbz 906225)
+
+* Tue Feb 19 2013 Josh Boyer <jwboyer@redhat.com>
+- Add support for Atheros 04ca:3004 bluetooth devices (rhbz 844750)
+- Backport support for newer ALPS touchpads (rhbz 812111)
+
+* Tue Feb 19 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix OMAP thermal driver by building it in (seems it doesn't auto load when a module)
+
 * Tue Feb 19 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.9-gnu.
 
