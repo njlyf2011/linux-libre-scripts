@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#    Copyright (C) 2008-2012 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008-2013 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.7 extra=
+kver=3.8 extra=
 
 case $1 in
 --force)
@@ -470,6 +470,15 @@ clean_blob drivers/net/ethernet/netx-eth.c
 clean_kconfig arch/arm/Kconfig 'ARCH_NETX'
 clean_mk CONFIG_ARCH_NETX arch/arm/Makefile
 
+# mips
+
+# I couldn't figure out where the firmware name actually comes from.
+# If it's from some user-set property, we could reenable it.  -lxo
+announce XRX200_PHY_FW - "XRX200 PHY firmware loader"
+reject_firmware arch/mips/lantiq/xway/xrx200_phy_fw.c
+clean_kconfig arch/mips/lantiq/Kconfig 'XRX200_PHY_FW'
+clean_mk CONFIG_XRX200_PHY_FW arch/mips/lantiq/xway/Makefile
+
 #######
 # ATM #
 #######
@@ -523,6 +532,8 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/tty/Makefile
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
 reject_firmware drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
 clean_blob drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
+reject_firmware drivers/gpu/drm/nouveau/core/core/falcon.c
+clean_blob drivers/gpu/drm/nouveau/core/core/falcon.c
 clean_kconfig drivers/gpu/drm/nouveau/Kconfig 'DRM_NOUVEAU'
 clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
 
@@ -1095,10 +1106,6 @@ clean_blob drivers/media/platform/s5p-mfc/s5p_mfc.c
 clean_kconfig drivers/media/platform/Kconfig 'VIDEO_SAMSUNG_S5P_MFC'
 clean_mk CONFIG_VIDEO_SAMSUNG_S5P_MFC drivers/media/platform/s5p-mfc/Makefile
 
-announce USB_DABUSB - "left-over DABUSB firmware"
-clean_fw firmware/dabusb/bitstream.bin.ihex firmware/dabusb/bitstream.bin
-clean_fw firmware/dabusb/firmware.HEX firmware/dabusb/firmware.fw
-
 announce USB_S2255 - "USB Sensoray 2255 video capture device"
 reject_firmware drivers/media/usb/s2255/s2255drv.c
 clean_blob drivers/media/usb/s2255/s2255drv.c
@@ -1634,6 +1641,13 @@ clean_blob drivers/net/wireless/mwl8k.c
 clean_kconfig drivers/net/wireless/Kconfig 'MWL8K'
 clean_mk CONFIG_MWL8K drivers/net/wireless/Makefile
 
+announce AR5523 - "Atheros AR5523 wireless driver support"
+reject_firmware drivers/net/wireless/ath/ar5523/ar5523.c
+clean_blob drivers/net/wireless/ath/ar5523/ar5523.c
+clean_blob drivers/net/wireless/ath/ar5523/ar5523.h
+clean_kconfig drivers/net/wireless/ath/ar5523/Kconfig 'AR5523'
+clean_mk CONFIG_AR5523 drivers/net/wireless/ath/ar5523/Makefile
+
 announce ATH6KL - "Atheros ath6kl support"
 reject_firmware drivers/net/wireless/ath/ath6kl/init.c
 clean_blob drivers/net/wireless/ath/ath6kl/init.c
@@ -1650,6 +1664,11 @@ announce ATH6KL_USB - "Atheros ath6kl USB support"
 clean_blob drivers/net/wireless/ath/ath6kl/usb.c
 clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL_USB'
 clean_mk CONFIG_ATH6KL_USB drivers/net/wireless/ath/ath6kl/Makefile
+
+announce ATH9K - "Atheros 802.11n wireless cards support"
+reject_firmware drivers/net/wireless/ath/ath9k/init.c
+clean_kconfig drivers/net/wireless/ath/ath9k/Kconfig 'ATH9K'
+clean_mk CONFIG_ATH9K drivers/net/wireless/ath/ath9k/Makefile
 
 announce ATH9K_HTC - "Atheros HTC based wireless cards support"
 reject_firmware drivers/net/wireless/ath/ath9k/hif_usb.c
@@ -1766,6 +1785,12 @@ clean_blob drivers/staging/rtl8712/hal_init.c
 clean_kconfig drivers/staging/rtl8712/Kconfig 'R8712U'
 clean_mk CONFIG_R8712U drivers/staging/rtl8712/Makefile
 
+announce RTL8723AE - "Realtek RTL8723AE PCIe Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8723ae/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8723ae/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig 'RTL8723AE'
+clean_mk CONFIG_RTL8723AE drivers/net/wireless/rtlwifi/rtl8723ae/Makefile
+
 announce VT6656 - "VIA Technologies VT6656 support"
 reject_firmware drivers/staging/vt6656/firmware.c
 clean_blob drivers/staging/vt6656/firmware.c
@@ -1869,12 +1894,7 @@ clean_kconfig drivers/staging/bcm/Kconfig 'BCM_WIMAX'
 clean_mk CONFIG_BCM_WIMAX drivers/staging/bcm/Makefile
 
 announce WIMAX_GDM72XX_SDIO - "GCT GDM72xx WiMAX support: SDIO interface"
-clean_sed '
-/^static int download_image/,/^}/ {
-  /filp = filp_open/ s,filp = .*;,/*(DEBLOBBED)*/,
-  s,if (IS_ERR(filp)),if (1 /*(DEBLOBBED)*/),
-}' drivers/staging/gdm72xx/sdio_boot.c \
-  'disabled non-Free firmware loading machinery'
+reject_firmware drivers/staging/gdm72xx/sdio_boot.c
 clean_blob drivers/staging/gdm72xx/sdio_boot.c
 clean_kconfig drivers/staging/gdm72xx/Kconfig 'WIMAX_GDM72XX_SDIO'
 clean_mk CONFIG_WIMAX_GDM72XX_SDIO drivers/staging/gdm72xx/Makefile
@@ -2085,13 +2105,23 @@ clean_blob drivers/scsi/bfa/bfad.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_BFA_FC'
 clean_mk CONFIG_SCSI_BFA_FC drivers/scsi/bfa/Makefile
 
+announce SCSI_CHELSIO_FCOE - "Chelsio Communications FCoE support"
+reject_firmware drivers/scsi/csiostor/csio_hw.c
+clean_blob drivers/scsi/csiostor/csio_hw.h
+clean_blob drivers/scsi/csiostor/csio_init.c
+clean_kconfig drivers/scsi/csiostor/Kconfig 'SCSI_CHELSIO_FCOE'
+clean_mk CONFIG_SCSI_CHELSIO_FCOE drivers/scsi/csiostor/Makefile
+
 announce SCSI_LPFC - "Emulex LightPulse Fibre Channel Support"
 # The firmware name is built out of Vital Product Data read from the
 # adapter.  The firmware is definitely code, and I couldn't find
 # evidence it is Free, so I'm disabling it.  It's not clear whether
 # this is the hardware or the software inducing to the installation of
 # non-Free firmware.
+reject_firmware drivers/scsi/lpfc/lpfc.h
+reject_firmware drivers/scsi/lpfc/lpfc_crtn.h
 reject_firmware drivers/scsi/lpfc/lpfc_init.c
+reject_firmware drivers/scsi/lpfc/lpfc_attr.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_LPFC'
 clean_mk CONFIG_SCSI_LPFC drivers/scsi/lpfc/Makefile
 
@@ -2552,6 +2582,13 @@ reject_firmware sound/soc/codecs/wm8958-dsp2.c
 clean_blob sound/soc/codecs/wm8958-dsp2.c
 clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_WM8994'
 clean_mk CONFIG_SND_SOC_WM8994 sound/soc/codecs/Makefile
+
+# The coeff files might be pure data, but the wmfw surely aren't.
+announce SND_SOC_WM_ADSP - "Wolfson ADSP support"
+reject_firmware sound/soc/codecs/wm_adsp.c
+clean_blob sound/soc/codecs/wm_adsp.c
+clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_WM_ADSP'
+clean_mk CONFIG_SND_SOC_WM_ADSP sound/soc/codecs/Makefile
 
 announce SND_SOC_SH4_SIU - "ALSA SoC driver for Renesas SH7343, SH7722 SIU peripheral"
 reject_firmware sound/soc/sh/siu_dai.c
