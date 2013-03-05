@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -722,6 +722,7 @@ Patch510: silence-noise.patch
 Patch520: quiet-apm.patch
 Patch530: silence-fbcon-logo.patch
 Patch540: silence-empty-ipi-mask-warning.patch
+Patch541: silence-tty-null.patch
 
 Patch800: crash-driver.patch
 
@@ -1504,6 +1505,7 @@ ApplyPatch silence-fbcon-logo.patch
 
 # no-one cares about these warnings.
 ApplyPatch silence-empty-ipi-mask-warning.patch
+ApplyPatch silence-tty-null.patch
 
 # Changes to upstream defaults.
 
@@ -1716,7 +1718,7 @@ BuildKernel() {
 
     make -s ARCH=$Arch V=1 dtbs
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
-    install -m 644 arch/arm/boot/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
+    install -m 644 arch/arm/boot/dts/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
 %else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
@@ -2453,6 +2455,24 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Mar  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* GNU Linux-libre 3.8.2-gnu.
+
+* Mon Mar 04 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.2-201
+- Linux v3.8.2
+
+* Mon Mar  4 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix DTB generation on ARM
+
+* Fri Mar 01 2013 Dave Jones <davej@redhat.com>
+- Silence "tty is NULL" trace.
+
+* Fri Mar 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patches to fix sunrpc panic (rhbz 904870)
+
+* Thu Feb 28 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config for 3.8
+
 * Thu Feb 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 * GNU Linux-libre 3.8.1-gnu.
 
