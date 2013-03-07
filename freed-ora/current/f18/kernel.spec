@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 204
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -727,7 +727,7 @@ Patch541: silence-tty-null.patch
 Patch800: crash-driver.patch
 
 # secure boot
-Patch1000: secure-boot-20130218.patch
+Patch1000: secure-boot-20130219.patch
 
 # virt + ksm patches
 
@@ -760,8 +760,6 @@ Patch2901: v4l-dvb-experimental.patch
 Patch10000: fs-proc-devtree-remove_proc_entry.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
-
-Patch12303: dmar-disable-when-ricoh-multifunction.patch
 
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
@@ -810,10 +808,22 @@ Patch22261: 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 914737
 Patch22262: x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 
+#rhbz 916544
+Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
+
+#rhbz 917984
+Patch22264: efi-fixes-3.8.patch
+
+#rhbz 918512 918521
+Patch22265: crypto-user-fix-info-leaks-in-report-API.patch
+
 #rhbz 812111
 Patch24000: alps.patch
 
 Patch24100: userns-avoid-recursion-in-put_user_ns.patch
+
+#rhbz 859346
+Patch24101: fix-destroy_conntrack-GPF.patch
 
 
 # END OF PATCH DEFINITIONS
@@ -1514,7 +1524,7 @@ ApplyPatch silence-tty-null.patch
 ApplyPatch crash-driver.patch
 
 # secure boot
-ApplyPatch secure-boot-20130218.patch
+ApplyPatch secure-boot-20130219.patch
 
 # Assorted Virt Fixes
 
@@ -1543,9 +1553,6 @@ ApplyOptionalPatch v4l-dvb-experimental.patch
 ApplyPatch fs-proc-devtree-remove_proc_entry.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
-
-# rhbz#605888
-ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
@@ -1584,8 +1591,19 @@ ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 914737
 ApplyPatch x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 
+#rhbz 916544
+ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
+
+#rhbz 917984
+ApplyPatch efi-fixes-3.8.patch
+
+#rhbz 918512 918521
+ApplyPatch crypto-user-fix-info-leaks-in-report-API.patch
+
 ApplyPatch userns-avoid-recursion-in-put_user_ns.patch
 
+#rhbz 859346
+ApplyPatch fix-destroy_conntrack-GPF.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -1719,6 +1737,7 @@ BuildKernel() {
     make -s ARCH=$Arch V=1 dtbs
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
     install -m 644 arch/arm/boot/dts/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
+    rm -f arch/arm/boot/dts/*.dtb
 %else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
@@ -2455,6 +2474,24 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Mar 06 2013 Justin M. Forbes <jforbes@redhat.com>
+- Remove Ricoh multifunction DMAR patch as it's no longer needed (rhbz 880051)
+- Fix destroy_conntrack GPF (rhbz 859346)
+
+* Wed Mar 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix regression in secure-boot acpi_rsdp patch (rhbz 906225)
+- crypto: info leaks in report API (rhbz 918512 918521)
+
+* Tue Mar  5 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix Beagle (omap), update vexpress
+
+* Tue Mar 05 2013 Josh Boyer <jwboyer@redhat.com>
+- Backport 4 fixes for efivarfs (rhbz 917984)
+- Enable CONFIG_IP6_NF_TARGET_MASQUERADE
+
+* Mon Mar 04 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix issues in nx crypto driver from Kent Yoder (rhbz 916544)
+
 * Mon Mar  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 * GNU Linux-libre 3.8.2-gnu.
 
