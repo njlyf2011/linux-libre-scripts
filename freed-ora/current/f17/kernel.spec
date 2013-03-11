@@ -54,13 +54,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 105
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 7
+%define base_sublevel 8
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -70,9 +70,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.7%{?stablegnux}
-#define rcrevlibre -3.7%{?rcrevgnux}
-#define gitrevlibre -3.7%{?gitrevgnux}
+#define stablelibre -3.8%{?stablegnux}
+#define rcrevlibre -3.8%{?rcrevgnux}
+#define gitrevlibre -3.8%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -286,9 +286,9 @@ Summary: The Linux kernel
 
 # kernel up (versatile express), tegra and omap are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
+%endif
 %define with_omap 0
 %define with_tegra 0
-%endif
 
 # kernel-kirkwood is only built for armv5
 %ifnarch armv5tel
@@ -367,8 +367,8 @@ Summary: The Linux kernel
 %define with_bootwrapper 0
 %endif
 
-# sparse blows up on ppc64 and sparc64
-%ifarch ppc64 ppc sparc64
+# sparse blows up on ppc64
+%ifarch ppc64 ppc
 %define with_sparse 0
 %endif
 
@@ -407,19 +407,6 @@ Summary: The Linux kernel
 %define make_target image
 %define kernel_image arch/s390/boot/image
 %define with_tools 0
-%endif
-
-%ifarch sparc64
-%define asmarch sparc
-%define all_arch_configs kernel-%{version}-sparc64*.config
-%define make_target vmlinux
-%define kernel_image vmlinux
-%define image_install_path boot
-%define with_tools 0
-%endif
-
-%ifarch sparcv9
-%define hdrarch sparc
 %endif
 
 %ifarch ppc
@@ -466,7 +453,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 s390 sparc sparcv9
+%define nobuildarches i386 s390
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -535,6 +522,10 @@ Provides: kernel-modeset = 1\
 Provides: kernel-libre-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-highbank\
+Provides: kernel-libre-highbank\
+Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -562,7 +553,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 %{sparc} s390 s390x %{arm}
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 s390 s390x %{arm}
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -579,7 +570,7 @@ BuildRequires: xmlto, asciidoc
 BuildRequires: sparse >= 0.4.1
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison audit-libs-devel
 %endif
 %if %{with_tools}
 BuildRequires: pciutils-devel gettext
@@ -623,8 +614,6 @@ Source52: config-powerpc32-smp
 Source53: config-powerpc64
 
 Source70: config-s390x
-
-Source90: config-sparc64-generic
 
 # Unified ARM kernels
 Source100: config-armv7
@@ -678,12 +667,10 @@ Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.bz2
 %endif
 
 # we also need compile fixes for -vanilla
-Patch04: linux-2.6-compile-fixes.patch
+Patch04: compile-fixes.patch
 
 # build tweak for build ID magic, even for -vanilla
-Patch05: linux-2.6-makefile-after_link.patch
-
-Patch06: power-x86-destdir.patch
+Patch05: makefile-after_link.patch
 
 Patch07: freedo.patch
 
@@ -691,7 +678,7 @@ Patch07: freedo.patch
 
 
 # revert upstream patches we get via other methods
-Patch09: linux-2.6-upstream-reverts.patch
+Patch09: upstream-reverts.patch
 # Git trees.
 
 # Standalone patches
@@ -701,27 +688,26 @@ Patch101: taint-rss.patch
 
 Patch110: vmbugon-warnon.patch
 
-Patch390: linux-2.6-defaults-acpi-video.patch
-Patch391: linux-2.6-acpi-video-dos.patch
-Patch394: linux-2.6-acpi-debug-infinite-loop.patch
+Patch390: defaults-acpi-video.patch
+Patch391: acpi-video-dos.patch
+Patch394: acpi-debug-infinite-loop.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
-Patch450: linux-2.6-input-kill-stupid-messages.patch
-Patch452: linux-2.6.30-no-pcspkr-modalias.patch
+Patch450: input-kill-stupid-messages.patch
+Patch452: no-pcspkr-modalias.patch
 
-Patch460: linux-2.6-serial-460800.patch
+Patch460: serial-460800.patch
 
 Patch470: die-floppy-die.patch
 
-Patch510: linux-2.6-silence-noise.patch
+Patch510: silence-noise.patch
 Patch520: quite-apm.patch
 
-Patch530: linux-2.6-silence-fbcon-logo.patch
+Patch530: silence-fbcon-logo.patch
 Patch540: silence-empty-ipi-mask-warning.patch
+Patch541: silence-tty-null.patch
 
-Patch700: linux-2.6-e1000-ich9-montevina.patch
-
-Patch800: linux-2.6-crash-driver.patch
+Patch800: crash-driver.patch
 
 # crypto/
 
@@ -739,14 +725,12 @@ Patch1825: drm-i915-dp-stfu.patch
 # mustard patch to shut abrt up. please drop (and notify ajax) whenever it
 # fails to apply
 Patch1826: drm-i915-tv-detect-hush.patch
-# d-i-n backport for https://bugzilla.redhat.com/show_bug.cgi?id=901951
-Patch1827: drm-i915-lvds-reclock-fix.patch
 
 Patch1900: linux-2.6-intel-iommu-igfx.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
-Patch2802: linux-2.6-silence-acpi-blacklist.patch
+Patch2802: silence-acpi-blacklist.patch
 
 # media patches
 Patch2901: drivers-media-update.patch
@@ -760,8 +744,6 @@ Patch10000: fs-proc-devtree-remove_proc_entry.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12303: dmar-disable-when-ricoh-multifunction.patch
-
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
@@ -769,8 +751,6 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 Patch19000: ips-noirq.patch
 
 # ARM
-Patch21000: arm-read_current_timer.patch
-Patch21001: arm-fix-omapdrm.patch
 Patch21003: arm-alignment-faults.patch
 # OMAP
 
@@ -796,20 +776,6 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 #rhbz 857324
 Patch22070: net-tcp-bz857324.patch
 
-#rhbz 871078
-Patch22112: USB-report-submission-of-active-URBs.patch
-
-#rhbz CVE-2012-4530 868285 880147
-Patch22229: exec-use-eloop-for-max-recursion-depth.patch
-
-#rhbz 851278
-Patch22231: 8139cp-revert-set-ring-address-before-enabling-receiver.patch
-Patch22232: 8139cp-set-ring-address-after-enabling-C-mode.patch
-Patch22233: 8139cp-re-enable-interrupts-after-tx-timeout.patch
-
-#rhbz 892428
-Patch22238: brcmsmac-updates-rhbz892428.patch
-
 #rhbz 799564
 Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 Patch22242: Input-add-support-for-Cypress-PS2-Trackpads.patch
@@ -817,27 +783,45 @@ Patch22242: Input-add-support-for-Cypress-PS2-Trackpads.patch
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
 
-#rhbz 909591
-Patch22255: usb-cypress-supertop.patch
-
-#rhbz 911479 911473 CVE-2013-0290
-Patch22256: net-fix-infinite-loop-in-__skb_recv_datagram.patch
-
-#rhbz 844750
-Patch22257: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
 #rhbz 903192
 Patch22261: 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 
 #rhbz 914737
 Patch22262: x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 
-Patch23000: silence-brcmsmac-warning.patch
+#rhbz 916544
+Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
+
+#rhbz 917984
+Patch22264: efi-fixes-3.8.patch
+
+#rhbz 918512 918521
+Patch22265: crypto-user-fix-info-leaks-in-report-API.patch
+
+# CVE-2013-1792 rhbz 916646,919021
+Patch22266: keys-fix-race-with-concurrent-install_user_keyrings.patch
+
+#rhbz 840391
+Patch22267: logitech-dj-do-not-directly-call-hid_output_raw_report-during-probe.patch
+
+#rhbz 916444
+Patch22268: dmi_scan-fix-missing-check-for-_dmi_-signature-in-smbios_present.patch
+
+#CVE-2013-1828 rhbz 919315 919316
+Patch22269: net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
 
 #rhbz 812111
-Patch24000: alps-v2-3.7.patch
+Patch24000: alps.patch
 
 Patch24100: userns-avoid-recursion-in-put_user_ns.patch
+
+#rhbz 859346
+Patch24101: fix-destroy_conntrack-GPF.patch
+
+#rhbz 917353
+Patch24102: backlight_revert.patch
+
+Patch24103: turbostat-makefile.diff
 
 # END OF PATCH DEFINITIONS
 
@@ -1429,14 +1413,12 @@ do
 done
 %endif
 
-ApplyPatch linux-2.6-makefile-after_link.patch
+ApplyPatch makefile-after_link.patch
 
 #
 # misc small stuff to make things compile
 #
-ApplyOptionalPatch linux-2.6-compile-fixes.patch
-
-ApplyPatch power-x86-destdir.patch
+ApplyOptionalPatch compile-fixes.patch
 
 # Freedo logo.
 ApplyPatch freedo.patch
@@ -1444,7 +1426,7 @@ ApplyPatch freedo.patch
 %if !%{nopatches}
 
 # revert patches from upstream that conflict or that we get via other means
-ApplyOptionalPatch linux-2.6-upstream-reverts.patch -R
+ApplyOptionalPatch upstream-reverts.patch -R
 
 ApplyPatch taint-vbox.patch
 ApplyPatch taint-rss.patch
@@ -1457,11 +1439,9 @@ ApplyPatch vmbugon-warnon.patch
 #
 # ARM
 #
-#ApplyPatch arm-read_current_timer.patch
-#ApplyPatch arm-fix-omapdrm.patch
-ApplyPatch arm-tegra-nvec-kconfig.patch
+#ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-tegra-sdhci-module-fix.patch
+#ApplyPatch arm-tegra-sdhci-module-fix.patch
 ApplyPatch arm-alignment-faults.patch
 
 #
@@ -1484,9 +1464,9 @@ ApplyPatch arm-alignment-faults.patch
 # WMI
 
 # ACPI
-ApplyPatch linux-2.6-defaults-acpi-video.patch
-ApplyPatch linux-2.6-acpi-video-dos.patch
-ApplyPatch linux-2.6-acpi-debug-infinite-loop.patch
+ApplyPatch defaults-acpi-video.patch
+ApplyPatch acpi-video-dos.patch
+ApplyPatch acpi-debug-infinite-loop.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
@@ -1505,33 +1485,31 @@ ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 # Misc fixes
 # The input layer spews crap no-one cares about.
-ApplyPatch linux-2.6-input-kill-stupid-messages.patch
+ApplyPatch input-kill-stupid-messages.patch
 
 # stop floppy.ko from autoloading during udev...
 ApplyPatch die-floppy-die.patch
 
-ApplyPatch linux-2.6.30-no-pcspkr-modalias.patch
+ApplyPatch no-pcspkr-modalias.patch
 
 # Allow to use 480600 baud on 16C950 UARTs
-ApplyPatch linux-2.6-serial-460800.patch
+ApplyPatch serial-460800.patch
 
 # Silence some useless messages that still get printed with 'quiet'
-ApplyPatch linux-2.6-silence-noise.patch
+ApplyPatch silence-noise.patch
 
 # Make fbcon not show the penguins with 'quiet'
-ApplyPatch linux-2.6-silence-fbcon-logo.patch
+ApplyPatch silence-fbcon-logo.patch
 
 # No-one cares about these warnings
 ApplyPatch silence-empty-ipi-mask-warning.patch
+ApplyPatch silence-tty-null.patch
 
 # Changes to upstream defaults.
 
 
 # /dev/crash driver.
-ApplyPatch linux-2.6-crash-driver.patch
-
-# Hack e1000e to work on Montevina SDV
-ApplyPatch linux-2.6-e1000-ich9-montevina.patch
+ApplyPatch crash-driver.patch
 
 # crypto/
 
@@ -1547,12 +1525,11 @@ ApplyPatch linux-2.6-e1000-ich9-montevina.patch
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-dp-stfu.patch
 ApplyPatch drm-i915-tv-detect-hush.patch
-ApplyPatch drm-i915-lvds-reclock-fix.patch
 
 ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
-ApplyPatch linux-2.6-silence-acpi-blacklist.patch
+ApplyPatch silence-acpi-blacklist.patch
 ApplyPatch quite-apm.patch
 
 # Media (V4L/DVB/IR) updates/fixes/experimental drivers
@@ -1563,9 +1540,6 @@ ApplyOptionalPatch drivers-media-update.patch
 ApplyPatch fs-proc-devtree-remove_proc_entry.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
-
-# rhbz#605888
-ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
@@ -1589,20 +1563,6 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 857324
 ApplyPatch net-tcp-bz857324.patch
 
-#rhbz 871078
-ApplyPatch USB-report-submission-of-active-URBs.patch
-
-#rhbz CVE-2012-4530 868285 880147
-ApplyPatch exec-use-eloop-for-max-recursion-depth.patch
-
-#rhbz 851278
-ApplyPatch 8139cp-revert-set-ring-address-before-enabling-receiver.patch -R
-ApplyPatch 8139cp-set-ring-address-after-enabling-C-mode.patch
-ApplyPatch 8139cp-re-enable-interrupts-after-tx-timeout.patch
-
-#rhbz 892428
-ApplyPatch brcmsmac-updates-rhbz892428.patch
-
 #rhbz 799564
 ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
@@ -1610,19 +1570,8 @@ ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-ApplyPatch silence-brcmsmac-warning.patch
-
-#rhbz 909591
-ApplyPatch usb-cypress-supertop.patch
-
-#rhbz 911479 911473 CVE-2013-0290
-ApplyPatch net-fix-infinite-loop-in-__skb_recv_datagram.patch
-
-#rhbz 844750
-ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
 #rhbz 812111
-ApplyPatch alps-v2-3.7.patch
+ApplyPatch alps.patch
 
 #rhbz 903192
 ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
@@ -1630,7 +1579,36 @@ ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 914737
 ApplyPatch x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 
+#rhbz 916544
+ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
+
+#rhbz 917984
+ApplyPatch efi-fixes-3.8.patch
+
+#rhbz 918512 918521
+ApplyPatch crypto-user-fix-info-leaks-in-report-API.patch
+
 ApplyPatch userns-avoid-recursion-in-put_user_ns.patch
+
+#rhbz 859346
+ApplyPatch fix-destroy_conntrack-GPF.patch
+
+# CVE-2013-1792 rhbz 916646,919021
+ApplyPatch keys-fix-race-with-concurrent-install_user_keyrings.patch
+
+#rhbz 840391
+ApplyPatch logitech-dj-do-not-directly-call-hid_output_raw_report-during-probe.patch
+
+#rhbz 916444
+ApplyPatch dmi_scan-fix-missing-check-for-_dmi_-signature-in-smbios_present.patch
+
+#CVE-2013-1828 rhbz 919315 919316
+ApplyPatch net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
+
+#rhbz 917353
+ApplyPatch backlight_revert.patch -R
+
+ApplyPatch turbostat-makefile.diff
 
 # END OF PATCH APPLICATIONS
 
@@ -1764,7 +1742,8 @@ BuildKernel() {
 
     make -s ARCH=$Arch V=1 dtbs
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
-    install -m 644 arch/arm/boot/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
+    install -m 644 arch/arm/boot/dts/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
+    rm -f arch/arm/boot/dts/*.dtb
 %else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
@@ -2498,6 +2477,63 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Sun Mar 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8.2-gnu.
+
+* Fri Mar 08 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.2-105
+- Add patch to fix 32-bit turbostat build with older glibc-headers
+
+* Fri Mar 08 2013 Justin M. Forbes <jforbes@redhat.com>
+- Revert "write backlight harder" until better solution is found (rhbz 917353)
+
+* Fri Mar 08 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-1828 sctp: SCTP_GET_ASSOC_STATS stack buffer overflow (rhbz 919315 919316)
+
+* Fri Mar  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Have kernel provide kernel-highbank for upgrade to unified
+- Update mvebu configs
+- Drop unused ARM patches
+
+* Thu Mar 07 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix DMI regression (rhbz 916444)
+- Fix logitech-dj HID bug from Benjamin Tissoires (rhbz 840391)
+- CVE-2013-1792 keys: race condition in install_user_keyrings (rhbz 916646 919021)
+
+* Wed Mar 06 2013 Justin M. Forbes <jforbes@redhat.com>
+- Remove Ricoh multifunction DMAR patch as it's no longer needed (rhbz 880051)
+- Fix destroy_conntrack GPF (rhbz 859346)
+
+* Wed Mar 06 2013 Josh Boyer <jwboyer@redhat.com>
+- crypto: info leaks in report API (rhbz 918512 918521)
+
+* Tue Mar  5 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM configs for 3.8. Fix beagle (OMAP), update vexpress
+
+* Tue Mar 05 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-1819 xfs: _xfs_buf_find oops on blocks beyond the filesystem end
+  (rhbz 918009,918070)
+- Backport 4 fixes for efivarfs (rhbz 917984)
+
+* Mon Mar 04 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix issues in nx crypto driver from Kent Yoder (rhbz 916544)
+
+* Mon Mar 04 2013 Justin M. Forbes <jforbes@redhat.com>
+- Add audit-libs-devel to perf build-deps to enable trace command. (rhbz 892893)
+
+* Mon Mar 04 2013 Josh Boyer <jwboyer@redhat.com>
+- Linux v3.8.2
+
+* Fri Mar 01 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.1-101
+- Linux v3.8.1
+- Drop SPARC64 support
+- Silence "tty is NULL" trace.
+
+* Fri Mar 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patches to fix sunrpc panic (rhbz 904870)
+
+* Wed Feb 27 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config to enable SPI and a few other cleanups
+
 * Wed Feb 27 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.7.10-gnu.
 
