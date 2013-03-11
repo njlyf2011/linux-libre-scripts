@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 205
+%global baserelease 206
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -297,9 +297,9 @@ Summary: The Linux kernel
 
 # kernel up (versatile express), tegra and  omap are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
+%endif
 %define with_omap 0
 %define with_tegra 0
-%endif
 
 # kernel-kirkwood is only built for armv5
 %ifnarch armv5tel
@@ -533,6 +533,10 @@ Provides: kernel-modeset = 1\
 Provides: kernel-libre-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-highbank\
+Provides: kernel-libre-highbank\
+Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -767,17 +771,15 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
+Patch14011: team-net-next-update-20130307.patch
+
 
 Patch20000: 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
 Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 # ARM
-Patch21000: arm-read_current_timer.patch
 # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/137164.html
 Patch21002: arm-alignment-faults.patch
-
-# OMAP
-Patch21003: arm-fix-omapdrm.patch
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
@@ -820,6 +822,15 @@ Patch22265: crypto-user-fix-info-leaks-in-report-API.patch
 # CVE-2013-1792 rhbz 916646,919021
 Patch22266: keys-fix-race-with-concurrent-install_user_keyrings.patch
 
+#rhbz 840391
+Patch22267: logitech-dj-do-not-directly-call-hid_output_raw_report-during-probe.patch
+
+#rhbz 916444
+Patch22268: dmi_scan-fix-missing-check-for-_dmi_-signature-in-smbios_present.patch
+
+#CVE-2013-1828 rhbz 919315 919316
+Patch22269: net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
+
 #rhbz 812111
 Patch24000: alps.patch
 
@@ -828,6 +839,8 @@ Patch24100: userns-avoid-recursion-in-put_user_ns.patch
 #rhbz 859346
 Patch24101: fix-destroy_conntrack-GPF.patch
 
+#rhbz 917353
+Patch24102: backlight_revert.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1452,8 +1465,6 @@ ApplyPatch vmbugon-warnon.patch
 #
 # ARM
 #
-#ApplyPatch arm-read_current_timer.patch
-#ApplyPatch arm-fix-omapdrm.patch
 
 #ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
@@ -1610,6 +1621,21 @@ ApplyPatch fix-destroy_conntrack-GPF.patch
 
 # CVE-2013-1792 rhbz 916646,919021
 ApplyPatch keys-fix-race-with-concurrent-install_user_keyrings.patch
+
+#rhbz 840391
+ApplyPatch logitech-dj-do-not-directly-call-hid_output_raw_report-during-probe.patch
+
+#rhbz 916444
+ApplyPatch dmi_scan-fix-missing-check-for-_dmi_-signature-in-smbios_present.patch
+
+#CVE-2013-1828 rhbz 919315 919316
+ApplyPatch net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
+
+#rhbz 917353
+ApplyPatch backlight_revert.patch -R
+
+#Team Driver update
+ApplyPatch team-net-next-update-20130307.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2479,7 +2505,21 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Mar 08 2013 Justin M. Forbes <jforbes@redhat.com>
+- Revert "write backlight harder" until better solution is found (rhbz 917353)
+- Update team driver from net-next from Jiri Pirko
+
+* Fri Mar 08 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-1828 sctp: SCTP_GET_ASSOC_STATS stack buffer overflow (rhbz 919315 919316)
+
+* Fri Mar  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Have kernel provide kernel-highbank for upgrade to unified
+- Update mvebu configs
+- Drop unused ARM patches
+
 * Thu Mar 07 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix DMI regression (rhbz 916444)
+- Fix logitech-dj HID bug from Benjamin Tissoires (rhbz 840391)
 - CVE-2013-1792 keys: race condition in install_user_keyrings (rhbz 916646 919021)
 
 * Wed Mar 06 2013 Justin M. Forbes <jforbes@redhat.com>
