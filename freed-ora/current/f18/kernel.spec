@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 206
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 0
 # The git snapshot level
-%define gitrev 0
+%define gitrev 100
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -297,9 +297,9 @@ Summary: The Linux kernel
 
 # kernel up (versatile express), tegra and  omap are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
-%endif
 %define with_omap 0
 %define with_tegra 0
+%endif
 
 # kernel-kirkwood is only built for armv5
 %ifnarch armv5tel
@@ -778,8 +778,6 @@ Patch20000: 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
 Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 # ARM
-# http://lists.infradead.org/pipermail/linux-arm-kernel/2012-December/137164.html
-Patch21002: arm-alignment-faults.patch
 
 # ARM tegra
 Patch21004: arm-tegra-nvec-kconfig.patch
@@ -801,6 +799,9 @@ Patch22226: vt-Drop-K_OFF-for-VC_MUTE.patch
 Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 Patch22241: Input-add-support-for-Cypress-PS2-Trackpads.patch
 
+#rhbz 912166
+Patch22243: Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
+
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
 
@@ -812,21 +813,6 @@ Patch22262: x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 
 #rhbz 916544
 Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
-
-#rhbz 917984
-Patch22264: efi-fixes-3.8.patch
-
-#rhbz 918512 918521
-Patch22265: crypto-user-fix-info-leaks-in-report-API.patch
-
-# CVE-2013-1792 rhbz 916646,919021
-Patch22266: keys-fix-race-with-concurrent-install_user_keyrings.patch
-
-#rhbz 840391
-Patch22267: logitech-dj-do-not-directly-call-hid_output_raw_report-during-probe.patch
-
-#rhbz 916444
-Patch22268: dmi_scan-fix-missing-check-for-_dmi_-signature-in-smbios_present.patch
 
 #CVE-2013-1828 rhbz 919315 919316
 Patch22269: net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
@@ -841,6 +827,37 @@ Patch24101: fix-destroy_conntrack-GPF.patch
 
 #rhbz 917353
 Patch24102: backlight_revert.patch
+
+#rhbz 904182
+Patch24103: TTY-do-not-reset-master-s-packet-mode.patch
+
+#rhbz 857954
+Patch24105: w1-fix-oops-when-w1_search-is-called-from.patch
+
+#rhbz 911771
+Patch24106: serial-8250-Keep-8250.-xxxx-module-options-functiona.patch
+
+#rhbz 879462
+Patch24107: uvcvideo-suspend-fix.patch
+
+#CVE-2013-0914 rhbz 920499 920510
+Patch24108: signal-always-clear-sa_restorer-on-execve.patch
+
+#CVE-2013-0913 rhbz 920471 920529
+Patch24109: drm-i915-bounds-check-execbuffer-relocation-count.patch
+
+#rhbz 856863 892599
+Patch24111: cfg80211-mac80211-disconnect-on-suspend.patch
+Patch24112: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
+
+#rhbz 859282
+Patch24113: VMX-x86-handle-host-TSC-calibration-failure.patch
+
+#rhbz 920586
+Patch25000: amd64_edac_fix_rank_count.patch
+
+#rhbz 921500
+Patch25001: i7300_edac_single_mode_fixup.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1013,7 +1030,7 @@ This package provides debug information for package kernel-libre-tools.
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|XXX' -o kernel-tools-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
 %endif # with_tools
 
@@ -1469,7 +1486,6 @@ ApplyPatch vmbugon-warnon.patch
 #ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 #ApplyPatch arm-tegra-sdhci-module-fix.patch
-ApplyPatch arm-alignment-faults.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1593,6 +1609,9 @@ ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
 ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
 
+#rhbz 912166
+ApplyPatch Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
+
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
@@ -1608,25 +1627,10 @@ ApplyPatch x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 #rhbz 916544
 ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
-#rhbz 917984
-ApplyPatch efi-fixes-3.8.patch
-
-#rhbz 918512 918521
-ApplyPatch crypto-user-fix-info-leaks-in-report-API.patch
-
 ApplyPatch userns-avoid-recursion-in-put_user_ns.patch
 
 #rhbz 859346
 ApplyPatch fix-destroy_conntrack-GPF.patch
-
-# CVE-2013-1792 rhbz 916646,919021
-ApplyPatch keys-fix-race-with-concurrent-install_user_keyrings.patch
-
-#rhbz 840391
-ApplyPatch logitech-dj-do-not-directly-call-hid_output_raw_report-during-probe.patch
-
-#rhbz 916444
-ApplyPatch dmi_scan-fix-missing-check-for-_dmi_-signature-in-smbios_present.patch
 
 #CVE-2013-1828 rhbz 919315 919316
 ApplyPatch net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
@@ -1634,8 +1638,39 @@ ApplyPatch net-sctp-Validate-parameter-size-for-SCTP_GET_ASSOC_.patch
 #rhbz 917353
 ApplyPatch backlight_revert.patch -R
 
+#rhbz 920586
+ApplyPatch amd64_edac_fix_rank_count.patch
+
+#rhbz 921500
+ApplyPatch i7300_edac_single_mode_fixup.patch
+
 #Team Driver update
 ApplyPatch team-net-next-update-20130307.patch
+
+#rhbz 904182
+ApplyPatch TTY-do-not-reset-master-s-packet-mode.patch
+
+#rhbz 857954
+ApplyPatch w1-fix-oops-when-w1_search-is-called-from.patch
+
+#rhbz 911771
+ApplyPatch serial-8250-Keep-8250.-xxxx-module-options-functiona.patch
+
+#rhbz 879462
+ApplyPatch uvcvideo-suspend-fix.patch
+
+#CVE-2013-0914 rhbz 920499 920510
+ApplyPatch signal-always-clear-sa_restorer-on-execve.patch
+
+#CVE-2013-0913 rhbz 920471 920529
+ApplyPatch drm-i915-bounds-check-execbuffer-relocation-count.patch
+
+#rhbz 856863 892599
+ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
+ApplyPatch mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
+
+#rhbz 859282
+ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2505,6 +2540,37 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Mar 15 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8.3-gnu.
+
+* Thu Mar 14 2013 Justin M. Forbes <jforbes@redhat.com> 3.8.3-201
+- Linux v3.8.3
+
+* Thu Mar 14 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix divide by zero on host TSC calibration failure (rhbz 859282)
+
+* Thu Mar 14 2013 Mauro Carvalho Chehab <mchehab@redhat.com>
+- fix i7300_edac twice-mem-size-report via EDAC API (rhbz 921500)
+
+* Tue Mar 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix ieee80211_do_stop (rhbz 892599)
+- Add patches to fix cfg80211 issues with suspend (rhbz 856863)
+- Add patch to fix Cypress trackpad on XPS 12 machines (rhbz 912166)
+- CVE-2013-0913 drm/i915: head writing overflow (rhbz 920471 920529)
+- CVE-2013-0914 sa_restorer information leak (rhbz 920499 920510)
+
+* Mon Mar 11 2013 Mauro Carvalho Chehab <mchehab@redhat.com>
+- fix amd64_edac twice-mem-size-report via EDAC API (rhbz 920586)
+
+* Mon Mar 11 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix usb_submit_urb error in uvcvideo (rhbz 879462)
+- Add patch to allow "8250." prefix to keep working (rhbz 911771)
+- Add patch to fix w1_search oops (rhbz 857954)
+- Add patch to fix broken tty handling (rhbz 904182)
+
+* Fri Mar 08 2013 Josh Boyer <jwboyer@redhat.com>
+- Add turbostat and x86_engery_perf_policy debuginfo to kernel-tools-debuginfo
+
 * Fri Mar 08 2013 Justin M. Forbes <jforbes@redhat.com>
 - Revert "write backlight harder" until better solution is found (rhbz 917353)
 - Update team driver from net-next from Jiri Pirko
