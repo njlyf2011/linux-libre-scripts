@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 746c856..1e51be3 100644
+index e20f162..b5e00d3 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -2745,6 +2745,32 @@ index 6529704..bf6a701 100644
  #include <asm/mipsregs.h>
  
  /*
+diff --git a/arch/mips/include/uapi/asm/signal.h b/arch/mips/include/uapi/asm/signal.h
+index 770732c..dfd6b5e 100644
+--- a/arch/mips/include/uapi/asm/signal.h
++++ b/arch/mips/include/uapi/asm/signal.h
+@@ -72,6 +72,12 @@ typedef unsigned long old_sigset_t;		/* at least 32 bits */
+  *
+  * SA_ONESHOT and SA_NOMASK are the historical Linux names for the Single
+  * Unix names RESETHAND and NODEFER respectively.
++ *
++ * SA_RESTORER used to be defined as 0x04000000 but only the O32 ABI ever
++ * supported its use and no libc was using it, so the entire sa-restorer
++ * functionality was removed with lmo commit 39bffc12c3580ab for 2.5.48
++ * retaining only the SA_RESTORER definition as a reminder to avoid
++ * accidental reuse of the mask bit.
+  */
+ #define SA_ONSTACK	0x08000000
+ #define SA_RESETHAND	0x80000000
+@@ -84,8 +90,6 @@ typedef unsigned long old_sigset_t;		/* at least 32 bits */
+ #define SA_NOMASK	SA_NODEFER
+ #define SA_ONESHOT	SA_RESETHAND
+ 
+-#define SA_RESTORER	0x04000000	/* Only for o32 */
+-
+ #define MINSIGSTKSZ    2048
+ #define SIGSTKSZ       8192
+ 
 diff --git a/arch/mips/kernel/cevt-r4k.c b/arch/mips/kernel/cevt-r4k.c
 index 7532392..80a1f99 100644
 --- a/arch/mips/kernel/cevt-r4k.c
@@ -8247,10 +8273,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 34e2547..acf1ee0 100644
+index 266e2ae..0852604 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -858,6 +858,9 @@
+@@ -862,6 +862,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -15330,7 +15356,7 @@ index 4c338ec..f6354b4 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index f7d339d..09c5dba 100644
+index 558adfc..4b7360b 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -15343,14 +15369,14 @@ index f7d339d..09c5dba 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_K4505			0x1464
-@@ -578,6 +581,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -580,6 +583,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c05, USB_CLASS_COMM, 0x02, 0xff) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c1f, USB_CLASS_COMM, 0x02, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c23, USB_CLASS_COMM, 0x02, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, HUAWEI_PRODUCT_E173, 0xff, 0xff, 0xff),
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
 index 768a137..ecc6cea 100644
 --- a/drivers/video/Makefile
