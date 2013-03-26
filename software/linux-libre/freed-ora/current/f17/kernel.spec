@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 102
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -830,6 +830,9 @@ Patch25004: 0002-KVM-x86-fix-for-buffer-overflow-in-handling-of-MSR_K.patch
 
 #CVE-2013-1797 rhbz 917013 923967
 Patch25005: 0003-KVM-x86-Convert-MSR_KVM_SYSTEM_TIME-to-use-gfn_to_hv.patch
+
+#rhbz 920218
+Patch25006: mac80211-Dont-restart-sta-timer-if-not-running.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1625,6 +1628,9 @@ ApplyPatch 0002-KVM-x86-fix-for-buffer-overflow-in-handling-of-MSR_K.patch
 
 #CVE-2013-1797 rhbz 917013 923967
 ApplyPatch 0003-KVM-x86-Convert-MSR_KVM_SYSTEM_TIME-to-use-gfn_to_hv.patch
+
+#rhbz 920218
+ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2493,6 +2499,15 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Sat Mar 23 2013 Peter Robinson <pbrobinson@fedoraproject.org> - 3.8.4-102
+- Disable Marvell Dove support for the moment as it breaks other SoCs
+
+* Thu Mar 21 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+
+* Thu Mar 21 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix workqueue crash in mac80211 (rhbz 920218)
+
 * Thu Mar 21 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.4-gnu.
 
