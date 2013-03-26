@@ -190,10 +190,6 @@ CONFIG_ARM_AMBA=y
 CONFIG_MACH_ARMADA_370_XP=y
 CONFIG_MACH_ARMADA_370=y
 CONFIG_MACH_ARMADA_XP=y
-CONFIG_ARCH_DOVE=y
-# CONFIG_MACH_DOVE_DB is not set
-# CONFIG_MACH_CM_A510 is not set
-CONFIG_MACH_DOVE_DT=y
 
 CONFIG_CACHE_TAUROS2=y
 CONFIG_MV_XOR=y
@@ -203,7 +199,6 @@ CONFIG_I2C_MV64XXX=m
 CONFIG_PINCTRL_MVEBU=y
 CONFIG_PINCTRL_ARMADA_370=y
 CONFIG_PINCTRL_ARMADA_XP=y
-CONFIG_PINCTRL_DOVE=y
 CONFIG_EDAC_MV64X60=m
 CONFIG_SATA_MV=m
 CONFIG_MARVELL_PHY=m
@@ -215,7 +210,6 @@ CONFIG_MVNETA=m
 CONFIG_GPIO_MVEBU=y
 CONFIG_MVEBU_CLK_CORE=y
 CONFIG_MVEBU_CLK_GATING=y
-CONFIG_MMC_SDHCI_DOVE=m
 
 # Allwinner a1x
 # CONFIG_SUNXI_RFKILL=y
@@ -465,6 +459,22 @@ CONFIG_ETHERNET=y
 # CONFIG_VIDEO_DM6446_CCDC is not set
 # CONFIG_PANEL_TAAL is not set
 # CONFIG_SND_OMAP_SOC_OMAP_TWL4030 is not set
+
+# these modules all fail with missing __bad_udelay
+# http://www.spinics.net/lists/arm/msg15615.html provides some background
+# CONFIG_SUNGEM is not set
+# CONFIG_FB_SAVAGE is not set
+# CONFIG_FB_RADEON is not set
+# CONFIG_DRM_RADEON is not set
+# CONFIG_ATM_HE is not set
+# CONFIG_SCSI_ACARD is not set
+# CONFIG_SFC is not set
+
+# these all currently fail due to missing symbols __bad_udelay or
+# error: implicit declaration of function ‘iowrite32be’
+# CONFIG_SND_ALI5451 is not set
+# CONFIG_DRM_NOUVEAU is not set
+# CONFIG_MLX4_EN is not set
 
 # CONFIG_DVB_USB_PCTV452E is not set
 # We need to fix these as they should be either generic includes or kconfig fixes
