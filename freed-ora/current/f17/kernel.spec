@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 102
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -798,16 +798,10 @@ Patch24000: alps.patch
 
 Patch24100: userns-avoid-recursion-in-put_user_ns.patch
 
-#rhbz 917353
-Patch24102: backlight_revert.patch
-
 Patch24103: turbostat-makefile.diff
 
 #rhbz 879462
 Patch24107: uvcvideo-suspend-fix.patch
-
-#CVE-2013-0913 rhbz 920471 920529
-Patch24109: drm-i915-bounds-check-execbuffer-relocation-count.patch
 
 #rhbz 856863 892599
 Patch24111: cfg80211-mac80211-disconnect-on-suspend.patch
@@ -815,6 +809,12 @@ Patch24112: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
 
 #rhbz 859282
 Patch24113: VMX-x86-handle-host-TSC-calibration-failure.patch
+
+#rhbz 806587
+Patch24115: HID-usbhid-quirk-for-Realtek-Multi-card-reader.patch
+
+#rhbz 907221
+Patch24116: HID-usbhid-quirk-for-MSI-GX680R-led-panel.patch
 
 #rhbz 920586
 Patch25000: amd64_edac_fix_rank_count.patch
@@ -833,6 +833,9 @@ Patch25005: 0003-KVM-x86-Convert-MSR_KVM_SYSTEM_TIME-to-use-gfn_to_hv.patch
 
 #rhbz 920218
 Patch25006: mac80211-Dont-restart-sta-timer-if-not-running.patch
+
+#rhbz 927469
+Patch25007: fix-child-thread-introspection.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1596,9 +1599,6 @@ ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
 ApplyPatch userns-avoid-recursion-in-put_user_ns.patch
 
-#rhbz 917353
-ApplyPatch backlight_revert.patch -R
-
 ApplyPatch turbostat-makefile.diff
 
 #rhbz 920586
@@ -1609,9 +1609,6 @@ ApplyPatch i7300_edac_single_mode_fixup.patch
 
 #rhbz 879462
 ApplyPatch uvcvideo-suspend-fix.patch
-
-#CVE-2013-0913 rhbz 920471 920529
-ApplyPatch drm-i915-bounds-check-execbuffer-relocation-count.patch
 
 #rhbz 856863 892599
 ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
@@ -1631,6 +1628,15 @@ ApplyPatch 0003-KVM-x86-Convert-MSR_KVM_SYSTEM_TIME-to-use-gfn_to_hv.patch
 
 #rhbz 920218
 ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
+
+#rhbz 907221
+ApplyPatch HID-usbhid-quirk-for-MSI-GX680R-led-panel.patch
+
+#rhbz 806587
+ApplyPatch HID-usbhid-quirk-for-Realtek-Multi-card-reader.patch
+
+#rhbz 927469
+ApplyPatch fix-child-thread-introspection.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2499,6 +2505,22 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri Mar 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -lbre
+- GNU Linux-libre 3.8.5-gnu.
+
+* Thu Mar 28 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.5-101
+- Linux v3.8.5
+
+* Tue Mar 26 2013 Justin M. Forbes <jforbes@redhat.com>
+- Fix child thread introspection of of /proc/self/exe (rhbz 927469)
+
+* Tue Mar 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add quirk for Realtek card reader to avoid 10 sec boot delay (rhbz 806587)
+- Add quirk for MSI keyboard backlight to avoid 10 sec boot delay (rhbz 907221)
+
+* Mon Mar 25 2013 Justin M. Forbes <jforbes@redhat.com>
+- disable whci-hcd since it doesnt seem to have users (rhbz 919289)
+
 * Sat Mar 23 2013 Peter Robinson <pbrobinson@fedoraproject.org> - 3.8.4-102
 - Disable Marvell Dove support for the moment as it breaks other SoCs
 
