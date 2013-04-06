@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -810,12 +810,6 @@ Patch24112: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
 #rhbz 859282
 Patch24113: VMX-x86-handle-host-TSC-calibration-failure.patch
 
-#rhbz 806587
-Patch24115: HID-usbhid-quirk-for-Realtek-Multi-card-reader.patch
-
-#rhbz 907221
-Patch24116: HID-usbhid-quirk-for-MSI-GX680R-led-panel.patch
-
 #rhbz 920586
 Patch25000: amd64_edac_fix_rank_count.patch
 
@@ -836,6 +830,9 @@ Patch25006: mac80211-Dont-restart-sta-timer-if-not-running.patch
 
 #rhbz 927469
 Patch25007: fix-child-thread-introspection.patch
+
+#rhbz 844750
+Patch25008: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1629,14 +1626,10 @@ ApplyPatch 0003-KVM-x86-Convert-MSR_KVM_SYSTEM_TIME-to-use-gfn_to_hv.patch
 #rhbz 920218
 ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
 
-#rhbz 907221
-ApplyPatch HID-usbhid-quirk-for-MSI-GX680R-led-panel.patch
-
-#rhbz 806587
-ApplyPatch HID-usbhid-quirk-for-Realtek-Multi-card-reader.patch
-
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
+
+ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2505,6 +2498,23 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri Apr  5 2013 Alexandre Oliva <lxoliva@fsfla.org> -lbre
+- GNU Linux-libre 3.8.6-gnu.
+
+* Fri Apr 05 2013 Justin M. Forbes <jforbes@redhat.com>
+- Linux v3.8.6
+
+* Wed Apr 03 2013 Dave Jones <davej@redhat.com>
+- Enable MTD_CHAR/MTD_BLOCK (Needed for SFC)
+  Enable 10gigE on 64-bit only.
+
+* Tue Apr 02 2013 Josh Boyer <jwboyer@redhat.com>
+- Add support for Atheros 04ca:3004 bluetooth devices (again) (rhbz 844750)
+- Enable CONFIG_SCSI_DMX3191D (rhbz 919874)
+
+* Mon Apr 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_MCE_INJECT (rhbz 927353)
+
 * Fri Mar 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -lbre
 - GNU Linux-libre 3.8.5-gnu.
 
