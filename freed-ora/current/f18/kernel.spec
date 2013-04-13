@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 203
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -730,7 +730,7 @@ Patch540: silence-empty-ipi-mask-warning.patch
 Patch800: crash-driver.patch
 
 # secure boot
-Patch1000: secure-boot-20130219.patch
+Patch1000: secure-boot-20130409.patch
 
 # virt + ksm patches
 
@@ -851,6 +851,12 @@ Patch25007: fix-child-thread-introspection.patch
 
 #rhbz 844750
 Patch25008: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 908604
+Patch25009: HID-magicmouse-fix-race-between-input_register-and-probe.patch
+
+#rhbz 871932
+Patch25010: 0001-drm-i915-add-quirk-to-invert-brightness-on-eMachines.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1546,7 +1552,7 @@ ApplyPatch silence-empty-ipi-mask-warning.patch
 ApplyPatch crash-driver.patch
 
 # secure boot
-ApplyPatch secure-boot-20130219.patch
+ApplyPatch secure-boot-20130409.patch
 
 # Assorted Virt Fixes
 
@@ -1656,6 +1662,12 @@ ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
 ApplyPatch fix-child-thread-introspection.patch
 
 ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+
+#rhbz 908604
+ApplyPatch HID-magicmouse-fix-race-between-input_register-and-probe.patch
+
+#rhbz 871932
+ApplyPatch 0001-drm-i915-add-quirk-to-invert-brightness-on-eMachines.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2525,6 +2537,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Apr 09 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.6-203
+- Temporarily work around pci device assignment issues (rhbz 908888)
+- CVE-2013-1929 tg3: len overflow in VPD firmware parsing (rhbz 949932 949946)
+- Backport intel brightness quirk for emachines (rhbz 871932)
+
+* Mon Apr  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable CMA on ARM tegra
+- Minor tweeks to ARM OMAP
+
+* Mon Apr 08 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Benjamin Tissoires to fix race in HID magicmouse (rhbz 908604)
+
 * Fri Apr  5 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.6-gnu.
 
