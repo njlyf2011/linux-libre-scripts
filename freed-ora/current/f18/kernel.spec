@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 203
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -710,6 +710,9 @@ Patch100: taint-vbox.patch
 
 Patch110: vmbugon-warnon.patch
 
+Patch200: debug-bad-pte-dmi.patch
+Patch201: debug-bad-pte-modules.patch
+
 Patch390: defaults-acpi-video.patch
 Patch391: acpi-video-dos.patch
 Patch394: acpi-debug-infinite-loop.patch
@@ -779,9 +782,7 @@ Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 # ARM
 
 # ARM tegra
-Patch21004: arm-tegra-nvec-kconfig.patch
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
-Patch21006: arm-tegra-sdhci-module-fix.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -814,7 +815,7 @@ Patch22262: x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
 #rhbz 812111
-Patch24000: alps.patch
+Patch24000: alps-v2.patch
 
 Patch24100: userns-avoid-recursion-in-put_user_ns.patch
 
@@ -851,12 +852,6 @@ Patch25007: fix-child-thread-introspection.patch
 
 #rhbz 844750
 Patch25008: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
-#rhbz 908604
-Patch25009: HID-magicmouse-fix-race-between-input_register-and-probe.patch
-
-#rhbz 871932
-Patch25010: 0001-drm-i915-add-quirk-to-invert-brightness-on-eMachines.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1475,6 +1470,10 @@ ApplyPatch taint-vbox.patch
 
 ApplyPatch vmbugon-warnon.patch
 
+ApplyPatch debug-bad-pte-dmi.patch
+ApplyPatch debug-bad-pte-modules.patch
+
+
 # Architecture patches
 # x86(-64)
 
@@ -1482,9 +1481,7 @@ ApplyPatch vmbugon-warnon.patch
 # ARM
 #
 
-#ApplyPatch arm-tegra-nvec-kconfig.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-#ApplyPatch arm-tegra-sdhci-module-fix.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1614,7 +1611,7 @@ ApplyPatch Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
 #rhbz 812111
-ApplyPatch alps.patch
+ApplyPatch alps-v2.patch
 
 #rhbz 903192
 ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
@@ -1662,12 +1659,6 @@ ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
 ApplyPatch fix-child-thread-introspection.patch
 
 ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
-#rhbz 908604
-ApplyPatch HID-magicmouse-fix-race-between-input_register-and-probe.patch
-
-#rhbz 871932
-ApplyPatch 0001-drm-i915-add-quirk-to-invert-brightness-on-eMachines.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2537,6 +2528,19 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sun Apr 14 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8.7-gnu.
+
+* Fri Apr 12 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.7-201
+- Linux v3.8.7
+- Enable CONFIG_LDM_PARTITION (rhbz 948636)
+
+* Thu Apr 11 2013 Dave Jones <davej@redhat.com>
+- Print out some extra debug information when we hit bad page tables.
+
+* Thu Apr 11 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix ALPS backport patch (rhbz 812111)
+
 * Mon Apr 09 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.6-203
 - Temporarily work around pci device assignment issues (rhbz 908888)
 - CVE-2013-1929 tg3: len overflow in VPD firmware parsing (rhbz 949932 949946)
