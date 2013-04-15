@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -688,6 +688,9 @@ Patch101: taint-rss.patch
 
 Patch110: vmbugon-warnon.patch
 
+Patch200: debug-bad-pte-dmi.patch
+Patch201: debug-bad-pte-modules.patch
+
 Patch390: defaults-acpi-video.patch
 Patch391: acpi-video-dos.patch
 Patch394: acpi-debug-infinite-loop.patch
@@ -794,7 +797,7 @@ Patch22262: x86-mm-Fix-vmalloc_fault-oops-during-lazy-MMU-updates.patch
 Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
 #rhbz 812111
-Patch24000: alps.patch
+Patch24000: alps-v2.patch
 
 Patch24100: userns-avoid-recursion-in-put_user_ns.patch
 
@@ -1444,6 +1447,10 @@ ApplyPatch taint-rss.patch
 
 ApplyPatch vmbugon-warnon.patch
 
+ApplyPatch debug-bad-pte-dmi.patch
+ApplyPatch debug-bad-pte-modules.patch
+
+
 # Architecture patches
 # x86(-64)
 
@@ -1583,7 +1590,7 @@ ApplyPatch Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
 #rhbz 812111
-ApplyPatch alps.patch
+ApplyPatch alps-v2.patch
 
 #rhbz 903192
 ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
@@ -2498,7 +2505,35 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Fri Apr  5 2013 Alexandre Oliva <lxoliva@fsfla.org> -lbre
+* Sun Apr 14 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8.7-gnu.
+
+* Fri Apr 12 2013 Dave Jones <davej@redhat.com> - 3.8.7-100
+- 3.8.7
+  dropped: HID-magicmouse-fix-race-between-input_register-and-probe.patch
+  dropped: 0001-drm-i915-add-quirk-to-invert-brightness-on-eMachines.patch
+
+* Fri Apr 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_LDM_PARTITION (rhbz 948636)
+
+* Thu Apr 11 2013 Dave Jones <davej@redhat.com>
+- Print out some extra debug information when we hit bad page tables.
+
+* Thu Apr 11 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix ALPS backport patch (rhbz 812111)
+
+* Mon Apr 09 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-1929 tg3: len overflow in VPD firmware parsing (rhbz 949932 949946)
+- Backport intel brightness quirk for emachines (rhbz 871932)
+
+* Mon Apr  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable CMA on ARM tegra
+- Minor tweeks to ARM OMAP
+
+* Mon Apr 08 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch from Benjamin Tissoires to fix race in HID magicmouse (rhbz 908604)
+
+* Fri Apr  5 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.6-gnu.
 
 * Fri Apr 05 2013 Justin M. Forbes <jforbes@redhat.com>
@@ -2515,7 +2550,7 @@ fi
 * Mon Apr 01 2013 Josh Boyer <jwboyer@redhat.com>
 - Enable CONFIG_MCE_INJECT (rhbz 927353)
 
-* Fri Mar 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -lbre
+* Fri Mar 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.5-gnu.
 
 * Thu Mar 28 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.5-101
