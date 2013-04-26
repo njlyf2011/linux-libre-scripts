@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 202
+%global baserelease 203
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -858,6 +858,42 @@ Patch25011: iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 #rhbz 947539
 Patch25013: md-raid1-10-Handle-REQ_WRITE_SAME-flag-in-write-bios.patch
+
+#CVE-2013-3222 rhbz 955216 955228
+Patch25014: atm-update-msg_namelen-in-vcc_recvmsg.patch
+
+#CVE-2013-3224 rhbz 955599 955607
+Patch25015: Bluetooth-fix-possible-info-leak-in-bt_sock_recvmsg.patch
+
+#CVE-2013-1979 rhbz 955629 955647
+Patch25016: net-fix-incorrect-credentials-passing.patch
+
+#CVE-2013-3225 rhbz 955649 955658
+Patch25017: Bluetooth-RFCOMM-Fix-missing-msg_namelen-update-in-r.patch
+
+#CVE-2013-3223 rhbz 955662 955666
+Patch25018: ax25-fix-info-leak-via-msg_name-in-ax25_recvmsg.patch
+
+#CVE-2013-3076 956162 956168
+Patch25019: crypto-algif-suppress-sending-source-address-informa.patch
+
+#CVE-2013-3234 956135 956139
+Patch25020: rose-fix-info-leak-via-msg_name-in-rose_recvmsg.patch
+
+#CVE-2013-3233 956125 956129
+Patch25021: NFC-llcp-fix-info-leaks-via-msg_name-in-llcp_sock_re.patch
+
+#CVE-2013-3232 956110 956113
+Patch25022: netrom-fix-invalid-use-of-sizeof-in-nr_recvmsg.patch
+
+#CVE-2013-3231 956094 956104
+Patch25023: llc-Fix-missing-msg_namelen-update-in-llc_ui_recvmsg.patch
+
+#CVE-2013-3230 956088 956089
+Patch25024: l2tp-fix-info-leak-in-l2tp_ip6_recvmsg.patch
+
+#CVE-2013-3228 956069 956071
+Patch25025: irda-Fix-missing-msg_namelen-update-in-irda_recvmsg_.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1671,6 +1707,42 @@ ApplyPatch iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 #rhbz 947539
 ApplyPatch md-raid1-10-Handle-REQ_WRITE_SAME-flag-in-write-bios.patch
+
+#CVE-2013-3222 rhbz 955216 955228
+ApplyPatch atm-update-msg_namelen-in-vcc_recvmsg.patch
+
+#CVE-2013-3224 rhbz 955599 955607
+ApplyPatch Bluetooth-fix-possible-info-leak-in-bt_sock_recvmsg.patch
+
+#CVE-2013-1979 rhbz 955629 955647
+ApplyPatch net-fix-incorrect-credentials-passing.patch
+
+#CVE-2013-3225 rhbz 955649 955658
+ApplyPatch Bluetooth-RFCOMM-Fix-missing-msg_namelen-update-in-r.patch
+
+#CVE-2013-3223 rhbz 955662 955666
+ApplyPatch ax25-fix-info-leak-via-msg_name-in-ax25_recvmsg.patch
+
+#CVE-2013-3076 956162 956168
+ApplyPatch crypto-algif-suppress-sending-source-address-informa.patch
+
+#CVE-2013-3234 956135 956139
+ApplyPatch rose-fix-info-leak-via-msg_name-in-rose_recvmsg.patch
+
+#CVE-2013-3233 956125 956129
+ApplyPatch NFC-llcp-fix-info-leaks-via-msg_name-in-llcp_sock_re.patch
+
+#CVE-2013-3232 956110 956113
+ApplyPatch netrom-fix-invalid-use-of-sizeof-in-nr_recvmsg.patch
+
+#CVE-2013-3231 956094 956104
+ApplyPatch llc-Fix-missing-msg_namelen-update-in-llc_ui_recvmsg.patch
+
+#CVE-2013-3230 956088 956089
+ApplyPatch l2tp-fix-info-leak-in-l2tp_ip6_recvmsg.patch
+
+#CVE-2013-3228 956069 956071
+ApplyPatch irda-Fix-missing-msg_namelen-update-in-irda_recvmsg_.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2540,6 +2612,24 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Apr 24 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.8-203
+- CVE-2013-3228 irda: missing msg_namelen update in irda_recvmsg_dgram (rhbz 956069 956071)
+- CVE-2013-3230 l2tp: info leak in l2tp_ip6_recvmsg (rhbz 956088 956089)
+- CVE-2013-3231 llc: Fix missing msg_namelen update in llc_ui_recvmsg (rhbz 956094 956104)
+- CVE-2013-3232 netrom: information leak via msg_name in nr_recvmsg (rhbz 956110 956113)
+- CVE-2013-3233 NFC: llcp: info leaks via msg_name in llcp_sock_recvmsg (rhbz 956125 956129)
+- CVE-2013-3234 rose: info leak via msg_name in rose_recvmsg (rhbz 956135 956139)
+- CVE-2013-3076 crypto: algif suppress sending src addr info in recvmsg (rhbz 956162 956168)
+
+* Tue Apr 23 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-3223 ax25: information leak via msg_name in ax25_recvmsg (rhbz 955662 955666)
+- CVE-2013-3225 Bluetooth: RFCOMM missing msg_namelen update in rfcomm_sock_recvmsg (rhbz 955649 955658)
+- CVE-2013-1979 net: incorrect SCM_CREDENTIALS passing (rhbz 955629 955647)
+- CVE-2013-3224 Bluetooth: possible info leak in bt_sock_recvmsg (rhbz 955599 955607)
+
+* Mon Apr 22 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-3222 atm: update msg_namelen in vcc_recvmsg (rhbz 955216 955228)
+
 * Wed Apr 17 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.8-202
 - Fix missing raid REQ_WRITE_SAME flag commit (rhbz 947539)
 
