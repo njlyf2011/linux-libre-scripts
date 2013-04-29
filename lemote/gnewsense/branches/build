@@ -27,11 +27,16 @@ extra=$2
 libre=$3
 rev=${4-0}loongsonlibre
 
+case $extra in
+"" | -rc*) extra0=.0$extra;;
+*) extra0=$extra;;
+esac
+
 branchdir=$1
 librebase=$branch$extra-gnu$libre
 srcbase=linux-libre-$librebase.tar.bz2
 pub=../pool
-buildnorev=$branch${extra:-.0}-gnu$libre
+buildnorev=$branch$extra0-gnu$libre
 buildid=${buildnorev}_${rev}
 srctree=linux-$buildid
 xsrctree=linux-$branch$extra
@@ -51,7 +56,7 @@ exec > $srctree.log
 exec 2>&1
 
 test -d $branchdir/.svn
-test -f $pub/$srcbase
+test -f $pub/debuginfo/$srcbase
 test ! -h $srclink || $rel || $force
 test ! -f $patches || $rel || $force
 test ! -f $buildtb || $rel || $force
@@ -67,7 +72,8 @@ done
 $rel || {
 rm -rf $srctree $xsrctree $srclink $patches $buildtb || :
 
-ln -s $pub/$srcbase $srclink
+ln -s $pub/debuginfo/$srcbase $srclink
+ln $pub/debuginfo/$srcbase.sign $srclink.sign
 tar -xf $srclink --use=bzip2
 if $prep; then
   rm $srclink
@@ -107,10 +113,10 @@ echo build is done, type ^C to stop, or Enter to move, commit and tag $buildid
 read proceed
 } # $rel
 
-rm -f $pub/*$buildid*.deb $pub/*$buildid*.tar.bz2 $srclink || :
-ln -s $srcbase $pub/$srclink
-mv $buildtb $pub/debuginfo/
-mv *$buildid*.deb *$buildid*.tar.bz2 $pub
+rm -f $pub/*$buildid*.deb $pub/debuginfo/*$buildid*.tar.bz2 $srclink || :
+ln -s $srcbase $pub/debuginfo/$srclink
+mv *$buildid*.tar.bz2* $pub/debuginfo
+mv *$buildid*.deb $pub
 
 cd $branchdir &&
 svn commit -m "$buildid" &&
