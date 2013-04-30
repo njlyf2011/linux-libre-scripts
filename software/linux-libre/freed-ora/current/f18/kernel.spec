@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2582,7 +2582,13 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
-* Fri Apr 26 2013 Alexandre Oliva <lxoliva@fsfla.org>
+* Mon Apr 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8.10-gnu.
+
+* Mon Apr 29 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.10-200
+- Linux v3.8.10
+
+* Fri Apr 26 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.9-gnu.
 
 * Fri Apr 26 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.9-200
