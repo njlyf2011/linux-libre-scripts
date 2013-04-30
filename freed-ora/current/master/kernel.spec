@@ -62,13 +62,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 8
+%define base_sublevel 9
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.8%{?stablegnux}
-#define rcrevlibre -3.8%{?rcrevgnux}
-#define gitrevlibre -3.8%{?gitrevgnux}
+#define stablelibre -3.9%{?stablegnux}
+#define rcrevlibre -3.9%{?rcrevgnux}
+#define gitrevlibre -3.9%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -131,7 +131,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -172,12 +172,10 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# ARM OMAP (Beagle/Panda Board)
-%define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
+# ARM Cortex-A15 support with LPAE and HW Virtualisation
+%define with_lpae      %{?_without_lpae:      0} %{?!_without_lpae:      1}
 # kernel-tegra (only valid for arm)
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
-# kernel-kirkwood (only valid for arm)
-%define with_kirkwood       %{?_without_kirkwood:       0} %{?!_without_kirkwood:       1}
 #
 # Additional options for user-friendly one-off kernel building:
 #
@@ -292,15 +290,10 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel up (unified kernel target), tegra and omap are only built on armv7 hfp/sfp
-%ifnarch armv7hl armv7l
-%define with_omap 0
+# kernel up (unified kernel target), unified LPAE, tegra are only built on armv7 hfp
+%ifnarch armv7hl
+%define with_lpae 0
 %define with_tegra 0
-%endif
-
-# kernel-kirkwood is only built for armv5
-%ifnarch armv5tel
-%define with_kirkwood 0
 %endif
 
 # if requested, only build base kernel
@@ -436,10 +429,7 @@ Summary: The Linux kernel
 %define kernel_image arch/arm/boot/zImage
 # we only build headers/perf/tools on the base arm arches
 # just like we used to only build them on i386 for x86
-%ifarch armv5tel
-%define with_up 0
-%endif
-%ifnarch armv5tel armv7hl
+%ifnarch armv7hl
 %define with_headers 0
 %define with_perf 0
 %define with_tools 0
@@ -530,6 +520,14 @@ Provides: kernel-modeset = 1\
 Provides: kernel-libre-modeset = 1\
 Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-highbank\
+Provides: kernel-libre-highbank\
+Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-omap\
+Provides: kernel-libre-nomap\
+Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -566,9 +564,9 @@ ExclusiveOS: Linux
 # List the packages used during the kernel build
 #
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
-BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools, hostname
+BuildRequires: net-tools, hostname, bc
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
@@ -634,13 +632,10 @@ Source54: config-powerpc64p7
 Source70: config-s390x
 
 # Unified ARM kernels
-Source100: config-armv7
-
-# Legacy ARM kernels
-Source105: config-arm-generic
-Source110: config-arm-omap
-Source111: config-arm-tegra
-Source112: config-arm-kirkwood
+Source100: config-armv7-generic
+Source101: config-armv7
+Source102: config-armv7-lpae
+Source103: config-armv7-tegra
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -705,9 +700,11 @@ Patch100: taint-vbox.patch
 
 Patch110: vmbugon-warnon.patch
 
+Patch200: debug-bad-pte-dmi.patch
+Patch201: debug-bad-pte-modules.patch
+
 Patch390: defaults-acpi-video.patch
 Patch391: acpi-video-dos.patch
-Patch394: acpi-debug-infinite-loop.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: input-kill-stupid-messages.patch
@@ -718,23 +715,22 @@ Patch460: serial-460800.patch
 Patch470: die-floppy-die.patch
 
 Patch510: silence-noise.patch
-Patch520: quiet-apm.patch
 Patch530: silence-fbcon-logo.patch
-Patch540: silence-empty-ipi-mask-warning.patch
 
 Patch800: crash-driver.patch
 
 # crypto/
 
 # secure boot
-Patch1000: devel-pekey-secure-boot-20130219.patch
+Patch1000: devel-pekey-secure-boot-20130306.patch
 
 # virt + ksm patches
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 #Patch1800: drm-vgem.patch
-
+Patch1700: drm-ttm-exports-for-qxl.patch
+Patch1701: drm-qxl-driver.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -758,8 +754,6 @@ Patch10000: fs-proc-devtree-remove_proc_entry.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch12303: dmar-disable-when-ricoh-multifunction.patch
-
 Patch13003: efi-dont-map-boot-services-on-32bit.patch
 
 Patch14000: hibernate-freeze-filesystems.patch
@@ -769,16 +763,18 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 
 # ARM
 Patch21000: arm-export-read_current_timer.patch
-Patch21001: arm-allnoconfig-error-__LINUX_ARM_ARCH__-undeclared.patch
+# https://lists.ozlabs.org/pipermail/devicetree-discuss/2013-March/029029.html
+Patch21001: arm-of-dma.patch
 
-# IMX
-Patch21003: arm-imx-fixdrm.patch
+# lpae
+Patch21002: arm-lpae-ax88796.patch
+
+# ARM omap
+Patch21003: arm-omap-ehci-fix.patch
 
 # ARM tegra
-Patch21004: arm-tegra-nvec-kconfig.patch
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
-
-# versatile
+Patch21006: arm-tegra-fixclk.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -786,36 +782,40 @@ Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 #rhbz 859485
 Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
 
-#rhbz 799564
-Patch21240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-Patch21241: Input-add-support-for-Cypress-PS2-Trackpads.patch
-
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 Patch21242: criu-no-expert.patch
-
-#rhbz 830151
-Patch21243: mac80211-improve-latency-and-throughput-while-software.patch
-Patch21244: iwlegacy-add-flush-callback.patch
 
 #rhbz 892811
 Patch21247: ath9k_rx_dma_stop_check.patch
 
-#rhbz 910126
-Patch21249: pstore-Create-a-convenient-mount-point-for-pstore.patch
+#rhbz 903192
+Patch21261: 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 
-#rhbz 844750
-Patch21250: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+#rhbz 856863 892599
+Patch21273: cfg80211-mac80211-disconnect-on-suspend.patch
+Patch21274: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
 
-#rhbz 909591
-Patch21255: usb-cypress-supertop.patch
-
-#rhbz 812111
-Patch21260: alps-v2.patch
+#rhbz 859282
+Patch21275: VMX-x86-handle-host-TSC-calibration-failure.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
+
+#rhbz 927469
+Patch23006: fix-child-thread-introspection.patch
+
+#rhbz 928024
+Patch23008: forcedeth-dma-error-check.patch
+
+#rhbz 919176
+Patch25010: wireless-regulatory-fix-channel-disabling-race-condition.patch
+
+#rhbz 951241
+Patch25011: iwlwifi-fix-freeing-uninitialized-pointer.patch
+
+Patch25014: blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -987,7 +987,7 @@ This package provides debug information for package kernel-libre-tools.
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|XXX' -o kernel-tools-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
 %endif # with_tools
 
@@ -1140,17 +1140,11 @@ on kernel bugs, as some of these options impact performance noticably.
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
-%define variant_summary The Linux kernel compiled for marvell kirkwood boards
-%kernel_variant_package kirkwood
-%description kirkwood
+%define variant_summary The Linux kernel compiled for Cortex-A15
+%kernel_variant_package lpae
+%description lpae
 This package includes a version of the Linux kernel with support for
-marvell kirkwood based systems, i.e., guruplug, sheevaplug
-
-%define variant_summary The Linux kernel compiled for TI-OMAP boards
-%kernel_variant_package omap
-%description omap
-This package includes a version of the Linux kernel with support for
-TI-OMAP based systems, i.e., BeagleBoard-xM.
+Cortex-A15 devices with LPAE and HW virtualisation support
 
 %define variant_summary The Linux kernel compiled for tegra boards
 %kernel_variant_package tegra
@@ -1432,6 +1426,9 @@ ApplyPatch taint-vbox.patch
 
 ApplyPatch vmbugon-warnon.patch
 
+ApplyPatch debug-bad-pte-dmi.patch
+ApplyPatch debug-bad-pte-modules.patch
+
 # Architecture patches
 # x86(-64)
 
@@ -1439,10 +1436,11 @@ ApplyPatch vmbugon-warnon.patch
 # ARM
 #
 ApplyPatch arm-export-read_current_timer.patch
-ApplyPatch arm-allnoconfig-error-__LINUX_ARM_ARCH__-undeclared.patch
-# ApplyPatch arm-tegra-nvec-kconfig.patch
+ApplyPatch arm-of-dma.patch
+ApplyPatch arm-lpae-ax88796.patch
+ApplyPatch arm-omap-ehci-fix.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-imx-fixdrm.patch
+ApplyPatch arm-tegra-fixclk.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1465,7 +1463,6 @@ ApplyPatch arm-imx-fixdrm.patch
 # ACPI
 ApplyPatch defaults-acpi-video.patch
 ApplyPatch acpi-video-dos.patch
-ApplyPatch acpi-debug-infinite-loop.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
@@ -1500,9 +1497,6 @@ ApplyPatch silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch silence-fbcon-logo.patch
 
-# no-one cares about these warnings.
-ApplyPatch silence-empty-ipi-mask-warning.patch
-
 # Changes to upstream defaults.
 
 
@@ -1512,11 +1506,13 @@ ApplyPatch crash-driver.patch
 # crypto/
 
 # secure boot
-ApplyPatch devel-pekey-secure-boot-20130219.patch
+ApplyPatch devel-pekey-secure-boot-20130306.patch
 
 # Assorted Virt Fixes
 
 # DRM core
+ApplyPatch drm-ttm-exports-for-qxl.patch
+ApplyPatch drm-qxl-driver.patch
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 #ApplyPatch drm-vgem.patch
 
@@ -1528,7 +1524,6 @@ ApplyPatch drm-i915-dp-stfu.patch
 
 # silence the ACPI blacklist code
 ApplyPatch silence-acpi-blacklist.patch
-ApplyPatch quiet-apm.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
@@ -1540,9 +1535,6 @@ ApplyOptionalPatch v4l-dvb-experimental.patch
 ApplyPatch fs-proc-devtree-remove_proc_entry.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
-
-# rhbz#605888
-ApplyPatch dmar-disable-when-ricoh-multifunction.patch
 
 ApplyPatch efi-dont-map-boot-services-on-32bit.patch
 
@@ -1562,31 +1554,35 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 859485
 ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 
-#rhbz 799564
-ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
-
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 ApplyPatch criu-no-expert.patch
-
-#rhbz 830151
-ApplyPatch mac80211-improve-latency-and-throughput-while-software.patch
-ApplyPatch iwlegacy-add-flush-callback.patch
 
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-#rhbz 910126
-ApplyPatch pstore-Create-a-convenient-mount-point-for-pstore.patch
+#rhbz 903192
+ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 
-#rhbz 909591
-ApplyPatch usb-cypress-supertop.patch
+#rhbz 856863 892599
+ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
+ApplyPatch mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
 
-#rhbz 844750
-ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+#rhbz 859282
+ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
 
-#rhbz 812111
-ApplyPatch alps-v2.patch
+#rhbz 927469
+ApplyPatch fix-child-thread-introspection.patch
+
+#rhbz 928024
+ApplyPatch forcedeth-dma-error-check.patch
+
+#rhbz 919176
+ApplyPatch wireless-regulatory-fix-channel-disabling-race-condition.patch
+
+#rhbz 951241
+ApplyPatch iwlwifi-fix-freeing-uninitialized-pointer.patch
+
+ApplyPatch blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1603,13 +1599,6 @@ touch .scmversion
 %ifnarch %nobuildarches
 
 mkdir configs
-
-# Remove configs not for the buildarch
-for cfg in kernel-%{version}-*.config; do
-  if [ `echo %{all_arch_configs} | grep -c $cfg` -eq 0 ]; then
-    rm -f $cfg
-  fi
-done
 
 %if !%{debugbuildsenabled}
 rm -f kernel-%{version}-*debug.config
@@ -1728,6 +1717,7 @@ BuildKernel() {
     make -s ARCH=$Arch V=1 dtbs
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
     install -m 644 arch/arm/boot/dts/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
+    rm -f arch/arm/boot/dts/*.dtb
 %else
     make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
@@ -1866,9 +1856,9 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe'
+    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe|register_netdevice'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler'
+    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler|blk_queue_physical_block_size'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -1940,12 +1930,8 @@ BuildKernel %make_target %kernel_image PAEdebug
 BuildKernel %make_target %kernel_image PAE
 %endif
 
-%if %{with_kirkwood}
-BuildKernel %make_target %kernel_image kirkwood
-%endif
-
-%if %{with_omap}
-BuildKernel %make_target %kernel_image omap
+%if %{with_lpae}
+BuildKernel %make_target %kernel_image lpae
 %endif
 
 %if %{with_tegra}
@@ -1961,7 +1947,7 @@ BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
-  make %{?_smp_mflags} -C tools/perf -s V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 prefix=%{_prefix}
+  make %{?_smp_mflags} -C tools/perf -s V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_LIBNUMA=1 NO_STRLCPY=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} all
@@ -2016,26 +2002,18 @@ find Documentation -type d | xargs chmod u+w
 # that will strip the signature off of the modules.
 
 %define __modsign_install_post \
-  if [ "%{signmodules}" == "1" ]; then \
-    if [ "%{with_pae}" != "0" ]; then \
-      mv signing_key.priv.sign.PAE signing_key.priv \
-      mv signing_key.x509.sign.PAE signing_key.x509 \
-      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAE/ \
+  if [ "%{signmodules}" -eq "1" ]; then \
+    if [ "%{with_pae}" -ne "0" ]; then \
+      %{modsign_cmd} signing_key.priv.sign.PAE signing_key.x509.sign.PAE $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAE/ \
     fi \
-    if [ "%{with_debug}" != "0" ]; then \
-      mv signing_key.priv.sign.debug signing_key.priv \
-      mv signing_key.x509.sign.debug signing_key.x509 \
-      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
+    if [ "%{with_debug}" -ne "0" ]; then \
+      %{modsign_cmd} signing_key.priv.sign.debug signing_key.x509.sign.debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
     fi \
-    if [ "%{with_pae_debug}" != "0" ]; then \
-      mv signing_key.priv.sign.PAEdebug signing_key.priv \
-      mv signing_key.x509.sign.PAEdebug signing_key.x509 \
-      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAEdebug/ \
+    if [ "%{with_pae_debug}" -ne "0" ]; then \
+      %{modsign_cmd} signing_key.priv.sign.PAEdebug signing_key.x509.sign.PAEdebug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAEdebug/ \
     fi \
-    if [ "%{with_up}" != "0" ]; then \
-      mv signing_key.priv.sign signing_key.priv \
-      mv signing_key.x509.sign signing_key.x509 \
-      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
+    if [ "%{with_up}" -ne "0" ]; then \
+      %{modsign_cmd} signing_key.priv.sign signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
     fi \
   fi \
 %{nil}
@@ -2278,11 +2256,8 @@ fi}\
 %kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
 %kernel_variant_preun PAEdebug
 
-%kernel_variant_preun kirkwood
-%kernel_variant_post -v kirkwood
-
-%kernel_variant_preun omap
-%kernel_variant_post -v omap
+%kernel_variant_preun lpae
+%kernel_variant_post -v lpae
 
 %kernel_variant_preun tegra
 %kernel_variant_post -v tegra
@@ -2437,16 +2412,15 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
-%kernel_variant_files %{with_kirkwood} kirkwood
-%kernel_variant_files %{with_omap} omap
+%kernel_variant_files %{with_lpae} lpae
 %kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 
 #  ___________________________________________________________
-# / This branch is for Fedora 19. You probably want to commit \
-# \ to the F-18 branch instead, or in addition to this one.   /
+# / This branch is for Fedora 20. You probably want to commit \
+# \ to the F-19 branch instead, or in addition to this one.   /
 #  -----------------------------------------------------------
 #         \   ^__^
 #          \  (@@)\_______
@@ -2454,6 +2428,342 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Apr 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9-gnu.
+
+* Mon Apr 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Linux v3.9
+
+* Fri Apr 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to prevent scheduling while atomic error in blkcg
+
+* Wed Apr 24 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix EFI boot on Macs (rhbz 953447)
+
+* Mon Apr 22 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc8.git0.1
+- Linux v3.9-rc8
+- Disable debugging options.
+
+* Mon Apr 22 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM updates
+
+* Fri Apr 19 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix RCU splat from perf events
+
+* Fri Apr 19 2013 Peter Robinson <pbrobinson@fedoraproject.org> 
+- Temporaily disable cpu idle on ARM as it appears to be causing stability issues
+
+* Fri Apr 19 2013 Josh Boyer <jwboyer@redhat.com>
+- Disable Intel HDA and enable RSXX block dev on ppc64/ppc64p7
+
+* Thu Apr 18 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc7.git3.1
+- Linux v3.9-rc7-70-gd202f05
+
+* Wed Apr 17 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc7.git2.1
+- Linux v3.9-rc7-24-g542a672
+
+* Wed Apr 17 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+- Add patch for DT DMA issues that affect at least highbank/tegra ARM devices
+
+* Tue Apr 16 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc7.git1.1
+- Linux v3.9-rc7-4-gbb33db7
+- Reenable debugging options.
+
+* Tue Apr 16 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix uninitialized variable free in iwlwifi (rhbz 951241)
+- Fix race in regulatory code (rhbz 919176)
+
+* Mon Apr 15 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix debug patches to build on s390x/ppc
+
+* Mon Apr 15 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc7.git0.1
+- Linux v3.9-rc7
+- Disable debugging options.
+
+* Fri Apr 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_LDM_PARTITION (rhbz 948636)
+
+* Fri Apr 12 2013 Justin M. Forbes <jforbes@redhat.com>
+- Fix forcedeth DMA check error (rhbz 928024)
+
+* Thu Apr 11 2013 Dave Jones <davej@redhat.com>
+- Print out some extra debug information when we hit bad page tables.
+
+* Thu Apr 11 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc6.git2.1
+- Linux v3.9-rc6-115-g7ee32a6
+- libsas: use right function to alloc smp response (rhbz 949875)
+
+* Tue Apr 09 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc6.git1.1
+- Linux v3.9-rc6-36-ge8f2b54
+- Reenable debugging options.
+
+* Tue Apr  9 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix building some ARM tegra modules
+- Some minor ARM OMAP updates
+
+* Mon Apr 08 2013 Neil Horman <nhorman@redhat.com>
+- Fix dma unmap error in e100 (rhbz 907694)
+
+* Mon Apr 08 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc6.git0.1
+- Disable debugging options.
+- Linux-3.9-rc6
+
+* Thu Apr 04 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc5.git3.1
+- Linux v3.9-rc5-183-g22d1e6f
+
+* Wed Apr 03 2013 Dave Jones <davej@redhat.com>
+- Enable MTD_CHAR/MTD_BLOCK (Needed for SFC)
+  Enable 10gigE on 64-bit only.
+
+* Wed Apr 03 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc5.git2.1
+- Linux v3.9-rc5-146-gda241ef
+
+* Wed Apr  3 2013 Peter Robinson <pbrobinson@fedoraproject.org> 
+- Add upstream usb-next OMAP patch to fix usb on omap/mvebu
+
+* Tue Apr 02 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_FB_MATROX_G on powerpc
+
+* Tue Apr 02 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc5.git1.1
+- Linux v3.9-rc5-108-g118c9a4
+- Reenable debugging options.
+
+* Tue Apr 02 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_SCSI_DMX3191D (rhbz 919874)
+
+* Mon Apr 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Enable CONFIG_MCE_INJECT (rhbz 927353)
+
+* Mon Apr 01 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.0-0.rc5.git0.1
+- Disable debugging options.
+- Linux v3.9-rc5
+- fix htmldoc build for 8250 rename. Patch from Kyle McMartin
+
+* Mon Apr  1 2013 Peter Robinson <pbrobinson@fedoraproject.org> 
+- Minor ARM LPAE updates
+
+* Sun Mar 31 2013 Peter Robinson <pbrobinson@fedoraproject.org> 
+- Make tegra inherit armv7-generic, fix and re-enable tegra
+- Enable SPI on ARM
+- Drop config-arm-generic
+- ARM config updates
+
+* Thu Mar 28 2013 Peter Robinson <pbrobinson@fedoraproject.org> 
+- Update ARM unified config for OMAP
+
+* Tue Mar 26 2013 Justin M. Forbes <jforbes@redhat.com>
+- Fix child thread introspection of of /proc/self/exe (rhbz 927469)
+
+* Tue Mar 26 2013 Dave Jones <davej@redhat.com>
+- Enable CONFIG_DM_CACHE (rhbz 924325)
+
+* Tue Mar 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add quirk for Realtek card reader to avoid 10 sec boot delay (rhbz 806587)
+- Add quirk for MSI keyboard backlight to avoid 10 sec boot delay (rhbz 907221)
+
+* Mon Mar 25 2013 Justin M. Forbes <jforbes@redhat.com>
+- disable whci-hcd since it doesnt seem to have users (rhbz 919289)
+
+* Sun Mar 24 2013 Dave Jones <davej@redhat.com> -3.9.0-0.rc4.git0.1
+- Linux 3.9-rc4
+  merged: drm-i915-bounds-check-execbuffer-relocation-count.patch
+
+* Sun Mar 24 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config for OMAP/mvebu/lpae
+
+* Fri Mar 22 2013 Dave Jones <davej@redhat.com>
+- Fix calculation of current frequency in intel_pstate driver. (rhbz 923942)
+- Add missing build-req for perl-Carp
+
+* Thu Mar 21 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix workqueue crash in mac80211 (rhbz 920218)
+
+* Thu Mar 21 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc3.git1.1
+- Linux v3.9-rc3-148-g2ffdd7e
+- Fixes CVE-2013-1796, CVE-2013-1797, CVE-2013-1798 in kvm.
+
+* Wed Mar 20 2013 Dave Jones <davej@redhat.com>
+- Enable CONFIG_DM_DELAY (rhbz 923721)
+
+* Tue Mar 19 2013 Dave Jones <davej@redhat.com> - 3.9.0-0.rc3.git0.5
+- Reenable debugging options.
+
+* Tue Mar 19 2013 Dave Jones <davej@redhat.com>
+- cpufreq/intel_pstate: Add function to check that all MSR's are valid (rhbz 922923)
+
+* Mon Mar 18 2013 Dave Jones <davej@redhat.com> - 3.9.0-0.rc3.git0.4
+- s390x config option changes from Dan Horák <dan@danny.cz>
+   - enable PCI
+   - disable few useless drivers
+   - disable drivers conflicting with s390x
+
+* Mon Mar 18 2013 Dave Jones <davej@redhat.com> - 3.9.0-0.rc3.git0.3
+- Linux v3.9-rc3
+  merged: w1-fix-oops-when-w1_search-is-called-from.patch
+- Disable debugging options.
+
+* Sun Mar 17 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Merge OMAP support into ARM unified kernel
+- Add ARM LPAE kernel for Cortex A-15 devices that support LPAE and HW virtualisation
+- Unified ARM kernel provides highbank and OMAP support
+- Drop remantents of ARM softfp kernels
+
+* Fri Mar 15 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix divide by zero on host TSC calibration failure (rhbz 859282)
+
+* Fri Mar 15 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc2.git1.1
+- Linux v3.9-rc2-292-ga2362d2
+- Fixes CVE-2013-1860 kernel: usb: cdc-wdm buffer overflow triggered by device
+
+* Thu Mar 14 2013 Dave Jones <davej@redhat.com>
+- Move cpufreq drivers to be modular (rhbz 746372)
+
+* Wed Mar 13 2013 Dave Jones <davej@redhat.com> - 3.9.0-0.rc2.git0.3
+- Reenable debugging options.
+
+* Tue Mar 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix ieee80211_do_stop (rhbz 892599)
+- Add patches to fix cfg80211 issues with suspend (rhbz 856863)
+- CVE-2013-0913 drm/i915: head writing overflow (rhbz 920471 920529)
+- CVE-2013-0914 sa_restorer information leak (rhbz 920499 920510)
+
+* Tue Mar 12 2013 Dave Airlie <airlied@redhat.com>
+- add QXL driver (f19 only)
+
+* Mon Mar 11 2013 Dave Jones <davej@redhat.com> - 3.9.0-0.rc2.git0.2
+- Disable debugging options.
+
+* Mon Mar 11 2013 Dave Jones <davej@redhat.com>
+- Linux 3.9-rc2
+
+* Mon Mar 11 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to allow "8250." prefix to keep working (rhbz 911771)
+- Add patch to fix w1_search oops (rhbz 857954)
+
+* Sun Mar 10 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc1.git2.1
+- Linux v3.9-rc1-278-g8343bce
+
+* Sun Mar 10 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Xilinx Zynq
+- Enable highbank cpufreq driver
+
+* Fri Mar 08 2013 Josh Boyer <jwboyer@redhat.com>
+- Add turbostat and x86_engery_perf_policy debuginfo to kernel-tools-debuginfo
+
+* Fri Mar 08 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc1.git1.1
+- Linux v3.9-rc1-211-g47b3bc9
+- Reenable debugging options.
+- CVE-2013-1828 sctp: SCTP_GET_ASSOC_STATS stack buffer overflow (rhbz 919315 919316)
+
+* Thu Mar 07 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-1792 keys: race condition in install_user_keyrings (rhbz 916646 919021)
+
+* Wed Mar 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Adjust secure-boot patchset to work with boot_params sanitizing
+- Don't clear efi_info in boot_params (rhbz 918408)
+
+* Wed Mar 06 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM mvebu config
+
+* Wed Mar 06 2013 Dave Jones <davej@redhat.com>
+- drop acpi debugging patch.
+
+* Wed Mar 06 2013 Justin M. Forbes <jforbes@redhat.com>
+- Remove Ricoh multifunction DMAR patch as it's no longer needed (rhbz 880051)
+
+* Tue Mar 05 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc1.git0.3
+- Fix intel_pstate init error path (rhbz 916833)
+
+* Tue Mar  5 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Temporarily disable tegra until we get a fix from upstream
+
+* Tue Mar 05 2013 Josh Boyer <jwboyer@redhat.com>
+- Add 3 fixes for efi issues (rhbz 917984)
+- Enable CONFIG_IP6_NF_TARGET_MASQUERADE
+
+* Mon Mar 04 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc1.git0.1
+- Linux v3.9-rc1
+- Add patch from Dirk Brandewie to fix intel pstate divide error (rhbz 916833)
+- Disable debugging options.
+
+* Mon Mar  4 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update vexpress and omap options (fix MMC on qemu, hopefully fix OMAP3)
+
+* Sun Mar 03 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git15.1
+- Linux v3.8-10734-ga7c1120
+
+* Fri Mar 01 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git14.1
+- Linux v3.8-10206-gb0af9cd
+
+* Fri Mar 01 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git13.1
+- Linux v3.8-9761-gde1a226
+
+* Thu Feb 28 2013 Kyle McMartin <kmcmarti@redhat.com>
+- Make iso9660 a module.
+
+* Thu Feb 28 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git12.1
+- Linux v3.8-9633-g2a7d2b9
+
+* Wed Feb 27 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Drop ARM kirkwood kernel
+- Enable SPI on ARM
+- General 3.9 updates
+
+* Wed Feb 27 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git11.1
+- Linux v3.8-9456-g309667e
+
+* Wed Feb 27 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git10.1
+- Linux v3.8-9405-gd895cb1
+
+* Tue Feb 26 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git9.1
+- Linux v3.8-9165-g1cef935
+
+* Tue Feb 26 2013 Kyle McMartin <kmcmarti@redhat.com>
+- Move VMXNET3 to config-x86-generic from config-generic, it's VMware
+  virtual ethernet.
+
+* Tue Feb 26 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git8.1
+- Linux v3.8-8664-gc41b381
+
+* Tue Feb 26 2013 Kyle McMartin <kmcmarti@redhat.com>
+- Add blk_queue_physical_block_size and register_netdevice to the symbols
+  used for initrd generation (synched from .el6)
+- ipr.ko driven SAS VRAID cards found on x86_64 machines these days, and not
+  just on ppc64
+
+* Tue Feb 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix vmalloc_fault oops during lazy MMU (rhbz 914737)
+
+* Mon Feb 25 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git7.1
+- Honor dmesg_restrict for /dev/kmsg (rhbz 903192)
+- Linux v3.8-7888-gab78265
+
+* Sun Feb 24 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git6.1
+- Linux v3.8-6988-g9e2d59a
+
+* Sun Feb 24 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-1763 sock_diag: out-of-bounds access to sock_diag_handlers (rhbz 915052,915057)
+
+* Fri Feb 22 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git5.1
+- Linux v3.8-6071-g8b5628a
+
+* Fri Feb 22 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git4.1
+- Linux v3.8-6071-g8b5628a
+- Enable the rtl8192e driver (rhbz 913753)
+
+* Thu Feb 21 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git3.1
+- Linux v3.8-3195-g024e4ec
+- Shut up perf about missing build things we don't care about
+- Drop the old aic7xxx driver, from Paul Bolle
+
+* Thu Feb 21 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git2.1
+- Linux v3.8-3040-ga0b1c42
+
+* Thu Feb 21 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc0.git1.1
+- Linux v3.8-523-gece8e0b
+- Reenable debugging options.
+
 * Tue Feb 19 2013 Josh Boyer <jwboyer@redhat.com> - 3.8.0-2
 - Add pekey support from David Howells and rework secure-boot patchset on top
 - Add support for Atheros 04ca:3004 bluetooth devices (rhbz 844750)
