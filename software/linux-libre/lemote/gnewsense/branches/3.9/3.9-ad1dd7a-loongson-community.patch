@@ -2675,7 +2675,7 @@ index 6529704..bf6a701 100644
  
  /*
 diff --git a/arch/mips/include/uapi/asm/inst.h b/arch/mips/include/uapi/asm/inst.h
-index 4d07881..cf01e49 100644
+index 4d07881..4a28a5f 100644
 --- a/arch/mips/include/uapi/asm/inst.h
 +++ b/arch/mips/include/uapi/asm/inst.h
 @@ -61,6 +61,8 @@ enum spec_op {
@@ -2696,6 +2696,17 @@ index 4d07881..cf01e49 100644
  };
  
  /*
+@@ -161,8 +163,8 @@ enum cop1_sdw_func {
+  */
+ enum cop1x_func {
+ 	lwxc1_op     =	0x00, ldxc1_op	   =  0x01,
+-	pfetch_op    =	0x07, swxc1_op	   =  0x08,
+-	sdxc1_op     =	0x09, madd_s_op	   =  0x20,
++	swxc1_op     =  0x08, sdxc1_op     =  0x09,
++	prefx_op     =  0x17, madd_s_op    =  0x20,
+ 	madd_d_op    =	0x21, madd_e_op	   =  0x22,
+ 	msub_s_op    =	0x28, msub_d_op	   =  0x29,
+ 	msub_e_op    =	0x2a, nmadd_s_op   =  0x30,
 diff --git a/arch/mips/kernel/cevt-r4k.c b/arch/mips/kernel/cevt-r4k.c
 index 07b847d..0fbddc9 100644
 --- a/arch/mips/kernel/cevt-r4k.c
@@ -3090,10 +3101,10 @@ index 58c601e..c0df14a 100644
  if MIPS_CPUFREQ
  
 diff --git a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-index 3237c52..d673ac1 100644
+index 3237c52..d8a79f4 100644
 --- a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 +++ b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-@@ -1,117 +1,218 @@
+@@ -1,190 +1,268 @@
  /*
 - * Cpufreq driver for the loongson-2 processors
 + * Cpufreq driver for the loongson-2 (>= 2F) processors
@@ -3183,22 +3194,22 @@ index 3237c52..d673ac1 100644
 +	 */
 +
 +	return 3 - newstate;
-+}
-+
+ }
+ 
+-static unsigned int loongson2_cpufreq_get(unsigned int cpu)
 +#ifdef CONFIG_R4K_TIMER_FOR_CPUFREQ
 +extern unsigned int scale_shift;
 +extern void update_virtual_count(unsigned int target_scale_shift);
 +
 +static inline void sync_virtual_count(unsigned int target_scale_shift)
-+{
-+	update_virtual_count(target_scale_shift);
-+	scale_shift = target_scale_shift;
- }
- 
--static unsigned int loongson2_cpufreq_get(unsigned int cpu)
-+static void notrace l2_cpufreq_set(unsigned int newstate)
  {
 -	return clk_get_rate(cpuclk);
++	update_virtual_count(target_scale_shift);
++	scale_shift = target_scale_shift;
++}
++
++static void notrace l2_cpufreq_set(unsigned int newstate)
++{
 +	unsigned long flag;
 +	unsigned int target_scale_shift;
 +
@@ -3230,7 +3241,10 @@ index 3237c52..d673ac1 100644
 + * The CPUFreq driver will put the cpu into the lowest level(1), no need to do
 + * it here.  If we do it here, some CPUFreq governors will not function well,
 + * so, disable the cpu_wait() completely when the R4K is used.
-+ */
+  */
+-static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
+-				     unsigned int target_freq,
+-				     unsigned int relation)
 +
 +#if 0
 +/*
@@ -3240,10 +3254,7 @@ index 3237c52..d673ac1 100644
 + *
 + * To avoid recording the garbage result in the kernel tracing, we don't call
 + * notifiers when FUNCTION_TRACER is enabled.
-  */
--static int loongson2_cpufreq_target(struct cpufreq_policy *policy,
--				     unsigned int target_freq,
--				     unsigned int relation)
++ */
 +
 +void notrace loongson2_cpu_wait(void)
  {
@@ -3284,8 +3295,7 @@ index 3237c52..d673ac1 100644
 -		return -EINVAL;
 +	/* setting the cpu frequency as the 1st level */
 +	l2_cpufreq_set(1);
- 
--	pr_debug("cpufreq: requested frequency %u Hz\n", target_freq * 1000);
++
 +	/* notifiers */
 +	cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
 +	}
@@ -3294,11 +3304,7 @@ index 3237c52..d673ac1 100644
 +#else
 +#define loongson2_cpu_wait NULL
 +#endif
- 
--	freqs.cpu = cpu;
--	freqs.old = loongson2_cpufreq_get(cpu);
--	freqs.new = freq;
--	freqs.flags = 0;
++
 +#else	/* MIPS_EXTERNAL_TIMER */
 +
 +static void l2_cpufreq_set(unsigned int newstate)
@@ -3322,13 +3328,18 @@ index 3237c52..d673ac1 100644
 +{
 +	cpu_wait = NULL;
 +}
-+
+ 
+-	pr_debug("cpufreq: requested frequency %u Hz\n", target_freq * 1000);
 +static int l2_cpufreq_target(struct cpufreq_policy *policy, unsigned int
 +		target_freq, unsigned int relation)
 +{
 +	unsigned int newstate;
 +	struct cpufreq_freqs freqs;
-+
+ 
+-	freqs.cpu = cpu;
+-	freqs.old = loongson2_cpufreq_get(cpu);
+-	freqs.new = freq;
+-	freqs.flags = 0;
 +	if (cpufreq_frequency_table_target(policy, &clockmod_table[0],
 +				target_freq, relation, &newstate))
 +		return -EINVAL;
@@ -3361,40 +3372,50 @@ index 3237c52..d673ac1 100644
 +static int l2_cpufreq_cpu_init(struct cpufreq_policy *policy)
  {
  	int i;
- 	unsigned long rate;
- 	int ret;
+-	unsigned long rate;
+-	int ret;
  
 -	if (!cpu_online(policy->cpu))
 -		return -ENODEV;
 +	/* get max cpu frequency in khz */
 +	max_cpufreq_khz = cpu_clock_freq / 1000;
  
- 	cpuclk = clk_get(NULL, "cpu_clk");
- 	if (IS_ERR(cpuclk)) {
-@@ -130,61 +231,57 @@ static int loongson2_cpufreq_cpu_init(struct cpufreq_policy *policy)
- 		return ret;
- 	}
+-	cpuclk = clk_get(NULL, "cpu_clk");
+-	if (IS_ERR(cpuclk)) {
+-		printk(KERN_ERR "cpufreq: couldn't get CPU clk\n");
+-		return PTR_ERR(cpuclk);
+-	}
++	/* table init */
++	for (i = 1; clockmod_table[i].index != DC_RESV; i++)
++		clockmod_table[i].frequency = idx_to_freq(clockmod_table[i].index);
  
+-	rate = cpu_clock_freq / 1000;
+-	if (!rate) {
+-		clk_put(cpuclk);
+-		return -EINVAL;
+-	}
+-	ret = clk_set_rate(cpuclk, rate);
+-	if (ret) {
+-		clk_put(cpuclk);
+-		return ret;
+-	}
+-
 -	/* clock table init */
 -	for (i = 2;
 -	     (loongson2_clockmod_table[i].frequency != CPUFREQ_TABLE_END);
 -	     i++)
 -		loongson2_clockmod_table[i].frequency = (rate * i) / 8;
-+	/* table init */
-+	for (i = 1; clockmod_table[i].index != DC_RESV; i++)
-+		clockmod_table[i].frequency = idx_to_freq(clockmod_table[i].index);
++	cpufreq_frequency_table_get_attr(clockmod_table, policy->cpu);
  
 -	policy->cur = loongson2_cpufreq_get(policy->cpu);
-+	cpufreq_frequency_table_get_attr(clockmod_table, policy->cpu);
++	/* cpuinfo and default policy values */
  
 -	cpufreq_frequency_table_get_attr(&loongson2_clockmod_table[0],
 -					 policy->cpu);
-+	/* cpuinfo and default policy values */
++	policy->cur = max_cpufreq_khz;
  
 -	return cpufreq_frequency_table_cpuinfo(policy,
 -					    &loongson2_clockmod_table[0]);
-+	policy->cur = max_cpufreq_khz;
-+
 +	return cpufreq_frequency_table_cpuinfo(policy, &clockmod_table[0]);
  }
  
@@ -3456,7 +3477,7 @@ index 3237c52..d673ac1 100644
  		.owner = THIS_MODULE,
  	},
  	.id_table = platform_device_ids,
-@@ -209,7 +306,7 @@ static void loongson2_cpu_wait(void)
+@@ -209,7 +287,7 @@ static void loongson2_cpu_wait(void)
  	spin_unlock_irqrestore(&loongson2_wait_lock, flags);
  }
  
@@ -3465,7 +3486,7 @@ index 3237c52..d673ac1 100644
  {
  	int ret;
  
-@@ -218,38 +315,29 @@ static int __init cpufreq_init(void)
+@@ -218,38 +296,29 @@ static int __init cpufreq_init(void)
  	if (ret)
  		return ret;
  
@@ -5558,7 +5579,7 @@ index 0ed3832..4fed18c 100644
  
  	return -ENODEV;
 diff --git a/arch/mips/loongson/common/serial.c b/arch/mips/loongson/common/serial.c
-index 5f2b78a..db9f98e 100644
+index 5f2b78a..c828600 100644
 --- a/arch/mips/loongson/common/serial.c
 +++ b/arch/mips/loongson/common/serial.c
 @@ -10,6 +10,7 @@
@@ -5569,7 +5590,7 @@ index 5f2b78a..db9f98e 100644
  #include <linux/io.h>
  #include <linux/init.h>
  #include <linux/serial_8250.h>
-@@ -19,13 +20,14 @@
+@@ -19,58 +20,44 @@
  #include <loongson.h>
  #include <machine.h>
  
@@ -5586,8 +5607,36 @@ index 5f2b78a..db9f98e 100644
 +	.iobase	= port,						\
  }
  
- #define PORT_M(int)				\
-@@ -53,24 +55,21 @@ static struct plat_serial8250_port uart8250_data[][2] = {
+-#define PORT_M(int)				\
+-{								\
+-	.irq		= MIPS_CPU_IRQ_BASE + (int),		\
+-	.uartclk	= 3686400,				\
+-	.iotype		= UPIO_MEM,				\
+-	.membase	= (void __iomem *)NULL,			\
+-	.flags		= UPF_BOOT_AUTOCONF | UPF_SKIP_TEST,	\
+-	.regshift	= 0,					\
+-}
+-
+-static struct plat_serial8250_port uart8250_data[][2] = {
+-	[MACH_LOONGSON_UNKNOWN]		{},
+-	[MACH_LEMOTE_FL2E]		{PORT(4), {} },
+-	[MACH_LEMOTE_FL2F]		{PORT(3), {} },
+-	[MACH_LEMOTE_ML2F7]		{PORT_M(3), {} },
+-	[MACH_LEMOTE_YL2F89]		{PORT_M(3), {} },
+-	[MACH_DEXXON_GDIUM2F10]		{PORT_M(3), {} },
+-	[MACH_LEMOTE_NAS]		{PORT_M(3), {} },
+-	[MACH_LEMOTE_LL2F]		{PORT(3), {} },
+-	[MACH_LOONGSON_END]		{},
++static struct plat_serial8250_port uart8250_data[] = {
++	/* ttyS0: cpu_uart0 Yeeloong, Gdium, UNAS, ...  */
++	PORT((MIPS_CPU_IRQ_BASE + 3), 3686400, UPIO_MEM, 0x3f8),
++	/* ttyS1: sb_uart1 2E */
++	PORT(4, 1843200, UPIO_PORT, 0x3f8),
++	/* ttyS2: sb_uart2 fuloong2f */
++	PORT(3, 1843200, UPIO_PORT, 0x2f8),
++	{},
+ };
+ 
  static struct platform_device uart8250_device = {
  	.name = "serial8250",
  	.id = PLAT8250_DEV_PLATFORM,
@@ -5599,9 +5648,7 @@ index 5f2b78a..db9f98e 100644
  static int __init serial_init(void)
  {
 -	unsigned char iotype;
-+	uart8250_data[0].membase = (void __iomem *)ioremap_nocache(
-+			LOONGSON_LIO1_BASE + uart8250_data[0].iobase, 8);
- 
+-
 -	iotype = uart8250_data[mips_machtype][0].iotype;
 -
 -	if (UPIO_MEM == iotype)
@@ -5612,7 +5659,9 @@ index 5f2b78a..db9f98e 100644
 -		    loongson_uart_base - LOONGSON_PCIIO_BASE;
 -
 -	uart8250_device.dev.platform_data = uart8250_data[mips_machtype];
--
++	uart8250_data[0].membase = (void __iomem *)ioremap_nocache(
++			LOONGSON_LIO1_BASE + uart8250_data[0].iobase, 8);
+ 
 -	return platform_device_register(&uart8250_device);
 +	platform_device_register(&uart8250_device);
 +	return 0;
@@ -13718,7 +13767,7 @@ index 0000000..1bfe4cf
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..497f246
+index 0000000..34b40e9
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
 @@ -0,0 +1,1350 @@
@@ -13788,7 +13837,7 @@ index 0000000..497f246
 +		 bd->props.power == FB_BLANK_UNBLANK) ?
 +	    bd->props.brightness : 0;
 +
-+	level = SENSORS_LIMIT(level, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
++	level = clamp_val(level, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
 +
 +	/* Avoid to modify the brightness when EC is tuning it */
 +	if (old_level != level) {
@@ -14137,7 +14186,7 @@ index 0000000..497f246
 +	if (get_fan_mode() != BIT_FAN_MANUAL)
 +		return;
 +
-+	value = SENSORS_LIMIT(value, MIN_FAN_SPEED, MAX_FAN_SPEED);
++	value = clamp_val(value, MIN_FAN_SPEED, MAX_FAN_SPEED);
 +
 +	/* We must ensure the fan is on */
 +	if (value > 0)
