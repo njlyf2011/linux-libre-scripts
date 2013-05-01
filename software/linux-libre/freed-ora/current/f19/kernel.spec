@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -62,13 +62,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 8
+%define base_sublevel 9
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -79,7 +79,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -3.9%{?stablegnux}
-%define rcrevlibre -3.8%{?rcrevgnux}
+#define rcrevlibre -3.9%{?rcrevgnux}
 #define gitrevlibre -3.9%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -525,7 +525,7 @@ Provides: kernel-libre-highbank\
 Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-omap\
-Provides: kernel-libre-nomap\
+Provides: kernel-libre-omap\
 Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
@@ -599,7 +599,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-3.%{upstream_sublevel}
+#Source6: deblob-3.%{upstream_sublevel}
 
 %if %{signmodules}
 Source11: x509.genkey
@@ -814,10 +814,7 @@ Patch25010: wireless-regulatory-fix-channel-disabling-race-condition.patch
 #rhbz 951241
 Patch25011: iwlwifi-fix-freeing-uninitialized-pointer.patch
 
-Patch25012: events-protect-access-via-task-subsys-state-check.patch
-
-#rhbz 953447
-Patch25013: efi-Check-EFI-revision-in-setup_efi_vars.patch
+Patch25014: blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1583,10 +1580,7 @@ ApplyPatch wireless-regulatory-fix-channel-disabling-race-condition.patch
 #rhbz 951241
 ApplyPatch iwlwifi-fix-freeing-uninitialized-pointer.patch
 
-ApplyPatch events-protect-access-via-task-subsys-state-check.patch
-
-#rhbz 953447
-ApplyPatch efi-Check-EFI-revision-in-setup_efi_vars.patch
+ApplyPatch blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2431,7 +2425,16 @@ fi
 # and build.
 
 %changelog
-* Sun Apr 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Apr 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9-gnu.
+
+* Mon Apr 29 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-301
+- Linux v3.9
+
+* Fri Apr 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to prevent scheduling while atomic error in blkcg
+
+* Fri Apr 26 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Apr 28
 - GNU Linux-libre 3.9-rc8-gnu.
 
 * Wed Apr 24 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-0.rc8.git0.2
