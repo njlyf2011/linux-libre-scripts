@@ -5259,7 +5259,7 @@ index 0a18fcf..0e69c16 100644
  			cpu_clock_freq = 533080000;
  			break;
 diff --git a/arch/mips/loongson/common/gpio.c b/arch/mips/loongson/common/gpio.c
-index 2186990..3b66160 100644
+index 2186990..8a1f77c 100644
 --- a/arch/mips/loongson/common/gpio.c
 +++ b/arch/mips/loongson/common/gpio.c
 @@ -19,7 +19,6 @@
@@ -5315,6 +5315,15 @@ index 2186990..3b66160 100644
  		return -EINVAL;
  
  	gpio_set_value(gpio, level);
+@@ -129,7 +128,7 @@ static struct gpio_chip ls2f_chip = {
+ 	.direction_output	= ls2f_gpio_direction_output,
+ 	.set			= ls2f_gpio_set_value,
+ 	.base			= 0,
+-	.ngpio			= STLS2F_N_GPIO,
++	.ngpio			= ARCH_NR_GPIOS,
+ };
+ 
+ static int __init ls2f_gpio_setup(void)
 diff --git a/arch/mips/loongson/common/init.c b/arch/mips/loongson/common/init.c
 index ae7af1f..3083978 100644
 --- a/arch/mips/loongson/common/init.c
