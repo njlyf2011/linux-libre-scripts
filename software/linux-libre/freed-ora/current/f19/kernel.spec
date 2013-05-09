@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 303
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -815,6 +815,12 @@ Patch25010: wireless-regulatory-fix-channel-disabling-race-condition.patch
 Patch25011: iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 Patch25014: blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
+
+Patch25015: powerpc-Add-isync-to-copy_and_flush.patch
+Patch25016: powerpc-power8-Fix-secondary-CPUs-hanging-on-boot-for-HV=0.patch
+Patch25017: powerpc-Fix-hardware-IRQs-with-MMU-on-exceptions-when-HV=0.patch
+Patch25018: pci-Set-dev-dev.type-in-alloc_pci_dev.patch
+Patch25019: powerpc-Set-default-VGA-device.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1582,6 +1588,12 @@ ApplyPatch iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 ApplyPatch blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
+ApplyPatch powerpc-Add-isync-to-copy_and_flush.patch
+ApplyPatch powerpc-power8-Fix-secondary-CPUs-hanging-on-boot-for-HV=0.patch
+ApplyPatch powerpc-Fix-hardware-IRQs-with-MMU-on-exceptions-when-HV=0.patch
+ApplyPatch pci-Set-dev-dev.type-in-alloc_pci_dev.patch
+ApplyPatch powerpc-Set-default-VGA-device.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2100,11 +2112,6 @@ find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
      	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
 
-# glibc provides scsi headers for itself, for now
-rm -rf $RPM_BUILD_ROOT/usr/include/scsi
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/atomic.h
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
 %endif
 
 %if %{with_perf}
@@ -2425,6 +2432,27 @@ fi
 # and build.
 
 %changelog
+* Tue May 07 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-303
+- Fix dmesg_restrict patch to avoid regression (rhbz 952655)
+
+* Mon May  6 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable TPS65217 (am33xx) on ARM
+
+* Mon May 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Don't remove headers explicitly exported via UAPI (rhbz 959467)
+
+* Fri May 03 2013 Josh Boyer <jwboyer@redhat.com>
+- Add two more patches for POWER
+
+* Wed May 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Add some powerpc fixes for POWER8
+
+* Tue Apr 30 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable CONFIG_SERIAL_8250_DW on ARM
+
+* Mon Apr 29 2013 Neil Horman <nhorman@redhat.com>
+- Enabled CONFIG_PACKET_DIAG (rhbz 956870)
+ 
 * Mon Apr 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9-gnu.
 
