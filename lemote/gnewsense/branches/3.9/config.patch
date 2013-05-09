@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2013-05-05 21:55:43.000000000 +0000
++++ .config	2013-05-09 05:46:33.000000000 +0000
 @@ -0,0 +1,4752 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.9.0-gnu Kernel Configuration
++# Linux/mips 3.9.1-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -4016,7 +4016,7 @@ Index: .config
 +CONFIG_DX_SEP=m
 +CONFIG_ZRAM=m
 +# CONFIG_ZRAM_DEBUG is not set
-+CONFIG_ZSMALLOC=m
++CONFIG_ZSMALLOC=y
 +CONFIG_FB_SM7XX=y
 +# CONFIG_CRYSTALHD is not set
 +# CONFIG_CXT1E1 is not set
