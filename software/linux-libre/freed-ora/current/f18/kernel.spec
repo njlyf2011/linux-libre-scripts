@@ -68,19 +68,19 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 8
+%define base_sublevel 9
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+#define librev
 
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.8%{?stablegnux}
-#define rcrevlibre -3.8%{?rcrevgnux}
-#define gitrevlibre -3.8%{?gitrevgnux}
+%define stablelibre -3.9%{?stablegnux}
+#define rcrevlibre -3.9%{?rcrevgnux}
+#define gitrevlibre -3.9%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -172,8 +172,6 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# ARM OMAP (Beagle/Panda Board)
-%define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
 # kernel-tegra (only valid for arm)
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 # kernel-kirkwood (only valid for arm)
@@ -295,9 +293,8 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel up (versatile express), tegra and  omap are only built on armv7 hfp/sfp
+# kernel up (versatile express), and tegra are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
-%define with_omap 0
 %define with_tegra 0
 %endif
 
@@ -537,6 +534,10 @@ Provides: kernel-highbank\
 Provides: kernel-libre-highbank\
 Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-omap\
+Provides: kernel-libre-omap\
+Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -575,7 +576,7 @@ ExclusiveOS: Linux
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools, hostname
+BuildRequires: net-tools, hostname, bc
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
@@ -640,12 +641,12 @@ Source70: config-s390x
 
 # Unified ARM kernels
 Source100: config-armv7
+Source101: config-armv7-generic
+Source102: config-armv7-tegra
 
 # Legacy ARM kernels
-Source105: config-arm-generic
-Source110: config-arm-omap
-Source111: config-arm-tegra
-Source112: config-arm-kirkwood
+Source104: config-arm-generic
+Source105: config-arm-kirkwood
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -726,14 +727,12 @@ Patch460: serial-460800.patch
 Patch470: die-floppy-die.patch
 
 Patch510: silence-noise.patch
-Patch520: quiet-apm.patch
 Patch530: silence-fbcon-logo.patch
-Patch540: silence-empty-ipi-mask-warning.patch
 
 Patch800: crash-driver.patch
 
 # secure boot
-Patch1000: secure-boot-20130409.patch
+Patch1000: secure-boot-20130506.patch
 
 # virt + ksm patches
 
@@ -773,8 +772,6 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
-Patch14011: team-net-next-update-20130307.patch
-
 
 Patch20000: 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
 Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
@@ -795,13 +792,6 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 859485
 Patch22226: vt-Drop-K_OFF-for-VC_MUTE.patch
 
-#rhbz 799564
-Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-Patch22241: Input-add-support-for-Cypress-PS2-Trackpads.patch
-
-#rhbz 912166
-Patch22243: Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
-
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
 
@@ -811,41 +801,14 @@ Patch22261: 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 916544
 Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
-#rhbz 812111
-Patch24000: alps-v2.patch
-
-Patch24100: userns-avoid-recursion-in-put_user_ns.patch
-
-#rhbz 879462
-Patch24107: uvcvideo-suspend-fix.patch
-
-#rhbz 856863 892599
-Patch24111: cfg80211-mac80211-disconnect-on-suspend.patch
-Patch24112: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
-
 #rhbz 859282
 Patch24113: VMX-x86-handle-host-TSC-calibration-failure.patch
-
-#rhbz 920586
-Patch25000: amd64_edac_fix_rank_count.patch
 
 #rhbz 921500
 Patch25001: i7300_edac_single_mode_fixup.patch
 
-#rhbz 920218
-Patch25006: mac80211-Dont-restart-sta-timer-if-not-running.patch
-
 #rhbz 927469
 Patch25007: fix-child-thread-introspection.patch
-
-#rhbz 844750
-Patch25008: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
-#rhbz 919176
-Patch25010: wireless-regulatory-fix-channel-disabling-race-condition.patch
-
-#rhbz 951241
-Patch25011: iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1176,12 +1139,6 @@ non-Free blobs it includes by default.
 %description kirkwood
 This package includes a version of the Linux kernel with support for
 marvell kirkwood based systems, i.e., guruplug, sheevaplug
-
-%define variant_summary The Linux kernel compiled for TI-OMAP boards
-%kernel_variant_package omap
-%description omap
-This package includes a version of the Linux kernel with support for
-TI-OMAP based systems, i.e., BeagleBoard-xM.
 
 %define variant_summary The Linux kernel compiled for tegra boards
 %kernel_variant_package tegra
@@ -1533,9 +1490,6 @@ ApplyPatch silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch silence-fbcon-logo.patch
 
-# no-one cares about these warnings.
-ApplyPatch silence-empty-ipi-mask-warning.patch
-
 # Changes to upstream defaults.
 
 
@@ -1543,7 +1497,7 @@ ApplyPatch silence-empty-ipi-mask-warning.patch
 ApplyPatch crash-driver.patch
 
 # secure boot
-ApplyPatch secure-boot-20130409.patch
+ApplyPatch secure-boot-20130506.patch
 
 # Assorted Virt Fixes
 
@@ -1560,7 +1514,6 @@ ApplyPatch drm-i915-tv-detect-hush.patch
 
 # silence the ACPI blacklist code
 ApplyPatch silence-acpi-blacklist.patch
-ApplyPatch quiet-apm.patch
 
 # V4L/DVB updates/fixes/experimental drivers
 #  apply if non-empty
@@ -1594,18 +1547,8 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 859485
 ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 
-#rhbz 799564
-ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
-
-#rhbz 912166
-ApplyPatch Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
-
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
-
-#rhbz 812111
-ApplyPatch alps-v2.patch
 
 #rhbz 903192
 ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
@@ -1613,40 +1556,14 @@ ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 916544
 ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
-ApplyPatch userns-avoid-recursion-in-put_user_ns.patch
-
-#rhbz 920586
-ApplyPatch amd64_edac_fix_rank_count.patch
-
 #rhbz 921500
 ApplyPatch i7300_edac_single_mode_fixup.patch
-
-#Team Driver update
-ApplyPatch team-net-next-update-20130307.patch
-
-#rhbz 879462
-ApplyPatch uvcvideo-suspend-fix.patch
-
-#rhbz 856863 892599
-ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
-ApplyPatch mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
 
 #rhbz 859282
 ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
 
-#rhbz 920218
-ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
-
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
-
-ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
-#rhbz 919176
-ApplyPatch wireless-regulatory-fix-channel-disabling-race-condition.patch
-
-#rhbz 951241
-ApplyPatch iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1667,6 +1584,7 @@ mkdir configs
 %if !%{debugbuildsenabled}
 rm -f kernel-%{version}-*debug.config
 %endif
+
 
 # now run oldconfig over all the config files
 for i in *.config
@@ -2000,10 +1918,6 @@ BuildKernel %make_target %kernel_image PAE
 BuildKernel %make_target %kernel_image kirkwood
 %endif
 
-%if %{with_omap}
-BuildKernel %make_target %kernel_image omap
-%endif
-
 %if %{with_tegra}
 BuildKernel %make_target %kernel_image tegra
 %endif
@@ -2178,11 +2092,6 @@ find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
      	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
 
-# glibc provides scsi headers for itself, for now
-rm -rf $RPM_BUILD_ROOT/usr/include/scsi
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/atomic.h
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
 %endif
 
 %if %{with_perf}
@@ -2343,9 +2252,6 @@ fi}\
 %kernel_variant_preun kirkwood
 %kernel_variant_post -v kirkwood
 
-%kernel_variant_preun omap
-%kernel_variant_post -v omap
-
 %kernel_variant_preun tegra
 %kernel_variant_post -v tegra
 
@@ -2500,7 +2406,6 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files %{with_kirkwood} kirkwood
-%kernel_variant_files %{with_omap} omap
 %kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
@@ -2516,6 +2421,48 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu May  9 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.1-gnu.
+
+* Wed May 08 2013 Dave Jones <davej@redhat.com> - 3.9.1-200
+- Linux 3.9.1
+
+* Wed May 08 2013 Josh Boyer <jwboyer@redhat.com>
+- Don't remove headers explicitly exported via UAPI (rhbz 959467)
+
+* Tue May 07 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix dmesg_restrict patch to avoid regression (rhbz 952655)
+
+* Mon May 06 2013 Dave Jones <davej@redhat.com> - 3.9.1-0.rc1.201
+- Linux 3.9.1-rc1
+  merged: wireless-regulatory-fix-channel-disabling-race-condition.patch
+  merged: iwlwifi-fix-freeing-uninitialized-pointer.patch
+
+* Mon May 06 2013 Josh Boyer <jwboyer@redhat.com>
+- Rebase F18 secure-boot patchset to Linux v3.9
+
+* Mon May  6 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial rebase of ARM to 3.9
+
+* Mon May 06 2013 Dave Jones <davej@redhat.com> - 3.9.0-200
+- Rebase to Linux 3.9
+  merged: silence-empty-ipi-mask-warning.patch
+  merged: quiet-apm.patch
+  merged: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
+  merged: Input-add-support-for-Cypress-PS2-Trackpads.patch
+  merged: Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
+  merged: alps-v2.patch
+  merged: userns-avoid-recursion-in-put_user_ns.patch
+  merged: amd64_edac_fix_rank_count.patch
+  merged: team-net-next-update-20130307.patch
+  merged: uvcvideo-suspend-fix.patch
+  merged: cfg80211-mac80211-disconnect-on-suspend.patch
+  merged: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
+  merged: mac80211-Dont-restart-sta-timer-if-not-running.patch
+  merged: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+  TODO: secure-boot
+  TODO: ARM configs.
+
 * Thu May  2 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.11-gnu1.
 
