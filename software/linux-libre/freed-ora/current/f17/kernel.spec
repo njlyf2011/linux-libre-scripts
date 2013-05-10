@@ -70,7 +70,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.8%{?stablegnux}
+%define stablelibre -3.8%{?stablegnux}
 #define rcrevlibre -3.8%{?rcrevgnux}
 #define gitrevlibre -3.8%{?gitrevgnux}
 
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -824,12 +824,6 @@ Patch25007: fix-child-thread-introspection.patch
 
 #rhbz 844750
 Patch25008: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
-#rhbz 919176
-Patch25010: wireless-regulatory-fix-channel-disabling-race-condition.patch
-
-#rhbz 951241
-Patch25011: iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1619,12 +1613,6 @@ ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
 ApplyPatch fix-child-thread-introspection.patch
 
 ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
-
-#rhbz 919176
-ApplyPatch wireless-regulatory-fix-channel-disabling-race-condition.patch
-
-#rhbz 951241
-ApplyPatch iwlwifi-fix-freeing-uninitialized-pointer.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2493,6 +2481,15 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Thu May  9 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.8.12-gnu1.
+
+* Wed May 08 2013 Justin M. Forbes <jforbes@redhat.com> - 3.8.12-100
+- Linux v3.8.12
+
+* Tue May 07 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix dmesg_restrict patch to avoid regression (rhbz 952655)
+
 * Thu May  2 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.11-gnu1.
 
