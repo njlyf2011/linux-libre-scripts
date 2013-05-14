@@ -103,8 +103,11 @@ if $prep; then
   false
 fi
 
+mv debian `pwd`.debian
 make-kpkg --rootcmd fakeroot --initrd --revision $rev \
+ --overlay-dir `pwd`.debian \
   kernel-image kernel-headers kernel-doc kernel-source
+rm -rf `pwd`.debian
 cd ..
 
 tar -cf $buildtb -C $srctree --use=bzip2 --exclude=debian/linux-*$buildnorev .
