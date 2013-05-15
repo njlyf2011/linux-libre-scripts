@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -293,7 +293,7 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel up (versatile express), and tegra are only built on armv7 hfp/sfp
+# kernel up (mutliplatform inc VExpress, highbank, omap), and tegra are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
 %define with_tegra 0
 %endif
@@ -777,9 +777,16 @@ Patch20000: 0001-efifb-Skip-DMI-checks-if-the-bootloader-knows-what-i.patch
 Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 # ARM
+Patch21000: arm-export-read_current_timer.patch
+# https://lists.ozlabs.org/pipermail/devicetree-discuss/2013-March/029029.html
+Patch21001: arm-of-dma.patch
+
+# ARM omap
+Patch21003: arm-omap-ehci-fix.patch
 
 # ARM tegra
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
+Patch21006: arm-tegra-fixclk.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1431,8 +1438,11 @@ ApplyPatch debug-bad-pte-modules.patch
 #
 # ARM
 #
-
+ApplyPatch arm-export-read_current_timer.patch
+ApplyPatch arm-of-dma.patch
+ApplyPatch arm-omap-ehci-fix.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
+ApplyPatch arm-tegra-fixclk.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -2421,7 +2431,22 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
-* Thu May  9 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon May 13 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.2-gnu.
+
+* Mon May 13 2013 Dave Jones <davej@redhat.com> - 3.9.2-200
+- Linux 3.9.2
+
+* Fri May 10 2013 Dave Jones <davej@redhat.com> - 3.9.2-0.rc1.200
+- Linux 3.9.2-rc1
+
+* Thu May 9 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable PL330 on ARM as it's broken on highbank
+
+* Wed May  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add the ARM patches needed for 3.9 :-/
+
+* Wed May  8 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu May  9
 - GNU Linux-libre 3.9.1-gnu.
 
 * Wed May 08 2013 Dave Jones <davej@redhat.com> - 3.9.1-200
