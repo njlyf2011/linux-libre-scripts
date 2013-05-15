@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -807,8 +807,6 @@ Patch23006: fix-child-thread-introspection.patch
 
 #rhbz 928024
 Patch23008: forcedeth-dma-error-check.patch
-
-Patch25014: blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
 Patch25018: pci-Set-dev-dev.type-in-alloc_pci_dev.patch
 Patch25019: powerpc-Set-default-VGA-device.patch
@@ -1570,8 +1568,6 @@ ApplyPatch fix-child-thread-introspection.patch
 
 #rhbz 928024
 ApplyPatch forcedeth-dma-error-check.patch
-
-ApplyPatch blkcg-fix-scheduling-while-atomic-in-blk_queue_bypass_start.patch
 
 ApplyPatch pci-Set-dev-dev.type-in-alloc_pci_dev.patch
 ApplyPatch powerpc-Set-default-VGA-device.patch
@@ -2414,10 +2410,19 @@ fi
 # and build.
 
 %changelog
+* Mon May 13 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.2-gnu.
+
+* Mon May 13 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.2-301
+- Linux v3.9.2
+
+* Thu May  9 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable PL330 on ARM as it's broken on highbank
+
 * Thu May  9 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.1-gnu.
 
-* Wed May 08 2013 Josh Boyer <jwboyer@redhat.com> - 3.0.1-301
+* Wed May 08 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.1-301
 - Linux v3.9.1
 
 * Tue May 07 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.0-303
