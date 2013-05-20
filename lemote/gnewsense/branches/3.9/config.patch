@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2013-05-12 00:41:36.000000000 +0000
-@@ -0,0 +1,4752 @@
++++ .config	2013-05-19 22:55:34.000000000 +0000
+@@ -0,0 +1,4751 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.9.2-gnu Kernel Configuration
++# Linux/mips 3.9.3-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -207,7 +207,6 @@ Index: .config
 +CONFIG_IRQ_DOMAIN=y
 +# CONFIG_IRQ_DOMAIN_DEBUG is not set
 +CONFIG_IRQ_FORCED_THREADING=y
-+# CONFIG_ALWAYS_USE_PERSISTENT_CLOCK is not set
 +CONFIG_GENERIC_CLOCKEVENTS=y
 +CONFIG_GENERIC_CLOCKEVENTS_BUILD=y
 +CONFIG_GENERIC_CMOS_UPDATE=y
