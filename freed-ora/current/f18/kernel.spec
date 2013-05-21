@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -778,8 +778,6 @@ Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 
 # ARM
 Patch21000: arm-export-read_current_timer.patch
-# https://lists.ozlabs.org/pipermail/devicetree-discuss/2013-March/029029.html
-Patch21001: arm-of-dma.patch
 
 # ARM omap
 Patch21003: arm-omap-ehci-fix.patch
@@ -1399,14 +1397,12 @@ make -f %{SOURCE19} config-release
 make -f %{SOURCE20} VERSION=%{version} configs
 
 # Merge in any user-provided local config option changes
-%if %{?all_arch_configs:1}%{!?all_arch_configs:0}
-for i in %{all_arch_configs}
+for i in kernel-%{version}-*.config
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE1000} $i.tmp > $i
   rm $i.tmp
 done
-%endif
 
 ApplyPatch makefile-after_link.patch
 
@@ -1439,7 +1435,6 @@ ApplyPatch debug-bad-pte-modules.patch
 # ARM
 #
 ApplyPatch arm-export-read_current_timer.patch
-ApplyPatch arm-of-dma.patch
 ApplyPatch arm-omap-ehci-fix.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-fixclk.patch
@@ -2431,6 +2426,16 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon May 20 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.3-gnu.
+
+* Mon May 20 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.3-200
+- Linux 3.9.3
+- Update s390x config
+
+* Thu May 16 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix config-local usage (rhbz 950841)
+
 * Mon May 13 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.2-gnu.
 
