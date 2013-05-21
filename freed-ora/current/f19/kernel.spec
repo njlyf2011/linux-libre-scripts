@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -731,10 +731,12 @@ Patch1000: devel-pekey-secure-boot-20130306.patch
 #Patch1800: drm-vgem.patch
 Patch1700: drm-ttm-exports-for-qxl.patch
 Patch1701: drm-qxl-driver.patch
+Patch1702: drm-qxl-backport-fixes.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
 Patch1825: drm-i915-dp-stfu.patch
+# radeon drm fix
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -761,8 +763,6 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 
 # ARM
 Patch21000: arm-export-read_current_timer.patch
-# https://lists.ozlabs.org/pipermail/devicetree-discuss/2013-March/029029.html
-Patch21001: arm-of-dma.patch
 
 # lpae
 Patch21002: arm-lpae-ax88796.patch
@@ -810,6 +810,10 @@ Patch23008: forcedeth-dma-error-check.patch
 
 Patch25018: pci-Set-dev-dev.type-in-alloc_pci_dev.patch
 Patch25019: powerpc-Set-default-VGA-device.patch
+
+#rhbz 961527
+Patch25020: powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
+Patch25021: radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1392,14 +1396,12 @@ make -f %{SOURCE19} config-release
 make -f %{SOURCE20} VERSION=%{version} configs
 
 # Merge in any user-provided local config option changes
-%if %{?all_arch_configs:1}%{!?all_arch_configs:0}
-for i in %{all_arch_configs}
+for i in kernel-%{version}-*.config
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE1000} $i.tmp > $i
   rm $i.tmp
 done
-%endif
 
 ApplyPatch makefile-after_link.patch
 
@@ -1430,7 +1432,6 @@ ApplyPatch debug-bad-pte-modules.patch
 # ARM
 #
 ApplyPatch arm-export-read_current_timer.patch
-ApplyPatch arm-of-dma.patch
 ApplyPatch arm-lpae-ax88796.patch
 ApplyPatch arm-omap-ehci-fix.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
@@ -1507,6 +1508,7 @@ ApplyPatch devel-pekey-secure-boot-20130306.patch
 # DRM core
 ApplyPatch drm-ttm-exports-for-qxl.patch
 ApplyPatch drm-qxl-driver.patch
+ApplyPatch drm-qxl-backport-fixes.patch
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 #ApplyPatch drm-vgem.patch
 
@@ -1571,6 +1573,10 @@ ApplyPatch forcedeth-dma-error-check.patch
 
 ApplyPatch pci-Set-dev-dev.type-in-alloc_pci_dev.patch
 ApplyPatch powerpc-Set-default-VGA-device.patch
+
+#rhbz 961527
+ApplyPatch powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
+ApplyPatch radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2410,6 +2416,24 @@ fi
 # and build.
 
 %changelog
+* Mon May 20 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.3-gnu.
+
+* Mon May 20 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.3-301
+- Linux v3.9.3
+
+* Thu May 16 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix config-local usage (rhbz 950841)
+
+* Wed May 15 2013 Dave Airlie <airlied@redhat.com>
+- fix nomodeset on radeon (rhbz 924507)
+
+* Tue May 14 2013 Dave Airlie <airlied@redhat.com>
+- backport upstream qxl fixes, fixes VM crash on X exit or randr.
+
+* Mon May 13 2013 Josh Boyer <jwboyer@redhat.com>
+- Add radeon fixes for PCI-e gen2 speed issues (rhbz 961527)
+
 * Mon May 13 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.2-gnu.
 
