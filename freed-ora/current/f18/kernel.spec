@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -2426,6 +2426,9 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue May 21 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.3-201
+- Fix modules-extra signing with 3.9 kernels (rhbz 965181)
+
 * Mon May 20 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.3-gnu.
 
