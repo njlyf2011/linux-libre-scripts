@@ -60,19 +60,19 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 2.6.22-rc7-git1 starts with a 2.6.21 base,
 # which yields a base_sublevel of 21.
-%define base_sublevel 8
+%define base_sublevel 9
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-%define librev 1
+#define librev
 
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.8%{?stablegnux}
-#define rcrevlibre -3.8%{?rcrevgnux}
-#define gitrevlibre -3.8%{?gitrevgnux}
+%define stablelibre -3.9%{?stablegnux}
+#define rcrevlibre -3.9%{?rcrevgnux}
+#define gitrevlibre -3.9%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -526,6 +526,10 @@ Provides: kernel-highbank\
 Provides: kernel-libre-highbank\
 Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-omap\
+Provides: kernel-libre-omap\
+Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -564,7 +568,7 @@ ExclusiveOS: Linux
 BuildRequires: module-init-tools, patch >= 2.5.4, bash >= 2.03, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, make >= 3.78, diffutils, gawk
 BuildRequires: gcc >= 3.4.2, binutils >= 2.12, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools, hostname
+BuildRequires: net-tools, hostname, bc
 BuildRequires: xmlto, asciidoc
 %if %{with_sparse}
 BuildRequires: sparse >= 0.4.1
@@ -617,12 +621,12 @@ Source70: config-s390x
 
 # Unified ARM kernels
 Source100: config-armv7
+Source101: config-armv7-generic
+Source102: config-armv7-tegra
 
 # Legacy ARM kernels
-Source105: config-arm-generic
-Source110: config-arm-omap
-Source111: config-arm-tegra
-Source112: config-arm-kirkwood
+Source104: config-arm-generic
+Source105: config-arm-kirkwood
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -704,10 +708,8 @@ Patch460: serial-460800.patch
 Patch470: die-floppy-die.patch
 
 Patch510: silence-noise.patch
-Patch520: quite-apm.patch
 
 Patch530: silence-fbcon-logo.patch
-Patch540: silence-empty-ipi-mask-warning.patch
 
 Patch800: crash-driver.patch
 
@@ -753,14 +755,14 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 Patch19000: ips-noirq.patch
 
 # ARM
-# OMAP
+Patch21000: arm-export-read_current_timer.patch
+
+# ARM omap
+Patch21003: arm-omap-ehci-fix.patch
 
 # ARM tegra
-Patch21004: arm-tegra-nvec-kconfig.patch
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
-Patch21006: arm-tegra-sdhci-module-fix.patch
-
-# ARM highbank patches
+Patch21006: arm-tegra-fixclk.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -777,13 +779,6 @@ Patch22014: efifb-skip-DMI-checks-if-bootloader-knows.patch
 #rhbz 857324
 Patch22070: net-tcp-bz857324.patch
 
-#rhbz 799564
-Patch22240: Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-Patch22242: Input-add-support-for-Cypress-PS2-Trackpads.patch
-
-#rhbz 912166
-Patch22243: Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
-
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
 
@@ -793,37 +788,18 @@ Patch22261: 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 916544
 Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
-#rhbz 812111
-Patch24000: alps-v2.patch
-
-Patch24100: userns-avoid-recursion-in-put_user_ns.patch
-
 Patch24103: turbostat-makefile.diff
-
-#rhbz 879462
-Patch24107: uvcvideo-suspend-fix.patch
-
-#rhbz 856863 892599
-Patch24111: cfg80211-mac80211-disconnect-on-suspend.patch
-Patch24112: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
 
 #rhbz 859282
 Patch24113: VMX-x86-handle-host-TSC-calibration-failure.patch
 
-#rhbz 920586
-Patch25000: amd64_edac_fix_rank_count.patch
-
 #rhbz 921500
 Patch25001: i7300_edac_single_mode_fixup.patch
-
-#rhbz 920218
-Patch25006: mac80211-Dont-restart-sta-timer-if-not-running.patch
 
 #rhbz 927469
 Patch25007: fix-child-thread-introspection.patch
 
-#rhbz 844750
-Patch25008: 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+Patch25022: iwlwifi-dvm-fix-memset.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1406,14 +1382,12 @@ make -f %{SOURCE19} config-release
 make -f %{SOURCE20} VERSION=%{version} configs
 
 # Merge in any user-provided local config option changes
-%if %{?all_arch_configs:1}%{!?all_arch_configs:0}
-for i in %{all_arch_configs}
+for i in kernel-%{version}-*.config
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE1000} $i.tmp > $i
   rm $i.tmp
 done
-%endif
 
 ApplyPatch makefile-after_link.patch
 
@@ -1445,9 +1419,10 @@ ApplyPatch debug-bad-pte-modules.patch
 #
 # ARM
 #
-#ApplyPatch arm-tegra-nvec-kconfig.patch
+ApplyPatch arm-export-read_current_timer.patch
+ApplyPatch arm-omap-ehci-fix.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-#ApplyPatch arm-tegra-sdhci-module-fix.patch
+ApplyPatch arm-tegra-fixclk.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1506,9 +1481,6 @@ ApplyPatch silence-noise.patch
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch silence-fbcon-logo.patch
 
-# No-one cares about these warnings
-ApplyPatch silence-empty-ipi-mask-warning.patch
-
 # Changes to upstream defaults.
 
 
@@ -1534,7 +1506,6 @@ ApplyPatch linux-2.6-intel-iommu-igfx.patch
 
 # silence the ACPI blacklist code
 ApplyPatch silence-acpi-blacklist.patch
-ApplyPatch quite-apm.patch
 
 # Media (V4L/DVB/IR) updates/fixes/experimental drivers
 #  apply if non-empty
@@ -1567,18 +1538,8 @@ ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 857324
 ApplyPatch net-tcp-bz857324.patch
 
-#rhbz 799564
-ApplyPatch Input-increase-struct-ps2dev-cmdbuf-to-8-bytes.patch
-ApplyPatch Input-add-support-for-Cypress-PS2-Trackpads.patch
-
-#rhbz 912166
-ApplyPatch Input-cypress_ps2-fix-trackpadi-found-in-Dell-XPS12.patch
-
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
-
-#rhbz 812111
-ApplyPatch alps-v2.patch
 
 #rhbz 903192
 ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
@@ -1586,33 +1547,18 @@ ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
 #rhbz 916544
 ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
 
-ApplyPatch userns-avoid-recursion-in-put_user_ns.patch
-
 ApplyPatch turbostat-makefile.diff
-
-#rhbz 920586
-ApplyPatch amd64_edac_fix_rank_count.patch
 
 #rhbz 921500
 ApplyPatch i7300_edac_single_mode_fixup.patch
 
-#rhbz 879462
-ApplyPatch uvcvideo-suspend-fix.patch
-
-#rhbz 856863 892599
-ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
-ApplyPatch mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.8.patch
-
 #rhbz 859282
 ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
-
-#rhbz 920218
-ApplyPatch mac80211-Dont-restart-sta-timer-if-not-running.patch
 
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-ApplyPatch 0001-bluetooth-Add-support-for-atheros-04ca-3004-device-t.patch
+ApplyPatch iwlwifi-dvm-fix-memset.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2133,11 +2079,6 @@ find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
      	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
 
-# glibc provides scsi headers for itself, for now
-rm -rf $RPM_BUILD_ROOT/usr/include/scsi
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/atomic.h
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/io.h
-rm -f $RPM_BUILD_ROOT/usr/include/asm*/irq.h
 %endif
 
 %if %{with_perf}
@@ -2481,6 +2422,20 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Fri May 24 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.3-gnu.
+
+* Wed May 22 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM configs for 3.9
+
+* Wed May 22 2013 Justin M. Forbes <jforbes@redhat.com>
+- Initial 3.9.3 rebase
+- Don't remove headers explicitly exported via UAPI (rhbz 959467)
+- Fix config-local usage (rhbz 950841)
+
+* Wed May 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix memcmp error in iwlwifi
+
 * Mon May 13 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.8.13-gnu1.
 
