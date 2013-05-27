@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -814,6 +814,14 @@ Patch25019: powerpc-Set-default-VGA-device.patch
 #rhbz 961527
 Patch25020: powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
 Patch25021: radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
+
+Patch25022: iwlwifi-dvm-fix-memset.patch
+
+#rhbz 964367
+Patch25023: hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
+
+#rhbz 948262
+Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1577,6 +1585,14 @@ ApplyPatch powerpc-Set-default-VGA-device.patch
 #rhbz 961527
 ApplyPatch powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
 ApplyPatch radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
+
+ApplyPatch iwlwifi-dvm-fix-memset.patch
+
+#rhbz 964367
+ApplyPatch hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
+
+#rhbz 948262
+ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2416,6 +2432,24 @@ fi
 # and build.
 
 %changelog
+* Sat May 25 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.4-gnu.
+
+* Fri May 24 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.3-300
+- Linux v3.9.4
+
+* Fri May 24 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to quiet irq remapping failures (rhbz 948262)
+
+* Thu May 23 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix oops from incorrect rfkill set in hp-wmi (rhbz 964367)
+
+* Wed May 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix memcmp error in iwlwifi
+
+* Tue May 21 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable OMAP5 on ARM multiplatform
+
 * Mon May 20 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.3-gnu.
 
