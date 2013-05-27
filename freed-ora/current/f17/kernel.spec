@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -800,6 +800,12 @@ Patch25001: i7300_edac_single_mode_fixup.patch
 Patch25007: fix-child-thread-introspection.patch
 
 Patch25022: iwlwifi-dvm-fix-memset.patch
+
+#rhbz 964367
+Patch25023: hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
+
+#rhbz 948262
+Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1559,6 +1565,12 @@ ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
 ApplyPatch fix-child-thread-introspection.patch
 
 ApplyPatch iwlwifi-dvm-fix-memset.patch
+
+#rhbz 964367
+ApplyPatch hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
+
+#rhbz 948262
+ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2422,7 +2434,19 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
-* Fri May 24 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat May 25 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.4-gnu.
+
+* Fri May 24 2013 Justin M. Forbes <jforbes@redhat.com> - 3.9.4-100
+- Linux v3.9.4
+
+* Fri May 24 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to quiet irq remapping failures (rhbz 948262)
+
+* Thu May 23 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix oops from incorrect rfkill set in hp-wmi (rhbz 964367)
+
+* Thu May 23 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri May 24
 - GNU Linux-libre 3.9.3-gnu.
 
 * Wed May 22 2013 Peter Robinson <pbrobinson@fedoraproject.org>
