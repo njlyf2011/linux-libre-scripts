@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -765,10 +765,13 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 Patch21000: arm-export-read_current_timer.patch
 
 # lpae
-Patch21002: arm-lpae-ax88796.patch
+Patch21001: arm-lpae-ax88796.patch
 
 # ARM omap
-Patch21003: arm-omap-ehci-fix.patch
+Patch21002: arm-omap-ehci-fix.patch
+Patch21003: arm-omap-load-tfp410.patch
+# https://patchwork.kernel.org/patch/2414881/
+Patch21004: arm-omap-fixdrm.patch
 
 # ARM tegra
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
@@ -815,6 +818,10 @@ Patch25019: powerpc-Set-default-VGA-device.patch
 Patch25020: powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
 Patch25021: radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
 
+#rhbz 962496
+Patch25027: powerpc-pseries-Force-32-bit-MSIs-for-devices-that-r.patch
+Patch25029: powerpc-pseries-Make-32-bit-MSI-quirk-work-on-system.patch
+
 Patch25022: iwlwifi-dvm-fix-memset.patch
 
 #rhbz 964367
@@ -822,6 +829,12 @@ Patch25023: hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
 
 #rhbz 948262
 Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
+
+#CVE-2013-2850 rhbz 968036 969272
+Patch25025: iscsi-target-fix-heap-buffer-overflow-on-error.patch
+
+#rhbz 964335
+Patch25026: Modify-UEFI-anti-bricking-code.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1442,6 +1455,8 @@ ApplyPatch debug-bad-pte-modules.patch
 ApplyPatch arm-export-read_current_timer.patch
 ApplyPatch arm-lpae-ax88796.patch
 ApplyPatch arm-omap-ehci-fix.patch
+ApplyPatch arm-omap-load-tfp410.patch
+ApplyPatch arm-omap-fixdrm.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-fixclk.patch
 
@@ -1586,6 +1601,10 @@ ApplyPatch powerpc-Set-default-VGA-device.patch
 ApplyPatch powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
 ApplyPatch radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
 
+#rhbz 962496
+ApplyPatch powerpc-pseries-Force-32-bit-MSIs-for-devices-that-r.patch
+ApplyPatch powerpc-pseries-Make-32-bit-MSI-quirk-work-on-system.patch
+
 ApplyPatch iwlwifi-dvm-fix-memset.patch
 
 #rhbz 964367
@@ -1593,6 +1612,12 @@ ApplyPatch hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
 
 #rhbz 948262
 ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
+
+#CVE-2013-2850 rhbz 968036 969272
+ApplyPatch iscsi-target-fix-heap-buffer-overflow-on-error.patch
+
+#rhbz 964335
+ApplyPatch Modify-UEFI-anti-bricking-code.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2432,6 +2457,20 @@ fi
 # and build.
 
 %changelog
+* Mon Jun 03 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix UEFI anti-bricking code (rhbz 964335)
+- Add patches to fix PowerPC MSI handling (rhbz 962496)
+
+* Sat Jun  1 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix DRM/X on omap (panda)
+- Enable Cortex-A8 errata on multiplatform kernels (omap3)
+
+* Fri May 31 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-2850 iscsi-target: heap buffer overflow on large key error (rhbz 968036 969272)
+
+* Thu May 30 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM tegra config
+
 * Sat May 25 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.4-gnu.
 
