@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -835,6 +835,9 @@ Patch25025: iscsi-target-fix-heap-buffer-overflow-on-error.patch
 
 #rhbz 964335
 Patch25026: Modify-UEFI-anti-bricking-code.patch
+
+# Needed for F19 gssproxy feature
+Patch25030: gssproxy-backport.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1618,6 +1621,9 @@ ApplyPatch iscsi-target-fix-heap-buffer-overflow-on-error.patch
 
 #rhbz 964335
 ApplyPatch Modify-UEFI-anti-bricking-code.patch
+
+# Needed for F19 gssproxy feature
+ApplyPatch gssproxy-backport.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2457,7 +2463,11 @@ fi
 # and build.
 
 %changelog
-* Mon Jun 03 2013 Josh Boyer <jwboyer@redhat.com>
+* Tue Jun 04 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.4-302
+- Add gssproxy backport from J. Bruce Fields
+- Fix build issue with PowerPC MSI patches (rhbz 962496)
+
+* Mon Jun 03 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.4-301
 - Fix UEFI anti-bricking code (rhbz 964335)
 - Add patches to fix PowerPC MSI handling (rhbz 962496)
 
