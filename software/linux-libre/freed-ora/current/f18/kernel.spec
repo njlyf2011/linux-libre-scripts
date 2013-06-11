@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -815,13 +815,32 @@ Patch25001: i7300_edac_single_mode_fixup.patch
 #rhbz 927469
 Patch25007: fix-child-thread-introspection.patch
 
-Patch25022: iwlwifi-dvm-fix-memset.patch
-
 #rhbz 964367
 Patch25023: hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
 
 #rhbz 948262
 Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
+
+#rhbz 964335
+Patch25026: Modify-UEFI-anti-bricking-code.patch
+
+#CVE-2013-2140 rhbz 971146 971148
+Patch25031: xen-blkback-Check-device-permissions-before-allowing.patch
+
+#CVE-2013-2147 rhbz 971242 971249
+Patch25032: cve-2013-2147-ciss-info-leak.patch
+
+#CVE-2013-2148 rhbz 971258 971261
+Patch25033: fanotify-info-leak-in-copy_event_to_user.patch
+
+#CVE-2013-2852 rhbz 969518 971665
+Patch25034: b43-stop-format-string-leaking-into-error-msgs.patch
+
+#CVE-2013-2851 rhbz 969515 971662
+Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
+
+# Fix for build failure on powerpc in 3.9.5
+Patch25037: powerpc-3.9.5-fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1578,13 +1597,32 @@ ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-ApplyPatch iwlwifi-dvm-fix-memset.patch
-
 #rhbz 964367
 ApplyPatch hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
 
 #rhbz 948262
 ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
+
+#rhbz 964335
+ApplyPatch Modify-UEFI-anti-bricking-code.patch
+
+#CVE-2013-2140 rhbz 971146 971148
+ApplyPatch xen-blkback-Check-device-permissions-before-allowing.patch
+
+#CVE-2013-2147 rhbz 971242 971249
+ApplyPatch cve-2013-2147-ciss-info-leak.patch
+
+#CVE-2013-2148 rhbz 971258 971261
+ApplyPatch fanotify-info-leak-in-copy_event_to_user.patch
+
+#CVE-2013-2852 rhbz 969518 971665
+ApplyPatch b43-stop-format-string-leaking-into-error-msgs.patch
+
+#CVE-2013-2851 rhbz 969515 971662
+ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
+
+# Fix for build failure on powerpc in 3.9.5
+ApplyPatch powerpc-3.9.5-fix.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2442,6 +2480,29 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Jun 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.5-gnu.
+
+* Mon Jun 10 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.5-200
+- Linux v3.9.5
+
+* Fri Jun 07 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-2851 block: passing disk names as format strings (rhbz 969515 971662)
+- CVE-2013-2852 b43: format string leaking into error msgs (rhbz 969518 971665)
+
+* Thu Jun 06 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-2148 fanotify: info leak in copy_event_to_user (rhbz 971258 971261)
+- CVE-2013-2147 cpqarray/cciss: information leak via ioctl (rhbz 971242 971249)
+
+* Wed Jun 05 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-2140 xen: blkback: insufficient permission checks for BLKIF_OP_DISCARD (rhbz 971146 971148)
+
+* Mon Jun 03 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix UEFI anti-bricking code (rhbz 964335)
+
+* Fri May 31 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-2850 iscsi-target: heap buffer overflow on large key error (rhbz 968036 969272)
+
 * Sat May 25 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.4-gnu.
 
