@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -855,6 +855,21 @@ Patch25036: scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
 # Fix for build failure on powerpc in 3.9.5
 Patch25037: powerpc-3.9.5-fix.patch
 
+#CVE-2013-2164 rhbz 973100 973109
+Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
+
+#rhbz 954181
+Patch25039: vhost_net-clear-msg.control-for-non-zerocopy-case-during-tx.patch
+Patch25040: tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
+
+#rhbz 973185
+Patch25041: x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
+Patch25042: x86-range-make-add_range-use-blank-slot.patch
+
+#rhbz 967230
+Patch25043: vfio-Set-container-device-mode.patch
+Patch25044: vfio-fix-crash-on-rmmod.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1634,7 +1649,7 @@ ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.pat
 ApplyPatch Modify-UEFI-anti-bricking-code.patch
 
 # Needed for F19 gssproxy feature
-ApplyPatch gssproxy-backport.patch
+#pplyPatch gssproxy-backport.patch
 
 #CVE-2013-2140 rhbz 971146 971148
 ApplyPatch xen-blkback-Check-device-permissions-before-allowing.patch
@@ -1656,6 +1671,21 @@ ApplyPatch scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
 
 # Fix for build failure on powerpc in 3.9.5
 ApplyPatch powerpc-3.9.5-fix.patch
+
+#CVE-2013-2164 rhbz 973100 973109
+ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
+
+#rhbz 954181
+ApplyPatch vhost_net-clear-msg.control-for-non-zerocopy-case-during-tx.patch
+ApplyPatch tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
+
+#rhbz 973185
+ApplyPatch x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
+ApplyPatch x86-range-make-add_range-use-blank-slot.patch
+
+#rhbz 967230
+ApplyPatch vfio-Set-container-device-mode.patch
+ApplyPatch vfio-fix-crash-on-rmmod.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2495,6 +2525,13 @@ fi
 # and build.
 
 %changelog
+* Tue Jun 11 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.5-301
+- Temporarily disable gssproxy patches
+- Add two patches to fix vfio device permissions (rhbz 967230)
+- Add patches to fix MTRR issues in 3.9.5 (rhbz 973185)
+- Add two patches to fix issues with vhost_net and macvlan (rhbz 954181)
+- CVE-2013-2164 information leak in cdrom driver (rhbz 973100 973109)
+
 * Mon Jun 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.5-gnu.
 
