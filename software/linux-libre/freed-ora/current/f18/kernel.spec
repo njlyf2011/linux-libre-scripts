@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -841,6 +841,17 @@ Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
 
 # Fix for build failure on powerpc in 3.9.5
 Patch25037: powerpc-3.9.5-fix.patch
+
+#CVE-2013-2164 rhbz 973100 973109
+Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
+
+#rhbz 954181
+Patch25039: vhost_net-clear-msg.control-for-non-zerocopy-case-during-tx.patch
+Patch25040: tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
+
+#rhbz 973185
+Patch25041: x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
+Patch25042: x86-range-make-add_range-use-blank-slot.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1623,6 +1634,17 @@ ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
 
 # Fix for build failure on powerpc in 3.9.5
 ApplyPatch powerpc-3.9.5-fix.patch
+
+#CVE-2013-2164 rhbz 973100 973109
+ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
+
+#rhbz 954181
+ApplyPatch vhost_net-clear-msg.control-for-non-zerocopy-case-during-tx.patch
+ApplyPatch tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
+
+#rhbz 973185
+ApplyPatch x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
+ApplyPatch x86-range-make-add_range-use-blank-slot.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2480,6 +2502,11 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Jun 11 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.5-201
+- Add patches to fix MTRR issues in 3.9.5 (rhbz 973185)
+- Add two patches to fix issues with vhost_net and macvlan (rhbz 954181)
+- CVE-2013-2164 information leak in cdrom driver (rhbz 973100 973109)
+
 * Mon Jun 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.5-gnu.
 
