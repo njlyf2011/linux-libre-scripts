@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -815,9 +815,6 @@ Patch25001: i7300_edac_single_mode_fixup.patch
 #rhbz 927469
 Patch25007: fix-child-thread-introspection.patch
 
-#rhbz 964367
-Patch25023: hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
-
 #rhbz 948262
 Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
@@ -839,9 +836,6 @@ Patch25034: b43-stop-format-string-leaking-into-error-msgs.patch
 #CVE-2013-2851 rhbz 969515 971662
 Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
 
-# Fix for build failure on powerpc in 3.9.5
-Patch25037: powerpc-3.9.5-fix.patch
-
 #CVE-2013-2164 rhbz 973100 973109
 Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
 
@@ -852,6 +846,12 @@ Patch25040: tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
 #rhbz 973185
 Patch25041: x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
 Patch25042: x86-range-make-add_range-use-blank-slot.patch
+
+#rhbz 950735
+Patch25045: rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
+
+#rhbz 969644
+Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1608,9 +1608,6 @@ ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-#rhbz 964367
-ApplyPatch hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
-
 #rhbz 948262
 ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
@@ -1632,9 +1629,6 @@ ApplyPatch b43-stop-format-string-leaking-into-error-msgs.patch
 #CVE-2013-2851 rhbz 969515 971662
 ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
 
-# Fix for build failure on powerpc in 3.9.5
-ApplyPatch powerpc-3.9.5-fix.patch
-
 #CVE-2013-2164 rhbz 973100 973109
 ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
 
@@ -1645,6 +1639,12 @@ ApplyPatch tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
 #rhbz 973185
 ApplyPatch x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
 ApplyPatch x86-range-make-add_range-use-blank-slot.patch
+
+#rhbz 950735
+ApplyPatch rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
+
+#rhbz 969644
+ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2502,6 +2502,16 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Jun 14 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.6-gnu.
+
+* Thu Jun 13 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.6-200
+- Linux v3.9.6
+
+* Wed Jun 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix KVM divide by zero error (rhbz 969644)
+- Add fix for rt5390/rt3290 regression (rhbz 950735)
+
 * Tue Jun 11 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.5-201
 - Add patches to fix MTRR issues in 3.9.5 (rhbz 973185)
 - Add two patches to fix issues with vhost_net and macvlan (rhbz 954181)
