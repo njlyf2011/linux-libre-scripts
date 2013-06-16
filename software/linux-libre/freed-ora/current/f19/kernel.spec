@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -152,7 +152,7 @@ Summary: The Linux kernel
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
 # kernel-smp (only valid for ppc 32-bit)
 %define with_smp       %{?_without_smp:       0} %{?!_without_smp:       1}
-# kernel-PAE (only valid for i686)
+# kernel PAE (only valid for i686 (PAE) and ARM (lpae))
 %define with_pae       %{?_without_pae:       0} %{?!_without_pae:       1}
 # kernel-debug
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
@@ -172,8 +172,6 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# ARM Cortex-A15 support with LPAE and HW Virtualisation
-%define with_lpae      %{?_without_lpae:      0} %{?!_without_lpae:      1}
 # kernel-tegra (only valid for arm)
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 #
@@ -285,14 +283,13 @@ Summary: The Linux kernel
 %endif
 %define debuginfodir /usr/lib/debug
 
-# kernel-PAE is only built on i686.
-%ifnarch i686
+# kernel PAE is only built on i686 and ARMv7.
+%ifnarch i686 armv7hl
 %define with_pae 0
 %endif
 
 # kernel up (unified kernel target), unified LPAE, tegra are only built on armv7 hfp
 %ifnarch armv7hl
-%define with_lpae 0
 %define with_tegra 0
 %endif
 
@@ -378,6 +375,7 @@ Summary: The Linux kernel
 %ifarch %{all_x86}
 %define asmarch x86
 %define hdrarch i386
+%define pae PAE
 %define all_arch_configs kernel-%{version}-i?86*.config
 %define image_install_path boot
 %define kernel_image arch/x86/boot/bzImage
@@ -425,8 +423,11 @@ Summary: The Linux kernel
 %define image_install_path boot
 %define asmarch arm
 %define hdrarch arm
+%define pae lpae
 %define make_target bzImage
 %define kernel_image arch/arm/boot/zImage
+# http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
+%define kernel_mflags KALLSYMS_EXTRA_PASS=1
 # we only build headers/perf/tools on the base arm arches
 # just like we used to only build them on i386 for x86
 %ifnarch armv7hl
@@ -760,6 +761,7 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
+Patch15000: nowatchdog-on-virt.patch
 
 # ARM
 Patch21000: arm-export-read_current_timer.patch
@@ -811,20 +813,6 @@ Patch23006: fix-child-thread-introspection.patch
 #rhbz 928024
 Patch23008: forcedeth-dma-error-check.patch
 
-Patch25018: pci-Set-dev-dev.type-in-alloc_pci_dev.patch
-Patch25019: powerpc-Set-default-VGA-device.patch
-
-#rhbz 961527
-Patch25020: powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
-Patch25021: radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
-
-#rhbz 962496
-Patch25027: powerpc-pseries-Force-32-bit-MSIs-for-devices-that-r.patch
-Patch25029: powerpc-pseries-Make-32-bit-MSI-quirk-work-on-system.patch
-
-#rhbz 964367
-Patch25023: hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
-
 #rhbz 948262
 Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
@@ -852,9 +840,6 @@ Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
 #rhbz 954252
 Patch25036: scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
 
-# Fix for build failure on powerpc in 3.9.5
-Patch25037: powerpc-3.9.5-fix.patch
-
 #CVE-2013-2164 rhbz 973100 973109
 Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
 
@@ -869,6 +854,12 @@ Patch25042: x86-range-make-add_range-use-blank-slot.patch
 #rhbz 967230
 Patch25043: vfio-Set-container-device-mode.patch
 Patch25044: vfio-fix-crash-on-rmmod.patch
+
+#rhbz 950735
+Patch25045: rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
+
+#rhbz 969644
+Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1148,13 +1139,21 @@ Install the kernel-libre-smp package if your machine uses two or more
 CPUs.
 
 
+%ifnarch armv7hl
 %define variant_summary The Linux kernel compiled for PAE capable machines
-%kernel_variant_package PAE
-%description PAE
+%kernel_variant_package %{pae}
+%description %{pae}
 This package includes a version of the Linux kernel with support for up to
 64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
 The non-PAE kernel can only address up to 4GB of memory.
 Install the kernel-PAE package if your machine has more than 4GB of memory.
+%else
+%define variant_summary The Linux kernel compiled for Cortex-A15
+%kernel_variant_package %{pae}
+%description %{pae}
+This package includes a version of the Linux kernel with support for
+Cortex-A15 devices with LPAE and HW virtualisation support
+%endif
 
 The kernel-libre-PAE package is the upstream kernel without the
 non-Free blobs it includes by default.
@@ -1162,9 +1161,9 @@ non-Free blobs it includes by default.
 
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled for PAE capable machines
-%kernel_variant_package PAEdebug
+%kernel_variant_package %{pae}debug
 Obsoletes: kernel-PAE-debug
-%description PAEdebug
+%description %{pae}debug
 This package includes a version of the Linux kernel with support for up to
 64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
 The non-PAE kernel can only address up to 4GB of memory.
@@ -1190,6 +1189,7 @@ This variant of the kernel has numerous debugging options enabled.
 It should only be installed when trying to gather additional information
 on kernel bugs, as some of these options impact performance noticably.
 
+<<<<<<< HEAD
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
@@ -1199,6 +1199,8 @@ non-Free blobs it includes by default.
 This package includes a version of the Linux kernel with support for
 Cortex-A15 devices with LPAE and HW virtualisation support
 
+=======
+>>>>>>> cb5b076
 %define variant_summary The Linux kernel compiled for tegra boards
 %kernel_variant_package tegra
 %description tegra
@@ -1594,6 +1596,9 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
+# Disable watchdog on virtual machines.
+ApplyPatch nowatchdog-on-virt.patch
+
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -1628,20 +1633,6 @@ ApplyPatch fix-child-thread-introspection.patch
 #rhbz 928024
 ApplyPatch forcedeth-dma-error-check.patch
 
-ApplyPatch pci-Set-dev-dev.type-in-alloc_pci_dev.patch
-ApplyPatch powerpc-Set-default-VGA-device.patch
-
-#rhbz 961527
-ApplyPatch powerpc-pseries-Perform-proper-max_bus_speed-detecti.patch
-ApplyPatch radeon-use-max_bus-speed-to-activate-gen2-speeds.patch
-
-#rhbz 962496
-ApplyPatch powerpc-pseries-Force-32-bit-MSIs-for-devices-that-r.patch
-ApplyPatch powerpc-pseries-Make-32-bit-MSI-quirk-work-on-system.patch
-
-#rhbz 964367
-ApplyPatch hp-wmi-fix-incorrect-rfkill-set-hw-state.patch
-
 #rhbz 948262
 ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
@@ -1649,7 +1640,7 @@ ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.pat
 ApplyPatch Modify-UEFI-anti-bricking-code.patch
 
 # Needed for F19 gssproxy feature
-#pplyPatch gssproxy-backport.patch
+ApplyPatch gssproxy-backport.patch
 
 #CVE-2013-2140 rhbz 971146 971148
 ApplyPatch xen-blkback-Check-device-permissions-before-allowing.patch
@@ -1669,9 +1660,6 @@ ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
 #rhbz 954252
 ApplyPatch scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
 
-# Fix for build failure on powerpc in 3.9.5
-ApplyPatch powerpc-3.9.5-fix.patch
-
 #CVE-2013-2164 rhbz 973100 973109
 ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
 
@@ -1686,6 +1674,12 @@ ApplyPatch x86-range-make-add_range-use-blank-slot.patch
 #rhbz 967230
 ApplyPatch vfio-Set-container-device-mode.patch
 ApplyPatch vfio-fix-crash-on-rmmod.patch
+
+#rhbz 950735
+ApplyPatch rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
+
+#rhbz 969644
+ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1813,18 +1807,15 @@ BuildKernel() {
     echo USING ARCH=$Arch
 
     make -s ARCH=$Arch oldnoconfig >/dev/null
-%ifarch %{arm}
-    # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
-    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} KALLSYMS_EXTRA_PASS=1
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
+    make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
+%ifarch %{arm}
     make -s ARCH=$Arch V=1 dtbs
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
     install -m 644 arch/arm/boot/dts/*.dtb $RPM_BUILD_ROOT/boot/dtb-$KernelVer/
     rm -f arch/arm/boot/dts/*.dtb
-%else
-    make -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags}
 %endif
-    make -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     # Start installing the results
 %if %{with_debuginfo}
@@ -2026,15 +2017,11 @@ BuildKernel %make_target %kernel_image debug
 %endif
 
 %if %{with_pae_debug}
-BuildKernel %make_target %kernel_image PAEdebug
+BuildKernel %make_target %kernel_image %{pae}debug
 %endif
 
 %if %{with_pae}
-BuildKernel %make_target %kernel_image PAE
-%endif
-
-%if %{with_lpae}
-BuildKernel %make_target %kernel_image lpae
+BuildKernel %make_target %kernel_image %{pae}
 %endif
 
 %if %{with_tegra}
@@ -2107,9 +2094,9 @@ find Documentation -type d | xargs chmod u+w
 %define __modsign_install_post \
   if [ "%{signmodules}" == "1" ]; then \
     if [ "%{with_pae}" != "0" ]; then \
-      mv signing_key.priv.sign.PAE signing_key.priv \
-      mv signing_key.x509.sign.PAE signing_key.x509 \
-      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAE/ \
+      mv signing_key.priv.sign.%{pae} signing_key.priv \
+      mv signing_key.x509.sign.%{pae} signing_key.x509 \
+      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}/ \
     fi \
     if [ "%{with_debug}" != "0" ]; then \
       mv signing_key.priv.sign.debug signing_key.priv \
@@ -2117,9 +2104,9 @@ find Documentation -type d | xargs chmod u+w
       %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
     fi \
     if [ "%{with_pae_debug}" != "0" ]; then \
-      mv signing_key.priv.sign.PAEdebug signing_key.priv \
-      mv signing_key.x509.sign.PAEdebug signing_key.x509 \
-      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.PAEdebug/ \
+      mv signing_key.priv.sign.%{pae}debug signing_key.priv \
+      mv signing_key.x509.sign.%{pae}debug signing_key.x509 \
+      %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}debug/ \
     fi \
     if [ "%{with_up}" != "0" ]; then \
       mv signing_key.priv.sign signing_key.priv \
@@ -2353,17 +2340,14 @@ fi}\
 %kernel_variant_preun smp
 %kernel_variant_post -v smp
 
-%kernel_variant_preun PAE
-%kernel_variant_post -v PAE -r (kernel|kernel-smp)
+%kernel_variant_preun %{pae}
+%kernel_variant_post -v %{pae} -r (kernel|kernel-smp)
+
+%kernel_variant_post -v %{pae}debug -r (kernel|kernel-smp)
+%kernel_variant_preun %{pae}debug
 
 %kernel_variant_preun debug
 %kernel_variant_post -v debug
-
-%kernel_variant_post -v PAEdebug -r (kernel|kernel-smp)
-%kernel_variant_preun PAEdebug
-
-%kernel_variant_preun lpae
-%kernel_variant_post -v lpae
 
 %kernel_variant_preun tegra
 %kernel_variant_post -v tegra
@@ -2516,15 +2500,34 @@ fi
 %kernel_variant_files %{with_up}
 %kernel_variant_files %{with_smp} smp
 %kernel_variant_files %{with_debug} debug
-%kernel_variant_files %{with_pae} PAE
-%kernel_variant_files %{with_pae_debug} PAEdebug
-%kernel_variant_files %{with_lpae} lpae
+%kernel_variant_files %{with_pae} %{pae}
+%kernel_variant_files %{with_pae_debug} %{pae}debug
 %kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 
 %changelog
+* Sat Jun 15 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.6-gnu.
+
+* Thu Jun 13 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.6-300
+- Linux v3.9.6
+- Drop a bunch of powerpc patches that were includes in 3.9.6.  Yay!
+
+* Wed Jun 12 2013 Kyle McMartin <kmcmarti@redhat.com>
+- Merge %{with_pae} and %{with_lpae} so both ARM and i686 use the same
+  flavours. Set %{pae} to the flavour name {lpae, PAE}. Merging
+  the descriptions would be nice, but is somewhat irrelevant...
+
+* Wed Jun 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Update gssproxy patches
+- Fix KVM divide by zero error (rhbz 969644)
+- Add fix for rt5390/rt3290 regression (rhbz 950735)
+
+* Tue Jun 11 2013 Dave Jones <davej@redhat.com>
+- Disable soft lockup detector on virtual machines. (rhbz 971139)
+
 * Tue Jun 11 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.5-301
 - Temporarily disable gssproxy patches
 - Add two patches to fix vfio device permissions (rhbz 967230)
