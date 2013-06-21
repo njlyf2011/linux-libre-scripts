@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2013-06-13 20:36:34.000000000 +0000
++++ .config	2013-06-21 03:09:02.000000000 +0000
 @@ -0,0 +1,4750 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.9.6-gnu Kernel Configuration
++# Linux/mips 3.9.7-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -2042,7 +2042,7 @@ Index: .config
 +CONFIG_ATH9K_PCI=y
 +CONFIG_ATH9K_AHB=y
 +# CONFIG_ATH9K_DEBUGFS is not set
-+CONFIG_ATH9K_RATE_CONTROL=y
++# CONFIG_ATH9K_LEGACY_RATE_CONTROL is not set
 +CONFIG_ATH9K_HTC=m
 +# CONFIG_ATH9K_HTC_DEBUGFS is not set
 +# CONFIG_CARL9170 is not set
