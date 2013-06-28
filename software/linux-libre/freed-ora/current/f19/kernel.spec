@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -861,6 +861,8 @@ Patch25045: rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
 #rhbz 969644
 Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
+Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1189,7 +1191,6 @@ This variant of the kernel has numerous debugging options enabled.
 It should only be installed when trying to gather additional information
 on kernel bugs, as some of these options impact performance noticably.
 
-<<<<<<< HEAD
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
@@ -1199,8 +1200,6 @@ non-Free blobs it includes by default.
 This package includes a version of the Linux kernel with support for
 Cortex-A15 devices with LPAE and HW virtualisation support
 
-=======
->>>>>>> cb5b076
 %define variant_summary The Linux kernel compiled for tegra boards
 %kernel_variant_package tegra
 %description tegra
@@ -1680,6 +1679,8 @@ ApplyPatch rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
 
 #rhbz 969644
 ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
+
+ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2508,6 +2509,9 @@ fi
 # and build.
 
 %changelog
+* Mon Jun 17 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.6-301
+- Add patch to fix radeon issues on powerpc
+
 * Sat Jun 15 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.6-gnu.
 
