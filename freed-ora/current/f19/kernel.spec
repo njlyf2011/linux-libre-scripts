@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -791,9 +791,6 @@ Patch21242: criu-no-expert.patch
 #rhbz 892811
 Patch21247: ath9k_rx_dma_stop_check.patch
 
-#rhbz 903192
-Patch21261: 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
-
 #rhbz 856863 892599
 Patch21273: cfg80211-mac80211-disconnect-on-suspend.patch
 Patch21274: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
@@ -816,9 +813,6 @@ Patch23008: forcedeth-dma-error-check.patch
 #rhbz 948262
 Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
-#rhbz 964335
-Patch25026: Modify-UEFI-anti-bricking-code.patch
-
 # Needed for F19 gssproxy feature
 Patch25030: gssproxy-backport.patch
 
@@ -831,9 +825,6 @@ Patch25032: cve-2013-2147-ciss-info-leak.patch
 #CVE-2013-2148 rhbz 971258 971261
 Patch25033: fanotify-info-leak-in-copy_event_to_user.patch
 
-#CVE-2013-2852 rhbz 969518 971665
-Patch25034: b43-stop-format-string-leaking-into-error-msgs.patch
-
 #CVE-2013-2851 rhbz 969515 971662
 Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
 
@@ -842,14 +833,6 @@ Patch25036: scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
 
 #CVE-2013-2164 rhbz 973100 973109
 Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
-
-#rhbz 954181
-Patch25039: vhost_net-clear-msg.control-for-non-zerocopy-case-during-tx.patch
-Patch25040: tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
-
-#rhbz 973185
-Patch25041: x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
-Patch25042: x86-range-make-add_range-use-blank-slot.patch
 
 #rhbz 967230
 Patch25043: vfio-Set-container-device-mode.patch
@@ -862,6 +845,22 @@ Patch25045: rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
 Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
+
+#rhbz 956732
+Patch25048: tulip-dma-debug-error.patch
+
+Patch25050: iwlwifi-pcie-fix-race-in-queue-unmapping.patch
+Patch25051: iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
+
+#rhbz 903741
+Patch25052: HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
+
+#rhbz 880035
+Patch25053: bridge-only-expire-the-mdb-entry-when-query-is-received.patch
+Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
+
+#rhbz 977558
+Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1616,9 +1615,6 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-#rhbz 903192
-ApplyPatch 0001-kmsg-Honor-dmesg_restrict-sysctl-on-dev-kmsg.patch
-
 #rhbz 856863 892599
 ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
 ApplyPatch mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
@@ -1635,9 +1631,6 @@ ApplyPatch forcedeth-dma-error-check.patch
 #rhbz 948262
 ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
 
-#rhbz 964335
-ApplyPatch Modify-UEFI-anti-bricking-code.patch
-
 # Needed for F19 gssproxy feature
 ApplyPatch gssproxy-backport.patch
 
@@ -1650,9 +1643,6 @@ ApplyPatch cve-2013-2147-ciss-info-leak.patch
 #CVE-2013-2148 rhbz 971258 971261
 ApplyPatch fanotify-info-leak-in-copy_event_to_user.patch
 
-#CVE-2013-2852 rhbz 969518 971665
-ApplyPatch b43-stop-format-string-leaking-into-error-msgs.patch
-
 #CVE-2013-2851 rhbz 969515 971662
 ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
 
@@ -1661,14 +1651,6 @@ ApplyPatch scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
 
 #CVE-2013-2164 rhbz 973100 973109
 ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
-
-#rhbz 954181
-ApplyPatch vhost_net-clear-msg.control-for-non-zerocopy-case-during-tx.patch
-ApplyPatch tuntap-set-SOCK_ZEROCOPY-flag-during-open.patch
-
-#rhbz 973185
-ApplyPatch x86-mtrr-Fix-original-mtrr-range-get-for-mtrr_cleanup.patch
-ApplyPatch x86-range-make-add_range-use-blank-slot.patch
 
 #rhbz 967230
 ApplyPatch vfio-Set-container-device-mode.patch
@@ -1681,6 +1663,22 @@ ApplyPatch rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
 ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
+
+#rhbz 956732
+ApplyPatch tulip-dma-debug-error.patch
+
+ApplyPatch iwlwifi-pcie-fix-race-in-queue-unmapping.patch
+ApplyPatch iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
+
+#rhbz 903741
+ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
+
+#rhbz 880035
+ApplyPatch bridge-only-expire-the-mdb-entry-when-query-is-received.patch
+ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
+
+#rhbz 977558
+ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2094,22 +2092,22 @@ find Documentation -type d | xargs chmod u+w
 
 %define __modsign_install_post \
   if [ "%{signmodules}" == "1" ]; then \
-    if [ "%{with_pae}" != "0" ]; then \
+    if [ "%{with_pae}" -ne "0" ]; then \
       mv signing_key.priv.sign.%{pae} signing_key.priv \
       mv signing_key.x509.sign.%{pae} signing_key.x509 \
       %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}/ \
     fi \
-    if [ "%{with_debug}" != "0" ]; then \
+    if [ "%{with_debug}" -ne "0" ]; then \
       mv signing_key.priv.sign.debug signing_key.priv \
       mv signing_key.x509.sign.debug signing_key.x509 \
       %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
     fi \
-    if [ "%{with_pae_debug}" != "0" ]; then \
+    if [ "%{with_pae_debug}" -ne "0" ]; then \
       mv signing_key.priv.sign.%{pae}debug signing_key.priv \
       mv signing_key.x509.sign.%{pae}debug signing_key.x509 \
       %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}debug/ \
     fi \
-    if [ "%{with_up}" != "0" ]; then \
+    if [ "%{with_up}" -ne "0" ]; then \
       mv signing_key.priv.sign signing_key.priv \
       mv signing_key.x509.sign signing_key.x509 \
       %{modsign_cmd} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
@@ -2509,6 +2507,38 @@ fi
 # and build.
 
 %changelog
+* Fri Jun 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.8-gnu.
+
+* Thu Jun 27 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.8-300
+- Linux v3.9.8
+
+* Thu Jun 27 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix stack memory usage for DMA in ath3k (rhbz 977558)
+
+* Wed Jun 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add two patches to fix bridge networking issues (rhbz 880035)
+
+* Tue Jun 25 2013 Kyle McMartin <kyle@redhat.com>
+- Cherry pick fix out of rawhide for %{with_*} tests in module
+  signing from Jan Stancek.
+
+* Mon Jun 24 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix battery issue with bluetooth keyboards (rhbz 903741)
+
+* Fri Jun 21 2013 Josh Boyer <jwboyer@redhat.com>
+- Add two patches to fix iwlwifi issues in unmapping
+- Add patch to fix carl9170 oops (rhbz 967271)
+
+* Thu Jun 20 2013 Justin M. Forbes <jforbes@redhat.com>
+- Linux v3.9.7
+
+* Tue Jun 18 2013 Neil Horman <nhorman@redhat.com>
+- Fix dma debug error in tulip driver (rhbz 956732)
+
+* Tue Jun 18 2013 Dave Jones <davej@redhat.com>
+- Disable MTRR sanitizer by default.
+
 * Mon Jun 17 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.6-301
 - Add patch to fix radeon issues on powerpc
 
