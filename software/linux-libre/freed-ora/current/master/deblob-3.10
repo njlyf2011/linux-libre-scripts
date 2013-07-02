@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.9 extra=
+kver=3.10 extra=
 
 case $1 in
 --force)
@@ -598,6 +598,8 @@ reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
 reject_firmware drivers/gpu/drm/radeon/si.c
 clean_blob drivers/gpu/drm/radeon/si.c
+reject_firmware drivers/gpu/drm/radeon/radeon_uvd.c
+clean_blob drivers/gpu/drm/radeon/radeon_uvd.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
@@ -966,7 +968,7 @@ reject_firmware drivers/media/pci/pluto2/pluto2.c
 announce SMS_SIANO_MDTV - "Siano SMS1xxx based MDTV receiver"
 reject_firmware drivers/media/common/siano/smscoreapi.c
 clean_blob drivers/media/common/siano/smscoreapi.c
-clean_blob drivers/media/common/siano/sms-cards.c
+clean_blob drivers/media/common/siano/smscoreapi.h
 clean_kconfig drivers/media/common/siano/Kconfig 'SMS_SIANO_MDTV'
 clean_mk CONFIG_SMS_SIANO_MDTV drivers/media/common/siano/Makefile
 
@@ -1054,6 +1056,12 @@ clean_blob drivers/media/usb/em28xx/em28xx-dvb.c
 clean_kconfig drivers/media/usb/em28xx/Kconfig 'VIDEO_EM28XX_DVB'
 clean_mk CONFIG_VIDEO_EM28XX_DVB drivers/media/usb/em28xx/Makefile
 
+announce VIDEO_EXYNOS4_FIMC_IS - "EXYNOS4x12 FIMC-IS (Imaging Subsystem) driver"
+reject_firmware drivers/media/platform/exynos4-is/fimc-is.c
+clean_blob drivers/media/platform/exynos4-is/fimc-is.h
+clean_kconfig drivers/media/platform/exynos4-is/Kconfig 'VIDEO_EXYNOS4_FIMC_IS'
+clean_mk CONFIG_VIDEO_EXYNOS4_FIMC_IS drivers/media/platform/exynos4-is/Makefile
+
 announce VIDEO_IVTV - "Conexant cx23416/cx23415 MPEG encoder/decoder support"
 reject_firmware drivers/media/pci/ivtv/ivtv-firmware.c
 clean_blob drivers/media/pci/ivtv/ivtv-firmware.c
@@ -1073,14 +1081,14 @@ announce VIDEO_GO7007 - "Go 7007 support"
 reject_firmware drivers/staging/media/go7007/go7007-driver.c
 clean_blob drivers/staging/media/go7007/go7007-driver.c
 reject_firmware drivers/staging/media/go7007/go7007-fw.c
-clean_blob drivers/staging/media/go7007/go7007-usb.c
+clean_blob drivers/staging/media/go7007/go7007-fw.c
 clean_blob drivers/staging/media/go7007/saa7134-go7007.c
 clean_kconfig drivers/staging/media/go7007/Kconfig 'VIDEO_GO7007'
 clean_mk CONFIG_VIDEO_GO7007 drivers/staging/media/go7007/Makefile
 
 announce VIDEO_GO7007_USB_S2250_BOARD - "Sensoray 2250/2251 support"
-reject_firmware drivers/staging/media/go7007/s2250-loader.c
-clean_blob drivers/staging/media/go7007/s2250-loader.c
+reject_firmware drivers/staging/media/go7007/go7007-loader.c
+clean_blob drivers/staging/media/go7007/go7007-loader.c
 clean_kconfig drivers/staging/media/go7007/Kconfig 'VIDEO_GO7007_USB_S2250_BOARD'
 clean_mk CONFIG_VIDEO_GO7007_USB_S2250_BOARD drivers/staging/media/go7007/Makefile
 
@@ -1580,11 +1588,11 @@ clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/5000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/6000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/7000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/1000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/2000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-7000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
 clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
@@ -1745,6 +1753,12 @@ clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
 
+announce RTL8188EE - "Realtek RTL8188EE Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8188EE
+clean_mk CONFIG_RTL8188EE drivers/net/wireless/rtlwifi/rtl8188ee/Makefile
+
 announce RTL8192CE - "Realtek RTL8192CE/RTL8188CE Wireless Network Adapter"
 reject_firmware drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
 clean_blob drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
@@ -1864,6 +1878,12 @@ reject_firmware drivers/bluetooth/bt3c_cs.c
 clean_blob drivers/bluetooth/bt3c_cs.c
 clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBT3C'
 clean_mk CONFIG_BT_HCIBT3C drivers/bluetooth/Makefile
+
+announce BT_HCIBTUSB - "HCI USB driver"
+reject_firmware drivers/bluetooth/btusb.c
+clean_blob drivers/bluetooth/btusb.c
+clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBTUSB'
+clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
 announce BT_MRVL_SDIO - "Marvell BT-over-SDIO driver"
 reject_firmware drivers/bluetooth/btmrvl_sdio.c
@@ -2030,6 +2050,12 @@ clean_blob drivers/staging/media/lirc/lirc_zilog.c
 clean_kconfig drivers/staging/media/lirc/Kconfig 'LIRC_ZILOG'
 clean_mk CONFIG_LIRC_ZILOG drivers/staging/media/lirc/Makefile
 
+announce INPUT_IMS_PCU - "IMS Passenger Control Unit driver"
+reject_firmware drivers/input/misc/ims-pcu.c
+clean_blob drivers/input/misc/ims-pcu.c
+clean_kconfig drivers/input/misc/Kconfig 'INPUT_IMS_PCU'
+clean_mk CONFIG_INPUT_IMS_PCU drivers/input/misc/Makefile
+
 ####################
 # Data acquisition #
 ####################
@@ -2139,7 +2165,7 @@ clean_mk CONFIG_SCSI_BFA_FC drivers/scsi/bfa/Makefile
 
 announce SCSI_CHELSIO_FCOE - "Chelsio Communications FCoE support"
 reject_firmware drivers/scsi/csiostor/csio_hw.c
-clean_blob drivers/scsi/csiostor/csio_hw.h
+clean_blob drivers/scsi/csiostor/csio_hw_chip.h
 clean_blob drivers/scsi/csiostor/csio_init.c
 clean_kconfig drivers/scsi/csiostor/Kconfig 'SCSI_CHELSIO_FCOE'
 clean_mk CONFIG_SCSI_CHELSIO_FCOE drivers/scsi/csiostor/Makefile
