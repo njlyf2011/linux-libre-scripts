@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -731,8 +731,11 @@ Patch1000: devel-pekey-secure-boot-20130306.patch
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 #Patch1800: drm-vgem.patch
 Patch1700: drm-ttm-exports-for-qxl.patch
-Patch1701: drm-qxl-driver.patch
-Patch1702: drm-qxl-backport-fixes.patch
+Patch1701: drm-hotspot-cursor-backport.patch
+Patch1702: drm-qxl-driver.patch
+Patch1703: drm-qxl-3.10-rc7-diff.patch
+Patch1704: drm-qxl-access-fix.patch
+Patch1705: drm-qxl-post-3.10-feature-fixes.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -838,9 +841,6 @@ Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
 Patch25043: vfio-Set-container-device-mode.patch
 Patch25044: vfio-fix-crash-on-rmmod.patch
 
-#rhbz 950735
-Patch25045: rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
-
 #rhbz 969644
 Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
@@ -861,6 +861,10 @@ Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
 
 #rhbz 977558
 Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
+
+#rhbz 977040
+Patch25056: iwl3945-better-skb-management-in-rx-path.patch
+Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1564,8 +1568,11 @@ ApplyPatch devel-pekey-secure-boot-20130306.patch
 
 # DRM core
 ApplyPatch drm-ttm-exports-for-qxl.patch
+ApplyPatch drm-hotspot-cursor-backport.patch
 ApplyPatch drm-qxl-driver.patch
-ApplyPatch drm-qxl-backport-fixes.patch
+ApplyPatch drm-qxl-3.10-rc7-diff.patch
+ApplyPatch drm-qxl-access-fix.patch
+ApplyPatch drm-qxl-post-3.10-feature-fixes.patch
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 #ApplyPatch drm-vgem.patch
 
@@ -1656,9 +1663,6 @@ ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
 ApplyPatch vfio-Set-container-device-mode.patch
 ApplyPatch vfio-fix-crash-on-rmmod.patch
 
-#rhbz 950735
-ApplyPatch rt2800-fix-RT5390-RT3290-TX-power-settings-regression.patch
-
 #rhbz 969644
 ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
@@ -1679,6 +1683,10 @@ ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
 
 #rhbz 977558
 ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
+
+#rhbz 977040
+ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
+ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2507,6 +2515,28 @@ fi
 # and build.
 
 %changelog
+* Sun Jul  7 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.9-gnu.
+
+* Wed Jul 03 2013 Justin M. Forbes <jforbes@redhat.com> 3.9.9-300
+- Linux v3.9.9
+
+* Wed Jul 03 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patches to fix iwl skb managment (rhbz 977040)
+
+* Wed Jul 03 2013 Dave Airlie <airlied@redhat.com>
+- fixup QXL driver patches to make it easier to rebase
+- add qxl driver dynamic resize + multiple heads support
+
+* Mon Jul 01 2013 Dave Airlie <airlied@redhat.com>
+- kernel portion of qxl cursor and dynamic resize fixes.
+
+* Fri Jun 28 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Only enable ARM A15 errata on the LPAE kernel as it breaks A8
+
+* Fri Jun 28 2013 Dave Airlie <airlied@redhat.com> 
+- add qxl fix for missing access ok macro.
+
 * Fri Jun 28 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.8-gnu.
 
