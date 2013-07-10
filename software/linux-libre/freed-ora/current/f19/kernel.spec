@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -865,6 +865,12 @@ Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
 #rhbz 977040
 Patch25056: iwl3945-better-skb-management-in-rx-path.patch
 Patch25057: iwl4965-better-skb-management-in-rx-path.patch
+
+#CVE-2013-2234 rhbz 980995 981007
+Patch25058: af_key-fix-info-leaks-in-notify-messages.patch
+
+#CVE-2013-1059 rhbz 977356 980341
+Patch25059: ceph-fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1687,6 +1693,12 @@ ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
 #rhbz 977040
 ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
 ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
+
+#CVE-2013-2234 rhbz 980995 981007
+ApplyPatch af_key-fix-info-leaks-in-notify-messages.patch
+
+#CVE-2013-1059 rhbz 977356 980341
+ApplyPatch ceph-fix.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2515,7 +2527,11 @@ fi
 # and build.
 
 %changelog
-* Sun Jul  7 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Jul 03 2013 Josh Boyer <jwboyer@redhat.com> 3.9.9-301
+- CVE-2013-1059 libceph: Fix NULL pointer dereference in auth client code (rhbz 977356 980341)
+- CVE-2013-2234 net: information leak in AF_KEY notify (rhbz 980995 981007)
+
+* Wed Jul  3 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jul  7
 - GNU Linux-libre 3.9.9-gnu.
 
 * Wed Jul 03 2013 Justin M. Forbes <jforbes@redhat.com> 3.9.9-300
