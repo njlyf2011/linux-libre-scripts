@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -736,6 +736,7 @@ Patch1702: drm-qxl-driver.patch
 Patch1703: drm-qxl-3.10-rc7-diff.patch
 Patch1704: drm-qxl-access-fix.patch
 Patch1705: drm-qxl-post-3.10-feature-fixes.patch
+Patch1706: drm-qxl-post-3.10-features-part-2.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -858,6 +859,8 @@ Patch25052: HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
 #rhbz 880035
 Patch25053: bridge-only-expire-the-mdb-entry-when-query-is-received.patch
 Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
+#rhbz 980254
+Patch25061: bridge-timer-fix.patch
 
 #rhbz 977558
 Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
@@ -871,6 +874,15 @@ Patch25058: af_key-fix-info-leaks-in-notify-messages.patch
 
 #CVE-2013-1059 rhbz 977356 980341
 Patch25059: ceph-fix.patch
+
+#CVE-2013-2232 rhbz 981552 981564
+Patch25060: ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
+
+#rhbz 976789 980643
+Patch25062: vhost-net-fix-use-after-free-in-vhost_net_flush.patch
+
+#rhbz 959721
+Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1579,6 +1591,7 @@ ApplyPatch drm-qxl-driver.patch
 ApplyPatch drm-qxl-3.10-rc7-diff.patch
 ApplyPatch drm-qxl-access-fix.patch
 ApplyPatch drm-qxl-post-3.10-feature-fixes.patch
+ApplyPatch drm-qxl-post-3.10-features-part-2.patch
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 #ApplyPatch drm-vgem.patch
 
@@ -1686,6 +1699,7 @@ ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
 #rhbz 880035
 ApplyPatch bridge-only-expire-the-mdb-entry-when-query-is-received.patch
 ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
+ApplyPatch bridge-timer-fix.patch
 
 #rhbz 977558
 ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
@@ -1699,6 +1713,15 @@ ApplyPatch af_key-fix-info-leaks-in-notify-messages.patch
 
 #CVE-2013-1059 rhbz 977356 980341
 ApplyPatch ceph-fix.patch
+
+#CVE-2013-2232 rhbz 981552 981564
+ApplyPatch ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
+
+#rhbz 976789 980643
+ApplyPatch vhost-net-fix-use-after-free-in-vhost_net_flush.patch
+
+#rhbz 959721
+ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2527,6 +2550,15 @@ fi
 # and build.
 
 %changelog
+* Fri Jul 05 2013 Josh Boyer <jwboyer@redhat.com>
+- Add report fixup for Genius Gila mouse from Benjamin Tissoires (rhbz 959721)
+- Add vhost-net use-after-free fix (rhbz 976789 980643)
+- Add fix for timer issue in bridge code (rhbz 980254)
+- CVE-2013-2232 ipv6: using ipv4 vs ipv6 structure during routing lookup in sendmsg (rhbz 981552 981564)
+
+* Thu Jul 04 2013 Dave Airlie <airlied@redhat.com>
+- qxl: add suspend/resume and hibernate support
+
 * Wed Jul 03 2013 Josh Boyer <jwboyer@redhat.com> 3.9.9-301
 - CVE-2013-1059 libceph: Fix NULL pointer dereference in auth client code (rhbz 977356 980341)
 - CVE-2013-2234 net: information leak in AF_KEY notify (rhbz 980995 981007)
