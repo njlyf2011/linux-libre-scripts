@@ -54,7 +54,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -164,8 +164,6 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# ARM OMAP (Beagle/Panda Board)
-%define with_omap      %{?_without_omap:      0} %{?!_without_omap:      1}
 # kernel-tegra (only valid for arm)
 %define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 # kernel-kirkwood (only valid for arm)
@@ -284,9 +282,8 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 
-# kernel up (versatile express), tegra and omap are only built on armv7 hfp/sfp
+# kernel up (versatile express) and tegra are only built on armv7 hfp/sfp
 %ifnarch armv7hl armv7l
-%define with_omap 0
 %define with_tegra 0
 %endif
 
@@ -808,12 +805,6 @@ Patch25032: cve-2013-2147-ciss-info-leak.patch
 #CVE-2013-2148 rhbz 971258 971261
 Patch25033: fanotify-info-leak-in-copy_event_to_user.patch
 
-#CVE-2013-2851 rhbz 969515 971662
-Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
-
-#CVE-2013-2164 rhbz 973100 973109
-Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
-
 #rhbz 969644
 Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
@@ -839,9 +830,6 @@ Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 #CVE-2013-2234 rhbz 980995 981007
 Patch25058: af_key-fix-info-leaks-in-notify-messages.patch
 
-#CVE-2013-1059 rhbz 977356 980341
-Patch25059: ceph-fix.patch
-
 #CVE-2013-2232 rhbz 981552 981564
 Patch25060: ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
 
@@ -850,6 +838,12 @@ Patch25062: vhost-net-fix-use-after-free-in-vhost_net_flush.patch
 
 #rhbz 959721
 Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
+
+#rhbz 885407
+Patch25064: iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
+
+#rhbz 976837
+Patch25065: fix-ext4-overflows.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1180,12 +1174,6 @@ non-Free blobs it includes by default.
 %description kirkwood
 This package includes a version of the Linux kernel with support for
 marvell kirkwood based systems, i.e., guruplug, sheevaplug
-
-%define variant_summary The Linux kernel compiled for TI-OMAP boards
-%kernel_variant_package omap
-%description omap
-This package includes a version of the Linux kernel with support for
-TI-OMAP based systems, i.e., BeagleBoard-xM.
 
 %define variant_summary The Linux kernel compiled for tegra boards
 %kernel_variant_package tegra
@@ -1617,12 +1605,6 @@ ApplyPatch cve-2013-2147-ciss-info-leak.patch
 #CVE-2013-2148 rhbz 971258 971261
 ApplyPatch fanotify-info-leak-in-copy_event_to_user.patch
 
-#CVE-2013-2851 rhbz 969515 971662
-ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
-
-#CVE-2013-2164 rhbz 973100 973109
-ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
-
 #rhbz 969644
 ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
@@ -1647,9 +1629,6 @@ ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 #CVE-2013-2234 rhbz 980995 981007
 ApplyPatch af_key-fix-info-leaks-in-notify-messages.patch
 
-#CVE-2013-1059 rhbz 977356 980341
-ApplyPatch ceph-fix.patch
-
 #CVE-2013-2232 rhbz 981552 981564
 ApplyPatch ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
 
@@ -1658,6 +1637,12 @@ ApplyPatch vhost-net-fix-use-after-free-in-vhost_net_flush.patch
 
 #rhbz 959721
 ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
+
+#rhbz 885407
+ApplyPatch iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
+
+#rhbz 976837
+ApplyPatch fix-ext4-overflows.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2055,10 +2040,6 @@ BuildKernel %make_target %kernel_image PAE
 BuildKernel %make_target %kernel_image kirkwood
 %endif
 
-%if %{with_omap}
-BuildKernel %make_target %kernel_image omap
-%endif
-
 %if %{with_tegra}
 BuildKernel %make_target %kernel_image tegra
 %endif
@@ -2338,9 +2319,6 @@ fi}\
 %kernel_variant_preun kirkwood
 %kernel_variant_post -v kirkwood
 
-%kernel_variant_preun omap
-%kernel_variant_post -v omap
-
 %kernel_variant_preun tegra
 %kernel_variant_post -v tegra
 
@@ -2495,7 +2473,6 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files %{with_kirkwood} kirkwood
-%kernel_variant_files %{with_omap} omap
 %kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
@@ -2521,6 +2498,22 @@ fi
 #    '-'      |  |
 #              '-'
 %changelog
+* Sat Jul 13 2013 Alexandre Oliva<lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.10-gnu.
+
+* Sat Jul 13 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.10-100
+- Linux v3.9.10
+
+* Fri Jul 12 2013 Dave Jones <davej@redhat.com> - 3.9.9-103
+- Disable LATENCYTOP/SCHEDSTATS in non-debug builds.
+
+* Fri Jul 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix various overflow issues in ext4 (rhbz 976837)
+- Add iwlwifi fix for connection issue (rhbz 885407)
+
+* Sun Jul  7 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix building ARM kernel by dropping OMAP subpackage
+
 * Fri Jul 05 2013 Josh Boyer <jwboyer@redhat.com>
 - Add report fixup for Genius Gila mouse from Benjamin Tissoires (rhbz 959721)
 - Add vhost-net use-after-free fix (rhbz 976789 980643)
