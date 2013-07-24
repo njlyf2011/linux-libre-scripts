@@ -62,13 +62,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 9
+%define base_sublevel 10
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.9%{?stablegnux}
-#define rcrevlibre -3.9%{?rcrevgnux}
-#define gitrevlibre -3.9%{?gitrevgnux}
+%define stablelibre -3.10%{?stablegnux}
+#define rcrevlibre -3.10%{?rcrevgnux}
+#define gitrevlibre -3.10%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -172,8 +172,6 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# kernel-tegra (only valid for arm)
-%define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 #
 # Additional options for user-friendly one-off kernel building:
 #
@@ -286,11 +284,6 @@ Summary: The Linux kernel
 # kernel PAE is only built on i686 and ARMv7.
 %ifnarch i686 armv7hl
 %define with_pae 0
-%endif
-
-# kernel up (unified kernel target), unified LPAE, tegra are only built on armv7 hfp
-%ifnarch armv7hl
-%define with_tegra 0
 %endif
 
 # if requested, only build base kernel
@@ -529,6 +522,10 @@ Provides: kernel-omap\
 Provides: kernel-libre-omap\
 Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-tegra\
+Provides: kernel-libre-tegra\
+Provides: kernel-tegra-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-tegra-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -633,10 +630,10 @@ Source54: config-powerpc64p7
 Source70: config-s390x
 
 # Unified ARM kernels
-Source100: config-armv7-generic
-Source101: config-armv7
-Source102: config-armv7-lpae
-Source103: config-armv7-tegra
+Source100: config-arm-generic
+Source101: config-armv7-generic
+Source102: config-armv7
+Source103: config-armv7-lpae
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -701,9 +698,6 @@ Patch100: taint-vbox.patch
 
 Patch110: vmbugon-warnon.patch
 
-Patch200: debug-bad-pte-dmi.patch
-Patch201: debug-bad-pte-modules.patch
-
 Patch390: defaults-acpi-video.patch
 Patch391: acpi-video-dos.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
@@ -723,18 +717,14 @@ Patch800: crash-driver.patch
 # crypto/
 
 # secure boot
-Patch1000: devel-pekey-secure-boot-20130306.patch
+Patch1000: devel-pekey-secure-boot-20130502.patch
 
 # virt + ksm patches
 
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 #Patch1800: drm-vgem.patch
-Patch1700: drm-ttm-exports-for-qxl.patch
 Patch1701: drm-hotspot-cursor-backport.patch
-Patch1702: drm-qxl-driver.patch
-Patch1703: drm-qxl-3.10-rc7-diff.patch
-Patch1704: drm-qxl-access-fix.patch
 Patch1705: drm-qxl-post-3.10-feature-fixes.patch
 Patch1706: drm-qxl-post-3.10-features-part-2.patch
 # nouveau + drm fixes
@@ -774,14 +764,10 @@ Patch21000: arm-export-read_current_timer.patch
 Patch21001: arm-lpae-ax88796.patch
 
 # ARM omap
-Patch21002: arm-omap-ehci-fix.patch
 Patch21003: arm-omap-load-tfp410.patch
-# https://patchwork.kernel.org/patch/2414881/
-Patch21004: arm-omap-fixdrm.patch
 
 # ARM tegra
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
-Patch21006: arm-tegra-fixclk.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -795,13 +781,6 @@ Patch21242: criu-no-expert.patch
 #rhbz 892811
 Patch21247: ath9k_rx_dma_stop_check.patch
 
-#rhbz 856863 892599
-Patch21273: cfg80211-mac80211-disconnect-on-suspend.patch
-Patch21274: mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
-
-#rhbz 859282
-Patch21275: VMX-x86-handle-host-TSC-calibration-failure.patch
-
 Patch22000: weird-root-dentry-name-debug.patch
 Patch22010: debug-idle-sched-warn-once.patch
 
@@ -811,14 +790,8 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 927469
 Patch23006: fix-child-thread-introspection.patch
 
-#rhbz 928024
-Patch23008: forcedeth-dma-error-check.patch
-
 #rhbz 948262
 Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
-
-# Needed for F19 gssproxy feature
-Patch25030: gssproxy-backport.patch
 
 #CVE-2013-2140 rhbz 971146 971148
 Patch25031: xen-blkback-Check-device-permissions-before-allowing.patch
@@ -829,29 +802,13 @@ Patch25032: cve-2013-2147-ciss-info-leak.patch
 #CVE-2013-2148 rhbz 971258 971261
 Patch25033: fanotify-info-leak-in-copy_event_to_user.patch
 
-#CVE-2013-2851 rhbz 969515 971662
-Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
-
 #rhbz 954252
 Patch25036: scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
-
-#CVE-2013-2164 rhbz 973100 973109
-Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
-
-#rhbz 967230
-Patch25043: vfio-Set-container-device-mode.patch
-Patch25044: vfio-fix-crash-on-rmmod.patch
 
 #rhbz 969644
 Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
-#rhbz 956732
-Patch25048: tulip-dma-debug-error.patch
-
-Patch25050: iwlwifi-pcie-fix-race-in-queue-unmapping.patch
-Patch25051: iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
 
 #rhbz 903741
 Patch25052: HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
@@ -861,6 +818,7 @@ Patch25053: bridge-only-expire-the-mdb-entry-when-query-is-received.patch
 Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
 #rhbz 980254
 Patch25061: bridge-timer-fix.patch
+Patch25066: bridge-do-not-call-setup_timer-multiple-times.patch
 
 #rhbz 977558
 Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
@@ -869,20 +827,16 @@ Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
 Patch25056: iwl3945-better-skb-management-in-rx-path.patch
 Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
-#CVE-2013-2234 rhbz 980995 981007
-Patch25058: af_key-fix-info-leaks-in-notify-messages.patch
-
-#CVE-2013-1059 rhbz 977356 980341
-Patch25059: ceph-fix.patch
-
-#CVE-2013-2232 rhbz 981552 981564
-Patch25060: ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
-
 #rhbz 976789 980643
 Patch25062: vhost-net-fix-use-after-free-in-vhost_net_flush.patch
 
 #rhbz 959721
 Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
+
+#rhbz 885407
+Patch25064: iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
+
+Patch26000: cve-2013-4125.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1212,22 +1166,6 @@ This variant of the kernel has numerous debugging options enabled.
 It should only be installed when trying to gather additional information
 on kernel bugs, as some of these options impact performance noticably.
 
-The kernel-libre-debug package is the upstream kernel without the
-non-Free blobs it includes by default.
-
-%define variant_summary The Linux kernel compiled for Cortex-A15
-%kernel_variant_package lpae
-%description lpae
-This package includes a version of the Linux kernel with support for
-Cortex-A15 devices with LPAE and HW virtualisation support
-
-%define variant_summary The Linux kernel compiled for tegra boards
-%kernel_variant_package tegra
-%description tegra
-This package includes a version of the Linux kernel with support for
-nvidia tegra based systems, i.e., trimslice, ac-100.
-
-
 %prep
 # do a few sanity-checks for --with *only builds
 %if %{with_baseonly}
@@ -1499,9 +1437,6 @@ ApplyPatch taint-vbox.patch
 
 ApplyPatch vmbugon-warnon.patch
 
-ApplyPatch debug-bad-pte-dmi.patch
-ApplyPatch debug-bad-pte-modules.patch
-
 # Architecture patches
 # x86(-64)
 
@@ -1510,11 +1445,8 @@ ApplyPatch debug-bad-pte-modules.patch
 #
 ApplyPatch arm-export-read_current_timer.patch
 ApplyPatch arm-lpae-ax88796.patch
-ApplyPatch arm-omap-ehci-fix.patch
 ApplyPatch arm-omap-load-tfp410.patch
-ApplyPatch arm-omap-fixdrm.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-tegra-fixclk.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1580,16 +1512,12 @@ ApplyPatch crash-driver.patch
 # crypto/
 
 # secure boot
-ApplyPatch devel-pekey-secure-boot-20130306.patch
+ApplyPatch devel-pekey-secure-boot-20130502.patch
 
 # Assorted Virt Fixes
 
 # DRM core
-ApplyPatch drm-ttm-exports-for-qxl.patch
 ApplyPatch drm-hotspot-cursor-backport.patch
-ApplyPatch drm-qxl-driver.patch
-ApplyPatch drm-qxl-3.10-rc7-diff.patch
-ApplyPatch drm-qxl-access-fix.patch
 ApplyPatch drm-qxl-post-3.10-feature-fixes.patch
 ApplyPatch drm-qxl-post-3.10-features-part-2.patch
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
@@ -1641,24 +1569,11 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-#rhbz 856863 892599
-ApplyPatch cfg80211-mac80211-disconnect-on-suspend.patch
-ApplyPatch mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
-
-#rhbz 859282
-ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
-
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-#rhbz 928024
-ApplyPatch forcedeth-dma-error-check.patch
-
 #rhbz 948262
 ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
-
-# Needed for F19 gssproxy feature
-ApplyPatch gssproxy-backport.patch
 
 #CVE-2013-2140 rhbz 971146 971148
 ApplyPatch xen-blkback-Check-device-permissions-before-allowing.patch
@@ -1669,29 +1584,13 @@ ApplyPatch cve-2013-2147-ciss-info-leak.patch
 #CVE-2013-2148 rhbz 971258 971261
 ApplyPatch fanotify-info-leak-in-copy_event_to_user.patch
 
-#CVE-2013-2851 rhbz 969515 971662
-ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
-
 #rhbz 954252
 ApplyPatch scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
-
-#CVE-2013-2164 rhbz 973100 973109
-ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
-
-#rhbz 967230
-ApplyPatch vfio-Set-container-device-mode.patch
-ApplyPatch vfio-fix-crash-on-rmmod.patch
 
 #rhbz 969644
 ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
-#rhbz 956732
-ApplyPatch tulip-dma-debug-error.patch
-
-ApplyPatch iwlwifi-pcie-fix-race-in-queue-unmapping.patch
-ApplyPatch iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
 
 #rhbz 903741
 ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
@@ -1699,7 +1598,9 @@ ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
 #rhbz 880035
 ApplyPatch bridge-only-expire-the-mdb-entry-when-query-is-received.patch
 ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
+#rhbz 980254
 ApplyPatch bridge-timer-fix.patch
+ApplyPatch bridge-do-not-call-setup_timer-multiple-times.patch
 
 #rhbz 977558
 ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
@@ -1708,20 +1609,16 @@ ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
 ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
 ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
-#CVE-2013-2234 rhbz 980995 981007
-ApplyPatch af_key-fix-info-leaks-in-notify-messages.patch
-
-#CVE-2013-1059 rhbz 977356 980341
-ApplyPatch ceph-fix.patch
-
-#CVE-2013-2232 rhbz 981552 981564
-ApplyPatch ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
-
 #rhbz 976789 980643
 ApplyPatch vhost-net-fix-use-after-free-in-vhost_net_flush.patch
 
 #rhbz 959721
 ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
+
+#rhbz 885407
+ApplyPatch iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
+
+ApplyPatch cve-2013-4125.patch 
 
 # END OF PATCH APPLICATIONS
 
@@ -2066,10 +1963,6 @@ BuildKernel %make_target %kernel_image %{pae}debug
 BuildKernel %make_target %kernel_image %{pae}
 %endif
 
-%if %{with_tegra}
-BuildKernel %make_target %kernel_image tegra
-%endif
-
 %if %{with_up}
 BuildKernel %make_target %kernel_image
 %endif
@@ -2391,9 +2284,6 @@ fi}\
 %kernel_variant_preun debug
 %kernel_variant_post -v debug
 
-%kernel_variant_preun tegra
-%kernel_variant_post -v tegra
-
 if [ -x /sbin/ldconfig ]
 then
     /sbin/ldconfig -X || exit $?
@@ -2544,12 +2434,68 @@ fi
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} %{pae}
 %kernel_variant_files %{with_pae_debug} %{pae}debug
-%kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 
 %changelog
+* Mon Jul 22 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.2-gnu.
+
+* Mon Jul 22 2013 Justin M. Forbes <jforbes@redhat.com> 3.10.2-301
+- Update secureboot patch for 3.10
+
+* Mon Jul 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix timer issue in bridge code (rhbz 980254)
+
+* Mon Jul 22 2013 Justin M. Forbes <jforbes@redhat.com> 3.10.2-300
+- Linux v3.10.2
+
+* Fri Jul 19 2013 Dave Jones <davej@redhat.com>
+- CVE-2013-4125  ipv6: BUG_ON in fib6_add_rt2node() (rhbz 984664)
+
+* Wed Jul 17 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Re-enable ARM
+- Drop tegra subkernel as it's now multi-platform
+- Enable i.MX SoC support
+- Drop old ARM patches
+
+* Wed Jul 17 2013 Dave Jones <davej@redhat.com>
+- Rebase to 3.10.1
+  dropped:
+   debug-bad-pte-dmi.patch
+   debug-bad-pte-modules.patch
+   arm-omap-ehci-fix.patch
+   arm-omap-fixdrm.patch
+   drm-ttm-exports-for-qxl.patch
+   drm-qxl-driver.patch
+   drm-qxl-3.10-rc7-diff.patch
+   drm-qxl-access-fix.patch
+   VMX-x86-handle-host-TSC-calibration-failure.patch
+   forcedeth-dma-error-check.patch
+   block-do-not-pass-disk-names-as-format-strings.patch
+   cdrom-use-kzalloc-for-failing-hardware.patch
+   vfio-Set-container-device-mode.patch
+   vfio-fix-crash-on-rmmod.patch
+   tulip-dma-debug-error.patch
+   af_key-fix-info-leaks-in-notify-messages.patch
+   ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
+   arm-tegra-fixclk.patch
+   cfg80211-mac80211-disconnect-on-suspend.patch
+   mac80211_fixes_for_ieee80211_do_stop_while_suspend_v3.9.patch
+   gssproxy-backport.patch
+   ceph-fix.patch
+
+* Fri Jul 12 2013 Dave Jones <davej@redhat.com> - 3.9.9-304
+- Disable LATENCYTOP/SCHEDSTATS in non-debug builds.
+
+* Fri Jul 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix various overflow issues in ext4 (rhbz 976837)
+- Add iwlwifi fix for connection issue (rhbz 885407)
+
+* Thu Jul 11 2013 Kyle McMartin <kyle@redhat.com>
+- Enable USB on i.MX based boards, patch from Niels de Vos.
+
 * Fri Jul 05 2013 Josh Boyer <jwboyer@redhat.com>
 - Add report fixup for Genius Gila mouse from Benjamin Tissoires (rhbz 959721)
 - Add vhost-net use-after-free fix (rhbz 976789 980643)
