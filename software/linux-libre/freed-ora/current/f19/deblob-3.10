@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.8 extra=
+kver=3.10 extra=
 
 case $1 in
 --force)
@@ -452,6 +452,12 @@ clean_blob arch/x86/kernel/microcode_intel.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_INTEL'
 clean_mk CONFIG_MICROCODE_INTEL arch/x86/kernel/Makefile
 
+announce MICROCODE_INTEL_EARLY - "Ëarly load microcode"
+clean_blob arch/x86/kernel/microcode_intel_early.c
+clean_blob Documentation/x86/early-microcode.txt
+clean_kconfig arch/x86/Kconfig 'MICROCODE_INTEL_EARLY'
+clean_mk CONFIG_MICROCODE_INTEL_EARLY arch/x86/kernel/Makefile
+
 # arm
 
 announce IXP4XX_NPE - "IXP4xx Network Processor Engine support"
@@ -592,6 +598,8 @@ reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
 reject_firmware drivers/gpu/drm/radeon/si.c
 clean_blob drivers/gpu/drm/radeon/si.c
+reject_firmware drivers/gpu/drm/radeon/radeon_uvd.c
+clean_blob drivers/gpu/drm/radeon/radeon_uvd.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
@@ -606,7 +614,7 @@ clean_blob arch/arm/mach-imx/mm-imx3.c
 clean_blob arch/arm/mach-imx/mm-imx5.c
 clean_blob arch/arm/boot/dts/imx51.dtsi
 clean_blob arch/arm/boot/dts/imx53.dtsi
-clean_blob arch/arm/boot/dts/imx6q.dtsi
+clean_blob arch/arm/boot/dts/imx6qdl.dtsi
 clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
 clean_kconfig drivers/dma/Kconfig 'IMX_SDMA'
 clean_mk CONFIG_IMX_SDMA drivers/dma/Makefile
@@ -960,7 +968,7 @@ reject_firmware drivers/media/pci/pluto2/pluto2.c
 announce SMS_SIANO_MDTV - "Siano SMS1xxx based MDTV receiver"
 reject_firmware drivers/media/common/siano/smscoreapi.c
 clean_blob drivers/media/common/siano/smscoreapi.c
-clean_blob drivers/media/common/siano/sms-cards.c
+clean_blob drivers/media/common/siano/smscoreapi.h
 clean_kconfig drivers/media/common/siano/Kconfig 'SMS_SIANO_MDTV'
 clean_mk CONFIG_SMS_SIANO_MDTV drivers/media/common/siano/Makefile
 
@@ -1028,6 +1036,7 @@ reject_firmware drivers/media/pci/cx23885/cx23885-417.c
 clean_blob drivers/media/pci/cx23885/cx23885-417.c
 reject_firmware drivers/media/pci/cx23885/cx23885-cards.c
 clean_blob drivers/media/pci/cx23885/cx23885-cards.c
+clean_blob drivers/media/pci/cx23885/cx23885-video.c
 clean_kconfig drivers/media/pci/cx23885/Kconfig 'VIDEO_CX23885'
 clean_mk CONFIG_VIDEO_CX23885 drivers/media/pci/cx23885/Makefile
 
@@ -1046,6 +1055,12 @@ announce VIDEO_EM28XX_DVB - "DVB/ATSC Support for em28xx based TV cards"
 clean_blob drivers/media/usb/em28xx/em28xx-dvb.c
 clean_kconfig drivers/media/usb/em28xx/Kconfig 'VIDEO_EM28XX_DVB'
 clean_mk CONFIG_VIDEO_EM28XX_DVB drivers/media/usb/em28xx/Makefile
+
+announce VIDEO_EXYNOS4_FIMC_IS - "EXYNOS4x12 FIMC-IS (Imaging Subsystem) driver"
+reject_firmware drivers/media/platform/exynos4-is/fimc-is.c
+clean_blob drivers/media/platform/exynos4-is/fimc-is.h
+clean_kconfig drivers/media/platform/exynos4-is/Kconfig 'VIDEO_EXYNOS4_FIMC_IS'
+clean_mk CONFIG_VIDEO_EXYNOS4_FIMC_IS drivers/media/platform/exynos4-is/Makefile
 
 announce VIDEO_IVTV - "Conexant cx23416/cx23415 MPEG encoder/decoder support"
 reject_firmware drivers/media/pci/ivtv/ivtv-firmware.c
@@ -1066,14 +1081,14 @@ announce VIDEO_GO7007 - "Go 7007 support"
 reject_firmware drivers/staging/media/go7007/go7007-driver.c
 clean_blob drivers/staging/media/go7007/go7007-driver.c
 reject_firmware drivers/staging/media/go7007/go7007-fw.c
-clean_blob drivers/staging/media/go7007/go7007-usb.c
+clean_blob drivers/staging/media/go7007/go7007-fw.c
 clean_blob drivers/staging/media/go7007/saa7134-go7007.c
 clean_kconfig drivers/staging/media/go7007/Kconfig 'VIDEO_GO7007'
 clean_mk CONFIG_VIDEO_GO7007 drivers/staging/media/go7007/Makefile
 
 announce VIDEO_GO7007_USB_S2250_BOARD - "Sensoray 2250/2251 support"
-reject_firmware drivers/staging/media/go7007/s2250-loader.c
-clean_blob drivers/staging/media/go7007/s2250-loader.c
+reject_firmware drivers/staging/media/go7007/go7007-loader.c
+clean_blob drivers/staging/media/go7007/go7007-loader.c
 clean_kconfig drivers/staging/media/go7007/Kconfig 'VIDEO_GO7007_USB_S2250_BOARD'
 clean_mk CONFIG_VIDEO_GO7007_USB_S2250_BOARD drivers/staging/media/go7007/Makefile
 
@@ -1093,6 +1108,12 @@ reject_firmware drivers/media/usb/tlg2300/pd-main.c
 clean_blob drivers/media/usb/tlg2300/pd-main.c
 clean_kconfig drivers/media/usb/tlg2300/Kconfig 'VIDEO_TLG2300'
 clean_mk CONFIG_VIDEO_TLG2300 drivers/media/usb/tlg2300/Makefile
+
+announce VIDEO_S5C73M3 - "Samsung S5C73M3 sensor support"
+reject_firmware drivers/media/i2c/s5c73m3/s5c73m3-core.c
+clean_blob drivers/media/i2c/s5c73m3/s5c73m3-core.c
+clean_kconfig drivers/media/i2c/Kconfig 'VIDEO_S5C73M3'
+clean_mk CONFIG_VIDEO_S5C73M3 drivers/media/i2c/s5c73m3/Makefile
 
 announce VIDEO_S5K4ECGX - "Samsung S5K4ECGX sensor support"
 reject_firmware drivers/media/i2c/s5k4ecgx.c
@@ -1187,14 +1208,14 @@ clean_sed '
 }' drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c 'report missing Free firmware'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
 clean_sed '
-/^bool bnx2x_test_firmware_version/,/^}$/{
-  /^	u32 my_fw = /i\
-	/*(DEBLOBBED)*/
-  /^	u32 my_fw = /,/<< 24);/d;
-  /^	u32 loaded_fw = /,/^$/{
+/^int bnx2x_nic_load_analyze_req/,/^}$/{
+  /^		u32 my_fw = /i\
+		/*(DEBLOBBED)*/
+  /^		u32 my_fw = /,/<< 24);/d;
+  /^		u32 loaded_fw = /,/^$/{
     /^$/i\
 \
-	u32 my_fw = ~loaded_fw;
+		u32 my_fw = ~loaded_fw;
   }
 }' drivers/net/ethernet/broadcom/bnx2x/bnx2x_cmn.c 'fail already-loaded test'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_hsi.h
@@ -1288,8 +1309,10 @@ clean_mk CONFIG_NETXEN_NIC drivers/net/ethernet/qlogic/Makefile
 announce QLCNIC - "QLOGIC QLCNIC 1/10Gb Converged Ethernet NIC Support"
 reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic.h
 reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_init.c
+reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_init.c
 reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c
 clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic.h
+clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.h
 clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c
 clean_kconfig drivers/net/ethernet/qlogic/Kconfig 'QLCNIC'
 clean_mk CONFIG_QLCNIC drivers/net/ethernet/qlogic/qlcnic/Makefile
@@ -1565,10 +1588,11 @@ clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/5000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/6000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/1000.c
-clean_blob drivers/net/wireless/iwlwifi/pcie/2000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-7000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
 clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
@@ -1665,17 +1689,6 @@ clean_blob drivers/net/wireless/ath/ath6kl/usb.c
 clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL_USB'
 clean_mk CONFIG_ATH6KL_USB drivers/net/wireless/ath/ath6kl/Makefile
 
-announce ATH9K - "Atheros 802.11n wireless cards support"
-reject_firmware drivers/net/wireless/ath/ath9k/init.c
-clean_kconfig drivers/net/wireless/ath/ath9k/Kconfig 'ATH9K'
-clean_mk CONFIG_ATH9K drivers/net/wireless/ath/ath9k/Makefile
-
-announce ATH9K_HTC - "Atheros HTC based wireless cards support"
-reject_firmware drivers/net/wireless/ath/ath9k/hif_usb.c
-clean_blob drivers/net/wireless/ath/ath9k/hif_usb.c
-clean_kconfig drivers/net/wireless/ath/ath9k/Kconfig 'ATH9K_HTC'
-clean_mk CONFIG_ATH9K_HTC drivers/net/wireless/ath/ath9k/Makefile
-
 announce PRISM2_USB - "Prism2.5/3 USB driver"
 reject_firmware drivers/staging/wlan-ng/prism2fw.c
 clean_blob drivers/staging/wlan-ng/prism2fw.c
@@ -1739,6 +1752,12 @@ clean_blob drivers/net/wireless/rt2x00/rt2800usb.h
 clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
+
+announce RTL8188EE - "Realtek RTL8188EE Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8188EE
+clean_mk CONFIG_RTL8188EE drivers/net/wireless/rtlwifi/rtl8188ee/Makefile
 
 announce RTL8192CE - "Realtek RTL8192CE/RTL8188CE Wireless Network Adapter"
 reject_firmware drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
@@ -1859,6 +1878,12 @@ reject_firmware drivers/bluetooth/bt3c_cs.c
 clean_blob drivers/bluetooth/bt3c_cs.c
 clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBT3C'
 clean_mk CONFIG_BT_HCIBT3C drivers/bluetooth/Makefile
+
+announce BT_HCIBTUSB - "HCI USB driver"
+reject_firmware drivers/bluetooth/btusb.c
+clean_blob drivers/bluetooth/btusb.c
+clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBTUSB'
+clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
 announce BT_MRVL_SDIO - "Marvell BT-over-SDIO driver"
 reject_firmware drivers/bluetooth/btmrvl_sdio.c
@@ -1982,6 +2007,33 @@ clean_blob drivers/tty/serial/ucc_uart.c
 clean_kconfig drivers/tty/serial/Kconfig 'SERIAL_QE'
 clean_mk CONFIG_SERIAL_QE drivers/tty/serial/Makefile
 
+announce SERIAL_RP2 - "Comtrol RocketPort EXPRESS/INFINITY support"
+reject_firmware drivers/tty/serial/rp2.c
+clean_blob drivers/tty/serial/rp2.c
+clean_kconfig drivers/tty/serial/Kconfig 'SERIAL_RP2'
+clean_mk CONFIG_SERIAL_RP2 drivers/tty/serial/Makefile
+
+########
+# Leds #
+########
+
+announce LEDS_LP55XX_COMMON - "Common Driver for TI/National LP5521 and LP5523/55231"
+reject_firmware drivers/leds/leds-lp55xx-common.c
+clean_kconfig drivers/leds/Kconfig 'LEDS_LP55XX_COMMON'
+clean_mk CONFIG_LEDS_LP55XX_COMMON drivers/leds/Makefile
+
+announce LEDS_LP5521 - "LED Support for N.S. LP5521 LED driver chip"
+# The blob name is the chip name; no point in deblobbing that.
+# clean_blob drivers/leds/leds-lp5521.c
+clean_kconfig drivers/leds/Kconfig 'LEDS_LP5521'
+clean_mk CONFIG_LEDS_LP5521 drivers/leds/Makefile
+
+announce LEDS_LP5523 - "LED Support for TI/National LP5523/55231 LED driver chip"
+# The blob name is the chip name; no point in deblobbing that.
+# clean_blob drivers/leds/leds-lp5523.c
+clean_kconfig drivers/leds/Kconfig 'LEDS_LP5523'
+clean_mk CONFIG_LEDS_LP5523 drivers/leds/Makefile
+
 #########
 # input #
 #########
@@ -1997,6 +2049,12 @@ reject_firmware drivers/staging/media/lirc/lirc_zilog.c
 clean_blob drivers/staging/media/lirc/lirc_zilog.c
 clean_kconfig drivers/staging/media/lirc/Kconfig 'LIRC_ZILOG'
 clean_mk CONFIG_LIRC_ZILOG drivers/staging/media/lirc/Makefile
+
+announce INPUT_IMS_PCU - "IMS Passenger Control Unit driver"
+reject_firmware drivers/input/misc/ims-pcu.c
+clean_blob drivers/input/misc/ims-pcu.c
+clean_kconfig drivers/input/misc/Kconfig 'INPUT_IMS_PCU'
+clean_mk CONFIG_INPUT_IMS_PCU drivers/input/misc/Makefile
 
 ####################
 # Data acquisition #
@@ -2107,7 +2165,7 @@ clean_mk CONFIG_SCSI_BFA_FC drivers/scsi/bfa/Makefile
 
 announce SCSI_CHELSIO_FCOE - "Chelsio Communications FCoE support"
 reject_firmware drivers/scsi/csiostor/csio_hw.c
-clean_blob drivers/scsi/csiostor/csio_hw.h
+clean_blob drivers/scsi/csiostor/csio_hw_chip.h
 clean_blob drivers/scsi/csiostor/csio_init.c
 clean_kconfig drivers/scsi/csiostor/Kconfig 'SCSI_CHELSIO_FCOE'
 clean_mk CONFIG_SCSI_CHELSIO_FCOE drivers/scsi/csiostor/Makefile
@@ -2295,9 +2353,15 @@ clean_mk CONFIG_UWB_I1480U drivers/uwb/i1480/dfu/Makefile
 
 
 
-##############
-# RemoteProc #
-##############
+################
+# Programmable #
+################
+
+announce LATTICE_ECP3_CONFIG - "Lattice ECP3 FPGA bitstrap configuration via SPI"
+reject_firmware drivers/misc/lattice-ecp3-config.c
+clean_blob drivers/misc/lattice-ecp3-config.c
+clean_kconfig drivers/misc/Kconfig 'LATTICE_ECP3_CONFIG'
+clean_mk CONFIG_LATTICE_ECP3_CONFIG drivers/misc/Makefile
 
 announce STE_MODEM_RPROC - "STE-Modem remoteproc support"
 maybe_reject_firmware drivers/remoteproc/remoteproc_core.c
@@ -2496,6 +2560,17 @@ clean_mk CONFIG_SND_RIPTIDE sound/pci/riptide/Makefile
 #announce SND_HDA_PATCH_LOADER - "Support initialization patch loading for HD-audio"
 #reject_firmware sound/pci/hda/hda_hwdep.c
 #clean_kconfig sound/pci/hda/Kconfig 'SND_HDA_PATCH_LOADER'
+
+announce SND_HDA_CODEC_CA0132_DSP - "Support new DSP code for CA0132 codec"
+reject_firmware sound/pci/hda/patch_ca0132.c
+clean_blob sound/pci/hda/patch_ca0132.c
+clean_sed '
+/^config SND_HDA_CODEC_CA0132_DSP$/, /^config / {
+  s,(ctefx.bin),(/*(DEBLOBBED)*/),;
+}' sound/pci/hda/Kconfig 'removed blob name'
+clean_kconfig sound/pci/hda/Kconfig 'SND_HDA_CODEC_CA0132_DSP'
+# There are no separate source files or Makefile entries for the _DSP option.
+clean_mk CONFIG_SND_HDA_CODEC_CA0132 sound/pci/hda/Makefile
 
 announce SND_HDSP - "RME Hammerfall DSP Audio"
 reject_firmware sound/pci/rme9652/hdsp.c
