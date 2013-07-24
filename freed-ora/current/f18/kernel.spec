@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -841,6 +841,7 @@ Patch25053: bridge-only-expire-the-mdb-entry-when-query-is-received.patch
 Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
 #rhbz 980254
 Patch25061: bridge-timer-fix.patch
+Patch25066: bridge-do-not-call-setup_timer-multiple-times.patch
 
 #rhbz 977558
 Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
@@ -864,8 +865,10 @@ Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 #rhbz 885407
 Patch25064: iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-#rhbz 976837
-Patch25065: fix-ext4-overflows.patch
+#rhbz 986538
+Patch25065: iwlwifi-add-new-pci-id-for-6x35-series.patch
+
+Patch26000: cve-2013-4125.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1646,7 +1649,9 @@ ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
 #rhbz 880035
 ApplyPatch bridge-only-expire-the-mdb-entry-when-query-is-received.patch
 ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
+#rhbz 980254
 ApplyPatch bridge-timer-fix.patch
+ApplyPatch bridge-do-not-call-setup_timer-multiple-times.patch
 
 #rhbz 977558
 ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
@@ -1670,8 +1675,10 @@ ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 #rhbz 885407
 ApplyPatch iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-#rhbz 976837
-ApplyPatch fix-ext4-overflows.patch
+ApplyPatch cve-2013-4125.patch
+
+#rhbz 986538
+ApplyPatch iwlwifi-add-new-pci-id-for-6x35-series.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2529,6 +2536,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Jul 22 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.9.11-gnu.
+
+* Mon Jul 22 2013 Josh Boyer <jwboyer@redhat.com> - 3.9.11-200
+- Fix timer issue in bridge code (rhbz 980254)
+- Add patch for iwlwifi 6x35 devices (rhbz 986538)
+- Linux v3.9.11
+
+* Fri Jul 19 2013 Dave Jones <davej@redhat.com>
+- CVE-2013-4125  ipv6: BUG_ON in fib6_add_rt2node() (rhbz 984664)
+
 * Sat Jul 13 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.10-gnu.
 
