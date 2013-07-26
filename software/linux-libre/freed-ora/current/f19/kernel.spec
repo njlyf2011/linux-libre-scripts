@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -827,16 +827,14 @@ Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
 Patch25056: iwl3945-better-skb-management-in-rx-path.patch
 Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
-#rhbz 976789 980643
-Patch25062: vhost-net-fix-use-after-free-in-vhost_net_flush.patch
-
 #rhbz 959721
 Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
 #rhbz 885407
 Patch25064: iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-Patch26000: cve-2013-4125.patch
+#rhbz 987639 987656
+Patch25065: net_310.mbox
 
 # END OF PATCH DEFINITIONS
 
@@ -1609,16 +1607,14 @@ ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
 ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
 ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
-#rhbz 976789 980643
-ApplyPatch vhost-net-fix-use-after-free-in-vhost_net_flush.patch
-
 #rhbz 959721
 ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
 #rhbz 885407
 ApplyPatch iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-ApplyPatch cve-2013-4125.patch 
+#rhbz 987639 987656
+ApplyPatch net_310.mbox
 
 # END OF PATCH APPLICATIONS
 
@@ -2439,6 +2435,15 @@ fi
 # and build.
 
 %changelog
+* Thu Jul 25 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.3-gnu.
+
+* Thu Jul 25 2013 Justin M. Forbes <jforbes@redhat.com> 3.10.3-300
+- Linux v3.10.3
+
+* Wed Jul 24 2013 Justin M. Forbes <jforbes@redhat.com>
+- Net stable queue from davem (rhbz 987639 987656)
+
 * Mon Jul 22 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.2-gnu.
 
