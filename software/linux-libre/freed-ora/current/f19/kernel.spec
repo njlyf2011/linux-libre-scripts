@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -833,8 +833,18 @@ Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 #rhbz 885407
 Patch25064: iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-#rhbz 987639 987656
-Patch25065: net_310.mbox
+#rhbz 979581
+Patch25069: iwlwifi-dvm-fix-calling-ieee80211_chswitch_done-with-NULL.patch
+
+#rhbz 969473
+Patch25070: Input-elantech-fix-for-newer-hardware-versions-v7.patch
+
+#rhbz 989093
+Patch25071: drm-i915-correctly-restore-fences-with-objects-attac.patch
+
+#rhbz 989138
+Patch25072: HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
+Patch25073: HID-hid-logitech-dj-querying_devices-was-never-set.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1613,8 +1623,18 @@ ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 #rhbz 885407
 ApplyPatch iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-#rhbz 987639 987656
-ApplyPatch net_310.mbox
+#rhbz 979581
+ApplyPatch iwlwifi-dvm-fix-calling-ieee80211_chswitch_done-with-NULL.patch
+
+#rhbz 969473
+ApplyPatch Input-elantech-fix-for-newer-hardware-versions-v7.patch
+
+#rhbz 989093
+ApplyPatch drm-i915-correctly-restore-fences-with-objects-attac.patch
+
+#rhbz 989138
+ApplyPatch HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
+ApplyPatch HID-hid-logitech-dj-querying_devices-was-never-set.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2435,6 +2455,20 @@ fi
 # and build.
 
 %changelog
+* Wed Jul 31 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.4-gnu.
+
+* Tue Jul 30 2013 Josh Boyer <jwboyer@redhat.com> - 3.10.4-300
+- Revert some changes to make Logitech devices function properly (rhbz 989138)
+
+* Mon Jul 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix i915 suspend/resume regression in 3.10 (rhbz 989093)
+- Linux v3.10.4
+- Add support for elantech v7 devices (rhbz 969473)
+
+* Fri Jul 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix NULL deref in iwlwifi (rhbz 979581)
+
 * Thu Jul 25 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.3-gnu.
 
