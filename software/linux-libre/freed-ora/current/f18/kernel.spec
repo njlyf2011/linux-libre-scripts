@@ -62,13 +62,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 9
+%define base_sublevel 10
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.9%{?stablegnux}
-#define rcrevlibre -3.9%{?rcrevgnux}
-#define gitrevlibre -3.9%{?gitrevgnux}
+%define stablelibre -3.10%{?stablegnux}
+#define rcrevlibre -3.10%{?rcrevgnux}
+#define gitrevlibre -3.10%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -172,8 +172,6 @@ Summary: The Linux kernel
 %define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
-# kernel-tegra (only valid for arm)
-%define with_tegra       %{?_without_tegra:       0} %{?!_without_tegra:       1}
 # kernel-kirkwood (only valid for arm)
 %define with_kirkwood       %{?_without_kirkwood:       0} %{?!_without_kirkwood:       1}
 #
@@ -291,11 +289,6 @@ Summary: The Linux kernel
 # kernel-PAE is only built on i686.
 %ifnarch i686
 %define with_pae 0
-%endif
-
-# kernel up (mutliplatform inc VExpress, highbank, omap), and tegra are only built on armv7 hfp/sfp
-%ifnarch armv7hl armv7l
-%define with_tegra 0
 %endif
 
 # kernel-kirkwood is only built for armv5
@@ -538,6 +531,10 @@ Provides: kernel-omap\
 Provides: kernel-libre-omap\
 Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-tegra\
+Provides: kernel-libre-tegra\
+Provides: kernel-tegra-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-tegra-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -640,13 +637,12 @@ Source54: config-powerpc64p7
 Source70: config-s390x
 
 # Unified ARM kernels
-Source100: config-armv7
-Source101: config-armv7-generic
-Source102: config-armv7-tegra
+Source100: config-arm-generic
+Source101: config-armv7
+Source102: config-armv7-generic
 
 # Legacy ARM kernels
-Source104: config-arm-generic
-Source105: config-arm-kirkwood
+Source103: config-arm-kirkwood
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -711,9 +707,6 @@ Patch100: taint-vbox.patch
 
 Patch110: vmbugon-warnon.patch
 
-Patch200: debug-bad-pte-dmi.patch
-Patch201: debug-bad-pte-modules.patch
-
 Patch390: defaults-acpi-video.patch
 Patch391: acpi-video-dos.patch
 Patch394: acpi-debug-infinite-loop.patch
@@ -732,7 +725,7 @@ Patch530: silence-fbcon-logo.patch
 Patch800: crash-driver.patch
 
 # secure boot
-Patch1000: secure-boot-20130506.patch
+Patch1000: devel-pekey-secure-boot-20130502.patch
 
 # virt + ksm patches
 
@@ -779,12 +772,14 @@ Patch20001: 0002-x86-EFI-Calculate-the-EFI-framebuffer-size-instead-o.patch
 # ARM
 Patch21000: arm-export-read_current_timer.patch
 
+# lpae
+Patch21001: arm-lpae-ax88796.patch
+
 # ARM omap
-Patch21003: arm-omap-ehci-fix.patch
+Patch21003: arm-omap-load-tfp410.patch
 
 # ARM tegra
 Patch21005: arm-tegra-usb-no-reset-linux33.patch
-Patch21006: arm-tegra-fixclk.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -799,15 +794,6 @@ Patch22226: vt-Drop-K_OFF-for-VC_MUTE.patch
 
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
-
-#rhbz 916544
-Patch22263: 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
-
-#rhbz 859282
-Patch24113: VMX-x86-handle-host-TSC-calibration-failure.patch
-
-#rhbz 921500
-Patch25001: i7300_edac_single_mode_fixup.patch
 
 #rhbz 927469
 Patch25007: fix-child-thread-introspection.patch
@@ -827,12 +813,6 @@ Patch25033: fanotify-info-leak-in-copy_event_to_user.patch
 #rhbz 969644
 Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
-#rhbz 975995
-Patch25047: drivers-hwmon-nct6775.patch
-
-Patch25050: iwlwifi-pcie-fix-race-in-queue-unmapping.patch
-Patch25051: iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
-
 #rhbz 903741
 Patch25052: HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
 
@@ -850,25 +830,28 @@ Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
 Patch25056: iwl3945-better-skb-management-in-rx-path.patch
 Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
-#CVE-2013-2234 rhbz 980995 981007
-Patch25058: af_key-fix-info-leaks-in-notify-messages.patch
-
-#CVE-2013-2232 rhbz 981552 981564
-Patch25060: ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
-
-#rhbz 976789 980643
-Patch25062: vhost-net-fix-use-after-free-in-vhost_net_flush.patch
-
 #rhbz 959721
 Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
 #rhbz 885407
 Patch25064: iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-#rhbz 986538
-Patch25065: iwlwifi-add-new-pci-id-for-6x35-series.patch
+#rhbz 979581
+Patch25069: iwlwifi-dvm-fix-calling-ieee80211_chswitch_done-with-NULL.patch
 
-Patch26000: cve-2013-4125.patch
+#rhbz 969473
+Patch25070: Input-elantech-fix-for-newer-hardware-versions-v7.patch
+
+#rhbz 989093
+Patch25071: drm-i915-correctly-restore-fences-with-objects-attac.patch
+
+#rhbz 977053
+Patch25073: iwl4965-reset-firmware-after-rfkill-off.patch
+
+#rhbz 981445
+Patch25074: mac80211-fix-infinite-loop-in-ieee80211_determine_chantype.patch
+Patch25075: mac80211-ignore-HT-primary-channel-while-connected.patch
+Patch25076: mac80211-continue-using-disabled-channels-while-connected.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1200,12 +1183,6 @@ non-Free blobs it includes by default.
 This package includes a version of the Linux kernel with support for
 marvell kirkwood based systems, i.e., guruplug, sheevaplug
 
-%define variant_summary The Linux kernel compiled for tegra boards
-%kernel_variant_package tegra
-%description tegra
-This package includes a version of the Linux kernel with support for
-nvidia tegra based systems, i.e., trimslice, ac-100.
-
 
 %prep
 # do a few sanity-checks for --with *only builds
@@ -1479,10 +1456,6 @@ ApplyPatch taint-vbox.patch
 
 ApplyPatch vmbugon-warnon.patch
 
-ApplyPatch debug-bad-pte-dmi.patch
-ApplyPatch debug-bad-pte-modules.patch
-
-
 # Architecture patches
 # x86(-64)
 
@@ -1490,9 +1463,9 @@ ApplyPatch debug-bad-pte-modules.patch
 # ARM
 #
 ApplyPatch arm-export-read_current_timer.patch
-ApplyPatch arm-omap-ehci-fix.patch
+ApplyPatch arm-lpae-ax88796.patch
+ApplyPatch arm-omap-load-tfp410.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-tegra-fixclk.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1557,7 +1530,7 @@ ApplyPatch silence-fbcon-logo.patch
 ApplyPatch crash-driver.patch
 
 # secure boot
-ApplyPatch secure-boot-20130506.patch
+ApplyPatch devel-pekey-secure-boot-20130502.patch
 
 # Assorted Virt Fixes
 
@@ -1610,15 +1583,6 @@ ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-#rhbz 916544
-ApplyPatch 0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
-
-#rhbz 921500
-ApplyPatch i7300_edac_single_mode_fixup.patch
-
-#rhbz 859282
-ApplyPatch VMX-x86-handle-host-TSC-calibration-failure.patch
-
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
@@ -1637,12 +1601,6 @@ ApplyPatch fanotify-info-leak-in-copy_event_to_user.patch
 #rhbz 969644
 ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
 
-#rhbz 975995
-ApplyPatch drivers-hwmon-nct6775.patch
-
-ApplyPatch iwlwifi-pcie-fix-race-in-queue-unmapping.patch
-ApplyPatch iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
-
 #rhbz 903741
 ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
 
@@ -1660,25 +1618,28 @@ ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
 ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
 ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
-#CVE-2013-2234 rhbz 980995 981007
-ApplyPatch af_key-fix-info-leaks-in-notify-messages.patch
-
-#CVE-2013-2232 rhbz 981552 981564
-ApplyPatch ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
-
-#rhbz 976789 980643
-ApplyPatch vhost-net-fix-use-after-free-in-vhost_net_flush.patch
-
 #rhbz 959721
 ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
 #rhbz 885407
 ApplyPatch iwlwifi-dvm-dont-send-BT_CONFIG-on-devices-wo-Bluetooth.patch
 
-ApplyPatch cve-2013-4125.patch
+#rhbz 979581
+ApplyPatch iwlwifi-dvm-fix-calling-ieee80211_chswitch_done-with-NULL.patch
 
-#rhbz 986538
-ApplyPatch iwlwifi-add-new-pci-id-for-6x35-series.patch
+#rhbz 969473
+ApplyPatch Input-elantech-fix-for-newer-hardware-versions-v7.patch
+
+#rhbz 989093
+ApplyPatch drm-i915-correctly-restore-fences-with-objects-attac.patch
+
+#rhbz 977053
+ApplyPatch iwl4965-reset-firmware-after-rfkill-off.patch
+
+#rhbz 981445
+ApplyPatch mac80211-fix-infinite-loop-in-ieee80211_determine_chantype.patch
+ApplyPatch mac80211-ignore-HT-primary-channel-while-connected.patch
+ApplyPatch mac80211-continue-using-disabled-channels-while-connected.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2033,10 +1994,6 @@ BuildKernel %make_target %kernel_image PAE
 BuildKernel %make_target %kernel_image kirkwood
 %endif
 
-%if %{with_tegra}
-BuildKernel %make_target %kernel_image tegra
-%endif
-
 %if %{with_up}
 BuildKernel %make_target %kernel_image
 %endif
@@ -2367,9 +2324,6 @@ fi}\
 %kernel_variant_preun kirkwood
 %kernel_variant_post -v kirkwood
 
-%kernel_variant_preun tegra
-%kernel_variant_post -v tegra
-
 if [ -x /sbin/ldconfig ]
 then
     /sbin/ldconfig -X || exit $?
@@ -2521,7 +2475,6 @@ fi
 %kernel_variant_files %{with_pae} PAE
 %kernel_variant_files %{with_pae_debug} PAEdebug
 %kernel_variant_files %{with_kirkwood} kirkwood
-%kernel_variant_files %{with_tegra} tegra
 
 # plz don't put in a version string unless you're going to tag
 # and build.
@@ -2536,6 +2489,49 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Aug  1 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.4-gnu.
+
+* Thu Aug  1 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Rebase ARM config
+
+* Thu Aug 01 2013 Justin M. Forbes <jforbes@redhat.com>
+- Update s390x config
+
+* Thu Aug 01 2013 Justin M. Forbes <jforbes@redhat.com>
+- Rebase to 3.10.4
+  dropped:
+   debug-bad-pte-dmi.patch
+   debug-bad-pte-modules.patch
+   VMX-x86-handle-host-TSC-calibration-failure.patch
+   ipv6-ip6_sk_dst_check-must-not-assume-ipv6-dst.patch
+   af_key-fix-info-leaks-in-notify-messages.patch
+   arm-tegra-fixclk.patch
+   vhost-net-fix-use-after-free-in-vhost_net_flush.patch
+   0001-drivers-crypto-nx-fix-init-race-alignmasks-and-GCM-b.patch
+   i7300_edac_single_mode_fixup.patch
+   drivers-hwmon-nct6775.patch
+   iwlwifi-pcie-fix-race-in-queue-unmapping.patch
+   iwlwifi-pcie-wake-the-queue-if-stopped-when-being-unmapped.patch
+   cve-2013-4125.patch
+   iwlwifi-add-new-pci-id-for-6x35-series.patch
+   ipv6-ip6_append_data_mtu-did-not-care-about-pmtudisc-and_frag_size.patch
+   ipv6-call-udp_push_pending_frames-when-uncorking-a-socket-with-AF_INET-pending-data.patch
+
+* Thu Aug 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix mac80211 connection issues (rhbz 981445)
+- Fix firmware issues with iwl4965 and rfkill (rhbz 977053)
+
+* Mon Jul 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Add support for elantech v7 devices (rhbz 969473)
+
+* Fri Jul 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix NULL deref in iwlwifi (rhbz 979581)
+
+* Wed Jul 24 2013 Josh Boyer <jwboyer@redhat.com>
+- CVE-2013-4162 net: panic while pushing pending data out of a IPv6 socket with UDP_CORK enabled (rhbz 987627 987656)
+- CVE-2013-4163 net: panic while appending data to a corked IPv6 socket in ip6_append_data_mtu (rhbz 987633 987639)
+
 * Mon Jul 22 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.9.11-gnu.
 
