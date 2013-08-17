@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -837,6 +837,9 @@ Patch25073: iwl4965-reset-firmware-after-rfkill-off.patch
 Patch25074: mac80211-fix-infinite-loop-in-ieee80211_determine_chantype.patch
 Patch25075: mac80211-ignore-HT-primary-channel-while-connected.patch
 Patch25076: mac80211-continue-using-disabled-channels-while-connected.patch
+
+#rhbz 963715
+Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1623,6 +1626,9 @@ ApplyPatch iwl4965-reset-firmware-after-rfkill-off.patch
 ApplyPatch mac80211-fix-infinite-loop-in-ieee80211_determine_chantype.patch
 ApplyPatch mac80211-ignore-HT-primary-channel-while-connected.patch
 ApplyPatch mac80211-continue-using-disabled-channels-while-connected.patch
+
+#rhbz 963715
+ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2447,6 +2453,14 @@ fi
 # and build.
 
 %changelog
+* Thu Aug 15 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.7-gnu.
+
+* Thu Aug 15 2013 Josh Boyer <jwboyer@redhat.com> - 3.6.10.7-200
+- Enable memory cgroup swap accounting (rhbz 982808)
+- Add patch to fix regression on TeVII S471 devices (rhbz 963715)
+- Linux v3.10.7
+
 * Mon Aug 12 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.6-gnu.
 
