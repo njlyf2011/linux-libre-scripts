@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index a9e4d61..38c4a56 100644
+index efa1453..d5fce8e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -35,10 +35,10 @@ index 5ce8029..d64786d 100644
  platforms += mti-malta
  platforms += netlogic
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index ce30e2f..c22d7c8 100644
+index 7d36f6e..63e3011 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -19,12 +19,12 @@ config MIPS
+@@ -19,13 +19,13 @@ config MIPS
  	select ARCH_BINFMT_ELF_RANDOMIZE_PIE
  	select RTC_LIB if !MACH_LOONGSON
  	select GENERIC_ATOMIC64 if !64BIT
@@ -47,13 +47,14 @@ index ce30e2f..c22d7c8 100644
  	select HAVE_GENERIC_HARDIRQS
  	select GENERIC_IRQ_PROBE
  	select GENERIC_IRQ_SHOW
+ 	select GENERIC_PCI_IOMAP
  	select HAVE_ARCH_JUMP_LABEL
 +	select HAVE_DMA_ATTRS
 +	select HAVE_DMA_API_DEBUG
  	select IRQ_FORCED_THREADING
  	select HAVE_MEMBLOCK
  	select HAVE_MEMBLOCK_NODE_MAP
-@@ -249,7 +249,7 @@ config LASAT
+@@ -250,7 +250,7 @@ config LASAT
  
  config MACH_LOONGSON
  	bool "Loongson family of machines"
@@ -62,7 +63,7 @@ index ce30e2f..c22d7c8 100644
  	help
  	  This enables the support of Loongson family of machines.
  
-@@ -258,6 +258,17 @@ config MACH_LOONGSON
+@@ -259,6 +259,17 @@ config MACH_LOONGSON
  	  Chinese Academy of Sciences (CAS) in the People's Republic
  	  of China. The chief architect is Professor Weiwu Hu.
  
@@ -80,7 +81,7 @@ index ce30e2f..c22d7c8 100644
  config MIPS_MALTA
  	bool "MIPS Malta board"
  	select ARCH_MAY_HAVE_PC_FDC
-@@ -829,6 +840,7 @@ source "arch/mips/txx9/Kconfig"
+@@ -830,6 +841,7 @@ source "arch/mips/txx9/Kconfig"
  source "arch/mips/vr41xx/Kconfig"
  source "arch/mips/cavium-octeon/Kconfig"
  source "arch/mips/loongson/Kconfig"
@@ -88,7 +89,7 @@ index ce30e2f..c22d7c8 100644
  source "arch/mips/netlogic/Kconfig"
  
  endmenu
-@@ -918,6 +930,60 @@ config CSRC_R4K
+@@ -919,6 +931,60 @@ config CSRC_R4K
  	select CSRC_R4K_LIB
  	bool
  
@@ -149,7 +150,7 @@ index ce30e2f..c22d7c8 100644
  config CSRC_SB1250
  	bool
  
-@@ -1208,8 +1274,6 @@ config CPU_LOONGSON2F
+@@ -1209,8 +1275,6 @@ config CPU_LOONGSON2F
  	bool "Loongson 2F"
  	depends on SYS_HAS_CPU_LOONGSON2F
  	select CPU_LOONGSON2
@@ -158,7 +159,7 @@ index ce30e2f..c22d7c8 100644
  	help
  	  The Loongson 2F processor implements the MIPS III instruction set
  	  with many extensions.
-@@ -1218,6 +1282,14 @@ config CPU_LOONGSON2F
+@@ -1219,6 +1283,14 @@ config CPU_LOONGSON2F
  	  have a similar programming interface with FPGA northbridge used in
  	  Loongson2E.
  
@@ -173,7 +174,7 @@ index ce30e2f..c22d7c8 100644
  config CPU_MIPS32_R1
  	bool "MIPS32 Release 1"
  	depends on SYS_HAS_CPU_MIPS32_R1
-@@ -1542,6 +1614,15 @@ config CPU_LOONGSON2
+@@ -1543,6 +1615,15 @@ config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
  	select CPU_SUPPORTS_64BIT_KERNEL
@@ -189,7 +190,7 @@ index ce30e2f..c22d7c8 100644
  	select CPU_SUPPORTS_HIGHMEM
  
  config CPU_BMIPS
-@@ -1562,6 +1643,9 @@ config SYS_HAS_CPU_LOONGSON2F
+@@ -1563,6 +1644,9 @@ config SYS_HAS_CPU_LOONGSON2F
  	select CPU_SUPPORTS_ADDRWINCFG if 64BIT
  	select CPU_SUPPORTS_UNCACHED_ACCELERATED
  
@@ -199,7 +200,7 @@ index ce30e2f..c22d7c8 100644
  config SYS_HAS_CPU_MIPS32_R1
  	bool
  
-@@ -2094,7 +2178,7 @@ config SYS_SUPPORTS_SMARTMIPS
+@@ -2095,7 +2179,7 @@ config SYS_SUPPORTS_SMARTMIPS
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -9826,10 +9827,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 02f4664..da6b912 100644
+index 14d2239..d3955e6 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -814,6 +814,9 @@
+@@ -817,6 +817,9 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -16788,7 +16789,7 @@ index 8c8377d..23b1c40 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 7d5f56e..9f302c2 100644
+index 5f8844c..62357fce 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
 @@ -691,8 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
@@ -16952,7 +16953,7 @@ index 7893351..4fef55d 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 78c4774..16a7ce2 100644
+index a37f14c..68d45c3 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -16965,7 +16966,7 @@ index 78c4774..16a7ce2 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_K4505			0x1464
-@@ -580,6 +583,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -576,6 +579,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
