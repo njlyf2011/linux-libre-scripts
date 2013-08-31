@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -821,9 +821,6 @@ Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 959721
 Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
-#rhbz 979581
-Patch25069: iwlwifi-dvm-fix-calling-ieee80211_chswitch_done-with-NULL.patch
-
 #rhbz 969473
 Patch25070: Input-elantech-fix-for-newer-hardware-versions-v7.patch
 
@@ -838,6 +835,8 @@ Patch25078: ipv6-remove-max_addresses-check-from-ipv6_create_tempaddr.patch
 
 #rhbz 989269
 Patch25079: 3.10.-6-7-crashes-on-network-activity.patch
+
+Patch25090: mei-3.10.y.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1608,9 +1607,6 @@ ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 959721
 ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
 
-#rhbz 979581
-ApplyPatch iwlwifi-dvm-fix-calling-ieee80211_chswitch_done-with-NULL.patch
-
 #rhbz 969473
 ApplyPatch Input-elantech-fix-for-newer-hardware-versions-v7.patch
 
@@ -1625,6 +1621,8 @@ ApplyPatch ipv6-remove-max_addresses-check-from-ipv6_create_tempaddr.patch
 
 #rhbz 989269
 ApplyPatch 3.10.-6-7-crashes-on-network-activity.patch
+
+ApplyPatch mei-3.10.y.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2449,6 +2447,15 @@ fi
 # and build.
 
 %changelog
+* Thu Aug 29 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.10-gnu.
+
+* Thu Aug 29 2013 Justin M. Forbes <jforbes@fedoraproject.org> 3.10.10-200
+- Linux v3.10.10
+
+* Wed Aug 28 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add mei patches that fix various s/r issues (rhbz 994824 989373)
+
 * Wed Aug 21 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.9-gnu.
 
