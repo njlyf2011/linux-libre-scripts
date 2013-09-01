@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.9%{?stablegnux}
-#define rcrevlibre -3.9%{?rcrevgnux}
-#define gitrevlibre -3.9%{?gitrevgnux}
+#define stablelibre -3.10%{?stablegnux}
+%define rcrevlibre -3.10%{?rcrevgnux}
+#define gitrevlibre -3.10%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -131,9 +131,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 4
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -196,7 +196,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -209,7 +209,7 @@ Summary: The Linux kernel
 %define doc_build_fail true
 %endif
 
-%define rawhide_skip_docs 0
+%define rawhide_skip_docs 1
 %if 0%{?rawhide_skip_docs}
 %define with_doc 0
 %define doc_build_fail true
@@ -478,33 +478,10 @@ Summary: The Linux kernel
 %define cpupowerarchs %{ix86} x86_64 ppc ppc64 ppc64p7 %{arm} aarch64
 
 #
-# Three sets of minimum package version requirements in the form of Conflicts:
-# to versions below the minimum
-#
-
-#
-# First the general kernel 2.6 required versions as per
-# Documentation/Changes
-#
-%define kernel_dot_org_conflicts  ppp < 2.4.3-3, isdn4k-utils < 3.2-32, nfs-utils < 1.2.5-7.fc17, e2fsprogs < 1.37-4, util-linux < 2.12, jfsutils < 1.1.7-2, reiserfs-utils < 3.6.19-2, xfsprogs < 2.6.13-4, procps < 3.2.5-6.3, oprofile < 0.9.1-2, device-mapper-libs < 1.02.63-2, mdadm < 3.2.1-5
-
-#
-# Then a series of requirements that are distribution specific, either
-# because we add patches for something, or the older versions have
-# problems with the newer kernel or lack certain things that make
-# integration in the distro harder than needed.
-#
-%define package_conflicts initscripts < 7.23, udev < 063-6, iptables < 1.3.2-1, ipw2200-firmware < 2.4, iwl4965-firmware < 228.57.2, selinux-policy-targeted < 1.25.3-14, squashfs-tools < 4.0, wireless-tools < 29-3
-
-# We moved the drm include files into kernel-headers, make sure there's
-# a recent enough libdrm-devel on the system that doesn't have those.
-%define kernel_headers_conflicts libdrm-devel < 2.4.0-0.15
-
-#
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, module-init-tools >= 3.16-4, initscripts >= 8.11.1-1, systemd >= 203-2
+%define kernel_prereq  fileutils, systemd >= 203-2
 %define initrd_prereq  dracut >= 027
 
 #
@@ -516,36 +493,34 @@ Summary: The Linux kernel
 %define kernel_reqprovconf \
 Provides: kernel = %{rpmversion}-%{pkg_release}\
 Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
-Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
-Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:.%{1}}\
+Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
+Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
 Provides: kernel-drm = 4.3.0\
 Provides: kernel-libre-drm = 4.3.0\
 Provides: kernel-drm-nouveau = 16\
 Provides: kernel-libre-drm-nouveau = 16\
 Provides: kernel-modeset = 1\
 Provides: kernel-libre-modeset = 1\
-Provides: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
-Provides: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
 Provides: kernel-highbank\
 Provides: kernel-libre-highbank\
-Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
-Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-highbank-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-highbank-uname-r = %{KVERREL}%{?1:+%{1}}\
 Provides: kernel-omap\
-Provides: kernel-libre-nomap\
-Provides: kernel-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
-Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-libre-omap\
+Provides: kernel-omap-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-omap-uname-r = %{KVERREL}%{?1:+%{1}}\
 Provides: kernel-tegra\
 Provides: kernel-libre-tegra\
-Provides: kernel-tegra-uname-r = %{KVERREL}%{?1:.%{1}}\
-Provides: kernel-libre-tegra-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-tegra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-tegra-uname-r = %{KVERREL}%{?1:+%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
 Requires(preun): systemd >= 200\
-Conflicts: %{kernel_dot_org_conflicts}\
-Conflicts: %{package_conflicts}\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
@@ -615,9 +590,7 @@ Source4: deblob-check
 Source5: deblob-%{kversion}
 #Source6: deblob-3.%{upstream_sublevel}
 
-%if %{signmodules}
 Source11: x509.genkey
-%endif
 
 Source15: merge.pl
 Source16: mod-extra.list
@@ -721,7 +694,6 @@ Patch110: vmbugon-warnon.patch
 Patch201: debug-bad-pte-modules.patch
 
 Patch390: defaults-acpi-video.patch
-Patch391: acpi-video-dos.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: input-kill-stupid-messages.patch
@@ -739,7 +711,10 @@ Patch800: crash-driver.patch
 # crypto/
 
 # secure boot
-Patch1000: devel-pekey-secure-boot-20130502.patch
+Patch1000: secure-modules.patch
+Patch1001: modsign-uefi.patch
+Patch1002: sb-hibernate.patch
+Patch1003: sysrq-secure-boot.patch
 
 # virt + ksm patches
 
@@ -780,21 +755,27 @@ Patch15000: nowatchdog-on-virt.patch
 
 # ARM64
 
-Patch16000: arm64-makefile-vdso_install.patch
-
 # ARM
 
 # lpae
 Patch21001: arm-lpae-ax88796.patch
-Patch21002: drm-exynos-fix-multiple-definition-build-error.patch
-
-Patch21003: v2-thermal-cpu_cooling-fix-stub-function.patch
+Patch21003: arm-dma-amba_pl08x-avoid-64bit-division.patch
+Patch21004: arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
+Patch21005: arm-exynos-mp.patch
 
 # ARM omap
-Patch21004: arm-omap-load-tfp410.patch
+Patch21010: arm-omap-load-tfp410.patch
 
 # ARM tegra
-Patch21005: arm-tegra-usb-no-reset-linux33.patch
+Patch21020: arm-tegra-usb-no-reset-linux33.patch
+
+# ARM wandboard
+Patch21030: arm-wandboard-quad.patch
+# https://git.kernel.org/cgit/linux/kernel/git/broonie/sound.git/patch/?id=3f1a91aa25579ba5e7268a47a73d2a83e4802c62
+Patch21031: arm-imx-fixsound.patch
+
+# AM33xx
+Patch21040: arm-omap-bbb-dts.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -816,38 +797,29 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 927469
 Patch23006: fix-child-thread-introspection.patch
 
-#rhbz 948262
-Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
-
-#CVE-2013-2140 rhbz 971146 971148
-Patch25031: xen-blkback-Check-device-permissions-before-allowing.patch
-
 #CVE-2013-2147 rhbz 971242 971249
 Patch25032: cve-2013-2147-ciss-info-leak.patch
 
-#CVE-2013-2148 rhbz 971258 971261
-Patch25033: fanotify-info-leak-in-copy_event_to_user.patch
-
-#CVE-2013-2851 rhbz 969515 971662
-Patch25035: block-do-not-pass-disk-names-as-format-strings.patch
-
-#CVE-2013-2164 rhbz 973100 973109
-Patch25038: cdrom-use-kzalloc-for-failing-hardware.patch
-
-#rhbz 969644
-Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
-
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 903741
-Patch25052: HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
+#rhbz 977040
+Patch25056: iwl3945-better-skb-management-in-rx-path.patch
+Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
-#rhbz 880035
-Patch25053: bridge-only-expire-the-mdb-entry-when-query-is-received.patch
-Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
+#rhbz 963715
+Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#rhbz 977558
-Patch25055: ath3k-dont-use-stack-memory-for-DMA.patch
+#rhbz 989269
+Patch25079: mac80211-add-a-flag-to-indicate-CCK-support-for-HT-clients.patch
+
+Patch25090: mei-me-fix-hardware-reset-flow.patch
+
+#CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
+#CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
+#CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
+#CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
+#CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
+Patch25099: HID-CVE-fixes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1038,7 +1010,7 @@ AutoReqProv: no\
 %description -n %{name}%{?1:-%{1}}-debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:\.%{1}}/.*|/.*%%{KVERREL}%{?1:\.%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:\+%{1}}/.*|/.*%%{KVERREL}%{?1:\+%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
 %{nil}
 
 #
@@ -1051,12 +1023,12 @@ Summary: Development package for building kernel modules to match the %{?2:%{2} 
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
-Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-devel = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-libre-devel = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
-Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-devel = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre-devel = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-devel-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:+%{1}}\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 Requires: perl\
@@ -1067,23 +1039,23 @@ against the %{?2:%{2} }kernel package.\
 
 #
 # This macro creates a kernel-<subpackage>-modules-extra package.
-#	%%kernel_modules-extra_package <subpackage> <pretty-name>
+#	%%kernel_modules_extra_package <subpackage> <pretty-name>
 #
-%define kernel_modules-extra_package() \
+%define kernel_modules_extra_package() \
 %package %{?1:%{1}-}modules-extra\
 Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
-Provides: kernel-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-libre-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-modules-extra = %{version}-%{release}%{?1:.%{1}}\
-Provides: kernel-libre-modules-extra = %{version}-%{release}%{?1:.%{1}}\
+Provides: kernel-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-modules-extra = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
-Provides: kernel-modules-extra-uname-r = %{KVERREL}%{?1:.%{1}}\
-Provides: kernel-libre-modules-extra-uname-r = %{KVERREL}%{?1:.%{1}}\
-Requires: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
-Requires: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
+Provides: installonlypkg(kernel-libre-module)\
+Provides: kernel-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
 AutoReqProv: no\
 %description -n kernel%{?variant}%{?1:-%{1}}-modules-extra\
 This package provides less commonly used kernel modules for the %{?2:%{2} }kernel package.\
@@ -1100,14 +1072,14 @@ Summary: %{variant_summary}\
 Group: System Environment/Kernel\
 %kernel_reqprovconf\
 %{expand:%%kernel_devel_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
-%{expand:%%kernel_modules-extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
+%{expand:%%kernel_modules_extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
 %{expand:%%kernel_debuginfo_package %1}\
 %{nil}
 
 
 # First the auxiliary packages of the main kernel package.
 %kernel_devel_package
-%kernel_modules-extra_package
+%kernel_modules_extra_package
 %kernel_debuginfo_package
 
 
@@ -1459,17 +1431,19 @@ ApplyPatch debug-bad-pte-modules.patch
 # x86(-64)
 
 # ARM64
-ApplyPatch arm64-makefile-vdso_install.patch
 
 #
 # ARM
 #
 ApplyPatch arm-lpae-ax88796.patch
-ApplyPatch drm-exynos-fix-multiple-definition-build-error.patch
+ApplyPatch arm-dma-amba_pl08x-avoid-64bit-division.patch
+ApplyPatch arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
+ApplyPatch arm-exynos-mp.patch
 ApplyPatch arm-omap-load-tfp410.patch
-ApplyPatch v2-thermal-cpu_cooling-fix-stub-function.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-
+ApplyPatch arm-wandboard-quad.patch
+ApplyPatch arm-imx-fixsound.patch
+#ApplyPatch arm-omap-bbb-dts.patch
 #
 # bugfixes to drivers and filesystems
 #
@@ -1490,7 +1464,6 @@ ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 
 # ACPI
 ApplyPatch defaults-acpi-video.patch
-ApplyPatch acpi-video-dos.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
@@ -1534,7 +1507,10 @@ ApplyPatch crash-driver.patch
 # crypto/
 
 # secure boot
-ApplyPatch devel-pekey-secure-boot-20130502.patch
+ApplyPatch secure-modules.patch
+ApplyPatch modsign-uefi.patch
+ApplyPatch sb-hibernate.patch
+ApplyPatch sysrq-secure-boot.patch
 
 # Assorted Virt Fixes
 
@@ -1547,6 +1523,8 @@ ApplyPatch devel-pekey-secure-boot-20130502.patch
 # Intel DRM
 ApplyOptionalPatch drm-intel-next.patch
 ApplyPatch drm-i915-dp-stfu.patch
+
+# Radeon DRM
 
 # silence the ACPI blacklist code
 ApplyPatch silence-acpi-blacklist.patch
@@ -1592,38 +1570,29 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-#rhbz 948262
-ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
-
-#CVE-2013-2140 rhbz 971146 971148
-ApplyPatch xen-blkback-Check-device-permissions-before-allowing.patch
-
 #CVE-2013-2147 rhbz 971242 971249
 ApplyPatch cve-2013-2147-ciss-info-leak.patch
 
-#CVE-2013-2148 rhbz 971258 971261
-ApplyPatch fanotify-info-leak-in-copy_event_to_user.patch
-
-#CVE-2013-2851 rhbz 969515 971662
-ApplyPatch block-do-not-pass-disk-names-as-format-strings.patch
-
-#CVE-2013-2164 rhbz 973100 973109
-ApplyPatch cdrom-use-kzalloc-for-failing-hardware.patch
-
-#rhbz 969644
-ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
-
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 903741
-ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
+#rhbz 977040
+ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
+ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
-#rhbz 880035
-ApplyPatch bridge-only-expire-the-mdb-entry-when-query-is-received.patch
-ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
+#rhbz 963715
+ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#rhbz 977558
-ApplyPatch ath3k-dont-use-stack-memory-for-DMA.patch
+#rhbz 989269
+ApplyPatch mac80211-add-a-flag-to-indicate-CCK-support-for-HT-clients.patch
+
+ApplyPatch mei-me-fix-hardware-reset-flow.patch
+
+#CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
+#CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
+#CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
+#CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
+#CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
+ApplyPatch HID-CVE-fixes.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1705,7 +1674,7 @@ BuildKernel() {
     MakeTarget=$1
     KernelImage=$2
     Flavour=$3
-    Flav=${Flavour:+.${Flavour}}
+    Flav=${Flavour:++${Flavour}}
     InstallName=${4:-vmlinuz}
 
     # Pick the right config file for the kernel we're building
@@ -1782,6 +1751,10 @@ BuildKernel() {
     %if %{signmodules}
     # Sign the image if we're using EFI
     %pesign -s -i $KernelImage -o vmlinuz.signed
+    if [ ! -s vmlinuz.signed ]; then
+        echo "pesigning failed"
+        exit 1
+    fi
     mv vmlinuz.signed $KernelImage
     %endif
     $CopyKernel $KernelImage \
@@ -2003,8 +1976,8 @@ chmod +x tools/power/cpupower/utils/version-gen.sh
 %endif
 
 %if %{with_doc}
-# Make the HTML and man pages.
-make htmldocs mandocs || %{doc_build_fail}
+# Make the HTML pages.
+make htmldocs || %{doc_build_fail}
 
 # sometimes non-world-readable files sneak into the kernel source tree
 chmod -R a=rX Documentation
@@ -2025,13 +1998,13 @@ find Documentation -type d | xargs chmod u+w
 %define __modsign_install_post \
   if [ "%{signmodules}" -eq "1" ]; then \
     if [ "%{with_pae}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign.%{pae} signing_key.x509.sign.%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}/ \
+      %{modsign_cmd} signing_key.priv.sign+%{pae} signing_key.x509.sign+%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}/ \
     fi \
     if [ "%{with_debug}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign.debug signing_key.x509.sign.debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
+      %{modsign_cmd} signing_key.priv.sign+debug signing_key.x509.sign+debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+debug/ \
     fi \
     if [ "%{with_pae_debug}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign.%{pae}debug signing_key.x509.sign.%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}debug/ \
+      %{modsign_cmd} signing_key.priv.sign+%{pae}debug signing_key.x509.sign+%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}debug/ \
     fi \
     if [ "%{with_up}" -ne "0" ]; then \
       %{modsign_cmd} signing_key.priv.sign signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
@@ -2081,17 +2054,11 @@ cd linux-%{KVERREL}
 
 %if %{with_doc}
 docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
-man9dir=$RPM_BUILD_ROOT%{_datadir}/man/man9
 
 # copy the source over
 mkdir -p $docdir
 tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
-# Install man pages for the kernel API.
-mkdir -p $man9dir
-find Documentation/DocBook/man -name '*.9.gz' -print0 |
-xargs -0 --no-run-if-empty %{__install} -m 444 -t $man9dir $m
-ls $man9dir | grep -q '' || > $man9dir/BROKEN
 %endif # with_doc
 
 # We have to do the headers install before the tools install because the
@@ -2202,7 +2169,7 @@ then\
 fi\
 if [ "$HARDLINK" != "no" -a -x /usr/sbin/hardlink ]\
 then\
-    (cd /usr/src/kernels/%{KVERREL}%{?1:.%{1}} &&\
+    (cd /usr/src/kernels/%{KVERREL}%{?1:+%{1}} &&\
      /usr/bin/find . -type f | while read f; do\
        hardlink -c /usr/src/kernels/*.fc*.*/$f $f\
      done)\
@@ -2211,11 +2178,11 @@ fi\
 
 #
 # This macro defines a %%post script for a kernel*-modules-extra package.
-#	%%kernel_modules-extra_post [<subpackage>]
+#	%%kernel_modules_extra_post [<subpackage>]
 #
 %define kernel_modules_extra_post() \
 %{expand:%%post %{?1:%{1}-}modules-extra}\
-/sbin/depmod -a %{KVERREL}%{?1:.%{1}}\
+/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
 %{nil}
 
 # This macro defines a %%posttrans script for a kernel package.
@@ -2224,7 +2191,7 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1}}\
-/bin/kernel-install add %{KVERREL}%{?1:.%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:.%{1}} || exit $?\
+/bin/kernel-install add %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
 %{nil}
 
 #
@@ -2250,7 +2217,7 @@ fi}\
 #
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1}}\
-/bin/kernel-install remove %{KVERREL}%{?1:.%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:.%{1}} || exit $?\
+/bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
 %{nil}
 
 %kernel_variant_preun
@@ -2304,7 +2271,6 @@ fi
 %{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation/*
 %dir %{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation
 %dir %{_datadir}/doc/kernel-doc-%{rpmversion}
-%{_datadir}/man/man9/*
 %endif
 
 %if %{with_perf}
@@ -2379,30 +2345,30 @@ fi
 %if %{1}\
 %{expand:%%files %{?2}}\
 %defattr(-,root,root)\
-/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:.%{2}}\
-/%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:.%{2}}.hmac \
+/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:+%{2}}\
+/%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:+%{2}}.hmac \
 %ifarch %{arm}\
-/%{image_install_path}/dtb-%{KVERREL}%{?2:.%{2}} \
+/%{image_install_path}/dtb-%{KVERREL}%{?2:+%{2}} \
 %endif\
-%attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:.%{2}}\
-/boot/config-%{KVERREL}%{?2:.%{2}}\
-%dir /lib/modules/%{KVERREL}%{?2:.%{2}}\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/kernel\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/build\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/source\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/updates\
+%attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:+%{2}}\
+/boot/config-%{KVERREL}%{?2:+%{2}}\
+%dir /lib/modules/%{KVERREL}%{?2:+%{2}}\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/kernel\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/build\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/source\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/updates\
 %ifarch %{vdso_arches}\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/vdso\
-/etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:.%{2}}.conf\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/vdso\
+/etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:+%{2}}.conf\
 %endif\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/modules.*\
-%ghost /boot/initramfs-%{KVERREL}%{?2:.%{2}}.img\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/modules.*\
+%ghost /boot/initramfs-%{KVERREL}%{?2:+%{2}}.img\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
-/usr/src/kernels/%{KVERREL}%{?2:.%{2}}\
+/usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
 %{expand:%%files %{?2:%{2}-}modules-extra}\
 %defattr(-,root,root)\
-/lib/modules/%{KVERREL}%{?2:.%{2}}/extra\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/extra\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %{expand:%%files -f debuginfo%{?2}.list %{?2:%{2}-}debuginfo}\
@@ -2421,17 +2387,317 @@ fi
 
 # plz don't put in a version string unless you're going to tag
 # and build.
-
-#  ___________________________________________________________
-# / This branch is for Fedora 20. You probably want to commit \
-# \ to the F-19 branch instead, or in addition to this one.   /
-#  -----------------------------------------------------------
-#         \   ^__^
-#          \  (@@)\_______
-#             (__)\       )\/\
-#                 ||----w |
-#                 ||     ||
+#
+# 
+#                        ___________________________________________________________
+#                       / This branch is for Fedora 21. You probably want to commit \
+#  _____ ____  _        \ to the F-20 branch instead, or in addition to this one.   /
+# |  ___|___ \/ |        -----------------------------------------------------------
+# | |_    __) | |             \   ^__^
+# |  _|  / __/| |              \  (@@)\_______
+# |_|   |_____|_|                 (__)\       )\/\
+#                                    ||----w |
+#                                    ||     ||
 %changelog
+* Sat Aug 31 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.11-rc7-gnu 42-g9deda0f.
+
+* Sat Aug 31 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc7.git4.1
+- Linux v3.11-rc7-42-gd9eda0f
+
+* Fri Aug 30 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix HID CVEs.  Absurd.
+- CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
+- CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
+- CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
+- CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
+- CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
+
+* Fri Aug 30 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc7.git3.1
+- Linux v3.11-rc7-30-g41615e8
+
+* Fri Aug 30 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Rework Secure Boot support to use the secure_modules approach
+- Drop pekey
+
+* Thu Aug 29 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc7.git2.1
+- Linux v3.11-rc7-24-gc95389b
+- Add mei patches that fix various s/r issues (rhbz 994824 989373)
+
+* Wed Aug 28 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc7.git1.1
+- Linux v3.11-rc7-14-gfa8218d
+- Reenable debugging options.
+
+* Tue Aug 27 2013 Kyle McMartin <kyle@redhat.com>
+- [arm] build pinctrl-single in, needed to prevent deferral of
+  omap_serial registration.
+
+* Mon Aug 26 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc7.git0.1
+- Linux v3.11-rc7
+- Disable debugging options.
+
+* Fri Aug 23 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc6.git4.1
+- Linux v3.11-rc6-139-g89b53e5
+
+* Fri Aug 23 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc6.git3.1
+- Linux v3.11-rc6-76-g6a7492a
+
+* Fri Aug 23 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config cleanups
+- Enable some IOMMU drivers on ARM
+- Enable some i.MX sound drivers
+
+* Thu Aug 22 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc6.git2.1
+- Linux v3.11-rc6-72-g1f8b766
+
+* Thu Aug 22 2013 Kyle McMartin <kyle@redhat.com>
+- Drop arm-tegra-remove-direct-vbus-regulator-control.patch, proper fix
+  will be in the next rebase.
+
+* Wed Aug 21 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc6.git1.2
+- Add patch to fix brcmsmac oops (rhbz 989269)
+- CVE-2013-0343 handling of IPv6 temporary addresses (rhbz 914664 999380)
+
+* Tue Aug 20 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc6.git1.1
+- Linux v3.11-rc6-28-gfd3930f
+- Reenable debugging options.
+
+* Tue Aug 20 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable Dell RBU so userspace firmware path isn't selected (rhbz 997149)
+
+* Mon Aug 19 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc6.git0.1
+- Linux v3.11-rc6
+- Disable debugging options.
+
+* Mon Aug 19 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor kernel configs cleanup merging duplicated config opts into generic
+
+* Sun Aug 18 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc5.git6.1
+- Linux v3.11-rc5-168-ga08797e
+
+* Sat Aug 17 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc5.git5.1
+- Linux v3.11-rc5-165-g215b28a
+
+* Fri Aug 16 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM drivers config for Zynq 7000 devices
+
+* Fri Aug 16 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc5.git4.1
+- Linux v3.11-rc5-150-g0f7dd1a
+
+* Fri Aug 16 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch from Nathanael Noblet to fix mic on Gateway LT27 (rhbz 845699)
+
+* Thu Aug 15 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Major cleanup of arm64 config
+- Add patch to enable build exynos5 as multi platform for lpae
+- Minor cleanup of ARMv7 configs
+
+* Thu Aug 15 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc5.git3.1
+- Enable CONFIG_HID_SENSOR_HUB (rhbz 995510)
+- Add patch to fix regression on TeVII S471 devices (rhbz 963715)
+- Linux v3.11-rc5-35-gf1d6e17
+
+* Wed Aug 14 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc5.git2.1
+- Linux v3.11-rc5-21-g28fbc8b
+- Disable WIMAX.  It's fairly broken and abandoned upstream.
+
+* Tue Aug 13 2013 Josh Boyer <jwboyer@gmail.com> - 3.11.0-0.rc5.git1.1
+- Linux v3.11-rc5-13-g584d88b
+- Reenable debugging options.
+
+* Mon Aug 12 2013 Josh Boyer <jwboyer@gmail.com> - 3.11.0-0.rc5.git0.1
+- Linux v3.11-rc5
+- Disable debugging options.
+
+* Sun Aug 11 2013 Josh Boyer <jwboyer@gmail.com> - 3.11.0-0.rc4.git5.1
+- Linux v3.11-rc4-216-g77f63b4
+
+* Sun Aug 11 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Drop a bunch of generic dupe config from aarch64
+
+* Sat Aug 10 2013 Josh Boyer <jwboyer@gmail.com> - 3.11.0-0.rc4.git4.1
+- Linux v3.11-rc4-162-g14e9419
+
+* Fri Aug 09 2013 Josh Boyer <jwboyer@gmail.com> - 3.11.0-0.rc4.git3.1
+- Linux v3.11-rc4-103-g6c2580c
+
+* Wed Aug 07 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc4.git2.1
+- Linux v3.11-rc4-27-ge4ef108
+- Add zero file length check to make sure pesign didn't fail (rhbz 991808)
+
+* Tue Aug 06 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc4.git1.1
+- Linux v3.11-rc4-20-g0fff106
+- Reenable debugging options.
+- Don't package API man pages in -doc (rhbz 993905)
+
+* Mon Aug 05 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc4.git0.1
+- Linux v3.11-rc4
+- Disable debugging options.
+
+* Sun Aug 04 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc3.git4.1
+- Linux v3.11-rc3-376-g72a67a9
+
+* Sat Aug 03 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc3.git3.1
+- Linux v3.11-rc3-288-gabe0308
+
+* Fri Aug 02 2013 Kyle McMartin <kyle@redhat.com> - 3.11.0-0.rc3.git2.1
+- radeon-si_calculate_leakage-use-div64.patch: fix a compile error on i686.
+- arm: disable CONFIG_LOCK_STAT, bloats .data massively, revisit shortly.
+- arm: build-in more rtc drivers.
+
+* Fri Aug 02 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc3.git2.1
+- Linux v3.11-rc3-207-g64ccccf
+
+* Thu Aug  1 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config update
+
+* Thu Aug 01 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix mac80211 connection issues (rhbz 981445)
+- Fix firmware issues with iwl4965 and rfkill (rhbz 977053)
+- Drop hid-logitech-dj patch that was breaking enumeration (rhbz 989138)
+
+* Tue Jul 30 2013 Josh Boyer <jwboyer@redhat.com> - 3.11.0-0.rc3.git1.1
+- Linux v3.11-rc3-4-g36f571e
+- Reenable debugging options.
+
+* Tue Jul 30 2013 Josh Boyer <jwboyer@redhat.com>
+- Revert some changes to make Logitech devices function properly (rhbz 989138)
+
+* Mon Jul 29 2013 Kyle McMartin <kyle@redhat.com> - 3.11.0-0.rc3.git0.1
+- arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch: ditto
+
+* Mon Jul 29 2013 Kyle McMartin <kyle@redhat.com>
+- arm-dma-amba_pl08x-avoid-64bit-division.patch: STAHP libgcc callouts
+
+* Mon Jul 29 2013 Josh Boyer <jwboyer@redhat.com>
+- Linux v3.11-rc3
+- Disable debugging options.
+- Always include x509.genkey in Sources list
+
+* Fri Jul 26 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc2.git4.1
+- Linux v3.11-rc2-333-ga9b5f02
+
+* Fri Jul 26 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patch to fix NULL deref in iwlwifi (rhbz 979581)
+
+* Thu Jul 25 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc2.git3.1
+- Linux v3.11-rc2-185-g07bc9dc
+
+* Wed Jul 24 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc2.git2.1
+- Linux v3.11-rc2-158-g04012e3
+
+* Tue Jul 23 2013 Kyle McMartin <kyle@redhat.com>
+- arm-tegra-remove-direct-vbus-regulator-control.patch: backport patches
+  to fix ehci-tegra.
+
+* Tue Jul 23 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc2.git1.1
+- Linux v3.11-rc2-93-gb3a3a9c
+
+* Mon Jul 22 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc2.git0.2
+- let flavors/variants end with "+$flavor" in the uname patch from harald@redhat.com
+- Reenable debugging options.
+
+* Mon Jul 22 2013 Josh Boyer <jwboyer@redhat.com>
+- Fix timer issue in bridge code (rhbz 980254)
+
+* Mon Jul 22 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc2.git0.1
+- Linux v3.11-rc2
+- Disable debugging options.
+
+* Sun Jul 21 2013 Kyle McMartin <kmcmartin@redhat.com> - 3.11.0-0.rc1.git4.1
+- Linux v3.11-rc1-247-g90db76e
+
+* Sun Jul 21 2013 Kyle McMartin <kyle@redhat.com>
+- arm-omap-bbb-dts.patch: disable for now, it needs too much work for
+  a sunday morning.
+
+* Fri Jul 19 2013 Kyle McMartin <kyle@redhat.com>
+- arm-omap-bbb-dts.patch: fix arch/arm/boot/dtb/Makefile rule
+
+* Fri Jul 19 2013 Kyle McMartin <kmcmartin@redhat.com> - 3.11.0-0.rc1.git3.1
+- Linux v3.11-rc1-181-gb8a33fc
+
+* Fri Jul 19 2013 Kyle McMartin <kmcmartin@redhat.com> - 3.11.0-0.rc1.git2.1
+- Linux v3.11-rc1-135-g0a693ab
+
+* Thu Jul 18 2013 Kyle McMartin <kyle@redhat.com>
+- Applied patch from Kay Sievers to kill initscripts Conflicts & Requires and
+  udev Conflicts...
+- And then clean up some of the ancient crap from our Conflicts and Requires
+  which reference versions not shipped since 2006.
+
+* Thu Jul 18 2013 Kyle McMartin <kyle@redhat.com>
+- devel-sysrq-secure-boot-20130717.patch: add a patch that allows the user to
+  disable secure boot restrictions from the local console or local serial
+  (but not /proc/sysrq-trigger or via uinput) by using SysRQ-x.
+
+* Wed Jul 17 2013 Kyle McMartin <kyle@redhat.com> - 3.11.0-0.rc1.git1.1
+- Linux v3.11-rc1-19-gc0d15cc
+- Reenable debugging options.
+
+* Wed Jul 17 2013 Kyle McMartin <kyle@redhat.com>
+- update s390x config [Dan Horák]
+
+* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 3.11.0-0.rc1.git0.2
+- Perl 5.18 rebuild
+
+* Wed Jul 17 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch for BeagleBone Black DTB
+
+* Tue Jul 16 2013 Kyle McMartin <kyle@redhat.com> - 3.11.0-0.rc1.git0.1
+- Linux v3.11-rc1
+- Disable debugging options.
+- Fix %kernel_modules warning.
+
+* Sun Jul 14 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config
+- Enable USB gadget module on ARM to fix build i.MX usb modules
+
+* Sun Jul 14 2013 Dennis Gilmore <dennis@ausil.us>
+- update and reenable wandboard quad dtb patch
+
+* Fri Jul 12 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc0.git7.1
+- Linux v3.10-9289-g9903883
+
+* Fri Jul 12 2013 Dave Jones <davej@redhat.com> - 3.11.0-0.rc0.git6.4
+- Disable LATENCYTOP/SCHEDSTATS in non-debug builds.
+
+* Fri Jul 12 2013 Josh Boyer <jwboyer@redhat.com>
+- Add iwlwifi fix for connection issue (rhbz 885407)
+
+* Thu Jul 11 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc0.git6.1
+- Linux v3.10-9080-g19d2f8e
+
+* Thu Jul 11 2013 Kyle McMartin <kyle@redhat.com>
+- Enable USB on Wandboard Duallite and other i.MX based boards, patch
+  from Niels de Vos.
+
+* Thu Jul 11 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM config cleanups and changes for 3.11
+
+* Wed Jul 10 2013 Kyle McMartin <kyle@redhat.com>
+- Fix crash-driver.patch to properly use page_is_ram. 
+
+* Tue Jul 09 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc0.git3.1
+- Linux v3.10-6378-ga82a729
+
+* Mon Jul  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial ARM config for 3.11
+
+* Mon Jul 08 2013 Justin M. Forbes <jforbes@redhat.com> - 3.11.0-0.rc0.git2.1
+- Linux v3.10-6005-gd2b4a64
+- Reenable debugging options.
+
+* Fri Jul 05 2013 Josh Boyer <jwboyer@redhat.com>
+- Add vhost-net use-after-free fix (rhbz 976789 980643)
+- Add fix for timer issue in bridge code (rhbz 980254)
+
+* Wed Jul 03 2013 Josh Boyer <jwboyer@redhat.com>
+- Add patches to fix iwl skb managment (rhbz 977040)
+
+* Tue Jul 02 2013 Dennis Gilmore <dennis@ausil.us> - 3.10-2
+- create a dtb for wandboard quad
+
 * Mon Jul  1 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10-gnu.
 
