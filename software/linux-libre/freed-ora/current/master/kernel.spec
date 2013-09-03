@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 4
+%define gitrev 5
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -775,7 +775,7 @@ Patch21030: arm-wandboard-quad.patch
 Patch21031: arm-imx-fixsound.patch
 
 # AM33xx
-Patch21040: arm-omap-bbb-dts.patch
+Patch21040: arm-am33xx-bbb-dts.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -808,9 +808,6 @@ Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
-
-#rhbz 989269
-Patch25079: mac80211-add-a-flag-to-indicate-CCK-support-for-HT-clients.patch
 
 Patch25090: mei-me-fix-hardware-reset-flow.patch
 
@@ -1443,7 +1440,10 @@ ApplyPatch arm-omap-load-tfp410.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-wandboard-quad.patch
 ApplyPatch arm-imx-fixsound.patch
-#ApplyPatch arm-omap-bbb-dts.patch
+
+# Fix OMAP and AM33xx (BeagleBone)
+#pplyPatch arm-am33xx-bbb-dts.patch
+
 #
 # bugfixes to drivers and filesystems
 #
@@ -1581,9 +1581,6 @@ ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
-
-#rhbz 989269
-ApplyPatch mac80211-add-a-flag-to-indicate-CCK-support-for-HT-clients.patch
 
 ApplyPatch mei-me-fix-hardware-reset-flow.patch
 
@@ -2399,6 +2396,12 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Mon Sep 02 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.0-0.rc7.git5.1
+- Linux v3.11-rc7-96-ga878764
+
+* Sun Sep  1 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build in OMAP MMC again (fix at least omap3)
+
 * Sat Aug 31 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.11-rc7-gnu 42-g9deda0f.
 
