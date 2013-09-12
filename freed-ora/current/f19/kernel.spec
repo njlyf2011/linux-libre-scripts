@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 10
+%define base_sublevel 11
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -3.10%{?stablegnux}
-#define rcrevlibre -3.10%{?rcrevgnux}
-#define gitrevlibre -3.10%{?gitrevgnux}
+#define stablelibre -3.11%{?stablegnux}
+#define rcrevlibre -3.11%{?rcrevgnux}
+#define gitrevlibre -3.11%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 0
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -131,7 +131,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -699,7 +699,6 @@ Patch100: taint-vbox.patch
 Patch110: vmbugon-warnon.patch
 
 Patch390: defaults-acpi-video.patch
-Patch391: acpi-video-dos.patch
 Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: input-kill-stupid-messages.patch
@@ -724,9 +723,6 @@ Patch1000: devel-pekey-secure-boot-20130502.patch
 # DRM
 #atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
 #Patch1800: drm-vgem.patch
-Patch1701: drm-hotspot-cursor-backport.patch
-Patch1705: drm-qxl-post-3.10-feature-fixes.patch
-Patch1706: drm-qxl-post-3.10-features-part-2.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1824: drm-intel-next.patch
@@ -790,48 +786,17 @@ Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 #rhbz 927469
 Patch23006: fix-child-thread-introspection.patch
 
-#rhbz 948262
-Patch25024: intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
-
 #CVE-2013-2147 rhbz 971242 971249
 Patch25032: cve-2013-2147-ciss-info-leak.patch
 
-#rhbz 954252
-Patch25036: scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
-
-#rhbz 969644
-Patch25046: KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
-
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
-#rhbz 903741
-Patch25052: HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
-
-#rhbz 880035
-Patch25053: bridge-only-expire-the-mdb-entry-when-query-is-received.patch
-Patch25054: bridge-send-query-as-soon-as-leave-is-received.patch
-#rhbz 980254
-Patch25061: bridge-timer-fix.patch
-Patch25066: bridge-do-not-call-setup_timer-multiple-times.patch
 
 #rhbz 977040
 Patch25056: iwl3945-better-skb-management-in-rx-path.patch
 Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 
-#rhbz 959721
-Patch25063: HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
-
-#rhbz 969473
-Patch25070: Input-elantech-fix-for-newer-hardware-versions-v7.patch
-
-#rhbz 989138
-Patch25072: HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
-
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
-
-#CVE-2013-0343 rhbz 914664 999380
-Patch25078: ipv6-remove-max_addresses-check-from-ipv6_create_tempaddr.patch
 
 #rhbz 1000679
 Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
@@ -978,15 +943,16 @@ This package contains the tools/ directory from the kernel source
 and the supporting documentation.
 
 %package -n kernel-libre-tools-libs
+Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
 Summary: Libraries for the kernels-tools
 Group: Development/System
 License: GPLv2
-Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
 %description -n kernel-libre-tools-libs
 This package contains the libraries built from the tools/ directory
 from the kernel source.
 
 %package -n kernel-libre-tools-libs-devel
+Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
 License: GPLv2
@@ -994,7 +960,6 @@ Requires: kernel-libre-tools = %{version}-%{release}
 Provides:  cpupowerutils-devel = 1:009-0.6.p1
 Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
 Requires: kernel-libre-tools-libs = %{version}-%{release}
-Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Provides: kernel-libre-tools-devel
 Provides: kernel-tools-devel
 %description -n kernel-libre-tools-libs-devel
@@ -1062,9 +1027,9 @@ against the %{?2:%{2} }kernel package.\
 
 #
 # This macro creates a kernel-<subpackage>-modules-extra package.
-#	%%kernel_modules-extra_package <subpackage> <pretty-name>
+#	%%kernel_modules_extra_package <subpackage> <pretty-name>
 #
-%define kernel_modules-extra_package() \
+%define kernel_modules_extra_package() \
 %package %{?1:%{1}-}modules-extra\
 Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
@@ -1075,9 +1040,9 @@ Provides: kernel-libre-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:
 Provides: kernel-modules-extra = %{version}-%{release}%{?1:.%{1}}\
 Provides: kernel-libre-modules-extra = %{version}-%{release}%{?1:.%{1}}\
 Provides: installonlypkg(kernel-module)\
+Provides: installonlypkg(kernel-libre-module)\
 Provides: kernel-modules-extra-uname-r = %{KVERREL}%{?1:.%{1}}\
 Provides: kernel-libre-modules-extra-uname-r = %{KVERREL}%{?1:.%{1}}\
-Requires: kernel-uname-r = %{KVERREL}%{?1:.%{1}}\
 Requires: kernel-libre-uname-r = %{KVERREL}%{?1:.%{1}}\
 AutoReqProv: no\
 %description -n kernel%{?variant}%{?1:-%{1}}-modules-extra\
@@ -1095,14 +1060,14 @@ Summary: %{variant_summary}\
 Group: System Environment/Kernel\
 %kernel_reqprovconf\
 %{expand:%%kernel_devel_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
-%{expand:%%kernel_modules-extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
+%{expand:%%kernel_modules_extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
 %{expand:%%kernel_debuginfo_package %1}\
 %{nil}
 
 
 # First the auxiliary packages of the main kernel package.
 %kernel_devel_package
-%kernel_modules-extra_package
+%kernel_modules_extra_package
 %kernel_debuginfo_package
 
 
@@ -1477,7 +1442,6 @@ ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 
 # ACPI
 ApplyPatch defaults-acpi-video.patch
-ApplyPatch acpi-video-dos.patch
 ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
@@ -1526,9 +1490,6 @@ ApplyPatch devel-pekey-secure-boot-20130502.patch
 # Assorted Virt Fixes
 
 # DRM core
-ApplyPatch drm-hotspot-cursor-backport.patch
-ApplyPatch drm-qxl-post-3.10-feature-fixes.patch
-ApplyPatch drm-qxl-post-3.10-features-part-2.patch
 #ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
 #ApplyPatch drm-vgem.patch
 
@@ -1581,48 +1542,17 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-#rhbz 948262
-ApplyPatch intel_iommu-Downgrade-the-warning-if-enabling-irq-remapping-fails.patch
-
 #CVE-2013-2147 rhbz 971242 971249
 ApplyPatch cve-2013-2147-ciss-info-leak.patch
 
-#rhbz 954252
-ApplyPatch scsi-ipr-possible-irq-lock-inversion-dependency-detected.patch
-
-#rhbz 969644
-ApplyPatch KVM-x86-handle-idiv-overflow-at-kvm_write_tsc.patch
-
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
-#rhbz 903741
-ApplyPatch HID-input-return-ENODATA-if-reading-battery-attrs-fails.patch
-
-#rhbz 880035
-ApplyPatch bridge-only-expire-the-mdb-entry-when-query-is-received.patch
-ApplyPatch bridge-send-query-as-soon-as-leave-is-received.patch
-#rhbz 980254
-ApplyPatch bridge-timer-fix.patch
-ApplyPatch bridge-do-not-call-setup_timer-multiple-times.patch
 
 #rhbz 977040
 ApplyPatch iwl3945-better-skb-management-in-rx-path.patch
 ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
-#rhbz 959721
-ApplyPatch HID-kye-Add-report-fixup-for-Genius-Gila-Gaming-mouse.patch
-
-#rhbz 969473
-ApplyPatch Input-elantech-fix-for-newer-hardware-versions-v7.patch
-
-#rhbz 989138
-ApplyPatch HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
-
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
-
-#CVE-2013-0343 rhbz 914664 999380
-ApplyPatch ipv6-remove-max_addresses-check-from-ipv6_create_tempaddr.patch
 
 #CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
 #CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
@@ -2241,7 +2171,7 @@ fi\
 
 #
 # This macro defines a %%post script for a kernel*-modules-extra package.
-#	%%kernel_modules-extra_post [<subpackage>]
+#	%%kernel_modules_extra_post [<subpackage>]
 #
 %define kernel_modules_extra_post() \
 %{expand:%%post %{?1:%{1}-}modules-extra}\
@@ -2457,6 +2387,12 @@ fi
 # and build.
 
 %changelog
+* Thu Sep 12 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.11-gnu.
+
+* Wed Sep 11 2013 Justin M. Forbes <jforbes@fedoraproject.org>
+- Linux v3.11 rebase
+
 * Tue Sep 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.11-gnu.
 
