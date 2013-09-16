@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -806,7 +806,19 @@ Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
 #CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
 #CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-Patch25099: HID-CVE-fixes.patch
+Patch25099: HID-CVE-fixes-3.11.patch
+
+#rhbz 963991
+Patch26000: acpi-pcie-hotplug-conflict.patch
+
+#rhbz 1002351
+Patch25100: crypto-fix-race-in-larval-lookup.patch
+
+#CVE-2013-4343 rhbz 1007733 1007741
+Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
+
+#CVE-2013-4350 rhbz 1007872 1007903
+Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1559,10 +1571,22 @@ ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.
 #CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
 #CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-ApplyPatch HID-CVE-fixes.patch
+ApplyPatch HID-CVE-fixes-3.11.patch
 
 #rhbz 1000679
 ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
+
+#rhbz 963991
+ApplyPatch acpi-pcie-hotplug-conflict.patch
+
+#rhbz1002351
+ApplyPatch crypto-fix-race-in-larval-lookup.patch
+
+#CVE-2013-4343 rhbz 1007733 1007741
+ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
+
+#CVE-2013-4350 rhbz 1007872 1007903
+ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2387,7 +2411,24 @@ fi
 # and build.
 
 %changelog
-* Thu Sep 12 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Sep 14 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.1-200
+- Linux v3.11.1
+
+* Fri Sep 13 2013 Kyle McMartin <kyle@redhat.com>
+- Fix crash-driver.patch to properly use page_is_ram. 
+
+* Fri Sep 13 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4350 net: sctp: ipv6 ipsec encryption bug in sctp_v6_xmit (rhbz 1007872 1007903)
+- CVE-2013-4343 net: use-after-free TUNSETIFF (rhbz 1007733 1007741)
+
+* Thu Sep 12 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Update HID CVE fixes to fix crash from lenovo-tpkbd driver (rhbz 1003998)
+
+* Wed Sep 11 2013 Neil Horman <nhorman@redhat.com>
+- Fix pcie/acpi hotplug conflict (rhbz 963991)
+- Fix race in crypto larval lookup
+
+* Wed Sep 11 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Sep 12
 - GNU Linux-libre 3.11-gnu.
 
 * Wed Sep 11 2013 Justin M. Forbes <jforbes@fedoraproject.org>
