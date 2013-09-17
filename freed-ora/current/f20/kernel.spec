@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -780,7 +780,6 @@ Patch21020: arm-tegra-usb-no-reset-linux33.patch
 # ARM wandboard
 Patch21030: arm-wandboard-quad.patch
 # https://git.kernel.org/cgit/linux/kernel/git/broonie/sound.git/patch/?id=3f1a91aa25579ba5e7268a47a73d2a83e4802c62
-Patch21031: arm-imx-fixsound.patch
 
 # AM33xx
 Patch21040: 0001-reset-Add-driver-for-gpio-controlled-reset-pins.patch
@@ -834,14 +833,27 @@ Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-Patch25090: mei-me-fix-hardware-reset-flow.patch
+#rhbz 1000679
+Patch25078: rt2800-rearrange-bbp-rfcsr-initialization.patch
 
 #CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
 #CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
 #CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
 #CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-Patch25099: HID-CVE-fixes.patch
+Patch25099: HID-CVE-fixes-3.11.patch
+
+#rhbz 963991
+Patch26000: acpi-pcie-hotplug-conflict.patch
+
+#rhbz 1002351
+Patch25100: crypto-fix-race-in-larval-lookup.patch
+
+#CVE-2013-4343 rhbz 1007733 1007741
+Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
+
+#CVE-2013-4350 rhbz 1007872 1007903
+Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1470,7 +1482,6 @@ ApplyPatch arm-highbank-for-3.12.patch
 ApplyPatch arm-omap-load-tfp410.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-wandboard-quad.patch
-ApplyPatch arm-imx-fixsound.patch
 
 # Fix OMAP and AM33xx (BeagleBone)
 ApplyPatch 0001-reset-Add-driver-for-gpio-controlled-reset-pins.patch
@@ -1635,14 +1646,27 @@ ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-ApplyPatch mei-me-fix-hardware-reset-flow.patch
-
 #CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
 #CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
 #CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
 #CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-ApplyPatch HID-CVE-fixes.patch
+ApplyPatch HID-CVE-fixes-3.11.patch
+
+#rhbz 1000679
+ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
+
+#rhbz 963991
+ApplyPatch acpi-pcie-hotplug-conflict.patch
+
+#rhbz1002351
+ApplyPatch crypto-fix-race-in-larval-lookup.patch
+
+#CVE-2013-4343 rhbz 1007733 1007741
+ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
+
+#CVE-2013-4350 rhbz 1007872 1007903
+ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2454,6 +2478,26 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sat Sep 14 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.1-300
+- Linux v3.11.1
+
+* Fri Sep 13 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4350 net: sctp: ipv6 ipsec encryption bug in sctp_v6_xmit (rhbz 1007872 1007903)
+- CVE-2013-4343 net: use-after-free TUNSETIFF (rhbz 1007733 1007741)
+
+* Thu Sep 12 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Update HID CVE fixes to fix crash from lenovo-tpkbd driver (rhbz 1003998)
+
+* Wed Sep 11 2013 Neil Horman <nhorman@redhat.com>
+- Fix pcie/acpi hotplug conflict (rhbz 963991)
+- Fix race in crypto larval lookup
+
+* Mon Sep 09 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix system freeze due to incorrect rt2800 initialization (rhbz 1000679)
+
+* Sun Sep  8 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor OMAP config changes
+
 * Thu Sep 05 2013 Kyle McMartin <kyle@redhat.com> - 3.11.0-300
 - Build.
 
