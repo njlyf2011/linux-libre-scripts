@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -830,9 +830,6 @@ Patch25070: Input-elantech-fix-for-newer-hardware-versions-v7.patch
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#CVE-2013-0343 rhbz 914664 999380
-Patch25078: ipv6-remove-max_addresses-check-from-ipv6_create_tempaddr.patch
-
 #rhbz 1000679
 Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
 
@@ -842,6 +839,15 @@ Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
 #CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
 Patch25099: HID-CVE-fixes.patch
+
+#rhbz 1002351
+Patch25100: crypto-fix-race-in-larval-lookup.patch
+
+#CVE-2013-4343 rhbz 1007733 1007741
+Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
+
+#CVE-2013-4350 rhbz 1007872 1007903
+Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1062,9 +1068,9 @@ against the %{?2:%{2} }kernel package.\
 
 #
 # This macro creates a kernel-<subpackage>-modules-extra package.
-#	%%kernel_modules-extra_package <subpackage> <pretty-name>
+#	%%kernel_modules_extra_package <subpackage> <pretty-name>
 #
-%define kernel_modules-extra_package() \
+%define kernel_modules_extra_package() \
 %package %{?1:%{1}-}modules-extra\
 Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
@@ -1095,14 +1101,14 @@ Summary: %{variant_summary}\
 Group: System Environment/Kernel\
 %kernel_reqprovconf\
 %{expand:%%kernel_devel_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
-%{expand:%%kernel_modules-extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
+%{expand:%%kernel_modules_extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
 %{expand:%%kernel_debuginfo_package %1}\
 %{nil}
 
 
 # First the auxiliary packages of the main kernel package.
 %kernel_devel_package
-%kernel_modules-extra_package
+%kernel_modules_extra_package
 %kernel_debuginfo_package
 
 
@@ -1608,9 +1614,6 @@ ApplyPatch Input-elantech-fix-for-newer-hardware-versions-v7.patch
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#CVE-2013-0343 rhbz 914664 999380
-ApplyPatch ipv6-remove-max_addresses-check-from-ipv6_create_tempaddr.patch
-
 #CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
 #CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
 #CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
@@ -1620,6 +1623,15 @@ ApplyPatch HID-CVE-fixes.patch
 
 #rhbz 1000679
 ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
+
+#rhbz1002351
+ApplyPatch crypto-fix-race-in-larval-lookup.patch
+
+#CVE-2013-4343 rhbz 1007733 1007741
+ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
+
+#CVE-2013-4350 rhbz 1007872 1007903
+ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2244,7 +2256,7 @@ fi\
 
 #
 # This macro defines a %%post script for a kernel*-modules-extra package.
-#	%%kernel_modules-extra_post [<subpackage>]
+#	%%kernel_modules_extra_post [<subpackage>]
 #
 %define kernel_modules_extra_post() \
 %{expand:%%post %{?1:%{1}-}modules-extra}\
@@ -2473,6 +2485,22 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Sep 16 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.12-gnu.
+
+* Mon Sep 16 2013 Justin M. Forbes <jforbes@fedoraproject.org> 3.10.12-100
+- Linux v3.10.12
+
+* Fri Sep 13 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4350 net: sctp: ipv6 ipsec encryption bug in sctp_v6_xmit (rhbz 1007872 1007903)
+- CVE-2013-4343 net: use-after-free TUNSETIFF (rhbz 1007733 1007741)
+
+* Thu Sep 12 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Update HID CVE fixes to fix crash from lenovo-tpkbd driver (rhbz 1003998)
+
+* Wed Sep 11 2013 Neil Horman <nhorman@redhat.com>
+- Fix race in crypto larval lookup
+
 * Tue Sep 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.11-gnu.
 
@@ -2541,7 +2569,7 @@ fi
 * Tue Aug 06 2013 Justin M. Forbes <jforbes@redhat.com> 3.10.5-100
 - update s390x config [Dan Horák]
 
-* Mon Aug 04 2013 Justin M. Forbes <jforbes@redhat.com>
+* Mon Aug 05 2013 Justin M. Forbes <jforbes@redhat.com>
 - Linux v3.10.5
 
 * Thu Aug  1 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
