@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -819,6 +819,31 @@ Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
 
 #CVE-2013-4350 rhbz 1007872 1007903
 Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
+
+#CVE-2013-4345 rhbz 1007690 1009136
+Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
+
+#rhbz 928561
+Patch25105: 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
+
+#rhbz 1008323
+Patch25106: 0001-skge-fix-broken-driver.patch
+Patch25120: skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
+
+#rhbz 985522
+Patch25107: ntp-Make-periodic-RTC-update-more-reliable.patch
+
+#rhbz 1010431
+Patch25108: Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
+
+#rhbz 971893
+Patch25109: bonding-driver-alb-learning.patch
+
+#rhbz 997705
+Patch25110: rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
+Patch25111: rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
+Patch25112: rpc-fix-huge-kmallocs-in-gss-proxy.patch
+Patch25113: rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1587,6 +1612,31 @@ ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
 
 #CVE-2013-4350 rhbz 1007872 1007903
 ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
+
+#CVE-2013-4345 rhbz 1007690 1009136
+ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
+
+#rhbz 928561
+ApplyPatch 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
+
+#rhbz 985522
+ApplyPatch ntp-Make-periodic-RTC-update-more-reliable.patch
+
+#rhbz 1010431
+ApplyPatch Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
+
+#rhbz 971893
+ApplyPatch bonding-driver-alb-learning.patch
+
+#rhbz 997705
+ApplyPatch rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
+ApplyPatch rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
+ApplyPatch rpc-fix-huge-kmallocs-in-gss-proxy.patch
+ApplyPatch rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
+
+#rhbz 1008323
+ApplyPatch 0001-skge-fix-broken-driver.patch
+ApplyPatch skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2411,6 +2461,27 @@ fi
 # and build.
 
 %changelog
+* Wed Sep 25 2013 Justin M. Forbes <jforbes@fedoraproject.org>
+- Bump baserelease for test build
+
+* Wed Sep 25 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add another fix for skge (rhbz 1008323)
+
+* Mon Sep 23 2013 Neil Horman <nhorman@redhat.com>
+- Add alb learning packet config knob (rhbz 971893)
+
+* Mon Sep 23 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Revert rt2x00 commit that breaks connectivity (rhbz 1010431)
+
+* Fri Sep 20 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix RTC updates from ntp (rhbz 985522)
+- Fix broken skge driver (rhbz 1008328)
+- Fix large order rpc allocations (rhbz 997705)
+- Fix multimedia keys on Genius GX keyboard (rhbz 928561)
+
+* Tue Sep 17 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4345 ansi_cprng: off by one error in non-block size request (rhbz 1007690 1009136)
+
 * Sat Sep 14 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.1-200
 - Linux v3.11.1
 
