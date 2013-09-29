@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -843,17 +843,33 @@ Patch25078: rt2800-rearrange-bbp-rfcsr-initialization.patch
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
 Patch25099: HID-CVE-fixes-3.11.patch
 
-#rhbz 963991
-Patch26000: acpi-pcie-hotplug-conflict.patch
-
-#rhbz 1002351
-Patch25100: crypto-fix-race-in-larval-lookup.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
 
 #CVE-2013-4350 rhbz 1007872 1007903
 Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
+
+#CVE-2013-4345 rhbz 1007690 1009136
+Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
+
+#rhbz 1008323
+Patch25106: 0001-skge-fix-broken-driver.patch
+Patch25120: skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
+
+#rhbz 985522
+Patch25107: ntp-Make-periodic-RTC-update-more-reliable.patch
+
+#rhbz 1010431
+Patch25108: Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
+
+#rhbz 971893
+Patch25109: bonding-driver-alb-learning.patch
+
+#rhbz 997705
+Patch25110: rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
+Patch25111: rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
+Patch25112: rpc-fix-huge-kmallocs-in-gss-proxy.patch
+Patch25113: rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1045,7 +1061,7 @@ AutoReqProv: no\
 %description -n %{name}%{?1:-%{1}}-debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:\+%{1}}/.*|/.*%%{KVERREL}%{?1:\+%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:[+]%{1}}/.*|/.*%%{KVERREL}%{?1:\+%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
 %{nil}
 
 #
@@ -1656,17 +1672,33 @@ ApplyPatch HID-CVE-fixes-3.11.patch
 #rhbz 1000679
 ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
 
-#rhbz 963991
-ApplyPatch acpi-pcie-hotplug-conflict.patch
-
-#rhbz1002351
-ApplyPatch crypto-fix-race-in-larval-lookup.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
 
 #CVE-2013-4350 rhbz 1007872 1007903
 ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
+
+#CVE-2013-4345 rhbz 1007690 1009136
+ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
+
+#rhbz 985522
+ApplyPatch ntp-Make-periodic-RTC-update-more-reliable.patch
+
+#rhbz 1010431
+ApplyPatch Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
+
+#rhbz 971893
+ApplyPatch bonding-driver-alb-learning.patch
+
+#rhbz 997705
+ApplyPatch rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
+ApplyPatch rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
+ApplyPatch rpc-fix-huge-kmallocs-in-gss-proxy.patch
+ApplyPatch rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
+
+#rhbz 1008323
+ApplyPatch 0001-skge-fix-broken-driver.patch
+ApplyPatch skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1939,13 +1971,16 @@ BuildKernel() {
     collect_modules_list()
     {
       sed -r -n -e "s/^([^ ]+) \\.?($2)\$/\\1/p" drivers.undef |
-      LC_ALL=C sort -u > $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$1
+        LC_ALL=C sort -u > $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$1
+      if [ ! -z "$3" ]; then
+        sed -r -e "/^($3)\$/d" -i $RPM_BUILD_ROOT/lib/modules/$KernelVer/modules.$1
+      fi
     }
 
     collect_modules_list networking \
     			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe|register_netdevice'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler|blk_queue_physical_block_size'
+    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_alloc_queue|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler|blk_queue_physical_block_size' 'pktcdvd.ko|dm-mod.ko'
     collect_modules_list drm \
     			 'drm_open|drm_init'
     collect_modules_list modesetting \
@@ -2478,6 +2513,31 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.2-300
+- Linux v3.11.2
+
+* Wed Sep 25 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix debuginfo_args regex for + separator (rhbz 1009751)
+- Add another fix for skge (rhbz 1008323)
+
+* Mon Sep 23 2013 Neil Horman <nhorman@redhat.com>
+- Add alb learning packet config knob (rhbz 971893)
+
+* Mon Sep 23 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Revert rt2x00 commit that breaks connectivity (rhbz 1010431)
+
+* Fri Sep 20 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix RTC updates from ntp (rhbz 985522)
+- Fix broken skge driver (rhbz 1008328)
+- Fix large order rpc allocations (rhbz 997705)
+- Fix multimedia keys on Genius GX keyboard (rhbz 928561)
+
+* Tue Sep 17 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4345 ansi_cprng: off by one error in non-block size request (rhbz 1007690 1009136)
+
+* Tue Sep 17 2013 Kyle McMartin <kyle@redhat.com>
+- Add nvme.ko to modules.block for anaconda.
+
 * Sat Sep 14 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.1-300
 - Linux v3.11.1
 
