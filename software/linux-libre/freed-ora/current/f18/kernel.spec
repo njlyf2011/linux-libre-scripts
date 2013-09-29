@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -840,14 +840,20 @@ Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
 Patch25099: HID-CVE-fixes.patch
 
-#rhbz 1002351
-Patch25100: crypto-fix-race-in-larval-lookup.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
 
 #CVE-2013-4350 rhbz 1007872 1007903
 Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
+
+#CVE-2013-4345 rhbz 1007690 1009136
+Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
+
+#rhbz 928561
+Patch25105: 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
+
+#rhbz 971893
+Patch25106: bonding-driver-alb-learning.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1624,14 +1630,20 @@ ApplyPatch HID-CVE-fixes.patch
 #rhbz 1000679
 ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
 
-#rhbz1002351
-ApplyPatch crypto-fix-race-in-larval-lookup.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
 
 #CVE-2013-4350 rhbz 1007872 1007903
 ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
+
+#CVE-2013-4345 rhbz 1007690 1009136
+ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
+
+#rhbz 928561
+ApplyPatch 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
+
+#rhbz 971893
+ApplyPatch bonding-driver-alb-learning.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2485,6 +2497,21 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Sep 27 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.13-gnu.
+
+* Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> 3.10.13-100
+- Linux v3.10.13
+
+* Mon Sep 23 2013 Neil Horman <nhorman@redhat.com>
+- Add alb learning packet config knob (rhbz 971893)
+
+* Fri Sep 20 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix multimedia keys on Genius GX keyboard (rhbz 928561)
+
+* Tue Sep 17 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4345 ansi_cprng: off by one error in non-block size request (rhbz 1007690 1009136)
+
 * Mon Sep 16 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.12-gnu.
 
