@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -808,12 +808,6 @@ Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
 #CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
 Patch25099: HID-CVE-fixes-3.11.patch
 
-#rhbz 963991
-Patch26000: acpi-pcie-hotplug-conflict.patch
-
-#rhbz 1002351
-Patch25100: crypto-fix-race-in-larval-lookup.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
 
@@ -822,9 +816,6 @@ Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 #CVE-2013-4345 rhbz 1007690 1009136
 Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
-
-#rhbz 928561
-Patch25105: 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
 
 #rhbz 1008323
 Patch25106: 0001-skge-fix-broken-driver.patch
@@ -1601,12 +1592,6 @@ ApplyPatch HID-CVE-fixes-3.11.patch
 #rhbz 1000679
 ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
 
-#rhbz 963991
-ApplyPatch acpi-pcie-hotplug-conflict.patch
-
-#rhbz1002351
-ApplyPatch crypto-fix-race-in-larval-lookup.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
 
@@ -1615,9 +1600,6 @@ ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 #CVE-2013-4345 rhbz 1007690 1009136
 ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
-
-#rhbz 928561
-ApplyPatch 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
 
 #rhbz 985522
 ApplyPatch ntp-Make-periodic-RTC-update-more-reliable.patch
@@ -2461,6 +2443,9 @@ fi
 # and build.
 
 %changelog
+* Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.2-200
+- Linux v3.11.2
+
 * Wed Sep 25 2013 Justin M. Forbes <jforbes@fedoraproject.org>
 - Bump baserelease for test build
 
