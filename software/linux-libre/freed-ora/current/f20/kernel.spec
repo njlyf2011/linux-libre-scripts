@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -870,6 +870,13 @@ Patch25110: rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
 Patch25111: rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
 Patch25112: rpc-fix-huge-kmallocs-in-gss-proxy.patch
 Patch25113: rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
+
+#rhbz 902012
+Patch25114: elevator-Fix-a-race-in-elevator-switching-and-md.patch
+Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
+
+#rhbz 1011719
+Patch25116: hwmon-applesmc-Check-key-count-before-proceeding.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1700,6 +1707,13 @@ ApplyPatch rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
 ApplyPatch 0001-skge-fix-broken-driver.patch
 ApplyPatch skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 
+#rhbz 902012
+ApplyPatch elevator-Fix-a-race-in-elevator-switching-and-md.patch
+ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
+
+#rhbz 1011719
+ApplyPatch hwmon-applesmc-Check-key-count-before-proceeding.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2513,6 +2527,14 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.2-301
+- Bump and tag for build
+
+* Fri Sep 27 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix oops from applesmc (rhbz 1011719)
+- Enable VIRTIO_CONSOLE as a module on all ARM (rhbz 1005551)
+- Add patches to fix soft lockup from elevator changes (rhbz 902012)
+
 * Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.2-300
 - Linux v3.11.2
 
