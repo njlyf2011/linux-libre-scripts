@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -855,6 +855,13 @@ Patch25105: 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
 #rhbz 971893
 Patch25106: bonding-driver-alb-learning.patch
 
+#rhbz 902012
+Patch25114: elevator-Fix-a-race-in-elevator-switching-and-md.patch
+Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
+
+#rhbz 1013000
+Patch25116: HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1644,6 +1651,13 @@ ApplyPatch 0001-HID-kye-Add-report-fixup-for-Genius-Gx-Imperator-Key.patch
 
 #rhbz 971893
 ApplyPatch bonding-driver-alb-learning.patch
+
+#rhbz 902012
+ApplyPatch elevator-Fix-a-race-in-elevator-switching-and-md.patch
+ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
+
+#rhbz 1013000
+ApplyPatch HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2497,6 +2511,13 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> 3.10.13-101
+- Bump and tag for build
+
+* Fri Sep 27 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add HID revert patch to fix logitech unifying devices (rhbz 1013000)
+- Add patches to fix soft lockup from elevator changes (rhbz 902012)
+
 * Fri Sep 27 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.10.13-gnu.
 
