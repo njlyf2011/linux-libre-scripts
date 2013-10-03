@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -804,9 +804,6 @@ Patch21057: 0002-dts-beaglebone-Add-I2C-definitions-for-EEPROMs-capes.patch
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
-#rhbz 859485
-Patch21226: vt-Drop-K_OFF-for-VC_MUTE.patch
-
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 Patch21242: criu-no-expert.patch
 
@@ -833,16 +830,6 @@ Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#rhbz 1000679
-Patch25078: rt2800-rearrange-bbp-rfcsr-initialization.patch
-
-#CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
-#CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
-#CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
-#CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
-#CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-Patch25099: HID-CVE-fixes-3.11.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
 
@@ -853,7 +840,6 @@ Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
 
 #rhbz 1008323
-Patch25106: 0001-skge-fix-broken-driver.patch
 Patch25120: skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 
 #rhbz 985522
@@ -865,18 +851,15 @@ Patch25108: Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
 #rhbz 971893
 Patch25109: bonding-driver-alb-learning.patch
 
-#rhbz 997705
-Patch25110: rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
-Patch25111: rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
-Patch25112: rpc-fix-huge-kmallocs-in-gss-proxy.patch
-Patch25113: rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
-
 #rhbz 902012
 Patch25114: elevator-Fix-a-race-in-elevator-switching-and-md.patch
 Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
 #rhbz 1011719
 Patch25116: hwmon-applesmc-Check-key-count-before-proceeding.patch
+
+#rhbz 974072
+Patch25117: rt2800-add-support-for-rf3070.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1645,9 +1628,6 @@ ApplyPatch weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 859485
-ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
-
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 ApplyPatch criu-no-expert.patch
 
@@ -1669,16 +1649,6 @@ ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
-#CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
-#CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
-#CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
-#CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-ApplyPatch HID-CVE-fixes-3.11.patch
-
-#rhbz 1000679
-ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
 
@@ -1697,14 +1667,7 @@ ApplyPatch Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
 #rhbz 971893
 ApplyPatch bonding-driver-alb-learning.patch
 
-#rhbz 997705
-ApplyPatch rpc-clean-up-decoding-of-gssproxy-linux-creds.patch
-ApplyPatch rpc-comment-on-linux_cred-encoding-treat-all-as-unsigned.patch
-ApplyPatch rpc-fix-huge-kmallocs-in-gss-proxy.patch
-ApplyPatch rpc-let-xdr-layer-allocate-gssproxy-receieve-pages.patch
-
 #rhbz 1008323
-ApplyPatch 0001-skge-fix-broken-driver.patch
 ApplyPatch skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 
 #rhbz 902012
@@ -1713,6 +1676,9 @@ ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
 #rhbz 1011719
 ApplyPatch hwmon-applesmc-Check-key-count-before-proceeding.patch
+
+#rhbz 974072
+ApplyPatch rt2800-add-support-for-rf3070.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2527,6 +2493,13 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Oct 2 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.3-300
+- Linux v3.11.3
+
+* Mon Sep 30 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for rf3070 devices from Stanislaw Gruszka (rhbz 974072)
+- Drop VC_MUTE patch (rhbz 859485)
+
 * Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.2-301
 - Bump and tag for build
 
