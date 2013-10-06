@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -789,9 +789,6 @@ Patch22000: weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 859485
-Patch22226: vt-Drop-K_OFF-for-VC_MUTE.patch
-
 #rhbz 892811
 Patch22247: ath9k_rx_dma_stop_check.patch
 
@@ -830,16 +827,6 @@ Patch25070: Input-elantech-fix-for-newer-hardware-versions-v7.patch
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#rhbz 1000679
-Patch25079: rt2800-rearrange-bbp-rfcsr-initialization.patch
-
-#CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
-#CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
-#CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
-#CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
-#CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-Patch25099: HID-CVE-fixes.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
 
@@ -861,6 +848,9 @@ Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
 #rhbz 1013000
 Patch25116: HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
+
+#CVE-2013-4387 rhbz 1011927 1015166
+Patch25121: ipv6-udp-packets-following-an-UFO-enqueued-packet-ne.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1586,9 +1576,6 @@ ApplyPatch weird-root-dentry-name-debug.patch
 #selinux ptrace child permissions
 ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
-#rhbz 859485
-ApplyPatch vt-Drop-K_OFF-for-VC_MUTE.patch
-
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
@@ -1627,16 +1614,6 @@ ApplyPatch Input-elantech-fix-for-newer-hardware-versions-v7.patch
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#CVE-2013-2888 rhbz 1000451 1002543 CVE-2013-2889 rhbz 999890 1002548
-#CVE-2013-2891 rhbz 999960 1002555  CVE-2013-2892 rhbz 1000429 1002570
-#CVE-2013-2893 rhbz 1000414 1002575 CVE-2013-2894 rhbz 1000137 1002579
-#CVE-2013-2895 rhbz 1000360 1002581 CVE-2013-2896 rhbz 1000494 1002594
-#CVE-2013-2897 rhbz 1000536 1002600 CVE-2013-2899 rhbz 1000373 1002604
-ApplyPatch HID-CVE-fixes.patch
-
-#rhbz 1000679
-ApplyPatch rt2800-rearrange-bbp-rfcsr-initialization.patch
-
 #CVE-2013-4343 rhbz 1007733 1007741
 ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
 
@@ -1658,6 +1635,9 @@ ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
 #rhbz 1013000
 ApplyPatch HID-Revert-Revert-HID-Fix-logitech-dj-missing-Unifying-device-issue.patch
+
+#CVE-2013-4387 rhbz 1011927 1015166
+ApplyPatch ipv6-udp-packets-following-an-UFO-enqueued-packet-ne.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2511,6 +2491,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Oct  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.10.14-gnu.
+
+* Fri Oct 4 2013 Justin M. Forbes <jforbes@fedoraproject.org> 3.10.14-100
+- Linux v3.10.14
+
+* Thu Oct 3 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4387 ipv6: panic when UFO=On for an interface (rhbz 1011927 1015166)
+
+* Mon Sep 30 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop VC_MUTE patch (rhbz 859485)
+
 * Fri Sep 27 2013 Justin M. Forbes <jforbes@fedoraproject.org> 3.10.13-101
 - Bump and tag for build
 
