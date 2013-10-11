@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.10 extra=
+kver=3.11 extra=
 
 case $1 in
 --force)
@@ -252,21 +252,29 @@ for f in \
   drivers/gpu/drm/nouveau/core/engine/crypt/fuc/nv98.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/crypt/fuc/nv98.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/com.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/nvc0.fuc \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/macros.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpc.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvd7.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvd7.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnve0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnve0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnve0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/nve0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvf0.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvf0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hub.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/nvc0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvd7.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvd7.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/nve0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc \
   drivers/net/wan/wanxlfw.inc_shipped \
     drivers/net/wan/wanxlfw.S \
   drivers/net/wireless/atmel.c \
@@ -446,17 +454,25 @@ clean_blob arch/x86/kernel/microcode_amd.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_AMD'
 clean_mk CONFIG_MICROCODE_AMD arch/x86/kernel/Makefile
 
+announce MICROCODE_AMD_EARLY - "Early load AMD microcode"
+clean_blob arch/x86/kernel/microcode_amd_early.c
+clean_kconfig arch/x86/Kconfig 'MICROCODE_AMD_EARLY'
+clean_mk CONFIG_MICROCODE_AMD_EARLY arch/x86/kernel/Makefile
+
 announce MICROCODE_INTEL - "Intel microcode patch loading support"
 reject_firmware arch/x86/kernel/microcode_intel.c
 clean_blob arch/x86/kernel/microcode_intel.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_INTEL'
 clean_mk CONFIG_MICROCODE_INTEL arch/x86/kernel/Makefile
 
-announce MICROCODE_INTEL_EARLY - "Ëarly load microcode"
+announce MICROCODE_INTEL_EARLY - "Early load Intel microcode"
 clean_blob arch/x86/kernel/microcode_intel_early.c
-clean_blob Documentation/x86/early-microcode.txt
 clean_kconfig arch/x86/Kconfig 'MICROCODE_INTEL_EARLY'
 clean_mk CONFIG_MICROCODE_INTEL_EARLY arch/x86/kernel/Makefile
+
+announce MICROCODE_EARLY - "Early load microcode"
+clean_blob Documentation/x86/early-microcode.txt
+clean_kconfig arch/x86/Kconfig 'MICROCODE_EARLY'
 
 # arm
 
@@ -538,8 +554,10 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/tty/Makefile
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
 reject_firmware drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
 clean_blob drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
-reject_firmware drivers/gpu/drm/nouveau/core/core/falcon.c
-clean_blob drivers/gpu/drm/nouveau/core/core/falcon.c
+reject_firmware drivers/gpu/drm/nouveau/core/engine/falcon.c
+clean_blob drivers/gpu/drm/nouveau/core/engine/falcon.c
+reject_firmware drivers/gpu/drm/nouveau/core/engine/xtensa.c
+clean_blob drivers/gpu/drm/nouveau/core/engine/xtensa.c
 clean_kconfig drivers/gpu/drm/nouveau/Kconfig 'DRM_NOUVEAU'
 clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
 
@@ -598,6 +616,8 @@ reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
 reject_firmware drivers/gpu/drm/radeon/si.c
 clean_blob drivers/gpu/drm/radeon/si.c
+reject_firmware drivers/gpu/drm/radeon/cik.c
+clean_blob drivers/gpu/drm/radeon/cik.c
 reject_firmware drivers/gpu/drm/radeon/radeon_uvd.c
 clean_blob drivers/gpu/drm/radeon/radeon_uvd.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
@@ -615,6 +635,7 @@ clean_blob arch/arm/mach-imx/mm-imx5.c
 clean_blob arch/arm/boot/dts/imx51.dtsi
 clean_blob arch/arm/boot/dts/imx53.dtsi
 clean_blob arch/arm/boot/dts/imx6qdl.dtsi
+clean_blob arch/arm/boot/dts/imx6sl.dtsi
 clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
 clean_kconfig drivers/dma/Kconfig 'IMX_SDMA'
 clean_mk CONFIG_IMX_SDMA drivers/dma/Makefile
@@ -1521,15 +1542,6 @@ clean_blob drivers/net/wireless/brcm80211/brcmfmac/usb.c
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC_USB'
 clean_mk CONFIG_BRCMFMAC_USB drivers/net/wireless/brcm80211/brcmfmac/Makefile
 
-announce CSR_WIFI - "CSR wireless driver"
-reject_firmware drivers/staging/csr/unifi_priv.h
-reject_firmware drivers/staging/csr/firmware.c
-reject_firmware drivers/staging/csr/putest.c
-reject_firmware drivers/staging/csr/sme_native.c
-reject_firmware drivers/staging/csr/sme_sys.c
-clean_kconfig drivers/staging/csr/Kconfig 'CSR_WIFI'
-clean_mk CONFIG_CSR_WIFI drivers/staging/csr/Makefile
-
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
 reject_firmware drivers/net/wireless/orinoco/fw.c
 clean_blob drivers/net/wireless/orinoco/fw.c
@@ -1585,6 +1597,13 @@ clean_blob drivers/net/wireless/iwlegacy/3945.h
 clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL3945'
 clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
 
+announce IWL4965 - "Intel Wireless WiFi 4965AGN"
+reject_firmware drivers/net/wireless/iwlegacy/4965-mac.c
+clean_blob drivers/net/wireless/iwlegacy/4965-mac.c
+clean_blob drivers/net/wireless/iwlegacy/4965.c
+clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL4965'
+clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlegacy/Makefile
+
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
@@ -1596,12 +1615,10 @@ clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
 clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
-announce IWL4965 - "Intel Wireless WiFi 4965AGN"
-reject_firmware drivers/net/wireless/iwlegacy/4965-mac.c
-clean_blob drivers/net/wireless/iwlegacy/4965-mac.c
-clean_blob drivers/net/wireless/iwlegacy/4965.c
-clean_kconfig drivers/net/wireless/iwlegacy/Kconfig 'IWL4965'
-clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlegacy/Makefile
+announce IWLMVM - "Intel Wireless WiFi MVM Firmware support"
+reject_firmware drivers/net/wireless/iwlwifi/mvm/nvm.c
+clean_kconfig drivers/net/wireless/iwlwifi/mvm/Kconfig 'IWLMVM'
+clean_mk CONFIG_IWLMVM drivers/net/wireless/iwlwifi/mvm/Makefile
 
 announce LIBERTAS - "Marvell 8xxx Libertas WLAN driver support"
 reject_firmware drivers/net/wireless/libertas/firmware.c
@@ -1688,6 +1705,29 @@ announce ATH6KL_USB - "Atheros ath6kl USB support"
 clean_blob drivers/net/wireless/ath/ath6kl/usb.c
 clean_kconfig drivers/net/wireless/ath/ath6kl/Kconfig 'ATH6KL_USB'
 clean_mk CONFIG_ATH6KL_USB drivers/net/wireless/ath/ath6kl/Makefile
+
+announce ATH10K - "Atheros 802.11ac wireless cards support"
+reject_firmware drivers/net/wireless/ath/ath10k/core.c
+clean_blob drivers/net/wireless/ath/ath10k/hw.h
+clean_kconfig drivers/net/wireless/ath/ath10k/Kconfig 'ATH10K'
+clean_mk CONFIG_ATH10K drivers/net/wireless/ath/ath10k/Makefile
+
+announce ATH10K_PCI - "Atheros ath10k PCI support"
+clean_blob drivers/net/wireless/ath/ath10k/pci.c
+clean_kconfig drivers/net/wireless/ath/ath10k/Kconfig 'ATH10K_PCI'
+clean_mk CONFIG_ATH10K_PCI drivers/net/wireless/ath/ath10k/Makefile
+
+announce CW1200 - "CW1200 WLAN support"
+reject_firmware drivers/net/wireless/cw1200/fwio.c
+clean_blob drivers/net/wireless/cw1200/fwio.h
+reject_firmware drivers/net/wireless/cw1200/sta.c
+clean_kconfig drivers/net/wireless/cw1200/Kconfig 'CW1200'
+clean_mk CONFIG_CW1200 drivers/net/wireless/cw1200/Makefile
+
+announce CW1200_WLAN_SDIO - "Support SDIO platforms"
+clean_blob drivers/net/wireless/cw1200/cw1200_sdio.c
+clean_kconfig drivers/net/wireless/cw1200/Kconfig 'CW1200_WLAN_SDIO'
+clean_mk CONFIG_CW1200_WLAN_SDIO drivers/net/wireless/cw1200/Makefile
 
 announce PRISM2_USB - "Prism2.5/3 USB driver"
 reject_firmware drivers/staging/wlan-ng/prism2fw.c
@@ -1898,6 +1938,12 @@ clean_blob drivers/misc/ti-st/st_kim.c
 clean_kconfig drivers/misc/ti-st/Kconfig 'TI_ST'
 clean_mk CONFIG_TI_ST drivers/misc/ti-st/Makefile
 
+announce USB_BTMTK - "Mediatek Bluetooth support"
+reject_firmware drivers/staging/btmtk_usb/btmtk_usb.c
+clean_blob drivers/staging/btmtk_usb/btmtk_usb.c
+clean_kconfig drivers/staging/btmtk_usb/Kconfig 'USB_BTMTK'
+clean_mk CONFIG_USB_BTMTK drivers/staging/btmtk_usb/Makefile
+
 # wimax
 
 announce WIMAX_I2400M - "Intel Wireless WiMAX Connection 2400"
@@ -2060,44 +2106,42 @@ clean_mk CONFIG_INPUT_IMS_PCU drivers/input/misc/Makefile
 # Data acquisition #
 ####################
 
+announce COMEDI - "Data acquisition support (comedi)"
+reject_firmware drivers/staging/comedi/drivers.c
+clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI'
+clean_mk CONFIG_COMEDI drivers/staging/comedi/Makefile
+
 announce COMEDI_DAQBOARD2000 - "IOtech DAQboard/2000 support"
-reject_firmware drivers/staging/comedi/drivers/daqboard2000.c
 clean_blob drivers/staging/comedi/drivers/daqboard2000.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_DAQBOARD2000'
 clean_mk CONFIG_COMEDI_DAQBOARD2000 drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_JR3_PCI - "JR3/PCI force sensor board support"
-reject_firmware drivers/staging/comedi/drivers/jr3_pci.c
 clean_blob drivers/staging/comedi/drivers/jr3_pci.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_JR3_PCI'
 clean_mk CONFIG_COMEDI_JR3_PCI drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_ME_DAQ - "Meilhaus ME-2000i, ME-2600i, ME-3000vm1 support"
-reject_firmware drivers/staging/comedi/drivers/me_daq.c
 clean_blob drivers/staging/comedi/drivers/me_daq.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_ME_DAQ'
 clean_mk CONFIG_COMEDI_ME_DAQ drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_NI_PCIDIO - "NI PCI-DIO32HS, PCI-6533, PCI-6534 support"
-reject_firmware drivers/staging/comedi/drivers/ni_pcidio.c
 clean_blob drivers/staging/comedi/drivers/ni_pcidio.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_NI_PCIDIO'
 clean_mk CONFIG_COMEDI_NI_PCIDIO drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_USBDUX - "ITL USBDUX support"
-reject_firmware drivers/staging/comedi/drivers/usbdux.c
 clean_blob drivers/staging/comedi/drivers/usbdux.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUX'
 clean_mk CONFIG_COMEDI_USBDUX drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_USBDUXFAST - "ITL USB-DUXfast support"
-reject_firmware drivers/staging/comedi/drivers/usbduxfast.c
 clean_blob drivers/staging/comedi/drivers/usbduxfast.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUXFAST'
 clean_mk CONFIG_COMEDI_USBDUXFAST drivers/staging/comedi/drivers/Makefile
 
 announce COMEDI_USBDUXSIGMA - "ITL USB-DUXsigma support"
-reject_firmware drivers/staging/comedi/drivers/usbduxsigma.c
 clean_blob drivers/staging/comedi/drivers/usbduxsigma.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUXSIGMA'
 clean_mk CONFIG_COMEDI_USBDUXSIGMA drivers/staging/comedi/drivers/Makefile
