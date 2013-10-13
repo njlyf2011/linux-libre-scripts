@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -850,6 +850,9 @@ Patch25125: vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
 Patch25126: 0001-iwlwifi-don-t-WARN-on-host-commands-sent-when-firmwa.patch
 Patch25127: 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 
+#rhbz 993744
+Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1636,6 +1639,9 @@ ApplyPatch vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
 #rhbz 896695
 ApplyPatch 0001-iwlwifi-don-t-WARN-on-host-commands-sent-when-firmwa.patch
 ApplyPatch 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
+
+#rhbz 993744
+ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2489,6 +2495,13 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Oct 10 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.4-101
+- Fix linux-firmware requirement
+
+* Thu Oct 10 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- USB OHCI accept very late isochronous URBs (in 3.11.4) (rhbz 975158)
+- Fix large order allocation in dm mq policy (rhbz 993744)
+
 * Thu Oct 10 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.11.4-gnu.
 
