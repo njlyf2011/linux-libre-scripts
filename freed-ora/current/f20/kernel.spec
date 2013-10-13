@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -752,8 +752,6 @@ Patch10000: fs-proc-devtree-remove_proc_entry.patch
 
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch13003: efi-dont-map-boot-services-on-32bit.patch
-
 Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
@@ -812,9 +810,6 @@ Patch21247: ath9k_rx_dma_stop_check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-#selinux ptrace child permissions
-Patch22001: selinux-apply-different-permission-to-ptrace-child.patch
-
 #rhbz 927469
 Patch23006: fix-child-thread-introspection.patch
 
@@ -855,17 +850,33 @@ Patch25109: bonding-driver-alb-learning.patch
 Patch25114: elevator-Fix-a-race-in-elevator-switching-and-md.patch
 Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
-#rhbz 1011719
-Patch25116: hwmon-applesmc-Check-key-count-before-proceeding.patch
-
 #rhbz 974072
 Patch25117: rt2800-add-support-for-rf3070.patch
 
 #rhbz 1005567
 Patch25118: bonding-driver-promisc.patch
 
-#rhbz 1013814
-Patch25119: drm-radeon-dont-set-default-clocks-for-SI-when-DPM-is-disabled.patch
+#CVE-2013-4387 rhbz 1011927 1015166
+Patch25121: ipv6-udp-packets-following-an-UFO-enqueued-packet-ne.patch
+
+#rhbz 1015989
+Patch25122: netfilter-nf_conntrack-use-RCU-safe-kfree-for-conntr.patch
+
+#rhbz 982153
+Patch25123: iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
+
+#rhbz 1015920
+Patch25124: drm-nouveau-bios-init-stub-opcode-0xaa.patch
+
+#rhbz 998732
+Patch25125: vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
+
+#rhbz 896695
+Patch25126: 0001-iwlwifi-don-t-WARN-on-host-commands-sent-when-firmwa.patch
+Patch25127: 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
+
+#rhbz 993744
+Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1616,8 +1627,6 @@ ApplyPatch fs-proc-devtree-remove_proc_entry.patch
 
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
-ApplyPatch efi-dont-map-boot-services-on-32bit.patch
-
 # FIXME: REBASE
 #ApplyPatch hibernate-freeze-filesystems.patch
 
@@ -1630,9 +1639,6 @@ ApplyPatch nowatchdog-on-virt.patch
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
 ApplyPatch weird-root-dentry-name-debug.patch
-
-#selinux ptrace child permissions
-ApplyPatch selinux-apply-different-permission-to-ptrace-child.patch
 
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 ApplyPatch criu-no-expert.patch
@@ -1680,17 +1686,33 @@ ApplyPatch skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 ApplyPatch elevator-Fix-a-race-in-elevator-switching-and-md.patch
 ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 
-#rhbz 1011719
-ApplyPatch hwmon-applesmc-Check-key-count-before-proceeding.patch
-
 #rhbz 974072
 ApplyPatch rt2800-add-support-for-rf3070.patch
 
 #rhbz 1005567
 ApplyPatch bonding-driver-promisc.patch
 
-#rhbz 1013814
-ApplyPatch drm-radeon-dont-set-default-clocks-for-SI-when-DPM-is-disabled.patch
+#CVE-2013-4387 rhbz 1011927 1015166
+ApplyPatch ipv6-udp-packets-following-an-UFO-enqueued-packet-ne.patch
+
+#rhbz 1015989
+ApplyPatch netfilter-nf_conntrack-use-RCU-safe-kfree-for-conntr.patch
+
+#rhbz 982153
+ApplyPatch iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
+
+#rhbz 1015920
+ApplyPatch drm-nouveau-bios-init-stub-opcode-0xaa.patch
+
+#rhbz 998732
+ApplyPatch vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
+
+#rhbz 896695
+ApplyPatch 0001-iwlwifi-don-t-WARN-on-host-commands-sent-when-firmwa.patch
+ApplyPatch 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
+
+#rhbz 993744
+ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2505,6 +2527,37 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Oct 10 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.4-301
+- Tag for build
+
+* Thu Oct 10 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- USB OHCI accept very late isochronous URBs (in 3.11.4) (rhbz 975158)
+- Fix large order allocation in dm mq policy (rhbz 993744)
+
+* Wed Oct 09 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Don't trigger a stack trace on crashing iwlwifi firmware (rhbz 896695)
+- Add patch to fix VFIO IOMMU crash (rhbz 998732)
+
+* Tue Oct 08 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix nouveau crash (rhbz 1015920)
+- Quiet irq remapping stack trace (rhbz 982153)
+- Use RCU safe kfree for conntrack (rhbz 1015989)
+
+* Mon Oct 7  2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- General ARM config cleanups
+- Remove old/dupe ARM config options
+- Enable external connectors on ARM
+- Enable i.MX RNG driver
+- ARM MFD and REGULATOR changes and cleanups
+- Enable console for Zynq-7xxx SoCs
+
+* Mon Oct 7 2013 Justin M. Forbes <jforbes@fedoraproject.org>
+- Linux v3.11.4
+
+* Thu Oct 3 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to support not importing certs from db
+- CVE-2013-4387 ipv6: panic when UFO=On for an interface (rhbz 1011927 1015166)
+
 * Wed Oct 2 2013 Justin M. Forbes <jforbes@fedoraproject.org>
 - drm/radeon: don't set default clocks for SI when DPM is disabled (rhbz 1013814)
 
