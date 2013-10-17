@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -780,9 +780,6 @@ Patch22010: debug-idle-sched-warn-once.patch
 #rhbz 927469
 Patch23006: fix-child-thread-introspection.patch
 
-#CVE-2013-2147 rhbz 971242 971249
-Patch25032: cve-2013-2147-ciss-info-leak.patch
-
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 #rhbz 977040
@@ -792,17 +789,8 @@ Patch25057: iwl4965-better-skb-management-in-rx-path.patch
 #rhbz 963715
 Patch25077: media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
 
-#CVE-2013-4343 rhbz 1007733 1007741
-Patch25101: tuntap-correctly-handle-error-in-tun_set_iff.patch
-
-#CVE-2013-4350 rhbz 1007872 1007903
-Patch25102: net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
-
 #CVE-2013-4345 rhbz 1007690 1009136
 Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
-
-#rhbz 1008323
-Patch25120: skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
 
 #rhbz 985522
 Patch25107: ntp-Make-periodic-RTC-update-more-reliable.patch
@@ -820,20 +808,11 @@ Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 #rhbz 974072
 Patch25117: rt2800-add-support-for-rf3070.patch
 
-#rhbz 1005567
-Patch25118: bonding-driver-promisc.patch
-
-#CVE-2013-4387 rhbz 1011927 1015166
-Patch25121: ipv6-udp-packets-following-an-UFO-enqueued-packet-ne.patch
-
 #rhbz 1015989
 Patch25122: netfilter-nf_conntrack-use-RCU-safe-kfree-for-conntr.patch
 
 #rhbz 982153
 Patch25123: iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
-
-#rhbz 1015920
-Patch25124: drm-nouveau-bios-init-stub-opcode-0xaa.patch
 
 #rhbz 998732
 Patch25125: vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
@@ -844,6 +823,9 @@ Patch25127: 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 
 #rhbz 993744
 Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
+
+#rhbz 1000439
+Patch25129: cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1573,9 +1555,6 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 #rhbz 927469
 ApplyPatch fix-child-thread-introspection.patch
 
-#CVE-2013-2147 rhbz 971242 971249
-ApplyPatch cve-2013-2147-ciss-info-leak.patch
-
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 #rhbz 977040
@@ -1584,12 +1563,6 @@ ApplyPatch iwl4965-better-skb-management-in-rx-path.patch
 
 #rhbz 963715
 ApplyPatch media-cx23885-Fix-TeVii-S471-regression-since-introduction-of-ts2020.patch
-
-#CVE-2013-4343 rhbz 1007733 1007741
-ApplyPatch tuntap-correctly-handle-error-in-tun_set_iff.patch
-
-#CVE-2013-4350 rhbz 1007872 1007903
-ApplyPatch net-sctp-fix-ipv6-ipsec-encryption-bug-in-sctp_v6_xmit.patch
 
 #CVE-2013-4345 rhbz 1007690 1009136
 ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
@@ -1603,9 +1576,6 @@ ApplyPatch Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
 #rhbz 971893
 ApplyPatch bonding-driver-alb-learning.patch
 
-#rhbz 1008323
-ApplyPatch skge-fix-invalid-value-passed-to-pci_unmap_sigle.patch
-
 #rhbz 902012
 ApplyPatch elevator-Fix-a-race-in-elevator-switching-and-md.patch
 ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
@@ -1613,20 +1583,11 @@ ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
 #rhbz 974072
 ApplyPatch rt2800-add-support-for-rf3070.patch
 
-#rhbz 1005567
-ApplyPatch bonding-driver-promisc.patch
-
-#CVE-2013-4387 rhbz 1011927 1015166
-ApplyPatch ipv6-udp-packets-following-an-UFO-enqueued-packet-ne.patch
-
 #rhbz 1015989
 ApplyPatch netfilter-nf_conntrack-use-RCU-safe-kfree-for-conntr.patch
 
 #rhbz 982153
 ApplyPatch iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
-
-#rhbz 1015920
-ApplyPatch drm-nouveau-bios-init-stub-opcode-0xaa.patch
 
 #rhbz 998732
 ApplyPatch vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
@@ -1637,6 +1598,9 @@ ApplyPatch 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 
 #rhbz 993744
 ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
+
+#rhbz 1000439
+ApplyPatch cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2461,6 +2425,12 @@ fi
 # and build.
 
 %changelog
+* Mon Oct 14 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.5-200
+- Linux v3.11.5
+
+* Fri Oct 11 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix segfault in cpupower set (rhbz 1000439)
+
 * Thu Oct 10 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.4-201
 - Tag for build
 
