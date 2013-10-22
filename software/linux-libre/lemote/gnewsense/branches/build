@@ -76,7 +76,7 @@ ln -s $pub/debuginfo/$srcbase $srclink
 ln $pub/debuginfo/$srcbase.sign $srclink.sign
 tar -xf $srclink --use=xz
 if $prep; then
-  rm $srclink
+  rm $srclink $srclink.sign
   srctree=$xsrctree
   ln -s ../$branchdir $srctree/.patches
 else
