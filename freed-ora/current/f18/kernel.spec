@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -834,6 +834,18 @@ Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
 #rhbz 1000439
 Patch25129: cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
+
+#rhbz 1010679
+Patch25130: fix-radeon-sound.patch
+
+#rhbz 1011714
+Patch25131: btrfs-relocate-csums-properly-with-prealloc-ext.patch
+
+#rhbz 984696
+Patch25132: rt2800usb-slow-down-TX-status-polling.patch
+
+#rhbz 1015558
+Patch25133: fix-buslogic.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1606,6 +1618,18 @@ ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
 #rhbz 1000439
 ApplyPatch cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
+
+#rhbz 1010679
+ApplyPatch fix-radeon-sound.patch
+
+#rhbz 1011714
+ApplyPatch btrfs-relocate-csums-properly-with-prealloc-ext.patch
+
+#rhbz 984696
+ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
+
+#rhbz 1015558
+ApplyPatch fix-buslogic.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2459,6 +2483,22 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Oct 18 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.6-100
+- Linux v3.11.6
+
+* Thu Oct 17 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix BusLogic error (rhbz 1015558)
+- Fix rt2800usb polling timeouts and throughput issues (rhbz 984696)
+
+* Wed Oct 16 2013 Josh Boyer <jwboyer@fedoraproject.org> 
+- Fix btrfs balance/scrub issue (rhbz 1011714)
+
+* Tue Oct 15 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix regression in radeon sound (rhbz 1010679)
+
+* Mon Oct 14 2013 Kyle McMartin <kyle@redhat.com>
+- Fix crash-driver.patch to properly use page_is_ram. 
+
 * Mon Oct 14 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.5-100
 - Linux v3.11.5
 
