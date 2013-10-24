@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -716,6 +716,7 @@ Patch800: crash-driver.patch
 Patch900: keys-expand-keyring.patch
 Patch901: keys-krb-support.patch
 Patch902: keys-x509-improv.patch
+Patch903: keyring-quota.patch
 
 # secure boot
 Patch1000: secure-modules.patch
@@ -848,6 +849,12 @@ Patch25130: fix-radeon-sound.patch
 
 #rhbz 1011714
 Patch25131: btrfs-relocate-csums-properly-with-prealloc-ext.patch
+
+#rhbz 984696
+Patch25132: rt2800usb-slow-down-TX-status-polling.patch
+
+#rhbz 1015558
+Patch25133: fix-buslogic.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1546,6 +1553,7 @@ ApplyPatch crash-driver.patch
 ApplyPatch keys-expand-keyring.patch
 ApplyPatch keys-krb-support.patch
 ApplyPatch keys-x509-improv.patch
+ApplyPatch keyring-quota.patch
 
 # secure boot
 ApplyPatch secure-modules.patch
@@ -1655,6 +1663,12 @@ ApplyPatch fix-radeon-sound.patch
 
 #rhbz 1011714
 ApplyPatch btrfs-relocate-csums-properly-with-prealloc-ext.patch
+
+#rhbz 984696
+ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
+
+#rhbz 1015558
+ApplyPatch fix-buslogic.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2469,6 +2483,16 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Oct 18 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.6-300
+- Linux v3.11.6
+
+* Fri Oct 18 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.5-303
+- Fix keyring quota misaccounting (rhbz 1017683)
+
+* Thu Oct 17 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix BusLogic error (rhbz 1015558)
+- Fix rt2800usb polling timeouts and throughput issues (rhbz 984696)
+
 * Wed Oct 16 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.5-302
 - Fix btrfs balance/scrub issue (rhbz 1011714)
 
