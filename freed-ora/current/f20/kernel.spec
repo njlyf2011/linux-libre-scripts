@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -688,11 +688,13 @@ Patch09: upstream-reverts.patch
 
 # Standalone patches
 
+#drop with next rebase
 Patch100: taint-vbox.patch
 
+#drop with next rebase
 Patch110: vmbugon-warnon.patch
 
-#atch200: debug-bad-pte-dmi.patch
+#drop with next rebase
 Patch201: debug-bad-pte-modules.patch
 
 Patch390: defaults-acpi-video.patch
@@ -727,8 +729,6 @@ Patch1003: sysrq-secure-boot.patch
 # virt + ksm patches
 
 # DRM
-#atch1700: drm-edid-try-harder-to-fix-up-broken-headers.patch
-#Patch1800: drm-vgem.patch
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
@@ -765,7 +765,6 @@ Patch15000: nowatchdog-on-virt.patch
 
 # lpae
 Patch21001: arm-lpae-ax88796.patch
-Patch21003: arm-dma-amba_pl08x-avoid-64bit-division.patch
 Patch21004: arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 Patch21005: arm-exynos-mp.patch
 Patch21006: arm-highbank-for-3.12.patch
@@ -855,6 +854,25 @@ Patch25132: rt2800usb-slow-down-TX-status-polling.patch
 
 #rhbz 1015558
 Patch25133: fix-buslogic.patch
+
+#rhbz 1023413
+Patch25135: alps-Support-for-Dell-XT2-model.patch
+
+#CVE-2013-4470 rhbz 1023477 1023495
+Patch25136: net_311.mbox
+
+#rhbz 1011621
+Patch25137: cifs-Allow-LANMAN-auth-for-unencapsulated-auth-methods.patch
+
+#rhbz 995782
+Patch25138: intel-3.12-stable-fixes.patch
+
+#CVE-2013-4348 rhbz 1007939 1025647
+Patch25139: net-flow_dissector-fail-on-evil-iph-ihl.patch
+
+#rhbz 1010603
+Patch25140: 0001-Revert-epoll-use-freezable-blocking-call.patch
+Patch25141: 0001-Revert-select-use-freezable-blocking-call.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1460,11 +1478,13 @@ ApplyPatch freedo.patch
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch upstream-reverts.patch -R
 
+#drop with next rebase
 ApplyPatch taint-vbox.patch
 
+#drop with next rebase
 ApplyPatch vmbugon-warnon.patch
 
-#plyPatch debug-bad-pte-dmi.patch
+#drop with next rebase
 ApplyPatch debug-bad-pte-modules.patch
 
 # Architecture patches
@@ -1476,7 +1496,6 @@ ApplyPatch debug-bad-pte-modules.patch
 # ARM
 #
 ApplyPatch arm-lpae-ax88796.patch
-#ApplyPatch arm-dma-amba_pl08x-avoid-64bit-division.patch
 ApplyPatch arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 ApplyPatch arm-exynos-mp.patch
 ApplyPatch arm-highbank-for-3.12.patch
@@ -1564,8 +1583,6 @@ ApplyPatch sysrq-secure-boot.patch
 # Assorted Virt Fixes
 
 # DRM core
-#ApplyPatch drm-edid-try-harder-to-fix-up-broken-headers.patch
-#ApplyPatch drm-vgem.patch
 
 # Nouveau DRM
 
@@ -1669,6 +1686,25 @@ ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
 
 #rhbz 1015558
 ApplyPatch fix-buslogic.patch
+
+#rhbz 1023413
+ApplyPatch alps-Support-for-Dell-XT2-model.patch
+
+#CVE-2013-4470 rhbz 1023477 1023495
+ApplyPatch net_311.mbox
+
+#rhbz 1011621
+ApplyPatch cifs-Allow-LANMAN-auth-for-unencapsulated-auth-methods.patch
+
+#rhbz 995782
+ApplyPatch intel-3.12-stable-fixes.patch
+
+#CVE-2013-4348 rhbz 1007939 1025647
+ApplyPatch net-flow_dissector-fail-on-evil-iph-ihl.patch
+
+#rhbz 1010603
+ApplyPatch 0001-Revert-epoll-use-freezable-blocking-call.patch
+ApplyPatch 0001-Revert-select-use-freezable-blocking-call.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2483,6 +2519,32 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Nov 01 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.6-302
+- Revert blocking patches causing systemd to crash on resume (rhbz 1010603)
+- CVE-2013-4348 net: deadloop path in skb_flow_dissect (rhbz 1007939 1025647)
+
+* Thu Oct 31 2013 Josh Boyer <jwboyer@fedoraprorject.org>
+- Fix display regression on Dell XPS 13 machines (rhbz 995782)
+
+* Tue Oct 29 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix plaintext auth regression in cifs (rhbz 1011621)
+
+* Fri Oct 25 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4470 net: memory corruption with UDP_CORK and UFO (rhbz 1023477 1023495)
+- Add touchpad support for Dell XT2 (rhbz 1023413)
+
+* Thu Oct 24 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Remove completely unapplied patches
+
+* Tue Oct 22 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Build virtio drivers as modules (rhbz 1019569)
+
+* Tue Oct 22 2013 Adam Jackson <ajax@redhat.com>
+- Drop voodoo1 fbdev driver
+
+* Tue Oct 22 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix warning in tcp_fastretrans_alert (rhbz 989251)
+
 * Mon Oct 21 2013 Kyle McMartin <kyle@fedoraproject.org> - 3.11.6-301
 - Reduce scope of am335x-bone.patch, as it broke serial on Wandboard.
 
