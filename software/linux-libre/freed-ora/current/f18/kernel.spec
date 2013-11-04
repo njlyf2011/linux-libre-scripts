@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -847,6 +847,25 @@ Patch25132: rt2800usb-slow-down-TX-status-polling.patch
 #rhbz 1015558
 Patch25133: fix-buslogic.patch
 
+#rhbz 1023413
+Patch25135: alps-Support-for-Dell-XT2-model.patch
+
+#CVE-2013-4470 rhbz 1023477 1023495
+Patch25136: net_311.mbox
+
+#rhbz 1011621
+Patch25137: cifs-Allow-LANMAN-auth-for-unencapsulated-auth-methods.patch
+
+#rhbz 995782
+Patch25138: intel-3.12-stable-fixes.patch
+
+#CVE-2013-4348 rhbz 1007939 1025647
+Patch25139: net-flow_dissector-fail-on-evil-iph-ihl.patch
+
+#rhbz 1010603
+Patch25140: 0001-Revert-epoll-use-freezable-blocking-call.patch
+Patch25141: 0001-Revert-select-use-freezable-blocking-call.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1630,6 +1649,25 @@ ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
 
 #rhbz 1015558
 ApplyPatch fix-buslogic.patch
+
+#rhbz 1023413
+ApplyPatch alps-Support-for-Dell-XT2-model.patch
+
+#CVE-2013-4470 rhbz 1023477 1023495
+ApplyPatch net_311.mbox
+
+#rhbz 1011621
+ApplyPatch cifs-Allow-LANMAN-auth-for-unencapsulated-auth-methods.patch
+
+#rhbz 995782
+ApplyPatch intel-3.12-stable-fixes.patch
+
+#CVE-2013-4348 rhbz 1007939 1025647
+ApplyPatch net-flow_dissector-fail-on-evil-iph-ihl.patch
+
+#rhbz 1010603
+ApplyPatch 0001-Revert-epoll-use-freezable-blocking-call.patch
+ApplyPatch 0001-Revert-select-use-freezable-blocking-call.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2483,6 +2521,23 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Nov 01 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.6-101
+- Revert blocking patches causing systemd to crash on resume (rhbz 1010603)
+- CVE-2013-4348 net: deadloop path in skb_flow_dissect (rhbz 1007939 1025647)
+
+* Thu Oct 31 2013 Josh Boyer <jwboyer@fedoraprorject.org>
+- Fix display regression on Dell XPS 13 machines (rhbz 995782)
+
+* Tue Oct 29 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix plaintext auth regression in cifs (rhbz 1011621)
+
+* Fri Oct 25 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4470 net: memory corruption with UDP_CORK and UFO (rhbz 1023477 1023495)
+- Add touchpad support for Dell XT2 (rhbz 1023413)
+
+* Tue Oct 22 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix warning in tcp_fastretrans_alert (rhbz 989251)
+
 * Fri Oct 18 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.6-100
 - Linux v3.11.6
 
