@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -793,6 +793,10 @@ Patch25132: rt2800usb-slow-down-TX-status-polling.patch
 
 #CVE-2013-4348 rhbz 1007939 1025647
 Patch25139: net-flow_dissector-fail-on-evil-iph-ihl.patch
+
+Patch25140: drm-qxl-backport-fixes-for-Fedora.patch
+
+Patch25141: Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1563,6 +1567,10 @@ ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
 
 #CVE-2013-4348 rhbz 1007939 1025647
 ApplyPatch net-flow_dissector-fail-on-evil-iph-ihl.patch
+
+ApplyPatch drm-qxl-backport-fixes-for-Fedora.patch
+
+ApplyPatch Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2378,6 +2386,13 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Sat Nov 09 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.0-2
+- Add patch from Daniel Stone to avoid high order allocations in evdev
+- Add qxl backport fixes from Dave Airlie
+
+* Tue Nov 05 2013 Kyle McMartin <kyle@fedoraproject.org>
+- Enable crash on {arm,aarch64,ppc64,s390x}
+
 * Mon Nov  4 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.12-gnu.
 
