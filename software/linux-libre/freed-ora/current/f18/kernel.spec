@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -806,9 +806,6 @@ Patch25106: bonding-driver-alb-learning.patch
 #rhbz 985522
 Patch25107: ntp-Make-periodic-RTC-update-more-reliable.patch
 
-#rhbz 1010431
-Patch25108: Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
-
 #rhbz 902012
 Patch25114: elevator-Fix-a-race-in-elevator-switching-and-md.patch
 Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
@@ -844,9 +841,6 @@ Patch25131: btrfs-relocate-csums-properly-with-prealloc-ext.patch
 #rhbz 984696
 Patch25132: rt2800usb-slow-down-TX-status-polling.patch
 
-#rhbz 1015558
-Patch25133: fix-buslogic.patch
-
 #rhbz 1023413
 Patch25135: alps-Support-for-Dell-XT2-model.patch
 
@@ -859,12 +853,12 @@ Patch25138: intel-3.12-stable-fixes.patch
 #CVE-2013-4348 rhbz 1007939 1025647
 Patch25139: net-flow_dissector-fail-on-evil-iph-ihl.patch
 
-#rhbz 1010603
-Patch25140: 0001-Revert-epoll-use-freezable-blocking-call.patch
-Patch25141: 0001-Revert-select-use-freezable-blocking-call.patch
-
 #rhbz 1025769
 Patch25142: iwlwifi-dvm-dont-override-mac80211-queue-setting.patch
+
+Patch25143: drm-qxl-backport-fixes-for-Fedora.patch
+
+Patch25144: Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1606,9 +1600,6 @@ ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
 #rhbz 985522
 ApplyPatch ntp-Make-periodic-RTC-update-more-reliable.patch
 
-#rhbz 1010431
-ApplyPatch Revert-rt2x00pci-Use-PCI-MSIs-whenever-possible.patch
-
 #rhbz 971893
 ApplyPatch bonding-driver-alb-learning.patch
 
@@ -1647,9 +1638,6 @@ ApplyPatch btrfs-relocate-csums-properly-with-prealloc-ext.patch
 #rhbz 984696
 ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
 
-#rhbz 1015558
-ApplyPatch fix-buslogic.patch
-
 #rhbz 1023413
 ApplyPatch alps-Support-for-Dell-XT2-model.patch
 
@@ -1662,12 +1650,12 @@ ApplyPatch intel-3.12-stable-fixes.patch
 #CVE-2013-4348 rhbz 1007939 1025647
 ApplyPatch net-flow_dissector-fail-on-evil-iph-ihl.patch
 
-#rhbz 1010603
-ApplyPatch 0001-Revert-epoll-use-freezable-blocking-call.patch
-ApplyPatch 0001-Revert-select-use-freezable-blocking-call.patch
-
 #rhbz 1025769
 ApplyPatch iwlwifi-dvm-dont-override-mac80211-queue-setting.patch
+
+ApplyPatch drm-qxl-backport-fixes-for-Fedora.patch
+
+ApplyPatch Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2521,6 +2509,13 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Nov 13 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.8-100
+- Linux v3.11.8
+
+* Sat Nov 09 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch from Daniel Stone to avoid high order allocations in evdev
+- Add qxl backport fixes from Dave Airlie
+
 * Mon Nov 04 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.7-100
 - Add patch to fix iwlwifi queue settings backtrace (rhbz 1025769)
 
