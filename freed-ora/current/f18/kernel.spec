@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -834,6 +834,7 @@ Patch25129: cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
 
 #rhbz 1010679
 Patch25130: fix-radeon-sound.patch
+Patch25149: drm-radeon-24hz-audio-fixes.patch
 
 #rhbz 1011714
 Patch25131: btrfs-relocate-csums-properly-with-prealloc-ext.patch
@@ -847,18 +848,28 @@ Patch25135: alps-Support-for-Dell-XT2-model.patch
 #rhbz 1011621
 Patch25137: cifs-Allow-LANMAN-auth-for-unencapsulated-auth-methods.patch
 
-#rhbz 995782
-Patch25138: intel-3.12-stable-fixes.patch
-
-#CVE-2013-4348 rhbz 1007939 1025647
-Patch25139: net-flow_dissector-fail-on-evil-iph-ihl.patch
-
 #rhbz 1025769
 Patch25142: iwlwifi-dvm-dont-override-mac80211-queue-setting.patch
 
 Patch25143: drm-qxl-backport-fixes-for-Fedora.patch
 
 Patch25144: Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
+
+#CVE-2013-4563 rhbz 1030015 1030017
+Patch25145: ipv6-fix-headroom-calculation-in-udp6_ufo_fragment.patch
+
+#rhbz 1015905
+Patch25146: 0001-ip6_output-fragment-outgoing-reassembled-skb-properl.patch
+Patch25147: 0002-netfilter-push-reasm-skb-through-instead-of-original.patch
+
+#rhbz 1011362
+Patch25148: alx-Reset-phy-speed-after-resume.patch
+
+#rhbz 1031086
+Patch25150: slab_common-Do-not-check-for-duplicate-slab-names.patch
+
+#rhbz 967652
+Patch25151: KVM-x86-fix-emulation-of-movzbl-bpl-eax.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1631,6 +1642,7 @@ ApplyPatch cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
 
 #rhbz 1010679
 ApplyPatch fix-radeon-sound.patch
+ApplyPatch drm-radeon-24hz-audio-fixes.patch
 
 #rhbz 1011714
 ApplyPatch btrfs-relocate-csums-properly-with-prealloc-ext.patch
@@ -1644,18 +1656,28 @@ ApplyPatch alps-Support-for-Dell-XT2-model.patch
 #rhbz 1011621
 ApplyPatch cifs-Allow-LANMAN-auth-for-unencapsulated-auth-methods.patch
 
-#rhbz 995782
-ApplyPatch intel-3.12-stable-fixes.patch
-
-#CVE-2013-4348 rhbz 1007939 1025647
-ApplyPatch net-flow_dissector-fail-on-evil-iph-ihl.patch
-
 #rhbz 1025769
 ApplyPatch iwlwifi-dvm-dont-override-mac80211-queue-setting.patch
 
 ApplyPatch drm-qxl-backport-fixes-for-Fedora.patch
 
 ApplyPatch Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
+
+#CVE-2013-4563 rhbz 1030015 1030017
+ApplyPatch ipv6-fix-headroom-calculation-in-udp6_ufo_fragment.patch
+
+#rhbz 1015905
+ApplyPatch 0001-ip6_output-fragment-outgoing-reassembled-skb-properl.patch
+ApplyPatch 0002-netfilter-push-reasm-skb-through-instead-of-original.patch
+
+#rhbz 1011362
+ApplyPatch alx-Reset-phy-speed-after-resume.patch
+
+#rhbz 1031086
+ApplyPatch slab_common-Do-not-check-for-duplicate-slab-names.patch
+
+#rhbz 967652
+ApplyPatch KVM-x86-fix-emulation-of-movzbl-bpl-eax.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2509,6 +2531,19 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Nov 20 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.11.9-100
+- Linux v3.11.9
+
+* Mon Nov 18 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix rhel5.9 KVM guests (rhbz 967652)
+- Add patch to fix crash from slab when using md-raid mirrors (rhbz 1031086)
+- Add patches from Pierre Ossman to fix 24Hz/24p radeon audio (rhbz 1010679)
+- Add patch to fix ALX phy issues after resume (rhbz 1011362)
+- Fix ipv6 sit panic with packet size > mtu (from Michele Baldessari) (rbhz 1015905)
+
+* Thu Nov 14 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4563: net: large udp packet over IPv6 over UFO-enabled device with TBF qdisc panic (rhbz 1030015 1030017)
+
 * Wed Nov 13 2013 Justin M. Forbes <jforbes@fedoraproject.org> - 3.11.8-100
 - Linux v3.11.8
 
