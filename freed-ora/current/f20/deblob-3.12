@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.11 extra=
+kver=3.12 extra=
 
 case $1 in
 --force)
@@ -568,6 +568,12 @@ reject_firmware drivers/gpu/drm/mga/mga_warp.c
 clean_blob drivers/gpu/drm/mga/mga_warp.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_MGA'
 clean_mk CONFIG_DRM_MGA drivers/gpu/drm/Makefile
+
+announce DRM_MSM - "MSM DRM"
+reject_firmware drivers/gpu/drm/msm/adreno/adreno_gpu.c
+clean_blob drivers/gpu/drm/msm/adreno/adreno_gpu.c
+clean_kconfig divers/gpu/drm/msm/Kconfig 'DRM_MSM'
+clean_mk CONFIG_DRM_MSM drivers/gpu/drm/msm/Makefile
 
 announce DRM_R128 - "ATI Rage 128"
 drop_fw_file firmware/r128/r128_cce.bin.ihex firmware/r128/r128_cce.bin
@@ -1440,6 +1446,11 @@ clean_blob drivers/nfc/nfcwilink.c
 clean_kconfig drivers/nfc/Kconfig 'NFC_WILINK'
 clean_mk CONFIG_NFC_WILINK drivers/nfc/Makefile
 
+announce NFC_PN544_I2C - "NFC PN544 i2c support"
+reject_firmware drivers/nfc/pn544/i2c.c
+clean_kconfig drivers/nfs/pn544/Kconfig 'NFC_PN544_I2C'
+clean_mk NFC_PN544_I2C drivers/nfc/pn544/Kconfig
+
 # pcmcia
 
 # CIS files are not software.
@@ -1799,6 +1810,12 @@ clean_blob drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
 clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8188EE
 clean_mk CONFIG_RTL8188EE drivers/net/wireless/rtlwifi/rtl8188ee/Makefile
 
+announce R8188EU - "Realtek RTL8188EU Wireless LAN NIC driver"
+clean_blob drivers/staging/rtl8188eu/hal/Hal8188EFWImg_CE.c
+clean_blob drivers/staging/rtl8188eu/include/rtl8188e_hal.h
+clean_kconfig drivers/staging/rtl8188eu/Kconfig R8188EU
+clean_mk CONFIG_R8188EU drivers/staging/rtl8188eu/Makefile
+
 announce RTL8192CE - "Realtek RTL8192CE/RTL8188CE Wireless Network Adapter"
 reject_firmware drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
 clean_blob drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
@@ -2023,6 +2040,11 @@ clean_mk CONFIG_MISDN_SPEEDFAX drivers/isdn/hardware/mISDN/Makefile
 ##########
 # Serial #
 ##########
+
+announce DGAP - "Digi EPCA PCI products"
+clean_blob drivers/staging/dgap/downld.c
+clean_kconfig drivers/staging/dgap/Kconfig 'DGAP'
+clean_mk CONFIG_DGAP drivers/staging/dgap/Makefile
 
 announce SERIAL_8250_CS - "8250/16550 PCMCIA device support"
 # These are not software; they're Free, but GPLed without in-tree sources.
