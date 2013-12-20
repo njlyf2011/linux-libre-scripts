@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -686,7 +686,6 @@ Patch09: upstream-reverts.patch
 # Standalone patches
 
 Patch390: defaults-acpi-video.patch
-Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: input-kill-stupid-messages.patch
 Patch452: no-pcspkr-modalias.patch
@@ -722,7 +721,6 @@ Patch1003: sysrq-secure-boot.patch
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
-Patch1825: drm-i915-dp-stfu.patch
 
 # Quiet boot fixes
 # silence the ACPI blacklist code
@@ -822,6 +820,12 @@ Patch25174: KVM-x86-fix-guest-initiated-crash-with-x2apic.patch
 
 #CVE-2013-4587 rhbz 1030986 1042071
 Patch25175: KVM-Improve-create-VCPU-parameter.patch
+
+#rhbz 1025770
+Patch25176: br-fix-use-of-rx_handler_data-in-code-executed-on-no.patch
+
+#rhbz 1024002
+Patch25177: libata-implement-ATA_HORKAGE_NO_NCQ_TRIM-and-apply-it-to-Micro-M500-SSDs.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1466,7 +1470,6 @@ ApplyPatch arm-am33xx-cpsw.patch
 
 # ACPI
 ApplyPatch defaults-acpi-video.patch
-ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
 # PCI
@@ -1527,7 +1530,6 @@ ApplyPatch sysrq-secure-boot.patch
 # Nouveau DRM
 
 # Intel DRM
-ApplyPatch drm-i915-dp-stfu.patch
 
 # Radeon DRM
 
@@ -1600,6 +1602,12 @@ ApplyPatch KVM-x86-fix-guest-initiated-crash-with-x2apic.patch
 
 #CVE-2013-4587 rhbz 1030986 1042071
 ApplyPatch KVM-Improve-create-VCPU-parameter.patch
+
+#rhbz 1025770
+ApplyPatch br-fix-use-of-rx_handler_data-in-code-executed-on-no.patch
+
+#rhbz 1024002
+ApplyPatch libata-implement-ATA_HORKAGE_NO_NCQ_TRIM-and-apply-it-to-Micro-M500-SSDs.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2414,6 +2422,12 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue Dec 17 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.5-302
+- Add patch to avoid using queued trim on M500 SSD (rhbz 1024002)
+
+* Mon Dec 16 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix host lockup in bridge code when starting from virt guest (rhbz 1025770)
+
 * Fri Dec 13 2013 Josh Boyer <jwboyer@fedoraproject.org> 3.12.5-301
 - More keys fixes from upstream to fix keyctl_get_persisent crash (rhbz 1043033)
 
