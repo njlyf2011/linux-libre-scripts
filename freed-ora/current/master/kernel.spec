@@ -133,7 +133,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %define rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 3.%{upstream_sublevel}.0
 %endif
@@ -156,8 +156,6 @@ Summary: The Linux kernel
 %define with_pae       %{?_without_pae:       0} %{?!_without_pae:       1}
 # kernel-debug
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
-# kernel-doc
-%define with_doc       %{?_without_doc:       0} %{?!_without_doc:       1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-firmware
@@ -198,24 +196,10 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
-
-# Build the kernel-doc package, but don't fail the build if it botches.
-# Here "true" means "continue" and "false" means "fail the build".
-%if 0%{?released_kernel}
-%define doc_build_fail false
-%else
-%define doc_build_fail true
-%endif
-
-%define rawhide_skip_docs 0
-%if 0%{?rawhide_skip_docs}
-%define with_doc 0
-%define doc_build_fail true
-%endif
 
 # pkg_release is what we'll fill in for the rpm Release: field
 %if 0%{?released_kernel}
@@ -341,11 +325,6 @@ Summary: The Linux kernel
 # don't do debug builds on anything but i686 and x86_64
 %ifnarch i686 x86_64
 %define with_debug 0
-%endif
-
-# only package docs noarch
-%ifnarch noarch
-%define with_doc 0
 %endif
 
 # don't build noarch kernels or headers (duh)
@@ -536,9 +515,6 @@ BuildRequires: kmod, patch, bash, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc
-%if %{with_doc}
-BuildRequires: xmlto, asciidoc
-%endif
 %if %{with_sparse}
 BuildRequires: sparse
 %endif
@@ -769,7 +745,19 @@ Patch25168: rpc_pipe-fix-cleanup-of-dummy-gssd-directory-when-notification-fails
 #rhbz 1030802
 Patch25171: elantech-Properly-differentiate-between-clickpads-an.patch
 
-Patch25172: xen-netback-Include-header-for-vmalloc.patch
+#rhbz 924916
+Patch25179: KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
+
+#rhbz 1047892
+Patch25180: KVM-VMX-fix-use-after-free-of-vmx-loaded_vmcs.patch
+
+#rhbz 1003167 1046238
+Patch25181: 0001-Input-wacom-make-sure-touch_max-is-set-for-touch-dev.patch
+Patch25182: 0002-Input-wacom-add-support-for-three-new-Intuos-devices.patch
+Patch25183: 0003-Input-wacom-add-reporting-of-SW_MUTE_DEVICE-events.patch
+
+#rhbz 953211
+Patch25184: Input-ALPS-add-support-for-Dolphin-devices.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -785,18 +773,6 @@ input and output, etc.
 
 The kernel-libre package is the upstream kernel without the non-Free
 blobs it includes by default.
-
-%package doc
-Summary: Various documentation bits found in the kernel source
-Group: Documentation
-Provides: kernel-doc = %{rpmversion}-%{pkg_release}
-%description doc
-This package contains documentation files from the kernel
-source. Various bits of information about the Linux kernel and the
-device drivers shipped with it are documented in these files.
-
-You'll want to install this package if you need a reference to the
-options that can be passed to Linux kernel modules at load time.
 
 
 %package headers
@@ -1511,7 +1487,19 @@ ApplyPatch rpc_pipe-fix-cleanup-of-dummy-gssd-directory-when-notification-fails.
 #rhbz 1030802
 ApplyPatch elantech-Properly-differentiate-between-clickpads-an.patch
 
-ApplyPatch xen-netback-Include-header-for-vmalloc.patch
+#rhbz 924916
+ApplyPatch KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
+
+#rhbz 1047892
+ApplyPatch KVM-VMX-fix-use-after-free-of-vmx-loaded_vmcs.patch
+
+#rhbz 1003167 1046238
+ApplyPatch 0001-Input-wacom-make-sure-touch_max-is-set-for-touch-dev.patch
+ApplyPatch 0002-Input-wacom-add-support-for-three-new-Intuos-devices.patch
+ApplyPatch 0003-Input-wacom-add-reporting-of-SW_MUTE_DEVICE-events.patch
+
+#rhbz 953211
+ApplyPatch Input-ALPS-add-support-for-Dolphin-devices.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1901,15 +1889,6 @@ pushd tools/thermal/tmon/
 popd
 %endif
 
-%if %{with_doc}
-# Make the HTML pages.
-make htmldocs || %{doc_build_fail}
-
-# sometimes non-world-readable files sneak into the kernel source tree
-chmod -R a=rX Documentation
-find Documentation -type d | xargs chmod u+w
-%endif
-
 # In the modsign case, we do 3 things.  1) We check the "flavour" and hard
 # code the value in the following invocations.  This is somewhat sub-optimal
 # but we're doing this inside of an RPM macro and it isn't as easy as it
@@ -1977,15 +1956,6 @@ find Documentation -type d | xargs chmod u+w
 %install
 
 cd linux-%{KVERREL}
-
-%if %{with_doc}
-docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
-
-# copy the source over
-mkdir -p $docdir
-tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
-
-%endif # with_doc
 
 # We have to do the headers install before the tools install because the
 # kernel headers_install will remove any header files in /usr/include that
@@ -2200,15 +2170,6 @@ fi
 %{_libdir}/kernel-wrapper
 %endif
 
-# only some architecture builds need kernel-doc
-%if %{with_doc}
-%files doc
-%defattr(-,root,root)
-%{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation/*
-%dir %{_datadir}/doc/kernel-doc-%{rpmversion}/Documentation
-%dir %{_datadir}/doc/kernel-doc-%{rpmversion}
-%endif
-
 %if %{with_perf}
 %files -n perf-libre
 %defattr(-,root,root)
@@ -2338,7 +2299,33 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Thu Jan  9 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Jan 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc7.git3.1
+- Linux v3.13-rc7-72-g7d1c153
+
+* Wed Jan 08 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable aic94xx driver (from Paul Bolle)
+- Backport support for ALPS Dolphin devices (rhbz 953211)
+
+* Wed Jan 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc7.git2.1
+- Linux v3.13-rc7-67-gceb3b02
+- Enable BCMA_DRIVER_GPIO by turning on GPIOLIB everywhere (rhbz 1021098)
+
+* Tue Jan 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop -doc subpackage
+
+* Tue Jan 07 2014 Josh Boyer <jwboyer@fedoraproject.com> - 3.13.0-0.rc7.git1.1
+- Linux v3.13-rc7-55-gef350bb
+- Reenable debugging options.
+
+* Tue Jan 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Change DEFAULT_MMAP_MIN_ADDR to 64k on x86_64
+
+* Mon Jan 06 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for Wacom Intuos 5 S devices (rhbz 1046238)
+- Fix use after free crash in KVM (rhbz 1047892)
+- Fix oops in KVM with invalid root_hpa (rhbz 924916)
+
+* Mon Jan  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Jan  9
 - GNU Linux-libre 3.13-rc7-gnu.
 
 * Sun Jan 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13-0.0.rc7.git0.1
