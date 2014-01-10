@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.12%{?stablegnux}
-#define rcrevlibre  -3.12%{?rcrevgnux}
-#define gitrevlibre -3.12%{?gitrevgnux}
+#define stablelibre -3.13%{?stablegnux}
+%define rcrevlibre  -3.12%{?rcrevgnux}
+#define gitrevlibre -3.13%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -131,7 +131,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -536,16 +536,18 @@ BuildRequires: kmod, patch, bash, sh-utils, tar
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc
+%if %{with_doc}
 BuildRequires: xmlto, asciidoc
+%endif
 %if %{with_sparse}
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex
 BuildRequires: audit-libs-devel
 %endif
 %if %{with_tools}
-BuildRequires: pciutils-devel gettext
+BuildRequires: pciutils-devel gettext ncurses-devel
 %endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
@@ -571,6 +573,7 @@ Source4: deblob-check
 Source5: deblob-%{kversion}
 # Source6: deblob-3.%{upstream_sublevel}
 
+Source10: perf-man.tar.gz
 Source11: x509.genkey
 
 Source15: merge.pl
@@ -669,7 +672,6 @@ Patch09: upstream-reverts.patch
 # Standalone patches
 
 Patch390: defaults-acpi-video.patch
-Patch396: acpi-sony-nonvs-blacklist.patch
 
 Patch450: input-kill-stupid-messages.patch
 Patch452: no-pcspkr-modalias.patch
@@ -681,17 +683,14 @@ Patch470: die-floppy-die.patch
 Patch510: silence-noise.patch
 Patch530: silence-fbcon-logo.patch
 
-Patch600: x86-allow-1024-cpus.patch
+Patch600: 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
+
+#rhbz 917708
+Patch700: Revert-userns-Allow-unprivileged-users-to-create-use.patch
 
 Patch800: crash-driver.patch
 
 # crypto/
-
-# keys
-Patch900: keys-expand-keyring.patch
-Patch901: keys-krb-support.patch
-Patch902: keys-x509-improv.patch
-Patch903: keyring-quota.patch
 
 # secure boot
 Patch1000: secure-modules.patch
@@ -705,11 +704,9 @@ Patch1003: sysrq-secure-boot.patch
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
-Patch1825: drm-i915-dp-stfu.patch
+Patch1826: drm-i915-hush-check-crtc-state.patch
 
 # Quiet boot fixes
-# silence the ACPI blacklist code
-Patch2802: silence-acpi-blacklist.patch
 
 # fs fixes
 
@@ -757,46 +754,22 @@ Patch22000: weird-root-dentry-name-debug.patch
 
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#CVE-2013-4345 rhbz 1007690 1009136
-Patch25104: ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
-
-#rhbz 985522
-Patch25107: ntp-Make-periodic-RTC-update-more-reliable.patch
-
-#rhbz 902012
-Patch25114: elevator-Fix-a-race-in-elevator-switching-and-md.patch
-Patch25115: elevator-acquire-q-sysfs_lock-in-elevator_change.patch
-
-#rhbz 974072
-Patch25116: rt2800-add-support-for-rf3070.patch
-
-#rhbz 982153
-Patch25123: iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
-
-#rhbz 998732
-Patch25124: vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
-
-#rhbz 896695
-Patch25127: 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
-
 #rhbz 993744
 Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
-#rhbz 1000439
-Patch25129: cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
+# Fix 15sec NFS mount delay
+Patch25152: sunrpc-create-a-new-dummy-pipe-for-gssd-to-hold-open.patch
+Patch25153: sunrpc-replace-gssd_running-with-more-reliable-check.patch
+Patch25154: nfs-check-gssd-running-before-krb5i-auth.patch
+#rhbz 1037793
+Patch25166: sunrpc-add-an-info-file-for-the-dummy-gssd-pipe.patch
+Patch25167: rpc_pipe-remove-the-clntXX-dir-if-creating-the-pipe-fails.patch
+Patch25168: rpc_pipe-fix-cleanup-of-dummy-gssd-directory-when-notification-fails.patch
 
-#rhbz 1011714
-Patch25131: btrfs-relocate-csums-properly-with-prealloc-ext.patch
+#rhbz 1030802
+Patch25171: elantech-Properly-differentiate-between-clickpads-an.patch
 
-#rhbz 984696
-Patch25132: rt2800usb-slow-down-TX-status-polling.patch
-
-#CVE-2013-4348 rhbz 1007939 1025647
-Patch25139: net-flow_dissector-fail-on-evil-iph-ihl.patch
-
-Patch25140: drm-qxl-backport-fixes-for-Fedora.patch
-
-Patch25141: Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
+Patch25172: xen-netback-Include-header-for-vmalloc.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -969,7 +942,7 @@ This package provides debug information for package kernel-libre-tools.
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
 %endif # with_tools
 
@@ -1285,7 +1258,7 @@ if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
     done
     if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{kversion} ]] ; then
 %setup -q -n kernel-%{kversion}%{?dist} -c -T
-      cp -rl $sharedir/vanilla-%{kversion} .
+      cp -al $sharedir/vanilla-%{kversion} .
     else
 %setup -q -n kernel-%{kversion}%{?dist} -c
       mv linux-%{kversion} vanilla-%{kversion}
@@ -1304,12 +1277,12 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
   done
   if [[ ! -z $sharedir  &&  -d $sharedir/vanilla-%{vanillaversion} ]] ; then
 
-    cp -rl $sharedir/vanilla-%{vanillaversion} .
+    cp -al $sharedir/vanilla-%{vanillaversion} .
 
   else
 
     # Need to apply patches to the base vanilla version.
-    cp -rl vanilla-%{kversion} vanilla-%{vanillaversion}
+    cp -al vanilla-%{kversion} vanilla-%{vanillaversion}
     cd vanilla-%{vanillaversion}
 
 # Update vanilla to the latest upstream.
@@ -1347,7 +1320,7 @@ else
 fi
 
 # Now build the fedora kernel tree.
-cp -rl vanilla-%{vanillaversion} linux-%{KVERREL}
+cp -al vanilla-%{vanillaversion} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
@@ -1404,7 +1377,7 @@ ApplyOptionalPatch upstream-reverts.patch -R
 
 # Architecture patches
 # x86(-64)
-ApplyPatch x86-allow-1024-cpus.patch
+ApplyPatch 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 # ARM64
 
@@ -1437,7 +1410,6 @@ ApplyPatch arm-imx6-utilite.patch
 
 # ACPI
 ApplyPatch defaults-acpi-video.patch
-ApplyPatch acpi-sony-nonvs-blacklist.patch
 
 #
 # PCI
@@ -1473,17 +1445,13 @@ ApplyPatch silence-fbcon-logo.patch
 
 # Changes to upstream defaults.
 
+#rhbz 917708
+ApplyPatch Revert-userns-Allow-unprivileged-users-to-create-use.patch
 
 # /dev/crash driver.
 ApplyPatch crash-driver.patch
 
 # crypto/
-
-# keys
-ApplyPatch keys-expand-keyring.patch
-ApplyPatch keys-krb-support.patch
-ApplyPatch keys-x509-improv.patch
-ApplyPatch keyring-quota.patch
 
 # secure boot
 ApplyPatch secure-modules.patch
@@ -1498,12 +1466,9 @@ ApplyPatch sysrq-secure-boot.patch
 # Nouveau DRM
 
 # Intel DRM
-ApplyPatch drm-i915-dp-stfu.patch
+ApplyPatch drm-i915-hush-check-crtc-state.patch
 
 # Radeon DRM
-
-# silence the ACPI blacklist code
-ApplyPatch silence-acpi-blacklist.patch
 
 # Patches headed upstream
 ApplyPatch fs-proc-devtree-remove_proc_entry.patch
@@ -1531,46 +1496,22 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#CVE-2013-4345 rhbz 1007690 1009136
-ApplyPatch ansi_cprng-Fix-off-by-one-error-in-non-block-size-request.patch
-
-#rhbz 985522
-ApplyPatch ntp-Make-periodic-RTC-update-more-reliable.patch
-
-#rhbz 902012
-ApplyPatch elevator-Fix-a-race-in-elevator-switching-and-md.patch
-ApplyPatch elevator-acquire-q-sysfs_lock-in-elevator_change.patch
-
-#rhbz 974072
-ApplyPatch rt2800-add-support-for-rf3070.patch
-
-#rhbz 982153
-ApplyPatch iommu-Remove-stack-trace-from-broken-irq-remapping-warning.patch
-
-#rhbz 998732
-ApplyPatch vfio-iommu-Fixed-interaction-of-VFIO_IOMMU_MAP_DMA.patch
-
-#rhbz 896695
-ApplyPatch 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
-
 #rhbz 993744
 ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
-#rhbz 1000439
-ApplyPatch cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
+# Fix 15sec NFS mount delay
+ApplyPatch sunrpc-create-a-new-dummy-pipe-for-gssd-to-hold-open.patch
+ApplyPatch sunrpc-replace-gssd_running-with-more-reliable-check.patch
+ApplyPatch nfs-check-gssd-running-before-krb5i-auth.patch
+#rhbz 1037793
+ApplyPatch rpc_pipe-remove-the-clntXX-dir-if-creating-the-pipe-fails.patch
+ApplyPatch sunrpc-add-an-info-file-for-the-dummy-gssd-pipe.patch
+ApplyPatch rpc_pipe-fix-cleanup-of-dummy-gssd-directory-when-notification-fails.patch
 
-#rhbz 1011714
-ApplyPatch btrfs-relocate-csums-properly-with-prealloc-ext.patch
+#rhbz 1030802
+ApplyPatch elantech-Properly-differentiate-between-clickpads-an.patch
 
-#rhbz 984696
-ApplyPatch rt2800usb-slow-down-TX-status-polling.patch
-
-#CVE-2013-4348 rhbz 1007939 1025647
-ApplyPatch net-flow_dissector-fail-on-evil-iph-ihl.patch
-
-ApplyPatch drm-qxl-backport-fixes-for-Fedora.patch
-
-ApplyPatch Input-evdev-fall-back-to-vmalloc-for-client-event-buffer.patch
+ApplyPatch xen-netback-Include-header-for-vmalloc.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1927,8 +1868,7 @@ BuildKernel %make_target %kernel_image smp
   make -s %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_LIBNUMA=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
-%{perf_make} all
-%{perf_make} man || %{doc_build_fail}
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT all
 %endif
 
 %if %{with_tools}
@@ -1956,6 +1896,9 @@ chmod +x tools/power/cpupower/utils/version-gen.sh
    popd
 %endif #turbostat/x86_energy_perf_policy
 %endif
+pushd tools/thermal/tmon/
+%{make}
+popd
 %endif
 
 %if %{with_doc}
@@ -2069,13 +2012,18 @@ find $RPM_BUILD_ROOT/usr/include \
 
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT install-bin
+# remove the 'trace' symlink.
+rm -f %{buildroot}%{_bindir}/trace
 
 # python-perf extension
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT install-python_ext
 
 # perf man pages (note: implicit rpm magic compresses them later)
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install-man || %{doc_build_fail}
+mkdir -p %{buildroot}/%{_mandir}/man1
+pushd %{buildroot}/%{_mandir}/man1
+tar -xf %{SOURCE10}
+popd
 %endif
 
 %if %{with_tools}
@@ -2110,6 +2058,9 @@ install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
    make DESTDIR=%{buildroot} install
    popd
 %endif #turbostat/x86_energy_perf_policy
+pushd tools/thermal/tmon
+make INSTALL_ROOT=%{buildroot} install
+popd
 %endif
 
 %if %{with_firmware}
@@ -2299,6 +2250,7 @@ fi
 %{_bindir}/turbostat
 %{_mandir}/man8/turbostat*
 %endif
+%{_bindir}/tmon
 %endif
 
 %if %{with_debuginfo}
@@ -2386,6 +2338,212 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu Jan  9 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.13-rc7-gnu.
+
+* Sun Jan 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13-0.0.rc7.git0.1
+- Linux v3.13-rc7
+- Fix xen-netback build failure on ARM
+
+* Mon Dec 30 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc6.git0.1
+- Linux v3.13-rc6
+
+* Mon Dec 23 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc5.git0.1
+- Linux v3.13-rc5
+- Disable debugging options.
+
+* Sat Dec 21 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc4.git5.1
+- Linux v3.13-rc4-256-gb7000ad
+
+* Fri Dec 20 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patches to fix dummy gssd entry (rhbz 1037793)
+
+* Thu Dec 19 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc4.git4.1
+- Linux v3.13-rc4-144-ga36c160
+
+* Thu Dec 19 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- copy kernel trees around with 'cp -al' so symlinks are preserved.  Fixes
+  weird build failures with coreutils 8.22 (rhbz 1044801)
+
+* Wed Dec 18 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc4.git3.1
+- Linux v3.13-rc4-99-g35eecf0
+
+* Wed Dec 18 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc4.git2.1
+- Linux v3.13-rc4-38-gb0031f2
+
+* Wed Dec 18 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Reenable MEMORY_HOTPLUG on x86_64
+- Fix nowatchdog-on-virt.patch to actually work in KVM guests
+
+* Tue Dec 17 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc4.git1.1
+- Linux v3.13-rc4-21-g0eda402
+- Reenable debugging options.
+
+* Mon Dec 16 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc4.git0.1
+- Linux v3.13-rc4
+- Disable debugging options.
+
+* Sat Dec 14 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git5.1
+- Linux v3.13-rc3-362-gb2077eb
+
+* Sat Dec 14 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Wrap doc BR in with_doc
+- Stop building perf in build AND install because that's stupid
+- Use prebuilt perf man pages
+
+* Fri Dec 13 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- More keys fixes from upstream to fix keyctl_get_persisent crash (rhbz 1043033)
+
+* Fri Dec 13 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git4.1
+- Linux v3.13-rc3-302-g8d27637
+
+* Thu Dec 12 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git3.1
+- Linux v3.13-rc3-249-g2208f65
+
+* Thu Dec 12 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2013-4587 kvm: out-of-bounds access (rhbz 1030986 1042071)
+- CVE-2013-6376 kvm: BUG_ON in apic_cluster_id (rhbz 1033106 1042099)
+- CVE-2013-6368 kvm: cross page vapic_addr access (rhbz 1032210 1042090)
+- CVE-2013-6367 kvm: division by 0 in apic_get_tmcct (rhbz 1032207 1042081)
+
+* Wed Dec 11 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git2.1
+- Linux v3.13-rc3-174-g9538e10
+
+* Wed Dec 11 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patches to support ETPS/2 Elantech touchpads (rhbz 1030802)
+
+* Tue Dec 10 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git1.2
+- Revert upstream selinux change causing sync hang (rhbz 1033965)
+- Add patch to fix radeon from crashing
+
+* Tue Dec 10 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git1.1
+- Linux v3.13-rc3-157-g17b2112
+- Reenable debugging options.
+
+* Mon Dec 09 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git0.1
+- Linux v3.13-rc3
+- Disable debugging options.
+
+* Fri Dec 06 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git7.1
+- Linux v3.13-rc2-326-g843f4f4
+
+* Fri Dec 06 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git6.1
+- Linux v3.13-rc2-295-g002acf1
+- Add test fix patch for crypto backtrace (rhbz 1038472)
+
+* Thu Dec 05 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git5.1
+- Linux v3.13-rc2-265-gef1e4e3
+
+* Thu Dec 05 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git4.1
+- Linux v3.13-rc2-215-g53c6de5
+- Enable PR kvm module on ppc64 (rhbz 1038541)
+
+* Wed Dec 04 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git3.1
+- Linux v3.13-rc2-208-g8ecffd7
+
+* Tue Dec  3 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM cleanups and remove obsolete options
+
+* Mon Dec 02 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git2.1
+- Linux v3.13-rc2-119-ga45299e
+
+* Mon Dec 02 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc2.git1.1
+- Linux v3.13-rc2-1-gaf91706
+- Reenable debugging options.
+
+* Sat Nov 30 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+- Enable sound compressed offload on ARM
+
+* Fri Nov 29 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc3.git0.1
+- Linux v3.13-rc2
+- Disable debugging options.
+
+* Fri Nov 29 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc1.git4.1
+- Linux v3.13-rc1-252-gdda9cc3
+
+* Tue Nov 26 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc1.git3.1
+- Linux v3.13-rc1-128-g0e4b074
+
+* Tue Nov 26 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix crash driver build and re-enable on s390x (from Dan Horák)
+- CVE-2013-6382 xfs: missing check for ZERO_SIZE_PTR (rhbz 1033603 1034670)
+
+* Mon Nov 25 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc1.git2.1
+- Linux v3.13-rc1-85-g7e3528c
+
+* Sun Nov 24 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc1.git1.1
+- Linux v3.13-rc1-77-g4c1cc40
+- Reenable debugging options.
+
+* Sat Nov 23 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc1.git0.1
+- Linux v3.13-rc1
+- Disable debugging options.
+
+* Fri Nov 22 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix ARM Utilite DTB
+
+* Fri Nov 22 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git11.1
+- Linux v3.12-11097-ga5d6e63
+- Drop all the keys-* patches because they were merged upstream.  Yay!
+
+* Thu Nov 21 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Some minor ARM config updates
+
+* Thu Nov 21 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git10.1
+- Linux v3.12-10928-g527d151
+- Drop ACPI blacklist year options and patch (removed with upstream commit 4c47cb197e13 )
+
+* Wed Nov 20 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git9.1
+- Linux v3.12-10710-gb4789b8
+
+* Tue Nov 19 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable CGROUP_HUGETLB on ppc64/ppc64p7 and x86_64 (rhbz 1031984)
+
+* Tue Nov 19 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git8.1
+- Linux v3.12-10554-g801a760
+
+* Tue Nov 19 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git7.1
+- Linux v3.12-10553-g27b5c3f
+
+* Sun Nov 17 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix up ARM usb gadget config to make it useful
+
+* Sun Nov 17 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git6.1
+- Linux v3.12-10087-g1213959
+- Update s390x config from Dan Horák
+
+* Sat Nov 16 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git5.1
+- Linux v3.12-9888-gf63c482
+
+* Thu Nov 14 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git4.1
+- Linux v3.12-8333-g4fbf888
+- Build tmon in kernel-tools
+- Disable ARM NEON optimised AES and OMAP2PLUS cpufreq because they don't build
+
+* Thu Nov 14 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM configs
+- Enable ARM NEON optimised AES
+
+* Wed Nov 13 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git3.2
+- Enable USER_NS for root-only processes (rhbz 917708)
+
+* Wed Nov 13 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git3.1
+- Linux v3.12-7033-g42a2d92
+
+* Wed Nov 13 2013 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix imx-drm build issues
+
+* Wed Nov 13 2013 Adam Jackson <ajax@redhat.com>
+- Hush i915's check_crtc_state()
+
+* Tue Nov 12 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git2.1
+- Linux v3.12-4849-g10d0c97
+
+* Mon Nov 11 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc0.git1.3
+- Linux v3.12-2839-gedae583
+- Reenable debugging options.
+
 * Sat Nov 09 2013 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.0-2
 - Add patch from Daniel Stone to avoid high order allocations in evdev
 - Add qxl backport fixes from Dave Airlie
