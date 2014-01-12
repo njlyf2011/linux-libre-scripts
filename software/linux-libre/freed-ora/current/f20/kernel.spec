@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -786,9 +786,6 @@ Patch25127: 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 #rhbz 993744
 Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
-#rhbz 1000439
-Patch25129: cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
-
 Patch25140: drm-qxl-backport-fixes-for-Fedora.patch
 
 #rhbz 1011362
@@ -812,8 +809,17 @@ Patch25171: elantech-Properly-differentiate-between-clickpads-an.patch
 #rhbz 1025770
 Patch25176: br-fix-use-of-rx_handler_data-in-code-executed-on-no.patch
 
-#rhbz 1024002
-Patch25177: libata-implement-ATA_HORKAGE_NO_NCQ_TRIM-and-apply-it-to-Micro-M500-SSDs.patch
+#rhbz 924916
+Patch25179: KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
+
+#rhbz 1047892
+Patch25180: KVM-VMX-fix-use-after-free-of-vmx-loaded_vmcs.patch
+
+#rhbz 1044471
+Patch25181: tg3-Add-support-for-new-577xx-device-ids.patch
+
+#rhbz 953211
+Patch25182: Input-ALPS-add-support-for-Dolphin-devices.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1556,9 +1562,6 @@ ApplyPatch 0002-iwlwifi-don-t-WARN-on-bad-firmware-state.patch
 #rhbz 993744
 ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
-#rhbz 1000439
-ApplyPatch cpupower-Fix-segfault-due-to-incorrect-getopt_long-a.patch
-
 ApplyPatch drm-qxl-backport-fixes-for-Fedora.patch
 
 #rhbz 1011362
@@ -1582,8 +1585,17 @@ ApplyPatch elantech-Properly-differentiate-between-clickpads-an.patch
 #rhbz 1025770
 ApplyPatch br-fix-use-of-rx_handler_data-in-code-executed-on-no.patch
 
-#rhbz 1024002
-ApplyPatch libata-implement-ATA_HORKAGE_NO_NCQ_TRIM-and-apply-it-to-Micro-M500-SSDs.patch
+#rhbz 924916
+ApplyPatch KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
+
+#rhbz 1047892
+ApplyPatch KVM-VMX-fix-use-after-free-of-vmx-loaded_vmcs.patch
+
+#rhbz 1044471
+ApplyPatch tg3-Add-support-for-new-577xx-device-ids.patch
+
+#rhbz 953211
+ApplyPatch Input-ALPS-add-support-for-Dolphin-devices.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2398,6 +2410,25 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Jan 10 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.12.7-gnu.
+
+* Fri Jan 10 2014 Justin M. Forbes <jforbes@fedoraproject.org - 3.12.7-300
+- Linux v3.12.7
+
+* Wed Jan 08 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport support for ALPS Dolphin devices (rhbz 953211)
+- Enable BCMA_DRIVER_GPIO by turning on GPIOLIB everywhere (rhbz 1021098)
+
+* Mon Jan 06 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for BCM57786 devices to tg3 (rhbz 1044471)
+- Fix use after free crash in KVM (rhbz 1047892)
+- Fix oops in KVM with invalid root_hpa (rhbz 924916)
+- CVE-2013-4579: ath9k_htc improper MAC update (rhbz 1032753 1033072)
+
+* Sat Dec 28 2013 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update am33xx (BeagleBone) cpsw patch to upstream version
+
 * Mon Dec 23 2013 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.12.6-gnu.
 
