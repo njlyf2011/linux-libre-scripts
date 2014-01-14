@@ -1,7 +1,7 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-01-09 23:34:57.000000000 +0000
++++ .config	2014-01-13 11:19:20.000000000 +0000
 @@ -0,0 +1,4931 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
@@ -188,8 +188,8 @@ Index: .config
 +CONFIG_HAVE_KERNEL_LZ4=y
 +# CONFIG_KERNEL_GZIP is not set
 +# CONFIG_KERNEL_BZIP2 is not set
-+# CONFIG_KERNEL_LZMA is not set
-+CONFIG_KERNEL_XZ=y
++CONFIG_KERNEL_LZMA=y
++# CONFIG_KERNEL_XZ is not set
 +# CONFIG_KERNEL_LZO is not set
 +# CONFIG_KERNEL_LZ4 is not set
 +CONFIG_DEFAULT_HOSTNAME="(none)"
