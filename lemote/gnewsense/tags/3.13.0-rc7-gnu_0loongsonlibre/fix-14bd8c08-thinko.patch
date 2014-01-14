@@ -1,0 +1,29 @@
+From: Alexandre Oliva <lxoliva@fsfla.org>
+Subject: Unbreak Loongson2 and r4k-generic flush icache range
+
+Commit 14bd8c08, that replaced Loongson2-specific ifdefs with cpu tests,
+inverted the CPU test in local_r4k_flush_icache_range.  Loongson2 won't
+boot up using the generic icache flush code.  Presumably other CPUs
+might face other problems when presented with Loongson2-specific icache
+flush code too.
+
+Signed-off-by: Alexandre Oliva <lxoliva@fsfla.org>
+
+diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
+index 62ffd20..1c2029d 100644
+--- a/arch/mips/mm/c-r4k.c
++++ b/arch/mips/mm/c-r4k.c
+@@ -580,11 +580,11 @@ static inline void local_r4k_flush_icache_range(unsigned long start, unsigned lo
+ 	else {
+ 		switch (boot_cpu_type()) {
+ 		case CPU_LOONGSON2:
+-			protected_blast_icache_range(start, end);
++			protected_loongson23_blast_icache_range(start, end);
+ 			break;
+ 
+ 		default:
+-			protected_loongson23_blast_icache_range(start, end);
++			protected_blast_icache_range(start, end);
+ 			break;
+ 		}
+ 	}
