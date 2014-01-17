@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -806,9 +806,6 @@ Patch25164: dell-laptop.patch
 #rhbz 1030802
 Patch25171: elantech-Properly-differentiate-between-clickpads-an.patch
 
-#rhbz 1025770
-Patch25176: br-fix-use-of-rx_handler_data-in-code-executed-on-no.patch
-
 #rhbz 924916
 Patch25179: KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
 
@@ -1048,14 +1045,14 @@ Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
-Provides: kernel-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-libre-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-modules-extra = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-libre-modules-extra = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
 Provides: installonlypkg(kernel-libre-module)\
-Provides: kernel-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
 Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
 AutoReqProv: no\
 %description -n kernel%{?variant}%{?1:-%{1}}-modules-extra\
@@ -1582,9 +1579,6 @@ ApplyPatch dell-laptop.patch
 #rhbz 1030802
 ApplyPatch elantech-Properly-differentiate-between-clickpads-an.patch
 
-#rhbz 1025770
-ApplyPatch br-fix-use-of-rx_handler_data-in-code-executed-on-no.patch
-
 #rhbz 924916
 ApplyPatch KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
 
@@ -1597,7 +1591,6 @@ ApplyPatch tg3-Add-support-for-new-577xx-device-ids.patch
 #rhbz 953211
 ApplyPatch Input-ALPS-add-support-for-Dolphin-devices.patch
 
-# END OF PATCH APPLICATIONS
 
 %endif
 
@@ -2410,6 +2403,26 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Jan 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.12.8-gnu.
+
+* Wed Jan 15 2014 Justin M. Forbes <jforbes@fedoraproject.org - 3.12.8-300
+- Linux v3.12.8
+
+* Wed Jan 15 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-1446 hamradio/yam: information leak in ioctl (rhbz 1053620 1053647)
+- CVE-2014-1438 x86: exceptions are not cleared in AMD FXSAVE workaround (rhbz 1053599 1052914)
+
+* Tue Jan 14 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix k-m-e Provides to be explicit to only the package flavor (rhbz 1046246)
+
+* Tue Jan 14 2014 Neil Horman <nhorman@redhat.com>
+- Backport ipv6 route cache expiration fix (rhbz 1040128)
+
+* Sun Jan 12 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable generic cpufreq-cpu0 driver on ARM
+- Enable thermal userspace support for ARM
+
 * Fri Jan 10 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.12.7-gnu.
 
