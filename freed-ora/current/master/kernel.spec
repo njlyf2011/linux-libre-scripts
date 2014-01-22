@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -16,35 +16,7 @@ Summary: The Linux kernel
 %global signmodules 0
 %endif
 
-# Save original buildid for later if it's defined
-%if 0%{?buildid:1}
-%global orig_buildid %{buildid}
-%undefine buildid
-%endif
-
-###################################################################
-# Polite request for people who spin their own kernel rpms:
-# please modify the "buildid" define in a way that identifies
-# that the kernel isn't the stock distribution kernel, for example,
-# by setting the define to ".local" or ".bz123456". This will be
-# appended to the full kernel version.
-#
-# (Uncomment the '#' and both spaces below to set the buildid.)
-#
 # % define buildid .local
-###################################################################
-
-# The buildid can also be specified on the rpmbuild command line
-# by adding --define="buildid .whatever". If both the specfile and
-# the environment define a buildid they will be concatenated together.
-%if 0%{?orig_buildid:1}
-%if 0%{?buildid:1}
-%global srpm_buildid %{buildid}
-%define buildid %{srpm_buildid}%{orig_buildid}
-%else
-%define buildid %{orig_buildid}
-%endif
-%endif
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -68,7 +40,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 12
+%define base_sublevel 13
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -79,7 +51,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -3.13%{?stablegnux}
-%define rcrevlibre  -3.12%{?rcrevgnux}
+#define rcrevlibre  -3.13%{?rcrevgnux}
 #define gitrevlibre -3.13%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -113,16 +85,10 @@ Summary: The Linux kernel
 
 # Do we have a -stable update to apply?
 %define stable_update 0
-# Is it a -stable RC?
-%define stable_rc 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
 %define stable_base %{stable_update}
-%if 0%{?stable_rc}
-# stable RCs are incremental patches, so we need the previous stable patch
-%define stable_base %(echo $((%{stable_update} - 1)))
-%endif
 %endif
 %define rpmversion 3.%{base_sublevel}.%{stable_update}
 
@@ -131,7 +97,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -204,12 +170,7 @@ Summary: The Linux kernel
 # pkg_release is what we'll fill in for the rpm Release: field
 %if 0%{?released_kernel}
 
-%if 0%{?stable_rc}
-%define stable_rctag .rc%{stable_rc}
-%define pkg_release 0%{stable_rctag}.%{fedora_build}%{?buildid}%{?dist}%{?libres}
-%else
 %define pkg_release %{fedora_build}%{?buildid}%{?dist}%{?libres}
-%endif
 
 %else
 
@@ -251,14 +212,6 @@ Summary: The Linux kernel
 %else
 %define variant -libre
 %define variant_fedora -libre-fedora
-%endif
-
-%define using_upstream_branch 0
-%if 0%{?upstream_branch:1}
-%define stable_update 0
-%define using_upstream_branch 1
-%define variant -%{upstream_branch}%{?variant_fedora}
-%define pkg_release 0.%{fedora_build}%{upstream_branch_tag}%{?buildid}%{?dist}%{?libres}
 %endif
 
 %if !%{debugbuildsenabled}
@@ -425,7 +378,7 @@ Summary: The Linux kernel
 
 # Should make listnewconfig fail if there's config options
 # printed out?
-%if %{nopatches}%{using_upstream_branch}
+%if %{nopatches}
 %define listnewconfig_fail 0
 %else
 %define listnewconfig_fail 1
@@ -549,7 +502,7 @@ Source4: deblob-check
 Source5: deblob-%{kversion}
 # Source6: deblob-3.%{upstream_sublevel}
 
-Source10: perf-man.tar.gz
+Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
 
 Source15: merge.pl
@@ -604,10 +557,6 @@ Source2001: cpupower.config
 %define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Patch00: %{stable_patch_00}
 %endif
-%if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}%{?rcrevgnu}.xz
-Patch01: %{stable_patch_01}
-%endif
 
 # non-released_kernel case
 # These are automagically defined by the rcrev and gitrev values set up
@@ -624,10 +573,6 @@ Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?g
 Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
-%endif
-
-%if %{using_upstream_branch}
-### BRANCH PATCH ###
 %endif
 
 # we also need compile fixes for -vanilla
@@ -974,14 +919,14 @@ Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
-Provides: kernel-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-libre-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-modules-extra = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-libre-modules-extra = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
 Provides: installonlypkg(kernel-libre-module)\
-Provides: kernel-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
 Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
 AutoReqProv: no\
 %description -n kernel%{?variant}%{?1:-%{1}}-modules-extra\
@@ -1123,7 +1068,6 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1
   fi
-%if !%{using_upstream_branch}
   if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
     if [ "${patch:0:8}" != "patch-3." ] &&
        [ "${patch:0:14}" != "patch-libre-3." ] ; then
@@ -1132,7 +1076,6 @@ ApplyPatch()
     fi
   fi 2>/dev/null
   $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
-%endif
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
   *.gz)  gunzip  < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1303,14 +1246,6 @@ cd linux-%{KVERREL}
 # released_kernel with possible stable updates
 %if 0%{?stable_base}
 ApplyPatch %{stable_patch_00}
-%endif
-%if 0%{?stable_rc}
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
-ApplyPatch %{stable_patch_01}
-%endif
-
-%if %{using_upstream_branch}
-### BRANCH APPLY ###
 %endif
 
 # Drop some necessary files from the source dir into the buildroot
@@ -1965,15 +1900,6 @@ cd linux-%{KVERREL}
 # Install kernel headers
 make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_install
 
-# Do headers_check but don't die if it fails.
-make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_check \
-     > hdrwarnings.txt || :
-if grep -q exist hdrwarnings.txt; then
-   sed s:^$RPM_BUILD_ROOT/usr/include/:: hdrwarnings.txt
-   # Temporarily cause a build failure if header inconsistencies.
-   # exit 1
-fi
-
 find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
      	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
@@ -2299,7 +2225,42 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Mon Jan 13 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jan 21 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.13-gnu.
+
+* Mon Jan 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-1
+- Linux v3.13
+- Disable debugging options.
+- Use versioned perf man pages tarball
+
+* Sat Jan 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc8.git4.1
+- Linux v3.13-rc8-76-g7d0d46d
+
+* Sat Jan 18 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable ARM_GLOBAL_TIMER on ARM used by a number of Cortex-A9 and later platforms
+
+* Thu Jan 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc8.git3.1
+- Linux v3.13-rc8-46-g85ce70f
+
+* Wed Jan 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc8.git2.1.1
+- Linux v3.13-rc8-27-g2e67c56
+
+* Tue Jan 14 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix k-m-e Provides to be explicit to only the package flavor (rhbz 1046246)
+
+* Tue Jan 14 2014 Kyle McMartin <kyle@fedoraproject.org>
+- aarch64: enable 4K pages and CONFIG_COMPAT.
+
+* Mon Jan 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc8.git1.1
+- Linux v3.13-rc8-5-ga6da83f
+- Reenable debugging options.
+
+* Sun Jan 12 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates and cleanups
+- Enable generic cpufreq-cpu0 driver on ARM
+- Enable thermal userspace support for ARM
+
+* Sun Jan 12 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Jan 13
 - GNU Linux-libre 3.13-rc8-gnu.
 
 * Sun Jan 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc8.git0.1
