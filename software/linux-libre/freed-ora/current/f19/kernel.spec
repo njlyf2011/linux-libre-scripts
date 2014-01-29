@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -819,6 +819,12 @@ Patch25181: tg3-Add-support-for-new-577xx-device-ids.patch
 
 #rhbz 953211
 Patch25182: Input-ALPS-add-support-for-Dolphin-devices.patch
+
+#rhbz 1056711
+Patch25183: ipv6-introduce-IFA_F_NOPREFIXROUTE-and-IFA_F_MANAGETEMPADDR-flags.patch
+
+#rhbz 1057533
+Patch25184: i915-remove-pm_qos-request-on-error.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1578,6 +1584,12 @@ ApplyPatch tg3-Add-support-for-new-577xx-device-ids.patch
 
 #rhbz 953211
 ApplyPatch Input-ALPS-add-support-for-Dolphin-devices.patch
+
+#rhbz 1056711
+ApplyPatch ipv6-introduce-IFA_F_NOPREFIXROUTE-and-IFA_F_MANAGETEMPADDR-flags.patch
+
+#rhbz 1057533
+ApplyPatch i915-remove-pm_qos-request-on-error.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2402,6 +2414,14 @@ fi
 # and build.
 
 %changelog
+* Tue Jan 28 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.12.9-gnu.
+
+* Mon Jan 27 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.12.9-200
+- Backport new IPv6 address flag IFA_F_NOPREFIXROUTE and IFA_F_MANAGETEMPADDR (rhbz 1056711)
+- Linux v3.12.9
+- i915: remove pm_qos request on error (rhbz 1057533)
+
 * Thu Jan 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.12.8-gnu.
 
