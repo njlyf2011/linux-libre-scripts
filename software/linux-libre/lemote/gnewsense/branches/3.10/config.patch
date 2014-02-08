@@ -1,17 +1,18 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-01-27 00:00:56.000000000 +0000
-@@ -0,0 +1,4767 @@
++++ .config	2014-02-08 08:53:36.000000000 +0000
+@@ -0,0 +1,4769 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.10.28-gnu Kernel Configuration
++# Linux/mips 3.10.29-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
 +#
 +# Machine selection
 +#
++CONFIG_ZONE_DMA=y
 +# CONFIG_MIPS_ALCHEMY is not set
 +# CONFIG_AR7 is not set
 +# CONFIG_ATH79 is not set
@@ -141,7 +142,8 @@ Index: .config
 +CONFIG_SPLIT_PTLOCK_CPUS=4
 +# CONFIG_COMPACTION is not set
 +CONFIG_PHYS_ADDR_T_64BIT=y
-+CONFIG_ZONE_DMA_FLAG=0
++CONFIG_ZONE_DMA_FLAG=1
++CONFIG_BOUNCE=y
 +CONFIG_VIRT_TO_BUS=y
 +CONFIG_KSM=y
 +CONFIG_DEFAULT_MMAP_MIN_ADDR=4096
