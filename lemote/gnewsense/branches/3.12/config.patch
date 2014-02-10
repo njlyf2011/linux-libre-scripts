@@ -1,8 +1,8 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-02-07 19:06:40.000000000 +0000
-@@ -0,0 +1,4886 @@
++++ .config	2014-02-10 09:36:19.000000000 +0000
+@@ -0,0 +1,4882 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
 +# Linux/mips 3.12.10-gnu Kernel Configuration
@@ -139,8 +139,7 @@ Index: .config
 +CONFIG_SPLIT_PTLOCK_CPUS=4
 +# CONFIG_COMPACTION is not set
 +CONFIG_PHYS_ADDR_T_64BIT=y
-+CONFIG_ZONE_DMA_FLAG=1
-+CONFIG_BOUNCE=y
++CONFIG_ZONE_DMA_FLAG=0
 +CONFIG_VIRT_TO_BUS=y
 +CONFIG_KSM=y
 +CONFIG_DEFAULT_MMAP_MIN_ADDR=4096
@@ -399,7 +398,6 @@ Index: .config
 +# CONFIG_PCIEPORTBUS is not set
 +CONFIG_ISA=y
 +CONFIG_MMU=y
-+CONFIG_ZONE_DMA=y
 +# CONFIG_PCCARD is not set
 +# CONFIG_HOTPLUG_PCI is not set
 +# CONFIG_RAPIDIO is not set
@@ -3478,7 +3476,7 @@ Index: .config
 +# CONFIG_SND_ISA is not set
 +CONFIG_SND_PCI=y
 +CONFIG_SND_AD1889=m
-+CONFIG_SND_ALS300=m
++# CONFIG_SND_ALS300 is not set
 +# CONFIG_SND_ALS4000 is not set
 +# CONFIG_SND_ALI5451 is not set
 +# CONFIG_SND_ATIIXP is not set
@@ -3517,9 +3515,7 @@ Index: .config
 +# CONFIG_SND_ENS1370 is not set
 +# CONFIG_SND_ENS1371 is not set
 +# CONFIG_SND_ES1938 is not set
-+CONFIG_SND_ES1968=m
-+CONFIG_SND_ES1968_INPUT=y
-+CONFIG_SND_ES1968_RADIO=y
++# CONFIG_SND_ES1968 is not set
 +CONFIG_SND_FM801=m
 +CONFIG_SND_FM801_TEA575X_BOOL=y
 +# CONFIG_SND_HDA_INTEL is not set
@@ -3531,7 +3527,7 @@ Index: .config
 +# CONFIG_SND_INTEL8X0M is not set
 +# CONFIG_SND_KORG1212 is not set
 +CONFIG_SND_LOLA=m
-+CONFIG_SND_LX6464ES=m
++# CONFIG_SND_LX6464ES is not set
 +# CONFIG_SND_MAESTRO3 is not set
 +# CONFIG_SND_MIXART is not set
 +# CONFIG_SND_NM256 is not set
