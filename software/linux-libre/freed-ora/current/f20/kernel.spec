@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -828,6 +828,8 @@ Patch25184: i915-remove-pm_qos-request-on-error.patch
 #rhbz 990955
 Patch25185: ath9k_htc-make-sta_rc_update-atomic-for-most-calls.patch
 
+#rhbz 950630
+Patch25186: xhci-fix-resume-issues-on-renesas-chips-in-samsung-laptops.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1611,6 +1613,9 @@ ApplyPatch i915-remove-pm_qos-request-on-error.patch
 
 #rhbz 990955
 ApplyPatch ath9k_htc-make-sta_rc_update-atomic-for-most-calls.patch
+
+#rhbz 950630
+ApplyPatch xhci-fix-resume-issues-on-renesas-chips-in-samsung-laptops.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2425,6 +2430,15 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Sat Feb  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.12.10-gnu.
+
+* Thu Feb 06 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.12.10-300
+- Linux v3.12.10
+
+* Wed Feb 05 2014 Justin M. Forbes <jforbes@fedoraproject.org>
+- fix resume issues on Renesas chips in Samsung laptops (rhbz 950630)
+
 * Wed Jan 29 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.12.9-301
 - ipv6 addrconf: revert /proc/net/if_inet6 ifa_flag format (rhbz 1056711)
 
