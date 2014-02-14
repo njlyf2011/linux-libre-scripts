@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-02-09 19:26:57.000000000 +0000
-@@ -0,0 +1,4929 @@
++++ .config	2014-02-14 14:14:50.000000000 +0000
+@@ -0,0 +1,4930 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.13.2-gnu Kernel Configuration
++# Linux/mips 3.13.3-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1669,6 +1669,7 @@ Index: .config
 +CONFIG_BCACHE=m
 +# CONFIG_BCACHE_DEBUG is not set
 +# CONFIG_BCACHE_CLOSURES_DEBUG is not set
++CONFIG_BLK_DEV_DM_BUILTIN=y
 +CONFIG_BLK_DEV_DM=m
 +# CONFIG_DM_DEBUG is not set
 +CONFIG_DM_BUFIO=m

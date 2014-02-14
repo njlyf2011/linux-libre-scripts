@@ -1,4 +1,5 @@
 3.13-rc7-f67624fd-loongson-community.patch -p1 # loongson-community patches
+fix-rtl8187.patch -p1
 gnewsense-binutils-flag.patch -p0
 100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
 config.patch -p0 # config file
