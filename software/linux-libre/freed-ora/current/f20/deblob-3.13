@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#    Copyright (C) 2008-2013 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008-2014 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.12 extra=
+kver=3.13 extra=
 
 case $1 in
 --force)
@@ -275,6 +275,14 @@ for f in \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc \
+  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nv108.fuc.h \
+    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nv108.fuc \
+  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nva3.fuc.h \
+    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nva3.fuc \
+  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvc0.fuc.h \
+    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvc0.fuc \
+  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvd0.fuc.h \
+    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvd0.fuc \
   drivers/net/wan/wanxlfw.inc_shipped \
     drivers/net/wan/wanxlfw.S \
   drivers/net/wireless/atmel.c \
@@ -917,6 +925,13 @@ reject_firmware drivers/media/dvb-frontends/cx24116.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_CX24116'
 clean_mk CONFIG_DVB_CX24116 drivers/media/dvb-frontends/Makefile
 
+announce DVB_CX24117 - "Conexant CX24117 based"
+undefault_firmware CX24117 drivers/media/dvb-frontends/cx24117.c
+reject_firmware drivers/media/dvb-frontends/cx24117.c
+clean_blob drivers/media/dvb-frontends/cx24117.c
+clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_CX24117'
+clean_mk CONFIG_DVB_CX24117 drivers/media/dvb-frontends/Makefile
+
 announce DVB_SP887X - "Spase sp887x based"
 undefault_firmware 'SP887X' drivers/media/dvb-frontends/sp887x.c
 reject_firmware drivers/media/dvb-frontends/sp887x.c
@@ -1166,6 +1181,12 @@ reject_firmware drivers/media/usb/gspca/vicam.c
 clean_blob drivers/media/usb/gspca/vicam.c
 clean_kconfig drivers/media/usb/gspca/Kconfig 'USB_GSPCA_VICAM'
 clean_mk CONFIG_USB_GSPCA_VICAM drivers/media/usb/gspca/Makefile
+
+announce VIDEO_TI_VPE - "TI VPE (Video Processing Engine) driver"
+reject_firmware drivers/media/platform/ti-vpe/vpdma.c
+clean_blob drivers/media/platform/ti-vpe/vpdma.c
+clean_kconfig drivers/media/platform/Kconfig 'VIDEO_TI_VPE'
+clean_mk CONFIG_VIDEO_TI_VPE drivers/media/platform/ti-vpe/Makefile
 
 # radio
 
@@ -1811,7 +1832,8 @@ clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8188EE
 clean_mk CONFIG_RTL8188EE drivers/net/wireless/rtlwifi/rtl8188ee/Makefile
 
 announce R8188EU - "Realtek RTL8188EU Wireless LAN NIC driver"
-clean_blob drivers/staging/rtl8188eu/hal/Hal8188EFWImg_CE.c
+reject_firmware drivers/staging/rtl8188eu/hal/rtl8188e_hal_init.c
+clean_blob drivers/staging/rtl8188eu/hal/rtl8188e_hal_init.c
 clean_blob drivers/staging/rtl8188eu/include/rtl8188e_hal.h
 clean_kconfig drivers/staging/rtl8188eu/Kconfig R8188EU
 clean_mk CONFIG_R8188EU drivers/staging/rtl8188eu/Makefile
@@ -1904,6 +1926,13 @@ clean_blob drivers/net/wireless/zd1201.c
 clean_kconfig drivers/net/wireless/Kconfig 'USB_ZD1201'
 clean_mk CONFIG_USB_ZD1201 drivers/net/wireless/Makefile
 
+announce WCN36XX - "Qualcomm Atheros WCN3660/3680 support"
+reject_firmware drivers/net/wireless/ath/wcn36xx/smd.c
+clean_blob drivers/net/wireless/ath/wcn36xx/wcn36xx.h
+clean_blob drivers/net/wireless/ath/wcn36xx/main.c
+clean_kconfig drivers/net/wireless/ath/wcn36xx/Kconfig 'WCN36XX'
+clean_mk CONFIG_WCN36XX drivers/net/wireless/ath/wcn36xx/Makefile
+
 announce ZD1211RW - "ZyDAS ZD1211/ZD1211B USB-wireless support"
 reject_firmware drivers/net/wireless/zd1211rw/zd_usb.c
 clean_blob drivers/net/wireless/zd1211rw/zd_usb.c
@@ -1942,10 +1971,15 @@ clean_blob drivers/bluetooth/btusb.c
 clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBTUSB'
 clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
+announce BT_MRVL - "Marvell Bluetooth driver support"
+reject_firmware drivers/bluetooth/btmrvl_main.c
+clean_blob Documentation/btmrvl.txt
+clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL'
+clean_mk CONFIG_BT_MRVL drivers/bluetooth/Makefile
+
 announce BT_MRVL_SDIO - "Marvell BT-over-SDIO driver"
 reject_firmware drivers/bluetooth/btmrvl_sdio.c
 clean_blob drivers/bluetooth/btmrvl_sdio.c
-clean_blob Documentation/btmrvl.txt
 clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL_SDIO'
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
 
