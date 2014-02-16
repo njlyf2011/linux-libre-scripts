@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -824,7 +824,6 @@ Patch25182: Input-ALPS-add-support-for-Dolphin-devices.patch
 Patch25183: ipv6-introduce-IFA_F_NOPREFIXROUTE-and-IFA_F_MANAGETEMPADDR-flags.patch
 
 #rhbz 1057533
-Patch25184: i915-remove-pm_qos-request-on-error.patch
 Patch25155: ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
 
 #rhbz 990955
@@ -832,6 +831,18 @@ Patch25185: ath9k_htc-make-sta_rc_update-atomic-for-most-calls.patch
 
 #rhbz 950630
 Patch25186: xhci-fix-resume-issues-on-renesas-chips-in-samsung-laptops.patch
+
+#CVE-2014-1874 rhbz 1062356 1062507
+Patch25188: SELinux-Fix-kernel-BUG-on-empty-security-contexts.patch
+
+#rhbz 1031296
+Patch25189: tick-Clear-broadcast-pending-bit-when-switching-to-oneshot.patch
+
+#rhbz 1045755
+Patch25195: cgroup-fixes.patch
+
+#rhbz 1051918
+Patch25198: pinctrl-protect-pinctrl_list-add.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1596,14 +1607,24 @@ ApplyPatch Input-ALPS-add-support-for-Dolphin-devices.patch
 ApplyPatch ipv6-introduce-IFA_F_NOPREFIXROUTE-and-IFA_F_MANAGETEMPADDR-flags.patch
 ApplyPatch ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
 
-#rhbz 1057533
-ApplyPatch i915-remove-pm_qos-request-on-error.patch
-
 #rhbz 990955
 ApplyPatch ath9k_htc-make-sta_rc_update-atomic-for-most-calls.patch
 
 #rhbz 950630
 ApplyPatch xhci-fix-resume-issues-on-renesas-chips-in-samsung-laptops.patch
+
+#CVE-2014-1874 rhbz 1062356 1062507
+ApplyPatch SELinux-Fix-kernel-BUG-on-empty-security-contexts.patch
+
+#rhbz 1031296
+ApplyPatch tick-Clear-broadcast-pending-bit-when-switching-to-oneshot.patch
+
+#rhbz 1045755
+ApplyPatch cgroup-fixes.patch
+
+#rhbz 1051918
+ApplyPatch pinctrl-protect-pinctrl_list-add.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -2428,6 +2449,18 @@ fi
 # and build.
 
 %changelog
+* Fri Feb 14 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.12.11-gnu.
+
+* Thu Feb 13 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.12.11-200
+- Linux v3.12.11
+
+* Wed Feb 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix list corruption from pinctrl (rhbz 1051918)
+- Fix cgroup destroy oops (rhbz 1045755)
+- Fix backtrace in amd_e400_idle (rhbz 1031296)
+- CVE-2014-1874 SELinux: local denial of service (rhbz 1062356 1062507)
+
 * Sat Feb  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.12.10-gnu.
 
