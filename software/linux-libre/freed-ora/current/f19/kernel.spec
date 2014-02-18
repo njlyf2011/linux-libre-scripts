@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -844,6 +844,10 @@ Patch25195: cgroup-fixes.patch
 #rhbz 1051918
 Patch25198: pinctrl-protect-pinctrl_list-add.patch
 
+#CVE-2014-0069 rhbz 1064253 1062585
+Patch25200: cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
+Patch25201: cifs-sanity-check-length-of-data-to-send-before-sending.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1624,6 +1628,10 @@ ApplyPatch cgroup-fixes.patch
 
 #rhbz 1051918
 ApplyPatch pinctrl-protect-pinctrl_list-add.patch
+
+#CVE-2014-0069 rhbz 1064253 1062585
+ApplyPatch cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
+ApplyPatch cifs-sanity-check-length-of-data-to-send-before-sending.patch
 
 
 # END OF PATCH APPLICATIONS
@@ -2449,6 +2457,9 @@ fi
 # and build.
 
 %changelog
+* Fri Feb 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.12.11-201
+- CVE-2014-0069 cifs: incorrect handling of bogus user pointers (rhbz 1064253 1062585)
+
 * Fri Feb 14 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.12.11-gnu.
 
