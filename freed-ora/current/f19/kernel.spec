@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -816,9 +816,6 @@ Patch25186: ath9k_htc-make-sta_rc_update-atomic-for-most-calls.patch
 #rhbz 950630
 Patch25187: xhci-fix-resume-issues-on-renesas-chips-in-samsung-laptops.patch
 
-#CVE-2014-1874 rhbz 1062356 1062507
-Patch25188: SELinux-Fix-kernel-BUG-on-empty-security-contexts.patch
-
 #rhbz 1031296
 Patch25189: tick-Clear-broadcast-pending-bit-when-switching-to-oneshot.patch
 
@@ -828,9 +825,6 @@ Patch25195: cgroup-fixes.patch
 #rhbz 1064430 1056711
 Patch25196: ipv6-introduce-IFA_F_NOPREFIXROUTE-and-IFA_F_MANAGETEMPADDR-flags.patch
 Patch25197: ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
-
-#rhbz 1051918
-Patch25198: pinctrl-protect-pinctrl_list-add.patch
 
 #CVE-2014-0069 rhbz 1064253 1062584
 Patch25200: cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
@@ -1601,9 +1595,6 @@ ApplyPatch ath9k_htc-make-sta_rc_update-atomic-for-most-calls.patch
 #rhbz 950630
 ApplyPatch xhci-fix-resume-issues-on-renesas-chips-in-samsung-laptops.patch
 
-#CVE-2014-1874 rhbz 1062356 1062507
-ApplyPatch SELinux-Fix-kernel-BUG-on-empty-security-contexts.patch
-
 #rhbz 1031296
 ApplyPatch tick-Clear-broadcast-pending-bit-when-switching-to-oneshot.patch
 
@@ -1613,9 +1604,6 @@ ApplyPatch cgroup-fixes.patch
 #rhbz 1064430 1056711
 ApplyPatch ipv6-introduce-IFA_F_NOPREFIXROUTE-and-IFA_F_MANAGETEMPADDR-flags.patch
 ApplyPatch ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
-
-#rhbz 1051918
-ApplyPatch pinctrl-protect-pinctrl_list-add.patch
 
 #CVE-2014-0069 rhbz 1064253 1062584
 ApplyPatch cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
@@ -2448,7 +2436,13 @@ fi
 # and build.
 
 %changelog
-* Fri Feb 21 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Feb 22 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.13.4-gnu.
+
+* Thu Feb 20 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.13.4-100
+- Linux v3.13.4
+
+* Thu Feb 20 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Feb 21
 - GNU Linux-libre 3.13.3-gnu.
 
 * Tue Feb 18 2014 Justin M. Forbes <jforbes@fedoraproject.org>
