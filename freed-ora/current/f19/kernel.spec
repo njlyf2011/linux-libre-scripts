@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -823,6 +823,9 @@ Patch25197: ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
 #CVE-2014-0069 rhbz 1064253 1062584
 Patch25200: cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
 Patch25201: cifs-sanity-check-length-of-data-to-send-before-sending.patch
+
+#rhbz 1068862
+Patch25002: cifs-mask-off-top-byte-in-get_rfc1002_length.patch
 
 #rhbz 1054408
 Patch25203: cpufreq-powernow-k8-Initialize-per-cpu-data-structures-properly.patch
@@ -1603,6 +1606,9 @@ ApplyPatch ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
 ApplyPatch cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
 ApplyPatch cifs-sanity-check-length-of-data-to-send-before-sending.patch
 
+#rhbz 1068862
+ApplyPatch cifs-mask-off-top-byte-in-get_rfc1002_length.patch
+
 #rhbz 1054408
 ApplyPatch cpufreq-powernow-k8-Initialize-per-cpu-data-structures-properly.patch
 
@@ -2028,13 +2034,13 @@ find Documentation -type d | xargs chmod u+w
 %define __modsign_install_post \
   if [ "%{signmodules}" -eq "1" ]; then \
     if [ "%{with_pae}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign.%{pae} signing_key.x509.sign+%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}/ \
+      %{modsign_cmd} signing_key.priv.sign.%{pae} signing_key.x509.sign.%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}/ \
     fi \
     if [ "%{with_debug}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign.debug signing_key.x509.sign+debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
+      %{modsign_cmd} signing_key.priv.sign.debug signing_key.x509.sign.debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.debug/ \
     fi \
     if [ "%{with_pae_debug}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign.%{pae}debug signing_key.x509.sign+%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}debug/ \
+      %{modsign_cmd} signing_key.priv.sign.%{pae}debug signing_key.x509.sign.%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}.%{pae}debug/ \
     fi \
     if [ "%{with_up}" -ne "0" ]; then \
       %{modsign_cmd} signing_key.priv.sign signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
@@ -2436,6 +2442,12 @@ fi
 # and build.
 
 %changelog
+* Tue Feb 25 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.13.5-101
+* Fix module signing so secure boot works again
+
+* Tue Feb 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix mounting issues on cifs (rhbz 1068862)
+
 * Mon Feb 24 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.13.5-gnu.
 
