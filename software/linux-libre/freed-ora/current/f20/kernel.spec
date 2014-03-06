@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -776,9 +776,6 @@ Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 #rhbz 993744
 Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
-#rhbz 1011362
-Patch25148: alx-Reset-phy-speed-after-resume.patch
-
 # Fix 15sec NFS mount delay
 Patch25152: sunrpc-create-a-new-dummy-pipe-for-gssd-to-hold-open.patch
 Patch25153: sunrpc-replace-gssd_running-with-more-reliable-check.patch
@@ -819,6 +816,9 @@ Patch25197: ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
 Patch25200: cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
 Patch25201: cifs-sanity-check-length-of-data-to-send-before-sending.patch
 
+#rhbz 1068862
+Patch25002: cifs-mask-off-top-byte-in-get_rfc1002_length.patch
+
 #rhbz 1054408
 Patch25203: cpufreq-powernow-k8-Initialize-per-cpu-data-structures-properly.patch
 
@@ -827,6 +827,15 @@ Patch25024: e100-Fix-disabling-already-disabled-device-warning.patch
 
 #rhbz 1056170
 Patch25025: usb-ehci-fix-deadlock-when-threadirqs-option-is-used.patch
+
+#CVE-2014-0102 rhbz 1071396
+Patch25026: keyring-fix.patch
+
+#CVE-2014-0049 rhbz 1062368 1071837
+Patch25027: kvm-x86-fix-emulator-buffer-overflow.patch
+
+#rhbz 1065087
+Patch25028: tty-Fix-low_latency-BUG.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1560,9 +1569,6 @@ ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 #rhbz 993744
 ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
 
-#rhbz 1011362
-ApplyPatch alx-Reset-phy-speed-after-resume.patch
-
 # Fix 15sec NFS mount delay
 ApplyPatch sunrpc-create-a-new-dummy-pipe-for-gssd-to-hold-open.patch
 ApplyPatch sunrpc-replace-gssd_running-with-more-reliable-check.patch
@@ -1603,6 +1609,9 @@ ApplyPatch ipv6-addrconf-revert-if_inet6ifa_flag-format.patch
 ApplyPatch cifs-ensure-that-uncached-writes-handle-unmapped-areas-correctly.patch
 ApplyPatch cifs-sanity-check-length-of-data-to-send-before-sending.patch
 
+#rhbz 1068862
+ApplyPatch cifs-mask-off-top-byte-in-get_rfc1002_length.patch
+
 #rhbz 1054408
 ApplyPatch cpufreq-powernow-k8-Initialize-per-cpu-data-structures-properly.patch
 
@@ -1612,6 +1621,14 @@ ApplyPatch e100-Fix-disabling-already-disabled-device-warning.patch
 #rhbz 1056170
 ApplyPatch usb-ehci-fix-deadlock-when-threadirqs-option-is-used.patch
 
+#CVE-2014-0102 rhbz 1071396
+ApplyPatch keyring-fix.patch
+
+#CVE-2014-0049 rhbz 1062368 1071837
+ApplyPatch kvm-x86-fix-emulator-buffer-overflow.patch
+
+#rhbz 1065087
+ApplyPatch tty-Fix-low_latency-BUG.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2435,6 +2452,19 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Mar 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.5-201
+- CVE-2014-0049 kvm: mmio_fragments out-of-bounds access (rhbz 1062368 1071837)
+- Fix atomic sched BUG in tty low_latency (rhbz 1065087)
+
+* Fri Feb 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-0102 keyctl_link can be used to cause an oops (rhbz 1071396)
+
+* Fri Feb 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop alx phy reset patch that is already in 3.13
+
+* Tue Feb 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix mounting issues on cifs (rhbz 1068862)
+
 * Mon Feb 24 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-livre 3.13.5-gnu.
 
