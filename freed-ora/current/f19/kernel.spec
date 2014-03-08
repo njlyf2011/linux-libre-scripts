@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 102
+%global baserelease 103
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -841,6 +841,15 @@ Patch25027: kvm-x86-fix-emulator-buffer-overflow.patch
 
 #rhbz 1065087
 Patch25028: tty-Fix-low_latency-BUG.patch
+
+#rhbz 1066064
+Patch25029: audit-don-t-generate-loginuid-log-when-audit-disable.patch
+
+#CVE-2014-0101 rhbz 1072029 1070705
+Patch25030: net-net-sctp-fix-sctp_sf_do_5_1D_ce-to-verify-if-we-peer-is-AUTH-capable.patch
+
+#CVE-2014-0100 rhbz 1072026 1070618
+Patch25031: net-fix-for-a-race-condition-in-the-inet-frag-code.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1629,6 +1638,15 @@ ApplyPatch kvm-x86-fix-emulator-buffer-overflow.patch
 
 #rhbz 1065087
 ApplyPatch tty-Fix-low_latency-BUG.patch
+
+#rhbz 1066064
+ApplyPatch audit-don-t-generate-loginuid-log-when-audit-disable.patch
+
+#CVE-2014-0101 rhbz 1072029 1070705
+ApplyPatch net-net-sctp-fix-sctp_sf_do_5_1D_ce-to-verify-if-we-peer-is-AUTH-capable.patch
+
+#CVE-2014-0100 rhbz 1072026 1070618
+ApplyPatch net-fix-for-a-race-condition-in-the-inet-frag-code.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2453,6 +2471,11 @@ fi
 # and build.
 
 %changelog
+* Mon Mar 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.5-103
+- CVE-2014-0100 net: inet frag race condition use-after-free (rhbz 1072026 1070618)
+- CVE-2014-0101 sctp: null ptr deref when processing auth cookie_echo chunk (rhbz 1070209 1070705)
+- Fix overly verbose audit logs (rhbz 1066064)
+
 * Mon Mar 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.5-102
 - CVE-2014-0049 kvm: mmio_fragments out-of-bounds access (rhbz 1062368 1071837)
 - Fix atomic sched BUG in tty low_latency (rhbz 1065087)
