@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 13
+%define base_sublevel 14
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -265,7 +265,7 @@ Summary: The Linux kernel
 
 %if %{with_vdso_install}
 # These arches install vdso/ directories.
-%define vdso_arches %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x aarch64
+%define vdso_arches %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x aarch64 ppc64le
 %endif
 
 # Overrides for generic default options
@@ -291,12 +291,12 @@ Summary: The Linux kernel
 %endif
 
 # bootwrapper is only on ppc
-%ifnarch ppc ppc64 ppc64p7
+%ifnarch ppc ppc64 ppc64p7 ppc64le
 %define with_bootwrapper 0
 %endif
 
 # sparse blows up on ppc64 and sparc64
-%ifarch ppc64 ppc ppc64p7
+%ifarch ppc64 ppc ppc64p7 ppc64le
 %define with_sparse 0
 %endif
 
@@ -326,6 +326,17 @@ Summary: The Linux kernel
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
+%endif
+
+%ifarch ppc64le
+%define asmarch powerpc
+%define hdrarch powerpc
+%define all_arch_configs kernel-%{version}-ppc64le.config
+%define image_install_path boot
+%define make_target vmlinux
+%define kernel_image vmlinux
+%define kernel_image_elf 1
+%define with_tools 0
 %endif
 
 %ifarch s390x
@@ -368,7 +379,7 @@ Summary: The Linux kernel
 %endif
 
 %ifarch aarch64
-%define all_arch_configs kernel-%{version}-arm64.config
+%define all_arch_configs kernel-%{version}-aarch64*.config
 %define asmarch arm64
 %define hdrarch arm64
 %define make_target Image.gz
@@ -409,7 +420,7 @@ Summary: The Linux kernel
 %endif
 
 # Architectures we build tools/cpupower on
-%define cpupowerarchs %{ix86} x86_64 ppc ppc64 ppc64p7 %{arm} aarch64
+%define cpupowerarchs %{ix86} x86_64 ppc ppc64 ppc64p7 %{arm} aarch64 ppc64le
 
 #
 # Packages that need to be installed before the kernel is, because the %%post
@@ -456,7 +467,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x %{arm} aarch64
+ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 
 %kernel_reqprovconf
@@ -529,6 +540,7 @@ Source51: config-powerpc32-generic
 Source52: config-powerpc32-smp
 Source53: config-powerpc64
 Source54: config-powerpc64p7
+Source55: config-powerpc64le
 
 Source70: config-s390x
 
@@ -634,8 +646,6 @@ Patch1826: drm-i915-hush-check-crtc-state.patch
 # NFSv4
 
 # patches headed upstream
-Patch10000: fs-proc-devtree-remove_proc_entry.patch
-
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
 Patch14000: hibernate-freeze-filesystems.patch
@@ -658,9 +668,15 @@ Patch21010: arm-omap-load-tfp410.patch
 # ARM tegra
 Patch21020: arm-tegra-usb-no-reset-linux33.patch
 
+# Add panel support for tegra paz00
+# Backported from linux-next scheduled for 3.15
+Patch21021: arm-tegra-paz00-panel-dts.patch
+
 # ARM i.MX6
 # http://www.spinics.net/lists/devicetree/msg08276.html
 Patch21030: arm-imx6-utilite.patch
+
+# ARM sunxi (AllWinner)
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -675,34 +691,17 @@ Patch22000: weird-root-dentry-name-debug.patch
 
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 993744
-Patch25128: dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
+#rhbz 1051748
+Patch25035: Bluetooth-allocate-static-minor-for-vhci.patch
 
-# Fix 15sec NFS mount delay
-Patch25152: sunrpc-create-a-new-dummy-pipe-for-gssd-to-hold-open.patch
-Patch25153: sunrpc-replace-gssd_running-with-more-reliable-check.patch
-Patch25154: nfs-check-gssd-running-before-krb5i-auth.patch
-#rhbz 1037793
-Patch25166: sunrpc-add-an-info-file-for-the-dummy-gssd-pipe.patch
-Patch25167: rpc_pipe-remove-the-clntXX-dir-if-creating-the-pipe-fails.patch
-Patch25168: rpc_pipe-fix-cleanup-of-dummy-gssd-directory-when-notification-fails.patch
+#Fixes module loading on ppc64le
+Patch25036: ppc64le_module_fix.patch
 
-#rhbz 1030802
-Patch25171: elantech-Properly-differentiate-between-clickpads-an.patch
+#rhbz 1046495
+Patch25044: iwlwifi-dvm-take-mutex-when-sending-SYNC-BT-config-command.patch
 
-#rhbz 924916
-Patch25179: KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
-
-#rhbz 1047892
-Patch25180: KVM-VMX-fix-use-after-free-of-vmx-loaded_vmcs.patch
-
-#rhbz 1003167 1046238
-Patch25181: 0001-Input-wacom-make-sure-touch_max-is-set-for-touch-dev.patch
-Patch25182: 0002-Input-wacom-add-support-for-three-new-Intuos-devices.patch
-Patch25183: 0003-Input-wacom-add-reporting-of-SW_MUTE_DEVICE-events.patch
-
-#rhbz 953211
-Patch25184: Input-ALPS-add-support-for-Dolphin-devices.patch
+#CVE-2014-2580 rhbz 1080084 1080086
+Patch25052: net-xen-netback-disable-rogue-vif-in-kthread-context.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1264,7 +1263,7 @@ make -f %{SOURCE19} config-release
 make -f %{SOURCE20} VERSION=%{version} configs
 
 # Merge in any user-provided local config option changes
-for i in kernel-%{version}-*.config
+for i in %{all_arch_configs}
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE1000} $i.tmp > $i
@@ -1299,6 +1298,7 @@ ApplyPatch arm-lpae-ax88796.patch
 ApplyPatch arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 ApplyPatch arm-omap-load-tfp410.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
+ApplyPatch arm-tegra-paz00-panel-dts.patch
 ApplyPatch arm-imx6-utilite.patch
 
 #
@@ -1382,8 +1382,6 @@ ApplyPatch drm-i915-hush-check-crtc-state.patch
 # Radeon DRM
 
 # Patches headed upstream
-ApplyPatch fs-proc-devtree-remove_proc_entry.patch
-
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
 # FIXME: REBASE
@@ -1407,34 +1405,17 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 993744
-ApplyPatch dm-cache-policy-mq_fix-large-scale-table-allocation-bug.patch
+#rhbz 1051748
+ApplyPatch Bluetooth-allocate-static-minor-for-vhci.patch
 
-# Fix 15sec NFS mount delay
-ApplyPatch sunrpc-create-a-new-dummy-pipe-for-gssd-to-hold-open.patch
-ApplyPatch sunrpc-replace-gssd_running-with-more-reliable-check.patch
-ApplyPatch nfs-check-gssd-running-before-krb5i-auth.patch
-#rhbz 1037793
-ApplyPatch rpc_pipe-remove-the-clntXX-dir-if-creating-the-pipe-fails.patch
-ApplyPatch sunrpc-add-an-info-file-for-the-dummy-gssd-pipe.patch
-ApplyPatch rpc_pipe-fix-cleanup-of-dummy-gssd-directory-when-notification-fails.patch
+# Fixes module loading on ppc64le
+ApplyPatch ppc64le_module_fix.patch
 
-#rhbz 1030802
-ApplyPatch elantech-Properly-differentiate-between-clickpads-an.patch
+#rhbz 1046495
+ApplyPatch iwlwifi-dvm-take-mutex-when-sending-SYNC-BT-config-command.patch
 
-#rhbz 924916
-ApplyPatch KVM-MMU-handle-invalid-root_hpa-at-__direct_map.patch
-
-#rhbz 1047892
-ApplyPatch KVM-VMX-fix-use-after-free-of-vmx-loaded_vmcs.patch
-
-#rhbz 1003167 1046238
-ApplyPatch 0001-Input-wacom-make-sure-touch_max-is-set-for-touch-dev.patch
-ApplyPatch 0002-Input-wacom-add-support-for-three-new-Intuos-devices.patch
-ApplyPatch 0003-Input-wacom-add-reporting-of-SW_MUTE_DEVICE-events.patch
-
-#rhbz 953211
-ApplyPatch Input-ALPS-add-support-for-Dolphin-devices.patch
+#CVE-2014-2580 rhbz 1080084 1080086
+ApplyPatch net-xen-netback-disable-rogue-vif-in-kthread-context.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2176,6 +2157,7 @@ fi
 %endif\
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:+%{2}}\
 /boot/config-%{KVERREL}%{?2:+%{2}}\
+%dir /lib/modules\
 %dir /lib/modules/%{KVERREL}%{?2:+%{2}}\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/kernel\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/build\
@@ -2225,7 +2207,301 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Tue Jan 21 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Mar 31 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14-gnu.
+
+* Mon Mar 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-1
+- Linux v3.14
+- Disable debugging options.
+
+* Mon Mar 31 2014 Hans de Goede <hdegoede@redhat.com>
+- Fix clicks getting lost with cypress_ps2 touchpads with recent
+  xorg-x11-drv-synaptics versions (bfdo#76341)
+
+* Fri Mar 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc8.git1.1
+- CVE-2014-2580 xen: netback crash trying to disable due to malformed packet (rhbz 1080084 1080086)
+- CVE-2014-0077 vhost-net: insufficent big packet handling in handle_rx (rhbz 1064440 1081504)
+- CVE-2014-0055 vhost-net: insufficent error handling in get_rx_bufs (rhbz 1062577 1081503)
+- CVE-2014-2568 net: potential info leak when ubuf backed skbs are zero copied (rhbz 1079012 1079013)
+
+* Fri Mar 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v3.14-rc8-12-g75c5a52
+- Reenable debugging options.
+
+* Fri Mar 28 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Tegra 114/124 SoCs
+- Re-enable OMAP cpufreq
+- Re-enable CPSW PTP option
+
+* Thu Mar 27 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Switch to CONFIG_TRANSPARENT_HUGEPAGE_MADVISE instead of always on
+
+* Tue Mar 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc8.git0.1
+- Linux v3.14-rc8
+- Disable debugging options.
+
+* Mon Mar 24 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update some generic ARM config options
+- Build in TPS65217 for ARM non lpae kernels (fixes BBW booting)
+
+* Fri Mar 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc7.git2.1
+- Linux v3.14-rc7-59-g08edb33
+
+* Wed Mar 19 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc7.git1.1
+- Linux v3.14-rc7-26-g4907cdc
+- Reenable debugging options.
+
+* Tue Mar 18 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable TEGRA_FBDEV (rhbz 1073960)
+
+* Mon Mar 17 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add bootwrapper for ppc64le
+
+* Mon Mar 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc7.git0.1
+- Linux v3.14-rc7
+- Disable debugging options.
+
+* Mon Mar 17 2014 Peter Robinson <pbrobinson@fedoraproject.org> 
+- Build in Palmas regulator on ARM to fix ext MMC boot on OMAP5
+
+* Fri Mar 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git4.1
+- Linux v3.14-rc6-133-gc60f7d5
+
+* Thu Mar 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git3.1
+- Linux v3.14-rc6-41-gac9dc67
+
+* Wed Mar 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git2.1
+- Fix locking issue in iwldvm (rhbz 1046495)
+- Linux v3.14-rc6-26-g33807f4
+
+* Wed Mar 12 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add some general missing ARM drivers (mostly sound)
+- ARM config tweaks and cleanups
+- Update i.MX6 dtb
+
+* Tue Mar 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git1.1
+- CVE-2014-2309 ipv6: crash due to router advertisment flooding (rhbz 1074471 1075064)
+- Linux v3.14-rc6-17-g8712a00
+- Reenable debugging options.
+
+* Mon Mar 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git0.1
+- Linux v3.14-rc6
+- Disable debugging options.
+
+* Fri Mar 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Revert two xhci fixes that break USB mass storage (rhbz 1073180)
+
+* Thu Mar 06 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix stale EC events on Samsung systems (rhbz 1003602)
+- Add ppc64le support from Brent Baude (rhbz 1073102)
+- Fix depmod error message from hci_vhci module (rhbz 1051748)
+- Fix bogus WARN in iwlwifi (rhbz 1071998)
+
+* Wed Mar 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc5.git2.1
+- Linux v3.14-rc5-185-gc3bebc7
+
+* Tue Mar 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc5.git1.1
+- Linux v3.14-rc5-43-g0c0bd34
+- Reenable debugging options.
+
+* Mon Mar 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc5.git0.1
+- Linux v3.14-rc5
+- Disable debugging options.
+
+* Fri Feb 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git3.1
+- Linux v3.14-rc4-78-gd8efcf3
+
+* Fri Feb 28 2014 Kyle McMartin <kyle@fedoraproject.org>
+- Enable appropriate CONFIG_XZ_DEC_$arch options to ensure we can mount
+  squashfs images on supported architectures.
+
+* Fri Feb 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-0102 keyctl_link can be used to cause an oops (rhbz 1071396)
+
+* Thu Feb 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git2.1
+- Linux v3.14-rc4-45-gd2a0476
+
+* Wed Feb 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git1.1
+- Linux v3.14-rc4-34-g6dba6ec
+- Reenable debugging options.
+
+* Wed Feb 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Re-enable KVM on aarch64 now it builds again
+
+* Tue Feb 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix mounting issues on cifs (rhbz 1068862)
+
+* Mon Feb 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix lockdep issue in EHCI when using threaded IRQs (rhbz 1056170)
+
+* Mon Feb 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git0.1
+- Linux v3.14-rc4
+- Disable debugging options.
+
+* Thu Feb 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git5.1
+- Linux v3.14-rc3-219-gd158fc7
+
+* Thu Feb 20 2014 Kyle McMartin <kyle@fedoraproject.org>
+- armv7: disable CONFIG_DEBUG_SET_MODULE_RONX until debugged (rhbz#1067113)
+
+* Thu Feb 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git4.1
+- Linux v3.14-rc3-184-ge95003c
+
+* Wed Feb 19 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git3.1
+- Linux v3.14-rc3-168-g960dfc4
+
+* Tue Feb 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git2.1
+- Linux v3.14-rc3-43-g805937c
+
+* Tue Feb 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git1.1
+- Linux v3.14-rc3-20-g60f76ea
+- Reenable debugging options.
+- Fix r8169 ethernet after suspend (rhbz 1054408)
+- Enable INTEL_MIC drivers (rhbz 1064086)
+
+* Mon Feb 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git0.1
+- Linux v3.14-rc3
+- Disable debugging options.
+- Enable CONFIG_PPC_DENORMALIZATION (from Tony Breeds)
+
+* Fri Feb 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git4.1
+- Linux v3.14-rc2-342-g5e57dc8
+- CVE-2014-0069 cifs: incorrect handling of bogus user pointers (rhbz 1064253 1062578)
+
+* Thu Feb 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git3.1
+- Linux v3.14-rc2-271-g4675348
+
+* Wed Feb 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git2.1
+- Linux v3.14-rc2-267-g9398a10
+
+* Wed Feb 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix cgroup destroy oops (rhbz 1045755)
+- Fix backtrace in amd_e400_idle (rhbz 1031296)
+
+* Tue Feb 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git1.1
+- Linux v3.14-rc2-26-g6792dfe
+- Reenable debugging options.
+
+* Mon Feb 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git0.1
+- Linux v3.14-rc2
+- Disable debugging options.
+
+* Sun Feb  9 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable CMA on aarch64
+- Disable KVM temporarily on aarch64
+- Minor ARM config updates and cleanups
+
+* Sun Feb 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git5.1.1
+- Linux v3.14-rc1-182-g4944790
+
+* Sat Feb 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git4.1
+- Linux v3.14-rc1-150-g34a9bff
+
+* Fri Feb 07 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git3.1
+- Linux v3.14-rc1-86-g9343224
+
+* Thu Feb 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git2.1
+- Linux v3.14-rc1-54-gef42c58
+
+* Wed Feb 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git1.1
+- Linux v3.14-rc1-13-g878a876
+
+* Tue Feb 04 2014 Kyle McMartin <kyle@fedoraproject.org>
+- Fix %all_arch_configs on aarch64.
+
+* Tue Feb 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git0.2
+- Add NUMA oops patches
+- Reenable debugging options.
+
+* Mon Feb 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git0.1
+- Linux v3.14-rc1
+- Disable debugging options.
+- Disable Xen on ARM temporarily as it doesn't build
+
+* Mon Feb  3 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Re-enable modular Tegra DRM driver
+- Add SD driver for ZYNQ SoCs
+
+* Fri Jan 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git19.1
+- Linux v3.13-10637-ge7651b8
+- Enable ZRAM/ZSMALLOC (rhbz 1058072)
+- Turn EXYNOS_HDMI back on now that it should build
+
+* Thu Jan 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git18.1
+- Linux v3.13-10231-g53d8ab2
+
+* Thu Jan 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git17.1
+- Linux v3.13-10094-g9b0cd30
+- Add patches to fix imx-hdmi build, and fix kernfs lockdep oops (rhbz 1055105)
+
+* Thu Jan 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git16.1
+- Linux v3.13-9240-g1329311
+
+* Wed Jan 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git15.1
+- Linux v3.13-9218-g0e47c96
+
+* Tue Jan 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git14.1
+- Linux v3.13-8905-g627f4b3
+
+* Tue Jan 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git13.1
+- Linux v3.13-8789-g54c0a4b
+- Enable CONFIG_CC_STACKPROTECTOR_STRONG on x86
+
+* Mon Jan 27 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build AllWinner (sunxi) on LPAE too (Cortex-A7 supports LPAE/KVM)
+
+* Mon Jan 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git12.1
+- Linux v3.13-8631-gba635f8
+
+* Mon Jan 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git11.1
+- Linux v3.13-8598-g77d143d
+
+* Sat Jan 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git10.1
+- Linux v3.13-8330-g4ba9920
+
+* Sat Jan 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git9.1
+- Linux v3.13-6058-g2d08cd0
+- Quiet incorrect usb phy error (rhbz 1057529)
+
+* Sat Jan 25 2014 Ville Skyttä <ville.skytta@iki.fi>
+- Own the /lib/modules dir.
+
+* Sat Jan 25 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial ARM config updates for 3.14
+- Disable highbank cpuidle driver
+- Enable mtd-nand drivers on ARM
+- Update CPU thermal scaling options for ARM
+
+* Fri Jan 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git8.1
+- Linux v3.13-5617-g3aacd62
+
+* Thu Jan 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git7.1
+- Linux v3.13-4156-g90804ed
+
+* Thu Jan 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git6.1.1
+- Revert fsnotify changes as they cause slab corruption for multiple people
+- Linux v3.13-3995-g0dc3fd0
+
+* Thu Jan 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git5.1
+- Linux v3.13-3667-ge1ba845
+
+* Wed Jan 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git4.1
+- Linux v3.13-3477-gdf32e43
+
+* Wed Jan 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git3.1
+- Linux v3.13-3260-g03d11a0
+
+* Wed Jan 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git2.1
+- Linux v3.13-2502-gec513b1
+
+* Tue Jan 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git1.1
+- Linux v3.13-737-g7fe67a1
+- Reenable debugging options.  Enable SLUB_DEBUG
+
+* Mon Jan 20 2014 Kyle McMartin <kyle@fedoraproject.org>
+- Enable CONFIG_KVM on AArch64.
+
+* Mon Jan 20 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan 21
 - GNU Linux-libre 3.13-gnu.
 
 * Mon Jan 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-1

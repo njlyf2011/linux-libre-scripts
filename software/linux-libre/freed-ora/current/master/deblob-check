@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2014-01-09
+# deblob-check version 2014-03-25
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -3567,13 +3567,39 @@ set_except () {
     defsnc 'static[ ]const[ ]struct[ ]reg_default[ ]aic3x_reg\[\][ ]=' sound/soc/codecs/tlv320aic3x.c
     blobname 'radeon[/]HAWAII_\(pfp\|[mc]e\|me\?c\|rlc\|sdma\|smc\)\.bin' drivers/gpu/drm/radeon/cik.c
     blobname 'ti-connectivity[/]wl1251-\(fw\|nvs\)\.bin' 'drivers/net/wireless/wl12\(51\|xx\)/wl1251.h'
+
+    # New in 3.13.2
+    blobname 'rtlwifi[/]rtl8192cufw_\([AB]\|TMSC\)\.bin' drivers/net/wireless/rtlwifi/rtl8192cu.sw
+
+    # New in 3.14
+    blobname 'dvb-usb-technisat-cablestar-hdci-drxk\.fw' drivers/media/usb/dvb-usb-v2/az6007.c
+    blobname 'ctfw-3\.2\.3\.0\.bin' drivers/net/ethernet/brocade/bna/cna.h
+    blobname 'ct2fw-3\.2\.3\.0\.bin' drivers/net/ethernet/brocade/bna/cna.h
+    blobname 'brcm[/]brcmfmac43362-sdio\.bin' drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+    blobname 'brcm[/]brcmfmac4339-sdio\.bin' drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+    blobname 'mrvl[/]usb8897_uapsta\.bin' drivers/net/wireless/mwifiex/usb.h
+    blobname 'cbfw-3\.2\.3\.0\.bin' drivers/scsi/bfa/bfad.c
+    blobname 'ctfw-3\.2\.3\.0\.bin' drivers/scsi/bfa/bfad.c
+    blobname 'ct2fw-3\.2\.3\.0\.bin' drivers/scsi/bfa/bfad.c
     ;;
 
   */*freedo*.patch | */*logo*.patch)
     accept 'P[13]\([\n]#[^\n]*\)*[\n]*\([\n][0-9 ]*\)\+' drivers/video/logo/logo_libre_clut224.ppm
     ;;
 
+  */patch-3.13*)
+    # Introduced in 3.13.2.
+    accept '[\t][\t][\t]err[ ]=[ ]request_firmware[(][&]firmware[,][ \t\n]*rtlpriv->cfg' drivers/net/wireless/rtlwifi/core.c
+    defsnc 'static[ ]const[ ]struct[ ]reg_default[ ]wm5110_sysclk_revd_patch\[\][ ]=' sound/soc/codecs/wm5110.c
+    initnc '[;][/][*]@@[ ]-[0-9]*,[0-9]*[ ][+][0-9]*,[0-9]*[ ]@@[ ]static[ ]const[ ]struct[ ]reg_default[ ]wm5110_s[*][/][;]' sound/soc/codecs/wm5110.c
+    # New in 3.13.7.
+    accept '[\t][{]0x00009e[1234][048c]\([,][ ]0x[0-9a-f]*\)*[}]\([\n][\t][{]0x00009e[1234][048c]\([,][ ]0x[0-9a-f]*\)*[}]\)*' drivers/net/wireless/ath/ath9k/ar9462_2p0_initvals.h
+    ;;
+
   */patch-3.12*)
+    # Introduced in 3.12.10.
+    accept '[\t][\t][\t]err[ ]=[ ]request_firmware[(][&]firmware[,][ \t\n]*rtlpriv->cfg' drivers/net/wireless/rtlwifi/core.c
+    defsnc 'static[ ]const[ ]struct[ ]reg_default[ ]wm5110_sysclk_revd_patch\[\][ ]=' sound/soc/codecs/wm5110.c
     # New in 3.13
     defsnc 'static[ ]const[ ]u32[ ]hawaii_\(golden_registers\|mgcg_cgcg_init\)\[\][ ]=' drivers/gpu/drm/radeon/cik.c
     defsnc 'static[ ]const[ ]u32[ ]hawaii_io_mc_regs\[HAWAII_IO_MC_REGS_SIZE\]\[2\][ ]=' drivers/gpu/drm/radeon/cik.c
