@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.13 extra=
+kver=3.14 extra=
 
 case $1 in
 --force)
@@ -291,8 +291,6 @@ for f in \
     drivers/scsi/aic7xxx/aic79xx.seq \
   drivers/scsi/aic7xxx/aic7xxx_seq.h_shipped \
     drivers/scsi/aic7xxx/aic7xxx.seq \
-  drivers/scsi/aic7xxx_old/aic7xxx_seq.c \
-    drivers/scsi/aic7xxx_old/aic7xxx.seq \
   drivers/scsi/53c700_d.h_shipped \
     drivers/scsi/53c700.scr \
   drivers/scsi/sym53c8xx_2/sym_fw1.h \
@@ -305,8 +303,6 @@ for f in \
     firmware/keyspan_pda/keyspan_pda.S \
   firmware/keyspan_pda/xircom_pgs.HEX \
     firmware/keyspan_pda/xircom_pgs.S \
-  sound/pci/cs46xx/imgs/cwcdma.h \
-    sound/pci/cs46xx/imgs/cwcdma.asp \
 ; do
   filetest $f
 done
@@ -393,6 +389,18 @@ maybe_reject_firmware(const struct firmware **fw,\
 	else\
 		return request_firmware(fw, name, device);\
 }\
+static inline int\
+reject_firmware_direct(const struct firmware **fw,\
+		const char *name, struct device *device)\
+{\
+	const struct firmware *xfw = NULL;\
+	int retval;\
+	report_missing_free_firmware(dev_name(device), NULL);\
+	retval = request_firmware_direct(&xfw, NONFREE_FIRMWARE, device);\
+	if (!retval)\
+		release_firmware(xfw);\
+	return -EINVAL;\
+}\
 static inline void\
 discard_rejected_firmware(const struct firmware *fw, void *context)\
 {\
@@ -457,30 +465,31 @@ maybe_reject_ihex_firmware(const struct firmware **fw,\
 # x86
 
 announce MICROCODE_AMD - "AMD microcode patch loading support"
-reject_firmware arch/x86/kernel/microcode_amd.c
-clean_blob arch/x86/kernel/microcode_amd.c
+reject_firmware arch/x86/kernel/cpu/microcode/amd.c
+clean_blob arch/x86/kernel/cpu/microcode/amd.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_AMD'
-clean_mk CONFIG_MICROCODE_AMD arch/x86/kernel/Makefile
+clean_mk CONFIG_MICROCODE_AMD arch/x86/kernel/cpu/microcode/Makefile
 
 announce MICROCODE_AMD_EARLY - "Early load AMD microcode"
-clean_blob arch/x86/kernel/microcode_amd_early.c
+clean_blob arch/x86/kernel/cpu/microcode/amd_early.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_AMD_EARLY'
-clean_mk CONFIG_MICROCODE_AMD_EARLY arch/x86/kernel/Makefile
+clean_mk CONFIG_MICROCODE_AMD_EARLY arch/x86/kernel/cpu/microcode/Makefile
 
 announce MICROCODE_INTEL - "Intel microcode patch loading support"
-reject_firmware arch/x86/kernel/microcode_intel.c
-clean_blob arch/x86/kernel/microcode_intel.c
+reject_firmware arch/x86/kernel/cpu/microcode/intel.c
+clean_blob arch/x86/kernel/cpu/microcode/intel.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_INTEL'
-clean_mk CONFIG_MICROCODE_INTEL arch/x86/kernel/Makefile
+clean_mk CONFIG_MICROCODE_INTEL arch/x86/kernel/cpu/microcode/Makefile
 
 announce MICROCODE_INTEL_EARLY - "Early load Intel microcode"
-clean_blob arch/x86/kernel/microcode_intel_early.c
+clean_blob arch/x86/kernel/cpu/microcode/intel_early.c
 clean_kconfig arch/x86/Kconfig 'MICROCODE_INTEL_EARLY'
-clean_mk CONFIG_MICROCODE_INTEL_EARLY arch/x86/kernel/Makefile
+clean_mk CONFIG_MICROCODE_INTEL_EARLY arch/x86/kernel/cpu/microcode/Makefile
 
 announce MICROCODE_EARLY - "Early load microcode"
 clean_blob Documentation/x86/early-microcode.txt
 clean_kconfig arch/x86/Kconfig 'MICROCODE_EARLY'
+clean_mk CONFIG_MICROCODE_EARLY arch/x86/kernel/cpu/microcode/Makefile
 
 # arm
 
@@ -1256,7 +1265,7 @@ clean_sed '
 }' drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c 'report missing Free firmware'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
 clean_sed '
-/^int bnx2x_nic_load_analyze_req/,/^}$/{
+/^int bnx2x_compare_fw_ver/,/^}$/{
   /^		u32 my_fw = /i\
 		/*(DEBLOBBED)*/
   /^		u32 my_fw = /,/<< 24);/d;
@@ -1971,15 +1980,10 @@ clean_blob drivers/bluetooth/btusb.c
 clean_kconfig drivers/bluetooth/Kconfig 'BT_HCIBTUSB'
 clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
-announce BT_MRVL - "Marvell Bluetooth driver support"
-reject_firmware drivers/bluetooth/btmrvl_main.c
-clean_blob Documentation/btmrvl.txt
-clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL'
-clean_mk CONFIG_BT_MRVL drivers/bluetooth/Makefile
-
 announce BT_MRVL_SDIO - "Marvell BT-over-SDIO driver"
 reject_firmware drivers/bluetooth/btmrvl_sdio.c
 clean_blob drivers/bluetooth/btmrvl_sdio.c
+clean_blob Documentation/btmrvl.txt
 clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL_SDIO'
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
 
@@ -1988,12 +1992,6 @@ reject_firmware drivers/misc/ti-st/st_kim.c
 clean_blob drivers/misc/ti-st/st_kim.c
 clean_kconfig drivers/misc/ti-st/Kconfig 'TI_ST'
 clean_mk CONFIG_TI_ST drivers/misc/ti-st/Makefile
-
-announce USB_BTMTK - "Mediatek Bluetooth support"
-reject_firmware drivers/staging/btmtk_usb/btmtk_usb.c
-clean_blob drivers/staging/btmtk_usb/btmtk_usb.c
-clean_kconfig drivers/staging/btmtk_usb/Kconfig 'USB_BTMTK'
-clean_mk CONFIG_USB_BTMTK drivers/staging/btmtk_usb/Makefile
 
 # wimax
 
@@ -2483,26 +2481,7 @@ clean_kconfig sound/pci/Kconfig 'SND_ASIHPI'
 clean_mk CONFIG_SND_ASIHPI sound/pci/asihpi/Makefile
 
 announce SND_CS46XX - "Cirrus Logic (Sound Fusion) CS4280/CS461x/CS462x/CS463x"
-# This appears to have been extracted from some non-Free driver
-clean_file sound/pci/cs46xx/cs46xx_image.h
-# The following blobs are definitely extracted from non-Free drivers.
-clean_file sound/pci/cs46xx/imgs/cwc4630.h
-clean_file sound/pci/cs46xx/imgs/cwcasync.h
-clean_file sound/pci/cs46xx/imgs/cwcsnoop.h
-clean_sed '
-/^\(int \)\?snd_cs46xx_download_image([^;]*$/,/^}$/{
-  /for.*BA1_MEMORY_COUNT/i\
-#if 0
-  /^}$/{
-    i\
-#else\
-	snd_printk(KERN_ERR "cs46xx: Missing Free firmware\\n");\
-	return -EINVAL;\
-#endif
-  }
-}
-s/cs46xx_dsp_load_module(chip, [&]cwc\(4630\|async\|snoop\)_module)/(snd_printk(KERN_ERR "cs46xx: Missing Free firmware\\n"),-EINVAL)/
-' sound/pci/cs46xx/cs46xx_lib.c 'report missing Free firmware'
+reject_firmware sound/pci/cs46xx/cs46xx_lib.c
 clean_blob sound/pci/cs46xx/cs46xx_lib.c
 clean_kconfig sound/pci/Kconfig 'SND_CS46XX'
 clean_mk 'CONFIG_SND_CS46XX' sound/pci/cs46xx/Makefile
