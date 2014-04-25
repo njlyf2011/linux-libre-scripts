@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -801,9 +801,6 @@ Patch25002: cifs-mask-off-top-byte-in-get_rfc1002_length.patch
 #CVE-2014-0102 rhbz 1071396
 Patch25026: keyring-fix.patch
 
-#rhbz 1065087
-Patch25028: tty-Fix-low_latency-BUG.patch
-
 #rhbz 1027465
 Patch25032: HID-Bluetooth-hidp-make-sure-input-buffers-are-big-e.patch
 
@@ -828,14 +825,20 @@ Patch25055: lib-percpu_counter.c-fix-bad-percpu-counter-state-du.patch
 #CVE-2014-0155 rhbz 1081589 1085016
 Patch25057: KVM-ioapic-fix-assignment-of-ioapic-rtc_status-pending_eoi.patch
 
-#rhbz 1048314
-Patch25058: 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
-
 #CVE-2014-2851 rhbz 1086730 1087420
 Patch25059: net-ipv4-current-group_info-should-be-put-after-using.patch
 
 #rhbz 1085582 1085697
 Patch25060: 0001-synaptics-Add-min-max-quirk-for-ThinkPad-T431s-L440-.patch
+
+#rhbz 1071914
+Patch25063: USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
+
+#rhbz 1048314
+Patch25062: 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
+
+#rhbz 1089583
+Patch25064: 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1584,9 +1587,6 @@ ApplyPatch cifs-mask-off-top-byte-in-get_rfc1002_length.patch
 #CVE-2014-0102 rhbz 1071396
 ApplyPatch keyring-fix.patch
 
-#rhbz 1065087
-ApplyPatch tty-Fix-low_latency-BUG.patch
-
 #rhbz 1027465
 ApplyPatch HID-Bluetooth-hidp-make-sure-input-buffers-are-big-e.patch
 
@@ -1613,12 +1613,17 @@ ApplyPatch KVM-ioapic-fix-assignment-of-ioapic-rtc_status-pending_eoi.patch
 
 #rhbz 1048314
 ApplyPatch 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
+#rhbz 1089583
+ApplyPatch 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
 
 #CVE-2014-2851 rhbz 1086730 1087420
 ApplyPatch net-ipv4-current-group_info-should-be-put-after-using.patch
 
 #rhbz 1085582 1085697
 ApplyPatch 0001-synaptics-Add-min-max-quirk-for-ThinkPad-T431s-L440-.patch
+
+#rhbz 1071914
+ApplyPatch USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2443,6 +2448,21 @@ fi
 # and build.
 
 %changelog
+* Thu Apr 24 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.13.11-gnu.
+
+* Wed Apr 23 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.13.11-100
+- Linux v3.13.11
+
+* Tue Apr 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix Synaptics touchscreens and HID rmi driver (rhbz 1089583)
+
+* Mon Apr 21 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix Brainboxes Express Cards (rhbz 1071914)
+
+* Thu Apr 17 2014 Hans de Goede <hdegoede@redhat.com>
+- Update min/max quirk patch to add a quirk for the ThinkPad L540 (rhbz1088588)
+
 * Mon Apr 14 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.13.10-gnu.
 
