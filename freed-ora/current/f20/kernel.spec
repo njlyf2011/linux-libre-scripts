@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -791,11 +791,26 @@ Patch25060: 0001-synaptics-Add-min-max-quirk-for-ThinkPad-T431s-L440-.patch
 #rhbz 1074710
 Patch25061: mm-page_alloc.c-change-mm-debug-routines-back-to-EXP.patch
 
+#rhbz 1071914
+Patch25063: USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
+
 #rhbz 1048314
 Patch25062: 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
 
-#rhbz 1071914
-Patch25063: USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
+#rhbz 1089583
+Patch25064: 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
+
+#rhbz 1013466
+Patch25065: selinux-put-the-mmap-DAC-controls-before-the-MAC-controls.patch
+
+#rhbz 1089689
+Patch25066: 0001-synaptics-Add-min-max-quirk-for-ThinkPad-Edge-E431.patch
+
+#rhbz 1090746
+Patch25067: ACPICA-Tables-Fix-bad-pointer-issue-in-acpi_tb_parse_root_table.patch
+
+#rhbz 696821
+Patch25068: fanotify-fix-EOVERFLOW-on-64-bit.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1533,6 +1548,8 @@ ApplyPatch KVM-ioapic-fix-assignment-of-ioapic-rtc_status-pending_eoi.patch
 
 #rhbz 1048314
 ApplyPatch 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
+#rhbz 1089583
+ApplyPatch 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
 
 #rhbz 1074235
 ApplyPatch lib-percpu_counter.c-fix-bad-percpu-counter-state-du.patch
@@ -1548,6 +1565,18 @@ ApplyPatch mm-page_alloc.c-change-mm-debug-routines-back-to-EXP.patch
 
 #rhbz 1071914
 ApplyPatch USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
+
+#rhbz 1013466
+ApplyPatch selinux-put-the-mmap-DAC-controls-before-the-MAC-controls.patch
+
+#rhbz 1089689
+ApplyPatch 0001-synaptics-Add-min-max-quirk-for-ThinkPad-Edge-E431.patch
+
+#rhbz 1090746
+ApplyPatch ACPICA-Tables-Fix-bad-pointer-issue-in-acpi_tb_parse_root_table.patch
+
+#rhbz 696821
+ApplyPatch fanotify-fix-EOVERFLOW-on-64-bit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2371,7 +2400,26 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
-* Wed Apr 23 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Apr 28 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.2-gnu.
+
+* Mon Apr 28 2014 Justin M. Forbes <jforbes@fedoraproject.org> 3.14.2-200
+- Linux v3.14.2 (rhbz 1067071 1091722 906568)
+
+* Fri Apr 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch from Will Woods to fix fanotify EOVERFLOW issue (rhbz 696821)
+- Fix ACPI issue preventing boot on AMI firmware (rhbz 1090746)
+
+* Fri Apr 25 2014 Hans de Goede <hdegoede@redhat.com>
+- Add synaptics min-max quirk for ThinkPad Edge E431 (rhbz#1089689)
+
+* Wed Apr 23 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix SELinux wine issue again (rhbz 1013466)
+
+* Tue Apr 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix Synaptics touchscreens and HID rmi driver (rhbz 1089583)
+
+* Tue Apr 22 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Apr 23
 - GNU Linux-libre 3.14.1-gnu.
 
 * Mon Apr 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.1-200
