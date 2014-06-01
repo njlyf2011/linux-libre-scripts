@@ -1,0 +1,7 @@
+3.14-455c6fd-loongson-community.patch -p1 # loongson-community patches
+gnewsense-binutils-flag.patch -p0
+100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
+config.patch -p0 # config file
+kpkg-mipsel.patch -p0 # use vmlinuz
+loongson2_cpufreq-1.patch -p1 # fix loongson2 cpufreq
+restore-wakeup-from-hibernate.patch -p0 # fix resume after hibernate
