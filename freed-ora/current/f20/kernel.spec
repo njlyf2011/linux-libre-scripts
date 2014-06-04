@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -740,11 +740,10 @@ Patch15000: nowatchdog-on-virt.patch
 # ARM
 
 # lpae
-Patch21001: arm-lpae-ax88796.patch
-Patch21004: arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 
 # ARM omap
 Patch21010: arm-omap-load-tfp410.patch
+Patch21011: arm-beagle.patch
 
 # ARM tegra
 Patch21020: arm-tegra-usb-no-reset-linux33.patch
@@ -773,14 +772,8 @@ Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 #rhbz 1051748
 Patch25035: Bluetooth-allocate-static-minor-for-vhci.patch
 
-#CVE-2014-2851 rhbz 1086730 1087420
-Patch25059: net-ipv4-current-group_info-should-be-put-after-using.patch
-
 #rhbz 1074710
 Patch25061: mm-page_alloc.c-change-mm-debug-routines-back-to-EXP.patch
-
-#rhbz 1071914
-Patch25063: USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
 
 #rhbz 1048314
 Patch25062: 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
@@ -806,14 +799,10 @@ Patch25070: 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
 #rhbz 1060327
 Patch25071: drm-fix-qxl-mode-flags-backport.patch
 
-#rhbz 1093931
-Patch25073: net-Start-with-correct-mac_len-in-skb_network_protoc.patch
-
 #rhbz 1089545
 Patch25074: 0001-acpi-video-Add-use_native_backlight-quirks-for-Think.patch
 
 #misc input fixes
-Patch25077: 0001-hid-quirks-Add-NO_INIT_REPORTS-quirk-for-Synaptics-T.patch
 Patch25078: 0002-elantech-Fix-elantech-on-Gigabyte-U2442.patch
 
 #rhbz 861573
@@ -823,7 +812,6 @@ Patch25079: 0003-samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
 Patch25080: 0004-acpi-blacklist-Add-dmi_enable_osi_linux-quirk-for-As.patch
 
 #CVE-2014-0181 rhbz 1094270 1094265
-Patch25081: net-Fix-ns_capable-check-in-sock_diag_put_filterinfo.patch
 Patch25082: 1-5-netlink-Rename-netlink_capable-netlink_allowed.patch
 Patch25083: 2-5-net-Move-the-permission-check-in-sock_diag_put_filterinfo-to-packet_diag_dump.patch
 Patch25084: 3-5-net-Add-variants-of-capable-for-use-on-on-sockets.patch
@@ -833,8 +821,14 @@ Patch25086: 5-5-net-Use-netlink_ns_capable-to-verify-the-permisions-of-netlink-m
 #rhbz 1082266
 Patch25087: jme-fix-dma-unmap-error.patch
 
-# CVE-2014-3144 CVE-2014-3145 rhbz 1096775, 1096784
-Patch25090: filter-prevent-nla-extensions-to-peek-beyond-the-end.patch
+#rhbz 1096436
+Patch25091: 0001-synaptics-Add-min-max-quirk-for-the-ThinkPad-W540.patch
+
+#rhbz 1051668
+Patch25092: Input-elantech-add-support-for-newer-elantech-touchpads.patch
+
+# CVE-2014-3917 rhbz 1102571 1102715
+Patch25093: auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1449,13 +1443,11 @@ ApplyPatch 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 #
 # ARM
 #
-ApplyPatch arm-lpae-ax88796.patch
-ApplyPatch arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 ApplyPatch arm-omap-load-tfp410.patch
+ApplyPatch arm-beagle.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-tegra-paz00-panel-dts.patch
 ApplyPatch arm-imx6-utilite.patch
-
 
 #
 # bugfixes to drivers and filesystems
@@ -1571,14 +1563,8 @@ ApplyPatch 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
 #rhbz 1090161
 ApplyPatch HID-rmi-do-not-fetch-more-than-16-bytes-in-a-query.patch
 
-#CVE-2014-2851 rhbz 1086730 1087420
-ApplyPatch net-ipv4-current-group_info-should-be-put-after-using.patch
-
 #rhbz 1074710
 ApplyPatch mm-page_alloc.c-change-mm-debug-routines-back-to-EXP.patch
-
-#rhbz 1071914
-ApplyPatch USB-serial-ftdi_sio-add-id-for-Brainboxes-serial-car.patch
 
 #rhbz 1013466
 ApplyPatch selinux-put-the-mmap-DAC-controls-before-the-MAC-controls.patch
@@ -1595,14 +1581,10 @@ ApplyPatch 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
 #rhbz 1060327
 ApplyPatch drm-fix-qxl-mode-flags-backport.patch
 
-#rhbz 1093931
-ApplyPatch net-Start-with-correct-mac_len-in-skb_network_protoc.patch
-
 #rhbz 1089545
 ApplyPatch 0001-acpi-video-Add-use_native_backlight-quirks-for-Think.patch
 
 #misc input fixes
-ApplyPatch 0001-hid-quirks-Add-NO_INIT_REPORTS-quirk-for-Synaptics-T.patch
 ApplyPatch 0002-elantech-Fix-elantech-on-Gigabyte-U2442.patch
 
 #rhbz 861573
@@ -1612,7 +1594,6 @@ ApplyPatch 0003-samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
 ApplyPatch 0004-acpi-blacklist-Add-dmi_enable_osi_linux-quirk-for-As.patch
 
 #CVE-2014-0181 rhbz 1094270 1094265
-ApplyPatch net-Fix-ns_capable-check-in-sock_diag_put_filterinfo.patch
 ApplyPatch 1-5-netlink-Rename-netlink_capable-netlink_allowed.patch
 ApplyPatch 2-5-net-Move-the-permission-check-in-sock_diag_put_filterinfo-to-packet_diag_dump.patch
 ApplyPatch 3-5-net-Add-variants-of-capable-for-use-on-on-sockets.patch
@@ -1622,8 +1603,14 @@ ApplyPatch 5-5-net-Use-netlink_ns_capable-to-verify-the-permisions-of-netlink-me
 #rhbz 1082266
 ApplyPatch jme-fix-dma-unmap-error.patch
 
-# CVE-2014-3144 CVE-2014-3145 rhbz 1096775, 1096784
-ApplyPatch filter-prevent-nla-extensions-to-peek-beyond-the-end.patch
+#rhbz 1096436
+ApplyPatch 0001-synaptics-Add-min-max-quirk-for-the-ThinkPad-W540.patch
+
+#rhbz 1051668
+ApplyPatch Input-elantech-add-support-for-newer-elantech-touchpads.patch
+
+# CVE-2014-3917 rhbz 1102571 1102715
+ApplyPatch auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2447,6 +2434,25 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Jun  2 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.5-gnu.
+
+* Mon Jun 02 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.5-200
+- Linux v3.14.5
+
+* Thu May 29 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-3917 DoS with syscall auditing (rhbz 1102571 1102715)
+
+* Fri May 23 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Re-add rebased Beagle patch set for 3.14 (RHBZ 1094768)
+- Drop some no longer needed ARM patches
+
+* Tue May 20 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch to add new elantech touchpad support (rhbz 1051668)
+
+* Wed May 14 2014 Hans de Goede <hdegoede@redhat.com>
+- Add synaptics min/max quirk patch for the ThinkPad W540 (rhbz 1096436)
+
 * Tue May 13 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.4-gnu.
 
