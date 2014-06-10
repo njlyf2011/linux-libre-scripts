@@ -33,6 +33,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_DEBUG_WW_MUTEX_SLOWPATH is not set/CONFIG_DEBUG_WW_MUTEX_SLOWPATH=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_RT_MUTEXES is not set/CONFIG_DEBUG_RT_MUTEXES=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_LOCK_ALLOC is not set/CONFIG_DEBUG_LOCK_ALLOC=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_LOCK_TORTURE_TEST is not set/CONFIG_LOCK_TORTURE_TEST=m/' config-nodebug
 	@perl -pi -e 's/# CONFIG_PROVE_LOCKING is not set/CONFIG_PROVE_LOCKING=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_PROVE_RCU is not set/CONFIG_PROVE_RCU=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_SPINLOCK is not set/CONFIG_DEBUG_SPINLOCK=y/' config-nodebug
@@ -54,6 +55,7 @@ debug:
 	@perl -pi -e 's/# CONFIG_DEBUG_OBJECTS_PERCPU_COUNTER is not set/CONFIG_DEBUG_OBJECTS_PERCPU_COUNTER=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_DEBUG_OBJECTS_RCU_HEAD is not set/CONFIG_DEBUG_OBJECTS_RCU_HEAD=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_X86_PTDUMP is not set/CONFIG_X86_PTDUMP=y/' config-nodebug
+	@perl -pi -e 's/# CONFIG_EFI_PGT_DUMP is not set/CONFIG_EFI_PGT_DUMP=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_CAN_DEBUG_DEVICES is not set/CONFIG_CAN_DEBUG_DEVICES=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_MODULE_FORCE_UNLOAD is not set/CONFIG_MODULE_FORCE_UNLOAD=y/' config-nodebug
 	@perl -pi -e 's/# CONFIG_SYSCTL_SYSCALL_CHECK is not set/CONFIG_SYSCTL_SYSCALL_CHECK=y/' config-nodebug
@@ -96,9 +98,6 @@ debug:
 	@perl -pi -e 's/CONFIG_DEBUG_PAGEALLOC=y/# CONFIG_DEBUG_PAGEALLOC is not set/' config-nodebug
 
 	@perl -pi -e 's/# CONFIG_MAXSMP is not set/CONFIG_MAXSMP=y/' config-x86-generic
-
-	@# Try out UAS in rawhide builds.
-	@perl -pi -e 's/# CONFIG_USB_UAS is not set/CONFIG_USB_UAS=m/' config-generic
 
 	@perl -pi -e 's/^%define debugbuildsenabled 1/%define debugbuildsenabled 0/' kernel.spec
 	@rpmdev-bumpspec -c "Reenable debugging options." kernel.spec
