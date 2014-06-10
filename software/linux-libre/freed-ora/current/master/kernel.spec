@@ -6,14 +6,20 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
 %ifarch %{ix86} x86_64
 %global signmodules 1
+%global zipmodules 1
 %else
 %global signmodules 0
+%global zipmodules 0
+%endif
+
+%if %{zipmodules}
+%global zipsed -e 's/\.ko$/\.ko.xz/'
 %endif
 
 # % define buildid .local
@@ -50,9 +56,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.13%{?stablegnux}
-#define rcrevlibre  -3.13%{?rcrevgnux}
-#define gitrevlibre -3.13%{?gitrevgnux}
+#define stablelibre -3.14%{?stablegnux}
+%define rcrevlibre  -3.14%{?rcrevgnux}
+#define gitrevlibre -3.14%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -97,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -429,36 +435,6 @@ Summary: The Linux kernel
 %define kernel_prereq  fileutils, systemd >= 203-2
 %define initrd_prereq  dracut >= 027
 
-#
-# This macro does requires, provides, conflicts, obsoletes for a kernel package.
-#	%%kernel_reqprovconf <subpackage>
-# It uses any kernel_<subpackage>_conflicts and kernel_<subpackage>_obsoletes
-# macros defined above.
-#
-%define kernel_reqprovconf \
-Provides: kernel = %{rpmversion}-%{pkg_release}\
-Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
-Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
-Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
-Provides: kernel-drm-nouveau = 16\
-Provides: kernel-libre-drm-nouveau = 16\
-Provides: kernel-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
-Requires(pre): %{kernel_prereq}\
-Requires(pre): %{initrd_prereq}\
-%if %{with_firmware}\
-Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
-%endif\
-Requires(preun): systemd >= 200\
-%{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
-%{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
-%{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
-# We can't let RPM do the dependencies automatic because it'll then pick up\
-# a correct but undesirable perl dependency from the module headers which\
-# isn't required for the kernel proper to function\
-AutoReqProv: no\
-%{nil}
-
 Name: kernel%{?variant}
 Group: System Environment/Kernel
 License: GPLv2
@@ -469,8 +445,11 @@ Release: %{pkg_release}
 # SET %%nobuildarches (ABOVE) INSTEAD
 ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
+%ifnarch %{nobuildarches}
+Requires: kernel%{?variant}-core-uname-r = %{KVERREL}
+Requires: kernel%{?variant}-modules-uname-r = %{KVERREL}
+%endif
 
-%kernel_reqprovconf
 
 #
 # List the packages used during the kernel build
@@ -511,7 +490,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -520,6 +499,15 @@ Source15: merge.pl
 Source16: mod-extra.list
 Source17: mod-extra.sh
 Source18: mod-sign.sh
+Source90: filter-x86_64.sh
+Source91: filter-armv7hl.sh
+Source92: filter-i686.sh
+Source93: filter-aarch64.sh
+Source94: filter-ppc.sh
+Source95: filter-ppc64.sh
+Source96: filter-ppc64le.sh
+Source97: filter-s390x.sh
+Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
 Source19: Makefile.release
@@ -659,24 +647,16 @@ Patch15000: nowatchdog-on-virt.patch
 # ARM
 
 # lpae
-Patch21001: arm-lpae-ax88796.patch
-Patch21004: arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
 
 # ARM omap
-Patch21010: arm-omap-load-tfp410.patch
 
 # ARM tegra
 Patch21020: arm-tegra-usb-no-reset-linux33.patch
 
-# Add panel support for tegra paz00
-# Backported from linux-next scheduled for 3.15
-Patch21021: arm-tegra-paz00-panel-dts.patch
-
 # ARM i.MX6
-# http://www.spinics.net/lists/devicetree/msg08276.html
-Patch21030: arm-imx6-utilite.patch
 
 # ARM sunxi (AllWinner)
+Patch21025: 0001-ARM-sunxi-Add-driver-for-SD-MMC-hosts-found-on-Allwi.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -691,17 +671,26 @@ Patch22000: weird-root-dentry-name-debug.patch
 
 Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 1051748
-Patch25035: Bluetooth-allocate-static-minor-for-vhci.patch
+#rhbz 1025603
+Patch25063: disable-libdw-unwind-on-non-x86.patch
 
-#Fixes module loading on ppc64le
-Patch25036: ppc64le_module_fix.patch
+#rhbz 1048314
+Patch25048: 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
 
-#rhbz 1046495
-Patch25044: iwlwifi-dvm-take-mutex-when-sending-SYNC-BT-config-command.patch
+#rhbz 1089583
+Patch25064: 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
 
-#CVE-2014-2580 rhbz 1080084 1080086
-Patch25052: net-xen-netback-disable-rogue-vif-in-kthread-context.patch
+#rhbz 1090161
+Patch25072: HID-rmi-do-not-fetch-more-than-16-bytes-in-a-query.patch
+
+#rhbz 983342 1093120
+Patch25069: 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
+
+Patch25071: s390-appldata-add-slab.h-for-kzalloc-kfree.patch
+
+
+# CVE-2014-3917 rhbz 1102571 1102715
+Patch25093: auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -710,10 +699,38 @@ Patch25052: net-xen-netback-disable-rogue-vif-in-kthread-context.patch
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
-The kernel package contains the Linux kernel (vmlinuz), the core of any
-GNU/Linux operating system.  The kernel handles the basic functions
-of the operating system: memory allocation, process allocation, device
-input and output, etc.
+The kernel meta package
+
+#
+# This macro does requires, provides, conflicts, obsoletes for a kernel package.
+#	%%kernel_reqprovconf <subpackage>
+# It uses any kernel_<subpackage>_conflicts and kernel_<subpackage>_obsoletes
+# macros defined above.
+#
+%define kernel_reqprovconf \
+Provides: kernel = %{rpmversion}-%{pkg_release}\
+Provides: kernel-libre = %{rpmversion}-%{pkg_release}\
+Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
+Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
+Provides: kernel-drm-nouveau = 16\
+Provides: kernel-libre-drm-nouveau = 16\
+Provides: kernel-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
+Requires(pre): %{kernel_prereq}\
+Requires(pre): %{initrd_prereq}\
+%if %{with_firmware}\
+Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
+%endif\
+Requires(preun): systemd >= 200\
+%{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
+%{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
+%{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
+# We can't let RPM do the dependencies automatic because it'll then pick up\
+# a correct but undesirable perl dependency from the module headers which\
+# isn't required for the kernel proper to function\
+AutoReq: no\
+AutoProv: yes\
+%{nil}
 
 The kernel-libre package is the upstream kernel without the non-Free
 blobs it includes by default.
@@ -873,6 +890,7 @@ This package provides debug information for package kernel-libre-tools.
 #
 %define kernel_debuginfo_package() \
 %package %{?1:%{1}-}debuginfo\
+Provides: kernel%{?1:-%{1}}-debuginfo = %{version}-%{release}\
 Summary: Debug information for package %{name}%{?1:-%{1}}\
 Group: Development/Debug\
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}\
@@ -890,6 +908,7 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 #
 %define kernel_devel_package() \
 %package %{?1:%{1}-}devel\
+Provides: kernel%{?1:-%{1}}-devel = %{version}-%{release}\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
@@ -914,6 +933,7 @@ against the %{?2:%{2} }kernel package.\
 #
 %define kernel_modules_extra_package() \
 %package %{?1:%{1}-}modules-extra\
+Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}\
 Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
 Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
@@ -927,9 +947,52 @@ Provides: installonlypkg(kernel-libre-module)\
 Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
 Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
-AutoReqProv: no\
+Requires: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
+AutoReq: no\
+AutoProv: yes\
 %description -n kernel%{?variant}%{?1:-%{1}}-modules-extra\
 This package provides less commonly used kernel modules for the %{?2:%{2} }kernel package.\
+%{nil}
+
+#
+# This macro creates a kernel-<subpackage>-modules package.
+#	%%kernel_modules_package <subpackage> <pretty-name>
+#
+%define kernel_modules_package() \
+%package %{?1:%{1}-}modules\
+Provides: kernel%{?1:-%{1}}-modules = %{version}-%{release}\
+Summary: kernel modules to match the %{?2:%{2}-}core kernel\
+Group: System Environment/Kernel\
+Provides: kernel%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-libre%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
+Provides: kernel-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-modules = %{version}-%{release}%{?1:+%{1}}\
+Provides: kernel-libre-modules = %{version}-%{release}%{?1:+%{1}}\
+Provides: installonlypkg(kernel-module)\
+Provides: installonlypkg(kernel-libre-module)\
+Provides: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
+Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
+AutoReq: no\
+AutoProv: yes\
+%description -n kernel%{?variant}%{?1:-%{1}}-modules\
+This package provides commonly used kernel modules for the %{?2:%{2}-}core kernel package.\
+%{nil}
+
+#
+# this macro creates a kernel-<subpackage> meta package.
+#	%%kernel_meta_package <subpackage>
+#
+%define kernel_meta_package() \
+%package %{1}\
+Provides: kernel-%{1} = %{KVERREL}+%{1}\
+summary: kernel meta-package for the %{1} kernel\
+group: system environment/kernel\
+Requires: kernel-libre-%{1}%{?variant}-core-uname-r = %{KVERREL}+%{1}\
+Requires: kernel-libre-%{1}%{?variant}-modules-uname-r = %{KVERREL}+%{1}\
+%description %{1}\
+The meta-package for the %{1} kernel\
 %{nil}
 
 #
@@ -938,31 +1001,29 @@ This package provides less commonly used kernel modules for the %{?2:%{2} }kerne
 #	%%kernel_variant_package [-n <pretty-name>] <subpackage>
 #
 %define kernel_variant_package(n:) \
-%package %1\
+%package %{?1:%{1}-}core\
+Provides: kernel-%{?1:%{1}-}core = %{KVERREL}%{?1:+%{1}}\
 Summary: %{variant_summary}\
 Group: System Environment/Kernel\
-%kernel_reqprovconf\
-%{expand:%%kernel_devel_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
-%if %{with_extra}\
-%{expand:%%kernel_modules_extra_package %1 %{!?-n:%1}%{?-n:%{-n*}}}\
+Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?1:+%{1}}\
+%{expand:%%kernel_reqprovconf}\
+%if %{?1:1} %{!?1:0} \
+%{expand:%%kernel_meta_package %{?1:%{1}}}\
 %endif\
-%{expand:%%kernel_debuginfo_package %1}\
+%{expand:%%kernel_devel_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
+%{expand:%%kernel_modules_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
+%if %{with_extra}\
+%{expand:%%kernel_modules_extra_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
+%endif\
+%{expand:%%kernel_debuginfo_package %{?1:%{1}}}\
 %{nil}
-
-
-# First the auxiliary packages of the main kernel package.
-%kernel_devel_package
-%if %{with_extra}
-%kernel_modules_extra_package
-%endif
-%kernel_debuginfo_package
-
 
 # Now, each variant package.
 
 %define variant_summary The Linux kernel compiled for SMP machines
 %kernel_variant_package -n SMP smp
-%description smp
+%description smp-core
 This package includes a SMP version of the Linux kernel. It is
 required only on machines with two or more CPUs as well as machines with
 hyperthreading technology.
@@ -973,11 +1034,10 @@ non-Free blobs it includes by default.
 Install the kernel-libre-smp package if your machine uses two or more
 CPUs.
 
-
 %ifnarch armv7hl
 %define variant_summary The Linux kernel compiled for PAE capable machines
 %kernel_variant_package %{pae}
-%description %{pae}
+%description %{pae}-core
 This package includes a version of the Linux kernel with support for up to
 64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
 The non-PAE kernel can only address up to 4GB of memory.
@@ -985,7 +1045,7 @@ Install the kernel-PAE package if your machine has more than 4GB of memory.
 %else
 %define variant_summary The Linux kernel compiled for Cortex-A15
 %kernel_variant_package %{pae}
-%description %{pae}
+%description %{pae}-core
 This package includes a version of the Linux kernel with support for
 Cortex-A15 devices with LPAE and HW virtualisation support
 %endif
@@ -998,7 +1058,7 @@ non-Free blobs it includes by default.
 %define variant_summary The Linux kernel compiled with extra debugging enabled for PAE capable machines
 %kernel_variant_package %{pae}debug
 Obsoletes: kernel-PAE-debug
-%description %{pae}debug
+%description %{pae}debug-core
 This package includes a version of the Linux kernel with support for up to
 64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
 The non-PAE kernel can only address up to 4GB of memory.
@@ -1014,7 +1074,7 @@ non-Free blobs it includes by default.
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled
 %kernel_variant_package debug
-%description debug
+%description debug-core
 The kernel package contains the Linux kernel (vmlinuz), the core of any
 GNU/Linux operating system.  The kernel handles the basic functions
 of the operating system:  memory allocation, process allocation, device
@@ -1026,6 +1086,19 @@ on kernel bugs, as some of these options impact performance noticably.
 
 The kernel-libre-debug package is the upstream kernel without the
 non-Free blobs it includes by default.
+
+# And finally the main -core package
+
+%define variant_summary The Linux kernel
+%kernel_variant_package 
+%description core
+The kernel package contains the Linux kernel (vmlinuz), the core of any
+GNU/Linux operating system.  The kernel handles the basic functions
+of the operating system: memory allocation, process allocation, device
+input and output, etc.
+
+The kernel-libre package is the upstream kernel without the non-Free
+blobs it includes by default.
 
 
 %prep
@@ -1074,7 +1147,10 @@ ApplyPatch()
       exit 1
     fi
   fi 2>/dev/null
-  $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
+  case $patch in 
+  patch*-gnu*-gnu*) ;;
+  *) $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1 ;;
+  esac
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
   *.gz)  gunzip  < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1263,12 +1339,14 @@ make -f %{SOURCE19} config-release
 make -f %{SOURCE20} VERSION=%{version} configs
 
 # Merge in any user-provided local config option changes
+%ifnarch %nobuildarches
 for i in %{all_arch_configs}
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE1000} $i.tmp > $i
   rm $i.tmp
 done
+%endif
 
 ApplyPatch makefile-after_link.patch
 
@@ -1294,12 +1372,8 @@ ApplyPatch 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 #
 # ARM
 #
-ApplyPatch arm-lpae-ax88796.patch
-ApplyPatch arm-sound-soc-samsung-dma-avoid-another-64bit-division.patch
-ApplyPatch arm-omap-load-tfp410.patch
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-tegra-paz00-panel-dts.patch
-ApplyPatch arm-imx6-utilite.patch
+ApplyPatch 0001-ARM-sunxi-Add-driver-for-SD-MMC-hosts-found-on-Allwi.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1405,17 +1479,23 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 1051748
-ApplyPatch Bluetooth-allocate-static-minor-for-vhci.patch
+#rhbz 1048314
+ApplyPatch 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
+#rhbz 1089583
+ApplyPatch 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
+#rhbz 1090161
+ApplyPatch HID-rmi-do-not-fetch-more-than-16-bytes-in-a-query.patch
 
-# Fixes module loading on ppc64le
-ApplyPatch ppc64le_module_fix.patch
+#rhbz 1025603
+ApplyPatch disable-libdw-unwind-on-non-x86.patch
 
-#rhbz 1046495
-ApplyPatch iwlwifi-dvm-take-mutex-when-sending-SYNC-BT-config-command.patch
+#rhbz 983342 1093120
+ApplyPatch 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
 
-#CVE-2014-2580 rhbz 1080084 1080086
-ApplyPatch net-xen-netback-disable-rogue-vif-in-kthread-context.patch
+ApplyPatch s390-appldata-add-slab.h-for-kzalloc-kfree.patch
+
+# CVE-2014-3917 rhbz 1102571 1102715
+ApplyPatch auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1645,6 +1725,10 @@ BuildKernel() {
     if [ -d arch/%{asmarch}/include ]; then
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
+%ifarch aarch64
+    # arch/arm64/include/asm/xen references arch/arm
+    cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%endif
     # include the machine specific headers for ARM variants, if available.
 %ifarch %{arm}
     if [ -d arch/%{asmarch}/mach-${Flavour}/include ]; then
@@ -1716,6 +1800,62 @@ BuildKernel() {
     # Call the modules-extra script to move things around
     %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
 %endif
+
+    #
+    # Generate the kernel-core and kernel-modules files lists
+    #
+
+    # Copy the System.map file for depmod to use, and create a backup of the
+    # full module tree so we can restore it after we're done filtering
+    cp System.map $RPM_BUILD_ROOT/.
+    pushd $RPM_BUILD_ROOT
+    mkdir restore
+    cp -r lib/modules/$KernelVer/* restore/.
+
+    # don't include anything going into k-m-e in the file lists
+    rm -rf lib/modules/$KernelVer/extra
+
+    # Find all the module files and filter them out into the core and modules
+    # lists.  This actually removes anything going into -modules from the dir.
+    find lib/modules/$KernelVer/kernel -name *.ko | sort -n > modules.list
+	cp $RPM_SOURCE_DIR/filter-*.sh .
+    %{SOURCE99} modules.list %{_target_cpu}
+	rm filter-*.sh
+
+    # Run depmod on the resulting module tree and make sure it isn't broken
+    depmod -b . -aeF ./System.map $KernelVer &> depmod.out
+    if [ -s depmod.out ]; then
+        echo "Depmod failure"
+        cat depmod.out
+        exit 1
+    else
+        rm depmod.out
+    fi
+    # remove files that will be auto generated by depmod at rpm -i time
+    pushd $RPM_BUILD_ROOT/lib/modules/$KernelVer/
+        rm -f modules.{alias*,builtin.bin,dep*,*map,symbols*,devname,softdep}
+    popd
+
+    # Go back and find all of the various directories in the tree.  We use this
+    # for the dir lists in kernel-core
+    find lib/modules/$KernelVer/kernel -type d | sort -n > module-dirs.list
+
+    # Cleanup
+    rm System.map
+    cp -r restore/* lib/modules/$KernelVer/.
+    rm -rf restore
+    popd
+
+    # Make sure the files lists start with absolute paths or rpmbuild fails.
+    # Also add in the dir entries
+    sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/k-d.list > ../kernel${Flavour:+-${Flavour}}-modules.list
+    sed -e 's/^lib*/%dir \/lib/' %{?zipsed} $RPM_BUILD_ROOT/module-dirs.list > ../kernel${Flavour:+-${Flavour}}-core.list
+    sed -e 's/^lib*/\/lib/' %{?zipsed} $RPM_BUILD_ROOT/modules.list >> ../kernel${Flavour:+-${Flavour}}-core.list
+
+    # Cleanup
+    rm -f $RPM_BUILD_ROOT/k-d.list
+    rm -f $RPM_BUILD_ROOT/modules.list
+    rm -f $RPM_BUILD_ROOT/module-dirs.list
 
 %if %{signmodules}
     # Save the signing keys so we can sign the modules in __modsign_install_post
@@ -1830,6 +1970,9 @@ popd
     if [ "%{with_up}" -ne "0" ]; then \
       %{modsign_cmd} signing_key.priv.sign signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
     fi \
+  fi \
+  if [ "%{zipmodules}" -eq "1" ]; then \
+    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | xargs xz; \
   fi \
 %{nil}
 
@@ -1989,10 +2132,27 @@ fi\
 
 #
 # This macro defines a %%post script for a kernel*-modules-extra package.
+# It also defines a %%postun script that does the same thing.
 #	%%kernel_modules_extra_post [<subpackage>]
 #
 %define kernel_modules_extra_post() \
 %{expand:%%post %{?1:%{1}-}modules-extra}\
+/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
+%{nil}\
+%{expand:%%postun %{?1:%{1}-}modules-extra}\
+/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
+%{nil}
+
+#
+# This macro defines a %%post script for a kernel*-modules package.
+# It also defines a %%postun script that does the same thing.
+#	%%kernel_modules_post [<subpackage>]
+#
+%define kernel_modules_post() \
+%{expand:%%post %{?1:%{1}-}modules}\
+/sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
+%{nil}\
+%{expand:%%postun %{?1:%{1}-}modules}\
 /sbin/depmod -a %{KVERREL}%{?1:+%{1}}\
 %{nil}
 
@@ -2001,7 +2161,7 @@ fi\
 # More text can follow to go at the end of this variant's %%post.
 #
 %define kernel_variant_posttrans() \
-%{expand:%%posttrans %{?1}}\
+%{expand:%%posttrans %{?1:%{1}-}core}\
 /bin/kernel-install add %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
 %{nil}
 
@@ -2012,11 +2172,12 @@ fi\
 #
 %define kernel_variant_post(v:r:) \
 %{expand:%%kernel_devel_post %{?-v*}}\
+%{expand:%%kernel_modules_post %{?-v*}}\
 %if %{with_extra}\
 %{expand:%%kernel_modules_extra_post %{?-v*}}\
 %endif\
 %{expand:%%kernel_variant_posttrans %{?-v*}}\
-%{expand:%%post %{?-v*}}\
+%{expand:%%post %{?-v*:%{-v*}-}core}\
 %{-r:\
 if [ `uname -i` == "x86_64" -o `uname -i` == "i386" ] &&\
    [ -f /etc/sysconfig/kernel ]; then\
@@ -2029,7 +2190,7 @@ fi}\
 #	%%kernel_variant_preun <subpackage>
 #
 %define kernel_variant_preun() \
-%{expand:%%preun %{?1}}\
+%{expand:%%preun %{?1:%{1}-}core}\
 /bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
 %{nil}
 
@@ -2137,6 +2298,12 @@ fi
 %endif
 %endif # with_perf
 
+%ifnarch noarch
+# empty meta-package
+%files
+%defattr(-,root,root)
+%endif
+
 # This is %%{image_install_path} on an arch where that includes ELF files,
 # or empty otherwise.
 %define elf_image_install_path %{?kernel_image_elf:%{image_install_path}}
@@ -2148,7 +2315,7 @@ fi
 #
 %define kernel_variant_files(k:) \
 %if %{1}\
-%{expand:%%files %{?2}}\
+%{expand:%%files -f kernel-%{?2:%{2}-}core.list %{?2:%{2}-}core}\
 %defattr(-,root,root)\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:+%{2}}\
 /%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:+%{2}}.hmac \
@@ -2157,9 +2324,10 @@ fi
 %endif\
 %attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:+%{2}}\
 /boot/config-%{KVERREL}%{?2:+%{2}}\
+%ghost /boot/initramfs-%{KVERREL}%{?2:+%{2}}.img\
 %dir /lib/modules\
 %dir /lib/modules/%{KVERREL}%{?2:+%{2}}\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/kernel\
+%dir /lib/modules/%{KVERREL}%{?2:+%{2}}/kernel\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/build\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/source\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/updates\
@@ -2168,7 +2336,8 @@ fi
 /etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:+%{2}}.conf\
 %endif\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/modules.*\
-%ghost /boot/initramfs-%{KVERREL}%{?2:+%{2}}.img\
+%{expand:%%files -f kernel-%{?2:%{2}-}modules.list %{?2:%{2}-}modules}\
+%defattr(-,root,root)\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
 /usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
@@ -2182,6 +2351,10 @@ fi
 %{expand:%%files -f debuginfo%{?2}.list %{?2:%{2}-}debuginfo}\
 %defattr(-,root,root)\
 %endif\
+%endif\
+%if %{?2:1} %{!?2:0}\
+%{expand:%%files %{2}}\
+%defattr(-,root,root)\
 %endif\
 %endif\
 %{nil}
@@ -2207,6 +2380,283 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Sun Jun  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.15-gnu-rc8.
+- Reenable firmware builds.  Do not create noarch meta-package.
+
+* Mon Jun 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git0.1
+- Linux v3.15-rc8
+- Disable debugging options.
+
+* Sat May 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git4.2
+- Add patch to fix dentry lockdep splat
+
+* Sat May 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git4.1
+- Linux v3.15-rc7-102-g1487385edb55
+
+* Fri May 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git3.1
+- Linux v3.15-rc7-79-gfe45736f4134
+- Disable CARL9170 on ppc64le
+
+* Thu May 29 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-3917 DoS with syscall auditing (rhbz 1102571 1102715)
+
+* Wed May 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git2.1
+- Linux v3.15-rc7-53-g4efdedca9326
+
+* Wed May 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git1.1
+- Linux v3.15-rc7-40-gcd79bde29f00
+- Reenable debugging options.
+
+* Mon May 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git0.1
+- Linux v3.15-rc7
+- Disable debugging options.
+
+* Sun May 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc6.git1.1
+- Linux v3.15-rc6-213-gdb1003f23189
+- Reenable debugging options.
+
+* Thu May 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable CONFIG_R8723AU (rhbz 1100162)
+
+* Thu May 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc6.git0.1
+- Linux v3.15-rc6
+- Disable debugging options.
+
+* Wed May 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git4.1
+- Linux v3.15-rc5-270-gfba69f042ad9
+
+* Tue May 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git3.1
+- Linux v3.15-rc5-157-g60b5f90d0fac
+
+* Mon May 19 2014 Dan Horák <dan@danny.cz>
+- kernel metapackage shouldn't depend on subpackages we don't build
+
+* Thu May 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git2.9
+- Fix build fail on s390x
+
+* Wed May 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git2.8
+- Enable autoprov for kernel module Provides (rhbz 1058331)
+- Enable xz compressed modules (from Kyle McMartin)
+
+* Tue May 13 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Don't try and merge local config changes on arches we aren't building
+
+* Tue May 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git2.1
+- Linux v3.15-rc5-77-g14186fea0cb0
+
+* Mon May 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git1.1
+- Linux v3.15-rc5-9-g7e338c9991ec
+- Reenable debugging options.
+
+* Sat May 10 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Marvell Dove support
+- Minor ARM cleanups
+- Disable some unneed drivers on ARM
+
+* Sat May 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git0.1
+- Linux v3.15-rc5
+- Disable debugging options.
+
+* Fri May 09 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Move isofs to kernel-core
+
+* Fri May 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git4.1
+- Linux v3.15-rc4-320-gafcf0a2d9289
+
+* Thu May 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git3.1
+- Linux v3.15-rc4-298-g9f1eb57dc706
+
+* Wed May 07 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git2.1
+- Linux v3.15-rc4-260-g38583f095c5a
+
+* Tue May 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git1.1
+- Linux v3.15-rc4-202-g30321c7b658a
+- Reenable debugging options.
+
+* Mon May  5 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix some USB on ARM LPAE kernels
+
+* Mon May 05 2014 Kyle McMartin <kyle@fedoraproject.org>
+- Install arch/arm/include/asm/xen headers on aarch64, since the headers in
+  arch/arm64/include/asm/xen reference them.
+
+* Mon May 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git0.1
+- Linux v3.15-rc4
+- Disable debugging options.
+
+* Mon May  5 2014 Hans de Goede <hdegoede@redhat.com>
+- Add use_native_brightness quirk for the ThinkPad T530 (rhbz 1089545)
+
+* Sun May  4 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- General minor ARM cleanups
+
+* Sun May 04 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix k-m-e requires on k-m-uname-r provides
+- ONE MORE TIME WITH FEELING
+
+* Sat May  3 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable OMAP-3 boards (use DT) and some minor omap3 config updates
+
+* Sat May 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git5.1
+- Linux v3.15-rc3-159-g6c6ca9c2a5b9
+
+* Sat May 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix HID rmi driver from Benjamin Tissoires (rhbz 1090161)
+
+* Sat May 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix up Provides on kernel-module variant packages
+- Enable CONFIG_USB_UAS unconditionally per Hans
+
+* Fri May 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git4.1
+- Linux v3.15-rc3-121-gb7270cce7db7
+
+* Thu May 01 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Rename kernel-drivers to kernel-modules
+- Add kernel metapackages for all flavors, not just debug
+
+* Thu May  1 2014 Hans de Goede <hdegoede@redhat.com>
+- Add use_native_backlight quirk for 4 laptops (rhbz 983342 1093120)
+
+* Wed Apr 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git3.1
+- Linux v3.15-rc3-82-g8aa9e85adac6
+
+* Wed Apr 30 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add kernel-debug metapackage when debugbuildsenabled is set
+
+* Wed Apr 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git2.1
+- Linux v3.15-rc3-62-ged8c37e158cb
+- Drop noarch from ExclusiveArch.  Nothing is built as noarch
+
+* Tue Apr 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git1.10
+- Make depmod call fatal if it errors or warns
+
+* Tue Apr 29 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Introduce kernel-core/kernel-drivers split for F21 Feature work
+
+* Tue Apr 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git1.1
+- Linux v3.15-rc3-41-g2aafe1a4d451
+- Reenable debugging options.
+
+* Mon Apr 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git0.1
+- Linux v3.15-rc3
+- Disable debugging options.
+
+* Fri Apr 25 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Drop obsolete ARM LPAE patches
+
+* Fri Apr 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch from Will Woods to fix fanotify EOVERFLOW issue (rhbz 696821)
+- Fix ACPI issue preventing boot on AMI firmware (rhbz 1090746)
+
+* Fri Apr 25 2014 Hans de Goede <hdegoede@redhat.com>
+- Add synaptics min-max quirk for ThinkPad Edge E431 (rhbz#1089689)
+
+* Fri Apr 25 2014 Hans de Goede <hdegoede@redhat.com>
+- Add a patch to add support for the mmc controller on sunxi ARM SoCs
+
+* Thu Apr 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git3.1
+- Linux v3.15-rc2-107-g76429f1dedbc
+
+* Wed Apr 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git2.1
+- Linux v3.15-rc2-69-g1aae31c8306e
+
+* Tue Apr 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git1.1
+- Linux v3.15-rc2-42-g4d0fa8a0f012
+- Reenable debugging options.
+
+* Tue Apr 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix Synaptics touchscreens and HID rmi driver (rhbz 1089583)
+
+* Mon Apr 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git0.1
+- Linux v3.15-rc2
+- Disable debugging options.
+
+* Fri Apr 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git4.1
+- Linux v3.15-rc1-137-g81cef0fe19e0
+
+* Thu Apr 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git3.1
+- Linux v3.15-rc1-113-g6ca2a88ad820
+- Build perf with unwind support via libdw (rhbz 1025603)
+
+* Thu Apr 17 2014 Hans de Goede <hdegoede@redhat.com>
+- Update min/max quirk patch to add a quirk for the ThinkPad L540 (rhbz1088588)
+
+* Thu Apr 17 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Drop OMAP DRM hack to load encoder module now it fully supports DT (YAY!)
+
+* Wed Apr 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git2.1
+- Linux v3.15-rc1-49-g10ec34fcb100
+
+* Tue Apr 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git1.1
+- Linux v3.15-rc1-12-g55101e2d6ce1
+- Reenable debugging options.
+
+* Mon Apr 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git0.1
+- Linux v3.15-rc1
+- Disable debugging options.
+- Turn SLUB_DEBUG off
+
+* Mon Apr 14 2014 Hans de Goede <hdegoede@redhat.com>
+- Add min/max quirks for various new Thinkpad touchpads (rhbz 1085582 1085697)
+
+* Mon Apr 14 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config changes and cleanups for 3.15 merge window
+
+* Mon Apr 14 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-2851 net ipv4 ping refcount issue in ping_init_sock (rhbz 1086730 1087420)
+
+* Sun Apr 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git13.1
+- Linux v3.14-12812-g321d03c86732
+
+* Fri Apr 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git12.1
+- Linux v3.14-12380-g9e897e13bd46
+- Add queued urgent efi fixes (rhbz 1085349)
+
+* Thu Apr 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git11.1
+- Linux v3.14-12376-g4ba85265790b
+
+* Thu Apr 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Backported HID RMI driver for Haswell Dell XPS machines from Benjamin Tissoires (rhbz 1048314)
+
+* Wed Apr 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git10.1
+- Linux v3.14-12042-g69cd9eba3886
+
+* Wed Apr 09 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-0155 KVM: BUG caused by invalid guest ioapic redirect table (rhbz 1081589 1085016)
+
+* Thu Apr 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git9.1
+- Linux v3.14-7333-g59ecc26004e7
+
+* Thu Apr 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git8.1
+- Linux v3.14-7247-gcd6362befe4c
+
+* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git7.1
+- Linux v3.14-5146-g0f1b1e6d73cb
+
+* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git6.1
+- Linux v3.14-4600-g467cbd207abd
+
+* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git5.1
+- Linux v3.14-4555-gb33ce4429938
+
+* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git4.1
+- Linux v3.14-4227-g3e75c6de1ac3
+
+* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git3.1
+- Linux v3.14-3893-gc12e69c6aaf7
+
+* Tue Apr 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git2.1
+- CVE-2014-2678 net: rds: deref of NULL dev in rds_iw_laddr_check (rhbz 1083274 1083280)
+
+* Tue Apr 01 2014 Josh Boyer <jwboyer@fedoraproject.org> 
+- Linux v3.14-751-g683b6c6f82a6
+
+* Tue Apr 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git1.1
+- Linux v3.14-313-g918d80a13643
+- Reenable debugging options.
+- Turn on SLUB_DEBUG
+
 * Mon Mar 31 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14-gnu.
 
