@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index cdaa5b6..a022520 100644
+index 6d1e304..b8a54b2 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -9303,6 +9303,18 @@ index 22365f1..757d7ce 100644
  source "drivers/staging/crystalhd/Kconfig"
  
  source "drivers/staging/cxt1e1/Kconfig"
+diff --git a/drivers/staging/Makefile b/drivers/staging/Makefile
+index fbe84ed..585bfce 100644
+--- a/drivers/staging/Makefile
++++ b/drivers/staging/Makefile
+@@ -34,6 +34,7 @@ obj-$(CONFIG_DX_SEP)            += sep/
+ obj-$(CONFIG_IIO)		+= iio/
+ obj-$(CONFIG_WLAGS49_H2)	+= wlags49_h2/
+ obj-$(CONFIG_WLAGS49_H25)	+= wlags49_h25/
++obj-$(CONFIG_FB_SM7XX)		+= sm7xxfb/
+ obj-$(CONFIG_CRYSTALHD)		+= crystalhd/
+ obj-$(CONFIG_CXT1E1)		+= cxt1e1/
+ obj-$(CONFIG_FB_XGI)		+= xgifb/
 diff --git a/drivers/staging/sm7xxfb/Kconfig b/drivers/staging/sm7xxfb/Kconfig
 new file mode 100644
 index 0000000..e2922ae
@@ -11186,7 +11198,7 @@ index 3586460..15f66e5 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 00661d3..ab16234 100644
+index 4a6d3dd..ed0e77f 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
@@ -11236,7 +11248,7 @@ index 00661d3..ab16234 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -925,6 +937,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -932,6 +944,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -11244,7 +11256,7 @@ index 00661d3..ab16234 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1032,6 +1045,9 @@ hc_init:
+@@ -1039,6 +1052,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -11255,7 +11267,7 @@ index 00661d3..ab16234 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index f213ee9..55d6b82 100644
+index 948a19f..54830b0 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -11268,7 +11280,7 @@ index f213ee9..55d6b82 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -602,6 +605,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -603,6 +606,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },

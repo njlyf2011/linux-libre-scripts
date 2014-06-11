@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-06-10 07:07:42.000000000 +0000
-@@ -0,0 +1,4989 @@
++++ .config	2014-06-11 06:02:00.000000000 +0000
+@@ -0,0 +1,4988 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.15.0-rc8-gnu Kernel Configuration
++# Linux/mips 3.15.0-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1850,7 +1850,6 @@ Index: .config
 +CONFIG_CHELSIO_T4VF=m
 +CONFIG_NET_VENDOR_CISCO=y
 +CONFIG_ENIC=m
-+CONFIG_CX_ECAT=m
 +# CONFIG_DM9000 is not set
 +CONFIG_DNET=m
 +CONFIG_NET_VENDOR_DEC=y
@@ -3484,7 +3483,7 @@ Index: .config
 +# CONFIG_BACKLIGHT_LV5207LP is not set
 +# CONFIG_BACKLIGHT_BD6107 is not set
 +CONFIG_VGASTATE=m
-+CONFIG_VIDEO_OUTPUT_CONTROL=m
++CONFIG_VIDEO_OUTPUT_CONTROL=y
 +
 +#
 +# Console display driver support
