@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -46,7 +46,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 14
+%define base_sublevel 15
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -490,7 +490,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-3.%{upstream_sublevel}
+#Source6: deblob-3.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -507,6 +507,7 @@ Source94: filter-ppc.sh
 Source95: filter-ppc64.sh
 Source96: filter-ppc64le.sh
 Source97: filter-s390x.sh
+Source98: filter-ppc64p7.sh
 Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
@@ -692,6 +693,24 @@ Patch25071: s390-appldata-add-slab.h-for-kzalloc-kfree.patch
 # CVE-2014-3917 rhbz 1102571 1102715
 Patch25093: auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
+Patch26000: perf-lib64.patch
+
+# Patch series from Hans for various backlight and platform driver fixes
+Patch26001: thinkpad_acpi-Add-mappings-for-F9-F12-hotkeys-on-X24.patch
+Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
+Patch26003: ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
+Patch26004: asus-wmi-Add-a-no-backlight-quirk.patch
+Patch26005: eeepc-wmi-Add-no-backlight-quirk-for-Asus-H87I-PLUS-.patch
+Patch26006: acpi-video-Don-t-register-acpi_video_resume-notifier.patch
+Patch26007: acpi-video-Add-an-acpi_video_unregister_backlight-fu.patch
+Patch26008: acer-wmi-Switch-to-acpi_video_unregister_backlight.patch
+Patch26009: acer-wmi-Add-Aspire-5741-to-video_vendor_dmi_table.patch
+Patch26010: nouveau-Don-t-check-acpi_video_backlight_support-bef.patch
+Patch26011: backlight-Add-backlight-device-un-registration-notif.patch
+Patch26012: acpi-video-Unregister-the-backlight-device-if-a-raw-.patch
+Patch26013: acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
+Patch26014: acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -796,7 +815,7 @@ This package provides debug information for the perf package.
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|XXX' -o perf-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_libdir}/traceevent/plugins/.*|XXX' -o perf-debuginfo.list}
 
 %package -n python-perf-libre
 Provides: python-perf = %{rpmversion}-%{pkg_release}
@@ -1497,6 +1516,24 @@ ApplyPatch s390-appldata-add-slab.h-for-kzalloc-kfree.patch
 # CVE-2014-3917 rhbz 1102571 1102715
 ApplyPatch auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
+ApplyPatch perf-lib64.patch
+
+# Patch series from Hans for various backlight and platform driver fixes
+ApplyPatch thinkpad_acpi-Add-mappings-for-F9-F12-hotkeys-on-X24.patch
+ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
+ApplyPatch ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
+ApplyPatch asus-wmi-Add-a-no-backlight-quirk.patch
+ApplyPatch eeepc-wmi-Add-no-backlight-quirk-for-Asus-H87I-PLUS-.patch
+ApplyPatch acpi-video-Don-t-register-acpi_video_resume-notifier.patch
+ApplyPatch acpi-video-Add-an-acpi_video_unregister_backlight-fu.patch
+ApplyPatch acer-wmi-Switch-to-acpi_video_unregister_backlight.patch
+ApplyPatch acer-wmi-Add-Aspire-5741-to-video_vendor_dmi_table.patch
+ApplyPatch nouveau-Don-t-check-acpi_video_backlight_support-bef.patch
+ApplyPatch backlight-Add-backlight-device-un-registration-notif.patch
+ApplyPatch acpi-video-Unregister-the-backlight-device-if-a-raw-.patch
+ApplyPatch acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
+ApplyPatch acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2032,7 +2069,7 @@ find $RPM_BUILD_ROOT/usr/include \
 
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install-bin
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT MULTILIBDIR=%{_lib} install-bin install-traceevent-plugins
 # remove the 'trace' symlink.
 rm -f %{buildroot}%{_bindir}/trace
 
@@ -2242,6 +2279,8 @@ fi
 %files -n perf-libre
 %defattr(-,root,root)
 %{_bindir}/perf
+%dir %{_libdir}/traceevent/plugins
+%{_libdir}/traceevent/plugins/*
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_mandir}/man[1-8]/perf*
@@ -2380,7 +2419,42 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Sun Jun  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jun 10 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.15-gnu.
+
+* Mon Jun 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-1
+- Linux v3.15
+- Disable debugging options.
+
+* Mon Jun  9 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable USB_EHCI_HCD_ORION to fix USB on Marvell (fix boot for some devices)
+
+* Fri Jun 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git4.1
+- CVE-2014-3940 missing check during hugepage migration (rhbz 1104097 1105042)
+- Linux v3.15-rc8-81-g951e273060d1
+
+* Thu Jun 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git3.1
+- Linux v3.15-rc8-72-g54539cd217d6
+
+* Wed Jun 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git2.1
+- Linux v3.15-rc8-58-gd2cfd3105094
+
+* Tue Jun 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add filter-ppc64p7.sh because ppc64p7 is an entirely separate RPM arch
+
+* Tue Jun 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git1.2
+- Fixes from Hans de Goede for backlight and platform drivers on various
+  machines.  (rhbz 1025690 1012674 1093171 1097436 861573)
+
+* Tue Jun 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git1.1
+- Add patch to install libtraceevent plugins from Kyle McMartin
+- Linux v3.15-rc8-53-gcae61ba37b4c
+- Reenable debugging options.
+
+* Mon Jun  2 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM MMC config updates
+
+* Mon Jun  2 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jun  8
 - GNU Linux-libre 3.15-gnu-rc8.
 - Reenable firmware builds.  Do not create noarch meta-package.
 
