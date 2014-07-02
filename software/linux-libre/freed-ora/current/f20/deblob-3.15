@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.14 extra=
+kver=3.15 extra=
 
 case $1 in
 --force)
@@ -809,12 +809,6 @@ reject_firmware drivers/media/usb/dvb-usb/gp8psk.c
 clean_blob drivers/media/usb/dvb-usb/gp8psk.c
 clean_kconfig drivers/media/usb/dvb-usb/Kconfig 'DVB_USB_GP8PSK'
 clean_mk CONFIG_DVB_USB_GP8PSK drivers/media/usb/dvb-usb/Makefile
-
-announce DVB_USB_IT913X - "it913x driver"
-clean_blob drivers/media/usb/dvb-usb-v2/it913x.c
-clean_file Documentation/dvb/it9137.txt
-clean_kconfig drivers/media/usb/dvb-usb-v2/Kconfig 'DVB_USB_IT913X'
-clean_mk CONFIG_DVB_USB_IT913X drivers/media/usb/dvb-usb-v2/Makefile
 
 announce DVB_USB_LME2510 - "LME DM04/QQBOX DVB-S USB2.0 support"
 reject_firmware drivers/media/usb/dvb-usb-v2/lmedm04.c
@@ -2072,11 +2066,6 @@ clean_mk CONFIG_MISDN_SPEEDFAX drivers/isdn/hardware/mISDN/Makefile
 ##########
 # Serial #
 ##########
-
-announce DGAP - "Digi EPCA PCI products"
-clean_blob drivers/staging/dgap/downld.c
-clean_kconfig drivers/staging/dgap/Kconfig 'DGAP'
-clean_mk CONFIG_DGAP drivers/staging/dgap/Makefile
 
 announce SERIAL_8250_CS - "8250/16550 PCMCIA device support"
 # These are not software; they're Free, but GPLed without in-tree sources.
