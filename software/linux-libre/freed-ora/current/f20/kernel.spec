@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -813,13 +813,6 @@ Patch25102: intel_pstate-Fix-setting-VID.patch
 Patch25103: intel_pstate-dont-touch-turbo-bit-if-turbo-disabled-or-unavailable.patch
 Patch25104: intel_pstate-Update-documentation-of-max-min_perf_pct-sysfs-files.patch
 
-#CVE-2014-4508 rhbz 1111590 1112073
-Patch25106: x86_32-entry-Do-syscall-exit-work-on-badsys.patch
-
-#CVE-2014-0206 rhbz 1094602 1112975
-Patch25107: aio-fix-kernel-memory-disclosure-in-io_getevents-int.patch
-Patch25108: aio-fix-aio-request-leak-when-events-are-reaped-by-u.patch
-
 Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
 
 #rhbz 1021036, submitted upstream
@@ -827,6 +820,12 @@ Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
 #rhbz 1015989
 Patch25111: netfilter-nf_nat-fix-oops-on-netns-removal.patch
+
+#rhbz 1114768
+Patch25112: 0001-synaptics-Add-min-max-quirk-for-pnp-id-LEN2002-Edge-.patch
+
+# https://bugs.freedesktop.org/show_bug.cgi?id=79813 submitted upstream
+Patch25113: i915-fix-backlight-regression-misconfigured-VBT.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1600,13 +1599,6 @@ ApplyPatch intel_pstate-Fix-setting-VID.patch
 ApplyPatch intel_pstate-dont-touch-turbo-bit-if-turbo-disabled-or-unavailable.patch
 ApplyPatch intel_pstate-Update-documentation-of-max-min_perf_pct-sysfs-files.patch
 
-#CVE-2014-4508 rhbz 1111590 1112073
-ApplyPatch x86_32-entry-Do-syscall-exit-work-on-badsys.patch
-
-#CVE-2014-0206 rhbz 1094602 1112975
-ApplyPatch aio-fix-kernel-memory-disclosure-in-io_getevents-int.patch
-ApplyPatch aio-fix-aio-request-leak-when-events-are-reaped-by-u.patch
-
 ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
 
 #rhbz 1021036, submitted upstream
@@ -1614,6 +1606,12 @@ ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
 #rhbz 1015989
 ApplyPatch netfilter-nf_nat-fix-oops-on-netns-removal.patch
+
+#rhbz 1114768
+ApplyPatch 0001-synaptics-Add-min-max-quirk-for-pnp-id-LEN2002-Edge-.patch
+
+# https://bugs.freedesktop.org/show_bug.cgi?id=79813 submitted upstream
+ApplyPatch i915-fix-backlight-regression-misconfigured-VBT.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2437,6 +2435,16 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Jul  2 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.15.3-gnu.
+
+* Tue Jul  1 2014 Justin M. Forbes <jforbes@fedoraproject.org> 3.15.3-200
+- Linux v3.15.3
+- drm/i915: Fix backlight regression caused by misconfigured VBT
+
+* Tue Jul  1 2014 Hans de Goede <hdegoede@redhat.com>
+- Add min/max quirk for the ThinkPad Edge E531 touchpad (rhbz#1114768)
+
 * Tue Jul  1 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.15.2-gnu.
 
