@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -811,15 +811,9 @@ Patch25087: jme-fix-dma-unmap-error.patch
 #rhbz 1051668
 Patch25092: Input-elantech-add-support-for-newer-elantech-touchpads.patch
 
-#rhbz 1094066
-Patch25096: drm-i915-set-backlight-duty-cycle-after-backlight-enable-for-gen4.patch
-
 #rhbz 1064516
 Patch25097: e1000e-Fix-SHRA-register-access-for-82579.patch
 Patch25098: e1000e-Failure-to-write-SHRA-turns-on-PROMISC-mode.patch
-
-#rhbz 1106856
-Patch25100: dm-thin-update-discard_granularity-to-reflect-the-thin-pool-blocksize.patch
 
 Patch25102: intel_pstate-Fix-setting-VID.patch
 Patch25103: intel_pstate-dont-touch-turbo-bit-if-turbo-disabled-or-unavailable.patch
@@ -1585,15 +1579,9 @@ ApplyPatch jme-fix-dma-unmap-error.patch
 #rhbz 1051668
 ApplyPatch Input-elantech-add-support-for-newer-elantech-touchpads.patch
 
-#rhbz 1094066
-ApplyPatch drm-i915-set-backlight-duty-cycle-after-backlight-enable-for-gen4.patch
-
 #rhbz 1064516
 ApplyPatch e1000e-Fix-SHRA-register-access-for-82579.patch
 ApplyPatch e1000e-Failure-to-write-SHRA-turns-on-PROMISC-mode.patch
-
-#rhbz 1106856
-ApplyPatch dm-thin-update-discard_granularity-to-reflect-the-thin-pool-blocksize.patch
 
 ApplyPatch intel_pstate-Fix-setting-VID.patch
 ApplyPatch intel_pstate-dont-touch-turbo-bit-if-turbo-disabled-or-unavailable.patch
@@ -2428,6 +2416,12 @@ fi
 # and build.
 
 %changelog
+* Mon Jul 14 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.12-gnu.
+
+* Mon Jul 14 2014 Josh Boyer <jwboyer@fedoraproject.rog> - 3.14.12-100
+- Linux v3.14.12
+
 * Tue Jul  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.11-gnu.
 
