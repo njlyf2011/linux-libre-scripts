@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -815,15 +815,14 @@ Patch25092: Input-elantech-add-support-for-newer-elantech-touchpads.patch
 Patch25097: e1000e-Fix-SHRA-register-access-for-82579.patch
 Patch25098: e1000e-Failure-to-write-SHRA-turns-on-PROMISC-mode.patch
 
-Patch25102: intel_pstate-Fix-setting-VID.patch
-Patch25103: intel_pstate-dont-touch-turbo-bit-if-turbo-disabled-or-unavailable.patch
-Patch25104: intel_pstate-Update-documentation-of-max-min_perf_pct-sysfs-files.patch
-
 Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
 
 #rhbz 1021036
 Patch25110: 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 Patch25111: 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
+
+#CVE-2014-4943 rhbz 1119458 1120542
+Patch25115: net-l2tp-don-t-fall-back-on-UDP-get-set-sockopt.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1583,15 +1582,14 @@ ApplyPatch Input-elantech-add-support-for-newer-elantech-touchpads.patch
 ApplyPatch e1000e-Fix-SHRA-register-access-for-82579.patch
 ApplyPatch e1000e-Failure-to-write-SHRA-turns-on-PROMISC-mode.patch
 
-ApplyPatch intel_pstate-Fix-setting-VID.patch
-ApplyPatch intel_pstate-dont-touch-turbo-bit-if-turbo-disabled-or-unavailable.patch
-ApplyPatch intel_pstate-Update-documentation-of-max-min_perf_pct-sysfs-files.patch
-
 ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
 
 #rhbz 1021036
 ApplyPatch 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 ApplyPatch 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
+
+#CVE-2014-4943 rhbz 1119458 1120542
+ApplyPatch net-l2tp-don-t-fall-back-on-UDP-get-set-sockopt.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2416,6 +2414,13 @@ fi
 # and build.
 
 %changelog
+* Fri Jul 18 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.13-gnu.
+
+* Thu Jul 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.13-100
+- Linux v3.14.13
+- CVE-2014-4943 pppol2tp level handling (rhbz 1119458 1120542)
+
 * Mon Jul 14 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.12-gnu.
 
