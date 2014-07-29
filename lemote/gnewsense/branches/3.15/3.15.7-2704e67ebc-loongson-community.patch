@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 6d1e304..b8a54b2 100644
+index 833f67f..354c3fe 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -2218,6 +2218,18 @@ index 0000000..b296220
 +DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NEC, PCI_DEVICE_ID_CT_65550,
 +				gdium_usb_host_fixup);
 +#endif
+diff --git a/arch/mips/power/hibernate.S b/arch/mips/power/hibernate.S
+index 32a7c82..7e0277a 100644
+--- a/arch/mips/power/hibernate.S
++++ b/arch/mips/power/hibernate.S
+@@ -43,7 +43,6 @@ LEAF(swsusp_arch_resume)
+ 	bne t1, t3, 1b
+ 	PTR_L t0, PBE_NEXT(t0)
+ 	bnez t0, 0b
+-	jal local_flush_tlb_all /* Avoid TLB mismatch after kernel resume */
+ 	PTR_LA t0, saved_regs
+ 	PTR_L ra, PT_R31(t0)
+ 	PTR_L sp, PT_R29(t0)
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
 index 7af9d0b..925d8bb 100644
 --- a/drivers/hid/Kconfig
@@ -2506,7 +2518,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index e7dc441a..124e8c3 100644
+index e7dc441..124e8c3 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -7920,10 +7932,10 @@ index 0000000..1bfe4cf
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..4f2cd91
+index 0000000..c285a67
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1354 @@
+@@ -0,0 +1,1360 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -8094,7 +8106,7 @@ index 0000000..4f2cd91
 +
 +static int get_bat_temp(void)
 +{
-+	return get_bat_l(TEMPERATURE) * 1000;
++	return get_bat_l(TEMPERATURE) * 10;
 +}
 +
 +static int get_bat_current(void)
@@ -8900,11 +8912,12 @@ index 0000000..4f2cd91
 +	[EVENT_DISPLAY_TOGGLE] = {0, switchvideomode_handler},
 +	[EVENT_USB_OC0] = {REG_USB2_FLAG, usb0_handler},
 +	[EVENT_USB_OC2] = {REG_USB2_FLAG, usb2_handler},
++	[EVENT_WLAN] = {REG_WLAN, NULL},
 +};
 +
 +static void do_event_action(int event)
 +{
-+	int status;
++	int status = -1;
 +	struct key_entry *ke;
 +	struct sci_event *sep;
 +
@@ -8912,6 +8925,11 @@ index 0000000..4f2cd91
 +
 +	if (sep->reg != 0)
 +		status = ec_read(sep->reg);
++
++	if (status == -1) {
++		/* ec_read hasn't been called, status is invalid */
++		return;
++	}
 +
 +	if (sep->handler != NULL)
 +		status = sep->handler(status);
@@ -9304,7 +9322,7 @@ index 22365f1..757d7ce 100644
  
  source "drivers/staging/cxt1e1/Kconfig"
 diff --git a/drivers/staging/Makefile b/drivers/staging/Makefile
-index fbe84ed..585bfce 100644
+index fbe84ed..585bfcef 100644
 --- a/drivers/staging/Makefile
 +++ b/drivers/staging/Makefile
 @@ -34,6 +34,7 @@ obj-$(CONFIG_DX_SEP)            += sep/
@@ -11198,7 +11216,7 @@ index 3586460..15f66e5 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 4a6d3dd..ed0e77f 100644
+index 2f3aceb..6647c3f 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
@@ -11238,7 +11256,7 @@ index 4a6d3dd..ed0e77f 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -793,6 +802,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -806,6 +815,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -11248,7 +11266,7 @@ index 4a6d3dd..ed0e77f 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -932,6 +944,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -945,6 +957,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -11256,7 +11274,7 @@ index 4a6d3dd..ed0e77f 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1039,6 +1052,9 @@ hc_init:
+@@ -1052,6 +1065,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -11267,7 +11285,7 @@ index 4a6d3dd..ed0e77f 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 948a19f..54830b0 100644
+index 9da566a..fffecfb 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -11280,7 +11298,7 @@ index 948a19f..54830b0 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -603,6 +606,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
