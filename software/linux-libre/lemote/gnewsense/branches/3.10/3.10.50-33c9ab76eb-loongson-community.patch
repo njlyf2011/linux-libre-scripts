@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index e5e3ba0..346b57d 100644
+index 8d891c6..c5f4411a 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -23,10 +23,10 @@ index e5e3ba0..346b57d 100644
  
  include $(srctree)/arch/$(SRCARCH)/Makefile
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 7a58ab9..56de7af 100644
+index e53e2b4..86c2834 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -269,7 +269,7 @@ config LASAT
+@@ -270,7 +270,7 @@ config LASAT
  
  config MACH_LOONGSON
  	bool "Loongson family of machines"
@@ -35,7 +35,7 @@ index 7a58ab9..56de7af 100644
  	help
  	  This enables the support of Loongson family of machines.
  
-@@ -931,6 +931,60 @@ config CSRC_POWERTV
+@@ -932,6 +932,60 @@ config CSRC_POWERTV
  config CSRC_R4K
  	bool
  
@@ -96,7 +96,7 @@ index 7a58ab9..56de7af 100644
  config CSRC_GIC
  	bool
  
-@@ -1536,6 +1590,15 @@ config CPU_LOONGSON2
+@@ -1537,6 +1591,15 @@ config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
  	select CPU_SUPPORTS_64BIT_KERNEL
@@ -112,7 +112,7 @@ index 7a58ab9..56de7af 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2130,7 +2193,7 @@ config SYS_SUPPORTS_MICROMIPS
+@@ -2131,7 +2194,7 @@ config SYS_SUPPORTS_MICROMIPS
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -595,7 +595,7 @@ index 0000000..8027d5d
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 +# CONFIG_EARLY_PRINTK is not set
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
-index 343bebc..ef8b4d1 100644
+index 343bebc..ef8b4d13 100644
 --- a/arch/mips/configs/lemote2f_defconfig
 +++ b/arch/mips/configs/lemote2f_defconfig
 @@ -1,27 +1,27 @@
@@ -5868,7 +5868,7 @@ index 0000000..5af3b23
 +MODULE_LICENSE("GPL");
 +MODULE_ALIAS("platform:sm501-pwm");
 diff --git a/arch/mips/loongson/lemote-2f/Makefile b/arch/mips/loongson/lemote-2f/Makefile
-index 4f9eaa3..f945bd7 100644
+index 4f9eaa3..f945bd7a 100644
 --- a/arch/mips/loongson/lemote-2f/Makefile
 +++ b/arch/mips/loongson/lemote-2f/Makefile
 @@ -2,7 +2,7 @@
@@ -6763,10 +6763,10 @@ index 21813be..d8ecfa6 100644
  	case CPU_SB1A:
  		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
 diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
-index caf92ec..d622664 100644
+index 23129d10..27e33a4 100644
 --- a/arch/mips/mm/dma-default.c
 +++ b/arch/mips/mm/dma-default.c
-@@ -331,7 +331,7 @@ int mips_dma_supported(struct device *dev, u64 mask)
+@@ -335,7 +335,7 @@ int mips_dma_supported(struct device *dev, u64 mask)
  	return plat_dma_supported(dev, mask);
  }
  
@@ -6775,7 +6775,7 @@ index caf92ec..d622664 100644
  			 enum dma_data_direction direction)
  {
  	BUG_ON(direction == DMA_NONE);
-@@ -341,8 +341,6 @@ void dma_cache_sync(struct device *dev, void *vaddr, size_t size,
+@@ -345,8 +345,6 @@ void dma_cache_sync(struct device *dev, void *vaddr, size_t size,
  		__dma_sync_virtual(vaddr, size, direction);
  }
  
@@ -6994,10 +6994,10 @@ index 0448860..fa7cfab 100644
  #define wrmsr(x, y, z) do { } while (0)
  #define use_msr 0
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index fb52f3f..a96088f 100644
+index bee88ee..fc9062f 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -744,6 +744,13 @@ config HID_ZYDACRON
+@@ -748,6 +748,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -7240,10 +7240,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 38535c9..53093d0 100644
+index a1e431f..84d07bc 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -892,6 +892,9 @@
+@@ -912,6 +912,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -7254,10 +7254,10 @@ index 38535c9..53093d0 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index 631736e..f1359b5 100644
+index d4fe13e..8c1daa0 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -942,7 +942,7 @@ config SCx200_I2C_SDA
+@@ -946,7 +946,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -12840,10 +12840,10 @@ index 0000000..1bfe4cf
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..34b40e9
+index 0000000..3db791e
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1350 @@
+@@ -0,0 +1,1356 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -13010,7 +13010,7 @@ index 0000000..34b40e9
 +
 +static int get_bat_temp(void)
 +{
-+	return get_bat_l(TEMPERATURE) * 1000;
++	return get_bat_l(TEMPERATURE) * 10;
 +}
 +
 +static int get_bat_current(void)
@@ -13816,11 +13816,12 @@ index 0000000..34b40e9
 +	[EVENT_SWITCHVIDEOMODE] = {0, switchvideomode_handler},
 +	[EVENT_USB_OC0] = {REG_USB2_FLAG, usb0_handler},
 +	[EVENT_USB_OC2] = {REG_USB2_FLAG, usb2_handler},
++	[EVENT_WLAN] = {REG_WLAN, NULL},
 +};
 +
 +static void do_event_action(int event)
 +{
-+	int status;
++	int status = -1;
 +	struct key_entry *ke;
 +	struct sci_event *sep;
 +
@@ -13828,6 +13829,11 @@ index 0000000..34b40e9
 +
 +	if (sep->reg != 0)
 +		status = ec_read(sep->reg);
++
++	if (status == -1) {
++		/* ec_read hasn't been called, status is invalid */
++		return;
++	}
 +
 +	if (sep->handler != NULL)
 +		status = sep->handler(status);
@@ -14207,10 +14213,10 @@ index b983813..1d8b111 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index f1cb706..b9e4833 100644
+index 6ae046b..4c46047 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -691,8 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -739,8 +739,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME:
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -14234,10 +14240,10 @@ index 8add64b..df8d3fb 100644
  	{"0x317", 1024, 768,  16},
  	{"0x31A", 1280, 1024, 16},
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index fc627fd..04aaa73 100644
+index 865946c..8b7434fdb 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
-@@ -861,9 +861,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+@@ -863,9 +863,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
  	}
  
  	if (ints & OHCI_INTR_WDH) {
@@ -14255,7 +14261,7 @@ index fc627fd..04aaa73 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 4c338ec..f6354b4 100644
+index 9cfe3af..b93877d 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -353,6 +353,7 @@ void usb_amd_dev_put(void)
@@ -14295,7 +14301,7 @@ index 4c338ec..f6354b4 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -692,6 +701,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -705,6 +714,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -14305,7 +14311,7 @@ index 4c338ec..f6354b4 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -836,6 +848,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -849,6 +861,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -14313,7 +14319,7 @@ index 4c338ec..f6354b4 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -943,6 +956,9 @@ hc_init:
+@@ -956,6 +969,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -14324,7 +14330,7 @@ index 4c338ec..f6354b4 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index bd4323d..4524a18 100644
+index 9da566a..fffecfb 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -14336,8 +14342,8 @@ index bd4323d..4524a18 100644
 +
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
- #define HUAWEI_PRODUCT_K4505			0x1464
-@@ -568,6 +571,7 @@ static const struct usb_device_id option_ids[] = {
+ #define HUAWEI_PRODUCT_E1750			0x1406
+@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
