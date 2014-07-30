@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index e5ac8a6..d8cc638 100644
+index 230c7f6..69dfbc4 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -244,8 +244,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -3423,6 +3423,18 @@ index 0000000..b296220
 +DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NEC, PCI_DEVICE_ID_CT_65550,
 +				gdium_usb_host_fixup);
 +#endif
+diff --git a/arch/mips/power/hibernate.S b/arch/mips/power/hibernate.S
+index 32a7c82..7e0277a 100644
+--- a/arch/mips/power/hibernate.S
++++ b/arch/mips/power/hibernate.S
+@@ -43,7 +43,6 @@ LEAF(swsusp_arch_resume)
+ 	bne t1, t3, 1b
+ 	PTR_L t0, PBE_NEXT(t0)
+ 	bnez t0, 0b
+-	jal local_flush_tlb_all /* Avoid TLB mismatch after kernel resume */
+ 	PTR_LA t0, saved_regs
+ 	PTR_L ra, PT_R31(t0)
+ 	PTR_L sp, PT_R29(t0)
 diff --git a/drivers/ata/pata_cs5536.c b/drivers/ata/pata_cs5536.c
 index 0448860..fa7cfab 100644
 --- a/drivers/ata/pata_cs5536.c
@@ -3683,10 +3695,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 22f28d6..ad68381 100644
+index 6e12cd0..1ce18ed 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -957,6 +957,9 @@
+@@ -956,6 +956,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -3697,10 +3709,10 @@ index 22f28d6..ad68381 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index de17c55..1fabf5b 100644
+index c5eec02..9e4eb1d 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -1001,7 +1001,7 @@ config SCx200_I2C_SDA
+@@ -1002,7 +1002,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -3737,7 +3749,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index e7dc441a..124e8c3 100644
+index e7dc441..124e8c3 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -9151,10 +9163,10 @@ index 0000000..1bfe4cf
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..4f2cd91
+index 0000000..c285a67
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1354 @@
+@@ -0,0 +1,1360 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -9325,7 +9337,7 @@ index 0000000..4f2cd91
 +
 +static int get_bat_temp(void)
 +{
-+	return get_bat_l(TEMPERATURE) * 1000;
++	return get_bat_l(TEMPERATURE) * 10;
 +}
 +
 +static int get_bat_current(void)
@@ -10131,11 +10143,12 @@ index 0000000..4f2cd91
 +	[EVENT_DISPLAY_TOGGLE] = {0, switchvideomode_handler},
 +	[EVENT_USB_OC0] = {REG_USB2_FLAG, usb0_handler},
 +	[EVENT_USB_OC2] = {REG_USB2_FLAG, usb2_handler},
++	[EVENT_WLAN] = {REG_WLAN, NULL},
 +};
 +
 +static void do_event_action(int event)
 +{
-+	int status;
++	int status = -1;
 +	struct key_entry *ke;
 +	struct sci_event *sep;
 +
@@ -10143,6 +10156,11 @@ index 0000000..4f2cd91
 +
 +	if (sep->reg != 0)
 +		status = ec_read(sep->reg);
++
++	if (status == -1) {
++		/* ec_read hasn't been called, status is invalid */
++		return;
++	}
 +
 +	if (sep->handler != NULL)
 +		status = sep->handler(status);
@@ -10510,7 +10528,7 @@ index 0000000..4f2cd91
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index db933dec..1232c4b 100644
+index db933de..1232c4b 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
 @@ -649,6 +649,7 @@ comment "Platform RTC drivers"
@@ -10555,7 +10573,7 @@ index 3586460..15f66e5 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 00661d3..ab16234 100644
+index 2f3aceb..6647c3f 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
@@ -10595,7 +10613,7 @@ index 00661d3..ab16234 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -793,6 +802,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -806,6 +815,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -10605,7 +10623,7 @@ index 00661d3..ab16234 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -925,6 +937,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -945,6 +957,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -10613,7 +10631,7 @@ index 00661d3..ab16234 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1032,6 +1045,9 @@ hc_init:
+@@ -1052,6 +1065,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -10624,7 +10642,7 @@ index 00661d3..ab16234 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 68fc9fe..be9c31f 100644
+index 9da566a..fffecfb 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -10637,7 +10655,7 @@ index 68fc9fe..be9c31f 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -572,6 +575,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
