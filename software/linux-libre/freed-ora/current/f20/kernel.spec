@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -805,11 +805,32 @@ Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 #rhbz 1114768
 Patch25112: 0001-synaptics-Add-min-max-quirk-for-pnp-id-LEN2002-Edge-.patch
 
-#rhbz 1117008
-Patch25114: Revert-drm-i915-reverse-dp-link-param-selection-pref.patch
-
 #CVE-2014-4943 rhbz 1119458 1120542
 Patch25115: net-l2tp-don-t-fall-back-on-UDP-get-set-sockopt.patch
+
+#CVE-2014-3534 rhbz 1114089 1122612
+Patch25117: s390-ptrace-fix-PSW-mask-check.patch
+
+#rhbz 1117942
+Patch25118: sched-fix-sched_setparam-policy-1-logic.patch
+
+#CVE-2014-5045 rhbz 1122472 1122482
+Patch25119: fs-umount-on-symlink-leaks-mnt-count.patch
+
+#rhbz 1060327
+Patch25123: drm-try-harder-to-avoid-regression-when-merging-mode.patch
+
+#CVE-2014-5077 rhbz 1122982 1123696
+Patch25124: net-v2-net-sctp-inherit-auth_capable-on-INIT-collisions.patch
+
+#rhbz 1025690
+Patch25125: 0001-ACPI-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
+
+#rhbz 1123565
+Patch25126: 0001-acpi-video-Add-video.use_native_backlight-1-for-HP-E.patch
+
+#rhbz 1121288
+Patch25127: 0001-xhci-Blacklist-using-streams-on-the-Etron-EJ168-cont.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1575,11 +1596,32 @@ ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 #rhbz 1114768
 ApplyPatch 0001-synaptics-Add-min-max-quirk-for-pnp-id-LEN2002-Edge-.patch
 
-#rhbz 1117008
-ApplyPatch Revert-drm-i915-reverse-dp-link-param-selection-pref.patch
-
 #CVE-2014-4943 rhbz 1119458 1120542
 ApplyPatch net-l2tp-don-t-fall-back-on-UDP-get-set-sockopt.patch
+
+#CVE-2014-3534 rhbz 1114089 1122612
+ApplyPatch s390-ptrace-fix-PSW-mask-check.patch
+
+#rhbz 1117942
+ApplyPatch sched-fix-sched_setparam-policy-1-logic.patch
+
+#CVE-2014-5045 rhbz 1122472 1122482
+ApplyPatch fs-umount-on-symlink-leaks-mnt-count.patch
+
+#rhbz 1060327
+ApplyPatch drm-try-harder-to-avoid-regression-when-merging-mode.patch
+
+#CVE-2014-5077 rhbz 1122982 1123696
+ApplyPatch net-v2-net-sctp-inherit-auth_capable-on-INIT-collisions.patch
+
+#rhbz 1025690
+ApplyPatch 0001-ACPI-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
+
+#rhbz 1123565
+ApplyPatch 0001-acpi-video-Add-video.use_native_backlight-1-for-HP-E.patch
+
+#rhbz 1121288
+ApplyPatch 0001-xhci-Blacklist-using-streams-on-the-Etron-EJ168-cont.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2403,6 +2445,30 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Jul 28 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.15.7-gnu.
+
+* Mon Jul 28 2014 Justin M. Forbes <jforbes@fedoraproject.org> 3.15.7-200
+- Linux v3.15.7
+
+* Mon Jul 28 2014 Hans de Goede <hdegoede@redhat.com>
+- Add use_native_backlight=1 quirk for HP ProBook 4540s (rhbz#1025690)
+- Add use_native_backlight=1 quirk for HP EliteBook 2014 series (rhbz#1123565)
+- Blacklist usb bulk streams on Etron EJ168 xhci controllers (rhbz#1121288)
+
+* Mon Jul 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-5077 sctp: fix NULL ptr dereference (rhbz 1122982 1123696)
+
+* Fri Jul 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Re-add patch fixing spice resize (rhbz 1060327)
+
+* Thu Jul 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-4171 shmem: denial of service (rhbz 1111180 1118247)
+- CVE-2014-5045 vfs: refcount issues during lazy umount on symlink (rhbz 1122471 1122482)
+- Fix regression in sched_setparam (rhbz 1117942)
+- CVE-2014-3534 s390: ptrace: insufficient sanitization with psw mask (rhbz 1114089 1122612)
+- Fix ath3k bluetooth regression (rhbz 1121785)
+
 * Fri Jul 18 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.15.6-gnu.
 
