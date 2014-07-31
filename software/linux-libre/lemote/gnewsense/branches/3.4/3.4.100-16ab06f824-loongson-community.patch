@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index efa1453..d5fce8e 100644
+index d6c64eb..710d1ff 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -9314,10 +9314,10 @@ index bda8eb2..df5cde1 100644
  	case CPU_SB1A:
  		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
 diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
-index 3fab204..562ae3f 100644
+index 0eea2d2..bacf4e0 100644
 --- a/arch/mips/mm/dma-default.c
 +++ b/arch/mips/mm/dma-default.c
-@@ -310,7 +310,7 @@ int mips_dma_supported(struct device *dev, u64 mask)
+@@ -314,7 +314,7 @@ int mips_dma_supported(struct device *dev, u64 mask)
  	return plat_dma_supported(dev, mask);
  }
  
@@ -9326,7 +9326,7 @@ index 3fab204..562ae3f 100644
  			 enum dma_data_direction direction)
  {
  	BUG_ON(direction == DMA_NONE);
-@@ -320,8 +320,6 @@ void dma_cache_sync(struct device *dev, void *vaddr, size_t size,
+@@ -324,8 +324,6 @@ void dma_cache_sync(struct device *dev, void *vaddr, size_t size,
  		__dma_sync_virtual(vaddr, size, direction);
  }
  
@@ -9827,10 +9827,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 14d2239..d3955e6 100644
+index 441be0e..41ab2d0 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -817,6 +817,9 @@
+@@ -828,6 +828,9 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -9841,10 +9841,10 @@ index 14d2239..d3955e6 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index ea8736b..04976d69 100644
+index 9494910..58b4467 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -903,7 +903,7 @@ config SCx200_I2C_SDA
+@@ -905,7 +905,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -12857,7 +12857,7 @@ index abd3b71..be3023e 100644
  
  config ADM8211
 diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
-index 98db761..a1b1a35 100644
+index 98db7619..a1b1a355 100644
 --- a/drivers/net/wireless/Makefile
 +++ b/drivers/net/wireless/Makefile
 @@ -24,7 +24,7 @@ obj-$(CONFIG_B43LEGACY)		+= b43legacy/
@@ -15423,10 +15423,10 @@ index 0000000..2f4d8fe
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..f2d2c0c
+index 0000000..b34fb4f
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1349 @@
+@@ -0,0 +1,1355 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -15592,7 +15592,7 @@ index 0000000..f2d2c0c
 +
 +static int get_bat_temp(void)
 +{
-+	return get_bat_l(TEMPERATURE) * 1000;
++	return get_bat_l(TEMPERATURE) * 10;
 +}
 +
 +static int get_bat_current(void)
@@ -16398,11 +16398,12 @@ index 0000000..f2d2c0c
 +	[EVENT_SWITCHVIDEOMODE] = {0, switchvideomode_handler},
 +	[EVENT_USB_OC0] = {REG_USB2_FLAG, usb0_handler},
 +	[EVENT_USB_OC2] = {REG_USB2_FLAG, usb2_handler},
++	[EVENT_WLAN] = {REG_WLAN, NULL},
 +};
 +
 +static void do_event_action(int event)
 +{
-+	int status;
++	int status = -1;
 +	struct key_entry *ke;
 +	struct sci_event *sep;
 +
@@ -16410,6 +16411,11 @@ index 0000000..f2d2c0c
 +
 +	if (sep->reg != 0)
 +		status = ec_read(sep->reg);
++
++	if (status == -1) {
++		/* ec_read hasn't been called, status is invalid */
++		return;
++	}
 +
 +	if (sep->handler != NULL)
 +		status = sep->handler(status);
@@ -16789,10 +16795,10 @@ index 8c8377d..23b1c40 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 5f8844c..62357fce 100644
+index 5f2eddb..d3bd9bc 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -691,8 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -739,8 +739,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME:
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -16846,7 +16852,7 @@ index 235171f..0157357 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 7893351..4fef55d 100644
+index 90dcf54..d0cabff 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -16924,7 +16930,7 @@ index 7893351..4fef55d 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -692,6 +702,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -705,6 +715,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -16934,7 +16940,7 @@ index 7893351..4fef55d 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -836,6 +849,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -849,6 +862,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -16942,7 +16948,7 @@ index 7893351..4fef55d 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -943,6 +957,9 @@ hc_init:
+@@ -956,6 +970,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -16953,7 +16959,7 @@ index 7893351..4fef55d 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index a37f14c..68d45c3 100644
+index e1e05ba..3099b02 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -16965,8 +16971,8 @@ index a37f14c..68d45c3 100644
 +
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
- #define HUAWEI_PRODUCT_K4505			0x1464
-@@ -576,6 +579,7 @@ static const struct usb_device_id option_ids[] = {
+ #define HUAWEI_PRODUCT_E1750			0x1406
+@@ -623,6 +626,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
