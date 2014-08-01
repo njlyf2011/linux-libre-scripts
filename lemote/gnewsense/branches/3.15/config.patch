@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-07-29 01:11:06.000000000 +0000
++++ .config	2014-08-01 05:10:24.000000000 +0000
 @@ -0,0 +1,4988 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.15.7-gnu Kernel Configuration
++# Linux/mips 3.15.8-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1339,8 +1339,8 @@ Index: .config
 +CONFIG_MTD_UBI_FASTMAP=y
 +# CONFIG_MTD_UBI_GLUEBI is not set
 +CONFIG_MTD_UBI_BLOCK=y
-+# CONFIG_PARPORT is not set
 +CONFIG_ARCH_MIGHT_HAVE_PC_PARPORT=y
++# CONFIG_PARPORT is not set
 +CONFIG_BLK_DEV=y
 +CONFIG_BLK_DEV_NULL_BLK=m
 +# CONFIG_BLK_DEV_PCIESSD_MTIP32XX is not set
