@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 868c0eb..bb68c23 100644
+index 647d87a..16736b8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -3469,10 +3469,10 @@ index 0448860..fa7cfab 100644
  #define wrmsr(x, y, z) do { } while (0)
  #define use_msr 0
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index c91d547..1f1fe97 100644
+index 1fc1569..940e733 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -772,6 +772,13 @@ config HID_ZYDACRON
+@@ -777,6 +777,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -3715,10 +3715,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index f0296a5..9d2664a 100644
+index ca275f4..8b77118 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -919,6 +919,9 @@
+@@ -940,6 +940,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -3729,10 +3729,10 @@ index f0296a5..9d2664a 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index cdcbd83..572a0cd 100644
+index 01892bd..d4d8370 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -953,7 +953,7 @@ config SCx200_I2C_SDA
+@@ -956,7 +956,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -3769,7 +3769,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index 33f040c..20d178d 100644
+index 3799a3d..c7ea4d7c 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -9181,10 +9181,10 @@ index 0000000..1bfe4cf
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..4f2cd91
+index 0000000..c285a67
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1354 @@
+@@ -0,0 +1,1360 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -9355,7 +9355,7 @@ index 0000000..4f2cd91
 +
 +static int get_bat_temp(void)
 +{
-+	return get_bat_l(TEMPERATURE) * 1000;
++	return get_bat_l(TEMPERATURE) * 10;
 +}
 +
 +static int get_bat_current(void)
@@ -10161,11 +10161,12 @@ index 0000000..4f2cd91
 +	[EVENT_DISPLAY_TOGGLE] = {0, switchvideomode_handler},
 +	[EVENT_USB_OC0] = {REG_USB2_FLAG, usb0_handler},
 +	[EVENT_USB_OC2] = {REG_USB2_FLAG, usb2_handler},
++	[EVENT_WLAN] = {REG_WLAN, NULL},
 +};
 +
 +static void do_event_action(int event)
 +{
-+	int status;
++	int status = -1;
 +	struct key_entry *ke;
 +	struct sci_event *sep;
 +
@@ -10173,6 +10174,11 @@ index 0000000..4f2cd91
 +
 +	if (sep->reg != 0)
 +		status = ec_read(sep->reg);
++
++	if (status == -1) {
++		/* ec_read hasn't been called, status is invalid */
++		return;
++	}
 +
 +	if (sep->handler != NULL)
 +		status = sep->handler(status);
@@ -10585,10 +10591,10 @@ index 604cad1..b691278 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 08ef282..c8fae6e 100644
+index 877f87f..0bd871a 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
-@@ -366,6 +366,7 @@ void usb_amd_dev_put(void)
+@@ -443,6 +443,7 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -10596,7 +10602,7 @@ index 08ef282..c8fae6e 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -473,12 +474,16 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -550,12 +551,16 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -10613,7 +10619,7 @@ index 08ef282..c8fae6e 100644
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -545,7 +550,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -622,7 +627,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -10625,7 +10631,7 @@ index 08ef282..c8fae6e 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -705,6 +714,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -795,6 +804,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -10635,7 +10641,7 @@ index 08ef282..c8fae6e 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -837,6 +849,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -934,6 +946,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -10643,7 +10649,7 @@ index 08ef282..c8fae6e 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -944,6 +957,9 @@ hc_init:
+@@ -1041,6 +1054,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -10654,7 +10660,7 @@ index 08ef282..c8fae6e 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index acaee06..35b69de 100644
+index 9da566a..fffecfb 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -10667,7 +10673,7 @@ index acaee06..35b69de 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -567,6 +570,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
