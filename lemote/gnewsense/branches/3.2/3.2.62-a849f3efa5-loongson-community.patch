@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 95e6220..d1ef558 100644
+index 30a5c65..126f190 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -4675,7 +4675,7 @@ index 315fc0b..7871e52 100644
  		pr_cont("Either hardware does not support performance "
  			"counters, or not yet implemented.\n");
 diff --git a/arch/mips/kernel/process.c b/arch/mips/kernel/process.c
-index bf128d7..a3a766fa 100644
+index bf128d7..a3a766f 100644
 --- a/arch/mips/kernel/process.c
 +++ b/arch/mips/kernel/process.c
 @@ -64,12 +64,12 @@ void __noreturn cpu_idle(void)
@@ -4695,7 +4695,7 @@ index bf128d7..a3a766fa 100644
  #ifdef CONFIG_HOTPLUG_CPU
  		if (!cpu_online(cpu) && !cpu_isset(cpu, cpu_callin_map))
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index 5422855..50ba267 100644
+index a56175b..5c44a7d 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -9250,10 +9250,10 @@ index daa81f7..c36d509 100644
  	case CPU_CAVIUM_OCTEON_PLUS:
  		c->icache.linesz = 2 << ((config1 >> 19) & 7);
 diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
-index a79fe9a..b2f09a4 100644
+index 7d5ac0b..a005eb83 100644
 --- a/arch/mips/mm/c-r4k.c
 +++ b/arch/mips/mm/c-r4k.c
-@@ -799,7 +799,7 @@ static void __cpuinit probe_pcache(void)
+@@ -788,7 +788,7 @@ static void __cpuinit probe_pcache(void)
  	unsigned long config1;
  	unsigned int lsize;
  
@@ -9262,7 +9262,7 @@ index a79fe9a..b2f09a4 100644
  	case CPU_R4600:			/* QED style two way caches? */
  	case CPU_R4700:
  	case CPU_R5000:
-@@ -887,10 +887,10 @@ static void __cpuinit probe_pcache(void)
+@@ -876,10 +876,10 @@ static void __cpuinit probe_pcache(void)
  		write_c0_config(config & ~VR41_CONF_P4K);
  	case CPU_VR4131:
  		/* Workaround for cache instruction bug of VR4131 */
@@ -9276,7 +9276,7 @@ index a79fe9a..b2f09a4 100644
  				config |= VR41_CONF_BP;
  			write_c0_config(config);
  		} else
-@@ -1038,7 +1038,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1027,7 +1027,7 @@ static void __cpuinit probe_pcache(void)
  	 * normally they'd suffer from aliases but magic in the hardware deals
  	 * with that for us so we don't need to take care ourselves.
  	 */
@@ -9285,7 +9285,7 @@ index a79fe9a..b2f09a4 100644
  	case CPU_20KC:
  	case CPU_25KF:
  	case CPU_SB1:
-@@ -1067,7 +1067,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1056,7 +1056,7 @@ static void __cpuinit probe_pcache(void)
  			c->dcache.flags |= MIPS_CACHE_ALIASES;
  	}
  
@@ -9294,7 +9294,7 @@ index a79fe9a..b2f09a4 100644
  	case CPU_20KC:
  		/*
  		 * Some older 20Kc chips doesn't have the 'VI' bit in
-@@ -1196,7 +1196,7 @@ static void __cpuinit setup_scache(void)
+@@ -1185,7 +1185,7 @@ static void __cpuinit setup_scache(void)
  	 * processors don't have a S-cache that would be relevant to the
  	 * Linux memory management.
  	 */
@@ -9303,7 +9303,7 @@ index a79fe9a..b2f09a4 100644
  	case CPU_R4000SC:
  	case CPU_R4000MC:
  	case CPU_R4400SC:
-@@ -1391,7 +1391,7 @@ void __cpuinit r4k_cache_init(void)
+@@ -1380,7 +1380,7 @@ void __cpuinit r4k_cache_init(void)
  	extern char __weak except_vec2_sb1;
  	struct cpuinfo_mips *c = &current_cpu_data;
  
@@ -9826,10 +9826,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index e665bdf..a90c285 100644
+index ccc89b0..6dbfb8b 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -764,6 +764,9 @@
+@@ -778,6 +778,9 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -9840,10 +9840,10 @@ index e665bdf..a90c285 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index 60f593c..6c01f01 100644
+index 949ea640..eda28fa 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -883,7 +883,7 @@ config SCx200_I2C_SDA
+@@ -885,7 +885,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -47907,10 +47907,10 @@ index 0000000..2f4d8fe
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..f2d2c0c
+index 0000000..b34fb4f
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
-@@ -0,0 +1,1349 @@
+@@ -0,0 +1,1355 @@
 +/*
 + * Driver for YeeLoong laptop extras
 + *
@@ -48076,7 +48076,7 @@ index 0000000..f2d2c0c
 +
 +static int get_bat_temp(void)
 +{
-+	return get_bat_l(TEMPERATURE) * 1000;
++	return get_bat_l(TEMPERATURE) * 10;
 +}
 +
 +static int get_bat_current(void)
@@ -48882,11 +48882,12 @@ index 0000000..f2d2c0c
 +	[EVENT_SWITCHVIDEOMODE] = {0, switchvideomode_handler},
 +	[EVENT_USB_OC0] = {REG_USB2_FLAG, usb0_handler},
 +	[EVENT_USB_OC2] = {REG_USB2_FLAG, usb2_handler},
++	[EVENT_WLAN] = {REG_WLAN, NULL},
 +};
 +
 +static void do_event_action(int event)
 +{
-+	int status;
++	int status = -1;
 +	struct key_entry *ke;
 +	struct sci_event *sep;
 +
@@ -48894,6 +48895,11 @@ index 0000000..f2d2c0c
 +
 +	if (sep->reg != 0)
 +		status = ec_read(sep->reg);
++
++	if (status == -1) {
++		/* ec_read hasn't been called, status is invalid */
++		return;
++	}
 +
 +	if (sep->handler != NULL)
 +		status = sep->handler(status);
@@ -49273,10 +49279,10 @@ index 53eb4e5..625d34d 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index 05beb6c..3bf1f21 100644
+index cae8985..22099d5 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
-@@ -691,8 +691,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
+@@ -739,8 +739,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
  	/* FIXME:
  	 * <asm-generic/rtc.h> doesn't know 12-hour mode either.
  	 */
@@ -49330,7 +49336,7 @@ index b263919..d4b05d1 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index c7cfbce..5f1736a 100644
+index eae35c1..eb41fbb 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -49408,7 +49414,7 @@ index c7cfbce..5f1736a 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -692,6 +702,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -705,6 +715,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -49418,7 +49424,7 @@ index c7cfbce..5f1736a 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -836,6 +849,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -849,6 +862,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -49426,7 +49432,7 @@ index c7cfbce..5f1736a 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -943,6 +957,9 @@ hc_init:
+@@ -956,6 +970,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -49437,7 +49443,7 @@ index c7cfbce..5f1736a 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 4418538..78fc8f8 100644
+index 7a1c91e..082e8d3 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -49449,8 +49455,8 @@ index 4418538..78fc8f8 100644
 +
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
- #define HUAWEI_PRODUCT_K4505			0x1464
-@@ -580,6 +583,7 @@ static const struct usb_device_id option_ids[] = {
+ #define HUAWEI_PRODUCT_E1750			0x1406
+@@ -620,6 +623,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
