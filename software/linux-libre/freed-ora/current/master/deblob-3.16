@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.15 extra=
+kver=3.16 extra=
 
 case $1 in
 --force)
@@ -265,6 +265,10 @@ for f in \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnve0.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvf0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvf0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcgm107.fuc5.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcgm107.fuc5 \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnv108.fuc5.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnv108.fuc5 \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hub.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
@@ -275,6 +279,10 @@ for f in \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc \
   drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc.h \
     drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubgm107.fuc5.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubgm107.fuc5 \
+  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnv108.fuc5.h \
+    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnv108.fuc5 \
   drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nv108.fuc.h \
     drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nv108.fuc \
   drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nva3.fuc.h \
@@ -568,6 +576,12 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/tty/Makefile
 
 # gpu drm
 
+announce DRM_AST - "AST server chips"
+reject_firmware drivers/gpu/drm/ast/ast_dp501.c
+clean_blob drivers/gpu/drm/ast/ast_dp501.c
+clean_kconfig drivers/gpu/drm/ast/Kconfig 'DRM_AST'
+clean_mk CONFIG_DRM_AST drivers/gpu/drm/ast/Makefile
+
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
 reject_firmware drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
 clean_blob drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
@@ -643,6 +657,8 @@ reject_firmware drivers/gpu/drm/radeon/cik.c
 clean_blob drivers/gpu/drm/radeon/cik.c
 reject_firmware drivers/gpu/drm/radeon/radeon_uvd.c
 clean_blob drivers/gpu/drm/radeon/radeon_uvd.c
+reject_firmware drivers/gpu/drm/radeon/radeon_vce.c
+clean_blob drivers/gpu/drm/radeon/radeon_vce.c
 clean_kconfig drivers/gpu/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/gpu/drm/Makefile
 
@@ -655,8 +671,12 @@ reject_firmware drivers/dma/imx-sdma.c
 clean_blob arch/arm/mach-imx/mm-imx25.c
 clean_blob arch/arm/mach-imx/mm-imx3.c
 clean_blob arch/arm/mach-imx/mm-imx5.c
+clean_blob arch/arm/boot/dts/imx25.dtsi
+clean_blob arch/arm/boot/dts/imx35.dtsi
+clean_blob arch/arm/boot/dts/imx50.dtsi
 clean_blob arch/arm/boot/dts/imx51.dtsi
 clean_blob arch/arm/boot/dts/imx53.dtsi
+clean_blob arch/arm/boot/dts/imx53-tx53.dtsi
 clean_blob arch/arm/boot/dts/imx6qdl.dtsi
 clean_blob arch/arm/boot/dts/imx6sl.dtsi
 clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
@@ -879,6 +899,19 @@ clean_sed '
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_BCM3510'
 clean_mk CONFIG_DVB_BCM3510 drivers/media/dvb-frontends/Makefile
 
+announce DVB_CX24116 - "Conexant CX24116 based"
+undefault_firmware CX24116 drivers/media/dvb-frontends/cx24116.c
+reject_firmware drivers/media/dvb-frontends/cx24116.c
+clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_CX24116'
+clean_mk CONFIG_DVB_CX24116 drivers/media/dvb-frontends/Makefile
+
+announce DVB_CX24117 - "Conexant CX24117 based"
+undefault_firmware CX24117 drivers/media/dvb-frontends/cx24117.c
+reject_firmware drivers/media/dvb-frontends/cx24117.c
+clean_blob drivers/media/dvb-frontends/cx24117.c
+clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_CX24117'
+clean_mk CONFIG_DVB_CX24117 drivers/media/dvb-frontends/Makefile
+
 announce DVB_DS3000 - "Montage Tehnology DS3000 based"
 undefault_firmware 'DS3000' \
   drivers/media/dvb-frontends/ds3000.c
@@ -887,11 +920,24 @@ clean_blob drivers/media/dvb-frontends/ds3000.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_DS3000'
 clean_mk CONFIG_DVB_DS3000 drivers/media/dvb-frontends/Makefile
 
+announce DVB_DRX39XYJ - "Micronas DRX-J demodulator"
+reject_firmware drivers/media/dvb-frontends/drx39xyj/drxj.c
+clean_blob drivers/media/dvb-frontends/drx39xyj/drxj.c
+clean_kconfig drivers/media/dvb-frontends/drx39xyj/Kconfig 'DVB_DRX39XYJ'
+clean_mk CONFIG_DVB_DRX39XYJ drivers/media/dvb-frontends/drx39xyj/Makefile
+
 announce DVB_LGS8GXX - "Legend Silicon LGS8913/LGS8GL5/LGS8GXX DMB-TH demodulator"
 reject_firmware drivers/media/dvb-frontends/lgs8gxx.c
 clean_blob drivers/media/dvb-frontends/lgs8gxx.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_LGS8GXX'
 clean_mk CONFIG_DVB_LGS8GXX drivers/media/dvb-frontends/Makefile
+
+announce DVB_M88DS3103 - "Montage M88DS3103"
+reject_firmware drivers/media/dvb-frontends/m88ds3103.c
+clean_blob drivers/media/dvb-frontends/m88ds3103.c
+clean_blob drivers/media/dvb-frontends/m88ds3103_priv.h
+clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_M88DS3103'
+clean_mk CONFIG_DVB_M88DS3103 drivers/media/dvb-frontends/Makefile
 
 announce DVB_NXT200X - "NxtWave Communications NXT2002/NXT2004 based"
 undefault_firmware 'NXT200[24]' drivers/media/dvb-frontends/nxt200x.c
@@ -914,6 +960,13 @@ clean_blob drivers/media/dvb-frontends/or51211.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_OR51211'
 clean_mk CONFIG_DVB_OR51211 drivers/media/dvb-frontends/Makefile
 
+announce DVB_SI2168 - "Silicon Labs Si2168"
+reject_firmware drivers/media/dvb-frontends/si2168.c
+clean_blob drivers/media/dvb-frontends/si2168.c
+clean_blob drivers/media/dvb-frontends/si2168_priv.h
+clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_SI2168'
+clean_mk CONFIG_DVB_SI2168 drivers/media/dvb-frontends/Makefile
+
 announce DVB_SP8870 - "Spase sp8870"
 undefault_firmware 'SP8870' drivers/media/dvb-frontends/sp8870.c
 reject_firmware drivers/media/dvb-frontends/sp8870.c
@@ -921,19 +974,6 @@ reject_firmware drivers/media/dvb-frontends/sp8870.h
 clean_blob drivers/media/dvb-frontends/sp8870.c
 clean_kconfig drivers/media/dvb-frontends 'DVB_SP8870'
 clean_mk CONFIG_DVB_SP8870 drivers/media/dvb-frontends/Makefile
-
-announce DVB_CX24116 - "Conexant CX24116 based"
-undefault_firmware CX24116 drivers/media/dvb-frontends/cx24116.c
-reject_firmware drivers/media/dvb-frontends/cx24116.c
-clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_CX24116'
-clean_mk CONFIG_DVB_CX24116 drivers/media/dvb-frontends/Makefile
-
-announce DVB_CX24117 - "Conexant CX24117 based"
-undefault_firmware CX24117 drivers/media/dvb-frontends/cx24117.c
-reject_firmware drivers/media/dvb-frontends/cx24117.c
-clean_blob drivers/media/dvb-frontends/cx24117.c
-clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_CX24117'
-clean_mk CONFIG_DVB_CX24117 drivers/media/dvb-frontends/Makefile
 
 announce DVB_SP887X - "Spase sp887x based"
 undefault_firmware 'SP887X' drivers/media/dvb-frontends/sp887x.c
@@ -1148,12 +1188,6 @@ clean_blob drivers/media/pci/saa7164/saa7164-fw.c
 clean_kconfig drivers/media/pci/saa7164/Kconfig 'VIDEO_SAA7164'
 clean_mk CONFIG_VIDEO_SAA7164 drivers/media/pci/saa7164/Makefile
 
-announce VIDEO_TLG2300 - "Telegent TLG2300 USB video capture support"
-reject_firmware drivers/media/usb/tlg2300/pd-main.c
-clean_blob drivers/media/usb/tlg2300/pd-main.c
-clean_kconfig drivers/media/usb/tlg2300/Kconfig 'VIDEO_TLG2300'
-clean_mk CONFIG_VIDEO_TLG2300 drivers/media/usb/tlg2300/Makefile
-
 announce VIDEO_S5C73M3 - "Samsung S5C73M3 sensor support"
 reject_firmware drivers/media/i2c/s5c73m3/s5c73m3-core.c
 clean_blob drivers/media/i2c/s5c73m3/s5c73m3-core.c
@@ -1163,14 +1197,26 @@ clean_mk CONFIG_VIDEO_S5C73M3 drivers/media/i2c/s5c73m3/Makefile
 announce VIDEO_S5K4ECGX - "Samsung S5K4ECGX sensor support"
 reject_firmware drivers/media/i2c/s5k4ecgx.c
 clean_blob drivers/media/i2c/s5k4ecgx.c
-clean_kconfig drivers/media/i2c/s5k4ecgx.c 'VIDEO_S5K4ECGX'
+clean_kconfig drivers/media/i2c/Kconfig 'VIDEO_S5K4ECGX'
 clean_mk CONFIG_VIDEO_S5K4ECGX drivers/media/i2c/Makefile
+
+announce VIDEO_S5K5BAF - "Samsung S5K5BAF sensor support"
+reject_firmware drivers/media/i2c/s5k5baf.c
+clean_blob drivers/media/i2c/s5k5baf.c
+clean_kconfig drivers/media/i2c/Kconfig 'VIDEO_S5K5BAF'
+clean_mk CONFIG_VIDEO_S5K5BAF drivers/media/i2c/Makefile
 
 announce VIDEO_SAMSUNG_S5P_MFC - "Samsung S5P MFC 5.1 Video Codec"
 reject_firmware drivers/media/platform/s5p-mfc/s5p_mfc_ctrl.c
 clean_blob drivers/media/platform/s5p-mfc/s5p_mfc.c
 clean_kconfig drivers/media/platform/Kconfig 'VIDEO_SAMSUNG_S5P_MFC'
 clean_mk CONFIG_VIDEO_SAMSUNG_S5P_MFC drivers/media/platform/s5p-mfc/Makefile
+
+announce VIDEO_TLG2300 - "Telegent TLG2300 USB video capture support"
+reject_firmware drivers/media/usb/tlg2300/pd-main.c
+clean_blob drivers/media/usb/tlg2300/pd-main.c
+clean_kconfig drivers/media/usb/tlg2300/Kconfig 'VIDEO_TLG2300'
+clean_mk CONFIG_VIDEO_TLG2300 drivers/media/usb/tlg2300/Makefile
 
 announce USB_S2255 - "USB Sensoray 2255 video capture device"
 reject_firmware drivers/media/usb/s2255/s2255drv.c
@@ -1565,14 +1611,17 @@ clean_blob drivers/net/wireless/brcm80211/brcmsmac/mac80211_if.c
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMSMAC'
 clean_mk CONFIG_BRCMSMAC drivers/net/wireless/brcm80211/Makefile
 
+announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
+reject_firmware drivers/net/wireless/brcm80211/brcmfmac/firmware.c
+clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC'
+clean_mk CONFIG_BRCMFMAC drivers/net/wireless/brcm80211/brcmfmac/Makefile
+
 announce BRCMFMAC_SDIO - "Broadcom IEEE802.11n SDIO FullMAC WLAN driver"
-reject_firmware drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
 clean_blob drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC_SDIO'
 clean_mk CONFIG_BRCMFMAC_SDIO drivers/net/wireless/brcm80211/brcmfmac/Makefile
 
 announce BRCMFMAC_USB - "Broadcom IEEE802.11n USB FullMAC WLAN driver"
-reject_firmware drivers/net/wireless/brcm80211/brcmfmac/usb.c
 clean_blob drivers/net/wireless/brcm80211/brcmfmac/usb.c
 clean_kconfig drivers/net/wireless/brcm80211/Kconfig 'BRCMFMAC_USB'
 clean_mk CONFIG_BRCMFMAC_USB drivers/net/wireless/brcm80211/brcmfmac/Makefile
@@ -1642,18 +1691,23 @@ clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlegacy/Makefile
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-7000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
 clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLWIFI'
 clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
 
+announce IWLDVM - "Intel Wireless WiFi DVM Firmware support"
+clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
+clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLDVM'
+clean_mk CONFIG_IWLMVM drivers/net/wireless/iwlwifi/Makefile
+
 announce IWLMVM - "Intel Wireless WiFi MVM Firmware support"
 reject_firmware drivers/net/wireless/iwlwifi/mvm/nvm.c
-clean_kconfig drivers/net/wireless/iwlwifi/mvm/Kconfig 'IWLMVM'
-clean_mk CONFIG_IWLMVM drivers/net/wireless/iwlwifi/mvm/Makefile
+clean_blob drivers/net/wireless/iwlwifi/iwl-7000.c
+clean_blob drivers/net/wireless/iwlwifi/iwl-8000.c
+clean_kconfig drivers/net/wireless/iwlwifi/Kconfig 'IWLMVM'
+clean_mk CONFIG_IWLMVM drivers/net/wireless/iwlwifi/Makefile
 
 announce LIBERTAS - "Marvell 8xxx Libertas WLAN driver support"
 reject_firmware drivers/net/wireless/libertas/firmware.c
@@ -1799,6 +1853,23 @@ clean_blob drivers/net/wireless/prism54/islpci_dev.c
 clean_kconfig drivers/net/wireless/Kconfig 'PRISM54'
 clean_mk CONFIG_PRISM54 drivers/net/wireless/prism54/Makefile
 
+announce RSI_91X - "Redpine Signals Inc 91x WLAN driver support"
+clean_blob drivers/net/wireless/rsi/rsi_common.h
+clean_kconfig drivers/net/wireless/rsi/Kconfig 'RSI_91X'
+clean_mk CONFIG_RSI_91X drivers/net/wireless/rsi/Makefile
+
+announce RSI_SDIO - "Redpine Signals SDIO bus support"
+reject_firmware drivers/net/wireless/rsi/rsi_91x_sdio_ops.c
+clean_blob drivers/net/wireless/rsi/rsi_91x_sdio.c
+clean_kconfig drivers/net/wireless/rsi/Kconfig 'RSI_SDIO'
+clean_mk CONFIG_RSI_SDIO drivers/net/wireless/rsi/Makefile
+
+announce RSI_USB - "Redpine Signals USB bus support"
+reject_firmware drivers/net/wireless/rsi/rsi_91x_usb_ops.c
+clean_blob drivers/net/wireless/rsi/rsi_91x_usb.c
+clean_kconfig drivers/net/wireless/rsi/Kconfig 'RSI_USB'
+clean_mk CONFIG_RSI_USB drivers/net/wireless/rsi/Makefile
+
 announce RT2X00_LIB_FIRMWARE - "Ralink driver firmware support"
 reject_firmware drivers/net/wireless/rt2x00/rt2x00firmware.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig 'RT2X00_LIB_FIRMWARE'
@@ -1827,6 +1898,11 @@ clean_blob drivers/net/wireless/rt2x00/rt2800usb.h
 clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
+
+announce RTLWIFI - "Realtek Wireless Network Adapters"
+reject_firmware drivers/net/wireless/rtlwifi/core.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTLWIFI
+clean_mk CONFIG_RTLWIFI drivers/net/wireless/rtlwifi/Makefile
 
 announce RTL8188EE - "Realtek RTL8188EE Wireless Network Adapter"
 reject_firmware drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
@@ -1868,11 +1944,15 @@ clean_mk CONFIG_RTL8192SE drivers/net/wireless/rtlwifi/rtl8192se/Makefile
 announce RTL8192E - "RealTek RTL8192E Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192e/rtl8192e/r8192E_firmware.c
 clean_blob drivers/staging/rtl8192e/rtl8192e/r8192E_firmware.h
-clean_blob drivers/staging/rtl8192e/rtl8192e/r8192E_firmware.c
-clean_blob drivers/staging/rtl8192e/rtl8192e/r8192E_hwimg.c
 clean_blob drivers/staging/rtl8192e/rtl8192e/rtl_core.c
 clean_kconfig drivers/staging/rtl8192e/Kconfig RTL8192E
 clean_mk CONFIG_RTL8192E drivers/staging/rtl8192e/Makefile
+
+announce R8192EE - "RealTek RTL8192EE Wireless Network Adapter"
+reject_firmware drivers/staging/rtl8192ee/rtl8192ee/sw.c
+clean_blob drivers/staging/rtl8192ee/rtl8192ee/sw.c
+clean_kconfig drivers/staging/rtl8192ee/Kconfig R8192EE
+clean_mk CONFIG_R8192EE drivers/staging/rtl8192ee/Makefile
 
 announce RTL8192U - "RealTek RTL8192U Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192u/r819xU_firmware.c
@@ -1891,6 +1971,25 @@ reject_firmware drivers/net/wireless/rtlwifi/rtl8723ae/sw.c
 clean_blob drivers/net/wireless/rtlwifi/rtl8723ae/sw.c
 clean_kconfig drivers/net/wireless/rtlwifi/Kconfig 'RTL8723AE'
 clean_mk CONFIG_RTL8723AE drivers/net/wireless/rtlwifi/rtl8723ae/Makefile
+
+announce R8723AU - "RealTek RTL8723AU Wireless LAN NIC driver"
+reject_firmware drivers/staging/rtl8723au/hal/rtl8723a_hal_init.c
+clean_blob drivers/staging/rtl8723au/hal/rtl8723a_hal_init.c
+clean_blob drivers/staging/rtl8723au/os_dep/os_intfs.c
+clean_kconfig drivers/staging/rtl8723au/Kconfig 'R8723AU'
+clean_mk CONFIG_R8723AU drivers/staging/rtl8723au/Makefile
+
+announce RTL8723BE - "Realtek RTL8723BE PCIe Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8723be/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8723be/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig 'RTL8723BE'
+clean_mk CONFIG_RTL8723BE drivers/net/wireless/rtlwifi/rtl8723be/Makefile
+
+announce R8821AE - "Realtek RTL8821AE Wireless LAN NIC driver"
+reject_firmware drivers/staging/rtl8821ae/rtl8821ae/sw.c
+clean_blob drivers/staging/rtl8821ae/rtl8821ae/sw.c
+clean_kconfig drivers/staging/rtl8821ae/Kconfig 'R8821AE'
+clean_mk CONFIG_R8821AE drivers/staging/rtl8821ae/Makefile
 
 announce VT6656 - "VIA Technologies VT6656 support"
 reject_firmware drivers/staging/vt6656/firmware.c
@@ -1981,6 +2080,12 @@ clean_blob Documentation/btmrvl.txt
 clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL_SDIO'
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
 
+announce BT_NOKIA_H4P - "HCI driver with H4 Nokia extensions"
+reject_firmware drivers/staging/nokia_h4p/nokia_fw.c
+clean_blob drivers/staging/nokia_h4p/nokia_fw.c
+clean_kconfig drivers/staging/nokia_h4p/Kconfig 'BT_NOKIA_H4P'
+clean_mk CONFIG_BT_NOKIA_H4P drivers/staging/nokia_h4p/Makefile
+
 announce TI_ST - "Texas Instruments shared transport line discipline"
 reject_firmware drivers/misc/ti-st/st_kim.c
 clean_blob drivers/misc/ti-st/st_kim.c
@@ -2066,6 +2171,12 @@ clean_mk CONFIG_MISDN_SPEEDFAX drivers/isdn/hardware/mISDN/Makefile
 ##########
 # Serial #
 ##########
+
+announce DGAP - "Digi EPCA PCI products"
+reject_firmware drivers/staging/dgap/dgap.c
+clean_blob drivers/staging/dgap/dgap.c
+clean_kconfig drivers/staging/dgap/Kconfig 'DGAP'
+clean_mk CONFIG_DGAP drivers/staging/dgap/Makefile
 
 announce SERIAL_8250_CS - "8250/16550 PCMCIA device support"
 # These are not software; they're Free, but GPLed without in-tree sources.
@@ -2409,6 +2520,12 @@ clean_blob drivers/usb/serial/io_ti.c
 clean_kconfig drivers/usb/serial/Kconfig 'USB_SERIAL_EDGEPORT_TI'
 clean_mk CONFIG_USB_SERIAL_EDGEPORT_TI drivers/usb/serial/Makefile
 
+announce USB_SERIAL_MXUPORT - "USB Moxa UPORT Serial Driver"
+reject_firmware drivers/usb/serial/mxuport.c
+clean_blob drivers/usb/serial/mxuport.c
+clean_kconfig drivers/usb/serial/Kconfig 'USB_SERIAL_MXUPORT'
+clean_mk CONFIG_USB_SERIAL_MXUPORT drivers/usb/serial/Makefile
+
 announce USB_SERIAL_TI - "USB TI 3410/5052 Serial Driver"
 drop_fw_file firmware/ti_3410.fw.ihex firmware/ti_3410.fw
 drop_fw_file firmware/ti_5052.fw.ihex firmware/ti_5052.fw
@@ -2703,8 +2820,24 @@ clean_blob sound/soc/codecs/adau1701.c
 clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_ADAU1701'
 clean_mk CONFIG_SND_SOC_ADAU1701 sound/soc/codecs/Makefile
 
+announce SND_SOC_ADAU1761 - "ADAU1761 SigmaDSP processor"
+clean_blob sound/soc/codecs/adau1761.c
+clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_ADAU1761'
+clean_mk CONFIG_SND_SOC_ADAU1761 sound/soc/codecs/Makefile
+
+announce SND_SOC_ADAU1781 - "ADAU1781 SigmaDSP processor"
+clean_blob sound/soc/codecs/adau1781.c
+clean_kconfig sound/soc/codecs/Kconfig 'SND_SOC_ADAU1781'
+clean_mk CONFIG_SND_SOC_ADAU1781 sound/soc/codecs/Makefile
+
 announce SND_SOC_SIGMADSP - "SigmaStudio firmware loader"
 maybe_reject_firmware sound/soc/codecs/sigmadsp.c
+
+announce SND_SOC_INTEL_SST_ACPI - "Intel SST (LPE) Driver"
+reject_firmware sound/soc/intel/sst-acpi.c
+clean_blob sound/soc/intel/sst-acpi.c
+clean_kconfig sound/soc/intel/Kconfig 'SND_SOC_INTEL_SST_ACPI'
+clean_mk 'CONFIG_SND_SOC_INTEL_SST_ACPI' sound/soc/intel/Makefile
 
 announce SND_SOC_WM0010 - "WM0010 DSP driver"
 reject_firmware sound/soc/codecs/wm0010.c
