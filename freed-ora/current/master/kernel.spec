@@ -8,6 +8,8 @@ Summary: The Linux kernel
 # be 0.
 %global released_kernel 1
 
+%global aarch64patches 1
+
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
 %ifarch %{ix86} x86_64
@@ -46,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 15
+%define base_sublevel 16
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -56,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.14%{?stablegnux}
-%define rcrevlibre  -3.14%{?rcrevgnux}
-#define gitrevlibre -3.14%{?gitrevgnux}
+#define stablelibre -3.16%{?stablegnux}
+%define rcrevlibre  -3.16%{?rcrevgnux}
+#define gitrevlibre -3.16%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -408,7 +410,11 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
+%if 0%{?aarch64patches}
 %define nobuildarches i386 s390
+%else
+%define nobuildarches i386 s390 aarch64
+%endif
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -593,14 +599,14 @@ Patch09: upstream-reverts.patch
 
 # Standalone patches
 
-Patch390: defaults-acpi-video.patch
-
 Patch450: input-kill-stupid-messages.patch
 Patch452: no-pcspkr-modalias.patch
 
 Patch460: serial-460800.patch
 
 Patch470: die-floppy-die.patch
+
+Patch500: Revert-Revert-ACPI-video-change-acpi-video-brightnes.patch
 
 Patch510: silence-noise.patch
 Patch530: silence-fbcon-logo.patch
@@ -617,7 +623,7 @@ Patch800: crash-driver.patch
 # secure boot
 Patch1000: secure-modules.patch
 Patch1001: modsign-uefi.patch
-Patch1002: sb-hibernate.patch
+# atch1002: sb-hibernate.patch
 Patch1003: sysrq-secure-boot.patch
 
 # virt + ksm patches
@@ -645,19 +651,12 @@ Patch15000: nowatchdog-on-virt.patch
 
 # ARM64
 
-# ARM
-
-# lpae
-
-# ARM omap
-
-# ARM tegra
+# ARMv7
 Patch21020: arm-tegra-usb-no-reset-linux33.patch
-
-# ARM i.MX6
-
-# ARM sunxi (AllWinner)
-Patch21025: 0001-ARM-sunxi-Add-driver-for-SD-MMC-hosts-found-on-Allwi.patch
+Patch21021: arm-beagle.patch
+Patch21022: arm-imx6-utilite.patch
+# http://www.spinics.net/lists/linux-tegra/msg17948.html
+Patch21023: arm-tegra-drmdetection.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -675,41 +674,28 @@ Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 #rhbz 1025603
 Patch25063: disable-libdw-unwind-on-non-x86.patch
 
-#rhbz 1048314
-Patch25048: 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
-
-#rhbz 1089583
-Patch25064: 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
-
-#rhbz 1090161
-Patch25072: HID-rmi-do-not-fetch-more-than-16-bytes-in-a-query.patch
-
 #rhbz 983342 1093120
 Patch25069: 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
-
-Patch25071: s390-appldata-add-slab.h-for-kzalloc-kfree.patch
-
-
-# CVE-2014-3917 rhbz 1102571 1102715
-Patch25093: auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
 
 Patch26000: perf-lib64.patch
 
 # Patch series from Hans for various backlight and platform driver fixes
-Patch26001: thinkpad_acpi-Add-mappings-for-F9-F12-hotkeys-on-X24.patch
 Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-Patch26003: ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 Patch26004: asus-wmi-Add-a-no-backlight-quirk.patch
 Patch26005: eeepc-wmi-Add-no-backlight-quirk-for-Asus-H87I-PLUS-.patch
-Patch26006: acpi-video-Don-t-register-acpi_video_resume-notifier.patch
-Patch26007: acpi-video-Add-an-acpi_video_unregister_backlight-fu.patch
-Patch26008: acer-wmi-Switch-to-acpi_video_unregister_backlight.patch
-Patch26009: acer-wmi-Add-Aspire-5741-to-video_vendor_dmi_table.patch
-Patch26010: nouveau-Don-t-check-acpi_video_backlight_support-bef.patch
-Patch26011: backlight-Add-backlight-device-un-registration-notif.patch
-Patch26012: acpi-video-Unregister-the-backlight-device-if-a-raw-.patch
 Patch26013: acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
 Patch26014: acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
+
+Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
+
+#rhbz 1021036, submitted upstream
+Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
+
+#rhbz 1117942
+Patch25118: sched-fix-sched_setparam-policy-1-logic.patch
+
+# git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
+Patch30000: kernel-arm64.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1392,7 +1378,9 @@ ApplyPatch 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 # ARM
 #
 ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch 0001-ARM-sunxi-Add-driver-for-SD-MMC-hosts-found-on-Allwi.patch
+ApplyPatch arm-beagle.patch
+ApplyPatch arm-imx6-utilite.patch
+ApplyPatch arm-tegra-drmdetection.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1413,7 +1401,6 @@ ApplyPatch 0001-ARM-sunxi-Add-driver-for-SD-MMC-hosts-found-on-Allwi.patch
 # WMI
 
 # ACPI
-ApplyPatch defaults-acpi-video.patch
 
 #
 # PCI
@@ -1424,6 +1411,8 @@ ApplyPatch defaults-acpi-video.patch
 #
 
 # ACPI
+
+ApplyPatch Revert-Revert-ACPI-video-change-acpi-video-brightnes.patch
 
 # ALSA
 
@@ -1460,7 +1449,7 @@ ApplyPatch crash-driver.patch
 # secure boot
 ApplyPatch secure-modules.patch
 ApplyPatch modsign-uefi.patch
-ApplyPatch sb-hibernate.patch
+# pplyPatch sb-hibernate.patch
 ApplyPatch sysrq-secure-boot.patch
 
 # Assorted Virt Fixes
@@ -1498,41 +1487,35 @@ ApplyPatch ath9k_rx_dma_stop_check.patch
 
 ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
-#rhbz 1048314
-ApplyPatch 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
-#rhbz 1089583
-ApplyPatch 0001-HID-rmi-do-not-handle-touchscreens-through-hid-rmi.patch
-#rhbz 1090161
-ApplyPatch HID-rmi-do-not-fetch-more-than-16-bytes-in-a-query.patch
-
 #rhbz 1025603
 ApplyPatch disable-libdw-unwind-on-non-x86.patch
 
 #rhbz 983342 1093120
 ApplyPatch 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
 
-ApplyPatch s390-appldata-add-slab.h-for-kzalloc-kfree.patch
-
-# CVE-2014-3917 rhbz 1102571 1102715
-ApplyPatch auditsc-audit_krule-mask-accesses-need-bounds-checking.patch
-
 ApplyPatch perf-lib64.patch
 
 # Patch series from Hans for various backlight and platform driver fixes
-ApplyPatch thinkpad_acpi-Add-mappings-for-F9-F12-hotkeys-on-X24.patch
 ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-ApplyPatch ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 ApplyPatch asus-wmi-Add-a-no-backlight-quirk.patch
 ApplyPatch eeepc-wmi-Add-no-backlight-quirk-for-Asus-H87I-PLUS-.patch
-ApplyPatch acpi-video-Don-t-register-acpi_video_resume-notifier.patch
-ApplyPatch acpi-video-Add-an-acpi_video_unregister_backlight-fu.patch
-ApplyPatch acer-wmi-Switch-to-acpi_video_unregister_backlight.patch
-ApplyPatch acer-wmi-Add-Aspire-5741-to-video_vendor_dmi_table.patch
-ApplyPatch nouveau-Don-t-check-acpi_video_backlight_support-bef.patch
-ApplyPatch backlight-Add-backlight-device-un-registration-notif.patch
-ApplyPatch acpi-video-Unregister-the-backlight-device-if-a-raw-.patch
 ApplyPatch acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
 ApplyPatch acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
+
+ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
+
+#rhbz 1021036, submitted upstream
+ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
+
+#rhbz 1117942
+ApplyPatch sched-fix-sched_setparam-policy-1-logic.patch
+
+%if 0%{?aarch64patches}
+ApplyPatch kernel-arm64.patch
+%ifnarch aarch64 # this is stupid, but i want to notice before secondary koji does.
+ApplyPatch kernel-arm64.patch -R
+%endif
+%endif
 
 # END OF PATCH APPLICATIONS
 
@@ -1719,6 +1702,7 @@ BuildKernel() {
     fi
     %{__install} -D -m 444 ldconfig-kernel.conf \
         $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-$KernelVer.conf
+    rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/vdso/.build-id
 %endif
 
     # And save the headers/makefiles etc for building modules against
@@ -2356,6 +2340,8 @@ fi
 %if %{1}\
 %{expand:%%files -f kernel-%{?2:%{2}-}core.list %{?2:%{2}-}core}\
 %defattr(-,root,root)\
+%{!?_licensedir:%global license %%doc}\
+%license linux-%{KVERREL}/COPYING\
 /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:+%{2}}\
 /%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:+%{2}}.hmac \
 %ifarch %{arm} aarch64\
@@ -2410,15 +2396,265 @@ fi
 #
 # 
 #                        ___________________________________________________________
-#                       / This branch is for Fedora 21. You probably want to commit \
-#  _____ ____  _        \ to the F-20 branch instead, or in addition to this one.   /
-# |  ___|___ \/ |        -----------------------------------------------------------
-# | |_    __) | |             \   ^__^
-# |  _|  / __/| |              \  (@@)\_______
-# |_|   |_____|_|                 (__)\       )\/\
+#                       / This branch is for Fedora 22. You probably want to commit \
+#  _____ ____  ____     \ to the f21 branch instead, or in addition to this one.    /
+# |  ___|___ \|___ \     -----------------------------------------------------------
+# | |_    __) | __) |        \   ^__^
+# |  _|  / __/ / __/          \  (@@)\_______
+# |_|   |_____|_____|            (__)\       )\/\
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu Aug  7 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.16-gnu.
+
+* Mon Aug 04 2014 Josh Boyer <jwboyer@gmail.com> - 3.16.0-1
+- Linux v3.16
+- Disable debugging options.
+
+* Sun Aug  3 2014 Peter Robinson <pbrobinson@redhat.com>
+- Minor config updates for Armada and Sunxi ARM devices
+
+* Fri Aug 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git4.1
+- Linux v3.16-rc7-84-g6f0928036bcb
+
+* Thu Jul 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git3.1
+- Linux v3.16-rc7-76-g3a1122d26c62
+
+* Wed Jul 30 2014 Kyle McMartin <kyle@fedoraproject.org>
+- kernel-arm64.patch: fix up merge conflict and re-enable
+
+* Wed Jul 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git2.1
+- Linux v3.16-rc7-64-g26bcd8b72563
+- Temporarily disable aarch64patches
+
+* Wed Jul 30 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Apply different patch from Milan Broz to fix LUKS partitions (rhbz 1115120)
+
+* Tue Jul 29 2014 Kyle McMartin <kyle@fedoraproject.org>
+- kernel-arm64.patch: update from upstream git.
+
+* Tue Jul 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git1.1
+- Linux v3.16-rc7-7-g31dab719fa50
+- Reenable debugging options.
+
+* Mon Jul 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Make sure acpi brightness_switch is disabled (like forever in Fedora)
+- CVE-2014-5077 sctp: fix NULL ptr dereference (rhbz 1122982 1123696)
+
+* Mon Jul 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git0.1
+- Linux v3.16-rc7
+- Disable debugging options.
+
+* Mon Jul 28 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix loading of tegra drm using device tree
+
+* Sat Jul 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc6.git3.1
+- Linux v3.16-rc6-139-g9c5502189fa0
+
+* Fri Jul 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc6.git2.1
+- Linux v3.16-rc6-118-g82e13c71bc65
+- Fix selinux sock_graft hook for AF_ALG address family (rhbz 1115120)
+
+* Thu Jul 24 2014 Kyle McMartin <kyle@fedoraproject.org>
+- kernel-arm64.patch: update from upstream git.
+- arm64: update config-arm64 to include PCI support.
+
+* Thu Jul 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-5045 vfs: refcount issues during lazy umount on symlink (rhbz 1122471 1122482)
+- Fix regression in sched_setparam (rhbz 1117942)
+
+* Tue Jul 22 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.0-0.rc6.git1.1
+- Linux v3.16-rc6-75-g15ba223
+- Reenable debugging options.
+
+* Mon Jul 21 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.0-0.rc6.git0.1
+- Linux v3.16-rc6
+- Disable debugging options.
+
+* Mon Jul 21 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7 config update
+
+* Thu Jul 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc5.git2.1
+- Linux v3.16-rc5-143-gb6603fe574af
+
+* Wed Jul 16 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable hermes prism driver (rhbz 1120393)
+
+* Wed Jul 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc5.git1.1
+- Linux v3.16-rc5-130-g2da294474093
+- Reenable debugging options.
+
+* Mon Jul 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc5.git0.1
+- Linux v3.16-rc5
+- Fix i915 regression with external monitors (rhbz 1117008)
+- Disable debugging options.
+
+* Sat Jul 12 2014 Tom Callaway <spot@fedoraproject.org>
+- Fix license handling (I hope)
+
+* Fri Jul 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git3.1
+- Linux v3.16-rc4-120-g85d90faed31e
+
+* Thu Jul 10 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Rebase Utilute and BeagleBone patches
+- Minor ARM updates
+- Enable ISL12057 RTC for ARM (NetGear ReadyNAS)
+
+* Wed Jul 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git2.1
+- Linux v3.16-rc4-28-g163e40743f73
+- Fix bogus vdso .build-id links (rhbz 1117563)
+
+* Tue Jul 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git1.1
+- Linux v3.16-rc4-20-g448bfad8a185
+- Reenable debugging options.
+
+* Sun Jul 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git0.1
+- Linux v3.16-rc4
+- Disable debugging options.
+
+* Fri Jul 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git3.1
+- Linux v3.16-rc3-149-g034a0f6b7db7
+
+* Wed Jul 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git2.1
+- Linux v3.16-rc3-62-gd92a333a65a1
+- Add patch to fix virt_blk oops (rhbz 1113805)
+
+* Wed Jul 02 2014 Kyle McMartin <kyle@fedoraproject.org>
+- arm64: build-in ahci, ethernet, and rtc drivers.
+
+* Tue Jul 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git1.1
+- Linux v3.16-rc3-6-g16874b2cb867
+- Reenable debugging options.
+
+* Tue Jul  1 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7 cleanup
+
+* Mon Jun 30 2014 Kyle McMartin <kyle@fedoraproject.org>
+- kernel-arm64.patch, update from git.
+
+* Mon Jun 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git0.1.1
+- Linux v3.16-rc3
+- Enable USB rtsx drivers (rhbz 1114229)
+- Disable debugging options.
+
+* Fri Jun 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git4.1
+- Linux v3.16-rc2-222-g3493860c76eb
+
+* Fri Jun 27 2014 Hans de Goede <hdegoede@redhat.com>
+- Add patch to fix wifi on lenove yoga 2 series (rhbz#1021036)
+
+* Thu Jun 26 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable rtl8192ee (rhbz 1113422)
+
+* Thu Jun 26 2014 Kyle McMartin <kyle@fedoraproject.org> - 3.16.0-0.rc2.git3.2
+- Add kernel-arm64.patch, which contains AArch64 support destined for upstream.
+  ssh://git.fedorahosted.org/git/kernel-arm64.git is Mark Salter's source tree
+  integrating these patches on the devel branch. I've added a twiddle to the
+  top of the spec file to disable the aarch64 patchset, and also set aarch64
+  to nobuildarches, so we still get kernel-headers, but no one accidentally
+  installs a non-booting kernel if the patchset causes rejects during a
+  rebase.
+
+* Thu Jun 26 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Trimmed changelog, see fedpkg git for earlier history.
+
+* Thu Jun 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git3.1
+- Linux v3.16-rc2-211-gd7933ab727ed
+
+* Wed Jun 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git2.1
+- Linux v3.16-rc2-69-gd91d66e88ea9
+
+* Wed Jun 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Revert commit that breaks Wacom Intuos4 from Benjamin Tissoires
+
+* Tue Jun 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git1.1
+- Linux v3.16-rc2-35-g8b8f5d971584
+- Reenable debugging options.
+
+* Mon Jun 23 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-4508 BUG in x86_32 syscall auditing (rhbz 1111590 1112073)
+
+* Mon Jun 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git0.1
+- Linux v3.16-rc2
+- Disable debugging options.
+
+* Sun Jun 22 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Exynos now it's finally multi platform capable
+- Minor TI Keystone update
+- ARM config cleanups
+
+* Fri Jun 20 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Bring in intel_pstate regression fixes for BayTrail (rhbz 1111920)
+
+* Fri Jun 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git4.1
+- Linux v3.16-rc1-215-g3c8fb5044583
+
+* Thu Jun 19 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git3.1
+- Linux v3.16-rc1-112-g894e552cfaa3
+
+* Thu Jun 19 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add missing bits for NVIDIA Jetson TK1 (thanks Stephen Warren)
+
+* Wed Jun 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git2.1
+- Linux v3.16-rc1-17-ge99cfa2d0634
+
+* Tue Jun 17 2014 Dennis Gilmore <dennis@ausil.us>
+- when ipuv3 moved out of staging the config was renamed
+- adjust the config to suit
+
+* Tue Jun 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git1.1
+- Linux v3.16-rc1-2-gebe06187bf2a
+- Reenable debugging options.
+
+* Mon Jun 16 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Qualcomm SoCs on ARM
+
+* Mon Jun 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git0.1
+- Linux v3.16-rc1
+- Disable debugging options.
+
+* Mon Jun 16 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM config updates for 3.16
+
+* Sat Jun 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git11.1
+- Linux v3.15-9930-g0e04c641b199
+- Enable CONFIG_RCU_NOCB_CPU(_ALL) (rbhz 1109113)
+
+* Fri Jun 13 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix build failure on aarch64
+
+* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git10.1
+- Linux v3.15-9837-g682b7c1c8ea8
+
+* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git9.1
+- Linux v3.15-8981-g5c02c392cd23
+
+* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git8.1
+- Linux v3.15-8835-g859862ddd2b6
+
+* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git7.1
+- Linux v3.15-8556-gdfb945473ae8
+
+* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git6.1
+- Linux v3.15-8351-g9ee4d7a65383
+
+* Thu Jun 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git5.1
+- Linux v3.15-8163-g5b174fd6472b
+
+* Thu Jun 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git4.1
+- Linux v3.15-7926-gd53b47c08d8f
+
+* Thu Jun 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git3.1
+- Linux v3.15-7378-g14208b0ec569
+
+* Wed Jun 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git2.1
+- Linux v3.15-7283-gda85d191f58a
+
+* Tue Jun 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git1.1
+- Linux v3.15-7218-g3f17ea6dea8b
+- Reenable debugging options.
+
 * Tue Jun 10 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.15-gnu.
 
@@ -3032,6 +3268,7 @@ fi
 - Linux v3.13
 - Disable debugging options.
 - Use versioned perf man pages tarball
+<<<<<<< HEAD
 
 * Sat Jan 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-0.rc8.git4.1
 - Linux v3.13-rc8-76-g7d0d46d
@@ -4955,6 +5192,8 @@ fi
 * Tue Dec 11 2012 Dave Jones <davej@redhat.com> - 3.7.0-1
 - Linux v3.7
 
+=======
+>>>>>>> 9c9c166
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
