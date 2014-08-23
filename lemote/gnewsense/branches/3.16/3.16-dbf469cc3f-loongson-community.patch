@@ -1654,6 +1654,30 @@ index 4f9eaa3..f945bd7a 100644
  
  #
  # Suspend Support
+diff --git a/arch/mips/loongson/lemote-2f/clock.c b/arch/mips/loongson/lemote-2f/clock.c
+index 1eed38e..ebfb9cd 100644
+--- a/arch/mips/loongson/lemote-2f/clock.c
++++ b/arch/mips/loongson/lemote-2f/clock.c
+@@ -91,6 +91,7 @@ EXPORT_SYMBOL(clk_put);
+ 
+ int clk_set_rate(struct clk *clk, unsigned long rate)
+ {
++	unsigned int rate_khz = rate / 1000;
+ 	struct cpufreq_frequency_table *pos;
+ 	int ret = 0;
+ 	int regval;
+@@ -107,9 +108,9 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
+ 		propagate_rate(clk);
+ 
+ 	cpufreq_for_each_valid_entry(pos, loongson2_clockmod_table)
+-		if (rate == pos->frequency)
++		if (rate_khz == pos->frequency)
+ 			break;
+-	if (rate != pos->frequency)
++	if (rate_khz != pos->frequency)
+ 		return -ENOTSUPP;
+ 
+ 	clk->rate = rate;
 diff --git a/arch/mips/loongson/lemote-2f/platform.c b/arch/mips/loongson/lemote-2f/platform.c
 new file mode 100644
 index 0000000..5316360
@@ -2217,6 +2241,47 @@ index 32a7c82..7e0277a 100644
  	PTR_LA t0, saved_regs
  	PTR_L ra, PT_R31(t0)
  	PTR_L sp, PT_R29(t0)
+diff --git a/drivers/cpufreq/loongson2_cpufreq.c b/drivers/cpufreq/loongson2_cpufreq.c
+index d4add86..f1dc611 100644
+--- a/drivers/cpufreq/loongson2_cpufreq.c
++++ b/drivers/cpufreq/loongson2_cpufreq.c
+@@ -162,20 +162,32 @@ static int __init cpufreq_init(void)
+ 	/* Register platform stuff */
+ 	ret = platform_driver_register(&platform_driver);
+ 	if (ret)
+-		return ret;
++		goto err_return;
+ 
+ 	pr_info("cpufreq: Loongson-2F CPU frequency driver.\n");
+ 
+-	cpufreq_register_notifier(&loongson2_cpufreq_notifier_block,
+-				  CPUFREQ_TRANSITION_NOTIFIER);
++	ret = cpufreq_register_notifier(&loongson2_cpufreq_notifier_block,
++					CPUFREQ_TRANSITION_NOTIFIER);
++	if (ret)
++		goto err_platform_driver_unregister;
+ 
+ 	ret = cpufreq_register_driver(&loongson2_cpufreq_driver);
++	if (ret)
++		goto err_cpufreq_unregister_notifier;
+ 
+-	if (!ret && !nowait) {
++	if (!nowait) {
+ 		saved_cpu_wait = cpu_wait;
+ 		cpu_wait = loongson2_cpu_wait;
+ 	}
+ 
++	return 0;
++
++ err_cpufreq_unregister_notifier:
++	cpufreq_unregister_notifier(&loongson2_cpufreq_notifier_block,
++				    CPUFREQ_TRANSITION_NOTIFIER);
++ err_platform_driver_unregister:
++	platform_driver_unregister(&platform_driver);
++ err_return:
+ 	return ret;
+ }
+ 
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
 index 5e79c6a..3f08f0d 100644
 --- a/drivers/hid/Kconfig
@@ -9295,175 +9360,1763 @@ index 0754f5c7..ff7475d 100644
  	default y if X86
  	help
  	  Say "yes" here to get direct support for the real time clock
-diff --git a/drivers/staging/Kconfig b/drivers/staging/Kconfig
-index 4f38fc0..f57367c 100644
---- a/drivers/staging/Kconfig
-+++ b/drivers/staging/Kconfig
-@@ -80,6 +80,8 @@ source "drivers/staging/wlags49_h2/Kconfig"
+diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
+index f98d03f..09cf729 100644
+--- a/drivers/usb/host/ohci-hcd.c
++++ b/drivers/usb/host/ohci-hcd.c
+@@ -864,9 +864,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
+ 	}
  
- source "drivers/staging/wlags49_h25/Kconfig"
+ 	if (ints & OHCI_INTR_WDH) {
+-		spin_lock (&ohci->lock);
+-		dl_done_list (ohci);
+-		spin_unlock (&ohci->lock);
++		if (ohci->hcca->done_head == 0) {
++			ints &= ~OHCI_INTR_WDH;
++		} else {
++			spin_lock (&ohci->lock);
++			dl_done_list (ohci);
++			spin_unlock (&ohci->lock);
++		}
+ 	}
  
-+source "drivers/staging/sm7xxfb/Kconfig"
+ 	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
+diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
+index 2f3aceb..6647c3f 100644
+--- a/drivers/usb/host/pci-quirks.c
++++ b/drivers/usb/host/pci-quirks.c
+@@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
+ }
+ EXPORT_SYMBOL_GPL(usb_amd_dev_put);
+ 
++#if defined(CONFIG_USB_UHCI_HCD) || defined(CONFIG_USB_UHCI_HCD_MODULE)
+ /*
+  * Make sure the controller is completely inactive, unable to
+  * generate interrupts or do DMA.
+@@ -561,12 +562,16 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
+ 	if (base)
+ 		uhci_check_and_reset_hc(pdev, base);
+ }
++#else
++#define quirk_usb_handoff_uhci(x) do { } while (0)
++#endif /* CONFIG_USB_UHCI_HCD* */
+ 
+ static int mmio_resource_enabled(struct pci_dev *pdev, int idx)
+ {
+ 	return pci_resource_start(pdev, idx) && mmio_enabled(pdev);
+ }
+ 
++#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+ {
+ 	void __iomem *base;
+@@ -633,7 +638,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+ 	/* Now the controller is safely in SUSPEND and nothing can wake it up */
+ 	iounmap(base);
+ }
++#else
++#define quirk_usb_handoff_ohci(x) do { } while(0)
++#endif /* CONFIG_USB_OHCI_HCD* */
+ 
++#if defined(CONFIG_USB_EHCI_HCD) || defined(CONFIG_USB_EHCI_HCD_MODULE)
+ static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
+ 	{
+ 		/*  Pegatron Lucid (ExoPC) */
+@@ -806,6 +815,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+ 
+ 	iounmap(base);
+ }
++#else
++#define quirk_usb_disable_ehci(x) do { } while (0)
++#endif /* CONFIG_USB_EHCI_HCD* */
+ 
+ /*
+  * handshake - spin reading a register until handshake completes
+@@ -945,6 +957,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+ }
+ EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
+ 
++#if defined(CONFIG_USB_XHCI_HCD) || defined(CONFIG_USB_XHCI_HCD_MODULE)
+ /**
+  * PCI Quirks for xHCI.
+  *
+@@ -1052,6 +1065,9 @@ hc_init:
+ 
+ 	iounmap(base);
+ }
++#else
++#define quirk_usb_handoff_xhci(x) do { } while (0)
++#endif /* CONFIG_USB_UHCI_HCD* */
+ 
+ static void quirk_usb_early_handoff(struct pci_dev *pdev)
+ {
+diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
+index a968894..0bfa2cb 100644
+--- a/drivers/usb/serial/option.c
++++ b/drivers/usb/serial/option.c
+@@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
+ #define OPTION_PRODUCT_ETNA_KOI_MODEM		0x7100
+ #define OPTION_PRODUCT_GTM380_MODEM		0x7201
+ 
++#define HUAWO_VENDOR_ID				0x21F5
++#define HUAWO_PRODUCT_E1621			0x2008
 +
- source "drivers/staging/crystalhd/Kconfig"
+ #define HUAWEI_VENDOR_ID			0x12D1
+ #define HUAWEI_PRODUCT_E173			0x140C
+ #define HUAWEI_PRODUCT_E1750			0x1406
+@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
+ 	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
+ 	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
+ 		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
++	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c05, USB_CLASS_COMM, 0x02, 0xff) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c1f, USB_CLASS_COMM, 0x02, 0xff) },
+ 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c23, USB_CLASS_COMM, 0x02, 0xff) },
+diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
+index 8bf495f..f6a15b6 100644
+--- a/drivers/video/Kconfig
++++ b/drivers/video/Kconfig
+@@ -36,6 +36,12 @@ config VGASTATE
+        tristate
+        default n
  
- source "drivers/staging/cxt1e1/Kconfig"
-diff --git a/drivers/staging/Makefile b/drivers/staging/Makefile
-index 1e97ad2..65a1ff0 100644
---- a/drivers/staging/Makefile
-+++ b/drivers/staging/Makefile
-@@ -34,6 +34,7 @@ obj-$(CONFIG_DX_SEP)            += sep/
- obj-$(CONFIG_IIO)		+= iio/
- obj-$(CONFIG_WLAGS49_H2)	+= wlags49_h2/
- obj-$(CONFIG_WLAGS49_H25)	+= wlags49_h25/
-+obj-$(CONFIG_FB_SM7XX)		+= sm7xxfb/
- obj-$(CONFIG_CRYSTALHD)		+= crystalhd/
- obj-$(CONFIG_CXT1E1)		+= cxt1e1/
- obj-$(CONFIG_FB_XGI)		+= xgifb/
-diff --git a/drivers/staging/sm7xxfb/Kconfig b/drivers/staging/sm7xxfb/Kconfig
-new file mode 100644
-index 0000000..e2922ae
---- /dev/null
-+++ b/drivers/staging/sm7xxfb/Kconfig
-@@ -0,0 +1,13 @@
-+config FB_SM7XX
-+	tristate "Silicon Motion SM7XX framebuffer support"
++config VIDEO_OUTPUT_CONTROL
++	tristate "Lowlevel video output switch controls"
++	help
++	  This framework adds support for low-level control of the video 
++	  output switch.
++
+ config VIDEOMODE_HELPERS
+ 	bool
+ 
+diff --git a/drivers/video/Makefile b/drivers/video/Makefile
+index 9ad3c17..3d869d9 100644
+--- a/drivers/video/Makefile
++++ b/drivers/video/Makefile
+@@ -7,6 +7,8 @@ obj-y				  += backlight/
+ 
+ obj-y				  += fbdev/
+ 
++#video output switch sysfs driver
++obj-$(CONFIG_VIDEO_OUTPUT_CONTROL) += output.o
+ obj-$(CONFIG_VIDEOMODE_HELPERS) += display_timing.o videomode.o
+ ifeq ($(CONFIG_OF),y)
+ obj-$(CONFIG_VIDEOMODE_HELPERS) += of_display_timing.o of_videomode.o
+diff --git a/drivers/video/fbdev/Kconfig b/drivers/video/fbdev/Kconfig
+index 59c98bfd..28c4349 100644
+--- a/drivers/video/fbdev/Kconfig
++++ b/drivers/video/fbdev/Kconfig
+@@ -2446,6 +2446,19 @@ config FB_SIMPLE
+ 	  Configuration re: surface address, size, and format must be provided
+ 	  through device tree, or plain old platform data.
+ 
++config FB_SM712
++	tristate "Silicon Motion SM712 framebuffer support"
 +	depends on FB && PCI
 +	select FB_CFB_FILLRECT
 +	select FB_CFB_COPYAREA
 +	select FB_CFB_IMAGEBLIT
 +	help
-+	  Frame buffer driver for the Silicon Motion SM710, SM712, SM721
-+	  and SM722 chips.
++	  Frame buffer driver for the Silicon Motion SM712 chip.
 +
 +	  This driver is also available as a module. The module will be
-+	  called sm7xxfb. If you want to compile it as a module, say M
++	  called sm712fb. If you want to compile it as a module, say M
 +	  here and read <file:Documentation/kbuild/modules.txt>.
-diff --git a/drivers/staging/sm7xxfb/Makefile b/drivers/staging/sm7xxfb/Makefile
++
+ source "drivers/video/fbdev/omap/Kconfig"
+ source "drivers/video/fbdev/omap2/Kconfig"
+ source "drivers/video/fbdev/exynos/Kconfig"
+diff --git a/drivers/video/fbdev/Makefile b/drivers/video/fbdev/Makefile
+index 0284f2a..0a0c865 100644
+--- a/drivers/video/fbdev/Makefile
++++ b/drivers/video/fbdev/Makefile
+@@ -112,6 +112,7 @@ obj-$(CONFIG_FB_COBALT)           += cobalt_lcdfb.o
+ obj-$(CONFIG_FB_IBM_GXT4500)	  += gxt4500.o
+ obj-$(CONFIG_FB_PS3)		  += ps3fb.o
+ obj-$(CONFIG_FB_SM501)            += sm501fb.o
++obj-$(CONFIG_FB_SM712)		  += sm712fb/
+ obj-$(CONFIG_FB_UDL)		  += udlfb.o
+ obj-$(CONFIG_FB_SMSCUFX)	  += smscufx.o
+ obj-$(CONFIG_FB_XILINX)           += xilinxfb.o
+diff --git a/drivers/video/fbdev/sm712fb/Makefile b/drivers/video/fbdev/sm712fb/Makefile
 new file mode 100644
-index 0000000..48f471c
+index 0000000..9bf3519
 --- /dev/null
-+++ b/drivers/staging/sm7xxfb/Makefile
-@@ -0,0 +1 @@
-+obj-$(CONFIG_FB_SM7XX) += sm7xxfb.o
-diff --git a/drivers/staging/sm7xxfb/TODO b/drivers/staging/sm7xxfb/TODO
++++ b/drivers/video/fbdev/sm712fb/Makefile
+@@ -0,0 +1,3 @@
++obj-$(CONFIG_FB_SM712) += sm712fb.o
++
++sm712fb-objs := sm712fb_drv.o sm712fb_accel.o
+diff --git a/drivers/video/fbdev/sm712fb/TODO b/drivers/video/fbdev/sm712fb/TODO
 new file mode 100644
-index 0000000..1fcead5
+index 0000000..dcfd4e7
 --- /dev/null
-+++ b/drivers/staging/sm7xxfb/TODO
-@@ -0,0 +1,9 @@
++++ b/drivers/video/fbdev/sm712fb/TODO
+@@ -0,0 +1,7 @@
 +TODO:
 +- Dual head support
-+- 2D acceleration support
-+- use kernel coding style
-+- refine the code and remove unused code
-+- move it to drivers/video/sm7xxfb.c
++- refine the code, convert more registers magic numbers to macros
++- Does it really works on Big Endian machines?
 +
 +Please send any patches to Greg Kroah-Hartman <greg@kroah.com> and
-+Teddy Wang <teddy.wang@siliconmotion.com.cn>.
-diff --git a/drivers/staging/sm7xxfb/sm7xx.h b/drivers/staging/sm7xxfb/sm7xx.h
++Tom Li <biergaizi@member.fsf.org>.
+diff --git a/drivers/video/fbdev/sm712fb/sm712fb_accel.c b/drivers/video/fbdev/sm712fb/sm712fb_accel.c
 new file mode 100644
-index 0000000..8599861
+index 0000000..12fce1f
 --- /dev/null
-+++ b/drivers/staging/sm7xxfb/sm7xx.h
-@@ -0,0 +1,779 @@
++++ b/drivers/video/fbdev/sm712fb/sm712fb_accel.c
+@@ -0,0 +1,246 @@
 +/*
 + * Silicon Motion SM712 frame buffer device
 + *
 + * Copyright (C) 2006 Silicon Motion Technology Corp.
-+ * Authors:	Ge Wang, gewang@siliconmotion.com
-+ *		Boyod boyod.yang@siliconmotion.com.cn
++ * Authors:  Ge Wang, gewang@siliconmotion.com
++ *	     Boyod boyod.yang@siliconmotion.com.cn
 + *
 + * Copyright (C) 2009 Lemote, Inc.
-+ * Author: Wu Zhangjin, wuzhangjin@gmail.com
++ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
 + *
-+ *  This file is subject to the terms and conditions of the GNU General Public
-+ *  License. See the file COPYING in the main directory of this archive for
-+ *  more details.
++ * Copyright (C) 2011 Igalia, S.L.
++ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
++ *
++ * Copyright (C) 2014 Tom Li.
++ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License. See the file COPYING in the main directory of this archive for
++ * more details.
++ *
++ * Framebuffer driver for Silicon Motion SM712 chip
 + */
 +
-+#define NR_PALETTE        256
++#include <linux/fb.h>
++#include <linux/screen_info.h>
++#include <linux/delay.h>
 +
-+#define FB_ACCEL_SMI_LYNX 88
++#include "sm712fb_drv.h"
++#include "sm712fb_accel.h"
 +
-+#define SCREEN_X_RES      1024
-+#define SCREEN_Y_RES      600
-+#define SCREEN_BPP        16
-+
-+/*Assume SM712 graphics chip has 4MB VRAM */
-+#define SM712_VIDEOMEMORYSIZE	  0x00400000
-+/*Assume SM722 graphics chip has 8MB VRAM */
-+#define SM722_VIDEOMEMORYSIZE	  0x00800000
-+
-+#define dac_reg	(0x3c8)
-+#define dac_val	(0x3c9)
-+
-+extern void __iomem *smtc_RegBaseAddress;
-+#define smtc_mmiowb(dat, reg)	writeb(dat, smtc_RegBaseAddress + reg)
-+#define smtc_mmioww(dat, reg)	writew(dat, smtc_RegBaseAddress + reg)
-+#define smtc_mmiowl(dat, reg)	writel(dat, smtc_RegBaseAddress + reg)
-+
-+#define smtc_mmiorb(reg)	readb(smtc_RegBaseAddress + reg)
-+#define smtc_mmiorw(reg)	readw(smtc_RegBaseAddress + reg)
-+#define smtc_mmiorl(reg)	readl(smtc_RegBaseAddress + reg)
-+
-+#define SIZE_SR00_SR04      (0x04 - 0x00 + 1)
-+#define SIZE_SR10_SR24      (0x24 - 0x10 + 1)
-+#define SIZE_SR30_SR75      (0x75 - 0x30 + 1)
-+#define SIZE_SR80_SR93      (0x93 - 0x80 + 1)
-+#define SIZE_SRA0_SRAF      (0xAF - 0xA0 + 1)
-+#define SIZE_GR00_GR08      (0x08 - 0x00 + 1)
-+#define SIZE_AR00_AR14      (0x14 - 0x00 + 1)
-+#define SIZE_CR00_CR18      (0x18 - 0x00 + 1)
-+#define SIZE_CR30_CR4D      (0x4D - 0x30 + 1)
-+#define SIZE_CR90_CRA7      (0xA7 - 0x90 + 1)
-+#define SIZE_VPR		(0x6C + 1)
-+#define SIZE_DPR		(0x44 + 1)
-+
-+static inline void smtc_crtcw(int reg, int val)
++static inline u32 bytes_to_dword(const u8 *bytes, int length)
 +{
-+	smtc_mmiowb(reg, 0x3d4);
-+	smtc_mmiowb(val, 0x3d5);
++	u32 dword = 0;
++
++	switch (length) {
++	case 4:
++#ifdef __BIG_ENDIAN
++		dword += bytes[3];
++#else
++		dword += bytes[3] << 24;
++#endif
++	case 3:
++#ifdef __BIG_ENDIAN
++		dword += bytes[2] << 8;
++#else
++		dword += bytes[2] << 16;
++#endif
++	case 2:
++#ifdef __BIG_ENDIAN
++		dword += bytes[1] << 16;
++#else
++		dword += bytes[1] << 8;
++#endif
++	case 1:
++#ifdef __BIG_ENDIAN
++		dword += bytes[0] << 24;
++#else
++		dword += bytes[0];
++#endif
++	}
++	return dword;
 +}
 +
-+static inline unsigned int smtc_crtcr(int reg)
++int sm712fb_init_accel(struct sm712fb_info *fb)
 +{
-+	smtc_mmiowb(reg, 0x3d4);
-+	return smtc_mmiorb(0x3d5);
++	u8 reg;
++
++	/* reset the 2D engine */
++	sm712_write_seq(fb, 0x21, sm712_read_seq(fb, 0x21) & 0xf8);
++	reg = sm712_read_seq(fb, 0x15);
++	sm712_write_seq(fb, 0x15, reg | 0x30);
++	sm712_write_seq(fb, 0x15, reg);
++
++	if (sm712fb_wait(fb) != 0)
++		return -1;
++
++	sm712_write_dpr(fb, DPR_CROP_TOPLEFT_COORDS, DPR_COORDS(0, 0));
++
++	/* same width for DPR_PITCH and DPR_SRC_WINDOW */
++	sm712_write_dpr(fb, DPR_PITCH,
++			DPR_COORDS(fb->fb.var.xres, fb->fb.var.xres));
++	sm712_write_dpr(fb, DPR_SRC_WINDOW,
++			DPR_COORDS(fb->fb.var.xres, fb->fb.var.xres));
++
++	sm712_write_dpr(fb, DPR_BYTE_BIT_MASK, 0xffffffff);
++	sm712_write_dpr(fb, DPR_COLOR_COMPARE_MASK, 0);
++	sm712_write_dpr(fb, DPR_COLOR_COMPARE, 0);
++	sm712_write_dpr(fb, DPR_SRC_BASE, 0);
++	sm712_write_dpr(fb, DPR_DST_BASE, 0);
++	sm712_read_dpr(fb, DPR_DST_BASE);
++
++	return 0;
 +}
 +
-+static inline void smtc_grphw(int reg, int val)
++int sm712fb_wait(struct sm712fb_info *fb)
 +{
-+	smtc_mmiowb(reg, 0x3ce);
-+	smtc_mmiowb(val, 0x3cf);
++	int i;
++	u8 reg;
++
++	for (i = 0; i < 10000; i++) {
++		reg = sm712_read_seq(fb, SCR_DE_STATUS);
++		if ((reg & SCR_DE_STATUS_MASK) == SCR_DE_ENGINE_IDLE)
++			return 0;
++		udelay(1);
++	}
++	return -EBUSY;
 +}
 +
-+static inline unsigned int smtc_grphr(int reg)
++void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 +{
-+	smtc_mmiowb(reg, 0x3ce);
-+	return smtc_mmiorb(0x3cf);
++	u32 width = rect->width, height = rect->height;
++	u32 dx = rect->dx, dy = rect->dy;
++	u32 color;
++
++	struct sm712fb_info *sfb = info->par;
++
++	if (unlikely(info->state != FBINFO_STATE_RUNNING))
++		return;
++	if ((rect->dx >= info->var.xres_virtual) ||
++	    (rect->dy >= info->var.yres_virtual))
++		return;
++
++	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
++	    info->fix.visual == FB_VISUAL_DIRECTCOLOR)
++		color = ((u32 *) (info->pseudo_palette))[rect->color];
++	else
++		color = rect->color;
++
++	sm712_write_dpr(sfb, DPR_FG_COLOR, color);
++	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
++	sm712_write_dpr(sfb, DPR_SPAN_COORDS, DPR_COORDS(width, height));
++	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE |
++			(DE_CTRL_COMMAND_SOLIDFILL << DE_CTRL_COMMAND_SHIFT) |
++			(DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
++	sm712_read_dpr(sfb, DPR_DE_CTRL);
++	sm712fb_wait(sfb);
 +}
 +
-+static inline void smtc_attrw(int reg, int val)
++void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 +{
-+	smtc_mmiorb(0x3da);
-+	smtc_mmiowb(reg, 0x3c0);
-+	smtc_mmiorb(0x3c1);
-+	smtc_mmiowb(val, 0x3c0);
++	u32 sx = area->sx, sy = area->sy;
++	u32 dx = area->dx, dy = area->dy;
++	u32 height = area->height, width = area->width;
++	u32 direction;
++
++	struct sm712fb_info *sfb = info->par;
++
++	if (unlikely(info->state != FBINFO_STATE_RUNNING))
++		return;
++	if ((sx >= info->var.xres_virtual) || (sy >= info->var.yres_virtual))
++		return;
++
++	if (sy < dy || (sy == dy && sx <= dx)) {
++		sx += width - 1;
++		dx += width - 1;
++		sy += height - 1;
++		dy += height - 1;
++		direction = DE_CTRL_RTOL;
++	} else
++		direction = 0;
++
++	sm712_write_dpr(sfb, DPR_SRC_COORDS, DPR_COORDS(sx, sy));
++	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
++	sm712_write_dpr(sfb, DPR_SPAN_COORDS, DPR_COORDS(width, height));
++	sm712_write_dpr(sfb, DPR_DE_CTRL,
++			DE_CTRL_START | DE_CTRL_ROP_ENABLE | direction |
++			(DE_CTRL_COMMAND_BITBLT << DE_CTRL_COMMAND_SHIFT) |
++			(DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
++	sm712_read_dpr(sfb, DPR_DE_CTRL);
++	sm712fb_wait(sfb);
 +}
 +
-+static inline void smtc_seqw(int reg, int val)
++void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 +{
-+	smtc_mmiowb(reg, 0x3c4);
-+	smtc_mmiowb(val, 0x3c5);
++	u32 dx = image->dx, dy = image->dy;
++	u32 width = image->width, height = image->height;
++	u32 fg_color, bg_color;
++
++	struct sm712fb_info *sfb = info->par;
++
++	u32 imgidx = 0;
++	u32 line = image->width >> 3;
++
++	int i, j;
++	u32 total_bytes, total_dwords, remain_bytes;
++
++	if (unlikely(info->state != FBINFO_STATE_RUNNING))
++		return;
++	if ((image->dx >= info->var.xres_virtual) ||
++	    (image->dy >= info->var.yres_virtual))
++		return;
++
++	if (unlikely(image->depth != 1)) {
++		/* unsupported depth, fallback to draw Tux */
++		cfb_imageblit(info, image);
++		return;
++	}
++
++	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
++	    info->fix.visual == FB_VISUAL_DIRECTCOLOR) {
++		fg_color = ((u32 *) (info->pseudo_palette))[image->fg_color];
++		bg_color = ((u32 *) (info->pseudo_palette))[image->bg_color];
++	} else {
++		fg_color = image->fg_color;
++		bg_color = image->bg_color;
++	}
++
++	/* total bytes we need to write */
++	total_bytes = (width + 7) / 8;
++
++	/* split the bytes into dwords and remainder bytes */
++	total_dwords = (total_bytes & ~3) / 4;
++	remain_bytes = total_bytes & 3;
++
++	sm712_write_dpr(sfb, DPR_SRC_COORDS, 0);
++	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
++	sm712_write_dpr(sfb, DPR_SPAN_COORDS, DPR_COORDS(width, height));
++	sm712_write_dpr(sfb, DPR_FG_COLOR, fg_color);
++	sm712_write_dpr(sfb, DPR_BG_COLOR, bg_color);
++
++	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE |
++			(DE_CTRL_COMMAND_HOST_WRITE << DE_CTRL_COMMAND_SHIFT) |
++			(DE_CTRL_HOST_MONO << DE_CTRL_HOST_SHIFT) |
++			(DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
++
++	for (i = 0; i < height; i++) {
++		/* cast bytes data into dwords and write to the dataport */
++		for (j = 0; j < total_dwords; j++) {
++			sm712_write_dataport(sfb,
++					     bytes_to_dword(&image->
++							    data[imgidx] +
++							    j * 4, 4));
++		}
++
++		if (remain_bytes) {
++			sm712_write_dataport(sfb,
++					     bytes_to_dword(&image->
++							    data[imgidx] +
++							    (total_dwords * 4),
++							    remain_bytes));
++		}
++		imgidx += line;
++	}
++	sm712_read_dpr(sfb, DPR_DE_CTRL);
++	sm712fb_wait(sfb);
++}
+diff --git a/drivers/video/fbdev/sm712fb/sm712fb_accel.h b/drivers/video/fbdev/sm712fb/sm712fb_accel.h
+new file mode 100644
+index 0000000..6f79177
+--- /dev/null
++++ b/drivers/video/fbdev/sm712fb/sm712fb_accel.h
+@@ -0,0 +1,33 @@
++/*
++ * Silicon Motion SM712 frame buffer device
++ *
++ * Copyright (C) 2006 Silicon Motion Technology Corp.
++ * Authors:  Ge Wang, gewang@siliconmotion.com
++ *	     Boyod boyod.yang@siliconmotion.com.cn
++ *
++ * Copyright (C) 2009 Lemote, Inc.
++ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
++ *
++ * Copyright (C) 2011 Igalia, S.L.
++ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
++ *
++ * Copyright (C) 2014 Tom Li.
++ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License. See the file COPYING in the main directory of this archive for
++ * more details.
++ *
++ * Framebuffer driver for Silicon Motion SM712 chip
++ */
++
++#ifndef _SM712FB_ACCEL_H
++#define _SM712FB_ACCEL_H
++
++int sm712fb_init_accel(struct sm712fb_info *fb);
++int sm712fb_wait(struct sm712fb_info *fb);
++void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect);
++void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area);
++void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image);
++
++#endif
+diff --git a/drivers/video/fbdev/sm712fb/sm712fb_drv.c b/drivers/video/fbdev/sm712fb/sm712fb_drv.c
+new file mode 100644
+index 0000000..7f7cd4f
+--- /dev/null
++++ b/drivers/video/fbdev/sm712fb/sm712fb_drv.c
+@@ -0,0 +1,1022 @@
++/*
++ * Silicon Motion SM712 frame buffer device
++ *
++ * Copyright (C) 2006 Silicon Motion Technology Corp.
++ * Authors:  Ge Wang, gewang@siliconmotion.com
++ *	     Boyod boyod.yang@siliconmotion.com.cn
++ *
++ * Copyright (C) 2009 Lemote, Inc.
++ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
++ *
++ * Copyright (C) 2011 Igalia, S.L.
++ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
++ *
++ * Copyright (C) 2014 Tom Li.
++ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License. See the file COPYING in the main directory of this archive for
++ * more details.
++ *
++ * Framebuffer driver for Silicon Motion SM712 chip
++ */
++
++#include <linux/io.h>
++#include <linux/fb.h>
++#include <linux/pci.h>
++#include <linux/init.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++#include <linux/module.h>
++#include <linux/console.h>
++#include <linux/screen_info.h>
++
++#ifdef CONFIG_PM
++#include <linux/pm.h>
++#endif
++
++#include "sm712fb_drv.h"
++#include "sm712fb_accel.h"
++#include "sm712fb_modedb.h"
++
++static struct fb_var_screeninfo sm712fb_var = {
++	.xres = 1024,
++	.yres = 600,
++	.xres_virtual = 1024,
++	.yres_virtual = 600,
++	.bits_per_pixel = 16,
++	.red = {16, 8, 0},
++	.green = {8, 8, 0},
++	.blue = {0, 8, 0},
++	.activate = FB_ACTIVATE_NOW,
++	.height = -1,
++	.width = -1,
++	.vmode = FB_VMODE_NONINTERLACED,
++	.nonstd = 0,
++	.accel_flags = FB_ACCELF_TEXT,
++};
++
++static struct fb_fix_screeninfo sm712fb_fix = {
++	.id = "smXXXfb",
++	.type = FB_TYPE_PACKED_PIXELS,
++	.visual = FB_VISUAL_TRUECOLOR,
++	.line_length = 800 * 3,
++	.accel = FB_ACCEL_SMI_LYNX,
++	.type_aux = 0,
++	.xpanstep = 0,
++	.ypanstep = 0,
++	.ywrapstep = 0,
++};
++
++struct vesa_mode {
++	char index[6];
++	u16 lfb_width;
++	u16 lfb_height;
++	u16 lfb_depth;
++};
++
++static bool accel = 1;
++
++static struct vesa_mode vesa_mode_table[] = {
++	{"0x301", 640, 480, 8},
++	{"0x303", 800, 600, 8},
++	{"0x305", 1024, 768, 8},
++	{"0x307", 1280, 1024, 8},
++
++	{"0x311", 640, 480, 16},
++	{"0x314", 800, 600, 16},
++	{"0x317", 1024, 768, 16},
++	{"0x31A", 1280, 1024, 16},
++
++	{"0x312", 640, 480, 24},
++	{"0x315", 800, 600, 24},
++	{"0x318", 1024, 768, 24},
++	{"0x31B", 1280, 1024, 24},
++};
++
++struct screen_info sm712_scr_info;
++
++static int sm712fb_setup(char *options)
++{
++	char *this_opt;
++
++	if (!options || !*options)
++		return 0;
++
++	while ((this_opt = strsep(&options, ",")) != NULL) {
++		if (!*this_opt)
++			continue;
++
++		if (!strcmp(this_opt, "accel:0"))
++			accel = false;
++		else if (!strcmp(this_opt, "accel:1"))
++			accel = true;
++	}
++	return 0;
 +}
 +
-+static inline unsigned int smtc_seqr(int reg)
++/* process command line options, get vga parameter */
++static int __init sm712_vga_setup(char *options)
 +{
-+	smtc_mmiowb(reg, 0x3c4);
-+	return smtc_mmiorb(0x3c5);
++	int i;
++
++	if (!options || !*options)
++		return -EINVAL;
++
++	sm712_scr_info.lfb_width = 0;
++	sm712_scr_info.lfb_height = 0;
++	sm712_scr_info.lfb_depth = 0;
++
++	pr_debug("sm712_vga_setup = %s\n", options);
++
++	for (i = 0; i < ARRAY_SIZE(vesa_mode_table); i++) {
++		if (strstr(options, vesa_mode_table[i].index)) {
++			sm712_scr_info.lfb_width = vesa_mode_table[i].lfb_width;
++			sm712_scr_info.lfb_height =
++			    vesa_mode_table[i].lfb_height;
++			sm712_scr_info.lfb_depth = vesa_mode_table[i].lfb_depth;
++			return 0;
++		}
++	}
++
++	return -1;
 +}
 +
++__setup("vga=", sm712_vga_setup);
++
++static void sm712_setpalette(int regno, unsigned red, unsigned green,
++			     unsigned blue, struct fb_info *info)
++{
++	struct sm712fb_info *sfb = info->par;
++
++	/* set bit 5:4 = 01 (write LCD RAM only) */
++	sm712_write_seq(sfb, 0x66, (sm712_read_seq(sfb, 0x66) & 0xC3) | 0x10);
++
++	sm712_writeb(sfb->mmio, DAC_REG, regno);
++	sm712_writeb(sfb->mmio, DAC_VAL, red >> 10);
++	sm712_writeb(sfb->mmio, DAC_VAL, green >> 10);
++	sm712_writeb(sfb->mmio, DAC_VAL, blue >> 10);
++}
++
++/* chan_to_field
++ *
++ * convert a colour value into a field position
++ *
++ * from pxafb.c
++ */
++
++static inline unsigned int chan_to_field(unsigned int chan,
++					 struct fb_bitfield *bf)
++{
++	chan &= 0xffff;
++	chan >>= 16 - bf->length;
++	return chan << bf->offset;
++}
++
++static int sm712_blank(int blank_mode, struct fb_info *info)
++{
++	struct sm712fb_info *sfb = info->par;
++
++	/* clear DPMS setting */
++	switch (blank_mode) {
++	case FB_BLANK_UNBLANK:
++		/* Screen On: HSync: On, VSync : On */
++		sm712_write_seq(sfb, 0x01,
++				(sm712_read_seq(sfb, 0x01) & (~0x20)));
++		sm712_write_seq(sfb, 0x6a, 0x16);
++		sm712_write_seq(sfb, 0x6b, 0x02);
++		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) & 0x77));
++		sm712_write_seq(sfb, 0x22,
++				(sm712_read_seq(sfb, 0x22) & (~0x30)));
++		sm712_write_seq(sfb, 0x23,
++				(sm712_read_seq(sfb, 0x23) & (~0xc0)));
++		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) | 0x01));
++		sm712_write_seq(sfb, 0x31, (sm712_read_seq(sfb, 0x31) | 0x03));
++		break;
++	case FB_BLANK_NORMAL:
++		/* Screen Off: HSync: On, VSync : On   Soft blank */
++		sm712_write_seq(sfb, 0x01,
++				(sm712_read_seq(sfb, 0x01) & (~0x20)));
++		sm712_write_seq(sfb, 0x6a, 0x16);
++		sm712_write_seq(sfb, 0x6b, 0x02);
++		sm712_write_seq(sfb, 0x22,
++				(sm712_read_seq(sfb, 0x22) & (~0x30)));
++		sm712_write_seq(sfb, 0x23,
++				(sm712_read_seq(sfb, 0x23) & (~0xc0)));
++		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) | 0x01));
++		sm712_write_seq(sfb, 0x31,
++				((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
++		break;
++	case FB_BLANK_VSYNC_SUSPEND:
++		/* Screen On: HSync: On, VSync : Off */
++		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
++		sm712_write_seq(sfb, 0x20,
++				(sm712_read_seq(sfb, 0x20) & (~0xB0)));
++		sm712_write_seq(sfb, 0x6a, 0x0c);
++		sm712_write_seq(sfb, 0x6b, 0x02);
++		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
++		sm712_write_seq(sfb, 0x22,
++				((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x20));
++		sm712_write_seq(sfb, 0x23,
++				((sm712_read_seq(sfb, 0x23) & (~0xc0)) | 0x20));
++		sm712_write_seq(sfb, 0x24,
++				(sm712_read_seq(sfb, 0x24) & (~0x01)));
++		sm712_write_seq(sfb, 0x31,
++				((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
++		sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0x80));
++		break;
++	case FB_BLANK_HSYNC_SUSPEND:
++		/* Screen On: HSync: Off, VSync : On */
++		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
++		sm712_write_seq(sfb, 0x20,
++				(sm712_read_seq(sfb, 0x20) & (~0xB0)));
++		sm712_write_seq(sfb, 0x6a, 0x0c);
++		sm712_write_seq(sfb, 0x6b, 0x02);
++		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
++		sm712_write_seq(sfb, 0x22,
++				((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x10));
++		sm712_write_seq(sfb, 0x23,
++				((sm712_read_seq(sfb, 0x23) & (~0xc0)) | 0xD8));
++		sm712_write_seq(sfb, 0x24,
++				(sm712_read_seq(sfb, 0x24) & (~0x01)));
++		sm712_write_seq(sfb, 0x31,
++				((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
++		sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0x80));
++		break;
++	case FB_BLANK_POWERDOWN:
++		/* Screen On: HSync: Off, VSync : Off */
++		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
++		sm712_write_seq(sfb, 0x20,
++				(sm712_read_seq(sfb, 0x20) & (~0xB0)));
++		sm712_write_seq(sfb, 0x6a, 0x5a);
++		sm712_write_seq(sfb, 0x6b, 0x20);
++		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
++		sm712_write_seq(sfb, 0x22,
++				((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x30));
++		sm712_write_seq(sfb, 0x23,
++				((sm712_read_seq(sfb, 0x23) & (~0xc0)) | 0xD8));
++		sm712_write_seq(sfb, 0x24,
++				(sm712_read_seq(sfb, 0x24) & (~0x01)));
++		sm712_write_seq(sfb, 0x31,
++				((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
++		sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0x80));
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int sm712_setcolreg(unsigned regno, unsigned red, unsigned green,
++			   unsigned blue, unsigned trans, struct fb_info *info)
++{
++	struct sm712fb_info *sfb;
++	u32 val;
++
++	sfb = info->par;
++
++	if (regno > 255)
++		return 1;
++
++	switch (sfb->fb.fix.visual) {
++	case FB_VISUAL_DIRECTCOLOR:
++	case FB_VISUAL_TRUECOLOR:
++		/*
++		 * 16/32 bit true-colour, use pseudo-palette for 16 base color
++		 */
++		if (regno < 16) {
++			if (sfb->fb.var.bits_per_pixel == 16) {
++				u32 *pal = sfb->fb.pseudo_palette;
++
++				val = chan_to_field(red, &sfb->fb.var.red);
++				val |= chan_to_field(green, &sfb->fb.var.green);
++				val |= chan_to_field(blue, &sfb->fb.var.blue);
++#ifdef __BIG_ENDIAN
++				pal[regno] =
++				    ((red & 0xf800) >> 8) |
++				    ((green & 0xe000) >> 13) |
++				    ((green & 0x1c00) << 3) |
++				    ((blue & 0xf800) >> 3);
++#else
++				pal[regno] = val;
++#endif
++			} else {
++				u32 *pal = sfb->fb.pseudo_palette;
++
++				val = chan_to_field(red, &sfb->fb.var.red);
++				val |= chan_to_field(green, &sfb->fb.var.green);
++				val |= chan_to_field(blue, &sfb->fb.var.blue);
++#ifdef __BIG_ENDIAN
++				val =
++				    (val & 0xff00ff00 >> 8) |
++				    (val & 0x00ff00ff << 8);
++#endif
++				pal[regno] = val;
++			}
++		}
++		break;
++
++	case FB_VISUAL_PSEUDOCOLOR:
++		/* color depth 8 bit */
++		sm712_setpalette(regno, red, green, blue, info);
++		break;
++
++	default:
++		return 1;	/* unknown type */
++	}
++
++	return 0;
++
++}
++
++#ifdef __BIG_ENDIAN
++static ssize_t sm712fb_read(struct fb_info *info, char __user *buf,
++			    size_t count, loff_t *ppos)
++{
++	unsigned long p = *ppos;
++
++	u32 *buffer, *dst;
++	u32 __iomem *src;
++	int c, i, cnt = 0, err = 0;
++	unsigned long total_size;
++
++	if (!info || !info->screen_base)
++		return -ENODEV;
++
++	if (info->state != FBINFO_STATE_RUNNING)
++		return -EPERM;
++
++	total_size = info->screen_size;
++
++	if (total_size == 0)
++		total_size = info->fix.smem_len;
++
++	if (p >= total_size)
++		return 0;
++
++	if (count >= total_size)
++		count = total_size;
++
++	if (count + p > total_size)
++		count = total_size - p;
++
++	buffer = kmalloc((count > PAGE_SIZE) ? PAGE_SIZE : count, GFP_KERNEL);
++	if (!buffer)
++		return -ENOMEM;
++
++	src = (u32 __iomem *) (info->screen_base + p);
++
++	if (info->fbops->fb_sync)
++		info->fbops->fb_sync(info);
++
++	while (count) {
++		c = (count > PAGE_SIZE) ? PAGE_SIZE : count;
++		dst = buffer;
++		for (i = c >> 2; i--;) {
++			*dst = fb_readl(src++);
++			*dst =
++			    (*dst & 0xff00ff00 >> 8) | (*dst & 0x00ff00ff << 8);
++			dst++;
++		}
++		if (c & 3) {
++			u8 *dst8 = (u8 *) dst;
++			u8 __iomem *src8 = (u8 __iomem *) src;
++
++			for (i = c & 3; i--;) {
++				if (i & 1) {
++					*dst8++ = fb_readb(++src8);
++				} else {
++					*dst8++ = fb_readb(--src8);
++					src8 += 2;
++				}
++			}
++			src = (u32 __iomem *) src8;
++		}
++
++		if (copy_to_user(buf, buffer, c)) {
++			err = -EFAULT;
++			break;
++		}
++		*ppos += c;
++		buf += c;
++		cnt += c;
++		count -= c;
++	}
++
++	kfree(buffer);
++
++	return (err) ? err : cnt;
++}
++
++static ssize_t
++sm712fb_write(struct fb_info *info, const char __user *buf, size_t count,
++	      loff_t *ppos)
++{
++	unsigned long p = *ppos;
++
++	u32 *buffer, *src;
++	u32 __iomem *dst;
++	int c, i, cnt = 0, err = 0;
++	unsigned long total_size;
++
++	if (!info || !info->screen_base)
++		return -ENODEV;
++
++	if (info->state != FBINFO_STATE_RUNNING)
++		return -EPERM;
++
++	total_size = info->screen_size;
++
++	if (total_size == 0)
++		total_size = info->fix.smem_len;
++
++	if (p > total_size)
++		return -EFBIG;
++
++	if (count > total_size) {
++		err = -EFBIG;
++		count = total_size;
++	}
++
++	if (count + p > total_size) {
++		if (!err)
++			err = -ENOSPC;
++
++		count = total_size - p;
++	}
++
++	buffer = kmalloc((count > PAGE_SIZE) ? PAGE_SIZE : count, GFP_KERNEL);
++	if (!buffer)
++		return -ENOMEM;
++
++	dst = (u32 __iomem *) (info->screen_base + p);
++
++	if (info->fbops->fb_sync)
++		info->fbops->fb_sync(info);
++
++	while (count) {
++		c = (count > PAGE_SIZE) ? PAGE_SIZE : count;
++		src = buffer;
++
++		if (copy_from_user(src, buf, c)) {
++			err = -EFAULT;
++			break;
++		}
++
++		for (i = c >> 2; i--;) {
++			fb_writel((*src & 0xff00ff00 >> 8) |
++				  (*src & 0x00ff00ff << 8), dst++);
++			src++;
++		}
++		if (c & 3) {
++			u8 *src8 = (u8 *) src;
++			u8 __iomem *dst8 = (u8 __iomem *) dst;
++
++			for (i = c & 3; i--;) {
++				if (i & 1) {
++					fb_writeb(*src8++, ++dst8);
++				} else {
++					fb_writeb(*src8++, --dst8);
++					dst8 += 2;
++				}
++			}
++			dst = (u32 __iomem *) dst8;
++		}
++
++		*ppos += c;
++		buf += c;
++		cnt += c;
++		count -= c;
++	}
++
++	kfree(buffer);
++
++	return (cnt) ? cnt : err;
++}
++#endif /* ! __BIG_ENDIAN */
++
++static void sm712_set_timing(struct sm712fb_info *sfb)
++{
++	int i = 0, j = 0;
++	u32 m_nScreenStride;
++
++	dev_dbg(&sfb->pdev->dev,
++		"sfb->width=%d sfb->height=%d "
++		"sfb->fb.var.bits_per_pixel=%d sfb->hz=%d\n",
++		sfb->width, sfb->height, sfb->fb.var.bits_per_pixel, sfb->hz);
++
++	for (j = 0; j < numVGAModes; j++) {
++		if (VGAMode[j].mmSizeX != sfb->width ||
++		    VGAMode[j].mmSizeY != sfb->height ||
++		    VGAMode[j].bpp != sfb->fb.var.bits_per_pixel ||
++		    VGAMode[j].hz != sfb->hz) {
++			continue;
++		}
++
++		dev_dbg(&sfb->pdev->dev,
++			"VGAMode[j].mmSizeX=%d VGAMode[j].mmSizeY=%d "
++			"VGAMode[j].bpp=%d VGAMode[j].hz=%d\n",
++			VGAMode[j].mmSizeX, VGAMode[j].mmSizeY,
++			VGAMode[j].bpp, VGAMode[j].hz);
++
++		dev_dbg(&sfb->pdev->dev, "VGAMode index=%d\n", j);
++
++		sm712_writeb(sfb->mmio, 0x3c6, 0x0);
++
++		sm712_write_seq(sfb, 0, 0x1);
++
++		sm712_writeb(sfb->mmio, 0x3c2, VGAMode[j].Init_MISC);
++
++		/* init SEQ register SR00 - SR04 */
++		for (i = 0; i < SR00_SR04_SIZE; i++)
++			sm712_write_seq(sfb, i, VGAMode[j].Init_SR00_SR04[i]);
++
++		/* init SEQ register SR10 - SR24 */
++		for (i = 0; i < SR10_SR24_SIZE; i++)
++			sm712_write_seq(sfb, i + 0x10,
++					VGAMode[j].Init_SR10_SR24[i]);
++
++		/* init SEQ register SR30 - SR75 */
++		for (i = 0; i < SR30_SR75_SIZE; i++)
++			if ((i + 0x30) != 0x62 &&
++			    (i + 0x30) != 0x6a && (i + 0x30) != 0x6b)
++				sm712_write_seq(sfb, i + 0x30,
++						VGAMode[j].Init_SR30_SR75[i]);
++
++		/* init SEQ register SR80 - SR93 */
++		for (i = 0; i < SR80_SR93_SIZE; i++)
++			sm712_write_seq(sfb, i + 0x80,
++					VGAMode[j].Init_SR80_SR93[i]);
++
++		/* init SEQ register SRA0 - SRAF */
++		for (i = 0; i < SRA0_SRAF_SIZE; i++)
++			sm712_write_seq(sfb, i + 0xa0,
++					VGAMode[j].Init_SRA0_SRAF[i]);
++
++		/* init Graphic register GR00 - GR08 */
++		for (i = 0; i < GR00_GR08_SIZE; i++)
++			sm712_write_grph(sfb, i, VGAMode[j].Init_GR00_GR08[i]);
++
++		/* init Attribute register AR00 - AR14 */
++		for (i = 0; i < AR00_AR14_SIZE; i++)
++			sm712_write_attr(sfb, i, VGAMode[j].Init_AR00_AR14[i]);
++
++		/* init CRTC register CR00 - CR18 */
++		for (i = 0; i < CR00_CR18_SIZE; i++)
++			sm712_write_crtc(sfb, i, VGAMode[j].Init_CR00_CR18[i]);
++
++		/* init CRTC register CR30 - CR4D */
++		for (i = 0; i < CR30_CR4D_SIZE; i++)
++			sm712_write_crtc(sfb, i + 0x30,
++					 VGAMode[j].Init_CR30_CR4D[i]);
++
++		/* init CRTC register CR90 - CRA7 */
++		for (i = 0; i < CR90_CRA7_SIZE; i++)
++			sm712_write_crtc(sfb, i + 0x90,
++					 VGAMode[j].Init_CR90_CRA7[i]);
++	}
++	sm712_writeb(sfb->mmio, 0x3c2, 0x67);
++
++	/* set VPR registers */
++	sm712_writel(sfb->vpr, 0x0C, 0x0);
++	sm712_writel(sfb->vpr, 0x40, 0x0);
++
++	/* set data width */
++	m_nScreenStride = (sfb->width * sfb->fb.var.bits_per_pixel) / 64;
++	switch (sfb->fb.var.bits_per_pixel) {
++	case 8:
++		sm712_writel(sfb->vpr, 0x0, 0x0);
++		break;
++	case 16:
++		sm712_writel(sfb->vpr, 0x0, 0x00020000);
++		break;
++	case 24:
++		sm712_writel(sfb->vpr, 0x0, 0x00040000);
++		break;
++	case 32:
++		sm712_writel(sfb->vpr, 0x0, 0x00030000);
++		break;
++	}
++	sm712_writel(sfb->vpr, 0x10,
++		     (u32) (((m_nScreenStride + 2) << 16) | m_nScreenStride));
++}
++
++static void sm712fb_setmode(struct sm712fb_info *sfb)
++{
++	switch (sfb->fb.var.bits_per_pixel) {
++	case 32:
++		sfb->fb.fix.visual = FB_VISUAL_TRUECOLOR;
++		sfb->fb.fix.line_length = sfb->fb.var.xres * 4;
++		sfb->fb.var.red.length = 8;
++		sfb->fb.var.green.length = 8;
++		sfb->fb.var.blue.length = 8;
++		sfb->fb.var.red.offset = 16;
++		sfb->fb.var.green.offset = 8;
++		sfb->fb.var.blue.offset = 0;
++		break;
++	case 24:
++		sfb->fb.fix.visual = FB_VISUAL_TRUECOLOR;
++		sfb->fb.fix.line_length = sfb->fb.var.xres * 3;
++		sfb->fb.var.red.length = 8;
++		sfb->fb.var.green.length = 8;
++		sfb->fb.var.blue.length = 8;
++		sfb->fb.var.red.offset = 16;
++		sfb->fb.var.green.offset = 8;
++		sfb->fb.var.blue.offset = 0;
++		break;
++	case 8:
++		sfb->fb.fix.visual = FB_VISUAL_PSEUDOCOLOR;
++		sfb->fb.fix.line_length = sfb->fb.var.xres;
++		sfb->fb.var.red.length = 3;
++		sfb->fb.var.green.length = 3;
++		sfb->fb.var.blue.length = 2;
++		sfb->fb.var.red.offset = 5;
++		sfb->fb.var.green.offset = 2;
++		sfb->fb.var.blue.offset = 0;
++		break;
++	case 16:
++	default:
++		sfb->fb.fix.visual = FB_VISUAL_TRUECOLOR;
++		sfb->fb.fix.line_length = sfb->fb.var.xres * 2;
++		sfb->fb.var.red.length = 5;
++		sfb->fb.var.green.length = 6;
++		sfb->fb.var.blue.length = 5;
++		sfb->fb.var.red.offset = 11;
++		sfb->fb.var.green.offset = 5;
++		sfb->fb.var.blue.offset = 0;
++		break;
++	}
++
++	sfb->width = sfb->fb.var.xres;
++	sfb->height = sfb->fb.var.yres;
++	sfb->hz = 60;
++	sm712_set_timing(sfb);
++}
++
++static int sm712_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
++{
++	/* sanity checks */
++	if (var->xres_virtual < var->xres)
++		var->xres_virtual = var->xres;
++
++	if (var->yres_virtual < var->yres)
++		var->yres_virtual = var->yres;
++
++	/* set valid default bpp */
++	if ((var->bits_per_pixel != 8) && (var->bits_per_pixel != 16) &&
++	    (var->bits_per_pixel != 24) && (var->bits_per_pixel != 32))
++		var->bits_per_pixel = 16;
++
++	return 0;
++}
++
++static int sm712_set_par(struct fb_info *info)
++{
++	sm712fb_setmode(info->par);
++
++	return 0;
++}
++
++static struct fb_ops sm712fb_ops = {
++	.owner = THIS_MODULE,
++	.fb_check_var = sm712_check_var,
++	.fb_set_par = sm712_set_par,
++	.fb_setcolreg = sm712_setcolreg,
++	.fb_blank = sm712_blank,
++	.fb_fillrect = cfb_fillrect,
++	.fb_imageblit = cfb_imageblit,
++	.fb_copyarea = cfb_copyarea,
++#ifdef __BIG_ENDIAN
++	.fb_read = sm712fb_read,
++	.fb_write = sm712fb_write,
++#endif
++};
++
++/*
++ * alloc struct sm712fb_info and assign default values
++ */
++static struct sm712fb_info *sm712_fb_info_new(struct pci_dev *pdev)
++{
++	struct sm712fb_info *sfb;
++
++	sfb = kzalloc(sizeof(*sfb), GFP_KERNEL);
++
++	if (!sfb)
++		return NULL;
++
++	sfb->pdev = pdev;
++
++	sfb->fb.flags = FBINFO_FLAG_DEFAULT;
++	sfb->fb.fbops = &sm712fb_ops;
++	sfb->fb.fix = sm712fb_fix;
++	sfb->fb.var = sm712fb_var;
++	sfb->fb.pseudo_palette = sfb->colreg;
++	sfb->fb.par = sfb;
++	sfb->accel = accel;
++
++	return sfb;
++}
++
++/*
++ * free struct sm712fb_info
++ */
++static void sm712_fb_info_free(struct sm712fb_info *sfb)
++{
++	kfree(sfb);
++}
++
++/*
++ * Map in the screen memory
++ */
++
++static int sm712_map_smem(struct sm712fb_info *sfb,
++			  struct pci_dev *pdev, u_long smem_len)
++{
++
++	sfb->fb.fix.smem_start = pci_resource_start(pdev, 0);
++
++#ifdef __BIG_ENDIAN
++	if (sfb->fb.var.bits_per_pixel == 32)
++		sfb->fb.fix.smem_start += 0x800000;
++#endif
++
++	sfb->fb.fix.smem_len = smem_len;
++
++	sfb->fb.screen_base = sfb->lfb;
++
++	if (!sfb->fb.screen_base) {
++		dev_err(&pdev->dev,
++			"%s: unable to map screen memory\n", sfb->fb.fix.id);
++		return -ENOMEM;
++	}
++
++	return 0;
++}
++
++/*
++ * Unmap in the screen memory
++ *
++ */
++static void sm712_unmap_smem(struct sm712fb_info *sfb)
++{
++	if (sfb && sfb->fb.screen_base) {
++		iounmap(sfb->fb.screen_base);
++		sfb->fb.screen_base = NULL;
++		sfb->lfb = NULL;
++	}
++}
++
++static inline void sm712_init_hw(struct sm712fb_info *sfb)
++{
++	/* enable linear memory mode and packed pixel format */
++	outb_p(0x18, 0x3c4);
++	outb_p(0x11, 0x3c5);
++
++	/* set MCLK = 14.31818 *  (0x16 / 0x2) */
++	sm712_write_seq(sfb, 0x6a, 0x16);
++	sm712_write_seq(sfb, 0x6b, 0x02);
++	sm712_write_seq(sfb, 0x62, 0x3e);
++
++	/* enable PCI burst */
++	sm712_write_seq(sfb, 0x17, 0x20);
++
++#ifdef __BIG_ENDIAN
++	/* enable word swap */
++	if (sfb->fb.var.bits_per_pixel == 32)
++		sm712_write_seq(sfb, 0x17, 0x30);
++#endif
++
++	if (!sfb->accel) {
++		dev_info(&sfb->pdev->dev, "2d acceleration was disabled by user.\n");
++		sfb->fb.flags = FBINFO_FLAG_DEFAULT | FBINFO_HWACCEL_NONE;
++		return;
++	}
++
++	if (sm712fb_init_accel(sfb) < 0) {
++		dev_info(&sfb->pdev->dev, "failed to enable 2d accleration.\n");
++		sfb->fb.flags = FBINFO_FLAG_DEFAULT | FBINFO_HWACCEL_NONE;
++		return;
++	} else {
++		sm712fb_ops.fb_fillrect = sm712fb_fillrect;
++		sm712fb_ops.fb_copyarea = sm712fb_copyarea;
++		sm712fb_ops.fb_imageblit = sm712fb_imageblit;
++		sfb->fb.flags |= FBINFO_HWACCEL_COPYAREA |
++				 FBINFO_HWACCEL_FILLRECT |
++				 FBINFO_HWACCEL_IMAGEBLIT |
++				 FBINFO_READS_FAST;
++		dev_info(&sfb->pdev->dev, "sm712fb: enable 2d acceleration.\n");
++	}
++}
++
++static int sm712fb_pci_probe(struct pci_dev *pdev,
++			     const struct pci_device_id *ent)
++{
++	struct sm712fb_info *sfb;
++	int err;
++	unsigned long mmio_base;
++
++#ifndef MODULE
++	char *option = NULL;
++
++	if (!fb_get_options("sm712fb", &option))
++		sm712fb_setup(option);
++#endif
++
++	dev_info(&pdev->dev, "Silicon Motion display driver.");
++
++	err = pci_enable_device(pdev);	/* enable SMTC chip */
++	if (err)
++		return err;
++
++	sprintf(sm712fb_fix.id, "sm712fb");
++
++	sfb = sm712_fb_info_new(pdev);
++
++	if (!sfb) {
++		err = -ENOMEM;
++		goto free_fail;
++	}
++
++	sfb->chip_id = ent->device;
++
++	pci_set_drvdata(pdev, sfb);
++
++	/* get mode parameter from sm712_scr_info */
++	if (sm712_scr_info.lfb_width != 0) {
++		sfb->fb.var.xres = sm712_scr_info.lfb_width;
++		sfb->fb.var.yres = sm712_scr_info.lfb_height;
++		sfb->fb.var.bits_per_pixel = sm712_scr_info.lfb_depth;
++	} else {
++		/* default resolution 1024x600 16bit mode */
++		sfb->fb.var.xres = SM712_DEFAULT_XRES;
++		sfb->fb.var.yres = SM712_DEFAULT_YRES;
++		sfb->fb.var.bits_per_pixel = SM712_DEFAULT_BPP;
++	}
++
++#ifdef __BIG_ENDIAN
++	if (sfb->fb.var.bits_per_pixel == 24)
++		sfb->fb.var.bits_per_pixel = (sm712_scr_info.lfb_depth = 32);
++#endif
++
++	/* Map address and memory detection */
++	mmio_base = pci_resource_start(pdev, 0);
++	pci_read_config_byte(pdev, PCI_REVISION_ID, &sfb->chip_rev_id);
++
++	if (sfb->chip_id != 0x712) {
++		dev_err(&pdev->dev,
++			"No valid Silicon Motion display chip was detected!");
++
++		goto fb_fail;
++	}
++
++	sfb->fb.fix.mmio_start = mmio_base + SM712_REG_BASE;
++	sfb->fb.fix.mmio_len = SM712_REG_SIZE;
++#ifdef __BIG_ENDIAN
++	sfb->lfb = ioremap(mmio_base, 0x00c00000);
++#else
++	sfb->lfb = ioremap(mmio_base, 0x00800000);
++#endif
++	sfb->mmio = sfb->lfb + SM712_MMIO_BASE;
++	sfb->dpr = sfb->lfb + SM712_DPR_BASE;
++	sfb->vpr = sfb->lfb + SM712_VPR_BASE;
++	sfb->dataport = sfb->lfb + SM712_DATAPORT_BASE;
++#ifdef __BIG_ENDIAN
++	if (sfb->fb.var.bits_per_pixel == 32) {
++		sfb->lfb += 0x800000;
++		dev_info(&pdev->dev, "sfb->lfb=%p", sfb->lfb);
++	}
++#endif
++	if (!sfb->mmio) {
++		dev_err(&pdev->dev,
++			"%s: unable to map memory mapped IO!", sfb->fb.fix.id);
++		err = -ENOMEM;
++		goto fb_fail;
++	}
++
++	sm712_init_hw(sfb);
++
++	/* can support 32 bpp */
++	if (15 == sfb->fb.var.bits_per_pixel)
++		sfb->fb.var.bits_per_pixel = 16;
++
++	sfb->fb.var.xres_virtual = sfb->fb.var.xres;
++	sfb->fb.var.yres_virtual = sfb->fb.var.yres;
++	err = sm712_map_smem(sfb, pdev, SM712_VRAM_SIZE);
++	if (err)
++		goto fail;
++
++	sm712fb_setmode(sfb);
++
++	err = register_framebuffer(&sfb->fb);
++	if (err < 0)
++		goto fail;
++
++	dev_info(&pdev->dev,
++		 "Silicon Motion SM%X Rev%X primary display mode %dx%d-%d Init Complete.",
++		 sfb->chip_id, sfb->chip_rev_id, sfb->fb.var.xres,
++		 sfb->fb.var.yres, sfb->fb.var.bits_per_pixel);
++
++	return 0;
++
++fail:
++	dev_err(&pdev->dev, "Silicon Motion, Inc. primary display init fail.");
++
++	sm712_unmap_smem(sfb);
++fb_fail:
++	sm712_fb_info_free(sfb);
++free_fail:
++	pci_disable_device(pdev);
++
++	return err;
++}
++
++/*
++ * 0x712 (LynxEM+)
++ */
++static const struct pci_device_id sm712fb_pci_table[] = {
++	{PCI_DEVICE(0x126f, 0x712),},
++	{0,}
++};
++
++static void sm712fb_pci_remove(struct pci_dev *pdev)
++{
++	struct sm712fb_info *sfb;
++
++	sfb = pci_get_drvdata(pdev);
++	sm712_unmap_smem(sfb);
++	unregister_framebuffer(&sfb->fb);
++	sm712_fb_info_free(sfb);
++}
++
++#ifdef CONFIG_PM
++static int sm712fb_pci_suspend(struct device *device)
++{
++	struct pci_dev *pdev = to_pci_dev(device);
++	struct sm712fb_info *sfb;
++
++	sfb = pci_get_drvdata(pdev);
++
++	/* set the hw in sleep mode use external clock and self memory refresh
++	 * so that we can turn off internal PLLs later on
++	 */
++	sm712_write_seq(sfb, 0x20, (sm712_read_seq(sfb, 0x20) | 0xc0));
++	sm712_write_seq(sfb, 0x69, (sm712_read_seq(sfb, 0x69) & 0xf7));
++
++	console_lock();
++	fb_set_suspend(&sfb->fb, 1);
++	console_unlock();
++
++	/* additionally turn off all function blocks including internal PLLs */
++	sm712_write_seq(sfb, 0x21, 0xff);
++
++	return 0;
++}
++
++static int sm712fb_pci_resume(struct device *device)
++{
++	struct pci_dev *pdev = to_pci_dev(device);
++	struct sm712fb_info *sfb;
++
++	sfb = pci_get_drvdata(pdev);
++
++	/* reinit hardware */
++	sm712_init_hw(sfb);
++
++	sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0xc0));
++	sm712_write_seq(sfb, 0x33, ((sm712_read_seq(sfb, 0x33) | 0x08) & 0xfb));
++
++	sm712fb_setmode(sfb);
++
++	console_lock();
++	fb_set_suspend(&sfb->fb, 0);
++	console_unlock();
++
++	return 0;
++}
++
++static SIMPLE_DEV_PM_OPS(sm712_pm_ops, sm712fb_pci_suspend, sm712fb_pci_resume);
++#define SM712_PM_OPS (&sm712_pm_ops)
++
++#else /* !CONFIG_PM */
++
++#define SM712_PM_OPS NULL
++
++#endif /* !CONFIG_PM */
++
++static struct pci_driver sm712fb_driver = {
++	.name = "sm712fb",
++	.id_table = sm712fb_pci_table,
++	.probe = sm712fb_pci_probe,
++	.remove = sm712fb_pci_remove,
++	.driver.pm = SM712_PM_OPS,
++};
++
++module_pci_driver(sm712fb_driver);
++
++module_param(accel, bool, S_IRUGO);
++MODULE_PARM_DESC(accel, "Enable or disable 2D Acceleration");
++
++MODULE_AUTHOR("Siliconmotion ");
++MODULE_DESCRIPTION("Framebuffer driver for Silicon Motion SM712 Graphic Cards");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/video/fbdev/sm712fb/sm712fb_drv.h b/drivers/video/fbdev/sm712fb/sm712fb_drv.h
+new file mode 100644
+index 0000000..bf81bff
+--- /dev/null
++++ b/drivers/video/fbdev/sm712fb/sm712fb_drv.h
+@@ -0,0 +1,130 @@
++/*
++ * Silicon Motion SM712 frame buffer device
++ *
++ * Copyright (C) 2006 Silicon Motion Technology Corp.
++ * Authors:  Ge Wang, gewang@siliconmotion.com
++ *	     Boyod boyod.yang@siliconmotion.com.cn
++ *
++ * Copyright (C) 2009 Lemote, Inc.
++ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
++ *
++ * Copyright (C) 2011 Igalia, S.L.
++ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
++ *
++ * Copyright (C) 2014 Tom Li.
++ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License. See the file COPYING in the main directory of this archive for
++ * more details.
++ *
++ * Framebuffer driver for Silicon Motion SM712 chip
++ */
++
++#ifndef _SM712FB_DRV_H
++#define _SM712FB_DRV_H
++
++/*
++* Private structure
++*/
++struct sm712fb_info {
++	struct pci_dev *pdev;
++	struct fb_info fb;
++	u16 chip_id;
++	u8  chip_rev_id;
++
++	void __iomem *lfb;	/* linear frame buffer, the base address */
++
++	void __iomem *dpr;	/* drawing processor control regs */
++	void __iomem *vpr;	/* video processor control regs */
++	void __iomem *cpr;	/* capture processor control regs */
++	void __iomem *mmio;	/* memory map IO port */
++	void __iomem *dataport; /* 2d drawing engine data port */
++
++	u_int width;
++	u_int height;
++	u_int hz;
++
++	u32 colreg[17];
++
++	bool accel;
++};
++
++/* constants for registers operations */
++
++#include "sm712fb_io.h"
++
++#define FB_ACCEL_SMI_LYNX		88
++
++#define SM712_DEFAULT_XRES		1024
++#define SM712_DEFAULT_YRES		600
++#define SM712_DEFAULT_BPP		16
++
++#define SM712_VRAM_SIZE			0x00400000
++
++#define	SM712_REG_BASE			0x00400000
++#define SM712_REG_SIZE                  0x00400000
++
++#define	SM712_MMIO_BASE			0x00700000
++
++#define	SM712_DPR_BASE			0x00408000
++#define SM712_DPR_SIZE                  (0x6C + 1)
++
++#define	DPR_COORDS(x, y)		(((x) << 16) | (y))
++
++#define	DPR_SRC_COORDS			0x00
++#define	DPR_DST_COORDS			0x04
++#define	DPR_SPAN_COORDS			0x08
++#define	DPR_DE_CTRL			0x0c
++#define	DPR_PITCH			0x10
++#define	DPR_FG_COLOR			0x14
++#define	DPR_BG_COLOR			0x18
++#define	DPR_STRETCH			0x1c
++#define	DPR_COLOR_COMPARE		0x20
++#define	DPR_COLOR_COMPARE_MASK		0x24
++#define	DPR_BYTE_BIT_MASK		0x28
++#define	DPR_CROP_TOPLEFT_COORDS		0x2c
++#define	DPR_CROP_BOTRIGHT_COORDS	0x30
++#define	DPR_SRC_WINDOW			0x3c
++#define	DPR_SRC_BASE			0x40
++#define	DPR_DST_BASE			0x44
++
++#define	DE_CTRL_START			0x80000000
++#define	DE_CTRL_RTOL			0x08000000
++#define	DE_CTRL_COMMAND_MASK		0x001f0000
++#define	DE_CTRL_COMMAND_SHIFT			16
++#define	DE_CTRL_COMMAND_BITBLT			0x00
++#define	DE_CTRL_COMMAND_SOLIDFILL		0x01
++#define DE_CTRL_COMMAND_HOST_WRITE              0x08
++#define	DE_CTRL_ROP_ENABLE		0x00008000
++#define	DE_CTRL_ROP_MASK		0x000000ff
++#define	DE_CTRL_ROP_SHIFT			0
++#define	DE_CTRL_ROP_SRC				0x0c
++
++#define DE_CTRL_HOST_SHIFT              22
++#define DE_CTRL_HOST_MONO               1
++
++#define SCR_DE_STATUS			0x16
++#define SCR_DE_STATUS_MASK		0x18
++#define SCR_DE_ENGINE_IDLE		0x10
++
++#define	SM712_VPR_BASE			0x0040c000
++#define SM712_VPR_SIZE                  (0x44 + 1)
++
++#define SM712_DATAPORT_BASE             0x00400000
++
++#define SR00_SR04_SIZE      (0x04 - 0x00 + 1)
++#define SR10_SR24_SIZE      (0x24 - 0x10 + 1)
++#define SR30_SR75_SIZE      (0x75 - 0x30 + 1)
++#define SR80_SR93_SIZE      (0x93 - 0x80 + 1)
++#define SRA0_SRAF_SIZE      (0xAF - 0xA0 + 1)
++#define GR00_GR08_SIZE      (0x08 - 0x00 + 1)
++#define AR00_AR14_SIZE      (0x14 - 0x00 + 1)
++#define CR00_CR18_SIZE      (0x18 - 0x00 + 1)
++#define CR30_CR4D_SIZE      (0x4D - 0x30 + 1)
++#define CR90_CRA7_SIZE      (0xA7 - 0x90 + 1)
++
++#define DAC_REG	(0x3c8)
++#define DAC_VAL	(0x3c9)
++
++#endif
+diff --git a/drivers/video/fbdev/sm712fb/sm712fb_io.h b/drivers/video/fbdev/sm712fb/sm712fb_io.h
+new file mode 100644
+index 0000000..93346a0
+--- /dev/null
++++ b/drivers/video/fbdev/sm712fb/sm712fb_io.h
+@@ -0,0 +1,90 @@
++/*
++ * Silicon Motion SM712 frame buffer device
++ *
++ * Copyright (C) 2006 Silicon Motion Technology Corp.
++ * Authors:  Ge Wang, gewang@siliconmotion.com
++ *	     Boyod boyod.yang@siliconmotion.com.cn
++ *
++ * Copyright (C) 2009 Lemote, Inc.
++ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
++ *
++ * Copyright (C) 2011 Igalia, S.L.
++ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
++ *
++ * Copyright (C) 2014 Tom Li.
++ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License. See the file COPYING in the main directory of this archive for
++ * more details.
++ *
++ */
++
++
++#define sm712_writeb(base, reg, dat)	writeb(dat, base + reg)
++#define sm712_writew(base, reg, dat)	writew(dat, base + reg)
++#define sm712_writel(base, reg, dat)	writel(dat, base + reg)
++
++#define sm712_readb(base, reg)	readb(base + reg)
++#define sm712_readw(base, reg)	readw(base + reg)
++#define sm712_readl(base, reg)	readl(base + reg)
++
++
++static inline void sm712_write_crtc(struct sm712fb_info *fb, u8 reg, u8 val)
++{
++	sm712_writeb(fb->mmio, 0x3d4, reg);
++	sm712_writeb(fb->mmio, 0x3d5, val);
++}
++
++static inline u8 sm712_read_crtc(struct sm712fb_info *fb, u8 reg)
++{
++	sm712_writeb(fb->mmio, 0x3d4, reg);
++	return sm712_readb(fb->mmio, 0x3d5);
++}
++
++static inline void sm712_write_grph(struct sm712fb_info *fb, u8 reg, u8 val)
++{
++	sm712_writeb(fb->mmio, 0x3ce, reg);
++	sm712_writeb(fb->mmio, 0x3cf, val);
++}
++
++static inline u8 sm712_read_grph(struct sm712fb_info *fb, u8 reg)
++{
++	sm712_writeb(fb->mmio, 0x3ce, reg);
++	return sm712_readb(fb->mmio, 0x3cf);
++}
++
++static inline void sm712_write_attr(struct sm712fb_info *fb, u8 reg, u8 val)
++{
++	sm712_readb(fb->mmio, 0x3da);
++	sm712_writeb(fb->mmio, 0x3c0, reg);
++	sm712_readb(fb->mmio, 0x3c1);
++	sm712_writeb(fb->mmio, 0x3c0, val);
++}
++
++static inline void sm712_write_seq(struct sm712fb_info *fb, u8 reg, u8 val)
++{
++	sm712_writeb(fb->mmio, 0x3c4, reg);
++	sm712_writeb(fb->mmio, 0x3c5, val);
++}
++
++static inline u8 sm712_read_seq(struct sm712fb_info *fb, u8 reg)
++{
++	sm712_writeb(fb->mmio, 0x3c4, reg);
++	return sm712_readb(fb->mmio, 0x3c5);
++}
++
++static inline u32 sm712_read_dpr(struct sm712fb_info *fb, u8 reg)
++{
++	return sm712_readl(fb->dpr, reg);
++}
++
++static inline void sm712_write_dpr(struct sm712fb_info *fb, u8 reg, u32 val)
++{
++	sm712_writel(fb->dpr, reg, val);
++}
++
++static inline void sm712_write_dataport(struct sm712fb_info *fb, u32 val)
++{
++	sm712_writel(fb->dataport, 0, val);
++}
+diff --git a/drivers/video/fbdev/sm712fb/sm712fb_modedb.h b/drivers/video/fbdev/sm712fb/sm712fb_modedb.h
+new file mode 100644
+index 0000000..16ee7e3
+--- /dev/null
++++ b/drivers/video/fbdev/sm712fb/sm712fb_modedb.h
+@@ -0,0 +1,682 @@
 +/* The next structure holds all information relevant for a specific video mode.
 + */
 +
@@ -9473,16 +11126,16 @@ index 0000000..8599861
 +	int bpp;
 +	int hz;
 +	unsigned char Init_MISC;
-+	unsigned char Init_SR00_SR04[SIZE_SR00_SR04];
-+	unsigned char Init_SR10_SR24[SIZE_SR10_SR24];
-+	unsigned char Init_SR30_SR75[SIZE_SR30_SR75];
-+	unsigned char Init_SR80_SR93[SIZE_SR80_SR93];
-+	unsigned char Init_SRA0_SRAF[SIZE_SRA0_SRAF];
-+	unsigned char Init_GR00_GR08[SIZE_GR00_GR08];
-+	unsigned char Init_AR00_AR14[SIZE_AR00_AR14];
-+	unsigned char Init_CR00_CR18[SIZE_CR00_CR18];
-+	unsigned char Init_CR30_CR4D[SIZE_CR30_CR4D];
-+	unsigned char Init_CR90_CRA7[SIZE_CR90_CRA7];
++	unsigned char Init_SR00_SR04[SR00_SR04_SIZE];
++	unsigned char Init_SR10_SR24[SR10_SR24_SIZE];
++	unsigned char Init_SR30_SR75[SR30_SR75_SIZE];
++	unsigned char Init_SR80_SR93[SR80_SR93_SIZE];
++	unsigned char Init_SRA0_SRAF[SRA0_SRAF_SIZE];
++	unsigned char Init_GR00_GR08[GR00_GR08_SIZE];
++	unsigned char Init_AR00_AR14[AR00_AR14_SIZE];
++	unsigned char Init_CR00_CR18[CR00_CR18_SIZE];
++	unsigned char Init_CR30_CR4D[CR30_CR4D_SIZE];
++	unsigned char Init_CR90_CRA7[CR90_CRA7_SIZE];
 +};
 +
 +/**********************************************************************
@@ -10146,1183 +11799,6 @@ index 0000000..8599861
 +};
 +
 +#define numVGAModes		ARRAY_SIZE(VGAMode)
-diff --git a/drivers/staging/sm7xxfb/sm7xxfb.c b/drivers/staging/sm7xxfb/sm7xxfb.c
-new file mode 100644
-index 0000000..e40ce80
---- /dev/null
-+++ b/drivers/staging/sm7xxfb/sm7xxfb.c
-@@ -0,0 +1,1029 @@
-+/*
-+ * Silicon Motion SM7XX frame buffer device
-+ *
-+ * Copyright (C) 2006 Silicon Motion Technology Corp.
-+ * Authors:  Ge Wang, gewang@siliconmotion.com
-+ *	     Boyod boyod.yang@siliconmotion.com.cn
-+ *
-+ * Copyright (C) 2009 Lemote, Inc.
-+ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
-+ *
-+ * Copyright (C) 2011 Igalia, S.L.
-+ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
-+ *
-+ * This file is subject to the terms and conditions of the GNU General Public
-+ * License. See the file COPYING in the main directory of this archive for
-+ * more details.
-+ *
-+ * Framebuffer driver for Silicon Motion SM710, SM712, SM721 and SM722 chips
-+ */
-+
-+#include <linux/io.h>
-+#include <linux/fb.h>
-+#include <linux/pci.h>
-+#include <linux/init.h>
-+#include <linux/slab.h>
-+#include <linux/uaccess.h>
-+#include <linux/module.h>
-+#include <linux/console.h>
-+#include <linux/screen_info.h>
-+
-+#ifdef CONFIG_PM
-+#include <linux/pm.h>
-+#endif
-+
-+#include "sm7xx.h"
-+
-+/*
-+* Private structure
-+*/
-+struct smtcfb_info {
-+	struct pci_dev *pdev;
-+	struct fb_info fb;
-+	u16 chip_id;
-+	u8  chip_rev_id;
-+
-+	void __iomem *lfb;	/* linear frame buffer */
-+	void __iomem *dp_regs;	/* drawing processor control regs */
-+	void __iomem *vp_regs;	/* video processor control regs */
-+	void __iomem *cp_regs;	/* capture processor control regs */
-+	void __iomem *mmio;	/* memory map IO port */
-+
-+	u_int width;
-+	u_int height;
-+	u_int hz;
-+
-+	u32 colreg[17];
-+};
-+
-+void __iomem *smtc_RegBaseAddress;	/* Memory Map IO starting address */
-+
-+static struct fb_var_screeninfo smtcfb_var = {
-+	.xres           = 1024,
-+	.yres           = 600,
-+	.xres_virtual   = 1024,
-+	.yres_virtual   = 600,
-+	.bits_per_pixel = 16,
-+	.red            = {16, 8, 0},
-+	.green          = {8, 8, 0},
-+	.blue           = {0, 8, 0},
-+	.activate       = FB_ACTIVATE_NOW,
-+	.height         = -1,
-+	.width          = -1,
-+	.vmode          = FB_VMODE_NONINTERLACED,
-+	.nonstd         = 0,
-+	.accel_flags    = FB_ACCELF_TEXT,
-+};
-+
-+static struct fb_fix_screeninfo smtcfb_fix = {
-+	.id             = "smXXXfb",
-+	.type           = FB_TYPE_PACKED_PIXELS,
-+	.visual         = FB_VISUAL_TRUECOLOR,
-+	.line_length    = 800 * 3,
-+	.accel          = FB_ACCEL_SMI_LYNX,
-+	.type_aux       = 0,
-+	.xpanstep       = 0,
-+	.ypanstep       = 0,
-+	.ywrapstep      = 0,
-+};
-+
-+struct vesa_mode {
-+	char index[6];
-+	u16  lfb_width;
-+	u16  lfb_height;
-+	u16  lfb_depth;
-+};
-+
-+static struct vesa_mode vesa_mode_table[] = {
-+	{"0x301", 640,  480,  8},
-+	{"0x303", 800,  600,  8},
-+	{"0x305", 1024, 768,  8},
-+	{"0x307", 1280, 1024, 8},
-+
-+	{"0x311", 640,  480,  16},
-+	{"0x313", 800,  480,  16},
-+	{"0x314", 800,  600,  16},
-+	{"0x317", 1024, 768,  16},
-+	{"0x31A", 1280, 1024, 16},
-+
-+	{"0x312", 640,  480,  24},
-+	{"0x315", 800,  600,  24},
-+	{"0x318", 1024, 768,  24},
-+	{"0x31B", 1280, 1024, 24},
-+};
-+
-+struct screen_info smtc_scr_info;
-+
-+/* process command line options, get vga parameter */
-+static int __init sm7xx_vga_setup(char *options)
-+{
-+	int i;
-+
-+	if (!options || !*options)
-+		return -EINVAL;
-+
-+	smtc_scr_info.lfb_width = 0;
-+	smtc_scr_info.lfb_height = 0;
-+	smtc_scr_info.lfb_depth = 0;
-+
-+	pr_debug("sm7xx_vga_setup = %s\n", options);
-+
-+	for (i = 0; i < ARRAY_SIZE(vesa_mode_table); i++) {
-+		if (strstr(options, vesa_mode_table[i].index)) {
-+			smtc_scr_info.lfb_width  = vesa_mode_table[i].lfb_width;
-+			smtc_scr_info.lfb_height =
-+						vesa_mode_table[i].lfb_height;
-+			smtc_scr_info.lfb_depth  = vesa_mode_table[i].lfb_depth;
-+			return 0;
-+		}
-+	}
-+
-+	return -1;
-+}
-+__setup("vga=", sm7xx_vga_setup);
-+
-+static void sm712_setpalette(int regno, unsigned red, unsigned green,
-+			     unsigned blue, struct fb_info *info)
-+{
-+	/* set bit 5:4 = 01 (write LCD RAM only) */
-+	smtc_seqw(0x66, (smtc_seqr(0x66) & 0xC3) | 0x10);
-+
-+	smtc_mmiowb(regno, dac_reg);
-+	smtc_mmiowb(red >> 10, dac_val);
-+	smtc_mmiowb(green >> 10, dac_val);
-+	smtc_mmiowb(blue >> 10, dac_val);
-+}
-+
-+/* chan_to_field
-+ *
-+ * convert a colour value into a field position
-+ *
-+ * from pxafb.c
-+ */
-+
-+static inline unsigned int chan_to_field(unsigned int chan,
-+					 struct fb_bitfield *bf)
-+{
-+	chan &= 0xffff;
-+	chan >>= 16 - bf->length;
-+	return chan << bf->offset;
-+}
-+
-+static int smtc_blank(int blank_mode, struct fb_info *info)
-+{
-+	/* clear DPMS setting */
-+	switch (blank_mode) {
-+	case FB_BLANK_UNBLANK:
-+		/* Screen On: HSync: On, VSync : On */
-+		smtc_seqw(0x01, (smtc_seqr(0x01) & (~0x20)));
-+		smtc_seqw(0x6a, 0x16);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x21, (smtc_seqr(0x21) & 0x77));
-+		smtc_seqw(0x22, (smtc_seqr(0x22) & (~0x30)));
-+		smtc_seqw(0x23, (smtc_seqr(0x23) & (~0xc0)));
-+		smtc_seqw(0x24, (smtc_seqr(0x24) | 0x01));
-+		smtc_seqw(0x31, (smtc_seqr(0x31) | 0x03));
-+		break;
-+	case FB_BLANK_NORMAL:
-+		/* Screen Off: HSync: On, VSync : On   Soft blank */
-+		smtc_seqw(0x01, (smtc_seqr(0x01) & (~0x20)));
-+		smtc_seqw(0x6a, 0x16);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x22, (smtc_seqr(0x22) & (~0x30)));
-+		smtc_seqw(0x23, (smtc_seqr(0x23) & (~0xc0)));
-+		smtc_seqw(0x24, (smtc_seqr(0x24) | 0x01));
-+		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-+		break;
-+	case FB_BLANK_VSYNC_SUSPEND:
-+		/* Screen On: HSync: On, VSync : Off */
-+		smtc_seqw(0x01, (smtc_seqr(0x01) | 0x20));
-+		smtc_seqw(0x20, (smtc_seqr(0x20) & (~0xB0)));
-+		smtc_seqw(0x6a, 0x0c);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x21, (smtc_seqr(0x21) | 0x88));
-+		smtc_seqw(0x22, ((smtc_seqr(0x22) & (~0x30)) | 0x20));
-+		smtc_seqw(0x23, ((smtc_seqr(0x23) & (~0xc0)) | 0x20));
-+		smtc_seqw(0x24, (smtc_seqr(0x24) & (~0x01)));
-+		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-+		smtc_seqw(0x34, (smtc_seqr(0x34) | 0x80));
-+		break;
-+	case FB_BLANK_HSYNC_SUSPEND:
-+		/* Screen On: HSync: Off, VSync : On */
-+		smtc_seqw(0x01, (smtc_seqr(0x01) | 0x20));
-+		smtc_seqw(0x20, (smtc_seqr(0x20) & (~0xB0)));
-+		smtc_seqw(0x6a, 0x0c);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x21, (smtc_seqr(0x21) | 0x88));
-+		smtc_seqw(0x22, ((smtc_seqr(0x22) & (~0x30)) | 0x10));
-+		smtc_seqw(0x23, ((smtc_seqr(0x23) & (~0xc0)) | 0xD8));
-+		smtc_seqw(0x24, (smtc_seqr(0x24) & (~0x01)));
-+		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-+		smtc_seqw(0x34, (smtc_seqr(0x34) | 0x80));
-+		break;
-+	case FB_BLANK_POWERDOWN:
-+		/* Screen On: HSync: Off, VSync : Off */
-+		smtc_seqw(0x01, (smtc_seqr(0x01) | 0x20));
-+		smtc_seqw(0x20, (smtc_seqr(0x20) & (~0xB0)));
-+		smtc_seqw(0x6a, 0x0c);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x21, (smtc_seqr(0x21) | 0x88));
-+		smtc_seqw(0x22, ((smtc_seqr(0x22) & (~0x30)) | 0x30));
-+		smtc_seqw(0x23, ((smtc_seqr(0x23) & (~0xc0)) | 0xD8));
-+		smtc_seqw(0x24, (smtc_seqr(0x24) & (~0x01)));
-+		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-+		smtc_seqw(0x34, (smtc_seqr(0x34) | 0x80));
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static int smtc_setcolreg(unsigned regno, unsigned red, unsigned green,
-+			  unsigned blue, unsigned trans, struct fb_info *info)
-+{
-+	struct smtcfb_info *sfb;
-+	u32 val;
-+
-+	sfb = info->par;
-+
-+	if (regno > 255)
-+		return 1;
-+
-+	switch (sfb->fb.fix.visual) {
-+	case FB_VISUAL_DIRECTCOLOR:
-+	case FB_VISUAL_TRUECOLOR:
-+		/*
-+		 * 16/32 bit true-colour, use pseudo-palette for 16 base color
-+		 */
-+		if (regno < 16) {
-+			if (sfb->fb.var.bits_per_pixel == 16) {
-+				u32 *pal = sfb->fb.pseudo_palette;
-+				val = chan_to_field(red, &sfb->fb.var.red);
-+				val |= chan_to_field(green, &sfb->fb.var.green);
-+				val |= chan_to_field(blue, &sfb->fb.var.blue);
-+#ifdef __BIG_ENDIAN
-+				pal[regno] =
-+				    ((red & 0xf800) >> 8) |
-+				    ((green & 0xe000) >> 13) |
-+				    ((green & 0x1c00) << 3) |
-+				    ((blue & 0xf800) >> 3);
-+#else
-+				pal[regno] = val;
-+#endif
-+			} else {
-+				u32 *pal = sfb->fb.pseudo_palette;
-+				val = chan_to_field(red, &sfb->fb.var.red);
-+				val |= chan_to_field(green, &sfb->fb.var.green);
-+				val |= chan_to_field(blue, &sfb->fb.var.blue);
-+#ifdef __BIG_ENDIAN
-+				val =
-+				    (val & 0xff00ff00 >> 8) |
-+				    (val & 0x00ff00ff << 8);
-+#endif
-+				pal[regno] = val;
-+			}
-+		}
-+		break;
-+
-+	case FB_VISUAL_PSEUDOCOLOR:
-+		/* color depth 8 bit */
-+		sm712_setpalette(regno, red, green, blue, info);
-+		break;
-+
-+	default:
-+		return 1;	/* unknown type */
-+	}
-+
-+	return 0;
-+
-+}
-+
-+#ifdef __BIG_ENDIAN
-+static ssize_t smtcfb_read(struct fb_info *info, char __user *buf, size_t
-+				count, loff_t *ppos)
-+{
-+	unsigned long p = *ppos;
-+
-+	u32 *buffer, *dst;
-+	u32 __iomem *src;
-+	int c, i, cnt = 0, err = 0;
-+	unsigned long total_size;
-+
-+	if (!info || !info->screen_base)
-+		return -ENODEV;
-+
-+	if (info->state != FBINFO_STATE_RUNNING)
-+		return -EPERM;
-+
-+	total_size = info->screen_size;
-+
-+	if (total_size == 0)
-+		total_size = info->fix.smem_len;
-+
-+	if (p >= total_size)
-+		return 0;
-+
-+	if (count >= total_size)
-+		count = total_size;
-+
-+	if (count + p > total_size)
-+		count = total_size - p;
-+
-+	buffer = kmalloc((count > PAGE_SIZE) ? PAGE_SIZE : count, GFP_KERNEL);
-+	if (!buffer)
-+		return -ENOMEM;
-+
-+	src = (u32 __iomem *) (info->screen_base + p);
-+
-+	if (info->fbops->fb_sync)
-+		info->fbops->fb_sync(info);
-+
-+	while (count) {
-+		c = (count > PAGE_SIZE) ? PAGE_SIZE : count;
-+		dst = buffer;
-+		for (i = c >> 2; i--;) {
-+			*dst = fb_readl(src++);
-+			*dst =
-+			    (*dst & 0xff00ff00 >> 8) |
-+			    (*dst & 0x00ff00ff << 8);
-+			dst++;
-+		}
-+		if (c & 3) {
-+			u8 *dst8 = (u8 *) dst;
-+			u8 __iomem *src8 = (u8 __iomem *) src;
-+
-+			for (i = c & 3; i--;) {
-+				if (i & 1) {
-+					*dst8++ = fb_readb(++src8);
-+				} else {
-+					*dst8++ = fb_readb(--src8);
-+					src8 += 2;
-+				}
-+			}
-+			src = (u32 __iomem *) src8;
-+		}
-+
-+		if (copy_to_user(buf, buffer, c)) {
-+			err = -EFAULT;
-+			break;
-+		}
-+		*ppos += c;
-+		buf += c;
-+		cnt += c;
-+		count -= c;
-+	}
-+
-+	kfree(buffer);
-+
-+	return (err) ? err : cnt;
-+}
-+
-+static ssize_t
-+smtcfb_write(struct fb_info *info, const char __user *buf, size_t count,
-+	     loff_t *ppos)
-+{
-+	unsigned long p = *ppos;
-+
-+	u32 *buffer, *src;
-+	u32 __iomem *dst;
-+	int c, i, cnt = 0, err = 0;
-+	unsigned long total_size;
-+
-+	if (!info || !info->screen_base)
-+		return -ENODEV;
-+
-+	if (info->state != FBINFO_STATE_RUNNING)
-+		return -EPERM;
-+
-+	total_size = info->screen_size;
-+
-+	if (total_size == 0)
-+		total_size = info->fix.smem_len;
-+
-+	if (p > total_size)
-+		return -EFBIG;
-+
-+	if (count > total_size) {
-+		err = -EFBIG;
-+		count = total_size;
-+	}
-+
-+	if (count + p > total_size) {
-+		if (!err)
-+			err = -ENOSPC;
-+
-+		count = total_size - p;
-+	}
-+
-+	buffer = kmalloc((count > PAGE_SIZE) ? PAGE_SIZE : count, GFP_KERNEL);
-+	if (!buffer)
-+		return -ENOMEM;
-+
-+	dst = (u32 __iomem *) (info->screen_base + p);
-+
-+	if (info->fbops->fb_sync)
-+		info->fbops->fb_sync(info);
-+
-+	while (count) {
-+		c = (count > PAGE_SIZE) ? PAGE_SIZE : count;
-+		src = buffer;
-+
-+		if (copy_from_user(src, buf, c)) {
-+			err = -EFAULT;
-+			break;
-+		}
-+
-+		for (i = c >> 2; i--;) {
-+			fb_writel((*src & 0xff00ff00 >> 8) |
-+				  (*src & 0x00ff00ff << 8), dst++);
-+			src++;
-+		}
-+		if (c & 3) {
-+			u8 *src8 = (u8 *) src;
-+			u8 __iomem *dst8 = (u8 __iomem *) dst;
-+
-+			for (i = c & 3; i--;) {
-+				if (i & 1) {
-+					fb_writeb(*src8++, ++dst8);
-+				} else {
-+					fb_writeb(*src8++, --dst8);
-+					dst8 += 2;
-+				}
-+			}
-+			dst = (u32 __iomem *) dst8;
-+		}
-+
-+		*ppos += c;
-+		buf += c;
-+		cnt += c;
-+		count -= c;
-+	}
-+
-+	kfree(buffer);
-+
-+	return (cnt) ? cnt : err;
-+}
-+#endif	/* ! __BIG_ENDIAN */
-+
-+static void sm7xx_set_timing(struct smtcfb_info *sfb)
-+{
-+	int i = 0, j = 0;
-+	u32 m_nScreenStride;
-+
-+	dev_dbg(&sfb->pdev->dev,
-+		"sfb->width=%d sfb->height=%d "
-+		"sfb->fb.var.bits_per_pixel=%d sfb->hz=%d\n",
-+		sfb->width, sfb->height, sfb->fb.var.bits_per_pixel, sfb->hz);
-+
-+	for (j = 0; j < numVGAModes; j++) {
-+		if (VGAMode[j].mmSizeX == sfb->width &&
-+		    VGAMode[j].mmSizeY == sfb->height &&
-+		    VGAMode[j].bpp == sfb->fb.var.bits_per_pixel &&
-+		    VGAMode[j].hz == sfb->hz) {
-+
-+			dev_dbg(&sfb->pdev->dev,
-+				"VGAMode[j].mmSizeX=%d VGAMode[j].mmSizeY=%d "
-+				"VGAMode[j].bpp=%d VGAMode[j].hz=%d\n",
-+				VGAMode[j].mmSizeX, VGAMode[j].mmSizeY,
-+				VGAMode[j].bpp, VGAMode[j].hz);
-+
-+			dev_dbg(&sfb->pdev->dev, "VGAMode index=%d\n", j);
-+
-+			smtc_mmiowb(0x0, 0x3c6);
-+
-+			smtc_seqw(0, 0x1);
-+
-+			smtc_mmiowb(VGAMode[j].Init_MISC, 0x3c2);
-+
-+			/* init SEQ register SR00 - SR04 */
-+			for (i = 0; i < SIZE_SR00_SR04; i++)
-+				smtc_seqw(i, VGAMode[j].Init_SR00_SR04[i]);
-+
-+			/* init SEQ register SR10 - SR24 */
-+			for (i = 0; i < SIZE_SR10_SR24; i++)
-+				smtc_seqw(i + 0x10,
-+					  VGAMode[j].Init_SR10_SR24[i]);
-+
-+			/* init SEQ register SR30 - SR75 */
-+			for (i = 0; i < SIZE_SR30_SR75; i++)
-+				if ((i + 0x30) != 0x62 &&
-+				    (i + 0x30) != 0x6a &&
-+				    (i + 0x30) != 0x6b)
-+					smtc_seqw(i + 0x30,
-+						VGAMode[j].Init_SR30_SR75[i]);
-+
-+			/* init SEQ register SR80 - SR93 */
-+			for (i = 0; i < SIZE_SR80_SR93; i++)
-+				smtc_seqw(i + 0x80,
-+					  VGAMode[j].Init_SR80_SR93[i]);
-+
-+			/* init SEQ register SRA0 - SRAF */
-+			for (i = 0; i < SIZE_SRA0_SRAF; i++)
-+				smtc_seqw(i + 0xa0,
-+					  VGAMode[j].Init_SRA0_SRAF[i]);
-+
-+			/* init Graphic register GR00 - GR08 */
-+			for (i = 0; i < SIZE_GR00_GR08; i++)
-+				smtc_grphw(i, VGAMode[j].Init_GR00_GR08[i]);
-+
-+			/* init Attribute register AR00 - AR14 */
-+			for (i = 0; i < SIZE_AR00_AR14; i++)
-+				smtc_attrw(i, VGAMode[j].Init_AR00_AR14[i]);
-+
-+			/* init CRTC register CR00 - CR18 */
-+			for (i = 0; i < SIZE_CR00_CR18; i++)
-+				smtc_crtcw(i, VGAMode[j].Init_CR00_CR18[i]);
-+
-+			/* init CRTC register CR30 - CR4D */
-+			for (i = 0; i < SIZE_CR30_CR4D; i++)
-+				smtc_crtcw(i + 0x30,
-+					   VGAMode[j].Init_CR30_CR4D[i]);
-+
-+			/* init CRTC register CR90 - CRA7 */
-+			for (i = 0; i < SIZE_CR90_CRA7; i++)
-+				smtc_crtcw(i + 0x90,
-+					   VGAMode[j].Init_CR90_CRA7[i]);
-+		}
-+	}
-+	smtc_mmiowb(0x67, 0x3c2);
-+
-+	/* set VPR registers */
-+	writel(0x0, sfb->vp_regs + 0x0C);
-+	writel(0x0, sfb->vp_regs + 0x40);
-+
-+	/* set data width */
-+	m_nScreenStride =
-+		(sfb->width * sfb->fb.var.bits_per_pixel) / 64;
-+	switch (sfb->fb.var.bits_per_pixel) {
-+	case 8:
-+		writel(0x0, sfb->vp_regs + 0x0);
-+		break;
-+	case 16:
-+		writel(0x00020000, sfb->vp_regs + 0x0);
-+		break;
-+	case 24:
-+		writel(0x00040000, sfb->vp_regs + 0x0);
-+		break;
-+	case 32:
-+		writel(0x00030000, sfb->vp_regs + 0x0);
-+		break;
-+	}
-+	writel((u32) (((m_nScreenStride + 2) << 16) | m_nScreenStride),
-+	       sfb->vp_regs + 0x10);
-+
-+}
-+
-+static void smtc_set_timing(struct smtcfb_info *sfb)
-+{
-+	switch (sfb->chip_id) {
-+	case 0x710:
-+	case 0x712:
-+	case 0x720:
-+		sm7xx_set_timing(sfb);
-+		break;
-+	}
-+}
-+
-+static void smtcfb_setmode(struct smtcfb_info *sfb)
-+{
-+	switch (sfb->fb.var.bits_per_pixel) {
-+	case 32:
-+		sfb->fb.fix.visual       = FB_VISUAL_TRUECOLOR;
-+		sfb->fb.fix.line_length  = sfb->fb.var.xres * 4;
-+		sfb->fb.var.red.length   = 8;
-+		sfb->fb.var.green.length = 8;
-+		sfb->fb.var.blue.length  = 8;
-+		sfb->fb.var.red.offset   = 16;
-+		sfb->fb.var.green.offset = 8;
-+		sfb->fb.var.blue.offset  = 0;
-+		break;
-+	case 24:
-+		sfb->fb.fix.visual       = FB_VISUAL_TRUECOLOR;
-+		sfb->fb.fix.line_length  = sfb->fb.var.xres * 3;
-+		sfb->fb.var.red.length   = 8;
-+		sfb->fb.var.green.length = 8;
-+		sfb->fb.var.blue.length  = 8;
-+		sfb->fb.var.red.offset   = 16;
-+		sfb->fb.var.green.offset = 8;
-+		sfb->fb.var.blue.offset  = 0;
-+		break;
-+	case 8:
-+		sfb->fb.fix.visual       = FB_VISUAL_PSEUDOCOLOR;
-+		sfb->fb.fix.line_length  = sfb->fb.var.xres;
-+		sfb->fb.var.red.length   = 3;
-+		sfb->fb.var.green.length = 3;
-+		sfb->fb.var.blue.length  = 2;
-+		sfb->fb.var.red.offset   = 5;
-+		sfb->fb.var.green.offset = 2;
-+		sfb->fb.var.blue.offset  = 0;
-+		break;
-+	case 16:
-+	default:
-+		sfb->fb.fix.visual       = FB_VISUAL_TRUECOLOR;
-+		sfb->fb.fix.line_length  = sfb->fb.var.xres * 2;
-+		sfb->fb.var.red.length   = 5;
-+		sfb->fb.var.green.length = 6;
-+		sfb->fb.var.blue.length  = 5;
-+		sfb->fb.var.red.offset   = 11;
-+		sfb->fb.var.green.offset = 5;
-+		sfb->fb.var.blue.offset  = 0;
-+		break;
-+	}
-+
-+	sfb->width  = sfb->fb.var.xres;
-+	sfb->height = sfb->fb.var.yres;
-+	sfb->hz = 60;
-+	smtc_set_timing(sfb);
-+}
-+
-+static int smtc_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
-+{
-+	/* sanity checks */
-+	if (var->xres_virtual < var->xres)
-+		var->xres_virtual = var->xres;
-+
-+	if (var->yres_virtual < var->yres)
-+		var->yres_virtual = var->yres;
-+
-+	/* set valid default bpp */
-+	if ((var->bits_per_pixel != 8)  && (var->bits_per_pixel != 16) &&
-+	    (var->bits_per_pixel != 24) && (var->bits_per_pixel != 32))
-+		var->bits_per_pixel = 16;
-+
-+	return 0;
-+}
-+
-+static int smtc_set_par(struct fb_info *info)
-+{
-+	smtcfb_setmode(info->par);
-+
-+	return 0;
-+}
-+
-+static struct fb_ops smtcfb_ops = {
-+	.owner        = THIS_MODULE,
-+	.fb_check_var = smtc_check_var,
-+	.fb_set_par   = smtc_set_par,
-+	.fb_setcolreg = smtc_setcolreg,
-+	.fb_blank     = smtc_blank,
-+	.fb_fillrect  = cfb_fillrect,
-+	.fb_imageblit = cfb_imageblit,
-+	.fb_copyarea  = cfb_copyarea,
-+#ifdef __BIG_ENDIAN
-+	.fb_read      = smtcfb_read,
-+	.fb_write     = smtcfb_write,
-+#endif
-+};
-+
-+/*
-+ * alloc struct smtcfb_info and assign default values
-+ */
-+static struct smtcfb_info *smtc_alloc_fb_info(struct pci_dev *pdev)
-+{
-+	struct smtcfb_info *sfb;
-+
-+	sfb = kzalloc(sizeof(*sfb), GFP_KERNEL);
-+
-+	if (!sfb)
-+		return NULL;
-+
-+	sfb->pdev = pdev;
-+
-+	sfb->fb.flags          = FBINFO_FLAG_DEFAULT;
-+	sfb->fb.fbops          = &smtcfb_ops;
-+	sfb->fb.fix            = smtcfb_fix;
-+	sfb->fb.var            = smtcfb_var;
-+	sfb->fb.pseudo_palette = sfb->colreg;
-+	sfb->fb.par            = sfb;
-+
-+	return sfb;
-+}
-+
-+/*
-+ * free struct smtcfb_info
-+ */
-+static void smtc_free_fb_info(struct smtcfb_info *sfb)
-+{
-+	kfree(sfb);
-+}
-+
-+/*
-+ * Unmap in the memory mapped IO registers
-+ */
-+
-+static void smtc_unmap_mmio(struct smtcfb_info *sfb)
-+{
-+	if (sfb && smtc_RegBaseAddress)
-+		smtc_RegBaseAddress = NULL;
-+}
-+
-+/*
-+ * Map in the screen memory
-+ */
-+
-+static int smtc_map_smem(struct smtcfb_info *sfb,
-+		struct pci_dev *pdev, u_long smem_len)
-+{
-+
-+	sfb->fb.fix.smem_start = pci_resource_start(pdev, 0);
-+
-+#ifdef __BIG_ENDIAN
-+	if (sfb->fb.var.bits_per_pixel == 32)
-+		sfb->fb.fix.smem_start += 0x800000;
-+#endif
-+
-+	sfb->fb.fix.smem_len = smem_len;
-+
-+	sfb->fb.screen_base = sfb->lfb;
-+
-+	if (!sfb->fb.screen_base) {
-+		dev_err(&pdev->dev,
-+			"%s: unable to map screen memory\n", sfb->fb.fix.id);
-+		return -ENOMEM;
-+	}
-+
-+	return 0;
-+}
-+
-+/*
-+ * Unmap in the screen memory
-+ *
-+ */
-+static void smtc_unmap_smem(struct smtcfb_info *sfb)
-+{
-+	if (sfb && sfb->fb.screen_base) {
-+		iounmap(sfb->fb.screen_base);
-+		sfb->fb.screen_base = NULL;
-+	}
-+}
-+
-+/*
-+ * We need to wake up the device and make sure its in linear memory mode.
-+ */
-+static inline void sm7xx_init_hw(void)
-+{
-+	outb_p(0x18, 0x3c4);
-+	outb_p(0x11, 0x3c5);
-+}
-+
-+static int smtcfb_pci_probe(struct pci_dev *pdev,
-+				   const struct pci_device_id *ent)
-+{
-+	struct smtcfb_info *sfb;
-+	u_long smem_size = 0x00800000;	/* default 8MB */
-+	int err;
-+	unsigned long mmio_base;
-+
-+	dev_info(&pdev->dev, "Silicon Motion display driver.");
-+
-+	err = pci_enable_device(pdev);	/* enable SMTC chip */
-+	if (err)
-+		return err;
-+
-+	sprintf(smtcfb_fix.id, "sm%Xfb", ent->device);
-+
-+	sfb = smtc_alloc_fb_info(pdev);
-+
-+	if (!sfb) {
-+		err = -ENOMEM;
-+		goto failed_free;
-+	}
-+
-+	sfb->chip_id = ent->device;
-+
-+	pci_set_drvdata(pdev, sfb);
-+
-+	sm7xx_init_hw();
-+
-+	/* get mode parameter from smtc_scr_info */
-+	if (smtc_scr_info.lfb_width != 0) {
-+		sfb->fb.var.xres = smtc_scr_info.lfb_width;
-+		sfb->fb.var.yres = smtc_scr_info.lfb_height;
-+		sfb->fb.var.bits_per_pixel = smtc_scr_info.lfb_depth;
-+	} else {
-+		/* default resolution 1024x600 16bit mode */
-+		sfb->fb.var.xres = SCREEN_X_RES;
-+		sfb->fb.var.yres = SCREEN_Y_RES;
-+		sfb->fb.var.bits_per_pixel = SCREEN_BPP;
-+	}
-+
-+#ifdef __BIG_ENDIAN
-+	if (sfb->fb.var.bits_per_pixel == 24)
-+		sfb->fb.var.bits_per_pixel = (smtc_scr_info.lfb_depth = 32);
-+#endif
-+	/* Map address and memory detection */
-+	mmio_base = pci_resource_start(pdev, 0);
-+	pci_read_config_byte(pdev, PCI_REVISION_ID, &sfb->chip_rev_id);
-+
-+	switch (sfb->chip_id) {
-+	case 0x710:
-+	case 0x712:
-+		sfb->fb.fix.mmio_start = mmio_base + 0x00400000;
-+		sfb->fb.fix.mmio_len = 0x00400000;
-+		smem_size = SM712_VIDEOMEMORYSIZE;
-+#ifdef __BIG_ENDIAN
-+		sfb->lfb = ioremap(mmio_base, 0x00c00000);
-+#else
-+		sfb->lfb = ioremap(mmio_base, 0x00800000);
-+#endif
-+		sfb->mmio = (smtc_RegBaseAddress =
-+		    sfb->lfb + 0x00700000);
-+		sfb->dp_regs = sfb->lfb + 0x00408000;
-+		sfb->vp_regs = sfb->lfb + 0x0040c000;
-+#ifdef __BIG_ENDIAN
-+		if (sfb->fb.var.bits_per_pixel == 32) {
-+			sfb->lfb += 0x800000;
-+			dev_info(&pdev->dev, "sfb->lfb=%p", sfb->lfb);
-+		}
-+#endif
-+		if (!smtc_RegBaseAddress) {
-+			dev_err(&pdev->dev,
-+				"%s: unable to map memory mapped IO!",
-+				sfb->fb.fix.id);
-+			err = -ENOMEM;
-+			goto failed_fb;
-+		}
-+
-+		/* set MCLK = 14.31818 * (0x16 / 0x2) */
-+		smtc_seqw(0x6a, 0x16);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x62, 0x3e);
-+		/* enable PCI burst */
-+		smtc_seqw(0x17, 0x20);
-+		/* enable word swap */
-+#ifdef __BIG_ENDIAN
-+		if (sfb->fb.var.bits_per_pixel == 32)
-+			smtc_seqw(0x17, 0x30);
-+#endif
-+		break;
-+	case 0x720:
-+		sfb->fb.fix.mmio_start = mmio_base;
-+		sfb->fb.fix.mmio_len = 0x00200000;
-+		smem_size = SM722_VIDEOMEMORYSIZE;
-+		sfb->dp_regs = ioremap(mmio_base, 0x00a00000);
-+		sfb->lfb = sfb->dp_regs + 0x00200000;
-+		sfb->mmio = (smtc_RegBaseAddress =
-+		    sfb->dp_regs + 0x000c0000);
-+		sfb->vp_regs = sfb->dp_regs + 0x800;
-+
-+		smtc_seqw(0x62, 0xff);
-+		smtc_seqw(0x6a, 0x0d);
-+		smtc_seqw(0x6b, 0x02);
-+		break;
-+	default:
-+		dev_err(&pdev->dev,
-+			"No valid Silicon Motion display chip was detected!");
-+
-+		goto failed_fb;
-+	}
-+
-+	/* can support 32 bpp */
-+	if (15 == sfb->fb.var.bits_per_pixel)
-+		sfb->fb.var.bits_per_pixel = 16;
-+
-+	sfb->fb.var.xres_virtual = sfb->fb.var.xres;
-+	sfb->fb.var.yres_virtual = sfb->fb.var.yres;
-+	err = smtc_map_smem(sfb, pdev, smem_size);
-+	if (err)
-+		goto failed;
-+
-+	smtcfb_setmode(sfb);
-+
-+	err = register_framebuffer(&sfb->fb);
-+	if (err < 0)
-+		goto failed;
-+
-+	dev_info(&pdev->dev,
-+		 "Silicon Motion SM%X Rev%X primary display mode %dx%d-%d Init Complete.",
-+		 sfb->chip_id, sfb->chip_rev_id, sfb->fb.var.xres,
-+		 sfb->fb.var.yres, sfb->fb.var.bits_per_pixel);
-+
-+	return 0;
-+
-+failed:
-+	dev_err(&pdev->dev, "Silicon Motion, Inc. primary display init fail.");
-+
-+	smtc_unmap_smem(sfb);
-+	smtc_unmap_mmio(sfb);
-+failed_fb:
-+	smtc_free_fb_info(sfb);
-+
-+failed_free:
-+	pci_disable_device(pdev);
-+
-+	return err;
-+}
-+
-+/*
-+ * 0x710 (LynxEM)
-+ * 0x712 (LynxEM+)
-+ * 0x720 (Lynx3DM, Lynx3DM+)
-+ */
-+static const struct pci_device_id smtcfb_pci_table[] = {
-+	{ PCI_DEVICE(0x126f, 0x710), },
-+	{ PCI_DEVICE(0x126f, 0x712), },
-+	{ PCI_DEVICE(0x126f, 0x720), },
-+	{0,}
-+};
-+
-+static void smtcfb_pci_remove(struct pci_dev *pdev)
-+{
-+	struct smtcfb_info *sfb;
-+
-+	sfb = pci_get_drvdata(pdev);
-+	smtc_unmap_smem(sfb);
-+	smtc_unmap_mmio(sfb);
-+	unregister_framebuffer(&sfb->fb);
-+	smtc_free_fb_info(sfb);
-+}
-+
-+#ifdef CONFIG_PM
-+static int smtcfb_pci_suspend(struct device *device)
-+{
-+	struct pci_dev *pdev = to_pci_dev(device);
-+	struct smtcfb_info *sfb;
-+
-+	sfb = pci_get_drvdata(pdev);
-+
-+	/* set the hw in sleep mode use external clock and self memory refresh
-+	 * so that we can turn off internal PLLs later on
-+	 */
-+	smtc_seqw(0x20, (smtc_seqr(0x20) | 0xc0));
-+	smtc_seqw(0x69, (smtc_seqr(0x69) & 0xf7));
-+
-+	console_lock();
-+	fb_set_suspend(&sfb->fb, 1);
-+	console_unlock();
-+
-+	/* additionally turn off all function blocks including internal PLLs */
-+	smtc_seqw(0x21, 0xff);
-+
-+	return 0;
-+}
-+
-+static int smtcfb_pci_resume(struct device *device)
-+{
-+	struct pci_dev *pdev = to_pci_dev(device);
-+	struct smtcfb_info *sfb;
-+
-+	sfb = pci_get_drvdata(pdev);
-+
-+	/* reinit hardware */
-+	sm7xx_init_hw();
-+	switch (sfb->chip_id) {
-+	case 0x710:
-+	case 0x712:
-+		/* set MCLK = 14.31818 *  (0x16 / 0x2) */
-+		smtc_seqw(0x6a, 0x16);
-+		smtc_seqw(0x6b, 0x02);
-+		smtc_seqw(0x62, 0x3e);
-+		/* enable PCI burst */
-+		smtc_seqw(0x17, 0x20);
-+#ifdef __BIG_ENDIAN
-+		if (sfb->fb.var.bits_per_pixel == 32)
-+			smtc_seqw(0x17, 0x30);
-+#endif
-+		break;
-+	case 0x720:
-+		smtc_seqw(0x62, 0xff);
-+		smtc_seqw(0x6a, 0x0d);
-+		smtc_seqw(0x6b, 0x02);
-+		break;
-+	}
-+
-+	smtc_seqw(0x34, (smtc_seqr(0x34) | 0xc0));
-+	smtc_seqw(0x33, ((smtc_seqr(0x33) | 0x08) & 0xfb));
-+
-+	smtcfb_setmode(sfb);
-+
-+	console_lock();
-+	fb_set_suspend(&sfb->fb, 0);
-+	console_unlock();
-+
-+	return 0;
-+}
-+
-+static SIMPLE_DEV_PM_OPS(sm7xx_pm_ops, smtcfb_pci_suspend, smtcfb_pci_resume);
-+#define SM7XX_PM_OPS (&sm7xx_pm_ops)
-+
-+#else  /* !CONFIG_PM */
-+
-+#define SM7XX_PM_OPS NULL
-+
-+#endif /* !CONFIG_PM */
-+
-+static struct pci_driver smtcfb_driver = {
-+	.name = "smtcfb",
-+	.id_table = smtcfb_pci_table,
-+	.probe = smtcfb_pci_probe,
-+	.remove = smtcfb_pci_remove,
-+	.driver.pm  = SM7XX_PM_OPS,
-+};
-+
-+module_pci_driver(smtcfb_driver);
-+
-+MODULE_AUTHOR("Siliconmotion ");
-+MODULE_DESCRIPTION("Framebuffer driver for SMI Graphic Cards");
-+MODULE_LICENSE("GPL");
-diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index f98d03f..09cf729 100644
---- a/drivers/usb/host/ohci-hcd.c
-+++ b/drivers/usb/host/ohci-hcd.c
-@@ -864,9 +864,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
- 	}
- 
- 	if (ints & OHCI_INTR_WDH) {
--		spin_lock (&ohci->lock);
--		dl_done_list (ohci);
--		spin_unlock (&ohci->lock);
-+		if (ohci->hcca->done_head == 0) {
-+			ints &= ~OHCI_INTR_WDH;
-+		} else {
-+			spin_lock (&ohci->lock);
-+			dl_done_list (ohci);
-+			spin_unlock (&ohci->lock);
-+		}
- 	}
- 
- 	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
-diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 2f3aceb..6647c3f 100644
---- a/drivers/usb/host/pci-quirks.c
-+++ b/drivers/usb/host/pci-quirks.c
-@@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
- }
- EXPORT_SYMBOL_GPL(usb_amd_dev_put);
- 
-+#if defined(CONFIG_USB_UHCI_HCD) || defined(CONFIG_USB_UHCI_HCD_MODULE)
- /*
-  * Make sure the controller is completely inactive, unable to
-  * generate interrupts or do DMA.
-@@ -561,12 +562,16 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
- 	if (base)
- 		uhci_check_and_reset_hc(pdev, base);
- }
-+#else
-+#define quirk_usb_handoff_uhci(x) do { } while (0)
-+#endif /* CONFIG_USB_UHCI_HCD* */
- 
- static int mmio_resource_enabled(struct pci_dev *pdev, int idx)
- {
- 	return pci_resource_start(pdev, idx) && mmio_enabled(pdev);
- }
- 
-+#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
- static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
- {
- 	void __iomem *base;
-@@ -633,7 +638,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
- 	/* Now the controller is safely in SUSPEND and nothing can wake it up */
- 	iounmap(base);
- }
-+#else
-+#define quirk_usb_handoff_ohci(x) do { } while(0)
-+#endif /* CONFIG_USB_OHCI_HCD* */
- 
-+#if defined(CONFIG_USB_EHCI_HCD) || defined(CONFIG_USB_EHCI_HCD_MODULE)
- static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
- 	{
- 		/*  Pegatron Lucid (ExoPC) */
-@@ -806,6 +815,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
- 
- 	iounmap(base);
- }
-+#else
-+#define quirk_usb_disable_ehci(x) do { } while (0)
-+#endif /* CONFIG_USB_EHCI_HCD* */
- 
- /*
-  * handshake - spin reading a register until handshake completes
-@@ -945,6 +957,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
- }
- EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
- 
-+#if defined(CONFIG_USB_XHCI_HCD) || defined(CONFIG_USB_XHCI_HCD_MODULE)
- /**
-  * PCI Quirks for xHCI.
-  *
-@@ -1052,6 +1065,9 @@ hc_init:
- 
- 	iounmap(base);
- }
-+#else
-+#define quirk_usb_handoff_xhci(x) do { } while (0)
-+#endif /* CONFIG_USB_UHCI_HCD* */
- 
- static void quirk_usb_early_handoff(struct pci_dev *pdev)
- {
-diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index a968894..0bfa2cb 100644
---- a/drivers/usb/serial/option.c
-+++ b/drivers/usb/serial/option.c
-@@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
- #define OPTION_PRODUCT_ETNA_KOI_MODEM		0x7100
- #define OPTION_PRODUCT_GTM380_MODEM		0x7201
- 
-+#define HUAWO_VENDOR_ID				0x21F5
-+#define HUAWO_PRODUCT_E1621			0x2008
-+
- #define HUAWEI_VENDOR_ID			0x12D1
- #define HUAWEI_PRODUCT_E173			0x140C
- #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
- 	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
- 	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
- 		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
-+	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c05, USB_CLASS_COMM, 0x02, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c1f, USB_CLASS_COMM, 0x02, 0xff) },
- 	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c23, USB_CLASS_COMM, 0x02, 0xff) },
-diff --git a/drivers/video/Kconfig b/drivers/video/Kconfig
-index 8bf495f..f6a15b6 100644
---- a/drivers/video/Kconfig
-+++ b/drivers/video/Kconfig
-@@ -36,6 +36,12 @@ config VGASTATE
-        tristate
-        default n
- 
-+config VIDEO_OUTPUT_CONTROL
-+	tristate "Lowlevel video output switch controls"
-+	help
-+	  This framework adds support for low-level control of the video 
-+	  output switch.
-+
- config VIDEOMODE_HELPERS
- 	bool
- 
-diff --git a/drivers/video/Makefile b/drivers/video/Makefile
-index 9ad3c17..3d869d9 100644
---- a/drivers/video/Makefile
-+++ b/drivers/video/Makefile
-@@ -7,6 +7,8 @@ obj-y				  += backlight/
- 
- obj-y				  += fbdev/
- 
-+#video output switch sysfs driver
-+obj-$(CONFIG_VIDEO_OUTPUT_CONTROL) += output.o
- obj-$(CONFIG_VIDEOMODE_HELPERS) += display_timing.o videomode.o
- ifeq ($(CONFIG_OF),y)
- obj-$(CONFIG_VIDEOMODE_HELPERS) += of_display_timing.o of_videomode.o
 diff --git a/drivers/video/output.c b/drivers/video/output.c
 new file mode 100644
 index 0000000..1446c49

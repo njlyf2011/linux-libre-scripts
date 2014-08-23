@@ -1,7 +1,7 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-08-14 05:37:39.000000000 +0000
++++ .config	2014-08-23 16:14:43.000000000 +0000
 @@ -0,0 +1,5020 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
@@ -3487,6 +3487,7 @@ Index: .config
 +CONFIG_FB_AUO_K1900=m
 +CONFIG_FB_AUO_K1901=m
 +# CONFIG_FB_SIMPLE is not set
++CONFIG_FB_SM712=y
 +CONFIG_BACKLIGHT_LCD_SUPPORT=y
 +CONFIG_LCD_CLASS_DEVICE=m
 +# CONFIG_LCD_PLATFORM is not set
@@ -4178,7 +4179,6 @@ Index: .config
 +# CONFIG_VT6655 is not set
 +# CONFIG_VT6656 is not set
 +CONFIG_DX_SEP=m
-+CONFIG_FB_SM7XX=y
 +# CONFIG_CRYSTALHD is not set
 +# CONFIG_CXT1E1 is not set
 +# CONFIG_FB_XGI is not set
