@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300 
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -602,8 +602,6 @@ Patch09: upstream-reverts.patch
 Patch450: input-kill-stupid-messages.patch
 Patch452: no-pcspkr-modalias.patch
 
-Patch460: serial-460800.patch
-
 Patch470: die-floppy-die.patch
 
 Patch500: Revert-Revert-ACPI-video-change-acpi-video-brightnes.patch
@@ -612,9 +610,6 @@ Patch510: silence-noise.patch
 Patch530: silence-fbcon-logo.patch
 
 Patch600: 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
-
-#rhbz 917708
-Patch700: Revert-userns-Allow-unprivileged-users-to-create-use.patch
 
 Patch800: crash-driver.patch
 
@@ -657,6 +652,7 @@ Patch21021: arm-beagle.patch
 Patch21022: arm-imx6-utilite.patch
 # http://www.spinics.net/lists/linux-tegra/msg17948.html
 Patch21023: arm-tegra-drmdetection.patch
+Patch21024: arm-qemu-fixdisplay.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -668,8 +664,6 @@ Patch21242: criu-no-expert.patch
 Patch21247: ath9k_rx_dma_stop_check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
-
-Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 #rhbz 1025603
 Patch25063: disable-libdw-unwind-on-non-x86.patch
@@ -702,6 +696,9 @@ Patch25120: 0001-xhci-Blacklist-using-streams-on-the-Etron-EJ168-cont.patch
 
 #rhbz 1128472
 Patch25121: 0001-uas-Limit-qdepth-to-32-when-connected-over-usb-2.patch
+
+#rhbz 1131551
+Patch25122: nfs3_list_one_acl-check-get_acl-result-with-IS_ERR_O.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1390,6 +1387,7 @@ ApplyPatch arm-tegra-usb-no-reset-linux33.patch
 ApplyPatch arm-beagle.patch
 ApplyPatch arm-imx6-utilite.patch
 ApplyPatch arm-tegra-drmdetection.patch
+ApplyPatch arm-qemu-fixdisplay.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1436,9 +1434,6 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch no-pcspkr-modalias.patch
 
-# Allow to use 480600 baud on 16C950 UARTs
-ApplyPatch serial-460800.patch
-
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch silence-noise.patch
 
@@ -1446,9 +1441,6 @@ ApplyPatch silence-noise.patch
 ApplyPatch silence-fbcon-logo.patch
 
 # Changes to upstream defaults.
-
-#rhbz 917708
-ApplyPatch Revert-userns-Allow-unprivileged-users-to-create-use.patch
 
 # /dev/crash driver.
 ApplyPatch crash-driver.patch
@@ -1494,8 +1486,6 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
 #rhbz 1025603
 ApplyPatch disable-libdw-unwind-on-non-x86.patch
 
@@ -1527,6 +1517,9 @@ ApplyPatch 0001-xhci-Blacklist-using-streams-on-the-Etron-EJ168-cont.patch
 
 #rhbz 1128472
 ApplyPatch 0001-uas-Limit-qdepth-to-32-when-connected-over-usb-2.patch
+
+#rhbz 1131551
+ApplyPatch nfs3_list_one_acl-check-get_acl-result-with-IS_ERR_O.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2423,6 +2416,18 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Fri Aug 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.1-301
+- Drop userns revert patch (rhbz 917708)
+
+* Tue Aug 19 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix NFSv3 oops (rhbz 1131551)
+
+* Fri Aug 15 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM updates for 3.16
+- Cleanup some old removed options
+- Disable legacy USB OTG (using new configfs equivilents)
+- Upstream patch to fix display on qemu (VExpress A9)
+
 * Thu Aug 14 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.16.1-gnu.
 
