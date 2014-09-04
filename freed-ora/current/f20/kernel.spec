@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -690,17 +690,12 @@ Patch390: defaults-acpi-video.patch
 Patch450: input-kill-stupid-messages.patch
 Patch452: no-pcspkr-modalias.patch
 
-Patch460: serial-460800.patch
-
 Patch470: die-floppy-die.patch
 
 Patch510: silence-noise.patch
 Patch530: silence-fbcon-logo.patch
 
 Patch600: 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
-
-#rhbz 917708
-Patch700: Revert-userns-Allow-unprivileged-users-to-create-use.patch
 
 Patch800: crash-driver.patch
 
@@ -758,8 +753,6 @@ Patch21242: criu-no-expert.patch
 Patch21247: ath9k_rx_dma_stop_check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
-
-Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 #rhbz 1025603
 Patch25063: disable-libdw-unwind-on-non-x86.patch
@@ -826,6 +819,15 @@ Patch25130: namespaces-remount-fixes.patch
 
 #rhbz 1128472
 Patch25131: 0001-uas-Limit-qdepth-to-32-when-connected-over-usb-2.patch
+
+#rhbz 1131551
+Patch25132: nfs3_list_one_acl-check-get_acl-result-with-IS_ERR_O.patch
+
+#rhbz 1132666
+Patch26016: xhci-Disable-streams-on-Via-XHCI-with-device-id-0x34.patch
+
+#CVE-2014-{5471,5472} rhbz 1134099 1134101
+Patch26017: isofs-Fix-unbounded-recursion-when-processing-relocated-directories.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1489,9 +1491,6 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch no-pcspkr-modalias.patch
 
-# Allow to use 480600 baud on 16C950 UARTs
-ApplyPatch serial-460800.patch
-
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch silence-noise.patch
 
@@ -1499,9 +1498,6 @@ ApplyPatch silence-noise.patch
 ApplyPatch silence-fbcon-logo.patch
 
 # Changes to upstream defaults.
-
-#rhbz 917708
-ApplyPatch Revert-userns-Allow-unprivileged-users-to-create-use.patch
 
 # /dev/crash driver.
 ApplyPatch crash-driver.patch
@@ -1546,8 +1542,6 @@ ApplyPatch criu-no-expert.patch
 
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
-
-ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
 
 #rhbz 1048314
 ApplyPatch 0001-HID-rmi-introduce-RMI-driver-for-Synaptics-touchpads.patch
@@ -1612,6 +1606,15 @@ ApplyPatch namespaces-remount-fixes.patch
 
 #rhbz 1128472
 ApplyPatch 0001-uas-Limit-qdepth-to-32-when-connected-over-usb-2.patch
+
+#rhbz 1131551
+ApplyPatch nfs3_list_one_acl-check-get_acl-result-with-IS_ERR_O.patch
+
+#rhbz 1132666
+ApplyPatch xhci-Disable-streams-on-Via-XHCI-with-device-id-0x34.patch
+
+#CVE-2014-{5471,5472} rhbz 1134099 1134101
+ApplyPatch isofs-Fix-unbounded-recursion-when-processing-relocated-directories.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2435,6 +2438,19 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Aug 27 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.15.10-201
+- CVE-2014-{5471,5472} isofs: Fix unbounded recursion when processing relocated
+  directories (rhbz 1134099 1134101)
+
+* Wed Aug 27 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable streams on via XHCI (rhbz 1132666)
+
+* Fri Aug 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop userns revert patch (rhbz 917708)
+
+* Tue Aug 19 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix NFSv3 oops (rhbz 1131551)
+
 * Sat Aug 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.15.10-gnu.
 
