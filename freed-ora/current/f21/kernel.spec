@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -134,8 +134,6 @@ Summary: The Linux kernel
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 # kernel-firmware
 %define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
-# kernel-modules-extra
-%define with_extra     %{?_without_extra:     0} %{?!_without_extra:     1}
 # perf
 %define with_perf      %{?_without_perf:      0} %{?!_without_perf:      1}
 # tools
@@ -685,20 +683,11 @@ Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pa
 #rhbz 1021036, submitted upstream
 Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#rhbz 1117942
-Patch25118: sched-fix-sched_setparam-policy-1-logic.patch
-
 #CVE-2014-{5206,5207} rhbz 1129662 1129669
 Patch25119: namespaces-remount-fixes.patch
 
-#rhbz 1121288
-Patch25120: 0001-xhci-Blacklist-using-streams-on-the-Etron-EJ168-cont.patch
-
-#rhbz 1128472
-Patch25121: 0001-uas-Limit-qdepth-to-32-when-connected-over-usb-2.patch
-
-#rhbz 1131551
-Patch25122: nfs3_list_one_acl-check-get_acl-result-with-IS_ERR_O.patch
+#rhbz 1134969
+Patch26019: Input-wacom-Add-support-for-the-Cintiq-Companion.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1024,9 +1013,7 @@ Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?1:+%{1}}\
 %endif\
 %{expand:%%kernel_devel_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
 %{expand:%%kernel_modules_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
-%if %{with_extra}\
 %{expand:%%kernel_modules_extra_package %{?1:%{1}} %{!?{-n}:%{1}}%{?{-n}:%{-n*}}}\
-%endif\
 %{expand:%%kernel_debuginfo_package %{?1:%{1}}}\
 %{nil}
 
@@ -1506,20 +1493,11 @@ ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pat
 #rhbz 1021036, submitted upstream
 ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#rhbz 1117942
-ApplyPatch sched-fix-sched_setparam-policy-1-logic.patch
-
 #CVE-2014-{5206,5207} rhbz 1129662 1129669
 ApplyPatch namespaces-remount-fixes.patch
 
-#rhbz 1121288
-ApplyPatch 0001-xhci-Blacklist-using-streams-on-the-Etron-EJ168-cont.patch
-
-#rhbz 1128472
-ApplyPatch 0001-uas-Limit-qdepth-to-32-when-connected-over-usb-2.patch
-
-#rhbz 1131551
-ApplyPatch nfs3_list_one_acl-check-get_acl-result-with-IS_ERR_O.patch
+#rhbz 1134969
+ApplyPatch Input-wacom-Add-support-for-the-Cintiq-Companion.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -1828,10 +1806,8 @@ BuildKernel() {
         rm -f modules.{alias*,builtin.bin,dep*,*map,symbols*,devname,softdep}
     popd
 
-%if %{with_extra}
     # Call the modules-extra script to move things around
     %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
-%endif
 
     #
     # Generate the kernel-core and kernel-modules files lists
@@ -2205,9 +2181,7 @@ fi\
 %define kernel_variant_post(v:r:) \
 %{expand:%%kernel_devel_post %{?-v*}}\
 %{expand:%%kernel_modules_post %{?-v*}}\
-%if %{with_extra}\
 %{expand:%%kernel_modules_extra_post %{?-v*}}\
-%endif\
 %{expand:%%kernel_variant_posttrans %{?-v*}}\
 %{expand:%%post %{?-v*:%{-v*}-}core}\
 %{-r:\
@@ -2377,9 +2351,7 @@ fi
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
 /usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
-%if %{with_extra}\
 %{expand:%%files %{?2:%{2}-}modules-extra}\
-%endif\
 %defattr(-,root,root)\
 /lib/modules/%{KVERREL}%{?2:+%{2}}/extra\
 %if %{with_debuginfo}\
@@ -2416,6 +2388,34 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Sat Sep  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.16.2-gnu.
+
+* Fri Sep 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.2-300
+- Linux v3.16.2
+
+* Thu Sep 04 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for Wacom Cintiq Companion from Benjamin Tissoires (rhbz 1134969)
+
+* Tue Sep 02 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Remove with_extra switch
+
+* Thu Aug 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix NFSv3 ACL regression (rhbz 1132786)
+- Don't enable CONFIG_DEBUG_WW_MUTEX_SLOWPATH (rhbz 1114160)
+
+* Wed Aug 27 2014 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2014-{5471,5472} isofs: Fix unbounded recursion when processing relocated
+  directories (rhbz 1134099 1134101)
+
+* Wed Aug 27 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable streams on via XHCI (rhbz 1132666)
+
+* Tue Aug 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor generic ARMv7 updates
+- Build tegra on both LPAE and general ARMv7 kernels (thank srwarren RHBZ 1110963)
+- Set CMA to 64mb on LPAE kernel (RHBZ 1127000)
+
 * Fri Aug 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.1-301
 - Drop userns revert patch (rhbz 917708)
 
