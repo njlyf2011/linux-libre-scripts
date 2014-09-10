@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 18
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -695,8 +695,6 @@ Patch390: defaults-acpi-video.patch
 Patch450: input-kill-stupid-messages.patch
 Patch452: no-pcspkr-modalias.patch
 
-Patch460: serial-460800.patch
-
 Patch470: die-floppy-die.patch
 
 Patch510: silence-noise.patch
@@ -773,8 +771,6 @@ Patch21247: ath9k_rx_dma_stop_check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-Patch25047: drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
 #rhbz 1051748
 Patch25035: Bluetooth-allocate-static-minor-for-vhci.patch
 
@@ -819,9 +815,6 @@ Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pa
 #rhbz 1021036
 Patch25110: 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 Patch25111: 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
-
-#rhbz 1117942
-Patch25118: sched-fix-sched_setparam-policy-1-logic.patch
 
 #CVE-2014-{5206,5207} rhbz 1129662 1129669
 Patch25130: namespaces-remount-fixes.patch
@@ -1486,9 +1479,6 @@ ApplyPatch die-floppy-die.patch
 
 ApplyPatch no-pcspkr-modalias.patch
 
-# Allow to use 480600 baud on 16C950 UARTs
-ApplyPatch serial-460800.patch
-
 # Silence some useless messages that still get printed with 'quiet'
 ApplyPatch silence-noise.patch
 
@@ -1544,8 +1534,6 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k_rx_dma_stop_check.patch
 
-ApplyPatch drm-radeon-Disable-writeback-by-default-on-ppc.patch
-
 #rhbz 1051748
 ApplyPatch Bluetooth-allocate-static-minor-for-vhci.patch
 
@@ -1588,9 +1576,6 @@ ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pat
 #rhbz 1021036
 ApplyPatch 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 ApplyPatch 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
-
-#rhbz 1117942
-ApplyPatch sched-fix-sched_setparam-policy-1-logic.patch
 
 #CVE-2014-{5206,5207} rhbz 1129662 1129669
 ApplyPatch namespaces-remount-fixes.patch
@@ -2418,6 +2403,22 @@ fi
 # and build.
 
 %changelog
+* Tue Sep  9 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.18-gnu.
+
+* Tue Sep 09 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.16-100
+- Linux v3.14.18
+
+* Thu Aug 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix NFSv3 ACL regression (rhbz 1132786)
+
+* Wed Aug 27 2014 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2014-{5471,5472} isofs: Fix unbounded recursion when processing relocated
+  directories (rhbz 1134099 1134101)
+
+* Tue Aug 19 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix NFSv3 oops (rhbz 1131551)
+
 * Sat Aug 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.17-gnu.
 
