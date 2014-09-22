@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -771,14 +771,8 @@ Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pa
 #rhbz 1021036, submitted upstream
 Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#CVE-2014-{5206,5207} rhbz 1129662 1129669
-Patch25119: namespaces-remount-fixes.patch
-
 #rhbz 1134969
 Patch26019: Input-wacom-Add-support-for-the-Cintiq-Companion.patch
-
-#CVE-2014-3631 rhbz 1116347
-Patch26020: KEYS-Fix-termination-condition-in-assoc-array-garbag.patch
 
 #rhbz 1110011
 Patch26021: i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
@@ -791,7 +785,7 @@ Patch26024: HID-magicmouse-sanity-check-report-size-in-raw_event.patch
 #CVE-2014-3186 rhbz 1141407 1141410
 Patch26025: HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
 
-#CVE-2014-XXXX rhbz 1141809 1141810
+#CVE-2014-6410 rhbz 1141809 1141810
 Patch26026: udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
@@ -1533,14 +1527,8 @@ ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pat
 #rhbz 1021036, submitted upstream
 ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#CVE-2014-{5206,5207} rhbz 1129662 1129669
-ApplyPatch namespaces-remount-fixes.patch
-
 #rhbz 1134969
 ApplyPatch Input-wacom-Add-support-for-the-Cintiq-Companion.patch
-
-#CVE-2014-3631 rhbz 1116347
-ApplyPatch KEYS-Fix-termination-condition-in-assoc-array-garbag.patch
 
 #rhbz 1110011
 ApplyPatch i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
@@ -1553,7 +1541,7 @@ ApplyPatch HID-magicmouse-sanity-check-report-size-in-raw_event.patch
 #CVE-2014-3186 rhbz 1141407 1141410
 ApplyPatch HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
 
-#CVE-2014-XXXX rhbz 1141809 1141810
+#CVE-2014-6410 rhbz 1141809 1141810
 ApplyPatch udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
 
 %if 0%{?aarch64patches}
@@ -2385,8 +2373,14 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri Sep 19 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.16.3-gnu.
+
+* Wed Sep 17 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.3-200
+- Linux v3.16.3
+
 * Mon Sep 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.2-201
-- CVE-2014-XXXX udf: avoid infinite loop on indirect ICBs (rhbz 1141809 1141810)
+- CVE-2014-6410 udf: avoid infinite loop on indirect ICBs (rhbz 1141809 1141810)
 - CVE-2014-3186 HID: memory corruption via OOB write (rhbz 1141407 1141410)
 
 * Fri Sep 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
