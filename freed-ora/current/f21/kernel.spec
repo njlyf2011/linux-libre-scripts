@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -674,14 +674,22 @@ Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pa
 #rhbz 1021036, submitted upstream
 Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#CVE-2014-{5206,5207} rhbz 1129662 1129669
-Patch25119: namespaces-remount-fixes.patch
-
 #rhbz 1134969
 Patch26019: Input-wacom-Add-support-for-the-Cintiq-Companion.patch
 
-# CVE-2014-3631 rhbz 1116347
-Patch26020: KEYS-Fix-termination-condition-in-assoc-array-garbag.patch
+#rhbz 1110011
+Patch26021: i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
+Patch26022: psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
+Patch26023: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
+
+#CVE-2014-3181 rhbz 1141179 1141173
+Patch26024: HID-magicmouse-sanity-check-report-size-in-raw_event.patch
+
+#CVE-2014-3186 rhbz 1141407 1141410
+Patch26025: HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
+
+#CVE-2014-6410 rhbz 1141809 1141810
+Patch26026: udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1487,14 +1495,22 @@ ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pat
 #rhbz 1021036, submitted upstream
 ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#CVE-2014-{5206,5207} rhbz 1129662 1129669
-ApplyPatch namespaces-remount-fixes.patch
-
 #rhbz 1134969
 ApplyPatch Input-wacom-Add-support-for-the-Cintiq-Companion.patch
 
-# CVE-2014-3631 rhbz 1116347
-ApplyPatch KEYS-Fix-termination-condition-in-assoc-array-garbag.patch
+#rhbz 1110011
+ApplyPatch i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
+ApplyPatch psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
+ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
+
+#CVE-2014-3181 rhbz 1141179 1141173
+ApplyPatch HID-magicmouse-sanity-check-report-size-in-raw_event.patch
+
+#CVE-2014-3186 rhbz 1141407 1141410
+ApplyPatch HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
+
+#CVE-2014-6410 rhbz 1141809 1141810
+ApplyPatch udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2385,6 +2401,22 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Sat Sep 20 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.16.3-gnu.
+
+* Wed Sep 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.3-300
+- Linux v3.16.3
+
+* Mon Sep 15 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-6410 udf: avoid infinite loop on indirect ICBs (rhbz 1141809 1141810)
+- CVE-2014-3186 HID: memory corruption via OOB write (rhbz 1141407 1141410)
+
+* Fri Sep 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-3181 HID: OOB write in magicmouse driver (rhbz 1141173 1141179)
+
+* Thu Sep 11 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for touchpad in Asus X450 and X550 (rhbz 1110011)
+
 * Wed Sep 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.2-301
 - CVE-2014-3631 Add patch to fix oops on keyring gc (rhbz 1116347)
 
