@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -428,7 +428,7 @@ Summary: The Linux kernel
 # scripts use them.
 #
 %define kernel_prereq  fileutils, systemd >= 203-2
-%define initrd_prereq  dracut >= 027
+%define initrd_prereq  dracut >= 038-29
 
 Name: kernel%{?variant}
 Group: System Environment/Kernel
@@ -690,6 +690,12 @@ Patch26025: HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
 
 #CVE-2014-6410 rhbz 1141809 1141810
 Patch26026: udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
+
+#rhbz 1143812
+Patch26027: HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
+
+#rhbz 1123584
+Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1511,6 +1517,12 @@ ApplyPatch HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
 
 #CVE-2014-6410 rhbz 1141809 1141810
 ApplyPatch udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
+
+#rhbz 1143812
+ApplyPatch HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
+
+#rhbz 1123584
+ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2401,6 +2413,16 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu Sep 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.3-302
+- Enable early microcode loading (rhbz 1083716)
+- Bump prereq on dracut that defaults to early microcode
+
+* Tue Sep 23 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix XPS 13 touchpad issue (rhbz 1123584)
+
+* Mon Sep 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix i2c-hid touchpad resume (rhbz 1143812)
+
 * Sat Sep 20 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.16.3-gnu.
 
