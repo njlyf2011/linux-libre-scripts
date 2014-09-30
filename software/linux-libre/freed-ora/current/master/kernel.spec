@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -667,9 +667,11 @@ Patch26020: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 #rhbz 1138759
 Patch26021: drm-vmwgfx-Fix-drm.h-include.patch
 
-Patch26022: x86-efi-Delete-misleading-efi_printk-error-message.patch
+#rhbz 1123584
+Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
 
-Patch26023: Revert-x86-efi-Fixup-GOT-in-all-boot-code-paths.patch
+#rhbz 1145318
+Patch26029: KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1482,9 +1484,11 @@ ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 #rhbz 1138759
 ApplyPatch drm-vmwgfx-Fix-drm.h-include.patch
 
-ApplyPatch x86-efi-Delete-misleading-efi_printk-error-message.patch
+#rhbz 1123584
+ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
 
-ApplyPatch Revert-x86-efi-Fixup-GOT-in-all-boot-code-paths.patch
+#rhbz 1145318
+ApplyPatch KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2367,7 +2371,23 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Sun Sep 28 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Sep 29 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.17-rc7-gnu.
+
+* Mon Sep 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc7.git0.1
+- Linux v3.17-rc7
+
+* Wed Sep 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc6.git2.1
+- Linux v3.17-rc6-180-g452b6361c4d9
+
+* Tue Sep 23 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix return code when adding keys (rhbz 1145318)
+- Add patch to fix XPS 13 touchpad issue (rhbz 1123584)
+
+* Tue Sep 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc6.git1.1
+- Linux v3.17-rc6-125-gf3670394c29f
+
+* Mon Sep 22 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Sep 28
 - GNU Linux-libre 3.17-rc6-gnu.
 
 * Mon Sep 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc6.git0.1
