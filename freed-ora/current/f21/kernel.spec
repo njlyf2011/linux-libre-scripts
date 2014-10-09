@@ -42,13 +42,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 16
+%define base_sublevel 17
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.16%{?stablegnux}
-#define rcrevlibre  -3.16%{?rcrevgnux}
-#define gitrevlibre -3.16%{?gitrevgnux}
+#define stablelibre -3.17%{?stablegnux}
+#define rcrevlibre  -3.17%{?rcrevgnux}
+#define gitrevlibre -3.17%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -124,8 +124,6 @@ Summary: The Linux kernel
 #
 # standard kernel
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
-# kernel-smp (only valid for ppc 32-bit)
-%define with_smp       %{?_without_smp:       0} %{?!_without_smp:       1}
 # kernel PAE (only valid for i686 (PAE) and ARM (lpae))
 %define with_pae       %{?_without_pae:       0} %{?!_without_pae:       1}
 # kernel-debug
@@ -149,8 +147,6 @@ Summary: The Linux kernel
 #
 # Only build the base kernel (--with baseonly):
 %define with_baseonly  %{?_with_baseonly:     1} %{?!_with_baseonly:     0}
-# Only build the smp kernel (--with smponly):
-%define with_smponly   %{?_with_smponly:      1} %{?!_with_smponly:      0}
 # Only build the pae kernel (--with paeonly):
 %define with_paeonly   %{?_with_paeonly:      1} %{?!_with_paeonly:      0}
 # Only build the debug kernel (--with dbgonly):
@@ -236,14 +232,6 @@ Summary: The Linux kernel
 
 # if requested, only build base kernel
 %if %{with_baseonly}
-%define with_smp 0
-%define with_pae 0
-%define with_debug 0
-%endif
-
-# if requested, only build smp kernel
-%if %{with_smponly}
-%define with_up 0
 %define with_pae 0
 %define with_debug 0
 %endif
@@ -251,7 +239,6 @@ Summary: The Linux kernel
 # if requested, only build pae kernel
 %if %{with_paeonly}
 %define with_up 0
-%define with_smp 0
 %define with_debug 0
 %endif
 
@@ -261,7 +248,6 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_pae 0
 %endif
-%define with_smp 0
 %define with_pae 0
 %define with_tools 0
 %define with_perf 0
@@ -271,15 +257,10 @@ Summary: The Linux kernel
 
 %if %{with_vdso_install}
 # These arches install vdso/ directories.
-%define vdso_arches %{all_x86} x86_64 ppc %{power64} s390 s390x aarch64
+%define vdso_arches %{all_x86} x86_64 %{power64} s390 s390x aarch64
 %endif
 
 # Overrides for generic default options
-
-# only ppc needs a separate smp kernel
-%ifnarch ppc 
-%define with_smp 0
-%endif
 
 # don't do debug builds on anything but i686 and x86_64
 %ifnarch i686 x86_64
@@ -298,7 +279,7 @@ Summary: The Linux kernel
 
 # bootwrapper is only on ppc
 # sparse blows up on ppc
-%ifnarch ppc %{power64}
+%ifnarch %{power64}
 %define with_bootwrapper 0
 %define with_sparse 0
 %endif
@@ -344,16 +325,6 @@ Summary: The Linux kernel
 %define make_target image
 %define kernel_image arch/s390/boot/image
 %define with_tools 0
-%endif
-
-%ifarch ppc
-%define asmarch powerpc
-%define hdrarch powerpc
-%define all_arch_configs kernel-%{version}-ppc{-,.}*config
-%define image_install_path boot
-%define make_target vmlinux
-%define kernel_image vmlinux
-%define kernel_image_elf 1
 %endif
 
 %ifarch %{arm}
@@ -407,7 +378,6 @@ Summary: The Linux kernel
 
 %ifarch %nobuildarches
 %define with_up 0
-%define with_smp 0
 %define with_pae 0
 %define with_debuginfo 0
 %define with_perf 0
@@ -421,7 +391,7 @@ Summary: The Linux kernel
 %endif
 
 # Architectures we build tools/cpupower on
-%define cpupowerarchs %{ix86} x86_64 ppc %{power64} %{arm} aarch64 
+%define cpupowerarchs %{ix86} x86_64 %{power64} %{arm} aarch64 
 
 #
 # Packages that need to be installed before the kernel is, because the %%post
@@ -438,7 +408,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc ppc64 ppc64p7 s390 s390x %{arm} aarch64 ppc64le
+ExclusiveArch: noarch %{all_x86} x86_64 ppc64 ppc64p7 s390 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
 Requires: kernel%{?variant}-core-uname-r = %{KVERREL}
@@ -498,7 +468,6 @@ Source90: filter-x86_64.sh
 Source91: filter-armv7hl.sh
 Source92: filter-i686.sh
 Source93: filter-aarch64.sh
-Source94: filter-ppc.sh
 Source95: filter-ppc64.sh
 Source96: filter-ppc64le.sh
 Source97: filter-s390x.sh
@@ -520,8 +489,6 @@ Source32: config-x86-32-generic
 Source40: config-x86_64-generic
 
 Source50: config-powerpc-generic
-Source51: config-powerpc32-generic
-Source52: config-powerpc32-smp
 Source53: config-powerpc64
 Source54: config-powerpc64p7
 Source55: config-powerpc64le
@@ -575,7 +542,7 @@ Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 Patch04: compile-fixes.patch
 
 # build tweak for build ID magic, even for -vanilla
-Patch05: makefile-after_link.patch
+Patch05: kbuild-AFTER_LINK.patch
 
 Patch07: freedo.patch
 
@@ -595,20 +562,38 @@ Patch470: die-floppy-die.patch
 
 Patch500: Revert-Revert-ACPI-video-change-acpi-video-brightnes.patch
 
-Patch510: silence-noise.patch
+Patch510: input-silence-i8042-noise.patch
 Patch530: silence-fbcon-logo.patch
 
-Patch600: 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
+Patch600: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 Patch800: crash-driver.patch
 
 # crypto/
 
 # secure boot
-Patch1000: secure-modules.patch
-Patch1001: modsign-uefi.patch
-# atch1002: sb-hibernate.patch
-Patch1003: sysrq-secure-boot.patch
+Patch1000: Add-secure_modules-call.patch
+Patch1001: PCI-Lock-down-BAR-access-when-module-security-is-ena.patch
+Patch1002: x86-Lock-down-IO-port-access-when-module-security-is.patch
+Patch1003: ACPI-Limit-access-to-custom_method.patch
+Patch1004: asus-wmi-Restrict-debugfs-interface-when-module-load.patch
+Patch1005: Restrict-dev-mem-and-dev-kmem-when-module-loading-is.patch
+Patch1006: acpi-Ignore-acpi_rsdp-kernel-parameter-when-module-l.patch
+Patch1007: kexec-Disable-at-runtime-if-the-kernel-enforces-modu.patch
+Patch1008: x86-Restrict-MSR-access-when-module-loading-is-restr.patch
+Patch1009: Add-option-to-automatically-enforce-module-signature.patch
+Patch1010: efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
+Patch1011: efi-Make-EFI_SECURE_BOOT_SIG_ENFORCE-depend-on-EFI.patch
+Patch1012: efi-Add-EFI_SECURE_BOOT-bit.patch
+Patch1013: hibernate-Disable-in-a-signed-modules-environment.patch
+
+Patch1014: Add-EFI-signature-data-types.patch
+Patch1015: Add-an-EFI-signature-blob-parser-and-key-loader.patch
+Patch1016: KEYS-Add-a-system-blacklist-keyring.patch
+Patch1017: MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
+Patch1018: MODSIGN-Support-not-importing-certs-from-db.patch
+
+Patch1019: Add-sysrq-option-to-disable-secure-boot-mode.patch
 
 # virt + ksm patches
 
@@ -631,17 +616,25 @@ Patch14000: hibernate-freeze-filesystems.patch
 
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
-Patch15000: nowatchdog-on-virt.patch
+Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 
+# PPC
+Patch18000: ppc64-fixtools.patch
 # ARM64
 
 # ARMv7
-Patch21020: arm-tegra-usb-no-reset-linux33.patch
-Patch21021: arm-beagle.patch
-Patch21022: arm-imx6-utilite.patch
-# http://www.spinics.net/lists/linux-tegra/msg17948.html
-Patch21023: arm-tegra-drmdetection.patch
-Patch21024: arm-qemu-fixdisplay.patch
+Patch21020: ARM-tegra-usb-no-reset.patch
+Patch21021: arm-dts-am335x-boneblack-lcdc-add-panel-info.patch
+Patch21022: arm-dts-am335x-boneblack-add-cpu0-opp-points.patch
+Patch21023: arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
+Patch21024: arm-dts-am335x-bone-common-setup-default-pinmux-http.patch
+Patch21025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
+Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
+
+Patch21028: arm-i.MX6-Utilite-device-dtb.patch
+Patch21029: arm-dts-sun7i-bananapi.patch
+
+Patch21100: arm-highbank-l2-reverts.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -650,7 +643,7 @@ Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 Patch21242: criu-no-expert.patch
 
 #rhbz 892811
-Patch21247: ath9k_rx_dma_stop_check.patch
+Patch21247: ath9k-rx-dma-stop-check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
@@ -658,44 +651,30 @@ Patch22000: weird-root-dentry-name-debug.patch
 Patch25063: disable-libdw-unwind-on-non-x86.patch
 
 #rhbz 983342 1093120
-Patch25069: 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
+Patch25069: acpi-video-Add-4-new-models-to-the-use_native_backli.patch
 
-Patch26000: perf-lib64.patch
+Patch26000: perf-install-trace-event-plugins.patch
 
 # Patch series from Hans for various backlight and platform driver fixes
 Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-Patch26004: asus-wmi-Add-a-no-backlight-quirk.patch
-Patch26005: eeepc-wmi-Add-no-backlight-quirk-for-Asus-H87I-PLUS-.patch
 Patch26013: acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
 Patch26014: acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
 
-Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
-
-#rhbz 1021036, submitted upstream
-Patch25110: 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
-
 #rhbz 1134969
-Patch26019: Input-wacom-Add-support-for-the-Cintiq-Companion.patch
+Patch26016: HID-wacom-Add-support-for-the-Cintiq-Companion.patch
 
 #rhbz 1110011
-Patch26021: i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
-Patch26022: psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
-Patch26023: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
+Patch26019: psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
+Patch26020: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 
-#CVE-2014-3181 rhbz 1141179 1141173
-Patch26024: HID-magicmouse-sanity-check-report-size-in-raw_event.patch
-
-#CVE-2014-3186 rhbz 1141407 1141410
-Patch26025: HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
-
-#CVE-2014-6410 rhbz 1141809 1141810
-Patch26026: udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
-
-#rhbz 1143812
-Patch26027: HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
+#rhbz 1138759
+Patch26021: drm-vmwgfx-Fix-drm.h-include.patch
 
 #rhbz 1123584
 Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
+
+#rhbz 1145318
+Patch26029: KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1027,19 +1006,6 @@ Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?1:+%{1}}\
 
 # Now, each variant package.
 
-%define variant_summary The Linux kernel compiled for SMP machines
-%kernel_variant_package -n SMP smp
-%description smp-core
-This package includes a SMP version of the Linux kernel. It is
-required only on machines with two or more CPUs as well as machines with
-hyperthreading technology.
-
-The kernel-libre-smp package is the upstream kernel without the
-non-Free blobs it includes by default.
-
-Install the kernel-libre-smp package if your machine uses two or more
-CPUs.
-
 %ifnarch armv7hl
 %define variant_summary The Linux kernel compiled for PAE capable machines
 %kernel_variant_package %{pae}
@@ -1112,13 +1078,6 @@ blobs it includes by default.
 %if %{with_baseonly}
 %if !%{with_up}%{with_pae}
 echo "Cannot build --with baseonly, up build is disabled"
-exit 1
-%endif
-%endif
-
-%if %{with_smponly}
-%if !%{with_smp}
-echo "Cannot build --with smponly, smp build is disabled"
 exit 1
 %endif
 %endif
@@ -1354,7 +1313,7 @@ do
 done
 %endif
 
-ApplyPatch makefile-after_link.patch
+ApplyPatch kbuild-AFTER_LINK.patch
 
 #
 # misc small stuff to make things compile
@@ -1371,18 +1330,29 @@ ApplyOptionalPatch upstream-reverts.patch -R
 
 # Architecture patches
 # x86(-64)
-ApplyPatch 0001-lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
+ApplyPatch lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
+
+# PPC
+ApplyPatch ppc64-fixtools.patch
 
 # ARM64
 
 #
 # ARM
 #
-ApplyPatch arm-tegra-usb-no-reset-linux33.patch
-ApplyPatch arm-beagle.patch
-ApplyPatch arm-imx6-utilite.patch
-ApplyPatch arm-tegra-drmdetection.patch
-ApplyPatch arm-qemu-fixdisplay.patch
+ApplyPatch ARM-tegra-usb-no-reset.patch
+
+ApplyPatch arm-dts-am335x-boneblack-lcdc-add-panel-info.patch
+ApplyPatch arm-dts-am335x-boneblack-add-cpu0-opp-points.patch
+ApplyPatch arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
+ApplyPatch arm-dts-am335x-bone-common-setup-default-pinmux-http.patch
+ApplyPatch arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
+ApplyPatch pinctrl-pinctrl-single-must-be-initialized-early.patch
+
+ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
+ApplyPatch arm-dts-sun7i-bananapi.patch
+
+ApplyPatch arm-highbank-l2-reverts.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -1430,7 +1400,7 @@ ApplyPatch die-floppy-die.patch
 ApplyPatch no-pcspkr-modalias.patch
 
 # Silence some useless messages that still get printed with 'quiet'
-ApplyPatch silence-noise.patch
+ApplyPatch input-silence-i8042-noise.patch
 
 # Make fbcon not show the penguins with 'quiet'
 ApplyPatch silence-fbcon-logo.patch
@@ -1443,10 +1413,28 @@ ApplyPatch crash-driver.patch
 # crypto/
 
 # secure boot
-ApplyPatch secure-modules.patch
-ApplyPatch modsign-uefi.patch
-# pplyPatch sb-hibernate.patch
-ApplyPatch sysrq-secure-boot.patch
+ApplyPatch Add-secure_modules-call.patch
+ApplyPatch PCI-Lock-down-BAR-access-when-module-security-is-ena.patch
+ApplyPatch x86-Lock-down-IO-port-access-when-module-security-is.patch
+ApplyPatch ACPI-Limit-access-to-custom_method.patch
+ApplyPatch asus-wmi-Restrict-debugfs-interface-when-module-load.patch
+ApplyPatch Restrict-dev-mem-and-dev-kmem-when-module-loading-is.patch
+ApplyPatch acpi-Ignore-acpi_rsdp-kernel-parameter-when-module-l.patch
+ApplyPatch kexec-Disable-at-runtime-if-the-kernel-enforces-modu.patch
+ApplyPatch x86-Restrict-MSR-access-when-module-loading-is-restr.patch
+ApplyPatch Add-option-to-automatically-enforce-module-signature.patch
+ApplyPatch efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
+ApplyPatch efi-Make-EFI_SECURE_BOOT_SIG_ENFORCE-depend-on-EFI.patch
+ApplyPatch efi-Add-EFI_SECURE_BOOT-bit.patch
+ApplyPatch hibernate-Disable-in-a-signed-modules-environment.patch
+
+ApplyPatch Add-EFI-signature-data-types.patch
+ApplyPatch Add-an-EFI-signature-blob-parser-and-key-loader.patch
+ApplyPatch KEYS-Add-a-system-blacklist-keyring.patch
+ApplyPatch MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
+ApplyPatch MODSIGN-Support-not-importing-certs-from-db.patch
+
+ApplyPatch Add-sysrq-option-to-disable-secure-boot-mode.patch
 
 # Assorted Virt Fixes
 
@@ -1468,7 +1456,7 @@ ApplyPatch disable-i8042-check-on-apple-mac.patch
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 # Disable watchdog on virtual machines.
-ApplyPatch nowatchdog-on-virt.patch
+ApplyPatch watchdog-Disable-watchdog-on-virtual-machines.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1479,50 +1467,36 @@ ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 ApplyPatch criu-no-expert.patch
 
 #rhbz 892811
-ApplyPatch ath9k_rx_dma_stop_check.patch
+ApplyPatch ath9k-rx-dma-stop-check.patch
 
 #rhbz 1025603
 ApplyPatch disable-libdw-unwind-on-non-x86.patch
 
 #rhbz 983342 1093120
-ApplyPatch 0001-acpi-video-Add-4-new-models-to-the-use_native_backli.patch
+ApplyPatch acpi-video-Add-4-new-models-to-the-use_native_backli.patch
 
-ApplyPatch perf-lib64.patch
+ApplyPatch perf-install-trace-event-plugins.patch
 
 # Patch series from Hans for various backlight and platform driver fixes
 ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-ApplyPatch asus-wmi-Add-a-no-backlight-quirk.patch
-ApplyPatch eeepc-wmi-Add-no-backlight-quirk-for-Asus-H87I-PLUS-.patch
 ApplyPatch acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
 ApplyPatch acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
 
-ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.patch
-
-#rhbz 1021036, submitted upstream
-ApplyPatch 0001-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
-
 #rhbz 1134969
-ApplyPatch Input-wacom-Add-support-for-the-Cintiq-Companion.patch
+ApplyPatch HID-wacom-Add-support-for-the-Cintiq-Companion.patch
 
 #rhbz 1110011
-ApplyPatch i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
 ApplyPatch psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
 ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 
-#CVE-2014-3181 rhbz 1141179 1141173
-ApplyPatch HID-magicmouse-sanity-check-report-size-in-raw_event.patch
-
-#CVE-2014-3186 rhbz 1141407 1141410
-ApplyPatch HID-picolcd-sanity-check-report-size-in-raw_event-ca.patch
-
-#CVE-2014-6410 rhbz 1141809 1141810
-ApplyPatch udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
-
-#rhbz 1143812
-ApplyPatch HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
+#rhbz 1138759
+ApplyPatch drm-vmwgfx-Fix-drm.h-include.patch
 
 #rhbz 1123584
 ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
+
+#rhbz 1145318
+ApplyPatch KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -1754,7 +1728,7 @@ BuildKernel() {
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
-%ifarch ppc %{power64}
+%ifarch %{power64}
     cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     if [ -d arch/%{asmarch}/include ]; then
@@ -1935,10 +1909,6 @@ BuildKernel %make_target %kernel_image %{pae}
 
 %if %{with_up}
 BuildKernel %make_target %kernel_image
-%endif
-
-%if %{with_smp}
-BuildKernel %make_target %kernel_image smp
 %endif
 
 %global perf_make \
@@ -2228,9 +2198,6 @@ fi}\
 %kernel_variant_preun
 %kernel_variant_post -r kernel-smp
 
-%kernel_variant_preun smp
-%kernel_variant_post -v smp
-
 %kernel_variant_preun %{pae}
 %kernel_variant_post -v %{pae} -r (kernel|kernel-smp)
 
@@ -2394,7 +2361,6 @@ fi
 
 
 %kernel_variant_files %{with_up}
-%kernel_variant_files %{with_smp} smp
 %kernel_variant_files %{with_debug} debug
 %kernel_variant_files %{with_pae} %{pae}
 %kernel_variant_files %{with_pae_debug} %{pae}debug
@@ -2413,6 +2379,12 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Mon Oct  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.17-gnu.
+
+* Mon Oct 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-300
+- Linux v3.17
+
 * Thu Sep 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.3-302
 - Enable early microcode loading (rhbz 1083716)
 - Bump prereq on dracut that defaults to early microcode
