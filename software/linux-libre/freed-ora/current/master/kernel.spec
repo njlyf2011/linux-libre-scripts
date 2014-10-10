@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 %global aarch64patches 1
 
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 16
+%define base_sublevel 17
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.16%{?stablegnux}
-%define rcrevlibre  -3.16%{?rcrevgnux}
-#define gitrevlibre -3.16%{?gitrevgnux}
+#define stablelibre -3.17%{?stablegnux}
+#define rcrevlibre  -3.17%{?rcrevgnux}
+#define gitrevlibre -3.17%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -455,7 +455,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-3.%{upstream_sublevel}
+#Source6: deblob-3.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -632,6 +632,9 @@ Patch21025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 Patch21028: arm-i.MX6-Utilite-device-dtb.patch
+Patch21029: arm-dts-sun7i-bananapi.patch
+
+Patch21100: arm-highbank-l2-reverts.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -1337,6 +1340,7 @@ ApplyPatch ppc64-fixtools.patch
 # ARM
 #
 ApplyPatch ARM-tegra-usb-no-reset.patch
+
 ApplyPatch arm-dts-am335x-boneblack-lcdc-add-panel-info.patch
 ApplyPatch arm-dts-am335x-boneblack-add-cpu0-opp-points.patch
 ApplyPatch arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
@@ -1345,6 +1349,9 @@ ApplyPatch arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 ApplyPatch pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
+ApplyPatch arm-dts-sun7i-bananapi.patch
+
+ApplyPatch arm-highbank-l2-reverts.patch
 
 #
 # bugfixes to drivers and filesystems
@@ -2371,6 +2378,39 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Mon Oct  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.17-gnu.
+
+* Mon Oct 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-1
+- Linux v3.17
+
+* Fri Oct 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc7.git3.1
+- Linux v3.17-rc7-76-g58586869599f
+- Various ppc64/ppc64le config changes
+
+* Thu Oct 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc7.git2.1
+- Linux v3.17-rc7-46-g50dddff3cb9a
+- Cleanup dead Kconfig symbols in config-* from Paul Bolle
+
+* Wed Oct 01 2014 Kyle McMartin <kyle@fedoraproject.org>
+- Update kernel-arm64.patch from git, again... enable AMD_XGBE on arm64.
+
+* Wed Oct 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc7.git1.1
+- Linux v3.17-rc7-6-gaad7fb916a10
+
+* Tue Sep 30 2014 Kyle McMartin <kyle@fedoraproject.org> - 3.17.0-0.rc7.git0.2
+- Revert some v3.16 changes to mach-highbank which broke L2 cache enablement.
+  Will debug upstream separately, but we need F22/21 running there. (#1139762)
+
+* Tue Sep 30 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Don't build Exynos4 on lpae kernel
+- Add dts for BananaPi
+- Minor ARM updates
+- Build 6lowpan modules
+
+* Mon Sep 29 2014 Kyle McMartin <kyle@fedoraproject.org>
+- Update kernel-arm64.patch from git.
+
 * Mon Sep 29 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17-rc7-gnu.
 
