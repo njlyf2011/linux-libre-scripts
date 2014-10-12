@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -778,14 +778,13 @@ Patch26021: i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
 Patch26022: psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
 Patch26023: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 
-#CVE-2014-6410 rhbz 1141809 1141810
-Patch26026: udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
-
 #rhbz 1143812
 Patch26027: HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
 
 #rhbz 1123584
 Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
+
+Patch26030: GFS2-Make-rename-not-save-dirent-location.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1533,14 +1532,13 @@ ApplyPatch i8042-Also-store-the-aux-firmware-id-in-multi-plexed.patch
 ApplyPatch psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
 ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 
-#CVE-2014-6410 rhbz 1141809 1141810
-ApplyPatch udf-Avoid-infinite-loop-when-processing-indirect-ICB.patch
-
 #rhbz 1143812
 ApplyPatch HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
 
 #rhbz 1123584
 ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
+
+ApplyPatch GFS2-Make-rename-not-save-dirent-location.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2371,6 +2369,15 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Oct  9 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.16.5-gnu.
+
+* Thu Oct 09 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.5-200
+- Linux v3.16.5
+
+* Tue Oct 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix GFS2 regression (from Bob Peterson)
+
 * Mon Oct  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.16.4-gnu.
 
