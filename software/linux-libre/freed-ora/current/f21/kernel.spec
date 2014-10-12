@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -675,6 +675,10 @@ Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
 
 #rhbz 1145318
 Patch26029: KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
+
+Patch26030: GFS2-Make-rename-not-save-dirent-location.patch
+
+Patch26031: libata-Un-break-ATA-blacklist.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1497,6 +1501,10 @@ ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
 
 #rhbz 1145318
 ApplyPatch KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
+
+ApplyPatch GFS2-Make-rename-not-save-dirent-location.patch
+
+ApplyPatch libata-Un-break-ATA-blacklist.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2379,6 +2387,16 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Wed Oct 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-301
+- Add patch to fix ATA blacklist
+
+* Tue Oct 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix GFS2 regression (from Bob Peterson)
+
+* Mon Oct 06 2014 Kyle McMartin <kyle@fedoraproject.org>
+- enable 64K pages on arm64... (presently) needed to boot on amd seattle
+  platforms due to physical memory being unreachable.
+
 * Mon Oct  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17-gnu.
 
