@@ -410,6 +410,23 @@ index 0000000..6d5db23
 +#define LS1X_INTC_INTEDGE(n)		LS1X_INTC_REG(n, 0x14)
 +
 +#endif /* __ASM_MACH_LOONGSON1_REGS_INTC_H */
+diff --git a/arch/mips/include/asm/sparsemem.h b/arch/mips/include/asm/sparsemem.h
+index b1071c1..8b8e551 100644
+--- a/arch/mips/include/asm/sparsemem.h
++++ b/arch/mips/include/asm/sparsemem.h
+@@ -11,7 +11,11 @@
+ #else
+ # define SECTION_SIZE_BITS	28
+ #endif
+-#define MAX_PHYSMEM_BITS	48
++#if !defined(CONFIG_MACH_LOONGSON) || !defined(CONFIG_CPU_LOONGSON2)	/* Commit c461731836 broke Loongson2.  */
++# define MAX_PHYSMEM_BITS	48
++#else
++# define MAX_PHYSMEM_BITS	35
++#endif
+ 
+ #endif /* CONFIG_SPARSEMEM */
+ #endif /* _MIPS_SPARSEMEM_H */
 diff --git a/arch/mips/include/asm/timex.h b/arch/mips/include/asm/timex.h
 index b05bb70..44c9a69 100644
 --- a/arch/mips/include/asm/timex.h
@@ -2242,14 +2259,16 @@ index 0000000..b296220
 +				gdium_usb_host_fixup);
 +#endif
 diff --git a/arch/mips/power/hibernate.S b/arch/mips/power/hibernate.S
-index 32a7c82..7e0277a 100644
+index 32a7c82..3a89502 100644
 --- a/arch/mips/power/hibernate.S
 +++ b/arch/mips/power/hibernate.S
-@@ -43,7 +43,6 @@ LEAF(swsusp_arch_resume)
+@@ -43,7 +43,9 @@ LEAF(swsusp_arch_resume)
  	bne t1, t3, 1b
  	PTR_L t0, PBE_NEXT(t0)
  	bnez t0, 0b
--	jal local_flush_tlb_all /* Avoid TLB mismatch after kernel resume */
++#if !defined(CONFIG_MACH_LOONGSON) || !defined(CONFIG_CPU_LOONGSON2)	/* Commit 771004298d broke Loongson2.  */
+ 	jal local_flush_tlb_all /* Avoid TLB mismatch after kernel resume */
++#endif
  	PTR_LA t0, saved_regs
  	PTR_L ra, PT_R31(t0)
  	PTR_L sp, PT_R29(t0)
