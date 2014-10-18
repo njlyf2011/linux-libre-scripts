@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -650,15 +650,10 @@ Patch22000: weird-root-dentry-name-debug.patch
 #rhbz 1025603
 Patch25063: disable-libdw-unwind-on-non-x86.patch
 
-#rhbz 983342 1093120
-Patch25069: acpi-video-Add-4-new-models-to-the-use_native_backli.patch
-
 Patch26000: perf-install-trace-event-plugins.patch
 
 # Patch series from Hans for various backlight and platform driver fixes
 Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-Patch26013: acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
-Patch26014: acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
 
 #rhbz 1134969
 Patch26016: HID-wacom-Add-support-for-the-Cintiq-Companion.patch
@@ -678,7 +673,23 @@ Patch26029: KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
 
 Patch26030: GFS2-Make-rename-not-save-dirent-location.patch
 
-Patch26031: libata-Un-break-ATA-blacklist.patch
+#CVE-2014-7970 rhbz 1151095 1151484
+Patch26032: mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
+
+#rhbz 1149509
+Patch26034: USB-core-add-device-qualifier-quirk.patch
+Patch26035: USB-quirks-enable-device-qualifier-quirk-for-Elan-To.patch
+Patch26036: USB-quirks-enable-device-qualifier-quirk-for-another.patch
+Patch26037: HID-usbhid-add-always-poll-quirk.patch
+Patch26038: HID-usbhid-enable-always-poll-quirk-for-Elan-Touchsc.patch
+Patch26039: HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-00.patch
+Patch26040: USB-quirks-device-qualifier-quirk-for-another-Elan-t.patch
+Patch26041: HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
+
+#CVE-2014-7975 rhbz 1151108 1152025
+Patch26042: fs-Add-a-missing-permission-check-to-do_umount.patch
+
+Patch26043: Revert-Btrfs-race-free-update-of-commit-root-for-ro-.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1476,15 +1487,10 @@ ApplyPatch ath9k-rx-dma-stop-check.patch
 #rhbz 1025603
 ApplyPatch disable-libdw-unwind-on-non-x86.patch
 
-#rhbz 983342 1093120
-ApplyPatch acpi-video-Add-4-new-models-to-the-use_native_backli.patch
-
 ApplyPatch perf-install-trace-event-plugins.patch
 
 # Patch series from Hans for various backlight and platform driver fixes
 ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-ApplyPatch acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
-ApplyPatch acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
 
 #rhbz 1134969
 ApplyPatch HID-wacom-Add-support-for-the-Cintiq-Companion.patch
@@ -1504,7 +1510,23 @@ ApplyPatch KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
 
 ApplyPatch GFS2-Make-rename-not-save-dirent-location.patch
 
-ApplyPatch libata-Un-break-ATA-blacklist.patch
+#CVE-2014-7970 rhbz 1151095 1151484
+ApplyPatch mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
+
+#rhbz 1149509
+ApplyPatch USB-core-add-device-qualifier-quirk.patch
+ApplyPatch USB-quirks-enable-device-qualifier-quirk-for-Elan-To.patch
+ApplyPatch USB-quirks-enable-device-qualifier-quirk-for-another.patch
+ApplyPatch HID-usbhid-add-always-poll-quirk.patch
+ApplyPatch HID-usbhid-enable-always-poll-quirk-for-Elan-Touchsc.patch
+ApplyPatch HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-00.patch
+ApplyPatch USB-quirks-device-qualifier-quirk-for-another-Elan-t.patch
+ApplyPatch HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
+
+#CVE-2014-7975 rhbz 1151108 1152025
+ApplyPatch fs-Add-a-missing-permission-check-to-do_umount.patch
+
+ApplyPatch Revert-Btrfs-race-free-update-of-commit-root-for-ro-.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2387,6 +2409,24 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu Oct 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.17.1-gnu.
+
+* Wed Oct 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.1-300
+- Linux v3.17.1
+- Revert Btrfs ro snapshot commit that causes filesystem corruption
+
+* Mon Oct 13 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7975 fs: umount DoS (rhbz 1151108 1152025)
+
+* Sun Oct 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable CONFIG_I2C_DESIGNWARE_PCI (rhbz 1045821)
+
+* Fri Oct 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patches to fix elantech touchscreens (rhbz 1149509)
+- CVE-2014-7970 VFS: DoS with USER_NS (rhbz 1151095 1151484)
+- Drop doubly applied ACPI video quirk patches
+
 * Wed Oct 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-301
 - Add patch to fix ATA blacklist
 
