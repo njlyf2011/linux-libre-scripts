@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 21
+%define stable_update 22
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -815,6 +815,12 @@ Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pa
 #rhbz 1021036
 Patch25110: 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 Patch25111: 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
+
+#CVE-2014-7970 rhbz 1151095 1151484
+Patch26032: mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
+
+#CVE-2014-7975 rhbz 1151108 1152025
+Patch26042: fs-Add-a-missing-permission-check-to-do_umount.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1573,6 +1579,12 @@ ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pat
 #rhbz 1021036
 ApplyPatch 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 ApplyPatch 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
+
+#CVE-2014-7970 rhbz 1151095 1151484
+ApplyPatch mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
+
+#CVE-2014-7975 rhbz 1151108 1152025
+ApplyPatch fs-Add-a-missing-permission-check-to-do_umount.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2397,7 +2409,19 @@ fi
 # and build.
 
 %changelog
-* Sat Oct 11 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Oct 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.22-gnu.
+
+* Wed Oct 15 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.22-100
+- Linux v3.14.22
+
+* Mon Oct 13 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7975 fs: umount DoS (rhbz 1151108 1152025)
+
+* Fri Oct 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7970 VFS: DoS with USER_NS (rhbz 1151095 1151484)
+
+* Fri Oct 10 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Oct 11
 - GNU Linux-libre 3.14.21-gnu.
 
 * Thu Oct 09 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.21-100
