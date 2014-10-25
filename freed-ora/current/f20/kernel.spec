@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 202
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -799,6 +799,27 @@ Patch26041: HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
 
 #CVE-2014-7975 rhbz 1151108 1152025
 Patch26042: fs-Add-a-missing-permission-check-to-do_umount.patch
+
+#CVE-2014-8086 rhbz 1151353 1152608
+Patch26056: ext4-fix-race-between-write-and-fcntl-F_SETFL.patch
+
+#rhbz 1089731
+Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
+
+#rhbz 1153381
+Patch26059: Input-synaptics-gate-forcepad-support-by-DMI-check.patch
+
+# CVE-2014-3690 rhbz 1153322 1155372
+Patch26060: x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
+
+#CVE-2014-3688 rhbz 1155745 1155751
+Patch26061: net-sctp-fix-skb_over_panic-when-receiving-malformed.patch
+
+#CVE-2014-3687 rhbz 1155731 1155738
+Patch26062: net-sctp-fix-panic-on-duplicate-ASCONF-chunks.patch
+
+#CVE-2014-3673 rhbz 1147850 1155727
+Patch26063: net-sctp-fix-remote-memory-pressure-from-excessive-q.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1567,6 +1588,27 @@ ApplyPatch HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
 
 #CVE-2014-7975 rhbz 1151108 1152025
 ApplyPatch fs-Add-a-missing-permission-check-to-do_umount.patch
+
+#CVE-2014-8086 rhbz 1151353 1152608
+ApplyPatch ext4-fix-race-between-write-and-fcntl-F_SETFL.patch
+
+#rhbz 1089731
+ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
+
+#rhbz 1153381
+ApplyPatch Input-synaptics-gate-forcepad-support-by-DMI-check.patch
+
+#CVE-2014-3690 rhbz 1153322 1155372
+ApplyPatch x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
+
+#CVE-2014-3688 rhbz 1155745 1155751
+ApplyPatch net-sctp-fix-skb_over_panic-when-receiving-malformed.patch
+
+#CVE-2014-3687 rhbz 1155731 1155738
+ApplyPatch net-sctp-fix-panic-on-duplicate-ASCONF-chunks.patch
+
+#CVE-2014-3673 rhbz 1147850 1155727
+ApplyPatch net-sctp-fix-remote-memory-pressure-from-excessive-q.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2397,6 +2439,17 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Oct 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.6-202
+- CVE-2014-3688 sctp: remote memory pressure from excessive queuing (rhbz 1155745 1155751)
+- CVE-2014-3687 sctp: panic on duplicate ASCONF chunks (rhbz 1155731 1155738)
+- CVE-2014-3673 sctp: panic with malformed ASCONF chunks (rhbz 1147850 1155727)
+- CVE-2014-3690 kvm: invalid host cr4 handling (rhbz 1153322 1155372)
+- Add patch to fix synaptics forcepad issues (rhbz 1153381)
+- Add patch to fix wifi on X550VB machines (rhbz 1089731)
+
+* Fri Oct 17 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-8086 ext4: race condition (rhbz 1151353 1152608)
+
 * Thu Oct 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.16.6-gnu.
 
