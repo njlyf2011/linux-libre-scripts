@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -821,6 +821,18 @@ Patch26032: mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
 
 #CVE-2014-7975 rhbz 1151108 1152025
 Patch26042: fs-Add-a-missing-permission-check-to-do_umount.patch
+
+# CVE-2014-3690 rhbz 1153322 1155372
+Patch26060: x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
+
+#CVE-2014-3688 rhbz 1155745 1155751
+Patch26061: net-sctp-fix-skb_over_panic-when-receiving-malformed.patch
+
+#CVE-2014-3687 rhbz 1155731 1155738
+Patch26062: net-sctp-fix-panic-on-duplicate-ASCONF-chunks.patch
+
+#CVE-2014-3673 rhbz 1147850 1155727
+Patch26063: net-sctp-fix-remote-memory-pressure-from-excessive-q.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1585,6 +1597,18 @@ ApplyPatch mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
 
 #CVE-2014-7975 rhbz 1151108 1152025
 ApplyPatch fs-Add-a-missing-permission-check-to-do_umount.patch
+
+# CVE-2014-3690 rhbz 1153322 1155372
+ApplyPatch x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
+
+#CVE-2014-3688 rhbz 1155745 1155751
+ApplyPatch net-sctp-fix-skb_over_panic-when-receiving-malformed.patch
+
+#CVE-2014-3687 rhbz 1155731 1155738
+ApplyPatch net-sctp-fix-panic-on-duplicate-ASCONF-chunks.patch
+
+#CVE-2014-3673 rhbz 1147850 1155727
+ApplyPatch net-sctp-fix-remote-memory-pressure-from-excessive-q.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2409,6 +2433,12 @@ fi
 # and build.
 
 %changelog
+* Wed Oct 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.22-101
+- CVE-2014-3688 sctp: remote memory pressure from excessive queuing (rhbz 1155745 1155751)
+- CVE-2014-3687 sctp: panic on duplicate ASCONF chunks (rhbz 1155731 1155738)
+- CVE-2014-3673 sctp: panic with malformed ASCONF chunks (rhbz 1147850 1155727)
+- CVE-2014-3690 kvm: invalid host cr4 handling (rhbz 1153322 1155372)
+
 * Thu Oct 16 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.22-gnu.
 
@@ -2436,7 +2466,7 @@ fi
 * Thu Sep 18 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.19-gnu.
 
-* Thu Sep 17 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.19-100
+* Thu Sep 18 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.19-100
 - Linux v3.14.19
 
 * Mon Sep 15 2014 Josh Boyer <jwboyer@fedoraproject.org>
