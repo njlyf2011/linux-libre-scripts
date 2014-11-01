@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 203
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -776,9 +776,6 @@ Patch26023: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 #rhbz 1143812
 Patch26027: HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
 
-#rhbz 1123584
-Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
-
 Patch26030: GFS2-Make-rename-not-save-dirent-location.patch
 
 #CVE-2014-7970 rhbz 1151095 1151484
@@ -797,9 +794,6 @@ Patch26039: HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-00.patch
 Patch26040: USB-quirks-device-qualifier-quirk-for-another-Elan-t.patch
 Patch26041: HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
 
-#CVE-2014-7975 rhbz 1151108 1152025
-Patch26042: fs-Add-a-missing-permission-check-to-do_umount.patch
-
 #CVE-2014-8086 rhbz 1151353 1152608
 Patch26056: ext4-fix-race-between-write-and-fcntl-F_SETFL.patch
 
@@ -808,9 +802,6 @@ Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1153381
 Patch26059: Input-synaptics-gate-forcepad-support-by-DMI-check.patch
-
-# CVE-2014-3690 rhbz 1153322 1155372
-Patch26060: x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
 
 #CVE-2014-3688 rhbz 1155745 1155751
 Patch26061: net-sctp-fix-skb_over_panic-when-receiving-malformed.patch
@@ -837,6 +828,12 @@ Patch26075: KVM-x86-Handle-errors-when-RIP-is-set-during-far-jum.patch
 Patch26076: kvm-vmx-handle-invvpid-vm-exit-gracefully.patch
 Patch26077: kvm-x86-don-t-kill-guest-on-unknown-exit-reason.patch
 Patch26082: kvm-fix-excessive-pages-un-pinning-in-kvm_iommu_map-.patch
+
+#rhbz 1157327
+Patch26083: quirk-for-Lenovo-Yoga-3-no-rfkill-switch.patch
+
+#rhbz 1154454
+Patch26084: media-cxusb-increase-buffer-length-to-80-bytes.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1582,9 +1579,6 @@ ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 #rhbz 1143812
 ApplyPatch HID-i2c-hid-call-the-hid-driver-s-suspend-and-resume.patch
 
-#rhbz 1123584
-ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
-
 ApplyPatch GFS2-Make-rename-not-save-dirent-location.patch
 
 #CVE-2014-7970 rhbz 1151095 1151484
@@ -1603,9 +1597,6 @@ ApplyPatch HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-00.patch
 ApplyPatch USB-quirks-device-qualifier-quirk-for-another-Elan-t.patch
 ApplyPatch HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
 
-#CVE-2014-7975 rhbz 1151108 1152025
-ApplyPatch fs-Add-a-missing-permission-check-to-do_umount.patch
-
 #CVE-2014-8086 rhbz 1151353 1152608
 ApplyPatch ext4-fix-race-between-write-and-fcntl-F_SETFL.patch
 
@@ -1614,9 +1605,6 @@ ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1153381
 ApplyPatch Input-synaptics-gate-forcepad-support-by-DMI-check.patch
-
-#CVE-2014-3690 rhbz 1153322 1155372
-ApplyPatch x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
 
 #CVE-2014-3688 rhbz 1155745 1155751
 ApplyPatch net-sctp-fix-skb_over_panic-when-receiving-malformed.patch
@@ -1643,6 +1631,12 @@ ApplyPatch KVM-x86-Handle-errors-when-RIP-is-set-during-far-jum.patch
 ApplyPatch kvm-vmx-handle-invvpid-vm-exit-gracefully.patch
 ApplyPatch kvm-x86-don-t-kill-guest-on-unknown-exit-reason.patch
 ApplyPatch kvm-fix-excessive-pages-un-pinning-in-kvm_iommu_map-.patch
+
+#rhbz 1157327
+ApplyPatch quirk-for-Lenovo-Yoga-3-no-rfkill-switch.patch
+
+#rhbz 1154454
+ApplyPatch media-cxusb-increase-buffer-length-to-80-bytes.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2473,6 +2467,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Oct 30 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.16.7-gnu.
+
+* Thu Oct 30 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.7-200
+- Linux v3.16.7
+
+* Wed Oct 29 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix DVB-T cxusb firmware loading (rhbz 1154454)
+
+* Tue Oct 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add quirk for rfkill on Yoga 3 machines (rhbz 1157327)
+
 * Fri Oct 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.6-203
 - CVE-2014-3610 kvm: noncanonical MSR writes (rhbz 1144883 1156543)
 - CVE-2014-3611 kvm: PIT timer race condition (rhbz 1144878 1156537)
