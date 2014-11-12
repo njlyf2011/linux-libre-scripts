@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -684,7 +684,7 @@ Patch26040: USB-quirks-device-qualifier-quirk-for-another-Elan-t.patch
 Patch26041: HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
 
 #CVE-2014-8086 rhbz 1151353 1152608
-Patch26056: ext4-fix-race-between-write-and-fcntl-F_SETFL.patch
+Patch26056: ext4-prevent-bugon-on-race-between-write-fcntl.patch
 
 #rhbz 1089731
 Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
@@ -725,6 +725,20 @@ Patch26082: kvm-fix-excessive-pages-un-pinning-in-kvm_iommu_map-.patch
 
 #rhbz 1157327
 Patch26083: quirk-for-Lenovo-Yoga-3-no-rfkill-switch.patch
+
+#rhbz 1159592
+Patch26084: x86-microcode-AMD-Fix-early-ucode-loading-on-32-bit.patch
+
+# CVE-2014-7826 CVE-2014-7825 rhbz 1161565 1161572
+Patch26085: tracing-syscalls-Ignore-numbers-outside-NR_syscalls-.patch
+
+#rhbz 1151836
+Patch26086: Revert-iwlwifi-mvm-treat-EAPOLs-like-mgmt-frames-wrt.patch
+
+Patch26087: crypto-algif-avoid-excessive-use-of-socket-buffer-in.patch
+
+#rhbz 1161805
+Patch26066: ahci-disable-MSI-instead-of-NCQ-on-Samsung-pci-e-SSD.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1556,7 +1570,7 @@ ApplyPatch USB-quirks-device-qualifier-quirk-for-another-Elan-t.patch
 ApplyPatch HID-usbhid-always-poll-quirk-for-Elan-Touchscreen-01.patch
 
 #CVE-2014-8086 rhbz 1151353 1152608
-ApplyPatch ext4-fix-race-between-write-and-fcntl-F_SETFL.patch
+ApplyPatch ext4-prevent-bugon-on-race-between-write-fcntl.patch
 
 #rhbz 1089731
 ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
@@ -1597,6 +1611,20 @@ ApplyPatch kvm-fix-excessive-pages-un-pinning-in-kvm_iommu_map-.patch
 
 #rhbz 1157327
 ApplyPatch quirk-for-Lenovo-Yoga-3-no-rfkill-switch.patch
+
+#rhbz 1159592
+ApplyPatch x86-microcode-AMD-Fix-early-ucode-loading-on-32-bit.patch
+
+# CVE-2014-7826 CVE-2014-7825 rhbz 1161565 1161572
+ApplyPatch tracing-syscalls-Ignore-numbers-outside-NR_syscalls-.patch
+
+#rhbz 1151836
+ApplyPatch Revert-iwlwifi-mvm-treat-EAPOLs-like-mgmt-frames-wrt.patch
+
+ApplyPatch crypto-algif-avoid-excessive-use-of-socket-buffer-in.patch
+
+#rhbz 1161805
+ApplyPatch ahci-disable-MSI-instead-of-NCQ-on-Samsung-pci-e-SSD.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2479,6 +2507,17 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Mon Nov 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.2-301
+- Fix Samsung pci-e SSD handling on some macbooks (rhbz 1161805)
+- Add patch to fix crypto allocation issues on PAGE_SIZE > 4k
+
+* Fri Nov 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix iwlwifi oops (rhbz 1151836)
+- CVE-2014-7826 CVE-2014-7825 insufficient syscall number validation in perf and ftrace subsystems (rhbz 1161565 1161572)
+
+* Mon Nov 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix early ucode crash on 32-bit AMD machines (rhbz 1159592)
+
 * Thu Oct 30 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17.2-gnu.
 
