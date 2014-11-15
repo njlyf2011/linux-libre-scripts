@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index a192280..c495766 100644
+index 57a45b1..aa6a6a1 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -303,8 +303,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -1683,30 +1683,6 @@ index 4f9eaa3..f945bd7a 100644
  
  #
  # Suspend Support
-diff --git a/arch/mips/loongson/lemote-2f/clock.c b/arch/mips/loongson/lemote-2f/clock.c
-index a217061..462e34d 100644
---- a/arch/mips/loongson/lemote-2f/clock.c
-+++ b/arch/mips/loongson/lemote-2f/clock.c
-@@ -91,6 +91,7 @@ EXPORT_SYMBOL(clk_put);
- 
- int clk_set_rate(struct clk *clk, unsigned long rate)
- {
-+	unsigned int rate_khz = rate / 1000;
- 	struct cpufreq_frequency_table *pos;
- 	int ret = 0;
- 	int regval;
-@@ -107,9 +108,9 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
- 		propagate_rate(clk);
- 
- 	cpufreq_for_each_valid_entry(pos, loongson2_clockmod_table)
--		if (rate == pos->frequency)
-+		if (rate_khz == pos->frequency)
- 			break;
--	if (rate != pos->frequency)
-+	if (rate_khz != pos->frequency)
- 		return -ENOTSUPP;
- 
- 	clk->rate = rate;
 diff --git a/arch/mips/loongson/lemote-2f/platform.c b/arch/mips/loongson/lemote-2f/platform.c
 new file mode 100644
 index 0000000..5316360
@@ -1762,7 +1738,7 @@ index 0000000..5316360
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index bf0fc6b..c9f2838 100644
+index 51a0fde..c5f59f5 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -2560,10 +2536,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 25cd674..41f58f7 100644
+index c3a712c..dbc409c 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -984,6 +984,9 @@
+@@ -991,6 +991,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9380,7 +9356,7 @@ index 0000000..c285a67
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index a168e96..5e820df5 100644
+index 54ef393..e6da9e9 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
 @@ -688,6 +688,7 @@ comment "Platform RTC drivers"
@@ -9461,7 +9437,7 @@ index 2f3aceb..6647c3f 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 54a8120..2ca4c23 100644
+index e87219a..098e427d 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9474,7 +9450,7 @@ index 54a8120..2ca4c23 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -626,6 +629,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -633,6 +636,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
