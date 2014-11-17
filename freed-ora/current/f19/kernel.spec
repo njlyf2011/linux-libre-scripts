@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 23
+%define stable_update 24
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -816,9 +816,6 @@ Patch25109: revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pa
 Patch25110: 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 Patch25111: 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#CVE-2014-7970 rhbz 1151095 1151484
-Patch26032: mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
-
 # CVE-2014-3690 rhbz 1153322 1155372
 Patch26060: x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
 
@@ -831,19 +828,11 @@ Patch26062: net-sctp-fix-panic-on-duplicate-ASCONF-chunks.patch
 #CVE-2014-3673 rhbz 1147850 1155727
 Patch26063: net-sctp-fix-remote-memory-pressure-from-excessive-q.patch
 
-# CVE-2014-3610 kvm: noncanonical MSR writes (rhbz 1144883 1156543)
-# CVE-2014-3611 kvm: PIT timer race condition (rhbz 1144878 1156537)
-# CVE-2014-3646 kvm: vmx: invvpid vm exit not handled (rhbz 1144825 1156534)
-# CVE-2014-8369 kvm: excessive pages un-pinning in kvm_iommu_map error path (rhbz 1156518 1156522)
-Patch26070: KVM-x86-Check-non-canonical-addresses-upon-WRMSR.patch
-Patch26071: KVM-x86-Prevent-host-from-panicking-on-shared-MSR-wr.patch
-Patch26072: KVM-x86-Improve-thread-safety-in-pit.patch
-Patch26073: KVM-x86-Fix-wrong-masking-on-relative-jump-call.patch
-Patch26074: KVM-x86-Emulator-fixes-for-eip-canonical-checks-on-n.patch
-Patch26075: KVM-x86-Handle-errors-when-RIP-is-set-during-far-jum.patch
-Patch26076: kvm-vmx-handle-invvpid-vm-exit-gracefully.patch
-Patch26077: kvm-x86-don-t-kill-guest-on-unknown-exit-reason.patch
-Patch26082: kvm-fix-excessive-pages-un-pinning-in-kvm_iommu_map-.patch
+#CVE-2014-7841 rhbz 1163087 1163095
+Patch26067: net-sctp-fix-NULL-pointer-dereference-in-af-from_add.patch
+
+#CVE-2014-7842 rhbz 1163762 1163767
+Patch26068: KVM-x86-Don-t-report-guest-userspace-emulation-error.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1603,9 +1592,6 @@ ApplyPatch revert-input-wacom-testing-result-shows-get_report-is-unnecessary.pat
 ApplyPatch 0001-ideapad-laptop-Blacklist-rfkill-control-on-the-Lenov.patch
 ApplyPatch 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
-#CVE-2014-7970 rhbz 1151095 1151484
-ApplyPatch mnt-Prevent-pivot_root-from-creating-a-loop-in-the-m.patch
-
 # CVE-2014-3690 rhbz 1153322 1155372
 ApplyPatch x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
 
@@ -1618,19 +1604,11 @@ ApplyPatch net-sctp-fix-panic-on-duplicate-ASCONF-chunks.patch
 #CVE-2014-3673 rhbz 1147850 1155727
 ApplyPatch net-sctp-fix-remote-memory-pressure-from-excessive-q.patch
 
-# CVE-2014-3610 kvm: noncanonical MSR writes (rhbz 1144883 1156543)
-# CVE-2014-3611 kvm: PIT timer race condition (rhbz 1144878 1156537)
-# CVE-2014-3646 kvm: vmx: invvpid vm exit not handled (rhbz 1144825 1156534)
-# CVE-2014-8369 kvm: excessive pages un-pinning in kvm_iommu_map error path (rhbz 1156518 1156522)
-ApplyPatch KVM-x86-Check-non-canonical-addresses-upon-WRMSR.patch
-ApplyPatch KVM-x86-Prevent-host-from-panicking-on-shared-MSR-wr.patch
-ApplyPatch KVM-x86-Improve-thread-safety-in-pit.patch
-ApplyPatch KVM-x86-Fix-wrong-masking-on-relative-jump-call.patch
-ApplyPatch KVM-x86-Emulator-fixes-for-eip-canonical-checks-on-n.patch
-ApplyPatch KVM-x86-Handle-errors-when-RIP-is-set-during-far-jum.patch
-ApplyPatch kvm-vmx-handle-invvpid-vm-exit-gracefully.patch
-ApplyPatch kvm-x86-don-t-kill-guest-on-unknown-exit-reason.patch
-ApplyPatch kvm-fix-excessive-pages-un-pinning-in-kvm_iommu_map-.patch
+#CVE-2014-7841 rhbz 1163087 1163095
+ApplyPatch net-sctp-fix-NULL-pointer-dereference-in-af-from_add.patch
+
+#CVE-2014-7842 rhbz 1163762 1163767
+ApplyPatch KVM-x86-Don-t-report-guest-userspace-emulation-error.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2455,6 +2433,21 @@ fi
 # and build.
 
 %changelog
+* Sat Nov 15 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.24-gnu.
+
+* Fri Nov 14 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.24-100
+- Linux v3.14.24
+
+* Thu Nov 13 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7842 kvm: reporting emulation failures to userspace (rhbz 1163762 1163767)
+
+* Wed Nov 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7841 sctp: NULL ptr deref on malformed packet (rhbz 1163087 1163095)
+
+* Fri Nov 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7826 CVE-2014-7825 insufficient syscall number validation in perf and ftrace subsystems (rhbz 1161565 1161572)
+
 * Thu Oct 30 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.23-gnu.
 
