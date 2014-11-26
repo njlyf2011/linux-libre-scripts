@@ -100,7 +100,8 @@ find .pc -perm 000 -print0 | xargs --no-run-if-empty -0 chmod 400
 
 if $prep; then
   make oldconfig
-  false
+  quilt refresh
+  exit
 fi
 
 mv debian `pwd`.debian
