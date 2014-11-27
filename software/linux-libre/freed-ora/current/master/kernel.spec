@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 %global aarch64patches 1
 
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -3.17%{?stablegnux}
-#define rcrevlibre  -3.17%{?rcrevgnux}
+%define rcrevlibre  -3.17%{?rcrevgnux}
 #define gitrevlibre -3.17%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -429,6 +429,9 @@ BuildRequires: sparse
 %if %{with_perf}
 BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex
 BuildRequires: audit-libs-devel
+%ifnarch s390 s390x %{arm}
+BuildRequires: numactl-devel
+%endif
 %endif
 %if %{with_tools}
 BuildRequires: pciutils-devel gettext ncurses-devel
@@ -455,7 +458,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -619,7 +622,7 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 
 # PPC
-Patch18000: ppc64-fixtools.patch
+
 # ARM64
 
 # ARMv7
@@ -647,34 +650,21 @@ Patch21247: ath9k-rx-dma-stop-check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-#rhbz 1025603
-Patch25063: disable-libdw-unwind-on-non-x86.patch
-
-#rhbz 983342 1093120
-Patch25069: acpi-video-Add-4-new-models-to-the-use_native_backli.patch
-
-Patch26000: perf-install-trace-event-plugins.patch
-
 # Patch series from Hans for various backlight and platform driver fixes
 Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-Patch26013: acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
-Patch26014: acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
 
-#rhbz 1134969
-Patch26016: HID-wacom-Add-support-for-the-Cintiq-Companion.patch
+Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
-#rhbz 1110011
-Patch26019: psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
-Patch26020: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
+#rhbz 1111138
+Patch26059: i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
 
-#rhbz 1138759
-Patch26021: drm-vmwgfx-Fix-drm.h-include.patch
+Patch26064: Input-add-driver-for-the-Goodix-touchpanel.patch
 
-#rhbz 1123584
-Patch26028: HID-rmi-check-sanity-of-incoming-report.patch
+#rhbz 1135338
+Patch26070: HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
 
-#rhbz 1145318
-Patch26029: KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
+#rhbz 1165206
+Patch26071: usb-quirks-Add-reset-resume-quirk-for-MS-Wireless-La.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1333,7 +1323,7 @@ ApplyOptionalPatch upstream-reverts.patch -R
 ApplyPatch lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 # PPC
-ApplyPatch ppc64-fixtools.patch
+
 # ARM64
 
 #
@@ -1468,34 +1458,21 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k-rx-dma-stop-check.patch
 
-#rhbz 1025603
-ApplyPatch disable-libdw-unwind-on-non-x86.patch
-
-#rhbz 983342 1093120
-ApplyPatch acpi-video-Add-4-new-models-to-the-use_native_backli.patch
-
-ApplyPatch perf-install-trace-event-plugins.patch
-
 # Patch series from Hans for various backlight and platform driver fixes
 ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-ApplyPatch acpi-video-Add-use-native-backlight-quirk-for-the-Th.patch
-ApplyPatch acpi-video-Add-use_native_backlight-quirk-for-HP-Pro.patch
 
-#rhbz 1134969
-ApplyPatch HID-wacom-Add-support-for-the-Cintiq-Companion.patch
+ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
-#rhbz 1110011
-ApplyPatch psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
-ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
+#rhbz 1111138
+ApplyPatch i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
 
-#rhbz 1138759
-ApplyPatch drm-vmwgfx-Fix-drm.h-include.patch
+ApplyPatch Input-add-driver-for-the-Goodix-touchpanel.patch
 
-#rhbz 1123584
-ApplyPatch HID-rmi-check-sanity-of-incoming-report.patch
+#rhbz 1135338
+ApplyPatch HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
 
-#rhbz 1145318
-ApplyPatch KEYS-Reinstate-EPERM-for-a-key-type-name-beginning-w.patch
+#rhbz 1165206
+ApplyPatch usb-quirks-Add-reset-resume-quirk-for-MS-Wireless-La.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -1911,7 +1888,7 @@ BuildKernel %make_target %kernel_image
 %endif
 
 %global perf_make \
-  make -s %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_LIBNUMA=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
+  make -s %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT all
@@ -2034,7 +2011,7 @@ find $RPM_BUILD_ROOT/usr/include \
 
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT MULTILIBDIR=%{_lib} install-bin install-traceevent-plugins
+%{perf_make} DESTDIR=$RPM_BUILD_ROOT lib=%{_lib} install-bin install-traceevent-plugins
 # remove the 'trace' symlink.
 rm -f %{buildroot}%{_bindir}/trace
 
@@ -2378,6 +2355,190 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Tue Nov 25 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18-rc6-gnu.
+
+* Mon Nov 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v3.18-rc6
+- Add quirk for Laser Mouse 6000 (rhbz 1165206)
+
+* Fri Nov 21 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Move TPM drivers to main kernel package (rhbz 1164937)
+
+* Wed Nov 19 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable SERIAL_8250 on s390x (rhbz 1158848)
+
+* Mon Nov 17 2014 Kyle McMartin <kyle@fedoraproject.org> - 3.18.0-0.rc5.git0.2
+- Re-merge kernel-arm64.patch
+
+* Mon Nov 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc5.git0.1
+- Linux v3.18-rc5
+- Disable debugging options.
+
+* Fri Nov 14 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable I40EVF driver (rhbz 1164029)
+
+* Fri Nov 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc4.git2.1
+- Linux v3.18-rc4-184-gb23dc5a7cc6e
+
+* Thu Nov 13 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch for MS Surface Pro 3 Type Cover (rhbz 1135338)
+- CVE-2014-7843 aarch64: copying from /dev/zero causes local DoS (rhbz 1163744 1163745)
+
+* Thu Nov 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc4.git1.1
+- Linux v3.18-rc4-52-g04689e749b7e
+- Reenable debugging options.
+
+* Wed Nov 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7841 sctp: NULL ptr deref on malformed packet (rhbz 1163087 1163095)
+
+* Tue Nov 11 2014 Kyle McMartin <kyle@fedoraproject.org> - 3.18.0-0.rc4.git0.2
+- Re-enable kernel-arm64.patch, and fix up merge conflicts with 3.18-rc4
+
+* Mon Nov 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix Samsung pci-e SSD handling on some macbooks (rhbz 1161805)
+
+* Mon Nov 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc4.git0.1
+- Linux v3.18-rc4
+- Temporarily disable aarch64patches
+- Disable debugging options.
+
+* Fri Nov 07 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc3.git4.1
+- Linux v3.18-rc3-82-ged78bb846e8b
+
+* Thu Nov 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc3.git3.1
+- Linux v3.18-rc3-68-g20f3963d8f48
+
+* Wed Nov 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc3.git2.1
+- Linux v3.18-rc3-61-ga1cff6e25e6e
+
+* Tue Nov 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc3.git1.1
+- Linux v3.18-rc3-31-g980d0d51b1c9
+- Reenable debugging options.
+
+* Mon Nov 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable CONFIG_KXCJK1013
+- Add driver for goodix touchscreen from Bastien Nocera
+
+* Mon Nov 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc3.git0.1
+- Linux v3.18-rc3
+- Disable debugging options.
+
+* Thu Oct 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc2.git3.1
+- Linux v3.18-rc2-106-ga7ca10f263d7
+
+* Wed Oct 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc2.git2.1
+- Linux v3.18-rc2-53-g9f76628da20f
+
+* Tue Oct 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add quirk for rfkill on Yoga 3 machines (rhbz 1157327)
+
+* Tue Oct 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc2.git1.1
+- Linux v3.18-rc2-43-gf7e87a44ef60
+- Add two RCU patches to fix a deadlock and a hang
+- Reenable debugging options.
+
+* Mon Oct 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc2.git0.1
+- Linux v3.18-rc2
+- Disable debugging options.
+
+* Sun Oct 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update ARM config options, some minor cleanups
+
+* Sun Oct 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc1.git4.1
+- Linux v3.18-rc1-422-g2cc91884b6b3
+
+* Fri Oct 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc1.git3.3
+- CVE-2014-3610 kvm: noncanonical MSR writes (rhbz 1144883 1156543)
+- CVE-2014-3611 kvm: PIT timer race condition (rhbz 1144878 1156537)
+- CVE-2014-3646 kvm: vmx: invvpid vm exit not handled (rhbz 1144825 1156534)
+- CVE-2014-8369 kvm: excessive pages un-pinning in kvm_iommu_map error path (rhbz 1156518 1156522)
+- CVE-2014-8480 CVE-2014-8481 kvm: NULL pointer dereference during rip relative instruction emulation (rhbz 1156615 1156616)
+
+* Fri Oct 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc1.git3.1
+- Linux v3.18-rc1-280-g816fb4175c29
+- Add touchpad quirk for Fujitsu Lifebook A544/AH544 models (rhbz 1111138)
+
+* Wed Oct 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc1.git2.1
+- Linux v3.18-rc1-221-gc3351dfabf5c
+- Add patch to fix wifi on X550VB machines (rhbz 1089731)
+
+* Tue Oct 21 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop pinctrl qcom revert now that it's dependencies should be merged
+
+* Tue Oct 21 2014 Kyle McMartin <kyle@fedoraproject.org> - 3.18.0-0.rc1.git1.2
+- Re-enable kernel-arm64.patch after updating.
+- CONFIG_SERIAL_8250_FINTEK moved to generic since it appears on x86-generic
+  and arm64 now.
+- CONFIG_IMX_THERMAL=n added to config-arm64.
+- arm64: disable BPF_JIT temporarily
+
+* Tue Oct 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc1.git1.1
+- Linux v3.18-rc1-68-gc2661b806092
+- Make LOG_BUF_SHIFT on arm64 the same as the rest of the arches (rhbz 1123327)
+- Enable RTC PL031 driver on arm64 (rhbz 1123882)
+- Reenable debugging options.
+
+* Mon Oct 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc1.git0.1
+- Linux v3.18-rc1
+- Disable debugging options.
+
+* Fri Oct 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git9.4
+- CVE-2014-8086 ext4: race condition (rhbz 1151353 1152608)
+- Enable B43_PHY_G to fix b43 driver regression (rhbz 1152502)
+
+* Wed Oct 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git9.3
+- Revert Btrfs ro snapshot commit that causes filesystem corruption
+
+* Wed Oct 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git9.1
+- Linux v3.17-9670-g0429fbc0bdc2
+
+* Tue Oct 14 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patches to fix elantech touchscreens (rhbz 1149509)
+
+* Tue Oct 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git8.1
+- Linux v3.17-9283-g2d65a9f48fcd
+
+* Tue Oct 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git7.1
+- Linux v3.17-8307-gf1d0d14120a8
+
+* Mon Oct 13 2014 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update armv7/aarch64 config options
+
+* Mon Oct 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git6.1
+- Linux v3.17-7872-g5ff0b9e1a1da
+
+* Sun Oct 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git5.1
+- Linux v3.17-7639-g90eac7eee2f4
+
+* Sun Oct 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable CONFIG_I2C_DESIGNWARE_PCI (rhbz 1045821)
+
+* Fri Oct 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-7970 VFS: DoS with USER_NS (rhbz 1151095 1151484)
+
+* Fri Oct 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git4.1
+- Linux v3.17-6136-gc798360cd143
+
+* Thu Oct 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git3.1
+- Linux v3.17-5585-g782d59c5dfc5
+
+* Thu Oct 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git2.1
+- Linux v3.17-5503-g35a9ad8af0bb
+
+* Wed Oct 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc0.git1.1
+- Linux v3.17-2860-gef0625b70dac
+- Reenable debugging options.
+- Temporarily disable aarch64patches
+- Add patch to fix ATA blacklist
+
+* Tue Oct 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix GFS2 regression (from Bob Peterson)
+
+* Mon Oct 06 2014 Kyle McMartin <kyle@fedoraproject.org>
+- enable 64K pages on arm64... (presently) needed to boot on amd seattle
+  platforms due to physical memory being unreachable.
+
 * Mon Oct  6 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17-gnu.
 
