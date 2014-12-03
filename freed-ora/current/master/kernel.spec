@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -662,9 +662,6 @@ Patch26064: Input-add-driver-for-the-Goodix-touchpanel.patch
 
 #rhbz 1135338
 Patch26070: HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
-
-#rhbz 1165206
-Patch26071: usb-quirks-Add-reset-resume-quirk-for-MS-Wireless-La.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1470,9 +1467,6 @@ ApplyPatch Input-add-driver-for-the-Goodix-touchpanel.patch
 
 #rhbz 1135338
 ApplyPatch HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
-
-#rhbz 1165206
-ApplyPatch usb-quirks-Add-reset-resume-quirk-for-MS-Wireless-La.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2355,6 +2349,16 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Tue Dec  2 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18-rc7-gnu.
+
+* Mon Dec 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc7.git0.1
+- Linux v3.18-rc7
+
+* Thu Nov 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc6.git1.1
+- Linux v3.18-rc6-28-g3314bf6ba2ac
+- Gobble Gobble
+
 * Tue Nov 25 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.18-rc6-gnu.
 
