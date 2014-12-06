@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -622,6 +622,8 @@ Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 # PPC
 Patch18000: ppc64-fixtools.patch
 # ARM64
+Patch20000: arm64-force-serial-to-be-active-consdev.patch
+Patch20001: arm64-vgic-error-to-info.patch
 
 # ARMv7
 Patch21020: ARM-tegra-usb-no-reset.patch
@@ -674,6 +676,14 @@ Patch26071: usb-quirks-Add-reset-resume-quirk-for-MS-Wireless-La.patch
 
 #rhbz 1167511
 Patch26072: drm-radeon-initialize-sadb-to-NULL-in-the-audio-code.patch
+
+#rhbz 1094048
+Patch26073: Input-xpad-use-proper-endpoint-type.patch
+
+Patch26074: drm-i915-Ignore-long-hpds-on-eDP-ports.patch
+
+#CVE-2014-9090 rhbz 1170691
+Patch26075: x86_64-traps-Stop-using-IST-for-SS.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1496,10 +1506,23 @@ ApplyPatch usb-quirks-Add-reset-resume-quirk-for-MS-Wireless-La.patch
 #rhbz 1167511
 ApplyPatch drm-radeon-initialize-sadb-to-NULL-in-the-audio-code.patch
 
+#rhbz 1094048
+ApplyPatch Input-xpad-use-proper-endpoint-type.patch
+
+ApplyPatch drm-i915-Ignore-long-hpds-on-eDP-ports.patch
+
+#CVE-2014-9090 rhbz 1170691
+ApplyPatch x86_64-traps-Stop-using-IST-for-SS.patch
+
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
 %ifnarch aarch64 # this is stupid, but i want to notice before secondary koji does.
 ApplyPatch kernel-arm64.patch -R
+%else
+# arm64-force-serial-to-be-active-consdev.patch: not for upstream
+#  solved with SPCR in future
+ApplyPatch arm64-force-serial-to-be-active-consdev.patch
+ApplyPatch arm64-vgic-error-to-info.patch
 %endif
 %endif
 
@@ -2377,6 +2400,21 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu Dec 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.4-302
+- CVE-2014-9090 local DoS via do_double_fault due to improper SS faults (rhbz 1170691)
+
+* Thu Dec 04 2014 Kyle McMartin <kyle@fedoraproject.org>
+- kernel-arm64.patch: update.
+- arm64-force-serial-to-be-active-consdev.patch: force serial consoles
+  to be the primary console device instead of defaulting to tty0. No
+  changes to drivers outside of ARM-land.
+- arm64-vgic-error-to-info.patch: change an error to a warning so that
+  kvm will work.
+
+* Mon Dec 01 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to quiet i915 driver on long hdps
+- Add patch to fix oops when using xpad (rhbz 1094048)
+
 * Thu Nov 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.4-301
 - Add patch to fix radeon HDMI issues (rhbz 1167511)
 
