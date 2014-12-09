@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 8d891c6..c5f4411a 100644
+index a0b8625..8da44ee 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -247,10 +247,10 @@ index bbaa1d4b..87af880 100644
 -clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec}
 +clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec,unsstrip}
 diff --git a/arch/mips/boot/compressed/decompress.c b/arch/mips/boot/compressed/decompress.c
-index 2c95730..3f65441 100644
+index d498a1f..4d9810f 100644
 --- a/arch/mips/boot/compressed/decompress.c
 +++ b/arch/mips/boot/compressed/decompress.c
-@@ -27,8 +27,13 @@ unsigned long free_mem_end_ptr;
+@@ -28,8 +28,13 @@ unsigned long free_mem_end_ptr;
  extern unsigned char __image_begin, __image_end;
  
  /* debug interfaces  */
@@ -2914,7 +2914,7 @@ index c6568bf4..ff54da8 100644
  		printk(KERN_INFO "FPU revision is: %08x\n", c->fpu_id);
  }
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index 74f485d..91688d1 100644
+index 37605dc..e09d1ec 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -3143,10 +3143,10 @@ index 29692e5..6be5dff 100644
  load-$(CONFIG_LEMOTE_MACH2F) += 0xffffffff80200000
 +load-$(CONFIG_DEXXON_GDIUM) += 0xffffffff80200000
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
-index 4c57b3e..703b058 100644
+index 33f76e6..703b058 100644
 --- a/arch/mips/loongson/common/Makefile
 +++ b/arch/mips/loongson/common/Makefile
-@@ -4,6 +4,7 @@
+@@ -4,15 +4,14 @@
  
  obj-y += setup.o init.o cmdline.o env.o time.o reset.o irq.o \
      pci.o bonito-irq.o mem.o machtype.o platform.o
@@ -3154,11 +3154,13 @@ index 4c57b3e..703b058 100644
  obj-$(CONFIG_GPIOLIB) += gpio.o
  
  #
-@@ -11,7 +12,6 @@ obj-$(CONFIG_GPIOLIB) += gpio.o
+ # Serial port support
  #
  obj-$(CONFIG_EARLY_PRINTK) += early_printk.o
- obj-$(CONFIG_SERIAL_8250) += serial.o
+-loongson-serial-$(CONFIG_SERIAL_8250) := serial.o
+-obj-y += $(loongson-serial-m) $(loongson-serial-y)
 -obj-$(CONFIG_LOONGSON_UART_BASE) += uart_base.o
++obj-$(CONFIG_SERIAL_8250) += serial.o
  obj-$(CONFIG_LOONGSON_MC146818) += rtc.o
  
  #
@@ -6698,10 +6700,10 @@ index 8557fb5..8b568ef 100644
  	case CPU_CAVIUM_OCTEON_PLUS:
  		c->icache.linesz = 2 << ((config1 >> 19) & 7);
 diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
-index 21813be..d8ecfa6 100644
+index c2ec87e..d0c7905 100644
 --- a/arch/mips/mm/c-r4k.c
 +++ b/arch/mips/mm/c-r4k.c
-@@ -809,7 +809,7 @@ static void __cpuinit probe_pcache(void)
+@@ -816,7 +816,7 @@ static void __cpuinit probe_pcache(void)
  	unsigned long config1;
  	unsigned int lsize;
  
@@ -6710,7 +6712,7 @@ index 21813be..d8ecfa6 100644
  	case CPU_R4600:			/* QED style two way caches? */
  	case CPU_R4700:
  	case CPU_R5000:
-@@ -897,10 +897,10 @@ static void __cpuinit probe_pcache(void)
+@@ -904,10 +904,10 @@ static void __cpuinit probe_pcache(void)
  		write_c0_config(config & ~VR41_CONF_P4K);
  	case CPU_VR4131:
  		/* Workaround for cache instruction bug of VR4131 */
@@ -6724,7 +6726,7 @@ index 21813be..d8ecfa6 100644
  				config |= VR41_CONF_BP;
  			write_c0_config(config);
  		} else
-@@ -1045,7 +1045,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1052,7 +1052,7 @@ static void __cpuinit probe_pcache(void)
  	 * normally they'd suffer from aliases but magic in the hardware deals
  	 * with that for us so we don't need to take care ourselves.
  	 */
@@ -6733,7 +6735,7 @@ index 21813be..d8ecfa6 100644
  	case CPU_20KC:
  	case CPU_25KF:
  	case CPU_SB1:
-@@ -1078,7 +1078,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1085,7 +1085,7 @@ static void __cpuinit probe_pcache(void)
  			c->dcache.flags |= MIPS_CACHE_ALIASES;
  	}
  
@@ -6742,7 +6744,7 @@ index 21813be..d8ecfa6 100644
  	case CPU_20KC:
  		/*
  		 * Some older 20Kc chips doesn't have the 'VI' bit in
-@@ -1207,7 +1207,7 @@ static void __cpuinit setup_scache(void)
+@@ -1214,7 +1214,7 @@ static void __cpuinit setup_scache(void)
  	 * processors don't have a S-cache that would be relevant to the
  	 * Linux memory management.
  	 */
@@ -6751,7 +6753,7 @@ index 21813be..d8ecfa6 100644
  	case CPU_R4000SC:
  	case CPU_R4000MC:
  	case CPU_R4400SC:
-@@ -1384,9 +1384,8 @@ static void __cpuinit r4k_cache_error_setup(void)
+@@ -1391,9 +1391,8 @@ static void __cpuinit r4k_cache_error_setup(void)
  {
  	extern char __weak except_vec2_generic;
  	extern char __weak except_vec2_sb1;
@@ -6811,7 +6813,7 @@ index df96da7..cceaaaf 100644
  	case CPU_74K:
  	case CPU_1004K:
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index afeef93..b81da41 100644
+index a91a7a9..08eead9 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
 @@ -138,7 +138,7 @@ static int scratchpad_offset(int i)
@@ -14330,7 +14332,7 @@ index 9cfe3af..b93877d 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 9da566a..fffecfb 100644
+index 8b34841..54e494d 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -14343,7 +14345,7 @@ index 9da566a..fffecfb 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -633,6 +636,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
