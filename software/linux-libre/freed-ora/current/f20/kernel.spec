@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2398,6 +2398,25 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Dec  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.17.6-gnu.
+
+* Mon Dec 08 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.17.6-200
+- Linux v3.17.6
+
+* Thu Dec 04 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-9090 local DoS via do_double_fault due to improper SS faults (rhbz 1170691)
+
+* Mon Dec 01 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to quiet i915 driver on long hdps
+- Add patch to fix oops when using xpad (rhbz 1094048)
+
+* Thu Nov 27 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix radeon HDMI issues (rhbz 1167511)
+
+* Mon Nov 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Add quirk for Laser Mouse 6000 (rhbz 1165206)
+
 * Sat Nov 22 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17.4-gnu.
 
