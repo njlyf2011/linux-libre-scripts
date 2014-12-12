@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 %global aarch64patches 1
 
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 17
+%define base_sublevel 18
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.17%{?stablegnux}
-%define rcrevlibre  -3.17%{?rcrevgnux}
-#define gitrevlibre -3.17%{?gitrevgnux}
+#define stablelibre -3.18%{?stablegnux}
+#define rcrevlibre  -3.18%{?rcrevgnux}
+#define gitrevlibre -3.18%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -458,7 +458,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-3.%{upstream_sublevel}
+#Source6: deblob-3.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -2349,6 +2349,21 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Tue Dec  9 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18-gnu.
+
+* Tue Dec 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-1
+- Linux v3.18
+
+* Fri Dec 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc7.git3.1
+- Linux v3.18-rc7-59-g56c67ce187a8
+
+* Thu Dec 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc7.git2.1
+- Linux v3.18-rc7-48-g7cc78f8fa02c
+
+* Wed Dec 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-0.rc7.git1.1
+- Linux v3.18-rc7-3-g3a18ca061311
+
 * Tue Dec  2 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.18-rc7-gnu.
 
