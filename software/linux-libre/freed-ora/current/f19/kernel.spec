@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 25
+%define stable_update 26
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -2403,6 +2403,15 @@ fi
 # and build.
 
 %changelog
+* Mon Dec  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.26-gnu.
+
+* Mon Dec 08 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.26-100
+- Linux v3.14.26
+
+* Thu Dec 04 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-9090 local DoS via do_double_fault due to improper SS faults (rhbz 1170691)
+
 * Sat Nov 22 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.25-gnu.
 
