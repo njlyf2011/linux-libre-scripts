@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 30a5c65..126f190 100644
+index 1433109..971a529 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -334,10 +334,10 @@ index 5042d51..c653ebd 100644
 -clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec}
 +clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec,unsstrip}
 diff --git a/arch/mips/boot/compressed/decompress.c b/arch/mips/boot/compressed/decompress.c
-index 5cad0fa..2f761a5 100644
+index ca51d69..d0a6828 100644
 --- a/arch/mips/boot/compressed/decompress.c
 +++ b/arch/mips/boot/compressed/decompress.c
-@@ -27,8 +27,13 @@ unsigned long free_mem_end_ptr;
+@@ -28,8 +28,13 @@ unsigned long free_mem_end_ptr;
  extern unsigned char __image_begin, __image_end;
  
  /* debug interfaces  */
@@ -2311,7 +2311,7 @@ index 7aa37dd..655f849 100644
  extern struct dma_map_ops *mips_dma_map_ops;
  
 diff --git a/arch/mips/include/asm/ftrace.h b/arch/mips/include/asm/ftrace.h
-index ce35c9a..4c02d4c 100644
+index 370ae7c..ca11fdc 100644
 --- a/arch/mips/include/asm/ftrace.h
 +++ b/arch/mips/include/asm/ftrace.h
 @@ -3,7 +3,7 @@
@@ -4658,10 +4658,10 @@ index decd1fa..154744c 100644
  	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
  
 diff --git a/arch/mips/kernel/perf_event_mipsxx.c b/arch/mips/kernel/perf_event_mipsxx.c
-index 315fc0b..7871e52 100644
+index dc6ffe0..a55e4af 100644
 --- a/arch/mips/kernel/perf_event_mipsxx.c
 +++ b/arch/mips/kernel/perf_event_mipsxx.c
-@@ -1617,6 +1617,12 @@ init_hw_perf_events(void)
+@@ -1612,6 +1612,12 @@ init_hw_perf_events(void)
  		mipspmu.cache_event_map = &octeon_cache_map;
  		mipspmu.map_raw_event = octeon_pmu_map_raw_event;
  		break;
@@ -4970,10 +4970,10 @@ index 29692e5..6be5dff 100644
  load-$(CONFIG_LEMOTE_MACH2F) += 0xffffffff80200000
 +load-$(CONFIG_DEXXON_GDIUM) += 0xffffffff80200000
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
-index e526488..ed90596 100644
+index ce415f7..ed90596 100644
 --- a/arch/mips/loongson/common/Makefile
 +++ b/arch/mips/loongson/common/Makefile
-@@ -3,7 +3,10 @@
+@@ -3,16 +3,17 @@
  #
  
  obj-y += setup.o init.o cmdline.o env.o time.o reset.o irq.o \
@@ -4985,11 +4985,13 @@ index e526488..ed90596 100644
  obj-$(CONFIG_GENERIC_GPIO) += gpio.o
  
  #
-@@ -11,7 +14,6 @@ obj-$(CONFIG_GENERIC_GPIO) += gpio.o
+ # Serial port support
  #
  obj-$(CONFIG_EARLY_PRINTK) += early_printk.o
- obj-$(CONFIG_SERIAL_8250) += serial.o
+-loongson-serial-$(CONFIG_SERIAL_8250) := serial.o
+-obj-y += $(loongson-serial-m) $(loongson-serial-y)
 -obj-$(CONFIG_LOONGSON_UART_BASE) += uart_base.o
++obj-$(CONFIG_SERIAL_8250) += serial.o
  obj-$(CONFIG_LOONGSON_MC146818) += rtc.o
  
  #
@@ -9250,10 +9252,10 @@ index daa81f7..c36d509 100644
  	case CPU_CAVIUM_OCTEON_PLUS:
  		c->icache.linesz = 2 << ((config1 >> 19) & 7);
 diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
-index 7d5ac0b..a005eb83 100644
+index 228a205..da71508 100644
 --- a/arch/mips/mm/c-r4k.c
 +++ b/arch/mips/mm/c-r4k.c
-@@ -788,7 +788,7 @@ static void __cpuinit probe_pcache(void)
+@@ -795,7 +795,7 @@ static void __cpuinit probe_pcache(void)
  	unsigned long config1;
  	unsigned int lsize;
  
@@ -9262,7 +9264,7 @@ index 7d5ac0b..a005eb83 100644
  	case CPU_R4600:			/* QED style two way caches? */
  	case CPU_R4700:
  	case CPU_R5000:
-@@ -876,10 +876,10 @@ static void __cpuinit probe_pcache(void)
+@@ -883,10 +883,10 @@ static void __cpuinit probe_pcache(void)
  		write_c0_config(config & ~VR41_CONF_P4K);
  	case CPU_VR4131:
  		/* Workaround for cache instruction bug of VR4131 */
@@ -9276,7 +9278,7 @@ index 7d5ac0b..a005eb83 100644
  				config |= VR41_CONF_BP;
  			write_c0_config(config);
  		} else
-@@ -1027,7 +1027,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1034,7 +1034,7 @@ static void __cpuinit probe_pcache(void)
  	 * normally they'd suffer from aliases but magic in the hardware deals
  	 * with that for us so we don't need to take care ourselves.
  	 */
@@ -9285,7 +9287,7 @@ index 7d5ac0b..a005eb83 100644
  	case CPU_20KC:
  	case CPU_25KF:
  	case CPU_SB1:
-@@ -1056,7 +1056,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1063,7 +1063,7 @@ static void __cpuinit probe_pcache(void)
  			c->dcache.flags |= MIPS_CACHE_ALIASES;
  	}
  
@@ -9294,7 +9296,7 @@ index 7d5ac0b..a005eb83 100644
  	case CPU_20KC:
  		/*
  		 * Some older 20Kc chips doesn't have the 'VI' bit in
-@@ -1185,7 +1185,7 @@ static void __cpuinit setup_scache(void)
+@@ -1192,7 +1192,7 @@ static void __cpuinit setup_scache(void)
  	 * processors don't have a S-cache that would be relevant to the
  	 * Linux memory management.
  	 */
@@ -9303,7 +9305,7 @@ index 7d5ac0b..a005eb83 100644
  	case CPU_R4000SC:
  	case CPU_R4000MC:
  	case CPU_R4400SC:
-@@ -1380,7 +1380,7 @@ void __cpuinit r4k_cache_init(void)
+@@ -1387,7 +1387,7 @@ void __cpuinit r4k_cache_init(void)
  	extern char __weak except_vec2_sb1;
  	struct cpuinfo_mips *c = &current_cpu_data;
  
@@ -9361,7 +9363,7 @@ index 9cca8de..0e633db 100644
  	case CPU_74K:
  	case CPU_1004K:
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index e06370f..ef36dcf 100644
+index 3ee768e..77b0f47 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
 @@ -136,7 +136,7 @@ static int scratchpad_offset(int i)
@@ -49443,7 +49445,7 @@ index eae35c1..eb41fbb 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 7a1c91e..082e8d3 100644
+index 64ea95d..52d6bec 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -49456,7 +49458,7 @@ index 7a1c91e..082e8d3 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -620,6 +623,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -631,6 +634,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
