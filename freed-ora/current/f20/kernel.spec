@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -697,6 +697,9 @@ Patch530: silence-fbcon-logo.patch
 
 Patch600: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
+#rhbz 1126580
+Patch601: Kbuild-Add-an-option-to-enable-GCC-VTA.patch
+
 Patch800: crash-driver.patch
 
 # crypto/
@@ -798,6 +801,27 @@ Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1135338
 Patch26090: HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
+
+#CVE-2014-8134 rhbz 1172765 1172769
+Patch26091: x86-kvm-Clear-paravirt_enabled-on-KVM-guests-for-esp.patch
+
+#rhbz 1164945
+Patch26092: xhci-Add-broken-streams-quirk-for-Fresco-Logic-FL100.patch
+Patch26093: uas-Add-US_FL_NO_ATA_1X-for-Seagate-devices-with-usb.patch
+Patch26094: uas-Add-US_FL_NO_REPORT_OPCODES-for-JMicron-JMS566-w.patch
+
+#rhbz 1172543
+Patch26096: cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
+
+#CVE-2014-8133 rhbz 1172797 1174374
+Patch26100: x86-tls-Validate-TLS-entries-to-protect-espfix.patch
+
+#rhbz 1173806
+Patch26101: powerpc-powernv-force-all-CPUs-to-be-bootable.patch
+
+#CVE-2014-8559 rhbz 1159313 1173814
+Patch26098: move-d_rcu-from-overlapping-d_child-to-overlapping-d.patch
+Patch26099: deal-with-deadlock-in-d_walk.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1484,6 +1508,8 @@ ApplyPatch input-silence-i8042-noise.patch
 ApplyPatch silence-fbcon-logo.patch
 
 # Changes to upstream defaults.
+#rhbz 1126580
+ApplyPatch Kbuild-Add-an-option-to-enable-GCC-VTA.patch
 
 # /dev/crash driver.
 ApplyPatch crash-driver.patch
@@ -1568,6 +1594,27 @@ ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1135338
 ApplyPatch HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
+
+#CVE-2014-8134 rhbz 1172765 1172769
+ApplyPatch x86-kvm-Clear-paravirt_enabled-on-KVM-guests-for-esp.patch
+
+#rhbz 1164945
+ApplyPatch xhci-Add-broken-streams-quirk-for-Fresco-Logic-FL100.patch
+ApplyPatch uas-Add-US_FL_NO_ATA_1X-for-Seagate-devices-with-usb.patch
+ApplyPatch uas-Add-US_FL_NO_REPORT_OPCODES-for-JMicron-JMS566-w.patch
+
+#rhbz 1172543
+ApplyPatch cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
+
+#CVE-2014-8133 rhbz 1172797 1174374
+ApplyPatch x86-tls-Validate-TLS-entries-to-protect-espfix.patch
+
+#rhbz 1173806
+ApplyPatch powerpc-powernv-force-all-CPUs-to-be-bootable.patch
+
+#CVE-2014-8559 rhbz 1159313 1173814
+ApplyPatch move-d_rcu-from-overlapping-d_child-to-overlapping-d.patch
+ApplyPatch deal-with-deadlock-in-d_walk.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2398,6 +2445,28 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Wed Dec 17 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.17.7-gnu.
+
+* Tue Dec 16 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.17.7-200
+- Linux v3.17.7
+
+* Tue Dec 16 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-8559 deadlock due to incorrect usage of rename_lock (rhbz 1159313 1173814)
+- Add patch from Josh Stone to restore var-tracking via Kconfig (rhbz 1126580)
+
+* Mon Dec 15 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix ppc64 boot with smt-enabled=off (rhbz 1173806)
+- CVE-2014-8133 x86: espfix(64) bypass via set_thread_area and CLONE_SETTLS (rhbz 1172797 1174374)
+
+* Fri Dec 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Remove pointless warning in cfg80211 (rhbz 1172543)
+
+* Wed Dec 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix MSI issues on another Samsung pci-e SSD (rhbz 1084928)
+- Fix UAS crashes with Seagate and Fresco Logic drives (rhbz 1164945)
+- CVE-2014-8134 fix espfix for 32-bit KVM paravirt guests (rhbz 1172765 1172769)
+
 * Mon Dec  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17.6-gnu.
 
