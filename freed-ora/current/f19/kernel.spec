@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 26
+%define stable_update 27
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -818,6 +818,9 @@ Patch25111: 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
 # CVE-2014-3690 rhbz 1153322 1155372
 Patch26060: x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
+
+#CVE-2014-8134 rhbz 1172765 1172769
+Patch26091: x86-kvm-Clear-paravirt_enabled-on-KVM-guests-for-esp.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1579,6 +1582,9 @@ ApplyPatch 0002-ideapad-laptop-Change-Lenovo-Yoga-2-series-rfkill-ha.patch
 
 # CVE-2014-3690 rhbz 1153322 1155372
 ApplyPatch x86-kvm-vmx-Preserve-CR4-across-VM-entry.patch
+
+#CVE-2014-8134 rhbz 1172765 1172769
+ApplyPatch x86-kvm-Clear-paravirt_enabled-on-KVM-guests-for-esp.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2403,6 +2409,15 @@ fi
 # and build.
 
 %changelog
+* Wed Dec 17 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.14.27-gnu.
+
+* Wed Dec 17 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.14.27-100
+- Linux v3.14.27
+
+* Wed Dec 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-8134 fix espfix for 32-bit KVM paravirt guests (rhbz 1172765 1172769)
+
 * Mon Dec  8 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.14.26-gnu.
 
