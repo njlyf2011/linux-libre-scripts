@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -677,15 +677,14 @@ Patch26094: uas-Add-US_FL_NO_REPORT_OPCODES-for-JMicron-JMS566-w.patch
 #rhbz 1172543
 Patch26096: cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
 
-#CVE-2014-8559 rhbz 1159313 1173814
-Patch26098: move-d_rcu-from-overlapping-d_child-to-overlapping-d.patch
-Patch26099: deal-with-deadlock-in-d_walk.patch
-
 #CVE-2014-8133 rhbz 1172797 1174374
 Patch26100: x86-tls-Validate-TLS-entries-to-protect-espfix.patch
 
 #rhbz 1173806
 Patch26101: powerpc-powernv-force-all-CPUs-to-be-bootable.patch
+
+#CVE-2014-XXXX rhbz 1175235 1175250
+Patch26102: isofs-Fix-infinite-looping-over-CE-entries.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1505,15 +1504,14 @@ ApplyPatch uas-Add-US_FL_NO_REPORT_OPCODES-for-JMicron-JMS566-w.patch
 #rhbz 1172543
 ApplyPatch cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
 
-#CVE-2014-8559 rhbz 1159313 1173814
-ApplyPatch move-d_rcu-from-overlapping-d_child-to-overlapping-d.patch
-ApplyPatch deal-with-deadlock-in-d_walk.patch
-
 #CVE-2014-8133 rhbz 1172797 1174374
 ApplyPatch x86-tls-Validate-TLS-entries-to-protect-espfix.patch
 
 #rhbz 1173806
 ApplyPatch powerpc-powernv-force-all-CPUs-to-be-bootable.patch
+
+#CVE-2014-XXXX rhbz 1175235 1175250
+ApplyPatch isofs-Fix-infinite-looping-over-CE-entries.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2396,6 +2394,15 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Fri Dec 19 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18.1-gnu.
+
+* Wed Dec 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.1-1
+- Linux v3.18.1
+- CVE-2014-XXXX isofs: infinite loop in CE record entries (rhbz 1175235 1175250)
+- Enable TCM_USER (rhbz 1174986)
+- Enable USBIP in modules-extra from Johnathan Dieter (rhbz 1169478)
+
 * Tue Dec 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.0-2
 - Add patch from Josh Stone to restore var-tracking via Kconfig (rhbz 1126580)
 
