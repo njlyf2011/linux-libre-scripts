@@ -42,13 +42,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 17
+%define base_sublevel 18
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.17%{?stablegnux}
-#define rcrevlibre  -3.17%{?rcrevgnux}
-#define gitrevlibre -3.17%{?gitrevgnux}
+#define stablelibre -3.18%{?stablegnux}
+#define rcrevlibre  -3.18%{?rcrevgnux}
+#define gitrevlibre -3.18%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -623,11 +623,8 @@ Patch14010: lis3-improve-handling-of-null-rate.patch
 Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 
 # PPC
-Patch18000: ppc64-fixtools.patch
+
 # ARM64
-Patch20000: arm64-force-serial-to-be-active-consdev.patch
-Patch20001: arm64-vgic-error-to-info.patch
-Patch20002: arm64-fix-xgene_enet_process_ring.patch
 
 # ARMv7
 Patch21020: ARM-tegra-usb-no-reset.patch
@@ -654,20 +651,8 @@ Patch21247: ath9k-rx-dma-stop-check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-#rhbz 1025603
-Patch25063: disable-libdw-unwind-on-non-x86.patch
-
-Patch26000: perf-install-trace-event-plugins.patch
-
 # Patch series from Hans for various backlight and platform driver fixes
 Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-
-#rhbz 1134969
-Patch26016: HID-wacom-Add-support-for-the-Cintiq-Companion.patch
-
-#rhbz 1110011
-Patch26019: psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
-Patch26020: psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 
 #rhbz 1089731
 Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
@@ -686,12 +671,10 @@ Patch26096: cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
 #rhbz 1173806
 Patch26101: powerpc-powernv-force-all-CPUs-to-be-bootable.patch
 
-#CVE-2014-8559 rhbz 1159313 1173814
-Patch26098: move-d_rcu-from-overlapping-d_child-to-overlapping-d.patch
-Patch26099: deal-with-deadlock-in-d_walk.patch
-
 #rhbz 1175261
 Patch26103: blk-mq-Fix-uninitialized-kobject-at-CPU-hotplugging.patch
+
+Patch26107: uapi-linux-target_core_user.h-fix-headers_install.sh.patch
 
 #rhbz 1163927
 Patch26121: Set-UID-in-sess_auth_rawntlmssp_authenticate-too.patch
@@ -701,6 +684,24 @@ Patch26122: batman-adv-Calculate-extra-tail-size-based-on-queued.patch
 
 #CVE-2014-9529 rhbz 1179813 1179853
 Patch26124: KEYS-close-race-between-key-lookup-and-freeing.patch
+
+#rhbz 1178975
+Patch26125: x86-vdso-Use-asm-volatile-in-__getcpu.patch
+
+#rhbz 1124119
+Patch26126: uas-Do-not-blacklist-ASM1153-disk-enclosures.patch
+Patch26127: uas-Add-US_FL_NO_ATA_1X-for-2-more-Seagate-disk-encl.patch
+Patch26128: uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
+
+#rhbz 1115713
+Patch26129: samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
+#rhbz 1163574
+Patch26130: acpi-video-Add-disable_native_backlight-quirk-for-De.patch
+#rhbz 1094948
+Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
+
+#CVE-2014-9585 rhbz 1181054 1181056
+Patch26132: x86_64-vdso-Fix-the-vdso-address-randomization-algor.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1359,7 +1360,6 @@ ApplyOptionalPatch upstream-reverts.patch -R
 ApplyPatch lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 # PPC
-ApplyPatch ppc64-fixtools.patch
 
 # ARM64
 
@@ -1498,20 +1498,8 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k-rx-dma-stop-check.patch
 
-#rhbz 1025603
-ApplyPatch disable-libdw-unwind-on-non-x86.patch
-
-ApplyPatch perf-install-trace-event-plugins.patch
-
 # Patch series from Hans for various backlight and platform driver fixes
 ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-
-#rhbz 1134969
-ApplyPatch HID-wacom-Add-support-for-the-Cintiq-Companion.patch
-
-#rhbz 1110011
-ApplyPatch psmouse-Add-psmouse_matches_pnp_id-helper-function.patch
-ApplyPatch psmouse-Add-support-for-detecting-FocalTech-PS-2-tou.patch
 
 #rhbz 1089731
 ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
@@ -1530,12 +1518,10 @@ ApplyPatch cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
 #rhbz 1173806
 ApplyPatch powerpc-powernv-force-all-CPUs-to-be-bootable.patch
 
-#CVE-2014-8559 rhbz 1159313 1173814
-ApplyPatch move-d_rcu-from-overlapping-d_child-to-overlapping-d.patch
-ApplyPatch deal-with-deadlock-in-d_walk.patch
-
 #rhbz 1175261
 ApplyPatch blk-mq-Fix-uninitialized-kobject-at-CPU-hotplugging.patch
+
+ApplyPatch uapi-linux-target_core_user.h-fix-headers_install.sh.patch
 
 #rhbz 1163927
 ApplyPatch Set-UID-in-sess_auth_rawntlmssp_authenticate-too.patch
@@ -1546,16 +1532,30 @@ ApplyPatch batman-adv-Calculate-extra-tail-size-based-on-queued.patch
 #CVE-2014-9529 rhbz 1179813 1179853
 ApplyPatch KEYS-close-race-between-key-lookup-and-freeing.patch
 
+#rhbz 1178975
+ApplyPatch x86-vdso-Use-asm-volatile-in-__getcpu.patch
+
+#rhbz 1124119
+ApplyPatch uas-Do-not-blacklist-ASM1153-disk-enclosures.patch
+ApplyPatch uas-Add-US_FL_NO_ATA_1X-for-2-more-Seagate-disk-encl.patch
+ApplyPatch uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
+
+#rhbz 1115713
+ApplyPatch samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
+#rhbz 1163574
+ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-De.patch
+#rhbz 1094948
+ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
+
+#CVE-2014-9585 rhbz 1181054 1181056
+ApplyPatch x86_64-vdso-Fix-the-vdso-address-randomization-algor.patch
+
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
 %ifnarch aarch64 # this is stupid, but i want to notice before secondary koji does.
 ApplyPatch kernel-arm64.patch -R
 %else
-# arm64-force-serial-to-be-active-consdev.patch: not for upstream
 #  solved with SPCR in future
-ApplyPatch arm64-force-serial-to-be-active-consdev.patch
-ApplyPatch arm64-vgic-error-to-info.patch
-ApplyPatch arm64-fix-xgene_enet_process_ring.patch
 %endif
 %endif
 
@@ -2433,6 +2433,18 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Wed Jan 14 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18.2-gnu.
+
+* Tue Jan 13 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.18.2-200
+- Linux v3.18.2
+
+* Mon Jan 12 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-9585 ASLR brute-force possible for vdso (rhbz 1181054 1181056)
+- Backlight fixes for Samsung and Dell machines (rhbz 1094948 1115713 1163574)
+- Add various UAS quirks (rhbz 1124119)
+- Add patch to fix loop in VDSO (rhbz 1178975)
+
 * Fri Jan  9 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17.8-gnu.
 

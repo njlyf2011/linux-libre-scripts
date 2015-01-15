@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.17 extra=
+kver=3.18 extra=
 
 case $1 in
 --force)
@@ -207,7 +207,7 @@ reject_firmware () {
   #$1 = file $2 = pre sed pattern
   filetest $1 || return
   clean_sed "$2"'
-s,request\(_ihex\)\?_firmware\(_nowait\)\?,reject_firmware\2,g
+s,\(^\|[^>.0-9a-zA-Z_$]\)request\(_ihex\)\?_firmware\(_nowait\|_direct\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\3\4,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
 }
 
@@ -215,7 +215,7 @@ maybe_reject_firmware () {
   #$1 = file $2 = pre sed pattern
   filetest $1 || return
   clean_sed "$2"'
-s,request_\(ihex_\)\?firmware\(_nowait\)\?,maybe_reject_\1firmware\2,g
+s,\(^\|[^>.0-9a-zA-Z_$]\)request_\(ihex_\)\?firmware\(_nowait\|_direct\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1maybe_reject_\2firmware\3\4,g
 ' "$1" 'retain Free firmware-loading machinery, disabling non-Free one'
 }
 
@@ -370,9 +370,15 @@ clean_sed '$i\
 #define NONFREE_FIRMWARE "/*(DEBLOBBED)*/"\
 \
 static inline int\
+is_nonfree_firmware(const char *name)\
+{\
+  return strstr(name, NONFREE_FIRMWARE) != 0;\
+}\
+\
+static inline int\
 report_missing_free_firmware(const char *name, const char *what)\
 {\
-	printk(KERN_ERR "%s: Missing Free %s\\n", name,\
+	printk(KERN_ERR "%s: Missing Free %s (non-Free firmware loading is disabled)\\n", name,\
 	       what ? what : "firmware");\
 	return -EINVAL;\
 }\
@@ -392,7 +398,7 @@ static inline int\
 maybe_reject_firmware(const struct firmware **fw,\
 		      const char *name, struct device *device)\
 {\
-	if (strstr (name, NONFREE_FIRMWARE))\
+	if (is_nonfree_firmware(name))\
 		return reject_firmware(fw, name, device);\
 	else\
 		return request_firmware(fw, name, device);\
@@ -437,7 +443,7 @@ maybe_reject_firmware_nowait(struct module *module, int uevent,\
 			     void (*cont)(const struct firmware *fw,\
 					  void *context))\
 {\
-	if (strstr (name, NONFREE_FIRMWARE))\
+	if (is_nonfree_firmware(name))\
 		return reject_firmware_nowait(module, uevent, name,\
 					      device, gfp, context, cont);\
 	else\
@@ -465,6 +471,11 @@ maybe_reject_ihex_firmware(const struct firmware **fw,\
 \
 #endif /* _LINUX_LIBRE_IHEX_H */\
 ' include/linux/ihex.h 'added non-Free ihex firmware notification support'
+
+clean_sed '
+s,\(timeout = \)\(firmware_loading_timeout()\),\1is_nonfree_firmware(name) ? 1 : \2,
+' drivers/base/firmware_class.c 'shorten non-Free firmware fail-to-load timeout'
+
 
 ########
 # Arch #
@@ -617,7 +628,7 @@ clean_mk CONFIG_DRM_MGA drivers/gpu/drm/Makefile
 
 announce DRM_MSM - "MSM DRM"
 reject_firmware drivers/gpu/drm/msm/adreno/adreno_gpu.c
-clean_blob drivers/gpu/drm/msm/adreno/adreno_gpu.c
+clean_blob drivers/gpu/drm/msm/adreno/adreno_device.c
 clean_kconfig divers/gpu/drm/msm/Kconfig 'DRM_MSM'
 clean_mk CONFIG_DRM_MSM drivers/gpu/drm/msm/Makefile
 
@@ -862,7 +873,6 @@ clean_kconfig drivers/media/usb/dvb-usb-v2/Kconfig 'DVB_USB_LME2510'
 clean_mk CONFIG_DVB_USB_LME2510 drivers/media/usb/dvb-usb-v2/Makefile
 
 announce DVB_USB_M920X - "Uli m920x DVB-T USB2.0 support"
-reject_firmware drivers/media/usb/dvb-usb/m920x.c
 clean_blob drivers/media/usb/dvb-usb/m920x.c
 clean_kconfig drivers/media/usb/dvb-usb/Kconfig 'DVB_USB_M920X'
 clean_mk CONFIG_DVB_USB_M920X drivers/media/usb/dvb-usb/Makefile
@@ -914,8 +924,6 @@ clean_mk CONFIG_DVB_AF9013 drivers/media/dvb-frontends/Makefile
 
 announce DVB_BCM3510 - "Broadcom BCM3510"
 undefault_firmware 'BCM3510' drivers/media/dvb-frontends/bcm3510.c
-reject_firmware drivers/media/dvb-frontends/bcm3510.c
-reject_firmware drivers/media/dvb-frontends/bcm3510.h
 clean_sed '
 /You.ll need a firmware/,/dvb-fe-bcm/d;
 ' drivers/media/dvb-frontends/bcm3510.c \
@@ -978,8 +986,6 @@ clean_mk CONFIG_DVB_OR51132 drivers/media/dvb-frontends/Makefile
 
 announce DVB_OR51211 - "Oren OR51211 based"
 undefault_firmware 'OR51211' drivers/media/dvb-frontends/or51211.c
-reject_firmware drivers/media/dvb-frontends/or51211.c
-reject_firmware drivers/media/dvb-frontends/or51211.h
 clean_blob drivers/media/dvb-frontends/or51211.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_OR51211'
 clean_mk CONFIG_DVB_OR51211 drivers/media/dvb-frontends/Makefile
@@ -1000,16 +1006,12 @@ clean_mk CONFIG_DVB_SI2168 drivers/media/dvb-frontends/Makefile
 
 announce DVB_SP8870 - "Spase sp8870"
 undefault_firmware 'SP8870' drivers/media/dvb-frontends/sp8870.c
-reject_firmware drivers/media/dvb-frontends/sp8870.c
-reject_firmware drivers/media/dvb-frontends/sp8870.h
 clean_blob drivers/media/dvb-frontends/sp8870.c
 clean_kconfig drivers/media/dvb-frontends 'DVB_SP8870'
 clean_mk CONFIG_DVB_SP8870 drivers/media/dvb-frontends/Makefile
 
 announce DVB_SP887X - "Spase sp887x based"
 undefault_firmware 'SP887X' drivers/media/dvb-frontends/sp887x.c
-reject_firmware drivers/media/dvb-frontends/sp887x.c
-reject_firmware drivers/media/dvb-frontends/sp887x.h
 clean_blob drivers/media/dvb-frontends/sp887x.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig 'DVB_SP887X'
 clean_mk CONFIG_DVB_SP887X drivers/media/dvb-frontends/Makefile
@@ -1024,8 +1026,6 @@ clean_mk CONFIG_DVB_TDA10048 drivers/media/dvb-frontends/Makefile
 
 announce DVB_TDA1004X - "Philips TDA10045H/TDA10046H"
 undefault_firmware 'TDA1004[56]' drivers/media/dvb-frontends/tda1004x.c
-reject_firmware drivers/media/dvb-frontends/tda1004x.c
-reject_firmware drivers/media/dvb-frontends/tda1004x.h
 clean_blob drivers/media/dvb-frontends/tda1004x.c
 clean_kconfig drivers/media/dvb-frontends 'DVB_TDA1004X'
 clean_mk CONFIG_DVB_TDA1004X drivers/media/dvb-frontends/Makefile
@@ -1040,10 +1040,10 @@ clean_mk CONFIG_DVB_TDA10071 drivers/media/dvb-frontends/Makefile
 # dvb
 
 announce DVB_AS102 - "Abilis AS102 DVB receiver"
-reject_firmware drivers/staging/media/as102/as102_fw.c
-clean_blob drivers/staging/media/as102/as102_fw.c
-clean_kconfig drivers/staging/media/as102/Kconfig 'DVB_AS102'
-clean_mk CONFIG_DVB_AS102 drivers/staging/media/as102/Makefile
+reject_firmware drivers/media/usb/as102/as102_fw.c
+clean_blob drivers/media/usb/as102/as102_fw.c
+clean_kconfig drivers/media/usb/as102/Kconfig 'DVB_AS102'
+clean_mk CONFIG_DVB_AS102 drivers/media/usb/as102/Makefile
 
 announce DVB_AV7110 - "AV7110 cards"
 reject_firmware drivers/media/pci/ttpci/av7110.c
@@ -1053,7 +1053,6 @@ clean_mk CONFIG_DVB_AV7110 drivers/media/pci/ttpci/Makefile
 
 announce DVB_BUDGET - "Budget cards"
 reject_firmware drivers/media/pci/ttpci/budget.c
-reject_firmware drivers/media/dvb-frontends/tdhd1.h
 
 announce DVB_BUDGET_AV - "Budget cards with analog video inputs"
 reject_firmware drivers/media/pci/ttpci/budget-av.c
@@ -1118,10 +1117,10 @@ clean_kconfig drivers/media/pci/bt8xx/Kconfig 'VIDEO_BT848'
 clean_mk CONFIG_VIDEO_BT848 drivers/media/pci/bt8xx/Makefile
 
 announce VIDEO_CODA - "Chips&Media Coda multi-standard codec IP"
-reject_firmware drivers/media/platform/coda.c
-clean_blob drivers/media/platform/coda.c
+reject_firmware drivers/media/platform/coda/coda-common.c
+clean_blob drivers/media/platform/coda/coda-common.c
 clean_kconfig drivers/media/platform/Kconfig 'VIDEO_CODA'
-clean_mk CONFIG_VIDEO_CODA drivers/media/platform/Makefile
+clean_mk CONFIG_VIDEO_CODA drivers/media/platform/coda/Makefile
 
 announce VIDEO_CPIA2 - "CPiA2 Video For Linux"
 clean_fw firmware/cpia2/stv0672_vp4.bin.ihex firmware/cpia2/stv0672_vp4.bin
@@ -1211,6 +1210,11 @@ announce VIDEO_SAA7134_DVB - "DVB/ATSC Support for saa7134 based TV cards"
 reject_firmware drivers/media/pci/saa7134/saa7134-dvb.c
 clean_kconfig drivers/media/pci/saa7134/Kconfig 'VIDEO_SAA7134_DVB'
 clean_mk CONFIG_VIDEO_SAA7134_DVB drivers/media/pci/saa7134/Makefile
+
+announce VIDEO_SAA7134_GO7007 - "go7007 support for saa7134 based TV cards"
+clean_blob drivers/media/pci/saa7134/saa7134-go7007.c
+clean_kconfig drivers/media/pci/saa7134/Kconfig 'VIDEO_SAA7134_GO7007'
+clean_mk CONFIG_VIDEO_SAA7134_GO7007 drivers/media/pci/saa7134/Makefile
 
 announce VIDEO_SAA7164 - "NXP SAA7164 support"
 reject_firmware drivers/media/pci/saa7164/saa7164-fw.c
@@ -1394,7 +1398,6 @@ clean_mk CONFIG_E100 drivers/net/ethernet/intel/Makefile
 
 announce FT1000_PCMCIA - "Driver for ft1000 pcmcia device."
 clean_file drivers/staging/ft1000/ft1000-pcmcia/ft1000.img
-reject_firmware drivers/staging/ft1000/TODO
 clean_blob drivers/staging/ft1000/ft1000-pcmcia/boot.h
 clean_sed '
 /^static int ft1000_reset_card/,/^}$/ {
@@ -1425,8 +1428,6 @@ clean_kconfig drivers/net/ethernet/myricom/Kconfig 'MYRI10GE'
 clean_mk CONFIG_MYRI10GE drivers/net/ethernet/myricom/myri10ge/Makefile
 
 announce NETXEN_NIC - "NetXen Multi port (1/10) Gigabit Ethernet NIC"
-reject_firmware drivers/net/ethernet/qlogic/netxen/netxen_nic.h
-reject_firmware drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c
 reject_firmware drivers/net/ethernet/qlogic/netxen/netxen_nic_init.c
 clean_blob drivers/net/ethernet/qlogic/netxen/netxen_nic.h
 clean_blob drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c
@@ -1434,10 +1435,8 @@ clean_kconfig drivers/net/ethernet/qlogic/Kconfig 'NETXEN_NIC'
 clean_mk CONFIG_NETXEN_NIC drivers/net/ethernet/qlogic/Makefile
 
 announce QLCNIC - "QLOGIC QLCNIC 1/10Gb Converged Ethernet NIC Support"
-reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic.h
 reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_init.c
 reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_init.c
-reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c
 clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic.h
 clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic_83xx_hw.h
 clean_blob drivers/net/ethernet/qlogic/qlcnic/qlcnic_main.c
@@ -1526,6 +1525,9 @@ clean_mk CONFIG_YAM drivers/net/hamradio/Makefile
 announce USB_IRDA - "IrDA USB dongles"
 reject_firmware drivers/net/irda/irda-usb.c
 clean_blob drivers/net/irda/irda-usb.c
+clean_sed '
+s,\(char stir421x_fw_name\)\[12\];,\1[16];,
+' drivers/net/irda/irda-usb.c "avoid buffer overflow with deblobbed filename"
 clean_kconfig drivers/net/irda/Kconfig 'USB_IRDA'
 clean_mk CONFIG_USB_IRDA drivers/net/irda/Makefile
 
@@ -1812,10 +1814,25 @@ clean_blob drivers/net/wireless/ath/ath10k/hw.h
 clean_kconfig drivers/net/wireless/ath/ath10k/Kconfig 'ATH10K'
 clean_mk CONFIG_ATH10K drivers/net/wireless/ath/ath10k/Makefile
 
+announce ATH10K NL80211_TESTMODE - "nl80211 testmode command"
+reject_firmware drivers/net/wireless/ath/ath10k/testmode.c
+clean_sed '
+/^[\t ]*\/\* utf\.bin firmware image/ s,/\* utf\.bin,/*(DEBLOBBED)*//*,
+' drivers/net/wireless/ath/ath10k/testmode.c 'removed blob name in comment'
+clean_kconfig net/wireless/ath/ath10k/Kconfig 'NL80211_TESTMODE'
+clean_mk CONFIG_NL80211_TESTMODE drivers/net/wireless/ath/ath10k/Makefile
+
 announce ATH10K_PCI - "Atheros ath10k PCI support"
 clean_blob drivers/net/wireless/ath/ath10k/pci.c
 clean_kconfig drivers/net/wireless/ath/ath10k/Kconfig 'ATH10K_PCI'
 clean_mk CONFIG_ATH10K_PCI drivers/net/wireless/ath/ath10k/Makefile
+
+announce WIL6210 - "Wilocity 60g WiFi card wil6210 support"
+reject_firmware drivers/net/wireless/ath/wil6210/fw_inc.c
+clean_blob drivers/net/wireless/ath/wil6210/fw.c
+clean_blob drivers/net/wireless/ath/wil6210/wil6210.h
+clean_kconfig drivers/net/wireless/ath/wil6210/Kconfig 'WIL6210'
+clean_mk CONFIG_WIL6210 drivers/net/wireless/ath/wil6210/Makefile
 
 announce CW1200 - "CW1200 WLAN support"
 reject_firmware drivers/net/wireless/cw1200/fwio.c
@@ -1923,8 +1940,8 @@ clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8188EE
 clean_mk CONFIG_RTL8188EE drivers/net/wireless/rtlwifi/rtl8188ee/Makefile
 
 announce R8188EU - "Realtek RTL8188EU Wireless LAN NIC driver"
-reject_firmware drivers/staging/rtl8188eu/hal/rtl8188e_hal_init.c
-clean_blob drivers/staging/rtl8188eu/hal/rtl8188e_hal_init.c
+reject_firmware drivers/staging/rtl8188eu/hal/fw.c
+clean_blob drivers/staging/rtl8188eu/hal/fw.c
 clean_blob drivers/staging/rtl8188eu/include/rtl8188e_hal.h
 clean_kconfig drivers/staging/rtl8188eu/Kconfig R8188EU
 clean_mk CONFIG_R8188EU drivers/staging/rtl8188eu/Makefile
@@ -1960,11 +1977,11 @@ clean_blob drivers/staging/rtl8192e/rtl8192e/rtl_core.c
 clean_kconfig drivers/staging/rtl8192e/Kconfig RTL8192E
 clean_mk CONFIG_RTL8192E drivers/staging/rtl8192e/Makefile
 
-announce R8192EE - "RealTek RTL8192EE Wireless Network Adapter"
-reject_firmware drivers/staging/rtl8192ee/rtl8192ee/sw.c
-clean_blob drivers/staging/rtl8192ee/rtl8192ee/sw.c
-clean_kconfig drivers/staging/rtl8192ee/Kconfig R8192EE
-clean_mk CONFIG_R8192EE drivers/staging/rtl8192ee/Makefile
+announce RTL8192EE - "RealTek RTL8192EE Wireless Network Adapter"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8192ee/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8192ee/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/rtl8192ee/Kconfig RTL8192EE
+clean_mk CONFIG_RTL8192EE drivers/net/wireless/rtlwifi/Makefile
 
 announce RTL8192U - "RealTek RTL8192U Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192u/r819xU_firmware.c
@@ -1997,11 +2014,11 @@ clean_blob drivers/net/wireless/rtlwifi/rtl8723be/sw.c
 clean_kconfig drivers/net/wireless/rtlwifi/Kconfig 'RTL8723BE'
 clean_mk CONFIG_RTL8723BE drivers/net/wireless/rtlwifi/rtl8723be/Makefile
 
-announce R8821AE - "Realtek RTL8821AE Wireless LAN NIC driver"
-reject_firmware drivers/staging/rtl8821ae/rtl8821ae/sw.c
-clean_blob drivers/staging/rtl8821ae/rtl8821ae/sw.c
-clean_kconfig drivers/staging/rtl8821ae/Kconfig 'R8821AE'
-clean_mk CONFIG_R8821AE drivers/staging/rtl8821ae/Makefile
+announce RTL8821AE - "Realtek RTL8821AE/RTL8812AE Wireless LAN NIC driver"
+reject_firmware drivers/net/wireless/rtlwifi/rtl8821ae/sw.c
+clean_blob drivers/net/wireless/rtlwifi/rtl8821ae/sw.c
+clean_kconfig drivers/net/wireless/rtlwifi/Kconfig 'RTL8821AE'
+clean_mk CONFIG_RTL8821AE drivers/net/wireless/rtlwifi/rtl8821ae/Makefile
 
 announce VT6656 - "VIA Technologies VT6656 support"
 reject_firmware drivers/staging/vt6656/firmware.c
@@ -2091,12 +2108,6 @@ clean_blob drivers/bluetooth/btmrvl_sdio.c
 clean_blob Documentation/btmrvl.txt
 clean_kconfig drivers/bluetooth/Kconfig 'BT_MRVL_SDIO'
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
-
-announce BT_NOKIA_H4P - "HCI driver with H4 Nokia extensions"
-reject_firmware drivers/staging/nokia_h4p/nokia_fw.c
-clean_blob drivers/staging/nokia_h4p/nokia_fw.c
-clean_kconfig drivers/staging/nokia_h4p/Kconfig 'BT_NOKIA_H4P'
-clean_mk CONFIG_BT_NOKIA_H4P drivers/staging/nokia_h4p/Makefile
 
 announce TI_ST - "Texas Instruments shared transport line discipline"
 reject_firmware drivers/misc/ti-st/st_kim.c
@@ -2273,7 +2284,7 @@ clean_mk CONFIG_INPUT_IMS_PCU drivers/input/misc/Makefile
 ####################
 
 announce COMEDI - "Data acquisition support (comedi)"
-reject_firmware drivers/staging/comedi/drivers.c
+maybe_reject_firmware drivers/staging/comedi/drivers.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI'
 clean_mk CONFIG_COMEDI drivers/staging/comedi/Makefile
 
@@ -2296,21 +2307,6 @@ announce COMEDI_NI_PCIDIO - "NI PCI-DIO32HS, PCI-6533, PCI-6534 support"
 clean_blob drivers/staging/comedi/drivers/ni_pcidio.c
 clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_NI_PCIDIO'
 clean_mk CONFIG_COMEDI_NI_PCIDIO drivers/staging/comedi/drivers/Makefile
-
-announce COMEDI_USBDUX - "ITL USBDUX support"
-clean_blob drivers/staging/comedi/drivers/usbdux.c
-clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUX'
-clean_mk CONFIG_COMEDI_USBDUX drivers/staging/comedi/drivers/Makefile
-
-announce COMEDI_USBDUXFAST - "ITL USB-DUXfast support"
-clean_blob drivers/staging/comedi/drivers/usbduxfast.c
-clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUXFAST'
-clean_mk CONFIG_COMEDI_USBDUXFAST drivers/staging/comedi/drivers/Makefile
-
-announce COMEDI_USBDUXSIGMA - "ITL USB-DUXsigma support"
-clean_blob drivers/staging/comedi/drivers/usbduxsigma.c
-clean_kconfig drivers/staging/comedi/Kconfig 'COMEDI_USBDUXSIGMA'
-clean_mk CONFIG_COMEDI_USBDUXSIGMA drivers/staging/comedi/drivers/Makefile
 
 
 #######
@@ -2386,18 +2382,12 @@ announce SCSI_LPFC - "Emulex LightPulse Fibre Channel Support"
 # evidence it is Free, so I'm disabling it.  It's not clear whether
 # this is the hardware or the software inducing to the installation of
 # non-Free firmware.
-reject_firmware drivers/scsi/lpfc/lpfc.h
-reject_firmware drivers/scsi/lpfc/lpfc_crtn.h
 reject_firmware drivers/scsi/lpfc/lpfc_init.c
-reject_firmware drivers/scsi/lpfc/lpfc_attr.c
 clean_kconfig drivers/scsi/Kconfig 'SCSI_LPFC'
 clean_mk CONFIG_SCSI_LPFC drivers/scsi/lpfc/Makefile
 
 announce SCSI_QLA_FC - "QLogic QLA2XXX Fibre Channel Support"
-reject_firmware drivers/scsi/qla2xxx/qla_gbl.h
-reject_firmware drivers/scsi/qla2xxx/qla_init.c
 reject_firmware drivers/scsi/qla2xxx/qla_os.c
-reject_firmware drivers/scsi/qla2xxx/qla_nx.c
 clean_sed '
 /^config SCSI_QLA_FC$/,/^config /{
   /^	By default, firmware/i\
@@ -2914,6 +2904,16 @@ reject_firmware sound/usb/6fire/firmware.c
 clean_blob sound/usb/6fire/firmware.c
 clean_kconfig sound/usb/Kconfig 'SND_USB_6FIRE'
 clean_mk 'CONFIG_SND_USB_6FIRE' sound/usb/6fire/Makefile
+
+#######
+# SOC #
+#######
+
+announce KEYSTONE_NAVIGATOR_QMSS - "Keystone Queue Manager Sub System"
+reject_firmware drivers/soc/ti/knav_qmss_queue.c
+clean_blob Documentation/devicetree/bindings/soc/ti/keystone-navigator-qmss.txt
+clean_kconfig drivers/soc/ti/Kconfig 'KEYSTONE_NAVIGATOR_QMSS'
+clean_mk CONFIG_KEYSTONE_NAVIGATOR_QMSS drivers/soc/ti/Makefile
 
 #################
 # Documentation #
