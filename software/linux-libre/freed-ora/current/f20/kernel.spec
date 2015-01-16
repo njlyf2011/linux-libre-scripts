@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -828,6 +828,27 @@ Patch26122: batman-adv-Calculate-extra-tail-size-based-on-queued.patch
 
 #CVE-2014-9529 rhbz 1179813 1179853
 Patch26124: KEYS-close-race-between-key-lookup-and-freeing.patch
+
+#rhbz 1178975
+Patch26125: x86-vdso-Use-asm-volatile-in-__getcpu.patch
+
+#rhbz 1124119
+Patch26126: uas-Do-not-blacklist-ASM1153-disk-enclosures.patch
+Patch26127: uas-Add-US_FL_NO_ATA_1X-for-2-more-Seagate-disk-encl.patch
+Patch26128: uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
+
+#rhbz 1115713
+Patch26129: samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
+#rhbz 1163574
+Patch26130: acpi-video-Add-disable_native_backlight-quirk-for-De.patch
+#rhbz 1094948
+Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
+
+#CVE-2014-9585 rhbz 1181054 1181056
+Patch26132: x86_64-vdso-Fix-the-vdso-address-randomization-algor.patch
+
+#CVE-2014-8160 rhbz 1182059 1182063
+Patch26133: netfilter-conntrack-disable-generic-tracking-for-kno.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -1627,6 +1648,27 @@ ApplyPatch batman-adv-Calculate-extra-tail-size-based-on-queued.patch
 
 #CVE-2014-9529 rhbz 1179813 1179853
 ApplyPatch KEYS-close-race-between-key-lookup-and-freeing.patch
+
+#rhbz 1178975
+ApplyPatch x86-vdso-Use-asm-volatile-in-__getcpu.patch
+
+#rhbz 1124119
+ApplyPatch uas-Do-not-blacklist-ASM1153-disk-enclosures.patch
+ApplyPatch uas-Add-US_FL_NO_ATA_1X-for-2-more-Seagate-disk-encl.patch
+ApplyPatch uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
+
+#rhbz 1115713
+ApplyPatch samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
+#rhbz 1163574
+ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-De.patch
+#rhbz 1094948
+ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
+
+#CVE-2014-9585 rhbz 1181054 1181056
+ApplyPatch x86_64-vdso-Fix-the-vdso-address-randomization-algor.patch
+
+#CVE-2014-8160 rhbz 1182059 1182063
+ApplyPatch netfilter-conntrack-disable-generic-tracking-for-kno.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2457,6 +2499,15 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Jan 15 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.8-201
+- CVE-2014-8160 iptables restriction bypass (rhbz 1182059 1182063)
+
+* Mon Jan 12 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-9585 ASLR brute-force possible for vdso (rhbz 1181054 1181056)
+- Backlight fixes for Samsung and Dell machines (rhbz 1094948 1115713 1163574)
+- Add various UAS quirks (rhbz 1124119)
+- Add patch to fix loop in VDSO (rhbz 1178975)
+
 * Fri Jan  9 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.17.8-gnu.
 
