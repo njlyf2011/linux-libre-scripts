@@ -32,7 +32,7 @@
 # Thanks to Brian Brazil @ gnewsense
 #
 
-# This version, suited for 2.6.24, avoids removing Free Software for
+# This version, suited for 2.6.26, avoids removing Free Software for
 # the sake of removing non-Free Software.  Drivers that currently
 # require non-Free firmware are retained, but firmware included in
 # GPLed sources is replaced with /*(DEBLOBBED)*/ if the deblob-check
@@ -40,7 +40,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=2.6.24 extra=2
+kver=2.6.26 extra=
 
 sed -i "s,^EXTRAVERSION.*,EXTRAVERSION = -libre$extra," Makefile
 
@@ -183,7 +183,7 @@ clean_kconfig drivers/char/drm/Kconfig 'DRM_R128'
 clean_mk CONFIG_DRM_R128 drivers/char/drm/Makefile
 
 # DRM_RADEON - ATI Radeon
-clean_blob drivers/char/drm/radeon_cp.c
+clean_blob drivers/char/drm/radeon_microcode.h
 clean_kconfig drivers/char/drm/Kconfig 'DRM_RADEON'
 clean_mk CONFIG_DRM_RADEON drivers/char/drm/Makefile
 
@@ -309,6 +309,10 @@ clean_blob drivers/net/bnx2_fw2.h
 clean_kconfig drivers/net/Kconfig 'BNX2'
 clean_mk CONFIG_BNX2 drivers/net/Makefile
 
+clean_blob drivers/net/bnx2x_init_values.h
+clean_kconfig drivers/net/Kconfig 'BNX2X'
+clean_mk CONFIG_BNX2X drivers/net/Makefile
+
 # CASSINI - Sun Cassini
 clean_blob drivers/net/cassini.h
 clean_kconfig drivers/net/Kconfig 'CASSINI'
@@ -425,7 +429,7 @@ clean_mk CONFIG_USB_KAWETH drivers/net/usb/Makefile
 ########################
 
 # QETH - Gigabit Ethernet device support
-clean_blob drivers/s390/net/qeth_mpc.c
+clean_blob drivers/s390/net/qeth_core_mpc.c
 clean_kconfig drivers/s390/net/Kconfig 'QETH'
 clean_mk CONFIG_QETH drivers/s390/net/Makefile
 
@@ -574,7 +578,7 @@ clean_kconfig sound/pci/Kconfig 'SND_CS46XX'
 # sed -i '/cs46xx\/ \\/d' sound/pci/Makefile
 
 # SND_KORG1212 - Korg 1212 IO
-clean_ifdef sound/pci/korg1212/korg1212.c CONFIG_SND_KORG1212_FIRMWARE_IN_KERNEL
+# clean_ifdef sound/pci/korg1212/korg1212.c CONFIG_SND_KORG1212_FIRMWARE_IN_KERNEL
 clean_blob sound/pci/korg1212/korg1212-firmware.h
 
 # SND_MAESTRO3 - ESS Allegro/Maestro3
