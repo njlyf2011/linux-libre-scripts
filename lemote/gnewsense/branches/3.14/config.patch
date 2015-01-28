@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-08-15 01:53:02.000000000 +0000
-@@ -0,0 +1,5008 @@
++++ .config	2015-01-28 02:55:50.024381408 -0500
+@@ -0,0 +1,5009 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.14.17-gnu Kernel Configuration
++# Linux/mips 3.14.30-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -3224,6 +3224,7 @@ Index: .config
 +CONFIG_DVB_B2C2_FLEXCOP=m
 +CONFIG_SMS_SIANO_MDTV=m
 +CONFIG_SMS_SIANO_RC=y
++# CONFIG_SMS_SIANO_DEBUGFS is not set
 +
 +#
 +# Media ancillary drivers (tuners, sensors, i2c, frontends)
