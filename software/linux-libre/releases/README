@@ -1,0 +1,61 @@
+This tree contains branches and tags for GNU Linux-libre releases,
+namely, the deblob scripts used to clean up the source tarballs of
+each upstream release.
+
+The latest development version of each deblobbing script is maintained
+in the trunk, in ../scripts.  There is no guarantee that they are
+fully functional at any point in time.  Indeed, unreleased changes to
+deblob scripts for old releases will often accumulate until some major
+infrastructure change is rolled out for such old releases.  For stable
+scripts and working combinations of scripts, use the branches,
+described below.
+
+For each upstream stable series (2.6.32, 3.4, 3.10), a directory in
+branches/ is maintained with scripts that are supposed to be usable to
+deblob any release in the series.
+
+As changes to deblobbing are required by upstream releases, or our
+deblobbing infrastructure evolves, the branches will be updated at
+release time, so that each branch contains the scripts used for the
+latest deblobbed release in that stable series.
+
+Once the branch is modified, the *first* release that carries those
+changes will get a tag in tags/.  Tags will NOT be created for
+Subsequent releases that use the same scripts.
+
+An example is in order (we didn't have branches and tags back then,
+but we describe what we'd have done if we did):
+
+When we first deblobbed upstream stable release 2.6.35, our releases
+were still tagged as -libre rather than -gnu, so our deblobbed release
+was 2.6.35-libre.  Both branches/2.6.35 and tags/2.6.35-libre had the
+same scripts at that point.
+
+There were deblobbing improvements shortly after that release, so we
+published 2.6.35-libre1, updating branches/2.6.35 and copying it ot
+tags/2.6.35-libre1.  This script set was used for releases
+2.6.35.1-libre1 and 2.6.35.2-libre1, but these were NOT tagged.
+
+Additional deblobbing changes were made for -libre2, so
+branches/2.6.35 was updated and copied to tags/2.6.35-libre2, used for
+(untagged) releases from 2.6.35.3-libre2 to 2.6.35.10-libre2.
+
+A major generation change led to 2.6.35-libre3, with another update to
+branches/2.6.35 and a new tag reflecting that release, the
+2.6.35.10-libre3 respin, and 2.6.35.11-libre3 to 2.6.35.13-libre3.
+
+The 2.6.35.14 upstream release required minor changes to the
+deblobbing machinery, small enough that they didn't justify bumping
+our release id (the deblobbing changes would affect deblobbing of
+upstream 2.6.35, only 2.6.35.14), so we updated branches/2.6.35 with
+the required changes for 2.6.35.14-libre3 and copied it to
+tags/2.6.35.14-libre3.  This one is tagged because it had changes to
+the deblobbing scripts, even though it did not increment our release
+counter to -libre4.
+
+Subsequent changes to the deblobbing infrastructure motivated new
+releases: 2.6.35-gnu and 2.6.35.14-gnu, both using the scripts in
+tags/2.6.35-gnu, and, at a later time, 2.6.35-gnu1 and 2.6.35.14-gnu1,
+both using the scripts in tags/2.6.35-gnu1.  Unless further releases
+of 2.6.35 came up, the scripts used for the -gnu1 release remain at
+the tip of branches/2.6.35.
