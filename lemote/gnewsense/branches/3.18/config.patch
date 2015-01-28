@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2014-11-26 00:46:52.666959432 -0500
-@@ -0,0 +1,5115 @@
++++ .config	2015-01-27 16:10:35.993009339 -0500
+@@ -0,0 +1,5116 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.18.0-rc6-gnu Kernel Configuration
++# Linux/mips 3.18.4-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -119,6 +119,7 @@ Index: .config
 +CONFIG_CPU_R4K_FPU=y
 +CONFIG_CPU_R4K_CACHE_TLB=y
 +# CONFIG_ARCH_PHYS_ADDR_T_64BIT is not set
++CONFIG_CPU_NEEDS_NO_SMARTMIPS_OR_MICROMIPS=y
 +CONFIG_CPU_HAS_WB=y
 +CONFIG_CPU_HAS_SYNC=y
 +CONFIG_CPU_SUPPORTS_HIGHMEM=y
