@@ -100,7 +100,7 @@ find .pc -perm 000 -print0 | xargs --no-run-if-empty -0 chmod 400
 
 if $prep; then
   make oldconfig
-  quilt refresh
+  quilt refresh config.patch
   exit
 fi
 
