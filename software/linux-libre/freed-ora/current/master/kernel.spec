@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 %global aarch64patches 1
 
@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -58,8 +58,8 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.18%{?stablegnux}
-#define rcrevlibre  -3.18%{?rcrevgnux}
+#define stablelibre -3.19%{?stablegnux}
+%define rcrevlibre  -3.18%{?rcrevgnux}
 #define gitrevlibre -3.18%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 0
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -458,7 +458,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-3.%{upstream_sublevel}
+Source6: deblob-3.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -638,7 +638,6 @@ Patch21025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 Patch21028: arm-i.MX6-Utilite-device-dtb.patch
-Patch21029: arm-dts-sun7i-bananapi.patch
 
 Patch21100: arm-highbank-l2-reverts.patch
 
@@ -653,65 +652,18 @@ Patch21247: ath9k-rx-dma-stop-check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-# Patch series from Hans for various backlight and platform driver fixes
-Patch26002: samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-
 Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1111138
 Patch26059: i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
 
-Patch26064: Input-add-driver-for-the-Goodix-touchpanel.patch
+#rhbz 1124119
+Patch26128: uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
 
-#rhbz 1135338
-Patch26070: HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
-
-#CVE-2014-8134 rhbz 1172765 1172769
-Patch26091: x86-kvm-Clear-paravirt_enabled-on-KVM-guests-for-esp.patch
-
-#rhbz 1164945
-Patch26092: xhci-Add-broken-streams-quirk-for-Fresco-Logic-FL100.patch
-Patch26093: uas-Add-US_FL_NO_ATA_1X-for-Seagate-devices-with-usb.patch
-Patch26094: uas-Add-US_FL_NO_REPORT_OPCODES-for-JMicron-JMS566-w.patch
-
-#rhbz 1172543
-Patch26096: cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
-
-#CVE-2014-8133 rhbz 1172797 1174374
-Patch26100: x86-tls-Validate-TLS-entries-to-protect-espfix.patch
-
-#rhbz 1173806
-Patch26101: powerpc-powernv-force-all-CPUs-to-be-bootable.patch
-
-#CVE-2014-XXXX rhbz 1175235 1175250
-Patch26102: isofs-Fix-infinite-looping-over-CE-entries.patch
-
-#rhbz 1175261
-Patch26103: blk-mq-Fix-uninitialized-kobject-at-CPU-hotplugging.patch
-
-#rhbz 1168434
-Patch26104: dm-cache-only-use-overwrite-optimisation-for-promoti.patch
-Patch26105: dm-cache-dirty-flag-was-mistakenly-being-cleared-whe.patch
-Patch26106: dm-cache-fix-spurious-cell_defer-when-dealing-with-p.patch
-
-Patch26107: uapi-linux-target_core_user.h-fix-headers_install.sh.patch
-
-#mount fixes for stable
-Patch26108: mnt-Implicitly-add-MNT_NODEV-on-remount-when-it-was-.patch
-Patch26109: mnt-Update-unprivileged-remount-test.patch
-Patch26110: umount-Disallow-unprivileged-mount-force.patch
-
-#CVE-2014-8989 rhbz 1170684 1170688
-Patch26111: groups-Consolidate-the-setgroups-permission-checks.patch
-Patch26112: userns-Document-what-the-invariant-required-for-safe.patch
-Patch26113: userns-Don-t-allow-setgroups-until-a-gid-mapping-has.patch
-Patch26114: userns-Don-t-allow-unprivileged-creation-of-gid-mapp.patch
-Patch26115: userns-Check-euid-no-fsuid-when-establishing-an-unpr.patch
-Patch26116: userns-Only-allow-the-creator-of-the-userns-unprivil.patch
-Patch26117: userns-Rename-id_map_mutex-to-userns_state_mutex.patch
-Patch26118: userns-Add-a-knob-to-disable-setgroups-on-a-per-user.patch
-Patch26119: userns-Allow-setting-gid_maps-without-privilege-when.patch
-Patch26120: userns-Unbreak-the-unprivileged-remount-tests.patch
+#rhbz 1115713
+Patch26129: samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
+#rhbz 1094948
+Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
@@ -943,6 +895,8 @@ Provides: kernel-devel = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre-devel = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?1:+%{1}}\
 Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: installonlypkg(kernel)\
+Provides: installonlypkg(kernel-libre)\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 Requires: perl\
@@ -1320,6 +1274,13 @@ cp -al vanilla-%{vanillaversion} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 
+#HACK for 3.19-rc6+patch-2.7.3 rbhz 1185928
+# make the symlink for arm64 dt-bindings.  sigh.
+mkdir -p arch/arm64/boot/dts/include
+pushd arch/arm64/boot/dts/include/
+ln -s ../../../../../include/dt-bindings
+popd
+
 # released_kernel with possible stable updates
 %if 0%{?stable_base}
 ApplyPatch %{stable_patch_00}
@@ -1386,7 +1347,6 @@ ApplyPatch arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 ApplyPatch pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
-ApplyPatch arm-dts-sun7i-bananapi.patch
 
 ApplyPatch arm-highbank-l2-reverts.patch
 
@@ -1507,65 +1467,18 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k-rx-dma-stop-check.patch
 
-# Patch series from Hans for various backlight and platform driver fixes
-ApplyPatch samsung-laptop-Add-broken-acpi-video-quirk-for-NC210.patch
-
 ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1111138
 ApplyPatch i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
 
-ApplyPatch Input-add-driver-for-the-Goodix-touchpanel.patch
+#rhbz 1124119
+ApplyPatch uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
 
-#rhbz 1135338
-ApplyPatch HID-add-support-for-MS-Surface-Pro-3-Type-Cover.patch
-
-#CVE-2014-8134 rhbz 1172765 1172769
-ApplyPatch x86-kvm-Clear-paravirt_enabled-on-KVM-guests-for-esp.patch
-
-#rhbz 1164945
-ApplyPatch xhci-Add-broken-streams-quirk-for-Fresco-Logic-FL100.patch
-ApplyPatch uas-Add-US_FL_NO_ATA_1X-for-Seagate-devices-with-usb.patch
-ApplyPatch uas-Add-US_FL_NO_REPORT_OPCODES-for-JMicron-JMS566-w.patch
-
-#rhbz 1172543
-ApplyPatch cfg80211-don-t-WARN-about-two-consecutive-Country-IE.patch
-
-#CVE-2014-8133 rhbz 1172797 1174374
-ApplyPatch x86-tls-Validate-TLS-entries-to-protect-espfix.patch
-
-#rhbz 1173806
-ApplyPatch powerpc-powernv-force-all-CPUs-to-be-bootable.patch
-
-#CVE-2014-XXXX rhbz 1175235 1175250
-ApplyPatch isofs-Fix-infinite-looping-over-CE-entries.patch
-
-#rhbz 1175261
-ApplyPatch blk-mq-Fix-uninitialized-kobject-at-CPU-hotplugging.patch
-
-#rhbz 1168434
-ApplyPatch dm-cache-only-use-overwrite-optimisation-for-promoti.patch
-ApplyPatch dm-cache-dirty-flag-was-mistakenly-being-cleared-whe.patch
-ApplyPatch dm-cache-fix-spurious-cell_defer-when-dealing-with-p.patch
-
-ApplyPatch uapi-linux-target_core_user.h-fix-headers_install.sh.patch
-
-#mount fixes for stable
-ApplyPatch mnt-Implicitly-add-MNT_NODEV-on-remount-when-it-was-.patch
-ApplyPatch mnt-Update-unprivileged-remount-test.patch
-ApplyPatch umount-Disallow-unprivileged-mount-force.patch
-
-#CVE-2014-8989 rhbz 1170684 1170688
-ApplyPatch groups-Consolidate-the-setgroups-permission-checks.patch
-ApplyPatch userns-Document-what-the-invariant-required-for-safe.patch
-ApplyPatch userns-Don-t-allow-setgroups-until-a-gid-mapping-has.patch
-ApplyPatch userns-Don-t-allow-unprivileged-creation-of-gid-mapp.patch
-ApplyPatch userns-Check-euid-no-fsuid-when-establishing-an-unpr.patch
-ApplyPatch userns-Only-allow-the-creator-of-the-userns-unprivil.patch
-ApplyPatch userns-Rename-id_map_mutex-to-userns_state_mutex.patch
-ApplyPatch userns-Add-a-knob-to-disable-setgroups-on-a-per-user.patch
-ApplyPatch userns-Allow-setting-gid_maps-without-privilege-when.patch
-ApplyPatch userns-Unbreak-the-unprivileged-remount-tests.patch
+#rhbz 1115713
+ApplyPatch samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
+#rhbz 1094948
+ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -1706,10 +1619,8 @@ BuildKernel() {
     %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
 %ifarch %{arm} aarch64
-    %{make} -s ARCH=$Arch V=1 dtbs
-    mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
-    install -m 644 arch/$Arch/boot/dts/*.dtb $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer/
-    rm -f arch/$Arch/boot/dts/*.dtb
+    %{make} -s ARCH=$Arch V=1 dtbs dtbs_install INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
+    find arch/$Arch/boot/dts -name '*.dtb' -type f | xargs rm -f
 %endif
 
     # Start installing the results
@@ -2448,6 +2359,90 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Sun Feb  1 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19-rc6-gnu.
+
+* Mon Jan 26 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc6.git0.1
+- Linux v3.19-rc6
+- Remove symbolic link hunk from patch-3.19-rc6 (rbhz 1185928)
+- Disable debugging options.
+
+* Thu Jan 22 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc5.git2.1
+- Linux v3.19-rc5-134-gf8de05ca38b7
+
+* Wed Jan 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc5.git1.1
+- Linux v3.19-rc5-117-g5eb11d6b3f55
+- Reenable debugging options.
+
+* Tue Jan 20 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- More ARM config option cleanups
+
+* Mon Jan 19 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc5.git0.1
+- Linux v3.19-rc5
+- Disable debugging options.
+
+* Sat Jan 17 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Move Rockchip to ARMv7 generic to support rk32xx on LPAE
+- Enable Device Tree Overlays for dynamic DTB
+- ARM config updates
+
+* Fri Jan 16 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc4.git4.1
+- Linux v3.19-rc4-155-gcb59670870d9
+
+* Thu Jan 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Re-enable BUILD_DOCSRC
+
+* Thu Jan 15 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc4.git3.1
+- Linux v3.19-rc4-141-gf800c25b7a76
+
+* Wed Jan 14 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc4.git2.1
+- Linux v3.19-rc4-46-g188c901941ef
+- Enable I40E_VXLAN (rhbz 1182116)
+
+* Tue Jan 13 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Checkpoint/Restore on ARMv7 (rhbz 1146995)
+
+* Tue Jan 13 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add installonlypkg(kernel) to kernel-devel subpackages (rhbz 1079906)
+
+* Tue Jan 13 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc4.git1.1
+- Linux v3.19-rc4-23-g971780b70194
+- Reenable debugging options.
+
+* Mon Jan 12 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc4.git0.1
+- Linux v3.19-rc4
+- Disable debugging options.
+
+* Mon Jan 12 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backlight fixes for Samsung and Dell machines (rhbz 1094948 1115713)
+- Add various UAS quirks (rhbz 1124119)
+- Add patch to fix loop in VDSO (rhbz 1178975)
+
+* Fri Jan 09 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc3.git2.1
+- Linux v3.19-rc3-69-g11c8f01b423b
+
+* Wed Jan 07 2015 Kyle McMartin <kyle@fedoraproject.org> - 3.19.0-0.rc3.git1.2
+- kernel-arm64.patch: fix up build... no idea if it works.
+
+* Wed Jan 07 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-9529 memory corruption or panic during key gc (rhbz 1179813 1179853)
+
+* Wed Jan 07 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc3.git1.1
+- Linux v3.19-rc3-38-gbdec41963890
+- Enable POWERCAP and INTEL_RAPL options
+- Reenable debugging options.
+
+* Tue Jan 06 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v3.19-rc3
+
+* Mon Jan 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v3.19-rc2
+- Temporarily disable aarch64patches
+- Happy New Year
+
+* Sun Dec 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable F2FS (rhbz 972446)
+
 * Thu Dec 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.1-2
 - CVE-2014-8989 userns can bypass group restrictions (rhbz 1170684 1170688)
 - Fix from Kyle McMartin for target_core_user uapi issue since it's enabled
