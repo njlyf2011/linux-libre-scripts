@@ -156,6 +156,72 @@ index 5a33409..de04ac9 100644
 +		*(.gnu.attributes)
  	}
  }
+diff --git a/arch/mips/include/asm/fpu.h b/arch/mips/include/asm/fpu.h
+index 994d219..5528f4e 100644
+--- a/arch/mips/include/asm/fpu.h
++++ b/arch/mips/include/asm/fpu.h
+@@ -74,8 +74,10 @@ static inline int __enable_fpu(enum fpu_mode mode)
+ #endif
+ 		/* fall through */
+ 	case FPU_32BIT:
+-		/* clear FRE */
+-		write_c0_config5(read_c0_config5() & ~MIPS_CONF5_FRE);
++		if (cpu_has_fre) {
++			/* clear FRE */
++			write_c0_config5(read_c0_config5() & ~MIPS_CONF5_FRE);
++		}
+ fr_common:
+ 		/* set CU1 & change FR appropriately */
+ 		fr = (int)mode & FPU_FR_MASK;
+@@ -182,25 +184,34 @@ static inline int init_fpu(void)
+ 	int ret = 0;
+ 
+ 	if (cpu_has_fpu) {
++		unsigned int config5;
++
+ 		ret = __own_fpu();
+-		if (!ret) {
+-			unsigned int config5 = read_c0_config5();
+-
+-			/*
+-			 * Ensure FRE is clear whilst running _init_fpu, since
+-			 * single precision FP instructions are used. If FRE
+-			 * was set then we'll just end up initialising all 32
+-			 * 64b registers.
+-			 */
+-			write_c0_config5(config5 & ~MIPS_CONF5_FRE);
+-			enable_fpu_hazard();
++		if (ret)
++			return ret;
+ 
++		if (!cpu_has_fre) {
+ 			_init_fpu();
+ 
+-			/* Restore FRE */
+-			write_c0_config5(config5);
+-			enable_fpu_hazard();
++			return 0;
+ 		}
++
++		config5 = read_c0_config5();
++
++		/*
++		 * Ensure FRE is clear whilst running _init_fpu, since
++		 * single precision FP instructions are used. If FRE
++		 * was set then we'll just end up initialising all 32
++		 * 64b registers.
++		 */
++		write_c0_config5(config5 & ~MIPS_CONF5_FRE);
++		enable_fpu_hazard();
++
++		_init_fpu();
++
++		/* Restore FRE */
++		write_c0_config5(config5);
++		enable_fpu_hazard();
+ 	} else
+ 		fpu_emulator_init_fpu();
+ 
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
 index a0ee0cb..4e18add 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
@@ -9307,18 +9373,53 @@ index f15cddf..33503de 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index ce63646..8463c03 100644
+index ce63646..31aa83c 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
-@@ -450,6 +450,7 @@ void usb_amd_dev_put(void)
+@@ -450,6 +450,26 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
++#if defined(CONFIG_USB_UHCI_HCD) || defined(CONFIG_USB_UHCI_HCD_MODULE) \
++ || defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE) \
++ || defined(CONFIG_USB_EHCI_HCD) || defined(CONFIG_USB_EHCI_HCD_MODULE) \
++ || defined(CONFIG_USB_XHCI_HCD) || defined(CONFIG_USB_XHCI_HCD_MODULE)
++static inline int io_type_enabled(struct pci_dev *pdev, unsigned int mask)
++{
++	u16 cmd;
++	return !pci_read_config_word(pdev, PCI_COMMAND, &cmd) && (cmd & mask);
++}
++
++#define pio_enabled(dev) io_type_enabled(dev, PCI_COMMAND_IO)
++#define mmio_enabled(dev) io_type_enabled(dev, PCI_COMMAND_MEMORY)
++
++static int mmio_resource_enabled(struct pci_dev *pdev, int idx)
++{
++	return pci_resource_start(pdev, idx) && mmio_enabled(pdev);
++}
++#endif
++
 +#if defined(CONFIG_USB_UHCI_HCD) || defined(CONFIG_USB_UHCI_HCD_MODULE)
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -557,12 +558,16 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -531,15 +551,6 @@ reset_needed:
+ }
+ EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
+ 
+-static inline int io_type_enabled(struct pci_dev *pdev, unsigned int mask)
+-{
+-	u16 cmd;
+-	return !pci_read_config_word(pdev, PCI_COMMAND, &cmd) && (cmd & mask);
+-}
+-
+-#define pio_enabled(dev) io_type_enabled(dev, PCI_COMMAND_IO)
+-#define mmio_enabled(dev) io_type_enabled(dev, PCI_COMMAND_MEMORY)
+-
+ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
+ {
+ 	unsigned long base = 0;
+@@ -557,12 +568,11 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -9326,16 +9427,16 @@ index ce63646..8463c03 100644
 +#define quirk_usb_handoff_uhci(x) do { } while (0)
 +#endif /* CONFIG_USB_UHCI_HCD* */
  
- static int mmio_resource_enabled(struct pci_dev *pdev, int idx)
- {
- 	return pci_resource_start(pdev, idx) && mmio_enabled(pdev);
- }
- 
+-static int mmio_resource_enabled(struct pci_dev *pdev, int idx)
+-{
+-	return pci_resource_start(pdev, idx) && mmio_enabled(pdev);
+-}
+-
 +#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -641,7 +646,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -641,7 +651,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -9347,7 +9448,7 @@ index ce63646..8463c03 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -814,6 +823,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -814,6 +828,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -9357,7 +9458,7 @@ index ce63646..8463c03 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -953,6 +965,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -953,6 +970,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -9365,7 +9466,7 @@ index ce63646..8463c03 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1060,6 +1073,9 @@ hc_init:
+@@ -1060,6 +1078,9 @@ hc_init:
  
  	iounmap(base);
  }
