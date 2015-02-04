@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2015-02-04 02:05:18.668302307 -0500
-@@ -0,0 +1,5165 @@
++++ .config	2015-02-04 06:32:19.495572815 -0500
+@@ -0,0 +1,5161 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.19.0-rc6-gnu Kernel Configuration
++# Linux/mips 3.19.0-rc7-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -4354,11 +4354,6 @@ Index: .config
 +CONFIG_LEMOTE_LYNLOONG2F=m
 +
 +#
-+# SOC (System On Chip) specific Drivers
-+#
-+# CONFIG_SOC_TI is not set
-+
-+#
 +# Hardware Spinlock drivers
 +#
 +
@@ -4385,6 +4380,7 @@ Index: .config
 +#
 +# SOC (System On Chip) specific Drivers
 +#
++# CONFIG_SOC_TI is not set
 +CONFIG_PM_DEVFREQ=y
 +
 +#
