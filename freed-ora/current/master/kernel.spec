@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -607,6 +607,7 @@ Patch1019: Add-sysrq-option-to-disable-secure-boot-mode.patch
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
+Patch1825: drm-i915-tame-the-chattermouth-v2.patch
 Patch1826: drm-i915-hush-check-crtc-state.patch
 
 # Quiet boot fixes
@@ -656,9 +657,6 @@ Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1111138
 Patch26059: i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
-
-#rhbz 1124119
-Patch26128: uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
 
 #rhbz 1115713
 Patch26129: samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
@@ -801,7 +799,7 @@ This package provides debug information for the perf python bindings.
 %endif # with_perf
 
 %if %{with_tools}
-%package -n kernel-libre-tools
+%package tools
 Provides: kernel-tools = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
@@ -813,21 +811,21 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
-Requires: kernel-libre-tools-libs = %{version}-%{release}
-%description -n kernel-libre-tools
+Requires: %{name}-tools-libs = %{version}-%{release}
+%description tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
 
-%package -n kernel-libre-tools-libs
+%package tools-libs
 Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
 Summary: Libraries for the kernels-tools
 Group: Development/System
 License: GPLv2
-%description -n kernel-libre-tools-libs
+%description tools-libs
 This package contains the libraries built from the tools/ directory
 from the kernel source.
 
-%package -n kernel-libre-tools-libs-devel
+%package tools-libs-devel
 Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
@@ -838,18 +836,18 @@ Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
 Requires: kernel-libre-tools-libs = %{version}-%{release}
 Provides: kernel-libre-tools-devel
 Provides: kernel-tools-devel
-%description -n kernel-libre-tools-libs-devel
+%description tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
 
-%package -n kernel-libre-tools-debuginfo
+%package tools-debuginfo
 Provides: kernel-tools-debuginfo = %{rpmversion}-%{pkg_release}
-Summary: Debug information for package kernel-libre-tools
+Summary: Debug information for package kernel-tools
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description -n kernel-libre-tools-debuginfo
-This package provides debug information for package kernel-libre-tools.
+%description tools-debuginfo
+This package provides debug information for package kernel-tools.
 
 # Note that this pattern only works right to match the .build-id
 # symlinks because of the trailing nonmatching alternation and
@@ -1441,6 +1439,7 @@ ApplyPatch Add-sysrq-option-to-disable-secure-boot-mode.patch
 # Nouveau DRM
 
 # Intel DRM
+ApplyPatch drm-i915-tame-the-chattermouth-v2.patch
 ApplyPatch drm-i915-hush-check-crtc-state.patch
 
 # Radeon DRM
@@ -1471,9 +1470,6 @@ ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
 
 #rhbz 1111138
 ApplyPatch i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
-
-#rhbz 1124119
-ApplyPatch uas-Add-no-report-opcodes-quirk-for-Simpletech-devic.patch
 
 #rhbz 1115713
 ApplyPatch samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
@@ -2242,7 +2238,7 @@ fi
 %endif # with_perf
 
 %if %{with_tools}
-%files -n kernel-libre-tools -f cpupower.lang
+%files tools -f cpupower.lang
 %defattr(-,root,root)
 %ifarch %{cpupowerarchs}
 %{_bindir}/cpupower
@@ -2263,16 +2259,16 @@ fi
 %endif
 
 %if %{with_debuginfo}
-%files -f kernel-tools-debuginfo.list -n kernel-libre-tools-debuginfo
+%files -f kernel-tools-debuginfo.list tools-debuginfo
 %defattr(-,root,root)
 %endif
 
 %ifarch %{cpupowerarchs}
-%files -n kernel-libre-tools-libs
+%files tools-libs
 %{_libdir}/libcpupower.so.0
 %{_libdir}/libcpupower.so.0.0.0
 
-%files -n kernel-libre-tools-libs-devel
+%files tools-libs-devel
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
@@ -2359,7 +2355,34 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Sun Feb  1 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Feb  3 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19-rc7-gnu.
+
+* Mon Feb 02 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc7.git0.1
+- Linux v3.19-rc7
+- Disable debugging options.
+
+* Fri Jan 30 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc6.git3.1
+- Linux v3.19-rc6-142-g1c999c47a9f1
+
+* Thu Jan 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch from Rob Clark to toggle i915 state machine checks
+
+* Thu Jan 29 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- More ARMv7 updates
+- A few more sound config cleanups
+
+* Wed Jan 28 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc6.git2.1
+- Linux v3.19-rc6-105-gc59c961ca511
+
+* Tue Jan 27 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable SND_SOC and the button array driver on x86 for Baytrail devices
+
+* Tue Jan 27 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc6.git1.1
+- Linux v3.19-rc6-21-g4adca1cbc4ce
+- Reenable debugging options.
+
+* Mon Jan 26 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Feb  1
 - GNU Linux-libre 3.19-rc6-gnu.
 
 * Mon Jan 26 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.0-0.rc6.git0.1
