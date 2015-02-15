@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -688,6 +688,9 @@ Patch30002: ipv4-try-to-cache-dst_entries-which-would-cause-a-re.patch
 
 #rhbz 1188074
 Patch30003: 0001-ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
+
+#rhbz 1186097
+Patch30004: acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1515,6 +1518,9 @@ ApplyPatch ipv4-try-to-cache-dst_entries-which-would-cause-a-re.patch
 
 #rhbz 1188074
 ApplyPatch 0001-ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
+
+#rhbz 1186097
+ApplyPatch acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2399,6 +2405,13 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu Feb 12 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18.7-gnu.
+
+* Wed Feb 11 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.18.7-200
+- Linux v3.18.7
+- Add disable_native_backlight quirk for Samsung 510R (rhbz 1186097)
+
 * Sat Feb  7 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.18.6-gnu.
 
