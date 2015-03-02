@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -683,14 +683,26 @@ Patch30000: kernel-arm64.patch
 # Fix for big-endian arches, already upstream
 Patch30001: mpssd-x86-only.patch
 
-# rhbz 1183744 1188347
-Patch30002: ipv4-try-to-cache-dst_entries-which-would-cause-a-re.patch
-
 #rhbz 1188074
 Patch30003: 0001-ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
 
 #rhbz 1186097
 Patch30004: acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
+
+#CVE-2015-1593 rhbz 1192519 1192520
+Patch26135: ASLR-fix-stack-randomization-on-64-bit-systems.patch
+
+#CVE-XXXX-XXXX rhbz 1189864 1192079
+Patch26136: vhost-scsi-potential-memory-corruption.patch
+
+#CVE-2015-0275 rhbz 1193907 1195178
+Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
+
+#rhbz 1188439
+Patch26139: HID-i2c-hid-Limit-reads-to-wMaxInputLength-bytes-for.patch
+
+#rhbz 1190947
+Patch26141: Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1513,14 +1525,26 @@ ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 # Fix for big-endian arches, already upstream
 ApplyPatch mpssd-x86-only.patch
 
-# rhbz 1183744 1188347
-ApplyPatch ipv4-try-to-cache-dst_entries-which-would-cause-a-re.patch
-
 #rhbz 1188074
 ApplyPatch 0001-ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
 
 #rhbz 1186097
 ApplyPatch acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
+
+#CVE-2015-1593 rhbz 1192519 1192520
+ApplyPatch ASLR-fix-stack-randomization-on-64-bit-systems.patch
+
+#CVE-XXXX-XXXX rhbz 1189864 1192079
+ApplyPatch vhost-scsi-potential-memory-corruption.patch
+
+#CVE-2015-0275 rhbz 1193907 1195178
+ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
+
+#rhbz 1188439
+ApplyPatch HID-i2c-hid-Limit-reads-to-wMaxInputLength-bytes-for.patch
+
+#rhbz 1190947
+ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2405,6 +2429,35 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Fri Feb 27 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18.8-gnu.
+
+* Fri Feb 27 2015 Kyle McMartin <kyle@fedoraproject.org> - 3.18.8-201
+- Fix up aarch64 build... mis-merge in kernel-arm64.patch.
+
+* Fri Feb 27 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.18.8-200
+- Linux v3.18.8
+
+* Thu Feb 26 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-1421 sctp: slab corruption from use after free on INIT collisions (rhbz 1196581 1196595)
+
+* Wed Feb 25 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for AR5B195 devices from Alexander Ploumistos (rhbz 1190947)
+
+* Tue Feb 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix ext4 remount with journal_checksum option (rhbz 1190933)
+
+* Mon Feb 23 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch for HID i2c from Seth Forshee (rhbz 1188439)
+- CVE-2015-0275 ext4: fallocate zero range page size > block size BUG (rhbz 1193907 1195178)
+
+* Fri Feb 20 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Move mtpspi and related mods to kernel-core for VMWare guests (rhbz 1194612)
+
+* Mon Feb 16 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-XXXX-XXXX potential memory corruption in vhost/scsi driver (rhbz 1189864 1192079)
+- CVE-2015-1593 stack ASLR integer overflow (rhbz 1192519 1192520)
+
 * Thu Feb 12 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.18.7-gnu.
 
