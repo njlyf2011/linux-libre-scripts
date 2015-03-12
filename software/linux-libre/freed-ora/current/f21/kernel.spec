@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -670,8 +670,6 @@ Patch26121: Set-UID-in-sess_auth_rawntlmssp_authenticate-too.patch
 Patch26126: uas-Do-not-blacklist-ASM1153-disk-enclosures.patch
 Patch26127: uas-Add-US_FL_NO_ATA_1X-for-2-more-Seagate-disk-encl.patch
 
-#rhbz 1115713
-Patch26129: samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
 #rhbz 1163574
 Patch26130: acpi-video-Add-disable_native_backlight-quirk-for-De.patch
 #rhbz 1094948
@@ -683,23 +681,17 @@ Patch30000: kernel-arm64.patch
 # Fix for big-endian arches, already upstream
 Patch30001: mpssd-x86-only.patch
 
-#rhbz 1188074
-Patch30003: 0001-ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
-
 #rhbz 1186097
 Patch30004: acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
-
-#CVE-2015-1593 rhbz 1192519 1192520
-Patch26135: ASLR-fix-stack-randomization-on-64-bit-systems.patch
 
 #CVE-XXXX-XXXX rhbz 1189864 1192079
 Patch26136: vhost-scsi-potential-memory-corruption.patch
 
+#rhbz 1185519
+Patch26142: NFS-fix-clp-cl_revoked-list-deletion-causing-softloc.patch
+
 #CVE-2015-0275 rhbz 1193907 1195178
 Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
-
-#rhbz 1188439
-Patch26139: HID-i2c-hid-Limit-reads-to-wMaxInputLength-bytes-for.patch
 
 #rhbz 1190947
 Patch26141: Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
@@ -1515,8 +1507,6 @@ ApplyPatch Set-UID-in-sess_auth_rawntlmssp_authenticate-too.patch
 ApplyPatch uas-Do-not-blacklist-ASM1153-disk-enclosures.patch
 ApplyPatch uas-Add-US_FL_NO_ATA_1X-for-2-more-Seagate-disk-encl.patch
 
-#rhbz 1115713
-ApplyPatch samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
 #rhbz 1163574
 ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-De.patch
 #rhbz 1094948
@@ -1525,14 +1515,8 @@ ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 # Fix for big-endian arches, already upstream
 ApplyPatch mpssd-x86-only.patch
 
-#rhbz 1188074
-ApplyPatch 0001-ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
-
 #rhbz 1186097
 ApplyPatch acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
-
-#CVE-2015-1593 rhbz 1192519 1192520
-ApplyPatch ASLR-fix-stack-randomization-on-64-bit-systems.patch
 
 #CVE-XXXX-XXXX rhbz 1189864 1192079
 ApplyPatch vhost-scsi-potential-memory-corruption.patch
@@ -1540,11 +1524,11 @@ ApplyPatch vhost-scsi-potential-memory-corruption.patch
 #CVE-2015-0275 rhbz 1193907 1195178
 ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1188439
-ApplyPatch HID-i2c-hid-Limit-reads-to-wMaxInputLength-bytes-for.patch
-
 #rhbz 1190947
 ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
+
+#rhbz 1185519
+ApplyPatch NFS-fix-clp-cl_revoked-list-deletion-causing-softloc.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -2429,6 +2413,19 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Mon Mar  9 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.18.9-gnu.
+
+* Mon Mar 09 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.18.9-200
+- Linux v3.18.9
+
+* Mon Mar 02 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix nfsd soft lockup (rhbz 1185519)
+- Enable ET131X driver (rhbz 1197842)
+
+* Sat Feb 28 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix Panda on ARMv7 crash on boot
+
 * Fri Feb 27 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.18.8-gnu.
 
