@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -663,9 +663,6 @@ Patch26135: acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
 #CVE-XXXX-XXXX rhbz 1189864 1192079
 Patch26136: vhost-scsi-potential-memory-corruption.patch
 
-#rhbz 1185519
-Patch26142: NFS-fix-clp-cl_revoked-list-deletion-causing-softloc.patch
-
 #CVE-2015-0275 rhbz 1193907 1195178
 Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
 
@@ -691,9 +688,6 @@ Patch26163: Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26165: xen-pciback-limit-guest-control-of-command-register.patch
 
-#rhbz 1069027
-Patch26166: drm-radeon-dp-Set-EDP_CONFIGURATION_SET-for-bridge-c.patch
-
 #CVE-2014-8159 rhbz 1181166 1200950
 Patch26167: IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
 
@@ -703,6 +697,7 @@ Patch26168: HID-multitouch-add-support-of-clickpads.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
+Patch30001: aarch64-fix-tlb-issues.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1511,9 +1506,6 @@ ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
 #rhbz 1190947
 ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
 
-#rhbz 1185519
-ApplyPatch NFS-fix-clp-cl_revoked-list-deletion-causing-softloc.patch
-
 #rhbz 1200777 1200778
 ApplyPatch Input-synaptics-split-synaptics_resolution-query-fir.patch
 ApplyPatch Input-synaptics-log-queried-and-quirked-dimension-va.patch
@@ -1533,9 +1525,6 @@ ApplyPatch Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-limit-guest-control-of-command-register.patch
 
-#rhbz 1069027
-ApplyPatch drm-radeon-dp-Set-EDP_CONFIGURATION_SET-for-bridge-c.patch
-
 #CVE-2014-8159 rhbz 1181166 1200950
 ApplyPatch IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
 
@@ -1544,6 +1533,8 @@ ApplyPatch HID-multitouch-add-support-of-clickpads.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
+# Just needed for 3.19
+ApplyPatch aarch64-fix-tlb-issues.patch
 %ifnarch aarch64 # this is stupid, but i want to notice before secondary koji does.
 ApplyPatch kernel-arm64.patch -R
 %endif
@@ -1681,10 +1672,8 @@ BuildKernel() {
     %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
 %ifarch %{arm} aarch64
-    %{make} -s ARCH=$Arch V=1 dtbs
-    mkdir -p $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
-    install -m 644 arch/$Arch/boot/dts/*.dtb $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer/
-    rm -f arch/$Arch/boot/dts/*.dtb
+    %{make} -s ARCH=$Arch V=1 dtbs dtbs_install INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
+    find arch/$Arch/boot/dts -name '*.dtb' -type f | xargs rm -f
 %endif
 
     # Start installing the results
@@ -2423,6 +2412,16 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Sun Mar 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19.2-gnu.
+
+* Thu Mar 19 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.19.2-200
+- Linux v3.19.2
+
+* Wed Mar 18 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream aarch64 patch to fix hang due to cache invalidation bug
+- Fix aarch64 DTBs now they're in vendor sub dirs
+
 * Tue Mar 17 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.19.1-201
 - Re-add patch to quiet i915 state machine
 
