@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -694,10 +694,18 @@ Patch26167: IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
 #rhbz 1201532
 Patch26168: HID-multitouch-add-support-of-clickpads.patch
 
+#rhbz 1187004
+Patch26170: acpi-video-Allow-forcing-native-backlight-on-non-win.patch
+Patch26171: acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
+
+#CVE-2015-2666 rhbz 1204724 1204722
+Patch26172: x86-microcode-intel-Guard-against-stack-overflow-in-.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
 Patch30001: aarch64-fix-tlb-issues.patch
+
+Patch26173: net-validate-the-range-we-feed-to-iov_iter_init-in-s.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1531,6 +1539,13 @@ ApplyPatch IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
 #rhbz 1201532
 ApplyPatch HID-multitouch-add-support-of-clickpads.patch
 
+#rhbz 1187004
+ApplyPatch acpi-video-Allow-forcing-native-backlight-on-non-win.patch
+ApplyPatch acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
+
+#CVE-2015-2666 rhbz 1204724 1204722
+ApplyPatch x86-microcode-intel-Guard-against-stack-overflow-in-.patch
+
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
 # Just needed for 3.19
@@ -1539,6 +1554,8 @@ ApplyPatch aarch64-fix-tlb-issues.patch
 ApplyPatch kernel-arm64.patch -R
 %endif
 %endif
+
+ApplyPatch net-validate-the-range-we-feed-to-iov_iter_init-in-s.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2412,7 +2429,18 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Sun Mar 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Mar 23 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.2-201
+- Enable CONFIG_SND_BEBOB (rhbz 1204342)
+- Validate iovec range in sys_sendto/sys_recvfrom
+- CVE-2015-2666 execution in the early microcode loader (rhbz 1204724 1204722)
+
+* Mon Mar 23 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Refix Panda on ARMv7 crash on boot
+
+* Fri Mar 20 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix brightness on Lenovo Ideapad Z570 (rhbz 1187004)
+
+* Fri Mar 20 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Mar 22
 - GNU Linux-libre 3.19.2-gnu.
 
 * Thu Mar 19 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.19.2-200
