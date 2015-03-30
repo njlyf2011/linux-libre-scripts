@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -641,6 +641,11 @@ Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 Patch21028: arm-i.MX6-Utilite-device-dtb.patch
 
+# IOMMU crash fixes - https://lists.linuxfoundation.org/pipermail/iommu/2015-February/012329.html
+Patch21030: iommu-omap-Play-nice-in-multi-platform-builds.patch
+Patch21031: iommu-exynos-Play-nice-in-multi-platform-builds.patch
+Patch21032: iommu-rockchip-Play-nice-in-multi-platform-builds.patch
+
 Patch21100: arm-highbank-l2-reverts.patch
 
 #rhbz 754518
@@ -685,9 +690,6 @@ Patch26161: Input-synaptics-re-route-tracksticks-buttons-on-the-.patch
 Patch26162: Input-synaptics-remove-X1-Carbon-3rd-gen-from-the-to.patch
 Patch26163: Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 
-#CVE-2015-2150 rhbz 1196266 1200397
-Patch26165: xen-pciback-limit-guest-control-of-command-register.patch
-
 #CVE-2014-8159 rhbz 1181166 1200950
 Patch26167: IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
 
@@ -703,9 +705,9 @@ Patch26172: x86-microcode-intel-Guard-against-stack-overflow-in-.patch
 
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
-Patch30001: aarch64-fix-tlb-issues.patch
 
-Patch26173: net-validate-the-range-we-feed-to-iov_iter_init-in-s.patch
+#rhbz 1204512
+Patch26174: tun-return-proper-error-code-from-tun_do_read.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1378,6 +1380,10 @@ ApplyPatch pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
 
+ApplyPatch iommu-omap-Play-nice-in-multi-platform-builds.patch
+ApplyPatch iommu-exynos-Play-nice-in-multi-platform-builds.patch
+ApplyPatch iommu-rockchip-Play-nice-in-multi-platform-builds.patch
+
 ApplyPatch arm-highbank-l2-reverts.patch
 
 #
@@ -1530,9 +1536,6 @@ ApplyPatch Input-synaptics-re-route-tracksticks-buttons-on-the-.patch
 ApplyPatch Input-synaptics-remove-X1-Carbon-3rd-gen-from-the-to.patch
 ApplyPatch Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 
-#CVE-2015-2150 rhbz 1196266 1200397
-ApplyPatch xen-pciback-limit-guest-control-of-command-register.patch
-
 #CVE-2014-8159 rhbz 1181166 1200950
 ApplyPatch IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
 
@@ -1548,14 +1551,13 @@ ApplyPatch x86-microcode-intel-Guard-against-stack-overflow-in-.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
-# Just needed for 3.19
-ApplyPatch aarch64-fix-tlb-issues.patch
 %ifnarch aarch64 # this is stupid, but i want to notice before secondary koji does.
 ApplyPatch kernel-arm64.patch -R
 %endif
 %endif
 
-ApplyPatch net-validate-the-range-we-feed-to-iov_iter_init-in-s.patch
+#rhbz 1204512
+ApplyPatch tun-return-proper-error-code-from-tun_do_read.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2429,6 +2431,18 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Fri Mar 27 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19.3-gnu.
+
+* Thu Mar 26 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.19.3-200
+- Linux v3.19.3
+
+* Thu Mar 26 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable the broken CONFIG_MSM_IOMMU
+
+* Tue Mar 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix tun bug causing Juniper VPN failure (rhbz 1204512)
+
 * Mon Mar 23 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.19.2-201
 - Enable CONFIG_SND_BEBOB (rhbz 1204342)
 - Validate iovec range in sys_sendto/sys_recvfrom
