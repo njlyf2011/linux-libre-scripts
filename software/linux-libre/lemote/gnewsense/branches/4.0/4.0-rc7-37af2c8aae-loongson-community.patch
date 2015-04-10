@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index b15036b..5180a92 100644
+index 54430f9..09d9a42 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -297,8 +297,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -23,10 +23,10 @@ index b15036b..5180a92 100644
  
  # Tell gcc to never replace conditional load with a non-conditional one
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 843713c..e01e4f6 100644
+index c7a1690..0f854f0 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -332,7 +332,7 @@ config LASAT
+@@ -333,7 +333,7 @@ config LASAT
  
  config MACH_LOONGSON
  	bool "Loongson family of machines"
@@ -35,7 +35,7 @@ index 843713c..e01e4f6 100644
  	help
  	  This enables the support of Loongson family of machines.
  
-@@ -1600,6 +1600,15 @@ config CPU_LOONGSON2
+@@ -1640,6 +1640,15 @@ config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
  	select CPU_SUPPORTS_64BIT_KERNEL
@@ -51,7 +51,7 @@ index 843713c..e01e4f6 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2248,7 +2257,7 @@ config CPU_SUPPORTS_MSA
+@@ -2313,7 +2322,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -382,7 +382,7 @@ index b05bb70..44c9a69 100644
  
  #include <asm/cpu.h>
 diff --git a/arch/mips/include/uapi/asm/inst.h b/arch/mips/include/uapi/asm/inst.h
-index 89c2243..6257b9f 100644
+index fc0cf5a..99e6430 100644
 --- a/arch/mips/include/uapi/asm/inst.h
 +++ b/arch/mips/include/uapi/asm/inst.h
 @@ -65,6 +65,8 @@ enum spec_op {
@@ -394,7 +394,7 @@ index 89c2243..6257b9f 100644
  	clz_op = 0x20, clo_op,
  	dclz_op = 0x24, dclo_op,
  	sdbpp_op = 0x3f
-@@ -147,7 +149,7 @@ enum cop0_com_func {
+@@ -151,7 +153,7 @@ enum cop0_com_func {
   */
  enum cop1_fmt {
  	s_fmt, d_fmt, e_fmt, q_fmt,
@@ -403,7 +403,7 @@ index 89c2243..6257b9f 100644
  };
  
  /*
-@@ -176,7 +178,8 @@ enum cop1_sdw_func {
+@@ -180,7 +182,8 @@ enum cop1_sdw_func {
  enum cop1x_func {
  	lwxc1_op     =	0x00, ldxc1_op	   =  0x01,
  	swxc1_op     =  0x08, sdxc1_op	   =  0x09,
@@ -453,7 +453,7 @@ index 8d01709..9cd25da 100644
  
  	/*
 diff --git a/arch/mips/lib/Makefile b/arch/mips/lib/Makefile
-index eeddc58..d7bec00 100644
+index 1e9e900..36fcccc 100644
 --- a/arch/mips/lib/Makefile
 +++ b/arch/mips/lib/Makefile
 @@ -2,10 +2,14 @@
@@ -471,7 +471,7 @@ index eeddc58..d7bec00 100644
 +
  obj-y			+= iomap.o
  obj-$(CONFIG_PCI)	+= iomap-pci.o
- 
+ lib-$(CONFIG_GENERIC_CSUM)	:= $(filter-out csum_partial.o, $(lib-y))
 diff --git a/arch/mips/loongson/Kconfig b/arch/mips/loongson/Kconfig
 index 156de85..0a433e6 100644
 --- a/arch/mips/loongson/Kconfig
@@ -1677,7 +1677,7 @@ index 0000000..5316360
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index 9dfcd7f..8dc2f2c 100644
+index b30bf65..c0177cb 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -1690,7 +1690,7 @@ index 9dfcd7f..8dc2f2c 100644
   *  This program is free software; you can distribute it and/or modify it
   *  under the terms of the GNU General Public License (Version 2) as
   *  published by the Free Software Foundation.
-@@ -59,6 +62,11 @@ static int fpu_emu(struct pt_regs *, struct mips_fpu_struct *,
+@@ -60,6 +63,11 @@ static int fpu_emu(struct pt_regs *, struct mips_fpu_struct *,
  static int fpux_emu(struct pt_regs *,
  	struct mips_fpu_struct *, mips_instruction, void *__user *);
  
@@ -1702,7 +1702,7 @@ index 9dfcd7f..8dc2f2c 100644
  /* Control registers */
  
  #define FPCREG_RID	0	/* $0  = revision id */
-@@ -695,6 +703,14 @@ do {									\
+@@ -842,6 +850,14 @@ do {									\
  #define DPFROMREG(dp, x)	DIFROMREG((dp).bits, x)
  #define DPTOREG(dp, x)	DITOREG((dp).bits, x)
  
@@ -1717,7 +1717,7 @@ index 9dfcd7f..8dc2f2c 100644
  /*
   * Emulate the single floating point instruction pointed at by EPC.
   * Two instructions if the instruction is in a branch delay slot.
-@@ -1088,6 +1104,16 @@ emul:
+@@ -1235,6 +1251,16 @@ emul:
  			xcp->regs[MIPSInst_RD(ir)] =
  				xcp->regs[MIPSInst_RS(ir)];
  		break;
@@ -1734,7 +1734,7 @@ index 9dfcd7f..8dc2f2c 100644
  	default:
  sigill:
  		return SIGILL;
-@@ -1165,6 +1191,172 @@ DEF3OP(msub, dp, ieee754dp_mul, ieee754dp_sub, );
+@@ -1312,6 +1338,172 @@ DEF3OP(msub, dp, ieee754dp_mul, ieee754dp_sub, );
  DEF3OP(nmadd, dp, ieee754dp_mul, ieee754dp_add, ieee754dp_neg);
  DEF3OP(nmsub, dp, ieee754dp_mul, ieee754dp_sub, ieee754dp_neg);
  
@@ -1907,7 +1907,7 @@ index 9dfcd7f..8dc2f2c 100644
  static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  	mips_instruction ir, void *__user *fault_addr)
  {
-@@ -1266,7 +1458,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1413,7 +1605,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			break;
  
  		default:
@@ -1916,7 +1916,7 @@ index 9dfcd7f..8dc2f2c 100644
  		}
  		break;
  	}
-@@ -1336,7 +1528,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1483,7 +1675,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			goto copcsr;
  
  		default:
@@ -1925,7 +1925,7 @@ index 9dfcd7f..8dc2f2c 100644
  		}
  		break;
  	}
-@@ -1349,6 +1541,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1496,6 +1688,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		break;
  
  	default:
@@ -1937,7 +1937,7 @@ index 9dfcd7f..8dc2f2c 100644
  		return SIGILL;
  	}
  
-@@ -1370,7 +1567,12 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1517,7 +1714,12 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  	unsigned cond;
  	union {
  		union ieee754dp d;
@@ -1951,7 +1951,7 @@ index 9dfcd7f..8dc2f2c 100644
  		int w;
  		s64 l;
  	} rv;			/* resulting value */
-@@ -1467,7 +1669,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1614,7 +1816,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		case fmov_op:
  			/* an easy one */
  			SPFROMREG(rv.s, MIPSInst_FS(ir));
@@ -1960,7 +1960,7 @@ index 9dfcd7f..8dc2f2c 100644
  
  			/* binary op on handler */
  scopbop:
-@@ -1664,7 +1866,7 @@ copcsr:
+@@ -1811,7 +2013,7 @@ copcsr:
  		case fmov_op:
  			/* an easy one */
  			DPFROMREG(rv.d, MIPSInst_FS(ir));
@@ -1969,7 +1969,7 @@ index 9dfcd7f..8dc2f2c 100644
  
  			/* binary op on handler */
  dcopbop:
-@@ -1781,6 +1983,83 @@ dcopuop:
+@@ -1928,6 +2130,83 @@ dcopuop:
  		break;
  	}
  
@@ -2053,7 +2053,7 @@ index 9dfcd7f..8dc2f2c 100644
  	case l_fmt:
  
  		if (!cpu_has_mips_3_4_5 && !cpu_has_mips64)
-@@ -1852,6 +2131,11 @@ dcopuop:
+@@ -1999,6 +2278,11 @@ dcopuop:
  
  		DITOREG(rv.l, MIPSInst_FD(ir));
  		break;
@@ -2229,10 +2229,10 @@ index fc897ba..ac60f6b 100644
  }
  
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index dfdc269..fcf0aa4 100644
+index 152b006..767d8de 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -861,6 +861,13 @@ config HID_ZYDACRON
+@@ -871,6 +871,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -2247,10 +2247,10 @@ index dfdc269..fcf0aa4 100644
  	tristate "HID Sensors framework support"
  	depends on HID && HAS_IOMEM
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index debd15b..03696f9 100644
+index 6f19958..2740ff0 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
-@@ -123,6 +123,7 @@ obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
+@@ -99,6 +99,7 @@ obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
  wacom-objs			:= wacom_wac.o wacom_sys.o
  obj-$(CONFIG_HID_WACOM)		+= wacom.o
  obj-$(CONFIG_HID_WALTOP)	+= hid-waltop.o
@@ -2475,10 +2475,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 9243359..8d860e3 100644
+index 9c47867..a3e1258 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1007,6 +1007,9 @@
+@@ -1021,6 +1021,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9295,10 +9295,10 @@ index 0000000..32a2bdb
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index f15cddf..33503de 100644
+index b5b5c3d..f908003 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
-@@ -716,6 +716,7 @@ comment "Platform RTC drivers"
+@@ -727,6 +727,7 @@ comment "Platform RTC drivers"
  config RTC_DRV_CMOS
  	tristate "PC-style 'CMOS'"
  	depends on X86 || ARM || M32R || PPC || MIPS || SPARC64
@@ -9307,7 +9307,7 @@ index f15cddf..33503de 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index ce63646..31aa83c 100644
+index f940056..a9bb1db 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -450,6 +450,26 @@ void usb_amd_dev_put(void)
@@ -9382,7 +9382,7 @@ index ce63646..31aa83c 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -814,6 +828,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -816,6 +830,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -9392,7 +9392,7 @@ index ce63646..31aa83c 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -953,6 +970,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -956,6 +973,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -9400,7 +9400,7 @@ index ce63646..31aa83c 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1060,6 +1078,9 @@ hc_init:
+@@ -1064,6 +1082,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -9411,7 +9411,7 @@ index ce63646..31aa83c 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index efdcee1..bdff3f2 100644
+index f0c0c53..84dff90 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9424,7 +9424,7 @@ index efdcee1..bdff3f2 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -641,6 +644,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -633,6 +636,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -9463,10 +9463,10 @@ index 9ad3c17..3d869d9 100644
  ifeq ($(CONFIG_OF),y)
  obj-$(CONFIG_VIDEOMODE_HELPERS) += of_display_timing.o of_videomode.o
 diff --git a/drivers/video/fbdev/Kconfig b/drivers/video/fbdev/Kconfig
-index 4916c97..3e02ed4 100644
+index b3dd417..452035ad 100644
 --- a/drivers/video/fbdev/Kconfig
 +++ b/drivers/video/fbdev/Kconfig
-@@ -2453,6 +2453,19 @@ config FB_SIMPLE
+@@ -2450,6 +2450,19 @@ config FB_SIMPLE
  	  Configuration re: surface address, size, and format must be provided
  	  through device tree, or plain old platform data.
  
@@ -12033,10 +12033,10 @@ index fa7cd79..616abb5 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 537c38c..0af330e 100755
+index 826470d..9e6dc30 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -304,14 +304,33 @@ if ($arch eq "x86_64") {
+@@ -309,14 +309,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -12078,7 +12078,7 @@ index 537c38c..0af330e 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -323,19 +342,12 @@ if ($arch eq "x86_64") {
+@@ -328,19 +347,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
