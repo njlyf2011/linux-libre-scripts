@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2015-04-11 23:34:30.933072815 -0400
++++ .config	2015-04-12 21:48:08.859342346 -0400
 @@ -0,0 +1,5200 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.0.0-rc7-gnu Kernel Configuration
++# Linux/mips 4.0.0-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -3613,7 +3613,7 @@ Index: .config
 +CONFIG_FB_AUO_K1900=m
 +CONFIG_FB_AUO_K1901=m
 +# CONFIG_FB_SIMPLE is not set
-+CONFIG_FB_SM712=y
++# CONFIG_FB_SM712 is not set
 +CONFIG_BACKLIGHT_LCD_SUPPORT=y
 +CONFIG_LCD_CLASS_DEVICE=m
 +# CONFIG_LCD_PLATFORM is not set
@@ -4324,7 +4324,7 @@ Index: .config
 +# CONFIG_RTS5208 is not set
 +# CONFIG_VT6655 is not set
 +# CONFIG_VT6656 is not set
-+# CONFIG_FB_SM7XX is not set
++CONFIG_FB_SM7XX=y
 +# CONFIG_FB_XGI is not set
 +# CONFIG_FT1000 is not set
 +
