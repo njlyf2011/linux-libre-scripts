@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index d6c64eb..710d1ff 100644
+index f53f41a..4254163 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -335,10 +335,10 @@ index 5042d51..c653ebd 100644
 -clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec}
 +clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec,unsstrip}
 diff --git a/arch/mips/boot/compressed/decompress.c b/arch/mips/boot/compressed/decompress.c
-index 5cad0fa..2f761a5 100644
+index ca51d69..d0a6828 100644
 --- a/arch/mips/boot/compressed/decompress.c
 +++ b/arch/mips/boot/compressed/decompress.c
-@@ -27,8 +27,13 @@ unsigned long free_mem_end_ptr;
+@@ -28,8 +28,13 @@ unsigned long free_mem_end_ptr;
  extern unsigned char __image_begin, __image_end;
  
  /* debug interfaces  */
@@ -4659,10 +4659,10 @@ index decd1fa..154744c 100644
  	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
  
 diff --git a/arch/mips/kernel/perf_event_mipsxx.c b/arch/mips/kernel/perf_event_mipsxx.c
-index 811084f..821b46f 100644
+index 52f60e5..4436356 100644
 --- a/arch/mips/kernel/perf_event_mipsxx.c
 +++ b/arch/mips/kernel/perf_event_mipsxx.c
-@@ -1571,6 +1571,12 @@ init_hw_perf_events(void)
+@@ -1566,6 +1566,12 @@ init_hw_perf_events(void)
  		mipspmu.cache_event_map = &octeon_cache_map;
  		mipspmu.map_raw_event = octeon_pmu_map_raw_event;
  		break;
@@ -4971,7 +4971,7 @@ index 29692e5..6be5dff 100644
  load-$(CONFIG_LEMOTE_MACH2F) += 0xffffffff80200000
 +load-$(CONFIG_DEXXON_GDIUM) += 0xffffffff80200000
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
-index e526488..ed90596 100644
+index ce415f7..471c148 100644
 --- a/arch/mips/loongson/common/Makefile
 +++ b/arch/mips/loongson/common/Makefile
 @@ -3,7 +3,10 @@
@@ -4986,10 +4986,10 @@ index e526488..ed90596 100644
  obj-$(CONFIG_GENERIC_GPIO) += gpio.o
  
  #
-@@ -11,7 +14,6 @@ obj-$(CONFIG_GENERIC_GPIO) += gpio.o
- #
+@@ -12,7 +15,6 @@ obj-$(CONFIG_GENERIC_GPIO) += gpio.o
  obj-$(CONFIG_EARLY_PRINTK) += early_printk.o
- obj-$(CONFIG_SERIAL_8250) += serial.o
+ loongson-serial-$(CONFIG_SERIAL_8250) := serial.o
+ obj-y += $(loongson-serial-m) $(loongson-serial-y)
 -obj-$(CONFIG_LOONGSON_UART_BASE) += uart_base.o
  obj-$(CONFIG_LOONGSON_MC146818) += rtc.o
  
@@ -9251,10 +9251,26 @@ index 47037ec..35d5f08 100644
  	case CPU_CAVIUM_OCTEON_PLUS:
  		c->icache.linesz = 2 << ((config1 >> 19) & 7);
 diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
-index bda8eb2..df5cde1 100644
+index fdd6042..86f4f41 100644
 --- a/arch/mips/mm/c-r4k.c
 +++ b/arch/mips/mm/c-r4k.c
-@@ -798,7 +798,7 @@ static void __cpuinit probe_pcache(void)
+@@ -605,6 +605,7 @@ static void r4k_dma_cache_wback_inv(unsigned long addr, unsigned long size)
+ 			r4k_blast_scache();
+ 		else
+ 			blast_scache_range(addr, addr + size);
++		preempt_enable();
+ 		__sync();
+ 		return;
+ 	}
+@@ -652,6 +653,7 @@ static void r4k_dma_cache_inv(unsigned long addr, unsigned long size)
+ 				 (addr + size - 1) & almask);
+ 			blast_inv_scache_range(addr, addr + size);
+ 		}
++		preempt_enable();
+ 		__sync();
+ 		return;
+ 	}
+@@ -803,7 +805,7 @@ static void __cpuinit probe_pcache(void)
  	unsigned long config1;
  	unsigned int lsize;
  
@@ -9263,7 +9279,7 @@ index bda8eb2..df5cde1 100644
  	case CPU_R4600:			/* QED style two way caches? */
  	case CPU_R4700:
  	case CPU_R5000:
-@@ -886,10 +886,10 @@ static void __cpuinit probe_pcache(void)
+@@ -891,10 +893,10 @@ static void __cpuinit probe_pcache(void)
  		write_c0_config(config & ~VR41_CONF_P4K);
  	case CPU_VR4131:
  		/* Workaround for cache instruction bug of VR4131 */
@@ -9277,7 +9293,7 @@ index bda8eb2..df5cde1 100644
  				config |= VR41_CONF_BP;
  			write_c0_config(config);
  		} else
-@@ -1037,7 +1037,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1042,7 +1044,7 @@ static void __cpuinit probe_pcache(void)
  	 * normally they'd suffer from aliases but magic in the hardware deals
  	 * with that for us so we don't need to take care ourselves.
  	 */
@@ -9286,7 +9302,7 @@ index bda8eb2..df5cde1 100644
  	case CPU_20KC:
  	case CPU_25KF:
  	case CPU_SB1:
-@@ -1066,7 +1066,7 @@ static void __cpuinit probe_pcache(void)
+@@ -1071,7 +1073,7 @@ static void __cpuinit probe_pcache(void)
  			c->dcache.flags |= MIPS_CACHE_ALIASES;
  	}
  
@@ -9295,7 +9311,7 @@ index bda8eb2..df5cde1 100644
  	case CPU_20KC:
  		/*
  		 * Some older 20Kc chips doesn't have the 'VI' bit in
-@@ -1195,7 +1195,7 @@ static void __cpuinit setup_scache(void)
+@@ -1200,7 +1202,7 @@ static void __cpuinit setup_scache(void)
  	 * processors don't have a S-cache that would be relevant to the
  	 * Linux memory management.
  	 */
@@ -9304,7 +9320,7 @@ index bda8eb2..df5cde1 100644
  	case CPU_R4000SC:
  	case CPU_R4000MC:
  	case CPU_R4400SC:
-@@ -1393,7 +1393,7 @@ void __cpuinit r4k_cache_init(void)
+@@ -1398,7 +1400,7 @@ void __cpuinit r4k_cache_init(void)
  	extern char __weak except_vec2_sb1;
  	struct cpuinfo_mips *c = &current_cpu_data;
  
@@ -9362,7 +9378,7 @@ index 93d937b..c0d6b19 100644
  	case CPU_74K:
  	case CPU_1004K:
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index 0bc485b..8db3c40 100644
+index 6d64efe..6e9e6a5 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
 @@ -137,7 +137,7 @@ static int scratchpad_offset(int i)
@@ -13007,7 +13023,7 @@ index 0000000..722d690
 +endif # MIPS_PLATFORM_DEVICES
 diff --git a/drivers/platform/mips/Makefile b/drivers/platform/mips/Makefile
 new file mode 100644
-index 0000000..0eadf8e
+index 0000000..0eadf8e0
 --- /dev/null
 +++ b/drivers/platform/mips/Makefile
 @@ -0,0 +1,8 @@
@@ -16852,7 +16868,7 @@ index 235171f..0157357 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 90dcf54..d0cabff 100644
+index 1f230ed..1de50d6 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -16918,7 +16934,7 @@ index 90dcf54..d0cabff 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -532,7 +538,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -544,7 +550,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -16930,7 +16946,7 @@ index 90dcf54..d0cabff 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -705,6 +715,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -717,6 +727,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -16940,7 +16956,7 @@ index 90dcf54..d0cabff 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -849,6 +862,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -861,6 +874,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -16948,7 +16964,7 @@ index 90dcf54..d0cabff 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -956,6 +970,9 @@ hc_init:
+@@ -968,6 +982,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -16959,7 +16975,7 @@ index 90dcf54..d0cabff 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index e1e05ba..3099b02 100644
+index d8232df..c7fa261 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -16972,7 +16988,7 @@ index e1e05ba..3099b02 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -623,6 +626,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -634,6 +637,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -17067,10 +17083,10 @@ index f974961..b40b225 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 858966a..537470e 100755
+index 679218b..4619488 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -307,14 +307,33 @@ if ($arch eq "x86_64") {
+@@ -306,14 +306,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -17112,7 +17128,7 @@ index 858966a..537470e 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -326,19 +345,12 @@ if ($arch eq "x86_64") {
+@@ -325,19 +344,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
