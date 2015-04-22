@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -676,6 +676,9 @@ Patch05: kbuild-AFTER_LINK.patch
 
 Patch07: freedo.patch
 
+# work around a coreboot bug
+Patch08: libreboot-i915.patch
+
 %if !%{nopatches}
 
 
@@ -808,9 +811,6 @@ Patch26161: Input-synaptics-re-route-tracksticks-buttons-on-the-.patch
 Patch26162: Input-synaptics-remove-X1-Carbon-3rd-gen-from-the-to.patch
 Patch26163: Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 
-#CVE-2014-8159 rhbz 1181166 1200950
-Patch26167: IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
-
 #rhbz 1201532
 Patch26168: HID-multitouch-add-support-of-clickpads.patch
 
@@ -830,14 +830,17 @@ Patch26174: tun-return-proper-error-code-from-tun_do_read.patch
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
-#rhbz 1203913
-Patch26176: sunrpc-make-debugfs-file-creation-failure-non-fatal.patch
-
 #rhbz 1207789
 Patch26177: tg3-Hold-tp-lock-before-calling-tg3_halt-from-tg3_in.patch
 
 #CVE-2015-XXXX rhbz 1203712 1208491
 Patch26178: ipv6-Don-t-reduce-hop-limit-for-an-interface.patch
+
+#rhbz 1208953
+Patch26179: pty-Fix-input-race-when-closing.patch
+
+#rhbz 1210801
+Patch26180: HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1440,6 +1443,8 @@ ApplyPatch freedo.patch
 
 %if !%{nopatches}
 
+ApplyPatch libreboot-i915.patch
+
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch upstream-reverts.patch -R
 
@@ -1612,9 +1617,6 @@ ApplyPatch Input-synaptics-re-route-tracksticks-buttons-on-the-.patch
 ApplyPatch Input-synaptics-remove-X1-Carbon-3rd-gen-from-the-to.patch
 ApplyPatch Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 
-#CVE-2014-8159 rhbz 1181166 1200950
-ApplyPatch IB-core-Prevent-integer-overflow-in-ib_umem_get-addr.patch
-
 #rhbz 1201532
 ApplyPatch HID-multitouch-add-support-of-clickpads.patch
 
@@ -1638,14 +1640,17 @@ ApplyPatch tun-return-proper-error-code-from-tun_do_read.patch
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
-#rhbz 1203913
-ApplyPatch sunrpc-make-debugfs-file-creation-failure-non-fatal.patch
-
 #rhbz 1207789
 ApplyPatch tg3-Hold-tp-lock-before-calling-tg3_halt-from-tg3_in.patch
 
 #CVE-2015-XXXX rhbz 1203712 1208491
 ApplyPatch ipv6-Don-t-reduce-hop-limit-for-an-interface.patch
+
+#rhbz 1208953
+ApplyPatch pty-Fix-input-race-when-closing.patch
+
+#rhbz 1210801
+ApplyPatch HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2469,6 +2474,19 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Mon Apr 20 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19.5-gnu.
+- Work around a (libre|core)boot bug that causes a boot-time oops.
+
+* Mon Apr 20 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 3.19.5-100
+- Linux v3.19.5
+
+* Fri Apr 17 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Allow disabling raw mode in logitech-hidpp (rhbz 1210801)
+
+* Wed Apr 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix tty closure race (rhbz 1208953)
+
 * Mon Apr 13 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.19.4-gnu.
 
