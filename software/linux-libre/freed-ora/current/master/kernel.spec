@@ -8,8 +8,6 @@ Summary: The Linux kernel
 # be 0.
 %global released_kernel 1
 
-%global aarch64patches 1
-
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
 %ifarch %{ix86} x86_64
@@ -48,7 +46,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 19
+%define base_sublevel 0
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +56,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.19%{?stablegnux}
-%define rcrevlibre  -3.18%{?rcrevgnux}
-#define gitrevlibre -3.18%{?gitrevgnux}
+#define stablelibre -4.0%{?stablegnux}
+#define rcrevlibre  -4.0%{?rcrevgnux}
+#define gitrevlibre -4.0%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -98,7 +96,7 @@ Summary: The Linux kernel
 %define stablerev %{stable_update}
 %define stable_base %{stable_update}
 %endif
-%define rpmversion 3.%{base_sublevel}.%{stable_update}
+%define rpmversion 4.%{base_sublevel}.%{stable_update}
 
 ## The not-released-kernel case ##
 %else
@@ -109,7 +107,7 @@ Summary: The Linux kernel
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
-%define rpmversion 3.%{upstream_sublevel}.0
+%define rpmversion 4.%{upstream_sublevel}.0
 %endif
 # Nb: The above rcrev and gitrev values automagically define Patch00 and Patch01 below.
 
@@ -192,7 +190,7 @@ Summary: The Linux kernel
 %endif
 
 # The kernel tarball/base version
-%define kversion 3.%{base_sublevel}
+%define kversion 4.%{base_sublevel}
 
 %define make_target bzImage
 
@@ -211,9 +209,6 @@ Summary: The Linux kernel
 %if %{nopatches}
 %define with_bootwrapper 0
 %define variant -vanilla
-%else
-%define variant -libre
-%define variant_fedora -libre-fedora
 %endif
 
 %if !%{debugbuildsenabled}
@@ -370,11 +365,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%if 0%{?aarch64patches}
 %define nobuildarches i386 s390
-%else
-%define nobuildarches i386 s390 aarch64
-%endif
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -400,7 +391,7 @@ Summary: The Linux kernel
 %define kernel_prereq  fileutils, systemd >= 203-2
 %define initrd_prereq  dracut >= 027
 
-Name: kernel%{?variant}
+Name: kernel-libre%{?variant}
 Group: System Environment/Kernel
 License: GPLv2
 URL: http://linux-libre.fsfla.org/
@@ -411,8 +402,8 @@ Release: %{pkg_release}
 ExclusiveArch: noarch %{all_x86} x86_64 ppc64 ppc64p7 s390 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
-Requires: kernel%{?variant}-core-uname-r = %{KVERREL}
-Requires: kernel%{?variant}-modules-uname-r = %{KVERREL}
+Requires: kernel-libre-core-uname-r = %{KVERREL}%{?variant}
+Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 %endif
 
 
@@ -458,7 +449,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-3.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -520,7 +511,7 @@ Source2001: cpupower.config
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
+%define    stable_patch_00  patch%{?stablelibre}-4.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Patch00: %{stable_patch_00}
 %endif
 
@@ -529,14 +520,14 @@ Patch00: %{stable_patch_00}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+Patch00: patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
-Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
+Patch01: patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
+Patch00: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 %endif
@@ -548,6 +539,9 @@ Patch04: compile-fixes.patch
 Patch05: kbuild-AFTER_LINK.patch
 
 Patch07: freedo.patch
+
+# work around a coreboot bug
+Patch08: libreboot-i915.patch
 
 %if !%{nopatches}
 
@@ -601,13 +595,15 @@ Patch1018: MODSIGN-Support-not-importing-certs-from-db.patch
 
 Patch1019: Add-sysrq-option-to-disable-secure-boot-mode.patch
 
+# esrt
+Patch1020: efi-Add-esrt-support.patch
+
 # virt + ksm patches
 
 # DRM
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
-Patch1825: drm-i915-tame-the-chattermouth-v2.patch
 Patch1826: drm-i915-hush-check-crtc-state.patch
 
 # Quiet boot fixes
@@ -628,6 +624,10 @@ Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 # PPC
 
 # ARM64
+Patch21000: net-amd-Add-xgbe-a0-driver.patch
+Patch21001: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
+Patch21002: arm64-avoid-needing-console-to-enable-serial-console.patch
+Patch21003: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
 
 # ARMv7
 Patch21020: ARM-tegra-usb-no-reset.patch
@@ -653,24 +653,27 @@ Patch21247: ath9k-rx-dma-stop-check.patch
 
 Patch22000: weird-root-dentry-name-debug.patch
 
-Patch26058: asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
-
-#rhbz 1111138
-Patch26059: i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
-
-#rhbz 1115713
-Patch26129: samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
 #rhbz 1094948
 Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 
-#rhbz 1188638
-Patch26132: nfs-don-t-call-blocking-operations-while-TASK_RUNNIN.patch
+#CVE-2015-0275 rhbz 1193907 1195178
+Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1188074
-Patch26133: ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
+#rhbz 1190947
+Patch26139: Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
 
-# git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
-Patch30000: kernel-arm64.patch
+#rhbz 1196825
+Patch26140: security-yama-Remove-unnecessary-selects-from-Kconfi.patch
+
+#rhbz 1201532
+Patch26168: HID-multitouch-add-support-of-clickpads.patch
+
+#rhbz 1187004
+Patch26170: acpi-video-Allow-forcing-native-backlight-on-non-win.patch
+Patch26171: acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
+
+#CVE-2015-2150 rhbz 1196266 1200397
+Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -694,8 +697,8 @@ Provides: kernel-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
 Provides: kernel-libre-%{_target_cpu} = %{rpmversion}-%{pkg_release}%{?1:+%{1}}\
 Provides: kernel-drm-nouveau = 16\
 Provides: kernel-libre-drm-nouveau = 16\
-Provides: kernel-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-libre-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
 %if %{with_firmware}\
@@ -721,7 +724,11 @@ Summary: Header files for the Linux kernel for use by glibc
 Group: Development/System
 Obsoletes: glibc-kernheaders < 3.0-46
 Provides: glibc-kernheaders = 3.0-46
+%if "0%{?variant}"
+Obsoletes: kernel-libre-headers < %{rpmversion}-%{pkg_release}
 Provides: kernel-headers = %{rpmversion}-%{pkg_release}
+Provides: kernel-libre-headers = %{rpmversion}-%{pkg_release}
+%endif
 %description headers
 Kernel-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -805,7 +812,7 @@ This package provides debug information for the perf python bindings.
 %endif # with_perf
 
 %if %{with_tools}
-%package tools
+%package -n kernel-libre-tools
 Provides: kernel-tools = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
@@ -817,21 +824,21 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
-Requires: %{name}-tools-libs = %{version}-%{release}
-%description tools
+Requires: kernel-tools-libs = %{version}-%{release}
+%description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
 
-%package tools-libs
+%package -n kernel-libre-tools-libs
 Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
 Summary: Libraries for the kernels-tools
 Group: Development/System
 License: GPLv2
-%description tools-libs
+%description -n kernel-libre-tools-libs
 This package contains the libraries built from the tools/ directory
 from the kernel source.
 
-%package tools-libs-devel
+%package -n kernel-libre-tools-libs-devel
 Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
 Summary: Assortment of tools for the Linux kernel
 Group: Development/System
@@ -842,17 +849,17 @@ Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
 Requires: kernel-libre-tools-libs = %{version}-%{release}
 Provides: kernel-libre-tools-devel
 Provides: kernel-tools-devel
-%description tools-libs-devel
+%description -n kernel-libre-tools-libs-devel
 This package contains the development files for the tools/ directory from
 the kernel source.
 
-%package tools-debuginfo
+%package -n kernel-libre-tools-debuginfo
 Provides: kernel-tools-debuginfo = %{rpmversion}-%{pkg_release}
 Summary: Debug information for package kernel-tools
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description tools-debuginfo
+%description -n kernel-libre-tools-debuginfo
 This package provides debug information for package kernel-tools.
 
 # Note that this pattern only works right to match the .build-id
@@ -876,7 +883,7 @@ Group: Development/Debug\
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}\
 Provides: %{name}%{?1:-%{1}}-debuginfo-%{_target_cpu} = %{version}-%{release}\
 AutoReqProv: no\
-%description -n %{name}%{?1:-%{1}}-debuginfo\
+%description %{?1:%{1}-}debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 %{expand:%%global debuginfo_args %{?debuginfo_args} -p '/.*/%%{KVERREL}%{?1:[+]%{1}}/.*|/.*%%{KVERREL}%{?1:\+%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
@@ -897,14 +904,14 @@ Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-devel = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre-devel = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-devel-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-devel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: installonlypkg(kernel)\
 Provides: installonlypkg(kernel-libre)\
 AutoReqProv: no\
 Requires(pre): /usr/bin/find\
 Requires: perl\
-%description -n kernel%{?variant}%{?1:-%{1}}-devel\
+%description %{?1:%{1}-}devel\
 This package provides kernel headers and makefiles sufficient to build modules\
 against the %{?2:%{2} }kernel package.\
 %{nil}
@@ -926,13 +933,13 @@ Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
 Provides: installonlypkg(kernel-libre-module)\
-Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?1:+%{1}}\
-Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
-Requires: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-libre-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Requires: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
-%description -n kernel%{?variant}%{?1:-%{1}}-modules-extra\
+%description %{?1:%{1}-}modules-extra\
 This package provides less commonly used kernel modules for the %{?2:%{2} }kernel package.\
 %{nil}
 
@@ -953,12 +960,12 @@ Provides: kernel-modules = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre-modules = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
 Provides: installonlypkg(kernel-libre-module)\
-Provides: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
-%description -n kernel%{?variant}%{?1:-%{1}}-modules\
+%description %{?1:%{1}-}modules\
 This package provides commonly used kernel modules for the %{?2:%{2}-}core kernel package.\
 %{nil}
 
@@ -971,8 +978,8 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 Provides: kernel-%{1} = %{KVERREL}+%{1}\
 summary: kernel meta-package for the %{1} kernel\
 group: system environment/kernel\
-Requires: kernel-libre-%{1}%{?variant}-core-uname-r = %{KVERREL}+%{1}\
-Requires: kernel-libre-%{1}%{?variant}-modules-uname-r = %{KVERREL}+%{1}\
+Requires: kernel-libre-%{1}%{?variant}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
+Requires: kernel-libre-%{1}%{?variant}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
 %description %{1}\
 The meta-package for the %{1} kernel\
 %{nil}
@@ -987,8 +994,8 @@ The meta-package for the %{1} kernel\
 Provides: kernel-%{?1:%{1}-}core = %{KVERREL}%{?1:+%{1}}\
 Summary: %{variant_summary}\
 Group: System Environment/Kernel\
-Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?1:+%{1}}\
-Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?1:+%{1}}\
+Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 %{expand:%%kernel_reqprovconf}\
 %if %{?1:1} %{!?1:0} \
 %{expand:%%kernel_meta_package %{?1:%{1}}}\
@@ -1100,14 +1107,14 @@ ApplyPatch()
   if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
     exit 1
   fi
-  if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:8}" != "patch-3." ] &&
-       [ "${patch:0:14}" != "patch-libre-3." ] ; then
+  if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%-libre%{?variant}}.spec ; then
+    if [ "${patch:0:8}" != "patch-4." ] &&
+       [ "${patch:0:14}" != "patch-libre-4." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
   fi 2>/dev/null
-  case $patch in 
+  case $patch in
   patch*-gnu*-gnu*) ;;
   *) $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1 ;;
   esac
@@ -1143,20 +1150,20 @@ ApplyOptionalPatch()
 
 # Update to latest upstream.
 %if 0%{?released_kernel}
-%define vanillaversion 3.%{base_sublevel}
+%define vanillaversion 4.%{base_sublevel}
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-%define vanillaversion 3.%{upstream_sublevel}-rc%{rcrev}
+%define vanillaversion 4.%{upstream_sublevel}-rc%{rcrev}
 %if 0%{?gitrev}
-%define vanillaversion 3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
+%define vanillaversion 4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-%define vanillaversion 3.%{base_sublevel}-git%{gitrev}
+%define vanillaversion 4.%{base_sublevel}-git%{gitrev}
 %else
-%define vanillaversion 3.%{base_sublevel}
+%define vanillaversion 4.%{base_sublevel}
 %endif
 %endif
 %endif
@@ -1169,7 +1176,7 @@ ApplyOptionalPatch()
 
 # Build a list of the other top-level kernel tree directories.
 # This will be used to hardlink identical vanilla subdirs.
-sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-3.*' \
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-4.*' \
             | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
 # Delete all old stale trees.
@@ -1245,10 +1252,10 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
 %endif
-    ApplyPatch patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+#    ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
-    ApplyPatch patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
+    ApplyPatch patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
@@ -1256,7 +1263,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
-    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
+    ApplyPatch patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 
@@ -1320,6 +1327,8 @@ ApplyPatch freedo.patch
 
 %if !%{nopatches}
 
+ApplyPatch libreboot-i915.patch
+
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch upstream-reverts.patch -R
 
@@ -1330,6 +1339,10 @@ ApplyPatch lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 # PPC
 
 # ARM64
+ApplyPatch net-amd-Add-xgbe-a0-driver.patch
+ApplyPatch amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
+ApplyPatch arm64-avoid-needing-console-to-enable-serial-console.patch
+ApplyPatch usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
 
 #
 # ARM
@@ -1431,6 +1444,8 @@ ApplyPatch MODSIGN-Support-not-importing-certs-from-db.patch
 
 ApplyPatch Add-sysrq-option-to-disable-secure-boot-mode.patch
 
+ApplyPatch efi-Add-esrt-support.patch
+
 # Assorted Virt Fixes
 
 # DRM core
@@ -1438,7 +1453,6 @@ ApplyPatch Add-sysrq-option-to-disable-secure-boot-mode.patch
 # Nouveau DRM
 
 # Intel DRM
-ApplyPatch drm-i915-tame-the-chattermouth-v2.patch
 ApplyPatch drm-i915-hush-check-crtc-state.patch
 
 # Radeon DRM
@@ -1465,28 +1479,27 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k-rx-dma-stop-check.patch
 
-ApplyPatch asus-nb-wmi-Add-wapf4-quirk-for-the-X550VB.patch
-
-#rhbz 1111138
-ApplyPatch i8042-Add-notimeout-quirk-for-Fujitsu-Lifebook-A544-.patch
-
-#rhbz 1115713
-ApplyPatch samsung-laptop-Add-use_native_backlight-quirk-and-en.patch
 #rhbz 1094948
 ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 
-#rhbz 1188638
-ApplyPatch nfs-don-t-call-blocking-operations-while-TASK_RUNNIN.patch
+#CVE-2015-0275 rhbz 1193907 1195178
+ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1188074
-ApplyPatch ntp-Fixup-adjtimex-freq-validation-on-32bit-systems.patch
+#rhbz 1190947
+ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
 
-%if 0%{?aarch64patches}
-ApplyPatch kernel-arm64.patch
-%ifnarch aarch64 # this is stupid, but i want to notice before secondary koji does.
-ApplyPatch kernel-arm64.patch -R
-%endif
-%endif
+#rhbz 1196825
+ApplyPatch security-yama-Remove-unnecessary-selects-from-Kconfi.patch
+
+#rhbz 1201532
+ApplyPatch HID-multitouch-add-support-of-clickpads.patch
+
+#rhbz 1187004
+ApplyPatch acpi-video-Allow-forcing-native-backlight-on-non-win.patch
+ApplyPatch acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
+
+#CVE-2015-2150 rhbz 1196266 1200397
+ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2243,7 +2256,7 @@ fi
 %endif # with_perf
 
 %if %{with_tools}
-%files tools -f cpupower.lang
+%files -n kernel-libre-tools -f cpupower.lang
 %defattr(-,root,root)
 %ifarch %{cpupowerarchs}
 %{_bindir}/cpupower
@@ -2264,16 +2277,16 @@ fi
 %endif
 
 %if %{with_debuginfo}
-%files -f kernel-tools-debuginfo.list tools-debuginfo
+%files -f kernel-tools-debuginfo.list -n kernel-libre-tools-debuginfo
 %defattr(-,root,root)
 %endif
 
 %ifarch %{cpupowerarchs}
-%files tools-libs
+%files -n kernel-libre-tools-libs
 %{_libdir}/libcpupower.so.0
 %{_libdir}/libcpupower.so.0.0.0
 
-%files tools-libs-devel
+%files -n kernel-libre-tools-libs-devel
 %{_libdir}/libcpupower.so
 %{_includedir}/cpufreq.h
 %endif
@@ -2350,16 +2363,233 @@ fi
 # and build.
 #
 # 
-#                        ___________________________________________________________
-#                       / This branch is for Fedora 22. You probably want to commit \
-#  _____ ____  ____     \ to the f21 branch instead, or in addition to this one.    /
-# |  ___|___ \|___ \     -----------------------------------------------------------
-# | |_    __) | __) |        \   ^__^
-# |  _|  / __/ / __/          \  (@@)\_______
-# |_|   |_____|_____|            (__)\       )\/\
-#                                    ||----w |
-#                                    ||     ||
 %changelog
+* Mon Apr 20 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0-gnu.
+- Work around a (libre|core)boot bug that causes a boot-time oops.
+
+* Sun Apr 12 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-1
+- Linux v4.0
+
+* Fri Apr 10 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc7.git2.1
+- Linux v4.0-rc7-42-ge5e02de0665e
+
+* Thu Apr 09 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc7.git1.1
+- Linux v4.0-rc7-30-g20624d17963c
+
+* Thu Apr 02 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc6.git2.1
+- Linux v4.0-rc6-101-g0a4812798fae
+
+* Thu Apr 02 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- DoS against IPv6 stacks due to improper handling of RA (rhbz 1203712 1208491)
+
+* Wed Apr 01 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc6.git1.1
+- Linux v4.0-rc6-31-gd4039314d0b1
+- CVE-2015-2150 xen: NMIs triggerable by guests (rhbz 1196266 1200397)
+
+* Tue Mar 31 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable MLX4_EN_VXLAN (rhbz 1207728)
+
+* Mon Mar 30 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc6.git0.1
+- Linux v4.0-rc6
+
+* Fri Mar 27 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc5.git4.1
+- Linux v4.0-rc5-96-g3c435c1e472b
+- Fixes hangs due to i915 issues (rhbz 1204050 1206056)
+
+* Thu Mar 26 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc5.git3.1
+- Linux v4.0-rc5-80-g4c4fe4c24782
+
+* Wed Mar 25 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add aarch64 patches to fix mustang usb, seattle eth, and console settings
+
+* Wed Mar 25 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc5.git2.4
+- Add patches to fix a few more i915 hangs/oopses
+
+* Wed Mar 25 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc5.git2.1
+- Linux v4.0-rc5-53-gc875f421097a
+
+* Tue Mar 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix ALPS v5 and v7 trackpads (rhbz 1203584)
+
+* Tue Mar 24 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc5.git1.3
+- Linux v4.0-rc5-25-g90a5a895cc8b
+- Add some i915 fixes
+
+* Mon Mar 23 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc5.git0.3
+- Enable CONFIG_SND_BEBOB (rhbz 1204342)
+- Validate iovec range in sys_sendto/sys_recvfrom
+- Revert i915 commit that causes boot hangs on at least some headless machines
+- Linux v4.0-rc5
+
+* Fri Mar 20 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc4.git2.1
+- Linux v4.0-rc4-199-gb314acaccd7e
+- Fix brightness on Lenovo Ideapad Z570 (rhbz 1187004)
+
+* Thu Mar 19 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc4.git1.3
+- Linux v4.0-rc4-88-g7b09ac704bac
+- Rename arm64-xgbe-a0.patch
+
+* Thu Mar 19 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Drop arm64 non upstream patch
+
+* Thu Mar 19 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix high cpu usage on direct_read kernfs files (rhbz 1202362)
+
+* Wed Mar 18 2015 Jarod Wilson <jwilson@fedoraproject.org>
+- Fix kernel-uname-r Requires/Provides variant mismatches
+
+* Tue Mar 17 2015 Kyle McMartin <kmcmarti@redhat.com> - 4.0.0-0.rc4.git0.3
+- Update kernel-arm64.patch, move EDAC to arm-generic, add EDAC_XGENE on arm64.
+- Add PCI_ECAM on generic, since it'll be selected most places anyway.
+
+* Mon Mar 16 2015 Jarod Wilson <jwilson@fedoraproject.org>
+- Fix bad variant usage in kernel dependencies
+
+* Mon Mar 16 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc4.git0.1
+- Linux v4.0-rc4
+- Drop arm64 RCU revert patch.  Should be fixed properly upstream now.
+- Disable debugging options.
+
+* Sun Mar 15 2015 Jarod Wilson <jwilson@fedoraproject.org>
+- Fix kernel-tools sub-packages for variant builds
+
+* Fri Mar 13 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix esrt build on aarch64
+
+* Fri Mar 13 2015 Kyle McMartin <kyle@fedoraproject.org>
+- arm64-revert-tlb-rcu_table_free.patch: revert 5e5f6dc1 which
+  causes lockups on arm64 machines.
+- Also revert ESRT on AArch64 for now.
+
+* Fri Mar 13 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc3.git2.1
+- Linux v4.0-rc3-148-gc202baf017ae
+- Add patch to support clickpads (rhbz 1201532)
+
+* Thu Mar 12 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2014-8159 infiniband: uverbs: unprotected physical memory access (rhbz 1181166 1200950)
+
+* Wed Mar 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc3.git1.1
+- Linux v4.0-rc3-111-gaffb8172de39
+- CVE-2015-2150 xen: NMIs triggerable by guests (rhbz 1196266 1200397)
+- Patch series to fix Lenovo *40 and Carbon X1 touchpads (rhbz 1200777 1200778)
+- Revert commit that added bad rpath to cpupower (rhbz 1199312)
+- Reenable debugging options.
+
+* Mon Mar 09 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc3.git0.1
+- Linux v4.0-rc3
+- Disable debugging options.
+
+* Sun Mar  8 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARMv7: add patches to fix crash on boot for some devices on multiplatform
+
+* Fri Mar 06 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc2.git2.1
+- Linux v4.0-rc2-255-g5f237425f352
+
+* Thu Mar 05 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc2.git1.1
+- Linux v4.0-rc2-150-g6587457b4b3d
+- Reenable debugging options.
+
+* Wed Mar 04 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable MLX4_EN on ppc64/aarch64 (rhbz 1198719)
+
+* Tue Mar 03 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc2.git0.1
+- Linux v4.0-rc2
+- Enable CONFIG_CM32181 for ALS on Carbon X1
+- Disable debugging options.
+
+* Tue Mar 03 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc1.git3.1
+- Linux v4.0-rc1-178-g023a6007a08d
+
+* Mon Mar 02 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix nfsd soft lockup (rhbz 1185519)
+- Enable ET131X driver (rhbz 1197842)
+- Enable YAMA (rhbz 1196825)
+
+* Sat Feb 28 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARMv7 OMAP updates, fix panda boot
+
+* Fri Feb 27 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc1.git2.1
+- Linux v4.0-rc1-36-g4f671fe2f952
+
+* Wed Feb 25 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for AR5B195 devices from Alexander Ploumistos (rhbz 1190947)
+
+* Tue Feb 24 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc1.git1.1
+- Linux v4.0-rc1-22-gb24e2bdde4af
+- Reenable debugging options.
+
+* Tue Feb 24 2015 Richard W.M. Jones <rjones@redhat.com> - 4.0.0-0.rc1.git0.2
+- Add patch to fix aarch64 KVM bug with module loading (rhbz 1194366).
+
+* Tue Feb 24 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config update
+
+* Mon Feb 23 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.0-0.rc1.git0.1
+- Add patch for HID i2c from Seth Forshee (rhbz 1188439)
+
+* Mon Feb 23 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v4.0-rc1
+- CVE-2015-0275 ext4: fallocate zero range page size > block size BUG (rhbz 1193907 1195178)
+- Disable debugging options.
+
+* Fri Feb 20 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git10.1
+- Linux v3.19-8975-g3d883483dc0a
+- Add patch to fix intermittent hangs in nouveau driver
+- Move mtpspi and related mods to kernel-core for VMWare guests (rhbz 1194612)
+
+* Wed Feb 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git9.1
+- Linux v3.19-8784-gb2b89ebfc0f0
+
+* Wed Feb 18 2015 Kyle McMartin <kyle@fedoraproject.org> - 3.20.0-0.rc0.git8.2
+- kernel-arm64.patch: Revert dropping some of the xgene fixes we carried
+  against upstream. (#1193875)
+- kernel-arm64-fix-psci-when-pg.patch: make it simpler.
+- config-arm64: turn on CONFIG_DEBUG_SECTION_MISMATCH.
+
+* Wed Feb 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git8.1
+- Linux v3.19-8217-gcc4f9c2a91b7
+
+* Tue Feb 17 2015 Kyle McMartin <kyle@fedoraproject.org> - 3.20.0-0.rc0.git7.3
+- kernel-arm64.patch turned on.
+
+* Tue Feb 17 2015 Kyle McMartin <kyle@fedoraproject.org> - 3.20.0-0.rc0.git7.2
+- kernel-arm64.patch merge, but leave it off.
+- kernel-arm64-fix-psci-when-pg.patch: when -pg (because of ftrace) is enabled
+  we must explicitly annotate which registers should be assigned, otherwise
+  gcc will do unexpected things behind our backs. 
+
+* Tue Feb 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git7.1
+- Linux v3.19-7478-g796e1c55717e
+- DRM merge
+
+* Mon Feb 16 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-XXXX-XXXX potential memory corruption in vhost/scsi driver (rhbz 1189864 1192079)
+- CVE-2015-1593 stack ASLR integer overflow (rhbz 1192519 1192520)
+
+* Mon Feb 16 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor updates for ARMv7/ARM64
+
+* Mon Feb 16 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git6.1
+- Linux v3.19-6676-g1fa185ebcbce
+
+* Fri Feb 13 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git5.1
+- Linux v3.19-5015-gc7d7b9867155
+
+* Thu Feb 12 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git4.1
+- Linux v3.19-4542-g8cc748aa76c9
+
+* Thu Feb 12 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git3.1
+- Linux v3.19-4020-gce01e871a1d4
+
+* Wed Feb 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git2.1
+- Linux v3.19-2595-gc5ce28df0e7c
+
+* Wed Feb 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git1.1
+- Linux v3.19-463-g3e8c04eb1174
+- Reenable debugging options.
+- Temporarily disable aarch64 patches
+
 * Mon Feb  9 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.19-gnu.
 
