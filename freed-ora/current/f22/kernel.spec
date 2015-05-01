@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -520,7 +520,7 @@ Patch00: %{stable_patch_00}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00 patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}.xz
+Patch00: patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
 Patch01: patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
@@ -539,6 +539,9 @@ Patch04: compile-fixes.patch
 Patch05: kbuild-AFTER_LINK.patch
 
 Patch07: freedo.patch
+
+# work around a coreboot bug
+Patch08: libreboot-i915.patch
 
 %if !%{nopatches}
 
@@ -634,7 +637,7 @@ Patch21023: arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
 Patch21024: arm-dts-am335x-bone-common-setup-default-pinmux-http.patch
 Patch21025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
-
+Patch21027: 0001-drivers-rtc-rtc-em3027.c-add-device-tree-support.patch
 Patch21028: arm-i.MX6-Utilite-device-dtb.patch
 
 Patch21100: arm-highbank-l2-reverts.patch
@@ -671,6 +674,31 @@ Patch26171: acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
 
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
+
+#rhbz 1208953
+Patch26178: pty-Fix-input-race-when-closing.patch
+
+#rhbz 1210801
+Patch26179: HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
+
+#rhbz 1209088
+Patch26180: Input-atmel_mxt_ts-implement-support-for-T100-touch-.patch
+Patch26181: Input-atmel_mxt_ts-split-out-touchpad-initialisation.patch
+Patch26182: Input-atmel_mxt_ts-add-support-for-Google-Pixel-2.patch
+
+#rhbz 1188741
+Patch26183: 0001-ALSA-hda-realtek-Support-Dell-headset-mode-for-ALC28.patch
+Patch26184: 0001-ALSA-hda-realtek-Support-headset-mode-for-ALC286-288.patch
+
+#rhbz 1208999
+Patch26177: SCSI-add-1024-max-sectors-black-list-flag.patch
+
+#rhbz 1211017 1211013
+Patch26190: nfs-fix-DIO-good-bytes-calculation.patch
+Patch26191: nfs-remove-WARN_ON_ONCE-from-nfs_direct_good_bytes.patch
+
+#rhbz 1210857
+Patch26192: blk-loop-avoid-too-many-pending-per-work-IO.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1324,6 +1352,8 @@ ApplyPatch freedo.patch
 
 %if !%{nopatches}
 
+ApplyPatch libreboot-i915.patch
+
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch upstream-reverts.patch -R
 
@@ -1343,14 +1373,13 @@ ApplyPatch usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
 # ARM
 #
 ApplyPatch ARM-tegra-usb-no-reset.patch
-
 ApplyPatch arm-dts-am335x-boneblack-lcdc-add-panel-info.patch
 ApplyPatch arm-dts-am335x-boneblack-add-cpu0-opp-points.patch
 ApplyPatch arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
 ApplyPatch arm-dts-am335x-bone-common-setup-default-pinmux-http.patch
 ApplyPatch arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 ApplyPatch pinctrl-pinctrl-single-must-be-initialized-early.patch
-
+ApplyPatch 0001-drivers-rtc-rtc-em3027.c-add-device-tree-support.patch
 ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
 
 ApplyPatch arm-highbank-l2-reverts.patch
@@ -1495,6 +1524,32 @@ ApplyPatch acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
 
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
+
+#rhbz 1208953
+ApplyPatch pty-Fix-input-race-when-closing.patch
+
+#rhbz 1210801
+ApplyPatch HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
+
+#rhbz 1209088
+ApplyPatch Input-atmel_mxt_ts-implement-support-for-T100-touch-.patch
+ApplyPatch Input-atmel_mxt_ts-split-out-touchpad-initialisation.patch
+ApplyPatch Input-atmel_mxt_ts-add-support-for-Google-Pixel-2.patch
+
+#rhbz 1188741
+ApplyPatch 0001-ALSA-hda-realtek-Support-Dell-headset-mode-for-ALC28.patch
+ApplyPatch 0001-ALSA-hda-realtek-Support-headset-mode-for-ALC286-288.patch
+
+#rhbz 1208999
+ApplyPatch SCSI-add-1024-max-sectors-black-list-flag.patch
+
+#rhbz 1211017 1211013
+ApplyPatch nfs-fix-DIO-good-bytes-calculation.patch
+ApplyPatch nfs-remove-WARN_ON_ONCE-from-nfs_direct_good_bytes.patch
+
+#rhbz 1210857
+ApplyPatch blk-loop-avoid-too-many-pending-per-work-IO.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -2359,6 +2414,37 @@ fi
 #
 # 
 %changelog
+* Wed Apr 29 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0-gnu.
+- Work around a (libre|core)boot bug that causes a boot-time oops.
+
+* Wed Apr 29 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.1-300
+- Linux v4.0.1
+
+* Tue Apr 28 2015 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix up boot times for live images (rhbz 1210857)
+
+* Mon Apr 27 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport NFS DIO fixes from 4.1 (rhbz 1211017 1211013)
+
+* Fri Apr 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-3339 race condition between chown and execve (rhbz 1214030)
+- Fix iscsi with QNAP devices (rhbz 1208999)
+
+* Wed Apr 22 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix RTC on TrimSlice
+- Enable all sound modules for TrimSlice (also needed for other devices)
+
+* Mon Apr 20 2015 Laura Abbott
+- Fix sound issues (rhbz 1188741)
+
+* Fri Apr 17 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add support for touchpad on Google Pixel 2 (rhbz 1209088)
+- Allow disabling raw mode in logitech-hidpp (rhbz 1210801)
+
+* Wed Apr 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix tty closure race (rhbz 1208953)
+
 * Mon Apr 13 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.0-gnu.
 
