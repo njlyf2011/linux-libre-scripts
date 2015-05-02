@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -824,23 +824,26 @@ Patch26172: x86-microcode-intel-Guard-against-stack-overflow-in-.patch
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
 
-#rhbz 1204512
-Patch26174: tun-return-proper-error-code-from-tun_do_read.patch
-
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
-
-#rhbz 1207789
-Patch26177: tg3-Hold-tp-lock-before-calling-tg3_halt-from-tg3_in.patch
-
-#CVE-2015-XXXX rhbz 1203712 1208491
-Patch26178: ipv6-Don-t-reduce-hop-limit-for-an-interface.patch
 
 #rhbz 1208953
 Patch26179: pty-Fix-input-race-when-closing.patch
 
 #rhbz 1210801
 Patch26180: HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
+
+#rhbz 1205083
+Patch26181: 0001-iwlwifi-mvm-remove-WARN_ON-for-invalid-BA-notificati.patch
+
+#rhbz 1208999
+Patch26182: SCSI-add-1024-max-sectors-black-list-flag.patch
+
+#rhbz 1204390
+Patch26189: 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
+
+#rhbz 1206036 1215989
+Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1634,23 +1637,27 @@ ApplyPatch kernel-arm64.patch -R
 %endif
 %endif
 
-#rhbz 1204512
-ApplyPatch tun-return-proper-error-code-from-tun_do_read.patch
-
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
-
-#rhbz 1207789
-ApplyPatch tg3-Hold-tp-lock-before-calling-tg3_halt-from-tg3_in.patch
-
-#CVE-2015-XXXX rhbz 1203712 1208491
-ApplyPatch ipv6-Don-t-reduce-hop-limit-for-an-interface.patch
 
 #rhbz 1208953
 ApplyPatch pty-Fix-input-race-when-closing.patch
 
 #rhbz 1210801
 ApplyPatch HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
+
+#rhbz 1205083
+ApplyPatch 0001-iwlwifi-mvm-remove-WARN_ON-for-invalid-BA-notificati.patch
+
+#rhbz 1208999
+ApplyPatch SCSI-add-1024-max-sectors-black-list-flag.patch
+
+#rhbz 1204390
+ApplyPatch 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
+
+#rhbz 1206036 1215989
+ApplyPatch toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
+
 
 # END OF PATCH APPLICATIONS
 
@@ -2474,6 +2481,25 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Thu Apr 30 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19.6-gnu.
+
+* Thu Apr 30 2015 Laura Abbott <labbott@fedoraproject.org> - 3.19.6-100
+- Linux v3.19.6
+
+* Thu Apr 30 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix backlight on various Toshiba machines (rhbz 1206036 1215989)
+
+* Tue Apr 28 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix more missing v4l2 caps
+
+* Fri Apr 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-3339 race condition between chown and execve (rhbz 1214030)
+- Fix iscsi with QNAP devices (rhbz 1208999)
+
+* Thu Apr 23 2015 Laura Abbott <labbott@fedoraproject.com>
+- Fix noisy iwlwifi warning (rhbz 1205083)
+
 * Mon Apr 20 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.19.5-gnu.
 - Work around a (libre|core)boot bug that causes a boot-time oops.
