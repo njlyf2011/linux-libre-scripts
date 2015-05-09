@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -540,9 +540,6 @@ Patch05: kbuild-AFTER_LINK.patch
 
 Patch07: freedo.patch
 
-# work around a coreboot bug
-Patch08: libreboot-i915.patch
-
 %if !%{nopatches}
 
 
@@ -659,9 +656,6 @@ Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 #CVE-2015-0275 rhbz 1193907 1195178
 Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1190947
-Patch26139: Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
-
 #rhbz 1196825
 Patch26140: security-yama-Remove-unnecessary-selects-from-Kconfi.patch
 
@@ -693,12 +687,17 @@ Patch26184: 0001-ALSA-hda-realtek-Support-headset-mode-for-ALC286-288.patch
 #rhbz 1208999
 Patch26177: SCSI-add-1024-max-sectors-black-list-flag.patch
 
-#rhbz 1211017 1211013
-Patch26190: nfs-fix-DIO-good-bytes-calculation.patch
-Patch26191: nfs-remove-WARN_ON_ONCE-from-nfs_direct_good_bytes.patch
-
 #rhbz 1210857
 Patch26192: blk-loop-avoid-too-many-pending-per-work-IO.patch
+
+#rhbz 1206036 1215989
+Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
+
+#CVE-2015-3636 rhbz 1218074 1218110
+Patch26194: ipv4-Missing-sk_nulls_node_init-in-ping_unhash.patch
+
+#rhbz 1218662
+Patch26199: libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1352,8 +1351,6 @@ ApplyPatch freedo.patch
 
 %if !%{nopatches}
 
-ApplyPatch libreboot-i915.patch
-
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch upstream-reverts.patch -R
 
@@ -1509,9 +1506,6 @@ ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 #CVE-2015-0275 rhbz 1193907 1195178
 ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1190947
-ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
-
 #rhbz 1196825
 ApplyPatch security-yama-Remove-unnecessary-selects-from-Kconfi.patch
 
@@ -1543,13 +1537,17 @@ ApplyPatch 0001-ALSA-hda-realtek-Support-headset-mode-for-ALC286-288.patch
 #rhbz 1208999
 ApplyPatch SCSI-add-1024-max-sectors-black-list-flag.patch
 
-#rhbz 1211017 1211013
-ApplyPatch nfs-fix-DIO-good-bytes-calculation.patch
-ApplyPatch nfs-remove-WARN_ON_ONCE-from-nfs_direct_good_bytes.patch
-
 #rhbz 1210857
 ApplyPatch blk-loop-avoid-too-many-pending-per-work-IO.patch
 
+#rhbz 1206036 1215989
+ApplyPatch toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
+
+#CVE-2015-3636 rhbz 1218074 1218110
+ApplyPatch ipv4-Missing-sk_nulls_node_init-in-ping_unhash.patch
+
+#rhbz 1218662
+ApplyPatch libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2414,8 +2412,22 @@ fi
 #
 # 
 %changelog
+* Thu May  7 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0.2-gnu.
+- Fix for (libre|core)boot bug that causes a boot-time oops is upstream.
+
+* Thu May 07 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.2-300
+- Linux v4.0.2 (rhbz 1182816)
+
+* Tue May 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch to blacklist TRIM on all Samsung 8xx series SSDs (rhbz 1218662)
+- CVE-2015-3636 ping-sockets use-after-free privilege escalation (rhbz 1218074 1218110)
+
+* Thu Apr 30 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix backlight on various Toshiba machines (rhbz 1206036 1215989)
+
 * Wed Apr 29 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 4.0-gnu.
+- GNU Linux-libre 4.0.1-gnu.
 - Work around a (libre|core)boot bug that causes a boot-time oops.
 
 * Wed Apr 29 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.1-300
