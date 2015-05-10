@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index a0b8625..8da44ee 100644
+index 923ad8a6..1f80d72 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -6967,6 +6967,21 @@ index 98254af..6b0f694 100644
  #endif
  
  #define PCI_ACCESS_READ	 0
+diff --git a/arch/mips/power/hibernate.S b/arch/mips/power/hibernate.S
+index e7567c8..498e42d 100644
+--- a/arch/mips/power/hibernate.S
++++ b/arch/mips/power/hibernate.S
+@@ -30,8 +30,10 @@ LEAF(swsusp_arch_suspend)
+ END(swsusp_arch_suspend)
+ 
+ LEAF(swsusp_arch_resume)
++#if !defined(CONFIG_MACH_LOONGSON) || !defined(CONFIG_CPU_LOONGSON2)	/* Commit 771004298d broke Loongson2.  */
+ 	/* Avoid TLB mismatch during and after kernel resume */
+ 	jal local_flush_tlb_all
++#endif
+ 	PTR_L t0, restore_pblist
+ 0:
+ 	PTR_L t1, PBE_ADDRESS(t0)   /* source */
 diff --git a/arch/mips/vr41xx/common/init.c b/arch/mips/vr41xx/common/init.c
 index 23916321..aca5c76 100644
 --- a/arch/mips/vr41xx/common/init.c
@@ -7242,10 +7257,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index a1e431f..84d07bc 100644
+index 45c593d..0a3dbf4 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -912,6 +912,9 @@
+@@ -913,6 +913,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -10424,7 +10439,7 @@ index 0000000..722d690
 +endif # MIPS_PLATFORM_DEVICES
 diff --git a/drivers/platform/mips/Makefile b/drivers/platform/mips/Makefile
 new file mode 100644
-index 0000000..0eadf8e
+index 0000000..0eadf8e0
 --- /dev/null
 +++ b/drivers/platform/mips/Makefile
 @@ -0,0 +1,8 @@
@@ -14263,7 +14278,7 @@ index 865946c..8b7434fdb 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 9cfe3af..b93877d 100644
+index 66c9058..4fdeb97 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -353,6 +353,7 @@ void usb_amd_dev_put(void)
@@ -14291,7 +14306,7 @@ index 9cfe3af..b93877d 100644
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -532,7 +537,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -544,7 +549,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -14303,7 +14318,7 @@ index 9cfe3af..b93877d 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -705,6 +714,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -717,6 +726,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -14313,7 +14328,7 @@ index 9cfe3af..b93877d 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -849,6 +861,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -861,6 +873,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -14321,7 +14336,7 @@ index 9cfe3af..b93877d 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -956,6 +969,9 @@ hc_init:
+@@ -968,6 +981,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -14440,10 +14455,10 @@ index 1cec5e4..f6e5eae 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 858966a..537470e 100755
+index 679218b..4619488 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -307,14 +307,33 @@ if ($arch eq "x86_64") {
+@@ -306,14 +306,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -14485,7 +14500,7 @@ index 858966a..537470e 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -326,19 +345,12 @@ if ($arch eq "x86_64") {
+@@ -325,19 +344,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
