@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -549,9 +549,6 @@ Patch05: kbuild-AFTER_LINK.patch
 
 Patch07: freedo.patch
 
-# work around a coreboot bug
-Patch08: libreboot-i915.patch
-
 %if !%{nopatches}
 
 
@@ -674,9 +671,6 @@ Patch26136: vhost-scsi-potential-memory-corruption.patch
 #CVE-2015-0275 rhbz 1193907 1195178
 Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1190947
-Patch26141: Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
-
 #rhbz 1200777 1200778
 Patch26159: Input-synaptics-retrieve-the-extended-capabilities-i.patch
 Patch26160: Input-synaptics-remove-TOPBUTTONPAD-property-for-Len.patch
@@ -717,6 +711,12 @@ Patch26189: 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
 
 #rhbz 1206036 1215989
 Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
+
+#CVE-2015-3636 rhbz 1218074 1218110
+Patch26194: ipv4-Missing-sk_nulls_node_init-in-ping_unhash.patch
+
+#rhbz 1218662
+Patch26199: libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1364,8 +1364,6 @@ ApplyPatch freedo.patch
 
 %if !%{nopatches}
 
-ApplyPatch libreboot-i915.patch
-
 # revert patches from upstream that conflict or that we get via other means
 ApplyOptionalPatch upstream-reverts.patch -R
 
@@ -1528,9 +1526,6 @@ ApplyPatch vhost-scsi-potential-memory-corruption.patch
 #CVE-2015-0275 rhbz 1193907 1195178
 ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
 
-#rhbz 1190947
-ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
-
 #rhbz 1200777 1200778
 ApplyPatch Input-synaptics-retrieve-the-extended-capabilities-i.patch
 ApplyPatch Input-synaptics-remove-TOPBUTTONPAD-property-for-Len.patch
@@ -1576,6 +1571,11 @@ ApplyPatch 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
 #rhbz 1206036 1215989
 ApplyPatch toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 
+#CVE-2015-3636 rhbz 1218074 1218110
+ApplyPatch ipv4-Missing-sk_nulls_node_init-in-ping_unhash.patch
+
+#rhbz 1218662
+ApplyPatch libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2449,6 +2449,17 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Thu May  7 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19.7-gnu.
+- Fix for (libre|core)boot bug that causes a boot-time oops is upstream.
+
+* Thu May 07 2015 Laura Abbott <labbott@fedoraproject.org> - 3.19.7-200
+- Linux v3.19.7
+
+* Tue May 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch to blacklist TRIM on all Samsung 8xx series SSDs (rhbz 1218662)
+- CVE-2015-3636 ping-sockets use-after-free privilege escalation (rhbz 1218074 1218110)
+
 * Thu Apr 30 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.19.6-gnu.
 
