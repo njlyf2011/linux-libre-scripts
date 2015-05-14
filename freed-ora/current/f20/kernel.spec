@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -838,9 +838,6 @@ Patch26189: 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
 
 #rhbz 1206036 1215989
 Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
-
-#CVE-2015-3636 rhbz 1218074 1218110
-Patch26194: ipv4-Missing-sk_nulls_node_init-in-ping_unhash.patch
 
 #rhbz 1218662
 Patch26199: libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
@@ -1652,9 +1649,6 @@ ApplyPatch 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
 
 #rhbz 1206036 1215989
 ApplyPatch toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
-
-#CVE-2015-3636 rhbz 1218074 1218110
-ApplyPatch ipv4-Missing-sk_nulls_node_init-in-ping_unhash.patch
 
 #rhbz 1218662
 ApplyPatch libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
@@ -2481,6 +2475,12 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Tue May 12 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 3.19.8-gnu.
+
+* Mon May 11 2015 Laura Abbott <labbott@fedoraproject.org> - 3.19.8-100
+- Linux v3.19.8
+
 * Thu May  7 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.19.7-gnu.
 - Fix for (libre|core)boot bug that causes a boot-time oops is upstream.
