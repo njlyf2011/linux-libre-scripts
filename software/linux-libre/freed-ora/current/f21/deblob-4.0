@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=3.19 extra=
+kver=4.0 extra=
 
 set -e
 
@@ -98,7 +98,7 @@ announce () {
 
 clean_file () {
   #$1 = filename
-  filetest $1 || return
+  filetest $1 || return 0
   rm $1
   echo $1: removed
 }
@@ -114,7 +114,7 @@ check_changed () {
 
 clean_blob () {
   #$1 = filename
-  filetest $1 || return
+  filetest $1 || return 0
   if $have_check; then
     name=$1
     set fnord "$@" -d
@@ -135,9 +135,9 @@ clean_blob () {
 dummy_blob () {
   #$1 = filename
   if test -f $1; then
-    die $1 exists, something is wrong && return
+    die $1 exists, something is wrong && return 0
   elif test ! -f firmware/Makefile; then
-    die firmware/Makefile does not exist, something is wrong && return
+    die firmware/Makefile does not exist, something is wrong && return 0
   fi
 
   clean_sed "s,`echo $1 | sed s,^firmware/,,`,\$(DEBLOBBED),g" \
@@ -146,9 +146,9 @@ dummy_blob () {
 
 clean_fw () {
   #$1 = firmware text input, $2 = firmware output
-  filetest $1 || return
+  filetest $1 || return 0
   if test -f $2; then
-    die $2 exists, something is wrong && return
+    die $2 exists, something is wrong && return 0
   fi
   clean_blob $1 -s 4
   dummy_blob $2
@@ -156,9 +156,9 @@ clean_fw () {
 
 drop_fw_file () {
   #$1 = firmware text input, $2 = firmware output
-  filetest $1 || return
+  filetest $1 || return 0
   if test -f $2; then
-    die $2 exists, something is wrong && return
+    die $2 exists, something is wrong && return 0
   fi
   clean_file $1
   dummy_blob $2
@@ -172,17 +172,17 @@ clean_kconfig () {
     ;;
   *)
     if $have_check; then
-      filetest $1 || return
+      filetest $1 || return 0
       if sed -n "/^\(menu\)\?config $2$/p" $1 | grep . > /dev/null; then
 	:
       else
 	die $1 does not contain matches for $2
       fi      
-      return
+      return 0
     fi
     ;;
   esac
-  filetest $1 || return
+  filetest $1 || return 0
   sed "/^config \\($2\\)\$/{p;i\
 	depends on NONFREE
 d;}" $1 > $1.deblob
@@ -195,7 +195,7 @@ clean_mk () {
   # sed -i "/\\($1\\)/d" $2
   # echo $2: removed $1 support
   # check_changed $2
-  filetest $2 || return
+  filetest $2 || return 0
   if sed -n "/\\($1\\)/p" $2 | grep . > /dev/null; then
     :
   else
@@ -205,15 +205,15 @@ clean_mk () {
 
 clean_sed () {
   #$1 = sed-script $2 = file $3 = comment
-  filetest $2 || return
+  filetest $2 || return 0
   sed -e "$1" "$2" > "$2".deblob || {
-    die $2: failed: ${3-applied sed script $1} && return 1; }
+    die $2: failed: ${3-applied sed script $1} && return 0; }
   check_changed $2 && echo $2: ${3-applied sed script $1}
 }
 
 reject_firmware () {
   #$1 = file $2 = pre sed pattern
-  filetest $1 || return
+  filetest $1 || return 0
   clean_sed "$2"'
 s,\(^\|[^>.0-9a-zA-Z_$]\)request\(_ihex\)\?_firmware\(_nowait\|_direct\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\3\4,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
@@ -221,7 +221,7 @@ s,\(^\|[^>.0-9a-zA-Z_$]\)request\(_ihex\)\?_firmware\(_nowait\|_direct\)\?\($\|[
 
 maybe_reject_firmware () {
   #$1 = file $2 = pre sed pattern
-  filetest $1 || return
+  filetest $1 || return 0
   clean_sed "$2"'
 s,\(^\|[^>.0-9a-zA-Z_$]\)request_\(ihex_\)\?firmware\(_nowait\|_direct\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1maybe_reject_\2firmware\3\4,g
 ' "$1" 'retain Free firmware-loading machinery, disabling non-Free one'
@@ -253,52 +253,62 @@ undefault_firmware () {
 # corresponding sources are present.
 
 for f in \
-  drivers/gpu/drm/nouveau/core/engine/copy/fuc/nva3.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/copy/fuc/nva3.fuc \
-  drivers/gpu/drm/nouveau/core/engine/copy/fuc/nvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/copy/fuc/nva3.fuc \
-  drivers/gpu/drm/nouveau/core/engine/crypt/fuc/nv98.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/crypt/fuc/nv98.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/com.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/macros.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpc.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvc0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvd7.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvd7.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnve0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnve0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvf0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnvf0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcgm107.fuc5.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcgm107.fuc5 \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnv108.fuc5.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/gpcnv108.fuc5 \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hub.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvc0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvd7.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvd7.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnve0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnvf0.fuc \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubgm107.fuc5.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubgm107.fuc5 \
-  drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnv108.fuc5.h \
-    drivers/gpu/drm/nouveau/core/engine/graph/fuc/hubnv108.fuc5 \
-  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nv108.fuc.h \
-    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nv108.fuc \
-  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nva3.fuc.h \
-    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nva3.fuc \
-  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvc0.fuc.h \
-    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvc0.fuc \
-  drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvd0.fuc.h \
-    drivers/gpu/drm/nouveau/core/subdev/pwr/fuc/nvd0.fuc \
+    drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/com.fuc \
+    drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/gf100.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/gf100.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/gt215.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/gt215.fuc3.h \
+\
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/macros.fuc \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/com.fuc \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpc.fuc \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgf100.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgf100.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgf117.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgf117.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgk104.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgk104.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgk110.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgk110.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgk208.fuc5 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgk208.fuc5.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgm107.fuc5 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/gpcgm107.fuc5.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hub.fuc \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgf100.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgf100.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgf117.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgf117.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgk104.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgk104.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgk110.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgk110.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgk208.fuc5 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgk208.fuc5.h \
+    drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgm107.fuc5 \
+  drivers/gpu/drm/nouveau/nvkm/engine/gr/fuc/hubgm107.fuc5.h \
+\
+    drivers/gpu/drm/nouveau/nvkm/engine/sec/fuc/g98.fuc0s \
+  drivers/gpu/drm/nouveau/nvkm/engine/sec/fuc/g98.fuc0s.h \
+\
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/macros.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/kernel.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/arith.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/host.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/memx.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/perf.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/i2c_.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/test.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/idle.fuc \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf100.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf100.fuc3.h \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf110.fuc4 \
+  drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf110.fuc4.h \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gk208.fuc5 \
+  drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gk208.fuc5.h \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gt215.fuc3 \
+  drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gt215.fuc3.h \
+\
   drivers/net/wan/wanxlfw.inc_shipped \
     drivers/net/wan/wanxlfw.S \
   drivers/net/wireless/atmel.c \
@@ -320,7 +330,7 @@ for f in \
   firmware/keyspan_pda/xircom_pgs.HEX \
     firmware/keyspan_pda/xircom_pgs.S \
 ; do
-  filetest $f
+  filetest $f || :
 done
 
 # Identify the tarball.
@@ -617,14 +627,14 @@ clean_kconfig drivers/gpu/drm/ast/Kconfig DRM_AST
 clean_mk CONFIG_DRM_AST drivers/gpu/drm/ast/Makefile
 
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
-reject_firmware drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
-clean_blob drivers/gpu/drm/nouveau/core/engine/graph/nvc0.c
-reject_firmware drivers/gpu/drm/nouveau/core/engine/falcon.c
-clean_blob drivers/gpu/drm/nouveau/core/engine/falcon.c
-reject_firmware drivers/gpu/drm/nouveau/core/engine/xtensa.c
-clean_blob drivers/gpu/drm/nouveau/core/engine/xtensa.c
+reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/gr/gf100.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gf100.c
+reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
+reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
 clean_kconfig drivers/gpu/drm/nouveau/Kconfig DRM_NOUVEAU
-clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/nouveau/Makefile
+clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/Makefile
 
 announce DRM_MGA - "Matrox g200/g400"
 drop_fw_file firmware/matrox/g200_warp.H16 firmware/matrox/g200_warp.fw
@@ -1092,7 +1102,7 @@ clean_blob drivers/staging/media/mn88472/mn88472_priv.h
 clean_kconfig drivers/staging/media/mn88472/Kconfig DVB_MN88472
 clean_mk CONFIG_DVB_MN88472 drivers/staging/media/mn88472/Makefile
 
-announce DVB_MN88473 - "Panasonic MN88472"
+announce DVB_MN88473 - "Panasonic MN88473"
 reject_firmware drivers/staging/media/mn88473/mn88473.c
 clean_blob drivers/staging/media/mn88473/mn88473.c
 clean_blob drivers/staging/media/mn88473/mn88473_priv.h
@@ -1273,12 +1283,6 @@ reject_firmware drivers/media/platform/s5p-mfc/s5p_mfc_ctrl.c
 clean_blob drivers/media/platform/s5p-mfc/s5p_mfc.c
 clean_kconfig drivers/media/platform/Kconfig VIDEO_SAMSUNG_S5P_MFC
 clean_mk CONFIG_VIDEO_SAMSUNG_S5P_MFC drivers/media/platform/s5p-mfc/Makefile
-
-announce VIDEO_TLG2300 - "Telegent TLG2300 USB video capture support"
-reject_firmware drivers/staging/media/tlg2300/pd-main.c
-clean_blob drivers/staging/media/tlg2300/pd-main.c
-clean_kconfig drivers/staging/media/tlg2300/Kconfig VIDEO_TLG2300
-clean_mk CONFIG_VIDEO_TLG2300 drivers/staging/media/tlg2300/Makefile
 
 announce USB_S2255 - "USB Sensoray 2255 video capture device"
 reject_firmware drivers/media/usb/s2255/s2255drv.c
@@ -2279,6 +2283,15 @@ clean_mk CONFIG_LEDS_LP5523 drivers/leds/Makefile
 # input #
 #########
 
+# This only requests files named by the user through a /sys interface.
+# There is no default firmware name, but there is a #define that
+# presumably was supposed to be one at some point.  This is fine, but
+# let's deblob the default name just in case.
+announce MOUSE_CYAPA - "Cypress APA I2C Trackpad support"
+clean_blob drivers/input/mouse/cyapa.c
+# clean_kconfig drivers/input/mouse/Kconfig MOUSE_CYAPA
+# clean_mk CONFIG_MOUSE_CYAPA drivers/input/mouse/Makefile
+
 announce MOUSE_ELAN_I2C - "ELAN I2C Touchpad support"
 reject_firmware drivers/input/mouse/elan_i2c_core.c
 clean_blob drivers/input/mouse/elan_i2c.h
@@ -2342,6 +2355,13 @@ announce COMEDI_NI_PCIDIO - "NI PCI-DIO32HS, PCI-6533, PCI-6534 support"
 clean_blob drivers/staging/comedi/drivers/ni_pcidio.c
 clean_kconfig drivers/staging/comedi/Kconfig COMEDI_NI_PCIDIO
 clean_mk CONFIG_COMEDI_NI_PCIDIO drivers/staging/comedi/drivers/Makefile
+
+# There are blob names, but no apparent request or filesystem load
+# mechanism.  Why are the blob names there, then?
+announce IIO_SSP_SENSORHUB - "Samsung Sensorhub driver"
+clean_blob drivers/iio/common/ssp_sensors/ssp_dev.c
+# clean_kconfig drivers/iio/common/ssp_sensors/Kconfig IIO_SSP_SENSORHUB
+# clean_mk CONFIG_IIO_SSP_SENSORHUB drivers/iio/common/ssp_sensors/Makefile
 
 
 #######
