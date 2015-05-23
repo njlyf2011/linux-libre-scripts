@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 2fd5c4e..a08399d 100644
+index 43377eb..897e624 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -297,8 +297,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -23,7 +23,7 @@ index 2fd5c4e..a08399d 100644
  
  # Tell gcc to never replace conditional load with a non-conditional one
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index f43aa53..4f71ec5 100644
+index 155bb7f..badf8e2 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -289,7 +289,7 @@ config LASAT
@@ -112,7 +112,7 @@ index f43aa53..4f71ec5 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2212,7 +2275,7 @@ config CPU_SUPPORTS_MSA
+@@ -2222,7 +2285,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -2235,19 +2235,20 @@ index 0000000..b296220
 +				gdium_usb_host_fixup);
 +#endif
 diff --git a/arch/mips/power/hibernate.S b/arch/mips/power/hibernate.S
-index 32a7c82..3a89502 100644
+index e7567c8..498e42d 100644
 --- a/arch/mips/power/hibernate.S
 +++ b/arch/mips/power/hibernate.S
-@@ -43,7 +43,9 @@ LEAF(swsusp_arch_resume)
- 	bne t1, t3, 1b
- 	PTR_L t0, PBE_NEXT(t0)
- 	bnez t0, 0b
+@@ -30,8 +30,10 @@ LEAF(swsusp_arch_suspend)
+ END(swsusp_arch_suspend)
+ 
+ LEAF(swsusp_arch_resume)
 +#if !defined(CONFIG_MACH_LOONGSON) || !defined(CONFIG_CPU_LOONGSON2)	/* Commit 771004298d broke Loongson2.  */
- 	jal local_flush_tlb_all /* Avoid TLB mismatch after kernel resume */
+ 	/* Avoid TLB mismatch during and after kernel resume */
+ 	jal local_flush_tlb_all
 +#endif
- 	PTR_LA t0, saved_regs
- 	PTR_L ra, PT_R31(t0)
- 	PTR_L sp, PT_R29(t0)
+ 	PTR_L t0, restore_pblist
+ 0:
+ 	PTR_L t1, PBE_ADDRESS(t0)   /* source */
 diff --git a/drivers/cpufreq/loongson2_cpufreq.c b/drivers/cpufreq/loongson2_cpufreq.c
 index 9fa1772..b17bbe3 100644
 --- a/drivers/cpufreq/loongson2_cpufreq.c
@@ -2536,10 +2537,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 7c86373..fa28b0c 100644
+index 0e28190..83c640a 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -994,6 +994,9 @@
+@@ -996,6 +996,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9368,7 +9369,7 @@ index 6dd12dd..78d9c47 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 2f3aceb..6647c3f 100644
+index f4e6b94..b42c1fb 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
@@ -9396,7 +9397,7 @@ index 2f3aceb..6647c3f 100644
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -633,7 +638,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -645,7 +650,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -9408,7 +9409,7 @@ index 2f3aceb..6647c3f 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -806,6 +815,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -818,6 +827,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -9418,7 +9419,7 @@ index 2f3aceb..6647c3f 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -945,6 +957,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -957,6 +969,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -9426,7 +9427,7 @@ index 2f3aceb..6647c3f 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1052,6 +1065,9 @@ hc_init:
+@@ -1064,6 +1077,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -9437,7 +9438,7 @@ index 2f3aceb..6647c3f 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 7a4c21b..aa1c8f7 100644
+index efdcee1..bdff3f2 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9450,7 +9451,7 @@ index 7a4c21b..aa1c8f7 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -634,6 +637,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -641,6 +644,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -12059,10 +12060,10 @@ index fa7cd79..616abb5 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index d4b6656..35e2000 100755
+index 1f9f08a..261fdca 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -305,14 +305,33 @@ if ($arch eq "x86_64") {
+@@ -304,14 +304,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -12104,7 +12105,7 @@ index d4b6656..35e2000 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -324,19 +343,12 @@ if ($arch eq "x86_64") {
+@@ -323,19 +342,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
