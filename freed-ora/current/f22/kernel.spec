@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -602,6 +602,7 @@ Patch1020: efi-Add-esrt-support.patch
 # nouveau + drm fixes
 # intel drm is all merged upstream
 Patch1826: drm-i915-hush-check-crtc-state.patch
+Patch1827: drm-i915-Disable-verbose-state-checks.patch
 
 # Quiet boot fixes
 
@@ -692,6 +693,12 @@ Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 
 #rhbz 1218662
 Patch26199: libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
+
+#rhbz 1219343
+Patch26200: 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
+
+#rhbz 1220915
+Patch26201: ovl-don-t-remove-non-empty-opaque-directory.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1469,6 +1476,7 @@ ApplyPatch efi-Add-esrt-support.patch
 
 # Intel DRM
 ApplyPatch drm-i915-hush-check-crtc-state.patch
+ApplyPatch drm-i915-Disable-verbose-state-checks.patch
 
 # Radeon DRM
 
@@ -1536,6 +1544,12 @@ ApplyPatch toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 
 #rhbz 1218662
 ApplyPatch libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
+
+#rhbz 1219343
+ApplyPatch 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
+
+#rhbz 1220915
+ApplyPatch ovl-don-t-remove-non-empty-opaque-directory.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2400,7 +2414,16 @@ fi
 #
 # 
 %changelog
-* Fri May 15 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu May 14 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.3-301
+- Disable i915 verbose state checks
+
+* Thu May 14 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix non-empty dir removal in overlayfs (rhbz 1220915)
+
+* Wed May 13 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix spew from KVM switch (rhbz 1219343)
+
+* Wed May 13 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri May 15
 - GNU Linux-libre 4.0.3-gnu.
 
 * Wed May 13 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.3-300
