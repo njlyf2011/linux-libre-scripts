@@ -68,7 +68,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 19
+%define base_sublevel 0
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -78,9 +78,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -3.17%{?stablegnux}
-#define rcrevlibre  -3.17%{?rcrevgnux}
-#define gitrevlibre -3.17%{?gitrevgnux}
+#define stablelibre -4.0%{?stablegnux}
+#define rcrevlibre  -4.0%{?rcrevgnux}
+#define gitrevlibre -4.0%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -112,7 +112,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 4
 # Is it a -stable RC?
 %define stable_rc 0
 # Set rpm version accordingly
@@ -124,7 +124,7 @@ Summary: The Linux kernel
 %define stable_base %(echo $((%{stable_update} - 1)))
 %endif
 %endif
-%define rpmversion 3.%{base_sublevel}.%{stable_update}
+%define rpmversion 4.%{base_sublevel}.%{stable_update}
 
 ## The not-released-kernel case ##
 %else
@@ -135,7 +135,7 @@ Summary: The Linux kernel
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
-%define rpmversion 3.%{upstream_sublevel}.0
+%define rpmversion 4.%{upstream_sublevel}.0
 %endif
 # Nb: The above rcrev and gitrev values automagically define Patch00 and Patch01 below.
 
@@ -245,7 +245,7 @@ Summary: The Linux kernel
 %endif
 
 # The kernel tarball/base version
-%define kversion 3.%{base_sublevel}
+%define kversion 4.%{base_sublevel}
 
 %define make_target bzImage
 
@@ -639,11 +639,11 @@ Source2001: cpupower.config
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-3.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
+%define    stable_patch_00  patch%{?stablelibre}-4.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Patch00: %{stable_patch_00}
 %endif
 %if 0%{?stable_rc}
-%define    stable_patch_01  patch%{?rcrevlibre}-3.%{base_sublevel}.%{stable_update}-rc%{stable_rc}%{?rcrevgnu}.xz
+%define    stable_patch_01  patch%{?rcrevlibre}-4.%{base_sublevel}.%{stable_update}-rc%{stable_rc}%{?rcrevgnu}.xz
 Patch01: %{stable_patch_01}
 %endif
 
@@ -652,14 +652,14 @@ Patch01: %{stable_patch_01}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Patch00: patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+Patch00: patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
-Patch01: patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
+Patch01: patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Patch00: patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
+Patch00: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 %endif
@@ -728,13 +728,15 @@ Patch1018: MODSIGN-Support-not-importing-certs-from-db.patch
 
 Patch1019: Add-sysrq-option-to-disable-secure-boot-mode.patch
 
+# esrt
+Patch1020: efi-Add-esrt-support.patch
+
 # virt + ksm patches
 
 # DRM
 
 # nouveau + drm fixes
 # intel drm is all merged upstream
-Patch1825: drm-i915-tame-the-chattermouth-v2.patch
 Patch1826: drm-i915-hush-check-crtc-state.patch
 Patch1827: drm-i915-Disable-verbose-state-checks.patch
 
@@ -756,6 +758,10 @@ Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 # PPC
 
 # ARM64
+Patch21000: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
+Patch21001: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
+Patch21002: arm64-avoid-needing-console-to-enable-serial-console.patch
+Patch21003: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
 
 # ARMv7
 Patch21020: ARM-tegra-usb-no-reset.patch
@@ -767,11 +773,6 @@ Patch21025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 Patch21028: arm-i.MX6-Utilite-device-dtb.patch
-
-# IOMMU crash fixes - https://lists.linuxfoundation.org/pipermail/iommu/2015-February/012329.html
-Patch21030: iommu-omap-Play-nice-in-multi-platform-builds.patch
-Patch21031: iommu-exynos-Play-nice-in-multi-platform-builds.patch
-Patch21032: iommu-rockchip-Play-nice-in-multi-platform-builds.patch
 
 Patch21100: arm-highbank-l2-reverts.patch
 
@@ -792,18 +793,8 @@ Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 #rhbz 1186097
 Patch26135: acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
 
-#CVE-XXXX-XXXX rhbz 1189864 1192079
-Patch26136: vhost-scsi-potential-memory-corruption.patch
-
 #CVE-2015-0275 rhbz 1193907 1195178
 Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
-
-#rhbz 1200777 1200778
-Patch26159: Input-synaptics-retrieve-the-extended-capabilities-i.patch
-Patch26160: Input-synaptics-remove-TOPBUTTONPAD-property-for-Len.patch
-Patch26161: Input-synaptics-re-route-tracksticks-buttons-on-the-.patch
-Patch26162: Input-synaptics-remove-X1-Carbon-3rd-gen-from-the-to.patch
-Patch26163: Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 
 #rhbz 1201532
 Patch26168: HID-multitouch-add-support-of-clickpads.patch
@@ -812,14 +803,14 @@ Patch26168: HID-multitouch-add-support-of-clickpads.patch
 Patch26170: acpi-video-Allow-forcing-native-backlight-on-non-win.patch
 Patch26171: acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
 
-#CVE-2015-2666 rhbz 1204724 1204722
-Patch26172: x86-microcode-intel-Guard-against-stack-overflow-in-.patch
-
 # git clone ssh://git.fedorahosted.org/git/kernel-arm64.git, git diff master...devel
 Patch30000: kernel-arm64.patch
 
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
+
+#rhbz 1212230
+Patch26176: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 #rhbz 1208953
 Patch26179: pty-Fix-input-race-when-closing.patch
@@ -827,20 +818,31 @@ Patch26179: pty-Fix-input-race-when-closing.patch
 #rhbz 1210801
 Patch26180: HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
 
-#rhbz 1205083
-Patch26181: 0001-iwlwifi-mvm-remove-WARN_ON-for-invalid-BA-notificati.patch
-
-#rhbz 1208999
-Patch26182: SCSI-add-1024-max-sectors-black-list-flag.patch
-
 #rhbz 1204390
 Patch26189: 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
+
+#rhbz 1210857
+Patch26192: blk-loop-avoid-too-many-pending-per-work-IO.patch
 
 #rhbz 1206036 1215989
 Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 
 #rhbz 1218662
 Patch26199: libata-Blacklist-queued-TRIM-on-all-Samsung-800-seri.patch
+
+#rhbz 1219343
+Patch26200: 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
+
+#rhbz 1220915
+Patch26201: ovl-don-t-remove-non-empty-opaque-directory.patch
+
+#rhbz 1220118
+Patch26202: 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+
+Patch26203: v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
+
+#rhbz 1223332
+Patch26207: md-raid0-fix-restore-to-sector-variable-in-raid0_mak.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1220,13 +1222,16 @@ ApplyPatch()
   fi
 %if !%{using_upstream_branch}
   if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%%{?variant}}.spec ; then
-    if [ "${patch:0:8}" != "patch-3." ] &&
-       [ "${patch:0:14}" != "patch-libre-3." ] ; then
+    if [ "${patch:0:8}" != "patch-4." ] &&
+       [ "${patch:0:14}" != "patch-libre-4." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
   fi 2>/dev/null
-  $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1
+  case $patch in
+  patch*-gnu*-gnu*) ;;
+  *) $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1 ;;
+  esac
 %endif
   case "$patch" in
   *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
@@ -1260,20 +1265,20 @@ ApplyOptionalPatch()
 
 # Update to latest upstream.
 %if 0%{?released_kernel}
-%define vanillaversion 3.%{base_sublevel}
+%define vanillaversion 4.%{base_sublevel}
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-%define vanillaversion 3.%{upstream_sublevel}-rc%{rcrev}
+%define vanillaversion 4.%{upstream_sublevel}-rc%{rcrev}
 %if 0%{?gitrev}
-%define vanillaversion 3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
+%define vanillaversion 4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-%define vanillaversion 3.%{base_sublevel}-git%{gitrev}
+%define vanillaversion 4.%{base_sublevel}-git%{gitrev}
 %else
-%define vanillaversion 3.%{base_sublevel}
+%define vanillaversion 4.%{base_sublevel}
 %endif
 %endif
 %endif
@@ -1286,7 +1291,7 @@ ApplyOptionalPatch()
 
 # Build a list of the other top-level kernel tree directories.
 # This will be used to hardlink identical vanilla subdirs.
-sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-3.*' \
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-4.*' \
             | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
 # Delete all old stale trees.
@@ -1362,10 +1367,10 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
 %endif
-    ApplyPatch patch%{?rcrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+    ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
-    ApplyPatch patch%{?gitrevlibre}-3.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
+    ApplyPatch patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
@@ -1373,7 +1378,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
-    ApplyPatch patch%{?gitrevlibre}-3.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
+    ApplyPatch patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 
@@ -1453,6 +1458,10 @@ ApplyPatch lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 # PPC
 
 # ARM64
+ApplyPatch amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
+ApplyPatch amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
+ApplyPatch arm64-avoid-needing-console-to-enable-serial-console.patch
+ApplyPatch usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
 
 #
 # ARM
@@ -1467,10 +1476,6 @@ ApplyPatch arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
 ApplyPatch pinctrl-pinctrl-single-must-be-initialized-early.patch
 
 ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
-
-ApplyPatch iommu-omap-Play-nice-in-multi-platform-builds.patch
-ApplyPatch iommu-exynos-Play-nice-in-multi-platform-builds.patch
-ApplyPatch iommu-rockchip-Play-nice-in-multi-platform-builds.patch
 
 ApplyPatch arm-highbank-l2-reverts.patch
 
@@ -1558,6 +1563,8 @@ ApplyPatch MODSIGN-Support-not-importing-certs-from-db.patch
 
 ApplyPatch Add-sysrq-option-to-disable-secure-boot-mode.patch
 
+ApplyPatch efi-Add-esrt-support.patch
+
 # Assorted Virt Fixes
 
 # DRM core
@@ -1565,7 +1572,6 @@ ApplyPatch Add-sysrq-option-to-disable-secure-boot-mode.patch
 # Nouveau DRM
 
 # Intel DRM
-ApplyPatch drm-i915-tame-the-chattermouth-v2.patch
 ApplyPatch drm-i915-hush-check-crtc-state.patch
 ApplyPatch drm-i915-Disable-verbose-state-checks.patch
 
@@ -1599,18 +1605,8 @@ ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 #rhbz 1186097
 ApplyPatch acpi-video-add-disable_native_backlight_quirk_for_samsung_510r.patch
 
-#CVE-XXXX-XXXX rhbz 1189864 1192079
-ApplyPatch vhost-scsi-potential-memory-corruption.patch
-
 #CVE-2015-0275 rhbz 1193907 1195178
 ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
-
-#rhbz 1200777 1200778
-ApplyPatch Input-synaptics-retrieve-the-extended-capabilities-i.patch
-ApplyPatch Input-synaptics-remove-TOPBUTTONPAD-property-for-Len.patch
-ApplyPatch Input-synaptics-re-route-tracksticks-buttons-on-the-.patch
-ApplyPatch Input-synaptics-remove-X1-Carbon-3rd-gen-from-the-to.patch
-ApplyPatch Input-synaptics-remove-X250-from-the-topbuttonpad-li.patch
 
 #rhbz 1201532
 ApplyPatch HID-multitouch-add-support-of-clickpads.patch
@@ -1618,9 +1614,6 @@ ApplyPatch HID-multitouch-add-support-of-clickpads.patch
 #rhbz 1187004
 ApplyPatch acpi-video-Allow-forcing-native-backlight-on-non-win.patch
 ApplyPatch acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
-
-#CVE-2015-2666 rhbz 1204724 1204722
-ApplyPatch x86-microcode-intel-Guard-against-stack-overflow-in-.patch
 
 %if 0%{?aarch64patches}
 ApplyPatch kernel-arm64.patch
@@ -1632,17 +1625,31 @@ ApplyPatch kernel-arm64.patch -R
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
+#rhbz 1212230
+ApplyPatch Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
+
+#rhbz 1210857
+ApplyPatch blk-loop-avoid-too-many-pending-per-work-IO.patch
+
+#rhbz 1219343
+ApplyPatch 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
+
+#rhbz 1220915
+ApplyPatch ovl-don-t-remove-non-empty-opaque-directory.patch
+
+#rhbz 1220118
+ApplyPatch 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+
+ApplyPatch v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
+
+#rhbz 1223332
+ApplyPatch md-raid0-fix-restore-to-sector-variable-in-raid0_mak.patch
+
 #rhbz 1208953
 ApplyPatch pty-Fix-input-race-when-closing.patch
 
 #rhbz 1210801
 ApplyPatch HID-logitech-hidpp-add-a-module-parameter-to-keep-fi.patch
-
-#rhbz 1205083
-ApplyPatch 0001-iwlwifi-mvm-remove-WARN_ON-for-invalid-BA-notificati.patch
-
-#rhbz 1208999
-ApplyPatch SCSI-add-1024-max-sectors-black-list-flag.patch
 
 #rhbz 1204390
 ApplyPatch 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
@@ -2475,6 +2482,18 @@ fi
 #                 ||----w |
 #                 ||     ||
 %changelog
+* Fri May 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0.4-gnu.
+
+* Thu May 21 2015 Laura Abbott <labbott@fedoraproject.org> - 4.0.4-100
+- Linux v4.0.4
+
+* Fri May 15 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix DVB oops (rhbz 1220118)
+
+* Wed May 13 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix spew from KVM switch (rhbz 1219343)
+
 * Tue May 12 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 3.19.8-gnu.
 
