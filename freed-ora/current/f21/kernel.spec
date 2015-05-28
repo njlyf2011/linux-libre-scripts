@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -706,6 +706,9 @@ Patch26200: 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
 #rhbz 1220915
 Patch26201: ovl-don-t-remove-non-empty-opaque-directory.patch
 
+#rhbz 1220118
+Patch26202: 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -1283,7 +1286,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
 %endif
-#    ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+    ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
     ApplyPatch patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
@@ -1556,6 +1559,9 @@ ApplyPatch 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
 
 #rhbz 1220915
 ApplyPatch ovl-don-t-remove-non-empty-opaque-directory.patch
+
+#rhbz 1220118
+ApplyPatch 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2429,7 +2435,17 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Sat May 16 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri May 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0.4-gnu.
+
+* Mon May 18 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.4-200
+- Disable YAMA for F21
+- Linux v4.0.4
+
+* Fri May 15 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix DVB oops (rhbz 1220118)
+
+* Fri May 15 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat May 16
 - GNU Linux-libre 4.0.3-gnu.
 
 * Thu May 14 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.3-201
