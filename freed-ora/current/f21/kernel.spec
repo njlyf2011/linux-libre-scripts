@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -708,6 +708,17 @@ Patch26201: ovl-don-t-remove-non-empty-opaque-directory.patch
 
 #rhbz 1220118
 Patch26202: 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+
+Patch26203: v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
+
+#rhbz 1204390
+Patch26204: 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
+
+#rhbz 1218688
+Patch26205: drm-i915-Fix-ilk-watermarks-calculation-when-primary.patch
+
+#rhbz 1223332
+Patch26207: md-raid0-fix-restore-to-sector-variable-in-raid0_mak.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1562,6 +1573,17 @@ ApplyPatch ovl-don-t-remove-non-empty-opaque-directory.patch
 
 #rhbz 1220118
 ApplyPatch 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+
+ApplyPatch v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
+
+#rhbz 1204390
+ApplyPatch 0001-cx18-add-missing-caps-for-the-PCM-video-device.patch
+
+#rhbz 1218688
+ApplyPatch drm-i915-Fix-ilk-watermarks-calculation-when-primary.patch
+
+#rhbz 1223332
+ApplyPatch md-raid0-fix-restore-to-sector-variable-in-raid0_mak.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2435,7 +2457,17 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
-* Fri May 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu May 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.4-201
+- Add patch to fix discard on md RAID0 (rhbz 1223332)
+- Add submitted stable fix for i915 flickering on ilk (rhbz 1218688)
+
+* Mon May 18 2015 Laura Abbott <labbott@fedoraproject.org>
+- Re-add the v4l2 query caps patch which was dropped
+
+* Mon May 18 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect bandwidth on some Chicony webcams
+
+* Mon May 18 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri May 22
 - GNU Linux-libre 4.0.4-gnu.
 
 * Mon May 18 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.4-200
