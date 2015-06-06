@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -714,6 +714,19 @@ Patch26205: drm-i915-Fix-ilk-watermarks-calculation-when-primary.patch
 #rhbz 1223332
 Patch26207: md-raid0-fix-restore-to-sector-variable-in-raid0_mak.patch
 
+#rhbz 1220519
+Patch26208: sched-always-use-blk_schedule_flush_plug-in-io_sched.patch
+
+#rhbz 1200353
+Patch26209: 0001-ktime-Fix-ktime_divns-to-do-signed-division.patch
+
+#rhbz 1214474
+Patch26210: Input-add-vmmouse-driver.patch
+
+# Apply queued fixes for crasher reported by Alex Larsson
+Patch26211: mnt-Fail-collect_mounts-when-applied-to-unmounted-mo.patch
+Patch26212: fs_pin-Allow-for-the-possibility-that-m_list-or-s_li.patch
+
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -744,6 +757,7 @@ Requires(pre): %{initrd_prereq}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
 Requires(preun): systemd >= 200\
+Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
@@ -1578,6 +1592,19 @@ ApplyPatch drm-i915-Fix-ilk-watermarks-calculation-when-primary.patch
 
 #rhbz 1223332
 ApplyPatch md-raid0-fix-restore-to-sector-variable-in-raid0_mak.patch
+
+#rhbz 1220519
+ApplyPatch sched-always-use-blk_schedule_flush_plug-in-io_sched.patch
+
+#rhbz 1200353
+ApplyPatch 0001-ktime-Fix-ktime_divns-to-do-signed-division.patch
+
+#rhbz 1214474
+ApplyPatch Input-add-vmmouse-driver.patch
+
+# Apply queued fixes for crasher reported by Alex Larsson
+ApplyPatch mnt-Fail-collect_mounts-when-applied-to-unmounted-mo.patch
+ApplyPatch fs_pin-Allow-for-the-possibility-that-m_list-or-s_li.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2442,6 +2469,16 @@ fi
 #
 # 
 %changelog
+* Wed May 27 2015 Josh Boyer <jwboyer@fedoraproject.org> -4.0.4-302
+- Apply queued fixes for crasher reported by Alex Larsson
+- Enable in-kernel vmmouse driver (rhbz 1214474)
+
+* Tue May 26 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix signed division error (rhbz 1200353)
+
+* Tue May 26 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch to fix might_sleep splat (rhbz 1220519)
+
 * Thu May 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.0.4-301
 - Add patch to fix discard on md RAID0 (rhbz 1223332)
 - Add submitted stable fix for i915 flickering on ilk (rhbz 1218688)
