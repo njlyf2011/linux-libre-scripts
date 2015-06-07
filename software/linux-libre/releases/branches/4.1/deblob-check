@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2015-06-06
+# deblob-check version 2015-06-07
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -4142,6 +4142,7 @@ set_except () {
     blobname '%s%c-%s\.ucode' drivers/net/wireless/iwlwifi/iwl-drv.c
     blobname 'intel[/]IntcPP01\.bin' sound/soc/intel/haswell/sst-haswell-ipc.c
     accept '[\t]*rc[ ]=[ ]wil_request_firmware[(]wil[,][ ]WIL_FW2\?_NAME[)][;]' drivers/net/wireless/ath/wil6210/main.c
+    blobname 'nvmData-8000[BC]' drivers/net/wireless/iwlwifi/iwl-8000.c
     ;;
 
   */*freedo*.patch | */*logo*.patch)
