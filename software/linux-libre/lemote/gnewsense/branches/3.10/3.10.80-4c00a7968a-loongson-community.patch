@@ -1,19 +1,19 @@
 diff --git a/Makefile b/Makefile
-index 923ad8a6..1f80d72 100644
+index 0674332..910742b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
  
  HOSTCC       = gcc
  HOSTCXX      = g++
--HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
+-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
 -HOSTCXXFLAGS = -O2
-+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer
++HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu89
 +HOSTCXXFLAGS = -O3
  
  # Decide whether to build built-in, modular, or both.
  # Normally, just do built-in.
-@@ -573,7 +573,7 @@ all: vmlinux
+@@ -575,7 +575,7 @@ all: vmlinux
  ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
  KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
  else
