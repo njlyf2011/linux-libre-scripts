@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -4.0%{?stablegnux}
-#define rcrevlibre  -4.0%{?rcrevgnux}
+%define rcrevlibre  -4.0%{?rcrevgnux}
 #define gitrevlibre -4.0%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -193,6 +193,7 @@ Summary: The Linux kernel
 %define kversion 4.%{base_sublevel}
 
 %define make_target bzImage
+%define image_install_path boot
 
 %define KVERREL %{version}-libre.%{release}.%{_target_cpu}
 %define hdrarch %_target_cpu
@@ -286,21 +287,18 @@ Summary: The Linux kernel
 %define hdrarch i386
 %define pae PAE
 %define all_arch_configs kernel-%{version}-i?86*.config
-%define image_install_path boot
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
 %ifarch x86_64
 %define asmarch x86
 %define all_arch_configs kernel-%{version}-x86_64*.config
-%define image_install_path boot
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
 %ifarch %{power64}
 %define asmarch powerpc
 %define hdrarch powerpc
-%define image_install_path boot
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
@@ -316,7 +314,6 @@ Summary: The Linux kernel
 %define asmarch s390
 %define hdrarch s390
 %define all_arch_configs kernel-%{version}-s390x.config
-%define image_install_path boot
 %define make_target image
 %define kernel_image arch/s390/boot/image
 %define with_tools 0
@@ -324,7 +321,6 @@ Summary: The Linux kernel
 
 %ifarch %{arm}
 %define all_arch_configs kernel-%{version}-arm*.config
-%define image_install_path boot
 %define asmarch arm
 %define hdrarch arm
 %define pae lpae
@@ -347,7 +343,6 @@ Summary: The Linux kernel
 %define hdrarch arm64
 %define make_target Image.gz
 %define kernel_image arch/arm64/boot/Image.gz
-%define image_install_path boot
 %endif
 
 # Should make listnewconfig fail if there's config options
@@ -532,9 +527,6 @@ Patch00: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 
-# we also need compile fixes for -vanilla
-Patch04: compile-fixes.patch
-
 # build tweak for build ID magic, even for -vanilla
 Patch05: kbuild-AFTER_LINK.patch
 
@@ -546,8 +538,6 @@ Patch08: libreboot-i915.patch
 %if !%{nopatches}
 
 
-# revert upstream patches we get via other methods
-Patch09: upstream-reverts.patch
 # Git trees.
 
 # Standalone patches
@@ -615,8 +605,6 @@ Patch1826: drm-i915-hush-check-crtc-state.patch
 # patches headed upstream
 Patch12016: disable-i8042-check-on-apple-mac.patch
 
-Patch14000: hibernate-freeze-filesystems.patch
-
 Patch14010: lis3-improve-handling-of-null-rate.patch
 
 Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
@@ -624,10 +612,11 @@ Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 # PPC
 
 # ARM64
-Patch21000: net-amd-Add-xgbe-a0-driver.patch
+Patch21000: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
 Patch21001: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
 Patch21002: arm64-avoid-needing-console-to-enable-serial-console.patch
 Patch21003: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
+Patch21004: arm64-acpi-drop-expert.patch
 
 # ARMv7
 Patch21020: ARM-tegra-usb-no-reset.patch
@@ -651,29 +640,25 @@ Patch21242: criu-no-expert.patch
 #rhbz 892811
 Patch21247: ath9k-rx-dma-stop-check.patch
 
-Patch22000: weird-root-dentry-name-debug.patch
-
 #rhbz 1094948
 Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 
-#CVE-2015-0275 rhbz 1193907 1195178
-Patch26138: ext4-Allocate-entire-range-in-zero-range.patch
-
-#rhbz 1190947
-Patch26139: Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
-
-#rhbz 1196825
-Patch26140: security-yama-Remove-unnecessary-selects-from-Kconfi.patch
-
-#rhbz 1201532
-Patch26168: HID-multitouch-add-support-of-clickpads.patch
-
-#rhbz 1187004
-Patch26170: acpi-video-Allow-forcing-native-backlight-on-non-win.patch
-Patch26171: acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
-
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
+
+#rhbz 1212230
+Patch26176: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
+
+#rhbz 1210857
+Patch26192: blk-loop-avoid-too-many-pending-per-work-IO.patch
+
+#rhbz 1220118
+Patch26202: media-Fix-regression-in-some-more-dib0700-based-devi.patch
+
+Patch26203: v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
+
+#rhbz 1217249
+Patch26214: acpi_video-Add-enable_native_backlight-quirk-for-Mac.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -705,6 +690,7 @@ Requires(pre): %{initrd_prereq}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
 Requires(preun): systemd >= 200\
+Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_provides:Provides: %%{kernel%{?1:_%{1}}_provides}}}\
@@ -824,7 +810,7 @@ Provides:  cpufrequtils = 1:009-0.6.p1
 Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
-Requires: kernel-tools-libs = %{version}-%{release}
+Requires: kernel-libre-tools-libs = %{version}-%{release}
 %description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
@@ -855,12 +841,12 @@ the kernel source.
 
 %package -n kernel-libre-tools-debuginfo
 Provides: kernel-tools-debuginfo = %{rpmversion}-%{pkg_release}
-Summary: Debug information for package kernel-tools
+Summary: Debug information for package kernel-libre-tools
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
 %description -n kernel-libre-tools-debuginfo
-This package provides debug information for package kernel-tools.
+This package provides debug information for package kernel-libre-tools.
 
 # Note that this pattern only works right to match the .build-id
 # symlinks because of the trailing nonmatching alternation and
@@ -962,7 +948,7 @@ Provides: installonlypkg(kernel-module)\
 Provides: installonlypkg(kernel-libre-module)\
 Provides: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-libre%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
-Requires: kernel-libre-uname-r = %{KVERREL}%{?1:+%{1}}\
+Requires: kernel-libre-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 AutoReq: no\
 AutoProv: yes\
 %description %{?1:%{1}-}modules\
@@ -1250,9 +1236,9 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 # (non-released_kernel case only)
 %if 0%{?rcrev}
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?rcrevgnux}/" Makefile
 %endif
-#    ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+    ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
     ApplyPatch patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
@@ -1260,7 +1246,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if "%{?stablelibre}" != "%{?gitrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevgnux}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
     ApplyPatch patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
@@ -1317,20 +1303,11 @@ done
 
 ApplyPatch kbuild-AFTER_LINK.patch
 
-#
-# misc small stuff to make things compile
-#
-ApplyOptionalPatch compile-fixes.patch
 
 # Freedo logo.
 ApplyPatch freedo.patch
 
 %if !%{nopatches}
-
-ApplyPatch libreboot-i915.patch
-
-# revert patches from upstream that conflict or that we get via other means
-ApplyOptionalPatch upstream-reverts.patch -R
 
 # Architecture patches
 # x86(-64)
@@ -1339,10 +1316,11 @@ ApplyPatch lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 # PPC
 
 # ARM64
-ApplyPatch net-amd-Add-xgbe-a0-driver.patch
+ApplyPatch amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
 ApplyPatch amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
 ApplyPatch arm64-avoid-needing-console-to-enable-serial-console.patch
 ApplyPatch usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
+ApplyPatch arm64-acpi-drop-expert.patch
 
 #
 # ARM
@@ -1460,9 +1438,6 @@ ApplyPatch drm-i915-hush-check-crtc-state.patch
 # Patches headed upstream
 ApplyPatch disable-i8042-check-on-apple-mac.patch
 
-# FIXME: REBASE
-#ApplyPatch hibernate-freeze-filesystems.patch
-
 ApplyPatch lis3-improve-handling-of-null-rate.patch
 
 # Disable watchdog on virtual machines.
@@ -1470,8 +1445,6 @@ ApplyPatch watchdog-Disable-watchdog-on-virtual-machines.patch
 
 #rhbz 754518
 ApplyPatch scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
-
-#pplyPatch weird-root-dentry-name-debug.patch
 
 # https://fedoraproject.org/wiki/Features/Checkpoint_Restore
 ApplyPatch criu-no-expert.patch
@@ -1482,24 +1455,22 @@ ApplyPatch ath9k-rx-dma-stop-check.patch
 #rhbz 1094948
 ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
 
-#CVE-2015-0275 rhbz 1193907 1195178
-ApplyPatch ext4-Allocate-entire-range-in-zero-range.patch
-
-#rhbz 1190947
-ApplyPatch Bluetooth-ath3k-Add-support-Atheros-AR5B195-combo-Mi.patch
-
-#rhbz 1196825
-ApplyPatch security-yama-Remove-unnecessary-selects-from-Kconfi.patch
-
-#rhbz 1201532
-ApplyPatch HID-multitouch-add-support-of-clickpads.patch
-
-#rhbz 1187004
-ApplyPatch acpi-video-Allow-forcing-native-backlight-on-non-win.patch
-ApplyPatch acpi-video-Add-force-native-backlight-quirk-for-Leno.patch
-
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
+
+#rhbz 1212230
+ApplyPatch Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
+
+#rhbz 1210857
+ApplyPatch blk-loop-avoid-too-many-pending-per-work-IO.patch
+
+#rhbz 1220118
+ApplyPatch media-Fix-regression-in-some-more-dib0700-based-devi.patch
+
+ApplyPatch v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
+
+#rhbz 1217249
+ApplyPatch acpi_video-Add-enable_native_backlight-quirk-for-Mac.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1632,19 +1603,23 @@ BuildKernel() {
     %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
     %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
+    mkdir -p $RPM_BUILD_ROOT/%{image_install_path}
+    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
+%if %{with_debuginfo}
+    mkdir -p $RPM_BUILD_ROOT%{debuginfodir}/%{image_install_path}
+%endif
+
 %ifarch %{arm} aarch64
     %{make} -s ARCH=$Arch V=1 dtbs dtbs_install INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
+    cp -r $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer $RPM_BUILD_ROOT/lib/modules/$KernelVer/dtb
     find arch/$Arch/boot/dts -name '*.dtb' -type f | xargs rm -f
 %endif
 
     # Start installing the results
-%if %{with_debuginfo}
-    mkdir -p $RPM_BUILD_ROOT%{debuginfodir}/boot
-    mkdir -p $RPM_BUILD_ROOT%{debuginfodir}/%{image_install_path}
-%endif
-    mkdir -p $RPM_BUILD_ROOT/%{image_install_path}
     install -m 644 .config $RPM_BUILD_ROOT/boot/config-$KernelVer
+    install -m 644 .config $RPM_BUILD_ROOT/lib/modules/$KernelVer/config
     install -m 644 System.map $RPM_BUILD_ROOT/boot/System.map-$KernelVer
+    install -m 644 System.map $RPM_BUILD_ROOT/lib/modules/$KernelVer/System.map
 
     # We estimate the size of the initramfs because rpm needs to take this size
     # into consideration when performing disk space calculations. (See bz #530778)
@@ -1652,6 +1627,7 @@ BuildKernel() {
 
     if [ -f arch/$Arch/boot/zImage.stub ]; then
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
+      cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/lib/modules/$KernelVer/zImage.stub-$KernelVer || :
     fi
     %if %{signmodules}
     # Sign the image if we're using EFI
@@ -1665,13 +1641,14 @@ BuildKernel() {
     $CopyKernel $KernelImage \
     		$RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+    cp $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer $RPM_BUILD_ROOT/lib/modules/$KernelVer/$InstallName
 
     # hmac sign the kernel for FIPS
     echo "Creating hmac file: $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac"
     ls -l $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     sha512hmac $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer | sed -e "s,$RPM_BUILD_ROOT,," > $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac;
+    cp $RPM_BUILD_ROOT/%{image_install_path}/.vmlinuz-$KernelVer.hmac $RPM_BUILD_ROOT/lib/modules/$KernelVer/.vmlinuz.hmac
 
-    mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
     # Override $(mod-fw) because we don't want it to install any firmware
     # we'll get it from the linux-firmware package and we don't want conflicts
     %{make} -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
@@ -2088,7 +2065,6 @@ popd
 make DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
 %endif
 
-
 ###
 ### clean
 ###
@@ -2159,7 +2135,7 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
-/bin/kernel-install add %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
+/bin/kernel-install add %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %{nil}
 
 #
@@ -2186,7 +2162,7 @@ fi}\
 #
 %define kernel_variant_preun() \
 %{expand:%%preun %{?1:%{1}-}core}\
-/bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /%{image_install_path}/vmlinuz-%{KVERREL}%{?1:+%{1}} || exit $?\
+/bin/kernel-install remove %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %{nil}
 
 %kernel_variant_preun
@@ -2313,13 +2289,18 @@ fi
 %defattr(-,root,root)\
 %{!?_licensedir:%global license %%doc}\
 %license linux-%{KVERREL}/COPYING\
-/%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:+%{2}}\
-/%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:+%{2}}.hmac \
+/lib/modules/%{KVERREL}%{?2:+%{2}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
+%ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:+%{2}}\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/.vmlinuz.hmac \
+%ghost /%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:+%{2}}.hmac \
 %ifarch %{arm} aarch64\
-/%{image_install_path}/dtb-%{KVERREL}%{?2:+%{2}} \
+/lib/modules/%{KVERREL}%{?2:+%{2}}/dtb \
+%ghost /%{image_install_path}/dtb-%{KVERREL}%{?2:+%{2}} \
 %endif\
-%attr(600,root,root) /boot/System.map-%{KVERREL}%{?2:+%{2}}\
-/boot/config-%{KVERREL}%{?2:+%{2}}\
+%attr(600,root,root) /lib/modules/%{KVERREL}%{?2:+%{2}}/System.map\
+%ghost /boot/System.map-%{KVERREL}%{?2:+%{2}}\
+/lib/modules/%{KVERREL}%{?2:+%{2}}/config\
+%ghost /boot/config-%{KVERREL}%{?2:+%{2}}\
 %ghost /boot/initramfs-%{KVERREL}%{?2:+%{2}}.img\
 %dir /lib/modules\
 %dir /lib/modules/%{KVERREL}%{?2:+%{2}}\
@@ -2364,7 +2345,156 @@ fi
 #
 # 
 %changelog
-* Mon Apr 20 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sun Jun  7 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.1-rc6-gnu.
+- Drop patch for upstreamed (libre|core)boot bug that causes a boot-time oops.
+
+* Mon Jun 01 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc6.git0.1
+- Linux v4.1-rc6
+
+* Thu May 28 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add quirk for Mac Pro backlight (rhbz 1217249)
+
+* Mon May 25 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc5.git0.1
+- Linux v4.1-rc5
+- Disable debugging options.
+
+* Thu May 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc4.git1.1
+- Linux v4.1-rc4-11-g1113cdfe7d2c
+- Reenable debugging options.
+- Add patch to fix discard on md RAID0 (rhbz 1223332)
+
+* Mon May 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc4.git0.1
+- Linux v4.1-rc4
+- Disable debugging options.
+
+* Mon May 18 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect bandwidth on some Chicony webcams
+- Fix DVB oops (rhbz 1220118)
+
+* Mon May 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc3.git4.1
+- Linux v4.1-rc3-346-gc0655fe9b090
+- Enable in-kernel vmmouse driver (rhbz 1214474)
+
+* Fri May 15 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc3.git3.1
+- Linux v4.1-rc3-177-gf0897f4cc0fc
+
+* Thu May 14 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix non-empty dir removal in overlayfs (rhbz 1220915)
+
+* Wed May 13 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix spew from KVM switch (rhbz 1219343)
+
+* Wed May 13 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc3.git2.1
+- Linux v4.1-rc3-165-g110bc76729d4
+
+* Tue May 12 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc3.git1.1
+- Linux v4.1-rc3-46-g4cfceaf0c087
+- Reenable debugging options.
+
+* Mon May 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc3.git0.1
+- Linux v4.1-rc3
+- Disable debugging options.
+- Use kernel-install to create files in /boot partition (from Harald Hoyer)
+
+* Mon May 11 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM update
+
+* Thu May 07 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc2.git3.1
+- Linux v4.1-rc2-79-g0e1dc4274828
+
+* Wed May 06 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc2.git2.1
+- Linux v4.1-rc2-37-g5198b44374ad
+
+* Tue May 05 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc2.git1.1
+- Linux v4.1-rc2-7-gd9cee5d4f66e
+- Reenable debugging options.
+
+* Tue May 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch to blacklist TRIM on all Samsung 8xx series SSDs (rhbz 1218662)
+
+* Mon May 04 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc2.git0.1
+- Linux v4.1-rc2
+- Disable debugging options.
+
+* Sun May  3 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable ACPI on aarch64
+- General ARMv7 updates
+
+* Fri May 01 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc1.git1.1
+- Linux v4.1-rc1-117-g4a152c3913fb
+- Reenable debugging options.
+
+* Tue Apr 28 2015 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix up boot times for live images (rhbz 1210857)
+
+* Mon Apr 27 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc1.git0.1
+- Linux v4.1-rc1
+- Disable debugging options.
+
+* Fri Apr 24 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git14.1
+- Linux v4.0-10976-gd56a669ca59c
+
+* Fri Apr 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix iscsi with QNAP devices (rhbz 1208999)
+
+* Thu Apr 23 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git13.1
+- Linux v4.0-10710-g27cf3a16b253
+
+* Wed Apr 22 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update AMD xgbe a0 aarch64 driver for 4.1
+
+* Wed Apr 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> - 4.1.0-0.rc0.git12.1
+- Inital ARM updates for 4.1
+- Temporarily disable AMD ARM64 xgbe-a0 driver
+
+* Wed Apr 22 2015 Josh Boyer <jwboyer@fedoraproject.org> 
+- Linux v4.0-9804-gdb4fd9c5d072
+
+* Tue Apr 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git11.1
+- Linux v4.0-9362-g1fc149933fd4
+
+* Tue Apr 21 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable ECHO driver (rhbz 749884)
+
+* Mon Apr 20 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git10.1
+- Linux v4.0-8962-g14aa02449064
+- DRM merge
+
+* Mon Apr 20 2015 Dennis Gilmore <dennis@ausil.us>
+- enable mvebu for the LPAE kernel
+
+* Mon Apr 20 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git9.1
+- Linux v4.0-8158-g09d51602cf84
+
+* Sat Apr 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git8.1
+- Linux v4.0-7945-g7505256626b0
+
+* Fri Apr 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git7.1
+- Linux v4.0-7300-g4fc8adcfec3d
+- Patch from Benjamin Tissoires to fix 3 finger tap on synaptics (rhbz 1212230)
+- Add patch to support touchpad on Google Pixel 2 (rhbz 1209088)
+
+* Fri Apr 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git6.1
+- Linux v4.0-7209-g7d69cff26cea
+
+* Thu Apr 16 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git5.1
+- Linux v4.0-7084-g497a5df7bf6f
+
+* Thu Apr 16 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git4.1
+- Linux v4.0-6817-geea3a00264cf
+
+* Wed Apr 15 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git3.1
+- Linux v4.0-5833-g6c373ca89399
+
+* Wed Apr 15 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git2.1
+- Linux v4.0-3843-gbb0fd7ab0986
+
+* Tue Apr 14 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git1.1
+- Linux v4.0-2620-gb79013b2449c
+- Reenable debugging options.
+
+* Mon Apr 13 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Apr 20
 - GNU Linux-libre 4.0-gnu.
 - Work around a (libre|core)boot bug that causes a boot-time oops.
 
