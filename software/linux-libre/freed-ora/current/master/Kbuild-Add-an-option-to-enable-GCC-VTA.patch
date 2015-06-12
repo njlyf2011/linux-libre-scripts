@@ -43,10 +43,10 @@ Signed-off-by: Josh Stone <jistone@redhat.com>
  2 files changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index fbd43bfe4445..4bc89d2a3508 100644
+index aee7e5cb4c15..febebdf01b8b 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -706,7 +706,11 @@ KBUILD_CFLAGS	+= -fomit-frame-pointer
+@@ -704,7 +704,11 @@ KBUILD_CFLAGS	+= -fomit-frame-pointer
  endif
  endif
  
@@ -59,7 +59,7 @@ index fbd43bfe4445..4bc89d2a3508 100644
  ifdef CONFIG_DEBUG_INFO
  ifdef CONFIG_DEBUG_INFO_SPLIT
 diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-index c5cefb3c009c..b663e8e211b0 100644
+index ba2b0c87e65b..390e4089c086 100644
 --- a/lib/Kconfig.debug
 +++ b/lib/Kconfig.debug
 @@ -165,7 +165,23 @@ config DEBUG_INFO_DWARF4
@@ -87,6 +87,3 @@ index c5cefb3c009c..b663e8e211b0 100644
  
  config GDB_SCRIPTS
  	bool "Provide GDB scripts for kernel debugging"
--- 
-2.1.0
-
