@@ -1,19 +1,19 @@
 diff --git a/Makefile b/Makefile
-index 8d03070..805149f 100644
+index 1ea4366..67b34be 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -241,8 +241,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
  
  HOSTCC       = gcc
  HOSTCXX      = g++
--HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
+-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
 -HOSTCXXFLAGS = -O2
-+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer
++HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu89
 +HOSTCXXFLAGS = -O3
  
  # Decide whether to build built-in, modular, or both.
  # Normally, just do built-in.
-@@ -573,7 +573,7 @@ all: vmlinux
+@@ -575,7 +575,7 @@ all: vmlinux
  ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
  KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
  else
@@ -3718,10 +3718,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 28f6cdc..fbea203 100644
+index 56a4ed6..d8a6ea5 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -952,6 +952,9 @@
+@@ -962,6 +962,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -10594,7 +10594,7 @@ index 3770fcb..61acf4c 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 877f87f..0bd871a 100644
+index 5a45437..68c0797 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -443,6 +443,7 @@ void usb_amd_dev_put(void)
@@ -10622,7 +10622,7 @@ index 877f87f..0bd871a 100644
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -622,7 +627,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -634,7 +639,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -10634,7 +10634,7 @@ index 877f87f..0bd871a 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -795,6 +804,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -807,6 +816,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -10644,7 +10644,7 @@ index 877f87f..0bd871a 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -934,6 +946,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -946,6 +958,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -10652,7 +10652,7 @@ index 877f87f..0bd871a 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1041,6 +1054,9 @@ hc_init:
+@@ -1053,6 +1066,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -10756,10 +10756,10 @@ index 1bacc10..400f90e 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index a674fd5..7fd2cf3 100755
+index a27134f..c386d38 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -307,14 +307,33 @@ if ($arch eq "x86_64") {
+@@ -306,14 +306,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -10801,7 +10801,7 @@ index a674fd5..7fd2cf3 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -326,19 +345,12 @@ if ($arch eq "x86_64") {
+@@ -325,19 +344,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
