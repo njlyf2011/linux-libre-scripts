@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -640,9 +640,6 @@ Patch21242: criu-no-expert.patch
 #rhbz 892811
 Patch21247: ath9k-rx-dma-stop-check.patch
 
-#rhbz 1094948
-Patch26131: acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
-
 #CVE-2015-2150 rhbz 1196266 1200397
 Patch26175: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
@@ -659,6 +656,15 @@ Patch26203: v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
 
 #rhbz 1217249
 Patch26214: acpi_video-Add-enable_native_backlight-quirk-for-Mac.patch
+
+#rhbz 1225563
+Patch26215: HID-lenovo-set-INPUT_PROP_POINTING_STICK.patch
+
+#rhbz 1133378
+Patch26219: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
+
+#rhbz 1226743
+Patch26221: drm-i915-turn-off-wc-mmaps.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1452,9 +1458,6 @@ ApplyPatch criu-no-expert.patch
 #rhbz 892811
 ApplyPatch ath9k-rx-dma-stop-check.patch
 
-#rhbz 1094948
-ApplyPatch acpi-video-Add-disable_native_backlight-quirk-for-Sa.patch
-
 #CVE-2015-2150 rhbz 1196266 1200397
 ApplyPatch xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
@@ -1471,6 +1474,15 @@ ApplyPatch v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
 
 #rhbz 1217249
 ApplyPatch acpi_video-Add-enable_native_backlight-quirk-for-Mac.patch
+
+#rhbz 1225563
+ApplyPatch HID-lenovo-set-INPUT_PROP_POINTING_STICK.patch
+
+#rhbz 1133378
+ApplyPatch firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
+
+#rhbz 1226743
+ApplyPatch drm-i915-turn-off-wc-mmaps.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1882,8 +1894,12 @@ BuildKernel %make_target %kernel_image %{pae}
 BuildKernel %make_target %kernel_image
 %endif
 
+%ifarch ppc64le
+%define no32bit NO_PERF_READ_VDSO32=1
+%endif
+
 %global perf_make \
-  make -s %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
+  make -s %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 %{?no32bit} WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT all
@@ -2345,7 +2361,34 @@ fi
 #
 # 
 %changelog
-* Sun Jun  7 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Jun 12 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.1-rc7-gnu.
+
+* Mon Jun 08 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc7.git0.1
+- Linux v4.1-rc7
+
+* Thu Jun 04 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc6.git2.1
+- Linux v4.1-rc6-49-g8a7deb362b76
+
+* Thu Jun 04 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to turn of WC mmaps on i915 from airlied (rhbz 1226743)
+
+* Wed Jun 03 2015 Laura Abbott <labbott@fedoraproject.org>
+- Drop that blasted firwmare warning until we get a real fix (rhbz 1133378)
+
+* Wed Jun 03 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix auditing of canonical mode (rhbz 1188695)
+
+* Wed Jun 03 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix from Ngo Than for perf build on ppc64le (rhbz 1227260)
+
+* Wed Jun 03 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc6.git1.1
+- Linux v4.1-rc6-44-g8cd9234c64c5
+
+* Tue Jun 02 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix middle button issues on external Lenovo keyboards (rhbz 1225563)
+
+* Mon Jun  1 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jun  7
 - GNU Linux-libre 4.1-rc6-gnu.
 - Drop patch for upstreamed (libre|core)boot bug that causes a boot-time oops.
 
