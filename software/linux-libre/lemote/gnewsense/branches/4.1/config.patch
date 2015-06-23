@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2015-06-15 13:16:38.077481995 -0400
-@@ -0,0 +1,5225 @@
++++ .config	2015-06-22 13:09:25.978971252 -0400
+@@ -0,0 +1,5224 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.1.0-rc8-gnu Kernel Configuration
++# Linux/mips 4.1.0-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -3086,7 +3086,6 @@ Index: .config
 +CONFIG_MEDIA_SDR_SUPPORT=y
 +CONFIG_MEDIA_RC_SUPPORT=y
 +CONFIG_MEDIA_CONTROLLER=y
-+CONFIG_MEDIA_CONTROLLER_DVB=y
 +CONFIG_VIDEO_DEV=m
 +CONFIG_VIDEO_V4L2_SUBDEV_API=y
 +CONFIG_VIDEO_V4L2=m
