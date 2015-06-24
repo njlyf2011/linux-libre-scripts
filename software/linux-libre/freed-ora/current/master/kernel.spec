@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -40,13 +40,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 0
+%define base_sublevel 1
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -56,9 +56,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.0%{?stablegnux}
-%define rcrevlibre  -4.0%{?rcrevgnux}
-#define gitrevlibre -4.0%{?gitrevgnux}
+#define stablelibre -4.1%{?stablegnux}
+#define rcrevlibre  -4.1%{?rcrevgnux}
+#define gitrevlibre -4.1%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -612,24 +612,24 @@ Patch15000: watchdog-Disable-watchdog-on-virtual-machines.patch
 # PPC
 
 # ARM64
-Patch21000: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
-Patch21001: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
-Patch21002: arm64-avoid-needing-console-to-enable-serial-console.patch
-Patch21003: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
-Patch21004: arm64-acpi-drop-expert.patch
+Patch16000: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
+Patch16001: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
+Patch16002: arm64-avoid-needing-console-to-enable-serial-console.patch
+Patch16003: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
+Patch16004: arm64-acpi-drop-expert.patch
 
 # ARMv7
-Patch21020: ARM-tegra-usb-no-reset.patch
-Patch21021: arm-dts-am335x-boneblack-lcdc-add-panel-info.patch
-Patch21022: arm-dts-am335x-boneblack-add-cpu0-opp-points.patch
-Patch21023: arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
-Patch21024: arm-dts-am335x-bone-common-setup-default-pinmux-http.patch
-Patch21025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
-Patch21026: pinctrl-pinctrl-single-must-be-initialized-early.patch
+Patch16020: ARM-tegra-usb-no-reset.patch
+Patch16021: arm-dts-am335x-boneblack-lcdc-add-panel-info.patch
+Patch16022: arm-dts-am335x-boneblack-add-cpu0-opp-points.patch
+Patch16023: arm-dts-am335x-bone-common-enable-and-use-i2c2.patch
+Patch16024: arm-dts-am335x-bone-common-setup-default-pinmux-http.patch
+Patch16025: arm-dts-am335x-bone-common-add-uart2_pins-uart4_pins.patch
+Patch16026: pinctrl-pinctrl-single-must-be-initialized-early.patch
 
-Patch21028: arm-i.MX6-Utilite-device-dtb.patch
+Patch16028: arm-i.MX6-Utilite-device-dtb.patch
 
-Patch21100: arm-highbank-l2-reverts.patch
+Patch16030: arm-highbank-l2-reverts.patch
 
 #rhbz 754518
 Patch21235: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
@@ -669,7 +669,8 @@ Patch26221: drm-i915-turn-off-wc-mmaps.patch
 # CVE-2015-XXXX rhbz 1230770 1230774
 Patch26231: kvm-x86-fix-kvm_apic_has_events-to-check-for-NULL-po.patch
 
-Patch26232: mm-shmem_zero_setup-skip-security-check-and-lockdep-.patch
+# rhbz 1227891
+Patch26250: HID-rmi-Disable-populating-F30-when-the-touchpad-has.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1492,7 +1493,8 @@ ApplyPatch drm-i915-turn-off-wc-mmaps.patch
 # CVE-2015-XXXX rhbz 1230770 1230774
 ApplyPatch kvm-x86-fix-kvm_apic_has_events-to-check-for-NULL-po.patch
 
-ApplyPatch mm-shmem_zero_setup-skip-security-check-and-lockdep-.patch
+#rhbz 1227891
+ApplyPatch HID-rmi-Disable-populating-F30-when-the-touchpad-has.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2371,7 +2373,16 @@ fi
 #
 # 
 %changelog
-* Fri Jun 19 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Jun 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.1-gnu.
+
+* Mon Jun 22 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-1
+- Linux v4.1
+
+* Thu Jun 18 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix touchpad issues on Razer machines (rhbz 1227891)
+
+* Thu Jun 18 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Jun 19
 - GNU Linux-libre 4.1-rc8-gnu.
 
 * Tue Jun 16 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc8.git0.2
