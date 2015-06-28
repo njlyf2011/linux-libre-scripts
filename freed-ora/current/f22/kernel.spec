@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -689,7 +689,7 @@ Patch26193: toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 Patch26200: 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
 
 #rhbz 1220118
-Patch26202: 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+Patch26202: media-Fix-regression-in-some-more-dib0700-based-devi.patch
 
 Patch26203: v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
 
@@ -712,11 +712,8 @@ Patch26215: HID-lenovo-set-INPUT_PROP_POINTING_STICK.patch
 #rhbz 1218882
 Patch26216: 0001-target-use-vfs_iter_read-write-in-fd_do_rw.patch
 
-#rhbz 1188695
-Patch26218: 0001-n_tty-Fix-auditing-support-for-cannonical-mode.patch
-
 #rhbz 1133378
-Patch26219: 0001-firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
+Patch26219: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 # FAF Problem 885578
 Patch26220: 0001-mwifiex-use-del_timer-variant-in-interrupt-context.patch
@@ -727,8 +724,16 @@ Patch26221: drm-i915-turn-off-wc-mmaps.patch
 #rhbz 1227877
 Patch26222: powerpc-powernv-Restore-non-volatile-CRs-after-nap.patch
 
-#rhbz 1226621
-Patch26223: block-discard-bdi_unregister-in-favour-of-bdi_destro.patch
+#rhbz 1212230
+Patch26238: Input-Revert-Revert-synaptics-use-dmax-in-input_mt_a.patch
+Patch26239: Input-synaptics-allocate-3-slots-to-keep-stability-i.patch
+Patch26240: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
+
+# CVE-2015-XXXX rhbz 1230770 1230774
+Patch26241: kvm-x86-fix-kvm_apic_has_events-to-check-for-NULL-po.patch
+
+# rhbz 1227891
+Patch26250: HID-rmi-Disable-populating-F30-when-the-touchpad-has.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1571,7 +1576,7 @@ ApplyPatch toshiba_acpi-Do-not-register-vendor-backlight-when-a.patch
 ApplyPatch 0001-HID-usbhid-Add-HID_QUIRK_NOGET-for-Aten-DVI-KVM-swit.patch
 
 #rhbz 1220118
-ApplyPatch 0001-media-media-Fix-regression-in-some-more-dib0700-base.patch
+ApplyPatch media-Fix-regression-in-some-more-dib0700-based-devi.patch
 
 ApplyPatch v4l-uvcvideo-Fix-incorrect-bandwidth-with-Chicony-de.patch
 
@@ -1594,11 +1599,8 @@ ApplyPatch HID-lenovo-set-INPUT_PROP_POINTING_STICK.patch
 #rhbz 1218882
 ApplyPatch 0001-target-use-vfs_iter_read-write-in-fd_do_rw.patch
 
-#rhbz 1188695
-ApplyPatch 0001-n_tty-Fix-auditing-support-for-cannonical-mode.patch
-
 #rhbz 1133378
-ApplyPatch 0001-firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
+ApplyPatch firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 # FAF Problem 885578
 ApplyPatch 0001-mwifiex-use-del_timer-variant-in-interrupt-context.patch
@@ -1609,8 +1611,16 @@ ApplyPatch drm-i915-turn-off-wc-mmaps.patch
 #rhbz 1227877
 ApplyPatch powerpc-powernv-Restore-non-volatile-CRs-after-nap.patch
 
-#rhbz 1226621
-ApplyPatch block-discard-bdi_unregister-in-favour-of-bdi_destro.patch
+#rhbz 1212230
+ApplyPatch Input-Revert-Revert-synaptics-use-dmax-in-input_mt_a.patch
+ApplyPatch Input-synaptics-allocate-3-slots-to-keep-stability-i.patch
+ApplyPatch Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
+
+# CVE-2015-XXXX rhbz 1230770 1230774
+ApplyPatch kvm-x86-fix-kvm_apic_has_events-to-check-for-NULL-po.patch
+
+#rhbz 1227891
+ApplyPatch HID-rmi-Disable-populating-F30-when-the-touchpad-has.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2475,7 +2485,26 @@ fi
 #
 # 
 %changelog
-* Tue Jun  9 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jun 23 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0.6-gnu.
+
+* Tue Jun 23 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.0.6-300
+- Linux v4.0.6
+
+* Thu Jun 18 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix touchpad issues on Razer machines (rhbz 1227891)
+
+* Fri Jun 12 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-XXXX kvm: NULL ptr deref in kvm_apic_has_events (rhbz 1230770 1230774)
+
+* Thu Jun 11 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport fixes for synaptic 3 finger tap (rhbz 1212230)
+- Backport btrfs fixes queued for stable (rhbz 1217191)
+
+* Tue Jun 09 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix touchpad for Thinkpad S540 (rhbz 1223051)
+
+* Mon Jun  8 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.0.5-gnu.
 
 * Mon Jun 08 2015 Josh Boyer <jwboyer@fedoraproject.org>
