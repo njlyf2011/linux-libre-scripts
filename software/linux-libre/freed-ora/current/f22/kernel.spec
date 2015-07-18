@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -1606,9 +1606,9 @@ ApplyPatch 0001-mwifiex-use-del_timer-variant-in-interrupt-context.patch
 ApplyPatch drm-i915-turn-off-wc-mmaps.patch
 
 #rhbz 1212230
-ApplyPatch Input-Revert-Revert-synaptics-use-dmax-in-input_mt_a.patch
-ApplyPatch Input-synaptics-allocate-3-slots-to-keep-stability-i.patch
-ApplyPatch Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
+# pplyPatch Input-Revert-Revert-synaptics-use-dmax-in-input_mt_a.patch
+# pplyPatch Input-synaptics-allocate-3-slots-to-keep-stability-i.patch
+# pplyPatch Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 # CVE-2015-XXXX rhbz 1230770 1230774
 ApplyPatch kvm-x86-fix-kvm_apic_has_events-to-check-for-NULL-po.patch
@@ -2479,6 +2479,15 @@ fi
 #
 # 
 %changelog
+* Mon Jul 13 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.0.8-gnu.
+
+* Fri Jul 10 2015 Laura Abbott <labbott@redhat.com> - 4.0.8-300
+- Linux v4.0.8
+
+* Tue Jul 07 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop incorrect patches for now (rhbz 1212230)
+
 * Mon Jun 29 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.0.7-gnu.
 
