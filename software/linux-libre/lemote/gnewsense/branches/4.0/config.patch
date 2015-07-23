@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2015-07-13 06:01:58.748990784 -0400
-@@ -0,0 +1,5200 @@
++++ .config	2015-07-22 18:45:08.331266174 -0400
+@@ -0,0 +1,5201 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.0.8-gnu Kernel Configuration
++# Linux/mips 4.0.9-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -413,6 +413,7 @@ Index: .config
 +CONFIG_HW_HAS_PCI=y
 +CONFIG_PCI=y
 +CONFIG_PCI_DOMAINS=y
++CONFIG_PCI_BUS_ADDR_T_64BIT=y
 +# CONFIG_PCI_MSI is not set
 +# CONFIG_PCI_DEBUG is not set
 +CONFIG_PCI_REALLOC_ENABLE_AUTO=y
