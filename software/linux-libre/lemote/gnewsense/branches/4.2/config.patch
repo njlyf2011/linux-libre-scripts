@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2015-08-19 17:39:39.539762268 -0400
-@@ -0,0 +1,5364 @@
++++ .config	2015-08-20 10:32:50.079679260 -0400
+@@ -0,0 +1,5365 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.2.0-rc6-gnu Kernel Configuration
++# Linux/mips 4.2.0-rc7-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -4505,6 +4505,7 @@ Index: .config
 +CONFIG_MIPS_PLATFORM_DEVICES=y
 +CONFIG_LEMOTE_YEELOONG2F=m
 +CONFIG_LEMOTE_LYNLOONG2F=m
++# CONFIG_CHROME_PLATFORMS is not set
 +
 +#
 +# Hardware Spinlock drivers
