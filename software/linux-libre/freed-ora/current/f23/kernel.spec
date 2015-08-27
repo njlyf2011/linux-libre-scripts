@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -634,6 +634,9 @@ Patch503: drm-i915-turn-off-wc-mmaps.patch
 Patch507: HID-chicony-Add-support-for-Acer-Aspire-Switch-12.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
+
+#rhbz 1239050
+Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2167,7 +2170,19 @@ fi
 #
 # 
 %changelog
-* Sat Aug 15 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Aug 24 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.2-rc7-gnu.
+
+* Mon Aug 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git0.1
+- Linux v4.2-rc7
+
+* Sat Aug 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Patch from Hans de Goede to add yoga 3 rfkill quirk (rhbz 1239050)
+
+* Fri Aug 14 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc6.git1.1
+- Linux v4.2-rc6-130-g7ddab73346a1
+
+* Fri Aug 14 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Aug 15
 - GNU Linux-libre 4.2-rc6-gnu.
 - Drop obsolete patch for libreboot.
 - Turn freedo patch into a git patch.
