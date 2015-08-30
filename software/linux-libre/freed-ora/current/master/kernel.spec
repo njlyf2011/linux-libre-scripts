@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -634,6 +634,15 @@ Patch503: drm-i915-turn-off-wc-mmaps.patch
 Patch507: HID-chicony-Add-support-for-Acer-Aspire-Switch-12.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
+
+#rhbz 1239050
+Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
+
+#rhbz 1253789
+Patch510: iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
+
+#rhbz 1250717
+Patch512: ext4-dont-manipulate-recovery-flag-when-freezing.patch
 
 Patch904: kdbus.patch
 
@@ -2169,7 +2178,46 @@ fi
 #
 # 
 %changelog
-* Sat Aug 15 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Aug 24 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.2-rc8-gnu.
+
+* Mon Aug 24 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc8.git0.1
+- Linux v4.2-rc8
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable EFI_VARS (rhbz 1252137)
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git4.1
+- Linux v4.2-rc7-100-ge45fc85a2f37
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git3.1
+- Linux v4.2-rc7-71-g0bad90985d39
+
+* Fri Aug 21 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor config updates for ARMv7
+
+* Thu Aug 20 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect ext4 freezing behavior on non-journaled fs (rhbz 1250717)
+
+* Wed Aug 19 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git2.1
+- Linux v4.2-rc7-24-g1b647a166f07
+
+* Tue Aug 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git1.1
+- Linux v4.2-rc7-15-gbf6740281ed5
+
+* Mon Aug 17 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix iscsi issue (rhbz 1253789)
+
+* Mon Aug 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git0.1
+- Linux v4.2-rc7
+
+* Sat Aug 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Patch from Hans de Goede to add yoga 3 rfkill quirk (rhbz 1239050)
+
+* Fri Aug 14 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc6.git1.1
+- Linux v4.2-rc6-130-g7ddab73346a1
+
+* Fri Aug 14 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Aug 15
 - GNU Linux-libre 4.2-rc6-gnu.
 - Drop obsolete patch for libreboot.
 - Turn freedo patch into a git patch.
