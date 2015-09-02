@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -46,7 +46,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 1
+%define base_sublevel 2
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -4.2%{?stablegnux}
-%define rcrevlibre  -4.1%{?rcrevgnux}
+#define rcrevlibre  -4.2%{?rcrevgnux}
 #define gitrevlibre -4.2%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -413,7 +413,7 @@ BuildRequires: net-tools, hostname, bc
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel
 %ifnarch s390 s390x %{arm}
 BuildRequires: numactl-devel
@@ -444,7 +444,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+#Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -637,6 +637,22 @@ Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
 #rhbz 1239050
 Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
+
+#rhbz 1253789
+Patch510: iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
+
+#rhbz 1250717
+Patch512: ext4-dont-manipulate-recovery-flag-when-freezing.patch
+
+#rhbz 1257534
+Patch513: nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
+
+#rhbz 1212201
+Patch514: drm-qxl-validate-monitors-config-modes.patch
+
+#rhbz 1257500
+Patch517: vmwgfx-Rework-device-initialization.patch
+Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1254,6 +1270,15 @@ fi
 cp -al vanilla-%{vanillaversion} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
+if [ ! -d .git ]; then
+    git init
+    git config user.email "kernel-team@fedoraproject.org"
+    git config user.name "Fedora Kernel Team"
+    git config gc.auto 0
+    git add .
+    git commit -a -q -m "baseline"
+fi
+
 
 # released_kernel with possible stable updates
 %if 0%{?stable_base}
@@ -1708,7 +1733,7 @@ BuildKernel %make_target %kernel_image
 %endif
 
 %global perf_make \
-  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
+  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT all
@@ -2170,7 +2195,60 @@ fi
 #
 # 
 %changelog
-* Mon Aug 24 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Aug 31 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.2-gnu.
+
+* Mon Aug 31 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-1
+- Linux v4.2
+
+* Fri Aug 28 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc8.git3.1
+- Linux v4.2-rc8-37-g4941b8f0c2b9
+
+* Thu Aug 27 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix vmware driver issues from Thomas Hellström (rhbz 1227193)
+
+* Thu Aug 27 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc8.git2.1
+- Linux v4.2-rc8-10-gf9ed72dde34e
+- Add patch from Hans de Goede to fix nv46 based cards (rhbz 1257534)
+- Add patch from Jonathon Jongsma to fix modes in qxl (rhbz 1212201)
+
+* Wed Aug 26 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc8.git1.1
+- Linux v4.2-rc8-7-gf5db4b31b315
+- Fixes x2apic panic (rhbz 1224764)
+- Don't build perf-read-vdsox32 either
+- Enable SCHEDSTATS and LATENCYTOP again (rhbz 1013225)
+
+* Mon Aug 24 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build in GPIO_OMAP to fix BeagleBone boot on mSD (changes in 4.2 upstream)
+
+* Mon Aug 24 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc8.git0.1
+- Linux v4.2-rc8
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable EFI_VARS (rhbz 1252137)
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git4.1
+- Linux v4.2-rc7-100-ge45fc85a2f37
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git3.1
+- Linux v4.2-rc7-71-g0bad90985d39
+
+* Fri Aug 21 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor config updates for ARMv7
+
+* Thu Aug 20 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect ext4 freezing behavior on non-journaled fs (rhbz 1250717)
+
+* Wed Aug 19 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git2.1
+- Linux v4.2-rc7-24-g1b647a166f07
+
+* Tue Aug 18 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git1.1
+- Linux v4.2-rc7-15-gbf6740281ed5
+
+* Mon Aug 17 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix iscsi issue (rhbz 1253789)
+
+* Mon Aug 17 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre Mon Aug 24
 - GNU Linux-libre 4.2-rc7-gnu.
 
 * Mon Aug 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.2.0-0.rc7.git0.1
@@ -3289,6 +3367,7 @@ fi
 - Linux v3.17-rc2-9-g68e370289c29
 - Reenable debugging options.
 
+<<<<<<< HEAD
 * Tue Aug 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
 - Minor tegra updates due to incorrect nvidia kernel config options
 
@@ -4230,6 +4309,8 @@ fi
 - Linux v3.13
 - Disable debugging options.
 - Use versioned perf man pages tarball
+=======
+>>>>>>> f2944e9
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
