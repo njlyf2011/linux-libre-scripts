@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -653,6 +653,9 @@ Patch514: drm-qxl-validate-monitors-config-modes.patch
 #rhbz 1257500
 Patch517: vmwgfx-Rework-device-initialization.patch
 Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
+
+#rhbz 1259231
+Patch519: make-flush-workqueue-available-to-non-GPL-modules.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2195,6 +2198,12 @@ fi
 #
 # 
 %changelog
+* Fri Sep 04 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.2.0-300
+- Bump linux-firmware require for amdgpu (rhbz 1259542)
+
+* Wed Sep 02 2015 Justin M. Forbes <jforbes@fedoraproject.org>
+- Make flush_workqueue() available again to non GPL modules (rhbz 1259231)
+
 * Mon Aug 31 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.2-gnu.
 
@@ -3367,7 +3376,6 @@ fi
 - Linux v3.17-rc2-9-g68e370289c29
 - Reenable debugging options.
 
-<<<<<<< HEAD
 * Tue Aug 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
 - Minor tegra updates due to incorrect nvidia kernel config options
 
@@ -4309,8 +4317,6 @@ fi
 - Linux v3.13
 - Disable debugging options.
 - Use versioned perf man pages tarball
-=======
->>>>>>> f2944e9
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
