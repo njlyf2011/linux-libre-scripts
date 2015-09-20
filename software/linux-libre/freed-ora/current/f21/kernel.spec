@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -679,15 +679,30 @@ Patch26253: pcmcia-fix-a-boot-time-warning-in-pcmcia-cs-code.patch
 #rhbz 1244511
 Patch507: HID-chicony-Add-support-for-Acer-Aspire-Switch-12.patch
 
-#rhbz 1251877 1251880 1250279 1248741
-# and probably more since ugh use after free bugs
-Patch26265: HID-hid-input-Fix-accessing-freed-memory-during-devi.patch
-
 #rhbz 1239050
 Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
 
 #rhbz 1253789
 Patch511: iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
+
+#rhbz 1250717
+Patch512: ext4-dont-manipulate-recovery-flag-when-freezing.patch
+
+#CVE-2015-6666 rhbz 1256746 1256753
+Patch513: Revert-sched-x86_64-Don-t-save-flags-on-context-swit.patch
+
+#rhbz 1256281
+Patch26266: mmc-sdhci-fix-dma-memory-leak-in-sdhci_pre_req.patch
+
+#rhbz 1257534
+Patch515: nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
+
+#rhbz 1212201
+Patch514: drm-qxl-validate-monitors-config-modes.patch
+
+#rhbz 1257500
+Patch517: vmwgfx-Rework-device-initialization.patch
+Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1516,14 +1531,30 @@ ApplyPatch pcmcia-fix-a-boot-time-warning-in-pcmcia-cs-code.patch
 #rhbz 1244511
 ApplyPatch HID-chicony-Add-support-for-Acer-Aspire-Switch-12.patch
 
-#rhbz 1251877 1251880 1250279 1248741
-ApplyPatch HID-hid-input-Fix-accessing-freed-memory-during-devi.patch
-
 #rhbz 1239050
 ApplyPatch ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
 
 #rhbz 1253789
 ApplyPatch iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
+
+#rhbz 1250717
+ApplyPatch ext4-dont-manipulate-recovery-flag-when-freezing.patch
+
+#CVE-2015-6666 rhbz 1256746 1256753
+ApplyPatch Revert-sched-x86_64-Don-t-save-flags-on-context-swit.patch
+
+#rhbz 1256281
+ApplyPatch mmc-sdhci-fix-dma-memory-leak-in-sdhci_pre_req.patch
+
+#rhbz 1257534
+ApplyPatch nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
+
+#rhbz 1212201
+ApplyPatch drm-qxl-validate-monitors-config-modes.patch
+
+#rhbz 1257500
+ApplyPatch vmwgfx-Rework-device-initialization.patch
+ApplyPatch drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -1863,7 +1894,7 @@ BuildKernel() {
 
     # Go back and find all of the various directories in the tree.  We use this
     # for the dir lists in kernel-core
-    find lib/modules/$KernelVer/kernel -type d | sort -n > module-dirs.list
+    find lib/modules/$KernelVer/kernel/* -type d | sort -n > module-dirs.list
 
     # Cleanup
     rm System.map
@@ -2125,10 +2156,10 @@ rm -rf $RPM_BUILD_ROOT
 ###
 
 %if %{with_tools}
-%post -n kernel-libre-tools
+%post -n kernel-libre-tools-libs
 /sbin/ldconfig
 
-%postun -n kernel-libre-tools
+%postun -n kernel-libre-tools-libs
 /sbin/ldconfig
 %endif
 
@@ -2397,6 +2428,38 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Mon Sep 14 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.1.7-gnu.
+
+* Mon Sep 14 2015 Laura Abbott <labbott@fedoraprojct.org> - 4.1.7-100
+- Linux v4.1.7
+
+* Thu Aug 27 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix vmware driver issues from Thomas Hellström (rhbz 1227193)
+- Add patch from Hans de Goede to fix nv46 based cards (rhbz 1257534)
+- Add patch from Jonathon Jongsma to fix modes in qxl (rhbz 1212201)
+
+* Wed Aug 26 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable CRYPTO_DEV_VMX_ENCRYPT on PPC for now to fix Power 8 boot (rhbz 1237089)
+
+* Tue Aug 25 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix x2apic refactoring breakage (rhbz 1224764)
+
+* Tue Aug 25 2015 Laura Abbott <labbott@fedoraproject.org>
+- Correct the sdhci DMA leak patch to actually compile (oops)
+
+* Tue Aug 25 2015 Laura Abbott <labbott@fedoraproject.org>
+- Fix DMA leak from sdhci (rhbz 1256281)
+
+* Tue Aug 25 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-6666 x86_64 NT flag handling DoS (rhbz 1256746 1256753)
+
+* Fri Aug 21 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable EFI_VARS (rhbz 1252137)
+
+* Thu Aug 20 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect ext4 freezing behavior on non-journaled fs (rhbz 1250717)
+
 * Tue Aug 18 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.1.6-gnu.
 
