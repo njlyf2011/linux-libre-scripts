@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -647,15 +647,21 @@ Patch512: ext4-dont-manipulate-recovery-flag-when-freezing.patch
 #rhbz 1257534
 Patch513: nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
 
-#rhbz 1212201
-Patch514: drm-qxl-validate-monitors-config-modes.patch
-
 #rhbz 1257500
 Patch517: vmwgfx-Rework-device-initialization.patch
 Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 #rhbz 1259231
 Patch519: make-flush-workqueue-available-to-non-GPL-modules.patch
+
+#rhbz 1237136
+Patch522: block-blkg_destroy_all-should-clear-q-root_blkg-and-.patch
+
+#CVE-2015-6937 rhbz 1263139 1263140
+Patch523: RDS-verify-the-underlying-transport-exists-before-cr.patch
+
+#rhbz 1263762
+Patch526: 0001-x86-cpu-cacheinfo-Fix-teardown-path.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1930,10 +1936,10 @@ rm -rf $RPM_BUILD_ROOT
 ###
 
 %if %{with_tools}
-%post -n kernel-libre-tools
+%post -n kernel-libre-tools-libs
 /sbin/ldconfig
 
-%postun -n kernel-libre-tools
+%postun -n kernel-libre-tools-libs
 /sbin/ldconfig
 %endif
 
@@ -2198,6 +2204,24 @@ fi
 #
 # 
 %changelog
+* Tue Sep 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.2.1-gnu.
+
+* Mon Sep 21 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.2.1-300
+- Linux v4.2.1
+
+* Thu Sep 17 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in 32-bit kernel on 64-bit AMD cpus (rhbz 1263762)
+
+* Tue Sep 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-6937 net: rds null pointer (rhbz 1263139 1263140)
+
+* Wed Sep  9 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7/aarch64 config updates
+
+* Tue Sep 08 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in blk layer (rhbz 1237136)
+
 * Fri Sep 04 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.2.0-300
 - Bump linux-firmware require for amdgpu (rhbz 1259542)
 
