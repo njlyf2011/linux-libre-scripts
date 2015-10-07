@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -552,6 +552,8 @@ Patch456: arm64-acpi-drop-expert-patch.patch
 
 Patch457: ARM-tegra-usb-no-reset.patch
 
+Patch458: regulator-axp20x-module-alias.patch
+
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
 
 Patch466: input-kill-stupid-messages.patch
@@ -641,18 +643,12 @@ Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
 #rhbz 1253789
 Patch510: iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
 
-#rhbz 1250717
-Patch512: ext4-dont-manipulate-recovery-flag-when-freezing.patch
-
 #rhbz 1257534
 Patch513: nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
 
 #rhbz 1257500
 Patch517: vmwgfx-Rework-device-initialization.patch
 Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
-
-#rhbz 1259231
-Patch519: make-flush-workqueue-available-to-non-GPL-modules.patch
 
 #rhbz 1237136
 Patch522: block-blkg_destroy_all-should-clear-q-root_blkg-and-.patch
@@ -662,6 +658,9 @@ Patch523: RDS-verify-the-underlying-transport-exists-before-cr.patch
 
 #rhbz 1263762
 Patch526: 0001-x86-cpu-cacheinfo-Fix-teardown-path.patch
+
+#CVE-2015-5257 rhbz 1265607 1265612
+Patch527: USB-whiteheat-fix-potential-null-deref-at-probe.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2204,6 +2203,18 @@ fi
 #
 # 
 %changelog
+* Wed Sep 30 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.2.2-gnu.
+
+* Tue Sep 29 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.2.2-300
+- Linux v4.2.2
+
+* Mon Sep 28 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream patch to fix a Allwinner regulator loading as a module
+
+* Thu Sep 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-5257 Null ptr deref in usb whiteheat driver (rhbz 1265607 1265612)
+
 * Tue Sep 22 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.2.1-gnu.
 
