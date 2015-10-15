@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.1 extra=
+kver=4.2 extra=
 
 set -e
 
@@ -620,11 +620,49 @@ clean_mk CONFIG_MOXA_INTELLIO drivers/tty/Makefile
 
 # gpu drm
 
+announce DRM_AMDGPU - "AMD GPU"
+reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_uvd.c
+clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_uvd.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_vce.c
+clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_vce.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/gfx_v8_0.c
+clean_blob drivers/gpu/drm/amd/amdgpu/gfx_v8_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/gmc_v8_0.c
+clean_blob drivers/gpu/drm/amd/amdgpu/gmc_v8_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/iceland_dpm.c
+clean_blob drivers/gpu/drm/amd/amdgpu/iceland_dpm.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
+clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v3_0.c
+clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v3_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/tonga_dpm.c
+clean_blob drivers/gpu/drm/amd/amdgpu/tonga_dpm.c
+clean_kconfig drivers/gpu/drm/Kconfig DRM_AMDGPU
+clean_mk CONFIG_DRM_AMDGPU drivers/gpu/drm/amd/amdgpu/Makefile
+
+announce DRM_AMDGPU_CIK - "Enable amdgpu support for CIK parts"
+reject_firmware drivers/gpu/drm/amd/amdgpu/ci_dpm.c
+clean_blob drivers/gpu/drm/amd/amdgpu/ci_dpm.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/cik_sdma.c
+clean_blob drivers/gpu/drm/amd/amdgpu/cik_sdma.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/gfx_v7_0.c
+clean_blob drivers/gpu/drm/amd/amdgpu/gfx_v7_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/gmc_v7_0.c
+clean_blob drivers/gpu/drm/amd/amdgpu/gmc_v7_0.c
+clean_kconfig drivers/gpu/drm/amd/amdgpu/Kconfig DRM_AMDGPU_CIK
+clean_mk CONFIG_DRM_AMDGPU_CIK drivers/gpu/drm/amd/amdgpu/Makefile
+
 announce DRM_AST - "AST server chips"
 reject_firmware drivers/gpu/drm/ast/ast_dp501.c
 clean_blob drivers/gpu/drm/ast/ast_dp501.c
 clean_kconfig drivers/gpu/drm/ast/Kconfig DRM_AST
 clean_mk CONFIG_DRM_AST drivers/gpu/drm/ast/Makefile
+
+announce DRM_I915 - "Intel 8xx/9xx/G3x/G4x/HD Graphics"
+reject_firmware drivers/gpu/drm/i915/intel_csr.c
+clean_blob drivers/gpu/drm/i915/intel_csr.c
+clean_kconfig drivers/gpu/drm/i915/Kconfig DRM_I915
+clean_mk CONFIG_DRM_I915 drivers/gpu/drm/i915/Makefile
 
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
 reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/gr/gf100.c
@@ -966,6 +1004,11 @@ reject_firmware drivers/media/dvb-frontends/cx24117.c
 clean_blob drivers/media/dvb-frontends/cx24117.c
 clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_CX24117
 clean_mk CONFIG_DVB_CX24117 drivers/media/dvb-frontends/Makefile
+
+announce DVB_CX24120 - "Conexant CX24120 based"
+clean_blob drivers/media/dvb-frontends/cx24120.c
+clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_CX24120
+clean_mk CONFIG_DVB_CX24120 drivers/media/dvb-frontends/Makefile
 
 announce DVB_DS3000 - "Montage Tehnology DS3000 based"
 undefault_firmware 'DS3000' \
@@ -1449,6 +1492,12 @@ clean_blob drivers/staging/ft1000/ft1000-usb/ft1000_usb.c
 clean_kconfig drivers/staging/ft1000/Kconfig FT1000_USB
 clean_mk CONFIG_FT1000_USB drivers/staging/ft1000/Makefile
 
+announce LIQUIDIO - "Cavium LiquidIO support"
+reject_firmware drivers/net/ethernet/cavium/liquidio/lio_main.c
+clean_blob drivers/net/ethernet/cavium/liquidio/lio_main.c
+clean_kconfig drivers/net/ethernet/cavium/Kconfig LIQUIDIO
+clean_mk CONFIG_LIQUIDIO drivers/net/ethernet/cavium/liquidio/Makefile
+
 announce MYRI_SBUS - "MyriCOM Gigabit Ethernet"
 drop_fw_file firmware/myricom/lanai.bin.ihex firmware/myricom/lanai.bin
 
@@ -1790,6 +1839,13 @@ clean_blob drivers/net/wireless/libertas_tf/if_usb.c
 clean_kconfig drivers/net/wireless/Kconfig LIBERTAS_THINFIRM_USB
 clean_mk CONFIG_LIBERTAS_THINFIRM_USB drivers/net/wireless/libertas_tf/Makefile
 
+announce MT7601U - "MediaTek MT7601U (USB) support"
+reject_firmware drivers/net/wireless/mediatek/mt7601u/mcu.c
+clean_blob drivers/net/wireless/mediatek/mt7601u/usb.c
+clean_blob drivers/net/wireless/mediatek/mt7601u/usb.h
+clean_kconfig drivers/net/wireless/mediatek/mt7601u/Kconfig MT7601U
+clean_mk CONFIG_MT7601U drivers/net/wireless/mediatek/mt7601u/Makefile
+
 announce MWIFIEX - "Marvell WiFi-Ex Driver"
 clean_blob drivers/net/wireless/mwifiex/README
 reject_firmware drivers/net/wireless/mwifiex/main.c
@@ -1892,7 +1948,8 @@ clean_mk CONFIG_PRISM2_USB drivers/staging/wlan-ng/Makefile
 announce P54_PCI - "Prism54 PCI support"
 reject_firmware drivers/net/wireless/p54/p54pci.c
 clean_blob drivers/net/wireless/p54/p54pci.c
-clean_sed 's,3826\.eeprom,DEBLOBBED,g' drivers/net/wireless/p54/Kconfig 'removed blob name'
+clean_sed 's,3826\.eeprom,DEBLOBBED,g' drivers/net/wireless/p54/Kconfig \
+    'removed blob name'
 clean_kconfig drivers/net/wireless/p54/Kconfig P54_PCI
 clean_mk CONFIG_P54_PCI drivers/net/wireless/p54/Makefile
 
@@ -2101,6 +2158,15 @@ clean_blob drivers/net/wireless/ath/wcn36xx/main.c
 clean_kconfig drivers/net/wireless/ath/wcn36xx/Kconfig WCN36XX
 clean_mk CONFIG_WCN36XX drivers/net/wireless/ath/wcn36xx/Makefile
 
+announce WILC1000 - "WILC1000 support (WiFi only)"
+reject_firmware drivers/staging/wilc1000/linux_wlan.c
+clean_blob drivers/staging/wilc1000/linux_wlan.c
+clean_blob drivers/staging/wilc1000/Makefile
+clean_sed 's,\\"/\*(DEBLOBBED)\*/\\","&",g' drivers/staging/wilc1000/Makefile \
+    "quote deblobbing markers"
+clean_kconfig drivers/staging/wilc1000/Kconfig WILC1000
+clean_mk CONFIG_WILC1000 drivers/staging/wilc1000/Makefile
+
 announce ZD1211RW - "ZyDAS ZD1211/ZD1211B USB-wireless support"
 reject_firmware drivers/net/wireless/zd1211rw/zd_usb.c
 clean_blob drivers/net/wireless/zd1211rw/zd_usb.c
@@ -2127,6 +2193,11 @@ clean_blob drivers/bluetooth/bcm203x.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIBCM203X
 clean_mk CONFIG_BT_HCIBCM203X drivers/bluetooth/Makefile
 
+announce BT_HCIUART_BCM - "Broadcom protocol support"
+reject_firmware drivers/bluetooth/hci_bcm.c
+clean_kconfig drivers/bluetooth/Kconfig BT_HCIUART_BCM
+clean_mk CONFIG_BT_HCIUART_BCM drivers/bluetooth/Makefile
+
 announce BT_HCIBFUSB - "HCI BlueFRITZ! USB driver"
 reject_firmware drivers/bluetooth/bfusb.c
 clean_blob drivers/bluetooth/bfusb.c
@@ -2151,6 +2222,12 @@ clean_blob drivers/bluetooth/btmrvl_sdio.c
 clean_blob Documentation/btmrvl.txt
 clean_kconfig drivers/bluetooth/Kconfig BT_MRVL_SDIO
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
+
+announce BT_RTL - "Bluetooth support for Realtek devices"
+reject_firmware drivers/bluetooth/btrtl.c
+clean_blob drivers/bluetooth/btrtl.c
+clean_kconfig drivers/bluetooth/Kconfig BT_RTL
+clean_mk CONFIG_BT_RTL drivers/bluetooth/Makefile
 
 announce TI_ST - "Texas Instruments shared transport line discipline"
 reject_firmware drivers/misc/ti-st/st_kim.c
@@ -2319,6 +2396,12 @@ reject_firmware drivers/input/touchscreen/atmel_mxt_ts.c
 clean_blob drivers/input/touchscreen/atmel_mxt_ts.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_ATMEL_MXT
 clean_mk CONFIG_TOUCHSCREEN_ATMEL_MXT drivers/input/touchscreen/Makefile
+
+announce TOUCHSCREEN_WDT87XX_I2C - "Weida HiTech I2C touchscreen"
+reject_firmware drivers/input/touchscreen/wdt87xx_i2c.c
+clean_blob drivers/input/touchscreen/wdt87xx_i2c.c
+clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_WDT87XX_I2C
+clean_mk CONFIG_TOUCHSCREEN_WDT87XX_I2C drivers/input/touchscreen/Makefile
 
 announce LIRC_ZILOG - "Zilog/Hauppauge IR Transmitter"
 reject_firmware drivers/staging/media/lirc/lirc_zilog.c
@@ -2642,6 +2725,7 @@ announce STE_MODEM_RPROC - "STE-Modem remoteproc support"
 maybe_reject_firmware drivers/remoteproc/remoteproc_core.c
 undefine_macro SPROC_MODEM_FIRMWARE "\"/*(DEBLOBBED)*/\"" \
   "disabled non-Free firmware" drivers/remoteproc/ste_modem_rproc.c
+clean_blob Documentation/devicetree/bindings/remoteproc/wkup_m3_rproc.txt
 clean_kconfig drivers/remoteproc/Kconfig STE_MODEM_RPROC
 clean_mk CONFIG_STE_MODEM_RPROC drivers/remoteproc/Makefile
 
