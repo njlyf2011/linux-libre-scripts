@@ -27,6 +27,6 @@ case `svn info $svnrepo/tags/$dist/$ver 2>&1` in
   ;;
 esac
 
-rpm --resign *.noarch/*.rpm
+until rpm --resign *.noarch/*.rpm; do :; done
 svn commit -m "$ver"
 svn cp -m "tag $ver" $svndir $svnrepo/tags/$dist/$ver
