@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        8
+Version:        9
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -183,6 +183,9 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Wed Oct 21 2015 Alexandre Oliva <lxoliva@fsfla.org> - 9-1
+- Switch from F- to f directories.
+
 * Sun Dec  7 2014 Alexandre Oliva <lxoliva@fsfla.org> - 8-1
 - Updated gnulinux.si mirror (was gnulinux.tv).
 - Dropped lsd.ic.unicamp.br mirror.
