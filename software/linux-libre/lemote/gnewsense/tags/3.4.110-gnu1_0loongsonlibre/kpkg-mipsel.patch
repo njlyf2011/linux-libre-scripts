@@ -1,0 +1,26 @@
+Index: debian/ruleset/arches/mipsel.mk
+===================================================================
+--- debian/ruleset/arches/mipsel.mk.orig	2010-04-04 23:04:25.000000000 -0300
++++ debian/ruleset/arches/mipsel.mk	2010-04-04 23:06:54.000000000 -0300
+@@ -65,14 +65,19 @@ endif
+ 
+ # Default value
+ ifeq (,$(kimage))
+-  kimage := vmlinux
++  kimage := vmlinuz
+ endif
+ ifeq (,$(kimagesrc))
+   kimagesrc := $(kimage)
+ endif
+ 
+ NEED_DIRECT_GZIP_IMAGE = NO
+-kimagedest = $(INT_IMAGE_DESTDIR)/vmlinux-$(KERNELRELEASE)
++kimagedest = $(INT_IMAGE_DESTDIR)/$(kimagesrc)-$(KERNELRELEASE)
++ifeq ($(kimage),vmlinuz)
++  int_install_vmlinux := YES
++  kelfimagesrc = vmlinux
++  kelfimagedest = $(INT_IMAGE_DESTDIR)/$(kelfimagesrc)-$(KERNELRELEASE)
++endif
+ 
+ ifneq ($(shell if [ $(VERSION)  -ge  2 ]  && [ $(PATCHLEVEL) -ge 5 ] &&    \
+                   [ $(SUBLEVEL) -ge 41 ]; then echo new;                   \
