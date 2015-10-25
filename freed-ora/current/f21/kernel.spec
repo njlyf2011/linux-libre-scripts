@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -688,9 +688,6 @@ Patch511: iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
 #CVE-2015-6666 rhbz 1256746 1256753
 Patch513: Revert-sched-x86_64-Don-t-save-flags-on-context-swit.patch
 
-#rhbz 1256281
-Patch26266: mmc-sdhci-fix-dma-memory-leak-in-sdhci_pre_req.patch
-
 #rhbz 1257534
 Patch515: nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
 
@@ -701,22 +698,19 @@ Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 #CVE-2015-6937 rhbz 1263139 1263140
 Patch523: RDS-verify-the-underlying-transport-exists-before-cr.patch
 
-#rhbz 1263762
-Patch526: 0001-x86-cpu-cacheinfo-Fix-teardown-path.patch
-
-#CVE-2015-5257 rhbz 1265607 1265612
-Patch527: USB-whiteheat-fix-potential-null-deref-at-probe.patch
-
-#CVE-2015-2925 rhbz 1209367 1209373
-Patch528: dcache-Handle-escaped-paths-in-prepend_path.patch
-Patch529: vfs-Test-for-and-handle-paths-that-are-unreachable-f.patch
-
-#CVE-2015-7613 rhbz 1268270 1268273
-Patch532: Initialize-msg-shm-IPC-objects-before-doing-ipc_addi.patch
-
 #rhbz 1266691
-Patch534: inet-fix-potential-deadlock-in-reqsk_queue_unlink.patch
 Patch535: inet-fix-race-in-reqsk_queue_unlink.patch
+
+#rhbz 1265978
+Patch536: si2168-Bounds-check-firmware.patch
+Patch537: si2157-Bounds-check-firmware.patch
+
+#CVE-2015-5156 rhbz 1243852 1266515
+Patch539: virtio-net-drop-NETIF_F_FRAGLIST.patch
+
+#rhbz 1272172
+Patch540: 0001-KEYS-Fix-crash-when-attempt-to-garbage-collect-an-un.patch
+Patch541: 0002-KEYS-Don-t-permit-request_key-to-construct-a-new-key.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1554,9 +1548,6 @@ ApplyPatch iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
 #CVE-2015-6666 rhbz 1256746 1256753
 ApplyPatch Revert-sched-x86_64-Don-t-save-flags-on-context-swit.patch
 
-#rhbz 1256281
-ApplyPatch mmc-sdhci-fix-dma-memory-leak-in-sdhci_pre_req.patch
-
 #rhbz 1257534
 ApplyPatch nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
 
@@ -1567,22 +1558,19 @@ ApplyPatch drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 #CVE-2015-6937 rhbz 1263139 1263140
 ApplyPatch RDS-verify-the-underlying-transport-exists-before-cr.patch
 
-#rhbz 1263762
-ApplyPatch 0001-x86-cpu-cacheinfo-Fix-teardown-path.patch
-
-#CVE-2015-5257 rhbz 1265607 1265612
-ApplyPatch USB-whiteheat-fix-potential-null-deref-at-probe.patch
-
-#CVE-2015-2925 rhbz 1209367 1209373
-ApplyPatch dcache-Handle-escaped-paths-in-prepend_path.patch
-ApplyPatch vfs-Test-for-and-handle-paths-that-are-unreachable-f.patch
-
-#CVE-2015-7613 rhbz 1268270 1268273
-ApplyPatch Initialize-msg-shm-IPC-objects-before-doing-ipc_addi.patch
-
 #rhbz 1266691
-ApplyPatch inet-fix-potential-deadlock-in-reqsk_queue_unlink.patch
 ApplyPatch inet-fix-race-in-reqsk_queue_unlink.patch
+
+#rhbz 1265978
+ApplyPatch si2168-Bounds-check-firmware.patch
+ApplyPatch si2157-Bounds-check-firmware.patch
+
+#CVE-2015-5156 rhbz 1243852 1266515
+ApplyPatch virtio-net-drop-NETIF_F_FRAGLIST.patch
+
+#rhbz 1272172
+ApplyPatch 0001-KEYS-Fix-crash-when-attempt-to-garbage-collect-an-un.patch
+ApplyPatch 0002-KEYS-Don-t-permit-request_key-to-construct-a-new-key.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2456,6 +2444,24 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Fri Oct 23 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.1.11-gnu.
+
+* Fri Oct 23 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.11
+- Linux v4.1.11
+
+* Mon Oct 19 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix crash in key garbage collector when using request_key (rhbz 1272172)
+
+* Wed Oct 07 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-5156 virtio-net: bug overflow with large fraglist (rhbz 1243852 1266515)
+
+* Mon Oct 05 2015 Laura Abbott <labbott@fedoraproject.org>
+- Make headphone work with with T550 + Dock (rhbz 1268037)
+
+* Mon Oct 05 2015 Laura Abbott <labbott@fedoraproject.org>
+- Stop stack smash for several DVB devices (rhbz 1265978)
+
 * Mon Oct  5 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.1.10-gnu.
 
