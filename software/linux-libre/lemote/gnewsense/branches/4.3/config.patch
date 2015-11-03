@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2015-11-02 03:58:13.826993713 -0500
-@@ -0,0 +1,5407 @@
++++ .config	2015-11-02 23:30:32.533414613 -0500
+@@ -0,0 +1,5408 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.3.0-rc7-gnu Kernel Configuration
++# Linux/mips 4.3.0-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -2197,6 +2197,7 @@ Index: .config
 +CONFIG_STE10XP=m
 +CONFIG_LSI_ET1011C_PHY=m
 +CONFIG_MICREL_PHY=m
++# CONFIG_DP83848_PHY is not set
 +CONFIG_DP83867_PHY=m
 +CONFIG_MICROCHIP_PHY=m
 +CONFIG_FIXED_PHY=m
