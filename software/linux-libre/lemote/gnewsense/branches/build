@@ -12,7 +12,7 @@ until $enough; do
   "") cat >&2 << EOF
 usage: branch [extra [gnu [rel]]]
  as in 2.6.31    .10    2 0
- for   2.6.31    .10-gnu2_0loongsonlibre
+ for   2.6.31    .10-gnu2_0freeloong
 
 args may be preceded by --prep, --force, and/or --release
 EOF
@@ -25,7 +25,7 @@ done
 branch=$1
 extra=$2
 libre=$3
-rev=${4-0}loongsonlibre
+rev=${4-0}freeloong
 
 case $extra in
 "" | -rc*) extra0=.0$extra;;
