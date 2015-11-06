@@ -46,7 +46,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 2
+%define base_sublevel 3
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -56,9 +56,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.2%{?stablegnux}
-%define rcrevlibre  -4.1%{?rcrevgnux}
-#define gitrevlibre -4.2%{?gitrevgnux}
+#define stablelibre -4.3%{?stablegnux}
+#define rcrevlibre  -4.3%{?rcrevgnux}
+#define gitrevlibre -4.3%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -429,7 +429,7 @@ BuildRequires: rpm-build, elfutils
 %endif
 
 %if %{signmodules}
-BuildRequires: openssl
+BuildRequires: openssl openssl-devel
 BuildRequires: pesign >= 0.10-4
 %endif
 
@@ -552,6 +552,8 @@ Patch456: arm64-acpi-drop-expert-patch.patch
 
 Patch457: ARM-tegra-usb-no-reset.patch
 
+Patch458: ARM-dts-Add-am335x-bonegreen.patch
+
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
 
 Patch466: input-kill-stupid-messages.patch
@@ -559,8 +561,6 @@ Patch466: input-kill-stupid-messages.patch
 Patch467: die-floppy-die.patch
 
 Patch468: no-pcspkr-modalias.patch
-
-Patch469: input-silence-i8042-noise.patch
 
 Patch470: silence-fbcon-logo.patch
 
@@ -630,31 +630,16 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 Patch503: drm-i915-turn-off-wc-mmaps.patch
 
-#rhbz 1244511
-Patch507: HID-chicony-Add-support-for-Acer-Aspire-Switch-12.patch
-
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
 #rhbz 1239050
 Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
 
-#rhbz 1253789
-Patch510: iSCSI-let-session-recovery_tmo-sysfs-writes-persist.patch
+#rhbz 1275490
+Patch510: 0001-iwlwifi-Add-new-PCI-IDs-for-the-8260-series.patch
 
-#rhbz 1250717
-Patch512: ext4-dont-manipulate-recovery-flag-when-freezing.patch
-
-#rhbz 1257534
-Patch513: nv46-Change-mc-subdev-oclass-from-nv44-to-nv4c.patch
-
-#rhbz 1212201
-Patch514: drm-qxl-validate-monitors-config-modes.patch
-
-#rhbz 1257500
-Patch517: vmwgfx-Rework-device-initialization.patch
-Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
-
-Patch904: kdbus.patch
+#CVE-2015-7990 rhbz 1276437 1276438
+Patch511: RDS-fix-race-condition-when-sending-a-message-on-unb.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1443,10 +1428,8 @@ BuildKernel() {
     cp configs/$Config .config
 
     %if %{signmodules}
-    cp %{SOURCE11} .
+    cp %{SOURCE11} certs/.
     %endif
-
-    chmod +x scripts/sign-file
 
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
@@ -1689,8 +1672,8 @@ BuildKernel() {
 
 %if %{signmodules}
     # Save the signing keys so we can sign the modules in __modsign_install_post
-    cp signing_key.priv signing_key.priv.sign${Flav}
-    cp signing_key.x509 signing_key.x509.sign${Flav}
+    cp certs/signing_key.pem certs/signing_key.pem.sign${Flav}
+    cp certs/signing_key.x509 certs/signing_key.x509.sign${Flav}
 %endif
 
     # Move the devel headers out of the root file system
@@ -1785,16 +1768,16 @@ popd
 %define __modsign_install_post \
   if [ "%{signmodules}" -eq "1" ]; then \
     if [ "%{with_pae}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign+%{pae} signing_key.x509.sign+%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}/ \
+      %{modsign_cmd} certs/signing_key.pem.sign+%{pae} certs/signing_key.x509.sign+%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}/ \
     fi \
     if [ "%{with_debug}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign+debug signing_key.x509.sign+debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+debug/ \
+      %{modsign_cmd} certs/signing_key.pem.sign+debug certs/signing_key.x509.sign+debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+debug/ \
     fi \
     if [ "%{with_pae_debug}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign+%{pae}debug signing_key.x509.sign+%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}debug/ \
+      %{modsign_cmd} certs/signing_key.pem.sign+%{pae}debug certs/signing_key.x509.sign+%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}debug/ \
     fi \
     if [ "%{with_up}" -ne "0" ]; then \
-      %{modsign_cmd} signing_key.priv.sign signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
+      %{modsign_cmd} certs/signing_key.pem.sign certs/signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
     fi \
   fi \
   if [ "%{zipmodules}" -eq "1" ]; then \
@@ -1929,10 +1912,10 @@ rm -rf $RPM_BUILD_ROOT
 ###
 
 %if %{with_tools}
-%post -n kernel-libre-tools
+%post -n kernel-libre-tools-libs
 /sbin/ldconfig
 
-%postun -n kernel-libre-tools
+%postun -n kernel-libre-tools-libs
 /sbin/ldconfig
 %endif
 
@@ -2066,6 +2049,7 @@ fi
 %{_libdir}/traceevent/plugins/*
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
+%{_datadir}/perf-core/*
 %{_mandir}/man[1-8]/perf*
 %{_sysconfdir}/bash_completion.d/perf
 %doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
@@ -2197,6 +2181,215 @@ fi
 #
 # 
 %changelog
+* Mon Nov  2 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.3-gnu.
+
+* Mon Nov 02 2015 Laura Abbott <labbott@redhat.com> - 4.2.0-1
+- Linux v4.3
+- Disable debugging options.
+
+* Fri Oct 30 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Drop kdbus
+
+* Thu Oct 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7099 RDS: race condition on unbound socket null deref (rhbz 1276437 1276438)
+
+* Thu Oct 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Move iscsi_tcp and related modules to kernel-core (rhbz 1249424)
+
+* Wed Oct 28 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc7.git2.1
+- Linux v4.3-rc7-32-g8a28d67
+
+* Wed Oct 28 2015 Laura Abbott <labbott@redhat.com>
+- Disable CONFIG_DMADEVICES_VDEBUG
+
+* Wed Oct 28 2015 Laura Abbott <labbott@redhat.com>
+- Add new PCI ids for wireless, including Lenovo Yoga
+
+* Tue Oct 27 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc7.git1.1
+- Linux v4.3-rc7-19-g858e904
+- Reenable debugging options.
+
+* Mon Oct 26 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc7.git0.1
+- Linux v4.3-rc7
+- Disable debugging options.
+
+* Fri Oct 23 2015 Laura Abbott <labbott@redhat.com>
+- Enable CONFIG_FS_DAX (rhbz 1274844)
+
+* Fri Oct 23 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc6.git3.1
+- Linux v4.3-rc6-232-g0386729
+
+* Thu Oct 22 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc6.git2.1
+- Linux v4.3-rc6-117-g8a70dd2
+
+* Tue Oct 20 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc6.git1.1
+- Linux v4.3-rc6-108-gce1fad2
+- Reenable debugging options.
+
+* Mon Oct 19 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc6.git0.1
+- Linux v4.3-rc6
+- Disable debugging options.
+
+* Mon Oct 19 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix crash in key garbage collector when using request_key (rhbz 1272172)
+
+* Fri Oct 16 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc5.git2.1
+- Linux v4.3-rc5-65-g69984b6
+
+* Wed Oct 14 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc5.git1.1
+- Linux v4.3-rc5-37-g5b5f145
+- Reenable debugging options.
+
+* Mon Oct 12 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc5.git0.1
+- Linux v4.3-rc5
+- Disable debugging options.
+
+* Thu Oct 08 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc4.git3.1
+- Linux v4.3-rc4-61-gc6fa8e6
+
+* Wed Oct 07 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc4.git2.1
+- Linux v4.3-rc4-46-g8ace60f
+
+* Wed Oct 07 2015 Laura Abbott <labbott@fedoraproject.org>
+- Disable hibernation for powerpc (rhbz 1267395)
+
+* Wed Oct 07 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Increase the default number of runtime UARTS (rhbz 1264383)
+- Enable X86_NUMACHIP
+
+* Tue Oct 06 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc4.git1.1
+- Linux v4.3-rc4-15-gf670268
+- Reenable debugging options.
+
+* Mon Oct 05 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc4.git0.1
+- Linux v4.3-rc4
+- Disable debugging options.
+
+* Mon Oct 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patches to fix qxl locking issues (rhbz 1238803 1249850)
+
+* Sun Oct  4 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add support for BeagleBone Green
+
+* Fri Oct 02 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc3.git4.1
+- Linux v4.3-rc3-145-g36f8daf
+
+* Thu Oct 01 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc3.git3.1
+- Linux v4.3-rc3-65-gf97b870
+
+* Wed Sep 30 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc3.git2.2
+- Reenable debugging options.
+
+* Tue Sep 29 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc3.git2.1
+- Linux v4.3-rc3-42-g3225031
+
+* Tue Sep 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Revert upstream guesture disabling patch on synaptics (rhbz 1262434)
+
+* Mon Sep 28 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc3.git1.1
+- Linux v4.3-rc3-40-g097f70b
+- Disable debugging options.
+
+* Mon Sep 28 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc3.git0.1
+- Linux v4.3-rc3
+
+* Mon Sep 28 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7 updates
+
+* Thu Sep 24 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-5257 Null ptr deref in usb whiteheat driver (rhbz 1265607 1265612)
+
+* Tue Sep 22 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc2.git1.1
+- Linux v4.3-rc2-19-gbcee19f
+- Reenable debugging options.
+
+* Mon Sep 21 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc2.git0.2
+- Linux v4.3-rc2
+- Disable debugging options.
+
+* Fri Sep 18 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc1.git4.1
+- Linux v4.3-rc1-131-ga7d5c18
+
+* Fri Sep 18 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in 32-bit kernel on 64-bit AMD cpus (rhbz 1263762)
+
+* Thu Sep 17 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc1.git3.1
+- Linux v4.3-rc1-47-g7271484
+
+* Wed Sep 16 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-0.rc1.git2.1
+- Linux v4.3-rc1-21-g865ca08
+
+* Tue Sep 15 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc1.git1.1
+- Linux v4.3-rc1-19-gd25ed277fbd4
+
+* Mon Sep 14 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Reenable debugging options.
+
+* Mon Sep 14 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc1.git0.1
+- Linux v4.3-rc1
+- Disable debugging options.
+
+* Mon Sep 14 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARMv7 update for AllWinner devices
+
+* Fri Sep 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git14.1
+- Linux v4.2-11169-g64d1def7d338
+
+* Fri Sep 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git13.1
+- Linux v4.2-11142-gb0a1ea51bda4
+
+* Fri Sep 11 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git12.1
+- Linux v4.2-10963-g519f526d391b
+
+* Wed Sep 09 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git11.1
+- Linux v4.2-10774-g26d2177e977c
+
+* Wed Sep 09 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git10.1
+- Linux v4.2-10637-ga794b4f32921
+- Rework secure boot patchset
+
+* Tue Sep  8 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Config updates for ARMv7/aarch64
+
+* Tue Sep 08 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git9.1
+- Linux v4.2-9861-g4e4adb2f4628
+
+* Tue Sep 08 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in blk layer (rhbz 1237136)
+
+* Sun Sep 06 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git8.1
+- Linux v4.2-9700-g7d9071a09502
+
+* Fri Sep 04 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix alternatives oops from Thomas Gleixner (rhbz 1258223)
+
+* Fri Sep 04 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git7.1
+- Linux v4.2-6663-g807249d3ada1
+
+* Fri Sep 04 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Bump Requiers on linux-firmware for new amdgpu firmware requirements
+
+* Thu Sep 03 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git6.1
+- Linux v4.2-6105-gdd5cdb48edfd
+- Networking merge
+
+* Thu Sep 03 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git5.1
+- Linux v4.2-4507-g1e1a4e8f4391
+
+* Wed Sep 02 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git4.1
+- Linux v4.2-4282-gae982073095a
+
+* Wed Sep 02 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git3.1
+- Linux v4.2-3986-g73b6fa8e49c2
+
+* Tue Sep 01 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git2.1
+- Linux v4.2-2890-g361f7d175734
+
+* Tue Sep 01 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.0-0.rc0.git1.1
+- Linux v4.2-2744-g65a99597f044
+- Reenable debugging options.
+
 * Mon Aug 31 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.2-gnu.
 
@@ -3370,950 +3563,6 @@ fi
 - Linux v3.17-rc2-9-g68e370289c29
 - Reenable debugging options.
 
-<<<<<<< HEAD
-* Tue Aug 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Minor tegra updates due to incorrect nvidia kernel config options
-
-* Tue Aug 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc2.git0.1
-- Linux v3.17-rc2
-- Fixup ARM MFD options after I2C=y change
-- Disable debugging options.
-
-* Tue Aug 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Minor generic ARMv7 updates
-- Build tegra on both LPAE and general ARMv7 kernels (thank srwarren RHBZ 1110963)
-- Set CMA to 64mb on LPAE kernel (RHBZ 1127000)
-
-* Mon Aug 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc1.git4.1
-- Linux v3.17-rc1-231-g7be141d05549
-- Add patch to fix NFS oops on /proc removal (rhbz 1132368)
-
-* Fri Aug 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Drop userns revert patch (rhbz 917708)
-
-* Fri Aug 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc1.git3.1
-- Linux v3.17-rc1-99-g5317821c0853
-
-* Thu Aug 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc1.git2.1
-- Linux v3.17-rc1-51-g372b1dbdd1fb
-
-* Wed Aug 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc1.git1.1
-- Linux v3.17-rc1-22-g480cadc2b7e0
-- Reenable debugging options.
-
-* Mon Aug 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc1.git0.1
-- Linux v3.17-rc1
-- Disable debugging options.
-
-* Sat Aug 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc0.git7.1
-- Linux v3.16-11452-g88ec63d6f85c
-
-* Fri Aug 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc0.git6.1
-- Linux v3.16-11383-gc9d26423e56c
-
-* Thu Aug 14 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64: resynch with git head (no functional change)
-
-* Thu Aug 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc0.git5.1
-- Linux v3.16-10959-gf0094b28f303
-
-* Wed Aug 13 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- 3.17 ARMv7 updates
-- Cleanup some old removed options
-- Disable legacy USB OTG (using new configfs equivilents)
-
-* Tue Aug 12 2014 Kyle McMartin <kyle@fedoraproject.org> 3.17.0-0.rc0.git4.2
-- tegra-powergate-header-move.patch: deal with armv7hl breakage
-- nouveau_platform-fix.patch: handle nouveau_dev() removal
-
-* Tue Aug 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc0.git4.1
-- Add updated crash driver from Dave Anderson and re-enable
-
-* Tue Aug 12 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64.patch: fix up merge conflict and re-enable
-
-* Tue Aug 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Linux v3.16-10473-gc8d6637d0497
-
-* Sat Aug 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc0.git3.1
-- Linux v3.16-10013-gc309bfa9b481
-- Temporarily don't apply crash driver patch
-
-* Thu Aug 07 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.17.0-0.rc0.git2.1
-- Linux v3.16-7503-g33caee39925b
-
-* Tue Aug 05 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64.patch: fix up merge conflict and re-enable
-
-* Tue Aug 05 2014 Josh Boyer <jwboyer@gmail.com> - 3.17.0-0.rc0.git1.1
-- Linux v3.16-3652-gf19107379dbc
-- Reenable debugging options.
-
-* Tue Aug  5 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Aug  7
-- GNU Linux-libre 3.16-gnu.
-
-* Mon Aug 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-1
-- Linux v3.16
-- Disable debugging options.
-
-* Sun Aug  3 2014 Peter Robinson <pbrobinson@redhat.com>
-- Minor config updates for Armada and Sunxi ARM devices
-
-* Fri Aug 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git4.1
-- Linux v3.16-rc7-84-g6f0928036bcb
-
-* Thu Jul 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git3.1
-- Linux v3.16-rc7-76-g3a1122d26c62
-
-* Wed Jul 30 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64.patch: fix up merge conflict and re-enable
-
-* Wed Jul 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git2.1
-- Linux v3.16-rc7-64-g26bcd8b72563
-- Temporarily disable aarch64patches
-
-* Wed Jul 30 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Apply different patch from Milan Broz to fix LUKS partitions (rhbz 1115120)
-
-* Tue Jul 29 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64.patch: update from upstream git.
-
-* Tue Jul 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git1.1
-- Linux v3.16-rc7-7-g31dab719fa50
-- Reenable debugging options.
-
-* Mon Jul 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Make sure acpi brightness_switch is disabled (like forever in Fedora)
-- CVE-2014-5077 sctp: fix NULL ptr dereference (rhbz 1122982 1123696)
-
-* Mon Jul 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc7.git0.1
-- Linux v3.16-rc7
-- Disable debugging options.
-
-* Mon Jul 28 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Add patch to fix loading of tegra drm using device tree
-
-* Sat Jul 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc6.git3.1
-- Linux v3.16-rc6-139-g9c5502189fa0
-
-* Fri Jul 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc6.git2.1
-- Linux v3.16-rc6-118-g82e13c71bc65
-- Fix selinux sock_graft hook for AF_ALG address family (rhbz 1115120)
-
-* Thu Jul 24 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64.patch: update from upstream git.
-- arm64: update config-arm64 to include PCI support.
-
-* Thu Jul 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2014-5045 vfs: refcount issues during lazy umount on symlink (rhbz 1122471 1122482)
-- Fix regression in sched_setparam (rhbz 1117942)
-
-* Tue Jul 22 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.0-0.rc6.git1.1
-- Linux v3.16-rc6-75-g15ba223
-- Reenable debugging options.
-
-* Mon Jul 21 2014 Justin M. Forbes <jforbes@fedoraproject.org> - 3.16.0-0.rc6.git0.1
-- Linux v3.16-rc6
-- Disable debugging options.
-
-* Mon Jul 21 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Minor ARMv7 config update
-
-* Thu Jul 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc5.git2.1
-- Linux v3.16-rc5-143-gb6603fe574af
-
-* Wed Jul 16 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Enable hermes prism driver (rhbz 1120393)
-
-* Wed Jul 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc5.git1.1
-- Linux v3.16-rc5-130-g2da294474093
-- Reenable debugging options.
-
-* Mon Jul 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc5.git0.1
-- Linux v3.16-rc5
-- Fix i915 regression with external monitors (rhbz 1117008)
-- Disable debugging options.
-
-* Sat Jul 12 2014 Tom Callaway <spot@fedoraproject.org>
-- Fix license handling (I hope)
-
-* Fri Jul 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git3.1
-- Linux v3.16-rc4-120-g85d90faed31e
-
-* Thu Jul 10 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Rebase Utilute and BeagleBone patches
-- Minor ARM updates
-- Enable ISL12057 RTC for ARM (NetGear ReadyNAS)
-
-* Wed Jul 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git2.1
-- Linux v3.16-rc4-28-g163e40743f73
-- Fix bogus vdso .build-id links (rhbz 1117563)
-
-* Tue Jul 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git1.1
-- Linux v3.16-rc4-20-g448bfad8a185
-- Reenable debugging options.
-
-* Sun Jul 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc4.git0.1
-- Linux v3.16-rc4
-- Disable debugging options.
-
-* Fri Jul 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git3.1
-- Linux v3.16-rc3-149-g034a0f6b7db7
-
-* Wed Jul 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git2.1
-- Linux v3.16-rc3-62-gd92a333a65a1
-- Add patch to fix virt_blk oops (rhbz 1113805)
-
-* Wed Jul 02 2014 Kyle McMartin <kyle@fedoraproject.org>
-- arm64: build-in ahci, ethernet, and rtc drivers.
-
-* Tue Jul 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git1.1
-- Linux v3.16-rc3-6-g16874b2cb867
-- Reenable debugging options.
-
-* Tue Jul  1 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Minor ARMv7 cleanup
-
-* Mon Jun 30 2014 Kyle McMartin <kyle@fedoraproject.org>
-- kernel-arm64.patch, update from git.
-
-* Mon Jun 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc3.git0.1.1
-- Linux v3.16-rc3
-- Enable USB rtsx drivers (rhbz 1114229)
-- Disable debugging options.
-
-* Fri Jun 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git4.1
-- Linux v3.16-rc2-222-g3493860c76eb
-
-* Fri Jun 27 2014 Hans de Goede <hdegoede@redhat.com>
-- Add patch to fix wifi on lenove yoga 2 series (rhbz#1021036)
-
-* Thu Jun 26 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Enable rtl8192ee (rhbz 1113422)
-
-* Thu Jun 26 2014 Kyle McMartin <kyle@fedoraproject.org> - 3.16.0-0.rc2.git3.2
-- Add kernel-arm64.patch, which contains AArch64 support destined for upstream.
-  ssh://git.fedorahosted.org/git/kernel-arm64.git is Mark Salter's source tree
-  integrating these patches on the devel branch. I've added a twiddle to the
-  top of the spec file to disable the aarch64 patchset, and also set aarch64
-  to nobuildarches, so we still get kernel-headers, but no one accidentally
-  installs a non-booting kernel if the patchset causes rejects during a
-  rebase.
-
-* Thu Jun 26 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Trimmed changelog, see fedpkg git for earlier history.
-
-* Thu Jun 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git3.1
-- Linux v3.16-rc2-211-gd7933ab727ed
-
-* Wed Jun 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git2.1
-- Linux v3.16-rc2-69-gd91d66e88ea9
-
-* Wed Jun 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Revert commit that breaks Wacom Intuos4 from Benjamin Tissoires
-
-* Tue Jun 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git1.1
-- Linux v3.16-rc2-35-g8b8f5d971584
-- Reenable debugging options.
-
-* Mon Jun 23 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2014-4508 BUG in x86_32 syscall auditing (rhbz 1111590 1112073)
-
-* Mon Jun 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc2.git0.1
-- Linux v3.16-rc2
-- Disable debugging options.
-
-* Sun Jun 22 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Enable Exynos now it's finally multi platform capable
-- Minor TI Keystone update
-- ARM config cleanups
-
-* Fri Jun 20 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Bring in intel_pstate regression fixes for BayTrail (rhbz 1111920)
-
-* Fri Jun 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git4.1
-- Linux v3.16-rc1-215-g3c8fb5044583
-
-* Thu Jun 19 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git3.1
-- Linux v3.16-rc1-112-g894e552cfaa3
-
-* Thu Jun 19 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Add missing bits for NVIDIA Jetson TK1 (thanks Stephen Warren)
-
-* Wed Jun 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git2.1
-- Linux v3.16-rc1-17-ge99cfa2d0634
-
-* Tue Jun 17 2014 Dennis Gilmore <dennis@ausil.us>
-- when ipuv3 moved out of staging the config was renamed
-- adjust the config to suit
-
-* Tue Jun 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git1.1
-- Linux v3.16-rc1-2-gebe06187bf2a
-- Reenable debugging options.
-
-* Mon Jun 16 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Enable Qualcomm SoCs on ARM
-
-* Mon Jun 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc1.git0.1
-- Linux v3.16-rc1
-- Disable debugging options.
-
-* Mon Jun 16 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- ARM config updates for 3.16
-
-* Sat Jun 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git11.1
-- Linux v3.15-9930-g0e04c641b199
-- Enable CONFIG_RCU_NOCB_CPU(_ALL) (rbhz 1109113)
-
-* Fri Jun 13 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Add patch to fix build failure on aarch64
-
-* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git10.1
-- Linux v3.15-9837-g682b7c1c8ea8
-
-* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git9.1
-- Linux v3.15-8981-g5c02c392cd23
-
-* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git8.1
-- Linux v3.15-8835-g859862ddd2b6
-
-* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git7.1
-- Linux v3.15-8556-gdfb945473ae8
-
-* Fri Jun 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git6.1
-- Linux v3.15-8351-g9ee4d7a65383
-
-* Thu Jun 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git5.1
-- Linux v3.15-8163-g5b174fd6472b
-
-* Thu Jun 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git4.1
-- Linux v3.15-7926-gd53b47c08d8f
-
-* Thu Jun 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git3.1
-- Linux v3.15-7378-g14208b0ec569
-
-* Wed Jun 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git2.1
-- Linux v3.15-7283-gda85d191f58a
-
-* Tue Jun 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.16.0-0.rc0.git1.1
-- Linux v3.15-7218-g3f17ea6dea8b
-- Reenable debugging options.
-
-* Tue Jun 10 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 3.15-gnu.
-
-* Mon Jun 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-1
-- Linux v3.15
-- Disable debugging options.
-
-* Mon Jun  9 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Enable USB_EHCI_HCD_ORION to fix USB on Marvell (fix boot for some devices)
-
-* Fri Jun 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git4.1
-- CVE-2014-3940 missing check during hugepage migration (rhbz 1104097 1105042)
-- Linux v3.15-rc8-81-g951e273060d1
-
-* Thu Jun 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git3.1
-- Linux v3.15-rc8-72-g54539cd217d6
-
-* Wed Jun 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git2.1
-- Linux v3.15-rc8-58-gd2cfd3105094
-
-* Tue Jun 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Add filter-ppc64p7.sh because ppc64p7 is an entirely separate RPM arch
-
-* Tue Jun 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git1.2
-- Fixes from Hans de Goede for backlight and platform drivers on various
-  machines.  (rhbz 1025690 1012674 1093171 1097436 861573)
-
-* Tue Jun 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git1.1
-- Add patch to install libtraceevent plugins from Kyle McMartin
-- Linux v3.15-rc8-53-gcae61ba37b4c
-- Reenable debugging options.
-
-* Mon Jun  2 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Minor ARM MMC config updates
-
-* Mon Jun  2 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jun  8
-- GNU Linux-libre 3.15-gnu-rc8.
-- Reenable firmware builds.  Do not create noarch meta-package.
-
-* Mon Jun 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc8.git0.1
-- Linux v3.15-rc8
-- Disable debugging options.
-
-* Sat May 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git4.2
-- Add patch to fix dentry lockdep splat
-
-* Sat May 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git4.1
-- Linux v3.15-rc7-102-g1487385edb55
-
-* Fri May 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git3.1
-- Linux v3.15-rc7-79-gfe45736f4134
-- Disable CARL9170 on ppc64le
-
-* Thu May 29 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2014-3917 DoS with syscall auditing (rhbz 1102571 1102715)
-
-* Wed May 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git2.1
-- Linux v3.15-rc7-53-g4efdedca9326
-
-* Wed May 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git1.1
-- Linux v3.15-rc7-40-gcd79bde29f00
-- Reenable debugging options.
-
-* Mon May 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc7.git0.1
-- Linux v3.15-rc7
-- Disable debugging options.
-
-* Sun May 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc6.git1.1
-- Linux v3.15-rc6-213-gdb1003f23189
-- Reenable debugging options.
-
-* Thu May 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Enable CONFIG_R8723AU (rhbz 1100162)
-
-* Thu May 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc6.git0.1
-- Linux v3.15-rc6
-- Disable debugging options.
-
-* Wed May 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git4.1
-- Linux v3.15-rc5-270-gfba69f042ad9
-
-* Tue May 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git3.1
-- Linux v3.15-rc5-157-g60b5f90d0fac
-
-* Mon May 19 2014 Dan Horák <dan@danny.cz>
-- kernel metapackage shouldn't depend on subpackages we don't build
-
-* Thu May 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git2.9
-- Fix build fail on s390x
-
-* Wed May 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git2.8
-- Enable autoprov for kernel module Provides (rhbz 1058331)
-- Enable xz compressed modules (from Kyle McMartin)
-
-* Tue May 13 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Don't try and merge local config changes on arches we aren't building
-
-* Tue May 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git2.1
-- Linux v3.15-rc5-77-g14186fea0cb0
-
-* Mon May 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git1.1
-- Linux v3.15-rc5-9-g7e338c9991ec
-- Reenable debugging options.
-
-* Sat May 10 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Enable Marvell Dove support
-- Minor ARM cleanups
-- Disable some unneed drivers on ARM
-
-* Sat May 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc5.git0.1
-- Linux v3.15-rc5
-- Disable debugging options.
-
-* Fri May 09 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Move isofs to kernel-core
-
-* Fri May 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git4.1
-- Linux v3.15-rc4-320-gafcf0a2d9289
-
-* Thu May 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git3.1
-- Linux v3.15-rc4-298-g9f1eb57dc706
-
-* Wed May 07 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git2.1
-- Linux v3.15-rc4-260-g38583f095c5a
-
-* Tue May 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git1.1
-- Linux v3.15-rc4-202-g30321c7b658a
-- Reenable debugging options.
-
-* Mon May  5 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Fix some USB on ARM LPAE kernels
-
-* Mon May 05 2014 Kyle McMartin <kyle@fedoraproject.org>
-- Install arch/arm/include/asm/xen headers on aarch64, since the headers in
-  arch/arm64/include/asm/xen reference them.
-
-* Mon May 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc4.git0.1
-- Linux v3.15-rc4
-- Disable debugging options.
-
-* Mon May  5 2014 Hans de Goede <hdegoede@redhat.com>
-- Add use_native_brightness quirk for the ThinkPad T530 (rhbz 1089545)
-
-* Sun May  4 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- General minor ARM cleanups
-
-* Sun May 04 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Fix k-m-e requires on k-m-uname-r provides
-- ONE MORE TIME WITH FEELING
-
-* Sat May  3 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Disable OMAP-3 boards (use DT) and some minor omap3 config updates
-
-* Sat May 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git5.1
-- Linux v3.15-rc3-159-g6c6ca9c2a5b9
-
-* Sat May 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Add patch to fix HID rmi driver from Benjamin Tissoires (rhbz 1090161)
-
-* Sat May 03 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Fix up Provides on kernel-module variant packages
-- Enable CONFIG_USB_UAS unconditionally per Hans
-
-* Fri May 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git4.1
-- Linux v3.15-rc3-121-gb7270cce7db7
-
-* Thu May 01 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Rename kernel-drivers to kernel-modules
-- Add kernel metapackages for all flavors, not just debug
-
-* Thu May  1 2014 Hans de Goede <hdegoede@redhat.com>
-- Add use_native_backlight quirk for 4 laptops (rhbz 983342 1093120)
-
-* Wed Apr 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git3.1
-- Linux v3.15-rc3-82-g8aa9e85adac6
-
-* Wed Apr 30 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Add kernel-debug metapackage when debugbuildsenabled is set
-
-* Wed Apr 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git2.1
-- Linux v3.15-rc3-62-ged8c37e158cb
-- Drop noarch from ExclusiveArch.  Nothing is built as noarch
-
-* Tue Apr 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git1.10
-- Make depmod call fatal if it errors or warns
-
-* Tue Apr 29 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Introduce kernel-core/kernel-drivers split for F21 Feature work
-
-* Tue Apr 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git1.1
-- Linux v3.15-rc3-41-g2aafe1a4d451
-- Reenable debugging options.
-
-* Mon Apr 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc3.git0.1
-- Linux v3.15-rc3
-- Disable debugging options.
-
-* Fri Apr 25 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Drop obsolete ARM LPAE patches
-
-* Fri Apr 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Add patch from Will Woods to fix fanotify EOVERFLOW issue (rhbz 696821)
-- Fix ACPI issue preventing boot on AMI firmware (rhbz 1090746)
-
-* Fri Apr 25 2014 Hans de Goede <hdegoede@redhat.com>
-- Add synaptics min-max quirk for ThinkPad Edge E431 (rhbz#1089689)
-
-* Fri Apr 25 2014 Hans de Goede <hdegoede@redhat.com>
-- Add a patch to add support for the mmc controller on sunxi ARM SoCs
-
-* Thu Apr 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git3.1
-- Linux v3.15-rc2-107-g76429f1dedbc
-
-* Wed Apr 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git2.1
-- Linux v3.15-rc2-69-g1aae31c8306e
-
-* Tue Apr 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git1.1
-- Linux v3.15-rc2-42-g4d0fa8a0f012
-- Reenable debugging options.
-
-* Tue Apr 22 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Add patch to fix Synaptics touchscreens and HID rmi driver (rhbz 1089583)
-
-* Mon Apr 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc2.git0.1
-- Linux v3.15-rc2
-- Disable debugging options.
-
-* Fri Apr 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git4.1
-- Linux v3.15-rc1-137-g81cef0fe19e0
-
-* Thu Apr 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git3.1
-- Linux v3.15-rc1-113-g6ca2a88ad820
-- Build perf with unwind support via libdw (rhbz 1025603)
-
-* Thu Apr 17 2014 Hans de Goede <hdegoede@redhat.com>
-- Update min/max quirk patch to add a quirk for the ThinkPad L540 (rhbz1088588)
-
-* Thu Apr 17 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Drop OMAP DRM hack to load encoder module now it fully supports DT (YAY!)
-
-* Wed Apr 16 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git2.1
-- Linux v3.15-rc1-49-g10ec34fcb100
-
-* Tue Apr 15 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git1.1
-- Linux v3.15-rc1-12-g55101e2d6ce1
-- Reenable debugging options.
-
-* Mon Apr 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc1.git0.1
-- Linux v3.15-rc1
-- Disable debugging options.
-- Turn SLUB_DEBUG off
-
-* Mon Apr 14 2014 Hans de Goede <hdegoede@redhat.com>
-- Add min/max quirks for various new Thinkpad touchpads (rhbz 1085582 1085697)
-
-* Mon Apr 14 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Minor ARM config changes and cleanups for 3.15 merge window
-
-* Mon Apr 14 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2014-2851 net ipv4 ping refcount issue in ping_init_sock (rhbz 1086730 1087420)
-
-* Sun Apr 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git13.1
-- Linux v3.14-12812-g321d03c86732
-
-* Fri Apr 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git12.1
-- Linux v3.14-12380-g9e897e13bd46
-- Add queued urgent efi fixes (rhbz 1085349)
-
-* Thu Apr 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git11.1
-- Linux v3.14-12376-g4ba85265790b
-
-* Thu Apr 10 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Backported HID RMI driver for Haswell Dell XPS machines from Benjamin Tissoires (rhbz 1048314)
-
-* Wed Apr 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git10.1
-- Linux v3.14-12042-g69cd9eba3886
-
-* Wed Apr 09 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2014-0155 KVM: BUG caused by invalid guest ioapic redirect table (rhbz 1081589 1085016)
-
-* Thu Apr 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git9.1
-- Linux v3.14-7333-g59ecc26004e7
-
-* Thu Apr 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git8.1
-- Linux v3.14-7247-gcd6362befe4c
-
-* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git7.1
-- Linux v3.14-5146-g0f1b1e6d73cb
-
-* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git6.1
-- Linux v3.14-4600-g467cbd207abd
-
-* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git5.1
-- Linux v3.14-4555-gb33ce4429938
-
-* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git4.1
-- Linux v3.14-4227-g3e75c6de1ac3
-
-* Wed Apr 02 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git3.1
-- Linux v3.14-3893-gc12e69c6aaf7
-
-* Tue Apr 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git2.1
-- CVE-2014-2678 net: rds: deref of NULL dev in rds_iw_laddr_check (rhbz 1083274 1083280)
-
-* Tue Apr 01 2014 Josh Boyer <jwboyer@fedoraproject.org> 
-- Linux v3.14-751-g683b6c6f82a6
-
-* Tue Apr 01 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.15.0-0.rc0.git1.1
-- Linux v3.14-313-g918d80a13643
-- Reenable debugging options.
-- Turn on SLUB_DEBUG
-
-* Mon Mar 31 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 3.14-gnu.
-
-* Mon Mar 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-1
-- Linux v3.14
-- Disable debugging options.
-
-* Mon Mar 31 2014 Hans de Goede <hdegoede@redhat.com>
-- Fix clicks getting lost with cypress_ps2 touchpads with recent
-  xorg-x11-drv-synaptics versions (bfdo#76341)
-
-* Fri Mar 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc8.git1.1
-- CVE-2014-2580 xen: netback crash trying to disable due to malformed packet (rhbz 1080084 1080086)
-- CVE-2014-0077 vhost-net: insufficent big packet handling in handle_rx (rhbz 1064440 1081504)
-- CVE-2014-0055 vhost-net: insufficent error handling in get_rx_bufs (rhbz 1062577 1081503)
-- CVE-2014-2568 net: potential info leak when ubuf backed skbs are zero copied (rhbz 1079012 1079013)
-
-* Fri Mar 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Linux v3.14-rc8-12-g75c5a52
-- Reenable debugging options.
-
-* Fri Mar 28 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Enable Tegra 114/124 SoCs
-- Re-enable OMAP cpufreq
-- Re-enable CPSW PTP option
-
-* Thu Mar 27 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Switch to CONFIG_TRANSPARENT_HUGEPAGE_MADVISE instead of always on
-
-* Tue Mar 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc8.git0.1
-- Linux v3.14-rc8
-- Disable debugging options.
-
-* Mon Mar 24 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Update some generic ARM config options
-- Build in TPS65217 for ARM non lpae kernels (fixes BBW booting)
-
-* Fri Mar 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc7.git2.1
-- Linux v3.14-rc7-59-g08edb33
-
-* Wed Mar 19 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc7.git1.1
-- Linux v3.14-rc7-26-g4907cdc
-- Reenable debugging options.
-
-* Tue Mar 18 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Enable TEGRA_FBDEV (rhbz 1073960)
-
-* Mon Mar 17 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Add bootwrapper for ppc64le
-
-* Mon Mar 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc7.git0.1
-- Linux v3.14-rc7
-- Disable debugging options.
-
-* Mon Mar 17 2014 Peter Robinson <pbrobinson@fedoraproject.org> 
-- Build in Palmas regulator on ARM to fix ext MMC boot on OMAP5
-
-* Fri Mar 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git4.1
-- Linux v3.14-rc6-133-gc60f7d5
-
-* Thu Mar 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git3.1
-- Linux v3.14-rc6-41-gac9dc67
-
-* Wed Mar 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git2.1
-- Fix locking issue in iwldvm (rhbz 1046495)
-- Linux v3.14-rc6-26-g33807f4
-
-* Wed Mar 12 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Add some general missing ARM drivers (mostly sound)
-- ARM config tweaks and cleanups
-- Update i.MX6 dtb
-
-* Tue Mar 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git1.1
-- CVE-2014-2309 ipv6: crash due to router advertisment flooding (rhbz 1074471 1075064)
-- Linux v3.14-rc6-17-g8712a00
-- Reenable debugging options.
-
-* Mon Mar 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc6.git0.1
-- Linux v3.14-rc6
-- Disable debugging options.
-
-* Fri Mar 07 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Revert two xhci fixes that break USB mass storage (rhbz 1073180)
-
-* Thu Mar 06 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Fix stale EC events on Samsung systems (rhbz 1003602)
-- Add ppc64le support from Brent Baude (rhbz 1073102)
-- Fix depmod error message from hci_vhci module (rhbz 1051748)
-- Fix bogus WARN in iwlwifi (rhbz 1071998)
-
-* Wed Mar 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc5.git2.1
-- Linux v3.14-rc5-185-gc3bebc7
-
-* Tue Mar 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc5.git1.1
-- Linux v3.14-rc5-43-g0c0bd34
-- Reenable debugging options.
-
-* Mon Mar 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc5.git0.1
-- Linux v3.14-rc5
-- Disable debugging options.
-
-* Fri Feb 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git3.1
-- Linux v3.14-rc4-78-gd8efcf3
-
-* Fri Feb 28 2014 Kyle McMartin <kyle@fedoraproject.org>
-- Enable appropriate CONFIG_XZ_DEC_$arch options to ensure we can mount
-  squashfs images on supported architectures.
-
-* Fri Feb 28 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2014-0102 keyctl_link can be used to cause an oops (rhbz 1071396)
-
-* Thu Feb 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git2.1
-- Linux v3.14-rc4-45-gd2a0476
-
-* Wed Feb 26 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git1.1
-- Linux v3.14-rc4-34-g6dba6ec
-- Reenable debugging options.
-
-* Wed Feb 26 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Re-enable KVM on aarch64 now it builds again
-
-* Tue Feb 25 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Fix mounting issues on cifs (rhbz 1068862)
-
-* Mon Feb 24 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Fix lockdep issue in EHCI when using threaded IRQs (rhbz 1056170)
-
-* Mon Feb 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc4.git0.1
-- Linux v3.14-rc4
-- Disable debugging options.
-
-* Thu Feb 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git5.1
-- Linux v3.14-rc3-219-gd158fc7
-
-* Thu Feb 20 2014 Kyle McMartin <kyle@fedoraproject.org>
-- armv7: disable CONFIG_DEBUG_SET_MODULE_RONX until debugged (rhbz#1067113)
-
-* Thu Feb 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git4.1
-- Linux v3.14-rc3-184-ge95003c
-
-* Wed Feb 19 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git3.1
-- Linux v3.14-rc3-168-g960dfc4
-
-* Tue Feb 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git2.1
-- Linux v3.14-rc3-43-g805937c
-
-* Tue Feb 18 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git1.1
-- Linux v3.14-rc3-20-g60f76ea
-- Reenable debugging options.
-- Fix r8169 ethernet after suspend (rhbz 1054408)
-- Enable INTEL_MIC drivers (rhbz 1064086)
-
-* Mon Feb 17 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc3.git0.1
-- Linux v3.14-rc3
-- Disable debugging options.
-- Enable CONFIG_PPC_DENORMALIZATION (from Tony Breeds)
-
-* Fri Feb 14 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git4.1
-- Linux v3.14-rc2-342-g5e57dc8
-- CVE-2014-0069 cifs: incorrect handling of bogus user pointers (rhbz 1064253 1062578)
-
-* Thu Feb 13 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git3.1
-- Linux v3.14-rc2-271-g4675348
-
-* Wed Feb 12 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git2.1
-- Linux v3.14-rc2-267-g9398a10
-
-* Wed Feb 12 2014 Josh Boyer <jwboyer@fedoraproject.org>
-- Fix cgroup destroy oops (rhbz 1045755)
-- Fix backtrace in amd_e400_idle (rhbz 1031296)
-
-* Tue Feb 11 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git1.1
-- Linux v3.14-rc2-26-g6792dfe
-- Reenable debugging options.
-
-* Mon Feb 10 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc2.git0.1
-- Linux v3.14-rc2
-- Disable debugging options.
-
-* Sun Feb  9 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Enable CMA on aarch64
-- Disable KVM temporarily on aarch64
-- Minor ARM config updates and cleanups
-
-* Sun Feb 09 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git5.1.1
-- Linux v3.14-rc1-182-g4944790
-
-* Sat Feb 08 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git4.1
-- Linux v3.14-rc1-150-g34a9bff
-
-* Fri Feb 07 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git3.1
-- Linux v3.14-rc1-86-g9343224
-
-* Thu Feb 06 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git2.1
-- Linux v3.14-rc1-54-gef42c58
-
-* Wed Feb 05 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git1.1
-- Linux v3.14-rc1-13-g878a876
-
-* Tue Feb 04 2014 Kyle McMartin <kyle@fedoraproject.org>
-- Fix %all_arch_configs on aarch64.
-
-* Tue Feb 04 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git0.2
-- Add NUMA oops patches
-- Reenable debugging options.
-
-* Mon Feb 03 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc1.git0.1
-- Linux v3.14-rc1
-- Disable debugging options.
-- Disable Xen on ARM temporarily as it doesn't build
-
-* Mon Feb  3 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Re-enable modular Tegra DRM driver
-- Add SD driver for ZYNQ SoCs
-
-* Fri Jan 31 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git19.1
-- Linux v3.13-10637-ge7651b8
-- Enable ZRAM/ZSMALLOC (rhbz 1058072)
-- Turn EXYNOS_HDMI back on now that it should build
-
-* Thu Jan 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git18.1
-- Linux v3.13-10231-g53d8ab2
-
-* Thu Jan 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git17.1
-- Linux v3.13-10094-g9b0cd30
-- Add patches to fix imx-hdmi build, and fix kernfs lockdep oops (rhbz 1055105)
-
-* Thu Jan 30 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git16.1
-- Linux v3.13-9240-g1329311
-
-* Wed Jan 29 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git15.1
-- Linux v3.13-9218-g0e47c96
-
-* Tue Jan 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git14.1
-- Linux v3.13-8905-g627f4b3
-
-* Tue Jan 28 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git13.1
-- Linux v3.13-8789-g54c0a4b
-- Enable CONFIG_CC_STACKPROTECTOR_STRONG on x86
-
-* Mon Jan 27 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Build AllWinner (sunxi) on LPAE too (Cortex-A7 supports LPAE/KVM)
-
-* Mon Jan 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git12.1
-- Linux v3.13-8631-gba635f8
-
-* Mon Jan 27 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git11.1
-- Linux v3.13-8598-g77d143d
-
-* Sat Jan 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git10.1
-- Linux v3.13-8330-g4ba9920
-
-* Sat Jan 25 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git9.1
-- Linux v3.13-6058-g2d08cd0
-- Quiet incorrect usb phy error (rhbz 1057529)
-
-* Sat Jan 25 2014 Ville Skyttä <ville.skytta@iki.fi>
-- Own the /lib/modules dir.
-
-* Sat Jan 25 2014 Peter Robinson <pbrobinson@fedoraproject.org>
-- Initial ARM config updates for 3.14
-- Disable highbank cpuidle driver
-- Enable mtd-nand drivers on ARM
-- Update CPU thermal scaling options for ARM
-
-* Fri Jan 24 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git8.1
-- Linux v3.13-5617-g3aacd62
-
-* Thu Jan 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git7.1
-- Linux v3.13-4156-g90804ed
-
-* Thu Jan 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git6.1.1
-- Revert fsnotify changes as they cause slab corruption for multiple people
-- Linux v3.13-3995-g0dc3fd0
-
-* Thu Jan 23 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git5.1
-- Linux v3.13-3667-ge1ba845
-
-* Wed Jan 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git4.1
-- Linux v3.13-3477-gdf32e43
-
-* Wed Jan 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git3.1
-- Linux v3.13-3260-g03d11a0
-
-* Wed Jan 22 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git2.1
-- Linux v3.13-2502-gec513b1
-
-* Tue Jan 21 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.14.0-0.rc0.git1.1
-- Linux v3.13-737-g7fe67a1
-- Reenable debugging options.  Enable SLUB_DEBUG
-
-* Mon Jan 20 2014 Kyle McMartin <kyle@fedoraproject.org>
-- Enable CONFIG_KVM on AArch64.
-
-* Mon Jan 20 2014 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan 21
-- GNU Linux-libre 3.13-gnu.
-
-* Mon Jan 20 2014 Josh Boyer <jwboyer@fedoraproject.org> - 3.13.0-1
-- Linux v3.13
-- Disable debugging options.
-- Use versioned perf man pages tarball
-=======
->>>>>>> 0ee200e
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
