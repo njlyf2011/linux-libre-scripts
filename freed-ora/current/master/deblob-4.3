@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.2 extra=
+kver=4.3 extra=
 
 set -e
 
@@ -302,8 +302,8 @@ for f in \
     drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/idle.fuc \
     drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf100.fuc3 \
   drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf100.fuc3.h \
-    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf110.fuc4 \
-  drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf110.fuc4.h \
+    drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf119.fuc4 \
+  drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gf119.fuc4.h \
     drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gk208.fuc5 \
   drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gk208.fuc5.h \
     drivers/gpu/drm/nouveau/nvkm/subdev/pmu/fuc/gt215.fuc3 \
@@ -635,6 +635,10 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v3_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v3_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/fiji_dpm.c
+clean_blob drivers/gpu/drm/amd/amdgpu/fiji_dpm.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
+clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/tonga_dpm.c
 clean_blob drivers/gpu/drm/amd/amdgpu/tonga_dpm.c
 clean_kconfig drivers/gpu/drm/Kconfig DRM_AMDGPU
@@ -1125,6 +1129,12 @@ reject_firmware drivers/media/pci/ttpci/budget-av.c
 
 announce DVB_BUDGET_CI - "Budget cards with onboard CI connector"
 reject_firmware drivers/media/pci/ttpci/budget-ci.c
+
+announce DVB_C8SECTPFE - "STMicroelectronics C8SECTPFE DVB support"
+reject_firmware drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c
+clean_blob drivers/media/platform/sti/c8sectpfe/c8sectpfe-core.c
+clean_kconfig drivers/media/platform/sti/c8sectpfe/Kconfig DVB_C8SECTPFE
+clean_mk CONFIG_DVB_C8SECTPFE drivers/media/platform/sti/c8sectpfe/Makefile
 
 announce DVB_DRXD - "Micronas DRXD driver"
 reject_firmware drivers/media/dvb-frontends/drxd_hard.c
@@ -1637,6 +1647,13 @@ announce NFC_PN544_I2C - "NFC PN544 i2c support"
 reject_firmware drivers/nfc/pn544/i2c.c
 clean_kconfig drivers/nfc/pn544/Kconfig NFC_PN544_I2C
 clean_mk CONFIG_NFC_PN544_I2C drivers/nfc/pn544/Makefile
+
+announce NFC_S3FWRN5 - "Core driver for Samsung S3FWRN5 NFC chip"
+clean_blob drivers/nfc/s3fwrn5/core.c
+reject_firmware drivers/nfc/s3fwrn5/firmware.c
+reject_firmware drivers/nfc/s3fwrn5/nci.c
+clean_kconfig drivers/nfc/s3fwrn5/Kconfig NFC_S3FWRN5
+clean_mk CONFIG_NFC_S3FWRN5 drivers/nfc/s3fwrn5/Makefile
 
 # pcmcia
 
@@ -2216,12 +2233,29 @@ clean_blob drivers/bluetooth/btusb.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIBTUSB
 clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
+announce BT_INTEL - "Bluetooth support for Intel devices"
+clean_blob drivers/bluetooth/btintel.c
+clean_kconfig drivers/bluetooth/Kconfig BT_INTEL
+clean_mk CONFIG_BT_INTEL drivers/bluetooth/Makefile
+
+announce BT_HCIUART_INTEL - "Intel protocol support"
+reject_firmware drivers/bluetooth/hci_intel.c
+clean_blob drivers/bluetooth/hci_intel.c
+clean_kconfig drivers/bluetooth/Kconfig BT_HCIUART_INTEL
+clean_mk CONFIG_BT_HCIUART_INTEL drivers/bluetooth/Makefile
+
 announce BT_MRVL_SDIO - "Marvell BT-over-SDIO driver"
 reject_firmware drivers/bluetooth/btmrvl_sdio.c
 clean_blob drivers/bluetooth/btmrvl_sdio.c
 clean_blob Documentation/btmrvl.txt
 clean_kconfig drivers/bluetooth/Kconfig BT_MRVL_SDIO
 clean_mk CONFIG_BT_MRVL_SDIO drivers/bluetooth/Makefile
+
+announce BT_QCA - "Bluetooh support for Qualcomm/Atheros devices"
+reject_firmware drivers/bluetooth/btqca.c
+clean_blob drivers/bluetooth/btqca.c
+clean_kconfig drivers/bluetooth/Kconfig BT_QCA
+clean_mk CONFIG_BT_QCA drivers/bluetooth/Makefile
 
 announce BT_RTL - "Bluetooth support for Realtek devices"
 reject_firmware drivers/bluetooth/btrtl.c
@@ -2257,6 +2291,12 @@ clean_kconfig drivers/staging/gdm72xx/Kconfig WIMAX_GDM72XX_USB
 clean_mk CONFIG_WIMAX_GDM72XX_USB drivers/staging/gdm72xx/Makefile
 
 # infiniband
+
+announce INFINIBAND_HFI1 - "Intel OPA Gen1 support"
+reject_firmware drivers/staging/rdma/hfi1/firmware.c
+clean_blob drivers/staging/rdma/hfi1/firmware.c
+clean_kconfig drivers/staging/rdma/hfi1/Kconfig INFINIBAND_HFI1
+clean_mk CONFIG_INFINIBAND_HFI1 drivers/staging/rdma/hfi1/Makefile
 
 announce INFINIBAND_QIB - "QLogic PCIe HCA support"
 drop_fw_file firmware/qlogic/sd7220.fw.ihex firmware/qlogic/sd7220.fw
@@ -2540,7 +2580,7 @@ clean_sed '
 /^config SCSI_QLA_FC$/,/^config /{
   /^	By default, firmware/i\
 	/*(DEBLOBBED)*/
-  /^	By default, firmware/,/linux-firmware tree[/]/d
+  /^	By default, firmware/,/linux-firmware tree/d
 }' drivers/scsi/qla2xxx/Kconfig 'removed firmware notes'
 clean_blob drivers/scsi/qla2xxx/qla_os.c
 clean_kconfig drivers/scsi/qla2xxx/Kconfig SCSI_QLA_FC
@@ -2670,6 +2710,8 @@ clean_mk CONFIG_USB_SERIAL_EDGEPORT drivers/usb/serial/Makefile
 announce USB_SERIAL_EDGEPORT_TI - "USB Inside Out Edgeport Serial Driver (TI devices)"
 clean_fw firmware/edgeport/down3.bin.ihex firmware/edgeport/down3.bin
 reject_firmware drivers/usb/serial/io_ti.c
+clean_sed 's,firmware "down3\.bin",firmware "(DEBLOBBED)",
+' drivers/usb/serial/io_ti.c 'deblobbed comment'
 clean_blob drivers/usb/serial/io_ti.c
 clean_kconfig drivers/usb/serial/Kconfig USB_SERIAL_EDGEPORT_TI
 clean_mk CONFIG_USB_SERIAL_EDGEPORT_TI drivers/usb/serial/Makefile
@@ -2726,6 +2768,8 @@ maybe_reject_firmware drivers/remoteproc/remoteproc_core.c
 undefine_macro SPROC_MODEM_FIRMWARE "\"/*(DEBLOBBED)*/\"" \
   "disabled non-Free firmware" drivers/remoteproc/ste_modem_rproc.c
 clean_blob Documentation/devicetree/bindings/remoteproc/wkup_m3_rproc.txt
+clean_blob arch/arm/boot/dts/am33xx.dtsi
+clean_blob arch/arm/boot/dts/am4372.dtsi
 clean_kconfig drivers/remoteproc/Kconfig STE_MODEM_RPROC
 clean_mk CONFIG_STE_MODEM_RPROC drivers/remoteproc/Makefile
 
@@ -3005,6 +3049,12 @@ reject_firmware sound/soc/intel/haswell/sst-haswell-ipc.c
 clean_blob sound/soc/intel/haswell/sst-haswell-ipc.c
 clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_HASWELL
 clean_mk CONFIG_SND_SOC_INTEL_HASWELL sound/soc/intel/haswell/Makefile
+
+announce SND_SOC_INTEL_SKYLAKE - undocumented
+reject_firmware sound/soc/intel/skylake/skl-sst.c
+clean_blob sound/soc/intel/skylake/skl-sst.c
+clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_SKYLAKE
+clean_mk CONFIG_SND_SOC_INTEL_SKYLAKE sound/soc/intel/skylake/Makefile
 
 announce SND_SST_IPC - undocumented
 reject_firmware sound/soc/intel/atom/sst/sst.c
