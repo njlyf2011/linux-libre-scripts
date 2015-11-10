@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -624,6 +624,7 @@ Patch16000: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
 Patch16001: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
 Patch16002: arm64-avoid-needing-console-to-enable-serial-console.patch
 Patch16003: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
+Patch16004: showmem-cma-correct-reserved-memory-calculation.patch
 
 # ARMv7
 Patch16020: ARM-tegra-usb-no-reset.patch
@@ -1368,6 +1369,8 @@ ApplyPatch amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
 ApplyPatch amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
 ApplyPatch arm64-avoid-needing-console-to-enable-serial-console.patch
 ApplyPatch usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
+
+ApplyPatch showmem-cma-correct-reserved-memory-calculation.patch
 
 #
 # ARM
@@ -2438,6 +2441,9 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Tue Oct 27 2015 Peter Robinson <pbrobinson@fedoraproject.org> - 4.1.12-101
+- CMA memory patch to fix aarch64 builder lockups
+
 * Tue Oct 27 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.1.12-gnu.
 
