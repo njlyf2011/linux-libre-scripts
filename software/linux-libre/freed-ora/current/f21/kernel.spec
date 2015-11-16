@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.0%{?stablegnux}
-#define rcrevlibre  -4.0%{?rcrevgnux}
-#define gitrevlibre -4.0%{?gitrevgnux}
+%define stablelibre -4.1%{?stablegnux}
+#define rcrevlibre  -4.1%{?rcrevgnux}
+#define gitrevlibre -4.1%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -424,7 +424,7 @@ BuildRequires: net-tools, hostname, bc
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex
+BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel
 %ifnarch s390 s390x %{arm}
 BuildRequires: numactl-devel
@@ -698,10 +698,8 @@ Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 #CVE-2015-6937 rhbz 1263139 1263140
 Patch523: RDS-verify-the-underlying-transport-exists-before-cr.patch
-
-#rhbz 1265978
-Patch536: si2168-Bounds-check-firmware.patch
-Patch537: si2157-Bounds-check-firmware.patch
+#CVE-2015-7990 rhbz 1276437 1276438
+Patch524: RDS-fix-race-condition-when-sending-a-message-on-unb.patch
 
 #CVE-2015-5156 rhbz 1243852 1266515
 Patch539: virtio-net-drop-NETIF_F_FRAGLIST.patch
@@ -709,6 +707,16 @@ Patch539: virtio-net-drop-NETIF_F_FRAGLIST.patch
 #rhbz 1272172
 Patch540: 0001-KEYS-Fix-crash-when-attempt-to-garbage-collect-an-un.patch
 Patch541: 0002-KEYS-Don-t-permit-request_key-to-construct-a-new-key.patch
+
+#CVE-2015-7799 rhbz 1271134 1271135
+Patch543: isdn_ppp-Add-checks-for-allocation-failure-in-isdn_p.patch
+Patch544: ppp-slip-Validate-VJ-compression-slot-parameters-com.patch
+
+#CVE-2015-5307 rhbz 1277172 1279688
+Patch550: KVM-x86-work-around-infinite-loop-in-microcode-when-.patch
+
+#CVE-2015-8104 rhbz 1278496 1279691
+Patch551: KVM-svm-unconditionally-intercept-DB.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1262,7 +1270,7 @@ if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
 
   fi
 
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversion}/Makefile
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablegnux}/" vanilla-%{kversion}/Makefile
 
 %if "%{kversion}" != "%{vanillaversion}"
 
@@ -1285,7 +1293,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 # (non-released_kernel case only)
 %if 0%{?rcrev}
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevgnux}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?rcrevgnux}/" Makefile
 %endif
     ApplyPatch patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
@@ -1295,7 +1303,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversi
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if "%{?stablelibre}" != "%{?gitrevlibre}"
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevgnux}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
     ApplyPatch patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
@@ -1557,10 +1565,8 @@ ApplyPatch drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 #CVE-2015-6937 rhbz 1263139 1263140
 ApplyPatch RDS-verify-the-underlying-transport-exists-before-cr.patch
-
-#rhbz 1265978
-ApplyPatch si2168-Bounds-check-firmware.patch
-ApplyPatch si2157-Bounds-check-firmware.patch
+#CVE-2015-7990 rhbz 1276437 1276438
+ApplyPatch RDS-fix-race-condition-when-sending-a-message-on-unb.patch
 
 #CVE-2015-5156 rhbz 1243852 1266515
 ApplyPatch virtio-net-drop-NETIF_F_FRAGLIST.patch
@@ -1568,6 +1574,16 @@ ApplyPatch virtio-net-drop-NETIF_F_FRAGLIST.patch
 #rhbz 1272172
 ApplyPatch 0001-KEYS-Fix-crash-when-attempt-to-garbage-collect-an-un.patch
 ApplyPatch 0002-KEYS-Don-t-permit-request_key-to-construct-a-new-key.patch
+
+#CVE-2015-7799 rhbz 1271134 1271135
+ApplyPatch isdn_ppp-Add-checks-for-allocation-failure-in-isdn_p.patch
+ApplyPatch ppp-slip-Validate-VJ-compression-slot-parameters-com.patch
+
+#CVE-2015-5307 rhbz 1277172 1279688
+ApplyPatch KVM-x86-work-around-infinite-loop-in-microcode-when-.patch
+
+#CVE-2015-8104 rhbz 1278496 1279691
+ApplyPatch KVM-svm-unconditionally-intercept-DB.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2441,6 +2457,29 @@ fi
 #                                    ||----w |
 #                                    ||     ||
 %changelog
+* Tue Nov 10 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.1.13-gnu.
+
+* Tue Nov 10 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v4.1.13
+- CVE-2015-8104 kvm: DoS infinite loop in microcode DB exception (rhbz 1278496 1279691)
+- CVE-2015-5307 kvm: DoS infinite loop in microcode AC exception (rhbz 1277172 1279688)
+
+* Thu Nov 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix backlight regression on older radeon devices (rhbz 1278407)
+
+* Tue Nov 03 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7799 slip:crash when using PPP char dev driver (rhbz 1271134 1271135)
+
+* Tue Nov 03 2015 Justin M. Forbes <jforbes@fedoraproject.org>
+- Add xz-devel builreq for perf (rhbz 1167457)
+
+* Mon Nov 02 2015 Laura Abbott <labbott@fedoraproject.org>
+- Add spurious wakeup quirk for LynxPoint-LP controllers (rhbz 1257131)
+
+* Thu Oct 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7099 RDS: race condition on unbound socket null deref (rhbz 1276437 1276438)
+
 * Tue Oct 27 2015 Peter Robinson <pbrobinson@fedoraproject.org> - 4.1.12-101
 - CMA memory patch to fix aarch64 builder lockups
 
