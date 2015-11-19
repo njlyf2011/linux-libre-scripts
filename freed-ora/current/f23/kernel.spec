@@ -56,7 +56,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.2%{?stablegnux}
+%define stablelibre -4.2%{?stablegnux}
 #define rcrevlibre  -4.2%{?rcrevgnux}
 #define gitrevlibre -4.2%{?gitrevgnux}
 
@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -550,13 +550,15 @@ Patch455: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
 
 Patch456: arm64-acpi-drop-expert-patch.patch
 
-Patch457: ARM-tegra-usb-no-reset.patch
+Patch457: showmem-cma-correct-reserved-memory-calculation.patch
 
-Patch458: regulator-axp20x-module-alias.patch
+Patch458: ARM-tegra-usb-no-reset.patch
 
-Patch459: regulator-anatop-module-alias.patch
+Patch459: regulator-axp20x-module-alias.patch
 
-Patch460: ARM-dts-Add-am335x-bonegreen.patch
+Patch460: regulator-anatop-module-alias.patch
+
+Patch461: ARM-dts-Add-am335x-bonegreen.patch
 
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
 
@@ -656,14 +658,25 @@ Patch518: drm-vmwgfx-Allow-dropped-masters-render-node-like-ac.patch
 
 #CVE-2015-6937 rhbz 1263139 1263140
 Patch523: RDS-verify-the-underlying-transport-exists-before-cr.patch
-
-#rhbz 1265978
-Patch536: si2168-Bounds-check-firmware.patch
-Patch537: si2157-Bounds-check-firmware.patch
+#CVE-2015-7990 rhbz 1276437 1276438
+Patch524: RDS-fix-race-condition-when-sending-a-message-on-unb.patch
 
 #rhbz 1272172
 Patch540: 0001-KEYS-Fix-crash-when-attempt-to-garbage-collect-an-un.patch
 Patch541: 0002-KEYS-Don-t-permit-request_key-to-construct-a-new-key.patch
+
+#CVE-2015-7799 rhbz 1271134 1271135
+Patch543: isdn_ppp-Add-checks-for-allocation-failure-in-isdn_p.patch
+Patch544: ppp-slip-Validate-VJ-compression-slot-parameters-com.patch
+
+#CVE-2015-5307 rhbz 1277172 1279688
+Patch550: KVM-x86-work-around-infinite-loop-in-microcode-when-.patch
+
+#CVE-2015-8104 rhbz 1278496 1279691
+Patch551: KVM-svm-unconditionally-intercept-DB.patch
+
+#rhbz 1269300
+Patch552: megaraid_sas-Do-not-use-PAGE_SIZE-for-max_sectors.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1218,7 +1231,7 @@ if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
 
   fi
 
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablegnux}/" vanilla-%{kversion}/Makefile
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = %{?stablegnux}/" vanilla-%{kversion}/Makefile
 
 %if "%{kversion}" != "%{vanillaversion}"
 
@@ -2206,6 +2219,41 @@ fi
 #
 # 
 %changelog
+* Tue Nov 10 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.2.6-gnu.
+
+* Tue Nov 10 2015 Justin M. Forbes <jforbes@fedoraproject.org> - 4.2.6-300
+- Linux v4.2.6
+
+* Tue Nov 10 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect size calculations in megaraid with 64K pages (rhbz 1269300)
+- CVE-2015-8104 kvm: DoS infinite loop in microcode DB exception (rhbz 1278496 1279691)
+- CVE-2015-5307 kvm: DoS infinite loop in microcode AC exception (rhbz 1277172 1279688)
+
+* Thu Nov  5 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable Exynos IOMMU as it crashes
+
+* Thu Nov 05 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix backlight regression on older radeon devices (rhbz 1278407)
+
+* Wed Nov  4 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable some IIO sensors (temp/humidity) on ARMv7
+
+* Tue Nov 03 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7799 slip:crash when using PPP char dev driver (rhbz 1271134 1271135)
+
+* Mon Nov 02 2015 Laura Abbott <labbott@fedoraproject.org>
+- Add spurious wakeup quirk for LynxPoint-LP controllers (rhbz 1257131)
+
+* Thu Oct 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7099 RDS: race condition on unbound socket null deref (rhbz 1276437 1276438)
+
+* Thu Oct 29 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Move iscsi_tcp and related modules to kernel-core (rhbz 1249424)
+
+* Tue Oct 27 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- CMA memory patch to fix aarch64 builder lockups
+
 * Mon Oct 26 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.2.5-gnu.
 
