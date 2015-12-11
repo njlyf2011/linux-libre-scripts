@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -686,6 +686,22 @@ Patch551: KVM-svm-unconditionally-intercept-DB.patch
 
 #rhbz 1269300
 Patch552: megaraid_sas-Do-not-use-PAGE_SIZE-for-max_sectors.patch
+
+#rhbz 1275490
+Patch553: ideapad-laptop-Add-Lenovo-Yoga-900-to-no_hw_rfkill-d.patch
+
+#rhbz 1279189
+Patch556: netfilter-ipset-Fix-extension-alignment.patch
+Patch557: netfilter-ipset-Fix-hash-type-expiration.patch
+Patch558: netfilter-ipset-Fix-hash-type-expire-release-empty-h.patch
+
+#rhbz 1272571
+Patch559: 0001-ipv6-Avoid-creating-RTF_CACHE-from-a-rt-that-is-not-.patch
+
+#rhbz 1278688
+Patch560: 0001-KVM-x86-build-kvm_userspace_memory_region-in-x86_set.patch
+Patch561: 0002-KVM-x86-map-unmap-private-slots-in-__x86_set_memory_.patch
+Patch562: 0003-KVM-x86-fix-previous-commit-for-32-bit.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1530,6 +1546,22 @@ ApplyPatch KVM-svm-unconditionally-intercept-DB.patch
 
 #rhbz 1269300
 ApplyPatch megaraid_sas-Do-not-use-PAGE_SIZE-for-max_sectors.patch
+
+#rhbz 1275490
+ApplyPatch ideapad-laptop-Add-Lenovo-Yoga-900-to-no_hw_rfkill-d.patch
+
+#rhbz 1279189
+ApplyPatch netfilter-ipset-Fix-extension-alignment.patch
+ApplyPatch netfilter-ipset-Fix-hash-type-expiration.patch
+ApplyPatch netfilter-ipset-Fix-hash-type-expire-release-empty-h.patch
+
+#rhbz 1272571
+ApplyPatch 0001-ipv6-Avoid-creating-RTF_CACHE-from-a-rt-that-is-not-.patch
+
+#rhbz 1278688
+ApplyPatch 0001-KVM-x86-build-kvm_userspace_memory_region-in-x86_set.patch
+ApplyPatch 0002-KVM-x86-map-unmap-private-slots-in-__x86_set_memory_.patch
+ApplyPatch 0003-KVM-x86-fix-previous-commit-for-32-bit.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2394,6 +2426,16 @@ fi
 #
 # 
 %changelog
+* Fri Nov 20 2015 Justin M. Forbes <jmforbes@fedoraproject.org>
+- Fix for GRE tunnel running in IPSec (rhbz 1272571)
+- Fix KVM on specific hardware (rhbz 1278688)
+
+* Mon Nov 16 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix ipset netfilter issues (rhbz 1279189)
+
+* Tue Nov 10 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix Yoga 900 rfkill switch issues (rhbz 1275490)
+
 * Tue Nov 10 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.2.6-gnu.
 
