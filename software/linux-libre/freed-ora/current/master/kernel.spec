@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -4.3%{?stablegnux}
-#define rcrevlibre  -4.3%{?rcrevgnux}
+%define rcrevlibre  -4.3%{?rcrevgnux}
 #define gitrevlibre -4.3%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -428,8 +428,12 @@ BuildRequires: rpm-build, elfutils
 %define debuginfo_args --strict-build-id -r
 %endif
 
-%if %{signmodules}
+%ifarch %{ix86} x86_64
+# MODULE_SIG is enabled in config-x86-generic and needs these:
 BuildRequires: openssl openssl-devel
+%endif
+
+%if %{signmodules}
 BuildRequires: pesign >= 0.10-4
 %endif
 
@@ -444,7 +448,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -546,13 +550,11 @@ Patch453: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
 
 Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
 
-Patch455: usb-make-xhci-platform-driver-use-64-bit-or-32-bit-D.patch
-
 Patch456: arm64-acpi-drop-expert-patch.patch
 
 Patch457: ARM-tegra-usb-no-reset.patch
 
-Patch458: ARM-dts-Add-am335x-bonegreen.patch
+Patch460: mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
 
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
 
@@ -632,14 +634,38 @@ Patch503: drm-i915-turn-off-wc-mmaps.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#rhbz 1239050
-Patch509: ideapad-laptop-Add-Lenovo-Yoga-3-14-to-no_hw_rfkill-.patch
+#CVE-2015-7833 rhbz 1270158 1270160
+Patch567: usbvision-fix-crash-on-detecting-device-with-invalid.patch
 
-#rhbz 1275490
-Patch510: 0001-iwlwifi-Add-new-PCI-IDs-for-the-8260-series.patch
+#rhbz 1287819
+Patch570: HID-multitouch-enable-palm-rejection-if-device-imple.patch
 
-#CVE-2015-7990 rhbz 1276437 1276438
-Patch511: RDS-fix-race-condition-when-sending-a-message-on-unb.patch
+#rhbz 1286293
+Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
+
+#rhbz 1288687
+Patch572: alua_fix.patch
+
+#CVE-2015-7550 rhbz 1291197 1291198
+Patch575: KEYS-Fix-race-between-read-and-revoke.patch
+
+#rhbz 1275718
+Patch577: 0001-device-property-always-check-for-fwnode-type.patch
+Patch578: 0002-device-property-rename-helper-functions.patch
+Patch579: 0003-device-property-refactor-built-in-properties-support.patch
+Patch580: 0004-device-property-keep-single-value-inplace.patch
+Patch581: 0005-device-property-helper-macros-for-property-entry-cre.patch
+Patch582: 0006-device-property-improve-readability-of-macros.patch
+Patch583: 0007-device-property-return-EINVAL-when-property-isn-t-fo.patch
+Patch584: 0008-device-property-Fallback-to-secondary-fwnode-if-prim.patch
+Patch585: 0009-device-property-Take-a-copy-of-the-property-set.patch
+Patch586: 0010-driver-core-platform-Add-support-for-built-in-device.patch
+Patch587: 0011-driver-core-Do-not-overwrite-secondary-fwnode-with-N.patch
+Patch588: 0012-mfd-core-propagate-device-properties-to-sub-devices-.patch
+Patch589: 0013-mfd-intel-lpss-Add-support-for-passing-device-proper.patch
+Patch590: 0014-mfd-intel-lpss-Pass-SDA-hold-time-to-I2C-host-contro.patch
+Patch591: 0015-mfd-intel-lpss-Pass-HSUART-configuration-via-propert.patch
+Patch592: 0016-i2c-designware-Convert-to-use-unified-device-propert.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2181,10 +2207,202 @@ fi
 #
 # 
 %changelog
+* Wed Dec 23 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4-rc6-gnu.
+
+* Mon Dec 21 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc6.git0.1
+- Linux v4.4-rc6
+- Disable debugging options.
+
+* Fri Dec 18 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc5.git3.1
+- Linux v4.4-rc5-168-g73796d8
+
+* Thu Dec 17 2015 Laura Abbott <labbott@redhat.com>
+- Enable XEN_PVN support (rhbz 1211904)
+
+* Thu Dec 17 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc5.git2.1
+- Linux v4.4-rc5-25-ga5e90b1
+- Reenable debugging options.
+
+* Thu Dec 17 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-8569 info leak from getsockname (rhbz 1292045 1292047)
+
+* Wed Dec 16 2015 Laura Abbott <labbott@redhat.com>
+- Enable a set of RDMA drivers (rhbz 1291902)
+
+* Wed Dec 16 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc5.git1.1
+- Linux v4.4-rc5-18-gedb42dc
+
+* Tue Dec 15 2015 Laura Abbott <labbott@fedoraproject.org>
+- Add support for Yoga touch input (rhbz 1275718)
+
+* Tue Dec 15 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-8543 ipv6: DoS via NULL pointer dereference (rhbz 1290475 1290477)
+
+* Mon Dec 14 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc5.git0.1
+- Linux v4.4-rc5
+- Disable debugging options.
+
+* Mon Dec 14 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7550 Race between read and revoke keys (rhbz 1291197 1291198)
+
+* Fri Dec 11 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc4.git4.1
+- Linux v4.4-rc4-113-g0bd0f1e
+
+* Thu Dec 10 2015 Laura Abbott <labbott@redhat.com>
+- Ignore errors from scsi_dh_add_device (rhbz 1288687)
+
+* Thu Dec 10 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc4.git3.1
+- Linux v4.4-rc4-86-g6764e5e
+
+* Thu Dec 10 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix rfkill issues on ideapad Y700-17ISK (rhbz 1286293)
+
+* Wed Dec 09 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc4.git2.1
+- Linux v4.4-rc4-48-gaa53685
+
+* Tue Dec 08 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc4.git1.1
+- Linux v4.4-rc4-16-g62ea1ec
+- Reenable debugging options.
+
+* Mon Dec 07 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc4.git0.1
+- Linux v4.4-rc4
+- Disable debugging options.
+
+* Fri Dec 04 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc3.git4.1
+- Linux v4.4-rc3-171-g071f5d1
+
+* Thu Dec 03 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc3.git3.1
+- Linux v4.4-rc3-24-g25364a9
+
+* Thu Dec 03 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch to fix palm rejection on certain touchpads (rhbz 1287819)
+
+* Wed Dec 02 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc3.git2.1
+- Linux v4.4-rc3-8-g6a24e72
+
+* Tue Dec 01 2015 Laura Abbott <labbott@redhat.com>
+- Enable CONFIG_X86_INTEL_MPX (rhbz 1287279)
+
+* Tue Dec 01 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7515 aiptek: crash on invalid device descriptors (rhbz 1285326 1285331)
+- CVE-2015-7833 usbvision: crash on invalid device descriptors (rhbz 1270158 1270160)
+
+* Tue Dec 01 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc3.git1.1
+- Linux v4.4-rc3-5-g2255702
+- Reenable debugging options.
+
+* Mon Nov 30 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc3.git0.1
+- Linux v4.4-rc3
+- Fix for cgroup use after free (rhbz 1282706)
+- Disable debugging options.
+
+* Wed Nov 25 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc2.git2.1
+- Linux v4.4-rc2-44-g6ffeba9
+
+* Tue Nov 24 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc2.git1.1
+- Linux v4.4-rc2-3-ga293154
+- Reenable debugging options.
+
+* Mon Nov 23 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update AMD xgbe driver for 4.4
+
+* Mon Nov 23 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc2.git0.1
+- Linux v4.4-rc2
+- Disable debugging options.
+
+* Sun Nov 22 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix sound issue on some ARM devices (tested on Arndale)
+
+* Fri Nov 20 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc1.git3.1
+- Linux v4.4-rc1-223-g86eaf54
+
+* Thu Nov 19 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc1.git2.1
+- Linux v4.4-rc1-118-g34258a3
+- Reenable debugging options.
+
+* Wed Nov 18 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc1.git1.1
+- Linux v4.4-rc1-96-g7f151f1
+
+* Mon Nov 16 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc1.git0.1
+- Linux v4.4-rc1
+- Disable debugging options.
+- Add potential fix for set_features breakage in networking
+
+* Fri Nov 13 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git9.1
+- Linux v4.3-11742-gf6d07df
+
+* Thu Nov 12 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git8.1
+- Linux v4.3-11626-g5d50ac7
+- Set CONFIG_SECTION_MISMATCH_WARN_ONLY since powerpc has mismatches
+
+* Thu Nov 12 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-5327 x509 time validation
+
+* Wed Nov 11 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git7.2
+- Drop CONFIG_DRM_DW_HDMI_AHB_AUDIO for now
+
+* Wed Nov 11 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git7.1
+- Linux v4.3-11481-gc5a3788
+- Actually drop CONFIG_DMADEVICES_VDEBUG
+
+* Tue Nov 10 2015 Laura Abbott <labbott@redhat.com>
+- Enable CONFIG_CMA on x86_64 (rhbz 1278985)
+
+* Tue Nov 10 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git6.1
+- Linux v4.3-9393-gbd4f203
+
+* Tue Nov 10 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix Yoga 900 rfkill switch issues (rhbz 1275490)
+- Fix incorrect size calculations in megaraid with 64K pages (rhbz 1269300)
+- CVE-2015-8104 kvm: DoS infinite loop in microcode DB exception (rhbz 1278496 1279691)
+- CVE-2015-5307 kvm: DoS infinite loop in microcode AC exception (rhbz 1277172 1279688)
+
+* Tue Nov 10 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Don't build Serial 8250 on ppc platforms (fix FBTFS)
+- Enable some more common sensors on ARMv7
+
+* Mon Nov 09 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git5.1
+- Linux v4.3-9269-gce5c2d2
+
+* Sun Nov  8 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7 updates
+
+* Fri Nov 06 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git4.2
+- Fix ARM dt compilation error
+
+* Fri Nov 06 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git4.1
+- Linux v4.3-7965-gd1e41ff
+
+* Fri Nov  6 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable Exynos IOMMU as it crashes
+- Minor ARMv7 update for battiery/charging
+
+* Thu Nov 05 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git3.1
+- Linux v4.3-6681-g8e483ed
+
+* Wed Nov 04 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git2.1
+- Linux v4.3-1107-g66ef349
+
+* Wed Nov  4 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7 config updates
+
+* Tue Nov 03 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc0.git1.1
+- Linux v4.3-272-g5062ecd
+- Reenable debugging options.
+
+* Tue Nov 03 2015 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7799 slip:crash when using PPP char dev driver (rhbz 1271134 1271135)
+
+* Tue Nov  3 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix crash in omap_wdt (headed upstream)
+- Build in ARM generic crypto optomisation modules
+- Minor ARM updates
+
 * Mon Nov  2 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.3-gnu.
 
-* Mon Nov 02 2015 Laura Abbott <labbott@redhat.com> - 4.2.0-1
+* Mon Nov 02 2015 Laura Abbott <labbott@redhat.com> - 4.3.0-1
 - Linux v4.3
 - Disable debugging options.
 
