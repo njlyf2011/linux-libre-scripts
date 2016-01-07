@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -645,9 +645,6 @@ Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
 
 #rhbz 1288687
 Patch572: alua_fix.patch
-
-#CVE-2015-7550 rhbz 1291197 1291198
-Patch575: KEYS-Fix-race-between-read-and-revoke.patch
 
 #rhbz 1275718
 Patch577: 0001-device-property-always-check-for-fwnode-type.patch
@@ -2207,6 +2204,21 @@ fi
 #
 # 
 %changelog
+* Tue Jan  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4-rc8-gnu.
+
+* Mon Jan 04 2016 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc8.git0.1
+- Linux v4.4-rc8
+- Disable debugging options.
+
+* Sun Dec 27 2015 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARMv7/aarch64/ppc/s390 config cleanups
+- Enable rk3368 aarch64 platforms
+
+* Wed Dec 23 2015 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc6.git1.1
+- Linux v4.4-rc6-23-g24bc3ea
+- Reenable debugging options.
+
 * Wed Dec 23 2015 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4-rc6-gnu.
 
