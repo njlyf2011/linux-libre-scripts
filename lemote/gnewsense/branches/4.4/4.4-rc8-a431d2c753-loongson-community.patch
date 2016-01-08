@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 4e2b18d..4a579d2 100644
+index 9d94ade..ef87142 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -297,8 +297,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -2129,6 +2129,19 @@ index 0000000..b296220
 +DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NEC, PCI_DEVICE_ID_CT_65550,
 +				gdium_usb_host_fixup);
 +#endif
+diff --git a/arch/mips/vdso/Makefile b/arch/mips/vdso/Makefile
+index 1456890..ee3617c 100644
+--- a/arch/mips/vdso/Makefile
++++ b/arch/mips/vdso/Makefile
+@@ -26,7 +26,7 @@ aflags-vdso := $(ccflags-vdso) \
+ # the comments on that file.
+ #
+ ifndef CONFIG_CPU_MIPSR6
+-  ifeq ($(call ld-ifversion, -lt, 22500000, y),y)
++  ifeq ($(call ld-ifversion, -lt, 225000000, y),y)
+     $(warning MIPS VDSO requires binutils >= 2.25)
+     obj-vdso-y := $(filter-out gettimeofday.o, $(obj-vdso-y))
+     ccflags-vdso += -DDISABLE_MIPS_VDSO
 diff --git a/drivers/cpufreq/loongson2_cpufreq.c b/drivers/cpufreq/loongson2_cpufreq.c
 index cd593c1..288e972 100644
 --- a/drivers/cpufreq/loongson2_cpufreq.c
@@ -9663,6 +9676,22 @@ index f53bf3b6..8763584 100644
  module_param_named(default_state, rfkill_default_state, uint, 0444);
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
+diff --git a/scripts/ld-version.sh b/scripts/ld-version.sh
+index 198580d..734ab06 100755
+--- a/scripts/ld-version.sh
++++ b/scripts/ld-version.sh
+@@ -1,8 +1,8 @@
+ #!/usr/bin/awk -f
+ # extract linker version number from stdin and turn into single number
+ 	{
+-	gsub(".*)", "");
+-	split($1,a, ".");
+-	print a[1]*10000000 + a[2]*100000 + a[3]*10000 + a[4]*100 + a[5];
++	gsub(".*[)]", "");
++	split($1,a, "[-.]");
++	printf "%i%04i\n", a[1]*10000 + a[2]*100 + a[3], (a[4]*100 + a[5])%10000;
+ 	exit
+ 	}
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
 index 826470d..9e6dc30 100755
 --- a/scripts/recordmcount.pl
