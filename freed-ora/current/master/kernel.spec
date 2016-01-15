@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -46,7 +46,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 3
+%define base_sublevel 4
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -56,9 +56,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.3%{?stablegnux}
-%define rcrevlibre  -4.3%{?rcrevgnux}
-#define gitrevlibre -4.3%{?gitrevgnux}
+#define stablelibre -4.4%{?stablegnux}
+#define rcrevlibre  -4.4%{?rcrevgnux}
+#define gitrevlibre -4.4%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 8
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -448,7 +448,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+#Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -646,23 +646,31 @@ Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
 #rhbz 1288687
 Patch572: alua_fix.patch
 
+#CVE-2015-8709 rhbz 1295287 1295288
+Patch603: ptrace-being-capable-wrt-a-process-requires-mapped-u.patch
+
+Patch604: drm-i915-shut-up-gen8-SDE-irq-dmesg-noise-again.patch
+
 #rhbz 1275718
-Patch577: 0001-device-property-always-check-for-fwnode-type.patch
-Patch578: 0002-device-property-rename-helper-functions.patch
-Patch579: 0003-device-property-refactor-built-in-properties-support.patch
-Patch580: 0004-device-property-keep-single-value-inplace.patch
-Patch581: 0005-device-property-helper-macros-for-property-entry-cre.patch
-Patch582: 0006-device-property-improve-readability-of-macros.patch
-Patch583: 0007-device-property-return-EINVAL-when-property-isn-t-fo.patch
-Patch584: 0008-device-property-Fallback-to-secondary-fwnode-if-prim.patch
-Patch585: 0009-device-property-Take-a-copy-of-the-property-set.patch
-Patch586: 0010-driver-core-platform-Add-support-for-built-in-device.patch
-Patch587: 0011-driver-core-Do-not-overwrite-secondary-fwnode-with-N.patch
-Patch588: 0012-mfd-core-propagate-device-properties-to-sub-devices-.patch
-Patch589: 0013-mfd-intel-lpss-Add-support-for-passing-device-proper.patch
-Patch590: 0014-mfd-intel-lpss-Pass-SDA-hold-time-to-I2C-host-contro.patch
-Patch591: 0015-mfd-intel-lpss-Pass-HSUART-configuration-via-propert.patch
-Patch592: 0016-i2c-designware-Convert-to-use-unified-device-propert.patch
+Patch605: 0001-device-property-always-check-for-fwnode-type.patch
+Patch606: 0002-device-property-rename-helper-functions.patch
+Patch607: 0003-device-property-refactor-built-in-properties-support.patch
+Patch608: 0004-device-property-keep-single-value-inplace.patch
+Patch609: 0005-device-property-helper-macros-for-property-entry-cre.patch
+Patch610: 0006-device-property-improve-readability-of-macros.patch
+Patch611: 0007-device-property-return-EINVAL-when-property-isn-t-fo.patch
+Patch612: 0008-device-property-Fallback-to-secondary-fwnode-if-prim.patch
+Patch613: 0009-device-property-Take-a-copy-of-the-property-set.patch
+Patch614: 0010-driver-core-platform-Add-support-for-built-in-device.patch
+Patch615: 0011-driver-core-Do-not-overwrite-secondary-fwnode-with-N.patch
+Patch616: 0012-mfd-core-propagate-device-properties-to-sub-devices-.patch
+Patch617: 0013-mfd-intel-lpss-Add-support-for-passing-device-proper.patch
+Patch618: 0014-mfd-intel-lpss-Pass-SDA-hold-time-to-I2C-host-contro.patch
+Patch619: 0015-mfd-intel-lpss-Pass-HSUART-configuration-via-propert.patch
+Patch620: 0016-i2c-designware-Convert-to-use-unified-device-propert.patch
+
+#rhbz 1295646
+Patch621: drm-udl-Use-unlocked-gem-unreferencing.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2204,6 +2212,38 @@ fi
 #
 # 
 %changelog
+* Tue Jan 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4-gnu.
+
+* Mon Jan 11 2016 Laura Abbott <labbott@redhat.com> - 4.4.0-1
+- Linux v4.4
+- Disable debugging options.
+
+* Fri Jan 08 2016 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc8.git3.1
+- Linux v4.4-rc8-36-g02006f7a
+
+* Thu Jan 07 2016 Laura Abbott <labbott@redhat.com>
+- Fix unlocked gem warning (rhbz 1295646)
+
+* Thu Jan 07 2016 Laura Abbott <labbott@redhat.com>
+- Bring back patches for Lenovo Yoga touchpad (rhbz 1275718)
+
+* Thu Jan 07 2016 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc8.git2.1
+- Linux v4.4-rc8-26-gb06f3a1
+
+* Thu Jan 07 2016 Josh Boyer <jwboyer@fedorparoject.org>
+- Quiet i915 gen8 irq messages
+
+* Wed Jan 06 2016 Laura Abbott <labbott@redhat.com> - 4.4.0-0.rc8.git1.1
+- Linux v4.4-rc8-5-gee9a7d2
+- Reenable debugging options.
+
+* Tue Jan 05 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-8709 ptrace: potential priv escalation with userns (rhbz 1295287 1295288)
+
+* Tue Jan 05 2016 Laura Abbott <labbott@redhat.com>
+- Drop patches for Lenovo Yoga Touchpad (rhbz 1275718)
+
 * Tue Jan  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4-rc8-gnu.
 
