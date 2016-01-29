@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 303
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -682,16 +682,7 @@ Patch574: ovl-fix-permission-checking-for-setattr.patch
 #CVE-2015-7550 rhbz 1291197 1291198
 Patch575: KEYS-Fix-race-between-read-and-revoke.patch
 
-#CVE-2015-8543 rhbz 1290475 1290477
-Patch576: net-add-validation-for-the-socket-syscall-protocol-a.patch
-
-#CVE-2015-8569 rhbz 1292045 1292047
-Patch600: pptp-verify-sockaddr_len-in-pptp_bind-and-pptp_conne.patch
-
 Patch601: vrf-fix-memory-leak-on-registration.patch
-
-#CVE-2015-8575 rhbz 1292840 1292841
-Patch602: bluetooth-Validate-socket-address-length-in-sco_sock.patch
 
 #CVE-2015-8709 rhbz 1295287 1295288
 Patch603: ptrace-being-capable-wrt-a-process-requires-mapped-u.patch
@@ -729,6 +720,19 @@ Patch626: selinux-fix-bug-in-conditional-rules-handling.patch
 Patch627: ideapad-laptop-Add-Lenovo-Yoga-700-to-no_hw_rfkill-d.patch 
 
 Patch628: i915-stable-backports.patch
+Patch635: nouveau-stable-backports.patch
+
+#rhbz 1299810
+Patch629: SCSI-refactor-device-matching-code-in-scsi_devinfo.c.patch
+Patch630: SCSI-fix-bug-in-scsi_dev_info_list-matching.patch
+
+Patch631: btrfs-handle-invalid-num_stripes-in-sys_array.patch
+Patch632: Btrfs-fix-fitrim-discarding-device-area-reserved-for.patch
+
+Patch633: net_43.mbox
+
+#CVE-2016-0728 rhbz 1296623 1297475
+Patch634: KEYS-Fix-keyring-ref-leak-in-join_session_keyring.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2270,12 +2274,19 @@ fi
 #
 # 
 %changelog
+* Tue Jan 19 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.3-303
+- Backport nouveau stable fixes (rhbz 1299349)
+- CVE-2016-0728 Keys: reference leak in join_session_keyring (rhbz 1296623 1297475)
+- Add currently queued networking stable patches
+- Add a couple btrfs patches cc'd to stable upstream
+- Add SCSI patches to avoid blacklist false positives (rhbz 1299810)
+
 * Mon Jan 18 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.3-302
 - Backport stable fixed marked in upstream 4.4
 - Fix rfkill issues on Yoga 700 (rhbz 1295272)
 - Fix SELinux issue with conditional rules (rhbz 1298192)
 
-* Fri Jan 16 2016 Josh Boyer <jwboyer@fedoraproject.org>
+* Fri Jan 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
 - Fix block errors on PAE machines (rhbz 1298996)
 
 * Wed Jan 13 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.3-301
