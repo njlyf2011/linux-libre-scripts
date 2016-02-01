@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 303
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -679,11 +679,6 @@ Patch572: alua_fix.patch
 #CVE-XXXX-XXXX rhbz 1291329 1291332
 Patch574: ovl-fix-permission-checking-for-setattr.patch
 
-#CVE-2015-7550 rhbz 1291197 1291198
-Patch575: KEYS-Fix-race-between-read-and-revoke.patch
-
-Patch601: vrf-fix-memory-leak-on-registration.patch
-
 #CVE-2015-8709 rhbz 1295287 1295288
 Patch603: ptrace-being-capable-wrt-a-process-requires-mapped-u.patch
 
@@ -694,6 +689,7 @@ Patch605: KVM-x86-Reload-pit-counters-for-all-channels-when-re.patch
 
 #rhbz 1296677
 Patch606: HID-multitouch-Fetch-feature-reports-on-demand-for-W.patch
+Patch641: HID-multitouch-fix-input-mode-switching-on-some-Elan.patch
 
 #rhbz 1281368
 Patch607: drm-nouveau-Fix-pre-nv50-pageflip-events-v4.patch
@@ -729,10 +725,20 @@ Patch630: SCSI-fix-bug-in-scsi_dev_info_list-matching.patch
 Patch631: btrfs-handle-invalid-num_stripes-in-sys_array.patch
 Patch632: Btrfs-fix-fitrim-discarding-device-area-reserved-for.patch
 
-Patch633: net_43.mbox
+#CVE-2013-4312 rhbz 1297813 1300216
+Patch636: unix-properly-account-for-FDs-passed-over-unix-socke.patch
 
-#CVE-2016-0728 rhbz 1296623 1297475
-Patch634: KEYS-Fix-keyring-ref-leak-in-join_session_keyring.patch
+#CVE-2016-0723 rhbz 1296253 1300224
+Patch637: tty-Fix-unsafe-ldisc-reference-via-ioctl-TIOCGETD.patch
+
+#rhbz 1279653
+Patch638: rtlwifi-rtl8821ae-Fix-5G-failure-when-EEPROM-is-inco.patch
+
+#CVE-XXXX-XXXX rhbz 1300731 1300732
+Patch639: netfilter-nf_nat_redirect-add-missing-NULL-pointer-c.patch 
+
+#rhbz 1300955
+Patch640: PNP-Add-Haswell-ULT-to-Intel-MCH-size-workaround.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2274,6 +2280,26 @@ fi
 #
 # 
 %changelog
+* Fri Jan 29 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.3.4-gnu.
+
+* Mon Jan 25 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.4-300
+- Add patch to fix some Elan touchpads (rhbz 1296677)
+
+* Sat Jan 23 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Linux v4.3.4
+
+* Fri Jan 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix backtrace from PNP conflict on Haswell-ULT (rhbz 1300955)
+
+* Thu Jan 21 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-XXXX-XXXX missing null ptr check in nf_nat_redirect_ipv4 (rhbz 1300731 1300732)
+- Fix incorrect country code issue on RTL8812AE devices (rhbz 1279653)
+
+* Wed Jan 20 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-0723 memory disclosure and crash in tty layer (rhbz 1296253 1300224)
+- CVE-2013-4312 file descr passed over unix sockects not properly accounted (rhbz 1297813 1300216)
+
 * Tue Jan 19 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.3-303
 - Backport nouveau stable fixes (rhbz 1299349)
 - CVE-2016-0728 Keys: reference leak in join_session_keyring (rhbz 1296623 1297475)
