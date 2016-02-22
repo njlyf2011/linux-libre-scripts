@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.3 extra=
+kver=4.4 extra=
 
 set -e
 
@@ -507,26 +507,14 @@ clean_blob arch/x86/kernel/cpu/microcode/amd.c
 clean_kconfig arch/x86/Kconfig MICROCODE_AMD
 clean_mk CONFIG_MICROCODE_AMD arch/x86/kernel/cpu/microcode/Makefile
 
-announce MICROCODE_AMD_EARLY - "Early load AMD microcode"
-clean_blob arch/x86/kernel/cpu/microcode/amd_early.c
-clean_kconfig arch/x86/Kconfig MICROCODE_AMD_EARLY
-clean_mk CONFIG_MICROCODE_AMD_EARLY arch/x86/kernel/cpu/microcode/Makefile
-
 announce MICROCODE_INTEL - "Intel microcode patch loading support"
 reject_firmware arch/x86/kernel/cpu/microcode/intel.c
 clean_blob arch/x86/kernel/cpu/microcode/intel.c
 clean_kconfig arch/x86/Kconfig MICROCODE_INTEL
 clean_mk CONFIG_MICROCODE_INTEL arch/x86/kernel/cpu/microcode/Makefile
 
-announce MICROCODE_INTEL_EARLY - "Early load Intel microcode"
-clean_blob arch/x86/kernel/cpu/microcode/intel_early.c
-clean_kconfig arch/x86/Kconfig MICROCODE_INTEL_EARLY
-clean_mk CONFIG_MICROCODE_INTEL_EARLY arch/x86/kernel/cpu/microcode/Makefile
-
 announce MICROCODE_EARLY - "Early load microcode"
 clean_blob Documentation/x86/early-microcode.txt
-clean_kconfig arch/x86/Kconfig MICROCODE_EARLY
-clean_mk CONFIG_MICROCODE_EARLY arch/x86/kernel/cpu/microcode/Makefile
 
 # arm
 
@@ -664,7 +652,9 @@ clean_mk CONFIG_DRM_AST drivers/gpu/drm/ast/Makefile
 
 announce DRM_I915 - "Intel 8xx/9xx/G3x/G4x/HD Graphics"
 reject_firmware drivers/gpu/drm/i915/intel_csr.c
+reject_firmware drivers/gpu/drm/i915/intel_guc_loader.c
 clean_blob drivers/gpu/drm/i915/intel_csr.c
+clean_blob drivers/gpu/drm/i915/intel_guc_loader.c
 clean_kconfig drivers/gpu/drm/i915/Kconfig DRM_I915
 clean_mk CONFIG_DRM_I915 drivers/gpu/drm/i915/Makefile
 
@@ -1480,28 +1470,6 @@ clean_blob drivers/net/ethernet/intel/e100.c
 clean_kconfig drivers/net/ethernet/intel/Kconfig E100
 clean_mk CONFIG_E100 drivers/net/ethernet/intel/Makefile
 
-announce FT1000_PCMCIA - "Driver for ft1000 pcmcia device."
-clean_file drivers/staging/ft1000/ft1000-pcmcia/ft1000.img
-clean_blob drivers/staging/ft1000/ft1000-pcmcia/boot.h
-clean_sed '
-/^static int ft1000_reset_card/,/^}$/ {
-  /card_bootload/i\
-		return /*(DEBLOBBED)*/ false;
-}
-' drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c \
-  'disabled non-Free firmware-loading machinery'
-reject_firmware drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c
-clean_blob drivers/staging/ft1000/ft1000-pcmcia/ft1000_hw.c
-clean_kconfig drivers/staging/ft1000/Kconfig FT1000_PCMCIA
-clean_mk CONFIG_FT1000_PCMCIA drivers/staging/ft1000/Makefile
-
-announce FT1000_USB - "Driver for ft1000 USB devices."
-clean_file drivers/staging/ft1000/ft1000-usb/ft3000.img
-reject_firmware drivers/staging/ft1000/ft1000-usb/ft1000_usb.c
-clean_blob drivers/staging/ft1000/ft1000-usb/ft1000_usb.c
-clean_kconfig drivers/staging/ft1000/Kconfig FT1000_USB
-clean_mk CONFIG_FT1000_USB drivers/staging/ft1000/Makefile
-
 announce LIQUIDIO - "Cavium LiquidIO support"
 reject_firmware drivers/net/ethernet/cavium/liquidio/lio_main.c
 clean_blob drivers/net/ethernet/cavium/liquidio/lio_main.c
@@ -1523,6 +1491,12 @@ clean_blob drivers/net/ethernet/qlogic/netxen/netxen_nic.h
 clean_blob drivers/net/ethernet/qlogic/netxen/netxen_nic_main.c
 clean_kconfig drivers/net/ethernet/qlogic/Kconfig NETXEN_NIC
 clean_mk CONFIG_NETXEN_NIC drivers/net/ethernet/qlogic/Makefile
+
+announce QED - "QLogic QED 25/40/100Gb core driver"
+reject_firmware drivers/net/ethernet/qlogic/qed/qed_main.c
+clean_blob drivers/net/ethernet/qlogic/qed/qed_main.c
+clean_kconfig drivers/net/ethernet/qlogic/Kconfig QED
+clean_mk CONFIG_QED drivers/net/ethernet/qlogic/qed/Makefile
 
 announce QLCNIC - "QLOGIC QLCNIC 1/10Gb Converged Ethernet NIC Support"
 reject_firmware drivers/net/ethernet/qlogic/qlcnic/qlcnic_init.c
@@ -1631,6 +1605,17 @@ clean_kconfig drivers/net/ethernet/smsc/Kconfig PCMCIA_SMC91C92
 clean_mk CONFIG_PCMCIA_SMC91C92 drivers/net/ethernet/smsc/Makefile
 
 # near-field communication
+
+announce NFC_FDP - "Intel FDP NFC driver"
+reject_firmware drivers/nfc/fdp/fdp.c
+clean_blob drivers/nfc/fdp/fdp.c
+clean_kconfig drivers/nfc/fdp/Kconfig NFC_FDP
+clean_mk CONFIG_NFC_FDP drivers/nfc/fdp/Makefile
+
+announce NFC_MRVL - "Marvell NFC core driver"
+reject_firmware drivers/nfc/nfcmrvl/fw_dnld.c
+clean_kconfig drivers/nfc/nfcmrvl/Kconfig NFC_MRVL
+clean_mk CONFIG_NFC_MRVL drivers/nfc/nfcmrvl/Makefile
 
 announce NFC_NXP_NCI - "NXP-NCI NFC driver"
 reject_firmware drivers/nfc/nxp-nci/firmware.c
@@ -1927,7 +1912,7 @@ clean_mk CONFIG_ATH10K drivers/net/wireless/ath/ath10k/Makefile
 announce ATH10K NL80211_TESTMODE - "nl80211 testmode command"
 reject_firmware drivers/net/wireless/ath/ath10k/testmode.c
 clean_sed '
-/^[\t ]*\/\* utf\.bin firmware image/ s,/\* utf\.bin,/*(DEBLOBBED)*//*,
+s,^\([\t ]*\/\* We didn.t find FW UTF API 1 \)("utf\.bin"),\1*//*(DEBLOBBED)*//*,
 ' drivers/net/wireless/ath/ath10k/testmode.c 'removed blob name in comment'
 clean_kconfig net/wireless/Kconfig NL80211_TESTMODE
 clean_mk CONFIG_NL80211_TESTMODE drivers/net/wireless/ath/ath10k/Makefile
@@ -2039,16 +2024,22 @@ clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
 clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
 
+announce RTL8XXXU - "RTL8723AU/RTL8188[CR]U/RTL819[12]CU (mac80211) support"
+reject_firmware drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
+clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
+clean_kconfig drivers/net/wireless/realtek/rtl8xxxu/Kconfig RTL8XXXU
+clean_mk CONFIG_RTL8XXXU drivers/net/wireless/realtek/rtl8xxxu/Makefile
+
 announce RTLWIFI - "Realtek Wireless Network Adapters"
-reject_firmware drivers/net/wireless/rtlwifi/core.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTLWIFI
-clean_mk CONFIG_RTLWIFI drivers/net/wireless/rtlwifi/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/core.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTLWIFI
+clean_mk CONFIG_RTLWIFI drivers/net/wireless/realtek/rtlwifi/Makefile
 
 announce RTL8188EE - "Realtek RTL8188EE Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8188ee/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8188EE
-clean_mk CONFIG_RTL8188EE drivers/net/wireless/rtlwifi/rtl8188ee/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8188ee/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8188ee/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8188EE
+clean_mk CONFIG_RTL8188EE drivers/net/wireless/realtek/rtlwifi/rtl8188ee/Makefile
 
 announce R8188EU - "Realtek RTL8188EU Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8188eu/hal/fw.c
@@ -2058,28 +2049,28 @@ clean_kconfig drivers/staging/rtl8188eu/Kconfig R8188EU
 clean_mk CONFIG_R8188EU drivers/staging/rtl8188eu/Makefile
 
 announce RTL8192CE - "Realtek RTL8192CE/RTL8188CE Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8192ce/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192CE
-clean_mk CONFIG_RTL8192CE drivers/net/wireless/rtlwifi/rtl8192ce/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8192ce/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8192ce/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8192CE
+clean_mk CONFIG_RTL8192CE drivers/net/wireless/realtek/rtlwifi/rtl8192ce/Makefile
 
 announce RTL8192CU - "Realtek RTL8192CU/RTL8188CU USB Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8192cu/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8192cu/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192CU
-clean_mk CONFIG_RTL8192CU drivers/net/wireless/rtlwifi/rtl8192cu/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8192cu/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8192cu/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8192CU
+clean_mk CONFIG_RTL8192CU drivers/net/wireless/realtek/rtlwifi/rtl8192cu/Makefile
 
 announce RTL8192DE - "Realtek RTL8192DE/RTL8188DE PCIe Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8192de/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8192de/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192DE
-clean_mk CONFIG_RTL8192DE drivers/net/wireless/rtlwifi/rtl8192de/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8192de/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8192de/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8192DE
+clean_mk CONFIG_RTL8192DE drivers/net/wireless/realtek/rtlwifi/rtl8192de/Makefile
 
 announce RTL8192SE - "Realtek RTL8192SE/RTL8191SE PCIe Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8192se/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8192se/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192SE
-clean_mk CONFIG_RTL8192SE drivers/net/wireless/rtlwifi/rtl8192se/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8192se/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8192se/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8192SE
+clean_mk CONFIG_RTL8192SE drivers/net/wireless/realtek/rtlwifi/rtl8192se/Makefile
 
 announce RTL8192E - "RealTek RTL8192E Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192e/rtl8192e/r8192E_firmware.c
@@ -2089,10 +2080,10 @@ clean_kconfig drivers/staging/rtl8192e/rtl8192e/Kconfig RTL8192E
 clean_mk CONFIG_RTL8192E drivers/staging/rtl8192e/Makefile
 
 announce RTL8192EE - "RealTek RTL8192EE Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8192ee/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8192ee/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8192EE
-clean_mk CONFIG_RTL8192EE drivers/net/wireless/rtlwifi/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8192ee/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8192ee/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8192EE
+clean_mk CONFIG_RTL8192EE drivers/net/wireless/realtek/rtlwifi/Makefile
 
 announce RTL8192U - "RealTek RTL8192U Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8192u/r819xU_firmware.c
@@ -2107,10 +2098,10 @@ clean_kconfig drivers/staging/rtl8712/Kconfig R8712U
 clean_mk CONFIG_R8712U drivers/staging/rtl8712/Makefile
 
 announce RTL8723AE - "Realtek RTL8723AE PCIe Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8723ae/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8723ae/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8723AE
-clean_mk CONFIG_RTL8723AE drivers/net/wireless/rtlwifi/rtl8723ae/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8723ae/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8723ae/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8723AE
+clean_mk CONFIG_RTL8723AE drivers/net/wireless/realtek/rtlwifi/rtl8723ae/Makefile
 
 announce R8723AU - "RealTek RTL8723AU Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8723au/hal/rtl8723a_hal_init.c
@@ -2120,16 +2111,16 @@ clean_kconfig drivers/staging/rtl8723au/Kconfig R8723AU
 clean_mk CONFIG_R8723AU drivers/staging/rtl8723au/Makefile
 
 announce RTL8723BE - "Realtek RTL8723BE PCIe Wireless Network Adapter"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8723be/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8723be/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8723BE
-clean_mk CONFIG_RTL8723BE drivers/net/wireless/rtlwifi/rtl8723be/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8723be/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8723be/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8723BE
+clean_mk CONFIG_RTL8723BE drivers/net/wireless/realtek/rtlwifi/rtl8723be/Makefile
 
 announce RTL8821AE - "Realtek RTL8821AE/RTL8812AE Wireless LAN NIC driver"
-reject_firmware drivers/net/wireless/rtlwifi/rtl8821ae/sw.c
-clean_blob drivers/net/wireless/rtlwifi/rtl8821ae/sw.c
-clean_kconfig drivers/net/wireless/rtlwifi/Kconfig RTL8821AE
-clean_mk CONFIG_RTL8821AE drivers/net/wireless/rtlwifi/rtl8821ae/Makefile
+reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8821ae/sw.c
+clean_blob drivers/net/wireless/realtek/rtlwifi/rtl8821ae/sw.c
+clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8821AE
+clean_mk CONFIG_RTL8821AE drivers/net/wireless/realtek/rtlwifi/rtl8821ae/Makefile
 
 announce VT6656 - "VIA Technologies VT6656 support"
 reject_firmware drivers/staging/vt6656/firmware.c
@@ -2177,7 +2168,6 @@ clean_mk CONFIG_WCN36XX drivers/net/wireless/ath/wcn36xx/Makefile
 
 announce WILC1000 - "WILC1000 support (WiFi only)"
 reject_firmware drivers/staging/wilc1000/linux_wlan.c
-clean_blob drivers/staging/wilc1000/linux_wlan.c
 clean_blob drivers/staging/wilc1000/Makefile
 clean_sed 's,\\"/\*(DEBLOBBED)\*/\\","&",g' drivers/staging/wilc1000/Makefile \
     "quote deblobbing markers"
@@ -2234,6 +2224,7 @@ clean_kconfig drivers/bluetooth/Kconfig BT_HCIBTUSB
 clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
 announce BT_INTEL - "Bluetooth support for Intel devices"
+reject_firmware drivers/bluetooth/btintel.c
 clean_blob drivers/bluetooth/btintel.c
 clean_kconfig drivers/bluetooth/Kconfig BT_INTEL
 clean_mk CONFIG_BT_INTEL drivers/bluetooth/Makefile
@@ -2436,6 +2427,12 @@ reject_firmware drivers/input/touchscreen/atmel_mxt_ts.c
 clean_blob drivers/input/touchscreen/atmel_mxt_ts.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_ATMEL_MXT
 clean_mk CONFIG_TOUCHSCREEN_ATMEL_MXT drivers/input/touchscreen/Makefile
+
+announce TOUCHSCREEN_ROHM_BU21023 - "ROHM BU21023/24 Dual touch support resistive touchscreens"
+reject_firmware drivers/input/touchscreen/rohm_bu21023.c
+clean_blob drivers/input/touchscreen/rohm_bu21023.c
+clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_ROHM_BU21023
+clean_mk CONFIG_TOUCHSCREEN_ROHM_BU21023 drivers/input/touchscreen/Makefile
 
 announce TOUCHSCREEN_WDT87XX_I2C - "Weida HiTech I2C touchscreen"
 reject_firmware drivers/input/touchscreen/wdt87xx_i2c.c
@@ -3052,7 +3049,9 @@ clean_mk CONFIG_SND_SOC_INTEL_HASWELL sound/soc/intel/haswell/Makefile
 
 announce SND_SOC_INTEL_SKYLAKE - undocumented
 reject_firmware sound/soc/intel/skylake/skl-sst.c
+reject_firmware sound/soc/intel/skylake/skl-topology.c
 clean_blob sound/soc/intel/skylake/skl-sst.c
+clean_blob sound/soc/intel/skylake/skl-topology.c
 clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_SKYLAKE
 clean_mk CONFIG_SND_SOC_INTEL_SKYLAKE sound/soc/intel/skylake/Makefile
 
@@ -3145,7 +3144,8 @@ clean_mk CONFIG_SND_USB_6FIRE sound/usb/6fire/Makefile
 
 announce KEYSTONE_NAVIGATOR_QMSS - "Keystone Queue Manager Sub System"
 reject_firmware drivers/soc/ti/knav_qmss_queue.c
-clean_blob Documentation/devicetree/bindings/soc/ti/keystone-navigator-qmss.txt
+clean_blob drivers/soc/ti/knav_qmss_queue.c
+clean_blob Documentation/arm/keystone/knav-qmss.txt
 clean_kconfig drivers/soc/ti/Kconfig KEYSTONE_NAVIGATOR_QMSS
 clean_mk CONFIG_KEYSTONE_NAVIGATOR_QMSS drivers/soc/ti/Makefile
 
