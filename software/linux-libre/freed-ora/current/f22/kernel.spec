@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -681,32 +681,14 @@ Patch574: ovl-fix-permission-checking-for-setattr.patch
 #CVE-2015-8709 rhbz 1295287 1295288
 Patch603: ptrace-being-capable-wrt-a-process-requires-mapped-u.patch
 
-#atch604: drm-i915-shut-up-gen8-SDE-irq-dmesg-noise-again.patch
-
 #CVE-2015-7513 rhbz 1284847 1296142
 Patch605: KVM-x86-Reload-pit-counters-for-all-channels-when-re.patch
-
-#rhbz 1296677
-Patch606: HID-multitouch-Fetch-feature-reports-on-demand-for-W.patch
-Patch641: HID-multitouch-fix-input-mode-switching-on-some-Elan.patch
 
 #rhbz 1281368
 Patch607: drm-nouveau-Fix-pre-nv50-pageflip-events-v4.patch
 
-#rhbz 1296820
-Patch608: drm-nouveau-pmu-do-not-assume-a-PMU-is-present.patch
-
 #rhbz 1083853
 Patch610: PNP-Add-Broadwell-to-Intel-MCH-size-workaround.patch
-
-#CVE-2015-7566 rhbz 1296466 1297517
-Patch623: usb-serial-visor-fix-crash-on-detecting-device-witho.patch
-
-#rhbz 1298309
-#atch624: drm-i915-Do-a-better-job-at-disabling-primary-plane-.patch
-
-#rhbz 1298996
-Patch625: block-ensure-to-split-after-potentially-bouncing-a-b.patch
 
 #rhbz 1298192
 Patch626: selinux-fix-bug-in-conditional-rules-handling.patch
@@ -724,9 +706,6 @@ Patch630: SCSI-fix-bug-in-scsi_dev_info_list-matching.patch
 Patch631: btrfs-handle-invalid-num_stripes-in-sys_array.patch
 Patch632: Btrfs-fix-fitrim-discarding-device-area-reserved-for.patch
 
-#CVE-2016-0723 rhbz 1296253 1300224
-Patch637: tty-Fix-unsafe-ldisc-reference-via-ioctl-TIOCGETD.patch
-
 #rhbz 1279653
 Patch638: rtlwifi-rtl8821ae-Fix-5G-failure-when-EEPROM-is-inco.patch
 
@@ -737,7 +716,6 @@ Patch639: netfilter-nf_nat_redirect-add-missing-NULL-pointer-c.patch
 Patch640: PNP-Add-Haswell-ULT-to-Intel-MCH-size-workaround.patch
 
 #rhbz 1278942
-Patch642: media-Revert-media-ivtv-avoid-going-past-input-audio.patch
 Patch643: media-ivtv-avoid-going-past-input-audio-array.patch
 
 #rhbz 1302037
@@ -746,6 +724,24 @@ Patch645: cfg80211-wext-fix-message-ordering.patch
 
 #rhbz 1255325
 Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
+
+#rhbz 1303270
+Patch647: rtlwifi-fix-memory-leak-for-USB-device.patch
+
+#CVE-2016-0617 rhbz 1305803 1305804
+Patch648: fs-hugetlbfs-inode.c-fix-bugs-in-hugetlb_vmtruncate_.patch
+
+#CVE-2016-2383 rhbz 1308452 1308453
+Patch650: bpf-fix-branch-offset-adjustment-on-backjumps-after-.patch
+
+#rhbz 1306987
+Patch651: Input-elantech-mark-protocols-v2-and-v3-as-semi-mt.patch
+
+#rhbz 1305181 1299901
+Patch652: drm-mgag200-fix-kernel-hang-in-cursor-code.patch
+
+#CVE-2015-8812 rhbz 1303532 1309548
+Patch653: iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1529,32 +1525,14 @@ ApplyPatch ovl-fix-permission-checking-for-setattr.patch
 #CVE-2015-8709 rhbz 1295287 1295288
 ApplyPatch ptrace-being-capable-wrt-a-process-requires-mapped-u.patch
 
-#atch604: drm-i915-shut-up-gen8-SDE-irq-dmesg-noise-again.patch
-
 #CVE-2015-7513 rhbz 1284847 1296142
 ApplyPatch KVM-x86-Reload-pit-counters-for-all-channels-when-re.patch
-
-#rhbz 1296677
-ApplyPatch HID-multitouch-Fetch-feature-reports-on-demand-for-W.patch
-ApplyPatch HID-multitouch-fix-input-mode-switching-on-some-Elan.patch
 
 #rhbz 1281368
 ApplyPatch drm-nouveau-Fix-pre-nv50-pageflip-events-v4.patch
 
-#rhbz 1296820
-ApplyPatch drm-nouveau-pmu-do-not-assume-a-PMU-is-present.patch
-
 #rhbz 1083853
 ApplyPatch PNP-Add-Broadwell-to-Intel-MCH-size-workaround.patch
-
-#CVE-2015-7566 rhbz 1296466 1297517
-ApplyPatch usb-serial-visor-fix-crash-on-detecting-device-witho.patch
-
-#rhbz 1298309
-#atch624: drm-i915-Do-a-better-job-at-disabling-primary-plane-.patch
-
-#rhbz 1298996
-ApplyPatch block-ensure-to-split-after-potentially-bouncing-a-b.patch
 
 #rhbz 1298192
 ApplyPatch selinux-fix-bug-in-conditional-rules-handling.patch
@@ -1572,9 +1550,6 @@ ApplyPatch SCSI-fix-bug-in-scsi_dev_info_list-matching.patch
 ApplyPatch btrfs-handle-invalid-num_stripes-in-sys_array.patch
 ApplyPatch Btrfs-fix-fitrim-discarding-device-area-reserved-for.patch
 
-#CVE-2016-0723 rhbz 1296253 1300224
-ApplyPatch tty-Fix-unsafe-ldisc-reference-via-ioctl-TIOCGETD.patch
-
 #rhbz 1279653
 ApplyPatch rtlwifi-rtl8821ae-Fix-5G-failure-when-EEPROM-is-inco.patch
 
@@ -1585,7 +1560,6 @@ ApplyPatch netfilter-nf_nat_redirect-add-missing-NULL-pointer-c.patch
 ApplyPatch PNP-Add-Haswell-ULT-to-Intel-MCH-size-workaround.patch
 
 #rhbz 1278942
-ApplyPatch media-Revert-media-ivtv-avoid-going-past-input-audio.patch
 ApplyPatch media-ivtv-avoid-going-past-input-audio-array.patch
 
 #rhbz 1302037
@@ -1594,6 +1568,24 @@ ApplyPatch cfg80211-wext-fix-message-ordering.patch
 
 #rhbz 1255325
 ApplyPatch HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
+
+#rhbz 1303270
+ApplyPatch rtlwifi-fix-memory-leak-for-USB-device.patch
+
+#CVE-2016-0617 rhbz 1305803 1305804
+ApplyPatch fs-hugetlbfs-inode.c-fix-bugs-in-hugetlb_vmtruncate_.patch
+
+#CVE-2016-2383 rhbz 1308452 1308453
+ApplyPatch bpf-fix-branch-offset-adjustment-on-backjumps-after-.patch
+
+#rhbz 1306987
+ApplyPatch Input-elantech-mark-protocols-v2-and-v3-as-semi-mt.patch
+
+#rhbz 1305181 1299901
+ApplyPatch drm-mgag200-fix-kernel-hang-in-cursor-code.patch
+
+#CVE-2015-8812 rhbz 1303532 1309548
+ApplyPatch iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2457,6 +2449,31 @@ fi
 #
 # 
 %changelog
+* Mon Feb 22 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* GNU Linux-libre 4.3.6-gnu.
+
+* Sat Feb 20 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.6-200
+- Linux v4.3.6
+
+* Thu Feb 18 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-8812 cxgb3 use after free (rhbz 1303532 1309548)
+
+* Wed Feb 17 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport mgag200 cursor hang fix (rhbz 1305181 1299901)
+
+* Tue Feb 16 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport fix for elantech touchpads (rhbz 1306987)
+
+* Mon Feb 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-2383 incorrect branch fixups for eBPG allow arbitrary reads (rhbz 1308452 1308453)
+- CVE-2016-2384 double free in usb-audio from invalid USB descriptor (rhbz 1308444 1308445)
+
+* Tue Feb 09 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-0617 fix hugetlbfs inode.c issues (rhbz 1305803 1305804)
+
+* Tue Feb 02 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport patch to fix memory leak in rtlwifi USB devices (rhbz 1303270)
+
 * Mon Feb  1 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 * GNU Linux-libre 4.3.5-gnu.
 
