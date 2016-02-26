@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -742,6 +742,8 @@ Patch652: drm-mgag200-fix-kernel-hang-in-cursor-code.patch
 
 #CVE-2015-8812 rhbz 1303532 1309548
 Patch653: iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
+
+Patch654: Revert-usb-hub-do-not-clear-BOS-field-during-reset-d.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1586,6 +1588,8 @@ ApplyPatch drm-mgag200-fix-kernel-hang-in-cursor-code.patch
 
 #CVE-2015-8812 rhbz 1303532 1309548
 ApplyPatch iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
+
+ApplyPatch Revert-usb-hub-do-not-clear-BOS-field-during-reset-d.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2449,6 +2453,9 @@ fi
 #
 # 
 %changelog
+* Mon Feb 22 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.3.6-201
+- Revert broken usb patch
+
 * Mon Feb 22 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 * GNU Linux-libre 4.3.6-gnu.
 
