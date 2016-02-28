@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -544,10 +544,6 @@ Patch07: freedo.patch
 
 Patch451: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
-Patch452: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
-
-Patch453: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
-
 Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
 
 Patch456: arm64-acpi-drop-expert-patch.patch
@@ -678,6 +674,12 @@ Patch651: Input-elantech-mark-protocols-v2-and-v3-as-semi-mt.patch
 
 #CVE-2015-8812 rhbz 1303532 1309548
 Patch653: iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
+
+#Known use after free, possibly rhbz 1310579
+Patch654: 0001-usb-hub-fix-panic-in-usb_reset_and_verify_device.patch
+
+#rhbz 1310258
+Patch655: iommu-fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2219,6 +2221,15 @@ fi
 #
 # 
 %changelog
+* Tue Feb 23 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.2-301
+- Fix a known use after free issue in the USB hub code
+- Fix AMD IOMMU warning spew on every boot (rhbz 1310258)
+
+* Sat Feb 20 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Drop AMD xgbe-a0 driver (fix aarch64 FTBFS)
+- Minor aarch64/ARMv7 config cleanup
+- ARM: enable nvmem drivers
+
 * Sat Feb 20 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4.2-gnu.
 
