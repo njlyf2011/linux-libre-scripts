@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -555,6 +555,8 @@ Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
 Patch456: arm64-acpi-drop-expert-patch.patch
 
 Patch457: ARM-tegra-usb-no-reset.patch
+
+Patch458: drm-nouveau-platform-Fix-deferred-probe.patch
 
 Patch460: mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
 
@@ -1341,6 +1343,8 @@ ApplyPatch arm64-avoid-needing-console-to-enable-serial-console.patch
 ApplyPatch arm64-acpi-drop-expert-patch.patch
 
 ApplyPatch ARM-tegra-usb-no-reset.patch
+
+ApplyPatch drm-nouveau-platform-Fix-deferred-probe.patch
 
 ApplyPatch mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
 
@@ -2331,7 +2335,11 @@ fi
 #
 # 
 %changelog
-* Sun Feb 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Feb 27 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.4.3-201
+- Bring missed 4.4 ARMv7 fixes from F-23 kernel
+- Fix deferred nouveau module loading on tegra
+
+* Fri Feb 26 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Feb 28
 * GNU Linux-libre 4.4.3-gnu.
 
 * Fri Feb 26 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.3-200
