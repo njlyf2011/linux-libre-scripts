@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -556,8 +556,6 @@ Patch456: arm64-acpi-drop-expert-patch.patch
 
 Patch457: ARM-tegra-usb-no-reset.patch
 
-Patch458: drm-nouveau-platform-Fix-deferred-probe.patch
-
 Patch460: mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
 
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
@@ -650,8 +648,6 @@ Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
 #rhbz 1288687
 Patch572: alua_fix.patch
 
-Patch604: drm-i915-shut-up-gen8-SDE-irq-dmesg-noise-again.patch
-
 #rhbz 1083853
 Patch610: PNP-Add-Broadwell-to-Intel-MCH-size-workaround.patch
 
@@ -668,27 +664,22 @@ Patch645: cfg80211-wext-fix-message-ordering.patch
 #rhbz 1255325
 Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 
-#CVE-2016-2383 rhbz 1308452 1308453
-Patch650: bpf-fix-branch-offset-adjustment-on-backjumps-after-.patch
-
-#CVE-2015-8812 rhbz 1303532 1309548
-Patch653: iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
-
 #Known use after free, possibly rhbz 1310579
 Patch654: 0001-usb-hub-fix-panic-in-usb_reset_and_verify_device.patch
 
 #rhbz 1310258
 Patch655: iommu-fix.patch
 
-#CVE-2016-2550 rhbz 1311517 1311518
-Patch656: unix-correctly-track-in-flight-fds-in-sending-proces.patch
-
 #rhbz 1310682
 Patch657: 0001-Test-ata-fix.patch
 
-Patch658: nouveau-displayoff-fix.patch
-# END OF PATCH DEFINITIONS
+#Mitigates CVE-2013-4312 rhbz 1313428 1313433
+Patch659: pipe-limit-the-per-user-amount-of-pages-allocated-in.patch
 
+#rhbz 1310252 1313318
+Patch660: 0001-drm-i915-Pretend-cursor-is-always-on-for-ILK-style-W.patch
+
+# END OF PATCH DEFINITIONS
 %endif
 
 BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
@@ -717,6 +708,7 @@ Requires(pre): %{initrd_prereq}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
 Requires(preun): systemd >= 200\
+Conflicts: xfsprogs < 4.3.0-1\
 Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
@@ -1344,8 +1336,6 @@ ApplyPatch arm64-acpi-drop-expert-patch.patch
 
 ApplyPatch ARM-tegra-usb-no-reset.patch
 
-ApplyPatch drm-nouveau-platform-Fix-deferred-probe.patch
-
 ApplyPatch mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
 
 ApplyPatch arm-i.MX6-Utilite-device-dtb.patch
@@ -1454,25 +1444,21 @@ ApplyPatch cfg80211-wext-fix-message-ordering.patch
 #rhbz 1255325
 ApplyPatch HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 
-#CVE-2016-2383 rhbz 1308452 1308453
-ApplyPatch bpf-fix-branch-offset-adjustment-on-backjumps-after-.patch
-
-#CVE-2015-8812 rhbz 1303532 1309548
-ApplyPatch iw_cxgb3-Fix-incorrectly-returning-error-on-success.patch
-
 #Known use after free, possibly rhbz 1310579
 ApplyPatch 0001-usb-hub-fix-panic-in-usb_reset_and_verify_device.patch
 
 #rhbz 1310258
 ApplyPatch iommu-fix.patch
 
-#CVE-2016-2550 rhbz 1311517 1311518
-ApplyPatch unix-correctly-track-in-flight-fds-in-sending-proces.patch
-
 #rhbz 1310682
 ApplyPatch 0001-Test-ata-fix.patch
 
-ApplyPatch nouveau-displayoff-fix.patch
+#Mitigates CVE-2013-4312 rhbz 1313428 1313433
+ApplyPatch pipe-limit-the-per-user-amount-of-pages-allocated-in.patch
+
+#rhbz 1310252 1313318
+ApplyPatch 0001-drm-i915-Pretend-cursor-is-always-on-for-ILK-style-W.patch
+
 # END OF PATCH APPLICATIONS
 
 %endif
@@ -2335,6 +2321,28 @@ fi
 #
 # 
 %changelog
+* Sat Mar  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4.4-gnu.
+
+* Fri Mar 04 2016 Laura Abbott <labbott@redhat.com> - 4.4.4-200
+- Require updated XFS utilities
+
+* Thu Mar 03 2016 Laura Abbott <labbott@redhat.com>
+- Linux v4.4.4
+- Switch back to not setting CONFIG_ACPI_REV_OVERRIDE_POSSIBLE
+
+* Thu Mar 03 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Partial SMAP bypass on 64-bit kernels (rhbz 1314253 1314255)
+
+* Wed Mar 02 2016 Laura Abbott <labbott@redhat.com>
+- Fix for flickering on Intel graphics (rhbz 1310252 1313318)
+
+* Wed Mar 02 2016 Laura Abbott <labbott@redhat.com>
+- Re-enable dropped CONFIG_ACPI_REV_OVERRIDE_POSSIBLE (rhbz 1313434)
+
+* Wed Mar 02 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- pipe: limit the per-user amount of pages allocated in pipes (rhbz 1313428 1313433)
+
 * Sat Feb 27 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.4.3-201
 - Bring missed 4.4 ARMv7 fixes from F-23 kernel
 - Fix deferred nouveau module loading on tegra
