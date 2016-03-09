@@ -1,8 +1,0 @@
-.svn
-clog
-*.bz2
-*.xz
-*.rpm
-*.orig
-kernel-[234].*/
-perf-man-*.tar.gz
