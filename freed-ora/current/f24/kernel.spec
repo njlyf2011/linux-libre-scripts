@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -57,7 +57,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-2.6.".
 #define stablelibre -4.4%{?stablegnux}
-#define rcrevlibre  -4.4%{?rcrevgnux}
+%define rcrevlibre  -4.4%{?rcrevgnux}
 #define gitrevlibre -4.4%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -103,7 +103,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -128,6 +128,7 @@ Summary: The Linux kernel
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
+%define with_cross_headers   %{?_without_cross_headers:   0} %{?!_without_cross_headers:   1}
 # kernel-firmware
 %define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
 # perf
@@ -267,6 +268,7 @@ Summary: The Linux kernel
 %ifarch noarch
 %define with_up 0
 %define with_headers 0
+%define with_cross_headers 0
 %define with_tools 0
 %define with_perf 0
 %define all_arch_configs kernel-%{version}-*.config
@@ -332,6 +334,7 @@ Summary: The Linux kernel
 # just like we used to only build them on i386 for x86
 %ifnarch armv7hl
 %define with_headers 0
+%define with_cross_headers 0
 %define with_perf 0
 %define with_tools 0
 %endif
@@ -448,7 +451,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -544,17 +547,23 @@ Patch07: freedo.patch
 
 Patch451: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
-Patch452: amd-xgbe-a0-Add-support-for-XGBE-on-A0.patch
-
-Patch453: amd-xgbe-phy-a0-Add-support-for-XGBE-PHY-on-A0.patch
-
 Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
 
 Patch456: arm64-acpi-drop-expert-patch.patch
 
+# http://patchwork.ozlabs.org/patch/587554/
 Patch457: ARM-tegra-usb-no-reset.patch
 
-Patch460: mfd-wm8994-Ensure-that-the-whole-MFD-is-built-into-a.patch
+Patch458: ARM-mvebu-change-order-of-ethernet-DT-nodes-on-Armada-38x.patch
+
+# http://www.spinics.net/lists/arm-kernel/msg480703.html
+Patch459: Geekbox-device-tree-support.patch
+
+# http://www.spinics.net/lists/arm-kernel/msg483898.html
+Patch460: Initial-AllWinner-A64-and-PINE64-support.patch
+
+# http://www.spinics.net/lists/linux-tegra/msg25152.html
+Patch461: Fix-tegra-to-use-stdout-path-for-serial-console.patch
 
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
 
@@ -630,47 +639,31 @@ Patch501: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
-Patch503: drm-i915-turn-off-wc-mmaps.patch
+# Patch503: drm-i915-turn-off-wc-mmaps.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
-
-#CVE-2015-7833 rhbz 1270158 1270160
-Patch567: usbvision-fix-crash-on-detecting-device-with-invalid.patch
-
-#rhbz 1287819
-Patch570: HID-multitouch-enable-palm-rejection-if-device-imple.patch
 
 #rhbz 1286293
 Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
 
-#rhbz 1288687
-Patch572: alua_fix.patch
-
-#CVE-2015-8709 rhbz 1295287 1295288
-Patch603: ptrace-being-capable-wrt-a-process-requires-mapped-u.patch
-
-Patch604: drm-i915-shut-up-gen8-SDE-irq-dmesg-noise-again.patch
-
-#rhbz 1275718
-Patch605: 0001-device-property-always-check-for-fwnode-type.patch
-Patch606: 0002-device-property-rename-helper-functions.patch
-Patch607: 0003-device-property-refactor-built-in-properties-support.patch
-Patch608: 0004-device-property-keep-single-value-inplace.patch
-Patch609: 0005-device-property-helper-macros-for-property-entry-cre.patch
-Patch610: 0006-device-property-improve-readability-of-macros.patch
-Patch611: 0007-device-property-return-EINVAL-when-property-isn-t-fo.patch
-Patch612: 0008-device-property-Fallback-to-secondary-fwnode-if-prim.patch
-Patch613: 0009-device-property-Take-a-copy-of-the-property-set.patch
-Patch614: 0010-driver-core-platform-Add-support-for-built-in-device.patch
-Patch615: 0011-driver-core-Do-not-overwrite-secondary-fwnode-with-N.patch
-Patch616: 0012-mfd-core-propagate-device-properties-to-sub-devices-.patch
-Patch617: 0013-mfd-intel-lpss-Add-support-for-passing-device-proper.patch
-Patch618: 0014-mfd-intel-lpss-Pass-SDA-hold-time-to-I2C-host-contro.patch
-Patch619: 0015-mfd-intel-lpss-Pass-HSUART-configuration-via-propert.patch
-Patch620: 0016-i2c-designware-Convert-to-use-unified-device-propert.patch
-
 #rhbz 1295646
 Patch621: drm-udl-Use-unlocked-gem-unreferencing.patch
+
+#Required for some persistent memory options
+Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
+
+#rhbz 1302037
+Patch644: wext-fix-message-delay-ordering.patch
+Patch645: cfg80211-wext-fix-message-ordering.patch
+
+#rhbz 1255325
+Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
+
+#rhbz 1309658
+Patch648: 0001-mm-CONFIG_NR_ZONES_EXTENDED.patch
+
+#rhbz 1312102
+Patch649: perf-tools-Fix-python-extension-build.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -702,6 +695,7 @@ Requires(pre): %{initrd_prereq}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
 Requires(preun): systemd >= 200\
+Conflicts: xfsprogs < 4.3.0-1\
 Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
@@ -734,6 +728,17 @@ header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 glibc package.
 
+%package cross-headers
+Provides: kernel-libre-cross-headers = %{rpmversion}-%{pkg_release}
+Summary: Header files for the Linux kernel for use by cross-glibc
+Group: Development/System
+%description cross-headers
+Kernel-cross-headers includes the C header files that specify the interface
+between the Linux kernel and userspace libraries and programs.  The
+header files define structures and constants that are needed for
+building most standard programs and are also needed for rebuilding the
+cross-glibc package.
+
 %package firmware
 Summary: Firmware files used by the Linux kernel
 Group: Development/System
@@ -744,6 +749,7 @@ Kernel-firmware includes firmware files required for some devices to
 operate.
 
 %package bootwrapper
+Provides: kernel-libre-bootwrapper = %{rpmversion}-%{pkg_release}
 Summary: Boot wrapper files for generating combined kernel + initrd images
 Group: Development/System
 Requires: gzip binutils
@@ -754,6 +760,7 @@ files combining both kernel and initial ramdisk.
 %package debuginfo-common-%{_target_cpu}
 Summary: Kernel source files used by %{name}-debuginfo packages
 Group: Development/Debug
+Provides: installonlypkg(kernel)
 %description debuginfo-common-%{_target_cpu}
 This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
@@ -880,6 +887,7 @@ Summary: Debug information for package %{name}%{?1:-%{1}}\
 Group: Development/Debug\
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}\
 Provides: %{name}%{?1:-%{1}}-debuginfo-%{_target_cpu} = %{version}-%{release}\
+Provides: installonlypkg(kernel)\
 AutoReqProv: no\
 %description %{?1:%{1}-}debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
@@ -976,8 +984,9 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 Provides: kernel-%{1} = %{KVERREL}+%{1}\
 summary: kernel meta-package for the %{1} kernel\
 group: system environment/kernel\
-Requires: kernel-libre-%{1}%{?variant}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
-Requires: kernel-libre-%{1}%{?variant}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
+Requires: kernel-libre-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
+Requires: kernel-libre-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
+Provides: installonlypkg(kernel-libre)\
 %description %{1}\
 The meta-package for the %{1} kernel\
 %{nil}
@@ -992,8 +1001,9 @@ The meta-package for the %{1} kernel\
 Provides: kernel-%{?1:%{1}-}core = %{KVERREL}%{?1:+%{1}}\
 Summary: %{variant_summary}\
 Group: System Environment/Kernel\
-Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
+Provides: installonlypkg(kernel-libre)\
 %{expand:%%kernel_reqprovconf}\
 %if %{?1:1} %{!?1:0} \
 %{expand:%%kernel_meta_package %{?1:%{1}}}\
@@ -1580,9 +1590,35 @@ BuildKernel() {
     if [ -d arch/%{asmarch}/mach-${Flavour}/include ]; then
       cp -a --parents arch/%{asmarch}/mach-${Flavour}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
+    # include a few files for 'make prepare'
+    cp -a --parents arch/arm/tools/gen-mach-types $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/arm/tools/mach-types $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+
 %endif
     cp -a include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
-
+%ifarch %{ix86} x86_64
+    # files for 'make prepare' to succeed with kernel-devel
+    cp -a --parents arch/x86/entry/syscalls/syscall_32.tbl $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/entry/syscalls/syscalltbl.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/entry/syscalls/syscallhdr.sh $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/entry/syscalls/syscall_64.tbl $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs_32.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs_64.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs_common.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/tools/relocs.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents tools/include/tools/le_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/sha256.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/sha256.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/stack.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/setup-x86_64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/purgatory/entry64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/boot/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/boot/ctype.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+%endif
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
     touch -r $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Makefile $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include/generated/uapi/linux/version.h
@@ -1870,11 +1906,40 @@ find $RPM_BUILD_ROOT/usr/include \
 
 %endif
 
+%if %{with_cross_headers}
+mkdir -p $RPM_BUILD_ROOT/usr/tmp-headers
+make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr/tmp-headers headers_install_all
+
+find $RPM_BUILD_ROOT/usr/tmp-headers/include \
+     \( -name .install -o -name .check -o \
+     	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+
+# Copy all the architectures we care about to their respective asm directories
+for arch in arm arm64 powerpc s390 x86 ; do
+mkdir -p $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include
+mv $RPM_BUILD_ROOT/usr/tmp-headers/include/asm-${arch} $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include/asm
+cp -a $RPM_BUILD_ROOT/usr/tmp-headers/include/asm-generic $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include/.
+done
+
+# Remove the rest of the architectures
+rm -rf $RPM_BUILD_ROOT/usr/tmp-headers/include/arch*
+rm -rf $RPM_BUILD_ROOT/usr/tmp-headers/include/asm-*
+
+# Copy the rest of the headers over
+for arch in arm arm64 powerpc s390 x86 ; do
+cp -a $RPM_BUILD_ROOT/usr/tmp-headers/include/* $RPM_BUILD_ROOT/usr/${arch}-linux-gnu/include/.
+done
+
+rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
+%endif
+
 %if %{with_perf}
 # perf tool binary and supporting scripts/binaries
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT lib=%{_lib} install-bin install-traceevent-plugins
 # remove the 'trace' symlink.
 rm -f %{buildroot}%{_bindir}/trace
+# remove the perf-tips
+rm -rf %{buildroot}%{_docdir}/perf-tip
 
 # python-perf extension
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT install-python_ext
@@ -2058,6 +2123,12 @@ fi
 /usr/include/*
 %endif
 
+%if %{with_cross_headers}
+%files cross-headers
+%defattr(-,root,root)
+/usr/*-linux-gnu/include/*
+%endif
+
 %if %{with_firmware}
 %files firmware
 %defattr(-,root,root)
@@ -2184,6 +2255,7 @@ fi
 %defattr(-,root,root)\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
+%defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
 %{expand:%%files %{?2:%{2}-}modules-extra}\
 %defattr(-,root,root)\
@@ -2212,6 +2284,174 @@ fi
 #
 # 
 %changelog
+* Mon Mar  7 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.5-rc7-gnu.
+
+* Mon Mar 07 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc7.git0.1
+- Disable debugging options.
+- Linux v4.5-rc7
+
+* Sat Mar  5 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Updates and new SoCs for aarch64 and ARMv7
+- Add aarch64 support for PINE64 and Geekbox devices
+- Fix ethernet naming on Armada 38x devices
+- Serial console fixes for Tegra
+
+* Fri Mar 04 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git3.1
+- Linux v4.5-rc6-41-ge3c2ef4
+
+* Thu Mar 03 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git2.1
+- Linux v4.5-rc6-18-gf983cd3
+
+* Wed Mar 02 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git1.1
+- Linux v4.5-rc6-8-gf691b77
+- Reenable debugging options.
+- enable VIDEO_GO7007
+
+* Mon Feb 29 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git0.1
+- Linux v4.5-rc6
+
+* Mon Feb 29 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable DHT11 (rhbz 1312888)
+- Fix erroneously installed .o files in python-perf subpackage (rhbz 1312102)
+
+* Thu Feb 25 2016 Laura Abbott <labbott@fedoraproject.org>
+- Re-enable ZONE_DMA (rhbz 1309658)
+
+* Thu Feb 25 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.5.0-0.rc5.git0.2
+- Fix tegra nouveau module load (thank kwizart for reference)
+- PowerPC Little Endian ToC fix
+
+* Sun Feb 21 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc5.git0.1
+- Disable debugging options.
+- Linux v4.5-rc5
+
+* Fri Feb 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc4.git3.1
+- Linux v4.5-rc4-137-g23300f6
+
+* Thu Feb 18 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc4.git2.1
+- Linux v4.5-rc4-95-g2850713
+
+* Wed Feb 17 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc4.git1.1
+- Linux v4.5-rc4-37-g65c23c6
+- Reenable debugging options.
+
+* Tue Feb 16 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor Aarch64 cleanups
+
+* Mon Feb 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc4.git0.1
+- Disable debugging options.
+- Linux v4.5-rc4
+
+* Fri Feb 12 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix warning spew from vmware sockets (rhbz 1288684)
+
+* Fri Feb 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc3.git3.1
+- Linux v4.5-rc3-83-gc05235d
+
+* Thu Feb 11 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc3.git2.1
+- Linux v4.5-rc3-57-g721675f
+
+* Tue Feb 09 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc3.git1.1
+- Linux v4.5-rc3-19-g7cf91ad
+
+* Tue Feb  9 2016 Laura Abbott <labbott@fedoraproject.org>
+- Let 'make prepare' succeed with kernel-devel
+
+* Tue Feb  9 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.5.0-0.rc3.git0.2
+- Fix Power64 kernel build
+
+* Mon Feb 08 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc3.git0.1
+- Disable debugging options.
+- Linux v4.5-rc3
+
+* Fri Feb 05 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc2.git3.1
+- Linux v4.5-rc2-212-gdf48ab3
+
+* Wed Feb 03 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc2.git2.1
+- Linux v4.5-rc2-192-gb37a05c
+
+* Tue Feb 02 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc2.git1.1
+- Linux v4.5-rc2-163-g34229b2
+- Reenable debugging options.
+
+* Mon Feb 01 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc1.git0.1
+- Disable debugging options.
+- Linux v4.5-rc2
+
+* Fri Jan 29 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Backport HID sony patch to fix some gamepads (rhbz 1255235)
+
+* Fri Jan 29 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc1.git2.1
+- Linux v4.5-rc1-32-g26cd836
+
+* Thu Jan 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patches to fix suprious NEWLINK netlink messages (rhbz 1302037)
+
+* Thu Jan 28 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc1.git1.1
+- Linux v4.5-rc1-28-g03c21cb
+- Reenable debugging options.
+
+* Wed Jan 27 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc1.git0.2
+- Only apply KEY_FLAG_KEEP to a key if a parent keyring has it set (rhbz 1301099)
+
+* Mon Jan 25 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc1.git0.1
+- Disable debugging options.
+- Linux v4.5-rc1
+
+* Fri Jan 22 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git9.1
+- Linux v4.4-10454-g3e1e21c
+
+* Fri Jan 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix backtrace from PNP conflict on Haswell-ULT (rhbz 1300955)
+
+* Thu Jan 21 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git8.1
+- Linux v4.4-10062-g30f0530
+
+* Thu Jan 21 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix incorrect country code issue on RTL8812AE devices (rhbz 1279653)
+
+* Wed Jan 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git7.1
+- Linux v4.4-8950-g2b4015e
+
+* Wed Jan 20 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-0723 memory disclosure and crash in tty layer (rhbz 1296253 1300224)
+
+* Tue Jan 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git6.1
+- Linux v4.4-8855-ga200dcb
+- CVE-2016-0728 Keys: reference leak in join_session_keyring (rhbz 1296623)
+
+* Tue Jan 19 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix boot on TI am33xx/omap devices
+
+* Mon Jan 18 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git5.1
+- Linux v4.4-8606-g5807fca
+
+* Sun Jan 17 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor updates and cleanups to aarch64/ARMv7/PowerPC
+- ARM: enable nvmem drivers
+- Build usb gadget/OTG on aarch64
+
+* Fri Jan 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git4.1
+- Linux v4.4-5966-g7d1fc01
+
+* Thu Jan 14 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git3.1
+- Linux v4.4-5593-g7fdec82
+
+* Wed Jan 13 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git2.1
+- Linux v4.4-3408-g6799060
+
+* Tue Jan 12 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- drop i915 patch to turn off wc mmaps
+
+* Tue Jan 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc0.git1.1
+- Linux v4.4-1175-g03891f9
+- Reenable debugging options.
+
+* Tue Jan 12 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2015-7566 usb: visor: Crash on invalid USB dev descriptors (rhbz 1296466 1297517)
+- Fix backtrace from PNP conflict on Broadwell (rhbz 1083853)
+
 * Tue Jan 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4-gnu.
 
