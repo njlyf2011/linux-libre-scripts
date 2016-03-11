@@ -717,7 +717,7 @@ building most standard programs and are also needed for rebuilding the
 glibc package.
 
 %package cross-headers
-Provides: kernel-cross-headers = %{rpmversion}-%{pkg_release}
+Provides: kernel-libre-cross-headers = %{rpmversion}-%{pkg_release}
 Summary: Header files for the Linux kernel for use by cross-glibc
 Group: Development/System
 %description cross-headers
@@ -737,7 +737,7 @@ Kernel-firmware includes firmware files required for some devices to
 operate.
 
 %package bootwrapper
-Provides: kernel-bootwrapper = %{rpmversion}-%{pkg_release}
+Provides: kernel-libre-bootwrapper = %{rpmversion}-%{pkg_release}
 Summary: Boot wrapper files for generating combined kernel + initrd images
 Group: Development/System
 Requires: gzip binutils
