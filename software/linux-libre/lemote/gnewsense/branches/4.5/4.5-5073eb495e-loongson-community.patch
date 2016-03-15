@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index af6e5f8..20b5960f 100644
+index 7b3ecdc..f9ecf6f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -297,8 +297,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -23,7 +23,7 @@ index af6e5f8..20b5960f 100644
  
  # Tell gcc to never replace conditional load with a non-conditional one
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 74a3db9..4fe6f27 100644
+index d3da79d..58983b9 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -1773,6 +1773,15 @@ config CPU_LOONGSON2
@@ -42,7 +42,7 @@ index 74a3db9..4fe6f27 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2449,7 +2458,7 @@ config CPU_SUPPORTS_MSA
+@@ -2450,7 +2459,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -9339,7 +9339,7 @@ index 26cb8c86..1725d8f 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 8849439a..3f0806a 100644
+index 348e198..51da8ae 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9352,7 +9352,7 @@ index 8849439a..3f0806a 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -665,6 +668,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -666,6 +669,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -9664,14 +9664,14 @@ index cf5b69a..2157501 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/ld-version.sh b/scripts/ld-version.sh
-index d154f08..557424a 100755
+index 7bfe9fa..557424a 100755
 --- a/scripts/ld-version.sh
 +++ b/scripts/ld-version.sh
 @@ -1,7 +1,7 @@
  #!/usr/bin/awk -f
  # extract linker version number from stdin and turn into single number
  	{
--	gsub(".*)", "");
+-	gsub(".*\\)", "");
 +	gsub(".*[)]", "");
  	gsub(".*version ", "");
  	gsub("-.*", "");
