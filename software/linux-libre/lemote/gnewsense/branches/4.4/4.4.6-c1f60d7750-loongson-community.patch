@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 9d94ade..ef87142 100644
+index 87d12b4..0afddfb 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -297,8 +297,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -23,7 +23,7 @@ index 9d94ade..ef87142 100644
  
  # Tell gcc to never replace conditional load with a non-conditional one
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 71683a8..055d03a 100644
+index db45961..83a25db 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -1760,6 +1760,15 @@ config CPU_LOONGSON2
@@ -42,7 +42,7 @@ index 71683a8..055d03a 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2435,7 +2444,7 @@ config CPU_SUPPORTS_MSA
+@@ -2436,7 +2445,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -9352,7 +9352,7 @@ index f940056..a9bb1db 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index f228060..2783d7d 100644
+index 348e198..51da8ae 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9365,7 +9365,7 @@ index f228060..2783d7d 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -648,6 +651,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -666,6 +669,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -9664,7 +9664,7 @@ index ce635dc..10e775d 100644
  	per_cpu(cpu_loops_per_jiffy, this_cpu) = lpj;
  	if (!printed)
 diff --git a/net/rfkill/core.c b/net/rfkill/core.c
-index f53bf3b6..8763584 100644
+index cf5b69a..2157501 100644
 --- a/net/rfkill/core.c
 +++ b/net/rfkill/core.c
 @@ -111,7 +111,7 @@ static LIST_HEAD(rfkill_list);	/* list of registered rf switches */
@@ -9677,26 +9677,25 @@ index f53bf3b6..8763584 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/ld-version.sh b/scripts/ld-version.sh
-index 198580d..734ab06 100755
+index 1659b40..cfa4dac 100755
 --- a/scripts/ld-version.sh
 +++ b/scripts/ld-version.sh
-@@ -1,8 +1,8 @@
+@@ -1,7 +1,9 @@
  #!/usr/bin/awk -f
  # extract linker version number from stdin and turn into single number
  	{
--	gsub(".*)", "");
--	split($1,a, ".");
--	print a[1]*10000000 + a[2]*100000 + a[3]*10000 + a[4]*100 + a[5];
+-	gsub(".*\\)", "");
 +	gsub(".*[)]", "");
-+	split($1,a, "[-.]");
-+	printf "%i%04i\n", a[1]*10000 + a[2]*100 + a[3], (a[4]*100 + a[5])%10000;
++	gsub(".*version ", "");
++	gsub("-.*", "");
+ 	split($1,a, ".");
+ 	print a[1]*10000000 + a[2]*100000 + a[3]*10000 + a[4]*100 + a[5];
  	exit
- 	}
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 826470d..9e6dc30 100755
+index 96e2486..8b7aff7 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -309,14 +309,33 @@ if ($arch eq "x86_64") {
+@@ -310,14 +310,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -9738,7 +9737,7 @@ index 826470d..9e6dc30 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -328,19 +347,12 @@ if ($arch eq "x86_64") {
+@@ -329,19 +348,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
