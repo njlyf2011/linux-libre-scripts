@@ -6,15 +6,17 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
 %ifarch %{ix86} x86_64
+%global signkernel 1
 %global signmodules 1
 %global zipmodules 1
 %else
-%global signmodules 0
+%global signkernel 0
+%global signmodules 1
 %global zipmodules 0
 %endif
 
@@ -46,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 4
+%define base_sublevel 5
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -56,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.4%{?stablegnux}
-%define rcrevlibre  -4.4%{?rcrevgnux}
-#define gitrevlibre -4.4%{?gitrevgnux}
+#define stablelibre -4.5%{?stablegnux}
+#define rcrevlibre  -4.5%{?rcrevgnux}
+#define gitrevlibre -4.5%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -103,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 6
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -431,13 +433,11 @@ BuildRequires: rpm-build, elfutils
 %define debuginfo_args --strict-build-id -r
 %endif
 
-%ifarch %{ix86} x86_64
-# MODULE_SIG is enabled in config-x86-generic and needs these:
+%if %{signkernel}%{signmodules}
 BuildRequires: openssl openssl-devel
-%endif
-
-%if %{signmodules}
+%if %{signkernel}
 BuildRequires: pesign >= 0.10-4
+%endif
 %endif
 
 %if %{with_cross}
@@ -451,7 +451,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+#Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -554,6 +554,17 @@ Patch456: arm64-acpi-drop-expert-patch.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch457: ARM-tegra-usb-no-reset.patch
 
+Patch458: ARM-mvebu-change-order-of-ethernet-DT-nodes-on-Armada-38x.patch
+
+# http://www.spinics.net/lists/arm-kernel/msg480703.html
+Patch459: Geekbox-device-tree-support.patch
+
+# http://www.spinics.net/lists/arm-kernel/msg483898.html
+Patch460: Initial-AllWinner-A64-and-PINE64-support.patch
+
+# http://www.spinics.net/lists/linux-tegra/msg25152.html
+Patch461: Fix-tegra-to-use-stdout-path-for-serial-console.patch
+
 Patch463: arm-i.MX6-Utilite-device-dtb.patch
 
 Patch466: input-kill-stupid-messages.patch
@@ -641,10 +652,6 @@ Patch621: drm-udl-Use-unlocked-gem-unreferencing.patch
 #Required for some persistent memory options
 Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 
-#rhbz 1302037
-Patch644: wext-fix-message-delay-ordering.patch
-Patch645: cfg80211-wext-fix-message-ordering.patch
-
 #rhbz 1255325
 Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 
@@ -653,6 +660,15 @@ Patch648: 0001-mm-CONFIG_NR_ZONES_EXTENDED.patch
 
 #rhbz 1312102
 Patch649: perf-tools-Fix-python-extension-build.patch
+
+#rhbz 1316136
+Patch663: USB-serial-ftdi_sio-Add-support-for-ICP-DAS-I-756xU-.patch
+
+#CVE-2016-3135 rhbz 1317386 1317387
+Patch664: netfilter-x_tables-check-for-size-overflow.patch
+
+#CVE-2016-3134 rhbz 1317383 1317384
+Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -684,6 +700,7 @@ Requires(pre): %{initrd_prereq}\
 Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
 %endif\
 Requires(preun): systemd >= 200\
+Conflicts: xfsprogs < 4.3.0-1\
 Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
 %{expand:%%{?kernel%{?1:_%{1}}_conflicts:Conflicts: %%{kernel%{?1:_%{1}}_conflicts}}}\
 %{expand:%%{?kernel%{?1:_%{1}}_obsoletes:Obsoletes: %%{kernel%{?1:_%{1}}_obsoletes}}}\
@@ -1456,7 +1473,7 @@ BuildKernel() {
     make -s mrproper
     cp configs/$Config .config
 
-    %if %{signmodules}
+    %if %{signkernel}%{signmodules}
     cp %{SOURCE11} certs/.
     %endif
 
@@ -1493,7 +1510,7 @@ BuildKernel() {
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/%{image_install_path}/zImage.stub-$KernelVer || :
       cp arch/$Arch/boot/zImage.stub $RPM_BUILD_ROOT/lib/modules/$KernelVer/zImage.stub-$KernelVer || :
     fi
-    %if %{signmodules}
+    %if %{signkernel}
     # Sign the image if we're using EFI
     %pesign -s -i $KernelImage -o vmlinuz.signed
     if [ ! -s vmlinuz.signed ]; then
@@ -2243,6 +2260,7 @@ fi
 %defattr(-,root,root)\
 %{expand:%%files %{?2:%{2}-}devel}\
 %defattr(-,root,root)\
+%defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
 %{expand:%%files %{?2:%{2}-}modules-extra}\
 %defattr(-,root,root)\
@@ -2271,7 +2289,60 @@ fi
 #
 # 
 %changelog
-* Fri Mar  4 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Mar 14 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.5-gnu.
+
+* Mon Mar 14 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-1
+- Linux v4.5
+- Disable debugging options.
+
+* Mon Mar 14 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3134 netfilter: missing bounds check in ipt_entry struct (rhbz 1317383 1317384)
+- CVE-2016-3135 netfilter: size overflow in x_tables (rhbz 1317386 1317387)
+
+* Fri Mar 11 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch for ICP DAS I-756xU devices (rhbz 1316136)
+
+* Thu Mar 10 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc7.git3.1
+- Linux v4.5-rc7-215-gf2c1242
+
+* Wed Mar 09 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc7.git2.1
+- Linux v4.5-rc7-159-g7f02bf6
+
+* Tue Mar 08 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc7.git1.1
+- Linux v4.5-rc7-116-ge2857b8
+- Reenable debugging options.
+
+* Tue Mar 08 2016 Thorsten Leemhuis <fedora@leemhuis.info>
+- add signkernel macro to make signing kernel and signing modules 
+  independent from each other
+- sign modules on all archs
+
+* Mon Mar  7 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.5.0-0.rc7.git0.2
+- Disble ARM_PATCH_IDIV as a work around to fix rhbz 1303147
+
+* Mon Mar 07 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc7.git0.1
+- Disable debugging options.
+- Linux v4.5-rc7
+
+* Sat Mar  5 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Updates and new SoCs for aarch64 and ARMv7
+- Add aarch64 support for PINE64 and Geekbox devices
+- Fix ethernet naming on Armada 38x devices
+- Serial console fixes for Tegra
+
+* Fri Mar 04 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git3.1
+- Linux v4.5-rc6-41-ge3c2ef4
+
+* Thu Mar 03 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git2.1
+- Linux v4.5-rc6-18-gf983cd3
+
+* Wed Mar 02 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git1.1
+- Linux v4.5-rc6-8-gf691b77
+- Reenable debugging options.
+- enable VIDEO_GO7007
+
+* Mon Feb 29 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Mar  4
 - GNU Linux-libre 4.5-rc6-gnu.
 
 * Mon Feb 29 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.0-0.rc6.git0.1
