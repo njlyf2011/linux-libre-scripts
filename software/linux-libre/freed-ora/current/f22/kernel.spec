@@ -40,7 +40,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -683,6 +683,52 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
 #CVE-2016-3135 rhbz 1318172 1318270
 Patch666: ipv4-Dont-do-expensive-useless-work-during-inetdev-des.patch
+
+#CVE-2016-2184 rhbz 1317012 1317470
+Patch670: ALSA-usb-audio-Fix-NULL-dereference-in-create_fixed_.patch
+Patch671: ALSA-usb-audio-Add-sanity-checks-for-endpoint-access.patch
+
+#CVE-2016-3137 rhbz 1317010 1316996
+Patch672: cypress_m8-add-sanity-checking.patch
+
+#CVE-2016-2186 rhbz 1317015 1317464
+Patch673: USB-input-powermate-fix-oops-with-malicious-USB-desc.patch
+
+#CVE-2016-2188 rhbz 1317018 1317467
+Patch674: USB-iowarrior-fix-oops-with-malicious-USB-descriptor.patch
+
+#CVE-2016-2185 rhbz 1317014 1317471
+Patch675: usb_driver_claim_interface-add-sanity-checking.patch
+Patch669: Input-ati_remote2-fix-crashes-on-detecting-device-wi.patch
+
+#CVE-2016-3138 rhbz 1317010 1316204
+Patch676: cdc-acm-more-sanity-checking.patch
+
+#CVE-2016-3140 rhbz 1317010 1316995
+Patch677: digi_acceleport-do-sanity-checking-for-the-number-of.patch
+
+Patch678: ims-pcu-sanity-check-against-missing-interfaces.patch
+
+#rhbz 1315013
+Patch679: 0001-uas-Limit-qdepth-at-the-scsi-host-level.patch
+
+#rhbz 1317190
+Patch680: thermal-fix.patch
+
+#rhbz 1318079
+Patch681: 0001-Input-synaptics-handle-spurious-release-of-trackstic.patch
+
+#CVE-2016-2187 rhbz 1317017 1317010
+Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
+
+#CVE-2016-3136 rhbz 1317007 1317010
+Patch687: mct_u232-sanity-checking-in-probe.patch
+
+#rhbz 1295646
+Patch688: 09-29-drm-udl-Use-unlocked-gem-unreferencing.patch
+
+# CVE-2016-3157 rhbz 1315711 1321948
+Patch689: x86-iopl-64-Properly-context-switch-IOPL-on-Xen-PV.patch
 
 # END OF PATCH DEFINITIONS
 %endif
@@ -1467,6 +1513,52 @@ ApplyPatch netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
 #CVE-2016-3135 rhbz 1318172 1318270
 ApplyPatch ipv4-Dont-do-expensive-useless-work-during-inetdev-des.patch
+
+#CVE-2016-2184 rhbz 1317012 1317470
+ApplyPatch ALSA-usb-audio-Fix-NULL-dereference-in-create_fixed_.patch
+ApplyPatch ALSA-usb-audio-Add-sanity-checks-for-endpoint-access.patch
+
+#CVE-2016-3137 rhbz 1317010 1316996
+ApplyPatch cypress_m8-add-sanity-checking.patch
+
+#CVE-2016-2186 rhbz 1317015 1317464
+ApplyPatch USB-input-powermate-fix-oops-with-malicious-USB-desc.patch
+
+#CVE-2016-2188 rhbz 1317018 1317467
+ApplyPatch USB-iowarrior-fix-oops-with-malicious-USB-descriptor.patch
+
+#CVE-2016-2185 rhbz 1317014 1317471
+ApplyPatch usb_driver_claim_interface-add-sanity-checking.patch
+ApplyPatch Input-ati_remote2-fix-crashes-on-detecting-device-wi.patch
+
+#CVE-2016-3138 rhbz 1317010 1316204
+ApplyPatch cdc-acm-more-sanity-checking.patch
+
+#CVE-2016-3140 rhbz 1317010 1316995
+ApplyPatch digi_acceleport-do-sanity-checking-for-the-number-of.patch
+
+ApplyPatch ims-pcu-sanity-check-against-missing-interfaces.patch
+
+#rhbz 1315013
+ApplyPatch 0001-uas-Limit-qdepth-at-the-scsi-host-level.patch
+
+#rhbz 1317190
+ApplyPatch thermal-fix.patch
+
+#rhbz 1318079
+ApplyPatch 0001-Input-synaptics-handle-spurious-release-of-trackstic.patch
+
+#CVE-2016-2187 rhbz 1317017 1317010
+ApplyPatch input-gtco-fix-crash-on-detecting-device-without-end.patch
+
+#CVE-2016-3136 rhbz 1317007 1317010
+ApplyPatch mct_u232-sanity-checking-in-probe.patch
+
+#rhbz 1295646
+ApplyPatch 09-29-drm-udl-Use-unlocked-gem-unreferencing.patch
+
+# CVE-2016-3157 rhbz 1315711 1321948
+ApplyPatch x86-iopl-64-Properly-context-switch-IOPL-on-Xen-PV.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2330,6 +2422,34 @@ fi
 #
 # 
 %changelog
+* Wed Mar 30 2016 Laura Abbott <labbott@redhat.com> - 4.4.6-201
+- Bump and build
+
+* Tue Mar 29 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3157 xen: priv escalation on 64bit PV domains with io port access (rhbz 1315711 1321948)
+
+* Wed Mar 23 2016 Laura Abbott <labbott@fedoraproject.org>
+- drm/udl: Use unlocked gem unreferencing (rhbz 1295646)
+
+* Tue Mar 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3136 mct_u232: oops on invalid USB descriptors (rhbz 1317007 1317010)
+- CVE-2016-2187 gtco: oops on invalid USB descriptors (rhbz 1317017 1317010)
+
+* Mon Mar 21 2016 Laura Abbott <labbott@fedoraproject.org>
+- uas: Limit qdepth at the scsi-host level (rhbz 1315013)
+- Fix for performance regression caused by thermal (rhbz 1317190)
+- Input: synaptics - handle spurious release of trackstick buttons, again (rhbz 1318079)
+
+* Fri Mar 18 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- ims-pcu: sanity checking on missing interfaces
+- CVE-2016-3140 digi_acceleport: oops on invalid USB descriptors (rhbz 1317010 1316995)
+- CVE-2016-3138 cdc_acm: oops on invalid USB descriptors (rhbz 1317010 1316204)
+- CVE-2016-2185 ati_remote2: oops on invalid USB descriptors (rhbz 1317014 1317471)
+- CVE-2016-2188 iowarrior: oops on invalid USB descriptors (rhbz 1317018 1317467)
+- CVE-2016-2186 powermate: oops on invalid USB descriptors (rhbz 1317015 1317464)
+- CVE-2016-3137 cypress_m8: oops on invalid USB descriptors (rhbz 1317010 1316996)
+- CVE-2016-2184 alsa: panic on invalid USB descriptors (rhbz 1317012 1317470)
+
 * Fri Mar 18 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4.6-gnu.
 
