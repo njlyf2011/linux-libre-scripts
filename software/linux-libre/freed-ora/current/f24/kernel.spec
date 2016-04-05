@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -545,33 +545,44 @@ Patch07: freedo.patch
 
 # Standalone patches
 
-# http://www.spinics.net/lists/netdev/msg369442.html
-Patch452: revert-stmmac-Fix-eth0-No-PHY-found-regression.patch
-Patch453: stmmac-fix-MDIO-settings.patch
+Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
 
-Patch454: bcm283x-add-aux-uart-support-extra-DT-bits-initial-r.patch
-
-Patch455: arm64-avoid-needing-console-to-enable-serial-console.patch
-
-Patch456: arm64-acpi-drop-expert-patch.patch
-
-# http://patchwork.ozlabs.org/patch/587554/
-Patch457: ARM-tegra-usb-no-reset.patch
-
-Patch458: ARM-mvebu-change-order-of-ethernet-DT-nodes-on-Armada-38x.patch
+Patch421: arm64-acpi-drop-expert-patch.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
-Patch459: geekbox-v4-device-tree-support.patch
+Patch422: geekbox-v4-device-tree-support.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg483898.html
-Patch460: Initial-AllWinner-A64-and-PINE64-support.patch
+Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
+
+# http://www.spinics.net/lists/arm-kernel/msg493431.html
+Patch424: efi-arm64-don-t-apply-MEMBLOCK_NOMAP-to-UEFI-memory-map-mapping.patch
+
+# http://patchwork.ozlabs.org/patch/587554/
+Patch430: ARM-tegra-usb-no-reset.patch
+
+Patch431: arm-i.MX6-Utilite-device-dtb.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg25152.html
-Patch461: Fix-tegra-to-use-stdout-path-for-serial-console.patch
+Patch432: Fix-tegra-to-use-stdout-path-for-serial-console.patch
 
-Patch463: arm-i.MX6-Utilite-device-dtb.patch
+Patch433: bcm283x-Pull-upstream-fixes.patch
 
-Patch465: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
+# http://www.spinics.net/lists/netdev/msg369442.html
+Patch434: revert-stmmac-Fix-eth0-No-PHY-found-regression.patch
+Patch435: stmmac-fix-MDIO-settings.patch
+
+Patch436: ARM-mvebu-change-order-of-ethernet-DT-nodes-on-Armada-38x.patch
+
+# mvebu usb fixes http://www.spinics.net/lists/arm-kernel/msg493305.html
+Patch437: 0001-ARM-mvebu-Correct-unit-address-for-linksys.patch
+
+# mvebu DSA switch fixes
+# http://www.spinics.net/lists/netdev/msg370841.html http://www.spinics.net/lists/netdev/msg370842.html
+Patch438: 0001-net-dsa-mv88e6xxx-Introduce-_mv88e6xxx_phy_page_-rea.patch
+Patch439: 0002-net-dsa-mv88e6xxx-Clear-the-PDOWN-bit-on-setup.patch
+
+Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 Patch466: input-kill-stupid-messages.patch
 
@@ -694,6 +705,7 @@ Patch674: USB-iowarrior-fix-oops-with-malicious-USB-descriptor.patch
 
 #CVE-2016-2185 rhbz 1317014 1317471
 Patch675: usb_driver_claim_interface-add-sanity-checking.patch
+Patch669: Input-ati_remote2-fix-crashes-on-detecting-device-wi.patch
 
 #CVE-2016-3138 rhbz 1317010 1316204
 Patch676: cdc-acm-more-sanity-checking.patch
@@ -702,6 +714,24 @@ Patch676: cdc-acm-more-sanity-checking.patch
 Patch677: digi_acceleport-do-sanity-checking-for-the-number-of.patch
 
 Patch678: ims-pcu-sanity-check-against-missing-interfaces.patch
+
+#rhbz 1315013
+Patch679: 0001-uas-Limit-qdepth-at-the-scsi-host-level.patch
+
+#rhbz 1317190
+Patch680: thermal-fix.patch
+
+#rhbz 1318079
+Patch681: 0001-Input-synaptics-handle-spurious-release-of-trackstic.patch
+
+#CVE-2016-2187 rhbz 1317017 1317010
+Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
+
+#CVE-2016-3136 rhbz 1317007 1317010
+Patch687: mct_u232-sanity-checking-in-probe.patch
+
+# CVE-2016-3157 rhbz 1315711 1321948
+Patch688: x86-iopl-64-Properly-context-switch-IOPL-on-Xen-PV.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2322,6 +2352,29 @@ fi
 #
 # 
 %changelog
+* Wed Mar 30 2016 Peter Robinson <pbrobinson@fedoraproject.org> - 4.5.0-302
+- Add upstream mvebu/DSA fixes
+- Minor ARMv7 fixes
+- Boot fix for aarch64 devices with 64K page size requirements (Seattle)
+
+* Tue Mar 29 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3157 xen: priv escalation on 64bit PV domains with io port access (rhbz 1315711 1321948)
+
+* Tue Mar 29 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Turn off DEBUG_WX (rhbz 1318599)
+
+* Wed Mar 23 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix Tegra Jetson TK1
+
+* Tue Mar 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-3136 mct_u232: oops on invalid USB descriptors (rhbz 1317007 1317010)
+- CVE-2016-2187 gtco: oops on invalid USB descriptors (rhbz 1317017 1317010)
+
+* Mon Mar 21 2016 Laura Abbott <labbott@fedoraproject.org>
+- uas: Limit qdepth at the scsi-host level (rhbz 1315013)
+- Fix for performance regression caused by thermal (rhbz 1317190)
+- Input: synaptics - handle spurious release of trackstick buttons, again (rhbz 1318079)
+
 * Sat Mar 19 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.5.0-301
 - Upstream fix for stmmac driver regressions (AllWinner Gb NICs)
 - Update various ARM device support patches
