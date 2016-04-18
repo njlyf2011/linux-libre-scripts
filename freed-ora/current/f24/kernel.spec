@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -544,7 +544,6 @@ Patch07: freedo.patch
 # Git trees.
 
 # Standalone patches
-
 Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
 
 Patch421: arm64-acpi-drop-expert-patch.patch
@@ -558,6 +557,8 @@ Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 # http://www.spinics.net/lists/arm-kernel/msg493431.html
 Patch424: efi-arm64-don-t-apply-MEMBLOCK_NOMAP-to-UEFI-memory-map-mapping.patch
 
+Patch425: arm-fix-idiv.patch
+
 # http://patchwork.ozlabs.org/patch/587554/
 Patch430: ARM-tegra-usb-no-reset.patch
 
@@ -566,7 +567,7 @@ Patch431: arm-i.MX6-Utilite-device-dtb.patch
 # http://www.spinics.net/lists/linux-tegra/msg25152.html
 Patch432: Fix-tegra-to-use-stdout-path-for-serial-console.patch
 
-Patch433: bcm283x-Pull-upstream-fixes.patch
+Patch433: bcm283x-Pull-upstream-fixes-plus-iproc-mmc-driver.patch
 
 # http://www.spinics.net/lists/netdev/msg369442.html
 Patch434: revert-stmmac-Fix-eth0-No-PHY-found-regression.patch
@@ -675,12 +676,6 @@ Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 #rhbz 1309658
 Patch648: 0001-mm-CONFIG_NR_ZONES_EXTENDED.patch
 
-#rhbz 1312102
-Patch649: perf-tools-Fix-python-extension-build.patch
-
-#rhbz 1316136
-Patch663: USB-serial-ftdi_sio-Add-support-for-ICP-DAS-I-756xU-.patch
-
 #CVE-2016-3135 rhbz 1317386 1317387
 Patch664: netfilter-x_tables-check-for-size-overflow.patch
 
@@ -690,48 +685,17 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 #CVE-2016-3135 rhbz 1318172 1318270
 Patch666: ipv4-Dont-do-expensive-useless-work-during-inetdev-des.patch
 
-#CVE-2016-2184 rhbz 1317012 1317470
-Patch670: ALSA-usb-audio-Fix-NULL-dereference-in-create_fixed_.patch
-Patch671: ALSA-usb-audio-Add-sanity-checks-for-endpoint-access.patch
-
-#CVE-2016-3137 rhbz 1317010 1316996
-Patch672: cypress_m8-add-sanity-checking.patch
-
-#CVE-2016-2186 rhbz 1317015 1317464
-Patch673: USB-input-powermate-fix-oops-with-malicious-USB-desc.patch
-
-#CVE-2016-2188 rhbz 1317018 1317467
-Patch674: USB-iowarrior-fix-oops-with-malicious-USB-descriptor.patch
-
-#CVE-2016-2185 rhbz 1317014 1317471
-Patch675: usb_driver_claim_interface-add-sanity-checking.patch
-Patch669: Input-ati_remote2-fix-crashes-on-detecting-device-wi.patch
-
-#CVE-2016-3138 rhbz 1317010 1316204
-Patch676: cdc-acm-more-sanity-checking.patch
-
-#CVE-2016-3140 rhbz 1317010 1316995
-Patch677: digi_acceleport-do-sanity-checking-for-the-number-of.patch
-
-Patch678: ims-pcu-sanity-check-against-missing-interfaces.patch
-
 #rhbz 1315013
 Patch679: 0001-uas-Limit-qdepth-at-the-scsi-host-level.patch
-
-#rhbz 1317190
-Patch680: thermal-fix.patch
-
-#rhbz 1318079
-Patch681: 0001-Input-synaptics-handle-spurious-release-of-trackstic.patch
 
 #CVE-2016-2187 rhbz 1317017 1317010
 Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
 
-#CVE-2016-3136 rhbz 1317007 1317010
-Patch687: mct_u232-sanity-checking-in-probe.patch
+# CVE-2016-3672 rhbz 1324749 1324750
+Patch689: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 
-# CVE-2016-3157 rhbz 1315711 1321948
-Patch688: x86-iopl-64-Properly-context-switch-IOPL-on-Xen-PV.patch
+#rhbz 1317116
+Patch697: HID-wacom-fix-Bamboo-ONE-oops.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2352,6 +2316,28 @@ fi
 #
 # 
 %changelog
+* Wed Apr 13 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.5.1-gnu.
+
+* Tue Apr 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.1-300
+- Linux v4.5.1
+
+* Tue Apr 12 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix Bamboo ONE issues (rhbz 1317116)
+
+* Mon Apr 11 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream patch to fix IDIV issue when booting on Cortex-A7/15/17 devices
+- Update bcm238x patch
+
+* Thu Apr 07 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Enable Full Randomization on 32bit x86 CVE-2016-3672 (rhbz 1324749 1324750)
+
+* Sun Apr  3 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Some minor ARMv7/aarch64 cleanups
+
+* Thu Mar 31 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Add two more patches for CVE-2016-2184
+
 * Wed Mar 30 2016 Peter Robinson <pbrobinson@fedoraproject.org> - 4.5.0-302
 - Add upstream mvebu/DSA fixes
 - Minor ARMv7 fixes
