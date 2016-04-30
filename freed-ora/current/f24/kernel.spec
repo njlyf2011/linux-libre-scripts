@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -691,6 +691,12 @@ Patch699: x86-xen-suppress-hugetlbfs-in-PV-guests.patch
 
 # CVE-2016-3955 rhbz 1328478 1328479
 Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
+
+#rhbz 1309487
+Patch701: antenna_select.patch
+
+#rhbz 1302071
+Patch702: x86-build-Build-compressed-x86-kernels-as-PIE.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2311,7 +2317,13 @@ fi
 #
 # 
 %changelog
-* Sun Apr 24 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Apr 21 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.2-301
+- Build 32bit x86 compressed kernels as PIE (rhbz 1302071)
+
+* Wed Apr 20 2016 Laura Abbott <labbott@fedoraproject.org>
+- Allow antenna selection for rtl8723be (rhbz 1309487)
+
+* Wed Apr 20 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Apr 24
 - GNU Linux-libre 4.5.2-gnu.
 
 * Wed Apr 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.2-300
