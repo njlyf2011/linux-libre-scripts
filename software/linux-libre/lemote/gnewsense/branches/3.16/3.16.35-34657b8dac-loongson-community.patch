@@ -1,19 +1,19 @@
 diff --git a/Makefile b/Makefile
-index d0901b4..d6f54c7 100644
+index c0de843..b02c1cd 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -303,8 +303,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
  
  HOSTCC       = gcc
  HOSTCXX      = g++
--HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
+-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
 -HOSTCXXFLAGS = -O2
-+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer
++HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu89
 +HOSTCXXFLAGS = -O3
  
  ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
  HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
-@@ -618,7 +618,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
+@@ -619,7 +619,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
  ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
  KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
  else
@@ -189,10 +189,10 @@ index 61af6b6..8598044 100644
 -clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec}
 +clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec,unsstrip}
 diff --git a/arch/mips/boot/compressed/decompress.c b/arch/mips/boot/compressed/decompress.c
-index c00c4dd..f4a656d 100644
+index 5244cec..965734f1 100644
 --- a/arch/mips/boot/compressed/decompress.c
 +++ b/arch/mips/boot/compressed/decompress.c
-@@ -27,8 +27,13 @@ unsigned long free_mem_end_ptr;
+@@ -28,8 +28,13 @@ unsigned long free_mem_end_ptr;
  extern unsigned char __image_begin, __image_end;
  
  /* debug interfaces  */
@@ -458,7 +458,7 @@ index 4bfdb9d..f57d892 100644
  	msub_s_op    =	0x28, msub_d_op	   =  0x29,
  	msub_e_op    =	0x2a, nmadd_s_op   =  0x30,
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index f1343cc..1320561 100644
+index 7f5feb2..b31396b 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -1654,30 +1654,6 @@ index 4f9eaa3..f945bd7a 100644
  
  #
  # Suspend Support
-diff --git a/arch/mips/loongson/lemote-2f/clock.c b/arch/mips/loongson/lemote-2f/clock.c
-index 1eed38e..ebfb9cd 100644
---- a/arch/mips/loongson/lemote-2f/clock.c
-+++ b/arch/mips/loongson/lemote-2f/clock.c
-@@ -91,6 +91,7 @@ EXPORT_SYMBOL(clk_put);
- 
- int clk_set_rate(struct clk *clk, unsigned long rate)
- {
-+	unsigned int rate_khz = rate / 1000;
- 	struct cpufreq_frequency_table *pos;
- 	int ret = 0;
- 	int regval;
-@@ -107,9 +108,9 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
- 		propagate_rate(clk);
- 
- 	cpufreq_for_each_valid_entry(pos, loongson2_clockmod_table)
--		if (rate == pos->frequency)
-+		if (rate_khz == pos->frequency)
- 			break;
--	if (rate != pos->frequency)
-+	if (rate_khz != pos->frequency)
- 		return -ENOTSUPP;
- 
- 	clk->rate = rate;
 diff --git a/arch/mips/loongson/lemote-2f/platform.c b/arch/mips/loongson/lemote-2f/platform.c
 new file mode 100644
 index 0000000..5316360
@@ -1733,7 +1709,7 @@ index 0000000..5316360
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index 736c17a..d6b6cac 100644
+index 51a0fde..c5f59f5 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -2229,18 +2205,6 @@ index 0000000..b296220
 +DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_NEC, PCI_DEVICE_ID_CT_65550,
 +				gdium_usb_host_fixup);
 +#endif
-diff --git a/arch/mips/power/hibernate.S b/arch/mips/power/hibernate.S
-index 32a7c82..7e0277a 100644
---- a/arch/mips/power/hibernate.S
-+++ b/arch/mips/power/hibernate.S
-@@ -43,7 +43,6 @@ LEAF(swsusp_arch_resume)
- 	bne t1, t3, 1b
- 	PTR_L t0, PBE_NEXT(t0)
- 	bnez t0, 0b
--	jal local_flush_tlb_all /* Avoid TLB mismatch after kernel resume */
- 	PTR_LA t0, saved_regs
- 	PTR_L ra, PT_R31(t0)
- 	PTR_L sp, PT_R29(t0)
 diff --git a/drivers/cpufreq/loongson2_cpufreq.c b/drivers/cpufreq/loongson2_cpufreq.c
 index d4add86..f1dc611 100644
 --- a/drivers/cpufreq/loongson2_cpufreq.c
@@ -2529,10 +2493,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 48b66bb..f5b5e46 100644
+index 2c04d93..070f8bf 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -980,6 +980,9 @@
+@@ -999,6 +999,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9361,7 +9325,7 @@ index 0754f5c7..ff7475d 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index f98d03f..09cf729 100644
+index a21a365..97f62415 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
 @@ -864,9 +864,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
@@ -9382,7 +9346,7 @@ index f98d03f..09cf729 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 2f3aceb..6647c3f 100644
+index f4e6b94..b42c1fb 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -454,6 +454,7 @@ void usb_amd_dev_put(void)
@@ -9410,7 +9374,7 @@ index 2f3aceb..6647c3f 100644
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -633,7 +638,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -645,7 +650,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -9422,7 +9386,7 @@ index 2f3aceb..6647c3f 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -806,6 +815,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -818,6 +827,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -9432,7 +9396,7 @@ index 2f3aceb..6647c3f 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -945,6 +957,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -957,6 +969,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -9440,7 +9404,7 @@ index 2f3aceb..6647c3f 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1052,6 +1065,9 @@ hc_init:
+@@ -1064,6 +1077,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -9451,7 +9415,7 @@ index 2f3aceb..6647c3f 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index a968894..0bfa2cb 100644
+index 1f3c119..0eeabd3 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9464,7 +9428,7 @@ index a968894..0bfa2cb 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -610,6 +613,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -681,6 +684,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -9503,10 +9467,10 @@ index 9ad3c17..3d869d9 100644
  ifeq ($(CONFIG_OF),y)
  obj-$(CONFIG_VIDEOMODE_HELPERS) += of_display_timing.o of_videomode.o
 diff --git a/drivers/video/fbdev/Kconfig b/drivers/video/fbdev/Kconfig
-index 59c98bfd..28c4349 100644
+index fac73ce..60adbd5 100644
 --- a/drivers/video/fbdev/Kconfig
 +++ b/drivers/video/fbdev/Kconfig
-@@ -2446,6 +2446,19 @@ config FB_SIMPLE
+@@ -2445,6 +2445,19 @@ config FB_SIMPLE
  	  Configuration re: surface address, size, and format must be provided
  	  through device tree, or plain old platform data.
  
@@ -9527,7 +9491,7 @@ index 59c98bfd..28c4349 100644
  source "drivers/video/fbdev/omap2/Kconfig"
  source "drivers/video/fbdev/exynos/Kconfig"
 diff --git a/drivers/video/fbdev/Makefile b/drivers/video/fbdev/Makefile
-index 0284f2a..0a0c865 100644
+index 0284f2a..0a0c865d 100644
 --- a/drivers/video/fbdev/Makefile
 +++ b/drivers/video/fbdev/Makefile
 @@ -112,6 +112,7 @@ obj-$(CONFIG_FB_COBALT)           += cobalt_lcdfb.o
@@ -12060,7 +12024,7 @@ index 520702d..e78762a 100644
  	per_cpu(cpu_loops_per_jiffy, this_cpu) = lpj;
  	if (!printed)
 diff --git a/net/rfkill/core.c b/net/rfkill/core.c
-index b3b16c0..e0a91100 100644
+index 24f2d9d..0542476 100644
 --- a/net/rfkill/core.c
 +++ b/net/rfkill/core.c
 @@ -111,7 +111,7 @@ static LIST_HEAD(rfkill_list);	/* list of registered rf switches */
@@ -12073,7 +12037,7 @@ index b3b16c0..e0a91100 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 397b6b8..fee5bc1 100755
+index 6a0307b..1e8caa6 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
 @@ -312,14 +312,33 @@ if ($arch eq "x86_64") {
