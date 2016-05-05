@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2016-04-23 03:18:21.706022033 -0400
++++ .config	2016-05-04 22:41:19.098233947 -0400
 @@ -0,0 +1,5491 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.5.2-gnu Kernel Configuration
++# Linux/mips 4.5.3-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1551,7 +1551,7 @@ Index: .config
 +CONFIG_SENSORS_APDS990X=m
 +CONFIG_HMC6352=m
 +CONFIG_DS1682=m
-+CONFIG_BMP085=y
++CONFIG_BMP085=m
 +CONFIG_BMP085_I2C=m
 +CONFIG_USB_SWITCH_FSA9480=m
 +# CONFIG_SRAM is not set
