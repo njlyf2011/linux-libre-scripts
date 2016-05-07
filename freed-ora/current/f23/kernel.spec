@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -383,7 +383,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, systemd >= 203-2
+%define kernel_prereq  fileutils, systemd >= 203-2, /usr/bin/kernel-install
 %define initrd_prereq  dracut >= 027
 
 Name: kernel-libre%{?variant}
@@ -544,6 +544,8 @@ Patch07: freedo.patch
 
 Patch451: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
+Patch452: 0001-gpu-ipu-v3-Fix-imx-ipuv3-crtc-module-autoloading.patch
+
 Patch454: arm64-avoid-needing-console-to-enable-serial-console.patch
 
 Patch456: arm64-acpi-drop-expert-patch.patch
@@ -666,17 +668,8 @@ Patch664: netfilter-x_tables-check-for-size-overflow.patch
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#CVE-2016-2187 rhbz 1317017 1317010
-Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
-
 # CVE-2016-3672 rhbz 1324749 1324750
 Patch690: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
-
-#CVE-2015-8839 rhbz 1323577 1323579
-Patch691: ext4-fix-races-between-page-faults-and-hole-punching.patch
-Patch692: ext4-move-unlocked-dio-protection-from-ext4_alloc_fi.patch
-Patch693: ext4-fix-races-between-buffered-IO-and-collapse-inse.patch
-Patch694: ext4-fix-races-of-writeback-with-punch-hole-and-zero.patch
 
 #CVE-2016-3951 rhbz 1324782 1324815
 Patch695: cdc_ncm-do-not-call-usbnet_link_change-from-cdc_ncm_.patch
@@ -684,14 +677,17 @@ Patch695: cdc_ncm-do-not-call-usbnet_link_change-from-cdc_ncm_.patch
 #rhbz 1309980
 Patch698: 0001-ACPI-processor-Request-native-thermal-interrupt-hand.patch
 
-# CVE-2016-3961 rhbz 1327219 1323956
-Patch699: x86-xen-suppress-hugetlbfs-in-PV-guests.patch
-
-# CVE-2016-3955 rhbz 1328478 1328479
-Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
-
 #rhbz 1309487
 Patch701: antenna_select.patch
+
+# Follow on for CVE-2016-3156
+Patch702: ipv4-fib-don-t-warn-when-primary-address-is-missing-.patch
+
+# Stop splashing crap about broken firmware BGRT
+Patch704: x86-efi-bgrt-Switch-all-pr_err-to-pr_debug-for-inval.patch
+
+#CVE-2016-4482 rhbz 1332931 1332932
+Patch705: USB-usbfs-fix-potential-infoleak-in-devio.patch
 
 # END OF PATCH DEFINITIONS
 %endif
@@ -2233,6 +2229,26 @@ fi
 #
 # 
 %changelog
+* Thu May  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4.9-gnu.
+
+* Wed May 04 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.9-300
+- Linux v4.4.9
+
+* Wed May 04 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable NFC_NXP_NCI options (rhbz 1290556)
+- CVE-2016-4482 info leak in devio.c (rhbz 1332931 1332932)
+
+* Fri Apr 29 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix i.MX6 graphics
+
+* Thu Apr 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Don't splash warnings from broken BGRT firmware implementations
+- Require /usr/bin/kernel-install (rhbz 1331012)
+
+* Tue Apr 26 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable IEEE802154_AT86RF230 on more arches (rhbz 1330356)
+
 * Sun Apr 24 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4.8-gnu.
 
