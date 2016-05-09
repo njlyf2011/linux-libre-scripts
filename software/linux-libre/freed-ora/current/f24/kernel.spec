@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -388,7 +388,7 @@ Summary: The Linux kernel
 # Packages that need to be installed before the kernel is, because the %%post
 # scripts use them.
 #
-%define kernel_prereq  fileutils, systemd >= 203-2
+%define kernel_prereq  fileutils, systemd >= 203-2, /usr/bin/kernel-install
 %define initrd_prereq  dracut >= 027
 
 Name: kernel-libre%{?variant}
@@ -554,9 +554,6 @@ Patch422: geekbox-v4-device-tree-support.patch
 # http://www.spinics.net/lists/arm-kernel/msg483898.html
 Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg493431.html
-Patch424: efi-arm64-don-t-apply-MEMBLOCK_NOMAP-to-UEFI-memory-map-mapping.patch
-
 # rhbz 1321330  http://www.spinics.net/lists/dri-devel/msg105829.html
 Patch425: 0001-gpu-ipu-v3-Fix-imx-ipuv3-crtc-module-autoloading.patch
 
@@ -578,9 +575,6 @@ Patch434: revert-stmmac-Fix-eth0-No-PHY-found-regression.patch
 Patch435: stmmac-fix-MDIO-settings.patch
 
 Patch436: ARM-mvebu-change-order-of-ethernet-DT-nodes-on-Armada-38x.patch
-
-# mvebu usb fixes http://www.spinics.net/lists/arm-kernel/msg493305.html
-Patch437: 0001-ARM-mvebu-Correct-unit-address-for-linksys.patch
 
 # mvebu DSA switch fixes
 # http://www.spinics.net/lists/netdev/msg370841.html http://www.spinics.net/lists/netdev/msg370842.html
@@ -683,20 +677,11 @@ Patch664: netfilter-x_tables-check-for-size-overflow.patch
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#CVE-2016-2187 rhbz 1317017 1317010
-Patch686: input-gtco-fix-crash-on-detecting-device-without-end.patch
-
 # CVE-2016-3672 rhbz 1324749 1324750
 Patch689: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 
 #rhbz 1309980
 Patch698: 0001-ACPI-processor-Request-native-thermal-interrupt-hand.patch
-
-# CVE-2016-3961 rhbz 1327219 1323956
-Patch699: x86-xen-suppress-hugetlbfs-in-PV-guests.patch
-
-# CVE-2016-3955 rhbz 1328478 1328479
-Patch700: USB-usbip-fix-potential-out-of-bounds-write.patch
 
 #rhbz 1309487
 Patch701: antenna_select.patch
@@ -706,6 +691,15 @@ Patch702: x86-build-Build-compressed-x86-kernels-as-PIE.patch
 
 # Follow on for CVE-2016-3156
 Patch703: ipv4-fib-don-t-warn-when-primary-address-is-missing-.patch
+
+# Stop splashing crap about broken firmware BGRT
+Patch704: x86-efi-bgrt-Switch-all-pr_err-to-pr_debug-for-inval.patch
+
+#rhbz 1331092
+Patch705: mm-thp-kvm-fix-memory-corruption-in-KVM-with-THP-ena.patch
+
+#CVE-2016-4482 rhbz 1332931 1332932
+Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2326,6 +2320,23 @@ fi
 #
 # 
 %changelog
+* Thu May  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.5.3-gnu.
+
+* Wed May 04 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.5.3-300
+- Linux v4.5.3
+
+* Wed May 04 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable NFC_NXP_NCI options (rhbz 1290556)
+- CVE-2016-4482 info leak in devio.c (rhbz 1332931 1332932)
+
+* Thu Apr 28 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix KVM with THP corruption (rhbz 1331092)
+
+* Thu Apr 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Don't splash warnings from broken BGRT firmware implementations
+- Require /usr/bin/kernel-install (rhbz 1331012)
+
 * Wed Apr 27 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.5.2-302
 - Fix i.MX6 gpu loading - rhbz 1321330
 - Fix usb loading on some tegra devices
