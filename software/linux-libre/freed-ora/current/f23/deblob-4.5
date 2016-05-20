@@ -1,6 +1,6 @@
 #! /bin/sh
 
-#    Copyright (C) 2008-2015 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008-2016 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.4 extra=
+kver=4.5 extra=
 
 set -e
 
@@ -311,8 +311,8 @@ for f in \
 \
   drivers/net/wan/wanxlfw.inc_shipped \
     drivers/net/wan/wanxlfw.S \
-  drivers/net/wireless/atmel.c \
-    drivers/net/wireless/atmel.c \
+  drivers/net/wireless/atmel/atmel.c \
+    drivers/net/wireless/atmel/atmel.c \
   drivers/scsi/aic7xxx/aic79xx_seq.h_shipped \
     drivers/scsi/aic7xxx/aic79xx.seq \
   drivers/scsi/aic7xxx/aic7xxx_seq.h_shipped \
@@ -584,6 +584,16 @@ reject_firmware drivers/crypto/qat/qat_common/adf_accel_engine.c
 clean_kconfig drivers/crypto/qat/Kconfig CRYPTO_DEV_QAT
 clean_mk CONFIG_CRYPTO_DEV_QAT drivers/crypto/qat/Makefile
 
+announce CRYPTO_DEV_QAT_C3XXX - "Support for Intel(R) C3XXX"
+clean_blob drivers/crypto/qat/qat_c3xxx/adf_c3xxx_hw_data.h
+clean_kconfig drivers/crypto/qat/Kconfig CRYPTO_DEV_QAT_C3XXX
+clean_mk CONFIG_CRYPTO_DEV_QAT_C3XXX drivers/crypto/qat/Makefile
+
+announce CRYPTO_DEV_QAT_C62X - "Support for Intel(R) C62X"
+clean_blob drivers/crypto/qat/qat_c62x/adf_c62x_hw_data.h
+clean_kconfig drivers/crypto/qat/Kconfig CRYPTO_DEV_QAT_C62X
+clean_mk CONFIG_CRYPTO_DEV_QAT_C62X drivers/crypto/qat/Makefile
+
 ########
 # tty #
 ########
@@ -665,6 +675,7 @@ reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
 reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
+clean_blob drivers/gpu/drm/nouveau/nouveau_platform.c
 clean_kconfig drivers/gpu/drm/nouveau/Kconfig DRM_NOUVEAU
 clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/Makefile
 
@@ -717,14 +728,10 @@ drop_fw_file firmware/radeon/RV730_me.bin.ihex firmware/radeon/RV730_me.bin
 drop_fw_file firmware/radeon/RV730_pfp.bin.ihex firmware/radeon/RV730_pfp.bin
 drop_fw_file firmware/radeon/RV770_me.bin.ihex firmware/radeon/RV770_me.bin
 drop_fw_file firmware/radeon/RV770_pfp.bin.ihex firmware/radeon/RV770_pfp.bin
-reject_firmware drivers/gpu/drm/radeon/radeon_cp.c
-clean_blob drivers/gpu/drm/radeon/radeon_cp.c
 reject_firmware drivers/gpu/drm/radeon/r100.c
 clean_blob drivers/gpu/drm/radeon/r100.c
 reject_firmware drivers/gpu/drm/radeon/r600.c
 clean_blob drivers/gpu/drm/radeon/r600.c
-reject_firmware drivers/gpu/drm/radeon/r600_cp.c
-clean_blob drivers/gpu/drm/radeon/r600_cp.c
 reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
 reject_firmware drivers/gpu/drm/radeon/si.c
@@ -1270,7 +1277,7 @@ clean_kconfig drivers/media/usb/pvrusb2/Kconfig VIDEO_PVRUSB2
 clean_mk CONFIG_VIDEO_PVRUSB2 drivers/media/usb/pvrusb2/Makefile
 
 announce "VIDEO_CX23885, VIDEO_CX88_BLACKBIRD, VIDEO_IVTV, VIDEO_PVRUSB2" - "See above"
-clean_blob include/media/cx2341x.h
+clean_blob include/media/drv-intf/cx2341x.h
 
 announce VIDEO_GO7007 - "Go 7007 support"
 reject_firmware drivers/media/usb/go7007/go7007-driver.c
@@ -1690,19 +1697,19 @@ clean_mk CONFIG_USB_KAWETH drivers/net/usb/Makefile
 # wireless
 
 announce ATMEL "Atmel at76c50x chipset  802.11b support"
-reject_firmware drivers/net/wireless/atmel.c
-clean_blob drivers/net/wireless/atmel.c
-clean_kconfig drivers/net/wireless/Kconfig ATMEL
-clean_mk CONFIG_ATMEL drivers/net/wireless/Makefile
+reject_firmware drivers/net/wireless/atmel/atmel.c
+clean_blob drivers/net/wireless/atmel/atmel.c
+clean_kconfig drivers/net/wireless/atmel/Kconfig ATMEL
+clean_mk CONFIG_ATMEL drivers/net/wireless/atmel/Makefile
 
 announce AT76C50X_USB - "Atmel at76c503/at76c505/at76c505a USB cards"
-reject_firmware drivers/net/wireless/at76c50x-usb.c
-clean_blob drivers/net/wireless/at76c50x-usb.c
-clean_kconfig drivers/net/wireless/Kconfig AT76C50X_USB
-clean_mk CONFIG_AT76C50X_USB drivers/net/wireless/Makefile
+reject_firmware drivers/net/wireless/atmel/at76c50x-usb.c
+clean_blob drivers/net/wireless/atmel/at76c50x-usb.c
+clean_kconfig drivers/net/wireless/atmel/Kconfig AT76C50X_USB
+clean_mk CONFIG_AT76C50X_USB drivers/net/wireless/atmel/Makefile
 
 announce B43 - "Broadcom 43xx wireless support (mac80211 stack)"
-maybe_reject_firmware drivers/net/wireless/b43/main.c
+maybe_reject_firmware drivers/net/wireless/broadcom/b43/main.c
 clean_sed '
 /^static int b43_upload_microcode(/,/^}$/{
   /	if (dev->fw\.opensource) {$/i\
@@ -1711,135 +1718,137 @@ clean_sed '
 		err = -EOPNOTSUPP;\
 		goto error;\
 	}
-}' drivers/net/wireless/b43/main.c 'double-check and reject non-Free firmware'
+}' drivers/net/wireless/broadcom/b43/main.c 'double-check and reject non-Free firmware'
 # Major portions of firmware filenames not deblobbed.
-clean_blob drivers/net/wireless/b43/main.c
-clean_kconfig drivers/net/wireless/b43/Kconfig B43
-clean_mk CONFIG_B43 drivers/net/wireless/b43/Makefile
+clean_blob drivers/net/wireless/broadcom/b43/main.c
+clean_kconfig drivers/net/wireless/broadcom/b43/Kconfig B43
+clean_mk CONFIG_B43 drivers/net/wireless/broadcom/b43/Makefile
 
 announce B43LEGACY - "Broadcom 43xx-legacy wireless support (mac80211 stack)"
-reject_firmware drivers/net/wireless/b43legacy/main.c
+reject_firmware drivers/net/wireless/broadcom/b43legacy/main.c
 # Major portions of firwmare filenames not deblobbed.
-clean_blob drivers/net/wireless/b43legacy/main.c
-clean_kconfig drivers/net/wireless/b43legacy/Kconfig B43LEGACY
-clean_mk CONFIG_B43LEGACY drivers/net/wireless/b43legacy/Makefile
+clean_blob drivers/net/wireless/broadcom/b43legacy/main.c
+clean_kconfig drivers/net/wireless/broadcom/b43legacy/Kconfig B43LEGACY
+clean_mk CONFIG_B43LEGACY drivers/net/wireless/broadcom/b43legacy/Makefile
 
 announce BRCMSMAC - "Broadcom IEEE802.11n PCIe SoftMAC WLAN driver"
-reject_firmware drivers/net/wireless/brcm80211/brcmsmac/mac80211_if.c
-clean_blob drivers/net/wireless/brcm80211/brcmsmac/mac80211_if.c
-clean_kconfig drivers/net/wireless/brcm80211/Kconfig BRCMSMAC
-clean_mk CONFIG_BRCMSMAC drivers/net/wireless/brcm80211/Makefile
+reject_firmware drivers/net/wireless/broadcom/brcm80211/brcmsmac/mac80211_if.c
+clean_blob drivers/net/wireless/broadcom/brcm80211/brcmsmac/mac80211_if.c
+clean_kconfig drivers/net/wireless/broadcom/brcm80211/Kconfig BRCMSMAC
+clean_mk CONFIG_BRCMSMAC drivers/net/wireless/broadcom/brcm80211/Makefile
 
 announce BRCMFMAC - "Broadcom IEEE802.11n embedded FullMAC WLAN driver"
-reject_firmware drivers/net/wireless/brcm80211/brcmfmac/firmware.c
-clean_kconfig drivers/net/wireless/brcm80211/Kconfig BRCMFMAC
-clean_mk CONFIG_BRCMFMAC drivers/net/wireless/brcm80211/brcmfmac/Makefile
+reject_firmware drivers/net/wireless/broadcom/brcm80211/brcmfmac/firmware.c
+clean_blob drivers/net/wireless/broadcom/brcm80211/brcmfmac/firmware.h
+clean_kconfig drivers/net/wireless/broadcom/brcm80211/Kconfig BRCMFMAC
+clean_mk CONFIG_BRCMFMAC drivers/net/wireless/broadcom/brcm80211/brcmfmac/Makefile
 
 announce BRCMFMAC_SDIO - "Broadcom IEEE802.11n SDIO FullMAC WLAN driver"
-clean_blob drivers/net/wireless/brcm80211/brcmfmac/sdio.c
-clean_kconfig drivers/net/wireless/brcm80211/Kconfig BRCMFMAC_SDIO
-clean_mk CONFIG_BRCMFMAC_SDIO drivers/net/wireless/brcm80211/brcmfmac/Makefile
+clean_blob drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+clean_kconfig drivers/net/wireless/broadcom/brcm80211/Kconfig BRCMFMAC_SDIO
+clean_mk CONFIG_BRCMFMAC_SDIO drivers/net/wireless/broadcom/brcm80211/brcmfmac/Makefile
 
 announce BRCMFMAC_USB - "Broadcom IEEE802.11n USB FullMAC WLAN driver"
-clean_blob drivers/net/wireless/brcm80211/brcmfmac/usb.c
-clean_kconfig drivers/net/wireless/brcm80211/Kconfig BRCMFMAC_USB
-clean_mk CONFIG_BRCMFMAC_USB drivers/net/wireless/brcm80211/brcmfmac/Makefile
+clean_blob drivers/net/wireless/broadcom/brcm80211/brcmfmac/usb.c
+clean_kconfig drivers/net/wireless/broadcom/brcm80211/Kconfig BRCMFMAC_USB
+clean_mk CONFIG_BRCMFMAC_USB drivers/net/wireless/broadcom/brcm80211/brcmfmac/Makefile
 
 announce BRCMFMAC_PCIE - "Broadcom IEEE802.11n PCIE FullMAC WLAN driver"
-clean_blob drivers/net/wireless/brcm80211/brcmfmac/pcie.c
-clean_kconfig drivers/net/wireless/brcm80211/Kconfig BRCMFMAC_PCIE
-clean_mk CONFIG_BRCMFMAC_PCIE drivers/net/wireless/brcm80211/brcmfmac/Makefile
+clean_blob drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+clean_kconfig drivers/net/wireless/broadcom/brcm80211/Kconfig BRCMFMAC_PCIE
+clean_mk CONFIG_BRCMFMAC_PCIE drivers/net/wireless/broadcom/brcm80211/brcmfmac/Makefile
 
 announce HERMES - "Hermes chipset 802.11b support (Orinoco/Prism2/Symbol)"
-reject_firmware drivers/net/wireless/orinoco/fw.c
-clean_blob drivers/net/wireless/orinoco/fw.c
-clean_kconfig drivers/net/wireless/orinoco/Kconfig HERMES
-clean_mk CONFIG_HERMES drivers/net/wireless/orinoco/Makefile
+reject_firmware drivers/net/wireless/intersil/orinoco/fw.c
+clean_blob drivers/net/wireless/intersil/orinoco/fw.c
+clean_kconfig drivers/net/wireless/intersil/orinoco/Kconfig HERMES
+clean_mk CONFIG_HERMES drivers/net/wireless/intersil/orinoco/Makefile
 
 announce ORINOCO_USB - "Agere Orinoco USB support"
-reject_firmware drivers/net/wireless/orinoco/orinoco_usb.c
-clean_blob drivers/net/wireless/orinoco/orinoco_usb.c
-clean_kconfig drivers/net/wireless/orinoco/Kconfig ORINOCO_USB
-clean_mk CONFIG_ORINOCO_USB drivers/net/wireless/orinoco/Makefile
+reject_firmware drivers/net/wireless/intersil/orinoco/orinoco_usb.c
+clean_blob drivers/net/wireless/intersil/orinoco/orinoco_usb.c
+clean_kconfig drivers/net/wireless/intersil/orinoco/Kconfig ORINOCO_USB
+clean_mk CONFIG_ORINOCO_USB drivers/net/wireless/intersil/orinoco/Makefile
 
 announce IPW2100 - "Intel PRO/Wireless 2100 Network Connection"
-reject_firmware drivers/net/wireless/ipw2x00/ipw2100.c
-clean_blob drivers/net/wireless/ipw2x00/ipw2100.c
-clean_kconfig drivers/net/wireless/ipw2x00/Kconfig IPW2100
-clean_mk CONFIG_IPW2100 drivers/net/wireless/ipw2x00/Makefile
+reject_firmware drivers/net/wireless/intel/ipw2x00/ipw2100.c
+clean_blob drivers/net/wireless/intel/ipw2x00/ipw2100.c
+clean_kconfig drivers/net/wireless/intel/ipw2x00/Kconfig IPW2100
+clean_mk CONFIG_IPW2100 drivers/net/wireless/intel/ipw2x00/Makefile
 
 announce IPW2200 - "Intel PRO/Wireless 2200BG and 2915ABG Network Connection"
-reject_firmware drivers/net/wireless/ipw2x00/ipw2200.c
-clean_blob drivers/net/wireless/ipw2x00/ipw2200.c
-clean_kconfig drivers/net/wireless/ipw2x00/Kconfig IPW2200
-clean_mk CONFIG_IPW2200 drivers/net/wireless/ipw2x00/Makefile
+reject_firmware drivers/net/wireless/intel/ipw2x00/ipw2200.c
+clean_blob drivers/net/wireless/intel/ipw2x00/ipw2200.c
+clean_kconfig drivers/net/wireless/intel/ipw2x00/Kconfig IPW2200
+clean_mk CONFIG_IPW2200 drivers/net/wireless/intel/ipw2x00/Makefile
 
 announce IWL3945 - "Intel PRO/Wireless 3945ABG/BG Network Connection"
-reject_firmware drivers/net/wireless/iwlegacy/3945-mac.c
-clean_blob drivers/net/wireless/iwlegacy/3945-mac.c
-clean_blob drivers/net/wireless/iwlegacy/3945.h
-clean_kconfig drivers/net/wireless/iwlegacy/Kconfig IWL3945
-clean_mk CONFIG_IWL3945 drivers/net/wireless/iwlegacy/Makefile
+reject_firmware drivers/net/wireless/intel/iwlegacy/3945-mac.c
+clean_blob drivers/net/wireless/intel/iwlegacy/3945-mac.c
+clean_blob drivers/net/wireless/intel/iwlegacy/3945.h
+clean_kconfig drivers/net/wireless/intel/iwlegacy/Kconfig IWL3945
+clean_mk CONFIG_IWL3945 drivers/net/wireless/intel/iwlegacy/Makefile
 
 announce IWL4965 - "Intel Wireless WiFi 4965AGN"
-reject_firmware drivers/net/wireless/iwlegacy/4965-mac.c
-clean_blob drivers/net/wireless/iwlegacy/4965-mac.c
-clean_blob drivers/net/wireless/iwlegacy/4965.c
-clean_kconfig drivers/net/wireless/iwlegacy/Kconfig IWL4965
-clean_mk CONFIG_IWL4965 drivers/net/wireless/iwlegacy/Makefile
+reject_firmware drivers/net/wireless/intel/iwlegacy/4965-mac.c
+clean_blob drivers/net/wireless/intel/iwlegacy/4965-mac.c
+clean_blob drivers/net/wireless/intel/iwlegacy/4965.c
+clean_kconfig drivers/net/wireless/intel/iwlegacy/Kconfig IWL4965
+clean_mk CONFIG_IWL4965 drivers/net/wireless/intel/iwlegacy/Makefile
 
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
-reject_firmware drivers/net/wireless/iwlwifi/iwl-drv.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-drv.c
-clean_kconfig drivers/net/wireless/iwlwifi/Kconfig IWLWIFI
-clean_mk CONFIG_IWLWIFI drivers/net/wireless/iwlwifi/Makefile
+reject_firmware drivers/net/wireless/intel/iwlwifi/iwl-drv.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-drv.c
+clean_kconfig drivers/net/wireless/intel/iwlwifi/Kconfig IWLWIFI
+clean_mk CONFIG_IWLWIFI drivers/net/wireless/intel/iwlwifi/Makefile
 
 announce IWLDVM - "Intel Wireless WiFi DVM Firmware support"
-clean_blob drivers/net/wireless/iwlwifi/iwl-1000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-2000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-5000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-6000.c
-clean_kconfig drivers/net/wireless/iwlwifi/Kconfig IWLDVM
-clean_mk CONFIG_IWLMVM drivers/net/wireless/iwlwifi/Makefile
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-1000.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-2000.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-5000.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-6000.c
+clean_kconfig drivers/net/wireless/intel/iwlwifi/Kconfig IWLDVM
+clean_mk CONFIG_IWLMVM drivers/net/wireless/intel/iwlwifi/Makefile
 
 announce IWLMVM - "Intel Wireless WiFi MVM Firmware support"
-reject_firmware drivers/net/wireless/iwlwifi/mvm/nvm.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-7000.c
-clean_blob drivers/net/wireless/iwlwifi/iwl-8000.c
-clean_kconfig drivers/net/wireless/iwlwifi/Kconfig IWLMVM
-clean_mk CONFIG_IWLMVM drivers/net/wireless/iwlwifi/Makefile
+reject_firmware drivers/net/wireless/intel/iwlwifi/mvm/nvm.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-7000.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-8000.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-9000.c
+clean_kconfig drivers/net/wireless/intel/iwlwifi/Kconfig IWLMVM
+clean_mk CONFIG_IWLMVM drivers/net/wireless/intel/iwlwifi/Makefile
 
 announce LIBERTAS - "Marvell 8xxx Libertas WLAN driver support"
-reject_firmware drivers/net/wireless/libertas/firmware.c
-clean_kconfig drivers/net/wireless/libertas/Kconfig LIBERTAS
-clean_mk CONFIG_LIBERTAS drivers/net/wireless/libertas/Makefile
+reject_firmware drivers/net/wireless/marvell/libertas/firmware.c
+clean_kconfig drivers/net/wireless/marvell/libertas/Kconfig LIBERTAS
+clean_mk CONFIG_LIBERTAS drivers/net/wireless/marvell/libertas/Makefile
 
 announce LIBERTAS_CS - "Marvell Libertas 8385 CompactFlash 802.11b/g cards"
-clean_blob drivers/net/wireless/libertas/if_cs.c
-clean_kconfig drivers/net/wireless/libertas/Kconfig LIBERTAS_CS
-clean_mk CONFIG_LIBERTAS_CS drivers/net/wireless/libertas/Makefile
+clean_blob drivers/net/wireless/marvell/libertas/if_cs.c
+clean_kconfig drivers/net/wireless/marvell/libertas/Kconfig LIBERTAS_CS
+clean_mk CONFIG_LIBERTAS_CS drivers/net/wireless/marvell/libertas/Makefile
 
 announce LIBERTAS_SDIO - "Marvell Libertas 8385 and 8686 SDIO 802.11b/g cards"
-clean_blob drivers/net/wireless/libertas/if_sdio.c
-clean_kconfig drivers/net/wireless/libertas/Kconfig LIBERTAS_SDIO
-clean_mk CONFIG_LIBERTAS_SDIO drivers/net/wireless/libertas/Makefile
+clean_blob drivers/net/wireless/marvell/libertas/if_sdio.c
+clean_kconfig drivers/net/wireless/marvell/libertas/Kconfig LIBERTAS_SDIO
+clean_mk CONFIG_LIBERTAS_SDIO drivers/net/wireless/marvell/libertas/Makefile
 
 announce LIBERTAS_SPI - "Marvell Libertas 8686 SPI 802.11b/g cards"
-clean_blob drivers/net/wireless/libertas/if_spi.c
-clean_kconfig drivers/net/wireless/libertas/Kconfig LIBERTAS_SPI
-clean_mk CONFIG_LIBERTAS_SPI drivers/net/wireless/libertas/Makefile
+clean_blob drivers/net/wireless/marvell/libertas/if_spi.c
+clean_kconfig drivers/net/wireless/marvell/libertas/Kconfig LIBERTAS_SPI
+clean_mk CONFIG_LIBERTAS_SPI drivers/net/wireless/marvell/libertas/Makefile
 
 announce LIBERTAS_USB - "Marvell Libertas 8388 USB 802.11b/g cards"
-clean_blob drivers/net/wireless/libertas/if_usb.c
-clean_blob drivers/net/wireless/libertas/README
-clean_kconfig drivers/net/wireless/libertas/Kconfig LIBERTAS_USB
-clean_mk CONFIG_LIBERTAS_USB drivers/net/wireless/libertas/Makefile
+clean_blob drivers/net/wireless/marvell/libertas/if_usb.c
+clean_blob drivers/net/wireless/marvell/libertas/README
+clean_kconfig drivers/net/wireless/marvell/libertas/Kconfig LIBERTAS_USB
+clean_mk CONFIG_LIBERTAS_USB drivers/net/wireless/marvell/libertas/Makefile
 
 announce LIBERTAS_THINFIRM_USB - "Marvell Libertas 8388 USB 802.11b/g cards with thin firmware"
-reject_firmware drivers/net/wireless/libertas_tf/if_usb.c
-clean_blob drivers/net/wireless/libertas_tf/if_usb.c
-clean_kconfig drivers/net/wireless/Kconfig LIBERTAS_THINFIRM_USB
-clean_mk CONFIG_LIBERTAS_THINFIRM_USB drivers/net/wireless/libertas_tf/Makefile
+reject_firmware drivers/net/wireless/marvell/libertas_tf/if_usb.c
+clean_blob drivers/net/wireless/marvell/libertas_tf/if_usb.c
+clean_kconfig drivers/net/wireless/marvell/libertas_tf/Kconfig LIBERTAS_THINFIRM_USB
+clean_mk CONFIG_LIBERTAS_THINFIRM_USB drivers/net/wireless/marvell/libertas_tf/Makefile
 
 announce MT7601U - "MediaTek MT7601U (USB) support"
 reject_firmware drivers/net/wireless/mediatek/mt7601u/mcu.c
@@ -1849,34 +1858,34 @@ clean_kconfig drivers/net/wireless/mediatek/mt7601u/Kconfig MT7601U
 clean_mk CONFIG_MT7601U drivers/net/wireless/mediatek/mt7601u/Makefile
 
 announce MWIFIEX - "Marvell WiFi-Ex Driver"
-clean_blob drivers/net/wireless/mwifiex/README
-reject_firmware drivers/net/wireless/mwifiex/main.c
-clean_kconfig drivers/net/wireless/mwifiex/Kconfig MWIFIEX
-clean_mk CONFIG_MWIFIEX drivers/net/wireless/mwifiex/Makefile
+clean_blob drivers/net/wireless/marvell/mwifiex/README
+reject_firmware drivers/net/wireless/marvell/mwifiex/main.c
+clean_kconfig drivers/net/wireless/marvell/mwifiex/Kconfig MWIFIEX
+clean_mk CONFIG_MWIFIEX drivers/net/wireless/marvell/mwifiex/Makefile
 
 announce MWIFIEX_SDIO - "Marvell WiFi-Ex Driver for SD8787"
-clean_blob drivers/net/wireless/mwifiex/sdio.h
-clean_blob drivers/net/wireless/mwifiex/sdio.c
-clean_kconfig drivers/net/wireless/mwifiex/Kconfig MWIFIEX_SDIO
-clean_mk CONFIG_MWIFIEX_SDIO drivers/net/wireless/mwifiex/Makefile
+clean_blob drivers/net/wireless/marvell/mwifiex/sdio.h
+clean_blob drivers/net/wireless/marvell/mwifiex/sdio.c
+clean_kconfig drivers/net/wireless/marvell/mwifiex/Kconfig MWIFIEX_SDIO
+clean_mk CONFIG_MWIFIEX_SDIO drivers/net/wireless/marvell/mwifiex/Makefile
 
 announce MWIFIEX_PCIE - "Marvell WiFi-Ex Driver for PCI 8766"
-clean_blob drivers/net/wireless/mwifiex/pcie.h
-clean_blob drivers/net/wireless/mwifiex/pcie.c
-clean_kconfig drivers/net/wireless/mwifiex/Kconfig MWIFIEX_PCIE
-clean_mk CONFIG_MWIFIEX_PCIE drivers/net/wireless/mwifiex/Makefile
+clean_blob drivers/net/wireless/marvell/mwifiex/pcie.h
+clean_blob drivers/net/wireless/marvell/mwifiex/pcie.c
+clean_kconfig drivers/net/wireless/marvell/mwifiex/Kconfig MWIFIEX_PCIE
+clean_mk CONFIG_MWIFIEX_PCIE drivers/net/wireless/marvell/mwifiex/Makefile
 
 announce MWIFIEX_USB - "Marvell WiFi-Ex Driver for USB8797"
-clean_blob drivers/net/wireless/mwifiex/usb.h
-clean_blob drivers/net/wireless/mwifiex/usb.c
-clean_kconfig drivers/net/wireless/mwifiex/Kconfig MWIFIEX_USB
-clean_mk CONFIG_MWIFIEX_USB drivers/net/wireless/mwifiex/Makefile
+clean_blob drivers/net/wireless/marvell/mwifiex/usb.h
+clean_blob drivers/net/wireless/marvell/mwifiex/usb.c
+clean_kconfig drivers/net/wireless/marvell/mwifiex/Kconfig MWIFIEX_USB
+clean_mk CONFIG_MWIFIEX_USB drivers/net/wireless/marvell/mwifiex/Makefile
 
 announce MWL8K - "Marvell 88W8xxx PCI/PCIe Wireless support"
-reject_firmware drivers/net/wireless/mwl8k.c
-clean_blob drivers/net/wireless/mwl8k.c
-clean_kconfig drivers/net/wireless/Kconfig MWL8K
-clean_mk CONFIG_MWL8K drivers/net/wireless/Makefile
+reject_firmware drivers/net/wireless/marvell/mwl8k.c
+clean_blob drivers/net/wireless/marvell/mwl8k.c
+clean_kconfig drivers/net/wireless/marvell/Kconfig MWL8K
+clean_mk CONFIG_MWL8K drivers/net/wireless/marvell/Makefile
 
 announce AR5523 - "Atheros AR5523 wireless driver support"
 reject_firmware drivers/net/wireless/ath/ar5523/ar5523.c
@@ -1930,16 +1939,16 @@ clean_kconfig drivers/net/wireless/ath/wil6210/Kconfig WIL6210
 clean_mk CONFIG_WIL6210 drivers/net/wireless/ath/wil6210/Makefile
 
 announce CW1200 - "CW1200 WLAN support"
-reject_firmware drivers/net/wireless/cw1200/fwio.c
-clean_blob drivers/net/wireless/cw1200/fwio.h
-reject_firmware drivers/net/wireless/cw1200/sta.c
-clean_kconfig drivers/net/wireless/cw1200/Kconfig CW1200
-clean_mk CONFIG_CW1200 drivers/net/wireless/cw1200/Makefile
+reject_firmware drivers/net/wireless/st/cw1200/fwio.c
+clean_blob drivers/net/wireless/st/cw1200/fwio.h
+reject_firmware drivers/net/wireless/st/cw1200/sta.c
+clean_kconfig drivers/net/wireless/st/cw1200/Kconfig CW1200
+clean_mk CONFIG_CW1200 drivers/net/wireless/st/cw1200/Makefile
 
 announce CW1200_WLAN_SDIO - "Support SDIO platforms"
-clean_blob drivers/net/wireless/cw1200/cw1200_sdio.c
-clean_kconfig drivers/net/wireless/cw1200/Kconfig CW1200_WLAN_SDIO
-clean_mk CONFIG_CW1200_WLAN_SDIO drivers/net/wireless/cw1200/Makefile
+clean_blob drivers/net/wireless/st/cw1200/cw1200_sdio.c
+clean_kconfig drivers/net/wireless/st/cw1200/Kconfig CW1200_WLAN_SDIO
+clean_mk CONFIG_CW1200_WLAN_SDIO drivers/net/wireless/st/cw1200/Makefile
 
 announce PRISM2_USB - "Prism2.5/3 USB driver"
 reject_firmware drivers/staging/wlan-ng/prism2fw.c
@@ -1948,35 +1957,35 @@ clean_kconfig drivers/staging/wlan-ng/Kconfig PRISM2_USB
 clean_mk CONFIG_PRISM2_USB drivers/staging/wlan-ng/Makefile
 
 announce P54_PCI - "Prism54 PCI support"
-reject_firmware drivers/net/wireless/p54/p54pci.c
-clean_blob drivers/net/wireless/p54/p54pci.c
-clean_sed 's,3826\.eeprom,DEBLOBBED,g' drivers/net/wireless/p54/Kconfig \
+reject_firmware drivers/net/wireless/intersil/p54/p54pci.c
+clean_blob drivers/net/wireless/intersil/p54/p54pci.c
+clean_sed 's,3826\.eeprom,DEBLOBBED,g' drivers/net/wireless/intersil/p54/Kconfig \
     'removed blob name'
-clean_kconfig drivers/net/wireless/p54/Kconfig P54_PCI
-clean_mk CONFIG_P54_PCI drivers/net/wireless/p54/Makefile
+clean_kconfig drivers/net/wireless/intersil/p54/Kconfig P54_PCI
+clean_mk CONFIG_P54_PCI drivers/net/wireless/intersil/p54/Makefile
 
 announce P54_SPI - "Prism54 SPI (stlc45xx) support"
 # There's support for loading custom 3826.eeprom here, with a default
 # eeprom that is clearly pure data.  Without Free 3826.arm, there's
 # little point in trying to retain the ability to load 3826.eeprom, so
 # we drop it altogether.
-reject_firmware drivers/net/wireless/p54/p54spi.c
-clean_blob drivers/net/wireless/p54/p54spi.c
-clean_kconfig drivers/net/wireless/p54/Kconfig P54_SPI
-clean_mk CONFIG_P54_SPI drivers/net/wireless/p54/Makefile
+reject_firmware drivers/net/wireless/intersil/p54/p54spi.c
+clean_blob drivers/net/wireless/intersil/p54/p54spi.c
+clean_kconfig drivers/net/wireless/intersil/p54/Kconfig P54_SPI
+clean_mk CONFIG_P54_SPI drivers/net/wireless/intersil/p54/Makefile
 
 announce P54_USB - "Prism54 USB support"
-reject_firmware drivers/net/wireless/p54/p54usb.c
-clean_blob drivers/net/wireless/p54/p54usb.c
-clean_blob drivers/net/wireless/p54/p54usb.h
-clean_kconfig drivers/net/wireless/p54/Kconfig P54_USB
-clean_mk CONFIG_P54_USB drivers/net/wireless/p54/Makefile
+reject_firmware drivers/net/wireless/intersil/p54/p54usb.c
+clean_blob drivers/net/wireless/intersil/p54/p54usb.c
+clean_blob drivers/net/wireless/intersil/p54/p54usb.h
+clean_kconfig drivers/net/wireless/intersil/p54/Kconfig P54_USB
+clean_mk CONFIG_P54_USB drivers/net/wireless/intersil/p54/Makefile
 
 announce PRISM54 - "Intersil Prism GT/Duette/Indigo PCI/Cardbus"
-reject_firmware drivers/net/wireless/prism54/islpci_dev.c
-clean_blob drivers/net/wireless/prism54/islpci_dev.c
-clean_kconfig drivers/net/wireless/Kconfig PRISM54
-clean_mk CONFIG_PRISM54 drivers/net/wireless/prism54/Makefile
+reject_firmware drivers/net/wireless/intersil/prism54/islpci_dev.c
+clean_blob drivers/net/wireless/intersil/prism54/islpci_dev.c
+clean_kconfig drivers/net/wireless/intersil/Kconfig PRISM54
+clean_mk CONFIG_PRISM54 drivers/net/wireless/intersil/prism54/Makefile
 
 announce RSI_91X - "Redpine Signals Inc 91x WLAN driver support"
 clean_blob drivers/net/wireless/rsi/rsi_common.h
@@ -1996,33 +2005,33 @@ clean_kconfig drivers/net/wireless/rsi/Kconfig RSI_USB
 clean_mk CONFIG_RSI_USB drivers/net/wireless/rsi/Makefile
 
 announce RT2X00_LIB_FIRMWARE - "Ralink driver firmware support"
-reject_firmware drivers/net/wireless/rt2x00/rt2x00firmware.c
-clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2X00_LIB_FIRMWARE
-clean_mk CONFIG_RT2X00_LIB_FIRMWARE drivers/net/wireless/rt2x00/Makefile
+reject_firmware drivers/net/wireless/ralink/rt2x00/rt2x00firmware.c
+clean_kconfig drivers/net/wireless/ralink/rt2x00/Kconfig RT2X00_LIB_FIRMWARE
+clean_mk CONFIG_RT2X00_LIB_FIRMWARE drivers/net/wireless/ralink/rt2x00/Makefile
 
 announce RT61PCI - "Ralink rt2501/rt61 (PCI/PCMCIA) support"
-clean_blob drivers/net/wireless/rt2x00/rt61pci.h
-clean_blob drivers/net/wireless/rt2x00/rt61pci.c
-clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT61PCI
-clean_mk CONFIG_RT61PCI drivers/net/wireless/rt2x00/Makefile
+clean_blob drivers/net/wireless/ralink/rt2x00/rt61pci.h
+clean_blob drivers/net/wireless/ralink/rt2x00/rt61pci.c
+clean_kconfig drivers/net/wireless/ralink/rt2x00/Kconfig RT61PCI
+clean_mk CONFIG_RT61PCI drivers/net/wireless/ralink/rt2x00/Makefile
 
 announce RT73USB - "Ralink rt2501/rt73 (USB) support"
-clean_blob drivers/net/wireless/rt2x00/rt73usb.h
-clean_blob drivers/net/wireless/rt2x00/rt73usb.c
-clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT73USB
-clean_mk CONFIG_RT73USB drivers/net/wireless/rt2x00/Makefile
+clean_blob drivers/net/wireless/ralink/rt2x00/rt73usb.h
+clean_blob drivers/net/wireless/ralink/rt2x00/rt73usb.c
+clean_kconfig drivers/net/wireless/ralink/rt2x00/Kconfig RT73USB
+clean_mk CONFIG_RT73USB drivers/net/wireless/ralink/rt2x00/Makefile
 
 announce RT2800PCI - "Ralink rt2800 (PCI/PCMCIA) support"
-clean_blob drivers/net/wireless/rt2x00/rt2800pci.h
-clean_blob drivers/net/wireless/rt2x00/rt2800pci.c
-clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800PCI
-clean_mk CONFIG_RT2800PCI drivers/net/wireless/rt2x00/Makefile
+clean_blob drivers/net/wireless/ralink/rt2x00/rt2800pci.h
+clean_blob drivers/net/wireless/ralink/rt2x00/rt2800pci.c
+clean_kconfig drivers/net/wireless/ralink/rt2x00/Kconfig RT2800PCI
+clean_mk CONFIG_RT2800PCI drivers/net/wireless/ralink/rt2x00/Makefile
 
 announce RT2800USB - "Ralink rt2800 (USB) support"
-clean_blob drivers/net/wireless/rt2x00/rt2800usb.h
-clean_blob drivers/net/wireless/rt2x00/rt2800usb.c
-clean_kconfig drivers/net/wireless/rt2x00/Kconfig RT2800USB
-clean_mk CONFIG_RT2800USB drivers/net/wireless/rt2x00/Makefile
+clean_blob drivers/net/wireless/ralink/rt2x00/rt2800usb.h
+clean_blob drivers/net/wireless/ralink/rt2x00/rt2800usb.c
+clean_kconfig drivers/net/wireless/ralink/rt2x00/Kconfig RT2800USB
+clean_mk CONFIG_RT2800USB drivers/net/wireless/ralink/rt2x00/Makefile
 
 announce RTL8XXXU - "RTL8723AU/RTL8188[CR]U/RTL819[12]CU (mac80211) support"
 reject_firmware drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
@@ -2154,10 +2163,10 @@ clean_kconfig drivers/net/wireless/ti/wlcore/Kconfig WLCORE
 clean_mk CONFIG_WLCORE drivers/net/wireless/ti/wlcore/Makefile
 
 announce USB_ZD1201 - "USB ZD1201 based Wireless device support"
-reject_firmware drivers/net/wireless/zd1201.c
-clean_blob drivers/net/wireless/zd1201.c
-clean_kconfig drivers/net/wireless/Kconfig USB_ZD1201
-clean_mk CONFIG_USB_ZD1201 drivers/net/wireless/Makefile
+reject_firmware drivers/net/wireless/zydas/zd1201.c
+clean_blob drivers/net/wireless/zydas/zd1201.c
+clean_kconfig drivers/net/wireless/zydas/Kconfig USB_ZD1201
+clean_mk CONFIG_USB_ZD1201 drivers/net/wireless/zydas/Makefile
 
 announce WCN36XX - "Qualcomm Atheros WCN3660/3680 support"
 reject_firmware drivers/net/wireless/ath/wcn36xx/smd.c
@@ -2175,10 +2184,18 @@ clean_kconfig drivers/staging/wilc1000/Kconfig WILC1000
 clean_mk CONFIG_WILC1000 drivers/staging/wilc1000/Makefile
 
 announce ZD1211RW - "ZyDAS ZD1211/ZD1211B USB-wireless support"
-reject_firmware drivers/net/wireless/zd1211rw/zd_usb.c
-clean_blob drivers/net/wireless/zd1211rw/zd_usb.c
-clean_kconfig drivers/net/wireless/zd1211rw/Kconfig ZD1211RW
-clean_mk CONFIG_ZD1211RW drivers/net/wireless/zd1211rw/Makefile
+reject_firmware drivers/net/wireless/zydas/zd1211rw/zd_usb.c
+clean_blob drivers/net/wireless/zydas/zd1211rw/zd_usb.c
+clean_kconfig drivers/net/wireless/zydas/zd1211rw/Kconfig ZD1211RW
+clean_mk CONFIG_ZD1211RW drivers/net/wireless/zydas/zd1211rw/Makefile
+
+# ieee802154
+
+announce IEEE802154_ADF7242 - "ADF7242 transceiver driver"
+reject_firmware drivers/net/ieee802154/adf7242.c
+clean_blob drivers/net/ieee802154/adf7242.c
+clean_kconfig drivers/net/ieee802154/Kconfig IEEE802154_ADF7242
+clean_mk CONFIG_IEEE802154_ADF7242 drivers/net/ieee802154/Makefile
 
 # bluetooth
 
@@ -2428,6 +2445,12 @@ clean_blob drivers/input/touchscreen/atmel_mxt_ts.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_ATMEL_MXT
 clean_mk CONFIG_TOUCHSCREEN_ATMEL_MXT drivers/input/touchscreen/Makefile
 
+announce TOUCHSCREEN_GOODIX - "Goodix I2C touchscreen"
+reject_firmware drivers/input/touchscreen/goodix.c
+clean_blob drivers/input/touchscreen/goodix.c
+clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_GOODIX
+clean_mk CONFIG_TOUCHSCREEN_GOODIX drivers/input/touchscreen/Makefile
+
 announce TOUCHSCREEN_ROHM_BU21023 - "ROHM BU21023/24 Dual touch support resistive touchscreens"
 reject_firmware drivers/input/touchscreen/rohm_bu21023.c
 clean_blob drivers/input/touchscreen/rohm_bu21023.c
@@ -2620,6 +2643,7 @@ clean_mk CONFIG_USB_UEAGLEATM drivers/usb/atm/Makefile
 announce USB_XHCI_RCAR - "xHCI support for Renesas R-Car SoCs"
 reject_firmware drivers/usb/host/xhci-rcar.c
 clean_blob drivers/usb/host/xhci-rcar.c
+clean_blob drivers/usb/host/xhci-rcar.h
 clean_kconfig drivers/usb/host/Kconfig USB_XHCI_RCAR
 clean_mk CONFIG_USB_XHCI_RCAR drivers/usb/host/Makefile
 
@@ -2718,6 +2742,14 @@ reject_firmware drivers/usb/serial/mxuport.c
 clean_blob drivers/usb/serial/mxuport.c
 clean_kconfig drivers/usb/serial/Kconfig USB_SERIAL_MXUPORT
 clean_mk CONFIG_USB_SERIAL_MXUPORT drivers/usb/serial/Makefile
+
+# This was removed in 4.5-rc7, but it will likely be back in some
+# future release, so let's keep the code commented out here.
+# announce USB_SERIAL_MXUPORT11 - "USB Moxa UPORT 11x0 Serial Driver"
+# reject_firmware drivers/usb/serial/mxu11x0.c
+# clean_blob drivers/usb/serial/mxu11x0.c
+# clean_kconfig drivers/usb/serial/Kconfig USB_SERIAL_MXUPORT11
+# clean_mk CONFIG_USB_SERIAL_MXUPORT11 drivers/usb/serial/Makefile
 
 announce USB_SERIAL_TI - "USB TI 3410/5052 Serial Driver"
 drop_fw_file firmware/ti_3410.fw.ihex firmware/ti_3410.fw
@@ -3050,6 +3082,7 @@ clean_mk CONFIG_SND_SOC_INTEL_HASWELL sound/soc/intel/haswell/Makefile
 announce SND_SOC_INTEL_SKYLAKE - undocumented
 reject_firmware sound/soc/intel/skylake/skl-sst.c
 reject_firmware sound/soc/intel/skylake/skl-topology.c
+clean_blob sound/soc/intel/skylake/skl.c
 clean_blob sound/soc/intel/skylake/skl-sst.c
 clean_blob sound/soc/intel/skylake/skl-topology.c
 clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_SKYLAKE
@@ -3141,6 +3174,12 @@ clean_mk CONFIG_SND_USB_6FIRE sound/usb/6fire/Makefile
 #######
 # SOC #
 #######
+
+announce QCOM_WCNSS_CTRL - "Qualcomm WCNSS control driver"
+reject_firmware drivers/soc/qcom/wcnss_ctrl.c
+clean_blob drivers/soc/qcom/wcnss_ctrl.c
+clean_kconfig drivers/soc/qcom/Kconfig QCOM_WCNSS_CTRL
+clean_mk CONFIG_QCOM_WCNSS_CTRL drivers/soc/qcom/Makefile
 
 announce KEYSTONE_NAVIGATOR_QMSS - "Keystone Queue Manager Sub System"
 reject_firmware drivers/soc/ti/knav_qmss_queue.c
