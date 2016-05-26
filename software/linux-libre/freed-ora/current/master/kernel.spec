@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 5
+%define base_sublevel 6
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.5%{?stablegnux}
-%define rcrevlibre  -4.5%{?rcrevgnux}
-#define gitrevlibre -4.5%{?gitrevgnux}
+#define stablelibre -4.6%{?stablegnux}
+#define rcrevlibre  -4.6%{?rcrevgnux}
+#define gitrevlibre -4.6%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -451,7 +451,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+#Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -662,9 +662,13 @@ Patch701: antenna_select.patch
 #CVE-2016-4482 rhbz 1332931 1332932
 Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
 
-#CVE-2016-4486 CVE-2016-4485 rhbz 1333316 1333309 1333321
-Patch707: net-fix-infoleak-in-llc.patch
-Patch708: net-fix-infoleak-in-rtnetlink.patch
+#CVE-2016-4569 rhbz 1334643 1334645
+Patch714: ALSA-timer-Fix-leak-in-SNDRV_TIMER_IOCTL_PARAMS.patch
+Patch715: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_cca.patch
+Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
+
+#CVE-2016-3713 rhbz 1332139 1336410
+Patch717: KVM-MTRR-remove-MSR-0x2f8.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2289,7 +2293,31 @@ fi
 #
 # 
 %changelog
-* Sat May 14 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed May 18 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.6-gnu.
+
+* Mon May 16 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.0-1
+- Linux v4.6
+- CVE-2016-3713 kvm: out-of-bounds access in set_var_mtrr_msr (rhbz 1332139 1336410)
+
+* Fri May 13 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.0-0.rc7.git3.1
+- Linux v4.6-rc7-116-ga2ccb68b1e6a
+
+* Thu May 12 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Some minor ARMv7 platform fixes from F-24
+- Enable PCI_HOST_GENERIC for all ARM arches (Jeremy Linton)
+
+* Wed May 11 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.0-0.rc7.git2.1
+- Linux v4.6-rc7-55-gc5114626f33b
+
+* Tue May 10 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.0-0.rc7.git1.1
+- Linux v4.6-rc7-45-g2d0bd9534c8d
+
+* Tue May 10 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Enable XEN SCSI front and backend (rhbz 1334512)
+- CVE-2016-4569 info leak in sound module (rhbz 1334643 1334645)
+
+* Mon May  9 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat May 14
 - GNU Linux-libre 4.6-rc7-gnu.
 
 * Mon May 09 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.0-0.rc7.git0.1
