@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -694,9 +694,6 @@ Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
 
 #CVE-2016-0758 rhbz 1300257 1335386
 Patch717: KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
-
-#CVE-2016-3713 rhbz 1332139 1336410
-Patch718: KVM-MTRR-remove-MSR-0x2f8.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
@@ -1493,9 +1490,6 @@ ApplyPatch ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
 
 #CVE-2016-0758 rhbz 1300257 1335386
 ApplyPatch KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
-
-#CVE-2016-3713 rhbz 1332139 1336410
-ApplyPatch KVM-MTRR-remove-MSR-0x2f8.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 ApplyPatch tipc-check-nl-sock-before-parsing-nested-attributes.patch
@@ -2362,6 +2356,12 @@ fi
 #
 # 
 %changelog
+* Thu Jun  2 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4.12-gnu.
+
+* Wed Jun 01 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.12-200
+- Linux v4.4.12
+
 * Tue May 24 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4.11-gnu.
 
