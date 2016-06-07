@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -692,9 +692,6 @@ Patch705: mm-thp-kvm-fix-memory-corruption-in-KVM-with-THP-ena.patch
 #CVE-2016-4482 rhbz 1332931 1332932
 Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
 
-#rhbz 1328633
-Patch713: sp5100_tco-properly-check-for-new-register-layouts.patch
-
 #CVE-2016-4569 rhbz 1334643 1334645
 Patch714: ALSA-timer-Fix-leak-in-SNDRV_TIMER_IOCTL_PARAMS.patch
 Patch715: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_cca.patch
@@ -703,11 +700,11 @@ Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
 #CVE-2016-0758 rhbz 1300257 1335386
 Patch717: KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
 
-#CVE-2016-3713 rhbz 1332139 1336410
-Patch718: KVM-MTRR-remove-MSR-0x2f8.patch
-
 #CVE-2016-4440 rhbz 1337806 1337807
 Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
+
+#CVE-2016-4951 rhbz 1338625 1338626
+Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2324,6 +2321,15 @@ fi
 #
 # 
 %changelog
+* Thu Jun  2 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.5.6-gnu.
+
+* Wed Jun 01 2016 Justin M. Forbes <jforbes@fedoraproject.org> 4.5.6-200
+- Linux v4.5.6
+
+* Mon May 23 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4951 null ptr deref in tipc_nl_publ_dump (rhbz 1338625 1338626)
+
 * Fri May 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> 4.5.5-201
 - Remove the installonly additions until dnf can handle the transition
 
