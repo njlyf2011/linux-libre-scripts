@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -660,9 +660,6 @@ Patch646: HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 #Known use after free, possibly rhbz 1310579
 Patch654: 0001-usb-hub-fix-panic-in-usb_reset_and_verify_device.patch
 
-#Mitigates CVE-2013-4312 rhbz 1313428 1313433
-Patch659: pipe-limit-the-per-user-amount-of-pages-allocated-in.patch
-
 #rhbz 1310252 1313318
 Patch660: 0001-drm-i915-Pretend-cursor-is-always-on-for-ILK-style-W.patch
 
@@ -677,9 +674,6 @@ Patch690: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 
 #CVE-2016-3951 rhbz 1324782 1324815
 Patch695: cdc_ncm-do-not-call-usbnet_link_change-from-cdc_ncm_.patch
-
-#rhbz 1309487
-Patch701: antenna_select.patch
 
 # Stop splashing crap about broken firmware BGRT
 Patch704: x86-efi-bgrt-Switch-all-pr_err-to-pr_debug-for-inval.patch
@@ -697,6 +691,12 @@ Patch717: KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
+
+#CVE-2016-5243 rhbz 1343338 1343335
+Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
+
+#CVE-2016-5244 rhbz 1343338 1343337
+Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
 
 # END OF PATCH DEFINITIONS
 %endif
@@ -1459,9 +1459,6 @@ ApplyPatch HID-sony-do-not-bail-out-when-the-sixaxis-refuses-th.patch
 #Known use after free, possibly rhbz 1310579
 ApplyPatch 0001-usb-hub-fix-panic-in-usb_reset_and_verify_device.patch
 
-#Mitigates CVE-2013-4312 rhbz 1313428 1313433
-ApplyPatch pipe-limit-the-per-user-amount-of-pages-allocated-in.patch
-
 #rhbz 1310252 1313318
 ApplyPatch 0001-drm-i915-Pretend-cursor-is-always-on-for-ILK-style-W.patch
 
@@ -1477,9 +1474,6 @@ ApplyPatch x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 #CVE-2016-3951 rhbz 1324782 1324815
 ApplyPatch cdc_ncm-do-not-call-usbnet_link_change-from-cdc_ncm_.patch
 
-#rhbz 1309487
-ApplyPatch antenna_select.patch
-
 #CVE-2016-4482 rhbz 1332931 1332932
 ApplyPatch USB-usbfs-fix-potential-infoleak-in-devio.patch
 
@@ -1493,6 +1487,12 @@ ApplyPatch KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 ApplyPatch tipc-check-nl-sock-before-parsing-nested-attributes.patch
+
+#CVE-2016-5243 rhbz 1343338 1343335
+ApplyPatch tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
+
+#CVE-2016-5244 rhbz 1343338 1343337
+ApplyPatch rds-fix-an-infoleak-in-rds_inc_info_copy.txt
 
 # END OF PATCH APPLICATIONS
 
@@ -2356,6 +2356,16 @@ fi
 #
 # 
 %changelog
+* Wed Jun  8 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4.13-gnu.
+
+* Wed Jun 08 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.13-200
+- Linux v4.4.13
+
+* Tue Jun 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5244 info leak in rds (rhbz 1343338 1343337)
+- CVE-2016-5243 info leak in tipc (rhbz 1343338 1343335)
+
 * Thu Jun  2 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4.12-gnu.
 
