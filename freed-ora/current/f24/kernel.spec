@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -679,9 +679,6 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 # CVE-2016-3672 rhbz 1324749 1324750
 Patch689: x86-mm-32-Enable-full-randomization-on-i386-and-X86_.patch
 
-#rhbz 1309487
-Patch701: antenna_select.patch
-
 #rhbz 1302071
 Patch702: x86-build-Build-compressed-x86-kernels-as-PIE.patch
 
@@ -707,6 +704,12 @@ Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
 
 #CVE-2016-4951 rhbz 1338625 1338626
 Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
+
+#CVE-2016-5243 rhbz 1343338 1343335
+Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
+
+#CVE-2016-5244 rhbz 1343338 1343337
+Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
 
 # END OF PATCH DEFINITIONS
 
@@ -2327,6 +2330,16 @@ fi
 #
 # 
 %changelog
+* Wed Jun  8 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.5.7-gnu.
+
+* Wed Jun 08 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.5.7-300
+- Linux v4.5.7
+
+* Tue Jun 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5244 info leak in rds (rhbz 1343338 1343337)
+- CVE-2016-5243 info leak in tipc (rhbz 1343338 1343335)
+
 * Thu Jun  2 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.5.6-gnu.
 
