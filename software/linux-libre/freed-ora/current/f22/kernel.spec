@@ -90,7 +90,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -639,9 +639,6 @@ Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 #rhbz 1287819
 Patch570: HID-multitouch-enable-palm-rejection-if-device-imple.patch
 
-#rhbz 1286293
-Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
-
 #rhbz 1288687
 Patch572: alua_fix.patch
 
@@ -689,14 +686,17 @@ Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
 #CVE-2016-0758 rhbz 1300257 1335386
 Patch717: KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
 
-#CVE-2016-4951 rhbz 1338625 1338626
-Patch720: tipc-check-nl-sock-before-parsing-nested-attributes.patch
-
 #CVE-2016-5243 rhbz 1343338 1343335
 Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
 
 #CVE-2016-5244 rhbz 1343338 1343337
 Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
+
+#CVE-2016-4470 rhbz 1341716 1346626
+Patch727: KEYS-potential-uninitialized-variable.patch
+
+#rhbz 1338025
+Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
 
 # END OF PATCH DEFINITIONS
 %endif
@@ -1438,9 +1438,6 @@ ApplyPatch kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 #rhbz 1287819
 ApplyPatch HID-multitouch-enable-palm-rejection-if-device-imple.patch
 
-#rhbz 1286293
-ApplyPatch ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
-
 #rhbz 1288687
 ApplyPatch alua_fix.patch
 
@@ -1485,14 +1482,17 @@ ApplyPatch ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
 #CVE-2016-0758 rhbz 1300257 1335386
 ApplyPatch KEYS-Fix-ASN.1-indefinite-length-object-parsing.patch
 
-#CVE-2016-4951 rhbz 1338625 1338626
-ApplyPatch tipc-check-nl-sock-before-parsing-nested-attributes.patch
-
 #CVE-2016-5243 rhbz 1343338 1343335
 ApplyPatch tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
 
 #CVE-2016-5244 rhbz 1343338 1343337
 ApplyPatch rds-fix-an-infoleak-in-rds_inc_info_copy.txt
+
+#CVE-2016-4470 rhbz 1341716 1346626
+ApplyPatch KEYS-potential-uninitialized-variable.patch
+
+#rhbz 1338025
+ApplyPatch hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
 
 # END OF PATCH APPLICATIONS
 
@@ -2356,6 +2356,21 @@ fi
 #
 # 
 %changelog
+* Sat Jun 25 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.4.14-gnu.
+
+* Fri Jun 24 2016 Laura Abbott <labbott@fedoraproject.org> - 4.4.14-200
+- Linux v4.4.14
+
+* Wed Jun 15 2016 Laura Abbott <labbott@fedoraproject.org>
+- hp-wmi: fix wifi cannot be hard-unblock (rhbz 1338025)
+
+* Wed Jun 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4470 keys: uninitialized variable crash (rhbz 1341716 1346626)
+
+* Mon Jun 13 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-1583 stack overflow via ecryptfs and /proc (rhbz 1344721 1344722)
+
 * Wed Jun  8 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.4.13-gnu.
 
