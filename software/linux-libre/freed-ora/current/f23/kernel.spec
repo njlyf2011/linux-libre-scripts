@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -656,9 +656,6 @@ Patch503: drm-i915-turn-off-wc-mmaps.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#rhbz 1286293
-Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
-
 #Required for some persistent memory options
 Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 
@@ -708,6 +705,24 @@ Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
 
 #CVE-2016-5244 rhbz 1343338 1343337
 Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
+
+#CVE-2016-1583 rhbz 1344721 1344722
+Patch723: proc-prevent-stacking-filesystems-on-top.patch
+Patch724: ecryptfs-fix-handling-of-directory-opening.patch
+Patch725: ecryptfs-forbid-opening-files-without-mmap-handler.patch
+Patch726: sched-panic-on-corrupted-stack-end.patch
+
+#CVE-2016-4470 rhbz 1341716 1346626
+Patch727: KEYS-potential-uninitialized-variable.patch
+
+#rhbz 1338025
+Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
+
+#CVE-2016-4998 rhbz 1349886 1350316
+Patch729: CVE-2016-4998.patch
+
+#CVE-2016-5829 rhbz 1350509 1350513
+Patch826: HID-hiddev-validate-num_values-for-HIDIOCGUSAGES-HID.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2324,6 +2339,21 @@ fi
 #
 # 
 %changelog
+* Mon Jun 27 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.5.7-201
+- CVE-2016-5829 heap overflow in hiddev (rhbz 1350509 1350513)
+
+* Mon Jun 27 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2016-4998 oob reads when processing IPT_SO_SET_REPLACE setsockopt (rhbz 1349886 1350316)
+
+* Wed Jun 15 2016 Laura Abbott <labbott@fedoraproject.org>
+- hp-wmi: fix wifi cannot be hard-unblock (rhbz 1338025)
+
+* Wed Jun 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4470 keys: uninitialized variable crash (rhbz 1341716 1346626)
+
+* Mon Jun 13 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-1583 stack overflow via ecryptfs and /proc (rhbz 1344721 1344722)
+
 * Wed Jun  8 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.5.7-gnu.
 
