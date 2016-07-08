@@ -48,9 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.5 extra=
-
-set -e
+kver=4.6 extra=
 
 case $1 in
 --force)
@@ -63,6 +61,7 @@ case $1 in
   shift
   ;;
 *)
+  set -e
   die () {
     echo ERROR: "$@" >&2
     echo Use --force to ignore
@@ -669,13 +668,15 @@ clean_kconfig drivers/gpu/drm/i915/Kconfig DRM_I915
 clean_mk CONFIG_DRM_I915 drivers/gpu/drm/i915/Makefile
 
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
-reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/gr/gf100.c
-clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gf100.c
+reject_firmware drivers/gpu/drm/nouveau/nvkm/core/firmware.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/core/firmware.c
 reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
 reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
 clean_blob drivers/gpu/drm/nouveau/nouveau_platform.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/subdev/secboot/gm200.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/subdev/secboot/gm20b.c
 clean_kconfig drivers/gpu/drm/nouveau/Kconfig DRM_NOUVEAU
 clean_mk CONFIG_DRM_NOUVEAU drivers/gpu/drm/Makefile
 
@@ -732,6 +733,13 @@ reject_firmware drivers/gpu/drm/radeon/r100.c
 clean_blob drivers/gpu/drm/radeon/r100.c
 reject_firmware drivers/gpu/drm/radeon/r600.c
 clean_blob drivers/gpu/drm/radeon/r600.c
+# Something like this might work on other radeon cards too.  If you
+# have such cards, please give it a try, and report back either way,
+# so that we can make more cards work, or at least add comments so
+# that others don't waste their time trying them again.
+clean_sed '
+/r = r600_init_microcode(rdev);/,/}/ s,return r;,/*(DEBLOBBED)*/,
+' drivers/gpu/drm/radeon/r600.c 'enable blobless activation'
 reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
 reject_firmware drivers/gpu/drm/radeon/si.c
@@ -767,6 +775,7 @@ clean_blob arch/arm/boot/dts/imx53-tx53.dtsi
 clean_blob arch/arm/boot/dts/imx6qdl.dtsi
 clean_blob arch/arm/boot/dts/imx6sl.dtsi
 clean_blob arch/arm/boot/dts/imx6sx.dtsi
+clean_blob arch/arm/boot/dts/imx6ul.dtsi
 clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
 clean_kconfig drivers/dma/Kconfig IMX_SDMA
 clean_mk CONFIG_IMX_SDMA drivers/dma/Makefile
@@ -1152,11 +1161,11 @@ clean_kconfig drivers/staging/media/mn88472/Kconfig DVB_MN88472
 clean_mk CONFIG_DVB_MN88472 drivers/staging/media/mn88472/Makefile
 
 announce DVB_MN88473 - "Panasonic MN88473"
-reject_firmware drivers/staging/media/mn88473/mn88473.c
-clean_blob drivers/staging/media/mn88473/mn88473.c
-clean_blob drivers/staging/media/mn88473/mn88473_priv.h
-clean_kconfig drivers/staging/media/mn88473/Kconfig DVB_MN88473
-clean_mk CONFIG_DVB_MN88473 drivers/staging/media/mn88473/Makefile
+reject_firmware drivers/media/dvb-frontends/mn88473.c
+clean_blob drivers/media/dvb-frontends/mn88473.c
+clean_blob drivers/media/dvb-frontends/mn88473_priv.h
+clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_MN88473
+clean_mk CONFIG_DVB_MN88473 drivers/media/dvb-frontends/Makefile
 
 announce DVB_NGENE - "Micronas nGene support"
 reject_firmware drivers/media/pci/ngene/ngene-core.c
@@ -2217,6 +2226,12 @@ clean_blob drivers/bluetooth/bcm203x.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIBCM203X
 clean_mk CONFIG_BT_HCIBCM203X drivers/bluetooth/Makefile
 
+announce BT_HCIUART_AG6XX - "Intel AG6XX protocol support"
+reject_firmware drivers/bluetooth/hci_ag6xx.c
+clean_blob drivers/bluetooth/hci_ag6xx.c
+clean_kconfig drivers/bluetooth/Kconfig BT_HCIUART_AG6XX
+clean_mk CONFIG_BT_HCIUART_AG6XX drivers/bluetooth/Makefile
+
 announce BT_HCIUART_BCM - "Broadcom protocol support"
 reject_firmware drivers/bluetooth/hci_bcm.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIUART_BCM
@@ -2286,18 +2301,6 @@ clean_blob Documentation/wimax/README.i2400m
 clean_kconfig drivers/net/wimax/i2400m/Kconfig WIMAX_I2400M
 clean_mk CONFIG_WIMAX_I2400M drivers/net/wimax/i2400m/Makefile
 
-announce WIMAX_GDM72XX_SDIO - "GCT GDM72xx WiMAX support: SDIO interface"
-reject_firmware drivers/staging/gdm72xx/sdio_boot.c
-clean_blob drivers/staging/gdm72xx/sdio_boot.c
-clean_kconfig drivers/staging/gdm72xx/Kconfig WIMAX_GDM72XX_SDIO
-clean_mk CONFIG_WIMAX_GDM72XX_SDIO drivers/staging/gdm72xx/Makefile
-
-announce WIMAX_GDM72XX_USB - "GCT GDM72xx WiMAX support: USB interface"
-reject_firmware drivers/staging/gdm72xx/usb_boot.c
-clean_blob drivers/staging/gdm72xx/usb_boot.c
-clean_kconfig drivers/staging/gdm72xx/Kconfig WIMAX_GDM72XX_USB
-clean_mk CONFIG_WIMAX_GDM72XX_USB drivers/staging/gdm72xx/Makefile
-
 # infiniband
 
 announce INFINIBAND_HFI1 - "Intel OPA Gen1 support"
@@ -2351,12 +2354,6 @@ clean_mk CONFIG_MISDN_SPEEDFAX drivers/isdn/hardware/mISDN/Makefile
 ##########
 # Serial #
 ##########
-
-announce DGAP - "Digi EPCA PCI products"
-reject_firmware drivers/staging/dgap/dgap.c
-clean_blob drivers/staging/dgap/dgap.c
-clean_kconfig drivers/staging/dgap/Kconfig DGAP
-clean_mk CONFIG_DGAP drivers/staging/dgap/Makefile
 
 announce SERIAL_8250_CS - "8250/16550 PCMCIA device support"
 # These are not software; they're Free, but GPLed without in-tree sources.
@@ -2450,6 +2447,12 @@ reject_firmware drivers/input/touchscreen/goodix.c
 clean_blob drivers/input/touchscreen/goodix.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_GOODIX
 clean_mk CONFIG_TOUCHSCREEN_GOODIX drivers/input/touchscreen/Makefile
+
+announce TOUCHSCREEN_MELFAS_MIP4 - ""
+reject_firmware drivers/input/touchscreen/melfas_mip4.c
+clean_blob drivers/input/touchscreen/melfas_mip4.c
+clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_MELFAS_MIP4
+clean_mk CONFIG_TOUCHSCREEN_MELFAS_MIP4 drivers/input/touchscreen/Makefile
 
 announce TOUCHSCREEN_ROHM_BU21023 - "ROHM BU21023/24 Dual touch support resistive touchscreens"
 reject_firmware drivers/input/touchscreen/rohm_bu21023.c
@@ -3083,6 +3086,7 @@ announce SND_SOC_INTEL_SKYLAKE - undocumented
 reject_firmware sound/soc/intel/skylake/skl-sst.c
 reject_firmware sound/soc/intel/skylake/skl-topology.c
 clean_blob sound/soc/intel/skylake/skl.c
+clean_blob sound/soc/intel/skylake/skl-nhlt.c
 clean_blob sound/soc/intel/skylake/skl-sst.c
 clean_blob sound/soc/intel/skylake/skl-topology.c
 clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_SKYLAKE
