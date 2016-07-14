@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -705,6 +705,15 @@ Patch826: HID-hiddev-validate-num_values-for-HIDIOCGUSAGES-HID.patch
 #CVE-2016-1237 rhbz 1350845 1350847
 Patch830: posix_acl-Add-set_posix_acl.patch
 Patch831: nfsd-check-permissions-when-setting-ACLs.patch
+
+#CVE-2016-6156 rhbz 1353490 1353491
+Patch832: platform-chrome-cros_ec_dev-double-fetch-bug-in-ioct.patch
+
+#rbhz 1351205
+Patch833: drm-nouveau-disp-sor-gf119-select-correct-sor-when.patch
+
+#rhbz 1346753
+Patch834: qla2xxx-Fix-NULL-pointer-deref-in-QLA-interrupt.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1604,6 +1613,9 @@ BuildKernel() {
     rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cp .config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
+    if [ -f tools/objtool/objtool ]; then
+      cp -a tools/objtool/objtool $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/objtool/ || :
+    fi
     if [ -d arch/$Arch/scripts ]; then
       cp -a arch/$Arch/scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch} || :
     fi
@@ -2321,6 +2333,20 @@ fi
 #
 # 
 %changelog
+* Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org>
+- GNU Linux-libre 4.6.4-gnu.
+
+* Mon Jul 11 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-200
+- Linux v4.6.4
+
+* Fri Jul 08 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Make sure to package objtool
+
+* Thu Jul 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in qla2xxx driver (rhbz 1346753)
+- Fix blank screen on some nvidia cards (rbhz 1351205)
+- CVE-2016-6156 race condition in chrome chardev driver (rhbz 1353490 1353491)
+
 * Wed Jul  6 2016 Alexandre Oliva <lxoliva@fsfla.org>
 - GNU Linux-libre 4.6.3-gnu.
 
