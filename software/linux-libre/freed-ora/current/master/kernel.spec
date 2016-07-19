@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -57,9 +57,9 @@ Summary: The Linux kernel
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
 
-# To be inserted between "patch" and "-2.6.".
+# To be inserted between "patch" and "-4.".
 #define stablelibre -4.6%{?stablegnux}
-#define rcrevlibre  -4.6%{?rcrevgnux}
+%define rcrevlibre  -4.6%{?rcrevgnux}
 #define gitrevlibre -4.6%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -411,7 +411,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 # List the packages used during the kernel build
 #
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
-BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, make, diffutils, gawk
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc
 %if %{with_sparse}
@@ -547,22 +547,18 @@ Patch07: freedo.patch
 
 Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
 
-Patch421: arm64-acpi-drop-expert-patch.patch
-
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
 Patch422: geekbox-v4-device-tree-support.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg483898.html
-Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
+# This has major conflicts and needs to be rebased
+# Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
 Patch430: ARM-tegra-usb-no-reset.patch
-
-# http://www.spinics.net/lists/linux-tegra/msg25152.html
-Patch431: Fix-tegra-to-use-stdout-path-for-serial-console.patch
 
 Patch432: arm-i.MX6-Utilite-device-dtb.patch
 
@@ -605,8 +601,6 @@ Patch482: Add-option-to-automatically-enforce-module-signature.patch
 
 Patch483: efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
 
-Patch484: efi-Make-EFI_SECURE_BOOT_SIG_ENFORCE-depend-on-EFI.patch
-
 Patch485: efi-Add-EFI_SECURE_BOOT-bit.patch
 
 Patch486: hibernate-Disable-in-a-signed-modules-environment.patch
@@ -615,6 +609,9 @@ Patch487: Add-EFI-signature-data-types.patch
 
 Patch488: Add-an-EFI-signature-blob-parser-and-key-loader.patch
 
+# This doesn't apply. It seems like it could be replaced by
+# https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=5ac7eace2d00eab5ae0e9fdee63e38aee6001f7c
+# which has an explicit line about blacklisting
 Patch489: KEYS-Add-a-system-blacklist-keyring.patch
 
 Patch490: MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
@@ -647,28 +644,36 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#rhbz 1286293
-Patch571: ideapad-laptop-Add-Lenovo-ideapad-Y700-17ISK-to-no_h.patch
-
 #Required for some persistent memory options
 Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#rhbz 1309487
-Patch701: antenna_select.patch
+#rhbz 1338025
+Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
 
-#CVE-2016-4482 rhbz 1332931 1332932
-Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
+#skl_update_other_pipe_wm issue patch-series from drm-next, rhbz 1305038
+Patch801: 0001-drm-i915-Reorganize-WM-structs-unions-in-CRTC-state.patch
+Patch802: 0002-drm-i915-Rename-s-skl_compute_pipe_wm-skl_build_pipe.patch
+Patch803: 0003-drm-i915-gen9-Cache-plane-data-rates-in-CRTC-state.patch
+Patch804: 0004-drm-i915-gen9-Allow-calculation-of-data-rate-for-in-.patch
+Patch805: 0005-drm-i915-gen9-Store-plane-minimum-blocks-in-CRTC-wm-.patch
+Patch806: 0006-drm-i915-Track-whether-an-atomic-transaction-changes.patch
+Patch807: 0007-drm-i915-gen9-Allow-skl_allocate_pipe_ddb-to-operate.patch
+Patch808: 0008-drm-i915-Add-distrust_bios_wm-flag-to-dev_priv-v2.patch
+Patch809: 0009-drm-i915-gen9-Compute-DDB-allocation-at-atomic-check.patch
+Patch810: 0010-drm-i915-gen9-Drop-re-allocation-of-DDB-at-atomic-co.patch
+Patch811: 0011-drm-i915-gen9-Calculate-plane-WM-s-from-state.patch
+Patch812: 0012-drm-i915-gen9-Allow-watermark-calculation-on-in-flig.patch
+Patch813: 0013-drm-i915-gen9-Use-a-bitmask-to-track-dirty-pipe-wate.patch
+Patch814: 0014-drm-i915-gen9-Propagate-watermark-calculation-failur.patch
+Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
+Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
+Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
-#CVE-2016-4569 rhbz 1334643 1334645
-Patch714: ALSA-timer-Fix-leak-in-SNDRV_TIMER_IOCTL_PARAMS.patch
-Patch715: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_cca.patch
-Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
-
-#CVE-2016-3713 rhbz 1332139 1336410
-Patch717: KVM-MTRR-remove-MSR-0x2f8.patch
+#Workaround for glibc update
+Patch835: 0001-Work-around-for-addition-of-metag-def-but-not-reloca.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2207,7 +2212,7 @@ fi
 %ifarch %{cpupowerarchs}
 %files -n kernel-libre-tools-libs
 %{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.0
+%{_libdir}/libcpupower.so.0.0.1
 
 %files -n kernel-libre-tools-libs-devel
 %{_libdir}/libcpupower.so
@@ -2293,7 +2298,207 @@ fi
 #
 # 
 %changelog
-* Wed May 18 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.7-rc7-gnu.
+
+* Mon Jul 11 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.7.0-0.rc7.git0.1
+- Disable debugging options.
+- linux v4.7-rc7
+
+* Fri Jul 08 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc6.git2.2
+- Workaround for glibc change
+
+* Fri Jul 08 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc6.git2.1
+- Linux v4.7-rc6-94-gcc23c61
+
+* Thu Jul 07 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc6.git1.1
+- Linux v4.7-rc6-74-g076501f
+- Reenable debugging options.
+
+* Thu Jul 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in qla2xxx driver (rhbz 1346753)
+- Fix blank screen on some nvidia cards (rbhz 1351205)
+
+* Thu Jul  7 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Marvell mvebu for aarch64
+
+* Tue Jul 05 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc6.git0.1
+- Linux v4.7-rc6
+- Disable debugging options.
+
+* Fri Jul 01 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc5.git3.1
+- Linux v4.7-rc5-254-g1a0a02d
+
+* Thu Jun 30 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc5.git2.1
+- Linux v4.7-rc5-227-ge7bdea7
+- Reenable debugging options.
+
+* Tue Jun 28 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc5.git1.1
+- Linux v4.7-rc5-28-g02184c6
+
+* Mon Jun 27 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc5.git0.1
+- Linux v4.7-rc5
+- Disable debugging options.
+
+* Fri Jun 24 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc4.git3.1
+- Linux v4.7-rc4-76-g63c04ee
+
+* Thu Jun 23 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc4.git2.1
+- Linux v4.7-rc4-20-gf9020d1
+
+* Wed Jun 22 2016 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Bring in patch-series from drm-next to fix skl_update_other_pipe_wm issues
+  (rhbz 1305038)
+- Disable fbc on haswell by default (fdo#96461)
+
+* Tue Jun 21 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc4.git1.1
+- Linux v4.7-rc4-14-g67016f6
+- Reenable debugging options.
+
+* Mon Jun 20 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc4.git0.1
+- Linux v4.7-rc4
+- Disable debugging options.
+
+* Fri Jun 17 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc3.git3.1
+- Linux v4.7-rc3-87-gbb96727
+- enable CONFIG_PWM (rhbz 1347454)
+
+* Thu Jun 16 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc3.git2.1
+- Linux v4.7-rc3-55-gd325ea8
+
+* Wed Jun 15 2016 Laura Abbott <labbott@fedoraproject.org>
+- hp-wmi: fix wifi cannot be hard-unblock (rhbz 1338025)
+
+* Wed Jun 15 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4470 keys: uninitialized variable crash (rhbz 1341716 1346626)
+
+* Wed Jun 15 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable support for TI dm81xx devices (kwizart)
+
+* Tue Jun 14 2016 Laura Abbott <labbott@redhat.com>
+- ath9k: fix GPIO mask for AR9462 and AR9565 (rhbz 1346145)
+
+* Tue Jun 14 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc3.git1.1
+- Linux v4.7-rc3-9-gdb06d75
+- Reenable debugging options.
+
+* Tue Jun 14 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Infiniband on ARM now we have HW
+
+* Mon Jun 13 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc3.git0.1
+- Linux v4.7-rc3
+- Disable debugging options.
+
+* Fri Jun 10 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.7.0-0.rc2.git3.2
+- Fix Power64 module filters
+- Minor ARM updates
+
+* Fri Jun 10 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc2.git3.1
+- Linux v4.7-rc2-64-g147d9e7
+
+* Thu Jun  9 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable ARM big.LITTLE on ARMv7 LPAE kernels
+
+* Wed Jun 08 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc2.git2.1
+- Linux v4.7-rc2-20-gc8ae067
+
+* Wed Jun  8 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM/aarch64 config updates
+
+* Tue Jun 07 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc2.git1.1
+- Linux v4.7-rc2-4-g3613a62
+
+* Tue Jun 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5244 info leak in rds (rhbz 1343338 1343337)
+- CVE-2016-5243 info leak in tipc (rhbz 1343338 1343335)
+
+* Mon Jun 06 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc2.git0.1
+- Linux v4.7-rc2
+- Disable debugging options.
+
+* Fri Jun 03 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc1.git4.1
+- Linux v4.7-rc1-122-g4340fa5
+
+* Thu Jun 02 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc1.git3.1
+- Linux v4.7-rc1-104-g719af93
+
+* Wed Jun 01 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc1.git2.2
+- Add filtering for i686 as well
+
+* Wed Jun 01 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc1.git2.1
+- Linux v4.7-rc1-94-g6b15d66
+- Reenable debugging options.
+
+* Tue May 31 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc1.git1.2
+- Update module filters
+
+* Tue May 31 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc1.git1.1
+- Linux v4.7-rc1-12-g852f42a
+- Disable debugging options.
+
+* Mon May 30 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update Utilite patch
+- Minor ARM cleanups
+- Initial Qualcomm ARM64 support (Dragonboard 410c)
+
+* Fri May 27 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git10.1
+- Linux v4.6-11010-gdc03c0f
+- Kconfig, Kbuild, ceph, nfs, xfs, mmc, hwmon merges
+
+* Thu May 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git9.1
+- Linux v4.6-10675-g2f7c3a1
+- EFI, sched, perf, objtool, acpi, pm, drm merges
+
+* Wed May 25 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git8.1
+- Linux v4.6-10530-g28165ec
+- ARM SoC, asm-generic, nfsd, ext4, spi, mtd, xen, merges
+
+* Tue May 24 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.7.0-0.rc0.git7.1
+- Linux v4.6-10203-g84787c572d40
+- Enable CONFIG_MEMORY_HOTPLUG_DEFAULT_ONLINE (rhbz 1339281)
+- Fixup SB patchset to work with upstream changes
+
+* Mon May 23 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git6.1
+- Linux v4.6-8907-g7639dad
+- trace, f2fs, btrfs, rtc, mailbox, akpm, staging, driver core, char, usb,
+  tty, clk, net, devicetree, rdma, mfd, iio, powerpc, arm merges
+
+* Fri May 20 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git5.1
+- Linux v4.6-6148-g03b979d
+- Docs, i2c, md, iommu, sound, pci, pinctrl, dmaengine, kvm, security merges
+
+* Fri May 20 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-4440 kvm: incorrect state leading to APIC register access (rhbz 1337806 1337807)
+
+* Fri May 20 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM cleanups, enable Tegra USB-3 controller
+
+* Thu May 19 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git4.1
+- Linux v4.6-5028-g2600a46
+- trace, audit, input, media, scsi, armsoc merges
+
+* Wed May 18 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git3.1
+- Linux v4.6-3623-g0b7962a
+- ata, regulator, gpio, HID, livepatching, networking, dm, block, vfs, fs,
+  timers, crypto merges 
+
+* Tue May 17 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git2.2
+- Adjust solib for cpupower
+
+* Tue May 17 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git2.1
+- Linux v4.6-1278-g1649098
+- Enable CONFIG_INTEL_POWERCLAMP
+- pm, ACPI, mmc, regulator, i2c, hwmon, edac, led, arm64, x86, sched, RAS merges
+
+* Mon May 16 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git1.1
+- Linux v4.6-153-g3469d26
+- Reenable debugging options.
+- locking, efi, signals, rcu merges
+
+* Mon May 16 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable CONFIG_DEBUG_VM_PGFLAGS on non debug kernels (rhbz 1335173)
+
+* Mon May 16 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed May 18
 - GNU Linux-libre 4.6-gnu.
 
 * Mon May 16 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.0-1
