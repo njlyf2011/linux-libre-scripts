@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -714,6 +714,9 @@ Patch833: drm-nouveau-disp-sor-gf119-select-correct-sor-when.patch
 
 #rhbz 1346753
 Patch834: qla2xxx-Fix-NULL-pointer-deref-in-QLA-interrupt.patch
+
+#CVE-2016-5389 CVE-2016-5969 rhbz 1354708 1355615
+Patch835: tcp-make-challenge-acks-less-predictable.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2333,6 +2336,9 @@ fi
 #
 # 
 %changelog
+* Tue Jul 12 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-201
+- CVE-2016-5389 CVE-2016-5969 tcp challenge ack info leak (rhbz 1354708 1355615)
+
 * Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org>
 - GNU Linux-libre 4.6.4-gnu.
 
