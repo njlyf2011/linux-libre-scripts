@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -555,6 +555,8 @@ Patch422: geekbox-v4-device-tree-support.patch
 # http://www.spinics.net/lists/arm-kernel/msg483898.html
 Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 
+Patch424: net-smsc911x-Fix-bug-where-PHY-interrupts-are-overwritten-by-0.patch
+
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
@@ -697,6 +699,22 @@ Patch822: 0002-drm-nouveau-fbcon-fix-out-of-bounds-memory-accesses.patch
 Patch823: 0003-drm-nouveau-disp-sor-gf119-both-links-use-the-same-t.patch
 Patch824: 0004-drm-nouveau-disp-sor-gm107-training-pattern-register.patch
 Patch825: 0005-i915-fbc-Disable-on-HSW-by-default-for-now.patch
+
+#CVE-2016-5829 rhbz 1350509 1350513
+Patch826: HID-hiddev-validate-num_values-for-HIDIOCGUSAGES-HID.patch
+
+#CVE-2016-1237 rhbz 1350845 1350847
+Patch830: posix_acl-Add-set_posix_acl.patch
+Patch831: nfsd-check-permissions-when-setting-ACLs.patch
+
+#CVE-2016-6156 rhbz 1353490 1353491
+Patch832: platform-chrome-cros_ec_dev-double-fetch-bug-in-ioct.patch
+
+#rbhz 1351205
+Patch833: drm-nouveau-disp-sor-gf119-select-correct-sor-when.patch
+
+#rhbz 1346753
+Patch834: qla2xxx-Fix-NULL-pointer-deref-in-QLA-interrupt.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2321,6 +2339,29 @@ fi
 #
 # 
 %changelog
+* Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.6.4-gnu.
+
+* Mon Jul 11 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-300
+- Linux v4.6.4
+
+* Thu Jul 07 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix oops in qla2xxx driver (rhbz 1346753)
+- Fix blank screen on some nvidia cards (rbhz 1351205)
+- CVE-2016-6156 race condition in chrome chardev driver (rhbz 1353490 1353491)
+
+* Fri Jul 01 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Reenable CONFIG_DW_DMAC_CORE=y to fix sound on some Broadwell machines (rhbz 1351738 1352176)
+
+* Thu Jun 30 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Pull upstream fix for smsc911x
+
+* Tue Jun 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-1237 missing check for permissions setting ACL (rhbz 1350845 1350847)
+
+* Mon Jun 27 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5829 heap overflow in hiddev (rhbz 1350509 1350513)
+
 * Sat Jun 25 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.6.3-gnu.
 
