@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 6
+%define base_sublevel 7
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.6%{?stablegnux}
-%define rcrevlibre  -4.6%{?rcrevgnux}
-#define gitrevlibre -4.6%{?gitrevgnux}
+#define stablelibre -4.7%{?stablegnux}
+#define rcrevlibre  -4.7%{?rcrevgnux}
+#define gitrevlibre -4.7%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,9 +105,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 0
 # The git snapshot level
-%define gitrev 0
+%define gitrev 2
 # Set rpm version accordingly
 %define rpmversion 4.%{upstream_sublevel}.0
 %endif
@@ -554,16 +554,18 @@ Patch422: geekbox-v4-device-tree-support.patch
 # This has major conflicts and needs to be rebased
 # Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 
+Patch424: arm64-pcie-acpi.patch
+Patch425: arm64-pcie-quirks-xgene.patch
+
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
 Patch430: ARM-tegra-usb-no-reset.patch
 
-Patch432: arm-i.MX6-Utilite-device-dtb.patch
+Patch431: bcm283x-upstream-fixes.patch
 
-# mvebu DSA switch fixes
-# http://www.spinics.net/lists/netdev/msg370841.html http://www.spinics.net/lists/netdev/msg370842.html
+Patch432: arm-i.MX6-Utilite-device-dtb.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -674,6 +676,11 @@ Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
 #Workaround for glibc update
 Patch835: 0001-Work-around-for-addition-of-metag-def-but-not-reloca.patch
+
+# https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
+Patch837: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
+Patch838: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
+Patch839: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2298,6 +2305,37 @@ fi
 #
 # 
 %changelog
+* Mon Jul 25 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.7-gnu.
+
+* Mon Jul 25 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-1
+- Linux v4.7
+
+* Tue Jul 19 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add aarch64 ACPI pci-e patches headed for 4.8
+
+* Mon Jul 18 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc7.git4.1
+- Linux v4.7-rc7-92-g47ef4ad
+
+* Mon Jul 18 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM config updates, update bcm238x patches
+
+* Fri Jul 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.7.0-0.rc7.git3.1
+- Linux v4.7-rc7-78-gfa3a9f574
+
+* Thu Jul 14 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix various i915 uncore oopses (rhbz 1340218 1325020 1342722 1347681)
+
+* Wed Jul 13 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.7.0-0.rc7.git2.1
+- Linux v4.7-rc7-27-gf97d104
+
+* Tue Jul 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.7.0-0.rc7.git1.1
+- Linux v4.7-rc7-6-g63bab22
+- Reenable debugging options.
+
+* Tue Jul 12 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5389 CVE-2016-5969 tcp challenge ack info leak (rhbz 1354708 1355615)
+
 * Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.7-rc7-gnu.
 
