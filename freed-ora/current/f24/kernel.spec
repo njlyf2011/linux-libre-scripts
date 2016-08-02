@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -668,9 +668,6 @@ Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
 #CVE-2016-5244 rhbz 1343338 1343337
 Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
 
-#CVE-2016-4470 rhbz 1341716 1346626
-Patch727: KEYS-potential-uninitialized-variable.patch
-
 #rhbz 1338025
 Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
 
@@ -693,31 +690,26 @@ Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
 Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
 Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
-#other drm/kms fixes (most Cc-ed stable)
-Patch821: 0001-drm-mgag200-Black-screen-fix-for-G200e-rev-4.patch
-Patch822: 0002-drm-nouveau-fbcon-fix-out-of-bounds-memory-accesses.patch
-Patch823: 0003-drm-nouveau-disp-sor-gf119-both-links-use-the-same-t.patch
-Patch824: 0004-drm-nouveau-disp-sor-gm107-training-pattern-register.patch
-Patch825: 0005-i915-fbc-Disable-on-HSW-by-default-for-now.patch
-
-#CVE-2016-5829 rhbz 1350509 1350513
-Patch826: HID-hiddev-validate-num_values-for-HIDIOCGUSAGES-HID.patch
-
-#CVE-2016-1237 rhbz 1350845 1350847
-Patch830: posix_acl-Add-set_posix_acl.patch
-Patch831: nfsd-check-permissions-when-setting-ACLs.patch
-
 #CVE-2016-6156 rhbz 1353490 1353491
 Patch832: platform-chrome-cros_ec_dev-double-fetch-bug-in-ioct.patch
-
-#rbhz 1351205
-Patch833: drm-nouveau-disp-sor-gf119-select-correct-sor-when.patch
 
 #rhbz 1346753
 Patch834: qla2xxx-Fix-NULL-pointer-deref-in-QLA-interrupt.patch
 
 #CVE-2016-5389 CVE-2016-5969 rhbz 1354708 1355615
 Patch835: tcp-make-challenge-acks-less-predictable.patch
+Patch839: tcp-enable-per-socket-rate-limiting-of-all-challenge.patch
+
+# https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
+Patch836: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
+Patch837: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
+Patch838: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
+
+#CVE-2016-5400 rhbz 1358184 1358186
+Patch840: airspy-fix-error-logic-during-device-register.patch
+
+#CVE-2016-6136 rhbz 1353533 1353534
+Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2342,6 +2334,21 @@ fi
 #
 # 
 %changelog
+* Thu Jul 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.6.5-gnu.
+
+* Wed Jul 27 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.5-300
+- Linux v4.6.5
+
+* Mon Jul 25 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-6136 race condition in auditsc.c (rhbz 1353533 1353534)
+
+* Mon Jul 25 2016 Justin Forbes <jforbes@fedoraproject.org>
+- CVE-2016-5400 Fix memory leak in airspy driver (rhbz 1358184 1358186)
+
+* Thu Jul 14 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Fix various i915 uncore oopses (rhbz 1340218 1325020 1342722 1347681)
+
 * Tue Jul 12 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-301
 - CVE-2016-5389 CVE-2016-5969 tcp challenge ack info leak (rhbz 1354708 1355615)
 
