@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -681,6 +681,9 @@ Patch835: 0001-Work-around-for-addition-of-metag-def-but-not-reloca.patch
 Patch837: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
 Patch838: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
 Patch839: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
+
+#CVE-2016-6136 rhbz 1353533 1353534
+Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2305,6 +2308,12 @@ fi
 #
 # 
 %changelog
+* Tue Jul 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-2
+- rebuild for koji errors
+
+* Mon Jul 25 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-6136 race condition in auditsc.c (rhbz 1353533 1353534)
+
 * Mon Jul 25 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.7-gnu.
 
