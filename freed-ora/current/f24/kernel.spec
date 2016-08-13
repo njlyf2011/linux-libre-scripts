@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -654,11 +654,6 @@ Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 #CVE-2016-4482 rhbz 1332931 1332932
 Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
 
-#CVE-2016-4569 rhbz 1334643 1334645
-Patch714: ALSA-timer-Fix-leak-in-SNDRV_TIMER_IOCTL_PARAMS.patch
-Patch715: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_cca.patch
-Patch716: ALSA-timer-Fix-leak-in-events-via-snd_timer_user_tin.patch
-
 #CVE-2016-4440 rhbz 1337806 1337807
 Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
 
@@ -690,26 +685,20 @@ Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
 Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
 Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
-#CVE-2016-6156 rhbz 1353490 1353491
-Patch832: platform-chrome-cros_ec_dev-double-fetch-bug-in-ioct.patch
-
-#rhbz 1346753
-Patch834: qla2xxx-Fix-NULL-pointer-deref-in-QLA-interrupt.patch
-
 #CVE-2016-5389 CVE-2016-5969 rhbz 1354708 1355615
 Patch835: tcp-make-challenge-acks-less-predictable.patch
 Patch839: tcp-enable-per-socket-rate-limiting-of-all-challenge.patch
 
 # https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
 Patch836: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
-Patch837: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
-Patch838: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
-
-#CVE-2016-5400 rhbz 1358184 1358186
-Patch840: airspy-fix-error-logic-during-device-register.patch
+Patch837: drm-i915-Acquire-audio-powerwell-for-HD-Audio-regist.patch
 
 #CVE-2016-6136 rhbz 1353533 1353534
 Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
+
+#CVE-2016-5412 rhbz 1349916 1361040
+Patch842: kvm-ppc-Book3S-HV-Pull-out-TM-state-save.patch
+Patch843: kvm-ppc-Book3S-HV-Save-restore-TM-state.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2334,6 +2323,25 @@ fi
 #
 # 
 %changelog
+* Wed Aug 10 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.6.6-gnu.
+
+* Wed Aug 10 2016 Laura Abbott <labbott@fedoraproject.org> - 4.6.6-300
+- Linux v4.6.6
+
+* Mon Aug 08 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Build CONFIG_POWERNV_CPUFREQ in on ppc64* (rhbz 1351346)
+
+* Tue Aug  2 2016 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Sync skylake hdaudio __unclaimed_reg WARN_ON fix with latest upstream version
+- Drop drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch for now
+
+* Thu Jul 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5412 powerpc: kvm: Infinite loop in HV mode (rhbz 1349916 1361040)
+
+* Thu Jul 28 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix IP Wireless driver filtering (rhbz 1356043) thanks lkundrak
+
 * Thu Jul 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.6.5-gnu.
 
