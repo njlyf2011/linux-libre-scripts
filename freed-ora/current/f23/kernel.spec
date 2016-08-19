@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -684,14 +684,9 @@ Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
 Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
 Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
-#CVE-2016-5389 CVE-2016-5969 rhbz 1354708 1355615
-Patch835: tcp-make-challenge-acks-less-predictable.patch
-Patch839: tcp-enable-per-socket-rate-limiting-of-all-challenge.patch
-
 # https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
 Patch836: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
-Patch837: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
-Patch838: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
+Patch837: drm-i915-Acquire-audio-powerwell-for-HD-Audio-regist.patch
 
 #CVE-2016-6136 rhbz 1353533 1353534
 Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
@@ -699,6 +694,12 @@ Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
 #CVE-2016-5412 rhbz 1349916 1361040
 Patch842: kvm-ppc-Book3S-HV-Pull-out-TM-state-save.patch
 Patch843: kvm-ppc-Book3S-HV-Save-restore-TM-state.patch
+
+#rhbz 1361414
+Patch844: openstack_fix.patch
+
+#rhbz 1367091,1367092
+Patch855: tcp-fix-use-after-free-in-tcp_xmit_retransmit_queue.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2318,6 +2319,21 @@ fi
 #
 # 
 %changelog
+* Wed Aug 17 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.6.7-gnu.
+
+* Wed Aug 17 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.6.7-200
+- tcp fix use after free in tcp_xmit_retransmit_queue (rhbz 1367091 1367092)
+
+* Tue Aug 16 2016 Laura Abbott <labbott@fedoraproject.org>
+- Linux v4.6.7
+- Fix for crash seen with Open Stack (rhbz 1361414)
+
+* Fri Aug 12 2016 Laura Abbott <labbott@fedoraproject.org>
+- Bring in fixes from f24
+ - Sync skylake hdaudio __unclaimed_reg WARN_ON fix with latest upstream version
+ - Drop drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch for now
+
 * Wed Aug 10 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.6.6-gnu.
 
