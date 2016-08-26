@@ -42,13 +42,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 6
+%define base_sublevel 7
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.6%{?stablegnux}
-#define rcrevlibre  -4.6%{?rcrevgnux}
-#define gitrevlibre -4.6%{?gitrevgnux}
+#define stablelibre -4.7%{?stablegnux}
+#define rcrevlibre  -4.7%{?rcrevgnux}
+#define gitrevlibre -4.7%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -411,7 +411,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 # List the packages used during the kernel build
 #
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
-BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, make, diffutils, gawk
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc
 %if %{with_sparse}
@@ -546,15 +546,15 @@ Patch07: freedo.patch
 # Standalone patches
 Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
 
-Patch421: arm64-acpi-drop-expert-patch.patch
-
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
 Patch422: geekbox-v4-device-tree-support.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg483898.html
-Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
+# This has major conflicts and needs to be rebased
+# Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
 
-Patch424: net-smsc911x-Fix-bug-where-PHY-interrupts-are-overwritten-by-0.patch
+Patch424: arm64-pcie-acpi.patch
+Patch425: arm64-pcie-quirks-xgene.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
@@ -562,12 +562,9 @@ Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch430: ARM-tegra-usb-no-reset.patch
 
-# http://www.spinics.net/lists/linux-tegra/msg25152.html
-Patch432: Fix-tegra-to-use-stdout-path-for-serial-console.patch
+Patch431: bcm283x-upstream-fixes.patch
 
-Patch431: arm-i.MX6-Utilite-device-dtb.patch
-
-Patch433: bcm283x-upstream-fixes.patch
+Patch432: arm-i.MX6-Utilite-device-dtb.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -605,8 +602,6 @@ Patch482: Add-option-to-automatically-enforce-module-signature.patch
 
 Patch483: efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
 
-Patch484: efi-Make-EFI_SECURE_BOOT_SIG_ENFORCE-depend-on-EFI.patch
-
 Patch485: efi-Add-EFI_SECURE_BOOT-bit.patch
 
 Patch486: hibernate-Disable-in-a-signed-modules-environment.patch
@@ -615,6 +610,9 @@ Patch487: Add-EFI-signature-data-types.patch
 
 Patch488: Add-an-EFI-signature-blob-parser-and-key-loader.patch
 
+# This doesn't apply. It seems like it could be replaced by
+# https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=5ac7eace2d00eab5ae0e9fdee63e38aee6001f7c
+# which has an explicit line about blacklisting
 Patch489: KEYS-Add-a-system-blacklist-keyring.patch
 
 Patch490: MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
@@ -650,20 +648,8 @@ Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 #Required for some persistent memory options
 Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
 
-#CVE-2016-4482 rhbz 1332931 1332932
-Patch706: USB-usbfs-fix-potential-infoleak-in-devio.patch
-
-#CVE-2016-4440 rhbz 1337806 1337807
-Patch719: kvm-vmx-more-complete-state-update-on-APICv-on-off.patch
-
-#CVE-2016-5243 rhbz 1343338 1343335
-Patch721: tipc-fix-an-infoleak-in-tipc_nl_compat_link_dump.patch
-
-#CVE-2016-5244 rhbz 1343338 1343337
-Patch722: rds-fix-an-infoleak-in-rds_inc_info_copy.txt
-
-#rhbz 1338025
-Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
+#CVE-2016-3134 rhbz 1317383 1317384
+Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
 #skl_update_other_pipe_wm issue patch-series from drm-next, rhbz 1305038
 Patch801: 0001-drm-i915-Reorganize-WM-structs-unions-in-CRTC-state.patch
@@ -685,21 +671,10 @@ Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
 Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
 # https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
-Patch836: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
-Patch837: drm-i915-Acquire-audio-powerwell-for-HD-Audio-regist.patch
+Patch838: drm-i915-Acquire-audio-powerwell-for-HD-Audio-regist.patch
 
-#CVE-2016-6136 rhbz 1353533 1353534
-Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
-
-#CVE-2016-5412 rhbz 1349916 1361040
-Patch842: kvm-ppc-Book3S-HV-Pull-out-TM-state-save.patch
-Patch843: kvm-ppc-Book3S-HV-Save-restore-TM-state.patch
-
-#rhbz 1361414
-Patch844: openstack_fix.patch
-
-#rhbz 1367091,1367092
-Patch855: tcp-fix-use-after-free-in-tcp_xmit_retransmit_queue.patch
+#rhbz 1353558
+Patch844: 0001-selinux-Only-apply-bounds-checking-to-source-types.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2233,7 +2208,7 @@ fi
 %ifarch %{cpupowerarchs}
 %files -n kernel-libre-tools-libs
 %{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.0
+%{_libdir}/libcpupower.so.0.0.1
 
 %files -n kernel-libre-tools-libs-devel
 %{_libdir}/libcpupower.so
@@ -2319,11 +2294,20 @@ fi
 #
 # 
 %changelog
+* Tue Aug 23 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.7.2-gnu.
+
+* Mon Aug 22 2016 Laura Abbott <labbott@redhat.com> - 4.7.2-100
+- Linux v4.7.2
+
+* Wed Aug 17 2016 Laura Abbott <labbott@fedoraproject.org> - 4.7.1-100
+- Linux v4.7.1
+
 * Wed Aug 17 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.6.7-gnu.
 
 * Wed Aug 17 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.6.7-200
-- tcp fix use after free in tcp_xmit_retransmit_queue (rhbz 1367091 1367092)
+- CVE-2016-6828 tcp fix use after free in tcp_xmit_retransmit_queue (rhbz 1367091 1367092)
 
 * Tue Aug 16 2016 Laura Abbott <labbott@fedoraproject.org>
 - Linux v4.6.7
@@ -2362,7 +2346,7 @@ fi
 - Fix various i915 uncore oopses (rhbz 1340218 1325020 1342722 1347681)
 
 * Tue Jul 12 2016 Josh Boyer <jwboyer@fedoraproject.org> - 4.6.4-201
-- CVE-2016-5389 CVE-2016-5969 tcp challenge ack info leak (rhbz 1354708 1355615)
+- CVE-2016-5389 CVE-2016-5696 tcp challenge ack info leak (rhbz 1354708 1355615)
 
 * Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org>
 - GNU Linux-libre 4.6.4-gnu.
