@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.6 extra=
+kver=4.7 extra=
 
 case $1 in
 --force)
@@ -638,6 +638,7 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/tonga_dpm.c
 clean_blob drivers/gpu/drm/amd/amdgpu/tonga_dpm.c
+clean_blob drivers/gpu/drm/amd/amdgpu/vi.c
 clean_kconfig drivers/gpu/drm/Kconfig DRM_AMDGPU
 clean_mk CONFIG_DRM_AMDGPU drivers/gpu/drm/amd/amdgpu/Makefile
 
@@ -1880,7 +1881,6 @@ clean_mk CONFIG_MWIFIEX_SDIO drivers/net/wireless/marvell/mwifiex/Makefile
 
 announce MWIFIEX_PCIE - "Marvell WiFi-Ex Driver for PCI 8766"
 clean_blob drivers/net/wireless/marvell/mwifiex/pcie.h
-clean_blob drivers/net/wireless/marvell/mwifiex/pcie.c
 clean_kconfig drivers/net/wireless/marvell/mwifiex/Kconfig MWIFIEX_PCIE
 clean_mk CONFIG_MWIFIEX_PCIE drivers/net/wireless/marvell/mwifiex/Makefile
 
@@ -1932,6 +1932,7 @@ reject_firmware drivers/net/wireless/ath/ath10k/testmode.c
 clean_sed '
 s,^\([\t ]*\/\* We didn.t find FW UTF API 1 \)("utf\.bin"),\1*//*(DEBLOBBED)*//*,
 ' drivers/net/wireless/ath/ath10k/testmode.c 'removed blob name in comment'
+clean_blob drivers/net/wireless/ath/ath10k/testmode.c
 clean_kconfig net/wireless/Kconfig NL80211_TESTMODE
 clean_mk CONFIG_NL80211_TESTMODE drivers/net/wireless/ath/ath10k/Makefile
 
@@ -2043,8 +2044,12 @@ clean_kconfig drivers/net/wireless/ralink/rt2x00/Kconfig RT2800USB
 clean_mk CONFIG_RT2800USB drivers/net/wireless/ralink/rt2x00/Makefile
 
 announce RTL8XXXU - "RTL8723AU/RTL8188[CR]U/RTL819[12]CU (mac80211) support"
-reject_firmware drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
-clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu.c
+reject_firmware drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_core.c
+clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_core.c
+clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_8192c.c
+clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_8192e.c
+clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_8723a.c
+clean_blob drivers/net/wireless/realtek/rtl8xxxu/rtl8xxxu_8723b.c
 clean_kconfig drivers/net/wireless/realtek/rtl8xxxu/Kconfig RTL8XXXU
 clean_mk CONFIG_RTL8XXXU drivers/net/wireless/realtek/rtl8xxxu/Makefile
 
@@ -2304,10 +2309,10 @@ clean_mk CONFIG_WIMAX_I2400M drivers/net/wimax/i2400m/Makefile
 # infiniband
 
 announce INFINIBAND_HFI1 - "Intel OPA Gen1 support"
-reject_firmware drivers/staging/rdma/hfi1/firmware.c
-clean_blob drivers/staging/rdma/hfi1/firmware.c
-clean_kconfig drivers/staging/rdma/hfi1/Kconfig INFINIBAND_HFI1
-clean_mk CONFIG_INFINIBAND_HFI1 drivers/staging/rdma/hfi1/Makefile
+reject_firmware drivers/infiniband/hw/hfi1/firmware.c
+clean_blob drivers/infiniband/hw/hfi1/firmware.c
+clean_kconfig drivers/infiniband/hw/hfi1/Kconfig INFINIBAND_HFI1
+clean_mk CONFIG_INFINIBAND_HFI1 drivers/infiniband/hw/hfi1/Makefile
 
 announce INFINIBAND_QIB - "QLogic PCIe HCA support"
 drop_fw_file firmware/qlogic/sd7220.fw.ihex firmware/qlogic/sd7220.fw
@@ -2448,7 +2453,7 @@ clean_blob drivers/input/touchscreen/goodix.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_GOODIX
 clean_mk CONFIG_TOUCHSCREEN_GOODIX drivers/input/touchscreen/Makefile
 
-announce TOUCHSCREEN_MELFAS_MIP4 - ""
+announce TOUCHSCREEN_MELFAS_MIP4 - "MELFAS MIP4 Touchscreen"
 reject_firmware drivers/input/touchscreen/melfas_mip4.c
 clean_blob drivers/input/touchscreen/melfas_mip4.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_MELFAS_MIP4
@@ -2649,6 +2654,12 @@ clean_blob drivers/usb/host/xhci-rcar.c
 clean_blob drivers/usb/host/xhci-rcar.h
 clean_kconfig drivers/usb/host/Kconfig USB_XHCI_RCAR
 clean_mk CONFIG_USB_XHCI_RCAR drivers/usb/host/Makefile
+
+announce USB_XHCI_TEGRA - "xHCI support for NVIDIA Tegra SoCs"
+reject_firmware drivers/usb/host/xhci-tegra.c
+clean_blob drivers/usb/host/xhci-tegra.c
+clean_kconfig drivers/usb/host/Kconfig USB_XHCI_TEGRA
+clean_mk CONFIG_USB_XHCI_TEGRA drivers/usb/host/Makefile
 
 # misc
 
@@ -3085,6 +3096,7 @@ clean_mk CONFIG_SND_SOC_INTEL_HASWELL sound/soc/intel/haswell/Makefile
 announce SND_SOC_INTEL_SKYLAKE - undocumented
 reject_firmware sound/soc/intel/skylake/skl-sst.c
 reject_firmware sound/soc/intel/skylake/skl-topology.c
+reject_firmware sound/soc/intel/skylake/bxt-sst.c
 clean_blob sound/soc/intel/skylake/skl.c
 clean_blob sound/soc/intel/skylake/skl-nhlt.c
 clean_blob sound/soc/intel/skylake/skl-sst.c
