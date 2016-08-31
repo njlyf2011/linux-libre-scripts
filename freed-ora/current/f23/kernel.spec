@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -675,6 +675,18 @@ Patch838: drm-i915-Acquire-audio-powerwell-for-HD-Audio-regist.patch
 
 #rhbz 1353558
 Patch844: 0001-selinux-Only-apply-bounds-checking-to-source-types.patch
+
+#CVE-2016-6480 rhbz 1362466 1362467
+Patch855: aacraid-Check-size-values-after-double-fetch-from-us.patch
+
+#rhbz 1365940
+Patch856: 0001-udp-fix-poll-issue-with-zero-sized-packets.patch
+
+#rhbz 13700161
+Patch857: kernel-panic-TPROXY-vanilla-4.7.1.patch
+
+# lkml.kernel.org/r/<20160822093249.GA14916@dhcp22.suse.cz>
+Patch858: 0001-OOM-detection-regressions-since-4.7.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1594,6 +1606,8 @@ BuildKernel() {
 %ifarch aarch64
     # arch/arm64/include/asm/xen references arch/arm
     cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    # arch/arm64/include/asm/opcodes.h references arch/arm
+    cp -a --parents arch/arm/include/asm/opcodes.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     # include the machine specific headers for ARM variants, if available.
 %ifarch %{arm}
@@ -2294,6 +2308,19 @@ fi
 #
 # 
 %changelog
+* Fri Aug 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.2-101
+- Bump and build
+
+* Thu Aug 25 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for TPROXY panic (rhbz 1370061)
+- Fix for known OOM regression
+
+* Tue Aug 23 2016 Laura Abbott <labbot@fedoraproject.org>
+- Fix for inabiltiy to send zero sized UDP packets (rhbz 1365940)
+
+* Tue Aug 23 2016 Justin M. Forbes <jforbes@fedoraproject.org> 
+- CVE-2016-6480 aacraid: Check size values after double-fetch from user (rhbz 1362466 1362467)
+
 * Tue Aug 23 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.7.2-gnu.
 
