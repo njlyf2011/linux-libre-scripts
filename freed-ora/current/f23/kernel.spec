@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.7%{?stablegnux}
+%define stablelibre -4.7%{?stablegnux}
 #define rcrevlibre  -4.7%{?rcrevgnux}
 #define gitrevlibre -4.7%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -549,10 +549,6 @@ Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
 Patch422: geekbox-v4-device-tree-support.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg483898.html
-# This has major conflicts and needs to be rebased
-# Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
-
 Patch424: arm64-pcie-acpi.patch
 Patch425: arm64-pcie-quirks-xgene.patch
 
@@ -670,14 +666,8 @@ Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
 Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
 Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
 
-# https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
-Patch838: drm-i915-Acquire-audio-powerwell-for-HD-Audio-regist.patch
-
 #rhbz 1353558
 Patch844: 0001-selinux-Only-apply-bounds-checking-to-source-types.patch
-
-#CVE-2016-6480 rhbz 1362466 1362467
-Patch855: aacraid-Check-size-values-after-double-fetch-from-us.patch
 
 #rhbz 1365940
 Patch856: 0001-udp-fix-poll-issue-with-zero-sized-packets.patch
@@ -687,6 +677,15 @@ Patch857: kernel-panic-TPROXY-vanilla-4.7.1.patch
 
 # lkml.kernel.org/r/<20160822093249.GA14916@dhcp22.suse.cz>
 Patch858: 0001-OOM-detection-regressions-since-4.7.patch
+
+#rhbz 1360688
+Patch859: rc-core-fix-repeat-events.patch
+
+# https://lkml.org/lkml/2016/8/30/566
+Patch861: 0001-cgroup-reduce-read-locked-section-of-cgroup_threadgr.patch
+
+#rhbz 1350174
+Patch862: tip-x86-boot-x86-KASLR-x86-power-Remove-x86-hibernation-restrictions.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2308,6 +2307,23 @@ fi
 #
 # 
 %changelog
+* Thu Sep  8 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.7.3-gnu.
+
+* Wed Sep 07 2016 <labbott@fedoraproject.org> - 4.7.3-100
+- Linux v4.7.3
+- Silence KASLR warning (rhbz 1350174)
+
+* Fri Sep 02 2016 <labbott@fedoraproject.org>
+- Add fix for known cgroup deadlock
+
+* Mon Aug 29 2016 Laura Abbott <labbott@fedoraproject.org>
+- Add event decoding fix (rhbz 1360688)
+- Add fix for NFS client issue (rhbz 1371237)
+
+* Sun Aug 28 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM updates
+
 * Fri Aug 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.2-101
 - Bump and build
 
