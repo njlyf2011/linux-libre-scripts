@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.7%{?stablegnux}
-#define rcrevlibre  -4.7%{?rcrevgnux}
+%define rcrevlibre  -4.7%{?rcrevgnux}
 #define gitrevlibre -4.7%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,9 +105,9 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 0
+%define rcrev 7
 # The git snapshot level
-%define gitrev 2
+%define gitrev 0
 # Set rpm version accordingly
 %define rpmversion 4.%{upstream_sublevel}.0
 %endif
@@ -382,7 +382,7 @@ Summary: The Linux kernel
 %endif
 
 # Architectures we build tools/cpupower on
-%define cpupowerarchs %{ix86} x86_64 %{power64} %{arm} aarch64 
+%define cpupowerarchs %{ix86} x86_64 %{power64} %{arm} aarch64
 
 #
 # Packages that need to be installed before the kernel is, because the %%post
@@ -413,12 +413,12 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
-BuildRequires: net-tools, hostname, bc
+BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if %{with_sparse}
 BuildRequires: sparse
 %endif
 %if %{with_perf}
-BuildRequires: elfutils-devel zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
+BuildRequires: zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel
 %ifnarch s390 s390x %{arm}
 BuildRequires: numactl-devel
@@ -451,7 +451,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -545,17 +545,18 @@ Patch07: freedo.patch
 
 # Standalone patches
 
-Patch420: arm64-avoid-needing-console-to-enable-serial-console.patch
+# http://www.spinics.net/lists/arm-kernel/msg523359.html
+Patch420: arm64-ACPI-parse-SPCR-table.patch
+
+# a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
+Patch421: qcom-QDF2432-tmp-errata.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
 Patch422: geekbox-v4-device-tree-support.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg483898.html
-# This has major conflicts and needs to be rebased
-# Patch423: Initial-AllWinner-A64-and-PINE64-support.patch
-
-Patch424: arm64-pcie-acpi.patch
-Patch425: arm64-pcie-quirks-xgene.patch
+# http://www.spinics.net/lists/linux-pci/msg53991.html
+# https://patchwork.kernel.org/patch/9337113/
+Patch425: arm64-pcie-quirks.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
@@ -563,9 +564,7 @@ Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch430: ARM-tegra-usb-no-reset.patch
 
-Patch431: bcm283x-upstream-fixes.patch
-
-Patch432: arm-i.MX6-Utilite-device-dtb.patch
+Patch431: bcm2837-initial-support.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -628,7 +627,8 @@ Patch494: disable-i8042-check-on-apple-mac.patch
 
 Patch495: lis3-improve-handling-of-null-rate.patch
 
-Patch496: watchdog-Disable-watchdog-on-virtual-machines.patch
+# In theory this has been fixed so should no longer be needed, it also causes problems with aarch64 DMI, so disable to see for sure if it's fixed
+# Patch496: watchdog-Disable-watchdog-on-virtual-machines.patch
 
 Patch497: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -646,44 +646,29 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
-#Required for some persistent memory options
-Patch641: disable-CONFIG_EXPERT-for-ZONE_DMA.patch
-
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#rhbz 1338025
-Patch728: hp-wmi-fix-wifi-cannot-be-hard-unblock.patch
+#rhbz 1200901 (There should be something better upstream at some point)
+Patch842: qxl-reapply-cursor-after-SetCrtc-calls.patch
 
-#skl_update_other_pipe_wm issue patch-series from drm-next, rhbz 1305038
-Patch801: 0001-drm-i915-Reorganize-WM-structs-unions-in-CRTC-state.patch
-Patch802: 0002-drm-i915-Rename-s-skl_compute_pipe_wm-skl_build_pipe.patch
-Patch803: 0003-drm-i915-gen9-Cache-plane-data-rates-in-CRTC-state.patch
-Patch804: 0004-drm-i915-gen9-Allow-calculation-of-data-rate-for-in-.patch
-Patch805: 0005-drm-i915-gen9-Store-plane-minimum-blocks-in-CRTC-wm-.patch
-Patch806: 0006-drm-i915-Track-whether-an-atomic-transaction-changes.patch
-Patch807: 0007-drm-i915-gen9-Allow-skl_allocate_pipe_ddb-to-operate.patch
-Patch808: 0008-drm-i915-Add-distrust_bios_wm-flag-to-dev_priv-v2.patch
-Patch809: 0009-drm-i915-gen9-Compute-DDB-allocation-at-atomic-check.patch
-Patch810: 0010-drm-i915-gen9-Drop-re-allocation-of-DDB-at-atomic-co.patch
-Patch811: 0011-drm-i915-gen9-Calculate-plane-WM-s-from-state.patch
-Patch812: 0012-drm-i915-gen9-Allow-watermark-calculation-on-in-flig.patch
-Patch813: 0013-drm-i915-gen9-Use-a-bitmask-to-track-dirty-pipe-wate.patch
-Patch814: 0014-drm-i915-gen9-Propagate-watermark-calculation-failur.patch
-Patch815: 0015-drm-i915-gen9-Calculate-watermarks-during-atomic-che.patch
-Patch816: 0016-drm-i915-gen9-Reject-display-updates-that-exceed-wm-.patch
-Patch817: 0017-drm-i915-Remove-wm_config-from-dev_priv-intel_atomic.patch
+# From kernel list, currently in linux-next
+Patch845: HID-microsoft-Add-Surface-4-type-cover-pro-4-JP.patch
 
-#Workaround for glibc update
-Patch835: 0001-Work-around-for-addition-of-metag-def-but-not-reloca.patch
+# SELinux OverlayFS support (queued for 4.9)
+Patch846: security-selinux-overlayfs-support.patch
 
-# https://lists.fedoraproject.org/archives/list/kernel@lists.fedoraproject.org/message/A4YCP7OGMX6JLFT5V44H57GOMAQLC3M4/
-Patch837: drm-amdgpu-Disable-RPM-helpers-while-reprobing.patch
-Patch838: drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch
-Patch839: Revert-ALSA-hda-remove-controller-dependency-on-i915.patch
+#rhbz 1360688
+Patch847: rc-core-fix-repeat-events.patch
 
-#CVE-2016-6136 rhbz 1353533 1353534
-Patch841: audit-fix-a-double-fetch-in-audit_log_single_execve_arg.patch
+#rhbz 1374212
+Patch848: 0001-cpupower-Correct-return-type-of-cpu_power_is_cpu_onl.patch
+
+#ongoing complaint, full discussion delayed until ksummit/plumbers
+Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
+
+#CVE-2016-7425 rhbz 1377330 1377331
+Patch850: arcmsr-buffer-overflow-in-archmsr_iop_message_xfer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -891,7 +876,7 @@ This package provides debug information for package kernel-libre-tools.
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
 %endif # with_tools
 
@@ -1093,7 +1078,7 @@ non-Free blobs it includes by default.
 # And finally the main -core package
 
 %define variant_summary The Linux kernel
-%kernel_variant_package 
+%kernel_variant_package
 %description core
 The kernel package contains the Linux kernel (vmlinuz), the core of any
 GNU/Linux operating system.  The kernel handles the basic functions
@@ -1439,7 +1424,7 @@ cd ..
 # This affects the vDSO images in vmlinux, and the vmlinux image in bzImage.
 export AFTER_LINK=\
 'sh -xc "/usr/lib/rpm/debugedit -b $$RPM_BUILD_DIR -d /usr/src/debug \
-    				-i $@ > $@.id"'
+                                -i $@ > $@.id"'
 %endif
 
 cp_vmlinux()
@@ -1536,7 +1521,7 @@ BuildKernel() {
     mv vmlinuz.signed $KernelImage
     %endif
     $CopyKernel $KernelImage \
-    		$RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
+                $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     chmod 755 $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer
     cp $RPM_BUILD_ROOT/%{image_install_path}/$InstallName-$KernelVer $RPM_BUILD_ROOT/lib/modules/$KernelVer/$InstallName
 
@@ -1608,6 +1593,8 @@ BuildKernel() {
 %ifarch aarch64
     # arch/arm64/include/asm/xen references arch/arm
     cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    # arch/arm64/include/asm/opcodes.h references arch/arm
+    cp -a --parents arch/arm/include/asm/opcodes.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     # include the machine specific headers for ARM variants, if available.
 %ifarch %{arm}
@@ -1685,13 +1672,13 @@ BuildKernel() {
     }
 
     collect_modules_list networking \
-    			 'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe|register_netdevice'
+      'register_netdev|ieee80211_register_hw|usbnet_probe|phy_driver_register|rt(l_|2x00)(pci|usb)_probe|register_netdevice'
     collect_modules_list block \
-    			 'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_alloc_queue|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler|blk_queue_physical_block_size' 'pktcdvd.ko|dm-mod.ko'
+      'ata_scsi_ioctl|scsi_add_host|scsi_add_host_with_dma|blk_alloc_queue|blk_init_queue|register_mtd_blktrans|scsi_esp_register|scsi_register_device_handler|blk_queue_physical_block_size' 'pktcdvd.ko|dm-mod.ko'
     collect_modules_list drm \
-    			 'drm_open|drm_init'
+      'drm_open|drm_init'
     collect_modules_list modesetting \
-    			 'drm_crtc_init'
+      'drm_crtc_init'
 
     # detect missing or incorrect license tags
     ( find $RPM_BUILD_ROOT/lib/modules/$KernelVer -name '*.ko' | xargs /sbin/modinfo -l | \
@@ -1722,9 +1709,9 @@ BuildKernel() {
     # Find all the module files and filter them out into the core and modules
     # lists.  This actually removes anything going into -modules from the dir.
     find lib/modules/$KernelVer/kernel -name *.ko | sort -n > modules.list
-	cp $RPM_SOURCE_DIR/filter-*.sh .
+    cp $RPM_SOURCE_DIR/filter-*.sh .
     %{SOURCE99} modules.list %{_target_cpu}
-	rm filter-*.sh
+    rm filter-*.sh
 
     # Run depmod on the resulting module tree and make sure it isn't broken
     depmod -b . -aeF ./System.map $KernelVer &> depmod.out
@@ -1843,6 +1830,9 @@ chmod +x tools/power/cpupower/utils/version-gen.sh
 pushd tools/thermal/tmon/
 %{make}
 popd
+pushd tools/iio/
+%{make}
+popd
 %endif
 
 # In the modsign case, we do 3 things.  1) We check the "flavour" and hard
@@ -1926,7 +1916,7 @@ make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_install
 
 find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
-     	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+        -name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
 
 %endif
 
@@ -1936,7 +1926,7 @@ make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr/tmp-headers headers_in
 
 find $RPM_BUILD_ROOT/usr/tmp-headers/include \
      \( -name .install -o -name .check -o \
-     	-name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+        -name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
 
 # Copy all the architectures we care about to their respective asm directories
 for arch in arm arm64 powerpc s390 x86 ; do
@@ -2008,6 +1998,9 @@ install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
    popd
 %endif #turbostat/x86_energy_perf_policy
 pushd tools/thermal/tmon
+make INSTALL_ROOT=%{buildroot} install
+popd
+pushd tools/iio
 make INSTALL_ROOT=%{buildroot} install
 popd
 %endif
@@ -2212,6 +2205,9 @@ fi
 %{_mandir}/man8/turbostat*
 %endif
 %{_bindir}/tmon
+%{_bindir}/iio_event_monitor
+%{_bindir}/iio_generic_buffer
+%{_bindir}/lsiio
 %endif
 
 %if %{with_debuginfo}
@@ -2306,8 +2302,218 @@ fi
 # plz don't put in a version string unless you're going to tag
 # and build.
 #
-# 
+#
 %changelog
+* Thu Sep 22 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8-rc7-gnu.
+
+* Mon Sep 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc7.git0.1
+- Linux v4.8-rc7
+- Disable debugging options.
+- CVE-2016-7425 SCSI arcmsr buffer overflow (rhbz 1377330 1377331)
+
+* Sat Sep 17 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable CPU IDLE on ARMv7
+- Tweak big.LITTLE on ARMv7
+- Update ARM64 pci-e quicks to latest upstream, update x-gene quirks patch
+
+* Fri Sep 16 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc6.git4.1
+- Linux v4.8-rc6-231-g024c7e3
+
+* Thu Sep 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc6.git3.1
+- Linux v4.8-rc6-214-g4cea877
+
+* Thu Sep 15 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch for bcm2837 (RPi3) HDMI EDID detection
+
+* Wed Sep 14 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc6.git2.1
+- Linux v4.8-rc6-211-g77e5bdf
+
+* Wed Sep 14 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for incorrect return checking in cpupower (rhbz 1374212)
+- Let iio tools build on older kernels
+
+* Tue Sep 13 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc6.git1.1
+- Linux v4.8-rc6-147-ge8988e0
+- Reenable debugging options.
+
+* Mon Sep 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc6.git0.1
+- Linux v4.8-rc6
+- Disable debugging options.
+
+* Sat Sep 10 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config tweaks
+
+* Fri Sep 09 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc5.git4.1
+- Linux v4.8-rc5-176-gd0acc7d
+
+* Thu Sep 08 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc5.git3.1
+- Linux v4.8-rc5-129-g711bef6
+
+* Thu Sep  8 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable some popular audio addon drivers
+
+* Wed Sep 07 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc5.git2.1
+- Linux v4.8-rc5-62-gd060e0f
+- Reenable debugging options.
+
+* Tue Sep 06 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc5.git1.1
+- Linux v4.8-rc5-5-gbc4dee5
+- Disable debugging options.
+
+* Sun Sep  4 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Use IIO BMP280 driver instead of old misc driver, wider HW support
+- Minor sensor driver changes
+- Disable omap_aes currently broken
+
+* Fri Sep 02 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc4.git4.1
+- Linux v4.8-rc4-199-gcc4163d
+
+* Thu Sep 01 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc4.git3.1
+- Linux v4.8-rc4-162-g071e31e
+
+* Wed Aug 31 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc4.git2.1
+- Linux v4.8-rc4-155-g86a1679
+
+* Tue Aug 30 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc4.git1.1
+- Linux v4.8-rc4-119-ge4e98c4
+
+* Mon Aug 29 2016 Laura Abbott <labbott@fedoraproject.org>
+- Add event decoding fix (rhbz 1360688)
+
+* Mon Aug 29 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Reenable debugging options.
+- Add SELinux OverlayFS support.
+
+* Mon Aug 29 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc4.git0.1
+- Disable debugging options.
+- Linux v4.8-rc4
+
+* Sun Aug 28 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM updates
+
+* Thu Aug 25 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc3.git2.1
+- Linux v4.8-rc3-39-g61c0457
+
+* Wed Aug 24 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Config updates and fixes for ARMv7 platforms
+
+* Wed Aug 24 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc3.git1.1
+- Linux v4.8-rc3-26-gcad9d20
+- Reenable debugging options.
+- Fix keyboard input for some devices (rhbz 1366224)
+
+* Tue Aug 23 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for inabiltiy to send zero sized UDP packets (rhbz 1365940)
+
+* Tue Aug 23 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Qualcomm QDF2432 errata fix
+- Move to upstream patches for ACPI SPCR (serial console)
+- Adjust max CPUs on ARM platforms to reflect newer real world hardware
+
+* Mon Aug 22 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc3.git0.1
+- Linux v4.8-rc3
+- Disable debugging options.
+
+* Sat Aug 20 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix for RTC crash on ARMv7 am33xx devices
+
+* Fri Aug 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc2.git4.1
+- Linux v4.8-rc2-348-g6040e57
+
+* Fri Aug 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc2.git3.1
+- Linux v4.8-rc2-232-g3408fef
+
+* Fri Aug 19 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor Tegra changes
+
+* Wed Aug 17 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc2.git2.1
+- Linux v4.8-rc2-42-g5ff132c
+- CVE-2016-6828 tcp fix use after free in tcp_xmit_retransmit_queue (rhbz 1367091 1367092)
+
+* Tue Aug 16 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc2.git1.1
+- Linux v4.8-rc2-17-gae5d68b
+- Add patch for qxl cursor bug (rhbz 1200901)
+- Reenable debugging options.
+
+* Mon Aug 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc2.git0.1
+- Linux v4.8-rc2
+- Disable debugging options.
+
+* Fri Aug 12 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc1.git5.1
+- Linux v4.8-rc1-166-g9909170
+
+* Thu Aug 11 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc1.git4.1
+- Linux v4.8-rc1-88-g3b3ce01
+
+* Thu Aug 11 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix for crash seen with open stack (rhbz 1361414)
+
+* Thu Aug 11 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+- Disable long running watchdog in VM patch (in theory fixed)
+- Enable NUMA on aarch64
+- Enable Cavium ThunderX
+- Enable Atmel i2c TPM on ARM platforms
+
+* Wed Aug 10 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc1.git3.1
+- Linux v4.8-rc1-70-g9512c47
+
+* Wed Aug 10 2016 Laura Abbott <labbott@fedoraproject.org>
+- Fix false positive VM_BUG() in page_add_file_rmap (rhbz 1365686)
+
+* Wed Aug 10 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc1.git2.1
+- Linux v4.8-rc1-53-ga0cba21
+
+* Tue Aug 09 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc1.git1.1
+- Linux v4.8-rc1-19-g81abf25
+- Reenable debugging options.
+
+* Mon Aug 08 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Build CONFIG_POWERNV_CPUFREQ in on ppc64* (rhbz 1351346)
+
+* Mon Aug 08 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc1.git0.1
+- Linux v4.8-rc1
+- Disable debugging options.
+
+* Fri Aug 05 2016 Laura Abbott <labbott@redhat.com> - 4.8.0-0.rc0.git7.1
+- Linux v4.7-11891-gdd7fd3a
+
+* Thu Aug 04 2016 Laura Abbott <labbott@redhat.com> - 4.8.0-0.rc0.git6.1
+- Linux v4.7-11544-g96b5852
+
+* Wed Aug 03 2016 Laura Abbott <labbott@redhat.com> - 4.8.0-0.rc0.git5.1
+- Linux v4.7-11470-gd52bd54
+
+* Tue Aug  2 2016 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Sync skylake hdaudio __unclaimed_reg WARN_ON fix with latest upstream version
+- Drop drm-i915-skl-Add-support-for-the-SAGV-fix-underrun-hangs.patch for now
+
+* Tue Aug 02 2016 Laura Abbott <labbott@redhat.com> - 4.8.0-0.rc0.git4.1
+- Linux v4.7-10753-g731c7d3
+
+* Fri Jul 29 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc0.git3.1
+- Linux v4.7-6438-gc624c86
+
+* Fri Jul 29 2016 Bastien Nocera <bnocera@redhat.com>
+- Add touchscreen and pen driver for the Surface 3
+- Add CrystalCove PWM support, for CherryTrail devices
+
+* Thu Jul 28 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc0.git2.1
+- Linux v4.7-5906-g194dc87
+
+* Thu Jul 28 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- CVE-2016-5412 powerpc: kvm: Infinite loop in HV mode (rhbz 1349916 1361040)
+
+* Thu Jul 28 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.8.0-0.rc0.git1.1
+- Filter nvme rdma modules to extras
+- Fix IP Wireless driver filtering (rhbz 1356043) thanks lkundrak
+- Build IIO tools
+
+* Wed Jul 27 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Linux v4.7-3199-g0e06f5c
+- Reenable debugging options.
+
 * Tue Jul 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-2
 - rebuild for koji errors
 
@@ -2343,7 +2549,7 @@ fi
 - Reenable debugging options.
 
 * Tue Jul 12 2016 Josh Boyer <jwboyer@fedoraproject.org>
-- CVE-2016-5389 CVE-2016-5969 tcp challenge ack info leak (rhbz 1354708 1355615)
+- CVE-2016-5389 CVE-2016-5696 tcp challenge ack info leak (rhbz 1354708 1355615)
 
 * Tue Jul 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.7-rc7-gnu.
@@ -2527,7 +2733,7 @@ fi
 * Wed May 18 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git3.1
 - Linux v4.6-3623-g0b7962a
 - ata, regulator, gpio, HID, livepatching, networking, dm, block, vfs, fs,
-  timers, crypto merges 
+  timers, crypto merges
 
 * Tue May 17 2016 Laura Abbott <labbott@redhat.com> - 4.7.0-0.rc0.git2.2
 - Adjust solib for cpupower
@@ -2872,7 +3078,7 @@ fi
 - Reenable debugging options.
 
 * Tue Mar 08 2016 Thorsten Leemhuis <fedora@leemhuis.info>
-- add signkernel macro to make signing kernel and signing modules 
+- add signkernel macro to make signing kernel and signing modules
   independent from each other
 - sign modules on all archs
 
@@ -3867,7 +4073,7 @@ fi
 - Inital ARM updates for 4.1
 - Temporarily disable AMD ARM64 xgbe-a0 driver
 
-* Wed Apr 22 2015 Josh Boyer <jwboyer@fedoraproject.org> 
+* Wed Apr 22 2015 Josh Boyer <jwboyer@fedoraproject.org>
 - Linux v4.0-9804-gdb4fd9c5d072
 
 * Tue Apr 21 2015 Josh Boyer <jwboyer@fedoraproject.org> - 4.1.0-0.rc0.git11.1
@@ -4106,7 +4312,7 @@ fi
 - kernel-arm64.patch merge, but leave it off.
 - kernel-arm64-fix-psci-when-pg.patch: when -pg (because of ftrace) is enabled
   we must explicitly annotate which registers should be assigned, otherwise
-  gcc will do unexpected things behind our backs. 
+  gcc will do unexpected things behind our backs.
 
 * Tue Feb 17 2015 Josh Boyer <jwboyer@fedoraproject.org> - 3.20.0-0.rc0.git7.1
 - Linux v3.19-7478-g796e1c55717e
