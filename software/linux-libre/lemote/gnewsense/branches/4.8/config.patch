@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2016-09-22 16:00:00.713162442 -0400
-@@ -0,0 +1,5596 @@
++++ .config	2016-09-26 11:34:29.014575314 -0400
+@@ -0,0 +1,5597 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.8.0-rc7-gnu Kernel Configuration
++# Linux/mips 4.8.0-rc8-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -364,6 +364,7 @@ Index: .config
 +CONFIG_HAVE_ARCH_TRACEHOOK=y
 +CONFIG_HAVE_DMA_CONTIGUOUS=y
 +CONFIG_GENERIC_SMP_IDLE_THREAD=y
++CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y
 +CONFIG_HAVE_CLK=y
 +CONFIG_HAVE_DMA_API_DEBUG=y
 +CONFIG_HAVE_ARCH_JUMP_LABEL=y
