@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 0d50489..0e1d844 100644
+index 48b0120..aa65ba7 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -301,8 +301,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -13,12 +13,12 @@ index 0d50489..0e1d844 100644
  
  ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
  HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
-@@ -624,9 +624,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
- KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
+@@ -625,9 +625,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= -Os
  else
  ifdef CONFIG_PROFILE_ALL_BRANCHES
--KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
-+KBUILD_CFLAGS	+= -O3 $(call cc-disable-warning,maybe-uninitialized,)
+-KBUILD_CFLAGS	+= -O2
++KBUILD_CFLAGS	+= -O3
  else
 -KBUILD_CFLAGS   += -O2
 +KBUILD_CFLAGS   += -O3
@@ -378,7 +378,7 @@ index 8051f9a..aeef3e4 100644
  	msub_s_op    =	0x28, msub_d_op	   =  0x29,
  	msub_e_op    =	0x2a, nmadd_s_op   =  0x30,
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index f4f28b1..f39471b 100644
+index 6efa713..4369b78 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -9328,7 +9328,7 @@ index 35af362..5ef8662 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index d96d423..86351bb 100644
+index 9894e34..bdab3d4 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9341,7 +9341,7 @@ index d96d423..86351bb 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -674,6 +677,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -692,6 +695,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
