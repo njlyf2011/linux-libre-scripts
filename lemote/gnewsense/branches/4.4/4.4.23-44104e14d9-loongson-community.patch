@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index 87d12b4..0afddfb 100644
+index 95421b6..e6ca025 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -297,8 +297,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+@@ -301,8 +301,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
  
  HOSTCC       = gcc
  HOSTCXX      = g++
@@ -13,15 +13,18 @@ index 87d12b4..0afddfb 100644
  
  ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
  HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
-@@ -610,7 +610,7 @@ KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
- ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
- KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
+@@ -622,9 +622,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= -Os
  else
+ ifdef CONFIG_PROFILE_ALL_BRANCHES
 -KBUILD_CFLAGS	+= -O2
 +KBUILD_CFLAGS	+= -O3
+ else
+-KBUILD_CFLAGS   += -O2
++KBUILD_CFLAGS   += -O3
+ endif
  endif
  
- # Tell gcc to never replace conditional load with a non-conditional one
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
 index db45961..83a25db 100644
 --- a/arch/mips/Kconfig
@@ -375,7 +378,7 @@ index 9b44d5a..1bc08c6 100644
  	msub_s_op    =	0x28, msub_d_op	   =  0x29,
  	msub_e_op    =	0x2a, nmadd_s_op   =  0x30,
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index e4b6d7c..c758f02 100644
+index b77052e..4edc498 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -1633,7 +1636,7 @@ index 0000000..5316360
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index 32f0e19..a19da51 100644
+index 734a2c7..0afee5a 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -1658,7 +1661,7 @@ index 32f0e19..a19da51 100644
  /* Control registers */
  
  #define FPCREG_RID	0	/* $0  = revision id */
-@@ -843,6 +851,14 @@ do {									\
+@@ -845,6 +853,14 @@ do {									\
  #define DPFROMREG(dp, x)	DIFROMREG((dp).bits, x)
  #define DPTOREG(dp, x)	DITOREG((dp).bits, x)
  
@@ -1673,7 +1676,7 @@ index 32f0e19..a19da51 100644
  /*
   * Emulate a CFC1 instruction.
   */
-@@ -1367,6 +1383,16 @@ branch_common:
+@@ -1369,6 +1385,16 @@ branch_common:
  			xcp->regs[MIPSInst_RD(ir)] =
  				xcp->regs[MIPSInst_RS(ir)];
  		break;
@@ -1690,7 +1693,7 @@ index 32f0e19..a19da51 100644
  	default:
  sigill:
  		return SIGILL;
-@@ -1452,6 +1478,172 @@ DEF3OP(msub, dp, ieee754dp_mul, ieee754dp_sub, );
+@@ -1454,6 +1480,172 @@ DEF3OP(msub, dp, ieee754dp_mul, ieee754dp_sub, );
  DEF3OP(nmadd, dp, ieee754dp_mul, ieee754dp_add, ieee754dp_neg);
  DEF3OP(nmsub, dp, ieee754dp_mul, ieee754dp_sub, ieee754dp_neg);
  
@@ -1863,7 +1866,7 @@ index 32f0e19..a19da51 100644
  static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  	mips_instruction ir, void *__user *fault_addr)
  {
-@@ -1553,7 +1745,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1555,7 +1747,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			break;
  
  		default:
@@ -1872,7 +1875,7 @@ index 32f0e19..a19da51 100644
  		}
  		break;
  	}
-@@ -1623,7 +1815,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1625,7 +1817,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			goto copcsr;
  
  		default:
@@ -1881,7 +1884,7 @@ index 32f0e19..a19da51 100644
  		}
  		break;
  	}
-@@ -1636,6 +1828,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1638,6 +1830,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		break;
  
  	default:
@@ -1893,7 +1896,7 @@ index 32f0e19..a19da51 100644
  		return SIGILL;
  	}
  
-@@ -1657,7 +1854,12 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1659,7 +1856,12 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  	unsigned cond;
  	union {
  		union ieee754dp d;
@@ -1907,7 +1910,7 @@ index 32f0e19..a19da51 100644
  		int w;
  		s64 l;
  	} rv;			/* resulting value */
-@@ -1874,7 +2076,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1876,7 +2078,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		case fmov_op:
  			/* an easy one */
  			SPFROMREG(rv.s, MIPSInst_FS(ir));
@@ -1916,7 +1919,7 @@ index 32f0e19..a19da51 100644
  
  			/* binary op on handler */
  scopbop:
-@@ -2192,7 +2394,7 @@ copcsr:
+@@ -2194,7 +2396,7 @@ copcsr:
  		case fmov_op:
  			/* an easy one */
  			DPFROMREG(rv.d, MIPSInst_FS(ir));
@@ -1925,7 +1928,7 @@ index 32f0e19..a19da51 100644
  
  			/* binary op on handler */
  dcopbop:
-@@ -2367,6 +2569,83 @@ dcopuop:
+@@ -2369,6 +2571,83 @@ dcopuop:
  		}
  	}
  
@@ -2009,7 +2012,7 @@ index 32f0e19..a19da51 100644
  	case l_fmt:
  
  		if (!cpu_has_mips_3_4_5_64_r2_r6)
-@@ -2487,6 +2766,11 @@ dcopuop:
+@@ -2489,6 +2768,11 @@ dcopuop:
  
  		DITOREG(rv.l, MIPSInst_FD(ir));
  		break;
@@ -2130,10 +2133,10 @@ index 0000000..b296220
 +				gdium_usb_host_fixup);
 +#endif
 diff --git a/arch/mips/vdso/Makefile b/arch/mips/vdso/Makefile
-index 1456890..ee3617c 100644
+index 090393a..f37e6ba 100644
 --- a/arch/mips/vdso/Makefile
 +++ b/arch/mips/vdso/Makefile
-@@ -26,7 +26,7 @@ aflags-vdso := $(ccflags-vdso) \
+@@ -28,7 +28,7 @@ aflags-vdso := $(ccflags-vdso) \
  # the comments on that file.
  #
  ifndef CONFIG_CPU_MIPSR6
@@ -2430,10 +2433,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 8b78a7f..190f812 100644
+index 909ab01..7825c12 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1035,6 +1035,9 @@
+@@ -1036,6 +1036,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9352,7 +9355,7 @@ index f940056..a9bb1db 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 348e198..51da8ae 100644
+index 9894e34..bdab3d4 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9365,7 +9368,7 @@ index 348e198..51da8ae 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -666,6 +669,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -692,6 +695,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
