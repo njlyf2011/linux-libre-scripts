@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%define rcrev 7
+%define rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -2304,7 +2304,30 @@ fi
 #
 #
 %changelog
-* Thu Sep 22 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Sep 26 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8-rc8-gnu.
+
+* Mon Sep 26 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc8.git0.1
+- Linux v4.8-rc8
+- Disable debugging options.
+
+* Sun Sep 25 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Updates to crash driver from Dave Anderson
+
+* Fri Sep 23 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc7.git4.1
+- Linux v4.8-rc7-158-g78bbf15
+
+* Thu Sep 22 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc7.git3.1
+- Linux v4.8-rc7-142-gb1f2beb
+
+* Wed Sep 21 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc7.git2.1
+- Linux v4.8-rc7-42-g7d1e042
+
+* Tue Sep 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc7.git1.1
+- Linux v4.8-rc7-37-gd2ffb01
+- Reenable debugging options.
+
+* Mon Sep 19 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Sep 22
 - GNU Linux-libre 4.8-rc7-gnu.
 
 * Mon Sep 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.0-0.rc7.git0.1
