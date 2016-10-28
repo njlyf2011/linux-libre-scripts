@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -568,6 +568,8 @@ Patch431: bcm2837-initial-support.patch
 
 Patch432: bcm283x-vc4-fixes.patch
 
+Patch433: AllWinner-net-emac.patch
+
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 Patch466: input-kill-stupid-messages.patch
@@ -676,6 +678,10 @@ Patch850: arcmsr-buffer-overflow-in-archmsr_iop_message_xfer.patch
 
 #rhbz 1366842
 Patch851: drm-virtio-reinstate-drm_virtio_set_busid.patch
+
+# Fix memory corruption caused by p8_ghash
+Patch852: 0001-crypto-ghash-generic-move-common-definitions-to-a-ne.patch
+Patch853: 0001-crypto-vmx-Fix-memory-corruption-caused-by-p8_ghash.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2311,6 +2317,21 @@ fi
 #
 #
 %changelog
+* Mon Oct 24 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.3-gnu.
+
+* Thu Oct 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.3-300
+- Linux v4.8.3
+- CVE-2016-5195 (rhbz 1384344 1387080)
+
+* Tue Oct 18 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix memory corruption caused by p8_ghash
+- Make __xfs_xattr_put_listen preperly report errors (rhbz 1384606)
+
+* Tue Oct 18 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable ACPI_CPPC_CPUFREQ on aarch64
+- Add ethernet driver for AllWinner sun8i-emac (H3/OrangePi and Pine64)
+
 * Mon Oct 17 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.8.2-gnu.
 
