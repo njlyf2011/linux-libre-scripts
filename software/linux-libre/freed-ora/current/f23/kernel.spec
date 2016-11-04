@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -683,9 +683,6 @@ Patch863: 0001-cpupower-Correct-return-type-of-cpu_power_is_cpu_onl.patch
 
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch864: 0001-iio-Use-event-header-from-kernel-tree.patch
-
-#CVE-2016-7425 rhbz 1377330 1377331
-Patch865: arcmsr-buffer-overflow-in-archmsr_iop_message_xfer.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2307,6 +2304,12 @@ fi
 #
 # 
 %changelog
+* Tue Nov  1 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.7.10-gnu.
+
+* Wed Oct 26 2016 Laura Abbott <labbott@redhat.com> - 4.7.10-100
+- Linux v4.7.10
+
 * Sun Oct 23 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.7.9-gnu.
 
