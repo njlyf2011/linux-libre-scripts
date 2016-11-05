@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -648,8 +648,6 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 # Patch503: drm-i915-turn-off-wc-mmaps.patch
 
-Patch504: i8042-skip-selftest-asus-laptops.patch
-
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
 #CVE-2016-3134 rhbz 1317383 1317384
@@ -672,6 +670,15 @@ Patch848: 0001-cpupower-Correct-return-type-of-cpu_power_is_cpu_onl.patch
 
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
+
+# CVE-2016-9083 CVE-2016-9084 rhbz 1389258 1389259 1389285
+Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
+
+# Skylake i915 fixes from 4.9
+Patch851: drm_i915_skl_Backport_watermark_fixes_for_4.8.y.patch
+
+#rhbz 1325354
+Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2307,7 +2314,18 @@ fi
 #
 #
 %changelog
-* Fri Oct 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Nov  2 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.5-gnu.
+
+* Fri Oct 28 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.5-300
+- Linux v4.8.5
+
+* Thu Oct 27 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2016-9083 CVE-2016-9084 vfio multiple flaws (rhbz 1389258 1389259 1389285)
+- Skylake i915 fixes from 4.9
+- Fix MS input devices identified as joysticks (rhbz 1325354)
+
+* Thu Oct 27 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Oct 28
 - GNU Linux-libre 4.8.4-gnu.
 
 * Mon Oct 24 2016 Peter Robinson <pbrobinson@fedoraproject.org> 4.8.4-301
