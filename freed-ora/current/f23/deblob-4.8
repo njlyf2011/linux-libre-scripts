@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=4.7 extra=
+kver=4.8 extra=
 
 case $1 in
 --force)
@@ -741,6 +741,9 @@ clean_blob drivers/gpu/drm/radeon/r600.c
 clean_sed '
 /r = r600_init_microcode(rdev);/,/}/ s,return r;,/*(DEBLOBBED)*/,
 ' drivers/gpu/drm/radeon/r600.c 'enable blobless activation'
+clean_sed '
+/r = r600_init_microcode(rdev);/,/}/ s,return r;,/*(DEBLOBBED)*/,
+' drivers/gpu/drm/radeon/evergreen.c 'enable blobless activation'
 reject_firmware drivers/gpu/drm/radeon/ni.c
 clean_blob drivers/gpu/drm/radeon/ni.c
 reject_firmware drivers/gpu/drm/radeon/si.c
@@ -940,7 +943,7 @@ clean_mk CONFIG_DVB_USB_GP8PSK drivers/media/usb/dvb-usb/Makefile
 announce DVB_USB_LME2510 - "LME DM04/QQBOX DVB-S USB2.0 support"
 reject_firmware drivers/media/usb/dvb-usb-v2/lmedm04.c
 clean_blob drivers/media/usb/dvb-usb-v2/lmedm04.c
-clean_file Documentation/dvb/lmedm04.txt
+clean_file Documentation/media/dvb-drivers/lmedm04.rst
 clean_kconfig drivers/media/usb/dvb-usb-v2/Kconfig DVB_USB_LME2510
 clean_mk CONFIG_DVB_USB_LME2510 drivers/media/usb/dvb-usb-v2/Makefile
 
@@ -1155,11 +1158,11 @@ clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_DRXK
 clean_mk CONFIG_DVB_DRXK drivers/media/dvb-frontends/Makefile
 
 announce DVB_MN88472 - "Panasonic MN88472"
-reject_firmware drivers/staging/media/mn88472/mn88472.c
-clean_blob drivers/staging/media/mn88472/mn88472.c
-clean_blob drivers/staging/media/mn88472/mn88472_priv.h
-clean_kconfig drivers/staging/media/mn88472/Kconfig DVB_MN88472
-clean_mk CONFIG_DVB_MN88472 drivers/staging/media/mn88472/Makefile
+reject_firmware drivers/media/dvb-frontends/mn88472.c
+clean_blob drivers/media/dvb-frontends/mn88472.c
+clean_blob drivers/media/dvb-frontends/mn88472_priv.h
+clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_MN88472
+clean_mk CONFIG_DVB_MN88472 drivers/media/dvb-frontends/Makefile
 
 announce DVB_MN88473 - "Panasonic MN88473"
 reject_firmware drivers/media/dvb-frontends/mn88473.c
@@ -1200,7 +1203,7 @@ clean_mk CONFIG_DVB_TTUSB_BUDGET drivers/media/usb/ttusb-budget/Makefile
 announce DVB_TTUSB_DEC - "Technotrend/Hauppauge USB DEC devices"
 reject_firmware drivers/media/usb/ttusb-dec/ttusb_dec.c
 clean_blob drivers/media/usb/ttusb-dec/ttusb_dec.c
-clean_blob Documentation/dvb/ttusb-dec.txt
+clean_blob Documentation/media/dvb-drivers/ttusb-dec.rst
 clean_kconfig drivers/media/usb/ttusb-dec/Kconfig DVB_TTUSB_DEC
 clean_mk CONFIG_DVB_TTUSB_DEC drivers/media/usb/ttusb-dec/Makefile
 
@@ -1209,7 +1212,7 @@ clean_mk CONFIG_DVB_TTUSB_DEC drivers/media/usb/ttusb-dec/Makefile
 announce VIDEO_BT848 - "BT848 Video For Linux"
 reject_firmware drivers/media/pci/bt8xx/bttv-cards.c
 clean_blob drivers/media/pci/bt8xx/bttv-cards.c
-clean_blob Documentation/video4linux/bttv/README
+clean_blob Documentation/media/v4l-drivers/bttv.rst
 clean_kconfig drivers/media/pci/bt8xx/Kconfig VIDEO_BT848
 clean_mk CONFIG_VIDEO_BT848 drivers/media/pci/bt8xx/Makefile
 
@@ -1279,6 +1282,13 @@ reject_firmware drivers/media/pci/ivtv/ivtv-firmware.c
 clean_blob drivers/media/pci/ivtv/ivtv-firmware.c
 clean_kconfig drivers/media/pci/ivtv/Kconfig VIDEO_IVTV
 clean_mk CONFIG_VIDEO_IVTV drivers/media/pci/ivtv/Makefile
+
+announce VIDEO_MEDIATEK_VPU - "Mediatek Video Processor Unit"
+reject_firmware drivers/media/platform/mtk-vpu/mtk_vpu.c
+clean_blob drivers/media/platform/mtk-vpu/mtk_vpu.c
+clean_kconfig drivers/media/platform/Kconfig VIDEO_MEDIATEK_VPU
+clean_mk CONFIG_VIDEO_MEDIATEK_VPU drivers/media/platform/mtk-vpu/Makefile
+
 
 announce VIDEO_PVRUSB2 - "Hauppauge WinTV-PVR USB2 support"
 reject_firmware drivers/media/usb/pvrusb2/pvrusb2-hdw.c
@@ -1825,8 +1835,16 @@ reject_firmware drivers/net/wireless/intel/iwlwifi/mvm/nvm.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-7000.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-8000.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-9000.c
+clean_blob drivers/net/wireless/intel/iwlwifi/iwl-a000.c
 clean_kconfig drivers/net/wireless/intel/iwlwifi/Kconfig IWLMVM
 clean_mk CONFIG_IWLMVM drivers/net/wireless/intel/iwlwifi/Makefile
+
+announce KS7010 - "KeyStream KS7010 SDIO support"
+reject_firmware drivers/staging/ks7010/ks7010_sdio.c
+clean_blob drivers/staging/ks7010/ks7010_sdio.c
+clean_blob drivers/staging/ks7010/ks7010_sdio.h
+clean_kconfig drivers/staging/ks7010/Kconfig KS7010
+clean_mk CONFIG_KS7010 drivers/staging/ks7010/Makefile
 
 announce LIBERTAS - "Marvell 8xxx Libertas WLAN driver support"
 reject_firmware drivers/net/wireless/marvell/libertas/firmware.c
@@ -2459,11 +2477,23 @@ clean_blob drivers/input/touchscreen/melfas_mip4.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_MELFAS_MIP4
 clean_mk CONFIG_TOUCHSCREEN_MELFAS_MIP4 drivers/input/touchscreen/Makefile
 
+announce TOUCHSCREEN_RM_TS - "Raydium I2C Touchscreen"
+reject_firmware drivers/input/touchscreen/raydium_i2c_ts.c
+clean_blob drivers/input/touchscreen/raydium_i2c_ts.c
+clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_RM_TS
+clean_mk CONFIG_TOUCHSCREEN_RM_TS drivers/input/touchscreen/Makefile
+
 announce TOUCHSCREEN_ROHM_BU21023 - "ROHM BU21023/24 Dual touch support resistive touchscreens"
 reject_firmware drivers/input/touchscreen/rohm_bu21023.c
 clean_blob drivers/input/touchscreen/rohm_bu21023.c
 clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_ROHM_BU21023
 clean_mk CONFIG_TOUCHSCREEN_ROHM_BU21023 drivers/input/touchscreen/Makefile
+
+announce TOUCHSCREEN_SILEAD - "Silead I2C touchscreen"
+reject_firmware drivers/input/touchscreen/silead.c
+clean_blob drivers/input/touchscreen/silead.c
+clean_kconfig drivers/input/touchscreen/Kconfig TOUCHSCREEN_SILEAD
+clean_mk CONFIG_TOUCHSCREEN_SILEAD drivers/input/touchscreen/Makefile
 
 announce TOUCHSCREEN_WDT87XX_I2C - "Weida HiTech I2C touchscreen"
 reject_firmware drivers/input/touchscreen/wdt87xx_i2c.c
@@ -2816,6 +2846,17 @@ clean_blob arch/arm/boot/dts/am4372.dtsi
 clean_kconfig drivers/remoteproc/Kconfig STE_MODEM_RPROC
 clean_mk CONFIG_STE_MODEM_RPROC drivers/remoteproc/Makefile
 
+announce QCOM_Q6V5_PIL - "Qualcomm Hexagon V5 Peripherial Image Loader"
+reject_firmware drivers/remoteproc/qcom_q6v5_pil.c
+clean_blob drivers/remoteproc/qcom_q6v5_pil.c
+clean_kconfig drivers/remoteproc/Kconfig QCOM_Q6V5_PIL
+clean_mk CONFIG_QCOM_Q6V5_PIL drivers/remoteproc/Makefile
+
+announce QCOM_MDT_LOADER - "Qualcomm Peripheral Image Loader"
+reject_firmware drivers/remoteproc/qcom_mdt_loader.c
+clean_kconfig drivers/remoteproc/Kconfig QCOM_MDT_LOADER
+clean_mk CONFIG_QCOM_MDT_LOADER drivers/remoteproc/Makefile
+
 
 #########
 # Sound #
@@ -3120,6 +3161,12 @@ clean_blob sound/soc/intel/atom/sst/sst_pci.c
 clean_kconfig sound/soc/intel/Kconfig SND_SST_IPC_PCI
 clean_mk CONFIG_SND_SST_IPC_PCI sound/soc/intel/atom/sst/Makefile
 
+announce SND_SOC_RT5514 - undocumented
+reject_firmware sound/soc/codecs/rt5514.c
+clean_blob sound/soc/codecs/rt5514.h
+clean_kconfig sound/soc/codecs/Kconfig SND_SOC_RT5514
+clean_mk CONFIG_SND_SOC_RT5514 sound/soc/codecs/Makefile
+
 announce SND_SOC_WM0010 - "WM0010 DSP driver"
 reject_firmware sound/soc/codecs/wm0010.c
 clean_blob sound/soc/codecs/wm0010.c
@@ -3209,15 +3256,15 @@ clean_mk CONFIG_KEYSTONE_NAVIGATOR_QMSS drivers/soc/ti/Makefile
 #################
 
 announce Documentation - "non-Free firmware scripts and documentation"
-clean_blob Documentation/dvb/avermedia.txt
-clean_blob Documentation/dvb/opera-firmware.txt
+clean_blob Documentation/media/dvb-drivers/avermedia.rst
+clean_blob Documentation/media/dvb-drivers/opera-firmware.rst
 clean_blob Documentation/sound/alsa/ALSA-Configuration.txt
 clean_blob Documentation/sound/oss/MultiSound
 clean_blob Documentation/sound/oss/PSS
 clean_blob Documentation/sound/oss/PSS-updates
 clean_blob Documentation/sound/oss/README.OSS
-clean_file Documentation/dvb/get_dvb_firmware
-clean_file Documentation/video4linux/extract_xc3028.pl
+clean_file scripts/get_dvb_firmware
+clean_file scripts/extract_xc3028.pl
 clean_sed s,usb8388,whatever,g drivers/base/Kconfig 'removed blob name'
 clean_blob firmware/README.AddingFirmware
 clean_blob firmware/WHENCE
