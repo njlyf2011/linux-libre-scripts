@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -685,8 +685,8 @@ Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
 #rhbz 1325354
 Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
-#rhbz 1391279
-Patch853: 0001-dm-raid-fix-compat_features-validation.patch
+#rhbz 1392885
+Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2322,6 +2322,14 @@ fi
 #
 #
 %changelog
+* Fri Nov 11 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.7-gnu.
+
+* Thu Nov 10 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.7-300
+- Linux v4.8.7
+- Fixes cve-2016-8630 (rhbz 1393350 1393358)
+- Refresh status of MST capable connectors (rhbz 1392885)
+
 * Wed Nov  2 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.6-301
 - dm raid: fix compat_features validation (rhbz 1391279)
 
