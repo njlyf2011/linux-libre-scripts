@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -682,6 +682,12 @@ Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
 #rhbz 1392885
 Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
+
+#rhbz 1390308
+Patch854: nouveau-add-maxwell-to-backlight-init.patch
+
+#CVE-2016-8645 rhbz 1393904 1393908
+Patch856: 0001-tcp-take-care-of-truncations-done-by-sk_filter.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2303,6 +2309,16 @@ fi
 #
 # 
 %changelog
+* Tue Nov 15 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.8-gnu.
+
+* Tue Nov 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.8-100
+- Linux v4.8.8
+- Fix crash in tcp_collapse CVE-2016-8645 (rhbz 1393904 1393908)
+
+* Fri Nov 11 2016 Justin M. Forbes <jforbes@fedoraproject.org>
+- Nouveau: Add Maxwell to backlight initialization (rhbz 1390308)
+
 * Fri Nov 11 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.8.7-gnu.
 
