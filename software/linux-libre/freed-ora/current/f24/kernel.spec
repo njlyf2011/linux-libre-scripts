@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -573,6 +573,8 @@ Patch432: bcm283x-vc4-fixes.patch
 
 Patch433: AllWinner-net-emac.patch
 
+Patch434: ARM-Drop-fixed-200-Hz-timer-requirement-from-Samsung-platforms.patch
+
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 Patch466: input-kill-stupid-messages.patch
@@ -677,14 +679,14 @@ Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
 #rhbz 1325354
 Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 
-#rhbz 1392885
-Patch853: 0001-drm-i915-Refresh-that-status-of-MST-capable-connecto.patch
-
 #rhbz 1390308
 Patch854: nouveau-add-maxwell-to-backlight-init.patch
 
 #rhbz 1385823
 Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
+
+# CVE-2016-8650 rhbz 1395187 1398463
+Patch856: 0001-mpi-Fix-NULL-ptr-dereference-in-mpi_powm-ver-3.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2311,6 +2313,19 @@ fi
 #
 # 
 %changelog
+* Mon Nov 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.11-gnu.
+
+* Mon Nov 28 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.11-200
+- Linux v4.8.11
+- CVE-2016-8650 Fix NULL ptr dereference in mpi_powm() (rhbz 1395187 1398463)
+
+* Mon Nov 28 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream patch to fix all ARMv7 devices set to initial 200Mhz
+
+* Tue Nov 22 2016 Josh Boyer <jwboyer@fedoraproject.org>
+- Add patch from Dave Anderson to fix live system crash analysis on Aarch64
+
 * Mon Nov 21 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.8.10-gnu.
 
