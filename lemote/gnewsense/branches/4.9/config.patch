@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2016-11-29 06:32:48.136647217 -0500
-@@ -0,0 +1,5627 @@
++++ .config	2016-12-05 15:53:22.424893635 -0500
+@@ -0,0 +1,5628 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.9.0-rc7-gnu Kernel Configuration
++# Linux/mips 4.9.0-rc8-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -405,6 +405,7 @@ Index: .config
 +CONFIG_MODULE_FORCE_LOAD=y
 +CONFIG_MODULE_UNLOAD=y
 +CONFIG_MODULE_FORCE_UNLOAD=y
++# CONFIG_MODVERSIONS is not set
 +# CONFIG_MODULE_SRCVERSION_ALL is not set
 +# CONFIG_MODULE_SIG is not set
 +# CONFIG_MODULE_COMPRESS is not set
