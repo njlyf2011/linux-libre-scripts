@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-#define stablelibre -4.8%{?stablegnux}
+%define stablelibre -4.8%{?stablegnux}
 #define rcrevlibre  -4.8%{?rcrevgnux}
 #define gitrevlibre -4.8%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -682,8 +682,8 @@ Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
 #rhbz 1390308
 Patch854: nouveau-add-maxwell-to-backlight-init.patch
 
-# CVE-2016-8650 rhbz 1395187 1398463
-Patch856: 0001-mpi-Fix-NULL-ptr-dereference-in-mpi_powm-ver-3.patch
+# CVE-2016-9755 rhbz 1400904 1400905
+Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1358,12 +1358,12 @@ done
 
 # The kbuild-AFTER_LINK patch is needed regardless so we list it as a Source
 # file and apply it separately from the rest.
-$RPM_SOURCE_DIR/deblob-check ${SOURCE5005} || exit 1
+$RPM_SOURCE_DIR/deblob-check %{SOURCE5005} || exit 1
 git am %{SOURCE5005}
 
 %if !%{nopatches}
 
-$RPM_SOURCE_DIR/deblob-check ${patches} || exit 1
+$RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
 git am %{patches}
 
 # END OF PATCH APPLICATIONS
@@ -2305,6 +2305,15 @@ fi
 #
 # 
 %changelog
+* Fri Dec  2 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.12-gnu.
+
+* Fri Dec 02 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.12-100
+- Linux v4.8.12
+- CVE-2016-9755 Fix Out-of-bounds write issue when defragmenting ipv6 packets (rhbz 1400904 1400905)
+- CVE-2016-9756 Fix kvm: stack memory information leakage (rhbz 1400468 1400469)
+- Fix kvm: out of bounds memory access via vcpu_id (rhbz 1400804 1400805)
+
 * Mon Nov 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.8.11-gnu.
 
