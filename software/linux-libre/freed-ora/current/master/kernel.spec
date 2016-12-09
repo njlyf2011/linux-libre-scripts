@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -577,6 +577,8 @@ Patch433: AllWinner-net-emac.patch
 
 Patch434: ARM-Drop-fixed-200-Hz-timer-requirement-from-Samsung-platforms.patch
 
+Patch435: imx6sx-Add-UDOO-Neo-support.patch
+
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
 Patch466: input-kill-stupid-messages.patch
@@ -666,8 +668,6 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
-
-Patch850: Fix-BUG-in-calc_seckey.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2314,7 +2314,34 @@ fi
 #
 #
 %changelog
-* Wed Nov 30 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Dec  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9-rc8-gnu.
+
+* Mon Dec 05 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc8.git0.1
+- Linux v4.9-rc8
+
+* Mon Dec 05 2016 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Dec 02 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc7.git4.1
+- Linux v4.9-rc7-45-g2caceb3
+
+* Thu Dec 01 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc7.git3.1
+- Linux v4.9-rc7-39-g43c4f67
+
+* Wed Nov 30 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc7.git2.1
+- Linux v4.9-rc7-23-gded6e84
+
+* Tue Nov 29 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream i.MX6sx Udoo NEO support
+
+* Tue Nov 29 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc7.git1.1
+- Linux v4.9-rc7-7-g88abd82
+
+* Tue Nov 29 2016 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
+* Mon Nov 28 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Nov 30
 - GNU Linux-libre 4.9-rc7-gnu.
 
 * Mon Nov 28 2016 Laura Abbott <labbott@redhat.com> - 4.9.0-0.rc7.git0.1
