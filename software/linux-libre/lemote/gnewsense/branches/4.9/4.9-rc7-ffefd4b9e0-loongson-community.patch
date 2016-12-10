@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 74e22c2..c65117f 100644
+index 694111b..fe8c027 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -301,8 +301,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -13,12 +13,12 @@ index 74e22c2..c65117f 100644
  
  ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
  HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
-@@ -626,9 +626,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
- KBUILD_CFLAGS	+= -Os
+@@ -632,9 +632,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
  else
  ifdef CONFIG_PROFILE_ALL_BRANCHES
--KBUILD_CFLAGS	+= -O2
-+KBUILD_CFLAGS	+= -O3
+-KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
++KBUILD_CFLAGS	+= -O3 $(call cc-disable-warning,maybe-uninitialized,)
  else
 -KBUILD_CFLAGS   += -O2
 +KBUILD_CFLAGS   += -O3
@@ -26,10 +26,10 @@ index 74e22c2..c65117f 100644
  endif
  
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index 2638856..f54f7fd 100644
+index b3c5bde..9983a9b 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -1797,6 +1797,15 @@ config CPU_LOONGSON2
+@@ -1829,6 +1829,15 @@ config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
  	select CPU_SUPPORTS_64BIT_KERNEL
@@ -45,7 +45,7 @@ index 2638856..f54f7fd 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2505,7 +2514,7 @@ config CPU_SUPPORTS_MSA
+@@ -2540,7 +2549,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -280,10 +280,10 @@ index 021d017..50aafca 100644
 +
  #endif /*!_CS5536_MFGPT_H */
 diff --git a/arch/mips/include/asm/mach-loongson64/loongson.h b/arch/mips/include/asm/mach-loongson64/loongson.h
-index d1ff774..6840eca 100644
+index c68c0cc..1edf3a4 100644
 --- a/arch/mips/include/asm/mach-loongson64/loongson.h
 +++ b/arch/mips/include/asm/mach-loongson64/loongson.h
-@@ -46,6 +46,12 @@ static inline void prom_init_uart_base(void)
+@@ -45,6 +45,12 @@ static inline void prom_init_uart_base(void)
  #endif
  }
  
@@ -378,7 +378,7 @@ index 77429d1..1518c08 100644
  	msub_s_op    =	0x28, msub_d_op	   =  0x29,
  	msub_e_op    =	0x2a, nmadd_s_op   =  0x30,
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index 6efa713..4369b78 100644
+index 5a47042..c6a037c 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -1636,7 +1636,7 @@ index 0000000..5316360
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index 36775d2..7cefb6a 100644
+index f8b7bf8..c9af5c9 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -1649,7 +1649,7 @@ index 36775d2..7cefb6a 100644
   *  This program is free software; you can distribute it and/or modify it
   *  under the terms of the GNU General Public License (Version 2) as
   *  published by the Free Software Foundation.
-@@ -61,6 +64,11 @@ static int fpu_emu(struct pt_regs *, struct mips_fpu_struct *,
+@@ -60,6 +63,11 @@ static int fpu_emu(struct pt_regs *, struct mips_fpu_struct *,
  static int fpux_emu(struct pt_regs *,
  	struct mips_fpu_struct *, mips_instruction, void *__user *);
  
@@ -1661,7 +1661,7 @@ index 36775d2..7cefb6a 100644
  /* Control registers */
  
  #define FPCREG_RID	0	/* $0  = revision id */
-@@ -845,6 +853,14 @@ do {									\
+@@ -844,6 +852,14 @@ do {									\
  #define DPFROMREG(dp, x)	DIFROMREG((dp).bits, x)
  #define DPTOREG(dp, x)	DITOREG((dp).bits, x)
  
@@ -1676,7 +1676,7 @@ index 36775d2..7cefb6a 100644
  /*
   * Emulate a CFC1 instruction.
   */
-@@ -1374,6 +1390,16 @@ branch_common:
+@@ -1373,6 +1389,16 @@ branch_common:
  			xcp->regs[MIPSInst_RD(ir)] =
  				xcp->regs[MIPSInst_RS(ir)];
  		break;
@@ -1693,7 +1693,7 @@ index 36775d2..7cefb6a 100644
  	default:
  sigill:
  		return SIGILL;
-@@ -1459,6 +1485,172 @@ DEF3OP(msub, dp, ieee754dp_mul, ieee754dp_sub, );
+@@ -1458,6 +1484,172 @@ DEF3OP(msub, dp, ieee754dp_mul, ieee754dp_sub, );
  DEF3OP(nmadd, dp, ieee754dp_mul, ieee754dp_add, ieee754dp_neg);
  DEF3OP(nmsub, dp, ieee754dp_mul, ieee754dp_sub, ieee754dp_neg);
  
@@ -1866,7 +1866,7 @@ index 36775d2..7cefb6a 100644
  static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  	mips_instruction ir, void *__user *fault_addr)
  {
-@@ -1560,7 +1752,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1559,7 +1751,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			break;
  
  		default:
@@ -1875,7 +1875,7 @@ index 36775d2..7cefb6a 100644
  		}
  		break;
  	}
-@@ -1630,7 +1822,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1629,7 +1821,7 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  			goto copcsr;
  
  		default:
@@ -1884,7 +1884,7 @@ index 36775d2..7cefb6a 100644
  		}
  		break;
  	}
-@@ -1643,6 +1835,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1642,6 +1834,11 @@ static int fpux_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		break;
  
  	default:
@@ -1896,7 +1896,7 @@ index 36775d2..7cefb6a 100644
  		return SIGILL;
  	}
  
-@@ -1664,7 +1861,12 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1663,7 +1860,12 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  	unsigned cond;
  	union {
  		union ieee754dp d;
@@ -1910,7 +1910,7 @@ index 36775d2..7cefb6a 100644
  		int w;
  		s64 l;
  	} rv;			/* resulting value */
-@@ -1881,7 +2083,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1880,7 +2082,7 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
  		case fmov_op:
  			/* an easy one */
  			SPFROMREG(rv.s, MIPSInst_FS(ir));
@@ -1919,7 +1919,7 @@ index 36775d2..7cefb6a 100644
  
  			/* binary op on handler */
  scopbop:
-@@ -2210,7 +2412,7 @@ copcsr:
+@@ -2209,7 +2411,7 @@ copcsr:
  		case fmov_op:
  			/* an easy one */
  			DPFROMREG(rv.d, MIPSInst_FS(ir));
@@ -1928,7 +1928,7 @@ index 36775d2..7cefb6a 100644
  
  			/* binary op on handler */
  dcopbop:
-@@ -2396,6 +2598,83 @@ dcopuop:
+@@ -2395,6 +2597,83 @@ dcopuop:
  		}
  	}
  
@@ -2012,7 +2012,7 @@ index 36775d2..7cefb6a 100644
  	case l_fmt:
  
  		if (!cpu_has_mips_3_4_5_64_r2_r6)
-@@ -2516,6 +2795,11 @@ dcopuop:
+@@ -2515,6 +2794,11 @@ dcopuop:
  
  		DITOREG(rv.l, MIPSInst_FD(ir));
  		break;
@@ -2025,10 +2025,10 @@ index 36775d2..7cefb6a 100644
  		return SIGILL;
  	}
 diff --git a/arch/mips/pci/Makefile b/arch/mips/pci/Makefile
-index 139ad1d..44c1de4 100644
+index 4b82148..33d9955 100644
 --- a/arch/mips/pci/Makefile
 +++ b/arch/mips/pci/Makefile
-@@ -30,6 +30,7 @@ obj-$(CONFIG_LASAT)		+= pci-lasat.o
+@@ -32,6 +32,7 @@ obj-$(CONFIG_LASAT)		+= pci-lasat.o
  obj-$(CONFIG_MIPS_COBALT)	+= fixup-cobalt.o
  obj-$(CONFIG_LEMOTE_FULOONG2E)	+= fixup-fuloong2e.o ops-loongson2.o
  obj-$(CONFIG_LEMOTE_MACH2F)	+= fixup-lemote2f.o ops-loongson2.o
@@ -2174,10 +2174,10 @@ index 6bbdac1..ffeba42 100644
  }
  
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 78ac481..e4a8aff 100644
+index cd4599c..aeb773f 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -922,6 +922,13 @@ config HID_ZYDACRON
+@@ -928,6 +928,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -2192,7 +2192,7 @@ index 78ac481..e4a8aff 100644
  	tristate "HID Sensors framework support"
  	depends on HID && HAS_IOMEM
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index fc4b2aa..4b0af1a 100644
+index 86b2b57..d4a49da 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
 @@ -104,6 +104,7 @@ obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
@@ -2420,10 +2420,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 4ed9a4f..6444aa4 100644
+index 575aa65..e4e7f2a 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1070,6 +1070,9 @@
+@@ -1081,6 +1081,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -2461,7 +2461,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index 65cd0d2..00d6d28 100644
+index 4053435..0785329 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -9212,10 +9212,10 @@ index 0000000..9f2d81b
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index e215f50..cfb6830 100644
+index e859d14..b37ce74 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
-@@ -812,6 +812,7 @@ comment "Platform RTC drivers"
+@@ -827,6 +827,7 @@ comment "Platform RTC drivers"
  config RTC_DRV_CMOS
  	tristate "PC-style 'CMOS'"
  	depends on X86 || ARM || M32R || PPC || MIPS || SPARC64 || MN10300
@@ -9224,10 +9224,10 @@ index e215f50..cfb6830 100644
  	select RTC_MC146818_LIB
  	help
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index 35af362..5ef8662 100644
+index a9a1e4c..5dafdde 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
-@@ -450,6 +450,26 @@ void usb_amd_dev_put(void)
+@@ -449,6 +449,26 @@ void usb_amd_dev_put(void)
  }
  EXPORT_SYMBOL_GPL(usb_amd_dev_put);
  
@@ -9254,7 +9254,7 @@ index 35af362..5ef8662 100644
  /*
   * Make sure the controller is completely inactive, unable to
   * generate interrupts or do DMA.
-@@ -531,15 +551,6 @@ reset_needed:
+@@ -530,15 +550,6 @@ reset_needed:
  }
  EXPORT_SYMBOL_GPL(uhci_check_and_reset_hc);
  
@@ -9270,7 +9270,7 @@ index 35af362..5ef8662 100644
  static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
  {
  	unsigned long base = 0;
-@@ -557,12 +568,11 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
+@@ -556,12 +567,11 @@ static void quirk_usb_handoff_uhci(struct pci_dev *pdev)
  	if (base)
  		uhci_check_and_reset_hc(pdev, base);
  }
@@ -9287,7 +9287,7 @@ index 35af362..5ef8662 100644
  static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -641,7 +651,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -640,7 +650,11 @@ static void quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -9299,7 +9299,7 @@ index 35af362..5ef8662 100644
  static const struct dmi_system_id ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -816,6 +830,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -815,6 +829,9 @@ static void quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -9309,7 +9309,7 @@ index 35af362..5ef8662 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -956,6 +973,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -955,6 +972,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -9317,7 +9317,7 @@ index 35af362..5ef8662 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -1058,6 +1076,9 @@ hc_init:
+@@ -1065,6 +1083,9 @@ hc_init:
  iounmap:
  	iounmap(base);
  }
@@ -9666,10 +9666,10 @@ index d135882..f47b21c 100755
  	gsub("-.*", "");
  	split($1,a, ".");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 96e2486..8b7aff7 100755
+index faac4b1..b1fc800 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -310,14 +310,33 @@ if ($arch eq "x86_64") {
+@@ -312,14 +312,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -9711,7 +9711,7 @@ index 96e2486..8b7aff7 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -329,19 +348,12 @@ if ($arch eq "x86_64") {
+@@ -331,19 +350,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
