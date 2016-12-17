@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 8
+%define base_sublevel 9
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -451,7 +451,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+#Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -471,38 +471,33 @@ Source98: filter-ppc64p7.sh
 Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
-Source19: Makefile.release
-Source20: Makefile.config
-Source21: config-debug
-Source22: config-nodebug
-Source23: config-generic
-Source24: config-no-extra
+Source20: kernel-aarch64.config
+Source21: kernel-aarch64-debug.config
+Source22: kernel-armv7hl.config
+Source23: kernel-armv7hl-debug.config
+Source24: kernel-armv7hl-lpae.config
+Source25: kernel-armv7hl-lpae-debug.config
+Source26: kernel-i686.config
+Source27: kernel-i686-debug.config
+Source28: kernel-i686-PAE.config
+Source29: kernel-i686-PAEdebug.config
+Source30: kernel-ppc64.config
+Source31: kernel-ppc64-debug.config
+Source32: kernel-ppc64le.config
+Source33: kernel-ppc64le-debug.config
+Source34: kernel-ppc64p7.config
+Source35: kernel-ppc64p7-debug.config
+Source36: kernel-s390x.config
+Source37: kernel-s390x-debug.config
+Source38: kernel-x86_64.config
+Source39: kernel-x86_64-debug.config
 
-Source30: config-x86-generic
-Source31: config-i686-PAE
-Source32: config-x86-32-generic
-
-Source40: config-x86_64-generic
-
-Source50: config-powerpc64-generic
-Source53: config-powerpc64
-Source54: config-powerpc64p7
-Source55: config-powerpc64le
-
-Source70: config-s390x
-
-Source100: config-arm-generic
-
-# Unified ARM kernels
-Source101: config-armv7-generic
-Source102: config-armv7
-Source103: config-armv7-lpae
-
-Source110: config-arm64
+Source40: generate_all_configs.sh
+Source41: generate_debug_configs.sh
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
-Source1000: config-local
+Source1000: kernel-local
 
 # Sources for kernel-libre-tools
 Source2000: cpupower.service
@@ -544,6 +539,9 @@ Patch07: freedo.patch
 # Git trees.
 
 # Standalone patches
+
+# http://www.spinics.net/lists/linux-serial/msg24272.html
+Patch420: arm64-ACPI-parse-SPCR-table.patch
 
 # a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
 Patch421: qcom-QDF2432-tmp-errata.patch
@@ -668,6 +666,12 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
+
+# Work around thinkpad firmware memory layout issues and efi_mem_reserve()
+Patch850: 0001-efi-efi_print_memmap-Call-out-invalid-entries-in-the.patch
+Patch851: 0002-efi-efi_map_region-traceback-if-we-try-to-map-invali.patch
+Patch852: 0003-efi-efi_memmap_insert-don-t-insert-a-region-more-tha.patch
+Patch853: 0004-efi-efi_memmap_insert-don-t-split-regions-with-inval.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1323,19 +1327,24 @@ git commit -a -m "Stable update"
 %endif
 
 # Drop some necessary files from the source dir into the buildroot
-cp $RPM_SOURCE_DIR/config-* .
+cp $RPM_SOURCE_DIR/kernel-*.config .
+cp %{SOURCE1000} .
 cp %{SOURCE15} .
+cp %{SOURCE40} .
+cp %{SOURCE41} .
 
 %if !%{debugbuildsenabled}
-%if %{with_release}
 # The normal build is a really debug build and the user has explicitly requested
 # a release kernel. Change the config files into non-debug versions.
-make -f %{SOURCE19} config-release
-%endif
+%if !%{with_release}
+VERSION=%{version} ./generate_debug_configs.sh
+%else
+VERSION=%{version} ./generate_all_configs.sh
 %endif
 
-# Dynamically generate kernel .config files from config-* files
-make -f %{SOURCE20} VERSION=%{version} configs
+%else
+VERSION=%{version} ./generate_all_configs.sh
+%endif
 
 # Merge in any user-provided local config option changes
 %ifnarch %nobuildarches
@@ -2314,6 +2323,38 @@ fi
 #
 #
 %changelog
+* Mon Dec 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9-gnu.
+
+* Mon Dec 12 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-1
+- Linux v4.9
+
+* Mon Dec 12 2016 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Sat Dec 10 2016 Christopher Covington <cov@codeaurora.org>
+- Re-add ACPI SPCR (serial console) support
+
+* Fri Dec 09 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc8.git4.1
+- Linux v4.9-rc8-85-ga37102d
+
+* Thu Dec 08 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc8.git3.1
+- Linux v4.9-rc8-78-g318c893
+
+* Thu Dec 08 2016 Peter Jones <pjones@redhat.com>
+- Work around thinkpad firmware memory layout issues and efi_mem_reserve()
+
+* Wed Dec 07 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc8.git2.1
+- Linux v4.9-rc8-55-gce779d6
+- Disable CONFIG_AF_KCM (rhbz 1402489)
+
+* Tue Dec 06 2016 Laura Abbott <labbott@fedoraproject.org> - 4.9.0-0.rc8.git1.1
+- Linux v4.9-rc8-9-gd9d0452
+- Fix DMA from stack in virtio-net (rhbz 1401612)
+
+* Tue Dec 06 2016 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
 * Mon Dec  5 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9-rc8-gnu.
 
