@@ -1,3 +1,2 @@
-6469b8a14f98a4d03caf3e80a9b86bbf  linux-libre-4.8-gnu.tar.xz
-0dad03f586e835d538d3e0d2cbdb9a28  perf-man-4.8.tar.gz
-a2d98299ef83e7faaf062548cc14fecc  patch-4.8-gnu-4.9-rc8-gnu.xz
+SHA512 (linux-libre-4.9-gnu.tar.xz) = 885eb0a7fab45dc749acb4329b4330a43b704df2d5f2f5aac1811503c132ca53ca49452f9b1cc80b0826c7a4962dbe4937aecb697aa823b2543ba2cabc704816
+SHA512 (perf-man-4.9.tar.gz) = d23bb3da1eadd6623fddbf4696948de7675f3dcf57c711a7427dd7ae111394f58d8f42752938bbea7cd219f1e7f6f116fc67a1c74f769711063940a065f37b99
