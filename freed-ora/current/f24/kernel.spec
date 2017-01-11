@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -687,9 +687,6 @@ Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
 
 # CVE-2016-9755 rhbz 1400904 1400905
 Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
-
-# CVE-2016-9588 rhbz 1404924 1404925
-Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2316,6 +2313,12 @@ fi
 #
 # 
 %changelog
+* Mon Jan  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.8.17-gnu.
+
+* Mon Jan 09 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.8.17-200
+- Linux v4.8.17
+
 * Fri Jan  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.8.16-gnu.
 
