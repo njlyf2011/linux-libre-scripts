@@ -42,13 +42,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 8
+%define base_sublevel 9
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-%define stablelibre -4.8%{?stablegnux}
-#define rcrevlibre  -4.8%{?rcrevgnux}
-#define gitrevlibre -4.8%{?gitrevgnux}
+#define stablelibre -4.9%{?stablegnux}
+#define rcrevlibre  -4.9%{?rcrevgnux}
+#define gitrevlibre -4.9%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -455,7 +455,7 @@ Source5: deblob-%{kversion}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
-
+Source12: remove-binary-diff.pl
 Source15: merge.pl
 Source16: mod-extra.list
 Source17: mod-extra.sh
@@ -545,9 +545,6 @@ Patch07: freedo.patch
 
 # Standalone patches
 
-# http://www.spinics.net/lists/arm-kernel/msg523359.html
-Patch420: arm64-ACPI-parse-SPCR-table.patch
-
 # a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
 Patch421: qcom-QDF2432-tmp-errata.patch
 
@@ -576,9 +573,16 @@ Patch431: bcm2837-initial-support.patch
 
 Patch432: bcm283x-vc4-fixes.patch
 
-Patch433: AllWinner-net-emac.patch
+Patch433: bcm283x-fixes.patch
 
-Patch434: ARM-Drop-fixed-200-Hz-timer-requirement-from-Samsung-platforms.patch
+# http://www.spinics.net/lists/linux-mmc/msg41151.html
+Patch434: bcm283x-mmc-imp-speed.patch
+
+Patch440: AllWinner-net-emac.patch
+
+Patch442: ARM-Drop-fixed-200-Hz-timer-requirement-from-Samsung-platforms.patch
+
+Patch443: imx6sx-Add-UDOO-Neo-support.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -614,7 +618,9 @@ Patch481: x86-Restrict-MSR-access-when-module-loading-is-restr.patch
 
 Patch482: Add-option-to-automatically-enforce-module-signature.patch
 
-Patch483: efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
+Patch483: efi-Add-SHIM-and-image-security-database-GUID-defini.patch
+
+Patch484: efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
 
 Patch485: efi-Add-EFI_SECURE_BOOT-bit.patch
 
@@ -660,41 +666,16 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
 
+Patch509: MODSIGN-Don-t-try-secure-boot-if-EFI-runtime-is-disa.patch
+
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
-
-#rhbz 1200901 (There should be something better upstream at some point)
-Patch842: qxl-reapply-cursor-after-SetCrtc-calls.patch
-
-# From kernel list, currently in linux-next
-Patch845: HID-microsoft-Add-Surface-4-type-cover-pro-4-JP.patch
-
-# SELinux OverlayFS support (queued for 4.9)
-Patch846: security-selinux-overlayfs-support.patch
-
-#rhbz 1360688
-Patch847: rc-core-fix-repeat-events.patch
 
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
 
-# CVE-2016-9083 CVE-2016-9084 rhbz 1389258 1389259 1389285
-Patch850: v3-vfio-pci-Fix-integer-overflows-bitmask-check.patch
-
-#rhbz 1325354
-Patch852: 0001-HID-input-ignore-System-Control-application-usages-i.patch
-
-#rhbz 1390308
-Patch854: nouveau-add-maxwell-to-backlight-init.patch
-
-#rhbz 1385823
-Patch855: 0001-platform-x86-ideapad-laptop-Add-Lenovo-Yoga-910-13IK.patch
-
-# CVE-2016-9755 rhbz 1400904 1400905
-Patch856: 0001-netfilter-ipv6-nf_defrag-drop-mangled-skb-on-ream-er.patch
-
-# CVE-2016-9588 rhbz 1404924 1404925
-Patch857: kvm-nVMX-allow-L1-to-intercept-software-exceptions.patch
+# Request from dwalsh
+Patch850: selinux-namespace-fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1286,16 +1267,18 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/"
     cp -al vanilla-%{kversion} vanilla-%{vanillaversion}
     cd vanilla-%{vanillaversion}
 
+cp %{SOURCE12} .
+
 # Update vanilla to the latest upstream.
 # (non-released_kernel case only)
 %if 0%{?rcrev}
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre: }%{?rcrevgnux}/" Makefile
 %endif
-    xzcat %{SOURCE5000} | patch -p1 -F1 -s
+    xzcat %{SOURCE5000} | ./remove-binary-diff.pl | patch -p1 -F1 -s
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
-    xzcat %{SOURCE5001} | patch -p1 -F1 -s
+    xzcat %{SOURCE5001} | ./remove-binary-diff.pl | patch -p1 -F1 -s
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
@@ -1303,7 +1286,7 @@ perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevlibre: }%{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
-    xzcat %{SOURCE5000} | patch -p1 -F1 -s
+    xzcat %{SOURCE5000} | ./remove-binary-diff.pl | patch -p1 -F1 -s
 %endif
 %endif
     git init
@@ -1822,7 +1805,7 @@ BuildKernel %make_target %kernel_image
 %endif
 
 %global perf_make \
-  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} %{?_smp_mflags} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
+  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT all
@@ -2330,6 +2313,12 @@ fi
 #
 #
 %changelog
+* Mon Jan  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.2-gnu.
+
+* Mon Jan 09 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.2-200
+- Linux v4.9.2 rebase
+
 * Fri Jan  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.8.16-gnu.
 
