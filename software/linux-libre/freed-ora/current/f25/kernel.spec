@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -560,7 +560,6 @@ Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # Fix OMAP4 (pandaboard)
 Patch427: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
-Patch428: ARM-OMAP4-Fix-crashes.patch
 
 # Not particularly happy we don't yet have a proper upstream resolution this is the right direction
 # https://www.spinics.net/lists/arm-kernel/msg535191.html
@@ -889,7 +888,7 @@ This package provides debug information for package kernel-libre-tools.
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
-%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
+%{expand:%%global debuginfo_args %{?debuginfo_args} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
 
 %endif # with_tools
 
@@ -1848,6 +1847,9 @@ popd
 pushd tools/iio/
 %{make}
 popd
+pushd tools/gpio/
+%{make}
+popd
 %endif
 
 # In the modsign case, we do 3 things.  1) We check the "flavour" and hard
@@ -2017,6 +2019,9 @@ make INSTALL_ROOT=%{buildroot} install
 popd
 pushd tools/iio
 make INSTALL_ROOT=%{buildroot} install
+popd
+pushd tools/gpio
+make DESTDIR=%{buildroot} install
 popd
 %endif
 
@@ -2223,6 +2228,9 @@ fi
 %{_bindir}/iio_event_monitor
 %{_bindir}/iio_generic_buffer
 %{_bindir}/lsiio
+%{_bindir}/lsgpio
+%{_bindir}/gpio-hammer
+%{_bindir}/gpio-event-mon
 %endif
 
 %if %{with_debuginfo}
@@ -2319,6 +2327,17 @@ fi
 #
 #
 %changelog
+* Tue Jan 17 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.4-gnu.
+
+* Mon Jan 16 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.4-200
+- Linux v4.9.4
+
+* Mon Jan 16 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor updates for Raspberry Pi 3 support
+- Re-enable /sys/class/gpio/
+- Build gpio tools
+
 * Fri Jan 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9.3-gnu.
 
