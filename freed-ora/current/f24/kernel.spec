@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -676,6 +676,12 @@ Patch851: selinux-namespace-fix.patch
 
 #rhbz 1390308
 Patch852: nouveau-add-maxwell-to-backlight-init.patch
+
+#CVE-2017-5576 CVE-2017-5577 rhbz 1416436 1416437 1416439
+Patch853: drm_vc4_Fix_an_integer_overflow_in_temporary_allocation_layout.patch
+
+#The saddest EFI firmware bug
+Patch854: 0001-x86-efi-always-map-first-physical-page-into-EFI-page.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2304,6 +2310,19 @@ fi
 #
 # 
 %changelog
+* Thu Jan 26 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.6-gnu.
+
+* Thu Jan 26 2017 Laura Abbott <labbott@redhat.com> - 4.9.6-100
+- Linux v4.9.6
+- Bring in fix for bogus EFI firmware
+
+* Wed Jan 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5576 CVE-2017-5577 vc4 overflows (rhbz 1416436 1416437 1416439)
+
+* Mon Jan 23 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Enable CONFIG_IPV6_GRE (rhbz 1405398)
+
 * Fri Jan 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9.5-gnu.
 
