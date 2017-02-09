@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 101
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -561,6 +561,8 @@ Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 # Fix OMAP4 (pandaboard)
 Patch427: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
+Patch428: arm64-dma-mapping-Fix-dma_mapping_error-when-bypassing-SWIOTLB.patch
+
 # Not particularly happy we don't yet have a proper upstream resolution this is the right direction
 # https://www.spinics.net/lists/arm-kernel/msg535191.html
 Patch429: arm64-mm-Fix-memmap-to-be-initialized-for-the-entire-section.patch
@@ -570,10 +572,12 @@ Patch430: ARM-tegra-usb-no-reset.patch
 
 Patch431: bcm2837-initial-support.patch
 
-Patch433: bcm283x-fixes.patch
+Patch432: bcm283x-fixes.patch
 
 # http://www.spinics.net/lists/linux-mmc/msg41151.html
-Patch434: bcm283x-mmc-imp-speed.patch
+Patch433: bcm283x-mmc-imp-speed.patch
+
+Patch434: mm-alloc_contig-re-allow-CMA-to-compact-FS-pages.patch
 
 Patch440: AllWinner-net-emac.patch
 
@@ -677,11 +681,14 @@ Patch851: selinux-namespace-fix.patch
 #rhbz 1390308
 Patch852: nouveau-add-maxwell-to-backlight-init.patch
 
-#CVE-2017-5576 CVE-2017-5577 rhbz 1416436 1416437 1416439
-Patch853: drm_vc4_Fix_an_integer_overflow_in_temporary_allocation_layout.patch
-
 #The saddest EFI firmware bug
 Patch854: 0001-x86-efi-always-map-first-physical-page-into-EFI-page.patch
+
+#CVE-2017-2596 rhbz 1417812 1417813
+Patch855: kvm-fix-page-struct-leak-in-handle_vmon.patch
+
+# rhbz 1418858
+Patch856: PCI-ASPM-Handle-PCI-to-PCIe-bridges-as-roots-of-PCIe-hierarchies.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2310,12 +2317,32 @@ fi
 #
 # 
 %changelog
+* Thu Feb  2 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.7-gnu.
+
+* Thu Feb 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.7-101
+- Fix for pcie_aspm_init_link_state crash (rhbz 1418858)
+
+* Thu Feb 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.7-100
+- Linux v4.9.7
+
+* Tue Jan 31 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix kvm nested virt CVE-2017-2596 (rhbz 1417812 1417813)
+
+* Tue Jan 31 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix CMA compaction regression (Raspberry Pi and others)
+
+* Thu Jan 26 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- arm64: dma-mapping: Fix dma_mapping_error() when bypassing SWIOTLB
+
 * Thu Jan 26 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9.6-gnu.
 
 * Thu Jan 26 2017 Laura Abbott <labbott@redhat.com> - 4.9.6-100
 - Linux v4.9.6
 - Bring in fix for bogus EFI firmware
+- Fixes CVE-2017-5547, CVE-2016-10153, CVE-2017-5548, CVE-2017-5551
+  (rhbz 1416096 1416101 1416110 1416126 1416128)
 
 * Wed Jan 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
 - CVE-2017-5576 CVE-2017-5577 vc4 overflows (rhbz 1416436 1416437 1416439)
