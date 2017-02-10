@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.8%{?stablegnux}
-%define rcrevlibre  -4.8%{?rcrevgnux}
-#define gitrevlibre -4.8%{?gitrevgnux}
+#define stablelibre -4.9%{?stablegnux}
+%define rcrevlibre  -4.9%{?rcrevgnux}
+#define gitrevlibre -4.9%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -354,8 +354,10 @@ Summary: The Linux kernel
 # printed out?
 %if %{nopatches}
 %define listnewconfig_fail 0
+%define configmismatch_fail 0
 %else
 %define listnewconfig_fail 1
+%define configmismatch_fail 1
 %endif
 
 # To temporarily exclude an architecture from being built, add it to
@@ -451,7 +453,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-#Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -494,6 +496,8 @@ Source39: kernel-x86_64-debug.config
 
 Source40: generate_all_configs.sh
 Source41: generate_debug_configs.sh
+
+Source42: check_configs.awk
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -540,42 +544,39 @@ Patch07: freedo.patch
 
 # Standalone patches
 
-# http://www.spinics.net/lists/linux-serial/msg24272.html
-Patch420: arm64-ACPI-parse-SPCR-table.patch
-
 # a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
-Patch421: qcom-QDF2432-tmp-errata.patch
+Patch420: qcom-QDF2432-tmp-errata.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg490981.html
-Patch422: geekbox-v4-device-tree-support.patch
-
-# http://www.spinics.net/lists/linux-pci/msg53991.html
-# https://patchwork.kernel.org/patch/9337113/
-Patch425: arm64-pcie-quirks.patch
+Patch421: geekbox-v4-device-tree-support.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
-Patch426: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
+Patch422: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # Fix OMAP4 (pandaboard)
-Patch427: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
-Patch428: ARM-OMAP4-Fix-crashes.patch
+Patch423: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
 # Not particularly happy we don't yet have a proper upstream resolution this is the right direction
 # https://www.spinics.net/lists/arm-kernel/msg535191.html
-Patch429: arm64-mm-Fix-memmap-to-be-initialized-for-the-entire-section.patch
+Patch424: arm64-mm-Fix-memmap-to-be-initialized-for-the-entire-section.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
-Patch430: ARM-tegra-usb-no-reset.patch
+Patch425: ARM-tegra-usb-no-reset.patch
 
-Patch431: bcm2837-initial-support.patch
+Patch426: AllWinner-net-emac.patch
 
-Patch432: bcm283x-vc4-fixes.patch
+# http://www.spinics.net/lists/arm-kernel/msg557831.html
+Patch427: arm64-dma-mapping-Fix-dma_mapping_error-when-bypassing-SWIOTLB.patch
 
-Patch433: AllWinner-net-emac.patch
+Patch430: bcm2837-initial-support.patch
 
-Patch434: ARM-Drop-fixed-200-Hz-timer-requirement-from-Samsung-platforms.patch
+# http://www.spinics.net/lists/linux-mmc/msg41151.html
+Patch431: bcm283x-mmc-imp-speed.patch
 
-Patch435: imx6sx-Add-UDOO-Neo-support.patch
+Patch432: bcm283x-VEC.patch
+
+# http://www.spinics.net/lists/arm-kernel/msg552554.html
+Patch434: arm-imx6-hummingboard2.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -591,33 +592,7 @@ Patch471: Kbuild-Add-an-option-to-enable-GCC-VTA.patch
 
 Patch472: crash-driver.patch
 
-Patch473: Add-secure_modules-call.patch
-
-Patch474: PCI-Lock-down-BAR-access-when-module-security-is-ena.patch
-
-Patch475: x86-Lock-down-IO-port-access-when-module-security-is.patch
-
-Patch476: ACPI-Limit-access-to-custom_method.patch
-
-Patch477: asus-wmi-Restrict-debugfs-interface-when-module-load.patch
-
-Patch478: Restrict-dev-mem-and-dev-kmem-when-module-loading-is.patch
-
-Patch479: acpi-Ignore-acpi_rsdp-kernel-parameter-when-module-l.patch
-
-Patch480: kexec-Disable-at-runtime-if-the-kernel-enforces-modu.patch
-
-Patch481: x86-Restrict-MSR-access-when-module-loading-is-restr.patch
-
-Patch482: Add-option-to-automatically-enforce-module-signature.patch
-
-Patch483: efi-Add-SHIM-and-image-security-database-GUID-defini.patch
-
-Patch484: efi-Disable-secure-boot-if-shim-is-in-insecure-mode.patch
-
-Patch485: efi-Add-EFI_SECURE_BOOT-bit.patch
-
-Patch486: hibernate-Disable-in-a-signed-modules-environment.patch
+Patch473: efi-lockdown.patch
 
 Patch487: Add-EFI-signature-data-types.patch
 
@@ -632,16 +607,11 @@ Patch490: MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
 
 Patch491: MODSIGN-Support-not-importing-certs-from-db.patch
 
-Patch492: Add-sysrq-option-to-disable-secure-boot-mode.patch
-
 Patch493: drm-i915-hush-check-crtc-state.patch
 
 Patch494: disable-i8042-check-on-apple-mac.patch
 
 Patch495: lis3-improve-handling-of-null-rate.patch
-
-# In theory this has been fixed so should no longer be needed, it also causes problems with aarch64 DMI, so disable to see for sure if it's fixed
-# Patch496: watchdog-Disable-watchdog-on-virtual-machines.patch
 
 Patch497: scsi-sd_revalidate_disk-prevent-NULL-ptr-deref.patch
 
@@ -657,8 +627,6 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 # Patch503: drm-i915-turn-off-wc-mmaps.patch
 
-Patch508: kexec-uefi-copy-secure_boot-flag-in-boot-params.patch
-
 Patch509: MODSIGN-Don-t-try-secure-boot-if-EFI-runtime-is-disa.patch
 
 #CVE-2016-3134 rhbz 1317383 1317384
@@ -667,11 +635,17 @@ Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 #ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
 
-# Work around thinkpad firmware memory layout issues and efi_mem_reserve()
-Patch850: 0001-efi-efi_print_memmap-Call-out-invalid-entries-in-the.patch
-Patch851: 0002-efi-efi_map_region-traceback-if-we-try-to-map-invali.patch
-Patch852: 0003-efi-efi_memmap_insert-don-t-insert-a-region-more-tha.patch
-Patch853: 0004-efi-efi_memmap_insert-don-t-split-regions-with-inval.patch
+# Fix build issue with armada_trace
+Patch851: Armada-trace-build-fix.patch
+
+# selinux: allow context mounts on tmpfs, ramfs, devpts within user namespaces
+Patch852: selinux-allow-context-mounts-on-tmpfs-etc.patch
+
+# See http://lists.infradead.org/pipermail/linux-arm-kernel/2016-October/461597.html
+Patch853: 0001-Work-around-for-gcc7-and-arm64.patch
+
+#CVE-2017-2596 rhbz 1417812 1417813
+Patch854: kvm-fix-page-struct-leak-in-handle_vmon.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1388,9 +1362,21 @@ rm -f kernel-%{version}-*debug.config
 
 %define make make %{?cross_opts}
 
+CheckConfigs() {
+     ./check_configs.awk $1 $2 > .mismatches
+     if [ -s .mismatches ]
+     then
+	echo "Error: Mismatches found in configuration files"
+	cat .mismatches
+	exit 1
+     fi
+}
+
+cp %{SOURCE42} .
 # now run oldconfig over all the config files
 for i in *.config
 do
+  cat $i > temp-$i
   mv $i .config
   Arch=`head -1 .config | cut -b 3-`
   make ARCH=$Arch listnewconfig | grep -E '^CONFIG_' >.newoptions || true
@@ -1404,6 +1390,10 @@ do
   make ARCH=$Arch oldnoconfig
   echo "# $Arch" > configs/$i
   cat .config >> configs/$i
+%if %{configmismatch_fail}
+  CheckConfigs configs/$i temp-$i
+%endif
+  rm temp-$i
 done
 # end of kernel config
 %endif
@@ -1806,9 +1796,11 @@ BuildKernel %make_target %kernel_image
 %endif
 
 %global perf_make \
-  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 prefix=%{_prefix}
+  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 NO_JVMTI=1 prefix=%{_prefix}
 %if %{with_perf}
 # perf
+# make sure check-headers.sh is executable
+chmod +x tools/perf/check-headers.sh
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT all
 %endif
 
@@ -2323,6 +2315,175 @@ fi
 #
 #
 %changelog
+* Mon Feb  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10-rc7-gnu.
+
+* Mon Feb 06 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc7.git0.1
+- Disable debugging options.
+- Linux v4.10-rc7
+
+* Fri Feb 03 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc6.git3.1
+- Linux v4.10-rc6-110-g34e00ac
+
+* Wed Feb 01 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc6.git2.1
+- Linux v4.10-rc6-85-g6d04dfc
+- enable CONFIG_SENSORS_JC42 (rhbz 1417454)
+
+* Tue Jan 31 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc6.git1.1
+- Linux v4.10-rc6-24-gf1774f4
+- Reenable debugging options.
+- Fix kvm nested virt CVE-2017-2596 (rhbz 1417812 1417813)
+
+* Mon Jan 30 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc6.git0.1
+- Linux v4.10-rc6
+- Disable debugging options.
+
+* Sat Jan 28 2017 Laura Abbott <labbott@redhat.com> - 4.10.0-0.rc5.git4.2
+- Temporary workaround for gcc7 and arm64
+
+* Fri Jan 27 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc5.git4.1
+- Linux v4.10-rc5-367-g1b1bc42
+
+* Thu Jan 26 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc5.git3.1
+- Linux v4.10-rc5-122-gff9f8a7
+
+* Thu Jan 26 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- arm64: dma-mapping: Fix dma_mapping_error() when bypassing SWIOTLB
+
+* Wed Jan 25 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc5.git2.1
+- Linux v4.10-rc5-107-g883af14
+- CVE-2017-5576 CVE-2017-5577 vc4 overflows (rhbz 1416436 1416437 1416439)
+
+* Tue Jan 24 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc5.git1.1
+- Linux v4.10-rc5-71-ga4685d2
+
+* Tue Jan 24 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc5.git0.2
+- Reenable debugging options.
+
+* Mon Jan 23 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc5.git0.1
+- Linux v4.10-rc5
+- Disable debugging options.
+
+* Fri Jan 20 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc4.git4.1
+- Linux v4.10-rc4-199-ge90665a
+
+* Fri Jan 20 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial DT support for Hummingboard 2 (Edge/Gate)
+
+* Thu Jan 19 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc4.git3.1
+- Linux v4.10-rc4-122-g81aaeaa
+
+* Wed Jan 18 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc4.git2.1
+- Linux v4.10-rc4-101-gfa19a76
+
+* Wed Jan 18 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable bcm283x VEC composite output
+
+* Tue Jan 17 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc4.git1.1
+- Linux v4.10-rc4-78-g4b19a9e
+
+* Tue Jan 17 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc4.git0.3
+- Reenable debugging options.
+
+* Mon Jan 16 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc4.git0.1
+- Disable debugging options.
+- Linux v4.10-rc4
+
+* Mon Jan 16 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM updates
+
+* Fri Jan 13 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc3.git4.1
+- Linux v4.10-rc3-187-g557ed56
+
+* Thu Jan 12 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc3.git3.1
+- Linux v4.10-rc3-163-ge28ac1f
+
+* Wed Jan 11 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc3.git2.1
+- Linux v4.10-rc3-98-gcff3b2c
+
+* Tue Jan 10 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc3.git1.1
+- Linux v4.10-rc3-52-gbd5d742
+
+* Tue Jan 10 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc3.git0.2
+- Reenable debugging options.
+
+* Mon Jan 09 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc3.git0.1
+- Disable debugging options.
+- Linux v4.10-rc3
+
+* Mon Jan  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to improve MMC/SD speed on Raspberry Pi (bcm283x)
+
+* Fri Jan 06 2017 Laura Abbott <labbott@fedoraproject.org>
+- Disable JVMTI for perf (rhbz 1410296)
+
+* Fri Jan 06 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git4.1
+- Linux v4.10-rc2-207-g88ba6ca
+
+* Fri Jan  6 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+
+* Thu Jan 05 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git3.1
+- Linux v4.10-rc2-183-gc433eb7
+
+* Wed Jan 04 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git2.1
+- Linux v4.10-rc2-43-g62f8c40
+
+* Tue Jan 03 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git1.1
+- Linux v4.10-rc2-20-g0f64df3
+
+* Tue Jan 03 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git0.3
+- Reenable debugging options.
+
+* Tue Jan 03 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git0.2
+- Disable debugging options.
+
+* Mon Jan 02 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc2.git0.1
+- Linux v4.10-rc2
+
+* Thu Dec 29 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc1.git1.1
+- Linux v4.10-rc1-17-g2d706e7
+- Fix generate-git-snapshtot.sh to work with SHA512 sources
+
+* Tue Dec 27 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Linux v4.10-rc1
+- ARM config updates, minor general config cleanups
+- Enable Amlogic (meson) SoCs for ARMv7/aarch64
+
+* Fri Dec 23 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git9.1
+- Linux v4.9-11999-g50f6584
+
+* Thu Dec 22 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git8.1
+- Linux v4.9-11937-g52bce91
+
+* Wed Dec 21 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git7.1
+- Linux v4.9-11893-gba6d973
+
+* Tue Dec 20 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git6.1
+- Linux v4.9-11815-ge93b1cc
+
+* Tue Dec 20 2016 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+- Enable some Qualcomm QDF2432 server platform options
+
+* Mon Dec 19 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git5.1
+- Linux v4.9-11744-gb0b3a37
+
+* Fri Dec 16 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git4.1
+- Linux v4.9-10415-g73e2e0c
+
+* Thu Dec 15 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git3.1
+- Linux v4.9-8648-g5cc60ae
+
+* Wed Dec 14 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git2.1
+- Linux v4.9-7150-gcdb98c2
+
+* Tue Dec 13 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc0.git1.1
+- Linux v4.9-2682-ge7aa8c2
+
+* Tue Dec 13 2016 Justin M. Forbes <jforbes@fedoraproject.org> - 4.9.0-2
+- Reenable debugging options.
+
 * Mon Dec 12 2016 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9-gnu.
 
