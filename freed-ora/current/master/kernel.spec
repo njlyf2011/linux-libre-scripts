@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -575,8 +575,11 @@ Patch431: bcm283x-mmc-imp-speed.patch
 
 Patch432: bcm283x-VEC.patch
 
+# http://www.spinics.net/lists/dri-devel/msg132235.html
+Patch433: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+
 # http://www.spinics.net/lists/arm-kernel/msg552554.html
-Patch434: arm-imx6-hummingboard2.patch
+Patch438: arm-imx6-hummingboard2.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -2315,6 +2318,30 @@ fi
 #
 #
 %changelog
+* Mon Feb 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10-rc8-gnu.
+
+* Mon Feb 13 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc8.git0.1
+- Disable debugging options.
+- Linux v4.10-rc8
+
+* Fri Feb 10 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc7.git4.1
+- Linux v4.10-rc7-127-g3d88460
+
+* Thu Feb 09 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc7.git3.1
+- Linux v4.10-rc7-114-g55aac6e
+
+* Thu Feb  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix OOPSes in vc4 (Raspberry Pi)
+
+* Wed Feb 08 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc7.git2.1
+- Linux v4.10-rc7-65-g926af627
+
+* Tue Feb 07 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc7.git1.1
+- Linux v4.10-rc7-29-g8b1b41e
+- Reenable debugging options.
+- CVE-2017-5897 ip6_gre: Invalid reads in ip6gre_err (rhbz 1419848 1419851)
+
 * Mon Feb  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10-rc7-gnu.
 
