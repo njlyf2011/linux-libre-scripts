@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -572,6 +572,8 @@ Patch430: ARM-tegra-usb-no-reset.patch
 
 Patch431: bcm2837-initial-support.patch
 
+Patch432: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+
 # http://www.spinics.net/lists/linux-mmc/msg41151.html
 Patch433: bcm283x-mmc-imp-speed.patch
 
@@ -694,6 +696,9 @@ Patch860: 0001-sctp-avoid-BUG_ON-on-sctp_wait_for_sndbuf.patch
 
 #rhbz 1415397
 Patch861: w1-ds2490-USB-transfer-buffers-need-to-be-DMAable.patch
+
+#CVE-2017-5970 rhbz 1421638
+Patch862: ipv4-keep-skb-dst-around-in-presence-of-IP-options.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2340,7 +2345,22 @@ fi
 #
 #
 %changelog
-* Sat Feb 11 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Feb 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.10-gnu.
+
+* Wed Feb 15 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.9.10-200
+- Linux v4.9.10
+
+* Tue Feb 14 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5967 Disable CONFIG_TIMER_STATS (rhbz 1422138 1422140)
+
+* Mon Feb 13 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-5970 keep skb->dst around in presence of IP options (rhbz 1421638)
+
+* Thu Feb  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix OOPSes in vc4 (Raspberry Pi)
+
+* Thu Feb  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Sat Feb 11
 - GNU Linux-libre 4.9.9-gnu.
 
 * Thu Feb 09 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.9-200
