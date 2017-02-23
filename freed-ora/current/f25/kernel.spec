@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -684,21 +684,15 @@ Patch852: nouveau-add-maxwell-to-backlight-init.patch
 # CVE-2017-2596 rhbz 1417812 1417813
 Patch855: kvm-fix-page-struct-leak-in-handle_vmon.patch
 
-#CVE-2017-5897 rhbz 1419848 1419851
-Patch857: ip6_gre-fix-ip6gre_err-invalid-reads.patch
-
 #rhbz 1417829
 Patch858: 1-2-media-cxusb-Use-a-dma-capable-buffer-also-for-reading.patch
 Patch859: 2-2-media-dvb-usb-firmware-don-t-do-DMA-on-stack.patch
 
-#rhbz 1420276
-Patch860: 0001-sctp-avoid-BUG_ON-on-sctp_wait_for_sndbuf.patch
-
 #rhbz 1415397
 Patch861: w1-ds2490-USB-transfer-buffers-need-to-be-DMAable.patch
 
-#CVE-2017-5970 rhbz 1421638
-Patch862: ipv4-keep-skb-dst-around-in-presence-of-IP-options.patch
+#rhbz 1422969
+Patch862: rt2800-warning.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2345,7 +2339,17 @@ fi
 #
 #
 %changelog
-* Thu Feb 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Feb 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.11-gnu.
+
+* Mon Feb 20 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.11-200
+- Linux v4.9.11
+- Fix rt2800 warning (rhbz 1422969)
+
+* Wed Feb 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable PWRSEQ_SIMPLE module (fixes rhbz 1377816)
+
+* Wed Feb 15 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Feb 16
 - GNU Linux-libre 4.9.10-gnu.
 
 * Wed Feb 15 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.9.10-200
