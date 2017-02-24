@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 9
+%define base_sublevel 10
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.9%{?stablegnux}
-%define rcrevlibre  -4.9%{?rcrevgnux}
-#define gitrevlibre -4.9%{?gitrevgnux}
+#define stablelibre -4.10%{?stablegnux}
+#define rcrevlibre  -4.10%{?rcrevgnux}
+#define gitrevlibre -4.10%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -453,7 +453,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+#Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -568,6 +568,7 @@ Patch426: AllWinner-net-emac.patch
 # http://www.spinics.net/lists/arm-kernel/msg557831.html
 Patch427: arm64-dma-mapping-Fix-dma_mapping_error-when-bypassing-SWIOTLB.patch
 
+# http://www.spinics.net/lists/devicetree/msg163238.html
 Patch430: bcm2837-initial-support.patch
 
 # http://www.spinics.net/lists/linux-mmc/msg41151.html
@@ -577,6 +578,13 @@ Patch432: bcm283x-VEC.patch
 
 # http://www.spinics.net/lists/dri-devel/msg132235.html
 Patch433: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+
+# Fix RPi3 from crashing. Nowhere near a final fix but provides breathing room while that is sorted
+# https://github.com/anholt/linux/issues/89
+Patch434: 0001-i2c-bcm2835-Debug-test-for-curr_msg.patch
+
+# Upstream fixes for i2c/serial/ethernet MAC addresses
+Patch435: bcm283x-fixes.patch
 
 # http://www.spinics.net/lists/arm-kernel/msg552554.html
 Patch438: arm-imx6-hummingboard2.patch
@@ -2318,6 +2326,31 @@ fi
 #
 #
 %changelog
+* Mon Feb 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10-gnu.
+
+* Mon Feb 20 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-1
+- Disable debugging options.
+- Linux v4.10
+
+* Sat Feb 18 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Update some Raspberry Pi patches
+- Add Raspberry Pi fixes for UART/i2c/stable eth MAC
+
+* Fri Feb 17 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc8.git2.1
+- Linux v4.10-rc8-62-g6dc39c5
+
+* Thu Feb 16 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc8.git1.1
+- Linux v4.10-rc8-39-g5a81e6a
+
+* Wed Feb 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable PWRSEQ_SIMPLE module (fixes rhbz 1377816)
+- Add patch to work around crash on RPi3
+
+* Tue Feb 14 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.0-0.rc8.git0.2
+- Reenable debugging options.
+- CVE-2017-5967 Disable CONFIG_TIMER_STATS (rhbz 1422138 1422140)
+
 * Mon Feb 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10-rc8-gnu.
 
