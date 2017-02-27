@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -693,6 +693,9 @@ Patch861: w1-ds2490-USB-transfer-buffers-need-to-be-DMAable.patch
 
 #rhbz 1422969
 Patch862: rt2800-warning.patch
+
+#CVE-2017-6074
+Patch863: dccp-fix-freeing-skb-too-early-for-IPV6_RECVPKTINFO.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2321,6 +2324,15 @@ fi
 #
 # 
 %changelog
+* Fri Feb 24 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.12-gnu.
+
+* Thu Feb 23 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.12-100
+- Linux v4.9.12
+
+* Wed Feb 22 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-6074 DCCP double-free vulnerability
+
 * Mon Feb 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9.11-gnu.
 
