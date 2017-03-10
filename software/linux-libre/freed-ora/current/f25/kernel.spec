@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -579,6 +579,8 @@ Patch433: bcm283x-mmc-imp-speed.patch
 
 Patch434: mm-alloc_contig-re-allow-CMA-to-compact-FS-pages.patch
 
+Patch436: vc4-fix-vblank-cursor-update-issue.patch
+
 Patch440: AllWinner-net-emac.patch
 
 Patch442: ARM-Drop-fixed-200-Hz-timer-requirement-from-Samsung-platforms.patch
@@ -693,6 +695,15 @@ Patch861: w1-ds2490-USB-transfer-buffers-need-to-be-DMAable.patch
 
 #rhbz 1422969
 Patch862: rt2800-warning.patch
+
+#CVE-2017-5669 rhbz 1427239
+Patch863: ipc-shm-Fix-shmat-mmap-nil-page-protection.patch
+
+#CVE-2017-6353 rhbz 1428907 1428910
+Patch864: sctp-deny-peeloff-operation-on-asocs-with-threads-sl.patch
+
+# CVE-2017-2636 rhbz 1430049
+Patch668: 0001-tty-n_hdlc-get-rid-of-racy-n_hdlc.tbuf.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -937,8 +948,6 @@ Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-devel = %{version}-%{release}%{?1:+%{1}}\
-Provides: kernel-libre-devel = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-devel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-libre-devel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: installonlypkg(kernel)\
@@ -2339,6 +2348,25 @@ fi
 #
 #
 %changelog
+* Tue Mar 07 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.13-201
+- Build for some CVEs
+
+* Tue Mar 07 2017 Laura Abbott <labbott@fedoraproject.org>
+- CVE-2017-2636 Race condition access to n_hdlc.tbuf causes double free in n_hdlc_release (rhbz 1430049)
+
+* Tue Mar  7 2017 Laura Abbott <labbott@redhat.com>
+- Disable CONFIG_IWLWIFI_PCIE_RTPM (rhbz 1429135)
+
+* Mon Mar  6 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-6353 Possible double free in stcp_sendmsg (rhbz 1428907 1428910)
+
+* Wed Mar  1 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix desktop lockups on RPi (vc4) RHBZ# 1389163
+
+* Tue Feb 28 2017 Justin M. Forbes <jforbes@fedoraproject.org> 
+- CVE-2017-5669 shmat allows mmap null page protection bypass (rhbz 1427239)
+- Fix kernel-devel virtual provide
+
 * Mon Feb 27 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9.13-gnu.
 
