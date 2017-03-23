@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -565,6 +565,9 @@ Patch425: ARM-tegra-usb-no-reset.patch
 
 Patch426: AllWinner-net-emac.patch
 
+Patch427: xgene_enet-remove-bogus-forward-declarations.patch
+Patch428: xgene-Fix-crash-on-DT-systems.patch
+
 # http://www.spinics.net/lists/devicetree/msg163238.html
 Patch430: bcm2837-initial-support.patch
 
@@ -575,10 +578,6 @@ Patch432: bcm283x-VEC.patch
 
 # http://www.spinics.net/lists/dri-devel/msg132235.html
 Patch433: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
-
-# Fix RPi3 from crashing. Nowhere near a final fix but provides breathing room while that is sorted
-# https://github.com/anholt/linux/issues/89
-Patch434: 0001-i2c-bcm2835-Debug-test-for-curr_msg.patch
 
 # Upstream fixes for i2c/serial/ethernet MAC addresses
 Patch435: bcm283x-fixes.patch
@@ -659,9 +658,6 @@ Patch854: kvm-fix-page-struct-leak-in-handle_vmon.patch
 
 #CVE-2017-6353 rhbz 1428907 1428910
 Patch855: sctp-deny-peeloff-operation-on-asocs-with-threads-sl.patch
-
-#CVE-2017-6874 rhbz 1432429 1432430
-Patch856: ucount-Remove-the-atomicity-from-ucount-count.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2329,6 +2325,15 @@ fi
 #
 #
 %changelog
+* Mon Mar 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10.4-gnu.
+
+* Mon Mar 20 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.4-200
+- Linux v4.10.4
+
+* Sun Mar 19 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream patches to improve xgene_enet stability a little
+
 * Thu Mar 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10.3-gnu.
 
