@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -693,9 +693,6 @@ Patch862: rt2800-warning.patch
 
 #CVE-2017-6353 rhbz 1428907 1428910
 Patch864: sctp-deny-peeloff-operation-on-asocs-with-threads-sl.patch
-
-#CVE-2017-6874 rhbz 1432429 1432430
-Patch865: ucount-Remove-the-atomicity-from-ucount-count.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2322,6 +2319,12 @@ fi
 #
 # 
 %changelog
+* Mon Mar 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.9.16-gnu.
+
+* Mon Mar 20 2017 Laura Abbott <labbott@fedoraproject.org> - 4.9.16-100
+- Linux v4.9.16
+
 * Thu Mar 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.9.15-gnu.
 
