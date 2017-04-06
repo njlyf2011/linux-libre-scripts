@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2017-03-18 03:58:19.962739765 -0400
-@@ -0,0 +1,5022 @@
++++ .config	2017-04-05 23:44:38.880372750 -0400
+@@ -0,0 +1,5021 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.16.42-gnu Kernel Configuration
++# Linux/mips 3.16.43-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1039,7 +1039,6 @@ Index: .config
 +CONFIG_OPENVSWITCH_GRE=y
 +CONFIG_OPENVSWITCH_VXLAN=y
 +CONFIG_VSOCKETS=m
-+# CONFIG_NETLINK_MMAP is not set
 +# CONFIG_NETLINK_DIAG is not set
 +# CONFIG_NET_MPLS_GSO is not set
 +CONFIG_HSR=m
