@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2017-04-12 19:45:13.757726025 -0400
-@@ -0,0 +1,5672 @@
++++ .config	2017-04-18 12:15:40.199193547 -0400
+@@ -0,0 +1,5673 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.10.10-gnu Kernel Configuration
++# Linux/mips 4.10.11-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -388,6 +388,7 @@ Index: .config
 +CONFIG_HAVE_MOD_ARCH_SPECIFIC=y
 +CONFIG_MODULES_USE_ELF_RELA=y
 +CONFIG_MODULES_USE_ELF_REL=y
++CONFIG_HAVE_IRQ_EXIT_ON_IRQ_STACK=y
 +CONFIG_ARCH_HAS_ELF_RANDOMIZE=y
 +CONFIG_HAVE_EXIT_THREAD=y
 +# CONFIG_HAVE_ARCH_HASH is not set
