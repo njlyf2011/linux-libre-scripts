@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -660,6 +660,9 @@ Patch863: rhbz_1441310.patch
 
 # CVE-2017-7645 rhbz 1443615 1443617
 Patch866: CVE-2017-7645.patch
+
+# CVE-2017-7477 rhbz 1445207 1445208
+Patch867: CVE-2017-7477.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2327,6 +2330,15 @@ fi
 #
 # 
 %changelog
+* Thu Apr 27 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10.13-gnu.
+
+* Thu Apr 27 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.13-200
+- Linux v4.10.13
+
+* Tue Apr 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2017-7477 (rhbz 1445207 1445208)
+
 * Sat Apr 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10.12-gnu.
 
