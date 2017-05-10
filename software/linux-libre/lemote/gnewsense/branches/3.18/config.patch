@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2017-04-30 04:06:45.833890722 -0400
-@@ -0,0 +1,5116 @@
++++ .config	2017-05-09 11:48:43.092850546 -0400
+@@ -0,0 +1,5115 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.18.51-gnu Kernel Configuration
++# Linux/mips 3.18.52-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -4264,7 +4264,6 @@ Index: .config
 +# CONFIG_VT6655 is not set
 +# CONFIG_VT6656 is not set
 +# CONFIG_FB_XGI is not set
-+# CONFIG_BCM_WIMAX is not set
 +# CONFIG_FT1000 is not set
 +
 +#
