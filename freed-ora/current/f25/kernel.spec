@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -651,6 +651,9 @@ Patch861: 0001-efi-libstub-Treat-missing-SecureBoot-variable-as-Sec.patch
 
 #rhbz 1441310
 Patch863: rhbz_1441310.patch
+
+#rhbz 1436686
+Patch864: dell-laptop-Adds-support-for-keyboard-backlight-timeout-AC-settings.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2318,6 +2321,15 @@ fi
 #
 #
 %changelog
+* Mon May  8 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10.15-gnu.
+
+* Mon May 08 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.15-200
+- Linux v4.10.15
+
+* Mon May 08 2017 Laura Abbott <labbott@fedoraproject.org>
+- Fix for Dell Laptop LED errors (rhbz 1436686)
+
 * Thu May  4 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10.14-gnu.
 
