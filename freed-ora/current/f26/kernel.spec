@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -2332,6 +2332,12 @@ fi
 #
 #
 %changelog
+* Tue May 09 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.0-2
+- Bump for updated gcc (rhbz 1448958)
+
+* Tue May 02 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Remove incorrect UEFI 2.6 Secure Boot patch (rhbz 1447191)
+
 * Mon May  1 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11-gnu.
 
