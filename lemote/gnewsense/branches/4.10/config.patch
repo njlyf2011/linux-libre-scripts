@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2017-05-08 16:39:26.714006900 -0400
-@@ -0,0 +1,5673 @@
++++ .config	2017-05-15 22:30:03.446214305 -0400
+@@ -0,0 +1,5672 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.10.15-gnu Kernel Configuration
++# Linux/mips 4.10.16-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1536,7 +1536,6 @@ Index: .config
 +# CONFIG_MTD_NAND_BRCMNAND is not set
 +CONFIG_MTD_NAND_BCM47XXNFLASH=m
 +# CONFIG_MTD_NAND_PLATFORM is not set
-+# CONFIG_MTD_NAND_OXNAS is not set
 +CONFIG_MTD_NAND_HISI504=m
 +# CONFIG_MTD_NAND_MTK is not set
 +CONFIG_MTD_ONENAND=m
