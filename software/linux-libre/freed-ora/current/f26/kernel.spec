@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2332,6 +2332,15 @@ fi
 #
 #
 %changelog
+* Mon May 15 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.1-gnu.
+
+* Mon May 15 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.1-300
+- Linux v4.11.1
+
+* Tue May 09 2017 Laura Abbott <labbott@fedoraproject.org>
+- Fix EXPORT_SYMBOL for external modules that shall not be named
+
 * Tue May 09 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.0-2
 - Bump for updated gcc (rhbz 1448958)
 
