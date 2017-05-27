@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -654,6 +654,22 @@ Patch864: dell-laptop-Adds-support-for-keyboard-backlight-timeout-AC-settings.pa
 
 #CVE-2017-7487 rhbz 1447734 1450417
 Patch865: 0001-ipx-call-ipxitf_put-in-ioctl-error-path.patch
+
+#CVE-2017-9059 rhbz 1451386 1451996
+Patch866: 0001-SUNRPC-Refactor-svc_set_num_threads.patch
+Patch867: 0002-NFSv4-Fix-callback-server-shutdown.patch
+
+#CVE-2017-8890 rhbz 1450972
+Patch868: 0001-dccp-tcp-do-not-inherit-mc_list-from-parent.patch
+
+#CVE-2017-9074 rhbz 1452679
+Patch869: 0001-ipv6-Prevent-overrun-when-parsing-v6-header-options.patch
+
+#CVE-2017-9075 rhbz 1452691
+Patch870: 0001-sctp-do-not-inherit-ipv6_-mc-ac-fl-_list-from-parent.patch
+
+#CVE-2017-9076 CVE-2017-9077 rhbz 1452688 1452744
+Patch871: 0001-ipv6-dccp-do-not-inherit-ipv6_mc_list-from-parent.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2321,6 +2337,17 @@ fi
 #
 # 
 %changelog
+* Mon May 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.10.17-gnu.
+
+* Mon May 22 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.10.17-100
+- Linux v4.10.17
+- Fix CVE-2017-8890 CVE-2017-9074 CVE-2017-9075 CVE-2017-9076 CVE-2017-9077
+  (rhbz 1452688 1450972 1452679 1452691 1452688 1452744)
+
+* Thu May 18 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2017-9059 (rhbz 1451386 1451996)
+
 * Mon May 15 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10.16-gnu.
 
