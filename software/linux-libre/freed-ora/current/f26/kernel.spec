@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -557,18 +557,11 @@ Patch07: freedo.patch
 # a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
 Patch420: qcom-QDF2432-tmp-errata.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg490981.html
-Patch421: geekbox-v4-device-tree-support.patch
-
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch422: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # Fix OMAP4 (pandaboard)
 Patch423: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
-
-# Not particularly happy we don't yet have a proper upstream resolution this is the right direction
-# https://www.spinics.net/lists/arm-kernel/msg535191.html
-Patch424: arm64-mm-Fix-memmap-to-be-initialized-for-the-entire-section.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
 Patch425: ARM-tegra-usb-no-reset.patch
@@ -671,6 +664,22 @@ Patch667: CVE-2017-7645.patch
 
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch668: CVE-2017-7477.patch
+
+#CVE-2017-9059 rhbz 1451386 1451996
+Patch669: 0001-SUNRPC-Refactor-svc_set_num_threads.patch
+Patch670: 0002-NFSv4-Fix-callback-server-shutdown.patch
+
+#CVE-2017-8890 rhbz 1450972
+Patch671: 0001-dccp-tcp-do-not-inherit-mc_list-from-parent.patch
+
+#CVE-2017-9074 rhbz 1452679
+Patch672: 0001-ipv6-Prevent-overrun-when-parsing-v6-header-options.patch
+
+#CVE-2017-9075 rhbz 1452691
+Patch673: 0001-sctp-do-not-inherit-ipv6_-mc-ac-fl-_list-from-parent.patch
+
+#CVE-2017-9076 CVE-2017-9077 rhbz 1452688 1452744
+Patch674: 0001-ipv6-dccp-do-not-inherit-ipv6_mc_list-from-parent.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2332,6 +2341,19 @@ fi
 #
 #
 %changelog
+* Mon May 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.2-gnu.
+
+* Mon May 22 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.2-300
+- Linux v4.11.2
+
+* Mon May 22 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2017-8890 CVE-2017-9074 CVE-2017-9075 CVE-2017-9076 CVE-2017-9077
+  (rhbz 1452688 1450972 1452679 1452691 1452688 1452744)
+
+* Thu May 18 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2017-9059 (rhbz 1451386 1451996)
+
 * Mon May 15 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11.1-gnu.
 
