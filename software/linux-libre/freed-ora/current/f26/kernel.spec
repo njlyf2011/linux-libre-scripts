@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.11%{?stablegnux}
+%define stablelibre -4.11%{?stablegnux}
 #define rcrevlibre  -4.11%{?rcrevgnux}
 #define gitrevlibre -4.11%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -563,6 +563,9 @@ Patch422: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 # Fix OMAP4 (pandaboard)
 Patch423: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
+# BBWireless Bluetooth
+Patch424: arm-dts-boneblack-wireless-add-WL1835-Bluetooth-device-node.patch
+
 # http://patchwork.ozlabs.org/patch/587554/
 Patch425: ARM-tegra-usb-no-reset.patch
 
@@ -596,9 +599,6 @@ Patch437: bcm283x-hdmi-audio.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
 Patch438: arm-imx6-hummingboard2.patch
-
-# https://lkml.org/lkml/2017/4/4/316
-Patch339: media-cec-Fix-runtime-BUG-when-CONFIG_RC_CORE-CEC_CAP_RC.patch
 
 Patch440: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
@@ -2341,6 +2341,15 @@ fi
 #
 #
 %changelog
+* Mon May 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.2-gnu.
+
+* Thu May 25 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-300
+- Linux v4.11.3
+
+* Wed May 24 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Various ARM updates
+
 * Mon May 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11.2-gnu.
 
