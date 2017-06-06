@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -680,6 +680,15 @@ Patch673: 0001-sctp-do-not-inherit-ipv6_-mc-ac-fl-_list-from-parent.patch
 
 #CVE-2017-9076 CVE-2017-9077 rhbz 1452688 1452744
 Patch674: 0001-ipv6-dccp-do-not-inherit-ipv6_mc_list-from-parent.patch
+
+#Fix broadwell issues
+Patch675: drm-i915-Do-not-drop-pagetables-when-empty.patch
+
+# rhbz 1455780
+Patch676: 2-2-nvme-Quirk-APST-on-Intel-600P-P3100-devices.patch
+
+# Networking fix reported on bodhi
+Patch678: net-v2-ip6_tunnel-ip6_gre-fix-setting-of-DSCP-on-encapsulated-packets.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2341,8 +2350,22 @@ fi
 #
 #
 %changelog
+* Fri Jun 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-301
+- Bump and build
+
+* Tue May 30 2017 Laura Abbott <labbott@fedoraproject.org>
+- NVME firmware quirk (rhbz 1455780)
+- Fix for IPv6 tunnels reported on bodhi)
+
+* Tue May 30 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix for some broadwell issues
+
+* Mon May 29 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Updates for ARM devices
+- Build ARM Chromebook specifics on all ARM architectures
+
 * Mon May 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 4.13.2-gnu.
+- GNU Linux-libre 4.11.3-gnu.
 
 * Thu May 25 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-300
 - Linux v4.11.3
