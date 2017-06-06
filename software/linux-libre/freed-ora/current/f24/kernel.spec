@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 10
+%define base_sublevel 11
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-2.6.".
-%define stablelibre -4.10%{?stablegnux}
-#define rcrevlibre  -4.10%{?rcrevgnux}
-#define gitrevlibre -4.10%{?gitrevgnux}
+%define stablelibre -4.11%{?stablegnux}
+#define rcrevlibre  -4.11%{?rcrevgnux}
+#define gitrevlibre -4.11%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -223,6 +223,9 @@ Summary: The Linux kernel
 %define _enable_debug_packages 0
 %endif
 %define debuginfodir /usr/lib/debug
+# Needed because we override almost everything involving build-ids
+# and debuginfo generation. Currently we rely on the old alldebug setting.
+%global _build_id_links alldebug
 
 # kernel PAE is only built on i686 and ARMv7.
 %ifnarch i686 armv7hl
@@ -256,7 +259,7 @@ Summary: The Linux kernel
 
 %if %{with_vdso_install}
 # These arches install vdso/ directories.
-%define vdso_arches %{all_x86} x86_64 %{power64} s390 s390x aarch64
+%define vdso_arches %{all_x86} x86_64 %{power64} s390x aarch64
 %endif
 
 # Overrides for generic default options
@@ -367,7 +370,7 @@ Summary: The Linux kernel
 # Which is a BadThing(tm).
 
 # We only build kernel-headers on the following...
-%define nobuildarches i386 s390
+%define nobuildarches i386
 
 %ifarch %nobuildarches
 %define with_up 0
@@ -401,7 +404,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc64 ppc64p7 s390 s390x %{arm} aarch64 ppc64le
+ExclusiveArch: noarch %{all_x86} x86_64 ppc64 ppc64p7 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
 Requires: kernel-libre-core-uname-r = %{KVERREL}%{?variant}
@@ -422,7 +425,7 @@ BuildRequires: sparse
 %if %{with_perf}
 BuildRequires: zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
 BuildRequires: audit-libs-devel
-%ifnarch s390 s390x %{arm}
+%ifnarch s390x %{arm}
 BuildRequires: numactl-devel
 %endif
 %endif
@@ -533,8 +536,15 @@ Source5000: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 
+## Patches needed for building this package
+
 # build tweak for build ID magic, even for -vanilla
-Source5005: kbuild-AFTER_LINK.patch
+Patch001: kbuild-AFTER_LINK.patch
+
+## compile fixes
+
+# ongoing complaint, full discussion delayed until ksummit/plumbers
+Patch002: 0001-iio-Use-event-header-from-kernel-tree.patch
 
 Patch07: freedo.patch
 
@@ -547,45 +557,47 @@ Patch07: freedo.patch
 # a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
 Patch420: qcom-QDF2432-tmp-errata.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg490981.html
-Patch421: geekbox-v4-device-tree-support.patch
-
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch422: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # Fix OMAP4 (pandaboard)
 Patch423: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
-# Not particularly happy we don't yet have a proper upstream resolution this is the right direction
-# https://www.spinics.net/lists/arm-kernel/msg535191.html
-Patch424: arm64-mm-Fix-memmap-to-be-initialized-for-the-entire-section.patch
-
 # http://patchwork.ozlabs.org/patch/587554/
 Patch425: ARM-tegra-usb-no-reset.patch
 
-Patch426: AllWinner-net-emac.patch
+Patch426: AllWinner-h3.patch
+Patch427: AllWinner-net-emac.patch
 
-Patch427: xgene_enet-remove-bogus-forward-declarations.patch
-Patch428: xgene-Fix-crash-on-DT-systems.patch
+# http://www.spinics.net/lists/linux-bluetooth/msg70169.html
+# https://www.spinics.net/lists/devicetree/msg170619.html
+Patch428: ti-bluetooth.patch
+
+Patch429: arm64-hikey-fixes.patch
 
 # http://www.spinics.net/lists/devicetree/msg163238.html
 Patch430: bcm2837-initial-support.patch
 
-# http://www.spinics.net/lists/linux-mmc/msg41151.html
-Patch431: bcm283x-mmc-imp-speed.patch
-
-Patch432: bcm283x-VEC.patch
+Patch431: arm-rk3288-tinker.patch
 
 # http://www.spinics.net/lists/dri-devel/msg132235.html
 Patch433: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
 
+# bcm283x mmc for wifi http://www.spinics.net/lists/arm-kernel/msg567077.html
+Patch434: bcm283x-mmc-bcm2835.patch
+
 # Upstream fixes for i2c/serial/ethernet MAC addresses
 Patch435: bcm283x-fixes.patch
 
+# https://lists.freedesktop.org/archives/dri-devel/2017-February/133823.html
 Patch436: vc4-fix-vblank-cursor-update-issue.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg552554.html
+Patch437: bcm283x-hdmi-audio.patch
+
+# https://www.spinics.net/lists/arm-kernel/msg554183.html
 Patch438: arm-imx6-hummingboard2.patch
+
+Patch440: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -641,19 +653,17 @@ Patch509: MODSIGN-Don-t-try-secure-boot-if-EFI-runtime-is-disa.patch
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
-#ongoing complaint, full discussion delayed until ksummit/plumbers
-Patch849: 0001-iio-Use-event-header-from-kernel-tree.patch
+#rhbz 1435154
+Patch666: powerpc-prom-Increase-RMA-size-to-512MB.patch
 
-# selinux: allow context mounts on tmpfs, ramfs, devpts within user namespaces
-Patch852: selinux-allow-context-mounts-on-tmpfs-etc.patch
+# CVE-2017-7645 rhbz 1443615 1443617
+Patch667: CVE-2017-7645.patch
 
-Patch861: 0001-efi-libstub-Treat-missing-SecureBoot-variable-as-Sec.patch
+# CVE-2017-7477 rhbz 1445207 1445208
+Patch668: CVE-2017-7477.patch
 
 #rhbz 1436686
 Patch864: dell-laptop-Adds-support-for-keyboard-backlight-timeout-AC-settings.patch
-
-#CVE-2017-7487 rhbz 1447734 1450417
-Patch865: 0001-ipx-call-ipxitf_put-in-ioctl-error-path.patch
 
 #CVE-2017-9059 rhbz 1451386 1451996
 Patch866: 0001-SUNRPC-Refactor-svc_set_num_threads.patch
@@ -670,6 +680,15 @@ Patch870: 0001-sctp-do-not-inherit-ipv6_-mc-ac-fl-_list-from-parent.patch
 
 #CVE-2017-9076 CVE-2017-9077 rhbz 1452688 1452744
 Patch871: 0001-ipv6-dccp-do-not-inherit-ipv6_mc_list-from-parent.patch
+
+#Fix broadwell issues
+Patch675: drm-i915-Do-not-drop-pagetables-when-empty.patch
+
+# rhbz 1455780
+Patch676: 2-2-nvme-Quirk-APST-on-Intel-600P-P3100-devices.patch
+
+# Networking fix reported on bodhi
+Patch678: net-v2-ip6_tunnel-ip6_gre-fix-setting-of-DSCP-on-encapsulated-packets.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1352,19 +1371,13 @@ do
 done
 %endif
 
-# The kbuild-AFTER_LINK patch is needed regardless so we list it as a Source
-# file and apply it separately from the rest.
-$RPM_SOURCE_DIR/deblob-check %{SOURCE5005} || exit 1
-git am %{SOURCE5005}
-
-%if !%{nopatches}
+# Note: Even in the "nopatches" path some patches (build tweaks and compile
+# fixes) will always get applied; see patch defition above for details
 
 $RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
 git am %{patches}
 
 # END OF PATCH APPLICATIONS
-
-%endif
 
 # Any further pre-build tree manipulations happen here.
 
@@ -2337,6 +2350,16 @@ fi
 #
 # 
 %changelog
+* Fri Jun  2 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.3-gnu.
+- Deblobbed ti-bluetooth.patch.
+
+* Thu Jun 01 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-100
+- Linux v4.11.3
+- Fix for some broadwell issues
+- NVME firmware quirk (rhbz 1455780)
+- Fix for IPv6 tunnels reported on bodhi)
+
 * Mon May 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.10.17-gnu.
 
