@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 202
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -689,6 +689,10 @@ Patch676: 2-2-nvme-Quirk-APST-on-Intel-600P-P3100-devices.patch
 
 # Networking fix reported on bodhi
 Patch678: net-v2-ip6_tunnel-ip6_gre-fix-setting-of-DSCP-on-encapsulated-packets.patch
+
+# rhbz 1458222 1458499
+# As linked from http://marc.info/?l=linux-netdev&m=149336766030175&w=2
+Patch679: actual_udpencap_fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2350,6 +2354,18 @@ fi
 #
 #
 %changelog
+* Mon Jun 05 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-202
+- Bump and build once again
+
+* Mon Jun 05 2017 Laura Abbott <labbott@fedoraproject.org>
+- Actually fix ipsec encapsulation problems (rhbz 1458222 1458499)
+
+* Fri Jun 02 2017 Laura Abbott <labbott@fedoraproject.org>
+- Turn CONFIG_GPIO_SYSFS back on
+
+* Fri Jun 02 2017 Laura Abbott <labbott@fedoraproject.org>
+- Enable Chromebook keyboard backlight (rhbz 1447031)
+
 * Fri Jun 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-201
 - Bump and build
 
