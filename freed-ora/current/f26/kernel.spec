@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -258,8 +258,7 @@ Summary: The Linux kernel
 %define all_x86 i386 i686
 
 %if %{with_vdso_install}
-# These arches install vdso/ directories.
-%define vdso_arches %{all_x86} x86_64 %{power64} s390x aarch64
+%define use_vdso 1
 %endif
 
 # Overrides for generic default options
@@ -328,6 +327,7 @@ Summary: The Linux kernel
 
 %ifarch %{arm}
 %define all_arch_configs kernel-%{version}-arm*.config
+%define skip_nonpae_vdso 1
 %define asmarch arm
 %define hdrarch arm
 %define pae lpae
@@ -388,6 +388,19 @@ Summary: The Linux kernel
 
 # Architectures we build tools/cpupower on
 %define cpupowerarchs %{ix86} x86_64 %{power64} %{arm} aarch64
+
+%if %{use_vdso}
+
+%if 0%{?skip_nonpae_vdso}
+%define _use_vdso 0
+%else
+%define _use_vdso 1
+%endif
+
+%else
+%define _use_vdso 0
+%endif
+
 
 #
 # Packages that need to be installed before the kernel is, because the %%post
@@ -557,6 +570,9 @@ Patch07: freedo.patch
 # a tempory patch for QCOM hardware enablement. Will be gone by end of 2016/F-26 GA
 Patch420: qcom-QDF2432-tmp-errata.patch
 
+# Upstream (in 4.12) patches to fix HiKey WiFi
+Patch421: arm-hikey-fixWiFi.patch
+
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch422: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
@@ -601,6 +617,8 @@ Patch437: bcm283x-hdmi-audio.patch
 Patch438: arm-imx6-hummingboard2.patch
 
 Patch440: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
+
+Patch441: bcm2835-clk-audio-jitter-issues.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -669,30 +687,19 @@ Patch668: CVE-2017-7477.patch
 Patch669: 0001-SUNRPC-Refactor-svc_set_num_threads.patch
 Patch670: 0002-NFSv4-Fix-callback-server-shutdown.patch
 
-#CVE-2017-8890 rhbz 1450972
-Patch671: 0001-dccp-tcp-do-not-inherit-mc_list-from-parent.patch
-
-#CVE-2017-9074 rhbz 1452679
-Patch672: 0001-ipv6-Prevent-overrun-when-parsing-v6-header-options.patch
-
-#CVE-2017-9075 rhbz 1452691
-Patch673: 0001-sctp-do-not-inherit-ipv6_-mc-ac-fl-_list-from-parent.patch
-
-#CVE-2017-9076 CVE-2017-9077 rhbz 1452688 1452744
-Patch674: 0001-ipv6-dccp-do-not-inherit-ipv6_mc_list-from-parent.patch
-
 #Fix broadwell issues
 Patch675: drm-i915-Do-not-drop-pagetables-when-empty.patch
 
 # rhbz 1455780
 Patch676: 2-2-nvme-Quirk-APST-on-Intel-600P-P3100-devices.patch
 
-# Networking fix reported on bodhi
-Patch678: net-v2-ip6_tunnel-ip6_gre-fix-setting-of-DSCP-on-encapsulated-packets.patch
-
 # rhbz 1458222 1458499
 # As linked from http://marc.info/?l=linux-netdev&m=149336766030175&w=2
 Patch679: actual_udpencap_fix.patch
+
+# rhbz 1459272
+Patch680: 0001-platform-x86-thinkpad_acpi-guard-generic-hotkey-case.patch
+Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1474,9 +1481,10 @@ cp_vmlinux()
 BuildKernel() {
     MakeTarget=$1
     KernelImage=$2
-    Flavour=$3
+    Flavour=$4
+    DoVDSO=$3
     Flav=${Flavour:++${Flavour}}
-    InstallName=${4:-vmlinuz}
+    InstallName=${5:-vmlinuz}
 
     # Pick the right config file for the kernel we're building
     Config=kernel-%{version}-%{_target_cpu}${Flavour:+-${Flavour}}.config
@@ -1574,16 +1582,16 @@ BuildKernel() {
     # we'll get it from the linux-firmware package and we don't want conflicts
     %{make} -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 
-%ifarch %{vdso_arches}
-    %{make} -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
-    if [ ! -s ldconfig-kernel.conf ]; then
-      echo > ldconfig-kernel.conf "\
-# Placeholder file, no vDSO hwcap entries used in this kernel."
+    if [ $DoVDSO -ne 0 ]; then
+        %{make} -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
+        if [ ! -s ldconfig-kernel.conf ]; then
+          echo > ldconfig-kernel.conf "\
+    # Placeholder file, no vDSO hwcap entries used in this kernel."
+        fi
+        %{__install} -D -m 444 ldconfig-kernel.conf \
+            $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-$KernelVer.conf
+        rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/vdso/.build-id
     fi
-    %{__install} -D -m 444 ldconfig-kernel.conf \
-        $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-$KernelVer.conf
-    rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/vdso/.build-id
-%endif
 
     # And save the headers/makefiles etc for building modules against
     #
@@ -1818,20 +1826,21 @@ mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
 
 cd linux-%{KVERREL}
 
+
 %if %{with_debug}
-BuildKernel %make_target %kernel_image debug
+BuildKernel %make_target %kernel_image %{_use_vdso} debug
 %endif
 
 %if %{with_pae_debug}
-BuildKernel %make_target %kernel_image %{pae}debug
+BuildKernel %make_target %kernel_image %{use_vdso} %{pae}debug
 %endif
 
 %if %{with_pae}
-BuildKernel %make_target %kernel_image %{pae}
+BuildKernel %make_target %kernel_image %{use_vdso} %{pae}
 %endif
 
 %if %{with_up}
-BuildKernel %make_target %kernel_image
+BuildKernel %make_target %kernel_image %{_use_vdso}
 %endif
 
 %global perf_make \
@@ -2292,68 +2301,83 @@ fi
 #	%%kernel_variant_files [-k vmlinux] <condition> <subpackage>
 #
 %define kernel_variant_files(k:) \
-%if %{1}\
-%{expand:%%files -f kernel-%{?2:%{2}-}core.list %{?2:%{2}-}core}\
+%if %{2}\
+%{expand:%%files -f kernel-%{?3:%{3}-}core.list %{?3:%{3}-}core}\
 %defattr(-,root,root)\
 %{!?_licensedir:%global license %%doc}\
 %license linux-%{KVERREL}/COPYING\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
-%ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?2:+%{2}}\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/.vmlinuz.hmac \
-%ghost /%{image_install_path}/.vmlinuz-%{KVERREL}%{?2:+%{2}}.hmac \
+/lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
+%ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
+%ghost /%{image_install_path}/.vmlinuz-%{KVERREL}%{?3:+%{3}}.hmac \
 %ifarch %{arm} aarch64\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/dtb \
-%ghost /%{image_install_path}/dtb-%{KVERREL}%{?2:+%{2}} \
+/lib/modules/%{KVERREL}%{?3:+%{3}}/dtb \
+%ghost /%{image_install_path}/dtb-%{KVERREL}%{?3:+%{3}} \
 %endif\
-%attr(600,root,root) /lib/modules/%{KVERREL}%{?2:+%{2}}/System.map\
-%ghost /boot/System.map-%{KVERREL}%{?2:+%{2}}\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/config\
-%ghost /boot/config-%{KVERREL}%{?2:+%{2}}\
-%ghost /boot/initramfs-%{KVERREL}%{?2:+%{2}}.img\
+%attr(600,root,root) /lib/modules/%{KVERREL}%{?3:+%{3}}/System.map\
+%ghost /boot/System.map-%{KVERREL}%{?3:+%{3}}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/config\
+%ghost /boot/config-%{KVERREL}%{?3:+%{3}}\
+%ghost /boot/initramfs-%{KVERREL}%{?3:+%{3}}.img\
 %dir /lib/modules\
-%dir /lib/modules/%{KVERREL}%{?2:+%{2}}\
-%dir /lib/modules/%{KVERREL}%{?2:+%{2}}/kernel\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/build\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/source\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/updates\
-%ifarch %{vdso_arches}\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/vdso\
-/etc/ld.so.conf.d/kernel-%{KVERREL}%{?2:+%{2}}.conf\
+%dir /lib/modules/%{KVERREL}%{?3:+%{3}}\
+%dir /lib/modules/%{KVERREL}%{?3:+%{3}}/kernel\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/build\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/source\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
+%if %{1}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/vdso\
+/etc/ld.so.conf.d/kernel-%{KVERREL}%{?3:+%{3}}.conf\
 %endif\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/modules.*\
-%{expand:%%files -f kernel-%{?2:%{2}-}modules.list %{?2:%{2}-}modules}\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/modules.*\
+%{expand:%%files -f kernel-%{?3:%{3}-}modules.list %{?3:%{3}-}modules}\
 %defattr(-,root,root)\
-%{expand:%%files %{?2:%{2}-}devel}\
+%{expand:%%files %{?3:%{3}-}devel}\
 %defattr(-,root,root)\
 %defverify(not mtime)\
-/usr/src/kernels/%{KVERREL}%{?2:+%{2}}\
-%{expand:%%files %{?2:%{2}-}modules-extra}\
+/usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
+%{expand:%%files %{?3:%{3}-}modules-extra}\
 %defattr(-,root,root)\
-/lib/modules/%{KVERREL}%{?2:+%{2}}/extra\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
 %if %{with_debuginfo}\
 %ifnarch noarch\
-%{expand:%%files -f debuginfo%{?2}.list %{?2:%{2}-}debuginfo}\
+%{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
 %defattr(-,root,root)\
 %endif\
 %endif\
-%if %{?2:1} %{!?2:0}\
-%{expand:%%files %{2}}\
+%if %{?3:1} %{!?3:0}\
+%{expand:%%files %{3}}\
 %defattr(-,root,root)\
 %endif\
 %endif\
 %{nil}
 
-
-%kernel_variant_files %{with_up}
-%kernel_variant_files %{with_debug} debug
-%kernel_variant_files %{with_pae} %{pae}
-%kernel_variant_files %{with_pae_debug} %{pae}debug
+%kernel_variant_files  %{_use_vdso} %{with_up}
+%kernel_variant_files  %{_use_vdso} %{with_debug} debug
+%kernel_variant_files %{use_vdso} %{with_pae} %{pae}
+%kernel_variant_files %{use_vdso} %{with_pae_debug} %{pae}debug
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 #
 #
 %changelog
+* Sun Jun 11 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.4-gnu.
+
+* Wed Jun 07 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.4-300
+- Linux v4.11.4
+
+* Wed Jun  7 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add upstream patch set to fix WiFi on HiKey
+- Patch set to fix Raspberry Pi PCM Audio clocking
+
+* Tue Jun 06 2017 Laura Abbott <labbott@redhat.com>
+- Backport hotkey event support for 2017 thinkpad models (rhbz 1459272)
+
+* Tue Jun 06 2017 Laura Abbott <labbott@redhat.com>
+- Enable the vDSO for arm LPAE
+
 * Mon Jun 05 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.3-302
 - Bump and build once again
 
