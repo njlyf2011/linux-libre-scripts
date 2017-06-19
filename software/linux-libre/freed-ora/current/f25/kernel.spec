@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -682,6 +682,9 @@ Patch679: actual_udpencap_fix.patch
 # rhbz 1459272
 Patch680: 0001-platform-x86-thinkpad_acpi-guard-generic-hotkey-case.patch
 Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
+
+# rhbz 1461337
+Patch682: 0001-efi-Fix-boot-panic-because-of-invalid-BGRT-image-add.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2343,6 +2346,15 @@ fi
 #
 #
 %changelog
+* Thu Jun 15 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.5-gnu.
+
+* Wed Jun 14 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.5-200
+- Linux v4.11.5
+
+* Wed Jun 14 2017 Laura Abbott <labbott@fedoraproject.org>
+- Add fix for EFI BGRT crash (rhbz 1461337)
+
 * Fri Jun  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11.4-gnu.
 
