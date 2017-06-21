@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -671,6 +671,9 @@ Patch502: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 Patch509: MODSIGN-Don-t-try-secure-boot-if-EFI-runtime-is-disa.patch
 
+# rhbz 1436686
+Patch600: dell-laptop-Adds-support-for-keyboard-backlight-timeout-AC-settings.patch
+
 #CVE-2016-3134 rhbz 1317383 1317384
 Patch665: netfilter-x_tables-deal-with-bogus-nextoffset-values.patch
 
@@ -700,6 +703,9 @@ Patch679: actual_udpencap_fix.patch
 # rhbz 1459272
 Patch680: 0001-platform-x86-thinkpad_acpi-guard-generic-hotkey-case.patch
 Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
+
+# rhbz 1461337
+Patch682: 0001-efi-Fix-boot-panic-because-of-invalid-BGRT-image-add.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2362,6 +2368,18 @@ fi
 #
 #
 %changelog
+* Fri Jun 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.5-gnu.
+
+* Wed Jun 14 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.5-300
+- Linux v4.11.5
+
+* Wed Jun 14 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor fixes for sun8i-dwmac plus extra device support
+
+* Wed Jun 14 2017 Laura Abbott <labbott@fedoraproject.org>
+- Add fix for EFI BGRT crash (rhbz 1461337)
+
 * Sun Jun 11 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11.4-gnu.
 
