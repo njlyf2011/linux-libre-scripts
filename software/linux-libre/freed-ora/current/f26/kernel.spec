@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -599,9 +599,6 @@ Patch430: bcm2837-initial-support.patch
 
 Patch431: arm-rk3288-tinker.patch
 
-# http://www.spinics.net/lists/dri-devel/msg132235.html
-Patch433: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
-
 # bcm283x mmc for wifi http://www.spinics.net/lists/arm-kernel/msg567077.html
 Patch434: bcm283x-mmc-bcm2835.patch
 
@@ -616,9 +613,17 @@ Patch437: bcm283x-hdmi-audio.patch
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
 Patch438: arm-imx6-hummingboard2.patch
 
+# Cavium fixes
+Patch439: arm64-cavium-fixes.patch
+
 Patch440: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
 Patch441: bcm2835-clk-audio-jitter-issues.patch
+
+# http://www.spinics.net/lists/dri-devel/msg132235.html
+Patch443: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+# https://lists.freedesktop.org/archives/dri-devel/2017-June/143688.html
+Patch444: vc4-tformat-fixes.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -690,9 +695,6 @@ Patch668: CVE-2017-7477.patch
 Patch669: 0001-SUNRPC-Refactor-svc_set_num_threads.patch
 Patch670: 0002-NFSv4-Fix-callback-server-shutdown.patch
 
-#Fix broadwell issues
-Patch675: drm-i915-Do-not-drop-pagetables-when-empty.patch
-
 # rhbz 1455780
 Patch676: 2-2-nvme-Quirk-APST-on-Intel-600P-P3100-devices.patch
 
@@ -704,8 +706,11 @@ Patch679: actual_udpencap_fix.patch
 Patch680: 0001-platform-x86-thinkpad_acpi-guard-generic-hotkey-case.patch
 Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
 
-# rhbz 1461337
-Patch682: 0001-efi-Fix-boot-panic-because-of-invalid-BGRT-image-add.patch
+# rhbz 1459326
+Patch683: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
+
+# CVE-2017-1000364 rhbz 1462819 1461333
+Patch684: mm-larger-stack-guard-gap-between-vmas.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2368,7 +2373,23 @@ fi
 #
 #
 %changelog
-* Fri Jun 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Jun 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.6-gnu.
+
+* Mon Jun 19 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.6-300
+- Linux v4.11.6
+- Fix CVE-2017-1000364 (rhbz 1462819 1461333)
+
+* Mon Jun 19 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add vc4 T-Format support to improve performance
+
+* Fri Jun 16 2017 Laura Abbott <labbott@fedoraproject.org>
+- Fix an auditd race condition (rhbz 1459326)
+
+* Thu Jun 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Upstream fixes for Cavium platforms
+
+* Thu Jun 15 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Jun 16
 - GNU Linux-libre 4.11.5-gnu.
 
 * Wed Jun 14 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.5-300
