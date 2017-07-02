@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -711,6 +711,7 @@ Patch683: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
 
 # CVE-2017-1000364 rhbz 1462819 1461333
 Patch684: mm-larger-stack-guard-gap-between-vmas.patch
+Patch685: mm-fix-new-crash-in-unmapped_area_topdown.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2373,7 +2374,10 @@ fi
 #
 #
 %changelog
-* Thu Jun 22 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jun 20 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.6-301
+- bump and build
+
+* Tue Jun 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Jun 22
 - GNU Linux-libre 4.11.6-gnu.
 
 * Mon Jun 19 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.6-300
