@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -594,36 +594,41 @@ Patch428: ti-bluetooth.patch
 
 Patch429: arm64-hikey-fixes.patch
 
-# http://www.spinics.net/lists/devicetree/msg163238.html
-Patch430: bcm2837-initial-support.patch
-
-Patch431: arm-rk3288-tinker.patch
-
-# bcm283x mmc for wifi http://www.spinics.net/lists/arm-kernel/msg567077.html
-Patch434: bcm283x-mmc-bcm2835.patch
-
-# Upstream fixes for i2c/serial/ethernet MAC addresses
-Patch435: bcm283x-fixes.patch
-
-# https://lists.freedesktop.org/archives/dri-devel/2017-February/133823.html
-Patch436: vc4-fix-vblank-cursor-update-issue.patch
-
-Patch437: bcm283x-hdmi-audio.patch
+Patch430: arm-rk3288-tinker.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch438: arm-imx6-hummingboard2.patch
+Patch431: arm-imx6-hummingboard2.patch
 
 # Cavium fixes
-Patch439: arm64-cavium-fixes.patch
+Patch432: arm64-cavium-fixes.patch
 
-Patch440: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
+Patch433: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
-Patch441: bcm2835-clk-audio-jitter-issues.patch
+# http://www.spinics.net/lists/devicetree/msg163238.html
+Patch440: bcm2837-initial-support.patch
+
+# bcm283x mmc for wifi http://www.spinics.net/lists/arm-kernel/msg567077.html
+Patch441: bcm283x-mmc-bcm2835.patch
+
+# Upstream fixes for i2c/serial/ethernet MAC addresses
+Patch442: bcm283x-fixes.patch
+
+# https://lists.freedesktop.org/archives/dri-devel/2017-February/133823.html
+Patch443: vc4-fix-vblank-cursor-update-issue.patch
+
+Patch444: bcm283x-hdmi-audio.patch
+
+Patch445: bcm2835-clk-audio-jitter-issues.patch
 
 # http://www.spinics.net/lists/dri-devel/msg132235.html
-Patch443: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+Patch446: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+
 # https://lists.freedesktop.org/archives/dri-devel/2017-June/143688.html
-Patch444: vc4-tformat-fixes.patch
+Patch447: vc4-tformat-fixes.patch
+
+# https://patchwork.freedesktop.org/patch/163300/
+# https://patchwork.freedesktop.org/patch/161978/
+Patch448: bcm283x-vc4-fix-vblank.patch
 
 Patch460: lib-cpumask-Make-CPUMASK_OFFSTACK-usable-without-deb.patch
 
@@ -709,9 +714,10 @@ Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
 # rhbz 1459326
 Patch683: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
 
-# CVE-2017-1000364 rhbz 1462819 1461333
-Patch684: mm-larger-stack-guard-gap-between-vmas.patch
-Patch685: mm-fix-new-crash-in-unmapped_area_topdown.patch
+# rhbz 1459676
+Patch686: 0001-netfilter-xtables-zero-padding-in-data_to_user.patch
+Patch687: 0002-netfilter-xtables-fix-build-failure-from-COMPAT_XT_A.patch
+
 
 # END OF PATCH DEFINITIONS
 
@@ -2374,6 +2380,19 @@ fi
 #
 #
 %changelog
+* Sun Jul  2 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.7-gnu.
+
+* Mon Jun 26 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.7-300
+- Linux v4.11.7
+- Make CONFIG_SERIAL_8250_PCI builtin (rhbz 1464709)
+
+* Mon Jun 26 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- vc4: hopefully improve the vblank crash issues
+
+* Tue Jun 20 2017 Laura Abbott <labbott@fedoraproject.org>
+- Add fix for iptables (rhbz 1459676)
+
 * Tue Jun 20 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.6-301
 - bump and build
 
