@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -604,6 +604,10 @@ Patch432: arm64-cavium-fixes.patch
 
 Patch433: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
+# https://patchwork.kernel.org/patch/9815555/
+# https://patchwork.kernel.org/patch/9815651/
+# Patch434: qcom-rmsg-spmi-fixes.patch
+
 # http://www.spinics.net/lists/devicetree/msg163238.html
 Patch440: bcm2837-initial-support.patch
 
@@ -713,11 +717,6 @@ Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
 
 # rhbz 1459326
 Patch683: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
-
-# rhbz 1459676
-Patch686: 0001-netfilter-xtables-zero-padding-in-data_to_user.patch
-Patch687: 0002-netfilter-xtables-fix-build-failure-from-COMPAT_XT_A.patch
-
 
 # END OF PATCH DEFINITIONS
 
@@ -2380,7 +2379,20 @@ fi
 #
 #
 %changelog
-* Sun Jul  2 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Jul  7 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.8-gnu.
+
+* Thu Jun 29 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.8-300
+- Linux v4.11.8
+
+* Wed Jun 28 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Tweak vc4 vblank for stability
+- Fix for early boot on Dragonboard 410c
+
+* Mon Jun 26 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Config improvements for Qualcomm devices
+
+* Mon Jun 26 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jul  2
 - GNU Linux-libre 4.11.7-gnu.
 
 * Mon Jun 26 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.7-300
