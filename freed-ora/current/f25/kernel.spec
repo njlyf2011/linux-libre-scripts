@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -682,11 +682,6 @@ Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
 
 # rhbz 1459326
 Patch683: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
-
-# rhbz 1459676
-Patch686: 0001-netfilter-xtables-zero-padding-in-data_to_user.patch
-Patch687: 0002-netfilter-xtables-fix-build-failure-from-COMPAT_XT_A.patch
-
 
 # END OF PATCH DEFINITIONS
 
@@ -2348,7 +2343,13 @@ fi
 #
 #
 %changelog
-* Fri Jun 30 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sun Jul  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.8-gnu.
+
+* Thu Jun 29 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.8-200
+- Linux v4.11.8
+
+* Thu Jun 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Jun 30
 - GNU Linux-libre 4.11.7-gnu.
 
 * Mon Jun 26 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.7-200
