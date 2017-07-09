@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -671,10 +671,6 @@ Patch867: 0002-NFSv4-Fix-callback-server-shutdown.patch
 
 # rhbz 1455780
 Patch676: 2-2-nvme-Quirk-APST-on-Intel-600P-P3100-devices.patch
-
-# rhbz 1458222 1458499
-# As linked from http://marc.info/?l=linux-netdev&m=149336766030175&w=2
-Patch679: actual_udpencap_fix.patch
 
 # rhbz 1459272
 Patch680: 0001-platform-x86-thinkpad_acpi-guard-generic-hotkey-case.patch
@@ -2344,6 +2340,12 @@ fi
 #
 %changelog
 * Sun Jul  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.9-gnu.
+
+* Wed Jul 05 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.9-200
+- Linux v4.11.9
+
+* Thu Jun 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jul  9
 - GNU Linux-libre 4.11.8-gnu.
 
 * Thu Jun 29 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.8-200
