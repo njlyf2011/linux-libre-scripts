@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -678,6 +678,9 @@ Patch681: 0002-platform-x86-thinkpad_acpi-add-mapping-for-new-hotke.patch
 
 # rhbz 1459326
 Patch683: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
+
+# rhbz 1458599
+Patch685: 0001-ACPI-LPSS-Only-call-pwm_add_table-for-the-first-PWM-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2339,6 +2342,18 @@ fi
 #
 # 
 %changelog
+* Thu Jul 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.10-gnu.
+
+* Wed Jul 12 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.10-100
+- Linux v4.11.10
+
+* Mon Jul 10 2017 Laura Abbott <labbott@fedoraproject.org>
+- Only call pwm_add_table for the first PWM controller (rhbz 1458599)
+
+* Thu Jul 06 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- CVE-2017-10810 fix virtio-gpu mem leak (rhbz 1468023 1468024)
+
 * Thu Jul  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11.9-gnu.
 
