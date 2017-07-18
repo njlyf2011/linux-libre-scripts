@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2342,6 +2342,13 @@ fi
 #
 #
 %changelog
+* Mon Jul 17 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.11.11-gnu.
+
+* Mon Jul 17 2017 Laura Abbott <labbott@fedoraproject.org> - 4.11.11-200
+- Linux v4.11.11
+- Bring back /dev/port (rhbz 1471429 1451220)
+
 * Thu Jul 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11.10-gnu.
 
