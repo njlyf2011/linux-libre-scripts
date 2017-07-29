@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.12%{?stablegnux}
+%define stablelibre -4.12%{?stablegnux}
 #define rcrevlibre  -4.12%{?rcrevgnux}
 #define gitrevlibre -4.12%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -596,6 +596,9 @@ Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 Patch123: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
+# Because the python 3 transition is fail
+Patch124: force-python3-in-kvm_stat.patch
+
 # 200 - x86 / secureboot
 
 Patch201: efi-lockdown.patch
@@ -713,12 +716,12 @@ Patch616: 0016-Input-silead-Do-not-try-to-directly-access-the-GPIO-.patch
 # CVE-2017-7542 rhbz 1473649 1473650
 Patch701: 0001-ipv6-avoid-overflow-of-offset-in-ip6_find_1stfragopt.patch
 
-# CVE-2017-11473 rhbz 1473209 147310
-Patch702: CVE-2017-11473.patch
-
 # rhbz 1431375
 Patch703: HID-rmi-Make-sure-the-HID-device-is-opened-on-resume.patch
 Patch704: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+
+# rhbz 1471302
+Patch705: bz1471302.patch 
 
 # END OF PATCH DEFINITIONS
 
@@ -2389,6 +2392,18 @@ fi
 #
 #
 %changelog
+* Fri Jul 28 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.12.4-gnu.
+
+* Thu Jul 27 2017 Justin M. Forbes <jforbes@redhat.com> - 4.12.4-300
+- Linux v4.12.4
+
+* Wed Jul 26 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix mtx (rhbz 1471302)
+
+* Tue Jul 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Force python3 for kvm_stat because we can't dep (rhbz 1456722)
+
 * Tue Jul 25 2017 Peter Robinson <pbrobinson@fedoraproject.org> 4.12.3-301
 - Bring in ARM patches from stabilization branch
 
