@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -722,6 +722,12 @@ Patch704: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # rhbz 1471302
 Patch705: bz1471302.patch 
+
+# rhbz 1476467
+Patch706: Fix-for-module-sig-verification.patch
+
+# rhbz 1462381
+Patch707: Back-out-qxl-atomic-delay.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2392,6 +2398,20 @@ fi
 #
 #
 %changelog
+* Mon Aug  7 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.12.5-gnu.
+
+* Mon Aug 07 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.12.5-300
+- Linux v4.12.5
+- Fixes CVE-2017-7533 (rhbz 1468283 1478086)
+
+* Thu Aug 03 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Temp fix for QXL (rhbz 1462381)
+- Fix for signed module loading (rhbz 1476467)
+
+* Thu Aug 03 2017 Laura Abbott <labbott@redhat.com>
+- Keep UDF in the main kernel package (rhbz 1471314)
+
 * Fri Jul 28 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.12.4-gnu.
 
