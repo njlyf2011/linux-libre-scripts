@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -713,9 +713,6 @@ Patch615: 0015-i2c-cht-wc-Add-Intel-Cherry-Trail-Whiskey-Cove-SMBUS.patch
 # Small workaround patches for issues with a more comprehensive fix in -next
 Patch616: 0016-Input-silead-Do-not-try-to-directly-access-the-GPIO-.patch
 
-# CVE-2017-7542 rhbz 1473649 1473650
-Patch701: 0001-ipv6-avoid-overflow-of-offset-in-ip6_find_1stfragopt.patch
-
 # rhbz 1431375
 Patch703: HID-rmi-Make-sure-the-HID-device-is-opened-on-resume.patch
 Patch704: input-rmi4-remove-the-need-for-artifical-IRQ.patch
@@ -728,6 +725,12 @@ Patch706: Fix-for-module-sig-verification.patch
 
 # rhbz 1462381
 Patch707: Back-out-qxl-atomic-delay.patch
+
+# CVE-2017-1000111 rhbz 1479304 1480464
+Patch708: net-packet-fix-tp_reserve-race-in-packet_set_ring.patch
+
+# CVE-2017-1000112 rhbz 1479307 1480465
+Patch709: udp-consistently-apply-ufo-or-fragmentation.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2398,6 +2401,20 @@ fi
 #
 #
 %changelog
+* Sat Aug 12 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.12.6-gnu.
+
+* Fri Aug 11 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.12.6-300
+- Linux v4.12.6
+- Fix CVE-2017-1000111 (rhbz 1479304 1480464)
+- Fix CVE-2017-1000112 (rhbz 1479307 1480465)
+
+* Fri Aug 11 2017 Dan Horak <dan@danny.cz>
+- disable SWIOTLB on Power (#1480380)
+
+* Fri Aug 11 2017 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable MEMORY_HOTPLUG_DEFAULT_ONLINE on ppc64 (rhbz 1476380)
+
 * Mon Aug  7 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.12.5-gnu.
 
