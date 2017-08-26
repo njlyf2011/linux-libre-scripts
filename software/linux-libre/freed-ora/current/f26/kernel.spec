@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -596,9 +596,6 @@ Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 Patch123: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
-# Because the python 3 transition is fail
-Patch124: force-python3-in-kvm_stat.patch
-
 # 200 - x86 / secureboot
 
 Patch201: efi-lockdown.patch
@@ -720,14 +717,17 @@ Patch704: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 # rhbz 1476467
 Patch706: Fix-for-module-sig-verification.patch
 
-# rhbz 1462381
-Patch707: Back-out-qxl-atomic-delay.patch
-
-# CVE-2017-12134 rhbz 1477656 1481786
-Patch708: xsa229.patch
-
 # request for bug fix
 Patch709: iio-race-fix.patch
+
+# rhbz 1485086
+Patch710: pci-mark-amd-stoney-gpu-ats-as-broken.patch
+
+# rhbz 1480829
+Patch711: rt2800-fix-TX_PIN_CFG-setting-for-non-MT7620-chips.patch
+
+# CVE-2017-7558 rhbz 1480266 1484810
+Patch712: net-sctp-Avoid-out-of-bounds-reads-from-address-storage.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -894,6 +894,7 @@ Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
 Requires: kernel-libre-tools-libs = %{version}-%{release}
+%define __requires_exclude ^%{_bindir}/python
 %description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
@@ -2398,6 +2399,19 @@ fi
 #
 #
 %changelog
+* Fri Aug 25 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.12.9-gnu.
+
+* Fri Aug 25 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.12.9-300
+- Linux v4.12.9
+- For for AMD Stoney GPU (rhbz 1485086)
+- Fix for RT3573 regression (rhbz 1480829)
+- Fix for CVE-2017-7558 (rhbz 1480266 1484810)
+- Fix for kvm_stat (rhbz 1483527)
+
+* Thu Aug 17 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix for vmalloc_32 crash (rhbz 1482249 1482570)
+
 * Thu Aug 17 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.12.8-gnu.
 
