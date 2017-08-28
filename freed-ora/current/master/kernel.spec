@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.12%{?stablegnux}
-#define rcrevlibre  -4.12%{?rcrevgnux}
+%define rcrevlibre  -4.12%{?rcrevgnux}
 #define gitrevlibre -4.12%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -429,7 +429,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 # List the packages used during the kernel build
 #
 BuildRequires: kmod, patch, bash, sh-utils, tar, git
-BuildRequires: bzip2, xz, findutils, gzip, m4, perl, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
+BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if %{with_sparse}
@@ -455,6 +455,9 @@ BuildConflicts: rpm < 4.13.0.1-19
 %undefine _unique_build_ids
 %undefine _unique_debug_names
 %undefine _unique_debug_srcs
+%undefine _debugsource_packages
+%undefine _debuginfo_subpackages
+%undefine _include_gdb_index
 %global _find_debuginfo_opts -r
 %global _missing_build_ids_terminate_build 1
 %global _no_recompute_build_ids 1
@@ -600,7 +603,8 @@ Patch121: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
 
 Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
-Patch123: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
+# This no longer applies, let's see if it needs to be updated
+# Patch123: firmware-Drop-WARN-from-usermodehelper_read_trylock-.patch
 
 # 200 - x86 / secureboot
 
@@ -631,31 +635,15 @@ Patch302: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 # Fix OMAP4 (pandaboard)
 Patch303: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
-# http://www.spinics.net/lists/arm-kernel/msg582772.html
-Patch304: arm-dts-boneblack-wireless-add-WL1835-Bluetooth-device-node.patch
-
 # http://patchwork.ozlabs.org/patch/587554/
-Patch305: ARM-tegra-usb-no-reset.patch
+Patch304: ARM-tegra-usb-no-reset.patch
 
-Patch306: AllWinner-net-emac.patch
-
-# http://www.spinics.net/lists/devicetree/msg163238.html
-Patch308: bcm2837-initial-support.patch
-
-# http://www.spinics.net/lists/dri-devel/msg132235.html
-Patch309: drm-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+Patch305: AllWinner-net-emac.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch311: arm-imx6-hummingboard2.patch
+Patch307: arm-imx6-hummingboard2.patch
 
-Patch312: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
-
-Patch313: bcm2835-clk-audio-jitter-issues.patch
-Patch314: bcm2835-fix-potential-null-pointer-dereferences.patch
-
-# https://patchwork.freedesktop.org/patch/163300/
-# https://patchwork.freedesktop.org/patch/161978/
-Patch315: bcm283x-vc4-fix-vblank.patch
+Patch308: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
 # https://patchwork.kernel.org/patch/9815555/
 # https://patchwork.kernel.org/patch/9815651/
@@ -663,7 +651,27 @@ Patch315: bcm283x-vc4-fix-vblank.patch
 # https://patchwork.kernel.org/patch/9820417/
 # https://patchwork.kernel.org/patch/9821151/
 # https://patchwork.kernel.org/patch/9821157/
-Patch316: qcom-msm89xx-fixes.patch
+Patch310: qcom-msm89xx-fixes.patch
+
+# https://patchwork.kernel.org/patch/9831825/
+# https://patchwork.kernel.org/patch/9833721/
+Patch311: arm-tegra-fix-gpu-iommu.patch
+
+# https://www.spinics.net/lists/linux-arm-msm/msg28203.html
+Patch312: qcom-display-iommu.patch
+
+# https://patchwork.kernel.org/patch/9839803/
+Patch313: qcom-Force-host-mode-for-USB-on-apq8016-sbc.patch
+
+# http://www.spinics.net/lists/dri-devel/msg132235.html
+Patch320: bcm283x-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
+
+# Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
+Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
+
+# This breaks RPi booting with a LPAE kernel, we don't support the DSI ports currently
+# Revert it while I engage upstream to work out what's going on
+Patch322: Revert-ARM-dts-bcm2835-Add-the-DSI-module-nodes-and-.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -672,29 +680,22 @@ Patch316: qcom-msm89xx-fixes.patch
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch502: CVE-2017-7477.patch
 
-# rhbz 1459326
-Patch504: RFC-audit-fix-a-race-condition-with-the-auditd-tracking-code.patch
-
 # 600 - Patches for improved Bay and Cherry Trail device support
-# Below patches are pending in -next:
-Patch601: 0001-platform-x86-Add-driver-for-ACPI-INT0002-Virtual-GPI.patch
-Patch602: 0002-mfd-Add-Cherry-Trail-Whiskey-Cove-PMIC-driver.patch
-Patch603: 0003-power-supply-core-Add-support-for-supplied-from-devi.patch
-Patch604: 0004-platform-x86-intel_cht_int33fe-Set-supplied-from-pro.patch
-Patch605: 0005-ACPI-PMIC-xpower-Add-support-for-the-GPI1-regulator-.patch
-Patch606: 0006-Input-axp20x-pek-Add-wakeup-support.patch
-Patch607: 0007-platform-x86-silead_dmi-Add-touchscreen-info-for-GP-.patch
-Patch608: 0008-platform-x86-silead_dmi-Add-touchscreen-info-for-PoV.patch
-Patch609: 0009-platform-x86-silead_dmi-Add-touchscreen-info-for-Pip.patch
 # Below patches are submitted upstream, awaiting review / merging
 Patch610: 0010-Input-silead-Add-support-for-capactive-home-button-f.patch
 Patch611: 0011-Input-goodix-Add-support-for-capacitive-home-button.patch
-Patch612: 0012-Input-gpio_keys-Do-not-report-wake-button-presses-as.patch
+# This either needs to be removed or rebased
+# Patch612: 0012-Input-gpio_keys-Do-not-report-wake-button-presses-as.patch
 Patch613: 0013-iio-accel-bmc150-Add-support-for-BOSC0200-ACPI-devic.patch
-Patch614: 0014-mmc-sdhci-acpi-Workaround-conflict-with-PCI-wifi-on-.patch
 Patch615: 0015-i2c-cht-wc-Add-Intel-Cherry-Trail-Whiskey-Cove-SMBUS.patch
 # Small workaround patches for issues with a more comprehensive fix in -next
 Patch616: 0016-Input-silead-Do-not-try-to-directly-access-the-GPIO-.patch
+
+# rhbz 1476467
+Patch617: Fix-for-module-sig-verification.patch
+
+# request for bug fix
+Patch618: iio-race-fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -946,7 +947,7 @@ Provides: installonlypkg(kernel-libre)\
 AutoReqProv: no\
 Requires(pre): findutils\
 Requires: findutils\
-Requires: perl\
+Requires: perl-interpreter\
 %description %{?1:%{1}-}devel\
 This package provides kernel headers and makefiles sufficient to build modules\
 against the %{?2:%{2} }kernel package.\
@@ -2345,6 +2346,193 @@ fi
 #
 #
 %changelog
+* Sun Aug 27 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13-rc6-gnu.
+
+* Mon Aug 21 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.0-0.rc6.git0.1
+- Disable debugging options.
+- Linux v4.13-rc6
+
+* Fri Aug 18 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.0-0.rc5.git4.1
+- Linux v4.13-rc5-130-g039a8e384733
+
+* Thu Aug 17 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc5.git3.1
+- Linux v4.13-rc5-75-gac9a40905a61
+
+* Thu Aug 17 2017 Laura Abbott <labbott@fedoraproject.org>
+- Fix for vmalloc_32 failure (rhbz 1482249)
+
+* Wed Aug 16 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc5.git2.1
+- Linux v4.13-rc5-67-g510c8a899caf
+
+* Wed Aug 16 2017 Laura Abbott <labbott@redhat.com>
+- Fix for iio race
+
+* Wed Aug 16 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Enable CONFIG_DRM_VBOXVIDEO=m on x86
+- Enable CONFIG_R8188EU=m on x86_64, some Cherry Trail devices use this
+
+* Tue Aug 15 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc5.git1.1
+- Linux v4.13-rc5-9-gfcd07350007b
+
+* Mon Aug 14 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix for signed module loading (rhbz 1476467)
+
+* Mon Aug 14 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc5.git0.1
+- Linux v4.13-rc5
+
+* Mon Aug 14 2017 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Aug 11 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc4.git4.1
+- Linux v4.13-rc4-220-gb2dbdf2ca1d2
+
+* Fri Aug 11 2017 Dan Horak <dan@danny.cz>
+- disable SWIOTLB on Power (#1480380)
+
+* Fri Aug 11 2017 Josh Boyer <jwboyer@fedoraproject.org>
+- Disable MEMORY_HOTPLUG_DEFAULT_ONLINE on ppc64 (rhbz 1476380)
+
+* Thu Aug 10 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc4.git3.1
+- Linux v4.13-rc4-139-g8d31f80eb388
+
+* Wed Aug 09 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc4.git2.1
+- Linux v4.13-rc4-52-gbfa738cf3dfa
+
+* Tue Aug 08 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc4.git1.1
+- Linux v4.13-rc4-18-g623ce3456671
+
+* Tue Aug 08 2017 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
+* Mon Aug 07 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc4.git0.1
+- Linux v4.13-rc4
+
+* Mon Aug 07 2017 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Aug  4 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM QCom updates
+- Patch to fix USB on Raspberry Pi
+
+* Fri Aug 04 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc3.git4.1
+- Linux v4.13-rc3-152-g869c058fbe74
+
+* Thu Aug 03 2017 Laura Abbott <labbott@redhat.com>
+- Keep UDF in the main kernel package (rhbz 1471314)
+
+* Thu Aug 03 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc3.git3.1
+- Linux v4.13-rc3-118-g19ec50a438c2
+
+* Wed Aug 02 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc3.git2.1
+- Linux v4.13-rc3-102-g26c5cebfdb6c
+
+* Tue Aug 01 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc3.git1.1
+- Linux v4.13-rc3-97-gbc78d646e708
+
+* Tue Aug 01 2017 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
+* Mon Jul 31 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc3.git0.1
+- Linux v4.13-rc3
+
+* Mon Jul 31 2017 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Mon Jul 31 2017 Florian Weimer <fweimer@redhat.com> - 4.13.0-0.rc2.git3.2
+- Rebuild with binutils fix for ppc64le (#1475636)
+
+* Fri Jul 28 2017 Adrian Reber <adrian@lisas.de>
+- Enable CHECKPOINT_RESTORE on s390x
+
+* Fri Jul 28 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc2.git3.1
+- Linux v4.13-rc2-110-g0b5477d9dabd
+
+* Thu Jul 27 2017 Laura Abbott <labbott@fedoraproject.org>
+- Revert patch breaking mustang boot
+
+* Thu Jul 27 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc2.git2.1
+- Linux v4.13-rc2-27-gda08f35b0f82
+
+* Thu Jul 27 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable ACPI CPPC CPUFreq driver on aarch64
+
+* Wed Jul 26 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc2.git1.1
+- Linux v4.13-rc2-22-gfd2b2c57ec20
+
+* Wed Jul 26 2017 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
+* Mon Jul 24 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc2.git0.1
+- Linux v4.13-rc2
+
+* Mon Jul 24 2017 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Jul 21 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc1.git4.1
+- Linux v4.13-rc1-190-g921edf312a6a
+
+* Thu Jul 20 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc1.git3.1
+- Linux v4.13-rc1-72-gbeaec533fc27
+
+* Wed Jul 19 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc1.git2.1
+- Linux v4.13-rc1-59-g74cbd96bc2e0
+
+* Tue Jul 18 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix for Tegra GPU display with IOMMU
+- Add QCom IOMMU for Dragonboard display
+- Add QCom patch to fix USB on Dragonboard
+- Fix Raspberry Pi booting with LPAE kernel
+
+* Tue Jul 18 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc1.git1.1
+- Linux v4.13-rc1-24-gcb8c65ccff7f
+
+* Tue Jul 18 2017 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
+* Mon Jul 17 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc1.git0.1
+- Linux v4.13-rc1
+
+* Mon Jul 17 2017 Laura Abbott <labbott@fedoraproject.org>
+- Disable debugging options.
+
+* Sun Jul 16 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor ARM config updates
+
+* Fri Jul 14 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git8.1
+- Linux v4.12-11618-gb86faee6d111
+
+* Thu Jul 13 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Minor updates for ARM
+
+* Thu Jul 13 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git7.1
+- Linux v4.12-10985-g4ca6df134847
+
+* Wed Jul 12 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Build in i2c-rk3x to fix some device boot
+
+* Wed Jul 12 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git6.1
+- Linux v4.12-10784-g3b06b1a7448e
+
+* Tue Jul 11 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git5.1
+- Linux v4.12-10624-g9967468
+
+* Mon Jul 10 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git4.1
+- Linux v4.12-10317-gaf3c8d9
+
+* Fri Jul 07 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git3.1
+- Linux v4.12-7934-g9f45efb
+
+* Thu Jul 06 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git2.1
+- Linux v4.12-6090-g9b51f04
+
+* Wed Jul 05 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc0.git1.1
+
+- Linux v4.12-3441-g1996454
+
+* Wed Jul 05 2017 Laura Abbott <labbott@fedoraproject.org>
+- Reenable debugging options.
+
 * Mon Jul  3 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.12-gnu.
 - Deblobbed 0007-platform-x86-silead_dmi-Add-touchscreen-info-for-GP-.patch.
