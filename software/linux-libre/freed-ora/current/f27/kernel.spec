@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 6
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -694,8 +694,11 @@ Patch616: 0016-Input-silead-Do-not-try-to-directly-access-the-GPIO-.patch
 # rhbz 1476467
 Patch617: Fix-for-module-sig-verification.patch
 
-# request for bug fix
-Patch618: iio-race-fix.patch
+# rhbz 1485086
+Patch619: pci-mark-amd-stoney-gpu-ats-as-broken.patch
+
+# CVE-2017-7558 rhbz 1480266 1484810
+Patch621: net-sctp-Avoid-out-of-bounds-reads-from-address-storage.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -862,6 +865,7 @@ Obsoletes: cpufreq-utils < 1:009-0.6.p1
 Obsoletes: cpufrequtils < 1:009-0.6.p1
 Obsoletes: cpuspeed < 1:1.5-16
 Requires: kernel-libre-tools-libs = %{version}-%{release}
+%define __requires_exclude ^%{_bindir}/python
 %description -n kernel-libre-tools
 This package contains the tools/ directory from the kernel source
 and the supporting documentation.
@@ -2346,7 +2350,37 @@ fi
 #
 #
 %changelog
-* Sun Aug 27 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Aug 28 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13-rc7-gnu.
+
+* Mon Aug 28 2017 Laura Abbott <labbott@redhat.com> - 4.13.0-0.rc7.git0.1
+- Linux v4.13-rc7
+
+* Mon Aug 28 2017 Laura Abbott <labbott@redhat.com> - 4.13.0-0.rc6.git4.2
+- Disable debugging options.
+
+* Fri Aug 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- For for AMD Stoney GPU (rhbz 1485086)
+- Fix for CVE-2017-7558 (rhbz 1480266 1484810)
+- Fix for kvm_stat (rhbz 1483527)
+
+* Fri Aug 25 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc6.git4.1
+- Linux v4.13-rc6-102-g90a6cd503982
+
+* Thu Aug 24 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc6.git3.1
+- Linux v4.13-rc6-66-g143c97cc6529
+
+* Wed Aug 23 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-0.rc6.git2.1
+- Linux v4.13-rc6-50-g98b9f8a45499
+
+* Tue Aug 22 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.0-0.rc6.git1.1
+- Linux v4.13-rc6-45-g6470812e2226
+- Reenable debugging options.
+
+* Tue Aug 22 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Force python3 for kvm_stat because we can't dep (rhbz 1456722)
+
+* Mon Aug 21 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Aug 27
 - GNU Linux-libre 4.13-rc6-gnu.
 
 * Mon Aug 21 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.0-0.rc6.git0.1
