@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2017-08-30 09:40:26.001285322 -0400
-@@ -0,0 +1,5832 @@
++++ .config	2017-08-30 17:14:52.643954966 -0400
+@@ -0,0 +1,5833 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.13.0-rc6-gnu Kernel Configuration
++# Linux/mips 4.13.0-rc7-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1752,6 +1752,7 @@ Index: .config
 +CONFIG_SCSI=y
 +CONFIG_SCSI_DMA=y
 +CONFIG_SCSI_NETLINK=y
++# CONFIG_SCSI_MQ_DEFAULT is not set
 +# CONFIG_SCSI_PROC_FS is not set
 +
 +#
