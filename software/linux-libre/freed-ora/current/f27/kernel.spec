@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 12
+%define base_sublevel 13
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.12%{?stablegnux}
-%define rcrevlibre  -4.12%{?rcrevgnux}
-#define gitrevlibre -4.12%{?gitrevgnux}
+#define stablelibre -4.13%{?stablegnux}
+#define rcrevlibre  -4.13%{?rcrevgnux}
+#define gitrevlibre -4.13%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -638,7 +638,7 @@ Patch303: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch304: ARM-tegra-usb-no-reset.patch
 
-Patch305: AllWinner-net-emac.patch
+Patch305: allwinner-net-emac.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
 Patch307: arm-imx6-hummingboard2.patch
@@ -663,6 +663,9 @@ Patch312: qcom-display-iommu.patch
 # https://patchwork.kernel.org/patch/9839803/
 Patch313: qcom-Force-host-mode-for-USB-on-apq8016-sbc.patch
 
+# https://patchwork.kernel.org/patch/9850189/
+Patch314: qcom-msm-ci_hdrc_msm_probe-missing-of_node_get.patch
+
 # http://www.spinics.net/lists/dri-devel/msg132235.html
 Patch320: bcm283x-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
 
@@ -682,23 +685,21 @@ Patch502: CVE-2017-7477.patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
+Patch601: 0001-Input-gpio_keys-Allow-suppression-of-input-events-fo.patch
+Patch602: 0002-Input-soc_button_array-Suppress-power-button-presses.patch
 Patch610: 0010-Input-silead-Add-support-for-capactive-home-button-f.patch
 Patch611: 0011-Input-goodix-Add-support-for-capacitive-home-button.patch
-# This either needs to be removed or rebased
-# Patch612: 0012-Input-gpio_keys-Do-not-report-wake-button-presses-as.patch
+# These patches are queued for 4.14 and can be dropped on rebase to 4.14-rc1
+Patch603: 0001-power-supply-max17042_battery-Add-support-for-ACPI-e.patch
+Patch604: 0002-power-supply-max17042_battery-Fix-ACPI-interrupt-iss.patch
 Patch613: 0013-iio-accel-bmc150-Add-support-for-BOSC0200-ACPI-devic.patch
 Patch615: 0015-i2c-cht-wc-Add-Intel-Cherry-Trail-Whiskey-Cove-SMBUS.patch
-# Small workaround patches for issues with a more comprehensive fix in -next
-Patch616: 0016-Input-silead-Do-not-try-to-directly-access-the-GPIO-.patch
 
 # rhbz 1476467
 Patch617: Fix-for-module-sig-verification.patch
 
 # rhbz 1485086
 Patch619: pci-mark-amd-stoney-gpu-ats-as-broken.patch
-
-# CVE-2017-7558 rhbz 1480266 1484810
-Patch621: net-sctp-Avoid-out-of-bounds-reads-from-address-storage.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2350,6 +2351,40 @@ fi
 #
 #
 %changelog
+* Mon Sep  4 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Revert drop of sun8i-emac DT bindings, we support for certain devs
+
+* Mon Sep  4 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13-gnu.
+
+* Mon Sep 04 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.0-1
+- Linux v4.13
+
+* Fri Sep 01 2017 Laura Abbott <labbott@redhat.com> - 4.13.0-0.rc7.git4.1
+- Linux v4.13-rc7-74-ge89ce1f89f62
+
+* Thu Aug 31 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable Infiniband/RDMA on ARMv7 as we no longer have userspace tools
+
+* Thu Aug 31 2017 Laura Abbott <labbott@redhat.com> - 4.13.0-0.rc7.git3.1
+- Linux v4.13-rc7-37-g42ff72cf2702
+
+* Thu Aug 31 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Update patches for power-button wakeup issues on Bay / Cherry Trail devices
+- Add patches to fix an IRQ storm on devices with a MAX17042 fuel-gauge
+
+* Wed Aug 30 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix for QCom Dragonboard USB
+
+* Wed Aug 30 2017 Laura Abbott <labbott@redhat.com> - 4.13.0-0.rc7.git2.1
+- Linux v4.13-rc7-15-g36fde05f3fb5
+
+* Tue Aug 29 2017 Laura Abbott <labbott@redhat.com> - 4.13.0-0.rc7.git1.1
+- Linux v4.13-rc7-7-g9c3a815f471a
+
+* Tue Aug 29 2017 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Mon Aug 28 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13-rc7-gnu.
 
