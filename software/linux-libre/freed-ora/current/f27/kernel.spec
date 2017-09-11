@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.13%{?stablegnux}
+%define stablelibre -4.13%{?stablegnux}
 #define rcrevlibre  -4.13%{?rcrevgnux}
 #define gitrevlibre -4.13%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -626,24 +626,21 @@ Patch211: drm-i915-hush-check-crtc-state.patch
 
 # 300 - ARM patches
 
-# a tempory patch for QCOM hardware enablement. Will be gone by F-26 GA
-Patch301: qcom-QDF2432-tmp-errata.patch
-
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
-Patch302: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
+Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # Fix OMAP4 (pandaboard)
-Patch303: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
+Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
-Patch304: ARM-tegra-usb-no-reset.patch
+Patch303: ARM-tegra-usb-no-reset.patch
 
-Patch305: allwinner-net-emac.patch
+Patch304: allwinner-net-emac.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch307: arm-imx6-hummingboard2.patch
+Patch305: arm-imx6-hummingboard2.patch
 
-Patch308: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
+Patch306: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
 # https://patchwork.kernel.org/patch/9815555/
 # https://patchwork.kernel.org/patch/9815651/
@@ -2351,6 +2348,15 @@ fi
 #
 #
 %changelog
+* Mon Sep 11 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.1-gnu.
+
+* Sun Sep 10 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.1-300
+- Linux v4.13.1
+
+* Sat Sep  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Only build ParPort support on x86
+
 * Mon Sep  4 2017 Peter Robinson <pbrobinson@fedoraproject.org>
 - Revert drop of sun8i-emac DT bindings, we support for certain devs
 
