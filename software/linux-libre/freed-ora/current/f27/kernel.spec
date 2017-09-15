@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 302
+%global baserelease 303
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -676,6 +676,9 @@ Patch322: bcm2837-move-dt.patch
 #
 Patch323: bcm2837-bluetooth-support.patch
 
+# https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/commit/?h=next-20170912&id=723288836628bc1c0855f3bb7b64b1803e4b9e4a
+Patch324: arm-of-restrict-dma-configuration.patch
+
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
@@ -700,6 +703,15 @@ Patch617: Fix-for-module-sig-verification.patch
 
 # rhbz 1485086
 Patch619: pci-mark-amd-stoney-gpu-ats-as-broken.patch
+
+# CVE-2017-12154 rhbz 1491224 1491231
+Patch620: kvm-nVMX-Don-t-allow-L2-to-access-the-hardware-CR8.patch
+
+# CVE-2017-12153 rhbz 1491046 1491057
+Patch621: nl80211-check-for-the-required-netlink-attributes-presence.patch
+
+# CVE-2017-1000251 rhbz 1489716 1490906
+Patch622: bluetooth-properly-check-l2cap-config-option-output-buffer-length.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2351,6 +2363,14 @@ fi
 #
 #
 %changelog
+* Wed Sep 13 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2017-12154 (rhbz 1491224 1491231)
+- Fix CVE-2017-12153 (rhbz 1491046 1491057)
+- Fix CVE-2017-1000251 (rhbz 1489716 1490906)
+
+* Tue Sep 12 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix issue with DMA allocation with some device configurations
+
 * Tue Sep 12 2017 Peter Robinson <pbrobinson@fedoraproject.org> 4.13.1-302
 - Disable debugging options.
 
