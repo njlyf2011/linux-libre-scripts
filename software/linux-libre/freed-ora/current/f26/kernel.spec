@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -741,11 +741,20 @@ Patch716: md-raid-reset-bio-allocated-from-mempool.patch
 # CVE-2017-14051 rhbz 1487126 1487127
 Patch717: v2-scsi-qla2xxx-Fix-an-integer-overflow-in-sysfs-code.patch
 
-# Should fix our QXL issues
-Patch718: qxl-fix-primary-surface-handling.patch
+# Should fix our QXL issues (Doesn't)
+# Patch718: qxl-fix-primary-surface-handling.patch
 
 # rhbz 1463000
 Patch719: 0001-xen-balloon-don-t-online-new-memory-initially.patch
+
+# CVE-2017-12154 rhbz 1491224 1491231
+Patch720: kvm-nVMX-Don-t-allow-L2-to-access-the-hardware-CR8.patch
+
+# CVE-2017-12153 rhbz 1491046 1491057
+Patch721: nl80211-check-for-the-required-netlink-attributes-presence.patch
+
+# CVE-2017-1000251 rhbz 1489716 1490906
+Patch722: bluetooth-properly-check-l2cap-config-option-output-buffer-length.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2417,6 +2426,11 @@ fi
 #
 #
 %changelog
+* Wed Sep 13 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2017-12154 (rhbz 1491224 1491231)
+- Fix CVE-2017-12153 (rhbz 1491046 1491057)
+- Fix CVE-2017-1000251 (rhbz 1489716 1490906)
+
 * Tue Sep 12 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.12.12-gnu.
 
