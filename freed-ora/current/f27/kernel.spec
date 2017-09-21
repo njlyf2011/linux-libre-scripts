@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -663,9 +663,6 @@ Patch313: qcom-Force-host-mode-for-USB-on-apq8016-sbc.patch
 # https://patchwork.kernel.org/patch/9850189/
 Patch314: qcom-msm-ci_hdrc_msm_probe-missing-of_node_get.patch
 
-# http://www.spinics.net/lists/dri-devel/msg132235.html
-Patch320: bcm283x-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
-
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
@@ -676,8 +673,10 @@ Patch322: bcm2837-move-dt.patch
 #
 Patch323: bcm2837-bluetooth-support.patch
 
+Patch324: bcm283x-vc4-fixes.patch
+
 # https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/commit/?h=next-20170912&id=723288836628bc1c0855f3bb7b64b1803e4b9e4a
-Patch324: arm-of-restrict-dma-configuration.patch
+Patch330: arm-of-restrict-dma-configuration.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -709,6 +708,16 @@ Patch620: kvm-nVMX-Don-t-allow-L2-to-access-the-hardware-CR8.patch
 
 # CVE-2017-12153 rhbz 1491046 1491057
 Patch621: nl80211-check-for-the-required-netlink-attributes-presence.patch
+
+# Should fix our QXL issues
+Patch622: qxl-fixes.patch
+
+# rhbz 1431375
+Patch623: HID-rmi-Make-sure-the-HID-device-is-opened-on-resume.patch
+Patch624: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+
+# rhbz 1493435 1493436
+Patch625: KEYS-prevent-KEYCTL_READ-on-negative-key.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2360,6 +2369,23 @@ fi
 #
 #
 %changelog
+* Wed Sep 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.3-gnu.
+
+* Wed Sep 20 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.3-300
+- Linux v4.13.3
+- Fixes 1493435 1493436
+
+* Tue Sep 19 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix a few vc4 crashes on the Raspberry Pi
+
+* Mon Sep 18 2017 Justin M. Forbes <jforbes@edoraproject.org>
+- Fixes for QXL (rhbz 1462381)
+- Fix rhbz 1431375
+
+* Fri Sep 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Tegra 186
+
 * Thu Sep 14 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.2-gnu.
 
