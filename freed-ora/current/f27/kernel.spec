@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -165,7 +165,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -718,6 +718,11 @@ Patch624: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # rhbz 1493435 1493436
 Patch625: KEYS-prevent-KEYCTL_READ-on-negative-key.patch
+
+# rhbz 1432684
+Patch626: 1-3-net-set-tb--fast_sk_family.patch
+Patch627: 2-3-net-use-inet6_rcv_saddr-to-compare-sockets.patch
+Patch628: 3-3-inet-fix-improper-empty-comparison.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2369,6 +2374,15 @@ fi
 #
 #
 %changelog
+* Mon Sep 25 2017 Laura Abbott <labbott@redhat.com> - 4.13.3-301
+- Bump for new build
+
+* Thu Sep 21 2017 Laura Abbott <labbott@redhat.com>
+- Fix useaddr regression (rhbz 1432684)
+
+* Wed Sep 20 2017 Laura Abbott <labbott@redhat.com>
+- Disable CONFIG_VIRTIO_BLK_SCSI
+
 * Wed Sep 20 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.3-gnu.
 
