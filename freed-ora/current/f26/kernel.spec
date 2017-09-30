@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -631,6 +631,9 @@ Patch304: ARM-tegra-usb-no-reset.patch
 
 Patch305: allwinner-net-emac.patch
 
+# https://patchwork.kernel.org/patch/9967397/
+Patch306: tegra-Use-different-MSI-target-address-for-Tegra20.patch
+
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
 Patch307: arm-imx6-hummingboard2.patch
 
@@ -705,9 +708,6 @@ Patch714: V4-acpi-acpica-fix-acpi-parse-and-parseext-cache-leaks.patch
 
 # CVE-2017-13695 rhbz 1485349
 Patch715: acpi-acpica-fix-acpi-operand-cache-leak-in-nseval.c.patch
-
-# CVE-2017-14051 rhbz 1487126 1487127
-Patch717: v2-scsi-qla2xxx-Fix-an-integer-overflow-in-sysfs-code.patch
 
 # Should fix our QXL issues (Doesn't)
 Patch718: qxl-fixes.patch
@@ -2400,6 +2400,15 @@ fi
 #
 #
 %changelog
+* Fri Sep 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.4-gnu.
+
+* Thu Sep 28 2017 Laura Abbott <labbott@redhat.com> - 4.13.4-300
+- Linux v4.13.4
+
+* Mon Sep 25 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix PCI on tegra20
+
 * Mon Sep 25 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.3-gnu.
 
