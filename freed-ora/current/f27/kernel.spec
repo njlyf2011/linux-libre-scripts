@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -308,7 +308,7 @@ Summary: The Linux kernel
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
-%ifarch ppc64 ppc64p7
+%ifarch ppc64
 %define all_arch_configs kernel-%{version}-ppc64*.config
 %endif
 %ifarch ppc64le
@@ -417,7 +417,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc64 ppc64p7 s390x %{arm} aarch64 ppc64le
+ExclusiveArch: noarch %{all_x86} x86_64 ppc64 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
 Requires: kernel-libre-core-uname-r = %{KVERREL}%{?variant}
@@ -497,7 +497,6 @@ Source93: filter-aarch64.sh
 Source95: filter-ppc64.sh
 Source96: filter-ppc64le.sh
 Source97: filter-s390x.sh
-Source98: filter-ppc64p7.sh
 Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
@@ -515,8 +514,6 @@ Source30: kernel-ppc64.config
 Source31: kernel-ppc64-debug.config
 Source32: kernel-ppc64le.config
 Source33: kernel-ppc64le-debug.config
-Source34: kernel-ppc64p7.config
-Source35: kernel-ppc64p7-debug.config
 Source36: kernel-s390x.config
 Source37: kernel-s390x-debug.config
 Source38: kernel-x86_64.config
@@ -706,12 +703,6 @@ Patch617: Fix-for-module-sig-verification.patch
 # rhbz 1485086
 Patch619: pci-mark-amd-stoney-gpu-ats-as-broken.patch
 
-# CVE-2017-12154 rhbz 1491224 1491231
-Patch620: kvm-nVMX-Don-t-allow-L2-to-access-the-hardware-CR8.patch
-
-# CVE-2017-12153 rhbz 1491046 1491057
-Patch621: nl80211-check-for-the-required-netlink-attributes-presence.patch
-
 # Should fix our QXL issues
 Patch622: qxl-fixes.patch
 
@@ -719,13 +710,13 @@ Patch622: qxl-fixes.patch
 Patch623: HID-rmi-Make-sure-the-HID-device-is-opened-on-resume.patch
 Patch624: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
-# rhbz 1493435 1493436
-Patch625: KEYS-prevent-KEYCTL_READ-on-negative-key.patch
-
 # rhbz 1432684
 Patch626: 1-3-net-set-tb--fast_sk_family.patch
 Patch627: 2-3-net-use-inet6_rcv_saddr-to-compare-sockets.patch
 Patch628: 3-3-inet-fix-improper-empty-comparison.patch
+
+# rhbz 1497861
+Patch629: 0001-platform-x86-peaq-wmi-Add-DMI-check-before-binding-t.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2377,6 +2368,13 @@ fi
 #
 #
 %changelog
+* Thu Oct  5 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.5-gnu.
+
+* Thu Oct 05 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.5-300
+- Linux v4.13.5
+- Fix for peaq_wmi nul spew (rhbz 1497861)
+
 * Fri Sep 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.4-gnu.
 
