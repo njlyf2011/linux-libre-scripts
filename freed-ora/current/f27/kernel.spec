@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -623,6 +623,11 @@ Patch211: drm-i915-hush-check-crtc-state.patch
 
 # 300 - ARM patches
 
+# Reduces a number of primarily info logs to dmesg
+# https://patchwork.freedesktop.org/patch/180737/
+# https://patchwork.freedesktop.org/patch/180554/
+Patch300: drm-cma-reduce-dmesg-logs.patch
+
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
@@ -663,6 +668,9 @@ Patch313: qcom-Force-host-mode-for-USB-on-apq8016-sbc.patch
 # https://patchwork.kernel.org/patch/9850189/
 Patch314: qcom-msm-ci_hdrc_msm_probe-missing-of_node_get.patch
 
+# Hack until interconnect API lands upstream
+Patch315: qcom-clk-gpu-msm.patch
+
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
@@ -678,12 +686,34 @@ Patch324: bcm283x-vc4-fixes.patch
 # https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/commit/?h=next-20170912&id=723288836628bc1c0855f3bb7b64b1803e4b9e4a
 Patch330: arm-of-restrict-dma-configuration.patch
 
+# Upstream ACPI fix
+Patch331: arm64-xgene-acpi-fix.patch
+
+# Generic fixes and enablement for Socionext SoC and 96board
+Patch332: ahci-don-t-ignore-result-code-of-ahci_reset_controller.patch
+
+# https://patchwork.kernel.org/patch/9980861/
+Patch333: PCI-aspm-deal-with-missing-root-ports-in-link-state-handling.patch
+
+# https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
+Patch334: arm64-socionext-96b-enablement.patch
+
+# ThunderX fixes
+Patch335: arm64-cavium-fixes.patch
+
+# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c0d8832e78cbfd4a64b7112e34920af4b0b0e60e
+# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=ae2e972dae3cea795e9f8f94eb1601213c2d49f0
+
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
 
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch502: CVE-2017-7477.patch
+
+# rhbz 1498016 1498017
+Patch503: KEYS-don-t-let-add_key-update-an-uninstantiated-key.patch
+Patch504: KEYS-fix-race-between-updating-and-finding-negative-.patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
@@ -707,7 +737,6 @@ Patch619: pci-mark-amd-stoney-gpu-ats-as-broken.patch
 Patch622: qxl-fixes.patch
 
 # rhbz 1431375
-Patch623: HID-rmi-Make-sure-the-HID-device-is-opened-on-resume.patch
 Patch624: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # rhbz 1432684
@@ -717,6 +746,12 @@ Patch628: 3-3-inet-fix-improper-empty-comparison.patch
 
 # rhbz 1497861
 Patch629: 0001-platform-x86-peaq-wmi-Add-DMI-check-before-binding-t.patch
+
+# rhbz 1482648
+Patch630: Input-synaptics---Disable-kernel-tracking-on-SMBus-devices.patch
+
+# Headed upstream
+Patch631: drm-i915-boost-GPU-clocks-if-we-miss-the-pageflip.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2368,12 +2403,37 @@ fi
 #
 #
 %changelog
+* Fri Oct 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.6-gnu.
+
+* Thu Oct 12 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.6-300
+- Linux v4.13.6
+- Fixes CVE-2017-1000255 (rhbz 1498067 1500335)
+
+* Thu Oct 12 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes for Cavium ThunderX plaforms
+
+* Wed Oct 11 2017 Jeremy Cline <jeremy@jcline.org>
+- Fix incorrect updates of uninstantiated keys crash the kernel (rhbz 1498016 1498017)
+
+* Tue Oct 10 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable kernel tracking on SMBus devices (rhbz 1482648)
+
+* Mon Oct  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable KASLR on aarch64
+
+* Fri Oct  6 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM ACPI fix for x-gene RHBZ #1498117
+- Initial support for Socionext Synquacer platform
+- Fix for QCom GPU clock rate
+
 * Thu Oct  5 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.5-gnu.
 
 * Thu Oct 05 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.5-300
 - Linux v4.13.5
 - Fix for peaq_wmi nul spew (rhbz 1497861)
+- Fixes CVE-2017-14954 (rhbz 1497745 1497747)
 
 * Fri Sep 29 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.4-gnu.
