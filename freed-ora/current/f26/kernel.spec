@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -742,6 +742,9 @@ Patch630: Input-synaptics---Disable-kernel-tracking-on-SMBus-devices.patch
 
 # Headed upstream
 Patch631: drm-i915-boost-GPU-clocks-if-we-miss-the-pageflip.patch
+
+# CVE-2017-15265 rhbz 1501878 1501880
+Patch633: 0001-ALSA-seq-Fix-use-after-free-at-creating-a-port.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2413,6 +2416,14 @@ fi
 #
 #
 %changelog
+* Mon Oct 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.7-gnu.
+
+* Mon Oct 16 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.7-200
+- Linux v4.13.7
+- Fixes CVE-2017-5123 (rhbz 1500094 1501762)
+- Fix CVE-2017-15265 (rhbz 1501878 1501880)
+
 * Fri Oct 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.6-gnu.
 
