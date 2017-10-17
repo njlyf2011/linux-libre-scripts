@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -701,8 +701,9 @@ Patch334: arm64-socionext-96b-enablement.patch
 # ThunderX fixes
 Patch335: arm64-cavium-fixes.patch
 
-# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c0d8832e78cbfd4a64b7112e34920af4b0b0e60e
-# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=ae2e972dae3cea795e9f8f94eb1601213c2d49f0
+Patch336: arm-exynos-fix-usb3.patch
+
+Patch337: arm64-aw64-devices.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -752,6 +753,12 @@ Patch630: Input-synaptics---Disable-kernel-tracking-on-SMBus-devices.patch
 
 # Headed upstream
 Patch631: drm-i915-boost-GPU-clocks-if-we-miss-the-pageflip.patch
+
+# fix gnome 3.26+ not working under VirtualBox, submitted upstream, Cc: Stable
+Patch632: 0001-staging-vboxvideo-Fix-reporting-invalid-suggested-of.patch
+
+# CVE-2017-15265 rhbz 1501878 1501880
+Patch633: 0001-ALSA-seq-Fix-use-after-free-at-creating-a-port.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2403,7 +2410,22 @@ fi
 #
 #
 %changelog
-* Fri Oct 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Oct 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.7-gnu.
+
+* Mon Oct 16 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.7-300
+- Linux v4.13.7
+- Fixes CVE-2017-5123 (rhbz 1500094 1501762)
+- Fix CVE-2017-15265 (rhbz 1501878 1501880)
+
+* Sun Oct 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix USB-3 Superspeed negotiation on exynos5 hardware (rhbz 1487006)
+- Some AllWinner A64 fixes and improvements
+
+* Thu Oct 12 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Fix vboxvideo causing gnome 3.26+ to not work under VirtualBox
+
+* Thu Oct 12 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Oct 13
 - GNU Linux-libre 4.13.6-gnu.
 
 * Thu Oct 12 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.13.6-300
