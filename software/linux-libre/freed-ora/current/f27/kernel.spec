@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -644,9 +644,6 @@ Patch305: arm-imx6-hummingboard2.patch
 
 Patch306: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
-# https://patchwork.kernel.org/patch/9967397/
-Patch307: tegra-Use-different-MSI-target-address-for-Tegra20.patch
-
 # https://patchwork.kernel.org/patch/9815555/
 # https://patchwork.kernel.org/patch/9815651/
 # https://patchwork.kernel.org/patch/9819885/
@@ -756,9 +753,6 @@ Patch631: drm-i915-boost-GPU-clocks-if-we-miss-the-pageflip.patch
 
 # fix gnome 3.26+ not working under VirtualBox, submitted upstream, Cc: Stable
 Patch632: 0001-staging-vboxvideo-Fix-reporting-invalid-suggested-of.patch
-
-# CVE-2017-15265 rhbz 1501878 1501880
-Patch633: 0001-ALSA-seq-Fix-use-after-free-at-creating-a-port.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2410,6 +2404,12 @@ fi
 #
 #
 %changelog
+* Thu Oct 19 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.8-gnu.
+
+* Wed Oct 18 2017 Laura Abbott <labbott@fedoraproject.org> - 4.13.8-300
+- Linux v4.13.8
+
 * Mon Oct 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.7-gnu.
 
