@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.13%{?stablegnux}
-#define rcrevlibre  -4.13%{?rcrevgnux}
+%define rcrevlibre  -4.13%{?rcrevgnux}
 #define gitrevlibre -4.13%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -131,8 +131,6 @@ Summary: The Linux kernel
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 %define with_cross_headers   %{?_without_cross_headers:   0} %{?!_without_cross_headers:   1}
-# kernel-firmware
-%define with_firmware  %{?_with_firmware:     1} %{?!_with_firmware:     0}
 # perf
 %define with_perf      %{?_without_perf:      0} %{?!_without_perf:      1}
 # tools
@@ -227,8 +225,10 @@ Summary: The Linux kernel
 # and debuginfo generation. Currently we rely on the old alldebug setting.
 %global _build_id_links alldebug
 
-# kernel PAE is only built on i686 and ARMv7.
-%ifnarch i686 armv7hl
+# kernel PAE is only built on ARMv7 in rawhide.
+# Fedora 27 and earlier still support PAE, so change this on rebases.
+# %ifnarch i686 armv7hl
+%ifnarch armv7hl
 %define with_pae 0
 %endif
 
@@ -276,7 +276,6 @@ Summary: The Linux kernel
 %define with_tools 0
 %define with_perf 0
 %define all_arch_configs kernel-%{version}-*.config
-%define with_firmware  %{?_without_firmware:     0} %{?!_without_firmware:     1}
 %endif
 
 # bootwrapper is only on ppc
@@ -308,7 +307,7 @@ Summary: The Linux kernel
 %define make_target vmlinux
 %define kernel_image vmlinux
 %define kernel_image_elf 1
-%ifarch ppc64 ppc64p7
+%ifarch ppc64
 %define all_arch_configs kernel-%{version}-ppc64*.config
 %endif
 %ifarch ppc64le
@@ -417,7 +416,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: noarch %{all_x86} x86_64 ppc64 ppc64p7 s390x %{arm} aarch64 ppc64le
+ExclusiveArch: %{all_x86} x86_64 ppc64 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
 Requires: kernel-libre-core-uname-r = %{KVERREL}%{?variant}
@@ -481,7 +480,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -497,7 +496,6 @@ Source93: filter-aarch64.sh
 Source95: filter-ppc64.sh
 Source96: filter-ppc64le.sh
 Source97: filter-s390x.sh
-Source98: filter-ppc64p7.sh
 Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
@@ -515,8 +513,6 @@ Source30: kernel-ppc64.config
 Source31: kernel-ppc64-debug.config
 Source32: kernel-ppc64le.config
 Source33: kernel-ppc64le-debug.config
-Source34: kernel-ppc64p7.config
-Source35: kernel-ppc64p7-debug.config
 Source36: kernel-s390x.config
 Source37: kernel-s390x-debug.config
 Source38: kernel-x86_64.config
@@ -626,24 +622,28 @@ Patch211: drm-i915-hush-check-crtc-state.patch
 
 # 300 - ARM patches
 
-# a tempory patch for QCOM hardware enablement. Will be gone by F-26 GA
-Patch301: qcom-QDF2432-tmp-errata.patch
+# Reduces a number of primarily info logs to dmesg
+# https://patchwork.freedesktop.org/patch/180737/
+# https://patchwork.freedesktop.org/patch/180554/
+Patch300: drm-cma-reduce-dmesg-logs.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
-Patch302: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
+Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
 # Fix OMAP4 (pandaboard)
-Patch303: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
+Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 
 # http://patchwork.ozlabs.org/patch/587554/
-Patch304: ARM-tegra-usb-no-reset.patch
+Patch303: ARM-tegra-usb-no-reset.patch
 
-Patch305: AllWinner-net-emac.patch
+Patch304: allwinner-net-emac.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch307: arm-imx6-hummingboard2.patch
+Patch305: arm-imx6-hummingboard2.patch
 
-Patch308: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
+Patch306: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
+
+# https://patchwork.kernel.org/patch/9967397/
 
 # https://patchwork.kernel.org/patch/9815555/
 # https://patchwork.kernel.org/patch/9815651/
@@ -655,16 +655,6 @@ Patch310: qcom-msm89xx-fixes.patch
 
 # https://patchwork.kernel.org/patch/9831825/
 # https://patchwork.kernel.org/patch/9833721/
-Patch311: arm-tegra-fix-gpu-iommu.patch
-
-# https://www.spinics.net/lists/linux-arm-msm/msg28203.html
-Patch312: qcom-display-iommu.patch
-
-# https://patchwork.kernel.org/patch/9839803/
-Patch313: qcom-Force-host-mode-for-USB-on-apq8016-sbc.patch
-
-# https://patchwork.kernel.org/patch/9850189/
-Patch314: qcom-msm-ci_hdrc_msm_probe-missing-of_node_get.patch
 
 # http://www.spinics.net/lists/dri-devel/msg132235.html
 Patch320: bcm283x-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
@@ -672,9 +662,18 @@ Patch320: bcm283x-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
-# This breaks RPi booting with a LPAE kernel, we don't support the DSI ports currently
-# Revert it while I engage upstream to work out what's going on
-Patch322: Revert-ARM-dts-bcm2835-Add-the-DSI-module-nodes-and-.patch
+# bcm2837 bluetooth support
+#
+Patch323: bcm2837-bluetooth-support.patch
+
+# Generic fixes and enablement for Socionext SoC and 96board
+# https://patchwork.kernel.org/patch/9980861/
+Patch331: PCI-aspm-deal-with-missing-root-ports-in-link-state-handling.patch
+
+# https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
+Patch332: arm64-socionext-96b-enablement.patch
+
+Patch335: arm-exynos-fix-usb3.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -683,23 +682,26 @@ Patch322: Revert-ARM-dts-bcm2835-Add-the-DSI-module-nodes-and-.patch
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch502: CVE-2017-7477.patch
 
+# rhbz 1498016 1498017
+#Patch503: KEYS-don-t-let-add_key-update-an-uninstantiated-key.patch
+
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
 Patch601: 0001-Input-gpio_keys-Allow-suppression-of-input-events-fo.patch
 Patch602: 0002-Input-soc_button_array-Suppress-power-button-presses.patch
 Patch610: 0010-Input-silead-Add-support-for-capactive-home-button-f.patch
-Patch611: 0011-Input-goodix-Add-support-for-capacitive-home-button.patch
-# These patches are queued for 4.14 and can be dropped on rebase to 4.14-rc1
-Patch603: 0001-power-supply-max17042_battery-Add-support-for-ACPI-e.patch
-Patch604: 0002-power-supply-max17042_battery-Fix-ACPI-interrupt-iss.patch
-Patch613: 0013-iio-accel-bmc150-Add-support-for-BOSC0200-ACPI-devic.patch
-Patch615: 0015-i2c-cht-wc-Add-Intel-Cherry-Trail-Whiskey-Cove-SMBUS.patch
 
 # rhbz 1476467
 Patch617: Fix-for-module-sig-verification.patch
 
-# rhbz 1485086
-Patch619: pci-mark-amd-stoney-gpu-ats-as-broken.patch
+# rhbz 1431375
+Patch619: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+
+# fix gnome 3.26+ not working under VirtualBox, submitted upstream, Cc: Stable
+Patch620: 0001-staging-vboxvideo-Fix-reporting-invalid-suggested-of.patch
+
+# Headed upstream
+Patch621: drm-i915-Boost-GPU-clocks-if-we-miss-the-pageflip-s-vblank.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -727,9 +729,6 @@ Provides: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-libre-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires(pre): %{kernel_prereq}\
 Requires(pre): %{initrd_prereq}\
-%if %{with_firmware}\
-Requires(pre): kernel-libre-firmware >= %{rpmversion}-%{pkg_release}\
-%endif\
 Requires(preun): systemd >= 200\
 Conflicts: xfsprogs < 4.3.0-1\
 Conflicts: xorg-x11-drv-vmmouse < 13.0.99\
@@ -774,15 +773,6 @@ between the Linux kernel and userspace libraries and programs.  The
 header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 cross-glibc package.
-
-%package firmware
-Summary: Firmware files used by the Linux kernel
-Group: Development/System
-License: GPLv2+
-Provides: kernel-firmware = %{rpmversion}-%{pkg_release}
-%description firmware
-Kernel-firmware includes firmware files required for some devices to
-operate.
 
 %package bootwrapper
 Provides: kernel-libre-bootwrapper = %{rpmversion}-%{pkg_release}
@@ -1183,10 +1173,6 @@ ApplyOptionalPatch()
     ApplyPatch $patch ${1+"$@"}
   fi
 }
-
-# we don't want a .config file when building firmware: it just confuses the build system
-%define build_firmware \
-   make INSTALL_FW_PATH=$RPM_BUILD_ROOT/lib/firmware firmware_install \
 
 # First we unpack the kernel tarball.
 # If this isn't the first make prep, we use links to the existing clean tarball
@@ -2038,7 +2024,7 @@ pushd tools/thermal/tmon
 make INSTALL_ROOT=%{buildroot} install
 popd
 pushd tools/iio
-make INSTALL_ROOT=%{buildroot} install
+make DESTDIR=%{buildroot} install
 popd
 pushd tools/gpio
 make DESTDIR=%{buildroot} install
@@ -2046,10 +2032,6 @@ popd
 pushd tools/kvm/kvm_stat
 make INSTALL_ROOT=%{buildroot} install-tools
 popd
-%endif
-
-%if %{with_firmware}
-%{build_firmware}
 %endif
 
 %if %{with_bootwrapper}
@@ -2189,13 +2171,6 @@ fi
 /usr/*-linux-gnu/include/*
 %endif
 
-%if %{with_firmware}
-%files firmware
-%defattr(-,root,root)
-/lib/firmware/*
-%doc linux-%{KVERREL}/firmware/WHENCE
-%endif
-
 %if %{with_bootwrapper}
 %files bootwrapper
 %defattr(-,root,root)
@@ -2274,11 +2249,9 @@ fi
 %endif
 %endif # with_perf
 
-%ifnarch noarch
 # empty meta-package
 %files
 %defattr(-,root,root)
-%endif
 
 # This is %%{image_install_path} on an arch where that includes ELF files,
 # or empty otherwise.
@@ -2351,6 +2324,171 @@ fi
 #
 #
 %changelog
+* Tue Oct 24 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14-rc6-gnu.
+- Drop firmware subpackage.
+
+* Mon Oct 23 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc6.git0.1
+- Linux v4.14-rc6
+
+* Mon Oct 23 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Oct 20 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc5.git4.1
+- Linux v4.14-rc5-94-g9a27ded2195a
+
+* Thu Oct 19 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc5.git3.1
+- Linux v4.14-rc5-31-g73d3393ada4f
+
+* Thu Oct 19 2017 Laura Abbott <labbott@redhat.com>
+- Turn off DCCP
+
+* Wed Oct 18 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc5.git2.1
+- Linux v4.14-rc5-22-g3e0cc09a3a2c
+
+* Tue Oct 17 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc5.git1.1
+- Linux v4.14-rc5-15-gebe6e90ccc66
+- Reenable debugging options.
+
+* Mon Oct 16 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc5.git0.1
+- Linux v4.14-rc5
+
+* Mon Oct 16 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Sun Oct 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix USB-3 Superspeed negotiation on exynos5 hardware
+
+* Fri Oct 13 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc4.git4.1
+- Linux v4.14-rc4-143-g997301a860fc
+
+* Thu Oct 12 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc4.git3.1
+- Linux v4.14-rc4-84-gff5abbe799e2
+
+* Thu Oct 12 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Fix vboxvideo causing gnome 3.26+ to not work under VirtualBox
+
+* Wed Oct 11 2017 Jeremy Cline <jeremy@jcline.org>
+- Fix incorrect updates of uninstantiated keys crash the kernel (rhbz 1498016 1498017)
+
+* Wed Oct 11 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc4.git2.1
+- Linux v4.14-rc4-77-g56ae414e9d27
+
+* Tue Oct 10 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc4.git1.1
+- Linux v4.14-rc4-52-g529a86e063e9
+- Reenable debugging options.
+
+* Mon Oct 09 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc4.git0.1
+- Linux v4.14-rc4
+
+* Mon Oct 09 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Mon Oct  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable KASLR on aarch64
+
+* Fri Oct 06 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc3.git4.1
+- Linux v4.14-rc3-394-gbf2db0b9f580
+
+* Fri Oct  6 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial support for Socionext Synquacer platform
+
+* Thu Oct 05 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc3.git3.1
+- Linux v4.14-rc3-315-g0f380715e51f
+
+* Wed Oct 04 2017 Justin M. Forbes <jforbes@redhat.com> - 4.14.0-0.rc3.git2.1
+- Linux v4.14-rc3-102-gd81fa669e3de
+
+* Tue Oct 03 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc3.git1.1
+- Linux v4.14-rc3-90-g887c8ba753fb
+- Reenable debugging options.
+
+* Mon Oct 02 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc3.git0.1
+- Linux v4.14-rc3
+
+* Mon Oct 02 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Sep 29 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc2.git4.1
+- Linux v4.14-rc2-201-g35dbba31be52
+
+* Thu Sep 28 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc2.git3.1
+- Linux v4.14-rc2-125-g9cd6681cb116
+
+* Wed Sep 27 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc2.git2.1
+- Linux v4.14-rc2-48-gdc972a67cc54
+
+* Tue Sep 26 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc2.git1.1
+- Linux v4.14-rc2-44-ge365806ac289
+- Reenable debugging options.
+
+* Mon Sep 25 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix PCI on tegra20
+
+* Mon Sep 25 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc2.git0.1
+- Linux v4.14-rc2
+
+* Mon Sep 25 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Sep 22 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc1.git4.1
+- Linux v4.14-rc1-125-g0a8abd97dcda
+
+* Thu Sep 21 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc1.git3.1
+- Linux v4.14-rc1-39-gc52f56a69d10
+
+* Wed Sep 20 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc1.git2.1
+- Linux v4.14-rc1-35-g820bf5c419e4
+
+* Tue Sep 19 2017 Laura Abbott <labbott@redhat.com>
+- Disable CONFIG_VIRTIO_BLK_SCSI
+
+* Tue Sep 19 2017 Justin M. Forbes <jforbes@redhat.com> - 4.14.0-0.rc1.git1.1
+- Linux v4.14-rc1-13-gebb2c2437d80
+- Reenable debugging options.
+- Fix PPC build
+
+* Mon Sep 18 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc1.git0.1
+- Linux v4.14-rc1
+
+* Mon Sep 18 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Sep 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Tegra 186
+
+* Thu Sep 14 2017 Justin M. Forbes <jforbes@redhat.com> - 4.14.0-0.rc0.git6.1
+- Linux v4.13-11811-g46c1e79fee41
+
+* Wed Sep 13 2017 Justin M. Forbes <jforbes@redhat.com> - 4.14.0-0.rc0.git5.1
+- Linux v4.13-11559-g6d8ef53e8b2f
+
+* Tue Sep 12 2017 Peter Robinson <pbrobinson@fedoraproject.org> 4.14.0-0.rc0.git4.1
+- Enable Physlink/SFP functionality
+- Tegra DRM FTB fix
+
+* Mon Sep 11 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Raspberry Pi serial console fixes, minor other Pi improvements
+- Various ARM cleanups, build mmc/pwrseq non modular
+
+* Mon Sep 11 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Linux v4.13-11197-gf007cad159e9
+
+* Sat Sep  9 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Only build ParPort support on x86
+
+* Fri Sep 08 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc0.git3.1
+- Linux v4.13-9219-g015a9e66b9b8
+
+* Thu Sep 07 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc0.git2.1
+- Linux v4.13-6657-g3b9f8ed25dbe
+
+* Wed Sep 06 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc0.git1.1
+- Linux v4.13-4257-ge7d0c41ecc2e
+
+* Mon Sep  4 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Revert drop of sun8i-emac DT bindings, we support for certain devs
+
 * Mon Sep  4 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13-gnu.
 
