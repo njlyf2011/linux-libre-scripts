@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -677,10 +677,6 @@ Patch331: arm64-xgene-acpi-fix.patch
 
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch502: CVE-2017-7477.patch
-
-# rhbz 1498016 1498017
-Patch503: KEYS-don-t-let-add_key-update-an-uninstantiated-key.patch
-Patch504: KEYS-fix-race-between-updating-and-finding-negative-.patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
@@ -2403,6 +2399,12 @@ fi
 #
 #
 %changelog
+* Sat Oct 28 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.10-gnu.
+
+* Fri Oct 27 2017 Jeremy Cline <jeremy@jcline.org> - 4.13.10-100
+- Linux v4.13.10
+
 * Mon Oct 23 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.9-gnu.
 
