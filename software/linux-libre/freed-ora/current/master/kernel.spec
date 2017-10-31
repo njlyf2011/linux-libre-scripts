@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 6
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -702,6 +702,11 @@ Patch620: 0001-staging-vboxvideo-Fix-reporting-invalid-suggested-of.patch
 
 # Headed upstream
 Patch621: drm-i915-Boost-GPU-clocks-if-we-miss-the-pageflip-s-vblank.patch
+
+# rhbz 1497861, submitted upstream, Cc: Stable
+Patch622: 0001-platform-x86-peaq-wmi-Add-DMI-check-before-binding-t.patch
+
+Patch623: 0001-PATCH-staging-rtl8822be-fix-wrong-dma-unmap-len.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2324,6 +2329,31 @@ fi
 #
 #
 %changelog
+* Mon Oct 30 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14-rc7-gnu.
+
+* Mon Oct 30 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc7.git0.1
+- Linux v4.14-rc7
+
+* Mon Oct 30 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Mon Oct 30 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Fix for peaq_wmi nul spew (rhbz 1497861)
+
+* Fri Oct 27 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc6.git4.1
+- Linux v4.14-rc6-53-g15f859ae5c43
+
+* Thu Oct 26 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc6.git3.1
+- Linux v4.14-rc6-50-g567825502730
+
+* Wed Oct 25 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc6.git2.1
+- Linux v4.14-rc6-21-gf34157878d3b
+
+* Tue Oct 24 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc6.git1.1
+- Linux v4.14-rc6-18-gae59df0349ba
+- Reenable debugging options.
+
 * Tue Oct 24 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14-rc6-gnu.
 - Drop firmware subpackage.
