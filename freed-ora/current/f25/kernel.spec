@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -728,6 +728,12 @@ Patch630: Input-synaptics---Disable-kernel-tracking-on-SMBus-devices.patch
 
 # Headed upstream
 Patch631: drm-i915-boost-GPU-clocks-if-we-miss-the-pageflip.patch
+
+# http://patchwork.ozlabs.org/patch/831938/
+Patch633: net-mlxsw-reg-Add-high-and-low-temperature-thresholds.patch
+
+# Included in 4.14, backport requested on kernel@
+Patch634: selinux-Generalize-support-for-NNP-nosuid-SELinux-do.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2399,6 +2405,18 @@ fi
 #
 #
 %changelog
+* Thu Nov  2 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.11-gnu.
+
+* Thu Nov 02 2017 Jeremy Cline <jeremy@jcline.org> - 4.13.11-100
+- Linux v4.13.11
+- Fix CVE-2017-12193 (rhbz 1501215 1508717)
+- SMB3: Validate negotiate request must always be signed (rhbz 1502606)
+- Backport new SELinux NNP/nosuid patch to resolve interactions with systemd
+
+* Wed Nov 01 2017 Laura Abbott <labbott@fedoraproject.org>
+- Add fix for potential mlxsw firmware incompatibility
+
 * Sat Oct 28 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.10-gnu.
 
