@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -656,9 +656,6 @@ Patch310: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/patch/9831825/
 # https://patchwork.kernel.org/patch/9833721/
 
-# http://www.spinics.net/lists/dri-devel/msg132235.html
-Patch320: bcm283x-vc4-Fix-OOPSes-from-trying-to-cache-a-partially-constructed-BO..patch
-
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
@@ -678,9 +675,6 @@ Patch335: arm-exynos-fix-usb3.patch
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
-
-# CVE-2017-7477 rhbz 1445207 1445208
-Patch502: CVE-2017-7477.patch
 
 # rhbz 1498016 1498017
 #Patch503: KEYS-don-t-let-add_key-update-an-uninstantiated-key.patch
@@ -2329,6 +2323,28 @@ fi
 #
 #
 %changelog
+* Mon Nov  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14-rc8-gnu.
+
+* Mon Nov 06 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc8.git0.1
+- Linux v4.14-rc8
+
+* Mon Nov 06 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Nov 03 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc7.git4.1
+- Linux v4.14-rc7-129-g81ca2caefc6d
+
+* Thu Nov 02 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc7.git3.1
+- Linux v4.14-rc7-47-g3a99df9a3d14
+
+* Wed Nov 01 2017 Jeremy Cline <jeremy@jcline.org> - 4.14.0-0.rc7.git2.1
+- Linux v4.14-rc7-39-g4f2ba5dc183b
+
+* Tue Oct 31 2017 Jeremy Cline <jeremy@jcline.org> - 4.14.0-0.rc7.git1.1
+- Linux v4.14-rc7-8-g5f479447d983
+- Reenable debugging options.
+
 * Mon Oct 30 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14-rc7-gnu.
 
