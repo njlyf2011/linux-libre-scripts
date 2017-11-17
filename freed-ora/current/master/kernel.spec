@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 13
+%define base_sublevel 14
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.13%{?stablegnux}
-%define rcrevlibre  -4.13%{?rcrevgnux}
-#define gitrevlibre -4.13%{?gitrevgnux}
+#define stablelibre -4.14%{?stablegnux}
+#define rcrevlibre  -4.14%{?rcrevgnux}
+#define gitrevlibre -4.14%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -427,7 +427,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 #
 # List the packages used during the kernel build
 #
-BuildRequires: kmod, patch, bash, sh-utils, tar, git
+BuildRequires: kmod, patch, bash, tar, git
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
 BuildRequires: net-tools, hostname, bc, elfutils-devel
@@ -480,7 +480,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -643,24 +643,16 @@ Patch305: arm-imx6-hummingboard2.patch
 
 Patch306: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
-# https://patchwork.kernel.org/patch/9967397/
-
-# https://patchwork.kernel.org/patch/9815555/
-# https://patchwork.kernel.org/patch/9815651/
-# https://patchwork.kernel.org/patch/9819885/
 # https://patchwork.kernel.org/patch/9820417/
-# https://patchwork.kernel.org/patch/9821151/
-# https://patchwork.kernel.org/patch/9821157/
 Patch310: qcom-msm89xx-fixes.patch
 
-# https://patchwork.kernel.org/patch/9831825/
-# https://patchwork.kernel.org/patch/9833721/
+# https://patchwork.kernel.org/patch/10054387/
+Patch311: USB-ulpi-fix-bus-node-lookup.patch
 
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
 # bcm2837 bluetooth support
-#
 Patch323: bcm2837-bluetooth-support.patch
 
 # Generic fixes and enablement for Socionext SoC and 96board
@@ -701,6 +693,12 @@ Patch621: drm-i915-Boost-GPU-clocks-if-we-miss-the-pageflip-s-vblank.patch
 Patch622: 0001-platform-x86-peaq-wmi-Add-DMI-check-before-binding-t.patch
 
 Patch623: 0001-PATCH-staging-rtl8822be-fix-wrong-dma-unmap-len.patch
+
+# rhbz 1509461
+Patch625: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
+
+# rhbz 1490803
+Patch626: 1-2-kvm-vmx-Reinstate-support-for-CPUs-without-virtual-NMI.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2323,6 +2321,27 @@ fi
 #
 #
 %changelog
+* Thu Nov 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14-gnu.
+
+* Mon Nov 13 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-1
+- Linux v4.14
+- Disable debugging options.
+
+* Fri Nov 10 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc8.git3.1
+- Linux v4.14-rc8-66-g1c9dbd4615fd
+
+* Wed Nov 08 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc8.git2.1
+- Linux v4.14-rc8-12-gd6a2cf07f0c9
+
+* Tue Nov 07 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-0.rc8.git1.1
+- Linux v4.14-rc8-9-gfbc3edf7d773
+- Reenable debugging options.
+
+* Mon Nov 06 2017 Laura Abbott <labbott@redhat.com>
+- Patches for ThinkPad X1 Carbon Gen5 Touchpad (rhbz 1509461)
+- Fix for KVM regression on some machines (rhbz 1490803)
+
 * Mon Nov  6 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14-rc8-gnu.
 
