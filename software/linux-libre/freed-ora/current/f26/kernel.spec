@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -670,6 +670,8 @@ Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe
 # Updat3 move of bcm2837, landed in 4.14
 Patch322: bcm2837-move-dt.patch
 
+Patch325: rpi-graphics-fix.patch
+
 # https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/commit/?h=next-20170912&id=723288836628bc1c0855f3bb7b64b1803e4b9e4a
 Patch324: arm-of-restrict-dma-configuration.patch
 
@@ -685,6 +687,9 @@ Patch332: arm64-cavium-fixes.patch
 
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch502: CVE-2017-7477.patch
+
+# CVE-2017-15115 rhbz 1513346 1513345
+Patch503: sctp-do-not-peel-off-an-assoc-from-one-netns-to-another-one.patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
@@ -2425,6 +2430,16 @@ fi
 #
 #
 %changelog
+* Thu Nov 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.13-gnu.
+
+* Wed Nov 15 2017 Jeremy Cline <jeremy@jcline.org> - 4.13.13-200
+- Linux v4.13.13
+- Fix CVE-2017-15115 (rhbz 1513346 1513345)
+
+* Wed Nov 15 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix for vc4 interupts
+
 * Thu Nov  9 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.12-gnu.
 
