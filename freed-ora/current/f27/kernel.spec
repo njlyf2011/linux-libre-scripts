@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -714,8 +714,8 @@ Patch337: arm64-aw64-devices.patch
 # CVE-2017-7477 rhbz 1445207 1445208
 Patch502: CVE-2017-7477.patch
 
-# CVE-2017-15115 rhbz 1513346 1513345
-Patch503: sctp-do-not-peel-off-an-assoc-from-one-netns-to-another-one.patch
+# CVE-2017-16644 rhbz 1516273 1516274
+Patch503: media-hdpvr-Fix-an-error-handling-path-in-hdpvr_probe.patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
@@ -767,6 +767,9 @@ Patch637: 1-2-kvm-vmx-Reinstate-support-for-CPUs-without-virtual-NMI.patch
 
 # CVE-2017-16538 rhbz 1510826 1510854
 Patch639: CVE-2017-16538.patch
+
+# rhbz 1507931
+Patch640: qxl_cursor_fix.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2418,6 +2421,19 @@ fi
 #
 #
 %changelog
+* Mon Nov 27 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.13.16-gnu.
+
+* Mon Nov 27 2017 Jeremy Cline <jeremy@jcline.org> - 4.13.16-300
+- Linux v4.13.16
+- Fix CVE-2017-16649 (rhbz 1516267 1516274)
+- Fix CVE-2017-16650 (rhbz 1516265 1516274)
+- Fix CVE-2017-16644 (rhbz 1516273 1516274)
+- Fix CVE-2017-16647 (rhbz 1516270 1516274)
+
+* Tue Nov 21 2017 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix cursor issues with QXL (rhbz 1507931)
+
 * Tue Nov 21 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.13.15-gnu.
 
