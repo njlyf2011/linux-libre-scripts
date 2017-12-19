@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -654,8 +654,6 @@ Patch332: arm64-socionext-96b-enablement.patch
 
 Patch335: arm-exynos-fix-usb3.patch
 
-Patch399: arm64-thunderX-fix-ipv6-checksum-offload.patch
-
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
@@ -705,6 +703,9 @@ Patch627: qxl-fixes.patch
 
 # rhbz 1462175
 Patch628: HID-rmi-Check-that-a-device-is-a-RMI-device-before-c.patch
+
+# CVE-2017-17712 rhbz 1526427 1526933 
+Patch629: net-ipv4-fix-for-a-race-condition-in-raw_sendmsg.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2349,6 +2350,13 @@ fi
 #
 #
 %changelog
+* Mon Dec 18 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14.7-gnu.
+
+* Mon Dec 18 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.7-200
+- Linux v4.14.7
+- Fix CVE-2017-17712 (rhbz 1526427 1526933)
+
 * Thu Dec 14 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14.6-gnu.
 
