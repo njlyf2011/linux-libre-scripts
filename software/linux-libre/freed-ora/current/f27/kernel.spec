@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2341,6 +2341,13 @@ fi
 #
 #
 %changelog
+* Tue Dec 26 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14.9-gnu.
+
+* Tue Dec 26 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.9-300
+- Linux v4.14.9
+- Fixes CVE-2017-17862 CVE-2017-17863 CVE-2017-17864 (rhbz 1529120 1529123 1529124 1529125)
+
 * Thu Dec 21 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14.8-gnu.
 
