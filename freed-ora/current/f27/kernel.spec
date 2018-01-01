@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -1395,6 +1395,7 @@ git am %{patches}
 # Any further pre-build tree manipulations happen here.
 
 chmod +x scripts/checkpatch.pl
+chmod +x tools/objtool/sync-check.sh
 
 # This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
@@ -2341,6 +2342,12 @@ fi
 #
 #
 %changelog
+* Mon Jan  1 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14.10-gnu.
+
+* Mon Jan 01 2018 Laura Abbott <labbott@redhat.com> - 4.14.10-300
+- Linux v4.14.10
+
 * Tue Dec 26 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14.9-gnu.
 
