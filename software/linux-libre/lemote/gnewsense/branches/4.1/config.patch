@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2017-10-17 12:23:55.344845357 -0400
-@@ -0,0 +1,5226 @@
++++ .config	2018-01-03 20:35:38.324021510 -0500
+@@ -0,0 +1,5228 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.1.45-gnu Kernel Configuration
++# Linux/mips 4.1.48-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -990,6 +990,7 @@ Index: .config
 +CONFIG_BRIDGE_IGMP_SNOOPING=y
 +CONFIG_BRIDGE_VLAN_FILTERING=y
 +CONFIG_HAVE_NET_DSA=y
++# CONFIG_NET_DSA is not set
 +CONFIG_VLAN_8021Q=m
 +CONFIG_VLAN_8021Q_GVRP=y
 +CONFIG_VLAN_8021Q_MVRP=y
@@ -4964,6 +4965,7 @@ Index: .config
 +# Security options
 +#
 +CONFIG_KEYS=y
++CONFIG_KEYS_COMPAT=y
 +# CONFIG_PERSISTENT_KEYRINGS is not set
 +# CONFIG_BIG_KEYS is not set
 +CONFIG_ENCRYPTED_KEYS=m
