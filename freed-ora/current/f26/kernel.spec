@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -661,10 +661,6 @@ Patch335: arm-exynos-fix-usb3.patch
 # rbhz 1519591 1520764
 Patch500: dccp-CVE-2017-8824-use-after-free-in-DCCP-code.patch
 
-# CVE-2017-17449
-# rhbz 1525762 1525763
-Patch503: netlink-Add-netns-check-on-taps.patch
-
 # CVE-2017-17450
 # rhbz 1525761 1525764
 Patch504: netfilter-xt_osf-Add-missing-permission-checks.patch
@@ -701,11 +697,11 @@ Patch627: qxl-fixes.patch
 # rhbz 1462175
 Patch628: HID-rmi-Check-that-a-device-is-a-RMI-device-before-c.patch
 
-# CVE-2017-17712 rhbz 1526427 1526933 
-Patch629: net-ipv4-fix-for-a-race-condition-in-raw_sendmsg.patch
-
 # CVE-2017-17741 rhbz 1527112 1527113
 Patch630: v4-KVM-Fix-stack-out-of-bounds-read-in-write_mmio.patch
+
+Patch631: cgroup-for-4.15-fixes-cgroup-fix-css_task_iter-crash-on-CSS_TASK_ITER_PROC.patch
+Patch632: x86-cpu-x86-pti-Do-not-enable-PTI-on-AMD-processors.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2351,6 +2347,12 @@ fi
 #
 #
 %changelog
+* Wed Jan  3 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14.11-gnu.
+
+* Wed Jan 03 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.11-200
+- Linux v4.14.11
+
 * Mon Jan  1 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14.10-gnu.
 
@@ -2363,6 +2365,8 @@ fi
 * Tue Dec 26 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.9-200
 - Linux v4.14.9
 - Fixes CVE-2017-17862 CVE-2017-17863 CVE-2017-17864 (rhbz 1529120 1529123 1529124 1529125)
+- Fixes CVE-2017-17852 CVE-2017-17853 CVE-2017-17854 CVE-2017-17855 CVE-2017-17856 CVE-2017-17857
+  (rhbz 1530269 1530270 1530271 1530272 1530273 1530274 1530279)
 
 * Thu Dec 21 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14.8-gnu.
