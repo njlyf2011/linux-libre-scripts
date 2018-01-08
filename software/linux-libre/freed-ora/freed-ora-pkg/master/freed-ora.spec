@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        9
+Version:        10
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -13,9 +13,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
 %description
-Packages to configure yum to use Linux-libre's Freed-ora repositories,
-and to avoid the installation of non-Free Software distributed by
-Fedora.
+Packages to configure dnf/yum to use Linux-libre's Freed-ora
+repositories, and to avoid the installation of non-Free Software
+distributed by Fedora.
 
 %package release
 Summary: Linux-libre Freed-ora Repository Configuration
@@ -78,6 +78,7 @@ Conflicts: alsa-firmware
 Conflicts: alsa-tools-firmware
 Conflicts: ar9170-firmware
 Conflicts: atmel-firmware
+Conflicts: bcm283x-firmware
 Conflicts: bfa-firmware
 Conflicts: crystalhd-firmware
 Conflicts: cx18-firmware
@@ -116,6 +117,7 @@ Conflicts: libertas-sd8787-firmware
 Conflicts: libertas-usb8388-firmware
 Conflicts: libertas-usb8388-olpc-firmware
 Conflicts: linux-firmware
+# lulzbot-marlin-firmware is Free Software
 Conflicts: microcode_ctl
 Conflicts: midisport-firmware
 Conflicts: netxen-firmware
@@ -136,6 +138,8 @@ Conflicts: sigrok-firmware-filesystem
 Conflicts: sigrok-firmware-nonfree
 Conflicts: ueagle-atm4-firmware
 Conflicts: uhd-firmware
+# Hmm, I wonder if either of these became lulzbot-marlin-firmware,
+# and was already Free Software.  Anyway, they are long gone.
 Conflicts: ultimaker-marlin-firmware
 Conflicts: ultimaker2-marlin-firmware
 Conflicts: xorg-x11-drv-ati-firmware
@@ -183,6 +187,12 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Mon Jan  8 2018 Alexandre Oliva <lxoliva@fsfla.org> - 10-1
+- Update mirror list: espoch->uta.
+- Use https rather than http where available.
+- Shuffle mirror lists a bit, so as to spread the load.
+- Update conflict list: added bcm283x-firmware.
+
 * Wed Oct 21 2015 Alexandre Oliva <lxoliva@fsfla.org> - 9-1
 - Switch from F- to f directories.
 

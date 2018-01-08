@@ -1,11 +1,11 @@
 [freed-ora-detesting]
 name=Linux-libre Freed-ora $releasever - Random builds
-baseurl=http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/f$releasever-detesting
+baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/f$releasever-detesting
+	https://mirror.uta.edu.ec/linux-libre/freed-ora/f$releasever-detesting
+	https://mirror.cedia.org.ec/linux-libre/freed-ora/f$releasever-detesting
 	http://ftp.linux.org.tr/linux-libre/freed-ora/f$releasever-detesting
-	http://mirror.espoch.edu.ec/linux-libre/freed-ora/f$releasever-detesting
 	http://linux-libre.gnulinux.si/freed-ora/f$releasever-detesting
-	http://mirror.cedia.org.ec/linux-libre/freed-ora/f$releasever-detesting
-	http://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/f$releasever-detesting
+	https://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/f$releasever-detesting
 enabled=0
 metadata_expire=7d
 gpgcheck=1
@@ -13,9 +13,9 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-freed-ora-linux-libre
 
 [freed-ora-detesting-debuginfo]
 name=Linux-libre Freed-ora $releasever - Random builds - Debug
-baseurl=http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/f$releasever-detesting
-	http://mirror.espoch.edu.ec/linux-libre/freed-ora/debuginfo/f$releasever-detesting
-	http://mirror.cedia.org.ec/linux-libre/freed-ora/debuginfo/f$releasever-detesting
+baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/f$releasever-detesting
+	https://mirror.cedia.org.ec/linux-libre/freed-ora/debuginfo/f$releasever-detesting
+	https://mirror.uta.edu.ec/linux-libre/freed-ora/debuginfo/f$releasever-detesting
 enabled=0
 metadata_expire=7d
 gpgcheck=1
