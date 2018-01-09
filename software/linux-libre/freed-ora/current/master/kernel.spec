@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -17,7 +17,7 @@ Summary: The Linux kernel
 %else
 %global signkernel 0
 %global signmodules 1
-%global zipmodules 0
+%global zipmodules 1
 %endif
 
 %if %{zipmodules}
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.14%{?stablegnux}
-#define rcrevlibre  -4.14%{?rcrevgnux}
+%define rcrevlibre  -4.14%{?rcrevgnux}
 #define gitrevlibre -4.14%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -131,10 +131,6 @@ Summary: The Linux kernel
 # kernel-headers
 %define with_headers   %{?_without_headers:   0} %{?!_without_headers:   1}
 %define with_cross_headers   %{?_without_cross_headers:   0} %{?!_without_cross_headers:   1}
-# perf
-%define with_perf      %{?_without_perf:      0} %{?!_without_perf:      1}
-# tools
-%define with_tools     %{?_without_tools:     0} %{?!_without_tools:     1}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
 # kernel-bootwrapper (for creating zImages from kernel + initrd)
@@ -251,8 +247,6 @@ Summary: The Linux kernel
 %define with_pae 0
 %endif
 %define with_pae 0
-%define with_tools 0
-%define with_perf 0
 %endif
 
 %define all_x86 i386 i686
@@ -273,8 +267,6 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_headers 0
 %define with_cross_headers 0
-%define with_tools 0
-%define with_perf 0
 %define all_arch_configs kernel-%{version}-*.config
 %endif
 
@@ -321,7 +313,6 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-s390x.config
 %define make_target image
 %define kernel_image arch/s390/boot/image
-%define with_tools 0
 %endif
 
 %ifarch %{arm}
@@ -339,8 +330,6 @@ Summary: The Linux kernel
 %ifnarch armv7hl
 %define with_headers 0
 %define with_cross_headers 0
-%define with_perf 0
-%define with_tools 0
 %endif
 %endif
 
@@ -375,8 +364,6 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_pae 0
 %define with_debuginfo 0
-%define with_perf 0
-%define with_tools 0
 %define _enable_debug_packages 0
 %endif
 
@@ -434,16 +421,6 @@ BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if %{with_sparse}
 BuildRequires: sparse
 %endif
-%if %{with_perf}
-BuildRequires: zlib-devel binutils-devel newt-devel python-devel perl(ExtUtils::Embed) bison flex xz-devel
-BuildRequires: audit-libs-devel
-%ifnarch s390x %{arm}
-BuildRequires: numactl-devel
-%endif
-%endif
-%if %{with_tools}
-BuildRequires: pciutils-devel gettext ncurses-devel
-%endif
 BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
 BuildRequires: rpm-build, elfutils
@@ -480,7 +457,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
@@ -521,7 +498,7 @@ Source39: kernel-x86_64-debug.config
 Source40: generate_all_configs.sh
 Source41: generate_debug_configs.sh
 
-Source42: check_configs.awk
+Source42: process_configs.sh
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -622,11 +599,6 @@ Patch211: drm-i915-hush-check-crtc-state.patch
 
 # 300 - ARM patches
 
-# Reduces a number of primarily info logs to dmesg
-# https://patchwork.freedesktop.org/patch/180737/
-# https://patchwork.freedesktop.org/patch/180554/
-Patch300: drm-cma-reduce-dmesg-logs.patch
-
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
@@ -636,45 +608,35 @@ Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch303: ARM-tegra-usb-no-reset.patch
 
-Patch304: allwinner-net-emac.patch
-
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
 Patch305: arm-imx6-hummingboard2.patch
 
 Patch306: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
+Patch307: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
+
 # https://patchwork.kernel.org/patch/9820417/
 Patch310: qcom-msm89xx-fixes.patch
-
-# https://patchwork.kernel.org/patch/10054387/
-Patch311: USB-ulpi-fix-bus-node-lookup.patch
 
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
-# bcm2837 bluetooth support
-Patch323: bcm2837-bluetooth-support.patch
-
-# Generic fixes and enablement for Socionext SoC and 96board
-# https://patchwork.kernel.org/patch/9980861/
-Patch331: PCI-aspm-deal-with-missing-root-ports-in-link-state-handling.patch
-
 # https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
 Patch332: arm64-socionext-96b-enablement.patch
 
-Patch335: arm-exynos-fix-usb3.patch
+# This needs a rebase
+# Patch335: arm-exynos-fix-usb3.patch
 
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
 
-# rhbz 1498016 1498017
-#Patch503: KEYS-don-t-let-add_key-update-an-uninstantiated-key.patch
+# rhbz 1525523
+# https://patchwork.kernel.org/patch/10104349/
+Patch500: e1000e-Fix-e1000_check_for_copper_link_ich8lan-return-value..patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
-Patch601: 0001-Input-gpio_keys-Allow-suppression-of-input-events-fo.patch
-Patch602: 0002-Input-soc_button_array-Suppress-power-button-presses.patch
 Patch610: 0010-Input-silead-Add-support-for-capactive-home-button-f.patch
 
 # rhbz 1476467
@@ -683,22 +645,35 @@ Patch617: Fix-for-module-sig-verification.patch
 # rhbz 1431375
 Patch619: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
-# fix gnome 3.26+ not working under VirtualBox, submitted upstream, Cc: Stable
-Patch620: 0001-staging-vboxvideo-Fix-reporting-invalid-suggested-of.patch
-
-# Headed upstream
-Patch621: drm-i915-Boost-GPU-clocks-if-we-miss-the-pageflip-s-vblank.patch
-
-# rhbz 1497861, submitted upstream, Cc: Stable
-Patch622: 0001-platform-x86-peaq-wmi-Add-DMI-check-before-binding-t.patch
-
-Patch623: 0001-PATCH-staging-rtl8822be-fix-wrong-dma-unmap-len.patch
-
 # rhbz 1509461
 Patch625: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 
-# rhbz 1490803
-Patch626: 1-2-kvm-vmx-Reinstate-support-for-CPUs-without-virtual-NMI.patch
+# For https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
+# Queued in bluetooth-next for merging into 4.16
+Patch628: 0001-Bluetooth-btusb-Add-a-Kconfig-option-to-enable-USB-a.patch
+
+# Fix left-button not working with some hid-multitouch touchpads
+# Adding these suggested by Benjamin Tissoires
+# Queued in hid.git/for-4.16/hid-quirks-cleanup/multitouch for merging into 4.16
+Patch630: 0001-HID-multitouch-Properly-deal-with-Win8-PTP-reports-w.patch
+Patch631: 0002-HID-multitouch-Only-look-at-non-touch-fields-in-firs.patch
+Patch632: 0003-HID-multitouch-Combine-all-left-button-events-in-a-f.patch
+
+# Reported upstream
+Patch635: 0003-x86-PCI-limit-the-size-of-the-64bit-BAR-to-256GB.patch
+
+# Make SATA link powermanagement policy configurable for:
+# https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
+# Queued upstream for merging into 4.16
+Patch636: 0001-ahci-Annotate-PCI-ids-for-mobile-Intel-chipsets-as-s.patch
+Patch637: 0002-ahci-Add-PCI-ids-for-Intel-Bay-Trail-Cherry-Trail-an.patch
+Patch638: 0003-ahci-Allow-setting-a-default-LPM-policy-for-mobile-c.patch
+
+# rhbz1514969, submitted upstream
+Patch640: 0001-platform-x86-dell-laptop-Filter-out-spurious-keyboar.patch
+
+# rhbz1514836, submitted upstream
+Patch641: 0001-Bluetooth-btusb-Disable-autosuspend-on-QCA-Rome-devi.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -787,118 +762,6 @@ Provides: installonlypkg(kernel)
 %description debuginfo-common-%{_target_cpu}
 This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
-
-%if %{with_perf}
-%package -n perf-libre
-Provides: perf = %{rpmversion}-%{pkg_release}
-Summary: Performance monitoring for the Linux kernel
-Group: Development/System
-License: GPLv2
-%description -n perf-libre
-This package contains the perf tool, which enables performance monitoring
-of the Linux kernel.
-
-%package -n perf-libre-debuginfo
-Provides: perf-debuginfo = %{rpmversion}-%{pkg_release}
-Summary: Debug information for package perf-libre
-Group: Development/Debug
-Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
-AutoReqProv: no
-%description -n perf-libre-debuginfo
-This package provides debug information for the perf package.
-
-# Note that this pattern only works right to match the .build-id
-# symlinks because of the trailing nonmatching alternation and
-# the leading .*, because of find-debuginfo.sh's buggy handling
-# of matching the pattern against the symlinks file.
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/perf(\.debug)?|.*%%{_libexecdir}/perf-core/.*|.*%%{_libdir}/traceevent/plugins/.*|XXX' -o perf-debuginfo.list}
-
-%package -n python-perf-libre
-Provides: python-perf = %{rpmversion}-%{pkg_release}
-Summary: Python bindings for apps which will manipulate perf events
-Group: Development/Libraries
-%description -n python-perf-libre
-The python-perf-libre package contains a module that permits applications
-written in the Python programming language to use the interface
-to manipulate perf events.
-
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
-
-%package -n python-perf-libre-debuginfo
-Provides: python-perf = %{rpmversion}-%{pkg_release}
-Summary: Debug information for package perf python bindings
-Group: Development/Debug
-Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
-AutoReqProv: no
-%description -n python-perf-libre-debuginfo
-This package provides debug information for the perf python bindings.
-
-# the python_sitearch macro should already be defined from above
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{python_sitearch}/perf.so(\.debug)?|XXX' -o python-perf-debuginfo.list}
-
-
-%endif # with_perf
-
-%if %{with_tools}
-%package -n kernel-libre-tools
-Provides: kernel-tools = %{rpmversion}-%{pkg_release}
-Summary: Assortment of tools for the Linux kernel
-Group: Development/System
-License: GPLv2
-Provides:  cpupowerutils = 1:009-0.6.p1
-Obsoletes: cpupowerutils < 1:009-0.6.p1
-Provides:  cpufreq-utils = 1:009-0.6.p1
-Provides:  cpufrequtils = 1:009-0.6.p1
-Obsoletes: cpufreq-utils < 1:009-0.6.p1
-Obsoletes: cpufrequtils < 1:009-0.6.p1
-Obsoletes: cpuspeed < 1:1.5-16
-Requires: kernel-libre-tools-libs = %{version}-%{release}
-%define __requires_exclude ^%{_bindir}/python
-%description -n kernel-libre-tools
-This package contains the tools/ directory from the kernel source
-and the supporting documentation.
-
-%package -n kernel-libre-tools-libs
-Provides: kernel-tools-libs = %{rpmversion}-%{pkg_release}
-Summary: Libraries for the kernels-tools
-Group: Development/System
-License: GPLv2
-%description -n kernel-libre-tools-libs
-This package contains the libraries built from the tools/ directory
-from the kernel source.
-
-%package -n kernel-libre-tools-libs-devel
-Provides: kernel-tools-libs-devel = %{rpmversion}-%{pkg_release}
-Summary: Assortment of tools for the Linux kernel
-Group: Development/System
-License: GPLv2
-Requires: kernel-libre-tools = %{version}-%{release}
-Provides:  cpupowerutils-devel = 1:009-0.6.p1
-Obsoletes: cpupowerutils-devel < 1:009-0.6.p1
-Requires: kernel-libre-tools-libs = %{version}-%{release}
-Provides: kernel-libre-tools-devel
-Provides: kernel-tools-devel
-%description -n kernel-libre-tools-libs-devel
-This package contains the development files for the tools/ directory from
-the kernel source.
-
-%package -n kernel-libre-tools-debuginfo
-Provides: kernel-tools-debuginfo = %{rpmversion}-%{pkg_release}
-Summary: Debug information for package kernel-libre-tools
-Group: Development/Debug
-Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
-AutoReqProv: no
-%description -n kernel-libre-tools-debuginfo
-This package provides debug information for package kernel-libre-tools.
-
-# Note that this pattern only works right to match the .build-id
-# symlinks because of the trailing nonmatching alternation and
-# the leading .*, because of find-debuginfo.sh's buggy handling
-# of matching the pattern against the symlinks file.
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_bindir}/centrino-decode(\.debug)?|.*%%{_bindir}/powernow-k8-decode(\.debug)?|.*%%{_bindir}/cpupower(\.debug)?|.*%%{_libdir}/libcpupower.*|.*%%{_bindir}/turbostat(\.debug)?|.*%%{_bindir}/x86_energy_perf_policy(\.debug)?|.*%%{_bindir}/tmon(\.debug)?|.*%%{_bindir}/lsgpio(\.debug)?|.*%%{_bindir}/gpio-hammer(\.debug)?|.*%%{_bindir}/gpio-event-mon(\.debug)?|.*%%{_bindir}/iio_event_monitor(\.debug)?|.*%%{_bindir}/iio_generic_buffer(\.debug)?|.*%%{_bindir}/lsiio(\.debug)?|XXX' -o kernel-tools-debuginfo.list}
-
-%endif # with_tools
-
 
 #
 # This macro creates a kernel-<subpackage>-debuginfo package.
@@ -1039,6 +902,7 @@ Provides: installonlypkg(kernel-libre)\
 
 # Now, each variant package.
 
+%if %{with_pae}
 %ifnarch armv7hl
 %define variant_summary The Linux kernel compiled for PAE capable machines
 %kernel_variant_package %{pae}
@@ -1076,6 +940,7 @@ on kernel bugs, as some of these options impact performance noticably.
 The kernel-libre-PAEdebug package is the upstream kernel without the
 non-Free blobs it includes by default.
 
+%endif
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled
 %kernel_variant_package debug
@@ -1336,6 +1201,26 @@ xzcat %{SOURCE5000} | patch -p1 -F1 -s
 git commit -a -m "Stable update"
 %endif
 
+# Note: Even in the "nopatches" path some patches (build tweaks and compile
+# fixes) will always get applied; see patch defition above for details
+
+$RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
+git am %{patches}
+
+# END OF PATCH APPLICATIONS
+
+# Any further pre-build tree manipulations happen here.
+
+chmod +x scripts/checkpatch.pl
+chmod +x tools/objtool/sync-check.sh
+
+# This Prevents scripts/setlocalversion from mucking with our version numbers.
+touch .scmversion
+
+# Deal with configs stuff
+mkdir configs
+cd configs
+
 # Drop some necessary files from the source dir into the buildroot
 cp $RPM_SOURCE_DIR/kernel-*.config .
 cp %{SOURCE1000} .
@@ -1366,25 +1251,8 @@ do
 done
 %endif
 
-# Note: Even in the "nopatches" path some patches (build tweaks and compile
-# fixes) will always get applied; see patch defition above for details
-
-$RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
-git am %{patches}
-
-# END OF PATCH APPLICATIONS
-
-# Any further pre-build tree manipulations happen here.
-
-chmod +x scripts/checkpatch.pl
-
-# This Prevents scripts/setlocalversion from mucking with our version numbers.
-touch .scmversion
-
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
-
-mkdir configs
 
 %if !%{debugbuildsenabled}
 rm -f kernel-%{version}-*debug.config
@@ -1403,30 +1271,20 @@ CheckConfigs() {
 }
 
 cp %{SOURCE42} .
-# now run oldconfig over all the config files
-for i in *.config
-do
-  cat $i > temp-$i
-  mv $i .config
-  Arch=`head -1 .config | cut -b 3-`
-  make ARCH=$Arch listnewconfig | grep -E '^CONFIG_' >.newoptions || true
+OPTS=""
 %if %{listnewconfig_fail}
-  if [ -s .newoptions ]; then
-    cat .newoptions
-    exit 1
-  fi
+	OPTS="$OPTS -n"
 %endif
-  rm -f .newoptions
-  make ARCH=$Arch oldnoconfig
-  echo "# $Arch" > configs/$i
-  cat .config >> configs/$i
 %if %{configmismatch_fail}
-  CheckConfigs configs/$i temp-$i
+	OPTS="$OPTS -c"
 %endif
-  rm temp-$i
-done
+./process_configs.sh $OPTS kernel %{rpmversion}
+
 # end of kernel config
 %endif
+
+cd ..
+# End of Configs stuff
 
 # get rid of unwanted files resulting from patch fuzz
 find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
@@ -1610,6 +1468,8 @@ BuildKernel() {
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
 %ifarch aarch64
+    # Needed for systemtap
+    cp -a --parents arch/arm64/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/xen references arch/arm
     cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/opcodes.h references arch/arm
@@ -1811,51 +1671,6 @@ BuildKernel %make_target %kernel_image %{use_vdso} %{pae}
 BuildKernel %make_target %kernel_image %{_use_vdso}
 %endif
 
-%global perf_make \
-  make -s EXTRA_CFLAGS="${RPM_OPT_FLAGS}" LDFLAGS="%{__global_ldflags}" %{?cross_opts} -C tools/perf V=1 NO_PERF_READ_VDSO32=1 NO_PERF_READ_VDSOX32=1 WERROR=0 NO_LIBUNWIND=1 HAVE_CPLUS_DEMANGLE=1 NO_GTK2=1 NO_STRLCPY=1 NO_BIONIC=1 NO_JVMTI=1 prefix=%{_prefix}
-%if %{with_perf}
-# perf
-# make sure check-headers.sh is executable
-chmod +x tools/perf/check-headers.sh
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT all
-%endif
-
-%if %{with_tools}
-%ifarch %{cpupowerarchs}
-# cpupower
-# make sure version-gen.sh is executable.
-chmod +x tools/power/cpupower/utils/version-gen.sh
-%{make} %{?_smp_mflags} -C tools/power/cpupower CPUFREQ_BENCH=false
-%ifarch %{ix86}
-    pushd tools/power/cpupower/debug/i386
-    %{make} %{?_smp_mflags} centrino-decode powernow-k8-decode
-    popd
-%endif
-%ifarch x86_64
-    pushd tools/power/cpupower/debug/x86_64
-    %{make} %{?_smp_mflags} centrino-decode powernow-k8-decode
-    popd
-%endif
-%ifarch %{ix86} x86_64
-   pushd tools/power/x86/x86_energy_perf_policy/
-   %{make}
-   popd
-   pushd tools/power/x86/turbostat
-   %{make}
-   popd
-%endif #turbostat/x86_energy_perf_policy
-%endif
-pushd tools/thermal/tmon/
-%{make}
-popd
-pushd tools/iio/
-%{make}
-popd
-pushd tools/gpio/
-%{make}
-popd
-%endif
-
 # In the modsign case, we do 3 things.  1) We check the "flavour" and hard
 # code the value in the following invocations.  This is somewhat sub-optimal
 # but we're doing this inside of an RPM macro and it isn't as easy as it
@@ -1964,73 +1779,6 @@ done
 rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
 %endif
 
-%if %{with_perf}
-# perf tool binary and supporting scripts/binaries
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT lib=%{_lib} install-bin install-traceevent-plugins
-# remove the 'trace' symlink.
-rm -f %{buildroot}%{_bindir}/trace
-# remove the perf-tips
-rm -rf %{buildroot}%{_docdir}/perf-tip
-
-# python-perf extension
-%{perf_make} DESTDIR=$RPM_BUILD_ROOT install-python_ext
-
-# perf man pages (note: implicit rpm magic compresses them later)
-mkdir -p %{buildroot}/%{_mandir}/man1
-pushd %{buildroot}/%{_mandir}/man1
-tar -xf %{SOURCE10}
-%if !%{with_tools}
-    rm -f kvm_stat.1
-%endif
-popd
-%endif
-
-%if %{with_tools}
-%ifarch %{cpupowerarchs}
-%{make} -C tools/power/cpupower DESTDIR=$RPM_BUILD_ROOT libdir=%{_libdir} mandir=%{_mandir} CPUFREQ_BENCH=false install
-rm -f %{buildroot}%{_libdir}/*.{a,la}
-%find_lang cpupower
-mv cpupower.lang ../
-%ifarch %{ix86}
-    pushd tools/power/cpupower/debug/i386
-    install -m755 centrino-decode %{buildroot}%{_bindir}/centrino-decode
-    install -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
-    popd
-%endif
-%ifarch x86_64
-    pushd tools/power/cpupower/debug/x86_64
-    install -m755 centrino-decode %{buildroot}%{_bindir}/centrino-decode
-    install -m755 powernow-k8-decode %{buildroot}%{_bindir}/powernow-k8-decode
-    popd
-%endif
-chmod 0755 %{buildroot}%{_libdir}/libcpupower.so*
-mkdir -p %{buildroot}%{_unitdir} %{buildroot}%{_sysconfdir}/sysconfig
-install -m644 %{SOURCE2000} %{buildroot}%{_unitdir}/cpupower.service
-install -m644 %{SOURCE2001} %{buildroot}%{_sysconfdir}/sysconfig/cpupower
-%endif
-%ifarch %{ix86} x86_64
-   mkdir -p %{buildroot}%{_mandir}/man8
-   pushd tools/power/x86/x86_energy_perf_policy
-   make DESTDIR=%{buildroot} install
-   popd
-   pushd tools/power/x86/turbostat
-   make DESTDIR=%{buildroot} install
-   popd
-%endif #turbostat/x86_energy_perf_policy
-pushd tools/thermal/tmon
-make INSTALL_ROOT=%{buildroot} install
-popd
-pushd tools/iio
-make DESTDIR=%{buildroot} install
-popd
-pushd tools/gpio
-make DESTDIR=%{buildroot} install
-popd
-pushd tools/kvm/kvm_stat
-make INSTALL_ROOT=%{buildroot} install-tools
-popd
-%endif
-
 %if %{with_bootwrapper}
 make DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
 %endif
@@ -2045,14 +1793,6 @@ rm -rf $RPM_BUILD_ROOT
 ###
 ### scripts
 ###
-
-%if %{with_tools}
-%post -n kernel-libre-tools-libs
-/sbin/ldconfig
-
-%postun -n kernel-libre-tools-libs
-/sbin/ldconfig
-%endif
 
 #
 # This macro defines a %%post script for a kernel*-devel package.
@@ -2138,11 +1878,13 @@ fi}\
 %kernel_variant_preun
 %kernel_variant_post -r kernel-smp
 
+%if %{with_pae}
 %kernel_variant_preun %{pae}
 %kernel_variant_post -v %{pae} -r (kernel|kernel-smp)
 
 %kernel_variant_post -v %{pae}debug -r (kernel|kernel-smp)
 %kernel_variant_preun %{pae}debug
+%endif
 
 %kernel_variant_preun debug
 %kernel_variant_post -v debug
@@ -2174,77 +1916,6 @@ fi
 /usr/sbin/*
 %{_libdir}/kernel-wrapper
 %endif
-
-%if %{with_perf}
-%files -n perf-libre
-%defattr(-,root,root)
-%{_bindir}/perf
-%dir %{_libdir}/traceevent/plugins
-%{_libdir}/traceevent/plugins/*
-%dir %{_libexecdir}/perf-core
-%{_libexecdir}/perf-core/*
-%{_datadir}/perf-core/*
-%{_mandir}/man[1-8]/perf*
-%{_sysconfdir}/bash_completion.d/perf
-%doc linux-%{KVERREL}/tools/perf/Documentation/examples.txt
-
-%files -n python-perf-libre
-%defattr(-,root,root)
-%{python_sitearch}
-
-%if %{with_debuginfo}
-%files -f perf-debuginfo.list -n perf-libre-debuginfo
-%defattr(-,root,root)
-
-%files -f python-perf-debuginfo.list -n python-perf-libre-debuginfo
-%defattr(-,root,root)
-%endif
-%endif # with_perf
-
-%if %{with_tools}
-%files -n kernel-libre-tools -f cpupower.lang
-%defattr(-,root,root)
-%ifarch %{cpupowerarchs}
-%{_bindir}/cpupower
-%ifarch %{ix86} x86_64
-%{_bindir}/centrino-decode
-%{_bindir}/powernow-k8-decode
-%endif
-%{_unitdir}/cpupower.service
-%{_mandir}/man[1-8]/cpupower*
-%config(noreplace) %{_sysconfdir}/sysconfig/cpupower
-%ifarch %{ix86} x86_64
-%{_bindir}/x86_energy_perf_policy
-%{_mandir}/man8/x86_energy_perf_policy*
-%{_bindir}/turbostat
-%{_mandir}/man8/turbostat*
-%endif
-%{_bindir}/tmon
-%{_bindir}/iio_event_monitor
-%{_bindir}/iio_generic_buffer
-%{_bindir}/lsiio
-%{_bindir}/lsgpio
-%{_bindir}/gpio-hammer
-%{_bindir}/gpio-event-mon
-%{_mandir}/man1/kvm_stat*
-%{_bindir}/kvm_stat
-%endif
-
-%if %{with_debuginfo}
-%files -f kernel-tools-debuginfo.list -n kernel-libre-tools-debuginfo
-%defattr(-,root,root)
-%endif
-
-%ifarch %{cpupowerarchs}
-%files -n kernel-libre-tools-libs
-%{_libdir}/libcpupower.so.0
-%{_libdir}/libcpupower.so.0.0.1
-
-%files -n kernel-libre-tools-libs-devel
-%{_libdir}/libcpupower.so
-%{_includedir}/cpufreq.h
-%endif
-%endif # with_perf
 
 # empty meta-package
 %files
@@ -2321,7 +1992,176 @@ fi
 #
 #
 %changelog
-* Thu Nov 16 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jan  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15-rc7-gnu.
+
+* Mon Jan 08 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc7.git0.1
+- Linux v4.15-rc7
+
+* Mon Jan 08 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jan 05 2018 Laura Abbott <labbott@redhat.com>
+- Remove kernel tools from kernel spec file
+
+* Fri Jan 05 2018 Laura Abbott <labbott@redhat.com>
+- Copy module linker script (rhbz 1531182)
+
+* Fri Jan 05 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc6.git2.1
+- Linux v4.15-rc6-48-ge1915c8195b3
+
+* Thu Jan 04 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc6.git1.1
+- Linux v4.15-rc6-18-g00a5ae218d57
+
+* Thu Jan 04 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Thu Jan 04 2018 Hans de Goede <hdegoede@redhat.com>
+- Add a patch to filter false positive kbd backlight change events (#1514969)
+- Add a patch to disable runtime-pm for QCA bluetooth devices (#1514836)
+
+* Wed Jan 03 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc6.git0.3
+- Yet another KPTI fix
+
+* Wed Jan 03 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc6.git0.2
+- KPTI Fix
+
+* Mon Jan 01 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc6.git0.1
+- Linux v4.15-rc6
+
+* Mon Jan 01 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Dec 22 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Add patches which allow specifying a default SATA linkpower management policy
+  for mobile chipsets and set the default LPM policy to "med_power_with_dipm"
+
+* Fri Dec 22 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc4.git4.1
+- Linux v4.15-rc4-202-gead68f216110
+
+* Thu Dec 21 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc4.git3.1
+- Linux v4.15-rc4-77-gd1ce8ceb8ba8
+
+* Wed Dec 20 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc4.git2.1
+- Linux v4.15-rc4-42-g10a7e9d84915
+
+* Wed Dec 20 2017 Jeremy Cline <jeremy@jcline.org>
+- Backport fix e1000_check_for_copper_link_ich8lan return value
+
+* Tue Dec 19 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc4.git1.1
+- Linux v4.15-rc4-41-gace52288edf0
+
+* Tue Dec 19 2017 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Dec 18 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc4.git0.1
+- Linux v4.15-rc4
+
+* Mon Dec 18 2017 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Dec 15 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc3.git4.1
+- Linux v4.15-rc3-86-g032b4cc8ff84
+
+* Fri Dec 15 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Enable CONFIG_REGULATOR on x86_64, fixing USB PD charging on some devices
+
+* Thu Dec 14 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc3.git3.1
+- Linux v4.15-rc3-45-g7c5cac1bc717
+
+* Wed Dec 13 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc3.git2.1
+- Linux v4.15-rc3-37-gd39a01eff9af
+
+* Tue Dec 12 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc3.git1.1
+- Linux v4.15-rc3-33-ga638349bf6c2
+
+* Tue Dec 12 2017 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Dec 11 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc3.git0.1
+- Linux v4.15-rc3
+
+* Mon Dec 11 2017 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Thu Dec 07 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc2.git2.1
+- Linux v4.15-rc2-252-g968edbd93c0c
+
+* Wed Dec 06 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc2.git1.1
+- Linux v4.15-rc2-174-g328b4ed93b69
+
+* Wed Dec 06 2017 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Wed Dec  6 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable IrDA (broken, being dropped upstream)
+
+* Mon Dec 04 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc2.git0.1
+- Linux v4.15-rc2
+
+* Mon Dec 04 2017 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Dec 01 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc1.git3.1
+- Linux v4.15-rc1-396-ga0651c7fa2c0
+
+* Thu Nov 30 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc1.git2.1
+- Linux v4.15-rc1-237-g9e0600f5cf6c
+
+* Wed Nov 29 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc1.git1.1
+- Linux v4.15-rc1-24-g43570f0383d6
+
+* Wed Nov 29 2017 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Nov 27 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc1.git0.1
+- Linux v4.15-rc1
+
+* Mon Nov 27 2017 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Sun Nov 26 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Fix left-button not working with some hid-multitouch touchpads
+
+* Thu Nov 23 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git7.2
+- Fix for TTM regression (rhbz 1516584)
+
+* Tue Nov 21 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git7.1
+- Linux v4.14-12995-g0c86a6bd85ff
+
+* Mon Nov 20 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git6.1
+- Linux v4.14-12891-gc8a0739b185d
+
+* Sat Nov 18 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git5.1
+- Linux v4.14-12375-g2dcd9c71c1ff
+
+* Thu Nov 16 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git4.1
+- Linux v4.14-9248-ge60e1ee60630
+
+* Thu Nov 16 2017 Hans de Goede <jwrdegoede@fedoraproject.org>
+- Enable USB autosuspend for USB bluetooth receivers by default, use
+  btusb.enable_autosuspend=n on the kernel cmdline to disable
+
+* Wed Nov 15 2017 Laura Abbott <labbott@redhat.com>
+- Disable IPX and NCPFS
+
+* Wed Nov 15 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git3.1
+- Linux v4.14-4050-g37cb8e1f8e10
+
+* Tue Nov 14 2017 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc0.git2.1
+- Linux v4.14-2229-g894025f24bd0
+- Include fix for RPi graphics
+
+* Mon Nov 13 2017 Laura Abbott <labbott@redhat.com> - 4.14.0-0.rc0.git1.1
+- Linux v4.14-104-g1e19bded7f5d
+
+* Mon Nov 13 2017 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Nov 13 2017 Peter Robinson <pbrobinson@fedoraproject.org>
+- Compress modules on all arches
+
+* Mon Nov 13 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Nov 16
 - GNU Linux-libre 4.14-gnu.
 
 * Mon Nov 13 2017 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.0-1
