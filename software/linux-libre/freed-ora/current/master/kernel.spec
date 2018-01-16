@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -593,6 +593,11 @@ Patch205: MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
 
 Patch206: MODSIGN-Support-not-importing-certs-from-db.patch
 
+# bz 1497559 - Make kernel MODSIGN code not error on missing variables
+Patch207: 0001-Make-get_cert_list-not-complain-about-cert-lists-tha.patch
+Patch208: 0002-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
+Patch209: 0003-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
+
 Patch210: disable-i8042-check-on-apple-mac.patch
 
 Patch211: drm-i915-hush-check-crtc-state.patch
@@ -624,16 +629,16 @@ Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe
 # https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
 Patch332: arm64-socionext-96b-enablement.patch
 
-# This needs a rebase
-# Patch335: arm-exynos-fix-usb3.patch
+# https://patchwork.kernel.org/patch/10149775/ MMC support for Synquacer
+Patch333: arm64-mmc-sdhci_f_sdh30-add-ACPI-support.patch
+
+# Fix Raspberry Pi and possibly some other dwc2/dwc3 users
+# https://patchwork.kernel.org/patch/10149439/
+Patch399: phy-work-around-phys-references-to-usb-phy-devices.patch
 
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
-
-# rhbz 1525523
-# https://patchwork.kernel.org/patch/10104349/
-Patch500: e1000e-Fix-e1000_check_for_copper_link_ich8lan-return-value..patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
@@ -659,9 +664,6 @@ Patch630: 0001-HID-multitouch-Properly-deal-with-Win8-PTP-reports-w.patch
 Patch631: 0002-HID-multitouch-Only-look-at-non-touch-fields-in-firs.patch
 Patch632: 0003-HID-multitouch-Combine-all-left-button-events-in-a-f.patch
 
-# Reported upstream
-Patch635: 0003-x86-PCI-limit-the-size-of-the-64bit-BAR-to-256GB.patch
-
 # Make SATA link powermanagement policy configurable for:
 # https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
 # Queued upstream for merging into 4.16
@@ -674,6 +676,10 @@ Patch640: 0001-platform-x86-dell-laptop-Filter-out-spurious-keyboar.patch
 
 # rhbz1514836, submitted upstream
 Patch641: 0001-Bluetooth-btusb-Disable-autosuspend-on-QCA-Rome-devi.patch
+
+# Speculative Execution patches
+Patch642: prevent-bounds-check-bypass-via-speculative-execution.patch
+
 
 # END OF PATCH DEFINITIONS
 
@@ -1992,10 +1998,46 @@ fi
 #
 #
 %changelog
-* Tue Jan  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Jan 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15-rc8-gnu.
+
+* Mon Jan 15 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc8.git0.1
+- Linux v4.15-rc8
+
+* Mon Jan 15 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jan 12 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc7.git4.1
+- Linux v4.15-rc7-152-g1545dec46db3
+
+* Thu Jan 11 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc7.git3.1
+- Linux v4.15-rc7-111-g5f615b97cdea
+
+* Thu Jan 11 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Initial retpoline patches for Spectre v2
+
+* Wed Jan 10 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc7.git2.1
+- Linux v4.15-rc7-102-gcf1fb158230e
+
+* Wed Jan 10 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix USB on Raspberry Pi (and possibly other dwc2 devices)
+
+* Tue Jan 09 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc7.git1.1
+- Linux v4.15-rc7-79-gef7f8cec80a0
+
+* Tue Jan 09 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jan 08 2018 Laura Abbott <labbott@redhat.com>
+- Disable CONFIG_RESET_ATTACK_MITIGATION (rhbz 1532058)
+
+* Mon Jan 08 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.15.0-0.rc7.git0.1
+- First round of Speculative Execution variant 1 patches
+
+* Mon Jan  8 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan  9
 - GNU Linux-libre 4.15-rc7-gnu.
 
-* Mon Jan 08 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc7.git0.1
+* Mon Jan 08 2018 Laura Abbott <labbott@redhat.com>
 - Linux v4.15-rc7
 
 * Mon Jan 08 2018 Laura Abbott <labbott@redhat.com>
