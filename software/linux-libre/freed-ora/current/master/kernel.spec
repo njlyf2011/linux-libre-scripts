@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 9
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -156,10 +156,19 @@ Summary: The Linux kernel
 # build a release kernel on rawhide
 %define with_release   %{?_with_release:      1} %{?!_with_release:      0}
 
+# verbose build, i.e. no silent rules and V=1
+%define with_verbose %{?_with_verbose:        1} %{?!_with_verbose:      0}
+
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
 %define debugbuildsenabled 1
+
+%if %{with_verbose}
+%define make_opts V=1
+%else
+%define make_opts -s
+%endif
 
 # Want to build a vanilla kernel build without any non-upstream patches?
 %define with_vanilla %{?_with_vanilla: 1} %{?!_with_vanilla: 0}
@@ -631,10 +640,6 @@ Patch332: arm64-socionext-96b-enablement.patch
 
 # https://patchwork.kernel.org/patch/10149775/ MMC support for Synquacer
 Patch333: arm64-mmc-sdhci_f_sdh30-add-ACPI-support.patch
-
-# Fix Raspberry Pi and possibly some other dwc2/dwc3 users
-# https://patchwork.kernel.org/patch/10149439/
-Patch399: phy-work-around-phys-references-to-usb-phy-devices.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -1354,7 +1359,7 @@ BuildKernel() {
 
     # and now to start the build process
 
-    make -s mrproper
+    make %{?make_opts} mrproper
     cp configs/$Config .config
 
     %if %{signkernel}%{signmodules}
@@ -1364,9 +1369,9 @@ BuildKernel() {
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
 
-    make -s ARCH=$Arch oldnoconfig >/dev/null
-    %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
-    %{make} -s ARCH=$Arch V=1 %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
+    make %{?make_opts} ARCH=$Arch olddefconfig >/dev/null
+    %{make} %{?make_opts} ARCH=$Arch %{?_smp_mflags} $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
+    %{make} %{?make_opts} ARCH=$Arch %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
@@ -1375,7 +1380,7 @@ BuildKernel() {
 %endif
 
 %ifarch %{arm} aarch64
-    %{make} -s ARCH=$Arch V=1 dtbs dtbs_install INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
+    %{make} %{?make_opts} ARCH=$Arch dtbs dtbs_install INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
     cp -r $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer $RPM_BUILD_ROOT/lib/modules/$KernelVer/dtb
     find arch/$Arch/boot/dts -name '*.dtb' -type f | xargs rm -f
 %endif
@@ -1416,10 +1421,10 @@ BuildKernel() {
 
     # Override $(mod-fw) because we don't want it to install any firmware
     # we'll get it from the linux-firmware package and we don't want conflicts
-    %{make} -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
+    %{make} %{?make_opts} ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 
     if [ $DoVDSO -ne 0 ]; then
-        %{make} -s ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
+        %{make} %{?make_opts} ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
         if [ ! -s ldconfig-kernel.conf ]; then
           echo > ldconfig-kernel.conf "\
     # Placeholder file, no vDSO hwcap entries used in this kernel."
@@ -1998,6 +2003,30 @@ fi
 #
 #
 %changelog
+* Tue Jan 23 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15-rc9-gnu.
+
+* Mon Jan 22 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.15.0-0.rc9.git0.1
+- Linux v4.15-rc9
+
+* Mon Jan 22 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Jan 19 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc8.git3.1
+- Linux v4.15-rc8-120-gdda3e15231b3
+
+* Thu Jan 18 2018 Laura Abbott <labbott@redhat.com>
+- Enable CONFIG_IP6_NF_TARGET_NPT (rhbz 1435884)
+
+* Thu Jan 18 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc8.git2.1
+- Linux v4.15-rc8-104-g1d966eb4d632
+
+* Wed Jan 17 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc8.git1.1
+- Linux v4.15-rc8-72-g8cbab92dff77
+
+* Wed Jan 17 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Mon Jan 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15-rc8-gnu.
 
