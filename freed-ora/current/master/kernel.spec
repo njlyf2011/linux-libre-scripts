@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 14
+%define base_sublevel 15
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.14%{?stablegnux}
-%define rcrevlibre  -4.14%{?rcrevgnux}
+#define rcrevlibre  -4.14%{?rcrevgnux}
 #define gitrevlibre -4.14%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 9
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -466,9 +466,8 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
-Source10: perf-man-%{kversion}.tar.gz
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
 Source15: merge.pl
@@ -612,6 +611,7 @@ Patch210: disable-i8042-check-on-apple-mac.patch
 Patch211: drm-i915-hush-check-crtc-state.patch
 
 # 300 - ARM patches
+Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
@@ -623,23 +623,24 @@ Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 Patch303: ARM-tegra-usb-no-reset.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch305: arm-imx6-hummingboard2.patch
+Patch304: arm-imx6-hummingboard2.patch
 
-Patch306: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
-
-Patch307: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
+Patch305: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
 
 # https://patchwork.kernel.org/patch/9820417/
-Patch310: qcom-msm89xx-fixes.patch
+Patch306: qcom-msm89xx-fixes.patch
+
+# https://patchwork.kernel.org/patch/10173115/
+Patch307: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
-Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
+Patch308: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
 # https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
-Patch332: arm64-socionext-96b-enablement.patch
+Patch330: arm64-socionext-96b-enablement.patch
 
 # https://patchwork.kernel.org/patch/10149775/ MMC support for Synquacer
-Patch333: arm64-mmc-sdhci_f_sdh30-add-ACPI-support.patch
+Patch331: arm64-mmc-sdhci_f_sdh30-add-ACPI-support.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -685,6 +686,8 @@ Patch641: 0001-Bluetooth-btusb-Disable-autosuspend-on-QCA-Rome-devi.patch
 # Speculative Execution patches
 Patch642: prevent-bounds-check-bypass-via-speculative-execution.patch
 
+# Fix crash on Xwayland using nouveau
+Patch650: dma-buf-fix-reservation_object_wait_timeout_rcu-once-more-v2.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2003,6 +2006,31 @@ fi
 #
 #
 %changelog
+* Mon Jan 29 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15-gnu.
+
+* Mon Jan 29 2018 Laura Abbott <labbott@redhat.com>  - 4.15.0-1
+- Linux v4.15
+- Disable debugging options.
+
+* Fri Jan 26 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix crash on Xwayland using nouveau
+
+* Fri Jan 26 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc9.git4.1
+- Linux v4.15-rc9-67-g993ca2068b04
+
+* Thu Jan 25 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc9.git3.1
+- Linux v4.15-rc9-55-g5b7d27967dab
+
+* Wed Jan 24 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc9.git2.1
+- Linux v4.15-rc9-23-g1f07476ec143
+
+* Tue Jan 23 2018 Laura Abbott <labbott@redhat.com> - 4.15.0-0.rc9.git1.1
+- Linux v4.15-rc9-5-g1995266727fa
+
+* Tue Jan 23 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Tue Jan 23 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15-rc9-gnu.
 
