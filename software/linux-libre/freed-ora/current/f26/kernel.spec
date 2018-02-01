@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -666,20 +666,11 @@ Patch335: arm-exynos-fix-usb3.patch
 # rbhz 1519591 1520764
 Patch500: dccp-CVE-2017-8824-use-after-free-in-DCCP-code.patch
 
-# CVE-2017-17450
-# rhbz 1525761 1525764
-Patch504: netfilter-xt_osf-Add-missing-permission-checks.patch
-
-# CVE-2017-17448
-# rhbz 1525768 1525769
-Patch505: netfilter-nfnetlink_cthelper-Add-missing-permission-.patch
-
 # CVE-2018-5344 rhbz 1533909 1533911
 Patch507: loop-fix-concurrent-lo_open-lo_release.patch
 
 # 550-600 Meltdown and Spectre Fixes
 Patch550: prevent-bounds-check-bypass-via-speculative-execution.patch
-Patch551: revert-module-add-retpoline-tag-to-vermagic.patch
 
 # 600 - Patches for improved Bay and Cherry Trail device support
 # Below patches are submitted upstream, awaiting review / merging
@@ -710,6 +701,15 @@ Patch633: 0001-platform-x86-dell-laptop-Filter-out-spurious-keyboar.patch
 
 # Fix crash on Xwayland using nouveau
 Patch634: dma-buf-fix-reservation_object_wait_timeout_rcu-once-more-v2.patch
+
+# rhbz 1539238
+Patch635: Add-support-for-One-by-Wacom-CTL-472-CTL-672.patch
+
+# CVE-2018-5750 rhbz 1539706 1539708
+Patch636: ACPI-sbshc-remove-raw-pointer-from-printk-message.patch
+
+# rhbz 1492664 1492665
+Patch637: 0001-mm-don-t-warn-about-allocations-which-stall-for-too-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2357,6 +2357,19 @@ fi
 #
 #
 %changelog
+* Wed Jan 31 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14.16-gnu.
+
+* Wed Jan 31 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.16-200
+- Linux v4.14.16
+
+* Mon Jan 29 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-5750 (rhbz 1539706 1539708)
+- Fix softlockup (rhbz 1492664 1492665)
+
+* Sat Jan 27 2018 Laura Abbott <labbott@fedoraproject.org>
+- Add support for Wacom tablet (rhbz 1539238)
+
 * Fri Jan 26 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.15-201
 - Revert retpoline vermagic tag
 
