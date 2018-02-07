@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -659,8 +659,6 @@ Patch321: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe
 # bcm2837 bluetooth support
 Patch323: bcm2837-bluetooth-support.patch
 
-Patch324: rpi-graphics-fix.patch
-
 # Generic fixes and enablement for Socionext SoC and 96board
 # https://patchwork.kernel.org/patch/9980861/
 Patch331: PCI-aspm-deal-with-missing-root-ports-in-link-state-handling.patch
@@ -676,9 +674,6 @@ Patch335: arm-exynos-fix-usb3.patch
 
 # rbhz 1519591 1520764
 Patch500: dccp-CVE-2017-8824-use-after-free-in-DCCP-code.patch
-
-# CVE-2018-5344 rhbz 1533909 1533911
-Patch507: loop-fix-concurrent-lo_open-lo_release.patch
 
 # 550-600 Meltdown and Spectre Fixes
 Patch550: prevent-bounds-check-bypass-via-speculative-execution.patch
@@ -2348,6 +2343,12 @@ fi
 #
 #
 %changelog
+* Mon Feb  5 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.14.17-gnu.
+
+* Mon Feb 05 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.14.17-300
+- Linux v4.14.17
+
 * Wed Jan 31 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.14.16-gnu.
 
