@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-01-10 16:34:02.161279709 -0500
-@@ -0,0 +1,5880 @@
++++ .config	2018-02-15 15:08:01.381665934 -0500
+@@ -0,0 +1,5879 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.15.0-rc7-gnu Kernel Configuration
++# Linux/mips 4.15.3-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -254,7 +254,6 @@ Index: .config
 +CONFIG_TASK_DELAY_ACCT=y
 +CONFIG_TASK_XACCT=y
 +CONFIG_TASK_IO_ACCOUNTING=y
-+# CONFIG_CPU_ISOLATION is not set
 +
 +#
 +# RCU Subsystem
