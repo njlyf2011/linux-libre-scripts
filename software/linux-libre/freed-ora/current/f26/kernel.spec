@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2022,6 +2022,12 @@ fi
 #
 #
 %changelog
+* Mon Feb 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.6-gnu.
+
+* Mon Feb 26 2018 Laura Abbott <labbott@redhat.com> - 4.15.6-200
+- Linux v4.15.6
+
 * Fri Feb 23 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.5-gnu.
 
