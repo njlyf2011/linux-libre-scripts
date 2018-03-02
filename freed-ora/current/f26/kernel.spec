@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -674,6 +674,9 @@ Patch652: iwlwifi-mvn.patch
 
 # CVE-2018-1000026 rhbz 1541846 1546744
 Patch653: CVE-2018-1000026.patch
+
+# rhbz 1549316
+Patch654: 0001-ipmi_si-Fix-error-handling-of-platform-device.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2022,6 +2025,13 @@ fi
 #
 #
 %changelog
+* Thu Mar  1 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.7-gnu.
+
+* Wed Feb 28 2018 Laura Abbott <labbott@redhat.com> - 4.15.7-200
+- Linux v4.15.7
+- Fix IPMI crash (rhbz 1549316)
+
 * Mon Feb 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.6-gnu.
 
