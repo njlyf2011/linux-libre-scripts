@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-02-26 11:55:48.758853335 -0500
++++ .config	2018-03-08 14:33:25.915949796 -0500
 @@ -0,0 +1,5228 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.1.49-gnu Kernel Configuration
++# Linux/mips 4.1.50-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -503,7 +503,6 @@ Index: .config
 +# CPU frequency scaling drivers
 +#
 +CONFIG_LOONGSON2_CPUFREQ=m
-+# CONFIG_LOONGSON1_CPUFREQ is not set
 +
 +#
 +# CPU Idle
@@ -2163,6 +2162,7 @@ Index: .config
 +CONFIG_USB_NET_PLUSB=m
 +CONFIG_USB_NET_MCS7830=m
 +CONFIG_USB_NET_RNDIS_HOST=m
++CONFIG_USB_NET_CDC_SUBSET_ENABLE=m
 +CONFIG_USB_NET_CDC_SUBSET=m
 +CONFIG_USB_ALI_M5632=y
 +CONFIG_USB_AN2720=y
