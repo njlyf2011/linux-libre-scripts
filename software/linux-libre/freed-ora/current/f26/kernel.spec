@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -683,6 +683,12 @@ Patch657: ipmi-fixes.patch
 
 # CVE-2018-7757 rhbz 1553361 1553363
 Patch658: 0001-scsi-libsas-fix-memory-leak-in-sas_smp_get_phy_event.patch
+
+# CVE-2018-7995 rhbz 1553911 1553918
+Patch659: 0001-x86-MCE-Serialize-sysfs-changes.patch
+
+# CVE-2018-8043 rhbz 1554199 1554200
+Patch660: 0001-net-phy-mdio-bcm-unimac-fix-potential-NULL-dereferen.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2043,10 +2049,20 @@ fi
 #
 #
 %changelog
+* Tue Mar 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.9-gnu.
+
+* Mon Mar 12 2018 Laura Abbott <labbott@redhat.com> - 4.15.9-200
+- Linux v4.15.9
+
+* Mon Mar 12 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-7995 (rhbz 1553911 1553918)
+- Fix CVE-2018-8043 (rhbz 1554199 1554200)
+
 * Fri Mar  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.8-gnu.
 
-* Fri Mar 09 2018 Laura Abbott <labbott@redhat.com> - 4.15.8-300
+* Fri Mar 09 2018 Laura Abbott <labbott@redhat.com> - 4.15.8-200
 - Linux v4.15.8
 
 * Thu Mar 08 2018 Justin M. Forbes <jforbes@fedoraproject.org>
