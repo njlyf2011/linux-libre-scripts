@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -714,6 +714,9 @@ Patch662: mm-khugepaged-Convert-VM_BUG_ON-to-collapse-fail.patch
 
 # CVE-2017-18232 rhbz 1558066 1558067
 Patch663: 0001-scsi-libsas-direct-call-probe-and-destruct.patch
+
+# rhbz 1511786
+Patch 664: drm-nouveau-bl-fix-backlight-regression.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1498,57 +1501,8 @@ BuildKernel() {
     rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cp .config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp -a scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
-    # the full copy of scripts also copies a bunch of binaries which ends
-    # up screwing the debuginfo. It's just easier to remove them.
-    if [ -f scripts/asn1_compiler ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/asn1_compiler
-    fi
-    if [ -f scripts/sign-file ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/sign-file
-    fi
-    if [ -f scripts/extract-cert ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/extract-cert
-    fi
-    if [ -f scripts/pnmtologo ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/pnmtologo
-    fi
-    if [ -f scripts/unifdef ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/unifdef
-    fi
-    if [ -f scripts/sortextable ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/sortextable
-    fi
-    if [ -f scripts/basic/fixdep ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/basic/fixdep
-    fi
-    if [ -f scripts/recordmcount ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/recordmcount
-    fi
-    if [ -f scripts/conmakehash ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/conmakehash
-    fi
-    if [ -f scripts/kallsyms ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/kallsyms
-    fi
-    if [ -f scripts/basic/bin2c ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/basic/bin2c
-    fi
-    if [ -f scripts/mod/mk_elfconfig ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/mod/mk_elfconfig
-    fi
-    if [ -f scripts/mod/modpost ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/mod/modpost
-    fi
-    if [ -f scripts/kconfig/conf ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/kconfig/conf
-    fi
-    if [ -f scripts/selinux/mdp/mdp ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/selinux/mdp/mdp
-    fi
-    if [ -f scripts/selinux/genheaders/genheaders ]; then
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/selinux/genheaders/genheaders
-    fi
     if [ -f tools/objtool/objtool ]; then
+      cp -a tools/objtool/objtool $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/objtool/ || :
       # these are a few files associated with objtool
       cp -a --parents tools/build/Build.include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
       cp -a --parents tools/build/Build $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -1556,9 +1510,6 @@ BuildKernel() {
       cp -a --parents tools/scripts/utilities.mak $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
       # also more than necessary but it's not that many more files
       cp -a --parents tools/objtool/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-      # these can be rebuilt
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/objtool/fixdep
-      rm $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/objtool/objtool
       cp -a --parents tools/lib/str_error_r.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
       cp -a --parents tools/lib/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
       cp -a --parents tools/lib/subcmd/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -2106,6 +2057,12 @@ fi
 #
 #
 %changelog
+* Thu Mar 22 2018 Laura Abbott <labbott@redhat.com> - 4.15.12-301
+- Rebuild for kernel-devel fix
+
+* Thu Mar 22 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix for nouveau backlight regression (rhbz 1511786)
+
 * Wed Mar 21 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.12-gnu.
 
