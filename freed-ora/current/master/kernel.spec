@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.14%{?stablegnux}
-#define rcrevlibre  -4.14%{?rcrevgnux}
-#define gitrevlibre -4.14%{?gitrevgnux}
+#define stablelibre -4.15%{?stablegnux}
+%define rcrevlibre  -4.15%{?rcrevgnux}
+#define gitrevlibre -4.15%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 6
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -404,8 +404,8 @@ Summary: The Linux kernel
 %define kernel_prereq  coreutils, systemd >= 203-2, /usr/bin/kernel-install
 %define initrd_prereq  dracut >= 027
 
+
 Name: kernel-libre%{?variant}
-Group: System Environment/Kernel
 License: GPLv2
 URL: http://linux-libre.fsfla.org/
 Version: %{rpmversion}
@@ -425,7 +425,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 #
 BuildRequires: kmod, patch, bash, tar, git
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
-BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
+BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex
 BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if %{with_sparse}
 BuildRequires: sparse
@@ -466,7 +466,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -507,6 +507,7 @@ Source40: generate_all_configs.sh
 Source41: generate_debug_configs.sh
 
 Source42: process_configs.sh
+Source43: generate_bls_conf.sh
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -548,6 +549,9 @@ Source5000: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 
 # ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch002: 0001-iio-Use-event-header-from-kernel-tree.patch
+
+# gcc -Werror=aliasing workaround
+Patch003: 0001-Temporarily-work-around-gcc-aliasing-warning-error.patch
 
 Patch07: freedo.patch
 
@@ -622,9 +626,6 @@ Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch303: ARM-tegra-usb-no-reset.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch304: arm-imx6-hummingboard2.patch
-
 Patch305: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
 
 # https://patchwork.kernel.org/patch/9820417/
@@ -636,64 +637,45 @@ Patch307: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch308: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
-# https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
-Patch330: arm64-socionext-96b-enablement.patch
+# https://www.spinics.net/lists/stable/msg214527.html
+Patch311: arm-clk-bcm2835-hdmi-fixes.patch
 
-# https://patchwork.kernel.org/patch/10149775/ MMC support for Synquacer
-Patch331: arm64-mmc-sdhci_f_sdh30-add-ACPI-support.patch
+# https://www.spinics.net/lists/arm-kernel/msg632925.html
+Patch313: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
+
+Patch314: bcm283x-gpio-expander.patch
+
+# https://www.spinics.net/lists/arm-kernel/msg621982.html
+Patch315: bcm283x-Fix-probing-of-bcm2835-i2s.patch
+
+# https://www.spinics.net/lists/arm-kernel/msg633942.html
+Patch316: mmc-sdhci-iproc-Disable-preset-values-for-BCM2835.patch
+
+# https://www.spinics.net/lists/arm-kernel/msg633945.html
+Patch317: bcm2835-hwrng-Handle-deferred-clock-properly.patch
+
+Patch318: bcm2837-rpi-initial-support-for-the-3.patch
 
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
 
-# 600 - Patches for improved Bay and Cherry Trail device support
-# Below patches are submitted upstream, awaiting review / merging
-Patch610: 0010-Input-silead-Add-support-for-capactive-home-button-f.patch
+# CVE-2018-7273 rhbz 1547384 1547386
+Patch500: floppy-Don-t-print-kernel-addresses-to-log-in-show_f.patch
 
 # rhbz 1476467
-Patch617: Fix-for-module-sig-verification.patch
+Patch501: Fix-for-module-sig-verification.patch
 
 # rhbz 1431375
-Patch619: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # rhbz 1509461
-Patch625: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
-
-# For https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
-# Queued in bluetooth-next for merging into 4.16
-Patch628: 0001-Bluetooth-btusb-Add-a-Kconfig-option-to-enable-USB-a.patch
-
-# Fix left-button not working with some hid-multitouch touchpads
-# Adding these suggested by Benjamin Tissoires
-# Queued in hid.git/for-4.16/hid-quirks-cleanup/multitouch for merging into 4.16
-Patch630: 0001-HID-multitouch-Properly-deal-with-Win8-PTP-reports-w.patch
-Patch631: 0002-HID-multitouch-Only-look-at-non-touch-fields-in-firs.patch
-Patch632: 0003-HID-multitouch-Combine-all-left-button-events-in-a-f.patch
-
-# Make SATA link powermanagement policy configurable for:
-# https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
-# Queued upstream for merging into 4.16
-Patch636: 0001-ahci-Annotate-PCI-ids-for-mobile-Intel-chipsets-as-s.patch
-Patch637: 0002-ahci-Add-PCI-ids-for-Intel-Bay-Trail-Cherry-Trail-an.patch
-Patch638: 0003-ahci-Allow-setting-a-default-LPM-policy-for-mobile-c.patch
-
-# rhbz1514969, submitted upstream
-Patch640: 0001-platform-x86-dell-laptop-Filter-out-spurious-keyboar.patch
-
-# rhbz1514836, submitted upstream
-Patch641: 0001-Bluetooth-btusb-Disable-autosuspend-on-QCA-Rome-devi.patch
-
-# Speculative Execution patches
-Patch642: prevent-bounds-check-bypass-via-speculative-execution.patch
-
-# Fix crash on Xwayland using nouveau
-Patch650: dma-buf-fix-reservation_object_wait_timeout_rcu-once-more-v2.patch
+Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 
 # END OF PATCH DEFINITIONS
 
 %endif
 
-BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
 The kernel meta package
@@ -734,7 +716,6 @@ blobs it includes by default.
 
 %package headers
 Summary: Header files for the Linux kernel for use by glibc
-Group: Development/System
 Obsoletes: glibc-kernheaders < 3.0-46
 Provides: glibc-kernheaders = 3.0-46
 %if "0%{?variant}"
@@ -752,7 +733,6 @@ glibc package.
 %package cross-headers
 Provides: kernel-libre-cross-headers = %{rpmversion}-%{pkg_release}
 Summary: Header files for the Linux kernel for use by cross-glibc
-Group: Development/System
 %description cross-headers
 Kernel-cross-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -763,7 +743,6 @@ cross-glibc package.
 %package bootwrapper
 Provides: kernel-libre-bootwrapper = %{rpmversion}-%{pkg_release}
 Summary: Boot wrapper files for generating combined kernel + initrd images
-Group: Development/System
 Requires: gzip binutils
 %description bootwrapper
 Kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
@@ -771,7 +750,6 @@ files combining both kernel and initial ramdisk.
 
 %package debuginfo-common-%{_target_cpu}
 Summary: Kernel source files used by %{name}-debuginfo packages
-Group: Development/Debug
 Provides: installonlypkg(kernel)
 %description debuginfo-common-%{_target_cpu}
 This package is required by %{name}-debuginfo subpackages.
@@ -785,7 +763,6 @@ It provides the kernel source files common to all builds.
 %package %{?1:%{1}-}debuginfo\
 Provides: kernel%{?1:-%{1}}-debuginfo = %{version}-%{release}\
 Summary: Debug information for package %{name}%{?1:-%{1}}\
-Group: Development/Debug\
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}\
 Provides: %{name}%{?1:-%{1}}-debuginfo-%{_target_cpu} = %{version}-%{release}\
 Provides: installonlypkg(kernel)\
@@ -804,7 +781,6 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 %package %{?1:%{1}-}devel\
 Provides: kernel%{?1:-%{1}}-devel = %{version}-%{release}\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
-Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
@@ -830,7 +806,6 @@ against the %{?2:%{2} }kernel package.\
 %package %{?1:%{1}-}modules-extra\
 Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}\
 Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
-Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
@@ -857,7 +832,6 @@ This package provides less commonly used kernel modules for the %{?2:%{2} }kerne
 %package %{?1:%{1}-}modules\
 Provides: kernel%{?1:-%{1}}-modules = %{version}-%{release}\
 Summary: kernel modules to match the %{?2:%{2}-}core kernel\
-Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
@@ -883,7 +857,6 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 %package %{1}\
 Provides: kernel-%{1} = %{KVERREL}+%{1}\
 summary: kernel meta-package for the %{1} kernel\
-group: system environment/kernel\
 Requires: kernel-libre-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
 Requires: kernel-libre-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
 Provides: installonlypkg(kernel-libre)\
@@ -900,7 +873,6 @@ The meta-package for the %{1} kernel\
 %package %{?1:%{1}-}core\
 Provides: kernel-%{?1:%{1}-}core = %{KVERREL}%{?1:+%{1}}\
 Summary: %{variant_summary}\
-Group: System Environment/Kernel\
 Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-libre)\
@@ -1241,6 +1213,7 @@ cp %{SOURCE1000} .
 cp %{SOURCE15} .
 cp %{SOURCE40} .
 cp %{SOURCE41} .
+cp %{SOURCE43} .
 
 %if !%{debugbuildsenabled}
 # The normal build is a really debug build and the user has explicitly requested
@@ -1426,14 +1399,15 @@ BuildKernel() {
     # we'll get it from the linux-firmware package and we don't want conflicts
     %{make} %{?make_opts} ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT modules_install KERNELRELEASE=$KernelVer mod-fw=
 
+    # add an a noop %%defattr statement 'cause rpm doesn't like empty file list files
+    echo '%%defattr(-,-,-)' > ../kernel${Flavour:+-${Flavour}}-ldsoconf.list
     if [ $DoVDSO -ne 0 ]; then
         %{make} %{?make_opts} ARCH=$Arch INSTALL_MOD_PATH=$RPM_BUILD_ROOT vdso_install KERNELRELEASE=$KernelVer
-        if [ ! -s ldconfig-kernel.conf ]; then
-          echo > ldconfig-kernel.conf "\
-    # Placeholder file, no vDSO hwcap entries used in this kernel."
+        if [ -s ldconfig-kernel.conf ]; then
+            install -D -m 444 ldconfig-kernel.conf \
+                $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-$KernelVer.conf
+            echo /etc/ld.so.conf.d/kernel-$KernelVer.conf >> ../kernel${Flavour:+-${Flavour}}-ldsoconf.list
         fi
-        %{__install} -D -m 444 ldconfig-kernel.conf \
-            $RPM_BUILD_ROOT/etc/ld.so.conf.d/kernel-$KernelVer.conf
         rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/vdso/.build-id
     fi
 
@@ -1466,6 +1440,16 @@ BuildKernel() {
     cp -a scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     if [ -f tools/objtool/objtool ]; then
       cp -a tools/objtool/objtool $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/tools/objtool/ || :
+      # these are a few files associated with objtool
+      cp -a --parents tools/build/Build.include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      cp -a --parents tools/build/Build $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      cp -a --parents tools/build/fixdep.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      cp -a --parents tools/scripts/utilities.mak $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      # also more than necessary but it's not that many more files
+      cp -a --parents tools/objtool/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      cp -a --parents tools/lib/str_error_r.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      cp -a --parents tools/lib/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+      cp -a --parents tools/lib/subcmd/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
     if [ -d arch/$Arch/scripts ]; then
       cp -a arch/$Arch/scripts $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch} || :
@@ -1511,7 +1495,9 @@ BuildKernel() {
     cp -a --parents arch/x86/tools/relocs.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/tools/relocs_common.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/tools/relocs.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    cp -a --parents tools/include/tools/le_byteshift.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    # Yes this is more includes than we probably need. Feel free to sort out
+    # dependencies if you so choose.
+    cp -a --parents tools/include/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/sha256.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/sha256.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -1655,6 +1641,9 @@ BuildKernel() {
 
     # prune junk from kernel-devel
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -exec rm -f {} \;
+
+    # build a BLS config for this kernel
+    %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 }
 
 ###
@@ -1728,7 +1717,6 @@ BuildKernel %make_target %kernel_image %{_use_vdso}
 %ifnarch noarch
 %global __debug_package 1
 %files -f debugfiles.list debuginfo-common-%{_target_cpu}
-%defattr(-,root,root)
 %endif
 
 %endif
@@ -1800,9 +1788,6 @@ make DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kerne
 ###
 ### clean
 ###
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 ###
 ### scripts
@@ -1914,27 +1899,22 @@ fi
 
 %if %{with_headers}
 %files headers
-%defattr(-,root,root)
 /usr/include/*
 %endif
 
 %if %{with_cross_headers}
 %files cross-headers
-%defattr(-,root,root)
 /usr/*-linux-gnu/include/*
 %endif
 
 %if %{with_bootwrapper}
 %files bootwrapper
-%defattr(-,root,root)
 /usr/sbin/*
 %{_libdir}/kernel-wrapper
 %endif
 
 # empty meta-package
 %files
-%defattr(-,root,root)
-
 # This is %%{image_install_path} on an arch where that includes ELF files,
 # or empty otherwise.
 %define elf_image_install_path %{?kernel_image_elf:%{image_install_path}}
@@ -1946,8 +1926,7 @@ fi
 #
 %define kernel_variant_files(k:) \
 %if %{2}\
-%{expand:%%files -f kernel-%{?3:%{3}-}core.list %{?3:%{3}-}core}\
-%defattr(-,root,root)\
+%{expand:%%files -f kernel-%{?3:%{3}-}core.list %{?1:-f kernel-%{?3:%{3}-}ldsoconf.list} %{?3:%{3}-}core}\
 %{!?_licensedir:%global license %%doc}\
 %license linux-%{KVERREL}/COPYING\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
@@ -1969,35 +1948,30 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/build\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/source\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
+/lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
 %if %{1}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/vdso\
-/etc/ld.so.conf.d/kernel-%{KVERREL}%{?3:+%{3}}.conf\
 %endif\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/modules.*\
 %{expand:%%files -f kernel-%{?3:%{3}-}modules.list %{?3:%{3}-}modules}\
-%defattr(-,root,root)\
 %{expand:%%files %{?3:%{3}-}devel}\
-%defattr(-,root,root)\
 %defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
 %{expand:%%files %{?3:%{3}-}modules-extra}\
-%defattr(-,root,root)\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
-%defattr(-,root,root)\
 %endif\
 %endif\
 %if %{?3:1} %{!?3:0}\
 %{expand:%%files %{3}}\
-%defattr(-,root,root)\
 %endif\
 %endif\
 %{nil}
 
-%kernel_variant_files  %{_use_vdso} %{with_up}
-%kernel_variant_files  %{_use_vdso} %{with_debug} debug
+%kernel_variant_files %{_use_vdso} %{with_up}
+%kernel_variant_files %{_use_vdso} %{with_debug} debug
 %kernel_variant_files %{use_vdso} %{with_pae} %{pae}
 %kernel_variant_files %{use_vdso} %{with_pae_debug} %{pae}debug
 
@@ -2006,6 +1980,161 @@ fi
 #
 #
 %changelog
+* Sun Mar 25 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16-rc6-gnu.
+
+* Mon Mar 19 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc6.git0.1
+- Linux v4.16-rc6
+
+* Mon Mar 19 2018 Jeremy Cline <jeremy@jcline.org>
+- Disable debugging options.
+
+* Sun Mar 18 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial Raspberry Pi 3+ support
+
+* Fri Mar 16 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc5.git3.1
+- Linux v4.16-rc5-86-gdf09348f78dc
+
+* Thu Mar 15 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc5.git2.1
+- Linux v4.16-rc5-60-g0aa3fdb8b3a6
+
+* Wed Mar 14 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc5.git1.2
+- Fix boot hang on aarch64
+
+* Tue Mar 13 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc5.git1.1
+- Linux v4.16-rc5-4-gfc6eabbbf8ef
+
+* Mon Mar 12 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc5.git0.1
+- Linux v4.16-rc5
+
+* Mon Mar 12 2018 Jeremy Cline <jeremy@jcline.org>
+- Disable debugging options.
+
+* Mon Mar 12 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Update efi-lockdown patch with current.
+
+* Fri Mar 09 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc4.git3.1
+- Linux v4.16-rc4-159-g1b88accf6a65
+
+* Wed Mar 07 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc4.git2.1
+- Linux v4.16-rc4-152-gea9b5ee31078
+
+* Tue Mar 06 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc4.git1.1
+- Linux v4.16-rc4-120-gce380619fab9
+- Re-enable debugging options.
+
+* Mon Mar 05 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc4.git0.1
+- Linux v4.16-rc4
+- Disable debugging options.
+
+* Sat Mar  3 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add GPIO expander driver for Raspberry Pi 3
+- Some Raspberry Pi fixes
+- Switch OMAP serial driver to new 8250 driver
+- General ARM updates
+
+* Fri Mar 02 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc3.git4.1
+- Linux v4.16-rc3-245-g5d60e057d127
+
+* Thu Mar 01 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc3.git3.1
+- Linux v4.16-rc3-167-g97ace515f014
+
+* Wed Feb 28 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc3.git2.1
+- Linux v4.16-rc3-97-gf3afe530d644
+
+* Tue Feb 27 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc3.git1.1
+- Linux v4.16-rc3-88-g6f70eb2b00eb
+- Re-enable debugging options
+
+* Mon Feb 26 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc3.git0.1
+- Linux v4.16-rc3
+
+* Mon Feb 26 2018 Jeremy Cline <jeremy@jcline.org>
+- Disable debugging options.
+
+* Fri Feb 23 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc2.git3.1
+- Linux v4.16-rc2-189-g0f9da844d877
+
+* Wed Feb 21 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc2.git2.1
+- Linux v4.16-rc2-64-gaf3e79d29555
+
+* Tue Feb 20 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc2.git1.1
+- Linux v4.16-rc2-62-g79c0ef3e85c0
+- Reenable debugging options
+- Fix build problems with BLS
+
+* Mon Feb 19 2018 Laura Abbott <labbott@redhat.com>
+- Enable IMA (rhbz 790008)
+
+* Mon Feb 19 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc2.git0.1
+- Linux v4.16-rc2
+
+* Mon Feb 19 2018 Jeremy Cline <jeremy@jcline.org>
+- Disable debugging options.
+
+* Fri Feb 16 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc1.git4.1
+- Linux v4.16-rc1-100-g1388c80438e6
+
+* Thu Feb 15 2018 François Cami <fcami@fedoraproject.org>
+- Enable CONFIG_DRM_AMDGPU_SI
+
+* Thu Feb 15 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc1.git3.1
+- Linux v4.16-rc1-88-ge525de3ab046
+
+* Wed Feb 14 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc1.git2.1
+- Linux v4.16-rc1-32-g6556677a8040
+
+* Tue Feb 13 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc1.git1.1
+- Linux v4.16-rc1-10-g178e834c47b0
+- Reenable debugging options.
+
+* Mon Feb 12 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc1.git0.1
+- Linux v4.16-rc1
+
+* Mon Feb 12 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Sun Feb 11 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Improvements/fixes for Raspberry Pi HDMI monitor detection
+- Fix regression with AllWinner (sunxi) crypto PRNG, and module loading
+
+* Fri Feb 09 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git9.1
+- Linux v4.15-12216-gf9f1e414128e
+
+* Thu Feb 08 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git8.1
+- Linux v4.15-11930-g581e400ff935
+
+* Wed Feb 07 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git7.1
+- Linux v4.15-11704-ga2e5790d8416
+
+* Wed Feb 07 2018 Hans de Goede <hdegoede@redhat.com>
+- Set CONFIG_VBOXGUEST=m
+
+* Mon Feb 05 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git6.1
+- Linux v4.15-10701-g2deb41b24532
+
+* Mon Feb 05 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git5.1
+- Linux v4.15-10668-g35277995e179
+
+* Fri Feb 02 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git4.1
+- Linux v4.15-9939-g4bf772b14675
+
+* Thu Feb 01 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git3.1
+- Linux v4.15-6064-g255442c93843
+
+* Wed Jan 31 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git2.1
+- Linux v4.15-2341-g3da90b159b14
+
+* Tue Jan 30 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.0-0.rc0.git1.1
+- Linux v4.15-1549-g6304672b7f0a
+- Reenable debugging options.
+
+* Mon Jan 29 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Filter GPU bridge drivers on all arches, re-enable adv7511
+
+* Mon Jan 29 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-5750 (rhbz 1539706 1539708)
+
 * Mon Jan 29 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15-gnu.
 
