@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 6
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -626,19 +626,22 @@ Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
 # http://patchwork.ozlabs.org/patch/587554/
 Patch303: ARM-tegra-usb-no-reset.patch
 
-Patch305: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
+Patch304: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
 
 # https://patchwork.kernel.org/patch/9820417/
-Patch306: qcom-msm89xx-fixes.patch
+Patch305: qcom-msm89xx-fixes.patch
 
 # https://patchwork.kernel.org/patch/10173115/
-Patch307: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
+Patch306: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
-Patch308: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
+Patch307: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
-# https://www.spinics.net/lists/stable/msg214527.html
-Patch311: arm-clk-bcm2835-hdmi-fixes.patch
+# http://patches.linaro.org/patch/131764/
+Patch308: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
+
+# https://patchwork.kernel.org/patch/10245303/
+Patch309: wcn36xx-reduce-verbosity-of-drivers-messages.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg632925.html
 Patch313: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
@@ -659,9 +662,6 @@ Patch318: bcm2837-rpi-initial-support-for-the-3.patch
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
-
-# CVE-2018-7273 rhbz 1547384 1547386
-Patch500: floppy-Don-t-print-kernel-addresses-to-log-in-show_f.patch
 
 # rhbz 1476467
 Patch501: Fix-for-module-sig-verification.patch
@@ -1980,7 +1980,35 @@ fi
 #
 #
 %changelog
-* Sun Mar 25 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Mar 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16-rc7-gnu.
+
+* Mon Mar 26 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc7.git0.1
+- Linux v4.16-rc7
+
+* Mon Mar 26 2018 Jeremy Cline <jeremy@jcline.org>
+- Disable debugging options.
+
+* Sun Mar 25 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable initial config for Xilinx ZynqMP platforms
+
+* Fri Mar 23 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc6.git3.1
+- Linux v4.16-rc6-384-gf36b7534b833
+
+* Thu Mar 22 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Wifi fixes for QCom DragonBoard 410c
+
+* Wed Mar 21 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc6.git2.1
+- Linux v4.16-rc6-75-g3215b9d57a2c
+
+* Tue Mar 20 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc6.git1.1
+- Linux v4.16-rc6-35-g1b5f3ba415fe
+- Re-enable debugging options
+
+* Mon Mar 19 2018 Javier Martinez Canillas <javierm@redhat.com>
+- Include version field to generated BLS configuration fragment
+
+* Mon Mar 19 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Mar 25
 - GNU Linux-libre 4.16-rc6-gnu.
 
 * Mon Mar 19 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc6.git0.1
