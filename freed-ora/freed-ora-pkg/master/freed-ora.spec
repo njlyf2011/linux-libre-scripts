@@ -1,10 +1,10 @@
 Name:           freed-ora
-Version:        10
+Version:        11
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
 License:        BSD
-URL:            http://linux-libre.fsfla.org/freed-ora
+URL:            https://linux-libre.fsfla.org/freed-ora
 Source0:        RPM-GPG-KEY-freed-ora-linux-libre
 Source1:        freed-ora.repo
 Source2:        freed-ora-testing.repo
@@ -66,7 +66,15 @@ rm -rf $RPM_BUILD_ROOT
 Summary: Meta-package that conflicts with non-Free components in Fedora
 Group: System Environment/Base
 
-%define kernelpkgs kernel, kernel-PAE, kernel-PAE-core, kernel-PAE-debuginfo, kernel-PAE-devel, kernel-PAE-modules, kernel-PAE-modules-extra, kernel-PAEdebug, kernel-PAEdebug-core, kernel-PAEdebug-debuginfo, kernel-PAEdebug-devel, kernel-PAEdebug-modules, kernel-PAEdebug-modules-extra, kernel-core, kernel-debug, kernel-debug-core, kernel-debug-debuginfo, kernel-debug-devel, kernel-debug-modules, kernel-debug-modules-extra, kernel-debuginfo, kernel-debuginfo-common-i686, kernel-debuginfo-common-x86_64, kernel-devel, kernel-doc, kernel-firmware, kernel-headers, kernel-modules, kernel-modules-extra, kernel-tools, kernel-tools-debuginfo, kernel-tools-libs, kernel-tools-libs-devel, perf, perf-debuginfo, python-perf, python-perf-debuginfo
+%define kernelpkgs kernel, kernel-PAE, kernel-PAE-core, kernel-PAE-debuginfo, kernel-PAE-devel, kernel-PAE-modules, kernel-PAE-modules-extra, kernel-PAEdebug, kernel-PAEdebug-core, kernel-PAEdebug-debuginfo, kernel-PAEdebug-devel, kernel-PAEdebug-modules, kernel-PAEdebug-modules-extra, kernel-core, kernel-debug, kernel-debug-core, kernel-debug-debuginfo, kernel-debug-devel, kernel-debug-modules, kernel-debug-modules-extra, kernel-debuginfo, kernel-debuginfo-common-i686, kernel-debuginfo-common-x86_64, kernel-devel, kernel-doc, kernel-firmware, kernel-headers, kernel-cross-headers, kernel-modules, kernel-modules-extra, kernel-tools < 4.15, kernel-tools-debuginfo < 4.15, kernel-tools-libs < 4.15, kernel-tools-libs-devel < 4.15, perf < 4.15, perf-debuginfo < 4.15, python-perf < 4.15, python-perf-debuginfo < 4.15
+Obsoletes: kernel-libre-tools < 4.15
+Obsoletes: kernel-libre-tools-debuginfo < 4.15
+Obsoletes: kernel-libre-tools-libs < 4.15
+Obsoletes: kernel-libre-tools-libs-devel < 4.15
+Obsoletes: perf-libre < 4.15
+Obsoletes: perf-libre-debuginfo < 4.15
+Obsoletes: python-perf-libre < 4.15
+Obsoletes: python-perf-libre-debuginfo < 4.15
 
 # We can't conflict with these, because kernel-libre packages provide them.
 # Conflicts: %{kernelpkgs}
@@ -187,6 +195,11 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Mon Mar 26 2018 Alexandre Oliva <lxoliva@fsfla.org> - 11-1
+- Add kernel-cross-headers to pseudo-conflict trigger list.
+- Drop kernel-tools* and perf* < 4.15 from the pseudo-conflict trigger list.
+- Obsolete kernel-libre-tools* and perf-libre* < 4.15.
+
 * Mon Jan  8 2018 Alexandre Oliva <lxoliva@fsfla.org> - 10-1
 - Update mirror list: espoch->uta.
 - Use https rather than http where available.
