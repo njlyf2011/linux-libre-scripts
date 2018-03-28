@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        11
+Version:        12
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -163,11 +163,11 @@ kernel-libre packages must provide the same names to satisfy other
 system-wide dependencies.  Unfortunately, this means it is up to you
 to verify that you have none of kernel, kernel-core, kernel-modules*,
 kernel-doc, kernel-headers, kernel-devel, kernel-firmware,
-kernel-tools*, perf, python-perf, and their -PAE, -debug, etc variants
+kernel-cross-headers, and their -PAE, -debug, etc variants
 or their debuginfo.
 
 Once you do that, you may want to
-exclude=kernel*,perf,*-firmware,*-ucode,microcode_ctl from Fedora
+exclude=kernel*,*-firmware,*-ucode,microcode_ctl from Fedora
 repos, to avoid accidents.  The conflict markers in this package will
 actually prevent the installation of most of these packages, but not
 of the kernel ones: these will only get warnings from triggers.
@@ -176,8 +176,11 @@ of the kernel ones: these will only get warnings from triggers.
 %defattr(-,root,root,-)
 
 %pre freedom
-if rpm -qa kernel kernel-\* perf | 
-   sed '/-libre-/d; s,.*,Error: & conflicts with freed-ora-freedom,' |
+if rpm -qa kernel kernel-\* |
+   sed '
+/-libre-/d;
+/^kernel-tools-/d;
+s,.*,Error: & conflicts with freed-ora-freedom,' |
    grep . >&2; then
   exit 1
 fi
@@ -195,9 +198,13 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Mon Mar 26 2018 Alexandre Oliva <lxoliva@fsfla.org> - 12-1
+- Adjust pre conflicts to ignore kernel-tools.
+- Drop kernel-tools and perf from package descriptions.
+
 * Mon Mar 26 2018 Alexandre Oliva <lxoliva@fsfla.org> - 11-1
 - Add kernel-cross-headers to pseudo-conflict trigger list.
-- Drop kernel-tools* and perf* < 4.15 from the pseudo-conflict trigger list.
+- Drop kernel-tools* and perf* >= 4.15 from the pseudo-conflict trigger list.
 - Obsolete kernel-libre-tools* and perf-libre* < 4.15.
 
 * Mon Jan  8 2018 Alexandre Oliva <lxoliva@fsfla.org> - 10-1
