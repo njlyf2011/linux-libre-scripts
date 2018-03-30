@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -709,14 +709,14 @@ Patch660: 0001-net-phy-mdio-bcm-unimac-fix-potential-NULL-dereferen.patch
 # rhbz 1549042
 Patch661: drm-i915-dp-Write-to-SET_POWER-dpcd-to-enable-MST-hub..patch
 
-# rhbz 1546709
-Patch662: mm-khugepaged-Convert-VM_BUG_ON-to-collapse-fail.patch
-
 # CVE-2017-18232 rhbz 1558066 1558067
 Patch663: 0001-scsi-libsas-direct-call-probe-and-destruct.patch
 
 # rhbz 1511786
-Patch 664: drm-nouveau-bl-fix-backlight-regression.patch
+Patch664: drm-nouveau-bl-fix-backlight-regression.patch
+
+# rhbz 1558977
+Patch665: sunrpc-remove-incorrect-HMAC-request-initialization.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2057,6 +2057,15 @@ fi
 #
 #
 %changelog
+* Thu Mar 29 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.14-gnu.
+
+* Thu Mar 29 2018 Laura Abbott <labbott@redhat.com> - 4.15.14-300
+- Linux v4.15.14
+
+* Thu Mar 29 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix mounting NFS with kerberos (rhbz 1558977)
+
 * Mon Mar 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.13-gnu.
 
