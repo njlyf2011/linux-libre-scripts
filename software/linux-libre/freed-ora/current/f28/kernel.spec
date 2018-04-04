@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 15
+%define base_sublevel 16
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.15%{?stablegnux}
-%define rcrevlibre  -4.15%{?rcrevgnux}
-#define gitrevlibre -4.15%{?gitrevgnux}
+#define stablelibre -4.16%{?stablegnux}
+#define rcrevlibre  -4.16%{?rcrevgnux}
+#define gitrevlibre -4.16%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -466,7 +466,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -671,6 +671,9 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # rhbz 1509461
 Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
+
+# rhbz 1558977
+Patch504: sunrpc-remove-incorrect-HMAC-request-initialization.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1980,6 +1983,16 @@ fi
 #
 #
 %changelog
+* Tue Apr  3 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16-gnu.
+
+* Mon Apr 02 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-1
+- Linux v4.16
+- Disable debugging options.
+
+* Thu Mar 29 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix for NFS mounts with Kerberos (rhbz 1558977)
+
 * Mon Mar 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16-rc7-gnu.
 
