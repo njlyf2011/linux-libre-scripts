@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -634,9 +634,6 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/patch/10173115/
 Patch306: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 
-# Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
-Patch307: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
-
 # http://patches.linaro.org/patch/131764/
 Patch308: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
 
@@ -646,18 +643,25 @@ Patch309: wcn36xx-reduce-verbosity-of-drivers-messages.patch
 # https://www.spinics.net/lists/arm-kernel/msg632925.html
 Patch313: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
 
-Patch314: bcm283x-gpio-expander.patch
+# Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
+Patch320: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg621982.html
-Patch315: bcm283x-Fix-probing-of-bcm2835-i2s.patch
+Patch321: bcm283x-Fix-probing-of-bcm2835-i2s.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg633942.html
-Patch316: mmc-sdhci-iproc-Disable-preset-values-for-BCM2835.patch
+Patch322: mmc-sdhci-iproc-Disable-preset-values-for-BCM2835.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg633945.html
-Patch317: bcm2835-hwrng-Handle-deferred-clock-properly.patch
+Patch323: bcm2835-hwrng-Handle-deferred-clock-properly.patch
 
-Patch318: bcm2837-rpi-initial-support-for-the-3.patch
+Patch324: bcm283x-clk-audio-fixes.patch
+
+# Enabling Patches for the RPi3+
+Patch330: bcm2837-rpi-initial-support-for-the-3.patch
+Patch331: bcm2837-gpio-expander.patch
+Patch332: bcm2837-enable-pmu.patch
+Patch333: bcm2837-lan78xx-fixes.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -1983,7 +1987,11 @@ fi
 #
 #
 %changelog
-* Tue Apr  3 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Apr  2 2018 Peter Robinson <pbrobinson@fedoraproject.org> 4.16.0-300
+- Improvements for the Raspberry Pi 3+
+- Fixes and minor improvements to Raspberry Pi 2/3
+
+* Mon Apr  2 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Apr  3
 - GNU Linux-libre 4.16-gnu.
 
 * Mon Apr 02 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-1
