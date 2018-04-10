@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -705,9 +705,6 @@ Patch658: 0001-scsi-libsas-fix-memory-leak-in-sas_smp_get_phy_event.patch
 
 # CVE-2018-8043 rhbz 1554199 1554200
 Patch660: 0001-net-phy-mdio-bcm-unimac-fix-potential-NULL-dereferen.patch
-
-# rhbz 1549042
-Patch661: drm-i915-dp-Write-to-SET_POWER-dpcd-to-enable-MST-hub..patch
 
 # CVE-2017-18232 rhbz 1558066 1558067
 Patch663: 0001-scsi-libsas-direct-call-probe-and-destruct.patch
@@ -2057,6 +2054,12 @@ fi
 #
 #
 %changelog
+* Mon Apr  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.16-gnu.
+
+* Mon Apr 09 2018 Laura Abbott <labbott@redhat.com> - 4.15.16-300
+- Linux v4.15.16
+
 * Tue Apr  3 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.15-gnu.
 
