@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -620,28 +620,23 @@ Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
-# Fix OMAP4 (pandaboard)
-Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
-
 # http://patchwork.ozlabs.org/patch/587554/
-Patch303: ARM-tegra-usb-no-reset.patch
-
-Patch304: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
+Patch302: ARM-tegra-usb-no-reset.patch
 
 # https://patchwork.kernel.org/patch/9820417/
-Patch305: qcom-msm89xx-fixes.patch
+Patch303: qcom-msm89xx-fixes.patch
 
 # https://patchwork.kernel.org/patch/10173115/
-Patch306: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
+Patch304: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 
 # http://patches.linaro.org/patch/131764/
-Patch308: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
+Patch305: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
 
 # https://patchwork.kernel.org/patch/10245303/
-Patch309: wcn36xx-reduce-verbosity-of-drivers-messages.patch
+Patch306: wcn36xx-reduce-verbosity-of-drivers-messages.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg632925.html
-Patch313: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
+Patch307: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
 
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch320: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
@@ -1987,6 +1982,12 @@ fi
 #
 #
 %changelog
+* Mon Apr  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.1-gnu.
+
+* Mon Apr 09 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.1-300
+- Linux v4.16.1
+
 * Mon Apr  2 2018 Peter Robinson <pbrobinson@fedoraproject.org> 4.16.0-300
 - Improvements for the Raspberry Pi 3+
 - Fixes and minor improvements to Raspberry Pi 2/3
