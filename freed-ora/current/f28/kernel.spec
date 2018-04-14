@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -638,6 +638,14 @@ Patch306: wcn36xx-reduce-verbosity-of-drivers-messages.patch
 # https://www.spinics.net/lists/arm-kernel/msg632925.html
 Patch307: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
 
+# https://marc.info/?l=linux-kernel&m=152328880417846&w=2
+Patch308: arm64-thunderx-crypto-zip-fixes.patch
+
+# https://www.spinics.net/lists/linux-crypto/msg32725.html
+Patch309: crypto-testmgr-Allow-different-compression-results.patch
+
+Patch310: arm-tegra-fix-nouveau-crash.patch
+
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch320: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
@@ -673,6 +681,10 @@ Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 
 # rhbz 1558977
 Patch504: sunrpc-remove-incorrect-HMAC-request-initialization.patch
+
+# In v4.17
+# rhbz 1549316
+Patch505: ipmi-fixes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1982,6 +1994,24 @@ fi
 #
 #
 %changelog
+* Fri Apr 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.2-gnu.
+
+* Thu Apr 12 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.2-300
+- Linux v4.16.2
+
+* Thu Apr 12 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Patch to fix nouveau on Tegra platforms
+- Enable IOMMU on Exynos now upstream does
+- Further fix for ThunderX ZIP driver
+
+* Mon Apr 09 2018 Jeremy Cline <jeremy@jcline.org>
+- Include the KCS IPMI BMC driver that's in F27
+
+* Mon Apr  9 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- More fixes for Raspberry Pi 3+ lan78xx ethernet interface
+- Fixes for Cavium ThunderX ZIP driver stability
+
 * Mon Apr  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.1-gnu.
 
