@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -700,9 +700,6 @@ Patch653: CVE-2018-1000026.patch
 # rhbz 1549316
 Patch657: ipmi-fixes.patch
 
-# CVE-2018-7757 rhbz 1553361 1553363
-Patch658: 0001-scsi-libsas-fix-memory-leak-in-sas_smp_get_phy_event.patch
-
 # CVE-2018-8043 rhbz 1554199 1554200
 Patch660: 0001-net-phy-mdio-bcm-unimac-fix-potential-NULL-dereferen.patch
 
@@ -714,6 +711,9 @@ Patch664: drm-nouveau-bl-fix-backlight-regression.patch
 
 # rhbz 1558977
 Patch665: sunrpc-remove-incorrect-HMAC-request-initialization.patch
+
+# CVE-2018-10021 rhbz 1566407 1566409
+Patch666: 0001-scsi-libsas-defer-ata-device-eh-commands-to-libata.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2054,6 +2054,15 @@ fi
 #
 #
 %changelog
+* Fri Apr 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.17-gnu.
+
+* Thu Apr 12 2018 Laura Abbott <labbott@redhat.com> - 4.15.17-300
+- Linux v4.15.17
+
+* Thu Apr 12 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-10021 (rhbz 1566407 1566409)
+
 * Mon Apr  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.16-gnu.
 
