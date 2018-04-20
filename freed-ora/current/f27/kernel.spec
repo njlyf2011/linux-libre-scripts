@@ -42,13 +42,13 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 15
+%define base_sublevel 16
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-%define stablelibre -4.15%{?stablegnux}
-#define rcrevlibre  -4.15%{?rcrevgnux}
-#define gitrevlibre -4.15%{?gitrevgnux}
+#define stablelibre -4.16%{?stablegnux}
+#define rcrevlibre  -4.16%{?rcrevgnux}
+#define gitrevlibre -4.16%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -404,8 +404,8 @@ Summary: The Linux kernel
 %define kernel_prereq  coreutils, systemd >= 203-2, /usr/bin/kernel-install
 %define initrd_prereq  dracut >= 027
 
+
 Name: kernel-libre%{?variant}
-Group: System Environment/Kernel
 License: GPLv2
 URL: http://linux-libre.fsfla.org/
 Version: %{rpmversion}
@@ -425,7 +425,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 #
 BuildRequires: kmod, patch, bash, tar, git
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
-BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc
+BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex
 BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if %{with_sparse}
 BuildRequires: sparse
@@ -549,6 +549,9 @@ Source5000: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 # ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch002: 0001-iio-Use-event-header-from-kernel-tree.patch
 
+# gcc -Werror=aliasing workaround
+Patch003: 0001-Temporarily-work-around-gcc-aliasing-warning-error.patch
+
 Patch07: freedo.patch
 
 %if !%{nopatches}
@@ -616,110 +619,87 @@ Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
 
-# Fix OMAP4 (pandaboard)
-Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
-
 # http://patchwork.ozlabs.org/patch/587554/
-Patch303: ARM-tegra-usb-no-reset.patch
-
-# https://www.spinics.net/lists/arm-kernel/msg554183.html
-Patch304: arm-imx6-hummingboard2.patch
-
-Patch305: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
+Patch302: ARM-tegra-usb-no-reset.patch
 
 # https://patchwork.kernel.org/patch/9820417/
-Patch306: qcom-msm89xx-fixes.patch
+Patch303: qcom-msm89xx-fixes.patch
 
 # https://patchwork.kernel.org/patch/10173115/
-Patch307: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
+Patch304: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
+
+# http://patches.linaro.org/patch/131764/
+Patch305: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
+
+# https://patchwork.kernel.org/patch/10245303/
+Patch306: wcn36xx-reduce-verbosity-of-drivers-messages.patch
+
+# https://www.spinics.net/lists/arm-kernel/msg632925.html
+Patch307: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
 
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch308: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
-# In 4.16
-Patch309: arm-exynos-fix-dwc3-neg.patch
+# https://www.spinics.net/lists/arm-kernel/msg621982.html
+Patch309: bcm283x-Fix-probing-of-bcm2835-i2s.patch
 
-# In 4.16
-Patch310: arm-imx6-cpufreq-fix-loading.patch
+# https://www.spinics.net/lists/arm-kernel/msg633942.html
+Patch310: mmc-sdhci-iproc-Disable-preset-values-for-BCM2835.patch
 
-# https://www.spinics.net/lists/stable/msg214527.html
-Patch311: arm-clk-bcm2835-hdmi-fixes.patch
+# https://www.spinics.net/lists/arm-kernel/msg633945.html
+Patch311: bcm2835-hwrng-Handle-deferred-clock-properly.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg632925.html
-Patch313: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
+Patch312: bcm283x-clk-audio-fixes.patch
 
-# https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=synquacer-netsec
-Patch330: arm64-socionext-96b-enablement.patch
+# https://marc.info/?l=linux-kernel&m=152328880417846&w=2
+Patch313: arm64-thunderx-crypto-zip-fixes.patch
 
-# https://patchwork.kernel.org/patch/10149775/ MMC support for Synquacer
-Patch331: arm64-mmc-sdhci_f_sdh30-add-ACPI-support.patch
+# https://www.spinics.net/lists/linux-crypto/msg32725.html
+Patch314: crypto-testmgr-Allow-different-compression-results.patch
+
+Patch315: arm-tegra-fix-nouveau-crash.patch
+
+# https://www.spinics.net/lists/arm-kernel/msg630629.html
+Patch316: arm-sunxi-nvmem-fixH3.patch
+
+# Upstream 4.17 back port
+Patch317: of-i2c-fix-module-aliases.patch
+
+# https://patchwork.kernel.org/patch/10311335/
+Patch318: clk-ti-fix-flag-space-conflict-with-clkctrl-clocks.patch
+
+Patch319: arm-dts-Add-am335x-pocketbeagle.patch
+
+# Enabling Patches for the RPi3+
+Patch320: bcm2837-rpi-initial-support-for-the-3.patch
+Patch321: bcm2837-gpio-expander.patch
+Patch322: bcm2837-enable-pmu.patch
+Patch323: bcm2837-lan78xx-fixes.patch
 
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
 
-# 550-600 Meltdown and Spectre Fixes
-
-# 600 - Patches for improved Bay and Cherry Trail device support
-# Below patches are submitted upstream, awaiting review / merging
-Patch610: 0010-Input-silead-Add-support-for-capactive-home-button-f.patch
-
 # rhbz 1476467
-Patch617: Fix-for-module-sig-verification.patch
+Patch501: Fix-for-module-sig-verification.patch
 
 # rhbz 1431375
-Patch619: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # rhbz 1509461
-Patch625: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
+Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 
-# For https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
-# Queued in bluetooth-next for merging into 4.16
-Patch628: 0001-Bluetooth-btusb-Add-a-Kconfig-option-to-enable-USB-a.patch
-
-# Fix left-button not working with some hid-multitouch touchpads
-# Adding these suggested by Benjamin Tissoires
-# Queued in hid.git/for-4.16/hid-quirks-cleanup/multitouch for merging into 4.16
-Patch630: 0001-HID-multitouch-Properly-deal-with-Win8-PTP-reports-w.patch
-Patch632: 0003-HID-multitouch-Combine-all-left-button-events-in-a-f.patch
-
-# Make SATA link powermanagement policy configurable for:
-# https://fedoraproject.org/wiki/Changes/ImprovedLaptopBatteryLife
-# Queued upstream for merging into 4.16
-Patch638: 0003-ahci-Allow-setting-a-default-LPM-policy-for-mobile-c.patch
-
-# rhbz1514969, submitted upstream
-Patch640: 0001-platform-x86-dell-laptop-Filter-out-spurious-keyboar.patch
-
-# https://bugzilla.kernel.org/show_bug.cgi?id=198351
-Patch652: iwlwifi-mvn.patch
-
-# CVE-2018-1000026 rhbz 1541846 1546744
-Patch653: CVE-2018-1000026.patch
-
+# In v4.17
 # rhbz 1549316
-Patch657: ipmi-fixes.patch
+Patch504: ipmi-fixes.patch
 
-# CVE-2018-8043 rhbz 1554199 1554200
-Patch660: 0001-net-phy-mdio-bcm-unimac-fix-potential-NULL-dereferen.patch
-
-# CVE-2017-18232 rhbz 1558066 1558067
-Patch663: 0001-scsi-libsas-direct-call-probe-and-destruct.patch
-
-# rhbz 1511786
-Patch664: drm-nouveau-bl-fix-backlight-regression.patch
-
-# rhbz 1558977
-Patch665: sunrpc-remove-incorrect-HMAC-request-initialization.patch
-
-# CVE-2018-10021 rhbz 1566407 1566409
-Patch666: 0001-scsi-libsas-defer-ata-device-eh-commands-to-libata.patch
+# rhbz 1566510
+Patch505: net-Revert-macsec-missing-dev_put-on-error-in-macsec_newlink.patch
 
 # END OF PATCH DEFINITIONS
 
 %endif
 
-BuildRoot: %{_tmppath}/kernel-%{KVERREL}-root
 
 %description
 The kernel meta package
@@ -760,7 +740,6 @@ blobs it includes by default.
 
 %package headers
 Summary: Header files for the Linux kernel for use by glibc
-Group: Development/System
 Obsoletes: glibc-kernheaders < 3.0-46
 Provides: glibc-kernheaders = 3.0-46
 %if "0%{?variant}"
@@ -778,7 +757,6 @@ glibc package.
 %package cross-headers
 Provides: kernel-libre-cross-headers = %{rpmversion}-%{pkg_release}
 Summary: Header files for the Linux kernel for use by cross-glibc
-Group: Development/System
 %description cross-headers
 Kernel-cross-headers includes the C header files that specify the interface
 between the Linux kernel and userspace libraries and programs.  The
@@ -789,7 +767,6 @@ cross-glibc package.
 %package bootwrapper
 Provides: kernel-libre-bootwrapper = %{rpmversion}-%{pkg_release}
 Summary: Boot wrapper files for generating combined kernel + initrd images
-Group: Development/System
 Requires: gzip binutils
 %description bootwrapper
 Kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
@@ -797,7 +774,6 @@ files combining both kernel and initial ramdisk.
 
 %package debuginfo-common-%{_target_cpu}
 Summary: Kernel source files used by %{name}-debuginfo packages
-Group: Development/Debug
 Provides: installonlypkg(kernel)
 %description debuginfo-common-%{_target_cpu}
 This package is required by %{name}-debuginfo subpackages.
@@ -811,7 +787,6 @@ It provides the kernel source files common to all builds.
 %package %{?1:%{1}-}debuginfo\
 Provides: kernel%{?1:-%{1}}-debuginfo = %{version}-%{release}\
 Summary: Debug information for package %{name}%{?1:-%{1}}\
-Group: Development/Debug\
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}\
 Provides: %{name}%{?1:-%{1}}-debuginfo-%{_target_cpu} = %{version}-%{release}\
 Provides: installonlypkg(kernel)\
@@ -830,7 +805,6 @@ This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
 %package %{?1:%{1}-}devel\
 Provides: kernel%{?1:-%{1}}-devel = %{version}-%{release}\
 Summary: Development package for building kernel modules to match the %{?2:%{2} }kernel\
-Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-devel-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-devel-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
@@ -856,7 +830,6 @@ against the %{?2:%{2} }kernel package.\
 %package %{?1:%{1}-}modules-extra\
 Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}\
 Summary: Extra kernel modules to match the %{?2:%{2} }kernel\
-Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
@@ -883,7 +856,6 @@ This package provides less commonly used kernel modules for the %{?2:%{2} }kerne
 %package %{?1:%{1}-}modules\
 Provides: kernel%{?1:-%{1}}-modules = %{version}-%{release}\
 Summary: kernel modules to match the %{?2:%{2}-}core kernel\
-Group: System Environment/Kernel\
 Provides: kernel%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-libre%{?1:-%{1}}-modules-%{_target_cpu} = %{version}-%{release}\
 Provides: kernel-modules-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
@@ -909,7 +881,6 @@ This package provides commonly used kernel modules for the %{?2:%{2}-}core kerne
 %package %{1}\
 Provides: kernel-%{1} = %{KVERREL}+%{1}\
 summary: kernel meta-package for the %{1} kernel\
-group: system environment/kernel\
 Requires: kernel-libre-%{1}-core-uname-r = %{KVERREL}%{?variant}+%{1}\
 Requires: kernel-libre-%{1}-modules-uname-r = %{KVERREL}%{?variant}+%{1}\
 Provides: installonlypkg(kernel-libre)\
@@ -926,7 +897,6 @@ The meta-package for the %{1} kernel\
 %package %{?1:%{1}-}core\
 Provides: kernel-%{?1:%{1}-}core = %{KVERREL}%{?1:+%{1}}\
 Summary: %{variant_summary}\
-Group: System Environment/Kernel\
 Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-libre)\
@@ -951,9 +921,6 @@ This package includes a version of the Linux kernel with support for up to
 64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
 The non-PAE kernel can only address up to 4GB of memory.
 Install the kernel-PAE package if your machine has more than 4GB of memory.
-
-The kernel-libre-PAE package is the upstream kernel without the
-non-Free blobs it includes by default.
 %else
 %define variant_summary The Linux kernel compiled for Cortex-A15
 %kernel_variant_package %{pae}
@@ -961,6 +928,9 @@ non-Free blobs it includes by default.
 This package includes a version of the Linux kernel with support for
 Cortex-A15 devices with LPAE and HW virtualisation support
 %endif
+
+The kernel-libre-PAE package is the upstream kernel without the
+non-Free blobs it includes by default.
 
 
 
@@ -1774,7 +1744,6 @@ BuildKernel %make_target %kernel_image %{_use_vdso}
 %ifnarch noarch
 %global __debug_package 1
 %files -f debugfiles.list debuginfo-common-%{_target_cpu}
-%defattr(-,root,root)
 %endif
 
 %endif
@@ -1846,9 +1815,6 @@ make DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kerne
 ###
 ### clean
 ###
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 ###
 ### scripts
@@ -1960,29 +1926,22 @@ fi
 
 %if %{with_headers}
 %files headers
-%defattr(-,root,root)
 /usr/include/*
 %endif
 
 %if %{with_cross_headers}
 %files cross-headers
-%defattr(-,root,root)
 /usr/*-linux-gnu/include/*
 %endif
 
 %if %{with_bootwrapper}
 %files bootwrapper
-%defattr(-,root,root)
 /usr/sbin/*
 %{_libdir}/kernel-wrapper
 %endif
 
-%ifnarch noarch
 # empty meta-package
 %files
-%defattr(-,root,root)
-%endif
-
 # This is %%{image_install_path} on an arch where that includes ELF files,
 # or empty otherwise.
 %define elf_image_install_path %{?kernel_image_elf:%{image_install_path}}
@@ -1995,7 +1954,6 @@ fi
 %define kernel_variant_files(k:) \
 %if %{2}\
 %{expand:%%files -f kernel-%{?3:%{3}-}core.list %{?3:%{3}-}core}\
-%defattr(-,root,root)\
 %{!?_licensedir:%global license %%doc}\
 %license linux-%{KVERREL}/COPYING\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
@@ -2023,29 +1981,24 @@ fi
 %endif\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/modules.*\
 %{expand:%%files -f kernel-%{?3:%{3}-}modules.list %{?3:%{3}-}modules}\
-%defattr(-,root,root)\
 %{expand:%%files %{?3:%{3}-}devel}\
-%defattr(-,root,root)\
 %defverify(not mtime)\
 /usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
 %{expand:%%files %{?3:%{3}-}modules-extra}\
-%defattr(-,root,root)\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
 %if %{with_debuginfo}\
 %ifnarch noarch\
 %{expand:%%files -f debuginfo%{?3}.list %{?3:%{3}-}debuginfo}\
-%defattr(-,root,root)\
 %endif\
 %endif\
 %if %{?3:1} %{!?3:0}\
 %{expand:%%files %{3}}\
-%defattr(-,root,root)\
 %endif\
 %endif\
 %{nil}
 
-%kernel_variant_files  %{_use_vdso} %{with_up}
-%kernel_variant_files  %{_use_vdso} %{with_debug} debug
+%kernel_variant_files %{_use_vdso} %{with_up}
+%kernel_variant_files %{_use_vdso} %{with_debug} debug
 %kernel_variant_files %{use_vdso} %{with_pae} %{pae}
 %kernel_variant_files %{use_vdso} %{with_pae_debug} %{pae}debug
 
@@ -2054,7 +2007,26 @@ fi
 #
 #
 %changelog
-* Fri Apr 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Apr 19 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.3-gnu.
+
+* Thu Apr 19 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.3-200
+- Linux v4.16.3
+
+* Thu Apr 19 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable UFS storage options on ARM
+- Add support for Pocket Beagle
+
+* Tue Apr 17 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable drivers for Xilinx ZYMQ-MP Ultra96
+
+* Mon Apr 16 2018 Laura Abbott <labbott@fedoraproject.org>
+- Fix for hang on removal of macsec module (rhbz 1566410)
+
+* Thu Apr 12 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.2-200
+- Linux v4.16.2
+
+* Thu Apr 12 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Apr 13
 - GNU Linux-libre 4.15.17-gnu.
 
 * Thu Apr 12 2018 Laura Abbott <labbott@redhat.com> - 4.15.17-300
