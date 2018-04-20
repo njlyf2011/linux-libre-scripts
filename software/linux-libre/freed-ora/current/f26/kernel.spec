@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 18
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -685,9 +685,6 @@ Patch663: 0001-scsi-libsas-direct-call-probe-and-destruct.patch
 
 # rhbz 1511786
 Patch664: drm-nouveau-bl-fix-backlight-regression.patch
-
-# rhbz 1558977
-Patch665: sunrpc-remove-incorrect-HMAC-request-initialization.patch
 
 # CVE-2018-10021 rhbz 1566407 1566409
 Patch666: 0001-scsi-libsas-defer-ata-device-eh-commands-to-libata.patch
@@ -2051,6 +2048,12 @@ fi
 #
 #
 %changelog
+* Thu Apr 19 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.15.18-gnu.
+
+* Thu Apr 19 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.15.18-200
+- Linux v4.15.18
+
 * Fri Apr 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.15.17-gnu.
 
