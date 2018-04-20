@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -646,6 +646,17 @@ Patch309: crypto-testmgr-Allow-different-compression-results.patch
 
 Patch310: arm-tegra-fix-nouveau-crash.patch
 
+# https://www.spinics.net/lists/arm-kernel/msg630629.html
+Patch311: arm-sunxi-nvmem-fixH3.patch
+
+# https://patchwork.kernel.org/patch/10311335/
+Patch312: clk-ti-fix-flag-space-conflict-with-clkctrl-clocks.patch
+
+Patch313: arm-dts-Add-am335x-pocketbeagle.patch
+
+# Upstream 4.17 back port
+Patch319: of-i2c-fix-module-aliases.patch
+
 # Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
 Patch320: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
 
@@ -679,12 +690,12 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 # rhbz 1509461
 Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 
-# rhbz 1558977
-Patch504: sunrpc-remove-incorrect-HMAC-request-initialization.patch
-
 # In v4.17
 # rhbz 1549316
-Patch505: ipmi-fixes.patch
+Patch504: ipmi-fixes.patch
+
+# rhbz 1566510
+Patch505: net-Revert-macsec-missing-dev_put-on-error-in-macsec_newlink.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1994,7 +2005,26 @@ fi
 #
 #
 %changelog
-* Fri Apr 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Apr 19 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.3-gnu.
+
+* Thu Apr 19 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.3-300
+- Linux v4.16.3
+
+* Thu Apr 19 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable UFS storage options on ARM
+- Add support for Pocket Beagle
+
+* Tue Apr 17 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable drivers for Xilinx ZYMQ-MP Ultra96
+
+* Mon Apr 16 2018 Laura Abbott <labbott@fedoraproject.org>
+- Fix for hang on removal of macsec module (rhbz 1566410)
+
+* Thu Apr 12 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable tps65217-charger on BeagleBone to fix USB-OTG port rhbz 1487399
+
+* Thu Apr 12 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Apr 13
 - GNU Linux-libre 4.16.2-gnu.
 
 * Thu Apr 12 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.2-300
@@ -2004,6 +2034,9 @@ fi
 - Patch to fix nouveau on Tegra platforms
 - Enable IOMMU on Exynos now upstream does
 - Further fix for ThunderX ZIP driver
+- Fix for OF i2c module aliases
+- Fix for nvmem on AllWinner H3/H5 SoCs
+- Add fix for the BeagleBone boot failure
 
 * Mon Apr 09 2018 Jeremy Cline <jeremy@jcline.org>
 - Include the KCS IPMI BMC driver that's in F27
