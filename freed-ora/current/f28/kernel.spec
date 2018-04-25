@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -626,25 +626,26 @@ Patch302: ARM-tegra-usb-no-reset.patch
 # https://patchwork.kernel.org/patch/9820417/
 Patch303: qcom-msm89xx-fixes.patch
 
+# https://patchwork.kernel.org/patch/10351797/
+Patch304: ACPI-scan-Fix-regression-related-to-X-Gene-UARTs.patch
+
 # https://patchwork.kernel.org/patch/10173115/
-Patch304: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
+Patch305: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 
 # http://patches.linaro.org/patch/131764/
-Patch305: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
+Patch306: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
 
 # https://patchwork.kernel.org/patch/10245303/
-Patch306: wcn36xx-reduce-verbosity-of-drivers-messages.patch
+Patch307: wcn36xx-reduce-verbosity-of-drivers-messages.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg632925.html
-Patch307: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
+Patch308: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
 
 # https://marc.info/?l=linux-kernel&m=152328880417846&w=2
-Patch308: arm64-thunderx-crypto-zip-fixes.patch
+Patch309: arm64-thunderx-crypto-zip-fixes.patch
 
 # https://www.spinics.net/lists/linux-crypto/msg32725.html
-Patch309: crypto-testmgr-Allow-different-compression-results.patch
-
-Patch310: arm-tegra-fix-nouveau-crash.patch
+Patch310: crypto-testmgr-Allow-different-compression-results.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg630629.html
 Patch311: arm-sunxi-nvmem-fixH3.patch
@@ -653,6 +654,14 @@ Patch311: arm-sunxi-nvmem-fixH3.patch
 Patch312: clk-ti-fix-flag-space-conflict-with-clkctrl-clocks.patch
 
 Patch313: arm-dts-Add-am335x-pocketbeagle.patch
+
+Patch314: arm-tegra-fix-nouveau-crash.patch
+
+# https://patchwork.kernel.org/patch/10354521/
+# https://patchwork.kernel.org/patch/10354187/
+# https://patchwork.kernel.org/patch/10306793/
+# https://patchwork.kernel.org/patch/10133165/
+Patch315: mvebu-a37xx-fixes.patch
 
 # Upstream 4.17 back port
 Patch319: of-i2c-fix-module-aliases.patch
@@ -671,9 +680,13 @@ Patch323: bcm2835-hwrng-Handle-deferred-clock-properly.patch
 
 Patch324: bcm283x-clk-audio-fixes.patch
 
+# in 4.17, headed to stable
+Patch329: bcm283x-drm-vc4-fix-mem-leak.patch
+
 # Enabling Patches for the RPi3+
-Patch330: bcm2837-rpi-initial-support-for-the-3.patch
-Patch331: bcm2837-gpio-expander.patch
+Patch330: bcm2837-gpio-expander.patch
+# http://www.spinics.net/lists/arm-kernel/msg647617.html
+Patch331: bcm2837-rpi-initial-3plus-support.patch
 Patch332: bcm2837-enable-pmu.patch
 Patch333: bcm2837-lan78xx-fixes.patch
 
@@ -2005,6 +2018,12 @@ fi
 #
 #
 %changelog
+* Sun Apr 22 2018 Peter Robinson <pbrobinson@fedoraproject.org> - 4.16.3-301
+- Add quirk patch to fix X-Gene 1 console on HP m400/Mustang (RHBZ 1531140)
+- Add fixes for Marvell a37xx EspressoBin
+- Update to latest Raspberry Pi 3+ fixes
+- More fixes for lan78xx on the Raspberry Pi 3+
+
 * Thu Apr 19 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.3-gnu.
 
