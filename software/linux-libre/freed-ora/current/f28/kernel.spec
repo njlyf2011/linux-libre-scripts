@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 302
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -657,12 +657,6 @@ Patch313: arm-dts-Add-am335x-pocketbeagle.patch
 
 Patch314: arm-tegra-fix-nouveau-crash.patch
 
-# https://patchwork.kernel.org/patch/10354521/
-# https://patchwork.kernel.org/patch/10354187/
-# https://patchwork.kernel.org/patch/10306793/
-# https://patchwork.kernel.org/patch/10133165/
-Patch315: mvebu-a37xx-fixes.patch
-
 # Upstream 4.17 back port
 Patch319: of-i2c-fix-module-aliases.patch
 
@@ -680,13 +674,9 @@ Patch323: bcm2835-hwrng-Handle-deferred-clock-properly.patch
 
 Patch324: bcm283x-clk-audio-fixes.patch
 
-# in 4.17, headed to stable
-Patch329: bcm283x-drm-vc4-fix-mem-leak.patch
-
 # Enabling Patches for the RPi3+
-Patch330: bcm2837-gpio-expander.patch
-# http://www.spinics.net/lists/arm-kernel/msg647617.html
-Patch331: bcm2837-rpi-initial-3plus-support.patch
+Patch330: bcm2837-rpi-initial-support-for-the-3.patch
+Patch331: bcm2837-gpio-expander.patch
 Patch332: bcm2837-enable-pmu.patch
 Patch333: bcm2837-lan78xx-fixes.patch
 
@@ -2018,11 +2008,8 @@ fi
 #
 #
 %changelog
-* Sun Apr 22 2018 Peter Robinson <pbrobinson@fedoraproject.org> - 4.16.3-301
+* Sun Apr 22 2018 Peter Robinson <pbrobinson@fedoraproject.org> - 4.16.3-302
 - Add quirk patch to fix X-Gene 1 console on HP m400/Mustang (RHBZ 1531140)
-- Add fixes for Marvell a37xx EspressoBin
-- Update to latest Raspberry Pi 3+ fixes
-- More fixes for lan78xx on the Raspberry Pi 3+
 
 * Thu Apr 19 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.3-gnu.
