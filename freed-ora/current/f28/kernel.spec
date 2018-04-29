@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -680,9 +680,6 @@ Patch323: bcm2835-hwrng-Handle-deferred-clock-properly.patch
 
 Patch324: bcm283x-clk-audio-fixes.patch
 
-# in 4.17, headed to stable
-Patch329: bcm283x-drm-vc4-fix-mem-leak.patch
-
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-gpio-expander.patch
 # http://www.spinics.net/lists/arm-kernel/msg647617.html
@@ -709,6 +706,16 @@ Patch504: ipmi-fixes.patch
 
 # rhbz 1566510
 Patch505: net-Revert-macsec-missing-dev_put-on-error-in-macsec_newlink.patch
+
+# rhbz 1571036
+# https://patchwork.kernel.org/patch/10345845/
+Patch506: ACPI-video-Only-default-only_lcd-to-true-on-Win8-ready-_desktops_.patch
+
+# rhbz 1565131
+Patch507: xhci-Fix-Kernel-oops-in-xhci-dbgtty.patch
+
+# rhbz 1514836
+Patch508: Bluetooth-btusb-autosuspend-XPS-13-9360-fixes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2018,11 +2025,26 @@ fi
 #
 #
 %changelog
-* Thu Apr 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Apr 28 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.5-gnu.
+
+* Fri Apr 27 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.5-300
+- Fix an issue with bluetooth autosupsend on some XPS 13 9360 (rhbz 1514836)
+- Fix prlimit64 with RLIMIT_CPU ignored (rhbz 1568337)
+- Linux v4.16.5
+
+* Fri Apr 27 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable QLogic NICs on ARM
+
+* Wed Apr 25 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix a kernel oops when using Thunderbolt 3 docks (rhbz 1565131)
+
+* Wed Apr 25 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Apr 26
 - GNU Linux-libre 4.16.4-gnu.
 
 * Tue Apr 24 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.4-300
 - Linux v4.16.4
+- Fix a regression in backlight interfaces for some laptops (rhbz 1571036)
 
 * Sun Apr 22 2018 Peter Robinson <pbrobinson@fedoraproject.org> - 4.16.3-301
 - Add quirk patch to fix X-Gene 1 console on HP m400/Mustang (RHBZ 1531140)
