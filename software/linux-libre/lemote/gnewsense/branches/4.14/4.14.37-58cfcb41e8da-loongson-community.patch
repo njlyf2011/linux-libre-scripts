@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index 01875d606f44..8bc078ef8f92 100644
+index ee330f5449e6..405d8803d125 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -300,9 +300,9 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS)
+@@ -363,9 +363,9 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS)
  
  HOSTCC       = gcc
  HOSTCXX      = g++
@@ -14,7 +14,7 @@ index 01875d606f44..8bc078ef8f92 100644
  HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS)
  HOST_LOADLIBES := $(HOST_LFS_LIBS)
  
-@@ -639,9 +639,9 @@ KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
+@@ -653,9 +653,9 @@ KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
  KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
  else
  ifdef CONFIG_PROFILE_ALL_BRANCHES
@@ -27,10 +27,10 @@ index 01875d606f44..8bc078ef8f92 100644
  endif
  
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index cb7fcc4216fd..f02f04ede837 100644
+index c82457b0e733..a23d86c839cb 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -1835,6 +1835,15 @@ config CPU_LOONGSON2
+@@ -1836,6 +1836,15 @@ config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
  	select CPU_SUPPORTS_64BIT_KERNEL
@@ -46,7 +46,7 @@ index cb7fcc4216fd..f02f04ede837 100644
  	select CPU_SUPPORTS_HIGHMEM
  	select CPU_SUPPORTS_HUGEPAGES
  
-@@ -2544,7 +2553,7 @@ config CPU_SUPPORTS_MSA
+@@ -2545,7 +2554,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -56,7 +56,7 @@ index cb7fcc4216fd..f02f04ede837 100644
  config ARCH_DISCONTIGMEM_ENABLE
  	bool
 diff --git a/arch/mips/boot/compressed/Makefile b/arch/mips/boot/compressed/Makefile
-index c675eece389a..3fa6e77a40cb 100644
+index adce180f3ee4..9cffb0903dcb 100644
 --- a/arch/mips/boot/compressed/Makefile
 +++ b/arch/mips/boot/compressed/Makefile
 @@ -92,9 +92,18 @@ quiet_cmd_zld = LD      $@
@@ -95,7 +95,7 @@ index c675eece389a..3fa6e77a40cb 100644
  	$(call cmd,32)
  
  quiet_cmd_ecoff = ECOFF	  $@
-@@ -123,14 +132,14 @@ vmlinuz.ecoff: $(obj)/../elf2ecoff $(VMLINUZ)
+@@ -123,11 +132,11 @@ vmlinuz.ecoff: $(obj)/../elf2ecoff $(VMLINUZ)
  	$(call cmd,ecoff)
  
  OBJCOPYFLAGS_vmlinuz.bin := $(OBJCOPYFLAGS) -O binary
@@ -109,10 +109,11 @@ index c675eece389a..3fa6e77a40cb 100644
  	$(call cmd,objcopy)
  
  uzImage.bin: vmlinuz.bin FORCE
- 	$(call if_changed,uimage,none)
- 
--clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec}
-+clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec,unsstrip}
+@@ -138,3 +147,4 @@ clean-files += $(objtree)/vmlinuz.32
+ clean-files += $(objtree)/vmlinuz.ecoff
+ clean-files += $(objtree)/vmlinuz.bin
+ clean-files += $(objtree)/vmlinuz.srec
++clean-files += $(objtree)/vmlinuz.unsstrip
 diff --git a/arch/mips/boot/compressed/ld.script b/arch/mips/boot/compressed/ld.script
 index 2ed08fbef8e7..a848aa5aa754 100644
 --- a/arch/mips/boot/compressed/ld.script
@@ -215,10 +216,10 @@ index 000000000000..6d5db23ebb05
 +
 +#endif /* __ASM_MACH_LOONGSON1_REGS_INTC_H */
 diff --git a/arch/mips/include/asm/mach-loongson64/cs5536/cs5536.h b/arch/mips/include/asm/mach-loongson64/cs5536/cs5536.h
-index a0ee0cb775ad..4e18addb1ad5 100644
+index 9795b3361532..7985f75353b7 100644
 --- a/arch/mips/include/asm/mach-loongson64/cs5536/cs5536.h
 +++ b/arch/mips/include/asm/mach-loongson64/cs5536/cs5536.h
-@@ -301,5 +301,40 @@ extern void _wrmsr(u32 msr, u32 hi, u32 lo);
+@@ -302,5 +302,40 @@ extern void _wrmsr(u32 msr, u32 hi, u32 lo);
  /* GPIO : I/O SPACE; REG : 32BITS */
  #define GPIOL_OUT_VAL		0x00
  #define GPIOL_OUT_EN		0x04
@@ -260,10 +261,10 @@ index a0ee0cb775ad..4e18addb1ad5 100644
  
  #endif				/* _CS5536_H */
 diff --git a/arch/mips/include/asm/mach-loongson64/cs5536/cs5536_mfgpt.h b/arch/mips/include/asm/mach-loongson64/cs5536/cs5536_mfgpt.h
-index 021d0172dad6..50aafca58718 100644
+index 52e8bb0fc04d..9f643908b71f 100644
 --- a/arch/mips/include/asm/mach-loongson64/cs5536/cs5536_mfgpt.h
 +++ b/arch/mips/include/asm/mach-loongson64/cs5536/cs5536_mfgpt.h
-@@ -28,8 +28,19 @@ static inline void __maybe_unused enable_mfgpt0_counter(void)
+@@ -29,8 +29,19 @@ static inline void __maybe_unused enable_mfgpt0_counter(void)
  #define COMPARE	 ((MFGPT_TICK_RATE + HZ/2) / HZ)
  
  #define MFGPT_BASE	mfgpt_base
@@ -318,10 +319,10 @@ index c52549bb4e56..bdde74eef5a5 100644
  
  #define LOONGSON_MACHTYPE MACH_LOONGSON_GENERIC
 diff --git a/arch/mips/include/asm/sparsemem.h b/arch/mips/include/asm/sparsemem.h
-index b1071c1e54f5..4a0d1e77e69d 100644
+index b0686ca3d8bf..bd967fd67adf 100644
 --- a/arch/mips/include/asm/sparsemem.h
 +++ b/arch/mips/include/asm/sparsemem.h
-@@ -11,7 +11,11 @@
+@@ -12,7 +12,11 @@
  #else
  # define SECTION_SIZE_BITS	28
  #endif
@@ -350,10 +351,10 @@ index b05bb70a2e46..44c9a69e1d9c 100644
  
  #include <asm/cpu.h>
 diff --git a/arch/mips/include/uapi/asm/inst.h b/arch/mips/include/uapi/asm/inst.h
-index 6abea5183d7c..2371193b80d6 100644
+index c05dcf5ab414..6b43781be748 100644
 --- a/arch/mips/include/uapi/asm/inst.h
 +++ b/arch/mips/include/uapi/asm/inst.h
-@@ -65,6 +65,8 @@ enum spec_op {
+@@ -66,6 +66,8 @@ enum spec_op {
  enum spec2_op {
  	madd_op, maddu_op, mul_op, spec2_3_unused_op,
  	msub_op, msubu_op, /* more unused ops */
@@ -362,7 +363,7 @@ index 6abea5183d7c..2371193b80d6 100644
  	clz_op = 0x20, clo_op,
  	dclz_op = 0x24, dclo_op,
  	sdbpp_op = 0x3f
-@@ -196,7 +198,7 @@ enum cop0_com_func {
+@@ -197,7 +199,7 @@ enum cop0_com_func {
   */
  enum cop1_fmt {
  	s_fmt, d_fmt, e_fmt, q_fmt,
@@ -371,7 +372,7 @@ index 6abea5183d7c..2371193b80d6 100644
  };
  
  /*
-@@ -231,7 +233,8 @@ enum cop1_sdw_func {
+@@ -232,7 +234,8 @@ enum cop1_sdw_func {
  enum cop1x_func {
  	lwxc1_op     =	0x00, ldxc1_op	   =  0x01,
  	swxc1_op     =  0x08, sdxc1_op	   =  0x09,
@@ -421,10 +422,10 @@ index a6ebc8135112..3fea5f766070 100644
  
  	/*
 diff --git a/arch/mips/lib/Makefile b/arch/mips/lib/Makefile
-index 6ab430d24575..32ae9cf60e74 100644
+index e84e12655fa8..28f2f98f7aa6 100644
 --- a/arch/mips/lib/Makefile
 +++ b/arch/mips/lib/Makefile
-@@ -2,10 +2,14 @@
+@@ -3,10 +3,14 @@
  # Makefile for MIPS-specific library files..
  #
  
@@ -441,10 +442,10 @@ index 6ab430d24575..32ae9cf60e74 100644
  obj-$(CONFIG_PCI)	+= iomap-pci.o
  lib-$(CONFIG_GENERIC_CSUM)	:= $(filter-out csum_partial.o, $(lib-y))
 diff --git a/arch/mips/loongson64/Kconfig b/arch/mips/loongson64/Kconfig
-index 8e6e292675b2..d7f9db5ca866 100644
+index 0d249fc3cfe9..138cdf7383e4 100644
 --- a/arch/mips/loongson64/Kconfig
 +++ b/arch/mips/loongson64/Kconfig
-@@ -32,12 +32,12 @@ config LEMOTE_FULOONG2E
+@@ -33,12 +33,12 @@ config LEMOTE_FULOONG2E
  
  config LEMOTE_MACH2F
  	bool "Lemote Loongson 2F family machines"
@@ -459,7 +460,7 @@ index 8e6e292675b2..d7f9db5ca866 100644
  	select CSRC_R4K if ! MIPS_EXTERNAL_TIMER
  	select DMA_NONCOHERENT
  	select GENERIC_ISA_DMA_SUPPORT_BROKEN
-@@ -50,9 +50,9 @@ config LEMOTE_MACH2F
+@@ -51,9 +51,9 @@ config LEMOTE_MACH2F
  	select SYS_HAS_EARLY_PRINTK
  	select SYS_SUPPORTS_32BIT_KERNEL
  	select SYS_SUPPORTS_64BIT_KERNEL
@@ -471,7 +472,7 @@ index 8e6e292675b2..d7f9db5ca866 100644
  	help
  	  Lemote Loongson 2F family machines utilize the 2F revision of
  	  Loongson processor and the AMD CS5536 south bridge.
-@@ -60,6 +60,31 @@ config LEMOTE_MACH2F
+@@ -61,6 +61,31 @@ config LEMOTE_MACH2F
  	  These family machines include fuloong2f mini PC, yeeloong2f notebook,
  	  LingLoong allinone PC and so forth.
  
@@ -503,7 +504,7 @@ index 8e6e292675b2..d7f9db5ca866 100644
  config LOONGSON_MACH3X
  	bool "Generic Loongson 3 family machines"
  	select ARCH_SPARSEMEM_ENABLE
-@@ -147,6 +172,24 @@ config LOONGSON_MC146818
+@@ -148,6 +173,24 @@ config LOONGSON_MC146818
  	bool
  	default n
  
@@ -532,19 +533,19 @@ diff --git a/arch/mips/loongson64/Makefile b/arch/mips/loongson64/Makefile
 index 4fe3d88fc361..fe2c285a2259 100644
 --- a/arch/mips/loongson64/Makefile
 +++ b/arch/mips/loongson64/Makefile
-@@ -17,6 +17,12 @@ obj-$(CONFIG_LEMOTE_FULOONG2E)	+= fuloong-2e/
+@@ -16,6 +16,12 @@ obj-$(CONFIG_LEMOTE_FULOONG2E)	+= fuloong-2e/
+ 
  obj-$(CONFIG_LEMOTE_MACH2F)  += lemote-2f/
  
- #
++#
 +# Dexxon gdium netbook, based on loongson 2F and SM502
 +#
 +
 +obj-$(CONFIG_DEXXON_GDIUM)  += gdium/
 +
-+#
+ #
  # All Loongson-3 family machines
  #
- 
 diff --git a/arch/mips/loongson64/Platform b/arch/mips/loongson64/Platform
 index 0fce4608aa88..67516f36168c 100644
 --- a/arch/mips/loongson64/Platform
@@ -1640,7 +1641,7 @@ index 000000000000..5316360670a8
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index 16d9ef5a78c5..00b663b66c1f 100644
+index 6f57212f5659..25ad67dc490f 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -2029,10 +2030,10 @@ index 16d9ef5a78c5..00b663b66c1f 100644
  		return SIGILL;
  	}
 diff --git a/arch/mips/pci/Makefile b/arch/mips/pci/Makefile
-index 4b821481dd44..33d99556f8ed 100644
+index 8185a2bfaf09..0fb07010e847 100644
 --- a/arch/mips/pci/Makefile
 +++ b/arch/mips/pci/Makefile
-@@ -32,6 +32,7 @@ obj-$(CONFIG_LASAT)		+= pci-lasat.o
+@@ -33,6 +33,7 @@ obj-$(CONFIG_LASAT)		+= pci-lasat.o
  obj-$(CONFIG_MIPS_COBALT)	+= fixup-cobalt.o
  obj-$(CONFIG_LEMOTE_FULOONG2E)	+= fixup-fuloong2e.o ops-loongson2.o
  obj-$(CONFIG_LEMOTE_MACH2F)	+= fixup-lemote2f.o ops-loongson2.o
@@ -2178,7 +2179,7 @@ index da344696beed..cb2a32e65c11 100644
  }
  
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 374301fcbc86..ca7fbf2b284d 100644
+index 8c7a0ce147a1..e476deee052e 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
 @@ -990,6 +990,13 @@ config HID_ZYDACRON
@@ -2196,10 +2197,10 @@ index 374301fcbc86..ca7fbf2b284d 100644
  	tristate "HID Sensors framework support"
  	depends on HID && HAS_IOMEM
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index 8659d7e633a5..0d7b9f0e1d3d 100644
+index 235bd2a7b333..2775cf374f6a 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
-@@ -110,6 +110,7 @@ obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
+@@ -111,6 +111,7 @@ obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
  wacom-objs			:= wacom_wac.o wacom_sys.o
  obj-$(CONFIG_HID_WACOM)		+= wacom.o
  obj-$(CONFIG_HID_WALTOP)	+= hid-waltop.o
@@ -2424,10 +2425,10 @@ index 000000000000..67cc0954a7e9
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index be2e005c3c51..e47af039af6d 100644
+index ff539c0b4637..72fbbe6c143f 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1143,6 +1143,9 @@
+@@ -1146,6 +1146,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9332,7 +9333,7 @@ index 6dda3623a276..49dfd59bee53 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index ba672cf4e888..03b2adb7a13f 100644
+index dcf78a498927..c35c9cf20fe2 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9345,7 +9346,7 @@ index ba672cf4e888..03b2adb7a13f 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -709,6 +712,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -725,6 +728,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -9371,10 +9372,10 @@ index 3c20af999893..d972c372c64a 100644
  	bool
  
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
-index 445b2c230b56..67ec39855321 100644
+index df7650adede9..cb472d47410a 100644
 --- a/drivers/video/Makefile
 +++ b/drivers/video/Makefile
-@@ -8,6 +8,8 @@ obj-y				  += backlight/
+@@ -9,6 +9,8 @@ obj-y				  += backlight/
  
  obj-y				  += fbdev/
  
@@ -9608,10 +9609,10 @@ index 000000000000..ed5cdeb3604d
 +#endif
 +#endif
 diff --git a/init/calibrate.c b/init/calibrate.c
-index ce635dccf3d9..10e775dd2c43 100644
+index f3831272f113..40ebd697d9ae 100644
 --- a/init/calibrate.c
 +++ b/init/calibrate.c
-@@ -21,6 +21,7 @@ static int __init lpj_setup(char *str)
+@@ -22,6 +22,7 @@ static int __init lpj_setup(char *str)
  
  __setup("lpj=", lpj_setup);
  
@@ -9619,7 +9620,7 @@ index ce635dccf3d9..10e775dd2c43 100644
  #ifdef ARCH_HAS_READ_CURRENT_TIMER
  
  /* This routine uses the read_current_timer() routine and gets the
-@@ -171,6 +172,7 @@ static unsigned long calibrate_delay_direct(void)
+@@ -172,6 +173,7 @@ static unsigned long calibrate_delay_direct(void)
  	return 0;
  }
  #endif
@@ -9627,7 +9628,7 @@ index ce635dccf3d9..10e775dd2c43 100644
  
  /*
   * This is the number of bits of precision for the loops_per_jiffy.  Each
-@@ -291,6 +293,7 @@ void calibrate_delay(void)
+@@ -292,6 +294,7 @@ void calibrate_delay(void)
  		lpj = lpj_fine;
  		pr_info("Calibrating delay loop (skipped), "
  			"value calculated using timer frequency.. ");
@@ -9635,7 +9636,7 @@ index ce635dccf3d9..10e775dd2c43 100644
  	} else if ((lpj = calibrate_delay_is_known())) {
  		;
  	} else if ((lpj = calibrate_delay_direct()) != 0) {
-@@ -301,6 +304,7 @@ void calibrate_delay(void)
+@@ -302,6 +305,7 @@ void calibrate_delay(void)
  		if (!printed)
  			pr_info("Calibrating delay loop... ");
  		lpj = calibrate_delay_converge();
@@ -9657,11 +9658,11 @@ index 2064c3a35ef8..850dccd57d8f 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/ld-version.sh b/scripts/ld-version.sh
-index d135882e2c40..f47b21ca290a 100755
+index f2be0ff9a738..309f491dee64 100755
 --- a/scripts/ld-version.sh
 +++ b/scripts/ld-version.sh
-@@ -1,7 +1,7 @@
- #!/usr/bin/awk -f
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0
  # extract linker version number from stdin and turn into single number
  	{
 -	gsub(".*\\)", "");
