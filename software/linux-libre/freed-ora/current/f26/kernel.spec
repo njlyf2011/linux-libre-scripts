@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -538,9 +538,6 @@ Patch001: kbuild-AFTER_LINK.patch
 # ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch002: 0001-iio-Use-event-header-from-kernel-tree.patch
 
-# gcc -Werror=aliasing workaround
-Patch003: 0001-Temporarily-work-around-gcc-aliasing-warning-error.patch
-
 Patch07: freedo.patch
 
 %if !%{nopatches}
@@ -692,11 +689,11 @@ Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 # rhbz 1549316
 Patch504: ipmi-fixes.patch
 
-# rhbz 1565131
-Patch507: xhci-Fix-Kernel-oops-in-xhci-dbgtty.patch
-
 # rhbz 1514836
 Patch508: Bluetooth-btusb-autosuspend-XPS-13-9360-fixes.patch
+
+# rhbz 1572944
+Patch509: Revert-the-random-series-for-4.16.4.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2029,6 +2026,16 @@ fi
 #
 #
 %changelog
+* Wed May  2 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.7-gnu.
+
+* Wed May 02 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.7-100
+- Linux v4.16.7
+- Revert a second patch related to CVE-2018-1108 4.16.4 (rhbz 1572944)
+
+* Tue May 01 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.6-101
+- Revert the fix for CVE-2018-1108 (rhbz 1572944)
+
 * Mon Apr 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.6-gnu.
 
