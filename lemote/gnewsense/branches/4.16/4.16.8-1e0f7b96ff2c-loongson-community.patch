@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index d65e2e229017..d077561df844 100644
+index 5da6ffd69209..10d9bb14a9c9 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -361,9 +361,9 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS)
@@ -14,7 +14,7 @@ index d65e2e229017..d077561df844 100644
  HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS)
  HOST_LOADLIBES := $(HOST_LFS_LIBS)
  
-@@ -646,9 +646,9 @@ KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
+@@ -648,9 +648,9 @@ KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
  KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
  else
  ifdef CONFIG_PROFILE_ALL_BRANCHES
@@ -2427,10 +2427,10 @@ index 000000000000..67cc0954a7e9
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 9454ac134ce2..87ae0617ac7b 100644
+index c631d2c8988d..9ca9f125d8d7 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1160,6 +1160,9 @@
+@@ -1163,6 +1163,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -9335,7 +9335,7 @@ index 67ad4bb6919a..a8b06586047b 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 2d8d9150da0c..d4e58ec62f6c 100644
+index 10c7ab427a52..ff1e7619a39f 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -75,6 +75,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9348,10 +9348,10 @@ index 2d8d9150da0c..d4e58ec62f6c 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -727,6 +730,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -593,6 +596,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
- 		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
+ 	  .driver_info = RSVD(4) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c05, USB_CLASS_COMM, 0x02, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c1f, USB_CLASS_COMM, 0x02, 0xff) },
