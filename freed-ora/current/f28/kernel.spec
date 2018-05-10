@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -320,8 +320,7 @@ Summary: The Linux kernel
 %define asmarch s390
 %define hdrarch s390
 %define all_arch_configs kernel-%{version}-s390x.config
-%define make_target image
-%define kernel_image arch/s390/boot/image
+%define kernel_image arch/s390/boot/bzImage
 %endif
 
 %ifarch %{arm}
@@ -660,6 +659,12 @@ Patch314: arm-tegra-fix-nouveau-crash.patch
 # https://patchwork.kernel.org/patch/10133165/
 Patch315: mvebu-a37xx-fixes.patch
 
+# https://www.spinics.net/lists/arm-kernel/msg643991.html
+Patch316: arm64-fix-usercopy-whitelist.patch
+
+# https://www.spinics.net/lists/linux-tegra/msg32920.html
+Patch318: arm-tegra-USB-driver-dependency-fix.patch
+
 # Upstream 4.17 back port
 Patch319: of-i2c-fix-module-aliases.patch
 
@@ -703,6 +708,15 @@ Patch508: Bluetooth-btusb-autosuspend-XPS-13-9360-fixes.patch
 
 # rhbz 1572944
 Patch509: Revert-the-random-series-for-4.16.4.patch
+
+# CVE-2018-10322 rhbz 1571623 1571624
+Patch510: 0001-xfs-enhance-dinode-verifier.patch
+
+# CVE-2018-10323 rhbz 1571627 1571630
+Patch511: 0001-xfs-set-format-back-to-extents-if-xfs_bmap_extents_t.patch
+
+# rhbz 1566258
+Patch512: KVM-vmx-update-sec-exec-controls-for-UMIP-iff-emulating-UMIP.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1489,6 +1503,9 @@ BuildKernel() {
     if [ -f arch/$Arch/*lds ]; then
       cp -a arch/$Arch/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
     fi
+    if [ -f arch/%{asmarch}/kernel/module.lds ]; then
+      cp -a --parents arch/%{asmarch}/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
 %ifarch %{power64}
@@ -1498,8 +1515,6 @@ BuildKernel() {
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
 %ifarch aarch64
-    # Needed for systemtap
-    cp -a --parents arch/arm64/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/xen references arch/arm
     cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/opcodes.h references arch/arm
@@ -2012,6 +2027,26 @@ fi
 #
 #
 %changelog
+* Wed May  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.8-gnu.
+
+* Wed May 09 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.8-300
+- Linux v4.16.8
+
+* Mon May 07 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix issue with KVM on older Core 2 processors (rhbz 1566258)
+
+* Sat May  5 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM and Raspberry Pi fixes
+- Fix USB-2 on Tegra devices
+
+* Fri May 04 2018 Laura Abbott <labbott@redhat.com>
+- Fix for building out of tree modules on powerpc (rhbz 1574604)
+
+* Fri May 04 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-10322 (rhbz 1571623 1571624)
+- Fix CVE-2018-10323 (rhbz 1571627 1571630)
+
 * Fri May  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.7-gnu.
 
