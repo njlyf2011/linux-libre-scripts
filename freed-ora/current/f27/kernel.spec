@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 200
+%global baserelease 201
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -320,8 +320,7 @@ Summary: The Linux kernel
 %define asmarch s390
 %define hdrarch s390
 %define all_arch_configs kernel-%{version}-s390x.config
-%define make_target image
-%define kernel_image arch/s390/boot/image
+%define kernel_image arch/s390/boot/bzImage
 %endif
 
 %ifarch %{arm}
@@ -676,12 +675,21 @@ Patch320: arm-dts-Add-am335x-pocketbeagle.patch
 # https://patchwork.kernel.org/patch/10133165/
 Patch321: mvebu-a37xx-fixes.patch
 
+# https://www.spinics.net/lists/arm-kernel/msg643991.html
+Patch322: arm64-fix-usercopy-whitelist.patch
+
+# https://www.spinics.net/lists/linux-tegra/msg32920.html
+Patch323: arm-tegra-USB-driver-dependency-fix.patch
+
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-gpio-expander.patch
 # http://www.spinics.net/lists/arm-kernel/msg647617.html
 Patch331: bcm2837-rpi-initial-3plus-support.patch
 Patch332: bcm2837-enable-pmu.patch
 Patch333: bcm2837-lan78xx-fixes.patch
+
+# rhbz 1574718
+Patch340: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -705,6 +713,15 @@ Patch508: Bluetooth-btusb-autosuspend-XPS-13-9360-fixes.patch
 
 # rhbz 1572944
 Patch509: Revert-the-random-series-for-4.16.4.patch
+
+# CVE-2018-10322 rhbz 1571623 1571624
+Patch510: 0001-xfs-enhance-dinode-verifier.patch
+
+# CVE-2018-10323 rhbz 1571627 1571630
+Patch511: 0001-xfs-set-format-back-to-extents-if-xfs_bmap_extents_t.patch
+
+# rhbz 1566258
+Patch512: KVM-vmx-update-sec-exec-controls-for-UMIP-iff-emulating-UMIP.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1497,6 +1514,9 @@ BuildKernel() {
     if [ -f arch/$Arch/*lds ]; then
       cp -a arch/$Arch/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
     fi
+    if [ -f arch/%{asmarch}/kernel/module.lds ]; then
+      cp -a --parents arch/%{asmarch}/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
 %ifarch %{power64}
@@ -1506,8 +1526,6 @@ BuildKernel() {
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
 %ifarch aarch64
-    # Needed for systemtap
-    cp -a --parents arch/arm64/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/xen references arch/arm
     cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/opcodes.h references arch/arm
@@ -2017,6 +2035,32 @@ fi
 #
 #
 %changelog
+* Thu May 10 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.8-gnu.
+
+* Wed May 09 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.8-201
+- Bump the release for a re-build
+
+* Wed May 09 2018 Jeremy Cline <jeremy@jcline.org>
+- Workaround for m400 uart irq firmware description (rhbz 1574718)
+
+* Wed May 09 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.8-200
+- Linux v4.16.8
+
+* Mon May 07 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix issue with KVM on older Core 2 processors (rhbz 1566258)
+
+* Sat May  5 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM and Raspberry Pi fixes
+- Fix USB-2 on Tegra devices
+
+* Fri May 04 2018 Laura Abbott <labbott@redhat.com>
+- Fix for building out of tree modules on powerpc (rhbz 1574604)
+
+* Fri May 04 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-10322 (rhbz 1571623 1571624)
+- Fix CVE-2018-10323 (rhbz 1571627 1571630)
+
 * Fri May  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.7-gnu.
 
