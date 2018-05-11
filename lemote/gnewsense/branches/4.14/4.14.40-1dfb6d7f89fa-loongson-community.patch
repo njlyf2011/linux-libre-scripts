@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index ee330f5449e6..405d8803d125 100644
+index 6eede39f898a..166d582406aa 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -363,9 +363,9 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS)
@@ -9333,7 +9333,7 @@ index 6dda3623a276..49dfd59bee53 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index dcf78a498927..c35c9cf20fe2 100644
+index d4124551fb56..752812df1c75 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9346,10 +9346,10 @@ index dcf78a498927..c35c9cf20fe2 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -725,6 +728,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -596,6 +599,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
- 		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
+ 	  .driver_info = RSVD(4) },
 +	{ USB_DEVICE(HUAWO_VENDOR_ID, HUAWO_PRODUCT_E1621) },	/* QUANTA 6500 chips, Unicom extensive use of this card */
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c05, USB_CLASS_COMM, 0x02, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c1f, USB_CLASS_COMM, 0x02, 0xff) },
