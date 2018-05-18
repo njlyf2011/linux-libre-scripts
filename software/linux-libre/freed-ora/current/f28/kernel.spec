@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -646,9 +646,6 @@ Patch310: crypto-testmgr-Allow-different-compression-results.patch
 # https://www.spinics.net/lists/arm-kernel/msg630629.html
 Patch311: arm-sunxi-nvmem-fixH3.patch
 
-# https://patchwork.kernel.org/patch/10311335/
-Patch312: clk-ti-fix-flag-space-conflict-with-clkctrl-clocks.patch
-
 Patch313: arm-dts-Add-am335x-pocketbeagle.patch
 
 Patch314: arm-tegra-fix-nouveau-crash.patch
@@ -686,6 +683,9 @@ Patch331: bcm2837-rpi-initial-3plus-support.patch
 Patch332: bcm2837-enable-pmu.patch
 Patch333: bcm2837-lan78xx-fixes.patch
 
+# rhbz 1574718
+Patch340: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
+
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
@@ -702,9 +702,6 @@ Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 # In v4.17
 # rhbz 1549316
 Patch504: ipmi-fixes.patch
-
-# rhbz 1514836
-Patch508: Bluetooth-btusb-autosuspend-XPS-13-9360-fixes.patch
 
 # rhbz 1572944
 Patch509: Revert-the-random-series-for-4.16.4.patch
@@ -2027,6 +2024,16 @@ fi
 #
 #
 %changelog
+* Thu May 17 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.9-gnu.
+
+* Thu May 17 2018 Jeremy Cline <jcline@redhat.com> - 4.16.9-300
+- Linux v4.16.9
+- Silence unwanted "swiotlb buffer is full" warnings (rhbz 1556797)
+
+* Wed May 09 2018 Jeremy Cline <jeremy@jcline.org>
+- Workaround for m400 uart irq firmware description (rhbz 1574718)
+
 * Wed May  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.8-gnu.
 
