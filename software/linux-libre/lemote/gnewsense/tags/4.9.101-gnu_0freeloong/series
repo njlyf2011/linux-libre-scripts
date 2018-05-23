@@ -1,0 +1,5 @@
+4.9.99-69bd6e17d5c9-loongson-community.patch -p1 # loongson-community patches
+gnewsense-binutils-flag.patch -p0
+100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
+config.patch -p0 # config file
+kpkg-mipsel.patch -p0 # use vmlinuz
