@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 101
+%global baserelease 100
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -702,9 +702,6 @@ Patch510: 0001-xfs-enhance-dinode-verifier.patch
 
 # CVE-2018-10323 rhbz 1571627 1571630
 Patch511: 0001-xfs-set-format-back-to-extents-if-xfs_bmap_extents_t.patch
-
-# CVE-2018-3639 rhbz 1566890 1580713
-Patch512: queue-4.16.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2038,6 +2035,12 @@ fi
 #
 #
 %changelog
+* Thu May 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.11-gnu.
+
+* Tue May 22 2018 Jeremy Cline <jcline@redhat.com> - 4.16.11-100
+- Linux v4.16.11
+
 * Mon May 21 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.16.10-101
 - Fix CVE-2018-3639 (rhbz 1566890 1580713)
 
