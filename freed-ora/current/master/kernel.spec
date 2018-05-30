@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 2
+%global baserelease 1
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.16%{?stablegnux}
-#define rcrevlibre  -4.16%{?rcrevgnux}
+%define rcrevlibre  -4.16%{?rcrevgnux}
 #define gitrevlibre -4.16%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -133,8 +133,6 @@ Summary: The Linux kernel
 %define with_cross_headers   %{?_without_cross_headers:   0} %{?!_without_cross_headers:   1}
 # kernel-debuginfo
 %define with_debuginfo %{?_without_debuginfo: 0} %{?!_without_debuginfo: 1}
-# kernel-bootwrapper (for creating zImages from kernel + initrd)
-%define with_bootwrapper %{?_without_bootwrapper: 0} %{?!_without_bootwrapper: 1}
 # Want to build a the vsdo directories installed
 %define with_vdso_install %{?_without_vdso_install: 0} %{?!_without_vdso_install: 1}
 #
@@ -214,7 +212,6 @@ Summary: The Linux kernel
 %endif
 
 %if %{nopatches}
-%define with_bootwrapper 0
 %define variant -vanilla
 %endif
 
@@ -279,10 +276,8 @@ Summary: The Linux kernel
 %define all_arch_configs kernel-%{version}-*.config
 %endif
 
-# bootwrapper is only on ppc
 # sparse blows up on ppc
 %ifnarch %{power64}
-%define with_bootwrapper 0
 %define with_sparse 0
 %endif
 
@@ -320,8 +315,7 @@ Summary: The Linux kernel
 %define asmarch s390
 %define hdrarch s390
 %define all_arch_configs kernel-%{version}-s390x.config
-%define make_target image
-%define kernel_image arch/s390/boot/image
+%define kernel_image arch/s390/boot/bzImage
 %endif
 
 %ifarch %{arm}
@@ -423,7 +417,7 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 #
 # List the packages used during the kernel build
 #
-BuildRequires: kmod, patch, bash, tar, git
+BuildRequires: kmod, patch, bash, tar, git-core
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex
 BuildRequires: net-tools, hostname, bc, elfutils-devel
@@ -466,7 +460,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -550,9 +544,6 @@ Source5000: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 # ongoing complaint, full discussion delayed until ksummit/plumbers
 Patch002: 0001-iio-Use-event-header-from-kernel-tree.patch
 
-# gcc -Werror=aliasing workaround
-Patch003: 0001-Temporarily-work-around-gcc-aliasing-warning-error.patch
-
 Patch07: freedo.patch
 
 %if !%{nopatches}
@@ -619,14 +610,13 @@ Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
 # http://www.spinics.net/lists/linux-tegra/msg26029.html
 Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
-
-# Fix OMAP4 (pandaboard)
-Patch302: arm-revert-mmc-omap_hsmmc-Use-dma_request_chan-for-reque.patch
-
 # http://patchwork.ozlabs.org/patch/587554/
-Patch303: ARM-tegra-usb-no-reset.patch
+Patch302: ARM-tegra-usb-no-reset.patch
 
-Patch304: arm64-Revert-allwinner-a64-pine64-Use-dcdc1-regulato.patch
+# https://patchwork.kernel.org/patch/10351797/
+Patch303: ACPI-scan-Fix-regression-related-to-X-Gene-UARTs.patch
+# rhbz 1574718
+Patch304: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
 
 # https://patchwork.kernel.org/patch/9820417/
 Patch305: qcom-msm89xx-fixes.patch
@@ -634,32 +624,30 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/patch/10173115/
 Patch306: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
 
-# http://patches.linaro.org/patch/131764/
-Patch308: wcn36xx-Fix-firmware-crash-due-to-corrupted-buffer-address.patch
+# https://marc.info/?l=linux-kernel&m=152328880417846&w=2
+Patch307: arm64-thunderx-crypto-zip-fixes.patch
 
-# https://patchwork.kernel.org/patch/10245303/
-Patch309: wcn36xx-reduce-verbosity-of-drivers-messages.patch
+# https://www.spinics.net/lists/linux-crypto/msg32725.html
+Patch308: crypto-testmgr-Allow-different-compression-results.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg632925.html
-Patch313: arm-crypto-sunxi-ss-Add-MODULE_ALIAS-to-sun4i-ss.patch
+Patch309: arm-tegra-fix-nouveau-crash.patch
 
-# Fix USB on the RPi https://patchwork.kernel.org/patch/9879371/
-Patch320: bcm283x-dma-mapping-skip-USB-devices-when-configuring-DMA-during-probe.patch
+# https://patchwork.kernel.org/patch/10346089/
+Patch310: arm-dts-Add-am335x-pocketbeagle.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg621982.html
-Patch321: bcm283x-Fix-probing-of-bcm2835-i2s.patch
+# https://www.spinics.net/lists/linux-tegra/msg32920.html
+Patch311: arm-tegra-USB-driver-dependency-fix.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg633942.html
-Patch322: mmc-sdhci-iproc-Disable-preset-values-for-BCM2835.patch
-
-# https://www.spinics.net/lists/arm-kernel/msg633945.html
-Patch323: bcm2835-hwrng-Handle-deferred-clock-properly.patch
+# https://patchwork.kernel.org/patch/10354521/
+# https://patchwork.kernel.org/patch/10354187/
+# https://patchwork.kernel.org/patch/10306793/
+# https://patchwork.kernel.org/patch/10133165/
+Patch313: mvebu-a37xx-fixes.patch
 
 Patch324: bcm283x-clk-audio-fixes.patch
 
 # Enabling Patches for the RPi3+
-Patch330: bcm2837-rpi-initial-support-for-the-3.patch
-Patch331: bcm2837-gpio-expander.patch
+Patch330: bcm2837-rpi-initial-3plus-support.patch
 Patch332: bcm2837-enable-pmu.patch
 Patch333: bcm2837-lan78xx-fixes.patch
 
@@ -676,8 +664,9 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 # rhbz 1509461
 Patch503: v3-2-2-Input-synaptics---Lenovo-X1-Carbon-5-should-use-SMBUS-RMI.patch
 
-# rhbz 1558977
-Patch504: sunrpc-remove-incorrect-HMAC-request-initialization.patch
+# rbhz 1435837
+# https://www.spinics.net/lists/linux-acpi/msg82405.html
+Patch504: mailbox-ACPI-erroneous-error-message-when-parsing-ACPI.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -747,13 +736,6 @@ header files define structures and constants that are needed for
 building most standard programs and are also needed for rebuilding the
 cross-glibc package.
 
-%package bootwrapper
-Provides: kernel-libre-bootwrapper = %{rpmversion}-%{pkg_release}
-Summary: Boot wrapper files for generating combined kernel + initrd images
-Requires: gzip binutils
-%description bootwrapper
-Kernel-bootwrapper contains the wrapper code which makes bootable "zImage"
-files combining both kernel and initial ramdisk.
 
 %package debuginfo-common-%{_target_cpu}
 Summary: Kernel source files used by %{name}-debuginfo packages
@@ -883,6 +865,9 @@ Summary: %{variant_summary}\
 Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-libre)\
+%ifarch %{power64}\
+Obsoletes: kernel-libre-bootwrapper\
+%endif\
 %{expand:%%kernel_reqprovconf}\
 %if %{?1:1} %{!?1:0} \
 %{expand:%%kernel_meta_package %{?1:%{1}}}\
@@ -1206,6 +1191,7 @@ git am %{patches}
 
 chmod +x scripts/checkpatch.pl
 chmod +x tools/objtool/sync-check.sh
+mv COPYING COPYING-%{version}
 
 # This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
@@ -1464,6 +1450,9 @@ BuildKernel() {
     if [ -f arch/$Arch/*lds ]; then
       cp -a arch/$Arch/*lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/arch/%{_arch}/ || :
     fi
+    if [ -f arch/%{asmarch}/kernel/module.lds ]; then
+      cp -a --parents arch/%{asmarch}/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
 %ifarch %{power64}
@@ -1473,8 +1462,6 @@ BuildKernel() {
       cp -a --parents arch/%{asmarch}/include $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     fi
 %ifarch aarch64
-    # Needed for systemtap
-    cp -a --parents arch/arm64/kernel/module.lds $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/xen references arch/arm
     cp -a --parents arch/arm/include/asm/xen $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     # arch/arm64/include/asm/opcodes.h references arch/arm
@@ -1506,8 +1493,6 @@ BuildKernel() {
     # dependencies if you so choose.
     cp -a --parents tools/include/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    cp -a --parents arch/x86/purgatory/sha256.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    cp -a --parents arch/x86/purgatory/sha256.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/stack.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/setup-x86_64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -1788,10 +1773,6 @@ done
 rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
 %endif
 
-%if %{with_bootwrapper}
-make DESTDIR=$RPM_BUILD_ROOT bootwrapper_install WRAPPER_OBJDIR=%{_libdir}/kernel-wrapper WRAPPER_DTSDIR=%{_libdir}/kernel-wrapper/dts
-%endif
-
 ###
 ### clean
 ###
@@ -1914,12 +1895,6 @@ fi
 /usr/*-linux-gnu/include/*
 %endif
 
-%if %{with_bootwrapper}
-%files bootwrapper
-/usr/sbin/*
-%{_libdir}/kernel-wrapper
-%endif
-
 # empty meta-package
 %files
 # This is %%{image_install_path} on an arch where that includes ELF files,
@@ -1935,7 +1910,7 @@ fi
 %if %{2}\
 %{expand:%%files -f kernel-%{?3:%{3}-}core.list %{?1:-f kernel-%{?3:%{3}-}ldsoconf.list} %{?3:%{3}-}core}\
 %{!?_licensedir:%global license %%doc}\
-%license linux-%{KVERREL}/COPYING\
+%license linux-%{KVERREL}/COPYING-%{version}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/%{?-k:%{-k*}}%{!?-k:vmlinuz}\
 %ghost /%{image_install_path}/%{?-k:%{-k*}}%{!?-k:vmlinuz}-%{KVERREL}%{?3:+%{3}}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/.vmlinuz.hmac \
@@ -1987,6 +1962,195 @@ fi
 #
 #
 %changelog
+* Tue May 29 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17-rc7-gnu.
+
+* Tue May 29 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc7.git0.1
+- Linux v4.17-rc7
+
+* Tue May 29 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri May 25 2018 Jeremy Cline <jcline@redhat.com> - 4.17.0-0.rc6.git3.1
+- Linux v4.17-rc6-224-g62d18ecfa641
+
+* Fri May 25 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix for incorrect error message about parsing PCCT (rhbz 1435837)
+
+* Thu May 24 2018 Justin M. Forbes <jforbes@redhat.com> - 4.17.0-0.rc6.git2.1
+- Linux v4.17-rc6-158-gbee797529d7c
+- Reenable debugging options.
+
+* Mon May 21 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc6.git1.1
+- Linux v4.17-rc6-146-g5997aab0a11e
+
+* Mon May 21 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc6.git0.1
+- Linux v4.17-rc6
+- Disable debugging options.
+
+* Sun May 20 2018 Hans de Goede <hdegoede@redhat.com>
+- Enable GPIO_AMDPT, PINCTRL_AMD and X86_AMD_PLATFORM_DEVICE Kconfig options
+  to fix i2c and GPIOs not working on AMD based laptops (rhbz#1510649)
+
+* Fri May 18 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc5.git3.1
+- Linux v4.17-rc5-110-g2c71d338bef2
+
+* Thu May 17 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc5.git2.1
+- Linux v4.17-rc5-65-g58ddfe6c3af9
+
+* Tue May 15 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc5.git1.1
+- Linux v4.17-rc5-20-g21b9f1c7e319
+- Reenable debugging options.
+
+* Mon May 14 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc5.git0.1
+- Linux v4.17-rc5
+
+* Mon May 14 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri May 11 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc4.git4.1
+- Linux v4.17-rc4-96-g41e3e1082367
+
+* Thu May 10 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix from linux-next for mvebu Armada 8K macbin boot regression
+
+* Thu May 10 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc4.git3.1
+- Linux v4.17-rc4-38-g008464a9360e
+
+* Wed May 09 2018 Jeremy Cline <jeremy@jcline.org>
+- Workaround for m400 uart irq firmware description (rhbz 1574718)
+
+* Wed May 09 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc4.git2.1
+- Linux v4.17-rc4-31-g036db8bd9637
+
+* Tue May 08 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc4.git1.1
+- Linux v4.17-rc4-12-gf142f08bf7ec
+- Reenable debugging options.
+
+* Mon May 07 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc4.git0.1
+- Linux v4.17-rc4
+
+* Mon May 07 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Sat May  5 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix USB-2 on Tegra devices
+
+* Fri May 04 2018 Laura Abbott <labbott@redhat.com>
+- Fix for building out of tree modules on powerpc (rhbz 1574604)
+
+* Fri May 04 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc3.git4.1
+- Linux v4.17-rc3-148-g625e2001e99e
+
+* Thu May 03 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc3.git3.1
+- Linux v4.17-rc3-36-gc15f6d8d4715
+
+* Wed May 02 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc3.git2.1
+- Linux v4.17-rc3-13-g2d618bdf7163
+
+* Tue May 01 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc3.git1.1
+- Linux v4.17-rc3-5-gfff75eb2a08c
+- Reenable debugging options.
+
+* Mon Apr 30 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc3.git0.1
+- Linux v4.17-rc3
+
+* Mon Apr 30 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Apr 27 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc2.git3.1
+- Linux v4.17-rc2-155-g0644f186fc9d
+
+* Fri Apr 27 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable QLogic NICs on ARM
+
+* Thu Apr 26 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc2.git2.1
+- Linux v4.17-rc2-104-g69bfd470f462
+
+* Wed Apr 25 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fixes for Marvell a37xx EspressoBin
+- Update to latest Raspberry Pi 3+ fixes
+- More fixes for lan78xx on the Raspberry Pi 3+
+
+* Tue Apr 24 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc2.git1.1
+- Linux v4.17-rc2-58-g24cac7009cb1
+- Reenable debugging options.
+
+* Mon Apr 23 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc2.git0.1
+- Linux v4.17-rc2
+
+* Mon Apr 23 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Sun Apr 22 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add quirk patch to fix X-Gene 1 console on HP m400/Mustang (RHBZ 1531140)
+
+* Fri Apr 20 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc1.git3.1
+- Linux v4.17-rc1-93-g43f70c960180
+
+* Thu Apr 19 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc1.git2.1
+- Linux v4.17-rc1-28-g87ef12027b9b
+
+* Thu Apr 19 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable UFS storage options on ARM
+
+* Wed Apr 18 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix rhbz 1565354
+
+* Tue Apr 17 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable drivers for Xilinx ZYMQ-MP Ultra96
+- Initial support for PocketBeagle
+
+* Tue Apr 17 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc1.git1.1
+- Linux v4.17-rc1-21-ga27fc14219f2
+- Reenable debugging options.
+
+* Mon Apr 16 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc1.git0.1
+- Linux v4.17-rc1
+- Disable debugging options.
+
+* Fri Apr 13 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git9.1
+- Linux v4.16-11958-g16e205cf42da
+
+* Thu Apr 12 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git8.1
+- Linux v4.16-11766-ge241e3f2bf97
+
+* Thu Apr 12 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Patch to fix nouveau on Tegra platforms
+- Enable IOMMU on Exynos now upstream does
+- Disable tps65217-charger on BeagleBone to fix USB-OTG port rhbz 1487399
+- Add fix for the BeagleBone boot failure
+- Further fix for ThunderX ZIP driver
+
+* Wed Apr 11 2018 Laura Abbott <labbott@redhat.com>
+- Enable JFFS2 and some MTD modules (rhbz 1474493)
+- Enable a few infiniband options (rhbz 1291902)
+
+* Wed Apr 11 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git7.1
+- Linux v4.16-11490-gb284d4d5a678
+
+* Tue Apr 10 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git6.1
+- Linux v4.16-10929-gc18bb396d3d2
+
+* Mon Apr  9 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes for Cavium ThunderX ZIP driver stability
+
+* Mon Apr 09 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git5.1
+- Linux v4.16-10608-gf8cf2f16a7c9
+
+* Fri Apr 06 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git4.1
+- Linux v4.16-9576-g38c23685b273
+
+* Thu Apr 05 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git3.1
+- Linux v4.16-7248-g06dd3dfeea60
+
+* Wed Apr 04 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git2.1
+- Linux v4.16-5456-g17dec0a94915
+
+* Tue Apr 03 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.0-0.rc0.git1.1
+- Linux v4.16-2520-g642e7fd23353
+- Reenable debugging options.
+
 * Mon Apr  2 2018 Peter Robinson <pbrobinson@fedoraproject.org> 4.16.0-2
 - Improvements for the Raspberry Pi 3+
 - Fixes and minor improvements to Raspberry Pi 2/3
