@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -641,9 +641,6 @@ Patch310: bcm283x-Fix-probing-of-bcm2835-i2s.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg633942.html
 Patch311: mmc-sdhci-iproc-Disable-preset-values-for-BCM2835.patch
-
-# https://www.spinics.net/lists/arm-kernel/msg633945.html
-Patch312: bcm2835-hwrng-Handle-deferred-clock-properly.patch
 
 Patch313: bcm283x-clk-audio-fixes.patch
 
@@ -2030,6 +2027,13 @@ fi
 #
 #
 %changelog
+* Wed May 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.13-gnu.
+
+* Wed May 30 2018 Jeremy Cline <jcline@redhat.com> - 4.16.13-200
+- Linux v4.16.13
+- Fixes CVE-2018-11506 (rhbz 1583210 1583213)
+
 * Fri May 25 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.12-gnu.
 
