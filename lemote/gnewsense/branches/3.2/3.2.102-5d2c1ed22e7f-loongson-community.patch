@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 1433109..971a529 100644
+index 46779a681440..60cc8dda976b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -15,7 +15,7 @@ index 1433109..971a529 100644
  # Normally, just do built-in.
 @@ -561,7 +561,7 @@ all: vmlinux
  ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
- KBUILD_CFLAGS	+= -Os
+ KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
  else
 -KBUILD_CFLAGS	+= -O2
 +KBUILD_CFLAGS	+= -O3
@@ -23,7 +23,7 @@ index 1433109..971a529 100644
  
  include $(srctree)/arch/$(SRCARCH)/Makefile
 diff --git a/arch/mips/Kbuild.platforms b/arch/mips/Kbuild.platforms
-index 5ce8029..d64786d 100644
+index 5ce8029f558b..d64786d5e2f3 100644
 --- a/arch/mips/Kbuild.platforms
 +++ b/arch/mips/Kbuild.platforms
 @@ -14,6 +14,7 @@ platforms += jz4740
@@ -35,7 +35,7 @@ index 5ce8029..d64786d 100644
  platforms += mti-malta
  platforms += netlogic
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index d46f1da..b6acf39 100644
+index d46f1da18a3c..b6acf39cca93 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
 @@ -18,12 +18,12 @@ config MIPS
@@ -209,7 +209,7 @@ index d46f1da..b6acf39 100644
  config ARCH_DISCONTIGMEM_ENABLE
  	bool
 diff --git a/arch/mips/Kconfig.debug b/arch/mips/Kconfig.debug
-index 83ed00a..bdb259d 100644
+index 83ed00a5644a..bdb259d569b6 100644
 --- a/arch/mips/Kconfig.debug
 +++ b/arch/mips/Kconfig.debug
 @@ -7,9 +7,9 @@ config TRACE_IRQFLAGS_SUPPORT
@@ -225,7 +225,7 @@ index 83ed00a..bdb259d 100644
  	  This option enables special console drivers which allow the kernel
  	  to print messages very early in the bootup process.
 diff --git a/arch/mips/Makefile b/arch/mips/Makefile
-index aaf7444..ceb2dc2 100644
+index 97ba1d6683b1..94aa13b0db58 100644
 --- a/arch/mips/Makefile
 +++ b/arch/mips/Makefile
 @@ -256,18 +256,19 @@ endif
@@ -254,7 +254,7 @@ index aaf7444..ceb2dc2 100644
  all:	$(all-y)
  
 diff --git a/arch/mips/bcm63xx/cpu.c b/arch/mips/bcm63xx/cpu.c
-index 7c7e4d4..5e5caae 100644
+index 7c7e4d4486ce..5e5caae04848 100644
 --- a/arch/mips/bcm63xx/cpu.c
 +++ b/arch/mips/bcm63xx/cpu.c
 @@ -297,7 +297,7 @@ void __init bcm63xx_cpu_init(void)
@@ -267,7 +267,7 @@ index 7c7e4d4..5e5caae 100644
  		if ((read_c0_prid() & 0xff00) == PRID_IMP_BMIPS3300_ALT) {
  			expected_cpu_id = BCM6348_CPU_ID;
 diff --git a/arch/mips/boot/compressed/Makefile b/arch/mips/boot/compressed/Makefile
-index 5042d51..c653ebd 100644
+index 35034cf81047..a65905fc8026 100644
 --- a/arch/mips/boot/compressed/Makefile
 +++ b/arch/mips/boot/compressed/Makefile
 @@ -28,9 +28,10 @@ KBUILD_AFLAGS := $(LINUXINCLUDE) $(KBUILD_AFLAGS) -D__ASSEMBLY__ \
@@ -331,10 +331,14 @@ index 5042d51..c653ebd 100644
 +vmlinuz.srec: vmlinuz.unsstrip
  	$(call cmd,objcopy)
  
--clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec}
-+clean-files := $(objtree)/vmlinuz $(objtree)/vmlinuz.{32,ecoff,bin,srec,unsstrip}
+ clean-files += $(objtree)/vmlinuz
+@@ -110,3 +120,4 @@ clean-files += $(objtree)/vmlinuz.32
+ clean-files += $(objtree)/vmlinuz.ecoff
+ clean-files += $(objtree)/vmlinuz.bin
+ clean-files += $(objtree)/vmlinuz.srec
++clean-files += $(objtree)/vmlinuz.unsstrip
 diff --git a/arch/mips/boot/compressed/decompress.c b/arch/mips/boot/compressed/decompress.c
-index ca51d69..d0a6828 100644
+index ca51d69a99ff..d0a6828e1c26 100644
 --- a/arch/mips/boot/compressed/decompress.c
 +++ b/arch/mips/boot/compressed/decompress.c
 @@ -28,8 +28,13 @@ unsigned long free_mem_end_ptr;
@@ -352,7 +356,7 @@ index ca51d69..d0a6828 100644
  void error(char *x)
  {
 diff --git a/arch/mips/boot/compressed/ld.script b/arch/mips/boot/compressed/ld.script
-index 8e6b07c..99ca111 100644
+index 8e6b07ca2f5e..99ca11150b8f 100644
 --- a/arch/mips/boot/compressed/ld.script
 +++ b/arch/mips/boot/compressed/ld.script
 @@ -46,5 +46,6 @@ SECTIONS
@@ -363,7 +367,7 @@ index 8e6b07c..99ca111 100644
  	}
  }
 diff --git a/arch/mips/configs/fuloong2e_defconfig b/arch/mips/configs/fuloong2e_defconfig
-index e5b73de..1e02d0b 100644
+index e5b73de08fc5..1e02d0b27868 100644
 --- a/arch/mips/configs/fuloong2e_defconfig
 +++ b/arch/mips/configs/fuloong2e_defconfig
 @@ -12,7 +12,6 @@ CONFIG_BSD_PROCESS_ACCT=y
@@ -397,7 +401,7 @@ index e5b73de..1e02d0b 100644
  CONFIG_CRYPTO_CCM=m
 diff --git a/arch/mips/configs/gdium_minimal_defconfig b/arch/mips/configs/gdium_minimal_defconfig
 new file mode 100644
-index 0000000..595b414
+index 000000000000..595b41421a99
 --- /dev/null
 +++ b/arch/mips/configs/gdium_minimal_defconfig
 @@ -0,0 +1,125 @@
@@ -528,7 +532,7 @@ index 0000000..595b414
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 diff --git a/arch/mips/configs/gdium_small_defconfig b/arch/mips/configs/gdium_small_defconfig
 new file mode 100644
-index 0000000..641daf5
+index 000000000000..641daf50787f
 --- /dev/null
 +++ b/arch/mips/configs/gdium_small_defconfig
 @@ -0,0 +1,150 @@
@@ -683,7 +687,7 @@ index 0000000..641daf5
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 +# CONFIG_EARLY_PRINTK is not set
 diff --git a/arch/mips/configs/lemote2f_defconfig b/arch/mips/configs/lemote2f_defconfig
-index b6acd2f..abc42e0 100644
+index b6acd2f256b6..abc42e0ee20f 100644
 --- a/arch/mips/configs/lemote2f_defconfig
 +++ b/arch/mips/configs/lemote2f_defconfig
 @@ -1,27 +1,27 @@
@@ -1699,7 +1703,7 @@ index b6acd2f..abc42e0 100644
 -CONFIG_CRC_T10DIF=y
 diff --git a/arch/mips/configs/lemote2f_minimal_defconfig b/arch/mips/configs/lemote2f_minimal_defconfig
 new file mode 100644
-index 0000000..82ad0bd4
+index 000000000000..82ad0bd47c2a
 --- /dev/null
 +++ b/arch/mips/configs/lemote2f_minimal_defconfig
 @@ -0,0 +1,122 @@
@@ -1827,7 +1831,7 @@ index 0000000..82ad0bd4
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 diff --git a/arch/mips/configs/lemote2f_small_defconfig b/arch/mips/configs/lemote2f_small_defconfig
 new file mode 100644
-index 0000000..a546502
+index 000000000000..a54650298c9e
 --- /dev/null
 +++ b/arch/mips/configs/lemote2f_small_defconfig
 @@ -0,0 +1,152 @@
@@ -1985,7 +1989,7 @@ index 0000000..a546502
 +# CONFIG_RCU_CPU_STALL_DETECTOR is not set
 diff --git a/arch/mips/configs/ls1b_defconfig b/arch/mips/configs/ls1b_defconfig
 new file mode 100644
-index 0000000..1451696
+index 000000000000..1451696bd284
 --- /dev/null
 +++ b/arch/mips/configs/ls1b_defconfig
 @@ -0,0 +1,89 @@
@@ -2080,7 +2084,7 @@ index 0000000..1451696
 +# CONFIG_FTRACE is not set
 diff --git a/arch/mips/configs/yeeloong_tiny_defconfig b/arch/mips/configs/yeeloong_tiny_defconfig
 new file mode 100644
-index 0000000..93e3e7b
+index 000000000000..93e3e7b0627b
 --- /dev/null
 +++ b/arch/mips/configs/yeeloong_tiny_defconfig
 @@ -0,0 +1,74 @@
@@ -2160,7 +2164,7 @@ index 0000000..93e3e7b
 +CONFIG_CRC16=y
 diff --git a/arch/mips/include/asm/clock.h b/arch/mips/include/asm/clock.h
 deleted file mode 100644
-index 83894aa..0000000
+index 83894aa7932c..000000000000
 --- a/arch/mips/include/asm/clock.h
 +++ /dev/null
 @@ -1,64 +0,0 @@
@@ -2229,7 +2233,7 @@ index 83894aa..0000000
 -
 -#endif				/* __ASM_MIPS_CLOCK_H */
 diff --git a/arch/mips/include/asm/cpu-features.h b/arch/mips/include/asm/cpu-features.h
-index ca400f7..c4e1834 100644
+index 0f4991b3dbee..b64d692da391 100644
 --- a/arch/mips/include/asm/cpu-features.h
 +++ b/arch/mips/include/asm/cpu-features.h
 @@ -13,8 +13,12 @@
@@ -2247,7 +2251,7 @@ index ca400f7..c4e1834 100644
  
  /*
 diff --git a/arch/mips/include/asm/cpu.h b/arch/mips/include/asm/cpu.h
-index 2f7f418..5c37303 100644
+index 2f7f41873f24..5c37303f2275 100644
 --- a/arch/mips/include/asm/cpu.h
 +++ b/arch/mips/include/asm/cpu.h
 @@ -37,6 +37,8 @@
@@ -2297,7 +2301,7 @@ index 2f7f418..5c37303 100644
 -
  #endif /* _ASM_CPU_H */
 diff --git a/arch/mips/include/asm/dma-mapping.h b/arch/mips/include/asm/dma-mapping.h
-index 7aa37dd..655f849 100644
+index 7aa37ddfca4b..655f849bd08d 100644
 --- a/arch/mips/include/asm/dma-mapping.h
 +++ b/arch/mips/include/asm/dma-mapping.h
 @@ -5,9 +5,7 @@
@@ -2311,7 +2315,7 @@ index 7aa37dd..655f849 100644
  extern struct dma_map_ops *mips_dma_map_ops;
  
 diff --git a/arch/mips/include/asm/ftrace.h b/arch/mips/include/asm/ftrace.h
-index 370ae7c..ca11fdc 100644
+index 370ae7cc588a..ca11fdcd182a 100644
 --- a/arch/mips/include/asm/ftrace.h
 +++ b/arch/mips/include/asm/ftrace.h
 @@ -3,7 +3,7 @@
@@ -2334,7 +2338,7 @@ index 370ae7c..ca11fdc 100644
  #endif /* CONFIG_FUNCTION_TRACER */
  #endif /* _ASM_MIPS_FTRACE_H */
 diff --git a/arch/mips/include/asm/inst.h b/arch/mips/include/asm/inst.h
-index 7ebfc39..0e8ba7c 100644
+index 7ebfc392e58d..0e8ba7c0aa29 100644
 --- a/arch/mips/include/asm/inst.h
 +++ b/arch/mips/include/asm/inst.h
 @@ -61,6 +61,8 @@ enum spec_op {
@@ -2385,7 +2389,7 @@ index 7ebfc39..0e8ba7c 100644
  	unsigned int func : 4;
  	unsigned int fd : 5;
 diff --git a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h b/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
-index 675bd86..5938f70 100644
+index 675bd8641d5a..5938f70db641 100644
 --- a/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
 +++ b/arch/mips/include/asm/mach-loongson/cpu-feature-overrides.h
 @@ -16,6 +16,20 @@
@@ -2410,7 +2414,7 @@ index 675bd86..5938f70 100644
  #define cpu_icache_line_size()	32
  #define cpu_scache_line_size()	32
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
-index 2a8e2bb..38bceee 100644
+index 2a8e2bb5d539..38bceee5f4cd 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
 +++ b/arch/mips/include/asm/mach-loongson/cs5536/cs5536.h
 @@ -255,21 +255,12 @@ extern void _wrmsr(u32 msr, u32 hi, u32 lo);
@@ -2478,7 +2482,7 @@ index 2a8e2bb..38bceee 100644
  
  #endif				/* _CS5536_H */
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h
-index 4b493d6..d058e46 100644
+index 4b493d6772c2..d058e466a0e7 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h
 +++ b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_mfgpt.h
 @@ -10,26 +10,45 @@
@@ -2538,7 +2542,7 @@ index 4b493d6..d058e46 100644
  
  #endif /*!_CS5536_MFGPT_H */
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_pci.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_pci.h
-index 0dca9c8..cfefc37 100644
+index 0dca9c89ee7c..cfefc377c0d5 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_pci.h
 +++ b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_pci.h
 @@ -13,6 +13,7 @@
@@ -2584,7 +2588,7 @@ index 0dca9c8..cfefc37 100644
  #define	PCI_EXPANSION_ROM_BAR		0x00000000
  
 diff --git a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_vsm.h b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_vsm.h
-index 21c4ece..40f6a81 100644
+index 21c4ecedebe7..40f6a81ac8bd 100644
 --- a/arch/mips/include/asm/mach-loongson/cs5536/cs5536_vsm.h
 +++ b/arch/mips/include/asm/mach-loongson/cs5536/cs5536_vsm.h
 @@ -17,15 +17,43 @@ typedef u32 (*cs5536_pci_vsm_read)(int reg);
@@ -2635,7 +2639,7 @@ index 21c4ece..40f6a81 100644
  #endif				/* _CS5536_VSM_H */
 diff --git a/arch/mips/include/asm/mach-loongson/ec_kb3310b.h b/arch/mips/include/asm/mach-loongson/ec_kb3310b.h
 new file mode 100644
-index 0000000..2e86905
+index 000000000000..2e8690532ea5
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson/ec_kb3310b.h
 @@ -0,0 +1,170 @@
@@ -2810,7 +2814,7 @@ index 0000000..2e86905
 +
 +#endif /* !_EC_KB3310B_H */
 diff --git a/arch/mips/include/asm/mach-loongson/gpio.h b/arch/mips/include/asm/mach-loongson/gpio.h
-index e30e73d..0fd06bf 100644
+index e30e73d443df..0fd06bfe1019 100644
 --- a/arch/mips/include/asm/mach-loongson/gpio.h
 +++ b/arch/mips/include/asm/mach-loongson/gpio.h
 @@ -13,12 +13,16 @@
@@ -2831,7 +2835,7 @@ index e30e73d..0fd06bf 100644
   * but it has not been tested and doc not clear
   */
 diff --git a/arch/mips/include/asm/mach-loongson/loongson.h b/arch/mips/include/asm/mach-loongson/loongson.h
-index 1e29b9d..ed089c7 100644
+index 1e29b9dd1d73..ed089c7a001f 100644
 --- a/arch/mips/include/asm/mach-loongson/loongson.h
 +++ b/arch/mips/include/asm/mach-loongson/loongson.h
 @@ -31,17 +31,13 @@ extern void __init prom_init_memory(void);
@@ -2878,7 +2882,7 @@ index 1e29b9d..ed089c7 100644
  
  /*
 diff --git a/arch/mips/include/asm/mach-loongson/machine.h b/arch/mips/include/asm/mach-loongson/machine.h
-index 4321338..8575995 100644
+index 43213388c174..8575995f3de3 100644
 --- a/arch/mips/include/asm/mach-loongson/machine.h
 +++ b/arch/mips/include/asm/mach-loongson/machine.h
 @@ -12,16 +12,16 @@
@@ -2905,7 +2909,7 @@ index 4321338..8575995 100644
  #endif /* __ASM_MACH_LOONGSON_MACHINE_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/clock.h b/arch/mips/include/asm/mach-loongson1/clock.h
 new file mode 100644
-index 0000000..ad3fbd8
+index 000000000000..ad3fbd830d47
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/clock.h
 @@ -0,0 +1,64 @@
@@ -2975,7 +2979,7 @@ index 0000000..ad3fbd8
 +#endif				/* __ASM_MACH_LOONGSON1_CLOCK_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/irq.h b/arch/mips/include/asm/mach-loongson1/irq.h
 new file mode 100644
-index 0000000..6373f53
+index 000000000000..6373f5376654
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/irq.h
 @@ -0,0 +1,68 @@
@@ -3049,7 +3053,7 @@ index 0000000..6373f53
 +#endif /* __ASM_MACH_LOONGSON1_IRQ_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/loongson1.h b/arch/mips/include/asm/mach-loongson1/loongson1.h
 new file mode 100644
-index 0000000..2946046
+index 000000000000..29460462bcda
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/loongson1.h
 @@ -0,0 +1,44 @@
@@ -3099,7 +3103,7 @@ index 0000000..2946046
 +#endif /* __ASM_MACH_LOONGSON1_LOONGSON1_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/platform.h b/arch/mips/include/asm/mach-loongson1/platform.h
 new file mode 100644
-index 0000000..1e4b313
+index 000000000000..1e4b313cd919
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/platform.h
 @@ -0,0 +1,21 @@
@@ -3126,7 +3130,7 @@ index 0000000..1e4b313
 +#endif /* __ASM_MACH_LOONGSON1_PLATFORM_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/prom.h b/arch/mips/include/asm/mach-loongson1/prom.h
 new file mode 100644
-index 0000000..b871dc4
+index 000000000000..b871dc41b8d9
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/prom.h
 @@ -0,0 +1,24 @@
@@ -3156,7 +3160,7 @@ index 0000000..b871dc4
 +#endif /* __ASM_MACH_LOONGSON1_PROM_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/regs-clk.h b/arch/mips/include/asm/mach-loongson1/regs-clk.h
 new file mode 100644
-index 0000000..4f488c3
+index 000000000000..4f488c39c277
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/regs-clk.h
 @@ -0,0 +1,32 @@
@@ -3194,7 +3198,7 @@ index 0000000..4f488c3
 +#endif /* __ASM_MACH_LOONGSON1_REGS_CLK_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/regs-intc.h b/arch/mips/include/asm/mach-loongson1/regs-intc.h
 new file mode 100644
-index 0000000..6d5db23
+index 000000000000..6d5db23ebb05
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/regs-intc.h
 @@ -0,0 +1,25 @@
@@ -3225,7 +3229,7 @@ index 0000000..6d5db23
 +#endif /* __ASM_MACH_LOONGSON1_REGS_INTC_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/regs-wdt.h b/arch/mips/include/asm/mach-loongson1/regs-wdt.h
 new file mode 100644
-index 0000000..875ce67
+index 000000000000..875ce67e9702
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/regs-wdt.h
 @@ -0,0 +1,21 @@
@@ -3252,7 +3256,7 @@ index 0000000..875ce67
 +#endif /* __ASM_MACH_LOONGSON1_REGS_WDT_H */
 diff --git a/arch/mips/include/asm/mach-loongson1/war.h b/arch/mips/include/asm/mach-loongson1/war.h
 new file mode 100644
-index 0000000..e3680a8
+index 000000000000..e3680a8fb349
 --- /dev/null
 +++ b/arch/mips/include/asm/mach-loongson1/war.h
 @@ -0,0 +1,25 @@
@@ -3282,7 +3286,7 @@ index 0000000..e3680a8
 +
 +#endif /* __ASM_MACH_LOONGSON1_WAR_H */
 diff --git a/arch/mips/include/asm/module.h b/arch/mips/include/asm/module.h
-index bc01a02..b53d642 100644
+index bc01a02cacd8..b53d642f975e 100644
 --- a/arch/mips/include/asm/module.h
 +++ b/arch/mips/include/asm/module.h
 @@ -116,6 +116,8 @@ search_module_dbetables(unsigned long addr)
@@ -3295,7 +3299,7 @@ index bc01a02..b53d642 100644
  #define MODULE_PROC_FAMILY "OCTEON "
  #elif defined CONFIG_CPU_XLR
 diff --git a/arch/mips/include/asm/signal.h b/arch/mips/include/asm/signal.h
-index c783f36..49abd51 100644
+index c783f364938c..49abd51130a1 100644
 --- a/arch/mips/include/asm/signal.h
 +++ b/arch/mips/include/asm/signal.h
 @@ -72,6 +72,12 @@ typedef unsigned long old_sigset_t;		/* at least 32 bits */
@@ -3321,7 +3325,7 @@ index c783f36..49abd51 100644
   * sigaltstack controls
   */
 diff --git a/arch/mips/include/asm/timex.h b/arch/mips/include/asm/timex.h
-index 6529704..bf6a701 100644
+index 6529704aa73a..bf6a70128936 100644
 --- a/arch/mips/include/asm/timex.h
 +++ b/arch/mips/include/asm/timex.h
 @@ -10,6 +10,10 @@
@@ -3336,7 +3340,7 @@ index 6529704..bf6a701 100644
  
  /*
 diff --git a/arch/mips/kernel/cevt-r4k.c b/arch/mips/kernel/cevt-r4k.c
-index e2d8e19..973885b 100644
+index e2d8e199be32..973885b0aaee 100644
 --- a/arch/mips/kernel/cevt-r4k.c
 +++ b/arch/mips/kernel/cevt-r4k.c
 @@ -11,6 +11,7 @@
@@ -3415,7 +3419,7 @@ index e2d8e19..973885b 100644
  }
  
 diff --git a/arch/mips/kernel/cpu-probe.c b/arch/mips/kernel/cpu-probe.c
-index c7d3cf1..00237b6 100644
+index c7d3cf1ce46e..00237b6b990f 100644
 --- a/arch/mips/kernel/cpu-probe.c
 +++ b/arch/mips/kernel/cpu-probe.c
 @@ -38,6 +38,8 @@
@@ -3584,10 +3588,11 @@ index c7d3cf1..00237b6 100644
  			c->options |= MIPS_CPU_FPU | MIPS_CPU_32FPR;
  		c->tlbsize = 48;
  		break;
-@@ -636,6 +635,18 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+@@ -635,6 +634,18 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c, unsigned int cpu)
+ 			     MIPS_CPU_FPU | MIPS_CPU_LLSC |
  			     MIPS_CPU_32FPR;
  		c->tlbsize = 64;
- 		break;
++		break;
 +	case PRID_IMP_LOONGSON1:
 +		decode_configs(c);
 +
@@ -3599,10 +3604,9 @@ index c7d3cf1..00237b6 100644
 +			break;
 +		}
 +
-+		break;
+ 		break;
  	}
  }
- 
 @@ -790,7 +801,7 @@ static void __cpuinit decode_configs(struct cpuinfo_mips *c)
  static inline void cpu_probe_mips(struct cpuinfo_mips *c, unsigned int cpu)
  {
@@ -3723,7 +3727,7 @@ index c7d3cf1..00237b6 100644
  		printk(KERN_INFO "FPU revision is: %08x\n", c->fpu_id);
  }
 diff --git a/arch/mips/kernel/cpufreq/Kconfig b/arch/mips/kernel/cpufreq/Kconfig
-index 58c601e..c0df14a 100644
+index 58c601eee6fd..c0df14ae705c 100644
 --- a/arch/mips/kernel/cpufreq/Kconfig
 +++ b/arch/mips/kernel/cpufreq/Kconfig
 @@ -4,11 +4,36 @@
@@ -3765,7 +3769,7 @@ index 58c601e..c0df14a 100644
  if MIPS_CPUFREQ
  
 diff --git a/arch/mips/kernel/cpufreq/Makefile b/arch/mips/kernel/cpufreq/Makefile
-index c3479a43..05a5715 100644
+index c3479a432efe..05a5715ee38c 100644
 --- a/arch/mips/kernel/cpufreq/Makefile
 +++ b/arch/mips/kernel/cpufreq/Makefile
 @@ -2,4 +2,4 @@
@@ -3776,7 +3780,7 @@ index c3479a43..05a5715 100644
 +obj-$(CONFIG_LOONGSON2_CPUFREQ) += loongson2_cpufreq.o
 diff --git a/arch/mips/kernel/cpufreq/loongson2_clock.c b/arch/mips/kernel/cpufreq/loongson2_clock.c
 deleted file mode 100644
-index 5426779..0000000
+index 5426779d9fdb..000000000000
 --- a/arch/mips/kernel/cpufreq/loongson2_clock.c
 +++ /dev/null
 @@ -1,171 +0,0 @@
@@ -3952,7 +3956,7 @@ index 5426779..0000000
 -MODULE_DESCRIPTION("cpufreq driver for Loongson 2F");
 -MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
-index ae5db20..f9f1ff5 100644
+index ae5db206347c..f9f1ff53bbac 100644
 --- a/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 +++ b/arch/mips/kernel/cpufreq/loongson2_cpufreq.c
 @@ -1,187 +1,306 @@
@@ -4413,7 +4417,7 @@ index ae5db20..f9f1ff5 100644
 +MODULE_DESCRIPTION("cpufreq driver for Loongson-2");
  MODULE_LICENSE("GPL");
 diff --git a/arch/mips/kernel/csrc-r4k.c b/arch/mips/kernel/csrc-r4k.c
-index decd1fa..154744c 100644
+index decd1fa38d55..154744cbdb44 100644
 --- a/arch/mips/kernel/csrc-r4k.c
 +++ b/arch/mips/kernel/csrc-r4k.c
 @@ -6,27 +6,238 @@
@@ -4658,7 +4662,7 @@ index decd1fa..154744c 100644
  	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
  
 diff --git a/arch/mips/kernel/perf_event_mipsxx.c b/arch/mips/kernel/perf_event_mipsxx.c
-index dc6ffe0..a55e4af 100644
+index dc6ffe011bea..a55e4afe3850 100644
 --- a/arch/mips/kernel/perf_event_mipsxx.c
 +++ b/arch/mips/kernel/perf_event_mipsxx.c
 @@ -1612,6 +1612,12 @@ init_hw_perf_events(void)
@@ -4675,7 +4679,7 @@ index dc6ffe0..a55e4af 100644
  		pr_cont("Either hardware does not support performance "
  			"counters, or not yet implemented.\n");
 diff --git a/arch/mips/kernel/process.c b/arch/mips/kernel/process.c
-index bf128d7..a3a766f 100644
+index bf128d7425ea..a3a766fa6463 100644
 --- a/arch/mips/kernel/process.c
 +++ b/arch/mips/kernel/process.c
 @@ -64,12 +64,12 @@ void __noreturn cpu_idle(void)
@@ -4695,7 +4699,7 @@ index bf128d7..a3a766f 100644
  #ifdef CONFIG_HOTPLUG_CPU
  		if (!cpu_online(cpu) && !cpu_isset(cpu, cpu_callin_map))
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index a56175b..5c44a7d 100644
+index 4eb5391007ee..6ad2fb14322f 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -4718,7 +4722,7 @@ index a56175b..5c44a7d 100644
  	SAVE_SOME
  	TRACE_IRQS_ON_RELOAD
 diff --git a/arch/mips/kernel/spram.c b/arch/mips/kernel/spram.c
-index 1821d12..5146254 100644
+index 1821d12a6410..514625494823 100644
 --- a/arch/mips/kernel/spram.c
 +++ b/arch/mips/kernel/spram.c
 @@ -199,10 +199,9 @@ static __cpuinit void probe_spram(char *type,
@@ -4734,7 +4738,7 @@ index 1821d12..5146254 100644
  	case CPU_34K:
  	case CPU_74K:
 diff --git a/arch/mips/kernel/time.c b/arch/mips/kernel/time.c
-index 99d73b7..9930bfe 100644
+index 99d73b72b00b..9930bfe34a06 100644
 --- a/arch/mips/kernel/time.c
 +++ b/arch/mips/kernel/time.c
 @@ -105,7 +105,7 @@ static __init int cpu_has_mfc0_count_bug(void)
@@ -4759,7 +4763,7 @@ index 99d73b7..9930bfe 100644
  
  	if (!mips_clockevent_init() || !cpu_has_mfc0_count_bug())
 diff --git a/arch/mips/kernel/traps.c b/arch/mips/kernel/traps.c
-index 5c8a49d..59598c8 100644
+index e0ee75d4c96f..9bad8a81bf84 100644
 --- a/arch/mips/kernel/traps.c
 +++ b/arch/mips/kernel/traps.c
 @@ -615,14 +615,14 @@ static int simulate_rdhwr(struct pt_regs *regs, unsigned int opcode)
@@ -4780,7 +4784,7 @@ index 5c8a49d..59598c8 100644
  			case CPU_20KC:
  			case CPU_25KF:
  				regs->regs[rt] = 1;
-@@ -1248,6 +1248,7 @@ static inline void parity_protection_init(void)
+@@ -1247,6 +1247,7 @@ static inline void parity_protection_init(void)
  		break;
  
  	case CPU_5KC:
@@ -4789,7 +4793,7 @@ index 5c8a49d..59598c8 100644
  		back_to_back_c0_hazard();
  		/* Set the PE bit (bit 31) in the c0_errctl register. */
 diff --git a/arch/mips/lib/Makefile b/arch/mips/lib/Makefile
-index b2cad4f..e6ebe8b 100644
+index b2cad4fd5fc4..e6ebe8b5a925 100644
 --- a/arch/mips/lib/Makefile
 +++ b/arch/mips/lib/Makefile
 @@ -2,9 +2,13 @@
@@ -4808,7 +4812,7 @@ index b2cad4f..e6ebe8b 100644
  obj-$(CONFIG_PCI)	+= iomap-pci.o
  
 diff --git a/arch/mips/loongson/Kconfig b/arch/mips/loongson/Kconfig
-index aca93ee..befcee9 100644
+index aca93eed8779..befcee9e9347 100644
 --- a/arch/mips/loongson/Kconfig
 +++ b/arch/mips/loongson/Kconfig
 @@ -32,61 +32,121 @@ config LEMOTE_FULOONG2E
@@ -4947,7 +4951,7 @@ index aca93ee..befcee9 100644
 +	  smaller ones.
  endif # MACH_LOONGSON
 diff --git a/arch/mips/loongson/Makefile b/arch/mips/loongson/Makefile
-index 2b76cb0..1c3ae7c 100644
+index 2b76cb0fb07d..1c3ae7c149f2 100644
 --- a/arch/mips/loongson/Makefile
 +++ b/arch/mips/loongson/Makefile
 @@ -15,3 +15,9 @@ obj-$(CONFIG_LEMOTE_FULOONG2E)  += fuloong-2e/
@@ -4961,7 +4965,7 @@ index 2b76cb0..1c3ae7c 100644
 +
 +obj-$(CONFIG_DEXXON_GDIUM)  += gdium/
 diff --git a/arch/mips/loongson/Platform b/arch/mips/loongson/Platform
-index 29692e5..6be5dff 100644
+index 29692e5433b1..6be5dffcf246 100644
 --- a/arch/mips/loongson/Platform
 +++ b/arch/mips/loongson/Platform
 @@ -30,3 +30,4 @@ platform-$(CONFIG_MACH_LOONGSON) += loongson/
@@ -4970,7 +4974,7 @@ index 29692e5..6be5dff 100644
  load-$(CONFIG_LEMOTE_MACH2F) += 0xffffffff80200000
 +load-$(CONFIG_DEXXON_GDIUM) += 0xffffffff80200000
 diff --git a/arch/mips/loongson/common/Makefile b/arch/mips/loongson/common/Makefile
-index ce415f7..ed90596 100644
+index ce415f70ca86..ed9059685d07 100644
 --- a/arch/mips/loongson/common/Makefile
 +++ b/arch/mips/loongson/common/Makefile
 @@ -3,16 +3,17 @@
@@ -4996,7 +5000,7 @@ index ce415f7..ed90596 100644
  
  #
 diff --git a/arch/mips/loongson/common/cmdline.c b/arch/mips/loongson/common/cmdline.c
-index 353e1d2..8bce6a8 100644
+index 353e1d2e41a5..8bce6a8b2b11 100644
 --- a/arch/mips/loongson/common/cmdline.c
 +++ b/arch/mips/loongson/common/cmdline.c
 @@ -17,10 +17,15 @@
@@ -5048,7 +5052,7 @@ index 353e1d2..8bce6a8 100644
 +	strncpy(loongson_cmdline, arcs_cmdline, COMMAND_LINE_SIZE);
  }
 diff --git a/arch/mips/loongson/common/cs5536/Makefile b/arch/mips/loongson/common/cs5536/Makefile
-index f12e640..70f6057 100644
+index f12e64007347..70f6057181f6 100644
 --- a/arch/mips/loongson/common/cs5536/Makefile
 +++ b/arch/mips/loongson/common/cs5536/Makefile
 @@ -2,8 +2,13 @@
@@ -5068,7 +5072,7 @@ index f12e640..70f6057 100644
  #
  # Enable cs5536 mfgpt Timer
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_acc.c b/arch/mips/loongson/common/cs5536/cs5536_acc.c
-index b3fd5ea..602b539 100644
+index b3fd5eab6548..602b5397ef4a 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_acc.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_acc.c
 @@ -18,7 +18,7 @@
@@ -5182,7 +5186,7 @@ index b3fd5ea..602b539 100644
 +	return cfg;
  }
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_ehci.c b/arch/mips/loongson/common/cs5536/cs5536_ehci.c
-index 5b5cbba..0fd49b8 100644
+index 5b5cbba699b3..0fd49b8b20ac 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_ehci.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_ehci.c
 @@ -18,7 +18,7 @@
@@ -5303,7 +5307,7 @@ index 5b5cbba..0fd49b8 100644
 +	return cfg;
  }
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_ide.c b/arch/mips/loongson/common/cs5536/cs5536_ide.c
-index 681d129..32ad4ee 100644
+index 681d1291a2c7..32ad4ee29849 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_ide.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_ide.c
 @@ -18,7 +18,7 @@
@@ -5477,7 +5481,7 @@ index 681d129..32ad4ee 100644
 +	return cfg;
  }
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_isa.c b/arch/mips/loongson/common/cs5536/cs5536_isa.c
-index 4d9f65a..3469f64 100644
+index 4d9f65abeaff..3469f64f8e0a 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_isa.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_isa.c
 @@ -86,7 +86,7 @@ static void divil_lbar_disable(void)
@@ -5628,7 +5632,7 @@ index 4d9f65a..3469f64 100644
 +	return cfg;
  }
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c b/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c
-index 0cb1b97..c949dd9 100644
+index 0cb1b9760e34..c949dd98cb01 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_mfgpt.c
 @@ -7,6 +7,9 @@
@@ -5972,7 +5976,7 @@ index 0cb1b97..c949dd9 100644
 -arch_initcall(init_mfgpt_clocksource);
 +arch_initcall(init_mfgpt1_clocksource);
 diff --git a/arch/mips/loongson/common/cs5536/cs5536_ohci.c b/arch/mips/loongson/common/cs5536/cs5536_ohci.c
-index bdedf51..bdb43bb 100644
+index bdedf512baf7..bdb43bb4ad57 100644
 --- a/arch/mips/loongson/common/cs5536/cs5536_ohci.c
 +++ b/arch/mips/loongson/common/cs5536/cs5536_ohci.c
 @@ -18,7 +18,7 @@
@@ -6086,7 +6090,7 @@ index bdedf51..bdb43bb 100644
 +	return cfg;
  }
 diff --git a/arch/mips/loongson/common/early_printk.c b/arch/mips/loongson/common/early_printk.c
-index a71736f..649b270 100644
+index a71736f00443..649b27067309 100644
 --- a/arch/mips/loongson/common/early_printk.c
 +++ b/arch/mips/loongson/common/early_printk.c
 @@ -10,9 +10,13 @@
@@ -6134,7 +6138,7 @@ index a71736f..649b270 100644
 +		(unsigned long)ioremap_nocache(loongson_uart_base, 8);
 +}
 diff --git a/arch/mips/loongson/common/env.c b/arch/mips/loongson/common/env.c
-index d93830a..d532c83 100644
+index d93830ad6113..d532c83da553 100644
 --- a/arch/mips/loongson/common/env.c
 +++ b/arch/mips/loongson/common/env.c
 @@ -40,7 +40,6 @@ void __init prom_init_env(void)
@@ -6156,7 +6160,7 @@ index d93830a..d532c83 100644
  			cpu_clock_freq = 533080000;
  			break;
 diff --git a/arch/mips/loongson/common/gpio.c b/arch/mips/loongson/common/gpio.c
-index e8a0ffa..a8645f8 100644
+index e8a0ffa935b4..a8645f809c7c 100644
 --- a/arch/mips/loongson/common/gpio.c
 +++ b/arch/mips/loongson/common/gpio.c
 @@ -19,7 +19,6 @@
@@ -6222,7 +6226,7 @@ index e8a0ffa..a8645f8 100644
  
  static int __init ls2f_gpio_setup(void)
 diff --git a/arch/mips/loongson/common/init.c b/arch/mips/loongson/common/init.c
-index 19d3415..73f4460 100644
+index 19d341591254..73f446034538 100644
 --- a/arch/mips/loongson/common/init.c
 +++ b/arch/mips/loongson/common/init.c
 @@ -30,8 +30,10 @@ void __init prom_init(void)
@@ -6237,7 +6241,7 @@ index 19d3415..73f4460 100644
  
  void __init prom_free_prom_memory(void)
 diff --git a/arch/mips/loongson/common/irq.c b/arch/mips/loongson/common/irq.c
-index 5897471..30396c8 100644
+index 5897471dedca..30396c82299d 100644
 --- a/arch/mips/loongson/common/irq.c
 +++ b/arch/mips/loongson/common/irq.c
 @@ -10,6 +10,10 @@
@@ -6291,7 +6295,7 @@ index 5897471..30396c8 100644
  	mach_init_irq();
  }
 diff --git a/arch/mips/loongson/common/mem.c b/arch/mips/loongson/common/mem.c
-index 30eba60..e90f2de 100644
+index 30eba6001205..e90f2ded2890 100644
 --- a/arch/mips/loongson/common/mem.c
 +++ b/arch/mips/loongson/common/mem.c
 @@ -14,39 +14,24 @@
@@ -6347,7 +6351,7 @@ index 30eba60..e90f2de 100644
  /* override of arch/mips/mm/cache.c: __uncached_access */
 diff --git a/arch/mips/loongson/common/mtd.c b/arch/mips/loongson/common/mtd.c
 new file mode 100644
-index 0000000..49a57a7
+index 000000000000..49a57a7eb201
 --- /dev/null
 +++ b/arch/mips/loongson/common/mtd.c
 @@ -0,0 +1,91 @@
@@ -6443,7 +6447,7 @@ index 0000000..49a57a7
 +MODULE_AUTHOR("Yanhua <yanh@lemote.com>");
 +MODULE_DESCRIPTION("MTD driver for pmon flushing/dumping");
 diff --git a/arch/mips/loongson/common/pci.c b/arch/mips/loongson/common/pci.c
-index 31d8c5e..5077456 100644
+index 31d8c5ecd16c..5077456d29c3 100644
 --- a/arch/mips/loongson/common/pci.c
 +++ b/arch/mips/loongson/common/pci.c
 @@ -50,11 +50,11 @@ static void __init setup_pcimap(void)
@@ -6462,7 +6466,7 @@ index 31d8c5e..5077456 100644
  	LOONGSON_PCI_HIT1_SEL_L = 0x00000006ul; /* set this BAR as invalid */
  	LOONGSON_PCI_HIT1_SEL_H = 0x00000000ul;
 diff --git a/arch/mips/loongson/common/platform.c b/arch/mips/loongson/common/platform.c
-index 502b059..05aa261 100644
+index 502b059de422..05aa261165b2 100644
 --- a/arch/mips/loongson/common/platform.c
 +++ b/arch/mips/loongson/common/platform.c
 @@ -13,16 +13,14 @@
@@ -6485,7 +6489,7 @@ index 502b059..05aa261 100644
  
  	return -ENODEV;
 diff --git a/arch/mips/loongson/common/serial.c b/arch/mips/loongson/common/serial.c
-index 7580873..8f2ebf4 100644
+index 7580873143c8..8f2ebf42d401 100644
 --- a/arch/mips/loongson/common/serial.c
 +++ b/arch/mips/loongson/common/serial.c
 @@ -19,58 +19,44 @@
@@ -6570,7 +6574,7 @@ index 7580873..8f2ebf4 100644
 +MODULE_AUTHOR("liu shiwei <liushiwei@anheng.com.cn>");
 +MODULE_DESCRIPTION("loongson serial");
 diff --git a/arch/mips/loongson/common/time.c b/arch/mips/loongson/common/time.c
-index 9fdd01f..b8cd030 100644
+index 9fdd01f6c56a..b8cd030002c1 100644
 --- a/arch/mips/loongson/common/time.c
 +++ b/arch/mips/loongson/common/time.c
 @@ -10,6 +10,8 @@
@@ -6666,7 +6670,7 @@ index 9fdd01f..b8cd030 100644
 +#endif /* !CONFIG_LOONGSON_MC146818 */
 diff --git a/arch/mips/loongson/common/uart_base.c b/arch/mips/loongson/common/uart_base.c
 deleted file mode 100644
-index d69ea54..0000000
+index d69ea54bc3d1..000000000000
 --- a/arch/mips/loongson/common/uart_base.c
 +++ /dev/null
 @@ -1,45 +0,0 @@
@@ -6716,7 +6720,7 @@ index d69ea54..0000000
 -		(unsigned long)ioremap_nocache(loongson_uart_base, 8);
 -}
 diff --git a/arch/mips/loongson/fuloong-2e/irq.c b/arch/mips/loongson/fuloong-2e/irq.c
-index 3cf1fef..560a065 100644
+index 3cf1fef29f0e..560a06594310 100644
 --- a/arch/mips/loongson/fuloong-2e/irq.c
 +++ b/arch/mips/loongson/fuloong-2e/irq.c
 @@ -9,7 +9,6 @@
@@ -6751,7 +6755,7 @@ index 3cf1fef..560a065 100644
  	/* 8259 irq at IP5 */
 diff --git a/arch/mips/loongson/gdium/Makefile b/arch/mips/loongson/gdium/Makefile
 new file mode 100644
-index 0000000..f3f4f51
+index 000000000000..f3f4f51ece6e
 --- /dev/null
 +++ b/arch/mips/loongson/gdium/Makefile
 @@ -0,0 +1,6 @@
@@ -6763,7 +6767,7 @@ index 0000000..f3f4f51
 +obj-$(CONFIG_GDIUM_PWM_CLOCK) += gdium-clock.o
 diff --git a/arch/mips/loongson/gdium/gdium-clock.c b/arch/mips/loongson/gdium/gdium-clock.c
 new file mode 100644
-index 0000000..fdbf42a
+index 000000000000..fdbf42af96c8
 --- /dev/null
 +++ b/arch/mips/loongson/gdium/gdium-clock.c
 @@ -0,0 +1,234 @@
@@ -7003,7 +7007,7 @@ index 0000000..fdbf42a
 +MODULE_ALIAS("platform:gdium-pwmclk");
 diff --git a/arch/mips/loongson/gdium/irq.c b/arch/mips/loongson/gdium/irq.c
 new file mode 100644
-index 0000000..2415d20
+index 000000000000..2415d205b4dc
 --- /dev/null
 +++ b/arch/mips/loongson/gdium/irq.c
 @@ -0,0 +1,55 @@
@@ -7064,7 +7068,7 @@ index 0000000..2415d20
 +}
 diff --git a/arch/mips/loongson/gdium/platform.c b/arch/mips/loongson/gdium/platform.c
 new file mode 100644
-index 0000000..ffafba4
+index 000000000000..ffafba4c54c0
 --- /dev/null
 +++ b/arch/mips/loongson/gdium/platform.c
 @@ -0,0 +1,135 @@
@@ -7205,7 +7209,7 @@ index 0000000..ffafba4
 +late_initcall(gdium_platform_devices_setup);
 diff --git a/arch/mips/loongson/gdium/reset.c b/arch/mips/loongson/gdium/reset.c
 new file mode 100644
-index 0000000..8289f95
+index 000000000000..8289f95f4fdd
 --- /dev/null
 +++ b/arch/mips/loongson/gdium/reset.c
 @@ -0,0 +1,22 @@
@@ -7233,7 +7237,7 @@ index 0000000..8289f95
 +}
 diff --git a/arch/mips/loongson/gdium/sm501-pwm.c b/arch/mips/loongson/gdium/sm501-pwm.c
 new file mode 100644
-index 0000000..5af3b23
+index 000000000000..5af3b23dca79
 --- /dev/null
 +++ b/arch/mips/loongson/gdium/sm501-pwm.c
 @@ -0,0 +1,465 @@
@@ -7703,7 +7707,7 @@ index 0000000..5af3b23
 +MODULE_LICENSE("GPL");
 +MODULE_ALIAS("platform:sm501-pwm");
 diff --git a/arch/mips/loongson/lemote-2f/Makefile b/arch/mips/loongson/lemote-2f/Makefile
-index 8699a53..10e9eb7 100644
+index 8699a53f0477..10e9eb7cd057 100644
 --- a/arch/mips/loongson/lemote-2f/Makefile
 +++ b/arch/mips/loongson/lemote-2f/Makefile
 @@ -2,7 +2,7 @@
@@ -7716,7 +7720,7 @@ index 8699a53..10e9eb7 100644
  #
  # Suspend Support
 diff --git a/arch/mips/loongson/lemote-2f/ec_kb3310b.c b/arch/mips/loongson/lemote-2f/ec_kb3310b.c
-index 2b666d3..88ef558 100644
+index 2b666d3a3947..88ef558fccb9 100644
 --- a/arch/mips/loongson/lemote-2f/ec_kb3310b.c
 +++ b/arch/mips/loongson/lemote-2f/ec_kb3310b.c
 @@ -14,7 +14,7 @@
@@ -7755,7 +7759,7 @@ index 2b666d3..88ef558 100644
  	value = inb(EC_DAT_PORT);
 diff --git a/arch/mips/loongson/lemote-2f/ec_kb3310b.h b/arch/mips/loongson/lemote-2f/ec_kb3310b.h
 deleted file mode 100644
-index 1595a21..0000000
+index 1595a21b315b..000000000000
 --- a/arch/mips/loongson/lemote-2f/ec_kb3310b.h
 +++ /dev/null
 @@ -1,188 +0,0 @@
@@ -7948,7 +7952,7 @@ index 1595a21..0000000
 -
 -#endif /* !_EC_KB3310B_H */
 diff --git a/arch/mips/loongson/lemote-2f/irq.c b/arch/mips/loongson/lemote-2f/irq.c
-index 14b0818..d95487c 100644
+index 14b081841b6b..d95487cf6343 100644
 --- a/arch/mips/loongson/lemote-2f/irq.c
 +++ b/arch/mips/loongson/lemote-2f/irq.c
 @@ -11,9 +11,7 @@
@@ -7985,7 +7989,7 @@ index 14b0818..d95487c 100644
  	/* setup source bridge irq (i8259) */
 diff --git a/arch/mips/loongson/lemote-2f/platform.c b/arch/mips/loongson/lemote-2f/platform.c
 new file mode 100644
-index 0000000..5316360
+index 000000000000..5316360670a8
 --- /dev/null
 +++ b/arch/mips/loongson/lemote-2f/platform.c
 @@ -0,0 +1,48 @@
@@ -8038,7 +8042,7 @@ index 0000000..5316360
 +
 +arch_initcall(lemote2f_platform_init);
 diff --git a/arch/mips/loongson/lemote-2f/pm.c b/arch/mips/loongson/lemote-2f/pm.c
-index cac4d38..b82ab17 100644
+index cac4d382ea73..b82ab17537ec 100644
 --- a/arch/mips/loongson/lemote-2f/pm.c
 +++ b/arch/mips/loongson/lemote-2f/pm.c
 @@ -23,7 +23,7 @@
@@ -8091,7 +8095,7 @@ index cac4d38..b82ab17 100644
 +	enable_mfgpt_counter();
  }
 diff --git a/arch/mips/loongson/lemote-2f/reset.c b/arch/mips/loongson/lemote-2f/reset.c
-index 36020a07..039c2ce 100644
+index 36020a07e180..039c2ce72604 100644
 --- a/arch/mips/loongson/lemote-2f/reset.c
 +++ b/arch/mips/loongson/lemote-2f/reset.c
 @@ -20,15 +20,14 @@
@@ -8124,7 +8128,7 @@ index 36020a07..039c2ce 100644
  #define yl2f89_reboot ml2f_reboot
 diff --git a/arch/mips/loongson1/Kconfig b/arch/mips/loongson1/Kconfig
 new file mode 100644
-index 0000000..237fa21
+index 000000000000..237fa214de9f
 --- /dev/null
 +++ b/arch/mips/loongson1/Kconfig
 @@ -0,0 +1,21 @@
@@ -8151,7 +8155,7 @@ index 0000000..237fa21
 +endif # MACH_LOONGSON1
 diff --git a/arch/mips/loongson1/Makefile b/arch/mips/loongson1/Makefile
 new file mode 100644
-index 0000000..e9123c2
+index 000000000000..e9123c2edb8b
 --- /dev/null
 +++ b/arch/mips/loongson1/Makefile
 @@ -0,0 +1,11 @@
@@ -8168,7 +8172,7 @@ index 0000000..e9123c2
 +obj-$(CONFIG_LOONGSON1_LS1B)  += ls1b/
 diff --git a/arch/mips/loongson1/Platform b/arch/mips/loongson1/Platform
 new file mode 100644
-index 0000000..92804c6
+index 000000000000..92804c65bdc4
 --- /dev/null
 +++ b/arch/mips/loongson1/Platform
 @@ -0,0 +1,7 @@
@@ -8181,7 +8185,7 @@ index 0000000..92804c6
 +load-$(CONFIG_LOONGSON1_LS1B)		+= 0xffffffff80010000
 diff --git a/arch/mips/loongson1/common/Makefile b/arch/mips/loongson1/common/Makefile
 new file mode 100644
-index 0000000..b279770
+index 000000000000..b2797709ef5b
 --- /dev/null
 +++ b/arch/mips/loongson1/common/Makefile
 @@ -0,0 +1,5 @@
@@ -8192,7 +8196,7 @@ index 0000000..b279770
 +obj-y	+= clock.o irq.o platform.o prom.o reset.o setup.o
 diff --git a/arch/mips/loongson1/common/clock.c b/arch/mips/loongson1/common/clock.c
 new file mode 100644
-index 0000000..7e9bd6c
+index 000000000000..7e9bd6cb3153
 --- /dev/null
 +++ b/arch/mips/loongson1/common/clock.c
 @@ -0,0 +1,165 @@
@@ -8363,7 +8367,7 @@ index 0000000..7e9bd6c
 +}
 diff --git a/arch/mips/loongson1/common/irq.c b/arch/mips/loongson1/common/irq.c
 new file mode 100644
-index 0000000..a33bf85
+index 000000000000..a33bf85660a1
 --- /dev/null
 +++ b/arch/mips/loongson1/common/irq.c
 @@ -0,0 +1,136 @@
@@ -8505,7 +8509,7 @@ index 0000000..a33bf85
 +}
 diff --git a/arch/mips/loongson1/common/platform.c b/arch/mips/loongson1/common/platform.c
 new file mode 100644
-index 0000000..82f0e5a
+index 000000000000..82f0e5ab7d06
 --- /dev/null
 +++ b/arch/mips/loongson1/common/platform.c
 @@ -0,0 +1,93 @@
@@ -8604,7 +8608,7 @@ index 0000000..82f0e5a
 +};
 diff --git a/arch/mips/loongson1/common/prom.c b/arch/mips/loongson1/common/prom.c
 new file mode 100644
-index 0000000..7e2f840
+index 000000000000..7e2f84089fa5
 --- /dev/null
 +++ b/arch/mips/loongson1/common/prom.c
 @@ -0,0 +1,88 @@
@@ -8698,7 +8702,7 @@ index 0000000..7e2f840
 +}
 diff --git a/arch/mips/loongson1/common/reset.c b/arch/mips/loongson1/common/reset.c
 new file mode 100644
-index 0000000..c913c56
+index 000000000000..c913c561802c
 --- /dev/null
 +++ b/arch/mips/loongson1/common/reset.c
 @@ -0,0 +1,46 @@
@@ -8750,7 +8754,7 @@ index 0000000..c913c56
 +arch_initcall(ls1x_reboot_setup);
 diff --git a/arch/mips/loongson1/common/setup.c b/arch/mips/loongson1/common/setup.c
 new file mode 100644
-index 0000000..62128cc
+index 000000000000..62128cc27e68
 --- /dev/null
 +++ b/arch/mips/loongson1/common/setup.c
 @@ -0,0 +1,29 @@
@@ -8785,7 +8789,7 @@ index 0000000..62128cc
 +}
 diff --git a/arch/mips/loongson1/ls1b/Makefile b/arch/mips/loongson1/ls1b/Makefile
 new file mode 100644
-index 0000000..891eac4
+index 000000000000..891eac482b82
 --- /dev/null
 +++ b/arch/mips/loongson1/ls1b/Makefile
 @@ -0,0 +1,5 @@
@@ -8796,7 +8800,7 @@ index 0000000..891eac4
 +obj-y += board.o
 diff --git a/arch/mips/loongson1/ls1b/board.c b/arch/mips/loongson1/ls1b/board.c
 new file mode 100644
-index 0000000..dd4cd9c
+index 000000000000..dd4cd9c75629
 --- /dev/null
 +++ b/arch/mips/loongson1/ls1b/board.c
 @@ -0,0 +1,31 @@
@@ -8832,7 +8836,7 @@ index 0000000..dd4cd9c
 +
 +arch_initcall(ls1b_platform_init);
 diff --git a/arch/mips/math-emu/cp1emu.c b/arch/mips/math-emu/cp1emu.c
-index dbf2f93..166b2a4 100644
+index dbf2f93a5091..166b2a4ed9f8 100644
 --- a/arch/mips/math-emu/cp1emu.c
 +++ b/arch/mips/math-emu/cp1emu.c
 @@ -7,6 +7,9 @@
@@ -9226,20 +9230,20 @@ index dbf2f93..166b2a4 100644
  	case w_fmt:{
  		ieee754sp fs;
  
-@@ -1301,6 +1579,11 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+@@ -1300,6 +1578,11 @@ static int fpu_emu(struct pt_regs *xcp, struct mips_fpu_struct *ctx,
+ 	case l_fmt:
  		DITOREG(rv.l, MIPSInst_FD(ir));
  		break;
- #endif
++#endif
 +#ifdef __loongson_fp
 +	case ps_fmt:
 +		PSPTOREG(rv.s, rv.s2, MIPSInst_FD(ir));
 +		break;
-+#endif
+ #endif
  	default:
  		return SIGILL;
- 	}
 diff --git a/arch/mips/mm/c-octeon.c b/arch/mips/mm/c-octeon.c
-index daa81f7..c36d509 100644
+index daa81f7284ac..c36d509e468f 100644
 --- a/arch/mips/mm/c-octeon.c
 +++ b/arch/mips/mm/c-octeon.c
 @@ -186,7 +186,7 @@ static void __cpuinit probe_octeon(void)
@@ -9252,7 +9256,7 @@ index daa81f7..c36d509 100644
  	case CPU_CAVIUM_OCTEON_PLUS:
  		c->icache.linesz = 2 << ((config1 >> 19) & 7);
 diff --git a/arch/mips/mm/c-r4k.c b/arch/mips/mm/c-r4k.c
-index 228a205..da71508 100644
+index 228a2057cfb4..da715086ffc3 100644
 --- a/arch/mips/mm/c-r4k.c
 +++ b/arch/mips/mm/c-r4k.c
 @@ -795,7 +795,7 @@ static void __cpuinit probe_pcache(void)
@@ -9315,7 +9319,7 @@ index 228a205..da71508 100644
  	case CPU_SB1A:
  		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
 diff --git a/arch/mips/mm/dma-default.c b/arch/mips/mm/dma-default.c
-index 4608491..1e20758 100644
+index 2bc2802a30cf..26e80c547f91 100644
 --- a/arch/mips/mm/dma-default.c
 +++ b/arch/mips/mm/dma-default.c
 @@ -310,7 +310,7 @@ int mips_dma_supported(struct device *dev, u64 mask)
@@ -9337,10 +9341,10 @@ index 4608491..1e20758 100644
  	.alloc_coherent = mips_dma_alloc_coherent,
  	.free_coherent = mips_dma_free_coherent,
 diff --git a/arch/mips/mm/page.c b/arch/mips/mm/page.c
-index 36272f7..24cdc98 100644
+index a22bd403dca3..69bd5277b221 100644
 --- a/arch/mips/mm/page.c
 +++ b/arch/mips/mm/page.c
-@@ -212,7 +212,7 @@ static void __cpuinit set_prefetch_parameters(void)
+@@ -174,7 +174,7 @@ static void __cpuinit set_prefetch_parameters(void)
  			 * hints are broken.
  			 */
  			if (current_cpu_type() == CPU_SB1 &&
@@ -9350,7 +9354,7 @@ index 36272f7..24cdc98 100644
  				pref_dst_mode = Pref_Store;
  			} else {
 diff --git a/arch/mips/mm/sc-mips.c b/arch/mips/mm/sc-mips.c
-index 9cca8de..0e633db 100644
+index 9cca8de00545..0e633db69a54 100644
 --- a/arch/mips/mm/sc-mips.c
 +++ b/arch/mips/mm/sc-mips.c
 @@ -72,7 +72,7 @@ static inline int mips_sc_is_activated(struct cpuinfo_mips *c)
@@ -9363,7 +9367,7 @@ index 9cca8de..0e633db 100644
  	case CPU_74K:
  	case CPU_1004K:
 diff --git a/arch/mips/mm/tlbex.c b/arch/mips/mm/tlbex.c
-index 3ee768e..77b0f47 100644
+index 3ee768e2dffc..77b0f4780e7e 100644
 --- a/arch/mips/mm/tlbex.c
 +++ b/arch/mips/mm/tlbex.c
 @@ -136,7 +136,7 @@ static int scratchpad_offset(int i)
@@ -9385,7 +9389,7 @@ index 3ee768e..77b0f47 100644
  	}
  }
 diff --git a/arch/mips/oprofile/common.c b/arch/mips/oprofile/common.c
-index d1f2d4c..99216f0 100644
+index d1f2d4c52d42..99216f0283da 100644
 --- a/arch/mips/oprofile/common.c
 +++ b/arch/mips/oprofile/common.c
 @@ -89,6 +89,7 @@ int __init oprofile_arch_init(struct oprofile_operations *ops)
@@ -9397,7 +9401,7 @@ index d1f2d4c..99216f0 100644
  		break;
  
 diff --git a/arch/mips/oprofile/op_model_mipsxx.c b/arch/mips/oprofile/op_model_mipsxx.c
-index 54759f1..d2ea5ca 100644
+index 54759f1669d3..d2ea5ca558b4 100644
 --- a/arch/mips/oprofile/op_model_mipsxx.c
 +++ b/arch/mips/oprofile/op_model_mipsxx.c
 @@ -349,7 +349,7 @@ static int __init mipsxx_init(void)
@@ -9421,7 +9425,7 @@ index 54759f1..d2ea5ca 100644
  		printk(KERN_ERR "Profiling unsupported for this CPU\n");
  
 diff --git a/arch/mips/pci/Makefile b/arch/mips/pci/Makefile
-index bb82cbd..19151b1 100644
+index bb82cbdbc62a..19151b117f61 100644
 --- a/arch/mips/pci/Makefile
 +++ b/arch/mips/pci/Makefile
 @@ -28,6 +28,7 @@ obj-$(CONFIG_MIPS_COBALT)	+= fixup-cobalt.o
@@ -9434,7 +9438,7 @@ index bb82cbd..19151b1 100644
  obj-$(CONFIG_PMC_MSP7120_EVAL)	+= fixup-pmcmsp.o ops-pmcmsp.o
 diff --git a/arch/mips/pci/fixup-gdium.c b/arch/mips/pci/fixup-gdium.c
 new file mode 100644
-index 0000000..b296220
+index 000000000000..b296220d6d6f
 --- /dev/null
 +++ b/arch/mips/pci/fixup-gdium.c
 @@ -0,0 +1,90 @@
@@ -9529,7 +9533,7 @@ index 0000000..b296220
 +				gdium_usb_host_fixup);
 +#endif
 diff --git a/arch/mips/pci/ops-loongson2.c b/arch/mips/pci/ops-loongson2.c
-index d657ee0..d4fa9d1 100644
+index d657ee0bc131..d4fa9d1d7828 100644
 --- a/arch/mips/pci/ops-loongson2.c
 +++ b/arch/mips/pci/ops-loongson2.c
 @@ -21,6 +21,7 @@
@@ -9541,7 +9545,7 @@ index d657ee0..d4fa9d1 100644
  
  #define PCI_ACCESS_READ  0
 diff --git a/arch/mips/pci/pci-vr41xx.c b/arch/mips/pci/pci-vr41xx.c
-index 444b8d8..e105c49 100644
+index 444b8d8004ad..e105c4970efa 100644
 --- a/arch/mips/pci/pci-vr41xx.c
 +++ b/arch/mips/pci/pci-vr41xx.c
 @@ -147,7 +147,7 @@ static int __init vr41xx_pciu_init(void)
@@ -9554,7 +9558,7 @@ index 444b8d8..e105c49 100644
  		pciu_write(PCICLKSELREG, ONE_THIRD_VTCLOCK);
  	else if ((vtclock / 4) < pci_clock_max)
 diff --git a/arch/mips/vr41xx/common/init.c b/arch/mips/vr41xx/common/init.c
-index 23916321..aca5c76 100644
+index 23916321cc1b..aca5c76c9354 100644
 --- a/arch/mips/vr41xx/common/init.c
 +++ b/arch/mips/vr41xx/common/init.c
 @@ -43,8 +43,8 @@ void __init plat_time_init(void)
@@ -9569,7 +9573,7 @@ index 23916321..aca5c76 100644
  	else
  		mips_hpt_frequency = tclock / 4;
 diff --git a/drivers/ata/pata_cs5536.c b/drivers/ata/pata_cs5536.c
-index 628c8fa..a6e6c96 100644
+index dbe0fa87ce63..08fda924c935 100644
 --- a/drivers/ata/pata_cs5536.c
 +++ b/drivers/ata/pata_cs5536.c
 @@ -44,8 +44,6 @@ static int use_msr;
@@ -9582,7 +9586,7 @@ index 628c8fa..a6e6c96 100644
  #define wrmsr(x, y, z) do { } while (0)
  #define use_msr 0
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index b5cc078..a675d47 100644
+index b5cc0785296a..a675d4798216 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
 @@ -647,6 +647,13 @@ config HID_ZYDACRON
@@ -9600,7 +9604,7 @@ index b5cc078..a675d47 100644
  
  endif # HID_SUPPORT
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index 1e0d2a6..dad773b 100644
+index 1e0d2a638b28..dad773b11a2a 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
 @@ -77,6 +77,7 @@ obj-$(CONFIG_HID_ZEROPLUS)	+= hid-zpff.o
@@ -9613,7 +9617,7 @@ index 1e0d2a6..dad773b 100644
  obj-$(CONFIG_USB_HID)		+= usbhid/
 diff --git a/drivers/hid/hid-gdium.c b/drivers/hid/hid-gdium.c
 new file mode 100644
-index 0000000..67cc095
+index 000000000000..67cc0954a7e9
 --- /dev/null
 +++ b/drivers/hid/hid-gdium.c
 @@ -0,0 +1,210 @@
@@ -9828,10 +9832,10 @@ index 0000000..67cc095
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index ccc89b0..6dbfb8b 100644
+index 219d35f61825..cf585e28f48f 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -778,6 +778,9 @@
+@@ -780,6 +780,9 @@
  #define USB_VENDOR_ID_ZYDACRON	0x13EC
  #define USB_DEVICE_ID_ZYDACRON_REMOTE_CONTROL	0x0006
  
@@ -9842,10 +9846,10 @@ index ccc89b0..6dbfb8b 100644
  #define USB_DEVICE_ID_PRIMAX_KEYBOARD	0x4e05
  
 diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
-index 949ea640..eda28fa 100644
+index ca1b2a49d800..18fbef61c8c6 100644
 --- a/drivers/i2c/busses/Kconfig
 +++ b/drivers/i2c/busses/Kconfig
-@@ -885,7 +885,7 @@ config SCx200_I2C_SDA
+@@ -896,7 +896,7 @@ config SCx200_I2C_SDA
  
  config SCx200_ACB
  	tristate "Geode ACCESS.bus support"
@@ -9855,7 +9859,7 @@ index 949ea640..eda28fa 100644
  	  Enable the use of the ACCESS.bus controllers on the Geode SCx200 and
  	  SC1100 processors and the CS5535 and CS5536 Geode companion devices.
 diff --git a/drivers/ide/ide-iops.c b/drivers/ide/ide-iops.c
-index 376f2dc..b576801 100644
+index 376f2dc410c5..b5768010204e 100644
 --- a/drivers/ide/ide-iops.c
 +++ b/drivers/ide/ide-iops.c
 @@ -27,6 +27,10 @@
@@ -9882,7 +9886,7 @@ index 376f2dc..b576801 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index df3702c..7242f3a 100644
+index df3702c1756d..7242f3aa83ef 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -9982,7 +9986,7 @@ index df3702c..7242f3a 100644
  static struct sm501_platdata_fbsub sm501_pdata_fbsub = {
 diff --git a/drivers/net/titan_ge.c b/drivers/net/titan_ge.c
 new file mode 100644
-index 0000000..dc137bf8
+index 000000000000..dc137bf8d19c
 --- /dev/null
 +++ b/drivers/net/titan_ge.c
 @@ -0,0 +1,2069 @@
@@ -12057,7 +12061,7 @@ index 0000000..dc137bf8
 +module_exit(titan_ge_cleanup_module);
 diff --git a/drivers/net/titan_ge.h b/drivers/net/titan_ge.h
 new file mode 100644
-index 0000000..3719f78
+index 000000000000..3719f78eafe6
 --- /dev/null
 +++ b/drivers/net/titan_ge.h
 @@ -0,0 +1,415 @@
@@ -12478,7 +12482,7 @@ index 0000000..3719f78
 +
 diff --git a/drivers/net/titan_mdio.c b/drivers/net/titan_mdio.c
 new file mode 100644
-index 0000000..8a8785b
+index 000000000000..8a8785b8db0c
 --- /dev/null
 +++ b/drivers/net/titan_mdio.c
 @@ -0,0 +1,217 @@
@@ -12701,7 +12705,7 @@ index 0000000..8a8785b
 +
 diff --git a/drivers/net/titan_mdio.h b/drivers/net/titan_mdio.h
 new file mode 100644
-index 0000000..5d23344
+index 000000000000..5d23344b8d76
 --- /dev/null
 +++ b/drivers/net/titan_mdio.h
 @@ -0,0 +1,56 @@
@@ -12762,7 +12766,7 @@ index 0000000..5d23344
 +
 +#endif /* _TITAN_MDIO_H */
 diff --git a/drivers/net/wireless/Kconfig b/drivers/net/wireless/Kconfig
-index abd3b71..804deee 100644
+index abd3b71cd4ab..804deeea5f5f 100644
 --- a/drivers/net/wireless/Kconfig
 +++ b/drivers/net/wireless/Kconfig
 @@ -217,8 +217,106 @@ config USB_NET_RNDIS_WLAN
@@ -12873,7 +12877,7 @@ index abd3b71..804deee 100644
  	tristate "ADMtek ADM8211 support"
  	depends on MAC80211 && PCI && EXPERIMENTAL
 diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
-index 0a304b0..1721945 100644
+index 0a304b060b6c..1721945ad353 100644
 --- a/drivers/net/wireless/Makefile
 +++ b/drivers/net/wireless/Makefile
 @@ -24,7 +24,8 @@ obj-$(CONFIG_B43LEGACY)		+= b43legacy/
@@ -12888,7 +12892,7 @@ index 0a304b0..1721945 100644
  obj-$(CONFIG_PCMCIA_RAYCS)	+= ray_cs.o
 diff --git a/drivers/net/wireless/rtl8187b/Makefile b/drivers/net/wireless/rtl8187b/Makefile
 new file mode 100644
-index 0000000..c688cc9
+index 000000000000..c688cc9c9043
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/Makefile
 @@ -0,0 +1,41 @@
@@ -12935,7 +12939,7 @@ index 0000000..c688cc9
 +EXTRA_CFLAGS += -DENABLE_DOT11D
 diff --git a/drivers/net/wireless/rtl8187b/dot11d.h b/drivers/net/wireless/rtl8187b/dot11d.h
 new file mode 100644
-index 0000000..99010be
+index 000000000000..99010befb171
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/dot11d.h
 @@ -0,0 +1,102 @@
@@ -13043,7 +13047,7 @@ index 0000000..99010be
 +#endif // #ifndef __INC_DOT11D_H
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/arc4.c b/drivers/net/wireless/rtl8187b/ieee80211/arc4.c
 new file mode 100644
-index 0000000..e93e5e2
+index 000000000000..e93e5e26ab76
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/arc4.c
 @@ -0,0 +1,103 @@
@@ -13152,7 +13156,7 @@ index 0000000..e93e5e2
 +MODULE_AUTHOR("Jon Oberheide <jon@oberheide.org>");
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/dot11d.c b/drivers/net/wireless/rtl8187b/ieee80211/dot11d.c
 new file mode 100644
-index 0000000..8d662b5
+index 000000000000..8d662b5898e1
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/dot11d.c
 @@ -0,0 +1,244 @@
@@ -13402,7 +13406,7 @@ index 0000000..8d662b5
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/dot11d.h b/drivers/net/wireless/rtl8187b/ieee80211/dot11d.h
 new file mode 100644
-index 0000000..64bcf15
+index 000000000000..64bcf15bd219
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/dot11d.h
 @@ -0,0 +1,102 @@
@@ -13510,7 +13514,7 @@ index 0000000..64bcf15
 +#endif // #ifndef __INC_DOT11D_H
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211.h b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211.h
 new file mode 100644
-index 0000000..e9ea893
+index 000000000000..e9ea893c010d
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211.h
 @@ -0,0 +1,1904 @@
@@ -15420,7 +15424,7 @@ index 0000000..e9ea893
 +#endif /* IEEE80211_H */
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt.c
 new file mode 100644
-index 0000000..57a6696
+index 000000000000..57a669645aa3
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt.c
 @@ -0,0 +1,275 @@
@@ -15701,7 +15705,7 @@ index 0000000..57a6696
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt.h b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt.h
 new file mode 100644
-index 0000000..5fa8764
+index 000000000000..5fa8764f8c1b
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt.h
 @@ -0,0 +1,91 @@
@@ -15798,7 +15802,7 @@ index 0000000..5fa8764
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_ccmp.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_ccmp.c
 new file mode 100644
-index 0000000..37f4259
+index 000000000000..37f4259ff4eb
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_ccmp.c
 @@ -0,0 +1,524 @@
@@ -16328,7 +16332,7 @@ index 0000000..37f4259
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_tkip.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_tkip.c
 new file mode 100644
-index 0000000..92a6e93
+index 000000000000..92a6e93716f0
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_tkip.c
 @@ -0,0 +1,996 @@
@@ -17330,7 +17334,7 @@ index 0000000..92a6e93
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_wep.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_wep.c
 new file mode 100644
-index 0000000..d97b637
+index 000000000000..d97b6374c93d
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_crypt_wep.c
 @@ -0,0 +1,383 @@
@@ -17719,7 +17723,7 @@ index 0000000..d97b637
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_module.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_module.c
 new file mode 100644
-index 0000000..b85f6dd
+index 000000000000..b85f6dd9a4f2
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_module.c
 @@ -0,0 +1,385 @@
@@ -18110,7 +18114,7 @@ index 0000000..b85f6dd
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_rx.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_rx.c
 new file mode 100644
-index 0000000..769203c
+index 000000000000..769203c3bf68
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_rx.c
 @@ -0,0 +1,2074 @@
@@ -20190,7 +20194,7 @@ index 0000000..769203c
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_softmac.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_softmac.c
 new file mode 100644
-index 0000000..c4b8629
+index 000000000000..c4b8629876d5
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_softmac.c
 @@ -0,0 +1,4083 @@
@@ -24279,7 +24283,7 @@ index 0000000..c4b8629
 +//EXPORT_SYMBOL(ieee80211_sta_ps_send_null_frame);
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_softmac_wx.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_softmac_wx.c
 new file mode 100644
-index 0000000..a23b9d0
+index 000000000000..a23b9d0ae91f
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_softmac_wx.c
 @@ -0,0 +1,629 @@
@@ -24914,7 +24918,7 @@ index 0000000..a23b9d0
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_tx.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_tx.c
 new file mode 100644
-index 0000000..cad850f
+index 000000000000..cad850fafd87
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_tx.c
 @@ -0,0 +1,876 @@
@@ -25796,7 +25800,7 @@ index 0000000..cad850f
 +
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_wx.c b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_wx.c
 new file mode 100644
-index 0000000..a5dffeb
+index 000000000000..a5dffeba7124
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/ieee80211_wx.c
 @@ -0,0 +1,926 @@
@@ -26728,7 +26732,7 @@ index 0000000..a5dffeb
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/internal.h b/drivers/net/wireless/rtl8187b/ieee80211/internal.h
 new file mode 100644
-index 0000000..189f285
+index 000000000000..189f285223ee
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/internal.h
 @@ -0,0 +1,115 @@
@@ -26849,7 +26853,7 @@ index 0000000..189f285
 +
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/kmap_types.h b/drivers/net/wireless/rtl8187b/ieee80211/kmap_types.h
 new file mode 100644
-index 0000000..de67bb0
+index 000000000000..de67bb01b5f5
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/kmap_types.h
 @@ -0,0 +1,20 @@
@@ -26875,7 +26879,7 @@ index 0000000..de67bb0
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/readme b/drivers/net/wireless/rtl8187b/ieee80211/readme
 new file mode 100644
-index 0000000..bc04ffb
+index 000000000000..bc04ffb3534d
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/readme
 @@ -0,0 +1,162 @@
@@ -27043,7 +27047,7 @@ index 0000000..bc04ffb
 +
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/rtl8187_mesh.h b/drivers/net/wireless/rtl8187b/ieee80211/rtl8187_mesh.h
 new file mode 100644
-index 0000000..80f23ea
+index 000000000000..80f23ea04599
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/rtl8187_mesh.h
 @@ -0,0 +1,282 @@
@@ -27331,7 +27335,7 @@ index 0000000..80f23ea
 +#endif // _RTL8187_MESH_H_
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/rtl_crypto.h b/drivers/net/wireless/rtl8187b/ieee80211/rtl_crypto.h
 new file mode 100644
-index 0000000..82fa2b7
+index 000000000000..82fa2b7882b7
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/rtl_crypto.h
 @@ -0,0 +1,399 @@
@@ -27736,7 +27740,7 @@ index 0000000..82fa2b7
 +
 diff --git a/drivers/net/wireless/rtl8187b/ieee80211/scatterwalk.h b/drivers/net/wireless/rtl8187b/ieee80211/scatterwalk.h
 new file mode 100644
-index 0000000..b164465
+index 000000000000..b16446519017
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/ieee80211/scatterwalk.h
 @@ -0,0 +1,51 @@
@@ -27793,7 +27797,7 @@ index 0000000..b164465
 +#endif  /* _CRYPTO_SCATTERWALK_H */
 diff --git a/drivers/net/wireless/rtl8187b/msh_class.h b/drivers/net/wireless/rtl8187b/msh_class.h
 new file mode 100644
-index 0000000..ccaa939
+index 000000000000..ccaa93925a63
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/msh_class.h
 @@ -0,0 +1,117 @@
@@ -27916,7 +27920,7 @@ index 0000000..ccaa939
 +#endif // _MESH_CLASS_HDR_H_
 diff --git a/drivers/net/wireless/rtl8187b/r8180_93cx6.c b/drivers/net/wireless/rtl8187b/r8180_93cx6.c
 new file mode 100644
-index 0000000..8de9153
+index 000000000000..8de915342403
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_93cx6.c
 @@ -0,0 +1,146 @@
@@ -28068,7 +28072,7 @@ index 0000000..8de9153
 +}
 diff --git a/drivers/net/wireless/rtl8187b/r8180_93cx6.h b/drivers/net/wireless/rtl8187b/r8180_93cx6.h
 new file mode 100644
-index 0000000..4d08565
+index 000000000000..4d085657fcf2
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_93cx6.h
 @@ -0,0 +1,46 @@
@@ -28120,7 +28124,7 @@ index 0000000..4d08565
 +u32 eprom_read(struct net_device *dev,u32 addr); //reads a 16 bits word
 diff --git a/drivers/net/wireless/rtl8187b/r8180_dm.c b/drivers/net/wireless/rtl8187b/r8180_dm.c
 new file mode 100644
-index 0000000..684610e
+index 000000000000..684610ea2f43
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_dm.c
 @@ -0,0 +1,882 @@
@@ -29008,7 +29012,7 @@ index 0000000..684610e
 +
 diff --git a/drivers/net/wireless/rtl8187b/r8180_dm.h b/drivers/net/wireless/rtl8187b/r8180_dm.h
 new file mode 100644
-index 0000000..2b7e671
+index 000000000000..2b7e671b9811
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_dm.h
 @@ -0,0 +1,38 @@
@@ -29052,7 +29056,7 @@ index 0000000..2b7e671
 +#endif //R8180_PM_H
 diff --git a/drivers/net/wireless/rtl8187b/r8180_hw.h b/drivers/net/wireless/rtl8187b/r8180_hw.h
 new file mode 100644
-index 0000000..c050fca
+index 000000000000..c050fca4b8fe
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_hw.h
 @@ -0,0 +1,788 @@
@@ -29846,7 +29850,7 @@ index 0000000..c050fca
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8180_pm.c b/drivers/net/wireless/rtl8187b/r8180_pm.c
 new file mode 100644
-index 0000000..90a0bd9
+index 000000000000..90a0bd9ded07
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_pm.c
 @@ -0,0 +1,97 @@
@@ -29949,7 +29953,7 @@ index 0000000..90a0bd9
 +#endif //CONFIG_RTL8180_PM
 diff --git a/drivers/net/wireless/rtl8187b/r8180_pm.h b/drivers/net/wireless/rtl8187b/r8180_pm.h
 new file mode 100644
-index 0000000..efcba1d
+index 000000000000..efcba1d3c9eb
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_pm.h
 @@ -0,0 +1,28 @@
@@ -29983,7 +29987,7 @@ index 0000000..efcba1d
 +#endif // CONFIG_RTL8180_PM
 diff --git a/drivers/net/wireless/rtl8187b/r8180_rtl8225.c b/drivers/net/wireless/rtl8187b/r8180_rtl8225.c
 new file mode 100644
-index 0000000..e53d4cd
+index 000000000000..e53d4cda5b46
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_rtl8225.c
 @@ -0,0 +1,1007 @@
@@ -30996,7 +31000,7 @@ index 0000000..e53d4cd
 +}
 diff --git a/drivers/net/wireless/rtl8187b/r8180_rtl8225.h b/drivers/net/wireless/rtl8187b/r8180_rtl8225.h
 new file mode 100644
-index 0000000..138e0d0
+index 000000000000..138e0d05324f
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_rtl8225.h
 @@ -0,0 +1,77 @@
@@ -31079,7 +31083,7 @@ index 0000000..138e0d0
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8180_rtl8225z2.c b/drivers/net/wireless/rtl8187b/r8180_rtl8225z2.c
 new file mode 100644
-index 0000000..b661ab5
+index 000000000000..b661ab57cbdf
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_rtl8225z2.c
 @@ -0,0 +1,2092 @@
@@ -33177,7 +33181,7 @@ index 0000000..b661ab5
 +}
 diff --git a/drivers/net/wireless/rtl8187b/r8180_wx.c b/drivers/net/wireless/rtl8187b/r8180_wx.c
 new file mode 100644
-index 0000000..2bb9fe3
+index 000000000000..2bb9fe3ec4b8
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_wx.c
 @@ -0,0 +1,2067 @@
@@ -35250,7 +35254,7 @@ index 0000000..2bb9fe3
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8180_wx.h b/drivers/net/wireless/rtl8187b/r8180_wx.h
 new file mode 100644
-index 0000000..0c62a99
+index 000000000000..0c62a99ea1a1
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8180_wx.h
 @@ -0,0 +1,21 @@
@@ -35277,7 +35281,7 @@ index 0000000..0c62a99
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8187.h b/drivers/net/wireless/rtl8187b/r8187.h
 new file mode 100644
-index 0000000..ab18683
+index 000000000000..ab18683f7f2d
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8187.h
 @@ -0,0 +1,811 @@
@@ -36094,7 +36098,7 @@ index 0000000..ab18683
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8187_core.c b/drivers/net/wireless/rtl8187b/r8187_core.c
 new file mode 100644
-index 0000000..e3ce75b
+index 000000000000..e3ce75bfea47
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8187_core.c
 @@ -0,0 +1,7047 @@
@@ -43147,7 +43151,7 @@ index 0000000..e3ce75b
 +module_exit(rtl8187_usb_module_exit);
 diff --git a/drivers/net/wireless/rtl8187b/r8187_led.c b/drivers/net/wireless/rtl8187b/r8187_led.c
 new file mode 100644
-index 0000000..dba3b5a
+index 000000000000..dba3b5ad62bd
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8187_led.c
 @@ -0,0 +1,1629 @@
@@ -44782,7 +44786,7 @@ index 0000000..dba3b5a
 +
 diff --git a/drivers/net/wireless/rtl8187b/r8187_led.h b/drivers/net/wireless/rtl8187b/r8187_led.h
 new file mode 100644
-index 0000000..83492db
+index 000000000000..83492db1f2bd
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8187_led.h
 @@ -0,0 +1,276 @@
@@ -45064,7 +45068,7 @@ index 0000000..83492db
 +#endif
 diff --git a/drivers/net/wireless/rtl8187b/r8187_rfkill.c b/drivers/net/wireless/rtl8187b/r8187_rfkill.c
 new file mode 100644
-index 0000000..c63877a
+index 000000000000..c63877a039bb
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/r8187_rfkill.c
 @@ -0,0 +1,157 @@
@@ -45227,7 +45231,7 @@ index 0000000..c63877a
 +}
 diff --git a/drivers/net/wireless/rtl8187b/readme b/drivers/net/wireless/rtl8187b/readme
 new file mode 100644
-index 0000000..4438d2a
+index 000000000000..4438d2a1d292
 --- /dev/null
 +++ b/drivers/net/wireless/rtl8187b/readme
 @@ -0,0 +1,124 @@
@@ -45356,7 +45360,7 @@ index 0000000..4438d2a
 +If you have some question/comments please feel free to write me.
 +
 diff --git a/drivers/net/wireless/rtl818x/rtl8187/dev.c b/drivers/net/wireless/rtl818x/rtl8187/dev.c
-index 4e98c39..28146ff 100644
+index 4e98c3925f73..28146ff3c349 100644
 --- a/drivers/net/wireless/rtl818x/rtl8187/dev.c
 +++ b/drivers/net/wireless/rtl818x/rtl8187/dev.c
 @@ -1006,6 +1006,9 @@ static void rtl8187_stop(struct ieee80211_hw *dev)
@@ -45382,7 +45386,7 @@ index 4e98c39..28146ff 100644
  
  static int rtl8187_config(struct ieee80211_hw *dev, u32 changed)
 diff --git a/drivers/net/wireless/rtl818x/rtl8187/rfkill.c b/drivers/net/wireless/rtl818x/rtl8187/rfkill.c
-index 3411671..4d252c1 100644
+index 34116719974a..4d252c1c7a1d 100644
 --- a/drivers/net/wireless/rtl818x/rtl8187/rfkill.c
 +++ b/drivers/net/wireless/rtl818x/rtl8187/rfkill.c
 @@ -22,6 +22,10 @@
@@ -45405,7 +45409,7 @@ index 3411671..4d252c1 100644
  
  void rtl8187_rfkill_init(struct ieee80211_hw *hw)
 diff --git a/drivers/platform/Kconfig b/drivers/platform/Kconfig
-index 8390dca..4fa78d5 100644
+index 8390dca2b4e1..4fa78d5600dd 100644
 --- a/drivers/platform/Kconfig
 +++ b/drivers/platform/Kconfig
 @@ -1,3 +1,7 @@
@@ -45417,7 +45421,7 @@ index 8390dca..4fa78d5 100644
 +source "drivers/platform/mips/Kconfig"
 +endif
 diff --git a/drivers/platform/Makefile b/drivers/platform/Makefile
-index 782953a..8bdc97c 100644
+index 782953ae4c03..8bdc97cc157e 100644
 --- a/drivers/platform/Makefile
 +++ b/drivers/platform/Makefile
 @@ -3,3 +3,4 @@
@@ -45427,7 +45431,7 @@ index 782953a..8bdc97c 100644
 +obj-$(CONFIG_MIPS)		+= mips/
 diff --git a/drivers/platform/mips/Kconfig b/drivers/platform/mips/Kconfig
 new file mode 100644
-index 0000000..722d690
+index 000000000000..722d69049626
 --- /dev/null
 +++ b/drivers/platform/mips/Kconfig
 @@ -0,0 +1,60 @@
@@ -45493,7 +45497,7 @@ index 0000000..722d690
 +endif # MIPS_PLATFORM_DEVICES
 diff --git a/drivers/platform/mips/Makefile b/drivers/platform/mips/Makefile
 new file mode 100644
-index 0000000..0eadf8e
+index 000000000000..0eadf8e07159
 --- /dev/null
 +++ b/drivers/platform/mips/Makefile
 @@ -0,0 +1,8 @@
@@ -45507,7 +45511,7 @@ index 0000000..0eadf8e
 +obj-$(CONFIG_GDIUM_LAPTOP)	+= gdium_laptop.o
 diff --git a/drivers/platform/mips/gdium_laptop.c b/drivers/platform/mips/gdium_laptop.c
 new file mode 100644
-index 0000000..41a65ad
+index 000000000000..41a65ad7a2a7
 --- /dev/null
 +++ b/drivers/platform/mips/gdium_laptop.c
 @@ -0,0 +1,927 @@
@@ -46440,7 +46444,7 @@ index 0000000..41a65ad
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/lynloong_pc.c b/drivers/platform/mips/lynloong_pc.c
 new file mode 100644
-index 0000000..e36add3
+index 000000000000..e36add38b331
 --- /dev/null
 +++ b/drivers/platform/mips/lynloong_pc.c
 @@ -0,0 +1,514 @@
@@ -46960,7 +46964,7 @@ index 0000000..e36add3
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_ecrom.c b/drivers/platform/mips/yeeloong_ecrom.c
 new file mode 100644
-index 0000000..2f4d8fe
+index 000000000000..2f4d8fe74699
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_ecrom.c
 @@ -0,0 +1,943 @@
@@ -47909,7 +47913,7 @@ index 0000000..2f4d8fe
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/platform/mips/yeeloong_laptop.c b/drivers/platform/mips/yeeloong_laptop.c
 new file mode 100644
-index 0000000..b34fb4f
+index 000000000000..b34fb4f5bac0
 --- /dev/null
 +++ b/drivers/platform/mips/yeeloong_laptop.c
 @@ -0,0 +1,1355 @@
@@ -49269,7 +49273,7 @@ index 0000000..b34fb4f
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index 53eb4e5..625d34d 100644
+index 53eb4e55b289..625d34d45850 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
 @@ -481,6 +481,7 @@ comment "Platform RTC drivers"
@@ -49281,7 +49285,7 @@ index 53eb4e5..625d34d 100644
  	help
  	  Say "yes" here to get direct support for the real time clock
 diff --git a/drivers/rtc/rtc-cmos.c b/drivers/rtc/rtc-cmos.c
-index cae8985..22099d5 100644
+index cae89855c62d..22099d5d5c21 100644
 --- a/drivers/rtc/rtc-cmos.c
 +++ b/drivers/rtc/rtc-cmos.c
 @@ -739,8 +739,8 @@ cmos_do_probe(struct device *dev, struct resource *ports, int rtc_irq)
@@ -49296,7 +49300,7 @@ index cae8985..22099d5 100644
  		goto cleanup1;
  	}
 diff --git a/drivers/staging/sm7xx/smtcfb.c b/drivers/staging/sm7xx/smtcfb.c
-index 39dbf33..19d77a4 100644
+index 39dbf339a4fc..19d77a47594b 100644
 --- a/drivers/staging/sm7xx/smtcfb.c
 +++ b/drivers/staging/sm7xx/smtcfb.c
 @@ -15,6 +15,8 @@
@@ -49317,7 +49321,7 @@ index 39dbf33..19d77a4 100644
  	{"0x317", 1024, 768,  16},
  	{"0x31A", 1280, 1024, 16},
 diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
-index b263919..d4b05d1 100644
+index b2639191549e..d4b05d1106af 100644
 --- a/drivers/usb/host/ohci-hcd.c
 +++ b/drivers/usb/host/ohci-hcd.c
 @@ -830,9 +830,13 @@ static irqreturn_t ohci_irq (struct usb_hcd *hcd)
@@ -49338,7 +49342,7 @@ index b263919..d4b05d1 100644
  
  	if (quirk_zfmicro(ohci) && (ints & OHCI_INTR_SF)) {
 diff --git a/drivers/usb/host/pci-quirks.c b/drivers/usb/host/pci-quirks.c
-index eae35c1..eb41fbb 100644
+index 0d608f1772b3..dd981ed1a6eb 100644
 --- a/drivers/usb/host/pci-quirks.c
 +++ b/drivers/usb/host/pci-quirks.c
 @@ -58,6 +58,16 @@
@@ -49404,7 +49408,7 @@ index eae35c1..eb41fbb 100644
  static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  {
  	void __iomem *base;
-@@ -532,7 +538,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
+@@ -544,7 +550,11 @@ static void __devinit quirk_usb_handoff_ohci(struct pci_dev *pdev)
  	/* Now the controller is safely in SUSPEND and nothing can wake it up */
  	iounmap(base);
  }
@@ -49416,7 +49420,7 @@ index eae35c1..eb41fbb 100644
  static const struct dmi_system_id __devinitconst ehci_dmi_nohandoff_table[] = {
  	{
  		/*  Pegatron Lucid (ExoPC) */
-@@ -705,6 +715,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
+@@ -717,6 +727,9 @@ static void __devinit quirk_usb_disable_ehci(struct pci_dev *pdev)
  
  	iounmap(base);
  }
@@ -49426,7 +49430,7 @@ index eae35c1..eb41fbb 100644
  
  /*
   * handshake - spin reading a register until handshake completes
-@@ -849,6 +862,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
+@@ -861,6 +874,7 @@ void usb_disable_xhci_ports(struct pci_dev *xhci_pdev)
  }
  EXPORT_SYMBOL_GPL(usb_disable_xhci_ports);
  
@@ -49434,7 +49438,7 @@ index eae35c1..eb41fbb 100644
  /**
   * PCI Quirks for xHCI.
   *
-@@ -956,6 +970,9 @@ hc_init:
+@@ -968,6 +982,9 @@ hc_init:
  
  	iounmap(base);
  }
@@ -49445,7 +49449,7 @@ index eae35c1..eb41fbb 100644
  static void __devinit quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index 64ea95d..52d6bec 100644
+index 3073881c7279..74903a7f6876 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -79,6 +79,9 @@ static void option_instat_callback(struct urb *urb);
@@ -49458,7 +49462,7 @@ index 64ea95d..52d6bec 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -631,6 +634,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -696,6 +699,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  		.driver_info = (kernel_ulong_t)&net_intf4_blacklist },
@@ -49467,10 +49471,10 @@ index 64ea95d..52d6bec 100644
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c1f, USB_CLASS_COMM, 0x02, 0xff) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x1c23, USB_CLASS_COMM, 0x02, 0xff) },
 diff --git a/drivers/video/Makefile b/drivers/video/Makefile
-index 9b9d8ff..63a833a 100644
+index 7177a9d929ae..a8110bef45f5 100644
 --- a/drivers/video/Makefile
 +++ b/drivers/video/Makefile
-@@ -135,7 +135,7 @@ obj-$(CONFIG_FB_SH_MOBILE_HDMI)	  += sh_mobile_hdmi.o
+@@ -136,7 +136,7 @@ obj-$(CONFIG_FB_SH_MOBILE_HDMI)	  += sh_mobile_hdmi.o
  obj-$(CONFIG_FB_SH_MOBILE_MERAM)  += sh_mobile_meram.o
  obj-$(CONFIG_FB_SH_MOBILE_LCDC)	  += sh_mobile_lcdcfb.o
  obj-$(CONFIG_FB_OMAP)             += omap/
@@ -49480,7 +49484,7 @@ index 9b9d8ff..63a833a 100644
  obj-$(CONFIG_FB_CARMINE)          += carminefb.o
  obj-$(CONFIG_FB_MB862XX)	  += mb862xx/
 diff --git a/include/linux/sm501.h b/include/linux/sm501.h
-index 02fde50..a8677f0 100644
+index 02fde50a79a5..a8677f05272c 100644
 --- a/include/linux/sm501.h
 +++ b/include/linux/sm501.h
 @@ -27,6 +27,9 @@ extern unsigned long sm501_set_clock(struct device *dev,
@@ -49502,7 +49506,7 @@ index 02fde50..a8677f0 100644
  #define SM501_USE_ALL		(0xffffffff)
  
 diff --git a/init/calibrate.c b/init/calibrate.c
-index 24df79768..fb1d404 100644
+index 24df7976816c..fb1d404f537e 100644
 --- a/init/calibrate.c
 +++ b/init/calibrate.c
 @@ -21,6 +21,7 @@ static int __init lpj_setup(char *str)
@@ -49540,7 +49544,7 @@ index 24df79768..fb1d404 100644
  	if (!printed)
  		pr_cont("%lu.%02lu BogoMIPS (lpj=%lu)\n",
 diff --git a/net/rfkill/core.c b/net/rfkill/core.c
-index 5be1957..c8a1958 100644
+index ae7b50afc215..8a10ddf46f75 100644
 --- a/net/rfkill/core.c
 +++ b/net/rfkill/core.c
 @@ -112,7 +112,7 @@ static LIST_HEAD(rfkill_list);	/* list of registered rf switches */
@@ -49553,10 +49557,10 @@ index 5be1957..c8a1958 100644
  MODULE_PARM_DESC(default_state,
  		 "Default initial state for all radio types, 0 = radio off");
 diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
-index 858966a..537470e 100755
+index 679218b56ede..46194882b030 100755
 --- a/scripts/recordmcount.pl
 +++ b/scripts/recordmcount.pl
-@@ -307,14 +307,33 @@ if ($arch eq "x86_64") {
+@@ -306,14 +306,33 @@ if ($arch eq "x86_64") {
      $cc .= " -m64";
      $objcopy .= " -O elf64-sparc";
  } elsif ($arch eq "mips") {
@@ -49598,7 +49602,7 @@ index 858966a..537470e 100755
      #
      #       c:	3c030000 	lui	v1,0x0
      #			c: R_MIPS_HI16	_mcount
-@@ -326,19 +345,12 @@ if ($arch eq "x86_64") {
+@@ -325,19 +344,12 @@ if ($arch eq "x86_64") {
      #			10: R_MIPS_NONE	*ABS*
      #      14:	03e0082d 	move	at,ra
      #      18:	0060f809 	jalr	v1
@@ -49622,7 +49626,7 @@ index 858966a..537470e 100755
  
 diff --git a/scripts/sstrip.sh b/scripts/sstrip.sh
 new file mode 100755
-index 0000000..49b973a
+index 000000000000..49b973a3956f
 --- /dev/null
 +++ b/scripts/sstrip.sh
 @@ -0,0 +1,59 @@
