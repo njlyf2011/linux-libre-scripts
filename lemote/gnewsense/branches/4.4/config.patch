@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-06-02 00:49:11.479698121 -0400
-@@ -0,0 +1,5446 @@
++++ .config	2018-06-08 08:29:25.077237544 -0400
+@@ -0,0 +1,5447 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.4.135-gnu Kernel Configuration
++# Linux/mips 4.4.136-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -295,6 +295,7 @@ Index: .config
 +CONFIG_RD_XZ=y
 +CONFIG_RD_LZO=y
 +CONFIG_RD_LZ4=y
++CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y
 +# CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
 +CONFIG_SYSCTL=y
 +CONFIG_ANON_INODES=y
