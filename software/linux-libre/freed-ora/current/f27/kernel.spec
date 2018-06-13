@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -715,6 +715,12 @@ Patch513: ext4-correctly-handle-a-zero-length-xattr-with-a-non.patch
 # rhbz 1583207
 # https://www.spinics.net/lists/kernel/msg2818652.html applies cleanly to 4.17
 Patch514: libata-Drop-SanDisk-SD7UB3Q-G1001-NOLPM-quirk.patch
+
+# CVE-2018-10853 rhbz 1589890 1589892
+Patch515: kvm-x86-Check-CPL-in-segmented_write_std.patch
+
+# https://www.spinics.net/lists/platform-driver-x86/msg15719.html
+Patch516: platform-x86-dell-laptop-Fix-keyboard-backlight-time.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2028,6 +2034,16 @@ fi
 #
 #
 %changelog
+* Tue Jun 12 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.16.15-gnu.
+
+* Mon Jun 11 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.15-200
+- Fix for the keyboard backlight on Dell XPS 13 9370
+- Linux v4.16.15
+
+* Mon Jun 11 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-10853 (rhbz 1589890 1589892)
+
 * Tue Jun  5 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.16.14-gnu.
 
