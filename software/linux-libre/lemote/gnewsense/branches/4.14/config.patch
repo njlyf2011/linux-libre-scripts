@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-06-17 02:12:53.194096727 -0400
++++ .config	2018-06-21 23:48:00.355738014 -0400
 @@ -0,0 +1,5853 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.14.50-gnu Kernel Configuration
++# Linux/mips 4.14.51-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -996,6 +996,9 @@ Index: .config
 +CONFIG_NF_SOCKET_IPV6=m
 +CONFIG_NF_TABLES_IPV6=m
 +CONFIG_NFT_CHAIN_ROUTE_IPV6=m
++CONFIG_NFT_CHAIN_NAT_IPV6=m
++CONFIG_NFT_MASQ_IPV6=m
++CONFIG_NFT_REDIR_IPV6=m
 +CONFIG_NFT_REJECT_IPV6=m
 +CONFIG_NFT_DUP_IPV6=m
 +CONFIG_NFT_FIB_IPV6=m
@@ -1003,10 +1006,7 @@ Index: .config
 +CONFIG_NF_REJECT_IPV6=m
 +CONFIG_NF_LOG_IPV6=m
 +CONFIG_NF_NAT_IPV6=m
-+CONFIG_NFT_CHAIN_NAT_IPV6=m
 +CONFIG_NF_NAT_MASQUERADE_IPV6=m
-+CONFIG_NFT_MASQ_IPV6=m
-+CONFIG_NFT_REDIR_IPV6=m
 +CONFIG_IP6_NF_IPTABLES=m
 +CONFIG_IP6_NF_MATCH_AH=m
 +CONFIG_IP6_NF_MATCH_EUI64=m
