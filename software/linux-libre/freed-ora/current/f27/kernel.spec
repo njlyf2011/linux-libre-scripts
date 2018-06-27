@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -679,9 +679,6 @@ Patch503: kexec-bzimage-verify-pe-signature-fix.patch
 # https://www.spinics.net/lists/linux-acpi/msg82405.html
 Patch504: mailbox-ACPI-erroneous-error-message-when-parsing-ACPI.patch
 
-# CVE-2018-12232 rhbz 1590215 1590216
-Patch506: 0001-socket-close-race-condition-between-sock_close-and-s.patch
-
 # https://www.spinics.net/lists/platform-driver-x86/msg15719.html
 Patch507: platform-x86-dell-laptop-Fix-keyboard-backlight-time.patch
 
@@ -696,6 +693,15 @@ Patch509: rtc-nvmem-don-t-return-an-error-when-not-enabled.patch
 # rhbz 1584216
 Patch510: 1-2-xen-netfront-Fix-mismatched-rtnl_unlock.patch
 Patch511: 2-2-xen-netfront-Update-features-after-registering-netdev.patch
+
+# CVE-2018-12633 rhbz 1594170 1594172
+Patch512: 0001-virt-vbox-Only-copy_from_user-the-request-header-onc.patch
+
+# rhbz 1592454
+Patch514: 0001-media-uvcvideo-Support-realtek-s-UVC-1.5-device.patch
+
+# rhbz 1591516
+Patch515: 0001-signal-Stop-special-casing-TRAP_FIXME-and-FPE_FIXME-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2005,7 +2011,21 @@ fi
 #
 #
 %changelog
-* Sun Jun 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jun 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17.3-gnu.
+
+* Tue Jun 26 2018 Jeremy Cline <jcline@redhat.com> - 4.17.3-100
+- Linux v4.17.3
+- Don't log an error if RTC_NVMEM isn't enabled (rhbz 1568276)
+
+* Mon Jun 25 2018 Laura Abbott <labbott@fedoraproject.org>
+- Some webcam fixes (rhbz 1592454 1590304)
+- Fix for armv7 siginfo ABI regression (rhbz 1591516)
+
+* Fri Jun 22 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-12633 (rhbz 1594170 1594172)
+
+* Fri Jun 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Jun 24
 - GNU Linux-libre 4.17.2-gnu.
 
 * Fri Jun 22 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.2-100
