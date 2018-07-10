@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -694,6 +694,25 @@ Patch515: 0001-signal-Stop-special-casing-TRAP_FIXME-and-FPE_FIXME-.patch
 
 # rhbz 1572944
 Patch517: Revert-the-random-series-for-4.16.4.patch
+
+# CVE-2018-13053 rhbz 1597747 1597748
+Patch518: alarmtimer-prevent-overflow-for-relative-nanosleep.patch
+
+# CVE-2018-12896 rhbz 1597759 1597760
+Patch519: 1-2-posix-timers-Make-forward-callback-return-s64.patch
+Patch520: 2-2-posix-timers-Sanitize-overrun-handling.patch
+
+# CVE-2018-13093 rhbz 1597766 1597767
+Patch521: 0001-xfs-validate-cached-inodes-are-free-when-allocated.patch
+
+# CVE-2018-13094 rhbz 1597771 1597772
+Patch522: 0001-xfs-don-t-call-xfs_da_shrink_inode-with-NULL-bp.patch
+
+# CVE-2018-13095 rhbz 1597775 1597777
+Patch523: 0001-xfs-More-robust-inode-extent-count-validation.patch
+
+# CVE-2018-13405 rhbz 1599161 1599162
+Patch524: CVE-2018-13405.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2003,6 +2022,20 @@ fi
 #
 #
 %changelog
+* Mon Jul  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17.5-gnu.
+
+* Mon Jul 09 2018 Jeremy Cline <jcline@redhat.com> - 4.17.5-100
+- Linux v4.17.5
+- Fix CVE-2018-13405 (rhbz 1599161 1599162)
+
+* Thu Jul 05 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-13053 (rhbz 1597747 1597748)
+- Fix CVE-2018-12896 (rhbz 1597759 1597760) 
+- Fix CVE-2018-13093 (rhbz 1597766 1597767)
+- Fix CVE-2018-13094 (rhbz 1597771 1597772)
+- Fix CVE-2018-13095 (rhbz 1597775 1597777)
+
 * Wed Jul  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.17.4-gnu.
 
