@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -714,8 +714,11 @@ Patch522: 0001-xfs-don-t-call-xfs_da_shrink_inode-with-NULL-bp.patch
 # CVE-2018-13095 rhbz 1597775 1597777
 Patch523: 0001-xfs-More-robust-inode-extent-count-validation.patch
 
-# CVE-2018-13405 rhbz 1599161 1599162
-Patch524: CVE-2018-13405.patch
+# rhbz 1597333
+# Patch526: xhci-Fix-perceived-dead-host-due-to-runtime-suspend-.patch
+
+# i686 patch that will eventually be 4.17.8
+Patch527: mm-don-t-do-zero_resv_unavail-if-memmap-is-not-allocated.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2025,7 +2028,20 @@ fi
 #
 #
 %changelog
-* Fri Jul 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Tue Jul 17 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17.7-gnu.
+
+* Tue Jul 17 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.7-100
+- Linux v4.17.7
+
+* Thu Jul 12 2018 Jeremy Cline <jeremy@jcline.org>
+- Avoid an early WARN_ON in Xen (rhbz 1592976)
+- Fix perceived dead xhci host (rhbz 1597333)
+
+* Thu Jul 12 2018 Dan Horák <dan@danny.cz>
+- Enable HDA sound drivers on PPC
+
+* Thu Jul 12 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Jul 13
 - GNU Linux-libre 4.17.6-gnu.
 
 * Wed Jul 11 2018 Jeremy Cline <jcline@redhat.com> - 4.17.6-100
