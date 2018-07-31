@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -4.17%{?stablegnux}
-#define rcrevlibre  -4.17%{?rcrevgnux}
+%define rcrevlibre  -4.17%{?rcrevgnux}
 #define gitrevlibre -4.17%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -161,6 +161,10 @@ Summary: The Linux kernel
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
 %define debugbuildsenabled 1
+
+# Kernel headers are being split out into a separate package
+%define with_headers 0
+%define with_cross_headers 0
 
 %if %{with_verbose}
 %define make_opts V=1
@@ -367,6 +371,7 @@ Summary: The Linux kernel
 %define with_up 0
 %define with_pae 0
 %define with_debuginfo 0
+%define with_debug 0
 %define _enable_debug_packages 0
 %endif
 
@@ -460,7 +465,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -605,6 +610,9 @@ Patch210: disable-i8042-check-on-apple-mac.patch
 
 Patch211: drm-i915-hush-check-crtc-state.patch
 
+Patch212: efi-secureboot.patch
+Patch213: lockdown-fix-coordination-of-kernel-module-signature-verification.patch
+
 # 300 - ARM patches
 Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
@@ -621,37 +629,22 @@ Patch304: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
 # https://patchwork.kernel.org/patch/9820417/
 Patch305: qcom-msm89xx-fixes.patch
 
-# https://patchwork.kernel.org/patch/10173115/
-Patch306: arm-dts-imx6qdl-udoo-Disable-usbh1-to-avoid-kernel-hang.patch
+# https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
+Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-# https://marc.info/?l=linux-kernel&m=152328880417846&w=2
-Patch307: arm64-thunderx-crypto-zip-fixes.patch
-
-# https://www.spinics.net/lists/linux-crypto/msg32725.html
-Patch308: crypto-testmgr-Allow-different-compression-results.patch
-
-Patch309: arm-tegra-fix-nouveau-crash.patch
-
-# https://patchwork.kernel.org/patch/10346089/
-Patch310: arm-dts-Add-am335x-pocketbeagle.patch
-
-# https://www.spinics.net/lists/linux-tegra/msg32920.html
-Patch311: arm-tegra-USB-driver-dependency-fix.patch
-
-# https://patchwork.kernel.org/patch/10354521/
-# https://patchwork.kernel.org/patch/10354187/
-# https://patchwork.kernel.org/patch/10306793/
-# https://patchwork.kernel.org/patch/10133165/
-Patch313: mvebu-a37xx-fixes.patch
-
-Patch324: bcm283x-clk-audio-fixes.patch
+Patch307: arm-tegra-fix-nouveau-crash.patch
 
 # Enabling Patches for the RPi3+
-Patch330: bcm2837-rpi-initial-3plus-support.patch
-Patch332: bcm2837-enable-pmu.patch
-Patch333: bcm2837-lan78xx-fixes.patch
+Patch330: bcm2837-enable-pmu.patch
 
-Patch335: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
+Patch331: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
+
+Patch332: bcm2835-hwmon-Add-support-for-RPi-voltage-sensor.patch
+
+# Fix for AllWinner A64 Timer Errata, still not final
+# https://patchwork.kernel.org/patch/10392891/
+Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
+Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -663,9 +656,29 @@ Patch501: Fix-for-module-sig-verification.patch
 # rhbz 1431375
 Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
-# rbhz 1435837
-# https://www.spinics.net/lists/linux-acpi/msg82405.html
-Patch504: mailbox-ACPI-erroneous-error-message-when-parsing-ACPI.patch
+# rhbz 1470995
+Patch504: kexec-bzimage-verify-pe-signature-fix.patch
+
+# Support for unique build ids
+# All queued in the kbuild tree
+Patch506: 0001-kbuild-Add-build-salt-to-the-kernel-and-modules.patch
+Patch507: 0002-x86-Add-build-salt-to-the-vDSO.patch
+Patch508: 0003-powerpc-Add-build-salt-to-the-vDSO.patch
+Patch509: 0004-arm64-Add-build-salt-to-the-vDSO.patch
+Patch512: 0003-treewide-Rename-HOSTCFLAGS-KBUILD_HOSTCFLAGS.patch
+Patch513: 0004-treewide-Rename-HOSTCXXFLAGS-to-KBUILD_HOSTCXXFLAGS.patch
+Patch514: 0005-treewide-Rename-HOSTLDFLAGS-to-KBUILD_HOSTLDFLAGS.patch
+Patch515: 0006-treewide-Rename-HOST_LOADLIBES-to-KBUILD_HOSTLDLIBS.patch
+Patch516: 0007-Kbuild-Use-HOST-FLAGS-options-from-the-command-line.patch
+
+# For quiet / flickerfree boot, all queued for merging into 4.19-rc1
+Patch521: 0001-printk-Make-CONSOLE_LOGLEVEL_QUIET-configurable.patch
+Patch522: 0002-printk-Export-is_console_locked.patch
+Patch523: 0003-fbcon-Call-WARN_CONSOLE_UNLOCKED-where-applicable.patch
+Patch524: 0004-console-fbcon-Add-support-for-deferred-console-takeo.patch
+Patch525: 0005-efi-bgrt-Drop-__initdata-from-bgrt_image_size.patch
+Patch526: 0006-efifb-Copy-the-ACPI-BGRT-boot-graphics-to-the-frameb.patch
+Patch527: 0007-efifb-BGRT-Do-not-copy-the-boot-graphics-for-non-nat.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1287,6 +1300,27 @@ cp_vmlinux()
   eu-strip --remove-comment -o "$2" "$1"
 }
 
+# These are for host programs that get built as part of the kernel and
+# are required to be packaged in kernel-devel for building external modules.
+# Since they are userspace binaries, they are required to pickup the hardening
+# flags defined in the macros. The --build-id=uuid is a trick to get around
+# debuginfo limitations: Typically, find-debuginfo.sh will update the build
+# id of all binaries to allow for parllel debuginfo installs. The kernel
+# can't use this because it breaks debuginfo for the vDSO so we have to
+# use a special mechanism for kernel and modules to be unique. Unfortunately,
+# we still have userspace binaries which need unique debuginfo and because
+# they come from the kernel package, we can't just use find-debuginfo.sh to
+# rewrite only those binaries. The easiest option right now is just to have
+# the build id be a uuid for the host programs.
+#
+# Note we need to disable these flags for cross builds because the flags
+# from redhat-rpm-config assume that host == target so target arch
+# flags cause issues with the host compiler.
+%if !%{with_cross}
+%define build_hostcflags  %{build_cflags}
+%define build_hostldflags %{build_ldflags} -Wl,--build-id=uuid
+%endif
+
 BuildKernel() {
     MakeTarget=$1
     KernelImage=$2
@@ -1337,9 +1371,12 @@ BuildKernel() {
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
 
-    make %{?make_opts} ARCH=$Arch olddefconfig >/dev/null
-    %{make} %{?make_opts} ARCH=$Arch %{?_smp_mflags} $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
-    %{make} %{?make_opts} ARCH=$Arch %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
+    make %{?make_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}" ARCH=$Arch olddefconfig
+
+    # This ensures build-ids are unique to allow parallel debuginfo
+    perl -p -i -e "s/^CONFIG_BUILD_SALT.*/CONFIG_BUILD_SALT=\"%{KVERREL}\"/" .config
+    %{make} %{?make_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}" ARCH=$Arch %{?_smp_mflags} $MakeTarget %{?sparse_mflags} %{?kernel_mflags}
+    %{make} %{?make_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}" ARCH=$Arch %{?_smp_mflags} modules %{?sparse_mflags} || exit 1
 
     mkdir -p $RPM_BUILD_ROOT/%{image_install_path}
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer
@@ -1961,6 +1998,215 @@ fi
 #
 #
 %changelog
+* Mon Jul 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18-rc7-gnu.
+
+* Mon Jul 30 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc7.git0.1
+- Linux v4.18-rc7
+
+* Mon Jul 30 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Mon Jul 30 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patch queued in -next to make quiet more quiet
+- Add patches queued in -next to make efifb / fbcon retain the vendor logo
+  (ACPI BRGT boot graphics) until the first text is output to the console
+- Enable support for ICN8505 touchscreen used on some Cherry Trail tablets
+
+* Fri Jul 27 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable FPGA Manager kernel framework
+
+* Fri Jul 27 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc6.git3.1
+- Linux v4.18-rc6-152-gcd3f77d74ac3
+- Disable headers in preparation for kernel headers split
+
+* Thu Jul 26 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc6.git2.1
+- Linux v4.18-rc6-110-g6e77b267723c
+
+* Thu Jul 26 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add Raspberry Pi voltage sensor driver
+
+* Wed Jul 25 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc6.git1.1
+- Linux v4.18-rc6-93-g9981b4fb8684
+
+* Wed Jul 25 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jul 23 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc6.git0.1
+- Linux v4.18-rc6
+
+* Mon Jul 23 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jul 20 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc5.git4.1
+- Linux v4.18-rc5-290-g28c20cc73b9c
+
+* Thu Jul 19 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc5.git3.1
+- Linux v4.18-rc5-264-gf39f28ff82c1
+
+* Wed Jul 18 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc5.git2.1
+- Linux v4.18-rc5-37-g3c53776e29f8
+
+* Tue Jul 17 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc5.git1.1
+- Linux v4.18-rc5-36-g30b06abfb92b
+- Fix aio uapi breakage (rhbz 1601529)
+
+* Tue Jul 17 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jul 16 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc5.git0.1
+- Linux v4.18-rc5
+
+* Mon Jul 16 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jul 13 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc4.git4.1
+- Linux v4.18-rc4-71-g63f047771621
+
+* Thu Jul 12 2018 Laura Abbott <labbott@redhat.com>
+- Proper support for parallel debuginfo and hardening flags
+
+* Thu Jul 12 2018 Javier Martinez Canillas <javierm@redhat.com>
+- Drop the id field from generated BLS snippets
+
+* Thu Jul 12 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc4.git3.1
+- Linux v4.18-rc4-69-gc25c74b7476e
+
+* Wed Jul 11 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc4.git2.1
+- Linux v4.18-rc4-17-g1e09177acae3
+
+* Tue Jul 10 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc4.git1.1
+- Linux v4.18-rc4-7-g092150a25cb7
+
+* Tue Jul 10 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jul 09 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc4.git0.1
+- Linux v4.18-rc4
+
+* Mon Jul 09 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Mon Jul  9 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix for AllWinner A64 timer scew errata
+
+* Fri Jul 06 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc3.git3.1
+- Linux v4.18-rc3-183-gc42c12a90545
+
+* Thu Jul 05 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc3.git2.1
+- Linux v4.18-rc3-134-g06c85639897c
+
+* Tue Jul 03 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc3.git1.1
+- Linux v4.18-rc3-107-gd0fbad0aec1d
+
+* Tue Jul 03 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jul 02 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc3.git0.1
+- Linux v4.18-rc3
+
+* Mon Jul 02 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jun 29 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc2.git4.1
+- Linux v4.18-rc2-207-gcd993fc4316d
+
+* Fri Jun 29 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add a possible i.MX6 sdhci fix
+
+* Thu Jun 28 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc2.git3.1
+- Linux v4.18-rc2-132-gf57494321cbf
+
+* Tue Jun 26 2018 Laura Abbott <labbott@redhat.com>
+- Enable leds-pca9532 module (rhbz 1595163)
+
+* Tue Jun 26 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc2.git2.1
+- Linux v4.18-rc2-44-g813835028e9a
+
+* Mon Jun 25 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc2.git1.1
+- Linux v4.18-rc2-37-g6f0d349d922b
+- Fix for aarch64 bpf (rhbz 1594447)
+
+* Mon Jun 25 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jun 25 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc2.git0.1
+- Linux v4.18-rc2
+
+* Mon Jun 25 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Mon Jun 25 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable BFP JIT on ARMv7 as it's currently broken
+- Remove forced console on aarch64, legacy config (rhbz 1594402)
+
+* Fri Jun 22 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc1.git4.1
+- Linux v4.18-rc1-189-g894b8c000ae6
+
+* Thu Jun 21 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc1.git3.1
+- Linux v4.18-rc1-107-g1abd8a8f39cd
+
+* Wed Jun 20 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc1.git2.1
+- Linux v4.18-rc1-52-g81e97f01371f
+
+* Tue Jun 19 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc1.git1.1
+- Linux v4.18-rc1-43-gba4dbdedd3ed
+
+* Tue Jun 19 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jun 18 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc1.git0.1
+- Linux v4.18-rc1
+
+* Mon Jun 18 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jun 15 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git10.1
+- Linux v4.17-12074-g4c5e8fc62d6a
+
+* Fri Jun 15 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- ARM updates for 4.18, cleanup some dropped config options
+- Disable zoron driver, moved to staging for removal upstream
+
+* Thu Jun 14 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git9.1
+- Linux v4.17-11928-g2837461dbe6f
+
+* Wed Jun 13 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git8.1
+- Linux v4.17-11782-gbe779f03d563
+
+* Wed Jun 13 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix kexec_file_load pefile signature verification (rhbz 1470995)
+
+* Tue Jun 12 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git7.1
+- Linux v4.17-11346-g8efcf34a2639
+
+* Mon Jun 11 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Secure Boot updates
+
+* Mon Jun 11 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git6.1
+- Linux v4.17-10288-ga2225d931f75
+
+* Fri Jun 08 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git5.1
+- Linux v4.17-7997-g68abbe729567
+
+* Thu Jun 07 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git4.1
+- Linux v4.17-6625-g1c8c5a9d38f6
+
+* Wed Jun 06 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git3.1
+- Linux v4.17-3754-g135c5504a600
+
+* Tue Jun 05 2018 Jeremy Cline <jeremy@jcline.org>
+- Enable CONFIG_SCSI_DH on s390x (rhbz 1586189)
+
+* Tue Jun 05 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git2.1
+- Linux v4.17-1535-g5037be168f0e
+
+* Mon Jun 04 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc0.git1.1
+- Linux v4.17-505-g9214407d1237
+
+* Mon Jun 04 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Mon Jun  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.17-gnu.
 
@@ -3300,6 +3546,7 @@ fi
 - Linux v4.11-1464-gd3b5d35
 - Reenable debugging options.
 
+<<<<<<< HEAD
 * Tue May  2 2017 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.11-gnu.
 
@@ -4986,6 +5233,8 @@ fi
 - Fix tegra nouveau module load (thank kwizart for reference)
 - PowerPC Little Endian ToC fix
 
+=======
+>>>>>>> 0256b7c58a87eb78d9921e675abb285ffb09d48a
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
