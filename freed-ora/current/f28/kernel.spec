@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -163,6 +163,10 @@ Summary: The Linux kernel
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
 %define debugbuildsenabled 1
+
+# Kernel headers are being split out into a separate package
+%define with_headers 0
+%define with_cross_headers 0
 
 %if %{with_verbose}
 %define make_opts V=1
@@ -713,11 +717,11 @@ Patch523: 0001-xfs-More-robust-inode-extent-count-validation.patch
 # rhbz 1597333
 # Patch526: xhci-Fix-perceived-dead-host-due-to-runtime-suspend-.patch
 
-# rbhz 1607092
-Patch528: Revert-iommu-intel-iommu-Enable-CONFIG_DMA_DIRECT_OP.patch
-
 # rhbz 1602971
 Patch529: ext4-fix-false-negative-and-false-positives.patch
+
+# CVE-2018-14678 rhbz 1608559 1608560
+Patch530: xsa274-linux-4_17.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2027,6 +2031,14 @@ fi
 #
 #
 %changelog
+* Mon Jul 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17.11-gnu.
+
+* Mon Jul 30 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.11-200
+- Linux v4.17.11
+- Turn off kernel-headers for the split
+- Fix CVE-2018-14678 (rhbz 1608559 1608560)
+
 * Wed Jul 25 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.17.10-gnu.
 
