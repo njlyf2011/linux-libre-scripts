@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -716,9 +716,6 @@ Patch523: 0001-xfs-More-robust-inode-extent-count-validation.patch
 
 # rhbz 1597333
 # Patch526: xhci-Fix-perceived-dead-host-due-to-runtime-suspend-.patch
-
-# rhbz 1602971
-Patch529: ext4-fix-false-negative-and-false-positives.patch
 
 # CVE-2018-14678 rhbz 1608559 1608560
 Patch530: xsa274-linux-4_17.patch
@@ -2031,6 +2028,17 @@ fi
 #
 #
 %changelog
+* Sat Aug  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17.12-gnu.
+
+* Fri Aug 03 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.12-200
+- Linux v4.17.12
+- Fixes CVE-2018-14734 (rhbz 1611005 1611007)
+- Fixes (rhbz 1609932)
+
+* Wed Aug  1 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix for lan78xx RX packets (Raspberry Pi 3B+)
+
 * Mon Jul 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.17.11-gnu.
 
