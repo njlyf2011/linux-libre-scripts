@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -634,12 +634,22 @@ Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
 Patch307: arm-tegra-fix-nouveau-crash.patch
 
+# https://patchwork.kernel.org/patch/10539291/
+Patch308: mmc-sunxi-allow-3.3V-DDR-when-DDR-is-available.patch
+# https://patchwork.kernel.org/patch/10540521/
+Patch309: mmc-sunxi-remove-output-of-virtual-base-address.patch
+
+Patch310: arm-dts-armada388-helios4.patch
+
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
 
 Patch331: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 Patch332: bcm2835-hwmon-Add-support-for-RPi-voltage-sensor.patch
+
+# https://patchwork.freedesktop.org/patch/240917/
+Patch334: drm-vc4-Fix-the-no-scaling-case-on-multi-planar-YUV-formats.patch
 
 # Fix for AllWinner A64 Timer Errata, still not final
 # https://patchwork.kernel.org/patch/10392891/
@@ -679,6 +689,9 @@ Patch524: 0004-console-fbcon-Add-support-for-deferred-console-takeo.patch
 Patch525: 0005-efi-bgrt-Drop-__initdata-from-bgrt_image_size.patch
 Patch526: 0006-efifb-Copy-the-ACPI-BGRT-boot-graphics-to-the-frameb.patch
 Patch527: 0007-efifb-BGRT-Do-not-copy-the-boot-graphics-for-non-nat.patch
+Patch528: 0008-console-dummycon-export-dummycon_-un-register_output.patch
+# Deferred fbcon takeover bugfix, pending upstream
+Patch529: 0009-fbcon-Only-defer-console-takeover-if-the-current-con.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1998,6 +2011,46 @@ fi
 #
 #
 %changelog
+* Mon Aug  6 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18-rc8-gnu.
+
+* Mon Aug 06 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc8.git0.1
+- Linux v4.18-rc8
+
+* Mon Aug 06 2018 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Sat Aug 04 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc7.git3.1
+- Linux v4.18-rc7-178-g0b5b1f9a78b5
+
+* Thu Aug 02 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc7.git2.1
+- Linux v4.18-rc7-112-g6b4703768268
+
+* Thu Aug  2 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add ARM Helios4 support
+
+* Wed Aug 01 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patch fixing FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER breaking
+  VT switching when combined with vgacon (rhbz#1610562)
+- Enable Apollo Lake Whiskey Cove PMIC support
+
+* Wed Aug 01 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc7.git1.1
+- Linux v4.18-rc7-90-gc1d61e7fe376
+
+* Wed Aug 01 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Wed Aug 01 2018 Jeremy Cline <jeremy@jcline.org>
+- Enable AEGIS and MORUS ciphers (rhbz 1610180)
+
+* Tue Jul 31 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add two bcm283x vc4 stability patches
+- Some AllWinner MMC driver fixes
+
+* Tue Jul 31 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patch to fix FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER on s390x and
+  re-enable FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER on s390x
+
 * Mon Jul 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18-rc7-gnu.
 
@@ -2424,6 +2477,7 @@ fi
 - Linux v4.16
 - Disable debugging options.
 
+<<<<<<< HEAD
 * Thu Mar 29 2018 Jeremy Cline <jeremy@jcline.org> - 4.16.0-0.rc7.git1.1
 - Linux v4.16-rc7-62-g0b412605ef5f
 - Re-enable debugging options
@@ -5235,6 +5289,8 @@ fi
 
 =======
 >>>>>>> 0256b7c58a87eb78d9921e675abb285ffb09d48a
+=======
+>>>>>>> 581efe4e7e1cc6faa17a776df09aea3a941c0089
 ###
 # The following Emacs magic makes C-c C-e use UTC dates.
 # Local Variables:
