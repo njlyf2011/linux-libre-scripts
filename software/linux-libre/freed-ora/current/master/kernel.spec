@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 17
+%define base_sublevel 18
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.17%{?stablegnux}
-%define rcrevlibre  -4.17%{?rcrevgnux}
-#define gitrevlibre -4.17%{?gitrevgnux}
+#define stablelibre -4.18%{?stablegnux}
+#define rcrevlibre  -4.18%{?rcrevgnux}
+#define gitrevlibre -4.18%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -465,7 +465,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -641,6 +641,9 @@ Patch309: mmc-sunxi-remove-output-of-virtual-base-address.patch
 
 Patch310: arm-dts-armada388-helios4.patch
 
+# https://www.spinics.net/lists/arm-kernel/msg670137.html
+Patch311: arm64-ZynqMP-firmware-clock-drivers-core.patch
+
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
 
@@ -692,6 +695,7 @@ Patch527: 0007-efifb-BGRT-Do-not-copy-the-boot-graphics-for-non-nat.patch
 Patch528: 0008-console-dummycon-export-dummycon_-un-register_output.patch
 # Deferred fbcon takeover bugfix, pending upstream
 Patch529: 0009-fbcon-Only-defer-console-takeover-if-the-current-con.patch
+Patch530: 0010-fbcon-Do-not-takeover-the-console-from-atomic-contex.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2011,6 +2015,34 @@ fi
 #
 #
 %changelog
+* Mon Aug 13 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18-gnu.
+
+* Mon Aug 13 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-1
+- Linux v4.18
+- Disable debugging options.
+
+* Mon Aug 13 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Disable speck crypto cipher
+
+* Sat Aug 11 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add ZYNQMP clock and firmware driver
+
+* Fri Aug 10 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc8.git2.1
+- Linux v4.18-rc8-4-gfedb8da96355
+
+* Fri Aug 10 2018 Hans de Goede <hdegoede@redhat.com>
+- Sync FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER bugfix with upstream
+
+* Wed Aug 08 2018 Laura Abbott <labbott@redhat.com> - 4.18.0-0.rc8.git1.1
+- Linux v4.18-rc8-2-g1236568ee3cb
+
+* Wed Aug 08 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Aug 06 2018 Hans de Goede <hdegoede@redhat.com>
+- Add one more FRAMEBUFFER_CONSOLE_DEFERRED_TAKEOVER bugfix patch
+
 * Mon Aug  6 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18-rc8-gnu.
 
