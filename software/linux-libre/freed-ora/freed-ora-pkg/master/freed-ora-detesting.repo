@@ -4,8 +4,8 @@ baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/f$releasever-det
 	https://mirror.uta.edu.ec/linux-libre/freed-ora/f$releasever-detesting
 	https://mirror.cedia.org.ec/linux-libre/freed-ora/f$releasever-detesting
 	http://ftp.linux.org.tr/linux-libre/freed-ora/f$releasever-detesting
-	http://linux-libre.gnulinux.si/freed-ora/f$releasever-detesting
-	https://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/f$releasever-detesting
+	https://mirror.linux.pizza/linux-libre/freed-ora/f$releasever-detesting
+	https://mirror.splentity.com/linux-libre/freed-ora/f$releasever-detesting
 enabled=0
 metadata_expire=7d
 gpgcheck=1
@@ -16,6 +16,8 @@ name=Linux-libre Freed-ora $releasever - Random builds - Debug
 baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/f$releasever-detesting
 	https://mirror.cedia.org.ec/linux-libre/freed-ora/debuginfo/f$releasever-detesting
 	https://mirror.uta.edu.ec/linux-libre/freed-ora/debuginfo/f$releasever-detesting
+	https://mirror.linux.pizza/linux-libre/freed-ora/debuginfo/f$releasever-detesting
+	https://mirror.splentity.com/linux-libre/freed-ora/debuginfo/f$releasever-detesting
 enabled=0
 metadata_expire=7d
 gpgcheck=1
