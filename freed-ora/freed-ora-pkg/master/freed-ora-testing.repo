@@ -1,11 +1,11 @@
 [freed-ora-testing]
 name=Linux-libre Freed-ora $releasever - Test builds
 baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/f$releasever-testing
-	https://mirror.cedia.org.ec/linux-libre/freed-ora/f$releasever
-	https://mirror.uta.edu.ec/linux-libre/freed-ora/f$releasever
-	http://linux-libre.gnulinux.si/freed-ora/f$releasever-testing
+	https://mirror.cedia.org.ec/linux-libre/freed-ora/f$releasever-testing
+	https://mirror.uta.edu.ec/linux-libre/freed-ora/f$releasever-testing
 	http://ftp.linux.org.tr/linux-libre/freed-ora/f$releasever-testing
-	https://www.fsfla.org/~lxoliva/fsfla/linux-libre/freed-ora/f$releasever-testing
+	https://mirror.linux.pizza/linux-libre/freed-ora/f$releasever-testing
+	https://mirror.splentity.com/linux-libre/freed-ora/f$releasever-testing
 enabled=0
 metadata_expire=7d
 gpgcheck=1
@@ -16,6 +16,8 @@ name=Linux-libre Freed-ora $releasever - Test builds - Debug
 baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/f$releasever-testing
 	https://mirror.uta.edu.ec/linux-libre/freed-ora/debuginfo/f$releasever-testing
 	https://mirror.cedia.org.ec/linux-libre/freed-ora/debuginfo/f$releasever-testing
+	https://mirror.linux.pizza/linux-libre/freed-ora/debuginfo/f$releasever-testing
+	https://mirror.splentity.com/linux-libre/freed-ora/debuginfo/f$releasever-testing
 enabled=0
 metadata_expire=7d
 gpgcheck=1
