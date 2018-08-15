@@ -1,0 +1,25 @@
+[freed-ora]
+name=Linux-libre Freed-ora $releasever - Released builds
+baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/f$releasever
+	https://mirror.uta.edu.ec/linux-libre/freed-ora/f$releasever
+	https://mirror.cedia.org.ec/linux-libre/freed-ora/f$releasever
+	http://ftp.linux.org.tr/linux-libre/freed-ora/f$releasever
+	ftp://ftp.linuxliber.ro/freed-ora/f$releasever
+	https://mirror.linux.pizza/linux-libre/freed-ora/f$releasever
+	https://mirror.splentity.com/linux-libre/freed-ora/f$releasever
+enabled=1
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-freed-ora-linux-libre
+
+[freed-ora-debuginfo]
+name=Linux-libre Freed-ora $releasever - Released builds - Debug
+baseurl=https://linux-libre.fsfla.org/pub/linux-libre/freed-ora/debuginfo/f$releasever
+	https://mirror.cedia.org.ec/linux-libre/freed-ora/debuginfo/f$releasever
+	https://mirror.uta.edu.ec/linux-libre/freed-ora/debuginfo/f$releasever
+	https://mirror.linux.pizza/linux-libre/freed-ora/debuginfo/f$releasever
+	https://mirror.splentity.com/linux-libre/freed-ora/debuginfo/f$releasever
+enabled=0
+metadata_expire=7d
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-freed-ora-linux-libre
