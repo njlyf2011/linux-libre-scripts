@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -653,6 +653,8 @@ Patch334: drm-vc4-Fix-the-no-scaling-case-on-multi-planar-YUV-formats.patch
 Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
 Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
 
+Patch399: arm-fix-bpf-jit.patch
+
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
@@ -690,6 +692,9 @@ Patch528: 0008-console-dummycon-export-dummycon_-un-register_output.patch
 # Deferred fbcon takeover bugfix, pending upstream
 Patch529: 0009-fbcon-Only-defer-console-takeover-if-the-current-con.patch
 Patch530: 0010-fbcon-Do-not-takeover-the-console-from-atomic-contex.patch
+
+# CVE-2018-15471 rhbz 1610555 1618414
+Patch531: xsa270.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1290,10 +1295,10 @@ cd ..
 # End of Configs stuff
 
 # get rid of unwanted files resulting from patch fuzz
-find . \( -name "*.orig" -o -name "*~" \) -exec rm -f {} \; >/dev/null
+find . \( -name "*.orig" -o -name "*~" \) -delete >/dev/null
 
 # remove unnecessary SCM files
-find . -name .gitignore -exec rm -f {} \; >/dev/null
+find . -name .gitignore -delete >/dev/null
 
 cd ..
 
@@ -2009,6 +2014,18 @@ fi
 #
 #
 %changelog
+* Mon Aug 20 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.3-gnu.
+
+* Mon Aug 20 2018 Laura Abbott <labbott@redhat.com> - 4.18.3-300
+- Linux v4.18.3
+
+* Mon Aug 20 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-15471 (rhbz 1610555 1618414)
+
+* Fri Aug 17 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add fix and re-enable BPF JIT on ARMv7
+
 * Thu Aug 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.1-gnu.
 
