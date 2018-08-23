@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -637,6 +637,11 @@ Patch310: arm-dts-armada388-helios4.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg670137.html
 Patch311: arm64-ZynqMP-firmware-clock-drivers-core.patch
+
+# https://www.spinics.net/lists/linux-usb/msg171314.html
+Patch312: usb-dwc2-Turn-on-uframe-sched-everywhere.patch
+
+Patch313: arm64-dts-marvell-a3700-reserve-ATF-memory.patch
 
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
@@ -2014,6 +2019,16 @@ fi
 #
 #
 %changelog
+* Wed Aug 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.4-gnu.
+
+* Wed Aug 22 2018 Laura Abbott <labbott@redhat.com> - 4.18.4-300
+- Linux v4.18.4
+
+* Wed Aug 22 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Re-add mvebu a3700 ATF memory exclusion
+- Upstream fix for dwc2 on some ARM platforms
+
 * Mon Aug 20 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.3-gnu.
 
