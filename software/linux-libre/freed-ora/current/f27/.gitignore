@@ -7,3 +7,5 @@ clog
 *.sign
 kernel-[234].*/
 perf-man-*.tar.gz
+kernel-tools/
+kernel-headers/
