@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 18
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2022,6 +2022,12 @@ fi
 #
 #
 %changelog
+* Wed Aug 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.17.18-gnu.
+
+* Wed Aug 22 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.17.18-200
+- Linux v4.17.18
+
 * Mon Aug 20 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.17.17-gnu.
 
