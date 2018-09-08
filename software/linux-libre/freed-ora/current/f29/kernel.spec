@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -657,8 +657,6 @@ Patch334: drm-vc4-Fix-the-no-scaling-case-on-multi-planar-YUV-formats.patch
 # https://patchwork.kernel.org/patch/10392891/
 Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
 Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
-
-Patch399: arm-fix-bpf-jit.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -2019,6 +2017,12 @@ fi
 #
 #
 %changelog
+* Fri Sep  7 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.6-gnu.
+
+* Wed Sep 05 2018 Laura Abbott <labbott@redhat.com> - 4.18.6-300
+- Linux v4.18.6
+
 * Fri Aug 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.5-gnu.
 
