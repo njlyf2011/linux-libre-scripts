@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -643,17 +643,11 @@ Patch308: mmc-sunxi-allow-3.3V-DDR-when-DDR-is-available.patch
 # https://patchwork.kernel.org/patch/10540521/
 Patch309: mmc-sunxi-remove-output-of-virtual-base-address.patch
 
-Patch310: arm-dts-armada388-helios4.patch
-
 # https://www.spinics.net/lists/arm-kernel/msg670137.html
 Patch311: arm64-ZynqMP-firmware-clock-drivers-core.patch
 
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
-
-Patch331: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
-
-Patch332: bcm2835-hwmon-Add-support-for-RPi-voltage-sensor.patch
 
 # https://patchwork.freedesktop.org/patch/240917/
 Patch334: drm-vc4-Fix-the-no-scaling-case-on-multi-planar-YUV-formats.patch
@@ -1987,10 +1981,16 @@ fi
 #
 #
 %changelog
+* Sun Sep  9 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.6-gnu.
+
+* Sun Sep 09 2018 Laura Abbott <labbott@redhat.com> - 4.18.6-200
+- Linux v4.18.6
+
 * Wed Sep  5 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.5-gnu.
 
-* Fri Aug 24 2018 Laura Abbott <labbott@redhat.com> - 4.18.5-300
+* Fri Aug 24 2018 Laura Abbott <labbott@redhat.com> - 4.18.5-200
 - Linux v4.18.5
 
 * Fri Aug 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
