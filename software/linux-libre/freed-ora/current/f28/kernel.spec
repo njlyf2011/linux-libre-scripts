@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -669,6 +669,13 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # CVE-2018-15471 rhbz 1610555 1618414
 Patch504: xsa270.patch
+
+# rhbz 1627963 1628715
+Patch505: HID-fixes.patch
+
+# rhbz 1572944
+Patch506: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
+Patch507: 0001-random-make-CPU-trust-a-boot-parameter.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1978,6 +1985,21 @@ fi
 #
 #
 %changelog
+* Sun Sep 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.8-gnu.
+
+* Sun Sep 16 2018 Laura Abbott <labbott@redhat.com> - 4.18.8-300
+- Linux v4.18.8
+
+* Fri Sep 14 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Additional Fixes for CVE-2018-5391 (rhbz 1616059)
+
+* Thu Sep 13 2018 Laura Abbott <labbott@redhat.com>
+- Use the CPU RNG for entropy (rhbz 1572944)
+
+* Thu Sep 13 2018 Laura Abbott <labbott@redhat.com>
+- HID fixes (rhbz 1627963 1628715)
+
 * Mon Sep 10 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.7-gnu.
 
