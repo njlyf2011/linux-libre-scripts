@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -607,6 +607,10 @@ Patch211: drm-i915-hush-check-crtc-state.patch
 Patch212: efi-secureboot.patch
 Patch213: lockdown-fix-coordination-of-kernel-module-signature-verification.patch
 
+# Fix printing of "EFI stub: UEFI Secure Boot is enabled.",
+# queued upstream in efi.git/next
+Patch214: efi-x86-call-parse-options-from-efi-main.patch
+
 # 300 - ARM patches
 Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
@@ -642,6 +646,13 @@ Patch311: arm64-ZynqMP-firmware-clock-drivers-core.patch
 Patch312: usb-dwc2-Turn-on-uframe-sched-everywhere.patch
 
 Patch313: arm64-dts-marvell-a3700-reserve-ATF-memory.patch
+
+#Patch315: arm64-96boards-RK3399-Ficus-board.patch
+#Patch316: arm64-96boards-Rock960-CE-board-support.patch
+
+Patch317: arm64-drm-msm-fix-missing-CTL-flush.patch
+
+Patch318: gpio-pxa-handle-corner-case-of-unprobed-device.patch
 
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
@@ -695,6 +706,16 @@ Patch530: 0010-fbcon-Do-not-takeover-the-console-from-atomic-contex.patch
 
 # CVE-2018-15471 rhbz 1610555 1618414
 Patch531: xsa270.patch
+
+# rhbz 1627963 1628715
+Patch532: HID-fixes.patch
+
+# rhbz 1572944
+Patch533: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
+Patch534: 0001-random-make-CPU-trust-a-boot-parameter.patch
+
+# Additional Fixes for CVE-2018-5391
+# Patch535: CVE-2018-5391-additional.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2014,6 +2035,27 @@ fi
 #
 #
 %changelog
+* Sun Sep 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.8-gnu.
+
+* Sun Sep 16 2018 Laura Abbott <labbott@redhat.com> - 4.18.8-300
+- Linux v4.18.8
+
+* Fri Sep 14 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Additional Fixes for CVE-2018-5391 (rhbz 1616059)
+
+* Thu Sep 13 2018 Laura Abbott <labbott@redhat.com>
+- Use the CPU RNG for entropy (rhbz 1572944)
+
+* Thu Sep 13 2018 Laura Abbott <labbott@redhat.com>
+- HID fixes (rhbz 1627963 1628715)
+
+* Thu Sep 13 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patch silencing "EFI stub: UEFI Secure Boot is enabled." at boot
+
+* Mon Sep 10 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add 96boards rk3399 Ficus and Rock960 support
+
 * Mon Sep 10 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.7-gnu.
 
