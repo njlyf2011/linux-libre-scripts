@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-09-16 06:33:58.147891006 -0400
-@@ -0,0 +1,5853 @@
++++ .config	2018-09-20 23:30:21.366241938 -0400
+@@ -0,0 +1,5852 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.14.70-gnu Kernel Configuration
++# Linux/mips 4.14.71-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -1320,7 +1320,6 @@ Index: .config
 +CONFIG_BT_HCIUART_H4=y
 +CONFIG_BT_HCIUART_BCSP=y
 +CONFIG_BT_HCIUART_ATH3K=y
-+CONFIG_BT_HCIUART_3WIRE=y
 +CONFIG_BT_HCIUART_INTEL=y
 +CONFIG_BT_HCIUART_QCA=y
 +CONFIG_BT_HCIUART_AG6XX=y
