@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.18%{?stablegnux}
+%define stablelibre -4.18%{?stablegnux}
 #define rcrevlibre  -4.18%{?rcrevgnux}
 #define gitrevlibre -4.18%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -669,9 +669,6 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # CVE-2018-15471 rhbz 1610555 1618414
 Patch504: xsa270.patch
-
-# rhbz 1627963 1628715
-Patch505: HID-fixes.patch
 
 # rhbz 1572944
 Patch506: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
@@ -1985,10 +1982,16 @@ fi
 #
 #
 %changelog
+* Thu Sep 20 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.9-gnu.
+
+* Thu Sep 20 2018 Laura Abbott <labbott@redhat.com> - 4.18.9-200
+- Linux v4.18.9
+
 * Sun Sep 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.8-gnu.
 
-* Sun Sep 16 2018 Laura Abbott <labbott@redhat.com> - 4.18.8-300
+* Sun Sep 16 2018 Laura Abbott <labbott@redhat.com> - 4.18.8-200
 - Linux v4.18.8
 
 * Fri Sep 14 2018 Justin M. Forbes <jforbes@fedoraproject.org>
