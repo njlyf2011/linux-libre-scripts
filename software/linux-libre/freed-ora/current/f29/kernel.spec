@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -630,8 +630,6 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-Patch307: arm-tegra-fix-nouveau-crash.patch
-
 # https://patchwork.kernel.org/patch/10539291/
 Patch308: mmc-sunxi-allow-3.3V-DDR-when-DDR-is-available.patch
 # https://patchwork.kernel.org/patch/10540521/
@@ -647,8 +645,8 @@ Patch312: usb-dwc2-Turn-on-uframe-sched-everywhere.patch
 
 Patch313: arm64-dts-marvell-a3700-reserve-ATF-memory.patch
 
-#Patch315: arm64-96boards-RK3399-Ficus-board.patch
-#Patch316: arm64-96boards-Rock960-CE-board-support.patch
+Patch315: arm64-96boards-RK3399-Ficus-board.patch
+Patch316: arm64-96boards-Rock960-CE-board-support.patch
 
 Patch317: arm64-drm-msm-fix-missing-CTL-flush.patch
 
@@ -711,8 +709,11 @@ Patch531: xsa270.patch
 Patch533: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
 Patch534: 0001-random-make-CPU-trust-a-boot-parameter.patch
 
-# Additional Fixes for CVE-2018-5391
-# Patch535: CVE-2018-5391-additional.patch
+# CVE-2018-14633 rhbz 1626035 1632185
+Patch535: CVE-2018-14633.patch
+
+# rhbz 1628394
+Patch536: powerpc-ipv6.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2032,11 +2033,24 @@ fi
 #
 #
 %changelog
+* Thu Sep 27 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.10-gnu.
+
+* Wed Sep 26 2018 Laura Abbott <labbott@redhat.com> - 4.18.10-300
+- Linux v4.18.10
+
+* Wed Sep 26 2018 Laura Abbott <labbott@redhat.com>
+- Fix powerpc IPv6 (rhbz 1628394)
+
+* Mon Sep 24 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2018-14633 (rhbz 1626035 1632185)
+
 * Thu Sep 20 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.9-gnu.
 
 * Thu Sep 20 2018 Laura Abbott <labbott@redhat.com> - 4.18.9-300
 - Linux v4.18.9
+- Fixes CVE-2018-17182 (rhbz 1631205 1631206)
 
 * Sun Sep 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.8-gnu.
