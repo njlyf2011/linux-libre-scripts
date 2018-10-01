@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -647,10 +647,11 @@ Patch313: arm64-dts-marvell-a3700-reserve-ATF-memory.patch
 
 Patch315: arm64-96boards-RK3399-Ficus-board.patch
 Patch316: arm64-96boards-Rock960-CE-board-support.patch
+Patch317: arm64-rockchip-add-initial-Rockpro64.patch
 
-Patch317: arm64-drm-msm-fix-missing-CTL-flush.patch
+Patch318: arm64-drm-msm-fix-missing-CTL-flush.patch
 
-Patch318: gpio-pxa-handle-corner-case-of-unprobed-device.patch
+Patch319: gpio-pxa-handle-corner-case-of-unprobed-device.patch
 
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
@@ -659,13 +660,11 @@ Patch331: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 Patch332: bcm2835-hwmon-Add-support-for-RPi-voltage-sensor.patch
 
-# https://patchwork.freedesktop.org/patch/240917/
-Patch334: drm-vc4-Fix-the-no-scaling-case-on-multi-planar-YUV-formats.patch
-
 # Fix for AllWinner A64 Timer Errata, still not final
 # https://patchwork.kernel.org/patch/10392891/
 Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
 Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
+Patch352: arm64-allwinner-fixes.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -708,9 +707,6 @@ Patch531: xsa270.patch
 # rhbz 1572944
 Patch533: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
 Patch534: 0001-random-make-CPU-trust-a-boot-parameter.patch
-
-# CVE-2018-14633 rhbz 1626035 1632185
-Patch535: CVE-2018-14633.patch
 
 # rhbz 1628394
 Patch536: powerpc-ipv6.patch
@@ -2033,7 +2029,18 @@ fi
 #
 #
 %changelog
-* Thu Sep 27 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sun Sep 30 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.11-gnu.
+
+* Sun Sep 30 2018 Laura Abbott <labbott@redhat.com> - 4.18.11-300
+- Linux v4.18.11
+
+* Wed Sep 26 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add thermal trip to bcm283x (Raspberry Pi) cpufreq
+- Add initial RockPro64 DT support
+- Add Pine64-LTS support and some other AllWinner-A64 fixes
+
+* Wed Sep 26 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Sep 27
 - GNU Linux-libre 4.18.10-gnu.
 
 * Wed Sep 26 2018 Laura Abbott <labbott@redhat.com> - 4.18.10-300
