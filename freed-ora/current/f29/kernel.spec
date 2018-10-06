@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -672,6 +672,12 @@ Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
 Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
 Patch352: arm64-allwinner-fixes.patch
 
+# Patch series is in 4.19, needed for Ampere eMAG platform
+# first patch fixes a bug in OF/DT seen on some devices with series
+# http://git.infradead.org/users/hch/dma-mapping.git/commitdiff/a5516219b10218a87abb3352c82248ce3088e94a
+# https://www.spinics.net/lists/linux-acpi/msg83312.html
+Patch360: dma-stop-losing-firmware-set-dma-masks.patch
+
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
@@ -714,8 +720,8 @@ Patch531: xsa270.patch
 Patch533: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
 Patch534: 0001-random-make-CPU-trust-a-boot-parameter.patch
 
-# rhbz 1628394
-Patch536: powerpc-ipv6.patch
+# rhbz 1634250
+Patch537: HID-intel-ish-hid-Enable-Sunrise-Point-H-ish-driver.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2035,7 +2041,25 @@ fi
 #
 #
 %changelog
-* Thu Oct  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Oct  5 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.12-gnu.
+
+* Thu Oct 04 2018 Laura Abbott <labbott@redhat.com> - 4.18.12-300
+- Linux v4.18.12
+
+* Wed Oct  3 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes for Ampere platforms
+
+* Wed Oct 03 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix arm64 kvm priv escalation (rhbz 1635475 1635476)
+
+* Mon Oct 01 2018 Laura Abbott <labbott@redhat.com>
+- Disable CONFIG_CRYPTO_DEV_SP_PSP (rhbz 1608242)
+
+* Mon Oct  1 2018 Laura Abbott <labbott@redhat.com>
+- Fix for Intel Sensor Hub (rhbz 1634250)
+
+* Mon Oct  1 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Oct  4
 - Adjusted 0002-brcmfmac-Remove-recursion-from-firmware-load-error-h.patch.
 - Adjusted 0003-brcmfmac-Add-support-for-first-trying-to-get-a-board.patch.
 
