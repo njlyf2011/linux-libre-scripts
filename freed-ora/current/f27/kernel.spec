@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -669,9 +669,6 @@ Patch504: xsa270.patch
 # rhbz 1572944
 Patch506: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
 Patch507: 0001-random-make-CPU-trust-a-boot-parameter.patch
-
-# rhbz 1634250
-Patch510: HID-intel-ish-hid-Enable-Sunrise-Point-H-ish-driver.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1981,6 +1978,15 @@ fi
 #
 #
 %changelog
+* Thu Oct 11 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.13-gnu.
+
+* Wed Oct 10 2018 Laura Abbott <labbott@redhat.com> - 4.18.13-300
+- Linux v4.18.13
+
+* Mon Oct 08 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Revert drm/amd/pp: Send khz clock values to DC for smu7/8 (rhbz 1636249)
+
 * Thu Oct  4 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.12-gnu.
 
