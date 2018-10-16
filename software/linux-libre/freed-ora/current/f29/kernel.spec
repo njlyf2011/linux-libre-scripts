@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -661,10 +661,8 @@ Patch331: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 Patch332: bcm2835-hwmon-Add-support-for-RPi-voltage-sensor.patch
 
 # Patches enabling device specific brcm firmware nvram
-Patch340: 0001-brcmfmac-Remove-firmware-loading-code-duplication.patch
-Patch341: 0002-brcmfmac-Remove-recursion-from-firmware-load-error-h.patch
-Patch342: 0003-brcmfmac-Add-support-for-first-trying-to-get-a-board.patch
-Patch343: 0004-brcmfmac-Set-board_type-used-for-nvram-file-selectio.patch
+# https://www.spinics.net/lists/linux-wireless/msg178827.html
+Patch340: brcmfmac-Remove-firmware-loading-code-duplication.patch
 
 # Fix for AllWinner A64 Timer Errata, still not final
 # https://patchwork.kernel.org/patch/10392891/
@@ -713,12 +711,12 @@ Patch528: 0008-console-dummycon-export-dummycon_-un-register_output.patch
 Patch529: 0009-fbcon-Only-defer-console-takeover-if-the-current-con.patch
 Patch530: 0010-fbcon-Do-not-takeover-the-console-from-atomic-contex.patch
 
-# CVE-2018-15471 rhbz 1610555 1618414
-Patch531: xsa270.patch
-
 # rhbz 1572944
 Patch533: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
 Patch534: 0001-random-make-CPU-trust-a-boot-parameter.patch
+
+# rhbz 1249364, patch accepted upstream and CCed for stable
+Patch535: ALSA-hda-Add-mic-quirk-for-the-Lenovo-G50-30-17aa-39.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1427,7 +1425,7 @@ BuildKernel() {
 %ifarch %{arm} aarch64
     %{make} %{?make_opts} ARCH=$Arch dtbs dtbs_install INSTALL_DTBS_PATH=$RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer
     cp -r $RPM_BUILD_ROOT/%{image_install_path}/dtb-$KernelVer $RPM_BUILD_ROOT/lib/modules/$KernelVer/dtb
-    find arch/$Arch/boot/dts -name '*.dtb' -type f | xargs rm -f
+    find arch/$Arch/boot/dts -name '*.dtb' -type f -delete
 %endif
 
     # Start installing the results
@@ -1708,7 +1706,7 @@ BuildKernel() {
     ln -sf $DevelDir $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
 
     # prune junk from kernel-devel
-    find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -exec rm -f {} \;
+    find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -delete
 
     # build a BLS config for this kernel
     %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
@@ -1818,7 +1816,7 @@ make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr headers_install
 
 find $RPM_BUILD_ROOT/usr/include \
      \( -name .install -o -name .check -o \
-        -name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+        -name ..install.cmd -o -name ..check.cmd \) -delete
 
 %endif
 
@@ -1828,7 +1826,7 @@ make ARCH=%{hdrarch} INSTALL_HDR_PATH=$RPM_BUILD_ROOT/usr/tmp-headers headers_in
 
 find $RPM_BUILD_ROOT/usr/tmp-headers/include \
      \( -name .install -o -name .check -o \
-        -name ..install.cmd -o -name ..check.cmd \) | xargs rm -f
+        -name ..install.cmd -o -name ..check.cmd \) -delete
 
 # Copy all the architectures we care about to their respective asm directories
 for arch in arm arm64 powerpc s390 x86 ; do
@@ -2038,6 +2036,19 @@ fi
 #
 #
 %changelog
+* Mon Oct 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.14-gnu.
+- Adjusted brcmfmac-Remove-firmware-loading-code-duplication.patch.
+
+* Mon Oct 15 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.18.14-300
+- Linux v4.18.14
+
+* Fri Oct 12 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Rebase device specific NVRAM files on brcm WiFi devices to latest
+
+* Fri Oct 12 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix the microphone on Lenovo G50-30s (rhbz 1249364)
+
 * Thu Oct 11 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.13-gnu.
 
