@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -653,12 +653,16 @@ Patch318: arm64-drm-msm-fix-missing-CTL-flush.patch
 
 Patch319: gpio-pxa-handle-corner-case-of-unprobed-device.patch
 
+Patch320: hikey-mmc-softdeps.patch
+
 # Enabling Patches for the RPi3+
 Patch330: bcm2837-enable-pmu.patch
 
 Patch331: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 Patch332: bcm2835-hwmon-Add-support-for-RPi-voltage-sensor.patch
+
+Patch334: bcm283x-drm-vc4-set-is_yuv-to-false-when-num_planes-1.patch
 
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
@@ -2036,6 +2040,19 @@ fi
 #
 #
 %changelog
+* Thu Oct 18 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.15-gnu.
+
+* Thu Oct 18 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.18.15-300
+- Linux v4.18.15
+
+* Thu Oct 18 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Add patch to fix mSD on 96boards Hikey
+
+* Tue Oct 16 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes to Rock960 series of devices, improves stability considerably
+- Raspberry Pi graphics fix
+
 * Mon Oct 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.14-gnu.
 - Adjusted brcmfmac-Remove-firmware-loading-code-duplication.patch.
