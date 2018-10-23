@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 18
+%define base_sublevel 19
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -466,7 +466,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -640,6 +640,8 @@ Patch309: arm64-rockchip-add-initial-Rockpro64.patch
 Patch310: gpio-pxa-handle-corner-case-of-unprobed-device.patch
 
 Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
+
+Patch331: bcm283x-drm-vc4-set-is_yuv-to-false-when-num_planes-1.patch
 
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
@@ -1990,6 +1992,34 @@ fi
 #
 #
 %changelog
+* Mon Oct 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19-gnu.
+
+* Mon Oct 22 2018 Jeremy Cline <jcline@redhat.com> - 4.19.0-1
+- Linux v4.19
+- Disable debugging options.
+
+* Sat Oct 20 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix network on some i.MX6 devices (rhbz 1628209)
+
+* Fri Oct 19 2018 Jeremy Cline <jcline@redhat.com> - 4.19.0-0.rc8.git4.1
+- Linux v4.19-rc8-95-g91b15613ce7f
+- Enable pinctrl-cannonlake (rhbz 1641057)
+
+* Thu Oct 18 2018 Jeremy Cline <jcline@redhat.com> - 4.19.0-0.rc8.git3.1
+- Linux v4.19-rc8-27-gfa520c47eaa1
+
+* Wed Oct 17 2018 Jeremy Cline <jcline@redhat.com> - 4.19.0-0.rc8.git2.1
+- Linux v4.19-rc8-16-gc343db455eb3
+
+* Tue Oct 16 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes to Rock960 series of devices, improves stability considerably
+- Raspberry Pi graphics fix
+
+* Tue Oct 16 2018 Jeremy Cline <jcline@redhat.com> - 4.19.0-0.rc8.git1.1
+- Linux v4.19-rc8-11-gb955a910d7fd
+- Re-enable debugging options.
+
 * Mon Oct 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19-rc8-gnu.
 - Adjusted brcmfmac-Remove-firmware-loading-code-duplication.patch.
