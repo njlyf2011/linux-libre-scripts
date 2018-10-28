@@ -1,0 +1,70 @@
+Our binutils somehow ended up with a -mfix-gs2f-kernel, rather than
+-mfix-ls2f-kernel.  Cope with it.
+Also, the old ld can't cope with thin archives very well: it fails
+to create vmlinux.o.  So, disable thin archives.
+
+Index: arch/mips/loongson64/Platform
+===================================================================
+--- arch/mips/loongson64/Platform.orig	2018-05-28 17:30:53.585710988 -0400
++++ arch/mips/loongson64/Platform	2018-05-28 17:30:54.057035733 -0400
+@@ -10,6 +10,12 @@
+ 	$(call cc-option,-march=loongson2f,-march=r4600)
+ # Enable the workarounds for Loongson2f
+ ifdef CONFIG_CPU_LOONGSON2F_WORKAROUNDS
++ ifneq ($(call as-option,-Wa$(comma)-mfix-gs2f-kernel,),)
++   cflags-$(CONFIG_CPU_NOP_WORKAROUNDS) += -Wa$(comma)-mfix-gs2f-kernel
++   ifneq ($(CONFIG_CPU_NOP_WORKAROUNDS),$(CONFIG_CPU_JUMP_WORKAROUNDS))
++     cflags-$(CONFIG_CPU_JUMP_WORKAROUNDS) += -Wa$(comma)-mfix-gs2f-kernel
++   endif
++ else
+   ifeq ($(call as-option,-Wa$(comma)-mfix-loongson2f-nop,),)
+     $(error only binutils >= 2.20.2 have needed option -mfix-loongson2f-nop)
+   else
+@@ -20,6 +26,7 @@
+   else
+     cflags-$(CONFIG_CPU_JUMP_WORKAROUNDS) += -Wa$(comma)-mfix-loongson2f-jump
+   endif
++ endif
+ endif
+ 
+ cflags-$(CONFIG_CPU_LOONGSON3)	+= -Wa,--trap
+Index: scripts/link-vmlinux.sh
+===================================================================
+--- scripts/link-vmlinux.sh.orig	2018-05-29 15:14:15.802690023 -0400
++++ scripts/link-vmlinux.sh	2018-05-29 15:30:49.624522990 -0400
+@@ -70,10 +70,8 @@
+ 
+ 	objects="--whole-archive				\
+ 		built-in.a					\
+-		--no-whole-archive				\
+-		--start-group					\
+ 		${KBUILD_VMLINUX_LIBS}				\
+-		--end-group"
++		--no-whole-archive"
+ 
+ 	${LD} ${LDFLAGS} -r -o ${1} ${objects}
+ }
+@@ -89,10 +87,8 @@
+ 	if [ "${SRCARCH}" != "um" ]; then
+ 		objects="--whole-archive			\
+ 			built-in.a				\
+-			--no-whole-archive			\
+-			--start-group				\
+ 			${KBUILD_VMLINUX_LIBS}			\
+-			--end-group				\
++			--no-whole-archive			\
+ 			${1}"
+ 
+ 		${LD} ${LDFLAGS} ${LDFLAGS_vmlinux} -o ${2}	\
+@@ -100,10 +96,8 @@
+ 	else
+ 		objects="-Wl,--whole-archive			\
+ 			built-in.a				\
+-			-Wl,--no-whole-archive			\
+-			-Wl,--start-group			\
+ 			${KBUILD_VMLINUX_LIBS}			\
+-			-Wl,--end-group				\
++			-Wl,--no-whole-archive			\
+ 			${1}"
+ 
+ 		${CC} ${CFLAGS_vmlinux} -o ${2}			\
