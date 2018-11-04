@@ -1,5 +1,5 @@
 Name:           freed-ora
-Version:        13
+Version:        14
 Release:        1
 
 Summary:        Linux-libre Freed-ora packages
@@ -164,9 +164,8 @@ We cannot conflict with the kernel packages because the corresponding
 kernel-libre packages must provide the same names to satisfy other
 system-wide dependencies.  Unfortunately, this means it is up to you
 to verify that you have none of kernel, kernel-core, kernel-modules*,
-kernel-doc, kernel-headers, kernel-devel, kernel-firmware,
-kernel-cross-headers, and their -PAE, -debug, etc variants
-or their debuginfo.
+kernel-doc, kernel-devel, kernel-firmware, and their -PAE, -debug, etc
+variants or their debuginfo.
 
 Once you do that, you may want to
 exclude=kernel*,*-firmware,*-ucode,microcode_ctl from Fedora
@@ -181,6 +180,8 @@ of the kernel ones: these will only get warnings from triggers.
 if rpm -qa kernel kernel-\* |
    sed '
 /-libre-/d;
+/^kernel-cross-headers-/d;
+/^kernel-headers-/d;
 /^kernel-tools-/d;
 s,.*,Error: & conflicts with freed-ora-freedom,' |
    grep . >&2; then
@@ -200,6 +201,9 @@ echo Error: newly-installed package conflicts with freed-ora-freedom >&2
 exit 1
 
 %changelog
+* Sun Nov 05 2018 Alexandre Oliva <lxoliva@fsfla.org> - 14-1
+- Actually adjust pre script checks to ignore headers packages.
+
 * Wed Aug 15 2018 Alexandre Oliva <lxoliva@fsfla.org> - 13-1
 - Adjust pre conflicts to ignore kernel-headers and kernel-cross-headers.
 - Update mirrors.
