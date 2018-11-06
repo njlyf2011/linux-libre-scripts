@@ -1,15 +1,15 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-10-26 18:10:47.081514421 -0400
-@@ -0,0 +1,5816 @@
++++ .config	2018-11-05 07:33:47.544944966 -0500
+@@ -0,0 +1,5817 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.18.16-gnu Kernel Configuration
++# Linux/mips 4.18.17-gnu Kernel Configuration
 +#
 +
 +#
-+# Compiler: gcc (Debian 4.4.5-8) 4.4.5
++# Compiler: gcc (gNewSense 4.6.3-14gnewsense1) 4.6.3
 +#
 +CONFIG_MIPS=y
 +
@@ -173,7 +173,7 @@ Index: .config
 +CONFIG_HAVE_LATENCYTOP_SUPPORT=y
 +CONFIG_PGTABLE_LEVELS=3
 +CONFIG_CC_IS_GCC=y
-+CONFIG_GCC_VERSION=40405
++CONFIG_GCC_VERSION=40603
 +CONFIG_CLANG_VERSION=0
 +CONFIG_IRQ_WORK=y
 +CONFIG_BUILDTIME_EXTABLE_SORT=y
@@ -375,6 +375,7 @@ Index: .config
 +CONFIG_PLUGIN_HOSTCC=""
 +CONFIG_HAVE_STACKPROTECTOR=y
 +CONFIG_CC_HAS_STACKPROTECTOR_NONE=y
++CONFIG_STACKPROTECTOR=y
 +CONFIG_HAVE_CONTEXT_TRACKING=y
 +CONFIG_HAVE_VIRT_CPU_ACCOUNTING_GEN=y
 +CONFIG_HAVE_IRQ_TIME_ACCOUNTING=y
