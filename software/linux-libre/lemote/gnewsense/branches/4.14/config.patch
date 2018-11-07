@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-10-27 23:59:04.684850359 -0400
-@@ -0,0 +1,5852 @@
++++ .config	2018-11-06 02:01:02.129094556 -0500
+@@ -0,0 +1,5853 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.14.78-gnu Kernel Configuration
++# Linux/mips 4.14.79-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -416,6 +416,7 @@ Index: .config
 +# CONFIG_ARCH_HAS_STRICT_KERNEL_RWX is not set
 +# CONFIG_ARCH_HAS_STRICT_MODULE_RWX is not set
 +# CONFIG_REFCOUNT_FULL is not set
++CONFIG_HAVE_ARCH_COMPILER_H=y
 +
 +#
 +# GCOV-based kernel profiling
