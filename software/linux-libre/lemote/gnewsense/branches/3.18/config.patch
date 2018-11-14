@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-10-16 11:25:47.795054852 -0400
-@@ -0,0 +1,5115 @@
++++ .config	2018-11-13 12:32:34.783647580 -0500
+@@ -0,0 +1,5112 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.18.124-gnu Kernel Configuration
++# Linux/mips 3.18.125-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -3929,10 +3929,7 @@ Index: .config
 +# CONFIG_USBIP_DEBUG is not set
 +CONFIG_USB_MUSB_HDRC=m
 +CONFIG_USB_MUSB_HOST=y
-+CONFIG_USB_MUSB_TUSB6010=m
-+CONFIG_USB_MUSB_UX500=m
-+CONFIG_USB_UX500_DMA=y
-+# CONFIG_MUSB_PIO_ONLY is not set
++CONFIG_MUSB_PIO_ONLY=y
 +# CONFIG_USB_DWC3 is not set
 +# CONFIG_USB_DWC2 is not set
 +CONFIG_USB_CHIPIDEA=m
