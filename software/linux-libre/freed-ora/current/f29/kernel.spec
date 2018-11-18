@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -637,6 +637,12 @@ Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 Patch331: bcm283x-drm-vc4-set-is_yuv-to-false-when-num_planes-1.patch
 
+# https://patchwork.kernel.org/patch/10686407/
+Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
+
+# https://patchwork.kernel.org/patch/10677591/
+Patch333: hwmon-rpi-Fix-initial-notify.patch
+
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
 Patch340: brcmfmac-Remove-firmware-loading-code-duplication.patch
@@ -662,6 +668,12 @@ Patch505: CI-2-6-drm-i915-dp-Restrict-link-retrain-workaround-to-external-monito
 
 # CVE-2018-18710 rhbz 1645140 1648485
 Patch506: cdrom-fix-improper-type-cast-which-can-leat-to-information-leak.patch
+
+# rhbz 1526312, patch is in 4.20, can be dropped on rebase
+Patch507: 0001-HID-i2c-hid-override-HID-descriptors-for-certain-dev.patch
+
+# Patches from 4.20 fixing black screen on CHT devices with i915.fastboot=1
+Patch508: cherrytrail-pwm-lpss-fixes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1983,7 +1995,17 @@ fi
 #
 #
 %changelog
-* Fri Nov 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Sat Nov 17 2018 Peter Robinson <pbrobinson@fedoraproject.org> 4.19.2-301
+- Fix WiFi on Raspberry Pi 3 on aarch64 (rhbz 1649344)
+- Fixes for Raspberry Pi hwmon driver and firmware interface
+
+* Fri Nov 16 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patches from 4.20 fixing black screen on CHT devices with i915.fastboot=1
+
+* Thu Nov 15 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patch fixing touchpads on some Apollo Lake devices not working (#1526312)
+
+* Thu Nov 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Nov 16
 - GNU Linux-libre 4.19.2-gnu.
 
 * Wed Nov 14 2018 Jeremy Cline <jcline@redhat.com> - 4.19.2-300
