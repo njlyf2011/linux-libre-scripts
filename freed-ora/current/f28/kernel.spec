@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -635,17 +635,15 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg670137.html
-Patch307: arm64-ZynqMP-firmware-clock-drivers-core.patch
-
-Patch308: arm64-96boards-Rock960-CE-board-support.patch
-Patch309: arm64-rockchip-add-initial-Rockpro64.patch
-
 Patch310: gpio-pxa-handle-corner-case-of-unprobed-device.patch
 
-Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
-
 Patch331: bcm283x-drm-vc4-set-is_yuv-to-false-when-num_planes-1.patch
+
+# https://patchwork.kernel.org/patch/10686407/
+Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
+
+# https://patchwork.kernel.org/patch/10677591/
+Patch333: hwmon-rpi-Fix-initial-notify.patch
 
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
@@ -666,12 +664,14 @@ Patch501: Fix-for-module-sig-verification.patch
 # rhbz 1431375
 Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
-# Fix known regression
-Patch504: CI-1-6-drm-i915-dp-Fix-link-retraining-comment-in-intel_dp_long_pulse.patch
-Patch505: CI-2-6-drm-i915-dp-Restrict-link-retrain-workaround-to-external-monitors.patch
+# rhbz 1526312, patch is in 4.20, can be dropped on rebase
+Patch507: 0001-HID-i2c-hid-override-HID-descriptors-for-certain-dev.patch
 
-# CVE-2018-18710 rhbz 1645140 1648485
-Patch506: cdrom-fix-improper-type-cast-which-can-leat-to-information-leak.patch
+# rhbz 1644013, patch pending upstream
+Patch509: 0001-ACPI-platform-Add-SMB0001-HID-to-forbidden_id_list.patch
+
+# rhbz 1526312 (accelerometer part of the bug), patches pending upstream
+Patch510: iio-accel-kxcjk1013-Add-more-hardware-ids.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1983,7 +1983,25 @@ fi
 #
 #
 %changelog
-* Fri Nov 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Thu Nov 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19.3-gnu.
+
+* Wed Nov 21 2018 Jeremy Cline <jcline@redhat.com> - 4.19.3-300
+- Linux v4.19.3
+
+* Tue Nov 20 2018 Hans de Goede <hdegoede@redhat.com>
+- Turn on CONFIG_PINCTRL_GEMINILAKE on x86_64 (rhbz#1639155)
+- Add a patch fixing touchscreens on HP AMD based laptops (rhbz#1644013)
+- Add a patch fixing KIOX010A accelerometers (rhbz#1526312)
+
+* Sat Nov 17 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix WiFi on Raspberry Pi 3 on aarch64 (rhbz 1649344)
+- Fixes for Raspberry Pi hwmon driver and firmware interface
+
+* Thu Nov 15 2018 Hans de Goede <hdegoede@redhat.com>
+- Add patch fixing touchpads on some Apollo Lake devices not working (#1526312)
+
+* Thu Nov 15 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Nov 16
 - GNU Linux-libre 4.19.2-gnu.
 - Adjusted brcmfmac-Remove-firmware-loading-code-duplication.patch.
 
