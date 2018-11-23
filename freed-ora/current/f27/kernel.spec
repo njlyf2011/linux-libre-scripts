@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 19
+%define stable_update 20
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -666,13 +666,6 @@ Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 # rhbz 1572944
 Patch506: 0001-random-add-a-config-option-to-trust-the-CPU-s-hwrng.patch
 Patch507: 0001-random-make-CPU-trust-a-boot-parameter.patch
-
-# Fix known regression
-Patch509: CI-1-6-drm-i915-dp-Fix-link-retraining-comment-in-intel_dp_long_pulse.patch
-Patch510: CI-2-6-drm-i915-dp-Restrict-link-retrain-workaround-to-external-monitors.patch
-
-# CVE-2018-18710 rhbz 1645140 1648485
-Patch511: cdrom-fix-improper-type-cast-which-can-leat-to-information-leak.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1982,6 +1975,12 @@ fi
 #
 #
 %changelog
+* Thu Nov 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.18.20-gnu.
+
+* Wed Nov 21 2018 Jeremy Cline <jcline@redhat.com> - 4.18.20-100
+- Linux v4.18.20
+
 * Fri Nov 16 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.18.19-gnu.
 
