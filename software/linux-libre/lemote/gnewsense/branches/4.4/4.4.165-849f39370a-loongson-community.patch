@@ -1,20 +1,21 @@
 diff --git a/Makefile b/Makefile
-index ace4a655548a..4d3ba7251b86 100644
+index 441a760dc5a4..0126161e0397 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -303,8 +303,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+@@ -303,8 +303,9 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
  
  HOSTCC       = gcc
  HOSTCXX      = g++
--HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+-HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
 -HOSTCXXFLAGS = -O2
-+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu89
++
++HOSTCFLAGS   := -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu89
 +HOSTCXXFLAGS = -O3
  
- ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
- HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
-@@ -629,9 +629,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
- KBUILD_CFLAGS	+= -Os
+ # Decide whether to build built-in, modular, or both.
+ # Normally, just do built-in.
+@@ -642,9 +643,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
  else
  ifdef CONFIG_PROFILE_ALL_BRANCHES
 -KBUILD_CFLAGS	+= -O2
@@ -346,7 +347,7 @@ index b05bb70a2e46..44c9a69e1d9c 100644
  
  #include <asm/cpu.h>
 diff --git a/arch/mips/include/uapi/asm/inst.h b/arch/mips/include/uapi/asm/inst.h
-index 9b44d5a816fa..1bc08c69dd95 100644
+index 1b6f2f219298..a3b6dd9576b4 100644
 --- a/arch/mips/include/uapi/asm/inst.h
 +++ b/arch/mips/include/uapi/asm/inst.h
 @@ -65,6 +65,8 @@ enum spec_op {
@@ -2433,10 +2434,10 @@ index 000000000000..67cc0954a7e9
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index b316ab7e8996..5861e09ad658 100644
+index 00d8366a614e..afa63cb92081 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1048,6 +1048,9 @@
+@@ -1053,6 +1053,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -2474,7 +2475,7 @@ index 376f2dc410c5..b5768010204e 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index c646784c5a7d..0d26b254c17b 100644
+index fbec711c4195..b95e1ef44be4 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -58,7 +58,7 @@ struct sm501_gpio {
@@ -2486,7 +2487,7 @@ index c646784c5a7d..0d26b254c17b 100644
  
  struct sm501_devdata {
  	spinlock_t			 reg_lock;
-@@ -1124,6 +1124,22 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
+@@ -1125,6 +1125,22 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
  {
  	return sm->gpio.registered;
  }
@@ -2509,7 +2510,7 @@ index c646784c5a7d..0d26b254c17b 100644
  #else
  static inline int sm501_register_gpio(struct sm501_devdata *sm)
  {
-@@ -1143,7 +1159,13 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
+@@ -1144,7 +1160,13 @@ static inline int sm501_gpio_isregistered(struct sm501_devdata *sm)
  {
  	return 0;
  }
@@ -2524,7 +2525,7 @@ index c646784c5a7d..0d26b254c17b 100644
  
  static int sm501_register_gpio_i2c_instance(struct sm501_devdata *sm,
  					    struct sm501_platdata_gpio_i2c *iic)
-@@ -1198,6 +1220,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
+@@ -1199,6 +1221,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
  	return 0;
  }
  
@@ -2545,7 +2546,7 @@ index c646784c5a7d..0d26b254c17b 100644
  /* sm501_dbg_regs
   *
   * Debug attribute to attach to parent device to show core registers
-@@ -1356,6 +1392,8 @@ static int sm501_init_dev(struct sm501_devdata *sm)
+@@ -1357,6 +1393,8 @@ static int sm501_init_dev(struct sm501_devdata *sm)
  			sm501_register_uart(sm, idata->devices);
  		if (idata->devices & SM501_USE_GPIO)
  			sm501_register_gpio(sm);
@@ -2554,7 +2555,7 @@ index c646784c5a7d..0d26b254c17b 100644
  	}
  
  	if (pdata && pdata->gpio_i2c != NULL && pdata->gpio_i2c_nr > 0) {
-@@ -1542,10 +1580,15 @@ static struct sm501_initdata sm501_pci_initdata = {
+@@ -1543,10 +1581,15 @@ static struct sm501_initdata sm501_pci_initdata = {
  	.devices	= SM501_USE_ALL,
  
  	/* Errata AB-3 says that 72MHz is the fastest available
@@ -9355,7 +9356,7 @@ index 89e9494c3245..02000e9eaec4 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index d982c455e18e..28b200d04e8d 100644
+index 2b81939fecd7..426a13c03183 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -78,6 +78,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9368,7 +9369,7 @@ index d982c455e18e..28b200d04e8d 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -596,6 +599,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -598,6 +601,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  	  .driver_info = RSVD(4) },
