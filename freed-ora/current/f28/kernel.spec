@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.19%{?stablegnux}
+%define stablelibre -4.19%{?stablegnux}
 #define rcrevlibre  -4.19%{?rcrevgnux}
 #define gitrevlibre -4.19%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -678,6 +678,13 @@ Patch512: mm-cleancache-fix-corruption-on-missed-inode-invalidation.patch
 
 # CVE-2018-19407 (rhbz 1652656 1652658)
 Patch513: CVE-2018-19407.patch
+
+# rhbz 1650984, in linux-next and Cc'd for stable
+Patch514: net-phy-add-workaround-for-issue-where-PHY-driver-do.patch
+
+# In the PCI tree and Cc'd for stable, fixes an issue with amdgpu
+# https://patchwork.freedesktop.org/patch/259364/
+Patch515: PCI-Fix-incorrect-value-returned-from-pcie_get_speed.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1989,10 +1996,20 @@ fi
 #
 #
 %changelog
+* Mon Dec  3 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19.6-gnu.
+
+* Sun Dec 02 2018 Jeremy Cline <jcline@redhat.com> - 4.19.6-200
+- Linux v4.19.6
+
+* Thu Nov 29 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix a problem with some rtl8168 chips (rhbz 1650984)
+- Fix slowdowns and crashes for AMD GPUs in pre-PCIe-v3 slots
+
 * Tue Nov 27 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19.5-gnu.
 
-* Tue Nov 27 2018 Jeremy Cline <jcline@redhat.com> - 4.19.5-300
+* Tue Nov 27 2018 Jeremy Cline <jcline@redhat.com> - 4.19.5-200
 - Linux v4.19.5
 - Fix CVE-2018-16862 (rhbz 1649017 1653122)
 - Fix CVE-2018-19407 (rhbz 1652656 1652658)
