@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -670,9 +670,6 @@ Patch507: 0001-HID-i2c-hid-override-HID-descriptors-for-certain-dev.patch
 # rhbz 1526312 (accelerometer part of the bug), patches pending upstream
 Patch510: iio-accel-kxcjk1013-Add-more-hardware-ids.patch
 
-# rhbz 1650224, patch in subsystem tree and Cc'd for stable
-Patch511: drm-set-is_master-to-0-upon-drm_new_set_master-failure.patch
-
 # rhbz 1645070 patch queued upstream for merging into 4.21
 Patch516: asus-fx503-keyb.patch
 
@@ -681,9 +678,6 @@ Patch517: ALSA-hda-realtek-Fix-speaker-output-regression-on-Thinkpad.patch
 
 # CVE-2018-19824 rhbz 1655816 1655817
 Patch518: alsa-usb-audio-fix-UAF-decrement-if-card-has-no-live.patch
-
-# https://bugzilla.kernel.org/show_bug.cgi?id=201685
-Patch519: blk-mq-fix-corruption-with-direct-issue.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1995,10 +1989,16 @@ fi
 #
 #
 %changelog
+* Mon Dec 10 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19.8-gnu.
+
+* Mon Dec 10 2018 Jeremy Cline <jcline@redhat.com> - 4.19.8-200
+- Linux v4.19.8
+
 * Thu Dec  6 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19.7-gnu.
 
-* Wed Dec 05 2018 Jeremy Cline <jcline@redhat.com> - 4.19.7-300
+* Wed Dec 05 2018 Jeremy Cline <jcline@redhat.com> - 4.19.7-200
 - Linux v4.19.7
 - Fix CVE-2018-19406 (rhbz 1652650 1653346)
 
