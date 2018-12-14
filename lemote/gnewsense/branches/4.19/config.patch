@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2018-12-09 00:00:13.149628291 -0500
-@@ -0,0 +1,5898 @@
++++ .config	2018-12-13 16:04:59.776360667 -0500
+@@ -0,0 +1,5899 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.19.8-gnu Kernel Configuration
++# Linux/mips 4.19.9-gnu Kernel Configuration
 +#
 +
 +#
@@ -2615,6 +2615,7 @@ Index: .config
 +CONFIG_WLAN_VENDOR_MEDIATEK=y
 +CONFIG_MT7601U=m
 +CONFIG_MT76_CORE=m
++CONFIG_MT76_LEDS=y
 +CONFIG_MT76_USB=m
 +CONFIG_MT76x2_COMMON=m
 +CONFIG_MT76x0U=m
