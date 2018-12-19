@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.18%{?stablegnux}
-%define rcrevlibre  -4.18%{?rcrevgnux}
-#define gitrevlibre -4.18%{?gitrevgnux}
+#define stablelibre -4.19%{?stablegnux}
+%define rcrevlibre  -4.19%{?rcrevgnux}
+#define gitrevlibre -4.19%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -163,7 +163,7 @@ Summary: The Linux kernel
 %define debugbuildsenabled 1
 
 # Kernel headers are being split out into a separate package
-%if 0%{fedora}
+%if 0%{?fedora}
 %define with_headers 0
 %define with_cross_headers 0
 %endif
@@ -466,7 +466,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -507,10 +507,6 @@ Source43: generate_bls_conf.sh
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
 Source1000: kernel-local
-
-# Sources for kernel-libre-tools
-Source2000: cpupower.service
-Source2001: cpupower.config
 
 # Here should be only the patches up to the upstream canonical Linus tree.
 
@@ -608,10 +604,6 @@ Patch211: drm-i915-hush-check-crtc-state.patch
 
 Patch212: efi-secureboot.patch
 
-# Fix printing of "EFI stub: UEFI Secure Boot is enabled.",
-# queued upstream in efi.git/next
-Patch213: efi-x86-call-parse-options-from-efi-main.patch
-
 # 300 - ARM patches
 Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
@@ -631,17 +623,15 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-# https://www.spinics.net/lists/arm-kernel/msg670137.html
-Patch307: arm64-ZynqMP-firmware-clock-drivers-core.patch
-
-Patch308: arm64-96boards-Rock960-CE-board-support.patch
-Patch309: arm64-rockchip-add-initial-Rockpro64.patch
-
-Patch310: gpio-pxa-handle-corner-case-of-unprobed-device.patch
-
 Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 Patch331: bcm283x-drm-vc4-set-is_yuv-to-false-when-num_planes-1.patch
+
+# https://patchwork.kernel.org/patch/10686407/
+Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
+
+# Improve raspberry pi camera and analog audio
+Patch333: bcm2835-vc04_services-Improve-driver-load-unload.patch
 
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
@@ -661,6 +651,12 @@ Patch501: Fix-for-module-sig-verification.patch
 
 # rhbz 1431375
 Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+
+# rhbz 1526312 (accelerometer part of the bug), patches pending upstream
+Patch504: iio-accel-kxcjk1013-Add-more-hardware-ids.patch
+
+# rhbz 1645070 patch queued upstream for merging into 4.21
+Patch505: asus-fx503-keyb.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1530,6 +1526,7 @@ BuildKernel() {
     cp -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/boot/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/boot/ctype.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
+    cp -a --parents arch/x86/kernel/macros.s $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
@@ -1992,6 +1989,164 @@ fi
 #
 #
 %changelog
+* Mon Dec 17 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.20-rc7-gnu.
+
+* Mon Dec 17 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc7.git0.1
+- Linux v4.20-rc7
+
+* Mon Dec 17 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Dec 14 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enhancements for Raspberrp Pi Camera
+
+* Thu Dec 13 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc6.git2.1
+- Linux v4.20-rc6-82-g65e08c5e8631
+
+* Wed Dec 12 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc6.git1.2
+- Reenable debugging options.
+
+* Tue Dec 11 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc6.git1.1
+- Linux v4.20-rc6-25-gf5d582777bcb
+
+* Tue Dec 11 2018 Hans de Goede <hdegoede@redhat.com>
+- Really fix non functional hotkeys on Asus FX503VD (#1645070)
+
+* Mon Dec 10 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc6.git0.1
+- Linux v4.20-rc6
+
+* Mon Dec 10 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Dec 07 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc5.git3.1
+- Linux v4.20-rc5-86-gb72f711a4efa
+
+* Wed Dec 05 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc5.git2.1
+- Linux v4.20-rc5-44-gd08970904582
+
+* Wed Dec 05 2018 Jeremy Cline <jeremy@jcline.org>
+- Fix corruption bug in direct dispatch for blk-mq
+
+* Tue Dec 04 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc5.git1.1
+- Linux v4.20-rc5-21-g0072a0c14d5b
+- Reenable debugging options.
+
+* Mon Dec 03 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc5.git0.1
+- Linux v4.20-rc5
+
+* Mon Dec 03 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Mon Dec  3 2018 Hans de Goede <hdegoede@redhat.com>
+- Fix non functional hotkeys on Asus FX503VD (#1645070)
+
+* Fri Nov 30 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc4.git2.1
+- Linux v4.20-rc4-156-g94f371cb7394
+
+* Wed Nov 28 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc4.git1.1
+- Linux v4.20-rc4-35-g121b018f8c74
+- Reenable debugging options.
+
+* Mon Nov 26 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc4.git0.1
+- Linux v4.20-rc4
+- Disable debugging options.
+
+* Tue Nov 20 2018 Jeremy Cline <jcline@redhat.com> - 4.20.0-0.rc3.git1.1
+- Linux v4.20-rc3-83-g06e68fed3282
+
+* Tue Nov 20 2018 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Tue Nov 20 2018 Hans de Goede <hdegoede@redhat.com>
+- Turn on CONFIG_PINCTRL_GEMINILAKE on x86_64 (rhbz#1639155)
+- Add a patch fixing touchscreens on HP AMD based laptops (rhbz#1644013)
+- Add a patch fixing KIOX010A accelerometers (rhbz#1526312)
+
+* Mon Nov 19 2018 Jeremy Cline <jcline@redhat.com> - 4.20.0-0.rc3.git0.1
+- Linux v4.20-rc3
+
+* Mon Nov 19 2018 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Sat Nov 17 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix WiFi on Raspberry Pi 3 on aarch64 (rhbz 1649344)
+- Fixes for Raspberry Pi hwmon driver and firmware interface
+
+* Fri Nov 16 2018 Hans de Goede <hdegoede@redhat.com>
+- Enable a few modules needed for accelerometer and other sensor support
+  on some HP X2 2-in-1s
+
+* Thu Nov 15 2018 Justin M. Forbes <jforbes@redhat.com> - 4.20.0-0.rc2.git2.1
+- Linux v4.20-rc2-52-g5929a1f0ff30
+
+* Wed Nov 14 2018 Justin M. Forbes <jforbes@redhat.com> - 4.20.0-0.rc2.git1.1
+- Linux v4.20-rc2-37-g3472f66013d1
+- Reenable debugging options.
+
+* Mon Nov 12 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Further updates for ARM
+- More Qualcomm SD845 enablement
+- FPGA Device Feature List (DFL) support
+- Minor cleanups
+
+* Sun Nov 11 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc2.git0.1
+- Linux v4.20-rc2
+- Disable debugging options.
+
+* Fri Nov 09 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc1.git4.1
+- Linux v4.20-rc1-145-gaa4330e15c26
+
+* Thu Nov  8 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial Qualcomm SD845 enablement
+
+* Thu Nov 08 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc1.git3.1
+- Linux v4.20-rc1-98-gb00d209241ff
+
+* Wed Nov 07 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc1.git2.1
+- Linux v4.20-rc1-87-g85758777c2a2
+
+* Wed Nov  7 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial Arm config updates for 4.20
+
+* Tue Nov 06 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc1.git1.1
+- Linux v4.20-rc1-62-g8053e5b93eca
+- Reenable debugging options.
+
+* Mon Nov 05 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc1.git0.1
+- Linux v4.20-rc1
+
+* Mon Nov 05 2018 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Nov 02 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git9.1
+- Linux v4.19-12532-g8adcc59974b8
+
+* Thu Nov 01 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git8.1
+- Linux v4.19-12279-g5b7449810ae6
+
+* Wed Oct 31 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git7.1
+- Linux v4.19-11807-g310c7585e830
+
+* Tue Oct 30 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git6.1
+- Linux v4.19-11706-g11743c56785c
+
+* Mon Oct 29 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git5.1
+- Linux v4.19-9448-g673c790e7282
+
+* Fri Oct 26 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git4.1
+- Linux v4.19-6148-ge5f6d9afa341
+
+* Thu Oct 25 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git3.1
+- Linux v4.19-5646-g3acbd2de6bc3
+
+* Wed Oct 24 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git2.1
+- Linux v4.19-4345-g638820d8da8e
+
+* Tue Oct 23 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc0.git1.1
+- Linux v4.19-1676-g0d1b82cd8ac2
+- Reenable debugging options.
+
 * Mon Oct 22 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19-gnu.
 
