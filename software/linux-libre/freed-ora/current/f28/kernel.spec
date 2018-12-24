@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -644,6 +644,9 @@ Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
 
 # From 4.20, fix eth link/act lights on 3B+
 Patch334: bcm2837-fix-eth-leds.patch
+
+# https://patchwork.kernel.org/patch/10741809/
+Patch335: bcm2835-mmc-sdhci-iproc-handle-mmc_of_parse-errors-during-probe.patch
 
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
@@ -1983,6 +1986,13 @@ fi
 #
 #
 %changelog
+* Mon Dec 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19.12-gnu.
+
+* Mon Dec 24 2018 Peter Robinson <pbrobinson@fedoraproject.org> 4.19.12-200
+- Linux v4.19.12
+- Another fix for issue affecting Raspberry Pi 3-series WiFi (rhbz 1652093)
+
 * Thu Dec 20 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19.11-gnu.
 
