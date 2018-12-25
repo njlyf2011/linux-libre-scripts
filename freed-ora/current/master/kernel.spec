@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 19
+%define base_sublevel 20
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.19%{?stablegnux}
-%define rcrevlibre  -4.19%{?rcrevgnux}
-#define gitrevlibre -4.19%{?gitrevgnux}
+#define stablelibre -4.20%{?stablegnux}
+#define rcrevlibre  -4.20%{?rcrevgnux}
+#define gitrevlibre -4.20%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -107,7 +107,7 @@ Summary: The Linux kernel
 # The rc snapshot level
 %global rcrev 7
 # The git snapshot level
-%define gitrev 0
+%define gitrev 3
 # Set rpm version accordingly
 %define rpmversion 4.%{upstream_sublevel}.0
 %endif
@@ -466,7 +466,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-4.%{upstream_sublevel}
+# Source6: deblob-4.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -632,6 +632,15 @@ Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
 
 # Improve raspberry pi camera and analog audio
 Patch333: bcm2835-vc04_services-Improve-driver-load-unload.patch
+
+# Initall support for the 3A+
+Patch334: bcm2837-dts-add-Raspberry-Pi-3-A.patch
+
+# Fixes for bcm2835 mmc (sdcard) driver
+Patch335: bcm2835-mmc-Several-fixes-for-bcm2835-driver.patch
+
+# https://patchwork.kernel.org/patch/10741809/
+Patch336: bcm2835-mmc-sdhci-iproc-handle-mmc_of_parse-errors-during-probe.patch
 
 # Patches enabling device specific brcm firmware nvram
 # https://www.spinics.net/lists/linux-wireless/msg178827.html
@@ -1526,7 +1535,6 @@ BuildKernel() {
     cp -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/boot/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/boot/ctype.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    cp -a --parents arch/x86/kernel/macros.s $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     # Make sure the Makefile and version.h have a matching timestamp so that
     # external modules can be built
@@ -1989,6 +1997,29 @@ fi
 #
 #
 %changelog
+* Mon Dec 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.20-gnu.
+
+* Mon Dec 24 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-1
+- Linux v4.20.0
+
+* Mon Dec 24 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Another fix for issue affecting Raspberry Pi 3-series WiFi (rhbz 1652093)
+
+* Fri Dec 21 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc7.git3.1
+- Linux v4.20-rc7-214-g9097a058d49e
+
+* Thu Dec 20 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc7.git2.1
+- Linux v4.20-rc7-202-g1d51b4b1d3f2
+
+* Wed Dec 19 2018 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial support for Raspberry Pi model 3A+
+- Stability fixes for Raspberry Pi MMC (sdcard) driver
+
+* Tue Dec 18 2018 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.0-0.rc7.git1.1
+- Linux v4.20-rc7-6-gddfbab46539f
+- Reenable debugging options.
+
 * Mon Dec 17 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.20-rc7-gnu.
 
