@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -680,6 +680,12 @@ Patch510: iio-accel-kxcjk1013-Add-more-hardware-ids.patch
 
 # rhbz 1645070 patch queued upstream for merging into 4.21
 Patch516: asus-fx503-keyb.patch
+
+# rhbz 1661961 patch merged upstream in 4.20
+Patch517: 0001-Bluetooth-btsdio-Do-not-bind-to-non-removable-BCM434.patch
+
+# CVE-2019-3701 rhbz 1663729 1663730
+Patch518: CVE-2019-3701.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2001,6 +2007,18 @@ fi
 #
 #
 %changelog
+* Thu Jan 10 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19.14-gnu.
+
+* Wed Jan 09 2019 Jeremy Cline <jcline@redhat.com> - 4.19.14-300
+- Linux v4.19.14
+
+* Wed Jan 09 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-3701 (rhbz 1663729 1663730)
+
+* Mon Jan  7 2019 Hans de Goede <hdegoede@redhat.com>
+- Add patch to fix bluetooth on RPI 3B+ registering twice (rhbz#1661961)
+
 * Sat Dec 29 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19.13-gnu.
 
