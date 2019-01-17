@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -1993,6 +1993,12 @@ fi
 #
 #
 %changelog
+* Thu Jan 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.19.16-gnu.
+
+* Wed Jan 16 2019 Jeremy Cline <jcline@redhat.com> - 4.19.16-200
+- Linux v4.19.16
+
 * Mon Jan 14 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.19.15-gnu.
 
