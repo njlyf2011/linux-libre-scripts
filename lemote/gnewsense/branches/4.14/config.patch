@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-01-26 04:38:33.815301663 -0500
-@@ -0,0 +1,5852 @@
++++ .config	2019-01-28 04:02:27.385226763 -0500
+@@ -0,0 +1,5854 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.14.95-gnu Kernel Configuration
++# Linux/mips 4.14.96-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -5260,9 +5260,11 @@ Index: .config
 +CONFIG_CEPH_FS_POSIX_ACL=y
 +CONFIG_CIFS=m
 +# CONFIG_CIFS_STATS is not set
++CONFIG_CIFS_ALLOW_INSECURE_LEGACY=y
 +CONFIG_CIFS_WEAK_PW_HASH=y
 +CONFIG_CIFS_UPCALL=y
 +CONFIG_CIFS_XATTR=y
++# CONFIG_CIFS_POSIX is not set
 +CONFIG_CIFS_ACL=y
 +# CONFIG_CIFS_DEBUG is not set
 +CONFIG_CIFS_DFS_UPCALL=y
