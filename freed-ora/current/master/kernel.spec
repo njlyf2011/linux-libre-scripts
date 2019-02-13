@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 20
+%define base_sublevel 0
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -4.20%{?stablegnux}
-#define rcrevlibre  -4.20%{?rcrevgnux}
-#define gitrevlibre -4.20%{?gitrevgnux}
+#define stablelibre -5.0%{?stablegnux}
+#define rcrevlibre  -5.0%{?rcrevgnux}
+#define gitrevlibre -5.0%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -98,18 +98,20 @@ Summary: The Linux kernel
 %define stablerev %{stable_update}
 %define stable_base %{stable_update}
 %endif
-%define rpmversion 4.%{base_sublevel}.%{stable_update}
+%define rpmversion 5%{base_sublevel}.%{stable_update}
 
 ## The not-released-kernel case ##
 %else
 # The next upstream release sublevel (base_sublevel+1)
-%define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
+# %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
+# Work around for major version bump
+%define upstream_sublevel 0
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 6
 # The git snapshot level
-%define gitrev 3
+%define gitrev 0
 # Set rpm version accordingly
-%define rpmversion 4.%{upstream_sublevel}.0
+%define rpmversion 5.%{upstream_sublevel}.0
 %endif
 # Nb: The above rcrev and gitrev values automagically define Patch00 and Patch01 below.
 
@@ -160,7 +162,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 1
+%define debugbuildsenabled 0
 
 # Kernel headers are being split out into a separate package
 %if 0%{?fedora}
@@ -200,7 +202,8 @@ Summary: The Linux kernel
 %endif
 
 # The kernel tarball/base version
-%define kversion 4.%{base_sublevel}
+# %define kversion 5.%{base_sublevel}
+%define kversion 5.%{base_sublevel}-rc%rcrev
 
 %define make_target bzImage
 %define image_install_path boot
@@ -425,8 +428,10 @@ BuildRequires: kmod, patch, bash, tar, git-core
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex
 BuildRequires: net-tools, hostname, bc, elfutils-devel, gcc-plugin-devel
+%if 0%{?fedora}
 # Used to mangle unversioned shebangs to be Python 3
 BuildRequires: /usr/bin/pathfix.py
+%endif
 %if %{with_sparse}
 BuildRequires: sparse
 %endif
@@ -460,13 +465,15 @@ BuildRequires: binutils-%{_build_arch}-linux-gnu, gcc-%{_build_arch}-linux-gnu
 %define cross_opts CROSS_COMPILE=%{_build_arch}-linux-gnu-
 %endif
 
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
+# Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-5.0-rc6-gnu.tar.xz
 
 # For documentation purposes only.
 Source3: deblob-main
 Source4: deblob-check
-Source5: deblob-%{kversion}
-# Source6: deblob-4.%{upstream_sublevel}
+# Source5: deblob-%{kversion}
+Source5: deblob-5.0
+# Source6: deblob-5.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -513,7 +520,7 @@ Source1000: kernel-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-4.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
+%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}.xz
 Source5000: %{stable_patch_00}
 %endif
 
@@ -522,14 +529,15 @@ Source5000: %{stable_patch_00}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-Source5000: patch%{?rcrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+# One more fixup apparently?
+# Source5000: patch%{?rcrevlibre}-5.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
-Source5001: patch%{?gitrevlibre}-4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
+Source5001: patch%{?gitrevlibre}-5.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-Source5000: patch%{?gitrevlibre}-4.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
+Source5000: patch%{?gitrevlibre}-5.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
 %endif
 %endif
@@ -585,14 +593,6 @@ Patch201: efi-lockdown.patch
 
 Patch202: KEYS-Allow-unrestricted-boot-time-addition-of-keys-t.patch
 
-Patch203: Add-EFI-signature-data-types.patch
-
-Patch204: Add-an-EFI-signature-blob-parser-and-key-loader.patch
-
-Patch205: MODSIGN-Import-certificates-from-UEFI-Secure-Boot.patch
-
-Patch206: MODSIGN-Support-not-importing-certs-from-db.patch
-
 # bz 1497559 - Make kernel MODSIGN code not error on missing variables
 Patch207: 0001-Make-get_cert_list-not-complain-about-cert-lists-tha.patch
 Patch208: 0002-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
@@ -623,49 +623,43 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-Patch330: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
-
-Patch331: bcm283x-drm-vc4-set-is_yuv-to-false-when-num_planes-1.patch
-
-# https://patchwork.kernel.org/patch/10686407/
-Patch332: raspberrypi-Fix-firmware-calls-with-large-buffers.patch
-
-# Improve raspberry pi camera and analog audio
-Patch333: bcm2835-vc04_services-Improve-driver-load-unload.patch
+# https://patchwork.kernel.org/patch/10778815/
+Patch308: drm-enable-uncached-DMA-optimization-for-ARM-and-arm64.patch
 
 # Initall support for the 3A+
-Patch334: bcm2837-dts-add-Raspberry-Pi-3-A.patch
+Patch330: bcm2837-dts-add-Raspberry-Pi-3-A.patch
 
-# Fixes for bcm2835 mmc (sdcard) driver
-Patch335: bcm2835-mmc-Several-fixes-for-bcm2835-driver.patch
+# https://www.spinics.net/lists/arm-kernel/msg699583.html
+Patch332: ARM-dts-bcm283x-Several-DTS-improvements.patch
 
-# https://patchwork.kernel.org/patch/10741809/
-Patch336: bcm2835-mmc-sdhci-iproc-handle-mmc_of_parse-errors-during-probe.patch
-
-# Patches enabling device specific brcm firmware nvram
-# https://www.spinics.net/lists/linux-wireless/msg178827.html
-Patch340: brcmfmac-Remove-firmware-loading-code-duplication.patch
+Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
 # Fix for AllWinner A64 Timer Errata, still not final
-# https://patchwork.kernel.org/patch/10392891/
-Patch350: arm64-arch_timer-Workaround-for-Allwinner-A64-timer-instability.patch
-Patch351: arm64-dts-allwinner-a64-Enable-A64-timer-workaround.patch
+# https://www.spinics.net/lists/arm-kernel/msg699622.html
+Patch350: Allwinner-A64-timer-workaround.patch
 
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
 
-# rhbz 1476467
-Patch501: Fix-for-module-sig-verification.patch
-
 # rhbz 1431375
-Patch502: input-rmi4-remove-the-need-for-artifical-IRQ.patch
+Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
-# rhbz 1526312 (accelerometer part of the bug), patches pending upstream
-Patch504: iio-accel-kxcjk1013-Add-more-hardware-ids.patch
+# https://patchwork.kernel.org/patch/10752253/
+Patch504: efi-use-32-bit-alignment-for-efi_guid_t.patch
 
-# rhbz 1645070 patch queued upstream for merging into 4.21
-Patch505: asus-fx503-keyb.patch
+# gcc9 fixes
+Patch505: Clean-the-new-GCC-9--Wmissing-attributes-warnings.patch
+Patch506: 0001-s390-jump_label-Correct-asm-contraint.patch
+Patch507: 0001-Drop-that-for-now.patch
+
+# patches for https://fedoraproject.org/wiki/Changes/FlickerFreeBoot
+# fixes, queued in -next for merging into 5.1
+Patch508: i915-fixes-for-fastboot.patch
+# fastboot by default on Skylake and newer, queued in -next for merging into 5.1
+Patch509: i915-enable-fastboot-on-skylake.patch
+# fastboot by default on VLV/CHV (BYT/CHT), queued in -next for merging into 5.1
+Patch510: i915-enable-fastboot-on-vlv-chv.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -981,8 +975,8 @@ ApplyPatch()
     exit 1
   fi
   if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%-libre%{?variant}}.spec ; then
-    if [ "${patch:0:8}" != "patch-4." ] &&
-       [ "${patch:0:14}" != "patch-libre-4." ] ; then
+    if [ "${patch:0:8}" != "patch-5." ] &&
+       [ "${patch:0:14}" != "patch-libre-5." ] ; then
       echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
       exit 1
     fi
@@ -1019,20 +1013,20 @@ ApplyOptionalPatch()
 
 # Update to latest upstream.
 %if 0%{?released_kernel}
-%define vanillaversion 4.%{base_sublevel}
+%define vanillaversion 5.%{base_sublevel}
 # non-released_kernel case
 %else
 %if 0%{?rcrev}
-%define vanillaversion 4.%{upstream_sublevel}-rc%{rcrev}
+%define vanillaversion 5.%{upstream_sublevel}-rc%{rcrev}
 %if 0%{?gitrev}
-%define vanillaversion 4.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
+%define vanillaversion 5.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
 %if 0%{?gitrev}
-%define vanillaversion 4.%{base_sublevel}-git%{gitrev}
+%define vanillaversion 5.%{base_sublevel}-git%{gitrev}
 %else
-%define vanillaversion 4.%{base_sublevel}
+%define vanillaversion 5.%{base_sublevel}
 %endif
 %endif
 %endif
@@ -1045,7 +1039,7 @@ ApplyOptionalPatch()
 
 # Build a list of the other top-level kernel tree directories.
 # This will be used to hardlink identical vanilla subdirs.
-sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-4.*' \
+sharedirs=$(find "$PWD" -maxdepth 1 -type d -name 'kernel-5.*' \
             | grep -x -v "$PWD"/kernel-%{kversion}%{?dist}) ||:
 
 # Delete all old stale trees.
@@ -1271,6 +1265,7 @@ find . \( -name "*.orig" -o -name "*~" \) -delete >/dev/null
 # remove unnecessary SCM files
 find . -name .gitignore -delete >/dev/null
 
+%if 0%{?fedora}
 # Mangle /usr/bin/python shebangs to /usr/bin/python3
 # Mangle all Python shebangs to be Python 3 explicitly
 # -p preserves timestamps
@@ -1280,6 +1275,7 @@ pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/diffconfig
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/bloat-o-meter
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" scripts/show_delta
+%endif
 
 cd ..
 
@@ -1348,7 +1344,7 @@ BuildKernel() {
 
     # make sure EXTRAVERSION says what we want it to say
     # Trim the release if this is a CI build, since KERNELVERSION is limited to 64 characters
-    ShortRel=$(python3 -c "import re; print(re.sub(r'\.pr\.[0-9A-Fa-f]{32}', '', '%{release}'))")
+    ShortRel=$(perl -e "print \"%{release}\" =~ s/\.pr\.[0-9A-Fa-f]{32}//r")
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre-${ShortRel}.%{_target_cpu}${Flav}/" Makefile
 
     # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
@@ -1997,6 +1993,138 @@ fi
 #
 #
 %changelog
+* Tue Feb 12 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0-rc6-gnu.
+
+* Mon Feb 11 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc6.git0.1
+- Linux v5.0-rc6
+- Disable debugging options.
+- Tweaks to gcc9 fixes
+
+* Mon Feb 04 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc5.git0.1
+- Linux v5.0-rc5
+- Disable debugging options.
+
+* Fri Feb 01 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc4.git3.1
+- Linux v5.0-rc4-106-g5b4746a03199
+
+* Thu Jan 31 2019 Hans de Goede <hdegoede@redhat.com>
+- Add patches from -next to enable i915.fastboot by default on Skylake+ for
+  https://fedoraproject.org/wiki/Changes/FlickerFreeBoot
+
+* Wed Jan 30 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc4.git2.1
+- Linux v5.0-rc4-59-g62967898789d
+
+* Tue Jan 29 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc4.git1.1
+- Linux v5.0-rc4-1-g4aa9fc2a435a
+
+* Tue Jan 29 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jan 28 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc4.git0.1
+- Linux v5.0-rc4
+- Disable debugging options.
+
+* Wed Jan 23 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc3.git1.1
+- Linux v5.0-rc3-53-g333478a7eb21
+
+* Wed Jan 23 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jan 21 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc3.git0.1
+- Linux v5.0-rc3
+- Disable debugging options.
+
+* Fri Jan 18 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc2.git4.1
+- Linux v5.0-rc2-211-gd7393226d15a
+
+* Thu Jan 17 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc2.git3.1
+- Linux v5.0-rc2-145-g7fbfee7c80de
+
+* Wed Jan 16 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc2.git2.1
+- Linux v5.0-rc2-141-g47bfa6d9dc8c
+
+* Tue Jan 15 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc2.git1.1
+- Linux v5.0-rc2-36-gfe76fc6aaf53
+
+* Tue Jan 15 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jan 14 2019 Laura Abbott <labbott@redhat.com>
+- Enable CONFIG_GPIO_LEDS and CONFIG_GPIO_PCA953X  (rhbz 1601623)
+
+* Mon Jan 14 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc2.git0.1
+- Linux v5.0-rc2
+
+* Mon Jan 14 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Sun Jan 13 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Raspberry Pi updates
+- Update AllWinner A64 timer errata workaround
+
+* Fri Jan 11 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc1.git4.1
+- Linux v5.0-rc1-43-g1bdbe2274920
+
+* Thu Jan 10 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc1.git3.1
+- Linux v5.0-rc1-26-g70c25259537c
+
+* Wed Jan 09 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc1.git2.1
+- Linux v5.0-rc1-24-g4064e47c8281
+
+* Wed Jan 09 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-3701 (rhbz 1663729 1663730)
+
+* Tue Jan 08 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc1.git1.1
+- Linux v5.0-rc1-2-g7b5585136713
+
+* Tue Jan 08 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jan 07 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Updates for secure boot
+
+* Mon Jan 07 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc1.git0.1
+- Linux v5.0-rc1
+
+* Mon Jan 07 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jan 04 2019 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git7.1
+- Linux v4.20-10979-g96d4f267e40f
+
+* Fri Jan  4 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Updates for Arm plaforms
+- IoT related updates
+
+* Thu Jan 03 2019 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git6.1
+- Linux v4.20-10911-g645ff1e8e704
+
+* Wed Jan 02 2019 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git5.1
+- Linux v4.20-10595-g8e143b90e4d4
+
+* Mon Dec 31 2018 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git4.1
+- Linux v4.20-9221-gf12e840c819b
+
+* Sun Dec 30 2018 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git3.1
+- Linux v4.20-9163-g195303136f19
+
+* Fri Dec 28 2018 Laura Abbott <labbott@redhat.com>
+- Enable CONFIG_BPF_LIRC_MODE2 (rhbz 1628151)
+- Enable CONFIG_NET_SCH_CAKE (rhbz 1655155)
+
+* Fri Dec 28 2018 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git2.1
+- Linux v4.20-6428-g00c569b567c7
+
+* Thu Dec 27 2018 Hans de Goede <hdegoede@redhat.com>
+- Set CONFIG_REALTEK_PHY=y to workaround realtek ethernet issues (rhbz 1650984)
+
+* Wed Dec 26 2018 Laura Abbott <labbott@redhat.com> - 4.21.0-0.rc0.git1.1
+- Linux v4.20-3117-ga5f2bd479f58
+
+* Wed Dec 26 2018 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Mon Dec 24 2018 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.20-gnu.
 

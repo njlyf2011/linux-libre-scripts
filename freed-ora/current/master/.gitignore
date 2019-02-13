@@ -1,11 +1,12 @@
 .svn
 clog
-*.bz2
 *.xz
+*.gz
+*.bz2
 *.rpm
 *.orig
 *.sign
-kernel-[234].*/
+kernel-[2345]*/
 perf-man-*.tar.gz
 kernel-headers/
 kernel-tools/
