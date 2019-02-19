@@ -107,7 +107,7 @@ Summary: The Linux kernel
 # Work around for major version bump
 %define upstream_sublevel 0
 # The rc snapshot level
-%global rcrev 6
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -162,7 +162,7 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 1 for production (build separate debug kernels)
 #  and 0 for rawhide (all kernels are debug kernels).
 # See also 'make debug' and 'make release'.
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
 # Kernel headers are being split out into a separate package
 %if 0%{?fedora}
@@ -466,7 +466,7 @@ BuildRequires: binutils-%{_build_arch}-linux-gnu, gcc-%{_build_arch}-linux-gnu
 %endif
 
 # Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-5.0-rc6-gnu.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-5.0-rc7-gnu.tar.xz
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -649,7 +649,6 @@ Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 Patch504: efi-use-32-bit-alignment-for-efi_guid_t.patch
 
 # gcc9 fixes
-Patch505: Clean-the-new-GCC-9--Wmissing-attributes-warnings.patch
 Patch506: 0001-s390-jump_label-Correct-asm-contraint.patch
 Patch507: 0001-Drop-that-for-now.patch
 
@@ -1993,6 +1992,25 @@ fi
 #
 #
 %changelog
+* Mon Feb 18 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0-rc7-gnu.
+
+* Mon Feb 18 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc7.git0.1
+- Linux v5.0-rc7
+- Disable debugging options.
+
+* Wed Feb 13 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc6.git1.1
+- Linux v5.0-rc6-42-g1f947a7a011f
+
+* Wed Feb 13 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Wed Feb 13 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Wed Feb 13 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable NXP Freescale Layerscape platform
+
 * Tue Feb 12 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0-rc6-gnu.
 
