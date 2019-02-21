@@ -1,4 +1,5 @@
 4.19-rc8-9ba66b217ae2-loongson-community.patch -p1 # loongson-community patches
+yeeloong-reboot.patch -p1 # in loongson-community after 4.19.23
 gnewsense-binutils-flag.patch -p0
 100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
 config.patch -p0 # config file
