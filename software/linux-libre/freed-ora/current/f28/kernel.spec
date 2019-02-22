@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -683,6 +683,9 @@ Patch507: CVE-2019-3459-and-CVE-2019-3460.patch
 
 # rhbz 1663613 patch merged into 5.0-rc#
 Patch508: 0001-drm-nouveau-register-backlight-on-pascal-and-newer.patch
+
+# CVE-2019-8912 rhbz 1678685 1678686
+Patch509: net-crypto-set-sk-to-NULL-when-af_alg_release.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2028,6 +2031,15 @@ fi
 #
 #
 %changelog
+* Thu Feb 21 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.20.11-gnu.
+
+* Wed Feb 20 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.11-200
+- Linux v4.20.11
+
+* Tue Feb 19 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-8912 (rhbz 1678685 1678686)
+
 * Sat Feb 16 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.20.10-gnu.
 
