@@ -1,4 +1,5 @@
 4.4.165-849f39370a-loongson-community.patch -p1 # loongson-community patches
+yeeloong-reboot.patch -p1 # in loongson-community after 4.4.174
 gnewsense-binutils-flag.patch -p0
 100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
 config.patch -p0 # config file
