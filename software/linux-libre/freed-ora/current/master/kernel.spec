@@ -107,7 +107,7 @@ Summary: The Linux kernel
 # Work around for major version bump
 %define upstream_sublevel 0
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -466,7 +466,7 @@ BuildRequires: binutils-%{_build_arch}-linux-gnu, gcc-%{_build_arch}-linux-gnu
 %endif
 
 # Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-5.0-rc7-gnu.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-5.0-rc8-gnu.tar.xz
 
 # For documentation purposes only.
 Source3: deblob-main
@@ -625,6 +625,10 @@ Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
 # https://patchwork.kernel.org/patch/10778815/
 Patch308: drm-enable-uncached-DMA-optimization-for-ARM-and-arm64.patch
+
+Patch310: arm64-rock960-enable-hdmi-audio.patch
+Patch311: arm64-rock960-add-onboard-wifi-bt.patch
+Patch312: arm64-rock960-enable-tsadc.patch
 
 # Initall support for the 3A+
 Patch330: bcm2837-dts-add-Raspberry-Pi-3-A.patch
@@ -1992,6 +1996,28 @@ fi
 #
 #
 %changelog
+* Tue Feb 26 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0-rc8-gnu.
+
+* Mon Feb 25 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc8.git0.1
+- Linux v5.0-rc8
+- Disable debugging options.
+
+* Fri Feb 22 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc7.git3.1
+- Linux v5.0-rc7-118-g8a61716ff2ab
+
+* Wed Feb 20 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Improvements to 96boards Rock960
+
+* Wed Feb 20 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc7.git2.1
+- Linux v5.0-rc7-85-g2137397c92ae
+
+* Tue Feb 19 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc7.git1.1
+- Linux v5.0-rc7-11-gb5372fe5dc84
+
+* Tue Feb 19 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Mon Feb 18 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0-rc7-gnu.
 
