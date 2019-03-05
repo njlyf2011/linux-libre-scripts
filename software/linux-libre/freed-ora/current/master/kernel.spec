@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -98,16 +98,16 @@ Summary: The Linux kernel
 %define stablerev %{stable_update}
 %define stable_base %{stable_update}
 %endif
-%define rpmversion 5%{base_sublevel}.%{stable_update}
+%define rpmversion 5.%{base_sublevel}.%{stable_update}
 
 ## The not-released-kernel case ##
 %else
 # The next upstream release sublevel (base_sublevel+1)
-# %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
+%define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # Work around for major version bump
 %define upstream_sublevel 0
 # The rc snapshot level
-%global rcrev 8
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -202,8 +202,7 @@ Summary: The Linux kernel
 %endif
 
 # The kernel tarball/base version
-# %define kversion 5.%{base_sublevel}
-%define kversion 5.%{base_sublevel}-rc%rcrev
+%define kversion 5.%{base_sublevel}
 
 %define make_target bzImage
 %define image_install_path boot
@@ -465,14 +464,12 @@ BuildRequires: binutils-%{_build_arch}-linux-gnu, gcc-%{_build_arch}-linux-gnu
 %define cross_opts CROSS_COMPILE=%{_build_arch}-linux-gnu-
 %endif
 
-# Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-5.0-rc8-gnu.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
 
 # For documentation purposes only.
 Source3: deblob-main
 Source4: deblob-check
-# Source5: deblob-%{kversion}
-Source5: deblob-5.0
+Source5: deblob-%{kversion}
 # Source6: deblob-5.%{upstream_sublevel}
 
 Source11: x509.genkey
@@ -529,8 +526,7 @@ Source5000: %{stable_patch_00}
 # near the top of this spec file.
 %else
 %if 0%{?rcrev}
-# One more fixup apparently?
-# Source5000: patch%{?rcrevlibre}-5.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
+Source5000: patch%{?rcrevlibre}-5.%{upstream_sublevel}-rc%{rcrev}%{?rcrevgnu}.xz
 %if 0%{?gitrev}
 Source5001: patch%{?gitrevlibre}-5.%{upstream_sublevel}-rc%{rcrev}-git%{gitrev}%{?gitrevgnu}.xz
 %endif
@@ -1996,6 +1992,18 @@ fi
 #
 #
 %changelog
+* Tue Mar  5 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0-gnu.
+
+* Mon Mar 04 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-1
+- Linux v5.0.0
+
+* Tue Feb 26 2019 Laura Abbott <labbott@redhat.com> - 5.0.0-0.rc8.git1.1
+- Linux v5.0-rc8-3-g7d762d69145a
+
+* Tue Feb 26 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Tue Feb 26 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0-rc8-gnu.
 
