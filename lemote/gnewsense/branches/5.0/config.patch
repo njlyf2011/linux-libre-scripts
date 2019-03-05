@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-02-27 09:11:19.754181900 -0500
-@@ -0,0 +1,5929 @@
++++ .config	2019-03-03 23:19:34.023787068 -0500
+@@ -0,0 +1,5930 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 5.0.0-rc8-gnu Kernel Configuration
++# Linux/mips 5.0.0-gnu Kernel Configuration
 +#
 +
 +#
@@ -5783,6 +5783,7 @@ Index: .config
 +CONFIG_DEBUG_MEMORY_INIT=y
 +CONFIG_HAVE_DEBUG_STACKOVERFLOW=y
 +# CONFIG_DEBUG_STACKOVERFLOW is not set
++CONFIG_KASAN_STACK=1
 +# CONFIG_DEBUG_SHIRQ is not set
 +
 +#
