@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -683,9 +683,6 @@ Patch507: CVE-2019-3459-and-CVE-2019-3460.patch
 
 # rhbz 1663613 patch merged into 5.0-rc#
 Patch508: 0001-drm-nouveau-register-backlight-on-pascal-and-newer.patch
-
-# CVE-2019-8980 rhbz 1679972 1679974
-Patch510: CVE-2019-8980.patch
 
 # rhbz 1683382
 Patch511: nfsv4.1-avoid-false-retries.patch
@@ -2037,6 +2034,12 @@ fi
 #
 #
 %changelog
+* Mon Mar 11 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.20.15-gnu.
+
+* Mon Mar 11 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.15-200
+- Linux v4.20.15
+
 * Wed Mar  6 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.20.14-gnu.
 
