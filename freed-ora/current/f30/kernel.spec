@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -630,7 +630,10 @@ Patch312: arm64-rock960-enable-tsadc.patch
 Patch330: bcm2837-dts-add-Raspberry-Pi-3-A.patch
 
 # https://www.spinics.net/lists/arm-kernel/msg699583.html
-Patch332: ARM-dts-bcm283x-Several-DTS-improvements.patch
+Patch331: ARM-dts-bcm283x-Several-DTS-improvements.patch
+
+# https://patchwork.freedesktop.org/patch/290632/
+Patch332: drm-vc4-Use-16bpp-by-default-for-the-fbdev-buffer.patch
 
 Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
@@ -1992,6 +1995,12 @@ fi
 #
 #
 %changelog
+* Mon Mar 11 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.1-gnu.
+
+* Mon Mar 11 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.0.1-300
+- Linux v5.0.1
+
 * Tue Mar  5 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0-gnu.
 
