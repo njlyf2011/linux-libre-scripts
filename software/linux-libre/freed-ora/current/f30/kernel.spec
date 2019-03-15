@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -104,8 +104,6 @@ Summary: The Linux kernel
 %else
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
-# Work around for major version bump
-%define upstream_sublevel 0
 # The rc snapshot level
 %global rcrev 0
 # The git snapshot level
@@ -619,9 +617,6 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-# https://patchwork.kernel.org/patch/10778815/
-Patch308: drm-enable-uncached-DMA-optimization-for-ARM-and-arm64.patch
-
 Patch310: arm64-rock960-enable-hdmi-audio.patch
 Patch311: arm64-rock960-add-onboard-wifi-bt.patch
 Patch312: arm64-rock960-enable-tsadc.patch
@@ -634,6 +629,8 @@ Patch331: ARM-dts-bcm283x-Several-DTS-improvements.patch
 
 # https://patchwork.freedesktop.org/patch/290632/
 Patch332: drm-vc4-Use-16bpp-by-default-for-the-fbdev-buffer.patch
+
+Patch333: iio-chemical-bme680-device-tree-support.patch
 
 Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
@@ -1995,6 +1992,15 @@ fi
 #
 #
 %changelog
+* Thu Mar 14 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.2-gnu.
+
+* Thu Mar 14 2019 Laura Abbott <labbott@redhat.com> - 5.0.2-300
+- Linux v5.0.2
+
+* Tue Mar 12 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Arm config updates and fixes
+
 * Mon Mar 11 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.1-gnu.
 
