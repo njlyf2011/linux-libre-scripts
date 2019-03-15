@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -622,12 +622,6 @@ Patch305: qcom-msm89xx-fixes.patch
 
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
-
-# https://patchwork.kernel.org/patch/10765783/
-Patch307: wlcore-sdio-Fixup-power-on-off-sequence.patch
-
-# https://patchwork.kernel.org/patch/10778815/
-Patch308: drm-enable-uncached-DMA-optimization-for-ARM-and-arm64.patch
 
 # omap4 fixes
 Patch309: arm-omap4-fix-lack-of-time-interupts-after-hotplug.patch
@@ -2022,6 +2016,12 @@ fi
 #
 #
 %changelog
+* Thu Mar 14 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.20.16-gnu.
+
+* Thu Mar 14 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.16-200
+- Linux v4.20.16
+
 * Mon Mar 11 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.20.15-gnu.
 
