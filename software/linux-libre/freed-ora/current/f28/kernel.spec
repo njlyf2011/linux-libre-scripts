@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2034,6 +2034,12 @@ fi
 #
 #
 %changelog
+* Thu Mar 21 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 4.20.17-gnu.
+
+* Tue Mar 19 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 4.20.17-100
+- Linux v4.20.17
+
 * Thu Mar 14 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 4.20.16-gnu.
 
