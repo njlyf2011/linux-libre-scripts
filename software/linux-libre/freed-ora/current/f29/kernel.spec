@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -634,9 +634,6 @@ Patch333: iio-chemical-bme680-device-tree-support.patch
 
 Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
-# Fix for AllWinner A64 Timer Errata, still not final
-# https://www.spinics.net/lists/arm-kernel/msg699622.html
-Patch350: Allwinner-A64-timer-workaround.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -650,6 +647,12 @@ Patch504: efi-use-32-bit-alignment-for-efi_guid_t.patch
 
 # https://bugs.freedesktop.org/show_bug.cgi?id=109806
 Patch512: 0001-Revert-drm-i915-fbdev-Actually-configure-untiled-dis.patch
+
+# rhbz 1689750, patch submitted upstream
+Patch513: 0001-virt-vbox-Implement-passing-requestor-info-to-the-ho.patch
+
+# rhbz 1688283
+Patch514: v3-tpm-fix-an-invalid-condition-in-tpm_common_poll.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1983,7 +1986,19 @@ fi
 #
 #
 %changelog
-* Thu Mar 21 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Mar 25 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.4-gnu.
+
+* Mon Mar 25 2019 Laura Abbott <labbott@redhat.com> - 5.0.4-200
+- Linux v5.0.4
+
+* Fri Mar 22 2019 Laura Abbott <labbott@redhat.com>
+- TPM fix (rhbz 1688283)
+
+* Wed Mar 20 2019 Hans de Goede <hdegoede@redhat.com>
+- Make the mainline vboxguest drv feature set match VirtualBox 6.0.x (#1689750)
+
+* Tue Mar 19 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Mar 21
 - GNU Linux-libre 5.0.3-gnu.
 
 * Tue Mar 19 2019 Laura Abbott <labbott@redhat.com> - 5.0.3-200
