@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -634,9 +634,11 @@ Patch333: iio-chemical-bme680-device-tree-support.patch
 
 Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
-# Fix for AllWinner A64 Timer Errata, still not final
-# https://www.spinics.net/lists/arm-kernel/msg699622.html
-Patch350: Allwinner-A64-timer-workaround.patch
+# Tegra bits
+Patch340: arm64-tegra-jetson-tx1-fixes.patch
+
+# https://patchwork.kernel.org/patch/10858639/
+Patch341: arm64-tegra-Add-NVIDIA-Jetson-Nano-Developer-Kit-support.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -659,6 +661,12 @@ Patch508: i915-fixes-for-fastboot.patch
 Patch509: i915-enable-fastboot-on-skylake.patch
 # fastboot by default on VLV/CHV (BYT/CHT), queued in -next for merging into 5.1
 Patch510: i915-enable-fastboot-on-vlv-chv.patch
+
+# rhbz 1689750, patch submitted upstream
+Patch511: 0001-virt-vbox-Implement-passing-requestor-info-to-the-ho.patch
+
+# rhbz 1688283
+Patch512: v3-tpm-fix-an-invalid-condition-in-tpm_common_poll.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1992,7 +2000,23 @@ fi
 #
 #
 %changelog
-* Thu Mar 21 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Mar 25 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.4-gnu.
+
+* Mon Mar 25 2019 Laura Abbott <labbott@redhat.com> - 5.0.4-300
+- Linux v5.0.4
+
+* Sat Mar 23 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes for Tegra Jetson TX series
+- Initial support for NVIDIA Jetson Nano
+
+* Fri Mar 22 2019 Laura Abbott <labbott@redhat.com>
+- TPM fix (rhbz 1688283)
+
+* Wed Mar 20 2019 Hans de Goede <hdegoede@redhat.com>
+- Make the mainline vboxguest drv feature set match VirtualBox 6.0.x (#1689750)
+
+* Tue Mar 19 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Mar 21
 - GNU Linux-libre 5.0.3-gnu.
 
 * Tue Mar 19 2019 Laura Abbott <labbott@redhat.com> - 5.0.3-300
