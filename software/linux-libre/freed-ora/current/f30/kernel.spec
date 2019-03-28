@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -667,6 +667,9 @@ Patch511: 0001-virt-vbox-Implement-passing-requestor-info-to-the-ho.patch
 
 # rhbz 1688283
 Patch512: v3-tpm-fix-an-invalid-condition-in-tpm_common_poll.patch
+
+# rhbz 1683382
+Patch515: nfsv4.1-avoid-false-retries.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2000,6 +2003,15 @@ fi
 #
 #
 %changelog
+* Wed Mar 27 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.5-gnu.
+
+* Wed Mar 27 2019 Laura Abbott <labbott@redhat.com> - 5.0.5-300
+- Linux v5.0.5
+
+* Tue Mar 26 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial NXP i.MX8 enablement
+
 * Mon Mar 25 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.4-gnu.
 
