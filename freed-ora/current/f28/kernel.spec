@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -661,6 +661,9 @@ Patch512: 0001-Revert-drm-i915-fbdev-Actually-configure-untiled-dis.patch
 
 # rhbz 1689750, patch submitted upstream
 Patch513: 0001-virt-vbox-Implement-passing-requestor-info-to-the-ho.patch
+
+# rhbz 1683382
+Patch515: nfsv4.1-avoid-false-retries.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2008,6 +2011,12 @@ fi
 #
 #
 %changelog
+* Wed Mar 27 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.5-gnu.
+
+* Wed Mar 27 2019 Laura Abbott <labbott@redhat.com> - 5.0.5-100
+- Linux v5.0.5
+
 * Wed Mar 27 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.4-gnu.
 
