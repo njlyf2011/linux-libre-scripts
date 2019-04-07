@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-03-27 19:46:26.910086089 -0400
-@@ -0,0 +1,5447 @@
++++ .config	2019-04-06 20:10:31.654859252 -0400
+@@ -0,0 +1,5445 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.4.177-gnu Kernel Configuration
++# Linux/mips 4.4.178-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -4653,8 +4653,6 @@ Index: .config
 +# CONFIG_LIBNVDIMM is not set
 +# CONFIG_NVMEM is not set
 +# CONFIG_STM is not set
-+# CONFIG_STM_DUMMY is not set
-+# CONFIG_STM_SOURCE_CONSOLE is not set
 +# CONFIG_INTEL_TH is not set
 +
 +#
