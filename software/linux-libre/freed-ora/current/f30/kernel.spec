@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.0%{?stablegnux}
+%define stablelibre -5.0%{?stablegnux}
 #define rcrevlibre  -5.0%{?rcrevgnux}
 #define gitrevlibre -5.0%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -515,7 +515,7 @@ Source1000: kernel-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}.xz
+%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Source5000: %{stable_patch_00}
 %endif
 
@@ -676,6 +676,13 @@ Patch516: 0001-inotify-Fix-fsnotify_mark-refcount-leak-in-inotify_u.patch
 
 # CVE-2019-3882 rhbz 1689426 1695571
 Patch517: vfio-type1-limit-dma-mappings-per-container.patch
+
+# CVE-2019 rhbz 1695044 1697187
+Patch518: 0001-KVM-x86-nVMX-close-leak-of-L0-s-x2APIC-MSRs-CVE-2019.patch
+Patch519: 0001-KVM-x86-nVMX-fix-x2APIC-VTPR-read-intercept.patch
+
+# drm fix
+Patch520: 0001-drm-i915-dp-revert-back-to-max-link-rate-and-lane-co.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2009,6 +2016,15 @@ fi
 #
 #
 %changelog
+* Mon Apr  8 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.7-gnu.
+
+* Mon Apr 08 2019 Laura Abbott <labbott@redhat.com> - 5.0.7-300
+- Linux v5.0.7
+
+* Mon Apr 08 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019 (rhbz 1695044 1697187)
+
 * Thu Apr  4 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.6-gnu.
 
