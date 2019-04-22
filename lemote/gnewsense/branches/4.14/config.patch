@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-04-09 14:34:44.523857016 -0400
++++ .config	2019-04-21 22:06:16.802513549 -0400
 @@ -0,0 +1,5854 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.14.111-gnu Kernel Configuration
++# Linux/mips 4.14.112-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -2847,6 +2847,7 @@ Index: .config
 +CONFIG_N_GSM=m
 +CONFIG_TRACE_ROUTER=m
 +CONFIG_TRACE_SINK=m
++CONFIG_LDISC_AUTOLOAD=y
 +CONFIG_DEVMEM=y
 +# CONFIG_DEVKMEM is not set
 +
@@ -2904,7 +2905,6 @@ Index: .config
 +CONFIG_HW_RANDOM_TIMERIOMEM=m
 +CONFIG_HW_RANDOM_VIRTIO=m
 +# CONFIG_DTLK is not set
-+CONFIG_R3964=m
 +CONFIG_APPLICOM=m
 +# CONFIG_RAW_DRIVER is not set
 +# CONFIG_TCG_TPM is not set
