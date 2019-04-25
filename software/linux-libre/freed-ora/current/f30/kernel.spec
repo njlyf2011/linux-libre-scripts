@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -585,8 +585,6 @@ Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 Patch201: efi-lockdown.patch
 
-Patch202: KEYS-Allow-unrestricted-boot-time-addition-of-keys-t.patch
-
 # bz 1497559 - Make kernel MODSIGN code not error on missing variables
 Patch207: 0001-Make-get_cert_list-not-complain-about-cert-lists-tha.patch
 Patch208: 0002-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
@@ -671,6 +669,9 @@ Patch512: v3-tpm-fix-an-invalid-condition-in-tpm_common_poll.patch
 # rhbz 1683382
 Patch515: nfsv4.1-avoid-false-retries.patch
 
+# https://bugs.freedesktop.org/show_bug.cgi?id=109806
+Patch516: 0001-Revert-drm-i915-fbdev-Actually-configure-untiled-dis.patch
+
 # CVE-2019-3882 rhbz 1689426 1695571
 Patch517: vfio-type1-limit-dma-mappings-per-container.patch
 
@@ -679,6 +680,15 @@ Patch518: 0001-brcmfmac-assure-SSID-length-from-firmware-is-limited.patch
 
 # rhbz 1701077
 Patch519: nfsd-wake-waiters-blocked-on-file_lock-before-deleting-it.patch
+
+# CVE-2019-9503 rhbz 1701842 1701843
+Patch520: 0001-brcmfmac-add-subtype-check-for-event-handling-in-dat.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1701096
+Patch521: 0001-integrity-KEYS-add-a-reference-to-platform-keyring.patch
+Patch522: 0001-kexec-KEYS-Make-use-of-platform-keyring-for-signatur.patch
+# Submitted upstream at https://lkml.org/lkml/2019/4/23/89
+Patch523: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2012,6 +2022,15 @@ fi
 #
 #
 %changelog
+* Tue Apr 23 2019 Laura Abbott <labbott@redhat.com> - 5.0.9-301
+- Bring in DRM workaround
+
+* Tue Apr 23 2019 Jeremy Cline <jcline@redhat.com>
+- Allow modules signed by keys in the platform keyring (rbhz 1701096)
+
+* Tue Apr 23 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-9503 rhbz 1701842 1701843
+
 * Mon Apr 22 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.9-gnu.
 
@@ -2020,7 +2039,7 @@ fi
 - Fix NFS server crash (rhbz 1701077)
 
 * Thu Apr 18 2019 Justin M. Forbes <jforbes@fedoraproject.org>
-- Fix CVE-2019-9500 (rhbz 1701224 1701226)
+- Fix CVE-2019-9500 (rhbz 1701224 1701225)
 
 * Wed Apr 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre Fri Apr 19
 - GNU Linux-libre 5.0.8-gnu.
