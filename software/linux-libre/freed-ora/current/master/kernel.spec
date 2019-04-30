@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -59,7 +59,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -5.0%{?stablegnux}
-#define rcrevlibre  -5.0%{?rcrevgnux}
+%define rcrevlibre  -5.0%{?rcrevgnux}
 #define gitrevlibre -5.0%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -104,10 +104,8 @@ Summary: The Linux kernel
 %else
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
-# Work around for major version bump
-%define upstream_sublevel 0
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -126,7 +124,7 @@ Summary: The Linux kernel
 #
 # standard kernel
 %define with_up        %{?_without_up:        0} %{?!_without_up:        1}
-# kernel PAE (only valid for i686 (PAE) and ARM (lpae))
+# kernel PAE (only valid for ARM (lpae))
 %define with_pae       %{?_without_pae:       0} %{?!_without_pae:       1}
 # kernel-debug
 %define with_debug     %{?_without_debug:     0} %{?!_without_debug:     1}
@@ -235,9 +233,7 @@ Summary: The Linux kernel
 # and debuginfo generation. Currently we rely on the old alldebug setting.
 %global _build_id_links alldebug
 
-# kernel PAE is only built on ARMv7 in rawhide.
-# Fedora 27 and earlier still support PAE, so change this on rebases.
-# %ifnarch i686 armv7hl
+# kernel PAE is only built on ARMv7
 %ifnarch armv7hl
 %define with_pae 0
 %endif
@@ -285,7 +281,7 @@ Summary: The Linux kernel
 %endif
 
 # sparse blows up on ppc
-%ifnarch %{power64}
+%ifnarch ppc64le
 %define with_sparse 0
 %endif
 
@@ -294,7 +290,6 @@ Summary: The Linux kernel
 %ifarch %{all_x86}
 %define asmarch x86
 %define hdrarch i386
-%define pae PAE
 %define all_arch_configs kernel-%{version}-i?86*.config
 %define kernel_image arch/x86/boot/bzImage
 %endif
@@ -305,7 +300,7 @@ Summary: The Linux kernel
 %define kernel_image arch/x86/boot/bzImage
 %endif
 
-%ifarch %{power64}
+%ifarch ppc64le
 %define asmarch powerpc
 %define hdrarch powerpc
 %define make_target vmlinux
@@ -328,7 +323,6 @@ Summary: The Linux kernel
 %define skip_nonpae_vdso 1
 %define asmarch arm
 %define hdrarch arm
-%define pae lpae
 %define make_target bzImage
 %define kernel_image arch/arm/boot/zImage
 # http://lists.infradead.org/pipermail/linux-arm-kernel/2012-March/091404.html
@@ -376,13 +370,8 @@ Summary: The Linux kernel
 %define _enable_debug_packages 0
 %endif
 
-%define with_pae_debug 0
-%if %{with_pae}
-%define with_pae_debug %{with_debug}
-%endif
-
 # Architectures we build tools/cpupower on
-%define cpupowerarchs %{ix86} x86_64 %{power64} %{arm} aarch64
+%define cpupowerarchs %{ix86} x86_64 ppc64le %{arm} aarch64
 
 %if %{use_vdso}
 
@@ -470,7 +459,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-5.%{upstream_sublevel}
+Source6: deblob-5.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -542,9 +531,6 @@ Source5000: patch%{?gitrevlibre}-5.%{base_sublevel}-git%{gitrev}%{?gitrevgnu}.xz
 
 ## compile fixes
 
-# ongoing complaint, full discussion delayed until ksummit/plumbers
-Patch002: 0001-iio-Use-event-header-from-kernel-tree.patch
-
 Patch07: freedo.patch
 
 %if !%{nopatches}
@@ -562,8 +548,6 @@ Patch112: die-floppy-die.patch
 
 Patch113: no-pcspkr-modalias.patch
 
-Patch114: silence-fbcon-logo.patch
-
 Patch115: Kbuild-Add-an-option-to-enable-GCC-VTA.patch
 
 Patch116: crash-driver.patch
@@ -576,8 +560,6 @@ Patch119: namespaces-no-expert.patch
 
 Patch120: ath9k-rx-dma-stop-check.patch
 
-Patch121: xen-pciback-Don-t-disable-PCI_COMMAND-on-PCI-device-.patch
-
 Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 
 # This no longer applies, let's see if it needs to be updated
@@ -586,8 +568,6 @@ Patch122: Input-synaptics-pin-3-touches-when-the-firmware-repo.patch
 # 200 - x86 / secureboot
 
 Patch201: efi-lockdown.patch
-
-Patch202: KEYS-Allow-unrestricted-boot-time-addition-of-keys-t.patch
 
 # bz 1497559 - Make kernel MODSIGN code not error on missing variables
 Patch207: 0001-Make-get_cert_list-not-complain-about-cert-lists-tha.patch
@@ -619,24 +599,15 @@ Patch305: qcom-msm89xx-fixes.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
-# https://patchwork.kernel.org/patch/10778815/
-Patch308: drm-enable-uncached-DMA-optimization-for-ARM-and-arm64.patch
-
-Patch310: arm64-rock960-enable-hdmi-audio.patch
-Patch311: arm64-rock960-add-onboard-wifi-bt.patch
 Patch312: arm64-rock960-enable-tsadc.patch
-
-# Initall support for the 3A+
-Patch330: bcm2837-dts-add-Raspberry-Pi-3-A.patch
-
-# https://www.spinics.net/lists/arm-kernel/msg699583.html
-Patch332: ARM-dts-bcm283x-Several-DTS-improvements.patch
 
 Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
 
-# Fix for AllWinner A64 Timer Errata, still not final
-# https://www.spinics.net/lists/arm-kernel/msg699622.html
-Patch350: Allwinner-A64-timer-workaround.patch
+# Tegra bits
+Patch340: arm64-tegra-jetson-tx1-fixes.patch
+
+# https://patchwork.kernel.org/patch/10858639/
+Patch341: arm64-tegra-Add-NVIDIA-Jetson-Nano-Developer-Kit-support.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -645,20 +616,19 @@ Patch350: Allwinner-A64-timer-workaround.patch
 # rhbz 1431375
 Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
-# https://patchwork.kernel.org/patch/10752253/
-Patch504: efi-use-32-bit-alignment-for-efi_guid_t.patch
-
 # gcc9 fixes
 Patch506: 0001-s390-jump_label-Correct-asm-contraint.patch
 Patch507: 0001-Drop-that-for-now.patch
 
-# patches for https://fedoraproject.org/wiki/Changes/FlickerFreeBoot
-# fixes, queued in -next for merging into 5.1
-Patch508: i915-fixes-for-fastboot.patch
-# fastboot by default on Skylake and newer, queued in -next for merging into 5.1
-Patch509: i915-enable-fastboot-on-skylake.patch
-# fastboot by default on VLV/CHV (BYT/CHT), queued in -next for merging into 5.1
-Patch510: i915-enable-fastboot-on-vlv-chv.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1701096
+# Submitted upstream at https://lkml.org/lkml/2019/4/23/89
+Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
+
+# CVE-2019-3900 rhbz 1698757 1702940
+Patch524: net-vhost_net-fix-possible-infinite-loop.patch
+
+# S390x build failure fix
+Patch525: 0001-RDMA-uverbs-Fix-compilation-error-on-s390-and-mips-p.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -857,7 +827,7 @@ Summary: %{variant_summary}\
 Provides: kernel-libre-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-%{?1:%{1}-}core-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-libre)\
-%ifarch %{power64}\
+%ifarch ppc64le\
 Obsoletes: kernel-libre-bootwrapper\
 %endif\
 %{expand:%%kernel_reqprovconf}\
@@ -873,43 +843,11 @@ Obsoletes: kernel-libre-bootwrapper\
 # Now, each variant package.
 
 %if %{with_pae}
-%ifnarch armv7hl
-%define variant_summary The Linux kernel compiled for PAE capable machines
-%kernel_variant_package %{pae}
-%description %{pae}-core
-This package includes a version of the Linux kernel with support for up to
-64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
-The non-PAE kernel can only address up to 4GB of memory.
-Install the kernel-PAE package if your machine has more than 4GB of memory.
-%else
 %define variant_summary The Linux kernel compiled for Cortex-A15
-%kernel_variant_package %{pae}
-%description %{pae}-core
+%kernel_variant_package lpae
+%description lpae-core
 This package includes a version of the Linux kernel with support for
 Cortex-A15 devices with LPAE and HW virtualisation support
-%endif
-
-The kernel-libre-PAE package is the upstream kernel without the
-non-Free blobs it includes by default.
-
-
-
-%define variant_summary The Linux kernel compiled with extra debugging enabled for PAE capable machines
-%kernel_variant_package %{pae}debug
-Obsoletes: kernel-PAE-debug
-%description %{pae}debug-core
-This package includes a version of the Linux kernel with support for up to
-64GB of high memory. It requires a CPU with Physical Address Extensions (PAE).
-The non-PAE kernel can only address up to 4GB of memory.
-Install the kernel-PAE package if your machine has more than 4GB of memory.
-
-This variant of the kernel has numerous debugging options enabled.
-It should only be installed when trying to gather additional information
-on kernel bugs, as some of these options impact performance noticably.
-
-The kernel-libre-PAEdebug package is the upstream kernel without the
-non-Free blobs it includes by default.
-
 %endif
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled
@@ -1485,7 +1423,7 @@ BuildKernel() {
     fi
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*.o
     rm -f $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts/*/*.o
-%ifarch %{power64}
+%ifarch ppc64le
     cp -a --parents arch/powerpc/lib/crtsavres.[So] $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
 %endif
     if [ -d arch/%{asmarch}/include ]; then
@@ -1684,12 +1622,8 @@ cd linux-%{KVERREL}
 BuildKernel %make_target %kernel_image %{_use_vdso} debug
 %endif
 
-%if %{with_pae_debug}
-BuildKernel %make_target %kernel_image %{use_vdso} %{pae}debug
-%endif
-
 %if %{with_pae}
-BuildKernel %make_target %kernel_image %{use_vdso} %{pae}
+BuildKernel %make_target %kernel_image %{use_vdso} lpae
 %endif
 
 %if %{with_up}
@@ -1710,13 +1644,10 @@ BuildKernel %make_target %kernel_image %{_use_vdso}
 %define __modsign_install_post \
   if [ "%{signmodules}" -eq "1" ]; then \
     if [ "%{with_pae}" -ne "0" ]; then \
-      %{modsign_cmd} certs/signing_key.pem.sign+%{pae} certs/signing_key.x509.sign+%{pae} $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}/ \
+      %{modsign_cmd} certs/signing_key.pem.sign+lpae certs/signing_key.x509.sign+lpae $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+lpae/ \
     fi \
     if [ "%{with_debug}" -ne "0" ]; then \
       %{modsign_cmd} certs/signing_key.pem.sign+debug certs/signing_key.x509.sign+debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+debug/ \
-    fi \
-    if [ "%{with_pae_debug}" -ne "0" ]; then \
-      %{modsign_cmd} certs/signing_key.pem.sign+%{pae}debug certs/signing_key.x509.sign+%{pae}debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+%{pae}debug/ \
     fi \
     if [ "%{with_up}" -ne "0" ]; then \
       %{modsign_cmd} certs/signing_key.pem.sign certs/signing_key.x509.sign $RPM_BUILD_ROOT/lib/modules/%{KVERREL}/ \
@@ -1896,11 +1827,8 @@ fi}\
 %kernel_variant_post -r kernel-smp
 
 %if %{with_pae}
-%kernel_variant_preun %{pae}
-%kernel_variant_post -v %{pae} -r (kernel|kernel-smp)
-
-%kernel_variant_post -v %{pae}debug -r (kernel|kernel-smp)
-%kernel_variant_preun %{pae}debug
+%kernel_variant_preun lpae
+%kernel_variant_post -v lpae -r (kernel|kernel-smp)
 %endif
 
 %kernel_variant_preun debug
@@ -1984,14 +1912,187 @@ fi
 
 %kernel_variant_files %{_use_vdso} %{with_up}
 %kernel_variant_files %{_use_vdso} %{with_debug} debug
-%kernel_variant_files %{use_vdso} %{with_pae} %{pae}
-%kernel_variant_files %{use_vdso} %{with_pae_debug} %{pae}debug
+%kernel_variant_files %{use_vdso} %{with_pae} lpae
 
 # plz don't put in a version string unless you're going to tag
 # and build.
 #
 #
 %changelog
+* Mon Apr 29 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.1-rc7-gnu.
+
+* Mon Apr 29 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc7.git0.1
+- Linux v5.1-rc7
+
+* Mon Apr 29 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Fri Apr 26 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc6.git4.1
+- Linux v5.1-rc6-72-g8113a85f8720
+
+* Thu Apr 25 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc6.git3.1
+- Linux v5.1-rc6-64-gcd8dead0c394
+
+* Thu Apr 25 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-3900 (rhbz 1698757 1702940)
+
+* Wed Apr 24 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc6.git2.1
+- Linux v5.1-rc6-15-gba25b50d582f
+
+* Tue Apr 23 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc6.git1.1
+- Linux v5.1-rc6-4-g7142eaa58b49
+
+* Tue Apr 23 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Tue Apr 23 2019 Jeremy Cline <jcline@redhat.com>
+- Allow modules signed by keys in the platform keyring (rbhz 1701096)
+
+* Mon Apr 22 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc6.git0.1
+- Linux v5.1-rc6
+
+* Mon Apr 22 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Wed Apr 17 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc5.git2.1
+- Linux v5.1-rc5-36-g444fe9913539
+
+* Tue Apr 16 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc5.git1.1
+- Linux v5.1-rc5-10-g618d919cae2f
+
+* Tue Apr 16 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Mon Apr 15 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc5.git0.1
+- Linux v5.1-rc5
+
+* Mon Apr 15 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Fri Apr 12 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc4.git4.1
+- Linux v5.1-rc4-184-g8ee15f324866
+
+* Thu Apr 11 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc4.git3.1
+- Linux v5.1-rc4-58-g582549e3fbe1
+
+* Wed Apr 10 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc4.git2.1
+- Linux v5.1-rc4-43-g771acc7e4a6e
+
+* Tue Apr 09 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc4.git1.1
+- Linux v5.1-rc4-34-g869e3305f23d
+
+* Tue Apr 09 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Mon Apr 08 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc4.git0.1
+- Linux v5.1-rc4
+
+* Mon Apr 08 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Fri Apr 05 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc3.git3.1
+- Linux v5.1-rc3-206-gea2cec24c8d4
+
+* Wed Apr 03 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc3.git2.1
+- Linux v5.1-rc3-35-g8ed86627f715
+
+* Tue Apr 02 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc3.git1.1
+- Linux v5.1-rc3-14-g5e7a8ca31926
+
+* Tue Apr 02 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Mon Apr 01 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc3.git0.1
+- Linux v5.1-rc3
+
+* Mon Apr 01 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Fri Mar 29 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc2.git4.1
+- Linux v5.1-rc2-247-g9936328b41ce
+- Pick up a mm fix causing hangs (rhbz 1693525)
+
+* Thu Mar 28 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc2.git3.1
+- Linux v5.1-rc2-243-g8c7ae38d1ce1
+
+* Wed Mar 27 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc2.git2.1
+- Linux v5.1-rc2-24-g14c741de9386
+
+* Wed Mar 27 2019 Jeremy Cline <jeremy@jcline.org>
+- Build iptable_filter as module
+
+* Tue Mar 26 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc2.git1.1
+- Linux v5.1-rc2-16-g65ae689329c5
+
+* Tue Mar 26 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Tue Mar 26 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Initial NXP i.MX8 enablement
+
+* Mon Mar 25 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc2.git0.1
+- Linux v5.1-rc2
+
+* Mon Mar 25 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Sat Mar 23 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes for Tegra Jetson TX series
+- Initial support for NVIDIA Jetson Nano
+
+* Fri Mar 22 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc1.git2.1
+- Linux v5.1-rc1-66-gfd1f297b794c
+
+* Wed Mar 20 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc1.git1.1
+- Linux v5.1-rc1-15-gbabf09c3837f
+- Reenable debugging options.
+
+* Wed Mar 20 2019 Hans de Goede <hdegoede@redhat.com>
+- Make the mainline vboxguest drv feature set match VirtualBox 6.0.x (#1689750)
+
+* Mon Mar 18 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc1.git0.1
+- Linux v5.1-rc1
+
+* Mon Mar 18 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Sun Mar 17 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Updates for Arm
+
+* Fri Mar 15 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git9.1
+- Linux v5.0-11520-gf261c4e529da
+
+* Thu Mar 14 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git8.1
+- Linux v5.0-11139-gfa3d493f7a57
+
+* Wed Mar 13 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git7.1
+- Linux v5.0-11053-gebc551f2b8f9
+
+* Tue Mar 12 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git6.1
+- Linux v5.0-10742-gea295481b6e3
+
+* Tue Mar 12 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Arm config updates and fixes
+
+* Mon Mar 11 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git5.1
+- Linux v5.0-10360-g12ad143e1b80
+
+* Fri Mar 08 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git4.1
+- Linux v5.0-7001-g610cd4eadec4
+
+* Thu Mar 07 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git3.1
+- Linux v5.0-6399-gf90d64483ebd
+
+* Wed Mar 06 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git2.1
+- Linux v5.0-3452-g3717f613f48d
+
+* Tue Mar 05 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc0.git1.1
+- Linux v5.0-510-gcd2a3bf02625
+
+* Tue Mar 05 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
 * Tue Mar  5 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0-gnu.
 
