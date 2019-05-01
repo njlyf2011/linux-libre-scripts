@@ -42,7 +42,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 301
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -663,9 +663,6 @@ Patch510: i915-enable-fastboot-on-vlv-chv.patch
 # rhbz 1689750, patch submitted upstream
 Patch511: 0001-virt-vbox-Implement-passing-requestor-info-to-the-ho.patch
 
-# rhbz 1688283
-Patch512: v3-tpm-fix-an-invalid-condition-in-tpm_common_poll.patch
-
 # rhbz 1683382
 Patch515: nfsv4.1-avoid-false-retries.patch
 
@@ -689,6 +686,12 @@ Patch521: 0001-integrity-KEYS-add-a-reference-to-platform-keyring.patch
 Patch522: 0001-kexec-KEYS-Make-use-of-platform-keyring-for-signatur.patch
 # Submitted upstream at https://lkml.org/lkml/2019/4/23/89
 Patch523: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
+
+# CVE-2019-3900 rhbz 1698757 1702940
+Patch524: net-vhost_net-fix-possible-infinite-loop.patch
+
+# Fix wifi on various ideapad models not working (rhbz#1703338)
+Patch525: 0001-platform-x86-ideapad-laptop-Remove-no_hw_rfkill_list.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2022,6 +2025,18 @@ fi
 #
 #
 %changelog
+* Tue Apr 30 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.10-gnu.
+
+* Tue Apr 30 2019 Laura Abbott <labbott@redhat.com> - 5.0.10-300
+- Linux v5.0.10
+
+* Tue Apr 30 2019 Hans de Goede <hdegoede@redhat.com>
+- Fix wifi on various ideapad models not working (rhbz#1703338)
+
+* Thu Apr 25 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-3900 (rhbz 1698757 1702940)
+
 * Tue Apr 23 2019 Laura Abbott <labbott@redhat.com> - 5.0.9-301
 - Bring in DRM workaround
 
