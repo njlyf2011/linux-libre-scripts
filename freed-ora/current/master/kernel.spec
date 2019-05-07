@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 0
+%global released_kernel 1
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -48,7 +48,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 0
+%define base_sublevel 1
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -58,9 +58,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.0%{?stablegnux}
-%define rcrevlibre  -5.0%{?rcrevgnux}
-#define gitrevlibre -5.0%{?gitrevgnux}
+#define stablelibre -5.1%{?stablegnux}
+#define rcrevlibre  -5.1%{?rcrevgnux}
+#define gitrevlibre -5.1%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -105,7 +105,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -435,7 +435,6 @@ BuildConflicts: rpm < 4.13.0.1-19
 %undefine _unique_debug_srcs
 %undefine _debugsource_packages
 %undefine _debuginfo_subpackages
-%undefine _include_gdb_index
 %global _find_debuginfo_opts -r
 %global _missing_build_ids_terminate_build 1
 %global _no_recompute_build_ids 1
@@ -459,7 +458,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-5.%{upstream_sublevel}
+# Source6: deblob-5.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -627,8 +626,8 @@ Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 # CVE-2019-3900 rhbz 1698757 1702940
 Patch524: net-vhost_net-fix-possible-infinite-loop.patch
 
-# S390x build failure fix
-Patch525: 0001-RDMA-uverbs-Fix-compilation-error-on-s390-and-mips-p.patch
+# Fix wifi on various ideapad models not working (rhbz#1703338)
+Patch526: 0001-platform-x86-ideapad-laptop-Remove-no_hw_rfkill_list.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1919,6 +1918,30 @@ fi
 #
 #
 %changelog
+* Mon May  6 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.1-gnu.
+
+* Mon May 06 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-1
+- Linux v5.1
+
+* Fri May 03 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc7.git4.1
+- Linux v5.1-rc7-131-gea9866793d1e
+
+* Thu May 02 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc7.git3.1
+- Linux v5.1-rc7-29-g600d7258316d
+
+* Wed May 01 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc7.git2.1
+- Linux v5.1-rc7-16-gf2bc9c908dfe
+
+* Tue Apr 30 2019 Jeremy Cline <jcline@redhat.com> - 5.1.0-0.rc7.git1.1
+- Linux v5.1-rc7-5-g83a50840e72a
+
+* Tue Apr 30 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Tue Apr 30 2019 Hans de Goede <hdegoede@redhat.com>
+- Fix wifi on various ideapad models not working (rhbz#1703338)
+
 * Mon Apr 29 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.1-rc7-gnu.
 
