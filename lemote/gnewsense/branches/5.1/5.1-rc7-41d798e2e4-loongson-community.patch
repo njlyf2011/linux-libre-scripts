@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index 86cf35d1d79d..6deed06c5c35 100644
+index 2b99679148dc..658735d5c346 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -370,10 +370,10 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
+@@ -384,10 +384,10 @@ HOST_LFS_LIBS := $(shell getconf LFS_LIBS 2>/dev/null)
  
  HOSTCC       = gcc
  HOSTCXX      = g++
@@ -15,23 +15,20 @@ index 86cf35d1d79d..6deed06c5c35 100644
  KBUILD_HOSTLDFLAGS  := $(HOST_LFS_LDFLAGS) $(HOSTLDFLAGS)
  KBUILD_HOSTLDLIBS   := $(HOST_LFS_LIBS) $(HOSTLDLIBS)
  
-@@ -661,9 +661,9 @@ KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
- KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
- else
- ifdef CONFIG_PROFILE_ALL_BRANCHES
--KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
-+KBUILD_CFLAGS	+= -O3 $(call cc-disable-warning,maybe-uninitialized,)
+@@ -682,7 +682,7 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
+ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ KBUILD_CFLAGS	+= -Os
  else
 -KBUILD_CFLAGS   += -O2
 +KBUILD_CFLAGS   += -O3
  endif
- endif
  
+ ifdef CONFIG_CC_DISABLE_WARN_MAYBE_UNINITIALIZED
 diff --git a/arch/mips/Kconfig b/arch/mips/Kconfig
-index a84c24d894aa..2918eb17c80a 100644
+index 4a5f5b0ee9a9..418f316d2b1f 100644
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -1873,9 +1873,10 @@ config CPU_LOONGSON2
+@@ -1874,9 +1874,10 @@ config CPU_LOONGSON2
  	bool
  	select CPU_SUPPORTS_32BIT_KERNEL
  	select CPU_SUPPORTS_64BIT_KERNEL
@@ -43,7 +40,7 @@ index a84c24d894aa..2918eb17c80a 100644
  	select CPU_HAS_LOAD_STORE_LR
  
  config CPU_LOONGSON1
-@@ -2626,7 +2627,7 @@ config CPU_SUPPORTS_MSA
+@@ -2632,7 +2633,7 @@ config CPU_SUPPORTS_MSA
  
  config ARCH_FLATMEM_ENABLE
  	def_bool y
@@ -380,7 +377,7 @@ index 40fbb5dd66df..b9a63318efdc 100644
  	msub_s_op    =	0x28, msub_d_op	   =  0x29,
  	msub_e_op    =	0x2a, nmadd_s_op   =  0x30,
 diff --git a/arch/mips/kernel/scall64-o32.S b/arch/mips/kernel/scall64-o32.S
-index f158c5894a9a..4a46927dbf4f 100644
+index feb2653490df..9b8a30afb3ab 100644
 --- a/arch/mips/kernel/scall64-o32.S
 +++ b/arch/mips/kernel/scall64-o32.S
 @@ -26,6 +26,18 @@
@@ -2029,10 +2026,10 @@ index e60e29078ef5..75b0d4dace2e 100644
  		return SIGILL;
  	}
 diff --git a/arch/mips/pci/Makefile b/arch/mips/pci/Makefile
-index 8185a2bfaf09..0fb07010e847 100644
+index c4f976593061..30228e8c0f53 100644
 --- a/arch/mips/pci/Makefile
 +++ b/arch/mips/pci/Makefile
-@@ -33,6 +33,7 @@ obj-$(CONFIG_LASAT)		+= pci-lasat.o
+@@ -34,6 +34,7 @@ obj-$(CONFIG_LASAT)		+= pci-lasat.o
  obj-$(CONFIG_MIPS_COBALT)	+= fixup-cobalt.o
  obj-$(CONFIG_LEMOTE_FULOONG2E)	+= fixup-fuloong2e.o ops-loongson2.o
  obj-$(CONFIG_LEMOTE_MACH2F)	+= fixup-lemote2f.o ops-loongson2.o
@@ -2178,10 +2175,10 @@ index da344696beed..cb2a32e65c11 100644
  }
  
 diff --git a/drivers/hid/Kconfig b/drivers/hid/Kconfig
-index 41e9935fc584..af2ce954e800 100644
+index 4ca0cdfa6b33..ef163dca45e4 100644
 --- a/drivers/hid/Kconfig
 +++ b/drivers/hid/Kconfig
-@@ -1056,6 +1056,13 @@ config HID_ZYDACRON
+@@ -1070,6 +1070,13 @@ config HID_ZYDACRON
  	---help---
  	Support for Zydacron remote control.
  
@@ -2196,10 +2193,10 @@ index 41e9935fc584..af2ce954e800 100644
  	tristate "HID Sensors framework support"
  	depends on HID && HAS_IOMEM
 diff --git a/drivers/hid/Makefile b/drivers/hid/Makefile
-index 896a51ce7ce0..3ee6f2236a70 100644
+index 170163b41303..7ff5a7556cc2 100644
 --- a/drivers/hid/Makefile
 +++ b/drivers/hid/Makefile
-@@ -118,6 +118,7 @@ obj-$(CONFIG_HID_ZYDACRON)	+= hid-zydacron.o
+@@ -123,6 +123,7 @@ obj-$(CONFIG_HID_VIEWSONIC)	+= hid-viewsonic.o
  wacom-objs			:= wacom_wac.o wacom_sys.o
  obj-$(CONFIG_HID_WACOM)		+= wacom.o
  obj-$(CONFIG_HID_WALTOP)	+= hid-waltop.o
@@ -2424,10 +2421,10 @@ index 000000000000..67cc0954a7e9
 +MODULE_LICENSE("GPL");
 +
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index 24f846d67478..d539f33cb831 100644
+index adce58f24f76..d8e5780ef145 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1219,6 +1219,9 @@
+@@ -1230,6 +1230,9 @@
  #define USB_VENDOR_ID_ZYTRONIC		0x14c8
  #define USB_DEVICE_ID_ZYTRONIC_ZXY100	0x0005
  
@@ -2465,7 +2462,7 @@ index d55e9ebd5628..977d0ed2b45c 100644
  		if (strstr(m, *list) != NULL) {
  			drive->dev_flags |= IDE_DFLAG_NIEN_QUIRK;
 diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
-index a530972c5a7e..94c465490696 100644
+index d217debf382e..369e3f73db9d 100644
 --- a/drivers/mfd/sm501.c
 +++ b/drivers/mfd/sm501.c
 @@ -59,7 +59,7 @@ struct sm501_gpio {
@@ -2515,7 +2512,7 @@ index a530972c5a7e..94c465490696 100644
  
  static int sm501_register_gpio_i2c_instance(struct sm501_devdata *sm,
  					    struct sm501_platdata_gpio_i2c *iic)
-@@ -1199,6 +1221,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
+@@ -1201,6 +1223,20 @@ static int sm501_register_gpio_i2c(struct sm501_devdata *sm,
  	return 0;
  }
  
@@ -2536,7 +2533,7 @@ index a530972c5a7e..94c465490696 100644
  /* sm501_dbg_regs
   *
   * Debug attribute to attach to parent device to show core registers
-@@ -1357,6 +1393,8 @@ static int sm501_init_dev(struct sm501_devdata *sm)
+@@ -1359,6 +1395,8 @@ static int sm501_init_dev(struct sm501_devdata *sm)
  			sm501_register_uart(sm, idata->devices);
  		if (idata->devices & SM501_USE_GPIO)
  			sm501_register_gpio(sm);
@@ -2545,7 +2542,7 @@ index a530972c5a7e..94c465490696 100644
  	}
  
  	if (pdata && pdata->gpio_i2c && pdata->gpio_i2c_nr > 0) {
-@@ -1539,10 +1577,15 @@ static struct sm501_initdata sm501_pci_initdata = {
+@@ -1541,10 +1579,15 @@ static struct sm501_initdata sm501_pci_initdata = {
  	.devices	= SM501_USE_ALL,
  
  	/* Errata AB-3 says that 72MHz is the fastest available
@@ -9216,10 +9213,10 @@ index 000000000000..d250d1d4988a
 +MODULE_DESCRIPTION("YeeLoong laptop driver");
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index 225b0b8516f3..69e35afa422e 100644
+index f933c06bff4f..143055aa9bd3 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
-@@ -871,6 +871,7 @@ comment "Platform RTC drivers"
+@@ -900,6 +900,7 @@ comment "Platform RTC drivers"
  config RTC_DRV_CMOS
  	tristate "PC-style 'CMOS'"
  	depends on X86 || ARM || PPC || MIPS || SPARC64
@@ -9332,7 +9329,7 @@ index 3ce71cbfbb58..2ba07e2a38b4 100644
  static void quirk_usb_early_handoff(struct pci_dev *pdev)
  {
 diff --git a/drivers/usb/serial/option.c b/drivers/usb/serial/option.c
-index aef15497ff31..d70b2f1dfc02 100644
+index 83869065b802..886c2910d18d 100644
 --- a/drivers/usb/serial/option.c
 +++ b/drivers/usb/serial/option.c
 @@ -75,6 +75,9 @@ static void option_instat_callback(struct urb *urb);
@@ -9345,7 +9342,7 @@ index aef15497ff31..d70b2f1dfc02 100644
  #define HUAWEI_VENDOR_ID			0x12D1
  #define HUAWEI_PRODUCT_E173			0x140C
  #define HUAWEI_PRODUCT_E1750			0x1406
-@@ -598,6 +601,7 @@ static const struct usb_device_id option_ids[] = {
+@@ -599,6 +602,7 @@ static const struct usb_device_id option_ids[] = {
  	{ USB_DEVICE(QUANTA_VENDOR_ID, QUANTA_PRODUCT_GLE) },
  	{ USB_DEVICE(QUANTA_VENDOR_ID, 0xea42),
  	  .driver_info = RSVD(4) },
