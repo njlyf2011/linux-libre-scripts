@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-05-16 22:22:11.357498814 -0400
-@@ -0,0 +1,5930 @@
++++ .config	2019-05-20 00:47:09.501504237 -0400
+@@ -0,0 +1,5929 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 5.0.11-gnu Kernel Configuration
++# Linux/mips 5.0.12-gnu Kernel Configuration
 +#
 +
 +#
@@ -4893,7 +4893,6 @@ Index: .config
 +#
 +# Gasket devices
 +#
-+# CONFIG_XIL_AXIS_FIFO is not set
 +CONFIG_EROFS_FS=m
 +# CONFIG_EROFS_FS_DEBUG is not set
 +CONFIG_EROFS_FS_XATTR=y
