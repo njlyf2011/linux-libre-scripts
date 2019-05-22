@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2016,6 +2016,12 @@ fi
 #
 #
 %changelog
+* Tue May 21 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.17-gnu.
+
+* Mon May 20 2019 Laura Abbott <labbott@redhat.com> - 5.0.17-300
+- Linux v5.0.17
+
 * Tue May 14 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.16-gnu.
 
