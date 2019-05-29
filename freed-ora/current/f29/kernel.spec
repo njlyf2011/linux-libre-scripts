@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 18
+%define stable_update 19
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -666,9 +666,6 @@ Patch524: net-vhost_net-fix-possible-infinite-loop.patch
 
 # Fix wifi on various ideapad models not working (rhbz#1703338)
 Patch525: 0001-platform-x86-ideapad-laptop-Remove-no_hw_rfkill_list.patch
-
-# Add missing backport to fix build on s390
-Patch526: 0001-mm-gup-Remove-the-write-parameter-from-gup_fast_perm.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2002,6 +1999,12 @@ fi
 #
 #
 %changelog
+* Tue May 28 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.0.19-gnu.
+
+* Tue May 28 2019 Laura Abbott <labbott@redhat.com> - 5.0.19-200
+- Linux v5.0.19
+
 * Thu May 23 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.0.18-gnu.
 
