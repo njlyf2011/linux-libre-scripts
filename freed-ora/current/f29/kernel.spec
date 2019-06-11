@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -658,6 +658,15 @@ Patch534: clk-sunxi-fix-a-missing-check-bug-in-sunxi_divs_clk_setup.patch
 
 # CVE-2019-12454 rhbz 1716996 1717003
 Patch535: wcd9335-fix-a-incorrect-use-of-kstrndup.patch
+
+# CVE-2019-12456 rhbz 1717182 1717183
+Patch536: scsi-mpt3sas_ctl-fix-double-fetch-bug-in_ctl_ioctl_main.patch
+
+# rhbz 1708717
+Patch537: neighbor-Reset-gc_entries-counter-if-new-entry-is-re.patch
+
+# CVE-2019-12614 rhbz 1718176 1718185
+Patch538: powerpc-fix-a-missing-check-in-dlpar_parse_cc_property.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1948,6 +1957,22 @@ fi
 #
 #
 %changelog
+* Mon Jun 10 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.1.8-gnu.
+
+* Sun Jun 09 2019 Jeremy Cline <jcline@redhat.com> - 5.1.8-200
+- Linux v5.1.8
+
+* Fri Jun 07 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-12614 (rhbz 1718176 1718185)
+
+* Thu Jun 06 2019 Jeremy Cline <jcline@redhat.com>
+- Fix incorrect permission denied with lock down off (rhbz 1658675)
+- Fix an issue with the IPv6 neighbor table (rhbz 1708717)
+
+* Wed Jun 05 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-12456 (rhbz 1717182 1717183)
+
 * Tue Jun  4 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.1.7-gnu.
 
