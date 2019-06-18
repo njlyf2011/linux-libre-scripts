@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-06-13 16:37:33.242290627 -0400
-@@ -0,0 +1,5899 @@
++++ .config	2019-06-17 20:40:33.155549879 -0400
+@@ -0,0 +1,5900 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.19.47-gnu Kernel Configuration
++# Linux/mips 4.19.48-gnu Kernel Configuration
 +#
 +
 +#
@@ -14,6 +14,7 @@ Index: .config
 +CONFIG_CC_IS_GCC=y
 +CONFIG_GCC_VERSION=40603
 +CONFIG_CLANG_VERSION=0
++CONFIG_CC_HAS_ASM_GOTO=y
 +CONFIG_IRQ_WORK=y
 +CONFIG_BUILDTIME_EXTABLE_SORT=y
 +
