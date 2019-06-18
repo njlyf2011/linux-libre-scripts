@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -631,11 +631,6 @@ Patch524: net-vhost_net-fix-possible-infinite-loop.patch
 # Fix wifi on various ideapad models not working (rhbz#1703338)
 Patch526: 0001-platform-x86-ideapad-laptop-Remove-no_hw_rfkill_list.patch
 
-# rhbz 1711468
-# https://lore.kernel.org/linux-bluetooth/20190522070540.48895-1-marcel@holtmann.org/
-# https://lore.kernel.org/linux-bluetooth/af8cf6f4-4979-2f6f-68ed-e5b368b17ec7@redhat.com/
-Patch527: Revert-Bluetooth-Align-minimum-encryption-key-size.patch
-
 # CVE-2019-12378 rhbz 1715459 1715460
 Patch528: ipv6_sockglue-fix-missing-check-bug-in-ip6_ra_control.patch
 
@@ -671,6 +666,17 @@ Patch539: usb-dwc2-Fix-DMA-cache-alignment-issues.patch
 
 # Mainlined, https://bugzilla.redhat.com/show_bug.cgi?id=1716289
 Patch540: 0001-netfilter-nat-fix-udp-checksum-corruption.patch
+
+# CVE-2019-10126 rhbz 1716992 1720122
+Patch541: mwifiex-Fix-heap-overflow-in-mwifiex_uap_parse_tail_ies.patch
+
+# 1697069 LCD panel an Asus EeePC 1025C not lighting up, submitted upstream
+Patch542: 0001-platform-x86-asus-wmi-Only-Tell-EC-the-OS-will-handl.patch
+
+# Fix the LCD panel on the GPD MicroPC not working, pending as fixes for 5.2
+Patch543: 0001-drm-i915-dsi-Use-a-fuzzy-check-for-burst-mode-clock-.patch
+Patch544: drm-panel-orientation-quirks.patch
+Patch545: efi-bgrt-acpi6.2-support.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1961,6 +1967,22 @@ fi
 #
 #
 %changelog
+* Mon Jun 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.1.11-gnu.
+
+* Mon Jun 17 2019 Jeremy Cline <jcline@redhat.com> - 5.1.11-300
+- Linux v5.1.11
+
+* Mon Jun 17 2019 Jeremy Cline <jcline@redhat.com> - 5.1.10-300
+- Linux v5.1.10
+
+* Fri Jun 14 2019 Hans de Goede <hdegoede@redhat.com>
+- Fix the LCD panel an Asus EeePC 1025C not lighting up (rhbz#1697069)
+- Fix the LCD panel on the GPD MicroPC not working
+
+* Thu Jun 13 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-10126 (rhbz 1716992 1720122)
+
 * Wed Jun 12 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.1.9-gnu.
 
