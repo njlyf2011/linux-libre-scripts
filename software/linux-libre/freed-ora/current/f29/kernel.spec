@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -660,9 +660,6 @@ Patch536: scsi-mpt3sas_ctl-fix-double-fetch-bug-in_ctl_ioctl_main.patch
 
 # CVE-2019-12614 rhbz 1718176 1718185
 Patch538: powerpc-fix-a-missing-check-in-dlpar_parse_cc_property.patch
-
-# Mainlined, https://bugzilla.redhat.com/show_bug.cgi?id=1716289
-Patch540: 0001-netfilter-nat-fix-udp-checksum-corruption.patch
 
 # CVE-2019-10126 rhbz 1716992 1720122
 Patch541: mwifiex-Fix-heap-overflow-in-mwifiex_uap_parse_tail_ies.patch
@@ -1963,6 +1960,12 @@ fi
 #
 #
 %changelog
+* Mon Jun 24 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.1.14-gnu.
+
+* Mon Jun 24 2019 Jeremy Cline <jcline@redhat.com> - 5.1.14-200
+- Linux v5.1.14
+
 * Wed Jun 19 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.1.12-gnu.
 
