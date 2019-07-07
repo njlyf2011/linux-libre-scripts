@@ -14,16 +14,16 @@ die()
 switch_to_toplevel()
 {
 	path="$(pwd)"
-	while test -n "$path"
+	while test "$path" != "/"
 	do
-			test -e $path/MAINTAINERS && \
-			test -d $path/drivers && \
-			break
+		test -e $path/MAINTAINERS && \
+		test -d $path/drivers && \
+		break
 
 		path="$(dirname $path)"
 	done
 
-	test -n "$path"  || die "Can't find toplevel"
+	test "$path" != "/" || die "Can't find toplevel"
 	echo "$path"
 }
 

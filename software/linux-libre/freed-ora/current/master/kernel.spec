@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -22,6 +22,8 @@ Summary: The Linux kernel
 
 %if %{zipmodules}
 %global zipsed -e 's/\.ko$/\.ko.xz/'
+# for parallel xz processes, replace with 1 to go back to single process
+%global zcpu `nproc --all`
 %endif
 
 # define buildid .local
@@ -59,7 +61,7 @@ Summary: The Linux kernel
 
 # To be inserted between "patch" and "-4.".
 #define stablelibre -5.1%{?stablegnux}
-#define rcrevlibre  -5.1%{?rcrevgnux}
+%define rcrevlibre  -5.1%{?rcrevgnux}
 #define gitrevlibre -5.1%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
@@ -105,7 +107,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -458,7 +460,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-5.%{upstream_sublevel}
+Source6: deblob-5.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -592,26 +594,34 @@ Patch303: ACPI-scan-Fix-regression-related-to-X-Gene-UARTs.patch
 # rhbz 1574718
 Patch304: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
 
-# https://patchwork.kernel.org/patch/9820417/
-Patch305: qcom-msm89xx-fixes.patch
-
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
-Patch306: arm-sdhci-esdhc-imx-fixes.patch
+Patch305: arm-sdhci-esdhc-imx-fixes.patch
 
-Patch312: arm64-rock960-enable-tsadc.patch
+# Fix accepted for 5.3 https://patchwork.kernel.org/patch/10992783/
+Patch306: arm64-dts-rockchip-Update-DWC3-modules-on-RK3399-SoCs.patch
 
-Patch339: bcm2835-cpufreq-add-CPU-frequency-control-driver.patch
+# Raspberry Pi bits
+Patch330: ARM-cpufreq-support-for-Raspberry-Pi.patch
+
+Patch331: watchdog-bcm2835_wdt-Fix-module-autoload.patch
+
+Patch332: bcm2835-camera-Restore-return-behavior-of-ctrl_set_bitrate.patch
+
+Patch333: bcm2835-vchiq-use-interruptible-waits.patch
 
 # Tegra bits
 Patch340: arm64-tegra-jetson-tx1-fixes.patch
 
-# https://patchwork.kernel.org/patch/10858639/
-Patch341: arm64-tegra-Add-NVIDIA-Jetson-Nano-Developer-Kit-support.patch
+# QCom ACPI device support pieces
+Patch350: arm64-qcom-pinctrl-support-for-ACPI.patch
+Patch351: arm64-acpi-ignore-5.1-fadts-reported-as-5.0.patch
+Patch352: arm64-acpi-make-ac-and-battery-drivers-available-on-non-x86.patch
+Patch353: arm64-qcom-DWC3-USB-Add-support-for-ACPI-based-AArch64-Laptops.patch
+Patch354: arm64-ufs-qcom-Add-support-for-platforms-booting-ACPI.patch
 
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
-
 # rhbz 1431375
 Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
@@ -623,11 +633,10 @@ Patch507: 0001-Drop-that-for-now.patch
 # Submitted upstream at https://lkml.org/lkml/2019/4/23/89
 Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 
-# CVE-2019-3900 rhbz 1698757 1702940
-Patch524: net-vhost_net-fix-possible-infinite-loop.patch
+# build fix
+Patch527: v2-powerpc-mm-mark-more-tlb-functions-as-__always_inline.patch
 
-# Fix wifi on various ideapad models not working (rhbz#1703338)
-Patch526: 0001-platform-x86-ideapad-laptop-Remove-no_hw_rfkill_list.patch
+Patch530: crypto-ghash-fix-unaligned-memory-access-in-ghash_setkey.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1653,7 +1662,7 @@ BuildKernel %make_target %kernel_image %{_use_vdso}
     fi \
   fi \
   if [ "%{zipmodules}" -eq "1" ]; then \
-    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | xargs xz; \
+    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | xargs -P%{zcpu} xz; \
   fi \
 %{nil}
 
@@ -1918,6 +1927,159 @@ fi
 #
 #
 %changelog
+* Tue Jul  2 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.2-rc7-gnu.
+- Adjust deblob-check for ARM-cpufreq-support-for-Raspberry-Pi.patch.
+
+* Mon Jul 01 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc7.git0.1
+- Linux v5.2-rc7
+
+* Mon Jul 01 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Jun 28 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc6.git2.1
+- Linux v5.2-rc6-93-g556e2f6020bf
+
+* Tue Jun 25 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc6.git1.1
+- Linux v5.2-rc6-15-g249155c20f9b
+- Reenable debugging options.
+
+* Mon Jun 24 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc6.git0.1
+- Linux v5.2-rc6
+
+* Mon Jun 24 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Sat Jun 22 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- QCom ACPI fixes
+
+* Fri Jun 21 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc5.git4.1
+- Linux v5.2-rc5-290-g4ae004a9bca8
+
+* Thu Jun 20 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc5.git3.1
+- Linux v5.2-rc5-239-g241e39004581
+
+* Wed Jun 19 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc5.git2.1
+- Linux v5.2-rc5-224-gbed3c0d84e7e
+
+* Tue Jun 18 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc5.git1.1
+- Linux v5.2-rc5-177-g29f785ff76b6
+- Reenable debugging options.
+
+* Mon Jun 17 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc5.git0.1
+- Linux v5.2-rc5
+
+* Mon Jun 17 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Jun 14 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc4.git3.1
+- Linux v5.2-rc4-129-g72a20cee5d99
+
+* Fri Jun 14 2019 Jeremy Cline <jcline@redhat.com>
+- Fix the long-standing bluetooth breakage
+
+* Fri Jun 14 2019 Hans de Goede <hdegoede@redhat.com>
+- Fix the LCD panel an Asus EeePC 1025C not lighting up (rhbz#1697069)
+- Add small bugfix for new Logitech wireless keyboard support
+
+* Thu Jun 13 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc4.git2.1
+- Linux v5.2-rc4-45-gc11fb13a117e
+
+* Wed Jun 12 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Raspberry Pi: move to cpufreq driver accepted for upstream \o/
+
+* Wed Jun 12 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc4.git1.1
+- Linux v5.2-rc4-20-gaa7235483a83
+- Reenable debugging options.
+
+* Mon Jun 10 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc4.git0.1
+- Linux v5.2-rc4
+
+* Mon Jun 10 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Jun 07 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc3.git3.1
+- Linux v5.2-rc3-77-g16d72dd4891f
+
+* Thu Jun 06 2019 Jeremy Cline <jcline@redhat.com>
+- Fix incorrect permission denied with lock down off (rhbz 1658675)
+
+* Thu Jun 06 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc3.git2.1
+- Linux v5.2-rc3-37-g156c05917e09
+
+* Tue Jun 04 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc3.git1.1
+- Linux v5.2-rc3-24-g788a024921c4
+- Reenable debugging options.
+
+* Mon Jun 03 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc3.git0.1
+- Linux v5.2-rc3
+
+* Mon Jun 03 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri May 31 2019 Peter Robinson <pbrobinson@fedoraproject.org> 5.2.0-0.rc2.git1.2
+- Bump for ARMv7 fix
+
+* Thu May 30 2019 Justin M. Forbes <jforbes@redhat.com> - 5.2.0-0.rc2.git1.1
+- Linux v5.2-rc2-24-gbec7550cca10
+- Reenable debugging options.
+
+* Mon May 27 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc2.git0.1
+- Linux v5.2-rc2
+
+* Mon May 27 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri May 24 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc1.git3.1
+- Linux v5.2-rc1-233-g0a72ef899014
+
+* Wed May 22 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc1.git2.1
+- Linux v5.2-rc1-165-g54dee406374c
+
+* Tue May 21 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc1.git1.1
+- Linux v5.2-rc1-129-g9c7db5004280
+
+* Tue May 21 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc1.git0.2
+- Reenable debugging options.
+
+* Mon May 20 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc1.git0.1
+- Disable debugging options.
+- Linux V5.2-rc1
+
+* Sun May 19 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Arm config updates
+
+* Fri May 17 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git9.1
+- Linux v5.1-12505-g0ef0fd351550
+
+* Thu May 16 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git8.1
+- Linux v5.1-12065-g8c05f3b965da
+
+* Wed May 15 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git7.1
+- Linux v5.1-10909-g2bbacd1a9278
+
+* Tue May 14 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git6.1
+- Linux v5.1-10326-g7e9890a3500d
+
+* Mon May 13 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git5.1
+- Linux v5.1-10135-ga13f0655503a
+
+* Fri May 10 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git4.1
+- Linux v5.1-9573-gb970afcfcabd
+
+* Thu May 09 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git3.1
+- Linux v5.1-8122-ga2d635decbfa
+
+* Wed May 08 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git2.1
+- Linux v5.1-5445-g80f232121b69
+
+* Tue May 07 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.0-0.rc0.git1.1
+- Linux v5.1-1199-g71ae5fc87c34
+- Reenable debugging options.
+
+* Mon May  6 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Enable Arm STM32MP1
+
 * Mon May  6 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.1-gnu.
 
