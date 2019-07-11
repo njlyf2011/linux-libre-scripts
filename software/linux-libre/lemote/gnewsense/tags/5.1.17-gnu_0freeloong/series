@@ -1,0 +1,7 @@
+5.1-rc7-41d798e2e4-loongson-community.patch -p1 # loongson-community patches
+loongson-iobarrier-unregress.patch -p1 # fix early irq loss
+gnewsense-binutils-flag.patch -p0
+100gnu+freedo.patch -p1 # 100% Freedo[m] GNU+Freedo logo
+config.patch -p0 # config file
+kpkg-non-usr-bin-make.patch -p1 # use newer GNU make from PATH
+kpkg-mipsel.patch -p0 # use vmlinuz
