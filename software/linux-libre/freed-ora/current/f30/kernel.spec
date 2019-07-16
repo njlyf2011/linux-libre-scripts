@@ -58,7 +58,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.1%{?stablegnux}
+%define stablelibre -5.1%{?stablegnux}
 #define rcrevlibre  -5.1%{?rcrevgnux}
 #define gitrevlibre -5.1%{?gitrevgnux}
 
@@ -92,7 +92,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 18
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -640,9 +640,6 @@ Patch526: 0001-platform-x86-ideapad-laptop-Remove-no_hw_rfkill_list.patch
 # CVE-2019-12378 rhbz 1715459 1715460
 Patch528: ipv6_sockglue-fix-missing-check-bug-in-ip6_ra_control.patch
 
-# CVE-2019-3846 rhbz 1713059 1715475
-Patch529: Buffer-overflow-read-checks-in-mwifiex.patch
-
 # CVE-2019-12380 rhbz 1715494 1715495
 Patch530: 0001-efi-x86-Add-missing-error-handling-to-old_memmap-1-1.patch
 
@@ -666,9 +663,6 @@ Patch536: scsi-mpt3sas_ctl-fix-double-fetch-bug-in_ctl_ioctl_main.patch
 
 # CVE-2019-12614 rhbz 1718176 1718185
 Patch538: powerpc-fix-a-missing-check-in-dlpar_parse_cc_property.patch
-
-# CVE-2019-10126 rhbz 1716992 1720122
-Patch541: mwifiex-Fix-heap-overflow-in-mwifiex_uap_parse_tail_ies.patch
 
 # Fix the LCD panel on the GPD MicroPC not working, pending as fixes for 5.2
 Patch544: drm-panel-orientation-quirks.patch
@@ -1970,6 +1964,12 @@ fi
 #
 #
 %changelog
+* Mon Jul 15 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.1.18-gnu.
+
+* Mon Jul 15 2019 Jeremy Cline <jcline@redhat.com> - 5.1.18-300
+- Linux v5.1.18
+
 * Thu Jul 11 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.1.17-gnu.
 
