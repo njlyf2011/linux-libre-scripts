@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-07-10 19:29:28.191402427 -0400
++++ .config	2019-07-15 21:58:33.566294384 -0400
 @@ -0,0 +1,5936 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 5.1.17-gnu Kernel Configuration
++# Linux/mips 5.1.18-gnu Kernel Configuration
 +#
 +
 +#
@@ -2365,7 +2365,7 @@ Index: .config
 +#
 +CONFIG_AMD_PHY=m
 +CONFIG_AQUANTIA_PHY=m
-+# CONFIG_ASIX_PHY is not set
++# CONFIG_AX88796B_PHY is not set
 +CONFIG_AT803X_PHY=m
 +CONFIG_BCM7XXX_PHY=m
 +CONFIG_BCM87XX_PHY=m
