@@ -1,0 +1,69 @@
+Index: debian/ruleset/arches/mipsel.mk
+===================================================================
+--- debian/ruleset/arches/mipsel.mk.orig	2009-04-01 16:19:58.000000000 -0400
++++ debian/ruleset/arches/mipsel.mk	2017-02-06 14:31:59.000000000 -0500
+@@ -38,14 +38,19 @@
+ 
+ # Default value
+ ifeq (,$(kimage))
+-  kimage := vmlinux
++  kimage := vmlinuz
+ endif
+ ifeq (,$(kimagesrc))
+   kimagesrc := $(kimage)
+ endif
+ 
+ NEED_DIRECT_GZIP_IMAGE = NO
+-kimagedest = $(INT_IMAGE_DESTDIR)/vmlinux-$(KERNELRELEASE)
++kimagedest = $(INT_IMAGE_DESTDIR)/$(kimagesrc)-$(KERNELRELEASE)
++ifeq ($(kimage),vmlinuz)
++  int_install_vmlinux := YES
++  kelfimagesrc = vmlinux
++  kelfimagedest = $(INT_IMAGE_DESTDIR)/$(kelfimagesrc)-$(KERNELRELEASE)
++endif
+ 
+ ifneq ($(shell if [ $(VERSION)  -ge  2 ]  && [ $(PATCHLEVEL) -ge 5 ] &&    \
+                   [ $(SUBLEVEL) -ge 41 ]; then echo new;                   \
+Index: debian/ruleset/targets/debug.mk
+===================================================================
+--- debian/ruleset/targets/debug.mk.orig	2017-02-08 09:39:07.444096179 -0500
++++ debian/ruleset/targets/debug.mk	2017-02-08 09:40:30.529350624 -0500
+@@ -53,8 +53,8 @@
+           $(install_file) debian/stamp/conf/vars  	$(DOCDIR)/conf.vars
+ 	$(install_file) CREDITS                         $(DOCDIR)/
+ 	$(install_file) MAINTAINERS                     $(DOCDIR)/
+-	$(install_file) REPORTING-BUGS                  $(DOCDIR)/
+-	$(install_file) README                          $(DOCDIR)/
++	$(install_file) Documentation/admin-guide/reporting-bugs.rst                  $(DOCDIR)/REPORTING-BUGS
++	$(install_file) Documentation/admin-guide/README.rst                          $(DOCDIR)/README
+ 	if test -f README.Debian ; then                                                 \
+            $(install_file) README.Debian                $(DOCDIR)/README.Debian.1st;\
+ 	fi
+Index: debian/ruleset/targets/headers.mk
+===================================================================
+--- debian/ruleset/targets/headers.mk.orig	2017-02-08 09:39:07.560919083 -0500
++++ debian/ruleset/targets/headers.mk	2017-02-08 09:41:09.818102582 -0500
+@@ -69,8 +69,8 @@
+           $(install_file) debian/stamp/conf/vars  	$(DOCDIR)/conf.vars
+ 	$(install_file) CREDITS                         $(DOCDIR)/
+ 	$(install_file) MAINTAINERS                     $(DOCDIR)/
+-	$(install_file) REPORTING-BUGS                  $(DOCDIR)/
+-	$(install_file) README                          $(DOCDIR)/
++	$(install_file) Documentation/admin-guide/reporting-bugs.rst                  $(DOCDIR)/REPORTING-BUGS
++	$(install_file) Documentation/admin-guide/README.rst                          $(DOCDIR)/README
+ 	if test -f README.Debian ; then                                                 \
+            $(install_file) README.Debian                $(DOCDIR)/README.Debian.1st;\
+ 	fi
+Index: debian/ruleset/targets/source.mk
+===================================================================
+--- debian/ruleset/targets/source.mk.orig	2017-02-08 09:42:11.883294236 -0500
++++ debian/ruleset/targets/source.mk	2017-02-08 09:42:29.729000948 -0500
+@@ -46,7 +46,7 @@
+ ######################################################################
+ #### Add documentation to /usr/share/doc
+ ######################################################################
+-	$(install_file) README                         $(DOCDIR)/README
++	$(install_file) Documentation/admin-guide/README.rst                          $(DOCDIR)/README
+ 	$(install_file) debian/changelog               $(DOCDIR)/changelog.Debian
+ 	$(install_file) $(DEBDIR)/docs/README          $(DOCDIR)/debian.README
+ 	$(install_file) $(DEBDIR)/docs/README.modules  $(DOCDIR)/
