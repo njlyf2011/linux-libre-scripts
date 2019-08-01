@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -628,17 +628,18 @@ Patch507: 0001-Drop-that-for-now.patch
 # Submitted upstream at https://lkml.org/lkml/2019/4/23/89
 Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 
-# build fix
-Patch527: v2-powerpc-mm-mark-more-tlb-functions-as-__always_inline.patch
-
 # Fix the LCD panel orientation on the GPD MicroPC, pending as fix for 5.3
 Patch531: drm-panel-orientation-quirks.patch
 
 # rhbz 1732045
 Patch532: 0001-dma-direct-correct-the-physical-addr-in-dma_direct_s.patch
 
-# This should make stable soon
+# These should make stable soon
 Patch533: for-v5.2-iwlwifi-mvm-disable-TX-AMSDU-on-older-NICs.patch
+Patch534: stable-v5.2-drm-i915-vbt-Fix-VBT-parsing-for-the-PSR-section.patch
+
+# CVE-2019-10207 rhbz 1733874 1734242
+Patch535: bluetooth-hci_uart-check-for-missing-tty-operations.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1929,6 +1930,16 @@ fi
 #
 #
 %changelog
+* Wed Jul 31 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.2.5-gnu.
+
+* Wed Jul 31 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.5-200
+- Linux v5.2.5
+- Fix CVE-2019-10207 (rhbz 1733874 1734242)
+
+* Tue Jul 30 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix for screen freezes with i915
+
 * Mon Jul 29 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.2.4-gnu.
 
