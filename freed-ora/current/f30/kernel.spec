@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -643,6 +643,9 @@ Patch535: 0001-Revert-for-bz-1737046.patch
 
 # rhbz 1730762
 Patch526: HID-input-fix-a4tech-horizontal-wheel-custom-usage.patch
+
+# rhbz 1737171
+Patch527: 1-1-netfilter-nf_tables-fix-module-autoload-for-redir.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1933,6 +1936,15 @@ fi
 #
 #
 %changelog
+* Fri Aug  9 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.2.7-gnu.
+
+* Thu Aug 08 2019 Justin M. Forbes <jforbes@redhat.com> - 5.2.7-200
+- Linux v5.2.7
+
+* Tue Aug 06 2019 Laura Abbott <labbott@redhat.com>
+- Fix netfilter regression (rhbz 1737171)
+
 * Tue Aug  6 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.2.6-gnu.
 
