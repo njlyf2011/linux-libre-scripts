@@ -1,0 +1,28 @@
+Our binutils somehow ended up with a -mfix-gs2f-kernel, rather than
+-mfix-ls2f-kernel.  Cope with it.
+
+Index: arch/mips/loongson/Platform
+===================================================================
+--- arch/mips/loongson/Platform.orig	2010-10-25 19:09:49.000000000 +0000
++++ arch/mips/loongson/Platform	2010-10-25 19:10:44.000000000 +0000
+@@ -10,6 +10,12 @@
+ 	$(call cc-option,-march=loongson2f,-march=r4600)
+ # Enable the workarounds for Loongson2f
+ ifdef CONFIG_CPU_LOONGSON2F_WORKAROUNDS
++ ifneq ($(call as-option,-Wa$(comma)-mfix-gs2f-kernel,),)
++   cflags-$(CONFIG_CPU_NOP_WORKAROUNDS) += -Wa$(comma)-mfix-gs2f-kernel
++   ifneq ($(CONFIG_CPU_NOP_WORKAROUNDS),$(CONFIG_CPU_JUMP_WORKAROUNDS))
++     cflags-$(CONFIG_CPU_JUMP_WORKAROUNDS) += -Wa$(comma)-mfix-gs2f-kernel
++   endif
++ else
+   ifeq ($(call as-option,-Wa$(comma)-mfix-loongson2f-nop,),)
+     $(error only binutils >= 2.20.2 have needed option -mfix-loongson2f-nop)
+   else
+@@ -20,6 +26,7 @@
+   else
+     cflags-$(CONFIG_CPU_JUMP_WORKAROUNDS) += -Wa$(comma)-mfix-loongson2f-jump
+   endif
++ endif
+ endif
+ 
+ #
