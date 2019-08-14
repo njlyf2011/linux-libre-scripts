@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-07-25 12:56:17.463865615 -0400
-@@ -0,0 +1,5019 @@
++++ .config	2019-08-13 18:37:52.945947155 -0400
+@@ -0,0 +1,5020 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 3.16.71-gnu Kernel Configuration
++# Linux/mips 3.16.72-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -4756,6 +4756,7 @@ Index: .config
 +# CONFIG_ASYNC_RAID6_TEST is not set
 +# CONFIG_TEST_STRING_HELPERS is not set
 +# CONFIG_TEST_KSTRTOX is not set
++# CONFIG_TEST_HASH is not set
 +# CONFIG_DMA_API_DEBUG is not set
 +# CONFIG_TEST_MODULE is not set
 +# CONFIG_TEST_USER_COPY is not set
