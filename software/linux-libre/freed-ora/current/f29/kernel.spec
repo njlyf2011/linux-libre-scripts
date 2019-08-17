@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -629,23 +629,20 @@ Patch507: 0001-Drop-that-for-now.patch
 Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 
 # Fix the LCD panel orientation on the GPD MicroPC, pending as fix for 5.3
-Patch531: drm-panel-orientation-quirks.patch
+Patch510: drm-panel-orientation-quirks.patch
 
 # rhbz 1732045
-Patch532: 0001-dma-direct-correct-the-physical-addr-in-dma_direct_s.patch
-
-# These should make stable soon
-Patch533: for-v5.2-iwlwifi-mvm-disable-TX-AMSDU-on-older-NICs.patch
-
-# rhbz 1737046 temporary revert until issue is fixed upstream
-Patch535: 0001-Revert-for-bz-1737046.patch
+Patch511: 0001-dma-direct-correct-the-physical-addr-in-dma_direct_s.patch
 
 # rhbz 1730762
-Patch526: HID-input-fix-a4tech-horizontal-wheel-custom-usage.patch
+Patch512: HID-input-fix-a4tech-horizontal-wheel-custom-usage.patch
 
-# rhbz 1737171
-Patch527: 1-1-netfilter-nf_tables-fix-module-autoload-for-redir.patch
+# These should make stable soon
+Patch513: for-v5.2-iwlwifi-mvm-disable-TX-AMSDU-on-older-NICs.patch
 
+# rhbz 1733369
+# https://www.spinics.net/lists/linux-wireless/msg188751.html
+Patch514: iwlwifi-Add-support-for-SAR-South-Korea-limitation.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1479,7 +1476,6 @@ BuildKernel() {
     cp -a --parents tools/include/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/stack.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    cp -a --parents arch/x86/purgatory/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/setup-x86_64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/entry64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -1936,6 +1932,12 @@ fi
 #
 #
 %changelog
+* Sat Aug 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.2.9-gnu.
+
+* Fri Aug 16 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.9-100
+- Linux v5.2.9
+
 * Mon Aug 12 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.2.8-gnu.
 
