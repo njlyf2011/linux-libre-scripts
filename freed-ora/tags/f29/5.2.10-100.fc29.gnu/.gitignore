@@ -1,0 +1,15 @@
+.svn
+clog
+*.bz2
+<<<<<<< HEAD
+*.xz
+=======
+*.gz
+>>>>>>> 866d1567e2be7f57009ec053bb5f125b7d845f03
+*.rpm
+*.orig
+*.sign
+kernel-[45].*/
+perf-man-*.tar.gz
+kernel-headers/
+kernel-tools/
