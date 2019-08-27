@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 9
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -639,10 +639,6 @@ Patch512: HID-input-fix-a4tech-horizontal-wheel-custom-usage.patch
 
 # These should make stable soon
 Patch513: for-v5.2-iwlwifi-mvm-disable-TX-AMSDU-on-older-NICs.patch
-
-# rhbz 1733369
-# https://www.spinics.net/lists/linux-wireless/msg188751.html
-Patch514: iwlwifi-Add-support-for-SAR-South-Korea-limitation.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1932,6 +1928,12 @@ fi
 #
 #
 %changelog
+* Mon Aug 26 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.2.10-gnu.
+
+* Mon Aug 26 2019 Justin M. Forbes <jforbes@fedoraproject.org> - 5.2.10-200
+- Linux v5.2.10
+
 * Sat Aug 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.2.9-gnu.
 
