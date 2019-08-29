@@ -1,0 +1,43 @@
+Our binutils somehow ended up with a -mfix-gs2f-kernel, rather than
+-mfix-ls2f-kernel.  Cope with it.
+Also, the old ld can't cope with thin archives very well: it fails
+to create vmlinux.o.  So, disable thin archives.
+
+Index: arch/mips/loongson64/Platform
+===================================================================
+--- arch/mips/loongson64/Platform.orig	2015-08-15 10:30:17.338956604 -0400
++++ arch/mips/loongson64/Platform	2015-08-15 10:32:47.841031800 -0400
+@@ -10,6 +10,12 @@
+ 	$(call cc-option,-march=loongson2f,-march=r4600)
+ # Enable the workarounds for Loongson2f
+ ifdef CONFIG_CPU_LOONGSON2F_WORKAROUNDS
++ ifneq ($(call as-option,-Wa$(comma)-mfix-gs2f-kernel,),)
++   cflags-$(CONFIG_CPU_NOP_WORKAROUNDS) += -Wa$(comma)-mfix-gs2f-kernel
++   ifneq ($(CONFIG_CPU_NOP_WORKAROUNDS),$(CONFIG_CPU_JUMP_WORKAROUNDS))
++     cflags-$(CONFIG_CPU_JUMP_WORKAROUNDS) += -Wa$(comma)-mfix-gs2f-kernel
++   endif
++ else
+   ifeq ($(call as-option,-Wa$(comma)-mfix-loongson2f-nop,),)
+     $(error only binutils >= 2.20.2 have needed option -mfix-loongson2f-nop)
+   else
+@@ -20,6 +26,7 @@
+   else
+     cflags-$(CONFIG_CPU_JUMP_WORKAROUNDS) += -Wa$(comma)-mfix-loongson2f-jump
+   endif
++ endif
+ endif
+ 
+ #
+Index: arch/Kconfig
+===================================================================
+--- arch/Kconfig.orig	2017-08-20 17:13:52.000000000 -0400
++++ arch/Kconfig	2017-08-30 07:40:42.626782220 -0400
+@@ -575,7 +575,7 @@
+ endchoice
+ 
+ config THIN_ARCHIVES
+-	def_bool y
++	bool
+ 	help
+ 	  Select this if the architecture wants to use thin archives
+ 	  instead of ld -r to create the built-in.o files.
