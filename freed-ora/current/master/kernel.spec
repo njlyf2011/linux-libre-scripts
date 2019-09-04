@@ -6,7 +6,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1. For rawhide
 # and/or a kernel built from an rc or git snapshot, released_kernel should
 # be 0.
-%global released_kernel 1
+%global released_kernel 0
 
 # Sign modules on x86.  Make sure the config files match this setting if more
 # architectures are added.
@@ -60,9 +60,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.1%{?stablegnux}
-%define rcrevlibre  -5.1%{?rcrevgnux}
-#define gitrevlibre -5.1%{?gitrevgnux}
+#define stablelibre -5.2%{?stablegnux}
+%define rcrevlibre  -5.2%{?rcrevgnux}
+#define gitrevlibre -5.2%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -107,7 +107,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 0
+%global rcrev 7
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -403,7 +403,7 @@ Version: %{rpmversion}
 Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
-ExclusiveArch: %{all_x86} x86_64 s390x %{arm} aarch64 ppc64le
+ExclusiveArch: x86_64 s390x %{arm} aarch64 ppc64le
 ExclusiveOS: Linux
 %ifnarch %{nobuildarches}
 Requires: kernel-libre-core-uname-r = %{KVERREL}%{?variant}
@@ -460,7 +460,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-# Source6: deblob-5.%{upstream_sublevel}
+Source6: deblob-5.%{upstream_sublevel}
 
 Source11: x509.genkey
 Source12: remove-binary-diff.pl
@@ -584,40 +584,26 @@ Patch212: efi-secureboot.patch
 # 300 - ARM patches
 Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
 
-# http://www.spinics.net/lists/linux-tegra/msg26029.html
-Patch301: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
-# http://patchwork.ozlabs.org/patch/587554/
-Patch302: ARM-tegra-usb-no-reset.patch
+# RHBZ Bug 1576593 - work around while vendor investigates
+Patch301: arm-make-highpte-not-expert.patch
 
 # https://patchwork.kernel.org/patch/10351797/
-Patch303: ACPI-scan-Fix-regression-related-to-X-Gene-UARTs.patch
+Patch302: ACPI-scan-Fix-regression-related-to-X-Gene-UARTs.patch
 # rhbz 1574718
-Patch304: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
+Patch303: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
+
+# http://www.spinics.net/lists/linux-tegra/msg26029.html
+Patch304: usb-phy-tegra-Add-38.4MHz-clock-table-entry.patch
+# http://patchwork.ozlabs.org/patch/587554/
+Patch305: ARM-tegra-usb-no-reset.patch
 
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
-Patch305: arm-sdhci-esdhc-imx-fixes.patch
-
-# Fix accepted for 5.3 https://patchwork.kernel.org/patch/10992783/
-Patch306: arm64-dts-rockchip-Update-DWC3-modules-on-RK3399-SoCs.patch
-
-# Raspberry Pi bits
-Patch330: ARM-cpufreq-support-for-Raspberry-Pi.patch
-
-Patch331: watchdog-bcm2835_wdt-Fix-module-autoload.patch
-
-Patch332: bcm2835-camera-Restore-return-behavior-of-ctrl_set_bitrate.patch
-
-Patch333: bcm2835-vchiq-use-interruptible-waits.patch
+Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
 # Tegra bits
-Patch340: arm64-tegra-jetson-tx1-fixes.patch
-
-# QCom ACPI device support pieces
-Patch350: arm64-qcom-pinctrl-support-for-ACPI.patch
-Patch351: arm64-acpi-ignore-5.1-fadts-reported-as-5.0.patch
-Patch352: arm64-acpi-make-ac-and-battery-drivers-available-on-non-x86.patch
-Patch353: arm64-qcom-DWC3-USB-Add-support-for-ACPI-based-AArch64-Laptops.patch
-Patch354: arm64-ufs-qcom-Add-support-for-platforms-booting-ACPI.patch
+Patch320: arm64-tegra-jetson-tx1-fixes.patch
+# https://www.spinics.net/lists/linux-tegra/msg43110.html
+Patch321: arm64-tegra-Jetson-TX2-Allow-bootloader-to-configure.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -626,17 +612,11 @@ Patch354: arm64-ufs-qcom-Add-support-for-platforms-booting-ACPI.patch
 Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # gcc9 fixes
-Patch506: 0001-s390-jump_label-Correct-asm-contraint.patch
 Patch507: 0001-Drop-that-for-now.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1701096
 # Submitted upstream at https://lkml.org/lkml/2019/4/23/89
 Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
-
-# build fix
-Patch527: v2-powerpc-mm-mark-more-tlb-functions-as-__always_inline.patch
-
-Patch530: crypto-ghash-fix-unaligned-memory-access-in-ghash_setkey.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -910,47 +890,6 @@ if [ "%{patches}" != "%%{patches}" ] ; then
     fi
   done
 fi 2>/dev/null
-
-patch_command='patch -p1 -F1 -s'
-ApplyPatch()
-{
-  local patch=$1
-  shift
-  if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
-    exit 1
-  fi
-  if ! grep -E "^Patch[0-9]+: $patch\$" %{_specdir}/${RPM_PACKAGE_NAME%%%%-libre%{?variant}}.spec ; then
-    if [ "${patch:0:8}" != "patch-5." ] &&
-       [ "${patch:0:14}" != "patch-libre-5." ] ; then
-      echo "ERROR: Patch  $patch  not listed as a source patch in specfile"
-      exit 1
-    fi
-  fi 2>/dev/null
-  case $patch in
-  patch*-gnu*-gnu*) ;;
-  *) $RPM_SOURCE_DIR/deblob-check $RPM_SOURCE_DIR/$patch || exit 1 ;;
-  esac
-  case "$patch" in
-  *.bz2) bunzip2 < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *.gz)  gunzip  < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *.xz)  unxz    < "$RPM_SOURCE_DIR/$patch" | $patch_command ${1+"$@"} ;;
-  *) $patch_command ${1+"$@"} < "$RPM_SOURCE_DIR/$patch" ;;
-  esac
-}
-
-# don't apply patch if it's empty
-ApplyOptionalPatch()
-{
-  local patch=$1
-  shift
-  if [ ! -f $RPM_SOURCE_DIR/$patch ]; then
-    exit 1
-  fi
-  local C=$(wc -l $RPM_SOURCE_DIR/$patch | awk '{print $1}')
-  if [ "$C" -gt 9 ]; then
-    ApplyPatch $patch ${1+"$@"}
-  fi
-}
 
 # First we unpack the kernel tarball.
 # If this isn't the first make prep, we use links to the existing clean tarball
@@ -1470,7 +1409,6 @@ BuildKernel() {
     cp -a --parents tools/include/* $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/purgatory.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/stack.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
-    cp -a --parents arch/x86/purgatory/string.c $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/setup-x86_64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/purgatory/entry64.S $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
     cp -a --parents arch/x86/boot/string.h $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/
@@ -1927,6 +1865,155 @@ fi
 #
 #
 %changelog
+* Wed Sep  4 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3-rc7-gnu.
+
+* Tue Sep 03 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc7.git0.1
+- Linux v5.3-rc7
+
+* Tue Sep 03 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Thu Aug 29 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc6.git2.1
+- Linux v5.3-rc6-119-g9cf6b756cdf2
+
+* Wed Aug 28 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc6.git1.1
+- Linux v5.3-rc6-115-g9e8312f5e160
+
+* Wed Aug 28 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Aug 26 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc6.git0.1
+- Linux v5.3-rc6
+
+* Mon Aug 26 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Aug 23 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc5.git2.1
+- Linux v5.3-rc5-224-gdd469a456047
+
+* Thu Aug 22 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc5.git1.1
+- Linux v5.3-rc5-149-gbb7ba8069de9
+
+* Thu Aug 22 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Aug 19 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc5.git0.1
+- Linux v5.3-rc5
+
+* Mon Aug 19 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Aug 16 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc4.git3.1
+- Linux v5.3-rc4-71-ga69e90512d9d
+
+* Thu Aug 15 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc4.git2.1
+- Linux v5.3-rc4-53-g41de59634046
+
+* Wed Aug 14 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc4.git1.1
+- Linux v5.3-rc4-4-gee1c7bd33e66
+
+* Wed Aug 14 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Tue Aug 13 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc4.git0.1
+- Linux v5.3-rc4
+
+* Tue Aug 13 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Wed Aug 07 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc3.git1.1
+- Linux v5.3-rc3-282-g33920f1ec5bf
+
+* Wed Aug 07 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Aug 05 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc3.git0.1
+- Linux v5.3-rc3
+
+* Mon Aug 05 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Aug 02 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc2.git4.1
+- Linux v5.3-rc2-70-g1e78030e5e5b
+
+* Thu Aug 01 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc2.git3.1
+- Linux v5.3-rc2-60-g5c6207539aea
+- Enable 8250 serial ports on powerpc
+
+* Wed Jul 31 2019 Peter Robinson <pbrobinson@fedoraproject.org> 5.3.0-0.rc2.git2.2
+- Enable IMA Appraisal
+
+* Wed Jul 31 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc2.git2.1
+- Linux v5.3-rc2-51-g4010b622f1d2
+
+* Tue Jul 30 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc2.git1.1
+- Linux v5.3-rc2-11-g2a11c76e5301
+
+* Tue Jul 30 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Mon Jul 29 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc2.git0.1
+- Linux v5.3-rc2
+
+* Mon Jul 29 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jul 26 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc1.git4.1
+- Linux v5.3-rc1-96-g6789f873ed37
+- Enable nvram driver (rhbz 1732612)
+
+* Thu Jul 25 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc1.git3.1
+- Linux v5.3-rc1-82-gbed38c3e2dca
+
+* Wed Jul 24 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc1.git2.1
+- Linux v5.3-rc1-59-gad5e427e0f6b
+
+* Tue Jul 23 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc1.git1.1
+- Linux v5.3-rc1-56-g7b5cf701ea9c
+
+* Tue Jul 23 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
+* Sun Jul 21 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc1.git0.1
+- Linux v5.3-rc1
+
+* Sun Jul 21 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Fri Jul 19 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- RHBZ Bug 1576593 - work around while vendor investigates
+
+* Thu Jul 18 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git7.1
+- Linux v5.2-11564-g22051d9c4a57
+
+* Wed Jul 17 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git6.1
+- Linux v5.2-11043-g0a8ad0ffa4d8
+
+* Tue Jul 16 2019 Jeremy Cline <jcline@redhat.com>
+- Fix a firmware crash in Intel 7000 and 8000 devices (rhbz 1716334)
+
+* Tue Jul 16 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git5.1
+- Linux v5.2-10808-g9637d517347e
+
+* Fri Jul 12 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Turn off i686 builds
+
+* Fri Jul 12 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git4.1
+- Linux v5.2-7109-gd7d170a8e357
+
+* Thu Jul 11 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git3.1
+- Linux v5.2-3311-g5450e8a316a6
+
+* Wed Jul 10 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git2.1
+- Linux v5.2-3135-ge9a83bd23220
+
+* Tue Jul 09 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc0.git1.1
+- Linux v5.2-915-g5ad18b2e60b7
+
+* Tue Jul 09 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Mon Jul  8 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.2-gnu.
 
