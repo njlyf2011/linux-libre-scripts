@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-08-30 00:49:00.838236205 -0400
-@@ -0,0 +1,5445 @@
++++ .config	2019-09-07 15:20:33.682058559 -0400
+@@ -0,0 +1,5446 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.4.190-gnu Kernel Configuration
++# Linux/mips 4.4.191-gnu Kernel Configuration
 +#
 +CONFIG_MIPS=y
 +
@@ -5136,6 +5136,7 @@ Index: .config
 +# CONFIG_TEST_KSTRTOX is not set
 +# CONFIG_TEST_PRINTF is not set
 +# CONFIG_TEST_RHASHTABLE is not set
++# CONFIG_TEST_HASH is not set
 +# CONFIG_DMA_API_DEBUG is not set
 +# CONFIG_TEST_LKM is not set
 +# CONFIG_TEST_USER_COPY is not set
