@@ -107,7 +107,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -604,6 +604,12 @@ Patch306: arm-sdhci-esdhc-imx-fixes.patch
 Patch320: arm64-tegra-jetson-tx1-fixes.patch
 # https://www.spinics.net/lists/linux-tegra/msg43110.html
 Patch321: arm64-tegra-Jetson-TX2-Allow-bootloader-to-configure.patch
+
+# QCom laptop bits
+# https://patchwork.kernel.org/patch/11133827/
+Patch330: arm64-qcom-i2c-geni-Disable-DMA-processing-on-the-Lenovo-Yoga-C630.patch
+# https://patchwork.kernel.org/patch/11133293/
+Patch332: arm64-dts-qcom-Add-Lenovo-Yoga-C630.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -1865,6 +1871,21 @@ fi
 #
 #
 %changelog
+* Tue Sep 10 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3-rc8-gnu.
+
+* Tue Sep 10 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc8.git0.1
+- Linux v5.3-rc8
+
+* Tue Sep 10 2019 Laura Abbott <labbott@redhat.com>
+- Disable debugging options.
+
+* Thu Sep 05 2019 Laura Abbott <labbott@redhat.com> - 5.3.0-0.rc7.git1.1
+- Linux v5.3-rc7-2-g3b47fd5ca9ea
+
+* Thu Sep 05 2019 Laura Abbott <labbott@redhat.com>
+- Reenable debugging options.
+
 * Wed Sep  4 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3-rc7-gnu.
 
