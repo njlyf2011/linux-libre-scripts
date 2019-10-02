@@ -44,7 +44,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 100
+%global baserelease 300
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -618,14 +618,17 @@ Patch332: arm64-dts-qcom-Add-Lenovo-Yoga-C630.patch
 Patch501: input-rmi4-remove-the-need-for-artifical-IRQ.patch
 
 # gcc9 fixes
-Patch507: 0001-Drop-that-for-now.patch
+Patch502: 0001-Drop-that-for-now.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1701096
 # Submitted upstream at https://lkml.org/lkml/2019/4/23/89
-Patch508: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
+Patch503: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 
 # rhbz 1753099
-Patch509: dwc3-fix.patch
+Patch504: dwc3-fix.patch
+
+# https://patchwork.kernel.org/patch/11158395/
+Patch505: iwlwifi-fw-don-t-send-GEO_TX_POWER_LIMIT-command-to-FW-version-36.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1874,7 +1877,10 @@ fi
 #
 #
 %changelog
-* Tue Sep 24 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Sep 23 2019 Peter Robinson <pbrobinson@fedoraproject.org> 5.3.1-300
+- Upstream patch for iwlwifi 8000 series FW issues (rhbz: 1749949)
+
+* Mon Sep 23 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Sep 24
 - GNU Linux-libre 5.3.1-gnu.
 
 * Mon Sep 23 2019 Laura Abbott <labbott@redhat.com> - 5.3.1-100
