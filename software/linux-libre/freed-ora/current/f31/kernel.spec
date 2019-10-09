@@ -60,9 +60,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.2%{?stablegnux}
-%define rcrevlibre  -5.2%{?rcrevgnux}
-#define gitrevlibre -5.2%{?gitrevgnux}
+%define stablelibre -5.3%{?stablegnux}
+#define rcrevlibre  -5.3%{?rcrevgnux}
+#define gitrevlibre -5.3%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -507,7 +507,7 @@ Source1000: kernel-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}.xz
+%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Source5000: %{stable_patch_00}
 %endif
 
@@ -600,10 +600,21 @@ Patch305: ARM-tegra-usb-no-reset.patch
 # https://patchwork.kernel.org/project/linux-mmc/list/?submitter=71861
 Patch306: arm-sdhci-esdhc-imx-fixes.patch
 
+# https://patchwork.kernel.org/patch/11173461/
+Patch307: arm64-dts-rockchip-fix-RockPro64-vdd-log-regulator-settings.patch
+# https://patchwork.kernel.org/patch/11155461/
+Patch308: arm64-dts-rockchip-fix-Rockpro64-RK808-interrupt-line.patch
+
 # Tegra bits
 Patch320: arm64-tegra-jetson-tx1-fixes.patch
 # https://www.spinics.net/lists/linux-tegra/msg43110.html
 Patch321: arm64-tegra-Jetson-TX2-Allow-bootloader-to-configure.patch
+# https://patchwork.kernel.org/patch/11171225/
+Patch322: mfd-max77620-Do-not-allocate-IRQs-upfront.patch
+# https://patchwork.ozlabs.org/patch/1170631/
+Patch323: gpio-max77620-Use-correct-unit-for-debounce-times.patch
+# https://www.spinics.net/lists/linux-tegra/msg44216.html
+Patch325: arm64-tegra186-enable-USB-on-Jetson-TX2.patch
 
 # QCom laptop bits
 # https://patchwork.kernel.org/patch/11133827/
@@ -626,12 +637,6 @@ Patch503: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 
 # rhbz 1753099
 Patch504: dwc3-fix.patch
-
-# https://patchwork.kernel.org/patch/11158395/
-Patch505: iwlwifi-fw-don-t-send-GEO_TX_POWER_LIMIT-command-to-FW-version-36.patch
-
-# new ids
-Patch506: 0001-x86-amd_nb-Add-PCI-device-IDs-for-family-17h-model-7.patch
 
 # rhbz 1752961
 Patch507: v2-1-2-efi-tpm-Don-t-access-event--count-when-it-isn-t-mapped..patch
@@ -1884,6 +1889,20 @@ fi
 #
 #
 %changelog
+* Tue Oct  8 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3.4-gnu.
+
+* Mon Oct  7 2019 Peter Robinson <pbrobinson@fedoraproject.org> 5.3.4-300
+- Linux v5.3.4
+
+* Sun Oct  6 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fixes for RockPro64
+- Fixes for Jetson-TX series devices
+
+* Thu Oct 03 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-17052 CVE-2019-17053 CVE-2019-17054 CVE-2019-17055 CVE-2019-17056
+  (rhbz 1758239 1758240 1758242 1758243 1758245 1758246 1758248 1758249 1758256 1758257)
+
 * Thu Oct  3 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3.2-gnu.
 
