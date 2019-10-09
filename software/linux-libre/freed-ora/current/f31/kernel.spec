@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 4
+%define stable_update 5
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -641,6 +641,8 @@ Patch504: dwc3-fix.patch
 # rhbz 1752961
 Patch507: v2-1-2-efi-tpm-Don-t-access-event--count-when-it-isn-t-mapped..patch
 Patch508: v3-tpm-only-set-efi_tpm_final_log_size-after-successful-event-log-parsing.patch
+
+Patch509: PATCH-v2-selinux-allow-labeling-before-policy-is-loaded.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1890,6 +1892,15 @@ fi
 #
 %changelog
 * Tue Oct  8 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3.5-gnu.
+
+* Tue Oct 08 2019 Laura Abbott <labbott@redhat.com> - 5.3.5-300
+- Linux v5.3.5
+
+* Mon Oct  7 2019 Laura Abbott <labbott@redhat.com>
+- selinux fix (rhbz 1758597)
+
+* Mon Oct 7 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Oct  8
 - GNU Linux-libre 5.3.4-gnu.
 
 * Mon Oct  7 2019 Peter Robinson <pbrobinson@fedoraproject.org> 5.3.4-300
