@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-10-15 01:09:35.837666957 -0400
-@@ -0,0 +1,6150 @@
++++ .config	2019-10-17 23:10:44.338089950 -0400
+@@ -0,0 +1,6149 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 5.3.6-gnu Kernel Configuration
++# Linux/mips 5.3.7-gnu Kernel Configuration
 +#
 +
 +#
@@ -4680,7 +4680,6 @@ Index: .config
 +CONFIG_USB_EMI26=m
 +CONFIG_USB_ADUTUX=m
 +CONFIG_USB_SEVSEG=m
-+CONFIG_USB_RIO500=m
 +CONFIG_USB_LEGOTOWER=m
 +CONFIG_USB_LCD=m
 +CONFIG_USB_CYPRESS_CY7C63=m
