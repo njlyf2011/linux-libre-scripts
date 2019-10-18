@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -617,10 +617,15 @@ Patch323: gpio-max77620-Use-correct-unit-for-debounce-times.patch
 Patch325: arm64-tegra186-enable-USB-on-Jetson-TX2.patch
 
 # QCom laptop bits
-# https://patchwork.kernel.org/patch/11133827/
-Patch330: arm64-qcom-i2c-geni-Disable-DMA-processing-on-the-Lenovo-Yoga-C630.patch
 # https://patchwork.kernel.org/patch/11133293/
 Patch332: arm64-dts-qcom-Add-Lenovo-Yoga-C630.patch
+
+# Raspberry Pi bits
+Patch340: bcm2835-audio-Fix-draining-behavior-regression.patch
+
+# This is typical rpi, we have a driver but it has problems because ¯\_(ツ)_/¯ but this revert makes pictures work again.
+# https://patchwork.kernel.org/patch/11136979/
+Patch341: Revert-ARM-bcm283x-Switch-V3D-over-to-using-the-PM-driver-instead-of-firmware.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -643,6 +648,12 @@ Patch507: v2-1-2-efi-tpm-Don-t-access-event--count-when-it-isn-t-mapped..patch
 Patch508: v3-tpm-only-set-efi_tpm_final_log_size-after-successful-event-log-parsing.patch
 
 Patch509: PATCH-v2-selinux-allow-labeling-before-policy-is-loaded.patch
+
+Patch510: iwlwifi-exclude-GEO-SAR-support-for-3168.patch
+Patch511: iwlwifi-pcie-change-qu-with-jf-devices-to-use-qu-configuration.patch
+
+# rhbz 1738614
+Patch512: drm-i915-Mark-contents-as-dirty-on-a-write-fault.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1932,6 +1943,18 @@ fi
 #
 #
 %changelog
+* Thu Oct 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3.6-gnu.
+
+* Mon Oct 14 2019 Laura Abbott <labbott@redhat.com> - 5.3.6-300
+- Linux v5.3.6
+
+* Fri Oct 11 2019 Laura Abbott <labbott@redhat.com>
+- Fix disappearing cursor issue (rhbz 1738614)
+
+* Fri Oct 11 2019 Peter Robinson <pbrobinson@fedoraproject.org>
+- Last iwlwifi fix for the recent firmware issues (rhbz 1733369)
+
 * Tue Oct  8 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3.5-gnu.
 
