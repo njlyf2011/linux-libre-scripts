@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -636,14 +636,7 @@ Patch503: KEYS-Make-use-of-platform-keyring-for-module-signature.patch
 # rhbz 1753099
 Patch504: dwc3-fix.patch
 
-# rhbz 1752961
-Patch507: v2-1-2-efi-tpm-Don-t-access-event--count-when-it-isn-t-mapped..patch
-Patch508: v3-tpm-only-set-efi_tpm_final_log_size-after-successful-event-log-parsing.patch
-
 Patch509: PATCH-v2-selinux-allow-labeling-before-policy-is-loaded.patch
-
-# rhbz 1738614
-Patch512: drm-i915-Mark-contents-as-dirty-on-a-write-fault.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1933,6 +1926,12 @@ fi
 #
 #
 %changelog
+* Fri Oct 18 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3.7-gnu.
+
+* Fri Oct 18 2019 Laura Abbott <labbott@redhat.com> - 5.3.7-100
+- Linux v5.3.7
+
 * Thu Oct 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3.6-gnu.
 
