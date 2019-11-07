@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-10-29 21:02:35.343402593 -0400
++++ .config	2019-11-06 14:59:15.404278894 -0500
 @@ -0,0 +1,6149 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 5.3.8-gnu Kernel Configuration
++# Linux/mips 5.3.9-gnu Kernel Configuration
 +#
 +
 +#
