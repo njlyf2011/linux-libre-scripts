@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -608,10 +608,10 @@ Patch320: arm64-tegra-jetson-tx1-fixes.patch
 Patch321: arm64-tegra-Jetson-TX2-Allow-bootloader-to-configure.patch
 # https://patchwork.kernel.org/patch/11171225/
 Patch322: mfd-max77620-Do-not-allocate-IRQs-upfront.patch
-# https://patchwork.ozlabs.org/patch/1170631/
-Patch323: gpio-max77620-Use-correct-unit-for-debounce-times.patch
 # https://www.spinics.net/lists/linux-tegra/msg44216.html
-Patch325: arm64-tegra186-enable-USB-on-Jetson-TX2.patch
+Patch324: arm64-tegra186-enable-USB-on-Jetson-TX2.patch
+# https://patchwork.kernel.org/patch/11224177/
+Patch325: arm64-usb-host-xhci-tegra-set-MODULE_FIRMWARE-for-tegra186.patch
 
 # QCom laptop bits
 # https://patchwork.kernel.org/patch/11133293/
@@ -642,16 +642,10 @@ Patch504: dwc3-fix.patch
 
 Patch509: PATCH-v2-selinux-allow-labeling-before-policy-is-loaded.patch
 
-Patch510: iwlwifi-exclude-GEO-SAR-support-for-3168.patch
-
 # it seems CONFIG_OPTIMIZE_INLINING has been forced now and is causing issues on ARMv7
 # https://lore.kernel.org/patchwork/patch/1132459/
 # https://lkml.org/lkml/2019/8/29/1772
 Patch505: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
-
-# CVE-2019-17666
-# rhbz 176362
-Patch506: 0001-rtlwifi-Fix-potential-overflow-on-P2P-code.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1900,6 +1894,13 @@ fi
 #
 #
 %changelog
+* Wed Nov  6 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3.9-gnu.
+- Deblobbed arm64-usb-host-xhci-tegra-set-MODULE_FIRMWARE-for-tegra186.patch.
+
+* Wed Nov 06 2019 Laura Abbott <labbott@redhat.com> - 5.3.9-300
+- Linux v5.3.9
+
 * Wed Oct 30 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3.8-gnu.
 
