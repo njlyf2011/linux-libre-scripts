@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-11-11 09:36:10.090165034 -0500
-@@ -0,0 +1,5894 @@
++++ .config	2019-11-15 12:19:41.443863841 -0500
+@@ -0,0 +1,5893 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.19.83-gnu Kernel Configuration
++# Linux/mips 4.19.84-gnu Kernel Configuration
 +#
 +
 +#
@@ -4911,7 +4911,6 @@ Index: .config
 +# Rpmsg drivers
 +#
 +# CONFIG_RPMSG_VIRTIO is not set
-+# CONFIG_SOUNDWIRE is not set
 +
 +#
 +# SOC (System On Chip) specific Drivers
