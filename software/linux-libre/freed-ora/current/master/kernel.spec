@@ -51,11 +51,15 @@ Summary: The Linux kernel
 
 %if %{zipmodules}
 %global zipsed -e 's/\.ko$/\.ko.xz/'
-# for parallel xz processes, replace with 1 to go back to single process
-%global zcpu `nproc --all`
 %endif
 
 # define buildid .local
+
+%if 0%{?fedora}
+%define primary_target fedora
+%else
+%define primary_target rhel
+%endif
 
 # baserelease defines which build revision of this kernel version we're
 # building.  We used to call this fedora_build, but the magical name
@@ -136,7 +140,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 7
+%global rcrev 8
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -184,7 +188,7 @@ Summary: The Linux kernel
 # Only build the debug kernel (--with dbgonly):
 %define with_dbgonly   %{?_with_dbgonly:      1} %{?!_with_dbgonly:      0}
 # Control whether we perform a compat. check against published ABI.
-#%define with_kabichk   %{?_without_kabichk:   0} %{?!_without_kabichk:   1}
+%define with_kabichk   %{?_without_kabichk:   0} %{?!_without_kabichk:   1}
 # Temporarily disable kabi checks until RC.
 %define with_kabichk 0
 # Control whether we perform a compat. check against DUP ABI.
@@ -550,11 +554,12 @@ Requires: kernel-libre-modules-uname-r = %{KVERREL}%{?variant}
 BuildRequires: kmod, patch, bash, tar, git-core
 BuildRequires: bzip2, xz, findutils, gzip, m4, perl-interpreter, perl-Carp, perl-devel, perl-generators, make, diffutils, gawk
 BuildRequires: gcc, binutils, redhat-rpm-config, hmaccalc, bison, flex
-BuildRequires: net-tools, hostname, bc, elfutils-devel, dwarves
+BuildRequires: net-tools, hostname, bc, elfutils-devel
 %if 0%{?fedora}
-# Used to mangle unversioned shebangs to be Python 3
-BuildRequires: /usr/bin/pathfix.py
+BuildRequires: dwarves
 %endif
+# Used to mangle unversioned shebangs to be Python 3
+BuildRequires: python3-devel
 %if %{with_headers}
 BuildRequires: rsync
 %endif
@@ -579,7 +584,9 @@ BuildConflicts: rhbuildsys(DiskFree) < 500Mb
 %if %{with_debuginfo}
 BuildRequires: rpm-build, elfutils
 BuildConflicts: rpm < 4.13.0.1-19
+%if 0%{?fedora}
 BuildConflicts: dwarves < 1.13
+%endif
 # Most of these should be enabled after more investigation
 %undefine _include_minidebuginfo
 %undefine _find_debuginfo_dwz_opts
@@ -619,44 +626,133 @@ Source4: deblob-check
 Source5: deblob-%{kversion}
 Source6: deblob-5.%{upstream_sublevel}
 
-Source11: x509.genkey
-Source12: remove-binary-diff.pl
-Source15: merge.pl
-Source16: mod-extra.list
+# Name of the packaged file containing signing key
+%ifarch ppc64le
+%define signing_key_filename kernel-signing-ppc.cer
+%endif
+%ifarch s390x
+%define signing_key_filename kernel-signing-s390.cer
+%endif
+
+Source10: x509.genkey.rhel
+Source11: x509.genkey.fedora
+%if %{?released_kernel}
+
+Source12: securebootca.cer
+Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
+
+%define secureboot_ca %{SOURCE12}
+%ifarch x86_64 aarch64
+%define secureboot_key %{SOURCE13}
+%define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
+%endif
+
+%else # released_kernel
+
+Source12: redhatsecurebootca2.cer
+Source13: redhatsecureboot003.cer
+
+%define secureboot_ca %{SOURCE12}
+%define secureboot_key %{SOURCE13}
+%define pesign_name redhatsecureboot003
+
+%endif # released_kernel
+
+Source15: mod-extra.list.rhel
+Source16: mod-extra.list.fedora
 Source17: mod-extra.sh
 Source18: mod-sign.sh
 Source19: mod-extra-blacklist.sh
-Source90: filter-x86_64.sh
-Source91: filter-armv7hl.sh
-Source92: filter-i686.sh
-Source93: filter-aarch64.sh
-Source94: filter-ppc64le.sh
-Source95: filter-s390x.sh
-Source99: filter-modules.sh
+Source79: parallel_xz.sh
+
+Source80: filter-x86_64.sh.fedora
+Source81: filter-armv7hl.sh.fedora
+Source82: filter-i686.sh.fedora
+Source83: filter-aarch64.sh.fedora
+Source86: filter-ppc64le.sh.fedora
+Source87: filter-s390x.sh.fedora
+Source89: filter-modules.sh.fedora
+
+Source90: filter-x86_64.sh.rhel
+Source91: filter-armv7hl.sh.rhel
+Source92: filter-i686.sh.rhel
+Source93: filter-aarch64.sh.rhel
+Source96: filter-ppc64le.sh.rhel
+Source97: filter-s390x.sh.rhel
+Source99: filter-modules.sh.rhel
 %define modsign_cmd %{SOURCE18}
 
-Source20: kernel-aarch64.config
-Source21: kernel-aarch64-debug.config
-Source22: kernel-armv7hl.config
-Source23: kernel-armv7hl-debug.config
-Source24: kernel-armv7hl-lpae.config
-Source25: kernel-armv7hl-lpae-debug.config
-Source26: kernel-i686.config
-Source27: kernel-i686-debug.config
-Source30: kernel-ppc64le.config
-Source31: kernel-ppc64le-debug.config
-Source32: kernel-s390x.config
-Source33: kernel-s390x-debug.config
-Source34: kernel-x86_64.config
-Source35: kernel-x86_64-debug.config
+Source20: kernel-aarch64-rhel.config
+Source21: kernel-aarch64-debug-rhel.config
+Source30: kernel-ppc64le-rhel.config
+Source31: kernel-ppc64le-debug-rhel.config
+Source32: kernel-s390x-rhel.config
+Source33: kernel-s390x-debug-rhel.config
+Source34: kernel-s390x-zfcpdump-rhel.config
+Source35: kernel-x86_64-rhel.config
+Source36: kernel-x86_64-debug-rhel.config
 
-Source40: generate_all_configs.sh
-Source41: generate_debug_configs.sh
+Source37: kernel-aarch64-fedora.config
+Source38: kernel-aarch64-debug-fedora.config
+Source39: kernel-armv7hl-fedora.config
+Source40: kernel-armv7hl-debug-fedora.config
+Source41: kernel-armv7hl-lpae-fedora.config
+Source42: kernel-armv7hl-lpae-debug-fedora.config
+Source43: kernel-i686-fedora.config
+Source44: kernel-i686-debug-fedora.config
+Source45: kernel-ppc64le-fedora.config
+Source46: kernel-ppc64le-debug-fedora.config
+Source47: kernel-s390x-fedora.config
+Source48: kernel-s390x-debug-fedora.config
+Source49: kernel-x86_64-fedora.config
+Source50: kernel-x86_64-debug-fedora.config
 
-Source42: process_configs.sh
-Source43: generate_bls_conf.sh
 
-Source44: mod-internal.list
+
+Source51: generate_all_configs.sh
+
+Source52: process_configs.sh
+Source53: generate_bls_conf.sh
+Source56: update_scripts.sh
+
+Source54: mod-internal.list
+Source55: merge.pl
+
+Source200: check-kabi
+
+Source201: Module.kabi_aarch64
+Source202: Module.kabi_ppc64le
+Source203: Module.kabi_s390x
+Source204: Module.kabi_x86_64
+
+Source210: Module.kabi_dup_aarch64
+Source211: Module.kabi_dup_ppc64le
+Source212: Module.kabi_dup_s390x
+Source213: Module.kabi_dup_x86_64
+
+# Source300: kernel-abi-whitelists-%{rpmversion}-%{distro_build}.tar.bz2
+# Source301: kernel-kabi-dw-%{rpmversion}-%{distro_build}.tar.bz2
+
+# Sources for kernel-tools
+Source2000: cpupower.service
+Source2001: cpupower.config
+
+## Patches needed for building this package
+
+# Patch1: patch-%{rpmversion}-redhat.patch
+
+# empty final patch to facilitate testing of kernel patches
+# Patch999999: linux-kernel-test.patch
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -847,7 +943,6 @@ This package is required by %{name}-debuginfo subpackages.
 It provides the kernel source files common to all builds.
 
 %if %{with_selftests}
-
 %package selftests-internal
 Summary: Kernel samples and selftests
 License: GPLv2
@@ -855,14 +950,13 @@ Requires: binutils, bpftool, iproute-tc, nmap-ncat
 Requires: kernel-modules-internal = %{version}-%{release}
 %description selftests-internal
 Kernel sample programs and selftests.
-
+%{nil}
 # Note that this pattern only works right to match the .build-id
 # symlinks because of the trailing nonmatching alternation and
 # the leading .*, because of find-debuginfo.sh's buggy handling
 # of matching the pattern against the symlinks file.
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_libexecdir}/(ksamples|kselftests)/.*|XXX' -o selftests-debuginfo.list}
-
-%endif # with_selftests
+%endif
 
 %if %{with_gcov}
 %package gcov
@@ -893,6 +987,11 @@ Enterprise Linux kernel, suitable for the kabi-dw tool.
 # This macro creates a kernel-<subpackage>-debuginfo package.
 #	%%kernel_debuginfo_package <subpackage>
 #
+# Explanation of the find_debuginfo_opts: We build multiple kernels (debug
+# pae etc.) so the regex filters those kernels appropriately. We also
+# have to package several binaries as part of kernel-devel but getting
+# unique build-ids is tricky for these userspace binaries. We don't really
+# care about debugging those so we just filter those out and remove it.
 %define kernel_debuginfo_package() \
 %package %{?1:%{1}-}debuginfo\
 Provides: kernel%{?1:-%{1}}-debuginfo = %{version}-%{release}\
@@ -904,7 +1003,9 @@ AutoReqProv: no\
 %description %{?1:%{1}-}debuginfo\
 This package provides debug information for package %{name}%{?1:-%{1}}.\
 This is required to use SystemTap with %{name}%{?1:-%{1}}-%{KVERREL}.\
-%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '/.*/%%{KVERREL_RE}%{?1:[+]%{1}}/.*|/.*%%{KVERREL_RE}%{?1:\+%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
+%{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*\/usr\/src\/kernels/.*|XXX' -o ignored-debuginfo.list -p '/.*/%%{KVERREL_RE}%{?1:[+]%{1}}/.*|/.*%%{KVERREL_RE}%{?1:\+%{1}}(\.debug)?' -o debuginfo%{?1}.list}\
+
+
 %{nil}
 
 #
@@ -1073,7 +1174,7 @@ Cortex-A15 devices with LPAE and HW virtualisation support
 %description zfcpdump-core
 The kernel package contains the Linux kernel (vmlinuz) for use by the
 zfcpdump infrastructure.
-%endif # with_zfcpdump
+%endif
 
 %define variant_summary The Linux kernel compiled with extra debugging enabled
 %kernel_variant_package debug
@@ -1277,10 +1378,10 @@ cp %{SOURCE12} .
 %if "%{?stablelibre}" != "%{?rcrevlibre}"
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre: }%{?rcrevgnux}/" Makefile
 %endif
-    xzcat %{SOURCE5000} | ./remove-binary-diff.pl | patch -p1 -F1 -s
+    xzcat %{SOURCE5000} | patch -p1 -F1 -s
 %if 0%{?gitrev}
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
-    xzcat %{SOURCE5001} | ./remove-binary-diff.pl | patch -p1 -F1 -s
+    xzcat %{SOURCE5001} | patch -p1 -F1 -s
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
@@ -1288,7 +1389,7 @@ cp %{SOURCE12} .
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevlibre: }%{?gitrevgnux}/" Makefile
 %endif
 %if 0%{?gitrev}
-    xzcat %{SOURCE5000} | ./remove-binary-diff.pl | patch -p1 -F1 -s
+    xzcat %{SOURCE5000} | patch -p1 -F1 -s
 %endif
 %endif
     git init
@@ -1349,7 +1450,6 @@ mv COPYING COPYING-%{version}
 # This Prevents scripts/setlocalversion from mucking with our version numbers.
 touch .scmversion
 
-%if 0%{?fedora}
 # Mangle /usr/bin/python shebangs to /usr/bin/python3
 # Mangle all Python shebangs to be Python 3 explicitly
 # -p preserves timestamps
@@ -1368,8 +1468,13 @@ pathfix.py -i "%{__python3} %{py3_shbang_opts}" -p -n \
 	tools/perf/scripts/python/sched-migration.py \
 	Documentation \
 	scripts/gen_compile_commands.py
-%endif
 
+# only deal with configs if we are going to build for the arch
+%ifnarch %nobuildarches
+
+if [ -L configs ]; then
+	rm -f configs
+fi
 # Deal with configs stuff
 mkdir configs
 cd configs
@@ -1377,23 +1482,10 @@ cd configs
 # Drop some necessary files from the source dir into the buildroot
 cp $RPM_SOURCE_DIR/kernel-*.config .
 cp %{SOURCE1000} .
-cp %{SOURCE15} .
-cp %{SOURCE40} .
-cp %{SOURCE41} .
-cp %{SOURCE43} .
+cp %{SOURCE55} .
+cp %{SOURCE51} .
+VERSION=%{version} ./generate_all_configs.sh %{primary_target} %{debugbuildsenabled}
 
-%if !%{debugbuildsenabled}
-# The normal build is a really debug build and the user has explicitly requested
-# a release kernel. Change the config files into non-debug versions.
-%if !%{with_release}
-VERSION=%{version} ./generate_debug_configs.sh
-%else
-VERSION=%{version} ./generate_all_configs.sh
-%endif
-
-%else
-VERSION=%{version} ./generate_all_configs.sh
-%endif
 
 # Merge in any user-provided local config option changes
 %ifnarch %nobuildarches
@@ -1404,9 +1496,6 @@ do
   rm $i.tmp
 done
 %endif
-
-# only deal with configs if we are going to build for the arch
-%ifnarch %nobuildarches
 
 %if !%{debugbuildsenabled}
 rm -f kernel-%{version}-*debug.config
@@ -1420,16 +1509,15 @@ do
 done
 %endif
 
-cp %{SOURCE42} .
+cp %{SOURCE52} .
 OPTS=""
 %if %{with_configchecks}
-%if 0%{?fedora}
-	OPTS="$OPTS -n -c"
-%else
 	OPTS="$OPTS -w -n -c"
 %endif
-%endif
 ./process_configs.sh $OPTS kernel %{rpmversion}
+
+cp %{SOURCE56} .
+RPM_SOURCE_DIR=$RPM_SOURCE_DIR ./update_scripts.sh %{primary_target}
 
 # end of kernel config
 %endif
@@ -1477,7 +1565,7 @@ cp_vmlinux()
 # flags cause issues with the host compiler.
 %if !%{with_cross}
 %define build_hostcflags  %{?build_cflags}
-%define build_hostldflags %{?build_ldflags} -Wl,--build-id=uuid
+%define build_hostldflags %{?build_ldflags}
 %endif
 
 %define make make %{?cross_opts} %{?make_opts} HOSTCFLAGS="%{?build_hostcflags}" HOSTLDFLAGS="%{?build_hostldflags}"
@@ -1516,9 +1604,7 @@ BuildKernel() {
     %endif
 
     # make sure EXTRAVERSION says what we want it to say
-    # Trim the release if this is a CI build, since KERNELVERSION is limited to 64 characters
-    ShortRel=$(perl -e "print \"%{release}\" =~ s/\.pr\.[0-9A-Fa-f]{32}//r")
-    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre.${ShortRel}.%{_target_cpu}${Flav}/" Makefile
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre.%{release}.%{_target_cpu}${Flav}/" Makefile
 
     # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
     %if !0%{?rcrev}
@@ -1533,13 +1619,18 @@ BuildKernel() {
     cp configs/$Config .config
 
     %if %{signkernel}%{signmodules}
-    cp %{SOURCE11} certs/.
+    cp $RPM_SOURCE_DIR/x509.genkey certs/.
     %endif
 
     Arch=`head -1 .config | cut -b 3-`
     echo USING ARCH=$Arch
 
     KCFLAGS="%{?kcflags}"
+
+    # add kpatch flags for base kernel
+    if [ "$Flavour" == "" ]; then
+        KCFLAGS="$KCFLAGS %{?kpatch_kcflags}"
+    fi
 
     %{make} ARCH=$Arch olddefconfig >/dev/null
 
@@ -1602,8 +1693,8 @@ BuildKernel() {
     %pesign -s -i $KernelImage -o vmlinuz.signed
     %else
     %pesign -s -i $SignImage -o vmlinuz.signed -a %{secureboot_ca} -c %{secureboot_key} -n %{pesign_name}
-    %endif # fedora
-    %endif # arches
+    %endif
+    %endif
     %ifarch s390x ppc64le
     if [ -x /usr/bin/rpm-sign ]; then
 	rpm-sign --key "%{pesign_name}" --lkmsign $SignImage --output vmlinuz.signed
@@ -1886,11 +1977,11 @@ BuildKernel() {
     popd
 
     # Call the modules-extra script to move things around
-    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE16}
+    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer $RPM_SOURCE_DIR/mod-extra.list
     # Blacklist net autoloadable modules in modules-extra
     %{SOURCE19} $RPM_BUILD_ROOT lib/modules/$KernelVer
     # Call the modules-extra script for internal modules
-    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE44} internal
+    %{SOURCE17} $RPM_BUILD_ROOT/lib/modules/$KernelVer %{SOURCE54} internal
 
     #
     # Generate the kernel-core and kernel-modules files lists
@@ -1913,7 +2004,7 @@ BuildKernel() {
 	# from the dir.
 	find lib/modules/$KernelVer/kernel -name *.ko | sort -n > modules.list
 	cp $RPM_SOURCE_DIR/filter-*.sh .
-	%{SOURCE99} modules.list %{_target_cpu}
+	./filter-modules.sh modules.list %{_target_cpu}
 	rm filter-*.sh
 
 	# Run depmod on the resulting module tree and make sure it isn't broken
@@ -1984,9 +2075,8 @@ BuildKernel() {
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -delete
 
     # build a BLS config for this kernel
-    %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
+    %{SOURCE53} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 
-%if 0
     # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
     install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
@@ -2001,7 +2091,6 @@ BuildKernel() {
 	fi
     fi
     %endif
-%endif
 
 %if %{with_ipaclones}
     MAXPROCS=$(echo %{?_smp_mflags} | sed -n 's/-j\s*\([0-9]\+\)/\1/p')
@@ -2078,7 +2167,7 @@ find Documentation -type d | xargs chmod u+w
 %define __modsign_install_post \
   if [ "%{signmodules}" -eq "1" ]; then \
     if [ "%{with_pae}" -ne "0" ]; then \
-      %{modsign_cmd} certs/signing_key.pem.sign+lpae certs/signing_key.x509.sign+lpae $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+lpae/ \
+       %{modsign_cmd} certs/signing_key.pem.sign+lpae certs/signing_key.x509.sign+lpae $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+lpae/ \
     fi \
     if [ "%{with_debug}" -ne "0" ]; then \
       %{modsign_cmd} certs/signing_key.pem.sign+debug certs/signing_key.x509.sign+debug $RPM_BUILD_ROOT/lib/modules/%{KVERREL}+debug/ \
@@ -2088,7 +2177,7 @@ find Documentation -type d | xargs chmod u+w
     fi \
   fi \
   if [ "%{zipmodules}" -eq "1" ]; then \
-    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | xargs -P%{zcpu} xz; \
+    find $RPM_BUILD_ROOT/lib/modules/ -type f -name '*.ko' | %{SOURCE79} %{?_smp_mflags}; \
   fi \
 %{nil}
 
@@ -2111,11 +2200,13 @@ find Documentation -type d | xargs chmod u+w
 # We don't want to package debuginfo for self-tests and samples but
 # we have to delete them to avoid an error messages about unpackaged
 # files.
+# Delete the debuginfo for for kernel-devel files
 %define __remove_unwanted_dbginfo_install_post \
   if [ "%{with_selftests}" -ne "0" ]; then \
     rm -rf $RPM_BUILD_ROOT/usr/lib/debug/usr/libexec/ksamples; \
     rm -rf $RPM_BUILD_ROOT/usr/lib/debug/usr/libexec/kselftests; \
   fi \
+  rm -rf $RPM_BUILD_ROOT/usr/lib/debug/usr/src; \
 %{nil}
 
 #
@@ -2145,7 +2236,7 @@ docdir=$RPM_BUILD_ROOT%{_datadir}/doc/kernel-doc-%{rpmversion}
 mkdir -p $docdir
 tar -h -f - --exclude=man --exclude='.*' -c Documentation | tar xf - -C $docdir
 
-%endif # with_doc
+%endif
 
 # We have to do the headers install before the tools install because the
 # kernel headers_install will remove any header files in /usr/include that
@@ -2187,10 +2278,9 @@ rm -rf $RPM_BUILD_ROOT/usr/tmp-headers
 # kabi directory
 INSTALL_KABI_PATH=$RPM_BUILD_ROOT/lib/modules/
 mkdir -p $INSTALL_KABI_PATH
-
 # install kabi releases directories
 tar xjvf %{SOURCE300} -C $INSTALL_KABI_PATH
-%endif  # with_kernel_abi_whitelists
+%endif
 
 %if %{with_selftests}
 pushd samples
@@ -2408,7 +2498,10 @@ fi
 %endif
 
 # empty meta-package
+%ifnarch %nobuildarches noarch
 %files
+%endif
+
 %if %{with_gcov}
 %ifarch x86_64 s390x ppc64le aarch64
 %files gcov
@@ -2423,7 +2516,7 @@ fi
 #
 # This macro defines the %%files sections for a kernel package
 # and its devel and debuginfo packages.
-#	%%kernel_variant_files [-k vmlinux] <condition> <subpackage>
+#	%%kernel_variant_files [-k vmlinux] <condition> <subpackage> <without_modules>
 #
 %define kernel_variant_files(k:) \
 %if %{2}\
@@ -2452,6 +2545,12 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/source\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca.cer\
+%ifarch s390x ppc64le\
+%if 0%{!?4:1}\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/%{signing_key_filename} \
+%endif\
+%endif\
 %if %{1}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/vdso\
 %endif\
@@ -2482,7 +2581,7 @@ fi
 %kernel_variant_files %{_use_vdso} %{with_up}
 %kernel_variant_files %{_use_vdso} %{with_debug} debug
 %kernel_variant_files %{use_vdso} %{with_pae} lpae
-%kernel_variant_files %{_use_vdso} %{with_zfcpdump} zfcpdump
+%kernel_variant_files %{_use_vdso} %{with_zfcpdump} zfcpdump 1
 
 %define kernel_variant_ipaclones(k:) \
 %if %{1}\
@@ -2502,7 +2601,28 @@ fi
 #
 #
 %changelog
-* Sun Nov 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Nov 18 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4-rc8-gnu.
+
+* Mon Nov 18 2019 Jeremy Cline <jcline@redhat.com> - 5.4.0-0.rc8.git0.1
+- Linux v5.4-rc8
+
+* Mon Nov 18 2019 Jeremy Cline <jcline@redhat.com>
+- Disable debugging options.
+
+* Fri Nov 15 2019 Jeremy Cline <jcline@redhat.com> - 5.4.0-0.rc7.git2.1
+- Linux v5.4-rc7-68-g96b95eff4a59
+
+* Thu Nov 14 2019 Laura Abbott <labbott@redhat.com> - 5.4.0-0.rc7.git1.2
+- bump and build
+
+* Wed Nov 13 2019 Jeremy Cline <jcline@redhat.com> - 5.4.0-0.rc7.git1.1
+- Linux v5.4-rc7-49-g0e3f1ad80fc8
+
+* Wed Nov 13 2019 Jeremy Cline <jcline@redhat.com>
+- Reenable debugging options.
+
+* Tue Nov 12 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre Sun Nov 17
 - GNU Linux-libre 5.4-rc7-gnu.
 - Deblobbed arm64-usb-host-xhci-tegra-set-MODULE_FIRMWARE-for-tegra186.patch.
 
