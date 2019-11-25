@@ -1,11 +1,11 @@
 Index: .config
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ .config	2019-11-21 06:24:00.248071109 -0500
++++ .config	2019-11-25 01:38:34.807551893 -0500
 @@ -0,0 +1,5893 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
-+# Linux/mips 4.19.85-gnu Kernel Configuration
++# Linux/mips 4.19.86-gnu Kernel Configuration
 +#
 +
 +#
@@ -4005,10 +4005,10 @@ Index: .config
 +#
 +# Frame buffer Devices
 +#
-+CONFIG_FB=y
-+CONFIG_FIRMWARE_EDID=y
 +CONFIG_FB_CMDLINE=y
 +CONFIG_FB_NOTIFY=y
++CONFIG_FB=y
++CONFIG_FIRMWARE_EDID=y
 +CONFIG_FB_DDC=m
 +CONFIG_FB_BOOT_VESA_SUPPORT=y
 +CONFIG_FB_CFB_FILLRECT=y
