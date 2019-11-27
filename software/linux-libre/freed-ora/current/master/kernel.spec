@@ -77,7 +77,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 1
+%global baserelease 2
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -640,11 +640,21 @@ Source11: x509.genkey.fedora
 
 Source12: securebootca.cer
 Source13: secureboot.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
 %define secureboot_ca %{SOURCE12}
 %ifarch x86_64 aarch64
 %define secureboot_key %{SOURCE13}
 %define pesign_name redhatsecureboot301
+%endif
+%ifarch s390x
+%define secureboot_key %{SOURCE14}
+%define pesign_name redhatsecureboot302
+%endif
+%ifarch ppc64le
+%define secureboot_key %{SOURCE15}
+%define pesign_name redhatsecureboot303
 %endif
 
 %else # released_kernel
@@ -658,7 +668,7 @@ Source13: redhatsecureboot003.cer
 
 %endif # released_kernel
 
-Source15: mod-extra.list.rhel
+Source22: mod-extra.list.rhel
 Source16: mod-extra.list.fedora
 Source17: mod-extra.sh
 Source18: mod-sign.sh
@@ -885,6 +895,19 @@ Patch522: mwifiex-pcie-fix-memory-leak-in-mwifiex_pcie_alloc_cmdrsp_buf.patch
 
 # CVE-2019-19054 rhbz 1775063 1775117
 Patch524: media-rc-prevent-memory-leak-in-cx23888_ir_probe.patch
+
+# CVE-2019-14895 rhbz 1774870 1776139
+Patch525: mwifiex-fix-possible-heap-overflow-in-mwifiex_process_country_ie.patch
+
+# CVE-2019-14896 rhbz 1774875 1776143
+# CVE-2019-14897 rhbz 1774879 1776146
+Patch526: libertas-Fix-two-buffer-overflows-at-parsing-bss-descriptor.patch
+
+# CVE-2019-14901 rhbz 1773519 1776184
+Patch527: mwifiex-Fix-heap-overflow-in-mmwifiex_process_tdls_action_frame.patch
+
+# CVE-2019-19078 rhbz 1776354 1776353
+Patch528: ath10k-fix-memory-leak.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1794,6 +1817,9 @@ BuildKernel() {
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/extra
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/internal
     mkdir -p $RPM_BUILD_ROOT/lib/modules/$KernelVer/updates
+    # CONFIG_KERNEL_HEADER_TEST generates some extra files in the process of
+    # testing so just delete
+    find . -name *.h.s -delete
     # first copy everything
     cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp Module.symvers $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -2588,9 +2614,6 @@ fi
 %{expand:%%files %{?3:%{3}-}modules-extra}\
 %config(noreplace) /etc/modprobe.d/*-blacklist.conf\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
-%%defattr(-,root,root)\
-%defverify(not mtime)\
-/usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
 %{expand:%%files %{?3:%{3}-}modules-internal}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/internal\
 %if %{with_debuginfo}\
@@ -2627,6 +2650,16 @@ fi
 #
 #
 %changelog
+* Mon Nov 25 2019 Laura Abbott <labbott@redhat.com> - 5.4.0-2
+- bump and build to pick up fixes
+
+* Mon Nov 25 2019 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2019-14895 (rhbz 1774870 1776139)
+- Fix CVE-2019-14896 (rhbz 1774875 1776143)
+- Fix CVE-2019-14897 (rhbz 1774879 1776146)
+- Fix CVE-2019-14901 (rhbz 1773519 1776184)
+- Fix CVE-2019-19078 (rhbz 1776354 1776353)
+
 * Mon Nov 25 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.4-gnu.
 
