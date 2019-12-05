@@ -1,0 +1,43 @@
+The old ld can't cope with thin archives very well: it fails
+to create vmlinux.o.  So, disable thin archives.
+
+Index: scripts/link-vmlinux.sh
+===================================================================
+--- scripts/link-vmlinux.sh.orig	2019-11-10 19:17:15.000000000 -0500
++++ scripts/link-vmlinux.sh	2019-11-17 20:28:16.240867718 -0500
+@@ -47,10 +47,8 @@
+ 
+ 	objects="--whole-archive				\
+ 		${KBUILD_VMLINUX_OBJS}				\
+-		--no-whole-archive				\
+-		--start-group					\
+ 		${KBUILD_VMLINUX_LIBS}				\
+-		--end-group"
++		--no-whole-archive"
+ 
+ 	${LD} ${KBUILD_LDFLAGS} -r -o ${1} ${objects}
+ }
+@@ -72,10 +70,8 @@
+ 	if [ "${SRCARCH}" != "um" ]; then
+ 		objects="--whole-archive			\
+ 			${KBUILD_VMLINUX_OBJS}			\
+-			--no-whole-archive			\
+-			--start-group				\
+ 			${KBUILD_VMLINUX_LIBS}			\
+-			--end-group				\
++			--no-whole-archive			\
+ 			${@}"
+ 
+ 		${LD} ${KBUILD_LDFLAGS} ${LDFLAGS_vmlinux}	\
+@@ -84,10 +80,8 @@
+ 	else
+ 		objects="-Wl,--whole-archive			\
+ 			${KBUILD_VMLINUX_OBJS}			\
+-			-Wl,--no-whole-archive			\
+-			-Wl,--start-group			\
+ 			${KBUILD_VMLINUX_LIBS}			\
+-			-Wl,--end-group				\
++			-Wl,--no-whole-archive			\
+ 			${@}"
+ 
+ 		${CC} ${CFLAGS_vmlinux}				\
