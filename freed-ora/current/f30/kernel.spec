@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -716,9 +716,6 @@ Patch534: 0001-ASoC-SOF-Fix-memory-leak-in-sof_dfsentry_write.patch
 
 # CVE-2019-16232 rhbz 1760351 1760352
 Patch535: 0001-libertas-fix-a-potential-NULL-pointer-dereference.patch
-
-# rhbz 1769600
-Patch536: powerpc-xive-skip-ioremap-of-ESB-pages-for-LSI-interrupts.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2008,6 +2005,12 @@ fi
 #
 #
 %changelog
+* Tue Dec 17 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.3.17-gnu.
+
+* Tue Dec 17 2019 Laura Abbott <labbott@redhat.com> - 5.3.17-200
+- Linux v5.3.17
+
 * Sat Dec 14 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3.16-gnu.
 
