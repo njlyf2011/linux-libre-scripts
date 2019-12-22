@@ -77,7 +77,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -2625,9 +2625,6 @@ fi
 %{expand:%%files %{?3:%{3}-}modules-extra}\
 %config(noreplace) /etc/modprobe.d/*-blacklist.conf\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/extra\
-%%defattr(-,root,root)\
-%defverify(not mtime)\
-/usr/src/kernels/%{KVERREL}%{?3:+%{3}}\
 %{expand:%%files %{?3:%{3}-}modules-internal}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/internal\
 %if %{with_debuginfo}\
