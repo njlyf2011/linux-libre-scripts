@@ -5,3 +5,4 @@ gnewsense-binutils-flag.patch -p0
 config.patch -p0 # config file
 kpkg-non-usr-bin-make.patch -p1 # use newer GNU make from PATH
 kpkg-mipsel.patch -p0 # use vmlinuz
+futex-no-include-sync.patch -p1 # revert bad sync patch in 5.4.7
