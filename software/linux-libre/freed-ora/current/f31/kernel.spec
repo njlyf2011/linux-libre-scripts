@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -2649,6 +2649,13 @@ fi
 #
 #
 %changelog
+* Tue Jan  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4.8-gnu.
+
+* Mon Jan 06 2020 Jeremy Cline <jcline@redhat.com> - 5.4.8-200
+- Linux v5.4.8
+- Fix a firmware load issue on some Intel wireless cards (rhbz 1788150)
+
 * Tue Dec 31 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.4.7-gnu.
 
