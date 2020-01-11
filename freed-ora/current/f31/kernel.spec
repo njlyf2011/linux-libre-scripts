@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 10
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -887,21 +887,11 @@ Patch529: ath10k-fix-memory-leak.patch
 # CVE-2019-18808 rhbz 1777418 1777421
 Patch531: 0001-crypto-ccp-Release-all-allocated-memory-if-sha-type-.patch
 
-# CVE-2019-18809 rhbz 1777449 1777451
-Patch532: 0001-media-usb-fix-memory-leak-in-af9005_identify_state.patch
-
-# ALSA code from v5.5 (Intel ASoC Sound Open Firmware driver support)
-Patch600: alsa-5.5.patch
-
-# ALSA code from v5.6 (Intel ASoC Sound Open Firmware driver support)
-Patch607: alsa-5.6.patch
-
-# rhbz 1706557, both patches are upstream in v5.5-rc2
-Patch608: 0001-drm-nouveau-Move-the-declaration-of-struct-nouveau_c.patch
-Patch609: 0002-drm-nouveau-Fix-drm-core-using-atomic-code-paths-on-.patch
-
 # rhbz 1781288
 Patch610: 0001-tracing-Do-not-create-directories-if-lockdown-is-in-.patch
+
+# rhbz 1788653
+Patch611: tpm-handle-negative-priv--response_len-in-tpm_common_read.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2649,7 +2639,20 @@ fi
 #
 #
 %changelog
-* Tue Jan  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Fri Jan 10 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4.10-gnu.
+
+* Thu Jan 09 2020 Jeremy Cline <jcline@redhat.com> - 5.4.10-200
+- Linux v5.4.10
+
+* Mon Jan 06 2020 Laura Abbott <labbott@redhat.com>
+- Fix for tpm usercopy (rhbz 1788653)
+
+* Mon Jan 06 2020 Hans de Goede <hdegoede@redhat.com>
+- Make the MFD Intel LPSS driver builtin, some devices require this to be
+  available early during boot (rhbz#1787997)
+
+* Mon Jan  6 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre Tue Jan  7
 - GNU Linux-libre 5.4.8-gnu.
 
 * Mon Jan 06 2020 Jeremy Cline <jcline@redhat.com> - 5.4.8-200
