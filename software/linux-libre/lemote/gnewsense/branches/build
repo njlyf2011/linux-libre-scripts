@@ -122,12 +122,11 @@ ln -s $srcbase $pub/debuginfo/$srclink
 mv *$buildid*.tar.xz* $pub/debuginfo
 mv *$buildid*.deb $pub
 
-cd $branchdir &&
 # retry svn ops in case the server is temporarily unreachable
-until svn commit -m "$buildid"; do sleep 30; done &&
+until (cd $branchdir && svn commit -m "$buildid"); do sleep 30; done &&
 until svn cp -m "$buildid" $svnbranches/$branchdir $svntags/$buildid; do
   sleep 30; done &&
-cd .. || {
+{
   status=$?
   echo failed to commit or tag $buildid >&2
   exit $status
