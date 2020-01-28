@@ -1,0 +1,41 @@
+From c278d08a1b068e6516f8c7b191f2cf6d1e43f1ee Mon Sep 17 00:00:00 2001
+From: Alexandre Oliva <lxoliva@fsfla.org>
+Date: Thu, 16 Jan 2020 00:09:57 -0300
+Subject: [PATCH] [Loongson2F] adjust cpufreq uses of LOONGSON_CHIPCFG
+
+The post-fork cleanup of loongson2ef from loongson64 changed
+LOONGSON_CHIPCFG from a single-argument functional macro to a
+non-functional macro with an mmio address in loongson2ef, but
+loongson2_cpufreq still uses the notation of a functional macro call
+expecting it to be an lvalue.  Fixed based on loongson_suspend_enter.
+
+Signed-off-by: Alexandre Oliva <lxoliva@fsfla.org>
+Cc: Jiaxun Yang <jiaxun.yang@flygoat.com>
+Cc: linux-mips@vger.kernel.org
+Cc: paul.burton@mips.com
+---
+ drivers/cpufreq/loongson2_cpufreq.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/cpufreq/loongson2_cpufreq.c b/drivers/cpufreq/loongson2_cpufreq.c
+index 84f0eee..ace2d46 100644
+--- a/drivers/cpufreq/loongson2_cpufreq.c
++++ b/drivers/cpufreq/loongson2_cpufreq.c
+@@ -144,9 +144,11 @@ static void loongson2_cpu_wait(void)
+ 	u32 cpu_freq;
+ 
+ 	spin_lock_irqsave(&loongson2_wait_lock, flags);
+-	cpu_freq = LOONGSON_CHIPCFG(0);
+-	LOONGSON_CHIPCFG(0) &= ~0x7;	/* Put CPU into wait mode */
+-	LOONGSON_CHIPCFG(0) = cpu_freq;	/* Restore CPU state */
++	cpu_freq = readl(LOONGSON_CHIPCFG);
++	/* Put CPU into wait mode */
++	writel(readl(LOONGSON_CHIPCFG) & ~0x7, LOONGSON_CHIPCFG);
++	/* Restore CPU state */
++	writel(cpu_freq, LOONGSON_CHIPCFG);
+ 	spin_unlock_irqrestore(&loongson2_wait_lock, flags);
+ 	local_irq_enable();
+ }
+-- 
+2.7.4
+
