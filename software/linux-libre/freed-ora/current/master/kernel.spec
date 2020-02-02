@@ -1,6 +1,9 @@
 # We have to override the new %%install behavior because, well... the kernel is special.
 %global __spec_install_pre %{___build_pre}
 
+# this should go away soon
+%define _legacy_common_support 1
+
 # At the time of this writing (2019-03), RHEL8 packages use w2.xzdio
 # compression for rpms (xz, level 2).
 # Kernel has several large (hundreds of mbytes) rpms, they take ~5 mins
@@ -24,7 +27,7 @@ Summary: The Linux kernel
 # For rawhide and/or a kernel built from an rc or git snapshot,
 # released_kernel should be 0.
 # For a stable, released kernel, released_kernel should be 1.
-%global released_kernel 0
+%global released_kernel 1
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -83,7 +86,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 4
+%define base_sublevel 5
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -93,9 +96,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.4%{?stablegnux}
-%define rcrevlibre  -5.4%{?rcrevgnux}
-#define gitrevlibre -5.4%{?gitrevgnux}
+#define stablelibre -5.5%{?stablegnux}
+#define rcrevlibre  -5.5%{?rcrevgnux}
+#define gitrevlibre -5.5%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -140,7 +143,7 @@ Summary: The Linux kernel
 # The next upstream release sublevel (base_sublevel+1)
 %define upstream_sublevel %(echo $((%{base_sublevel} + 1)))
 # The rc snapshot level
-%global rcrev 6
+%global rcrev 0
 # The git snapshot level
 %define gitrev 0
 # Set rpm version accordingly
@@ -664,7 +667,7 @@ Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?base
 Source3: deblob-main
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-5.%{upstream_sublevel}
+# Source6: deblob-5.%{upstream_sublevel}
 
 # Name of the packaged file containing signing key
 %ifarch ppc64le
@@ -876,6 +879,8 @@ Patch320: arm64-tegra-jetson-tx1-fixes.patch
 # https://www.spinics.net/lists/linux-tegra/msg43110.html
 Patch321: arm64-tegra-Jetson-TX2-Allow-bootloader-to-configure.patch
 
+Patch322: arm64-usb-host-xhci-tegra-set-MODULE_FIRMWARE-for-tegra186.patch
+
 # 400 - IBM (ppc/s390x) patches
 
 # 500 - Temp fixes/CVEs etc
@@ -898,12 +903,11 @@ Patch504: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
 # https://lkml.org/lkml/2019/8/29/1772
 Patch505: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
 
-# CVE-2019-14896 rhbz 1774875 1776143
-# CVE-2019-14897 rhbz 1774879 1776146
-Patch526: libertas-Fix-two-buffer-overflows-at-parsing-bss-descriptor.patch
-
 # ALSA code from v5.6 (Intel ASoC Sound Open Firmware driver support)
 Patch527: alsa-5.6.patch
+
+# GCC 10 build fix for x86_64
+Patch528: 0001-x86-Don-t-declare-__force_order-in-kaslr_64.c.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2023,7 +2027,6 @@ BuildKernel() {
 %endif
 
     # then drop all but the needed Makefiles/Kconfig files
-    rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/Documentation
     rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/scripts
     rm -rf $RPM_BUILD_ROOT/lib/modules/$KernelVer/build/include
     cp .config $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
@@ -2930,12 +2933,7 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/source\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca.cer\
-%ifarch s390x ppc64le\
-%if 0%{!?4:1}\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/%{signing_key_filename} \
-%endif\
-%endif\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}\
 %if %{1}\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/vdso\
 %endif\
@@ -2983,6 +2981,38 @@ fi
 #
 #
 %changelog
+* Sat Feb  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.5-gnu.
+- Deblobbed arm64-usb-host-xhci-tegra-set-MODULE_FIRMWARE-for-tegra186.patch.
+
+* Mon Jan 27 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-1
+- Linux v5.5
+
+* Fri Jan 24 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-0.rc7.git2.1
+- Linux v5.5-rc7-62-g6381b442836e
+
+* Thu Jan 23 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-0.rc7.git1.1
+- Linux v5.5-rc7-16-g131701c697e8
+
+* Mon Jan 20 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-0.rc7.git0.1
+- Linux v5.5-rc7
+
+* Mon Jan 20 2020 Justin M. Forbes <jforbes@fedoraproject.org>
+- Disable debugging options.
+
+* Fri Jan 17 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-0.rc6.git3.1
+- Linux v5.5-rc6-143-gab7541c3addd
+
+* Wed Jan 15 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-0.rc6.git2.1
+- Linux v5.5-rc6-45-g51d69817519f
+
+* Tue Jan 14 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.0-0.rc6.git1.1
+- Linux v5.5-rc6-27-g452424cdcbca
+- Reenable debugging options.
+
+* Mon Jan 13 2020 Justin M. Forbes <jforbes@fedoraproject.org>
+- Add Documentation back to kernel-devel as it has Kconfig now (rhbz 1789641)
+
 * Mon Jan 13 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.5-rc6-gnu.
 
@@ -3295,6 +3325,7 @@ fi
 
 * Tue Sep 17 2019 Jeremy Cline <jcline@redhat.com>
 - Reenable debugging options.
+<<<<<<< HEAD
 
 * Mon Sep 16 2019 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.3-gnu.
@@ -4924,3 +4955,5 @@ fi
 # rpm-change-log-uses-utc: t
 # End:
 ###
+=======
+>>>>>>> 92ebc5dd37dba1571143b5f13dd830423ddf5053
