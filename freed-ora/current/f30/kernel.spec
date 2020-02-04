@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -604,10 +604,6 @@ Patch504: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
 # CVE-2019-19054 rhbz 1775063 1775117
 Patch523: media-rc-prevent-memory-leak-in-cx23888_ir_probe.patch
 
-# CVE-2019-14896 rhbz 1774875 1776143
-# CVE-2019-14897 rhbz 1774879 1776146
-Patch525: libertas-Fix-two-buffer-overflows-at-parsing-bss-descriptor.patch
-
 # CVE-2019-18808 rhbz 1777418 1777421
 Patch527: 0001-crypto-ccp-Release-all-allocated-memory-if-sha-type-.patch
 
@@ -616,6 +612,9 @@ Patch612: drm-i915-gt-Detect-if-we-miss-WaIdleLiteRestore.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1772498#c101
 Patch602: ASoC-topology-fix-soc_tplg_fe_link_create-link-dobj-.patch
+
+# This is already in 5.5 rhbz 1794369
+Patch603: 0001-e1000e-Add-support-for-Comet-Lake.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1909,6 +1908,15 @@ fi
 #
 #
 %changelog
+* Sat Feb  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4.16-gnu.
+
+* Thu Jan 30 2020 Jeremy Cline <jcline@redhat.com> - 5.4.16-100
+- Linux v5.4.16
+
+* Wed Jan 29 2020 Justin Forbes <jforbes@fedoraproject.org>
+- Add support for Comet Lake (rhbz 1794369)
+
 * Mon Jan 27 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.4.15-gnu.
 
