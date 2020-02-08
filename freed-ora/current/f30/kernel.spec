@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 17
+%define stable_update 18
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -609,9 +609,6 @@ Patch527: 0001-crypto-ccp-Release-all-allocated-memory-if-sha-type-.patch
 
 # https://gitlab.freedesktop.org/drm/intel/issues/673
 Patch612: drm-i915-gt-Detect-if-we-miss-WaIdleLiteRestore.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1772498#c101
-Patch602: ASoC-topology-fix-soc_tplg_fe_link_create-link-dobj-.patch
 
 # This is already in 5.5 rhbz 1794369
 Patch603: 0001-e1000e-Add-support-for-Comet-Lake.patch
@@ -1908,6 +1905,12 @@ fi
 #
 #
 %changelog
+* Fri Feb  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4.18-gnu.
+
+* Thu Feb 06 2020 Jeremy Cline <jcline@redhat.com> - 5.4.18-100
+- Linux v5.4.18
+
 * Tue Feb  4 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.4.17-gnu.
 
