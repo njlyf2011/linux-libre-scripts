@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 18
+%define stable_update 19
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -795,8 +795,6 @@ Patch201: 0002-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
 Patch202: 0003-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
 
 Patch204: efi-secureboot.patch
-
-Patch205: lift-lockdown-sysrq.patch
 
 # 300 - ARM patches
 Patch300: arm64-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
@@ -2610,6 +2608,15 @@ fi
 #
 #
 %changelog
+* Wed Feb 12 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4.19-gnu.
+
+* Tue Feb 11 2020 Jeremy Cline <jcline@redhat.com> - 5.4.19-200
+- Linux v5.4.19
+
+* Mon Feb 10 2020 Jeremy Cline <jcline@redhat.com>
+- Remove sysrq support to lift lockdown (rhbz 1800859)
+
 * Fri Feb  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.4.18-gnu.
 
