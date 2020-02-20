@@ -1,6 +1,8 @@
 # We have to override the new %%install behavior because, well... the kernel is special.
 %global __spec_install_pre %{___build_pre}
 
+#define pe_signing_token OpenSC Card (Fedora Signer)
+
 Summary: The Linux kernel
 
 # For a stable, released kernel, released_kernel should be 1. For rawhide
@@ -94,7 +96,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 19
+%define stable_update 20
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -1903,6 +1905,12 @@ fi
 #
 #
 %changelog
+* Tue Feb 18 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.4.20-gnu.
+
+* Mon Feb 17 2020 Jeremy Cline <jcline@redhat.com> - 5.4.20-100
+- Linux v5.4.20
+
 * Wed Feb 12 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.4.19-gnu.
 
