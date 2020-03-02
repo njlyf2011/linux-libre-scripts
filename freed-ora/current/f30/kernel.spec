@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 6
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -608,9 +608,6 @@ Patch505: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
 
 # ALSA code from v5.6 (Intel ASoC Sound Open Firmware driver support)
 Patch506: alsa-5.6.patch
-
-# rhbz 1797052
-Patch507: 0001-mm-Avoid-creating-virtual-address-aliases-in-brk-mma.patch
 
 # i915 "critical" patch from upstream
 Patch508: 0001-drm-i915-Serialise-i915_active_acquire-with-__active.patch
@@ -1914,6 +1911,16 @@ fi
 #
 #
 %changelog
+* Sun Mar  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.5.7-gnu.
+
+* Fri Feb 28 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.7-100
+- Linux v5.5.7
+- Fixes CVE-2020-2732 (rhbz 1805135 1806816)
+
+* Thu Feb 27 2020 Hans de Goede <hdegoede@redhat.com>
+- Fix 5.5.6 sof_hda regression (rhbz 1772498)
+
 * Tue Feb 25 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.5.6-gnu.
 
