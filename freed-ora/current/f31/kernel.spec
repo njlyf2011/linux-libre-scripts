@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -840,7 +840,6 @@ Patch07: freedo.patch
 # 200 - x86 / secureboot
 
 # bz 1497559 - Make kernel MODSIGN code not error on missing variables
-Patch200: 0001-Make-get_cert_list-not-complain-about-cert-lists-tha.patch
 Patch201: 0002-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
 Patch202: 0003-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
 
@@ -906,13 +905,17 @@ Patch505: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
 Patch506: alsa-5.6.patch
 
 # i915 "critical" patch from upstream
-Patch508: 0001-drm-i915-Serialise-i915_active_acquire-with-__active.patch
+Patch508: 20200310_chris_chris_wilson_co_uk.patch
 
 # Backport vboxsf from 5.6, can be dropped when we move to 5.6
 Patch510: 0001-fs-Add-VirtualBox-guest-shared-folder-vboxsf-support.patch
 
 # rhbz 1800335
 Patch511: v2_20200128_dmoulding_me_com.patch
+
+# Fix backtraces triggered by warnings about buggy BIOS (rhbz 1564895, 1808874)
+# Submitted upstream
+Patch512: iommu-WARN_TAINT-fixes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2991,6 +2994,17 @@ fi
 #
 #
 %changelog
+* Fri Mar 13 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.5.9-gnu.
+
+* Thu Mar 12 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.9-200
+- Linux v5.5.9
+
+* Mon Mar 09 2020 Hans de Goede <hdegoede@redhat.com>
+- Fix backtraces on various buggy BIOS-es (rhbz 1564895, 1808874)
+- Add /etc/modprobe.d/floppy-blacklist.conf to fix auto-loading of the
+  legacy floppy driver (rhbz 1789155)
+
 * Fri Mar  6 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.5.8-gnu.
 
