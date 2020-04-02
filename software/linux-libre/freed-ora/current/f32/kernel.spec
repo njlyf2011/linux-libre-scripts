@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 0
+%define stable_update 1
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -888,6 +888,8 @@ Patch324: regulator-pwm-Don-t-warn-on-probe-deferral.patch
 Patch325: backlight-lp855x-Ensure-regulators-are-disabled-on-probe-failure.patch
 # https://patchwork.ozlabs.org/patch/1261638/
 Patch326: arm64-drm-tegra-Fix-SMMU-support-on-Tegra124-and-Tegra210.patch
+# http://patchwork.ozlabs.org/patch/1221384/
+Patch327: PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 
 # Coral
 Patch330: arm64-dts-imx8mq-phanbell-Add-support-for-ethernet.patch
@@ -3075,6 +3077,13 @@ fi
 #
 #
 %changelog
+* Wed Apr  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6-gnu.
+
+* Wed Apr 01 2020 Jeremy Cline <jcline@redhat.com> - 5.6.1-300
+- Linux v5.6.1
+- Fixes CVE-2020-8835 (rhbz 1818941 1817350)
+
 * Wed Apr  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6-gnu.
 - Mark non-blobs in Add-support-for-PinePhone-LCD-panel.patch.
