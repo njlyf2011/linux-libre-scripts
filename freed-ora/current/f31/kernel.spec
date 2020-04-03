@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -909,6 +909,13 @@ Patch508: 20200310_chris_chris_wilson_co_uk.patch
 
 # Backport vboxsf from 5.6, can be dropped when we move to 5.6
 Patch510: 0001-fs-Add-VirtualBox-guest-shared-folder-vboxsf-support.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1816621
+# https://patchwork.ozlabs.org/patch/1260523/
+Patch511: e1000e-bump-up-timeout-to-wait-when-ME-un-configure-ULP-mode.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1820196
+Patch512: 0001-ALSA-hda-realtek-Add-quirk-for-Lenovo-Carbon-X1-8th-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -2987,6 +2994,16 @@ fi
 #
 #
 %changelog
+* Fri Apr  3 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.5.15-gnu.
+
+* Thu Apr 02 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.5.15-200
+- Linux v5.5.15
+
+* Thu Apr 02 2020 Hans de Goede <hdegoede@redhat.com>
+- Add patch fixing Lenovo X1 7th and 8th gen not suspending (rhbz 1816621)
+- Add patch fixing Lenovo X1 8th gen speaker volume control (rhbz 1820196)
+
 * Wed Apr  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.5.14-gnu.
 
