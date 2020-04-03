@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -937,7 +937,12 @@ Patch507: drm-dp-mst-error-handling-improvements.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1811850
 Patch509: drm-i915-backports.patch
 
-Patch510: 0001-mac80211-fix-authentication-with-iwlwifi-mvm.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1816621
+# https://patchwork.ozlabs.org/patch/1260523/
+Patch511: e1000e-bump-up-timeout-to-wait-when-ME-un-configure-ULP-mode.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1820196
+Patch512: 0001-ALSA-hda-realtek-Add-quirk-for-Lenovo-Carbon-X1-8th-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3077,8 +3082,18 @@ fi
 #
 #
 %changelog
+* Fri Apr  3 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.2-gnu.
+
+* Thu Apr 02 2020 Jeremy Cline <jcline@redhat.com> - 5.6.2-300
+- Linux v5.6.2
+
+* Thu Apr 02 2020 Hans de Goede <hdegoede@redhat.com>
+- Add patch fixing Lenovo X1 7th and 8th gen not suspending (rhbz 1816621)
+- Add patch fixing Lenovo X1 8th gen speaker volume control (rhbz 1820196)
+
 * Wed Apr  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 5.6-gnu.
+- GNU Linux-libre 5.6.1-gnu.
 
 * Wed Apr 01 2020 Jeremy Cline <jcline@redhat.com> - 5.6.1-300
 - Linux v5.6.1
