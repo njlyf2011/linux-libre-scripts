@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 2
+%define stable_update 3
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -874,6 +874,12 @@ Patch311: USB-pci-quirks-Add-Raspberry-Pi-4-quirk.patch
 Patch312: bcm2835-irqchip-Quiesce-IRQs-left-enabled-by-bootloader.patch
 # https://patchwork.kernel.org/patch/11420129/
 Patch313: ARM-dts-bcm2711-Move-emmc2-into-its-own-bus.patch
+# Upstream commit f87391eec2c5 thread: https://www.spinics.net/lists/linux-mmc/msg58036.html
+Patch314: arm-bcm2711-mmc-sdhci-iproc-Add-custom-set_power-callback.patch
+# https://patchwork.freedesktop.org/patch/358980/
+Patch315: drm-vc4-Fix-HDMI-mode-validation.patch
+# Upstream commit 57b76faf1d78
+Patch316: arm-bcm2835-serial-8250_early-support-aux-uart.patch
 
 # Tegra bits
 # https://www.spinics.net/lists/linux-tegra/msg48152.html
@@ -943,6 +949,12 @@ Patch511: e1000e-bump-up-timeout-to-wait-when-ME-un-configure-ULP-mode.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1820196
 Patch512: 0001-ALSA-hda-realtek-Add-quirk-for-Lenovo-Carbon-X1-8th-.patch
+
+# nouveau runpm and secboot fixes
+# Accepted nouveau upstream https://github.com/skeggsb/nouveau/commit/f5755e7069d4acbcce1a93692421f358241ead7b
+Patch513: 0001-drm-nouveau-workaround-runpm-fail-by-disabling-PCI-p.patch
+# Accepted nouveau upstream https://github.com/skeggsb/nouveau/commit/41c6a13e8143af71928749ea9895d2ebc2fb4ffd
+Patch514: 0002-drm-nouveau-gr-gp107-gp108-implement-workaround-for-.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3082,6 +3094,19 @@ fi
 #
 #
 %changelog
+* Thu Apr  9 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.3-gnu.
+
+* Wed Apr 08 2020 Jeremy Cline <jcline@redhat.com> - 5.6.3-300
+- Linux v5.6.3
+
+* Tue Apr 07 2020 Karol Herbst <kherbst@redhat.com> - 5.6.2-301
+- Add patches to fix nouveau issues preventing booting the installer or system
+
+* Fri Apr  3 2020 Peter Robinson <pbrobinson@fedoraproject.org>
+- Raspberry Pi HDMI mode validation fix
+- Raspberry Pi 4 rev 1.2 mmc fix
+
 * Fri Apr  3 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6.2-gnu.
 
