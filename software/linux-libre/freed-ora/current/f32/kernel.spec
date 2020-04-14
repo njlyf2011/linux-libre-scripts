@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 3
+%define stable_update 4
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3094,6 +3094,12 @@ fi
 #
 #
 %changelog
+* Mon Apr 13 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.4-gnu.
+
+* Mon Apr 13 2020 Jeremy Cline <jcline@redhat.com> - 5.6.4-300
+- Linux v5.6.4
+
 * Thu Apr  9 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6.3-gnu.
 
