@@ -96,7 +96,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.6%{?stablegnux}
+%define stablelibre -5.6%{?stablegnux}
 #define rcrevlibre  -5.6%{?rcrevgnux}
 #define gitrevlibre -5.6%{?gitrevgnux}
 
@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 5
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -808,7 +808,7 @@ Source1000: kernel-local
 # For a stable release kernel
 %if 0%{?stable_update}
 %if 0%{?stable_base}
-%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}.xz
+%define    stable_patch_00  patch%{?stablelibre}-5.%{base_sublevel}.%{stable_base}%{?stablegnu}.xz
 Source5000: %{stable_patch_00}
 %endif
 
@@ -914,6 +914,10 @@ Patch344: arm64-pine64-pinetab.patch
 Patch345: arm64-pine64-pinephone.patch
 # https://patchwork.kernel.org/cover/11440399/
 Patch346: Add-support-for-PinePhone-LCD-panel.patch
+# https://www.spinics.net/lists/devicetree/msg346446.html
+Patch347: arm64-Fix-some-GPIO-setup-on-Pinebook-Pro.patch
+# https://www.spinics.net/lists/devicetree/msg347052.html
+Patch348: usb-fusb302-Convert-to-use-GPIO-descriptors.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -3091,6 +3095,12 @@ fi
 #
 #
 %changelog
+* Wed Apr 22 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.6-gnu.
+
+* Tue Apr 21 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.6-300
+- Linux v5.6.6
+
 * Sat Apr 18 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6.5-gnu.
 - Drop nouveau-add-missing-MODULE_FIRMWARE.patch, nothing in it for us.
