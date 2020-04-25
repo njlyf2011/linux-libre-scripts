@@ -50,7 +50,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 5
+%define base_sublevel 6
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -60,9 +60,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-%define stablelibre -5.5%{?stablegnux}
-#define rcrevlibre  -5.5%{?rcrevgnux}
-#define gitrevlibre -5.5%{?gitrevgnux}
+%define stablelibre -5.6%{?stablegnux}
+#define rcrevlibre  -5.6%{?rcrevgnux}
+#define gitrevlibre -5.6%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -94,7 +94,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 19
+%define stable_update 7
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -477,26 +477,36 @@ Source95: filter-s390x.sh
 Source99: filter-modules.sh
 %define modsign_cmd %{SOURCE18}
 
-Source20: kernel-aarch64.config
-Source21: kernel-aarch64-debug.config
-Source22: kernel-armv7hl.config
-Source23: kernel-armv7hl-debug.config
-Source24: kernel-armv7hl-lpae.config
-Source25: kernel-armv7hl-lpae-debug.config
-Source26: kernel-i686.config
-Source27: kernel-i686-debug.config
-Source30: kernel-ppc64le.config
-Source31: kernel-ppc64le-debug.config
-Source32: kernel-s390x.config
-Source33: kernel-s390x-debug.config
-Source34: kernel-x86_64.config
-Source35: kernel-x86_64-debug.config
+Source20: kernel-aarch64-rhel.config
+Source21: kernel-aarch64-debug-rhel.config
+Source30: kernel-ppc64le-rhel.config
+Source31: kernel-ppc64le-debug-rhel.config
+Source32: kernel-s390x-rhel.config
+Source33: kernel-s390x-debug-rhel.config
+Source34: kernel-s390x-zfcpdump-rhel.config
+Source35: kernel-x86_64-rhel.config
+Source36: kernel-x86_64-debug-rhel.config
 
-Source40: generate_all_configs.sh
-Source41: generate_debug_configs.sh
+Source37: kernel-aarch64-fedora.config
+Source38: kernel-aarch64-debug-fedora.config
+Source39: kernel-armv7hl-fedora.config
+Source40: kernel-armv7hl-debug-fedora.config
+Source41: kernel-armv7hl-lpae-fedora.config
+Source42: kernel-armv7hl-lpae-debug-fedora.config
+Source43: kernel-i686-fedora.config
+Source44: kernel-i686-debug-fedora.config
+Source45: kernel-ppc64le-fedora.config
+Source46: kernel-ppc64le-debug-fedora.config
+Source47: kernel-s390x-fedora.config
+Source48: kernel-s390x-debug-fedora.config
+Source49: kernel-x86_64-fedora.config
+Source50: kernel-x86_64-debug-fedora.config
 
-Source42: process_configs.sh
-Source43: generate_bls_conf.sh
+Source60: generate_all_configs.sh
+Source61: generate_debug_configs.sh
+
+Source62: process_configs.sh
+Source63: generate_bls_conf.sh
 
 # This file is intentionally left empty in the stock kernel. Its a nicety
 # added for those wanting to do custom rebuilds with altered config opts.
@@ -565,23 +575,54 @@ Patch303: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
 Patch304: ARM-tegra-usb-no-reset.patch
 
 # Raspberry Pi
-# https://patchwork.kernel.org/cover/11271017/
-Patch310: Raspberry-Pi-4-PCIe-support.patch
-# https://patchwork.kernel.org/patch/11223139/
-Patch311: ARM-Enable-thermal-support-for-Raspberry-Pi-4.patch
-# https://patchwork.kernel.org/patch/11299997/
-Patch312: bcm283x-gpu-drm-v3d-Add-ARCH_BCM2835-to-DRM_V3D-Kconfig.patch
 # https://patchwork.kernel.org/cover/11353083/
-Patch313: arm64-pinctrl-bcm2835-Add-support-for-all-BCM2711-GPIOs.patch
-# https://github.com/raspberrypi/linux/commit/c74b1b53254016fd83b580b8d49bb02d72ce4836
-Patch314: usb-xhci-Raspberry-Pi-FW-loader-for-VIA-VL805.patch
+Patch310: arm64-pinctrl-bcm2835-Add-support-for-all-BCM2711-GPIOs.patch
+# v5 https://patchwork.kernel.org/cover/11429245/
+Patch311: USB-pci-quirks-Add-Raspberry-Pi-4-quirk.patch
 # https://patchwork.kernel.org/patch/11372935/
-Patch315: bcm2835-irqchip-Quiesce-IRQs-left-enabled-by-bootloader.patch
+Patch312: bcm2835-irqchip-Quiesce-IRQs-left-enabled-by-bootloader.patch
+# https://patchwork.kernel.org/patch/11420129/
+Patch313: ARM-dts-bcm2711-Move-emmc2-into-its-own-bus.patch
+# Upstream commit f87391eec2c5 thread: https://www.spinics.net/lists/linux-mmc/msg58036.html
+Patch314: arm-bcm2711-mmc-sdhci-iproc-Add-custom-set_power-callback.patch
+# Upstream commit 57b76faf1d78
+Patch316: arm-bcm2835-serial-8250_early-support-aux-uart.patch
 
 # Tegra bits
-Patch320: arm64-tegra-jetson-tx1-fixes.patch
-# https://www.spinics.net/lists/linux-tegra/msg43110.html
-Patch321: arm64-tegra-Jetson-TX2-Allow-bootloader-to-configure.patch
+# https://www.spinics.net/lists/linux-tegra/msg48152.html
+Patch320: ARM64-Tegra-fixes.patch
+# http://patchwork.ozlabs.org/patch/1230891/
+Patch321: arm64-serial-8250_tegra-Create-Tegra-specific-8250-driver.patch
+# http://patchwork.ozlabs.org/patch/1243162/
+Patch324: regulator-pwm-Don-t-warn-on-probe-deferral.patch
+# http://patchwork.ozlabs.org/patch/1243112/
+Patch325: backlight-lp855x-Ensure-regulators-are-disabled-on-probe-failure.patch
+# https://patchwork.ozlabs.org/patch/1261638/
+Patch326: arm64-drm-tegra-Fix-SMMU-support-on-Tegra124-and-Tegra210.patch
+# http://patchwork.ozlabs.org/patch/1221384/
+Patch327: PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
+
+# Coral
+Patch330: arm64-dts-imx8mq-phanbell-Add-support-for-ethernet.patch
+
+# Pine64 bits
+# 340-345 queued for 5.7
+Patch340: arm64-pinebook-fixes.patch
+Patch341: arm64-a64-mbus.patch
+# v4 https://patchwork.kernel.org/cover/11420797/
+Patch342: Add-support-for-the-pine64-Pinebook-Pro.patch
+# https://patchwork.kernel.org/cover/11405517/
+Patch343: Add-LCD-support-for-Pine64-Pinebook-1080p.patch
+# https://lkml.org/lkml/2020/1/15/1320
+Patch344: arm64-pine64-pinetab.patch
+# https://www.spinics.net/lists/arm-kernel/msg789135.html
+Patch345: arm64-pine64-pinephone.patch
+# https://patchwork.kernel.org/cover/11440399/
+Patch346: Add-support-for-PinePhone-LCD-panel.patch
+# https://www.spinics.net/lists/devicetree/msg346446.html
+Patch347: arm64-Fix-some-GPIO-setup-on-Pinebook-Pro.patch
+# https://www.spinics.net/lists/devicetree/msg347052.html
+Patch348: usb-fusb302-Convert-to-use-GPIO-descriptors.patch
 
 # 400 - IBM (ppc/s390x) patches
 
@@ -605,14 +646,11 @@ Patch504: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
 # https://lkml.org/lkml/2019/8/29/1772
 Patch505: ARM-fix-__get_user_check-in-case-uaccess_-calls-are-not-inlined.patch
 
-# ALSA code from v5.6 (Intel ASoC Sound Open Firmware driver support)
-Patch506: alsa-5.6.patch
+# More DP-MST fixes, pending for 5.7
+Patch507: drm-dp-mst-error-handling-improvements.patch
 
-# i915 "critical" patch from upstream
-Patch508: 20200310_chris_chris_wilson_co_uk.patch
-
-# Backport vboxsf from 5.6, can be dropped when we move to 5.6
-Patch510: 0001-fs-Add-VirtualBox-guest-shared-folder-vboxsf-support.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1811850
+Patch509: drm-i915-backports.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1816621
 # https://patchwork.ozlabs.org/patch/1260523/
@@ -1124,22 +1162,11 @@ cd configs
 cp $RPM_SOURCE_DIR/kernel-*.config .
 cp %{SOURCE1000} .
 cp %{SOURCE15} .
-cp %{SOURCE40} .
-cp %{SOURCE41} .
-cp %{SOURCE43} .
+cp %{SOURCE60} .
+cp %{SOURCE61} .
+cp %{SOURCE63} .
 
-%if !%{debugbuildsenabled}
-# The normal build is a really debug build and the user has explicitly requested
-# a release kernel. Change the config files into non-debug versions.
-%if !%{with_release}
-VERSION=%{version} ./generate_debug_configs.sh
-%else
-VERSION=%{version} ./generate_all_configs.sh
-%endif
-
-%else
-VERSION=%{version} ./generate_all_configs.sh
-%endif
+VERSION=%{version} ./generate_all_configs.sh fedora %{debugbuildsenabled}
 
 # Merge in any user-provided local config option changes
 %ifnarch %nobuildarches
@@ -1170,7 +1197,7 @@ CheckConfigs() {
      fi
 }
 
-cp %{SOURCE42} .
+cp %{SOURCE62} .
 OPTS=""
 %if %{listnewconfig_fail}
 	OPTS="$OPTS -n"
@@ -1595,7 +1622,7 @@ BuildKernel() {
     find $RPM_BUILD_ROOT/usr/src/kernels -name ".*.cmd" -delete
 
     # build a BLS config for this kernel
-    %{SOURCE43} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
+    %{SOURCE63} "$KernelVer" "$RPM_BUILD_ROOT" "%{?variant}"
 }
 
 ###
@@ -1911,6 +1938,13 @@ fi
 #
 #
 %changelog
+* Fri Apr 24 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.7-gnu.
+- Mark non-blobs in Add-support-for-PinePhone-LCD-panel.patch.
+
+* Fri Apr 24 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.7-100
+- Linux v5.6.7 rebase
+
 * Wed Apr 22 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.5.19-gnu.
 
