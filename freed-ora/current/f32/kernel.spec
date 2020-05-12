@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -864,6 +864,9 @@ Patch302: ACPI-scan-Fix-regression-related-to-X-Gene-UARTs.patch
 Patch303: ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m400.patch
 
 Patch304: ARM-tegra-usb-no-reset.patch
+
+# https://patchwork.kernel.org/patch/11527525/
+Patch305: usb-usbfs-correct-kernel-user-page-attribute-mismatch.patch
 
 # Raspberry Pi
 # https://patchwork.kernel.org/cover/11353083/
@@ -3088,6 +3091,12 @@ fi
 #
 #
 %changelog
+* Mon May 11 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.12-gnu.
+
+* Mon May 11 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.12-300
+- Linux v5.6.12
+
 * Thu May  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6.11-gnu.
 
