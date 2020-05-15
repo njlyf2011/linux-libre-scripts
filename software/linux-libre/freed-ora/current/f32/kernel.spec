@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 13
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -895,6 +895,8 @@ Patch325: backlight-lp855x-Ensure-regulators-are-disabled-on-probe-failure.patch
 Patch326: arm64-drm-tegra-Fix-SMMU-support-on-Tegra124-and-Tegra210.patch
 # http://patchwork.ozlabs.org/patch/1221384/
 Patch327: PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
+# https://patchwork.ozlabs.org/patch/1281134/
+Patch328: arm64-tegra-Fix-ethernet-phy-mode-for-Jetson-Xavier.patch
 
 # Coral
 Patch330: arm64-dts-imx8mq-phanbell-Add-support-for-ethernet.patch
@@ -951,6 +953,15 @@ Patch509: drm-i915-backports.patch
 Patch511: e1000e-bump-up-timeout-to-wait-when-ME-un-configure-ULP-mode.patch
 
 Patch512: drm-dp_mst-Fix-drm_dp_send_dpcd_write-return-code.patch
+
+# CVE-2020-10711 rhbz 1825116 1834778
+Patch513: net-netlabel-cope-with-NULL-catmap.patch
+
+#rhbz 1779611
+Patch514: tpm-check-event-log-version-before-reading-final-eve.patch
+
+# CVE-2020-12655 rhbz 1832543 1832545
+Patch515: 0001-xfs-add-agf-freeblocks-verify-in-xfs_agf_verify.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3091,6 +3102,20 @@ fi
 #
 #
 %changelog
+* Thu May 14 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.13-gnu.
+
+* Thu May 14 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.13-300
+- Linux v5.6.13
+- Fix boot hang caused by buggy TPM support (rhbz 1779611)
+- Fix CVE-2020-12655 (rhbz 1832543 1832545)
+
+* Thu May 14 2020 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix for NIC issues on Jetson Xavier AGX
+
+* Tue May 12 2020 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2020-10711 (rhbz 1825116 1834778)
+
 * Mon May 11 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6.12-gnu.
 
