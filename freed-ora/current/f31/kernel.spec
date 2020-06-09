@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 17
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3038,10 +3038,19 @@ fi
 #
 #
 %changelog
+* Mon Jun  8 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.6.17-gnu.
+
+* Mon Jun 08 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.17-200
+- Linux v5.6.17
+
+* Thu Jun 04 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.16-200
+- Fix CVE-2020-10757 (rhbz 1842525 184388)
+
 * Thu Jun  4 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.6.16-gnu.
 
-* Wed Jun 03 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.6.16-200
+* Wed Jun 03 2020 Justin M. Forbes <jforbes@fedoraproject.org>
 - Linux v5.6.16
 
 * Thu May 28 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
