@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.6 extra=
+kver=5.7 extra=
 
 case $1 in
 --force)
@@ -216,7 +216,7 @@ reject_firmware () {
   #$1 = file $2 = pre sed pattern
   filetest $1 || return 0
   clean_sed "$2"'
-s,\(^\|[^>.0-9a-zA-Z_$]\)request\(_ihex\)\?_firmware\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\3\4,g
+s,\(^\|[^>.0-9a-zA-Z_$]\)\(request\(_ihex\)\?_firmware\|firmware_request_platform\)\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\4\5,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
 }
 
@@ -701,6 +701,12 @@ clean_blob drivers/crypto/inside-secure/safexcel.c
 clean_kconfig drivers/crypto/Kconfig CRYPTO_DEV_SAFEXCEL
 clean_mk CONFIG_CRYPTO_DEV_SAFEXCEL drivers/crypto/inside-secure/Makefile
 
+announce CRYPTO_DEV_OCTEONTX_CPT - "Support for Marvell OcteonTX CPT driver"
+reject_firmware drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c
+clean_blob drivers/crypto/marvell/octeontx/otx_cptpf_ucode.h
+clean_kconfig drivers/crypto/marvell/Kconfig CRYPTO_DEV_OCTEONTX_CPT
+clean_mk CONFIG_CRYPTO_DEV_OCTEONTX_CPT drivers/crypto/marvell/octeontx/Makefile
+
 announce CRYPTO_DEV_QAT_DH895xCC - "Support for Intel(R) DH895xCC"
 clean_blob drivers/crypto/qat/qat_dh895xcc/adf_dh895xcc_hw_data.h
 clean_blob drivers/crypto/qat/qat_dh895xcc/adf_drv.c
@@ -798,6 +804,8 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
 clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_psp.c
+clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_psp.c
 clean_blob drivers/gpu/drm/amd/powerplay/smumgr/smumgr.c
 reject_firmware drivers/gpu/drm/amd/powerplay/smu_v11_0.c
 clean_blob drivers/gpu/drm/amd/powerplay/smu_v11_0.c
@@ -833,12 +841,19 @@ clean_kconfig drivers/gpu/drm/ast/Kconfig DRM_AST
 clean_mk CONFIG_DRM_AST drivers/gpu/drm/ast/Makefile
 
 announce DRM_I915 - "Intel 8xx/9xx/G3x/G4x/HD Graphics"
-reject_firmware drivers/gpu/drm/i915/intel_csr.c
-clean_blob drivers/gpu/drm/i915/intel_csr.c
+reject_firmware drivers/gpu/drm/i915/display/intel_csr.c
+clean_blob drivers/gpu/drm/i915/display/intel_csr.c
 reject_firmware drivers/gpu/drm/i915/display/intel_opregion.c
 reject_firmware drivers/gpu/drm/i915/gt/uc/intel_uc_fw.c
 clean_blob drivers/gpu/drm/i915/gt/uc/intel_uc_fw.c
 clean_blob drivers/gpu/drm/i915/gt/uc/intel_uc_fw.h
+# Hmm, these are quite sparse, and a little too regular to be code of
+# significant complexity, but being a little on the too-big side, and
+# due to the inclusion as X11/MIT-licensed without comments or links
+# to corresponding sources, I'm conservatively assuming they are
+# binary blobs.  If you know otherwise, please let me know.
+clean_blob drivers/gpu/drm/i915/gt/hsw_clear_kernel.c
+clean_blob drivers/gpu/drm/i915/gt/ivb_clear_kernel.c
 clean_kconfig drivers/gpu/drm/i915/Kconfig DRM_I915
 clean_mk CONFIG_DRM_I915 drivers/gpu/drm/i915/Makefile
 
@@ -867,6 +882,11 @@ clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gv100.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/tu102.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/sec2/gp102.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/sec2/gp108.c
+if grep MODULE_FIRMWARE \
+	drivers/gpu/drm/nouveau/nvkm/engine/sec2/tu102.c > /dev/null; then
+  # Added in 5.6.6.
+  clean_blob drivers/gpu/drm/nouveau/nvkm/engine/sec2/tu102.c
+fi
 clean_blob drivers/gpu/drm/nouveau/nvkm/subdev/acr/gm200.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/subdev/acr/gm20b.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/subdev/acr/gp102.c
@@ -980,6 +1000,7 @@ clean_blob arch/arm/boot/dts/imx6ul.dtsi
 clean_blob arch/arm/boot/dts/imx7s.dtsi
 clean_blob arch/arm64/boot/dts/freescale/imx8mm.dtsi
 clean_blob arch/arm64/boot/dts/freescale/imx8mn.dtsi
+clean_blob arch/arm64/boot/dts/freescale/imx8mp.dtsi
 clean_blob arch/arm64/boot/dts/freescale/imx8mq.dtsi
 clean_blob Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt
 clean_kconfig drivers/dma/Kconfig IMX_SDMA
@@ -1509,6 +1530,7 @@ clean_mk CONFIG_VIDEO_MEDIATEK_VPU drivers/media/platform/mtk-vpu/Makefile
 
 announce VIDEO_MESON_VDEC - "Amlogic video decoder driver"
 reject_firmware drivers/staging/media/meson/vdec/vdec_1.c
+reject_firmware drivers/staging/media/meson/vdec/vdec_hevc.c
 clean_blob drivers/staging/media/meson/vdec/vdec_platform.c
 clean_kconfig drivers/staging/media/meson/vdec/Kconfig VIDEO_MESON_VDEC
 clean_mk CONFIG_VIDEO_MESON_VDEC drivers/staging/media/meson/vdec/Makefile
@@ -1655,7 +1677,6 @@ clean_sed '
 	  -EINVAL)
 }' drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c 'report missing Free firmware'
 clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c
-clean_blob drivers/net/ethernet/broadcom/bnx2x/bnx2x_ethtool.c
 clean_sed '
 /^int bnx2x_compare_fw_ver/,/^}$/{
   /^		u32 my_fw = /i\
@@ -2136,6 +2157,11 @@ clean_blob drivers/net/wireless/mediatek/mt76/mt7615/mt7615.h
 clean_blob drivers/net/wireless/mediatek/mt76/mt7615/pci.c
 clean_kconfig drivers/net/wireless/mediatek/mt76/mt7615/Kconfig MT7615E
 clean_mk CONFIG_MT7615E drivers/net/wireless/mediatek/mt76/mt7615/Makefile
+
+announce MT7622_WMAC - "MT7622 (SoC) WMAC support"
+clean_blob drivers/net/wireless/mediatek/mt76/mt7615/soc.c
+clean_kconfig drivers/net/wireless/mediatek/mt76/mt7615/Kconfig MT7622_WMAC
+clean_mk CONFIG_MT7622_WMAC drivers/net/wireless/mediatek/mt76/mt7615/Makefile
 
 announce MWIFIEX - "Marvell WiFi-Ex Driver"
 clean_blob drivers/net/wireless/marvell/mwifiex/README
@@ -2711,10 +2737,10 @@ clean_mk CONFIG_NET_DSA_LANTIQ_GSWIP drivers/net/dsa/Makefile
 # PHY
 
 announce MICROSEMI_PHY - "Microsemi PHYs"
-reject_firmware drivers/net/phy/mscc.c
-clean_blob drivers/net/phy/mscc.c
+reject_firmware drivers/net/phy/mscc/mscc_main.c
+clean_blob drivers/net/phy/mscc/mscc.h
 clean_kconfig drivers/net/phy/Kconfig MICROSEMI_PHY
-clean_mk CONFIG_MICROSEMI_PHY drivers/net/phy/Makefile
+clean_mk CONFIG_MICROSEMI_PHY drivers/net/phy/mscc/Makefile
 
 ########
 # ISDN #
@@ -3001,7 +3027,7 @@ clean_mk CONFIG_SCSI_QLA_FC drivers/scsi/qla2xxx/Makefile
 announce SCSI_WD719x - "Western Digital WD7193/7197/7296 support"
 reject_firmware drivers/scsi/wd719x.c
 clean_blob drivers/scsi/wd719x.c
-clean_blob Documentation/scsi/wd719x.txt
+clean_blob Documentation/scsi/wd719x.rst
 clean_kconfig drivers/scsi/Kconfig SCSI_WD719X
 clean_mk CONFIG_SCSI_WD719X drivers/scsi/Makefile
 
@@ -3122,16 +3148,6 @@ clean_blob drivers/usb/typec/ucsi/ucsi_ccg.c
 clean_kconfig drivers/usb/typec/ucsi/Kconfig UCSI_CCG
 clean_mk CONFIG_UCSI_CCG drivers/usb/typec/ucsi/Makefile
 
-# uwb
-
-announce UWB_I1480U - Support for Intel Wireless UWB Link 1480 HWA
-reject_firmware drivers/staging/uwb/i1480/dfu/i1480-dfu.h
-reject_firmware drivers/staging/uwb/i1480/dfu/mac.c
-reject_firmware drivers/staging/uwb/i1480/dfu/phy.c
-clean_blob drivers/staging/uwb/i1480/dfu/usb.c
-clean_kconfig drivers/staging/uwb/Kconfig UWB_I1480U
-clean_mk CONFIG_UWB_I1480U drivers/staging/uwb/i1480/dfu/Makefile
-
 
 
 ################
@@ -3198,6 +3214,23 @@ clean_blob drivers/remoteproc/qcom_wcnss.c
 clean_kconfig drivers/remoteproc/Kconfig QCOM_WCNSS_PIL
 clean_mk CONFIG_QCOM_WCNSS_PIL drivers/remoteproc/Makefile
 
+announce QCOM_IPA - "Qualcomm IPA support"
+reject_firmware drivers/net/ipa/ipa_main.c
+clean_blob drivers/net/ipa/ipa_main.c
+clean_kconfig drivers/net/ipa/Kconfig QCOM_IPA
+clean_mk CONFIG_QCOM_IPA drivers/net/ipa/Makefile
+
+
+#######
+# MFD #
+#######
+
+announce MFD_IQS62X - "Azoteq IQS620A/621/622/624/625 core support"
+reject_firmware drivers/mfd/iqs62x.c
+clean_blob drivers/mfd/iqs62x.c
+clean_blob Documentation/devicetree/bindings/mfd/iqs62x.yaml
+clean_kconfig drivers/mfd/Kconfig MFD_IQS62X
+clean_mk CONFIG_MFD_IQS62X drivers/mfd/Makefile
 
 #######
 # PTP #
@@ -3208,6 +3241,13 @@ reject_firmware drivers/ptp/ptp_clockmatrix.c
 clean_blob drivers/ptp/ptp_clockmatrix.h
 clean_kconfig drivers/ptp/Kconfig PTP_1588_CLOCK_IDTCM
 clean_mk CONFIG_PTP_1588_CLOCK_IDTCM drivers/ptp/Makefile
+
+announce PTP_1588_CLOCK_IDT82P33 - "IDT 82P33xxx PTP clock"
+reject_firmware drivers/ptp/ptp_idt82p33.c
+clean_blob drivers/ptp/ptp_idt82p33.h
+clean_kconfig drivers/ptp/Kconfig PTP_1588_CLOCK_IDT82P33
+clean_mk CONFIG_PTP_1588_CLOCK_IDT82P33 drivers/ptp/Makefile
+
 
 
 #########
@@ -3572,9 +3612,19 @@ clean_blob drivers/fsi/fsi-master-ast-cf.c
 clean_kconfig drivers/fsi/Kconfig FSI_MASTER_AST_CF
 clean_mk CONFIG_FSI_MASTER_AST_CF drivers/fsi/Makefile
 
-###########
-# Greybus #
-###########
+#######
+# Bus #
+#######
+
+# I couldn't find any uses of mhi_register_controller, that should
+# fill in the required fw_image field of mhi_controller.  Let me know
+# if you find any uses in which the firmware is Free Software.
+announce MHI_BUS - "Modem Host Interface (MHI) bus"
+reject_firmware drivers/bus/mhi/core/boot.c
+clean_kconfig drivers/bus/mhi/Kconfig MHI_BUS
+clean_mk CONFIG_MHI_BUS drivers/bus/mhi/core/Makefile
+
+# Greybus
 
 # I couldn't find any evidence of any Free Software firmware for
 # devices that use this bus type, so I'm tentatively disabling it all.
@@ -3597,6 +3647,7 @@ clean_mk CONFIG_GREYBUS_BOOTROM drivers/staging/greybus/Makefile
 
 announce ARCH_QCOM - "Qualcomm Support"
 clean_blob arch/arm64/boot/dts/qcom/sdm845-db845c.dts
+clean_blob arch/arm64/boot/dts/qcom/sdm845-mtp.dts
 clean_kconfig arch/arm/mach-qcom/Kconfig ARCH_QCOM
 clean_mk CONFIG_ARCH_QCOM arch/arm64/boot/dts/qcom/Makefile
 
