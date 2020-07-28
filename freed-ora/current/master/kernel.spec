@@ -30,7 +30,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 1
+%global distro_build 0.rc7.1
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -68,8 +68,11 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.7.0
-%define pkgrelease 1
+%define rpmversion 5.8.0
+%define pkgrelease 0.rc7.1
+
+# This is needed to do merge window version magic
+%define patchlevel 8
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -110,9 +113,9 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 1%{?buildid}%{?dist}%{?libres}
+%define specrelease 0.rc7.1%{?buildid}%{?dist}
 
-%define pkg_release %{specrelease}
+%define pkg_release %{specrelease}%{?libres}
 
 # What parts do we want to build?  We must build at least one kernel.
 # These are the kernels that are built IF the architecture allows it.
@@ -204,7 +207,7 @@ Summary: The Linux kernel
 %define debugbuildsenabled 1
 
 # The kernel tarball/base version
-%define kversion 5.7
+%define kversion 5.8
 
 %if 0%{?fedora}
 # Kernel headers are being split out into a separate package
@@ -602,7 +605,7 @@ BuildRequires: asciidoc
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}-rc7%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -623,34 +626,44 @@ Source10: x509.genkey.rhel
 Source11: x509.genkey.fedora
 %if %{?released_kernel}
 
-Source12: securebootca.cer
-Source13: secureboot.cer
-Source14: secureboot_s390.cer
-Source15: secureboot_ppc.cer
+Source12: redhatsecurebootca5.cer
+Source13: redhatsecurebootca1.cer
+Source14: redhatsecureboot501.cer
+Source15: redhatsecureboot301.cer
+Source16: secureboot_s390.cer
+Source17: secureboot_ppc.cer
 
-%define secureboot_ca %{SOURCE12}
+%define secureboot_ca_1 %{SOURCE12}
+%define secureboot_ca_0 %{SOURCE13}
 %ifarch x86_64 aarch64
-%define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot301
+%define secureboot_key_1 %{SOURCE14}
+%define pesign_name_1 redhatsecureboot501
+%define secureboot_key_0 %{SOURCE15}
+%define pesign_name_0 redhatsecureboot301
 %endif
 %ifarch s390x
-%define secureboot_key %{SOURCE14}
-%define pesign_name redhatsecureboot302
+%define secureboot_key_0 %{SOURCE16}
+%define pesign_name_0 redhatsecureboot302
 %endif
 %ifarch ppc64le
-%define secureboot_key %{SOURCE15}
-%define pesign_name redhatsecureboot303
+%define secureboot_key_0 %{SOURCE17}
+%define pesign_name_0 redhatsecureboot303
 %endif
 
 # released_kernel
 %else
 
-Source12: redhatsecurebootca2.cer
-Source13: redhatsecureboot003.cer
+Source12: redhatsecurebootca4.cer
+Source13: redhatsecurebootca2.cer
+Source14: redhatsecureboot401.cer
+Source15: redhatsecureboot003.cer
 
-%define secureboot_ca %{SOURCE12}
-%define secureboot_key %{SOURCE13}
-%define pesign_name redhatsecureboot003
+%define secureboot_ca_1 %{SOURCE12}
+%define secureboot_ca_0 %{SOURCE13}
+%define secureboot_key_1 %{SOURCE14}
+%define pesign_name_1 redhatsecureboot401
+%define secureboot_key_0 %{SOURCE15}
+%define pesign_name_0 redhatsecureboot003
 
 # released_kernel
 %endif
@@ -805,53 +818,45 @@ Patch56: 0001-redhat-rh_kabi-add-a-comment-with-warning-about-RH_K.patch
 Patch57: 0001-redhat-rh_kabi-deduplication-friendly-structs.patch
 Patch58: 0001-arm-make-CONFIG_HIGHPTE-optional-without-CONFIG_EXPE.patch
 Patch59: 0001-ARM-tegra-usb-no-reset.patch
-Patch60: 0001-backlight-lp855x-Ensure-regulators-are-disabled-on-p.patch
-Patch61: 0001-dt-bindings-Add-doc-for-Pine64-Pinebook-Pro.patch
-Patch62: 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
-Patch63: 0001-Drop-that-for-now.patch
-Patch64: 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
-Patch65: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
-Patch66: 0001-ARM-fix-__get_user_check-in-case-uaccess_-calls-are-.patch
-Patch67: 0001-soc-bcm2835-Sync-xHCI-reset-firmware-property-with-d.patch
-Patch68: 0001-firmware-raspberrypi-Introduce-vl805-init-routine.patch
-Patch69: 0001-PCI-brcmstb-Wait-for-Raspberry-Pi-s-firmware-when-pr.patch
-Patch70: 0001-USB-pci-quirks-Add-Raspberry-Pi-4-quirk.patch
-Patch71: 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
-Patch72: 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
-Patch73: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
-Patch74: 0001-arm64-allwinner-dts-a64-add-LCD-related-device-nodes.patch
-Patch75: 0001-e1000e-bump-up-timeout-to-wait-when-ME-un-configure-.patch
-Patch76: 0001-perf-cs-etm-Move-defined-of-traceid_list.patch
-Patch77: 0001-pwm-lpss-Fix-get_state-runtime-pm-reference-handling.patch
-Patch78: 0001-x86-Fix-compile-issues-with-rh_check_supported.patch
-Patch79: 0001-disp-gv100-expose-capabilities-class.patch
-Patch80: 0001-core-memory-remove-redundant-assignments-to-variable.patch
-Patch81: 0001-acr-Use-kmemdup-instead-of-kmalloc-and-memcpy.patch
-Patch82: 0001-drm-Use-generic-helper-to-check-_PR3-presence.patch
-Patch83: 0001-mmu-Remove-unneeded-semicolon.patch
-Patch84: 0001-device-rework-mmio-mapping-code-to-get-rid-of-second.patch
-Patch85: 0001-device-detect-if-changing-endianness-failed.patch
-Patch86: 0001-device-detect-vGPUs.patch
-Patch87: 0001-device-use-regular-PRI-accessors-in-chipset-detectio.patch
-Patch88: 0001-kms-Fix-regression-by-audio-component-transition.patch
-Patch89: 0001-disp-nv50-increase-timeout-on-pio-channel-free-polli.patch
-Patch90: 0001-disp-hda-gt215-pass-head-to-nvkm_ior.hda.eld.patch
-Patch91: 0001-disp-hda-gf119-add-HAL-for-programming-device-entry-.patch
-Patch92: 0001-disp-hda-gf119-select-HDA-device-entry-based-on-boun.patch
-Patch93: 0001-disp-hda-gv100-NV_PDISP_SF_AUDIO_CNTRL0-register-mov.patch
-Patch94: 0001-kms-nv50-Initialize-core-channel-in-nouveau_display_.patch
-Patch95: 0001-kms-nv50-Probe-SOR-and-PIOR-caps-for-DP-interlacing-.patch
-Patch96: 0001-kms-gv100-Add-support-for-interlaced-modes.patch
-Patch97: 0001-kms-nv50-Move-8BPC-limit-for-MST-into-nv50_mstc_get_.patch
-Patch98: 0001-kms-nv50-Share-DP-SST-mode_valid-handling-with-MST.patch
-Patch99: 0001-virt-vbox-Fix-VBGL_IOCTL_VMMDEV_REQUEST_BIG-and-_LOG.patch
-Patch100: 0001-virt-vbox-Fix-guest-capabilities-mask-check.patch
-Patch101: 0001-virt-vbox-Rename-guest_caps-struct-members-to-set_gu.patch
-Patch102: 0001-virt-vbox-Add-vbg_set_host_capabilities-helper-funct.patch
-Patch103: 0001-virt-vbox-Add-support-for-the-new-VBG_IOCTL_ACQUIRE_.patch
-Patch104: 0001-virt-vbox-Add-a-few-new-vmmdev-request-types-to-the-.patch
-Patch105: 0001-virt-vbox-Log-unknown-ioctl-requests-as-error.patch
-Patch106: 0001-platform-x86-sony-laptop-SNC-calls-should-handle-BUF.patch
+Patch60: 0001-dt-bindings-Add-doc-for-Pine64-Pinebook-Pro.patch
+Patch61: 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
+Patch62: 0001-Drop-that-for-now.patch
+Patch63: 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
+Patch64: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
+Patch65: 0001-ARM-fix-__get_user_check-in-case-uaccess_-calls-are-.patch
+Patch66: 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
+Patch67: 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
+Patch68: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
+Patch69: 0001-arm64-allwinner-dts-a64-add-LCD-related-device-nodes.patch
+Patch70: 0001-e1000e-bump-up-timeout-to-wait-when-ME-un-configure-.patch
+Patch71: 0001-x86-Fix-compile-issues-with-rh_check_supported.patch
+Patch72: 0001-virt-vbox-Rename-guest_caps-struct-members-to-set_gu.patch
+Patch73: 0001-virt-vbox-Add-vbg_set_host_capabilities-helper-funct.patch
+Patch74: 0001-virt-vbox-Add-support-for-the-new-VBG_IOCTL_ACQUIRE_.patch
+Patch75: 0001-virt-vbox-Add-a-few-new-vmmdev-request-types-to-the-.patch
+Patch76: 0001-virt-vbox-Log-unknown-ioctl-requests-as-error.patch
+Patch77: 0001-PCI-tegra-Revert-raw_violation_fixup-for-tegra124.patch
+Patch78: 0001-redhat-Replace-hardware.redhat.com-link-in-Unsupport.patch
+Patch79: 0001-arch-x86-Remove-vendor-specific-CPU-ID-checks.patch
+Patch80: 0001-Fixes-acpi-prefer-booting-with-ACPI-over-DTS-to-be-R.patch
+Patch81: 0001-selinux-allow-reading-labels-before-policy-is-loaded.patch
+Patch82: 0001-Revert-dt-bindings-panel-add-binding-for-Xingbangda-.patch
+Patch83: 0001-Revert-drm-panel-add-Xingbangda-XBD599-panel.patch
+Patch84: 0001-Revert-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timin.patch
+Patch85: 0001-Revert-arm64-allwinner-dts-a64-add-LCD-related-devic.patch
+Patch86: 0001-dt-bindings-vendor-prefixes-Add-Xingbangda.patch
+Patch87: 0001-dt-bindings-panel-Convert-rocktech-jh057n00900-to-ya.patch
+Patch88: 0001-dt-bindings-panel-Add-compatible-for-Xingbangda-XBD5.patch
+Patch89: 0001-drm-panel-rocktech-jh057n00900-Rename-the-driver-to-.patch
+Patch90: 0001-drm-panel-st7703-Rename-functions-from-jh057n-prefix.patch
+Patch91: 0001-drm-panel-st7703-Prepare-for-supporting-multiple-pan.patch
+Patch92: 0001-drm-panel-st7703-Move-code-specific-to-jh057n-closer.patch
+Patch93: 0001-drm-panel-st7703-Move-generic-part-of-init-sequence-.patch
+Patch94: 0001-drm-panel-st7703-Add-support-for-Xingbangda-XBD599.patch
+Patch95: 0001-drm-panel-st7703-Enter-sleep-after-display-off.patch
+Patch96: 0001-drm-panel-st7703-Assert-reset-prior-to-powering-down.patch
+Patch97: 0001-arm64-dts-sun50i-a64-pinephone-Enable-LCD-support-on.patch
+Patch98: 0001-arm64-dts-sun50i-a64-pinephone-Add-touchscreen-suppo.patch
 
 %endif
 
@@ -1380,8 +1385,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel%{?baselibre}-5.7.0 -c
-mv linux-%kversion linux-%{KVERREL}
+%setup -q -n kernel-5.8-rc7 -c
+mv linux-5.8-rc7 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -1449,53 +1454,45 @@ ApplyOptionalPatch 0001-redhat-rh_kabi-add-a-comment-with-warning-about-RH_K.pat
 ApplyOptionalPatch 0001-redhat-rh_kabi-deduplication-friendly-structs.patch
 ApplyOptionalPatch 0001-arm-make-CONFIG_HIGHPTE-optional-without-CONFIG_EXPE.patch
 ApplyOptionalPatch 0001-ARM-tegra-usb-no-reset.patch
-ApplyOptionalPatch 0001-backlight-lp855x-Ensure-regulators-are-disabled-on-p.patch
 ApplyOptionalPatch 0001-dt-bindings-Add-doc-for-Pine64-Pinebook-Pro.patch
 ApplyOptionalPatch 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
 ApplyOptionalPatch 0001-Drop-that-for-now.patch
 ApplyOptionalPatch 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
 ApplyOptionalPatch 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
 ApplyOptionalPatch 0001-ARM-fix-__get_user_check-in-case-uaccess_-calls-are-.patch
-ApplyOptionalPatch 0001-soc-bcm2835-Sync-xHCI-reset-firmware-property-with-d.patch
-ApplyOptionalPatch 0001-firmware-raspberrypi-Introduce-vl805-init-routine.patch
-ApplyOptionalPatch 0001-PCI-brcmstb-Wait-for-Raspberry-Pi-s-firmware-when-pr.patch
-ApplyOptionalPatch 0001-USB-pci-quirks-Add-Raspberry-Pi-4-quirk.patch
 ApplyOptionalPatch 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
 ApplyOptionalPatch 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
 ApplyOptionalPatch 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
 ApplyOptionalPatch 0001-arm64-allwinner-dts-a64-add-LCD-related-device-nodes.patch
 ApplyOptionalPatch 0001-e1000e-bump-up-timeout-to-wait-when-ME-un-configure-.patch
-ApplyOptionalPatch 0001-perf-cs-etm-Move-defined-of-traceid_list.patch
-ApplyOptionalPatch 0001-pwm-lpss-Fix-get_state-runtime-pm-reference-handling.patch
 ApplyOptionalPatch 0001-x86-Fix-compile-issues-with-rh_check_supported.patch
-ApplyOptionalPatch 0001-disp-gv100-expose-capabilities-class.patch
-ApplyOptionalPatch 0001-core-memory-remove-redundant-assignments-to-variable.patch
-ApplyOptionalPatch 0001-acr-Use-kmemdup-instead-of-kmalloc-and-memcpy.patch
-ApplyOptionalPatch 0001-drm-Use-generic-helper-to-check-_PR3-presence.patch
-ApplyOptionalPatch 0001-mmu-Remove-unneeded-semicolon.patch
-ApplyOptionalPatch 0001-device-rework-mmio-mapping-code-to-get-rid-of-second.patch
-ApplyOptionalPatch 0001-device-detect-if-changing-endianness-failed.patch
-ApplyOptionalPatch 0001-device-detect-vGPUs.patch
-ApplyOptionalPatch 0001-device-use-regular-PRI-accessors-in-chipset-detectio.patch
-ApplyOptionalPatch 0001-kms-Fix-regression-by-audio-component-transition.patch
-ApplyOptionalPatch 0001-disp-nv50-increase-timeout-on-pio-channel-free-polli.patch
-ApplyOptionalPatch 0001-disp-hda-gt215-pass-head-to-nvkm_ior.hda.eld.patch
-ApplyOptionalPatch 0001-disp-hda-gf119-add-HAL-for-programming-device-entry-.patch
-ApplyOptionalPatch 0001-disp-hda-gf119-select-HDA-device-entry-based-on-boun.patch
-ApplyOptionalPatch 0001-disp-hda-gv100-NV_PDISP_SF_AUDIO_CNTRL0-register-mov.patch
-ApplyOptionalPatch 0001-kms-nv50-Initialize-core-channel-in-nouveau_display_.patch
-ApplyOptionalPatch 0001-kms-nv50-Probe-SOR-and-PIOR-caps-for-DP-interlacing-.patch
-ApplyOptionalPatch 0001-kms-gv100-Add-support-for-interlaced-modes.patch
-ApplyOptionalPatch 0001-kms-nv50-Move-8BPC-limit-for-MST-into-nv50_mstc_get_.patch
-ApplyOptionalPatch 0001-kms-nv50-Share-DP-SST-mode_valid-handling-with-MST.patch
-ApplyOptionalPatch 0001-virt-vbox-Fix-VBGL_IOCTL_VMMDEV_REQUEST_BIG-and-_LOG.patch
-ApplyOptionalPatch 0001-virt-vbox-Fix-guest-capabilities-mask-check.patch
 ApplyOptionalPatch 0001-virt-vbox-Rename-guest_caps-struct-members-to-set_gu.patch
 ApplyOptionalPatch 0001-virt-vbox-Add-vbg_set_host_capabilities-helper-funct.patch
 ApplyOptionalPatch 0001-virt-vbox-Add-support-for-the-new-VBG_IOCTL_ACQUIRE_.patch
 ApplyOptionalPatch 0001-virt-vbox-Add-a-few-new-vmmdev-request-types-to-the-.patch
 ApplyOptionalPatch 0001-virt-vbox-Log-unknown-ioctl-requests-as-error.patch
-ApplyOptionalPatch 0001-platform-x86-sony-laptop-SNC-calls-should-handle-BUF.patch
+ApplyOptionalPatch 0001-PCI-tegra-Revert-raw_violation_fixup-for-tegra124.patch
+ApplyOptionalPatch 0001-redhat-Replace-hardware.redhat.com-link-in-Unsupport.patch
+ApplyOptionalPatch 0001-arch-x86-Remove-vendor-specific-CPU-ID-checks.patch
+ApplyOptionalPatch 0001-Fixes-acpi-prefer-booting-with-ACPI-over-DTS-to-be-R.patch
+ApplyOptionalPatch 0001-selinux-allow-reading-labels-before-policy-is-loaded.patch
+ApplyOptionalPatch 0001-Revert-dt-bindings-panel-add-binding-for-Xingbangda-.patch
+ApplyOptionalPatch 0001-Revert-drm-panel-add-Xingbangda-XBD599-panel.patch
+ApplyOptionalPatch 0001-Revert-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timin.patch
+ApplyOptionalPatch 0001-Revert-arm64-allwinner-dts-a64-add-LCD-related-devic.patch
+ApplyOptionalPatch 0001-dt-bindings-vendor-prefixes-Add-Xingbangda.patch
+ApplyOptionalPatch 0001-dt-bindings-panel-Convert-rocktech-jh057n00900-to-ya.patch
+ApplyOptionalPatch 0001-dt-bindings-panel-Add-compatible-for-Xingbangda-XBD5.patch
+ApplyOptionalPatch 0001-drm-panel-rocktech-jh057n00900-Rename-the-driver-to-.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Rename-functions-from-jh057n-prefix.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Prepare-for-supporting-multiple-pan.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Move-code-specific-to-jh057n-closer.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Move-generic-part-of-init-sequence-.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Add-support-for-Xingbangda-XBD599.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Enter-sleep-after-display-off.patch
+ApplyOptionalPatch 0001-drm-panel-st7703-Assert-reset-prior-to-powering-down.patch
+ApplyOptionalPatch 0001-arm64-dts-sun50i-a64-pinephone-Enable-LCD-support-on.patch
+ApplyOptionalPatch 0001-arm64-dts-sun50i-a64-pinephone-Add-touchscreen-suppo.patch
 
 %endif
 
@@ -1649,6 +1646,10 @@ BuildKernel() {
     ShortRel=$(perl -e "print \"%{release}\" =~ s/\.pr\.[0-9A-Fa-f]{32}//r")
     perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -libre.${ShortRel}.%{_target_cpu}${Flav}/" Makefile
 
+    # if pre-rc1 devel kernel, must fix up PATCHLEVEL for our versioning scheme
+    # if we are post rc1 this should match anyway so this won't matter
+    perl -p -i -e 's/^PATCHLEVEL.*/PATCHLEVEL = %{patchlevel}/' Makefile
+
     # and now to start the build process
 
     %{make} %{?_smp_mflags} mrproper
@@ -1725,11 +1726,13 @@ BuildKernel() {
     fi
 
     %ifarch x86_64 aarch64
-    %pesign -s -i $SignImage -o vmlinuz.signed -a %{secureboot_ca} -c %{secureboot_key} -n %{pesign_name}
+    %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i vmlinuz.tmp -o vmlinuz.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
+    rm vmlinuz.tmp
     %endif
     %ifarch s390x ppc64le
     if [ -x /usr/bin/rpm-sign ]; then
-	rpm-sign --key "%{pesign_name}" --lkmsign $SignImage --output vmlinuz.signed
+	rpm-sign --key "%{pesign_name_0}" --lkmsign $SignImage --output vmlinuz.signed
     elif [ $DoModules -eq 1 ]; then
 	chmod +x scripts/sign-file
 	./scripts/sign-file -p sha256 certs/signing_key.pem certs/signing_key.x509 $SignImage vmlinuz.signed
@@ -1806,6 +1809,9 @@ BuildKernel() {
     find . -name *.h.s -delete
     # first copy everything
     cp --parents `find  -type f -name "Makefile*" -o -name "Kconfig*"` $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
+    if [ ! -e Module.symvers ]; then
+        touch Module.symvers
+    fi
     cp Module.symvers $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     cp System.map $RPM_BUILD_ROOT/lib/modules/$KernelVer/build
     if [ -s Module.markers ]; then
@@ -2129,11 +2135,17 @@ BuildKernel() {
 
     # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
-    install -m 0644 %{secureboot_ca} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %ifarch x86_64 aarch64
+       install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
+       install -m 0644 %{secureboot_ca_1} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20140212.cer
+       ln -s kernel-signing-ca-20200609.cer $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %else
+       install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %endif
     %ifarch s390x ppc64le
     if [ $DoModules -eq 1 ]; then
 	if [ -x /usr/bin/rpm-sign ]; then
-	    install -m 0644 %{secureboot_key} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
+	    install -m 0644 %{secureboot_key_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
 	else
 	    install -m 0644 certs/signing_key.x509.sign${Flav} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
 	    openssl x509 -in certs/signing_key.pem.sign${Flav} -outform der -out $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/%{signing_key_filename}
@@ -2790,6 +2802,8 @@ fi
 %{_sysconfdir}/bash_completion.d/bpftool
 %{_mandir}/man8/bpftool-cgroup.8.gz
 %{_mandir}/man8/bpftool-gen.8.gz
+%{_mandir}/man8/bpftool-iter.8.gz
+%{_mandir}/man8/bpftool-link.8.gz
 %{_mandir}/man8/bpftool-map.8.gz
 %{_mandir}/man8/bpftool-prog.8.gz
 %{_mandir}/man8/bpftool-perf.8.gz
@@ -2861,7 +2875,7 @@ fi
 /lib/modules/%{KVERREL}%{?3:+%{3}}/updates\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/bls.conf\
 /lib/modules/%{KVERREL}%{?3:+%{3}}/weak-updates\
-%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca.cer\
+%{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/kernel-signing-ca*.cer\
 %ifarch s390x ppc64le\
 %if 0%{!?4:1}\
 %{_datadir}/doc/kernel-keys/%{KVERREL}%{?3:+%{3}}/%{signing_key_filename} \
@@ -2912,11 +2926,157 @@ fi
 #
 #
 %changelog
-* Thu Jun  4 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 5.7-gnu.
+* Mon Jul 27 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.8-rc7-gnu.
 
-* Mon Jun 01 2020 CKI@GitLab <cki-project@redhat.com> [5.7.0-1]
-- v5.7 rebase
+* Mon Jul 27 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc7.1]
+- v5.8-rc7 rebase
+- Updated changelog for the release based on 04300d66f0a0 (Fedora Kernel Team)
+
+* Sun Jul 26 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc6.20200726git04300d66f0a0.1]
+- 04300d66f0a0 rebase
+- Updated changelog for the release based on 23ee3e4e5bd2 (Fedora Kernel Team)
+
+* Sat Jul 25 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc6.20200725git23ee3e4e5bd2.1]
+- 23ee3e4e5bd2 rebase
+- Enable CONFIG_DM_VERITY_VERIFY_ROOTHASH_SIG ("Justin M. Forbes")
+- Updated changelog for the release based on f37e99aca03f (Fedora Kernel Team)
+
+* Fri Jul 24 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc6.20200724gitf37e99aca03f.1]
+- f37e99aca03f rebase
+- Updated changelog for the release based on d15be546031c (Fedora Kernel Team)
+
+* Thu Jul 23 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc6.20200723gitd15be546031c.1]
+- d15be546031c rebase
+- fedora: arm: Update some meson config options (Peter Robinson)
+- Updated changelog for the release based on 4fa640dc5230 (Fedora Kernel Team)
+
+* Tue Jul 21 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc6.20200721git4fa640dc5230.1]
+- 4fa640dc5230 rebase
+- Updated changelog for the release based on 5714ee50bb43 (Fedora Kernel Team)
+- redhat/docs: Add Fedora RPM tagging date (Prarit Bhargava)
+
+* Mon Jul 20 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc6.20200720git5714ee50bb43.1]
+- 5714ee50bb43 rebase
+- Updated changelog for the release based on f932d58abc38 (Fedora Kernel Team)
+
+* Sun Jul 19 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc5.20200719gitf932d58abc38.1]
+- f932d58abc38 rebase
+- Updated changelog for the release based on 6a70f89cc58f (Fedora Kernel Team)
+
+* Sat Jul 18 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc5.20200718git6a70f89cc58f.1]
+- 6a70f89cc58f rebase
+- Updated changelog for the release based on 07a56bb875af (Fedora Kernel Team)
+
+* Fri Jul 17 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc5.20200717git07a56bb875af.1]
+- 07a56bb875af rebase
+- redhat/configs: Fix common CONFIGs (Prarit Bhargava)
+- redhat/configs: General CONFIG cleanups (Prarit Bhargava)
+- redhat/configs: Update & generalize evaluate_configs (Prarit Bhargava)
+- arch/x86: Remove vendor specific CPU ID checks (Prarit Bhargava)
+- Updated changelog for the release based on e9919e11e219 (Fedora Kernel Team)
+
+* Wed Jul 15 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc5.20200715gite9919e11e219.1]
+- e9919e11e219 rebase
+- arm64: dts: sun50i-a64-pinephone: Add touchscreen support (Ondrej Jirman)
+- arm64: dts: sun50i-a64-pinephone: Enable LCD support on PinePhone (Icenowy Zheng)
+- drm/panel: st7703: Assert reset prior to powering down the regulators (Ondrej Jirman)
+- drm/panel: st7703: Enter sleep after display off (Ondrej Jirman)
+- drm/panel: st7703: Add support for Xingbangda XBD599 (Ondrej Jirman)
+- drm/panel: st7703: Move generic part of init sequence to enable callback (Ondrej Jirman)
+- drm/panel: st7703: Move code specific to jh057n closer together (Ondrej Jirman)
+- drm/panel: st7703: Prepare for supporting multiple panels (Ondrej Jirman)
+- drm/panel: st7703: Rename functions from jh057n prefix to st7703 (Ondrej Jirman)
+- drm/panel: rocktech-jh057n00900: Rename the driver to st7703 (Ondrej Jirman)
+- dt-bindings: panel: Add compatible for Xingbangda XBD599 panel (Ondrej Jirman)
+- dt-bindings: panel: Convert rocktech, jh057n00900 to yaml (Ondrej Jirman)
+- dt-bindings: vendor-prefixes: Add Xingbangda (Icenowy Zheng)
+- Revert "arm64: allwinner: dts: a64: add LCD-related device nodes for PinePhone" (Peter Robinson)
+- Revert "drm/sun4i: sun6i_mipi_dsi: fix horizontal timing calculation" (Peter Robinson)
+- Revert "drm: panel: add Xingbangda XBD599 panel" (Peter Robinson)
+- Revert "dt-bindings: panel: add binding for Xingbangda XBD599 panel" (Peter Robinson)
+- selinux: allow reading labels before policy is loaded (Jonathan Lebon)
+- Fixes "acpi: prefer booting with ACPI over DTS" to be RHEL only (Peter Robinson)
+- Update config for renamed panel driver. (Peter Robinson)
+- Enable SERIAL_SC16IS7XX for SPI interfaces (Peter Robinson)
+- Updated changelog for the release based on dcde237b9b0e (Fedora Kernel Team)
+
+* Wed Jul 08 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc4.20200708gitdcde237b9b0e.1]
+- dcde237b9b0e rebase
+- Updated changelog for the release based on v5.8-rc4 (Fedora Kernel Team)
+
+* Mon Jul 06 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc4.1]
+- v5.8-rc4 rebase
+- Updated changelog for the release based on cd77006e01b3 (Fedora Kernel Team)
+
+* Thu Jul 02 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc3.20200702gitcd77006e01b3.1]
+- cd77006e01b3 rebase
+- Updated changelog for the release based on v5.8-rc3 (Fedora Kernel Team)
+
+* Mon Jun 29 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc3.1]
+- v5.8-rc3 rebase
+- s390x-zfcpdump: Handle missing Module.symvers file (Don Zickus)
+- Updated changelog for the release based on 8be3a53e18e0 (Fedora Kernel Team)
+
+* Thu Jun 25 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc2.20200625git8be3a53e18e0.1]
+- 8be3a53e18e0 rebase
+- redhat: Replace hardware.redhat.com link in Unsupported message (Prarit Bhargava)
+- redhat/configs: Add .tmp files to .gitignore (Prarit Bhargava)
+- disable uncommon TCP congestion control algorithms (Davide Caratti)
+- Updated changelog for the release based on dd0d718152e4 (Fedora Kernel Team)
+
+* Tue Jun 23 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc2.20200623gitdd0d718152e4.1]
+- dd0d718152e4 rebase
+- Add new bpf man pages ("Justin M. Forbes")
+- Add default option for CONFIG_ARM64_BTI_KERNEL to pending-common so that eln kernels build ("Justin M. Forbes")
+- Updated changelog for the release based on 625d3449788f (Fedora Kernel Team)
+
+* Mon Jun 22 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc2.20200622git625d3449788f.1]
+- 625d3449788f rebase
+- Updated changelog for the release based on 1b5044021070 (Fedora Kernel Team)
+
+* Thu Jun 18 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc1.20200618git1b5044021070.1]
+- 1b5044021070 rebase
+- redhat/Makefile: Add fedora-configs and rh-configs make targets (Prarit Bhargava)
+- Updated changelog for the release based on 69119673bd50 (Fedora Kernel Team)
+- redhat/configs: Use SHA512 for module signing (Prarit Bhargava)
+- genspec.sh: 'touch' empty Patchlist file for single tarball (Don Zickus)
+
+* Wed Jun 17 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc1.20200617git69119673bd50.1]
+- 69119673bd50 rebase
+- Updated changelog for the release based on a5dc8300df75 (Fedora Kernel Team)
+
+* Tue Jun 16 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc1.20200616gita5dc8300df75.1]
+- a5dc8300df75 rebase
+- Fedora config update for rc1 ("Justin M. Forbes")
+- Updated changelog for the release based on v5.8-rc1 (Fedora Kernel Team)
+
+* Sun Jun 14 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc1.1]
+- v5.8-rc1 rebase
+- Updated changelog for the release based on df2fbf5bfa0e (Fedora Kernel Team)
+
+* Sat Jun 13 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc0.20200613gitdf2fbf5bfa0e.1]
+- df2fbf5bfa0e rebase
+- Updated changelog for the release based on b791d1bdf921 (Fedora Kernel Team)
+
+* Fri Jun 12 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.8.0-0.rc0.20200612gitb791d1bdf921.1]
+- b791d1bdf921 rebase
+- PCI: tegra: Revert raw_violation_fixup for tegra124 (Nicolas Chauvet)
+- One more Fedora config update ("Justin M. Forbes")
+- Change ark CONFIG_COMMON_CLK to yes, it is selected already by other options ("Justin M. Forbes")
+- Fix PATCHLEVEL for merge window ("Justin M. Forbes")
+- More module filtering for Fedora ("Justin M. Forbes")
+- Update filters for rnbd in Fedora ("Justin M. Forbes")
+- redhat/Makefile.common: fix RPMKSUBLEVEL condition (Ondrej Mosnacek)
+- redhat/Makefile: silence KABI tar output (Ondrej Mosnacek)
+- Fix up module filtering for 5.8 ("Justin M. Forbes")
+- More Fedora config work ("Justin M. Forbes")
+- RTW88BE and CE have been extracted to their own modules ("Justin M. Forbes")
+- Set CONFIG_BLK_INLINE_ENCRYPTION_FALLBACK for Fedora ("Justin M. Forbes")
+- Arm64 Use Branch Target Identification for kernel ("Justin M. Forbes")
+- Fedora config updates ("Justin M. Forbes")
+- Change value of CONFIG_SECURITY_SELINUX_CHECKREQPROT_VALUE ("Justin M. Forbes")
+- Fix configs for Fedora ("Justin M. Forbes")
 - Fix update_scripts.sh unselective pattern sub (David Howells)
 - Updated changelog for the release based on b0c3ba31be3e ("CKI@GitLab")
 - Drop the static path configuration for the Sphinx docs (Jeremy Cline)
