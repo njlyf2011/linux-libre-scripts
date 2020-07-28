@@ -30,7 +30,7 @@ Signed-off-by: Herton R. Krzesinski <herton@redhat.com>
  2 files changed, 33 insertions(+)
 
 diff --git a/drivers/pci/pci-driver.c b/drivers/pci/pci-driver.c
-index 0454ca0e4e3f..5cc490b821be 100644
+index da6510af1221..2ec02cbfda72 100644
 --- a/drivers/pci/pci-driver.c
 +++ b/drivers/pci/pci-driver.c
 @@ -18,6 +18,7 @@
@@ -77,10 +77,10 @@ index 0454ca0e4e3f..5cc490b821be 100644
  	struct pci_driver *drv;
  	struct pci_dev *dev;
 diff --git a/include/linux/pci.h b/include/linux/pci.h
-index 83ce1cdf5676..88397dd562d9 100644
+index 34c1c4f45288..6d9a405feea5 100644
 --- a/include/linux/pci.h
 +++ b/include/linux/pci.h
-@@ -1397,6 +1397,10 @@ int pci_add_dynid(struct pci_driver *drv,
+@@ -1406,6 +1406,10 @@ int pci_add_dynid(struct pci_driver *drv,
  		  unsigned long driver_data);
  const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
  					 struct pci_dev *dev);

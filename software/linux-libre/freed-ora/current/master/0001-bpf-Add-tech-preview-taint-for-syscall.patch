@@ -27,17 +27,17 @@ Signed-off-by: Herton R. Krzesinski <herton@redhat.com>
  1 file changed, 6 insertions(+)
 
 diff --git a/kernel/bpf/syscall.c b/kernel/bpf/syscall.c
-index 77ecd8b47d70..759670262445 100644
+index 60f70f31060e..628d0ba68106 100644
 --- a/kernel/bpf/syscall.c
 +++ b/kernel/bpf/syscall.c
-@@ -3698,11 +3698,17 @@ static int link_update(union bpf_attr *attr)
+@@ -4094,11 +4094,17 @@ static int bpf_iter_create(union bpf_attr *attr)
  SYSCALL_DEFINE3(bpf, int, cmd, union bpf_attr __user *, uattr, unsigned int, size)
  {
  	union bpf_attr attr;
 +	static int marked;
  	int err;
 
- 	if (sysctl_unprivileged_bpf_disabled && !capable(CAP_SYS_ADMIN))
+ 	if (sysctl_unprivileged_bpf_disabled && !bpf_capable())
  		return -EPERM;
 
 +	if (!marked) {

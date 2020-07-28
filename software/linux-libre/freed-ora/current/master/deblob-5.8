@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.7 extra=
+kver=5.8 extra=
 
 case $1 in
 --force)
@@ -267,6 +267,12 @@ for f in \
     drivers/gpu/drm/amd/amdkfd/cwsr_trap_handler_gfx9.asm \
     drivers/gpu/drm/amd/amdkfd/cwsr_trap_handler_gfx10.asm \
   drivers/gpu/drm/amd/amdkfd/cwsr_trap_handler.h \
+\
+    drivers/gpu/drm/i915/gt/shaders/README \
+    drivers/gpu/drm/i915/gt/shaders/clear_kernel/hsw.asm \
+  drivers/gpu/drm/i915/gt/hsw_clear_kernel.c \
+    drivers/gpu/drm/i915/gt/shaders/clear_kernel/ivb.asm \
+  drivers/gpu/drm/i915/gt/ivb_clear_kernel.c \
 \
     drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/com.fuc \
     drivers/gpu/drm/nouveau/nvkm/engine/ce/fuc/gf100.fuc3 \
@@ -661,7 +667,7 @@ clean_mk CONFIG_ATM_AMBASSADOR drivers/atm/Makefile
 announce ATM_FORE200E - "FORE Systems 200E-series"
 reject_firmware drivers/atm/fore200e.c
 clean_blob drivers/atm/fore200e.c
-clean_blob Documentation/networking/fore200e.txt
+clean_blob Documentation/networking/fore200e.rst
 clean_blob drivers/atm/.gitignore
 clean_blob Documentation/dontdiff
 clean_kconfig drivers/atm/Kconfig ATM_FORE200E
@@ -784,13 +790,11 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/gmc_v8_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/gmc_v8_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/mes_v10_1.c
 clean_blob drivers/gpu/drm/amd/amdgpu/mes_v10_1.c
-reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v3_1.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v3_1.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v10_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v10_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v11_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v11_0.c
-reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v12_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v12_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
@@ -847,13 +851,6 @@ reject_firmware drivers/gpu/drm/i915/display/intel_opregion.c
 reject_firmware drivers/gpu/drm/i915/gt/uc/intel_uc_fw.c
 clean_blob drivers/gpu/drm/i915/gt/uc/intel_uc_fw.c
 clean_blob drivers/gpu/drm/i915/gt/uc/intel_uc_fw.h
-# Hmm, these are quite sparse, and a little too regular to be code of
-# significant complexity, but being a little on the too-big side, and
-# due to the inclusion as X11/MIT-licensed without comments or links
-# to corresponding sources, I'm conservatively assuming they are
-# binary blobs.  If you know otherwise, please let me know.
-clean_blob drivers/gpu/drm/i915/gt/hsw_clear_kernel.c
-clean_blob drivers/gpu/drm/i915/gt/ivb_clear_kernel.c
 clean_kconfig drivers/gpu/drm/i915/Kconfig DRM_I915
 clean_mk CONFIG_DRM_I915 drivers/gpu/drm/i915/Makefile
 
@@ -869,7 +866,7 @@ reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/falcon.c
 reject_firmware drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/xtensa.c
-clean_blob drivers/gpu/drm/nouveau/nouveau_platform.c
+clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gk20a.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gm200.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gm20b.c
 clean_blob drivers/gpu/drm/nouveau/nvkm/engine/gr/gp100.c
@@ -1084,6 +1081,7 @@ reject_firmware drivers/media/pci/bt8xx/dvb-bt8xx.c
 
 announce DVB_USB_A800 - "AVerMedia AverTV DVB-T USB 2.0 (A800)"
 clean_blob drivers/media/usb/dvb-usb/a800.c
+clean_blob Documentation/admin-guide/media/avermedia.rst
 clean_kconfig drivers/media/usb/dvb-usb/Kconfig DVB_USB_A800
 clean_mk CONFIG_DVB_USB_A800 drivers/media/usb/dvb-usb/Makefile
 
@@ -1172,7 +1170,7 @@ clean_mk CONFIG_DVB_USB_GP8PSK drivers/media/usb/dvb-usb/Makefile
 announce DVB_USB_LME2510 - "LME DM04/QQBOX DVB-S USB2.0 support"
 reject_firmware drivers/media/usb/dvb-usb-v2/lmedm04.c
 clean_blob drivers/media/usb/dvb-usb-v2/lmedm04.c
-clean_file Documentation/media/dvb-drivers/lmedm04.rst
+clean_file Documentation/admin-guide/media/lmedm04.rst
 clean_kconfig drivers/media/usb/dvb-usb-v2/Kconfig DVB_USB_LME2510
 clean_mk CONFIG_DVB_USB_LME2510 drivers/media/usb/dvb-usb-v2/Makefile
 
@@ -1189,6 +1187,7 @@ clean_mk CONFIG_DVB_USB_NOVA_T_USB2 drivers/media/usb/dvb-usb/Makefile
 announce DVB_USB_OPERA1 - "Opera1 DVB-S USB2.0 receiver"
 reject_firmware drivers/media/usb/dvb-usb/opera1.c
 clean_blob drivers/media/usb/dvb-usb/opera1.c
+clean_blob Documentation/admin-guide/media/opera-firmware.rst
 clean_kconfig drivers/media/usb/dvb-usb/Kconfig DVB_USB_OPERA1
 clean_mk CONFIG_DVB_USB_OPERA1 drivers/media/usb/dvb-usb/Makefile
 
@@ -1431,7 +1430,7 @@ clean_mk CONFIG_DVB_TTUSB_BUDGET drivers/media/usb/ttusb-budget/Makefile
 announce DVB_TTUSB_DEC - "Technotrend/Hauppauge USB DEC devices"
 reject_firmware drivers/media/usb/ttusb-dec/ttusb_dec.c
 clean_blob drivers/media/usb/ttusb-dec/ttusb_dec.c
-clean_blob Documentation/media/dvb-drivers/ttusb-dec.rst
+clean_blob Documentation/admin-guide/media/ttusb-dec.rst
 clean_kconfig drivers/media/usb/ttusb-dec/Kconfig DVB_TTUSB_DEC
 clean_mk CONFIG_DVB_TTUSB_DEC drivers/media/usb/ttusb-dec/Makefile
 
@@ -1443,10 +1442,17 @@ clean_blob drivers/staging/media/allegro-dvt/allegro-core.c
 clean_kconfig drivers/staging/media/allegro-dvt/Kconfig VIDEO_ALLEGRO_DVT
 clean_mk CONFIG_VIDEO_ALLEGRO_DVT drivers/staging/media/allegro-dvt/Makefile
 
+announce VIDEO_ATOMISP - "Intel Atom Image Signal Processor Driver"
+reject_firmware drivers/staging/media/atomisp/pci/atomisp_v4l2.c
+clean_blob drivers/staging/media/atomisp/pci/atomisp_v4l2.c
+clean_blob drivers/staging/media/atomisp/TODO
+clean_kconfig drivers/staging/media/atomisp/Kconfig VIDEO_ATOMISP
+clean_mk CONFIG_VIDEO_ATOMISP drivers/staging/media/atomisp/Makefile
+
 announce VIDEO_BT848 - "BT848 Video For Linux"
 reject_firmware drivers/media/pci/bt8xx/bttv-cards.c
 clean_blob drivers/media/pci/bt8xx/bttv-cards.c
-clean_blob Documentation/media/v4l-drivers/bttv.rst
+clean_blob Documentation/admin-guide/media/bttv.rst
 clean_kconfig drivers/media/pci/bt8xx/Kconfig VIDEO_BT848
 clean_mk CONFIG_VIDEO_BT848 drivers/media/pci/bt8xx/Makefile
 
@@ -1519,6 +1525,7 @@ clean_mk CONFIG_VIDEO_IPU3_IMGU drivers/staging/media/ipu3/Makefile
 announce VIDEO_IVTV - "Conexant cx23416/cx23415 MPEG encoder/decoder support"
 reject_firmware drivers/media/pci/ivtv/ivtv-firmware.c
 clean_blob drivers/media/pci/ivtv/ivtv-firmware.c
+clean_blob Documentation/admin-guide/media/ivtv.rst
 clean_kconfig drivers/media/pci/ivtv/Kconfig VIDEO_IVTV
 clean_mk CONFIG_VIDEO_IVTV drivers/media/pci/ivtv/Makefile
 
@@ -2152,6 +2159,7 @@ clean_kconfig drivers/net/wireless/mediatek/mt76/mt7603/Kconfig MT7603E
 clean_mk CONFIG_MT7603E drivers/net/wireless/mediatek/mt76/mt7603/Makefile
 
 announce MT7615E - "MediaTek MT7615E (PCIe) support"
+reject_firmware_nowarn drivers/net/wireless/mediatek/mt76/mt7615/mcu.c
 reject_firmware drivers/net/wireless/mediatek/mt76/mt7615/mcu.c
 clean_blob drivers/net/wireless/mediatek/mt76/mt7615/mt7615.h
 clean_blob drivers/net/wireless/mediatek/mt76/mt7615/pci.c
@@ -2162,6 +2170,18 @@ announce MT7622_WMAC - "MT7622 (SoC) WMAC support"
 clean_blob drivers/net/wireless/mediatek/mt76/mt7615/soc.c
 clean_kconfig drivers/net/wireless/mediatek/mt76/mt7615/Kconfig MT7622_WMAC
 clean_mk CONFIG_MT7622_WMAC drivers/net/wireless/mediatek/mt76/mt7615/Makefile
+
+announce MT7663U - "MediaTek MT7663U (USB) support"
+clean_blob drivers/net/wireless/mediatek/mt76/mt7615/usb.c
+clean_kconfig drivers/net/wireless/mediatek/mt76/mt7615/Kconfig MT7663U
+clean_mk CONFIG_MT7663U drivers/net/wireless/mediatek/mt76/mt7615/Makefile
+
+announce MT7915E - "MediaTek MT7915E (PCIe) support"
+reject_firmware drivers/net/wireless/mediatek/mt76/mt7915/mcu.c
+clean_blob drivers/net/wireless/mediatek/mt76/mt7915/mt7915.h
+clean_blob drivers/net/wireless/mediatek/mt76/mt7915/pci.c
+clean_kconfig drivers/net/wireless/mediatek/mt76/mt7915/Kconfig MT7915E
+clean_mk CONFIG_MT7915E drivers/net/wireless/mediatek/mt76/mt7915/Makefile
 
 announce MWIFIEX - "Marvell WiFi-Ex Driver"
 clean_blob drivers/net/wireless/marvell/mwifiex/README
@@ -2478,9 +2498,15 @@ clean_blob drivers/net/wireless/realtek/rtw88/rtw8822c.c
 clean_kconfig drivers/net/wireless/realtek/rtw88/Kconfig RTW88_8822CE
 clean_mk CONFIG_RTW88_8822CE drivers/net/wireless/realtek/rtw88/Makefile
 
+announce RTW88_8723DE - "Realtek 8723DE PCI wireless network adaptar"
+clean_blob drivers/net/wireless/realtek/rtw88/rtw8723d.c
+clean_kconfig drivers/net/wireless/realtek/rtw88/Kconfig RTW88_8723DE
+clean_mk CONFIG_RTW88_8723DE drivers/net/wireless/realtek/rtw88/Makefile
+
 announce VT6656 - "VIA Technologies VT6656 support"
-reject_firmware drivers/staging/vt6656/firmware.c
-clean_blob drivers/staging/vt6656/firmware.c
+reject_firmware drivers/staging/vt6656/main_usb.c
+clean_blob drivers/staging/vt6656/device.h
+clean_blob drivers/staging/vt6656/main_usb.c
 clean_kconfig drivers/staging/vt6656/Kconfig VT6656
 clean_mk CONFIG_VT6656 drivers/staging/vt6656/Makefile
 
@@ -2574,7 +2600,7 @@ clean_kconfig drivers/bluetooth/Kconfig BT_ATH3K
 clean_mk CONFIG_BT_ATH3K drivers/bluetooth/Makefile
 
 announce BT_BCM - "Broadcom protocol support"
-reject_firmware drivers/bluetooth/btbcm.c
+reject_firmware_nowarn drivers/bluetooth/btbcm.c
 clean_blob drivers/bluetooth/btbcm.c
 clean_kconfig drivers/bluetooth/Kconfig BT_BCM
 clean_mk CONFIG_BT_BCM drivers/bluetooth/Makefile
@@ -2590,11 +2616,6 @@ reject_firmware drivers/bluetooth/hci_ag6xx.c
 clean_blob drivers/bluetooth/hci_ag6xx.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIUART_AG6XX
 clean_mk CONFIG_BT_HCIUART_AG6XX drivers/bluetooth/Makefile
-
-announce BT_HCIUART_BCM - "Broadcom protocol support"
-reject_firmware drivers/bluetooth/hci_bcm.c
-clean_kconfig drivers/bluetooth/Kconfig BT_HCIUART_BCM
-clean_mk CONFIG_BT_HCIUART_BCM drivers/bluetooth/Makefile
 
 announce BT_HCIUART_LL - "HCILL protocol support"
 reject_firmware drivers/bluetooth/hci_ll.c
@@ -3058,6 +3079,16 @@ clean_mk CONFIG_USB_UEAGLEATM drivers/usb/atm/Makefile
 
 # host
 
+announce USB_XHCI_PCI_RENESAS - "Support for additional Renesas xHCI controller with firwmare"
+reject_firmware drivers/usb/host/xhci-pci-renesas.c
+clean_kconfig drivers/usb/host/Kconfig USB_XHCI_PCI_RENESAS
+clean_mk CONFIG_USB_XHCI_PCI_RENESAS drivers/usb/host/Makefile
+
+announce USB_XHCI_PCI - "because of USB_XHCI_PCI_RENESAS"
+clean_blob drivers/usb/host/xhci-pci.c
+clean_kconfig drivers/usb/host/Kconfig USB_XHCI_PCI
+clean_mk CONFIG_USB_XHCI_PCI drivers/usb/host/Makefile
+
 announce USB_XHCI_RCAR - "xHCI support for Renesas R-Car SoCs"
 reject_firmware drivers/usb/host/xhci-rcar.c
 clean_blob drivers/usb/host/xhci-rcar.c
@@ -3156,6 +3187,8 @@ clean_mk CONFIG_UCSI_CCG drivers/usb/typec/ucsi/Makefile
 
 announce HABANA_AI - "HabanaAI accelerators (habanalabs)"
 reject_firmware drivers/misc/habanalabs/firmware_if.c
+reject_firmware drivers/misc/habanalabs/gaudi/gaudi.c
+clean_blob drivers/misc/habanalabs/gaudi/gaudi.c
 clean_blob drivers/misc/habanalabs/goya/goya.c
 clean_kconfig drivers/misc/habanalabs/Kconfig HABANA_AI
 clean_mk CONFIG_HABANA_AI drivers/misc/Makefile
@@ -3239,6 +3272,7 @@ clean_mk CONFIG_MFD_IQS62X drivers/mfd/Makefile
 announce PTP_1588_CLOCK_IDTCM - "IDT CLOCKMATRIX as PTP clock"
 reject_firmware drivers/ptp/ptp_clockmatrix.c
 clean_blob drivers/ptp/ptp_clockmatrix.h
+clean_blob Documentation/driver-api/ptp.rst
 clean_kconfig drivers/ptp/Kconfig PTP_1588_CLOCK_IDTCM
 clean_mk CONFIG_PTP_1588_CLOCK_IDTCM drivers/ptp/Makefile
 
@@ -3375,7 +3409,7 @@ clean_blob sound/pci/echoaudio/mona.c
 clean_kconfig sound/pci/Kconfig SND_MONA
 clean_mk CONFIG_SND_MONA sound/pci/echoaudio/Makefile
 
-announce SND_'<(Echoaudio)>' - "(Echoaudio) all of the above "
+announce SND_'<(Echoaudio)>' - "(Echoaudio) all of the above"
 reject_firmware sound/pci/echoaudio/echoaudio.c
 clean_blob sound/pci/echoaudio/echoaudio.c
 
@@ -3465,6 +3499,18 @@ announce SND_SOC_ADAU1781 - "ADAU1781 SigmaDSP processor"
 clean_blob sound/soc/codecs/adau1781.c
 clean_kconfig sound/soc/codecs/Kconfig SND_SOC_ADAU1781
 clean_mk CONFIG_SND_SOC_ADAU1781 sound/soc/codecs/Makefile
+
+announce SND_SOC_FSL_EASRC - "Enhanced Asynchronous Sample Rate Converter (EASRC) module support"
+reject_firmware sound/soc/fsl/fsl_easrc.c
+clean_blob Documentation/devicetree/bindings/sound/fsl,easrc.yaml
+clean_kconfig sound/soc/fsl/Kconfig SND_SOC_FSL_EASRC
+clean_mk CONFIG_SND_SOC_FSL_EASRC sound/soc/fsl/Makefile
+
+announce SND_SOC_MAX98390 - "Maxim Integrated MAX98390 Speaker Amplifier"
+reject_firmware sound/soc/codecs/max98390.c
+clean_blob sound/soc/codecs/max98390.c
+clean_kconfig sound/soc/codecs/Kconfig SND_SOC_MAX98390
+clean_mk CONFIG_SND_SOC_MAX98390 sound/soc/codecs/Makefile
 
 announce SND_SOC_RT5677 - "RT5677 SoC"
 reject_firmware sound/soc/codecs/rt5677.c
@@ -3557,6 +3603,12 @@ clean_blob sound/soc/codecs/wm_adsp.c
 clean_kconfig sound/soc/codecs/Kconfig SND_SOC_WM_ADSP
 clean_mk CONFIG_SND_SOC_WM_ADSP sound/soc/codecs/Makefile
 
+announce SND_SOC_ZL38060 - "Microsemi ZL38060 Connected Home Audio Processor"
+reject_firmware sound/soc/codecs/zl38060.c
+clean_blob sound/soc/codecs/zl38060.c
+clean_kconfig sound/soc/codecs/Kconfig SND_SOC_ZL38060
+clean_mk CONFIG_SND_SOC_ZL38060 sound/soc/codecs/Makefile
+
 announce SND_SOC_SH4_SIU - "ALSA SoC driver for Renesas SH7343, SH7722 SIU peripheral"
 reject_firmware sound/soc/sh/siu_dai.c
 clean_blob sound/soc/sh/siu_dai.c
@@ -3615,6 +3667,13 @@ clean_mk CONFIG_FSI_MASTER_AST_CF drivers/fsi/Makefile
 #######
 # Bus #
 #######
+
+# This takes firmware names from devicetree files, too likely to be
+# binary blobs offered by a hardware.
+announce I2C_SLAVE_EEPROM - "I2C eeprom slave driver"
+reject_firmware drivers/i2c/i2c-slave-eeprom.c
+clean_kconfig drivers/i2c/Kconfig I2C_SLAVE_EEPROM
+clean_mk CONFIG_I2C_SLAVE_EEPROM drivers/i2c/Makefile
 
 # I couldn't find any uses of mhi_register_controller, that should
 # fill in the required fw_image field of mhi_controller.  Let me know
@@ -3681,9 +3740,6 @@ clean_mk CONFIG_ARCH_BRCMSTB drivers/memory/Makefile
 #################
 
 announce Documentation - "non-Free firmware scripts and documentation"
-clean_blob Documentation/media/dvb-drivers/avermedia.rst
-clean_blob Documentation/media/dvb-drivers/opera-firmware.rst
-clean_blob Documentation/media/v4l-drivers/ivtv.rst
 clean_blob Documentation/sound/alsa-configuration.rst
 clean_file scripts/get_dvb_firmware
 clean_file scripts/extract_xc3028.pl
