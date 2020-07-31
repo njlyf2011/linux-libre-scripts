@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -923,8 +923,8 @@ Patch123: 0001-usb-fusb302-Convert-to-use-GPIO-descriptors.patch
 # Tegra194 ACPI PCI quirk - http://patchwork.ozlabs.org/patch/1221384/
 Patch124: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 
-# Killer wireless headed to stable
-Patch125: iwlwifi-make-some-killer-wireless-ac-1550-cards-work-again.patch
+# rhbz 1857101
+Patch125: 0001-ALSA-hda-Workaround-for-spurious-wakeups-on-some-Int.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3012,10 +3012,17 @@ fi
 #
 #
 %changelog
+* Fri Jul 31 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.7.11-gnu.
+
+* Wed Jul 29 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.7.11-100
+- Linux v5.7.11
+- Fix rhbz 1857101
+
 * Thu Jul 23 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.7.10-gnu.
 
-* Wed Jul 22 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.7.10-100
+* Wed Jul 22 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.7.10-101
 - Linux v5.7.10
 
 * Mon Jul 20 2020 Justin M. Forbes <jforbes@fedoraproject.org>
