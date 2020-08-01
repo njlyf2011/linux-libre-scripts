@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -930,6 +930,9 @@ Patch124: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 
 # rhbz 1857101
 Patch125: 0001-ALSA-hda-Workaround-for-spurious-wakeups-on-some-Int.patch
+
+# Work around a bug in gcc https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96377
+Patch126: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3078,6 +3081,12 @@ fi
 #
 #
 %changelog
+* Sat Aug  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.7.12-gnu.
+
+* Sat Aug 01 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.7.12-200
+- Linux v5.7.12
+
 * Fri Jul 31 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.7.11-gnu.
 
