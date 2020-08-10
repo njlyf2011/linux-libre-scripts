@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 12
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -922,9 +922,6 @@ Patch122: 0013-arm64-dts-sun50i-a64-pinephone-Add-touchscreen-suppo.patch
 Patch123: 0001-usb-fusb302-Convert-to-use-GPIO-descriptors.patch
 # Tegra194 ACPI PCI quirk - http://patchwork.ozlabs.org/patch/1221384/
 Patch124: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
-
-# rhbz 1857101
-Patch125: 0001-ALSA-hda-Workaround-for-spurious-wakeups-on-some-Int.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3012,6 +3009,16 @@ fi
 #
 #
 %changelog
+* Mon Aug 10 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.7.14-gnu.
+
+* Fri Aug 07 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.7.14-100
+- Linux v5.7.14
+
+* Wed Aug 05 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.7.13-100
+- Linux v5.7.13
+- Fix CVE-2020-16166 (rhbz 1865751 1865752)
+
 * Sat Aug  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.7.12-gnu.
 
