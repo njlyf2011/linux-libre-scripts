@@ -135,7 +135,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 1
+%define stable_update 2
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -918,6 +918,9 @@ Patch100: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
 Patch101: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 Patch102: 0002-arm64-tegra-Re-order-PCIe-aperture-mappings-to-suppo.patch
 Patch103: arm64-tegra-Use-valid-PWM-period-for-VDD_GPU-on-Tegra210.patch
+
+# https://lkml.org/lkml/2020/8/14/221
+Patch104: dma-pool-fixes.patch
 # END OF PATCH DEFINITIONS
 
 %endif
@@ -3057,6 +3060,12 @@ fi
 #
 #
 %changelog
+* Wed Aug 19 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.8.2-gnu.
+
+* Wed Aug 19 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.2-300.rpi1
+- Linux v5.8.2
+
 * Wed Aug 12 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.8.1-gnu.
 
