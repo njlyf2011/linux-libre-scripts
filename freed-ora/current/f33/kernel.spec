@@ -80,7 +80,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 300
+%global baserelease 301
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -135,7 +135,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -925,7 +925,21 @@ Patch105: 0001-platform-x86-thinkpad_acpi-lap-or-desk-mode-interfac.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1874117
 Patch107: 0001-drivers-perf-xgene_pmu-Fix-uninitialized-resource-st.patch
 
-Patch110: memory-tegra-Remove-GPU-from-DRM-IOMMU-group.patch
+# https://patchwork.kernel.org/patch/11745283/
+Patch108: brcmfmac-BCM4329-Fixes-and-improvement.patch
+
+# https://patchwork.kernel.org/patch/11743769/
+Patch109: mmc-sdhci-iproc-Enable-eMMC-DDR-3.3V-support-for-bcm2711.patch
+# https://www.spinics.net/lists/linux-mmc/msg60653.html
+Patch111: mmc-sdio-Use-mmc_pre_req-mmc_post_req.patch
+
+Patch112: memory-tegra-Remove-GPU-from-DRM-IOMMU-group.patch
+
+# CVE-2020-25211 rhbz 1877571 1877572
+Patch113: netfilter-ctnetlink-add-range-check-for-l3-l4-protonum.patch
+
+# rhbz 1878858
+Patch114: block-restore-a-specific-error-code-in-bdev_del_part.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3066,6 +3080,23 @@ fi
 #
 #
 %changelog
+* Mon Sep 14 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.8.9-gnu.
+
+* Mon Sep 14 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.9-301
+- Fix error code in bdev_del_part (rhbz 1878858)
+
+* Mon Sep 14 08:51:55 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.9-300
+- Linux v5.8.9
+
+* Sat Sep 12 2020 Peter Robinson <pbrobinson@fedoraproject.org>
+- Fix for SDIO speed issue
+- Fix for certain mSD cards on Raspberry Pi 4
+- Fix for older brcm sdio WiFi modules
+
+* Thu Sep 10 2020 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix CVE-2020-25211 (rhbz 1877571 1877572)
+
 * Wed Sep  9 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.8.8-gnu.
 
