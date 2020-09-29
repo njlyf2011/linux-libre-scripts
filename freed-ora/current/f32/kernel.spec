@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -922,6 +922,15 @@ Patch112: v2-nfs-Fix-security-label-length-not-being-reset.patch
 
 # rhbz 1875339 1875828 1876997
 Patch113: pdx86-SW_TABLET_MODE-fixes.patch
+
+# https://patchwork.kernel.org/patch/11796255/
+Patch116: arm64-dts-rockchip-disable-USB-type-c-DisplayPort.patch
+
+# https://patchwork.kernel.org/patch/11787259/
+Patch117: arm64-pwm-rockchip-Keep-enabled-PWMs-running-while-probing.patch
+
+# Backport from 5.9
+Patch118: arm64-rockchip-pinebookpro-add-fuel-gauge.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3079,6 +3088,12 @@ fi
 #
 #
 %changelog
+* Mon Sep 28 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.8.12-gnu.
+
+* Mon Sep 28 06:48:18 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.12-200
+- Linux v5.8.12
+
 * Wed Sep 23 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.8.11-gnu.
 
