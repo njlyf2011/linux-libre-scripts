@@ -23,7 +23,7 @@ Signed-off-by: Herton R. Krzesinski <herton@redhat.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/drivers/scsi/megaraid/megaraid_sas_base.c b/drivers/scsi/megaraid/megaraid_sas_base.c
-index 00668335c2af..219f95ab56f8 100644
+index 2b7e7b5f38ed..b3bacfdcb727 100644
 --- a/drivers/scsi/megaraid/megaraid_sas_base.c
 +++ b/drivers/scsi/megaraid/megaraid_sas_base.c
 @@ -133,6 +133,7 @@ static void megasas_get_pd_info(struct megasas_instance *instance,
@@ -43,5 +43,5 @@ index 00668335c2af..219f95ab56f8 100644
  	/* Fusion */
  	{PCI_DEVICE(PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_LSI_PLASMA)},
 -- 
-2.26.2
+2.28.0
 

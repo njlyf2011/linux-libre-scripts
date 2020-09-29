@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.8 extra=
+kver=5.9 extra=
 
 case $1 in
 --force)
@@ -126,42 +126,10 @@ clean_blob () {
     else
       die failed removing blobs from $name
     fi
-    check_changed $name && echo $name: removed blobs
+    check_changed $name && echo $name: removed blobs or mentions thereof
   else
     clean_file $1
   fi
-}
-
-dummy_blob () {
-  #$1 = filename
-  if test -f $1; then
-    die $1 exists, something is wrong && return 0
-  elif test ! -f firmware/Makefile; then
-    die firmware/Makefile does not exist, something is wrong && return 0
-  fi
-
-  clean_sed "s,`echo $1 | sed s,^firmware/,,`,\$(DEBLOBBED),g" \
-    firmware/Makefile "dropped $1"
-}
-
-clean_fw () {
-  #$1 = firmware text input, $2 = firmware output
-  filetest $1 || return 0
-  if test -f $2; then
-    die $2 exists, something is wrong && return 0
-  fi
-  clean_blob $1 -s 4
-  dummy_blob $2
-}
-
-drop_fw_file () {
-  #$1 = firmware text input, $2 = firmware output
-  filetest $1 || return 0
-  if test -f $2; then
-    die $2 exists, something is wrong && return 0
-  fi
-  clean_file $1
-  dummy_blob $2
 }
 
 clean_kconfig () {
@@ -244,7 +212,7 @@ undefine_macro () {
   macro=$1 repl=$2 msg=$3; shift 3
   for f in "$@"; do
     clean_sed "
-s,^#define $macro .*\$,/*(DEBLOBBED)*/,;
+s,^#[ 	]*define[ 	][ 	]*$macro[ 	].*\$,/*(DEBLOBBED)*/,;
 s,$macro,$repl,g;
 " "$f" "$msg"
   done
@@ -667,7 +635,7 @@ clean_mk CONFIG_ATM_AMBASSADOR drivers/atm/Makefile
 announce ATM_FORE200E - "FORE Systems 200E-series"
 reject_firmware drivers/atm/fore200e.c
 clean_blob drivers/atm/fore200e.c
-clean_blob Documentation/networking/fore200e.rst
+clean_blob Documentation/networking/device_drivers/atm/fore200e.rst
 clean_blob drivers/atm/.gitignore
 clean_blob Documentation/dontdiff
 clean_kconfig drivers/atm/Kconfig ATM_FORE200E
@@ -804,6 +772,8 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v4_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v4_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v5_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v5_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v5_2.c
+clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v5_2.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_cgs.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
@@ -1763,7 +1733,7 @@ clean_mk CONFIG_MYRI10GE drivers/net/ethernet/myricom/myri10ge/Makefile
 announce NFP - "Netronome(R) NFP4000/NFP6000 NIC driver"
 reject_firmware drivers/net/ethernet/netronome/nfp/nfp_main.c
 clean_blob drivers/net/ethernet/netronome/nfp/nfp_main.c
-clean_blob Documentation/networking/device_drivers/netronome/nfp.rst
+clean_blob Documentation/networking/device_drivers/ethernet/netronome/nfp.rst
 clean_kconfig drivers/net/ethernet/netronome/Kconfig NFP
 clean_mk CONFIG_NFP drivers/net/ethernet/netronome/nfp/Makefile
 
@@ -2052,7 +2022,7 @@ clean_mk CONFIG_IWL4965 drivers/net/wireless/intel/iwlegacy/Makefile
 announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/intel/iwlwifi/iwl-nvm-parse.c
 reject_firmware drivers/net/wireless/intel/iwlwifi/iwl-drv.c
-reject_firmware drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
+reject_firmware_nowarn drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
 clean_kconfig drivers/net/wireless/intel/iwlwifi/Kconfig IWLWIFI
@@ -2163,6 +2133,7 @@ reject_firmware_nowarn drivers/net/wireless/mediatek/mt76/mt7615/mcu.c
 reject_firmware drivers/net/wireless/mediatek/mt76/mt7615/mcu.c
 clean_blob drivers/net/wireless/mediatek/mt76/mt7615/mt7615.h
 clean_blob drivers/net/wireless/mediatek/mt76/mt7615/pci.c
+clean_blob drivers/net/wireless/mediatek/mt76/mt7615/sdio.c
 clean_kconfig drivers/net/wireless/mediatek/mt76/mt7615/Kconfig MT7615E
 clean_mk CONFIG_MT7615E drivers/net/wireless/mediatek/mt76/mt7615/Makefile
 
@@ -2488,6 +2459,11 @@ reject_firmware drivers/net/wireless/realtek/rtw88/main.c
 clean_kconfig drivers/net/wireless/realtek/rtw88/Kconfig RTW88
 clean_mk CONFIG_RTW88 drivers/net/wireless/realtek/rtw88/Makefile
 
+announce RTW88_8821C - "Realtek 8821CE PCI wireless network adapter"
+clean_blob drivers/net/wireless/realtek/rtw88/rtw8821c.c
+clean_kconfig drivers/net/wireless/realtek/rtw88/Kconfig RTW88_8821C
+clean_mk CONFIG_RTW88_8821C drivers/net/wireless/realtek/rtw88/Makefile
+
 announce RTW88_8822BE - "Realtek 8822BE PCI wireless network adapter"
 clean_blob drivers/net/wireless/realtek/rtw88/rtw8822b.c
 clean_kconfig drivers/net/wireless/realtek/rtw88/Kconfig RTW88_8822BE
@@ -2570,12 +2546,12 @@ clean_kconfig drivers/staging/wfx/Kconfig WFX
 clean_mk CONFIG_WFX drivers/staging/wfx/Makefile
 
 announce WILC1000 - "WILC1000 support (WiFi only)"
-reject_firmware drivers/staging/wilc1000/netdev.c
-clean_blob drivers/staging/wilc1000/Makefile
-clean_sed 's,\\"/\*(DEBLOBBED)\*/\\","&",g' drivers/staging/wilc1000/Makefile \
-    "quote deblobbing markers"
-clean_kconfig drivers/staging/wilc1000/Kconfig WILC1000
-clean_mk CONFIG_WILC1000 drivers/staging/wilc1000/Makefile
+reject_firmware drivers/net/wireless/microchip/wilc1000/netdev.c
+undefine_macro "WILC1000_FW_PREFIX" "\"/*(DEBLOBBED)*/\"" \
+  "disabled non-Free firmware" drivers/net/wireless/microchip/wilc1000/netdev.c
+clean_blob drivers/net/wireless/microchip/wilc1000/netdev.c
+clean_kconfig drivers/net/wireless/microchip/wilc1000/Kconfig WILC1000
+clean_mk CONFIG_WILC1000 drivers/net/wireless/microchip/wilc1000/Makefile
 
 announce ZD1211RW - "ZyDAS ZD1211/ZD1211B USB-wireless support"
 reject_firmware drivers/net/wireless/zydas/zd1211rw/zd_usb.c
@@ -3186,7 +3162,7 @@ clean_mk CONFIG_UCSI_CCG drivers/usb/typec/ucsi/Makefile
 ################
 
 announce HABANA_AI - "HabanaAI accelerators (habanalabs)"
-reject_firmware drivers/misc/habanalabs/firmware_if.c
+reject_firmware drivers/misc/habanalabs/common/firmware_if.c
 reject_firmware drivers/misc/habanalabs/gaudi/gaudi.c
 clean_blob drivers/misc/habanalabs/gaudi/gaudi.c
 clean_blob drivers/misc/habanalabs/goya/goya.c
@@ -3734,6 +3710,12 @@ reject_firmware_nowarn drivers/memory/brcmstb_dpfe.c
 clean_blob drivers/memory/brcmstb_dpfe.c
 clean_kconfig arch/arm/mach-bcm/Kconfig ARCH_BRCMSTB
 clean_mk CONFIG_ARCH_BRCMSTB drivers/memory/Makefile
+
+announce ARCH_MEDIATEK - "MediaTek SoC Support"
+clean_blob arch/arm64/boot/dts/mediatek/mt8183-kukui.dtsi
+clean_blob arch/arm64/boot/dts/mediatek/mt8183-kukui-krane.dtsi
+clean_kconfig arch/arm/mach-mediatek/Kconfig ARCH_MEDIATEK
+clean_mk CONFIG_ARCH_MEDIATEK arch/arm64/boot/dts/mediatek/Makefile
 
 #################
 # Documentation #
