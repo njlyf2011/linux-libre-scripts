@@ -30,7 +30,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 0.rc7.20
+%global distro_build 0.rc8.28
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -69,7 +69,7 @@ Summary: The Linux kernel
 %endif
 
 %define rpmversion 5.9.0
-%define pkgrelease 0.rc7.20
+%define pkgrelease 0.rc8.28
 
 # This is needed to do merge window version magic
 %define patchlevel 9
@@ -113,7 +113,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc7.20%{?buildid}%{?dist}
+%define specrelease 0.rc8.28%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -604,7 +604,7 @@ BuildRequires: asciidoc
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}-rc7%{basegnu}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}-rc8%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -1362,8 +1362,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-5.9-rc7 -c
-mv linux-5.9-rc7 linux-%{KVERREL}
+%setup -q -n kernel-5.9-rc8 -c
+mv linux-5.9-rc8 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -2875,6 +2875,69 @@ fi
 #
 #
 %changelog
+* Wed Oct  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.9-rc8-gnu.
+
+* Mon Oct 05 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.27]
+- Merge ark-patches
+
+* Mon Oct 05 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.26.test]
+- v5.9-rc8 rebase
+- Updated changelog for the release based on 22fbc037cd32 (Fedora Kernel Team)
+
+* Mon Oct 05 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201005git22fbc037cd32.26]
+- Merge ark-patches
+
+* Mon Oct 05 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201005git22fbc037cd32.25.test]
+- 22fbc037cd32 rebase
+- Updated changelog for the release based on d3d45f8220d6 (Fedora Kernel Team)
+
+* Sun Oct 04 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201004gitd3d45f8220d6.25]
+- Merge ark-patches
+
+* Sun Oct 04 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201004gitd3d45f8220d6.24.test]
+- d3d45f8220d6 rebase
+- Updated changelog for the release based on 472e5b056f00 (Fedora Kernel Team)
+
+* Sat Oct 03 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201003git472e5b056f00.24]
+- Merge ark-patches
+
+* Sat Oct 03 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201003git472e5b056f00.23.test]
+- 472e5b056f00 rebase
+- Set SquashFS decompression options for all flavors to match RHEL (Bohdan Khomutskyi)
+- Updated changelog for the release based on 60e720931556 (Fedora Kernel Team)
+
+* Fri Oct 02 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201002git60e720931556.23]
+- Merge ark-patches
+
+* Fri Oct 02 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201002git60e720931556.22.test]
+- 60e720931556 rebase
+- New configs in drivers/pinctrl (Fedora Kernel Team)
+- Updated changelog for the release based on 02de58b24d2e (Fedora Kernel Team)
+- Update CONFIG_THERMAL_NETLINK (Justin Forbes)
+- configs: Enable CONFIG_ENERGY_MODEL (Phil Auld)
+
+* Thu Oct 01 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201001git02de58b24d2e.22]
+- Merge ark-patches
+
+* Thu Oct 01 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20201001git02de58b24d2e.21.test]
+- 02de58b24d2e rebase
+- Updated changelog for the release based on fb0155a09b02 (Fedora Kernel Team)
+
+* Wed Sep 30 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20200930gitfb0155a09b02.21]
+- Merge ark-patches
+
+* Wed Sep 30 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20200930gitfb0155a09b02.20.test]
+- fb0155a09b02 rebase
+
+* Tue Sep 29 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.20]
+- Merge ark-patches
+
+* Tue Sep 29 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc7.19.test]
+- Separate merge-upstream and release stages (Don Zickus)
+- Re-enable CONFIG_IR_SERIAL on Fedora (Prarit Bhargava)
+- Updated changelog for the release based on v5.9-rc7 (Fedora Kernel Team)
+
 * Mon Sep 28 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.9-rc7-gnu.
 
