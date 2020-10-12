@@ -127,7 +127,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 13
+%define stable_update 14
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -910,9 +910,6 @@ Patch105: 0001-platform-x86-thinkpad_acpi-lap-or-desk-mode-interfac.patch
 Patch107: 0001-drivers-perf-xgene_pmu-Fix-uninitialized-resource-st.patch
 
 Patch110: memory-tegra-Remove-GPU-from-DRM-IOMMU-group.patch
-
-# rhbz 1873720
-Patch112: v2-nfs-Fix-security-label-length-not-being-reset.patch
 
 # rhbz 1875339 1875828 1876997
 Patch113: pdx86-SW_TABLET_MODE-fixes.patch
@@ -3078,6 +3075,12 @@ fi
 #
 #
 %changelog
+* Sun Oct 12 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.8.14-gnu.
+
+* Wed Oct  7 07:21:35 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.14-100
+- Linux v5.8.14
+
 * Thu Oct  1 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.8.13-gnu.
 
