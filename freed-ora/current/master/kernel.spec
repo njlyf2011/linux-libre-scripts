@@ -30,7 +30,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 0.rc8.28
+%global distro_build 36
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -69,7 +69,7 @@ Summary: The Linux kernel
 %endif
 
 %define rpmversion 5.9.0
-%define pkgrelease 0.rc8.28
+%define pkgrelease 36
 
 # This is needed to do merge window version magic
 %define patchlevel 9
@@ -113,7 +113,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc8.28%{?buildid}%{?dist}
+%define specrelease 36%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -604,7 +604,7 @@ BuildRequires: asciidoc
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}-rc8%{basegnu}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
 
@@ -749,92 +749,16 @@ Source2001: cpupower.config
 # source tree, but in the mean time we carry this to support the legacy workflow
 Source3000: merge.pl
 Source3001: kernel-local
-Source3002: Patchlist
 Source3003: Patchlist.changelog
 
 Source4000: README.rst
 
 ## Patches needed for building this package
 
+Patch0: freedo.patch
+
 %if !%{nopatches}
-
-Patch1: freedo.patch
-
-Patch2: 0001-initial-commit-Add-Red-Hat-variables-in-the-top-leve.patch
-Patch3: 0001-Pull-the-RHEL-version-defines-out-of-the-Makefile.patch
-Patch4: 0001-Introduce-CONFIG_RH_DISABLE_DEPRECATED.patch
-Patch5: 0001-Add-Red-Hat-tainting.patch
-Patch6: 0001-ACPI-APEI-arm64-Ignore-broken-HPE-moonshot-APEI-supp.patch
-Patch7: 0001-modules-add-rhelversion-MODULE_INFO-tag.patch
-Patch8: 0001-ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m.patch
-Patch9: 0001-aarch64-acpi-scan-Fix-regression-related-to-X-Gene-U.patch
-Patch10: 0001-acpi-prefer-booting-with-ACPI-over-DTS.patch
-Patch11: 0001-kdump-round-up-the-total-memory-size-to-128M-for-cra.patch
-Patch12: 0001-kdump-add-support-for-crashkernel-auto.patch
-Patch13: 0001-put-RHEL-info-into-generated-headers.patch
-Patch14: 0001-tags.sh-Ignore-redhat-rpm.patch
-Patch15: 0001-kdump-fix-a-grammar-issue-in-a-kernel-message.patch
-Patch16: 0001-add-Red-Hat-specific-taint-flags.patch
-Patch17: 0001-bpf-set-unprivileged_bpf_disabled-to-1-by-default-ad.patch
-Patch18: 0001-bpf-Add-tech-preview-taint-for-syscall.patch
-Patch19: 0001-Vulcan-AHCI-PCI-bar-fix-for-Broadcom-Vulcan-early-si.patch
-Patch20: 0001-ahci-thunderx2-Fix-for-errata-that-affects-stop-engi.patch
-Patch21: 0001-add-pci_hw_vendor_status.patch
-Patch22: 0001-kABI-Add-generic-kABI-macros-to-use-for-kABI-workaro.patch
-Patch23: 0001-ice-mark-driver-as-tech-preview.patch
-Patch24: 0001-scsi-smartpqi-add-inspur-advantech-ids.patch
-Patch25: 0001-IB-rxe-Mark-Soft-RoCE-Transport-driver-as-tech-previ.patch
-Patch26: 0001-ipmi-do-not-configure-ipmi-for-HPE-m400.patch
-Patch27: 0001-rh_kabi-introduce-RH_KABI_EXCLUDE.patch
-Patch28: 0001-iommu-arm-smmu-workaround-DMA-mode-issues.patch
-Patch29: 0001-arm-aarch64-Drop-the-EXPERT-setting-from-ARM64_FORCE.patch
-Patch30: 0001-Add-support-for-deprecating-processors.patch
-Patch31: 0001-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
-Patch32: 0001-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
-Patch33: 0001-security-lockdown-expose-a-hook-to-lock-the-kernel-d.patch
-Patch34: 0001-efi-Add-an-EFI_SECURE_BOOT-flag-to-indicate-secure-b.patch
-Patch35: 0001-efi-Lock-down-the-kernel-if-booted-in-secure-boot-mo.patch
-Patch36: 0001-s390-Lock-down-the-kernel-when-the-IPL-secure-flag-i.patch
-Patch37: 0001-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
-Patch38: 0001-Rename-RH_DISABLE_DEPRECATED-to-RHEL_DIFFERENCES.patch
-Patch39: 0001-kernel-add-SUPPORT_REMOVED-kernel-taint.patch
-Patch40: 0001-mpt-remove-certain-deprecated-pci-ids.patch
-Patch41: 0001-megaraid_sas-remove-deprecated-pci-ids.patch
-Patch42: 0001-aacraid-Remove-depreciated-device-and-vendor-PCI-id-.patch
-Patch43: 0001-qla4xxx-Remove-deprecated-PCI-IDs-from-RHEL-8.patch
-Patch44: 0001-hpsa-remove-old-cciss-based-smartarray-pci-ids.patch
-Patch45: 0001-mptspi-Taint-kernel-if-mptspi-is-loaded.patch
-Patch46: 0001-be2iscsi-remove-unsupported-device-IDs.patch
-Patch47: 0001-qla2xxx-Remove-PCI-IDs-of-deprecated-adapter.patch
-Patch48: 0001-mptspi-pci-id-table-changes.patch
-Patch49: 0001-mptsas-Taint-kernel-if-mptsas-is-loaded.patch
-Patch50: 0001-mptsas-pci-id-table-changes.patch
-Patch51: 0001-Removing-Obsolete-hba-pci-ids-from-rhel8.patch
-Patch52: 0001-redhat-rh_kabi-Add-macros-to-size-and-extend-structs.patch
-Patch53: 0001-redhat-rh_kabi-Fix-RH_KABI_SET_SIZE-to-use-dereferen.patch
-Patch54: 0001-redhat-rh_kabi-Indirect-EXTEND-macros-so-nesting-of-.patch
-Patch55: 0001-redhat-rh_kabi-introduce-RH_KABI_EXTEND_WITH_SIZE.patch
-Patch56: 0001-redhat-rh_kabi-add-a-comment-with-warning-about-RH_K.patch
-Patch57: 0001-redhat-rh_kabi-deduplication-friendly-structs.patch
-Patch58: 0001-arm-make-CONFIG_HIGHPTE-optional-without-CONFIG_EXPE.patch
-Patch59: 0001-ARM-tegra-usb-no-reset.patch
-Patch60: 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
-Patch61: 0001-Drop-that-for-now.patch
-Patch62: 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
-Patch63: 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
-Patch64: 0001-ARM-fix-__get_user_check-in-case-uaccess_-calls-are-.patch
-Patch65: 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
-Patch66: 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
-Patch67: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
-Patch68: 0001-e1000e-bump-up-timeout-to-wait-when-ME-un-configure-.patch
-Patch69: 0001-x86-Fix-compile-issues-with-rh_check_supported.patch
-Patch70: 0001-redhat-Replace-hardware.redhat.com-link-in-Unsupport.patch
-Patch71: 0001-arch-x86-Remove-vendor-specific-CPU-ID-checks.patch
-Patch72: 0001-Fixes-acpi-prefer-booting-with-ACPI-over-DTS-to-be-R.patch
-Patch73: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
-Patch74: 0001-Temporarily-remove-cdomain-from-sphinx-documentation.patch
-Patch75: 0001-Filter-out-LTO-build-options-from-the-perl-ccopts.patch
-
+Patch1: patch-%{rpmversion}-redhat.patch
 %endif
 
 # empty final patch to facilitate testing of kernel patches
@@ -1362,8 +1286,8 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-5.9-rc8 -c
-mv linux-5.9-rc8 linux-%{KVERREL}
+%setup -q -n kernel-5.9 -c
+mv linux-5.9 linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -1373,81 +1297,7 @@ ApplyOptionalPatch freedo.patch
 
 %if !%{nopatches}
 
-ApplyOptionalPatch 0001-initial-commit-Add-Red-Hat-variables-in-the-top-leve.patch
-ApplyOptionalPatch 0001-Pull-the-RHEL-version-defines-out-of-the-Makefile.patch
-ApplyOptionalPatch 0001-Introduce-CONFIG_RH_DISABLE_DEPRECATED.patch
-ApplyOptionalPatch 0001-Add-Red-Hat-tainting.patch
-ApplyOptionalPatch 0001-ACPI-APEI-arm64-Ignore-broken-HPE-moonshot-APEI-supp.patch
-ApplyOptionalPatch 0001-modules-add-rhelversion-MODULE_INFO-tag.patch
-ApplyOptionalPatch 0001-ACPI-irq-Workaround-firmware-issue-on-X-Gene-based-m.patch
-ApplyOptionalPatch 0001-aarch64-acpi-scan-Fix-regression-related-to-X-Gene-U.patch
-ApplyOptionalPatch 0001-acpi-prefer-booting-with-ACPI-over-DTS.patch
-ApplyOptionalPatch 0001-kdump-round-up-the-total-memory-size-to-128M-for-cra.patch
-ApplyOptionalPatch 0001-kdump-add-support-for-crashkernel-auto.patch
-ApplyOptionalPatch 0001-put-RHEL-info-into-generated-headers.patch
-ApplyOptionalPatch 0001-tags.sh-Ignore-redhat-rpm.patch
-ApplyOptionalPatch 0001-kdump-fix-a-grammar-issue-in-a-kernel-message.patch
-ApplyOptionalPatch 0001-add-Red-Hat-specific-taint-flags.patch
-ApplyOptionalPatch 0001-bpf-set-unprivileged_bpf_disabled-to-1-by-default-ad.patch
-ApplyOptionalPatch 0001-bpf-Add-tech-preview-taint-for-syscall.patch
-ApplyOptionalPatch 0001-Vulcan-AHCI-PCI-bar-fix-for-Broadcom-Vulcan-early-si.patch
-ApplyOptionalPatch 0001-ahci-thunderx2-Fix-for-errata-that-affects-stop-engi.patch
-ApplyOptionalPatch 0001-add-pci_hw_vendor_status.patch
-ApplyOptionalPatch 0001-kABI-Add-generic-kABI-macros-to-use-for-kABI-workaro.patch
-ApplyOptionalPatch 0001-ice-mark-driver-as-tech-preview.patch
-ApplyOptionalPatch 0001-scsi-smartpqi-add-inspur-advantech-ids.patch
-ApplyOptionalPatch 0001-IB-rxe-Mark-Soft-RoCE-Transport-driver-as-tech-previ.patch
-ApplyOptionalPatch 0001-ipmi-do-not-configure-ipmi-for-HPE-m400.patch
-ApplyOptionalPatch 0001-rh_kabi-introduce-RH_KABI_EXCLUDE.patch
-ApplyOptionalPatch 0001-iommu-arm-smmu-workaround-DMA-mode-issues.patch
-ApplyOptionalPatch 0001-arm-aarch64-Drop-the-EXPERT-setting-from-ARM64_FORCE.patch
-ApplyOptionalPatch 0001-Add-support-for-deprecating-processors.patch
-ApplyOptionalPatch 0001-Add-efi_status_to_str-and-rework-efi_status_to_err.patch
-ApplyOptionalPatch 0001-Make-get_cert_list-use-efi_status_to_str-to-print-er.patch
-ApplyOptionalPatch 0001-security-lockdown-expose-a-hook-to-lock-the-kernel-d.patch
-ApplyOptionalPatch 0001-efi-Add-an-EFI_SECURE_BOOT-flag-to-indicate-secure-b.patch
-ApplyOptionalPatch 0001-efi-Lock-down-the-kernel-if-booted-in-secure-boot-mo.patch
-ApplyOptionalPatch 0001-s390-Lock-down-the-kernel-when-the-IPL-secure-flag-i.patch
-ApplyOptionalPatch 0001-Add-option-of-13-for-FORCE_MAX_ZONEORDER.patch
-ApplyOptionalPatch 0001-Rename-RH_DISABLE_DEPRECATED-to-RHEL_DIFFERENCES.patch
-ApplyOptionalPatch 0001-kernel-add-SUPPORT_REMOVED-kernel-taint.patch
-ApplyOptionalPatch 0001-mpt-remove-certain-deprecated-pci-ids.patch
-ApplyOptionalPatch 0001-megaraid_sas-remove-deprecated-pci-ids.patch
-ApplyOptionalPatch 0001-aacraid-Remove-depreciated-device-and-vendor-PCI-id-.patch
-ApplyOptionalPatch 0001-qla4xxx-Remove-deprecated-PCI-IDs-from-RHEL-8.patch
-ApplyOptionalPatch 0001-hpsa-remove-old-cciss-based-smartarray-pci-ids.patch
-ApplyOptionalPatch 0001-mptspi-Taint-kernel-if-mptspi-is-loaded.patch
-ApplyOptionalPatch 0001-be2iscsi-remove-unsupported-device-IDs.patch
-ApplyOptionalPatch 0001-qla2xxx-Remove-PCI-IDs-of-deprecated-adapter.patch
-ApplyOptionalPatch 0001-mptspi-pci-id-table-changes.patch
-ApplyOptionalPatch 0001-mptsas-Taint-kernel-if-mptsas-is-loaded.patch
-ApplyOptionalPatch 0001-mptsas-pci-id-table-changes.patch
-ApplyOptionalPatch 0001-Removing-Obsolete-hba-pci-ids-from-rhel8.patch
-ApplyOptionalPatch 0001-redhat-rh_kabi-Add-macros-to-size-and-extend-structs.patch
-ApplyOptionalPatch 0001-redhat-rh_kabi-Fix-RH_KABI_SET_SIZE-to-use-dereferen.patch
-ApplyOptionalPatch 0001-redhat-rh_kabi-Indirect-EXTEND-macros-so-nesting-of-.patch
-ApplyOptionalPatch 0001-redhat-rh_kabi-introduce-RH_KABI_EXTEND_WITH_SIZE.patch
-ApplyOptionalPatch 0001-redhat-rh_kabi-add-a-comment-with-warning-about-RH_K.patch
-ApplyOptionalPatch 0001-redhat-rh_kabi-deduplication-friendly-structs.patch
-ApplyOptionalPatch 0001-arm-make-CONFIG_HIGHPTE-optional-without-CONFIG_EXPE.patch
-ApplyOptionalPatch 0001-ARM-tegra-usb-no-reset.patch
-ApplyOptionalPatch 0001-Input-rmi4-remove-the-need-for-artificial-IRQ-in-cas.patch
-ApplyOptionalPatch 0001-Drop-that-for-now.patch
-ApplyOptionalPatch 0001-KEYS-Make-use-of-platform-keyring-for-module-signatu.patch
-ApplyOptionalPatch 0001-mm-kmemleak-skip-late_init-if-not-skip-disable.patch
-ApplyOptionalPatch 0001-ARM-fix-__get_user_check-in-case-uaccess_-calls-are-.patch
-ApplyOptionalPatch 0001-dt-bindings-panel-add-binding-for-Xingbangda-XBD599-.patch
-ApplyOptionalPatch 0001-drm-panel-add-Xingbangda-XBD599-panel.patch
-ApplyOptionalPatch 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
-ApplyOptionalPatch 0001-e1000e-bump-up-timeout-to-wait-when-ME-un-configure-.patch
-ApplyOptionalPatch 0001-x86-Fix-compile-issues-with-rh_check_supported.patch
-ApplyOptionalPatch 0001-redhat-Replace-hardware.redhat.com-link-in-Unsupport.patch
-ApplyOptionalPatch 0001-arch-x86-Remove-vendor-specific-CPU-ID-checks.patch
-ApplyOptionalPatch 0001-Fixes-acpi-prefer-booting-with-ACPI-over-DTS-to-be-R.patch
-ApplyOptionalPatch 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
-ApplyOptionalPatch 0001-Temporarily-remove-cdomain-from-sphinx-documentation.patch
-ApplyOptionalPatch 0001-Filter-out-LTO-build-options-from-the-perl-ccopts.patch
-
+ApplyOptionalPatch patch-%{rpmversion}-redhat.patch
 %endif
 
 ApplyOptionalPatch linux-kernel-test.patch
@@ -2875,7 +2725,133 @@ fi
 #
 #
 %changelog
-* Wed Oct  7 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Oct 14 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.9-gnu.
+
+* Mon Oct 12 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-35]
+- Filter out LTO build options from the perl ccopts ("Justin M. Forbes")
+- Temporarily remove cdomain from sphinx documentation ("Justin M. Forbes")
+- Work around for gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96377 ("Justin M. Forbes")
+
+* Mon Oct 12 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-34.test]
+- v5.9 rebase
+
+* Mon Oct 12 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201012gitda690031a5d6.33.test]
+- da690031a5d6 rebase
+
+* Sun Oct 11 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201011git6f2f486d57c4.32.test]
+- 6f2f486d57c4 rebase
+
+* Sat Oct 10 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201010git583090b1b823.31.test]
+- 583090b1b823 rebase
+- redhat/self-test: Initial commit (Ben Crocker)
+- generate_all_configs.sh: Fix syntax flagged by shellcheck (Ben Crocker)
+- process_configs.sh: Fix syntax flagged by shellcheck (Ben Crocker)
+
+* Fri Oct 09 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201009git7575fdda569b.31]
+- Modify patchlist changelog output (Don Zickus)
+- Filter out LTO build options from the perl ccopts ("Justin M. Forbes")
+- Temporarily remove cdomain from sphinx documentation ("Justin M. Forbes")
+- Work around for gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=96377 ("Justin M. Forbes")
+
+* Fri Oct 09 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201009git7575fdda569b.30.test]
+- Updated changelog for the release based on 7575fdda569b (Fedora Kernel Team)
+- Fix path location for ark-update-configs.sh (Don Zickus)
+- Stop merging ark-patches for release (Don Zickus)
+- Combine Red Hat patches into single patch (Don Zickus)
+- Fixes "acpi: prefer booting with ACPI over DTS" to be RHEL only (Peter Robinson)
+- arch/x86: Remove vendor specific CPU ID checks (Prarit Bhargava)
+- redhat: Replace hardware.redhat.com link in Unsupported message (Prarit Bhargava)
+- x86: Fix compile issues with rh_check_supported() (Don Zickus)
+- e1000e: bump up timeout to wait when ME un-configure ULP mode (Aaron Ma)
+- drm/sun4i: sun6i_mipi_dsi: fix horizontal timing calculation (Icenowy Zheng)
+- drm: panel: add Xingbangda XBD599 panel (Icenowy Zheng)
+- dt-bindings: panel: add binding for Xingbangda XBD599 panel (Icenowy Zheng)
+- ARM: fix __get_user_check() in case uaccess_* calls are not inlined (Masahiro Yamada)
+- mm/kmemleak: skip late_init if not skip disable (Murphy Zhou)
+- KEYS: Make use of platform keyring for module signature verify (Robert Holmes)
+- Drop that for now (Laura Abbott)
+- Input: rmi4 - remove the need for artificial IRQ in case of HID (Benjamin Tissoires)
+- ARM: tegra: usb no reset (Peter Robinson)
+- arm: make CONFIG_HIGHPTE optional without CONFIG_EXPERT (Jon Masters)
+- redhat: rh_kabi: deduplication friendly structs (Jiri Benc)
+- redhat: rh_kabi add a comment with warning about RH_KABI_EXCLUDE usage (Jiri Benc)
+- redhat: rh_kabi: introduce RH_KABI_EXTEND_WITH_SIZE (Jiri Benc)
+- redhat: rh_kabi: Indirect EXTEND macros so nesting of other macros will resolve. (Don Dutile)
+- redhat: rh_kabi: Fix RH_KABI_SET_SIZE to use dereference operator (Tony Camuso)
+- redhat: rh_kabi: Add macros to size and extend structs (Prarit Bhargava)
+- Removing Obsolete hba pci-ids from rhel8 (Dick Kennedy) [1572321]
+- mptsas: pci-id table changes (Laura Abbott)
+- mptsas: Taint kernel if mptsas is loaded (Laura Abbott)
+- mptspi: pci-id table changes (Laura Abbott)
+- qla2xxx: Remove PCI IDs of deprecated adapter (Jeremy Cline)
+- be2iscsi: remove unsupported device IDs (Chris Leech) [1574502]
+- mptspi: Taint kernel if mptspi is loaded (Laura Abbott)
+- hpsa: remove old cciss-based smartarray pci ids (Joseph Szczypek) [1471185]
+- qla4xxx: Remove deprecated PCI IDs from RHEL 8 (Chad Dupuis) [1518874]
+- aacraid: Remove depreciated device and vendor PCI id's (Raghava Aditya Renukunta) [1495307]
+- megaraid_sas: remove deprecated pci-ids (Tomas Henzl) [1509329]
+- mpt*: remove certain deprecated pci-ids (Jeremy Cline)
+- kernel: add SUPPORT_REMOVED kernel taint (Tomas Henzl) [1602033]
+- Rename RH_DISABLE_DEPRECATED to RHEL_DIFFERENCES (Don Zickus)
+- Add option of 13 for FORCE_MAX_ZONEORDER (Peter Robinson)
+- s390: Lock down the kernel when the IPL secure flag is set (Jeremy Cline)
+- efi: Lock down the kernel if booted in secure boot mode (David Howells)
+- efi: Add an EFI_SECURE_BOOT flag to indicate secure boot mode (David Howells)
+- security: lockdown: expose a hook to lock the kernel down (Jeremy Cline)
+- Make get_cert_list() use efi_status_to_str() to print error messages. (Peter Jones)
+- Add efi_status_to_str() and rework efi_status_to_err(). (Peter Jones)
+- Add support for deprecating processors (Laura Abbott)
+- arm: aarch64: Drop the EXPERT setting from ARM64_FORCE_52BIT (Jeremy Cline)
+- iommu/arm-smmu: workaround DMA mode issues (Laura Abbott)
+- rh_kabi: introduce RH_KABI_EXCLUDE (Jakub Racek) [1652256]
+- ipmi: do not configure ipmi for HPE m400 (Laura Abbott) [https://bugzilla.redhat.com/show_bug.cgi?id=1670017]
+- IB/rxe: Mark Soft-RoCE Transport driver as tech-preview (Don Dutile) [1605216]
+- scsi: smartpqi: add inspur advantech ids (Don Brace) [1503736]
+- ice: mark driver as tech-preview (Jonathan Toppins) [1495347]
+- kABI: Add generic kABI macros to use for kABI workarounds (Myron Stowe) [1546831]
+- add pci_hw_vendor_status() (Maurizio Lombardi) [1590829]
+- ahci: thunderx2: Fix for errata that affects stop engine (Robert Richter) [1563590]
+- Vulcan: AHCI PCI bar fix for Broadcom Vulcan early silicon (Robert Richter) [1563590]
+- bpf: Add tech preview taint for syscall (Eugene Syromiatnikov) [1559877]
+- bpf: set unprivileged_bpf_disabled to 1 by default, add a boot parameter (Eugene Syromiatnikov) [1561171]
+- add Red Hat-specific taint flags (Eugene Syromiatnikov) [1559877]
+- kdump: fix a grammar issue in a kernel message (Dave Young) [1507353]
+- tags.sh: Ignore redhat/rpm (Jeremy Cline)
+- put RHEL info into generated headers (Laura Abbott) [https://bugzilla.redhat.com/show_bug.cgi?id=1663728]
+- kdump: add support for crashkernel=auto (Jeremy Cline)
+- kdump: round up the total memory size to 128M for crashkernel reservation (Dave Young) [1507353]
+- acpi: prefer booting with ACPI over DTS (Mark Salter) [1576869]
+- aarch64: acpi scan: Fix regression related to X-Gene UARTs (Mark Salter) [1519554]
+- ACPI / irq: Workaround firmware issue on X-Gene based m400 (Mark Salter) [1519554]
+- modules: add rhelversion MODULE_INFO tag (Laura Abbott)
+- ACPI: APEI: arm64: Ignore broken HPE moonshot APEI support (Al Stone) [1518076]
+- Add Red Hat tainting (Laura Abbott)
+- Introduce CONFIG_RH_DISABLE_DEPRECATED (Laura Abbott)
+
+* Thu Oct 08 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201008git7575fdda569b.30]
+- Merge ark-patches
+
+* Thu Oct 08 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201008git7575fdda569b.29.test]
+- Updated changelog for the release based on 7575fdda569b (Fedora Kernel Team)
+
+* Wed Oct 07 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201007git7575fdda569b.29]
+- Merge ark-patches
+
+* Wed Oct 07 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.20201007git7575fdda569b.28.test]
+- 7575fdda569b rebase
+- New configs in drivers/misc (Jeremy Cline)
+- New configs in drivers/net/wireless ("Justin M. Forbes")
+- New configs in drivers/phy (Fedora Kernel Team)
+- New configs in drivers/tty (Fedora Kernel Team)
+
+* Tue Oct 06 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.28]
+- Merge ark-patches
+
+* Tue Oct 06 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.27.test]
+- Updated changelog for the release based on v5.9-rc8 (Fedora Kernel Team)
+
+* Mon Oct  5 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre Wed Oct  7
 - GNU Linux-libre 5.9-rc8-gnu.
 
 * Mon Oct 05 2020 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.9.0-0.rc8.27]
