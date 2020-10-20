@@ -80,7 +80,7 @@ Summary: The Linux kernel
 # For non-released -rc kernels, this will be appended after the rcX and
 # gitX tags, so a 3 here would become part of release "0.rcX.gitX.3"
 #
-%global baserelease 201
+%global baserelease 200
 %global fedora_build %{baserelease}
 
 # base_sublevel is the kernel version we're starting with and patching
@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 15
+%define stable_update 16
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -926,8 +926,11 @@ Patch118: arm64-rockchip-pinebookpro-add-fuel-gauge.patch
 # CVE-2020-16119 rhbz 1886374 1888083
 Patch119: CVE-2020-16119-DCCP-CCID-structure-use-after-free.patch
 
-# CVE-2020-12351 CVE-2020-12352 rhbz 1886521 1888439 1886529 1888440
-Patch122: bluetooth_cves.patch
+# Surface Go series not booting regression fix (rhbz 1886249)
+# Also fixes some touchscreen regressions:
+# https://bugzilla.kernel.org/show_bug.cgi?id=209627
+# Pending for inclusion into stable series
+Patch123: 0001-i2c-core-Restore-acpi_walk_dep_device_list-getting-c.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3085,6 +3088,15 @@ fi
 #
 #
 %changelog
+* Mon Oct 19 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.8.16-gnu.
+
+* Mon Oct 19 07:15:06 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.16-200
+- Linux v5.8.16
+
+* Fri Oct 16 2020 Hans de Goede <hdegoede@redhat.com>
+- Fix Micrsoft Surface Go series boot regression (rhbz 1886249)
+
 * Thu Oct 15 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.8.15-gnu.
 
@@ -3095,7 +3107,7 @@ fi
 - Linux v5.8.15
 - Fix CVE-2020-16119 (rhbz 1886374 1888083)
 
-* Sun Oct 12 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Mon Oct 12 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.8.14-gnu.
 
 * Wed Oct  7 07:21:23 CDT 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.8.14-200
