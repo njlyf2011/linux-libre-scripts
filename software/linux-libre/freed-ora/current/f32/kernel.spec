@@ -130,7 +130,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -909,6 +909,9 @@ Patch129: arm64-dts-allwinner-h5-OrangePi-Prime-Fix-ethernet-node.patch
 Patch130: arm64-dts-allwinner-h5-OrangePi-PC2-Fix-ethernet-node.patch
 # https://patchwork.kernel.org/project/linux-arm-kernel/patch/20201023194902.368239-1-jernej.skrabec@siol.net/
 Patch131: arm64-dts-allwinner-h6-Pine-H64-Fix-ethernet-node.patch
+
+# rhbz 1897038
+Patch132: bluetooth-fix-LL-privacy-BLE-device-fails-to-connect.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3066,11 +3069,21 @@ fi
 #
 #
 %changelog
+* Fri Nov 20 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.9.9-gnu.
+
+* Thu Nov 19 07:12:19 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.9-100
+- Linux v5.9.9
+
+* Thu Nov 12 2020 Justin M. Forbes <jforbes@fedoraproject.org>
+- Fix bluetooth device disconnect issues. (rhbz 1897038)
+
 * Tue Nov 10 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.9.8-gnu.
 
 * Tue Nov 10 15:34:54 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.8-100
 - Linux v5.9.8
+- Fixes CVE-2020-8694 (rhbz 1828580 1896525)
 
 * Tue Nov 10 2020 <jforbes@fedoraproject.org> - 5.9.7-100
 - Linux v5.9.7 rebase
