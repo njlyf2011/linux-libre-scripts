@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.9 extra=
+kver=5.10 extra=
 
 case $1 in
 --force)
@@ -184,7 +184,7 @@ reject_firmware () {
   #$1 = file $2 = pre sed pattern
   filetest $1 || return 0
   clean_sed "$2"'
-s,\(^\|[^>.0-9a-zA-Z_$]\)\(request\(_ihex\)\?_firmware\|firmware_request_platform\)\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\4\5,g
+s,\(^\|[^>.0-9a-zA-Z_$]\)\(request\(_ihex\|_partial\)\?_firmware\|firmware_request_platform\)\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\4\5,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
 }
 
@@ -200,7 +200,7 @@ maybe_reject_firmware () {
   #$1 = file $2 = pre sed pattern
   filetest $1 || return 0
   clean_sed "$2"'
-s,\(^\|[^>.0-9a-zA-Z_$]\)request_\(ihex_\)\?firmware\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1maybe_reject_\2firmware\3\4,g
+s,\(^\|[^>.0-9a-zA-Z_$]\)request_\(ihex_\|partial_\)\?firmware\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1maybe_reject_\2firmware\3\4,g
 ' "$1" 'retain Free firmware-loading machinery, disabling non-Free one'
 }
 
@@ -312,6 +312,9 @@ for f in \
     drivers/scsi/sym53c8xx_2/sym_fw1.h \
   drivers/scsi/sym53c8xx_2/sym_fw2.h \
     drivers/scsi/sym53c8xx_2/sym_fw2.h \
+\
+  kernel/bpf/preload/iterators/iterators.skel.h \
+    kernel/bpf/preload/iterators/iterators.bpf.c \
 ; do
   filetest $f || :
 done
@@ -551,6 +554,29 @@ maybe_reject_firmware_into_buf(const struct firmware **firmware_p, const char *n
 	else\
 		return request_firmware_into_buf(firmware_p, name, device, buf, size);\
 }\
+static inline int\
+reject_partial_firmware_into_buf(const struct firmware **firmware_p, const char *name,\
+				 struct device *device, void *buf, size_t size, size_t offset)\
+{\
+	const struct firmware *xfw = NULL;\
+	int retval, retval0;\
+	retval0 = report_missing_free_firmware(dev_name(device), NULL);\
+	retval = request_partial_firmware_into_buf(&xfw, NONFREE_FIRMWARE, device, buf, size, offset);\
+	if (!retval) {\
+		release_firmware(xfw);\
+		retval = retval0;\
+	}\
+	return retval;\
+}\
+static inline int\
+maybe_reject_partial_firmware_into_buf(const struct firmware **firmware_p, const char *name,\
+				       struct device *device, void *buf, size_t size, size_t offset)\
+{\
+	if (is_nonfree_firmware(name))\
+		return reject_partial_firmware_into_buf(firmware_p, name, device, buf, size, offset);\
+	else\
+		return request_partial_firmware_into_buf(firmware_p, name, device, buf, size, offset);\
+}\
 \
 #endif /* _LINUX_LIBRE_FIRMWARE_H */\
 ' include/linux/firmware.h 'added non-Free firmware notification support'
@@ -763,6 +789,7 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v10_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v10_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v11_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v11_0.c
+reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v12_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v12_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
@@ -780,9 +807,9 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
 clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_device.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/amdgpu_psp.c
 clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_psp.c
-clean_blob drivers/gpu/drm/amd/powerplay/smumgr/smumgr.c
-reject_firmware drivers/gpu/drm/amd/powerplay/smu_v11_0.c
-clean_blob drivers/gpu/drm/amd/powerplay/smu_v11_0.c
+clean_blob drivers/gpu/drm/amd/pm/powerplay/smumgr/smumgr.c
+reject_firmware drivers/gpu/drm/amd/pm/swsmu/smu11/smu_v11_0.c
+clean_blob drivers/gpu/drm/amd/pm/swsmu/smu11/smu_v11_0.c
 reject_firmware drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
 clean_blob drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
 clean_kconfig drivers/gpu/drm/Kconfig DRM_AMDGPU
@@ -798,9 +825,9 @@ clean_blob drivers/gpu/drm/amd/amdgpu/gmc_v7_0.c
 clean_kconfig drivers/gpu/drm/amd/amdgpu/Kconfig DRM_AMDGPU_CIK
 clean_mk CONFIG_DRM_AMDGPU_CIK drivers/gpu/drm/amd/amdgpu/Makefile
 
-announce DRM_AMDGPU_SI - "Enable amdgpu support for CIK parts"
-reject_firmware drivers/gpu/drm/amd/amdgpu/si_dpm.c
-clean_blob drivers/gpu/drm/amd/amdgpu/si_dpm.c
+announce DRM_AMDGPU_SI - "Enable amdgpu support for SI parts"
+reject_firmware drivers/gpu/drm/amd/pm/powerplay/si_dpm.c
+clean_blob drivers/gpu/drm/amd/pm/powerplay/si_dpm.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/gfx_v6_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/gmc_v6_0.c
@@ -813,6 +840,13 @@ reject_firmware drivers/gpu/drm/ast/ast_dp501.c
 clean_blob drivers/gpu/drm/ast/ast_dp501.c
 clean_kconfig drivers/gpu/drm/ast/Kconfig DRM_AST
 clean_mk CONFIG_DRM_AST drivers/gpu/drm/ast/Makefile
+
+announce DRM_CDNS_MHDP8546 - "Cadence DPI/DP bridge"
+reject_firmware drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c
+clean_blob drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c
+clean_blob drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.h
+clean_kconfig drivers/gpu/drm/bridge/cadence/Kconfig DRM_CDNS_MHDP8546
+clean_mk CONFIG_DRM_CDNS_MHDP8546 drivers/gpu/drm/bridge/cadence/Makefile
 
 announce DRM_I915 - "Intel 8xx/9xx/G3x/G4x/HD Graphics"
 reject_firmware drivers/gpu/drm/i915/display/intel_csr.c
@@ -951,7 +985,6 @@ clean_mk CONFIG_DRM_TEGRA drivers/gpu/drm/tegra/Makefile
 announce IMX_SDMA - "i.MX SDMA support"
 reject_firmware drivers/dma/imx-sdma.c
 clean_blob drivers/dma/imx-sdma.c
-clean_blob arch/arm/mach-imx/mm-imx3.c
 clean_blob arch/arm/boot/dts/imx25.dtsi
 clean_blob arch/arm/boot/dts/imx31.dtsi
 clean_blob arch/arm/boot/dts/imx35.dtsi
@@ -1717,8 +1750,8 @@ clean_kconfig drivers/net/ethernet/cavium/Kconfig LIQUIDIO
 clean_mk CONFIG_LIQUIDIO drivers/net/ethernet/cavium/liquidio/Makefile
 
 announce MLXSW_SPECTRUM - "Mellanox Technologies Spectrum support"
-reject_firmware drivers/net/ethernet/mellanox/mlxsw/spectrum.c '
-/request_firmware_direct.*fw_filename/!{p;d;};
+reject_firmware drivers/net/ethernet/mellanox/mlxsw/core.c '
+/request_firmware_direct.*[ ]params->file_name/{p;d;};
 '
 clean_blob drivers/net/ethernet/mellanox/mlxsw/spectrum.c
 clean_kconfig drivers/net/ethernet/mellanox/mlxsw/Kconfig MLXSW_SPECTRUM
@@ -2023,6 +2056,7 @@ announce IWLWIFI - "Intel Wireless WiFi Next Gen AGN"
 reject_firmware drivers/net/wireless/intel/iwlwifi/iwl-nvm-parse.c
 reject_firmware drivers/net/wireless/intel/iwlwifi/iwl-drv.c
 reject_firmware_nowarn drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
+reject_firmware_nowarn drivers/net/wireless/intel/iwlwifi/fw/pnvm.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-drv.c
 clean_blob drivers/net/wireless/intel/iwlwifi/iwl-dbg-tlv.c
 clean_kconfig drivers/net/wireless/intel/iwlwifi/Kconfig IWLWIFI
@@ -2184,6 +2218,12 @@ clean_blob drivers/net/wireless/marvell/mwl8k.c
 clean_kconfig drivers/net/wireless/marvell/Kconfig MWL8K
 clean_mk CONFIG_MWL8K drivers/net/wireless/marvell/Makefile
 
+announce PRESTERA_PCI - "PCI interface driver for Marvell Prestera Switch ASICs family"
+reject_firmware drivers/net/ethernet/marvell/prestera/prestera_pci.c
+clean_blob drivers/net/ethernet/marvell/prestera/prestera_pci.c
+clean_kconfig drivers/net/ethernet/marvell/prestera/Kconfig PRESTERA_PCI
+clean_mk CONFIG_PRESTERA_PCI drivers/net/ethernet/marvell/prestera/Makefile
+
 announce AR5523 - "Atheros AR5523 wireless driver support"
 reject_firmware drivers/net/wireless/ath/ar5523/ar5523.c
 clean_blob drivers/net/wireless/ath/ar5523/ar5523.c
@@ -2232,9 +2272,7 @@ clean_mk CONFIG_ATH10K_PCI drivers/net/wireless/ath/ath10k/Makefile
 
 announce ATH11K - "Qualcomm Technologies 802.11ax chipset support"
 reject_firmware_nowarn drivers/net/wireless/ath/ath11k/core.c
-reject_firmware drivers/net/wireless/ath/ath11k/qmi.c
 clean_blob drivers/net/wireless/ath/ath11k/hw.h
-clean_blob drivers/net/wireless/ath/ath11k/qmi.h
 clean_blob drivers/net/wireless/ath/ath11k/core.c
 clean_kconfig drivers/net/wireless/ath/ath11k/Kconfig ATH11K
 clean_mk CONFIG_ATH11K drivers/net/wireless/ath/ath11k/Makefile
@@ -3498,11 +3536,6 @@ clean_mk CONFIG_SND_SOC_RT5677 sound/soc/codecs/Makefile
 announce SND_SOC_SIGMADSP - "SigmaStudio firmware loader"
 maybe_reject_firmware sound/soc/codecs/sigmadsp.c
 
-announce SND_SOC_INTEL_SST_ACPI - "Intel SST (LPE) Driver"
-maybe_reject_firmware sound/soc/intel/common/sst-acpi.c
-clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_SST_ACPI
-clean_mk CONFIG_SND_SOC_INTEL_SST_ACPI sound/soc/intel/common/Makefile
-
 announce SND_SOC_ACPI_INTEL_MATCH - undocumented
 clean_blob sound/soc/intel/common/soc-acpi-intel-bxt-match.c
 clean_blob sound/soc/intel/common/soc-acpi-intel-byt-match.c
@@ -3517,13 +3550,13 @@ clean_blob sound/soc/intel/common/soc-acpi-intel-skl-match.c
 clean_kconfig sound/soc/intel/Kconfig SND_SOC_ACPI_INTEL_MATCH
 clean_mk CONFIG_SND_SOC_ACPI_INTEL_MATCH sound/soc/intel/common/Makefile
 
-announce SND_SOC_INTEL_HASWELL - undocumented
-reject_firmware sound/soc/intel/haswell/sst-haswell-ipc.c
-clean_blob sound/soc/intel/haswell/sst-haswell-ipc.c
-clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_HASWELL
-clean_mk CONFIG_SND_SOC_INTEL_HASWELL sound/soc/intel/haswell/Makefile
+announce SND_SOC_INTEL_CATPT - undocumented
+reject_firmware sound/soc/intel/catpt/loader.c
+clean_blob sound/soc/intel/catpt/loader.c
+clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_CATPT
+clean_mk CONFIG_SND_SOC_INTEL_CATPT sound/soc/intel/catpt/Makefile
 
-announce SND_SOC_INTEL_SKYLAKE - undocumented
+announce SND_SOC_INTEL_SKYLAKE - "All Skylake/SST Platforms"
 reject_firmware sound/soc/intel/skylake/skl-sst.c
 reject_firmware sound/soc/intel/skylake/skl-sst-utils.c
 reject_firmware sound/soc/intel/skylake/skl-topology.c
@@ -3535,16 +3568,16 @@ clean_blob sound/soc/intel/skylake/skl-topology.c
 clean_kconfig sound/soc/intel/Kconfig SND_SOC_INTEL_SKYLAKE
 clean_mk CONFIG_SND_SOC_INTEL_SKYLAKE sound/soc/intel/skylake/Makefile
 
-announce SND_SST_IPC - undocumented
+announce SND_SST_ATOM_HIFI2_PLATFORM - "HiFi2 Platforms"
 reject_firmware sound/soc/intel/atom/sst/sst.c
 reject_firmware sound/soc/intel/atom/sst/sst_loader.c
-clean_kconfig sound/soc/intel/Kconfig SND_SST_IPC
-clean_mk CONFIG_SND_SST_IPC sound/soc/intel/atom/sst/Makefile
+clean_kconfig sound/soc/intel/Kconfig SND_SST_ATOM_HIFI2_PLATFORM
+clean_mk CONFIG_SND_SST_ATOM_HIFI2_PLATFORM sound/soc/intel/atom/sst/Makefile
 
-announce SND_SST_IPC_PCI - undocumented
+announce SND_SST_ATOM_HIFI2_PLATFORM_PCI - "PCI HiFi2 (Merrifield) Platforms"
 clean_blob sound/soc/intel/atom/sst/sst_pci.c
-clean_kconfig sound/soc/intel/Kconfig SND_SST_IPC_PCI
-clean_mk CONFIG_SND_SST_IPC_PCI sound/soc/intel/atom/sst/Makefile
+clean_kconfig sound/soc/intel/Kconfig SND_SST_ATOM_HIFI2_PLATFORM_PCI
+clean_mk CONFIG_SND_SST_ATOM_HIFI2_PLATFORM_PCI sound/soc/intel/atom/sst/Makefile
 
 announce SND_SOC_RT5514 - undocumented
 reject_firmware sound/soc/codecs/rt5514.c
@@ -3681,8 +3714,15 @@ clean_mk CONFIG_GREYBUS_BOOTROM drivers/staging/greybus/Makefile
 #######
 
 announce ARCH_QCOM - "Qualcomm Support"
+clean_blob arch/arm64/boot/dts/qcom/msm8998-lenovo-miix-630.dts
+clean_blob arch/arm64/boot/dts/qcom/sc7180-trogdor.dtsi
+clean_blob arch/arm64/boot/dts/qcom/sc7180-trogdor-lte-sku.dtsi
 clean_blob arch/arm64/boot/dts/qcom/sdm845-db845c.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-mtp.dts
+clean_blob arch/arm64/boot/dts/qcom/sdm845-xiaomi-beryllium.dts
+clean_blob arch/arm64/boot/dts/qcom/sdm850-lenovo-yoga-c630.dts
+clean_blob Documentation/devicetree/bindings/display/msm/gpu.txt
+clean_blob arch/arm64/boot/dts/qcom/sm8250-mtp.dts
 clean_kconfig arch/arm/mach-qcom/Kconfig ARCH_QCOM
 clean_mk CONFIG_ARCH_QCOM arch/arm64/boot/dts/qcom/Makefile
 
@@ -3705,11 +3745,11 @@ clean_blob Documentation/arm/keystone/knav-qmss.rst
 clean_kconfig drivers/soc/ti/Kconfig KEYSTONE_NAVIGATOR_QMSS
 clean_mk CONFIG_KEYSTONE_NAVIGATOR_QMSS drivers/soc/ti/Makefile
 
-announce ARCH_BRCMSTB - "Broadcom BCM7XXX based boards"
+announce BRCMSTB_DPFE - "Broadcom STM DPFE driver"
 reject_firmware_nowarn drivers/memory/brcmstb_dpfe.c
 clean_blob drivers/memory/brcmstb_dpfe.c
-clean_kconfig arch/arm/mach-bcm/Kconfig ARCH_BRCMSTB
-clean_mk CONFIG_ARCH_BRCMSTB drivers/memory/Makefile
+clean_kconfig drivers/memory/Kconfig BRCMSTB_DPFE
+clean_mk CONFIG_BRCMSTB_DPFE drivers/memory/Makefile
 
 announce ARCH_MEDIATEK - "MediaTek SoC Support"
 clean_blob arch/arm64/boot/dts/mediatek/mt8183-kukui.dtsi
