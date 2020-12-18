@@ -137,7 +137,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3064,6 +3064,12 @@ fi
 #
 #
 %changelog
+* Fri Dec 18 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.9.15-gnu.
+
+* Wed Dec 16 08:06:21 CST 2020 Justin M. Forbes <jforbes@fedoraproject.org> - 5.9.15-200
+- Linux v5.9.15
+
 * Sun Dec 13 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.9.14-gnu.
 
