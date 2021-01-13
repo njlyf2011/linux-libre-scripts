@@ -88,7 +88,7 @@ Summary: The Linux kernel
 # base_sublevel is the kernel version we're starting with and patching
 # on top of -- for example, 3.1-rc7-git1 starts with a 3.0 base,
 # which yields a base_sublevel of 0.
-%define base_sublevel 9
+%define base_sublevel 10
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
@@ -98,9 +98,9 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-%define stablelibre -5.9%{?stablegnux}
-#define rcrevlibre  -5.9%{?rcrevgnux}
-#define gitrevlibre -5.9%{?gitrevgnux}
+#define stablelibre -5.10%{?stablegnux}
+#define rcrevlibre  -5.10%{?rcrevgnux}
+#define gitrevlibre -5.10%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -137,7 +137,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 16
+%define stable_update 6
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -893,28 +893,22 @@ Patch68: 0001-drm-sun4i-sun6i_mipi_dsi-fix-horizontal-timing-calcu.patch
 Patch70: 0001-e1000e-bump-up-timeout-to-wait-when-ME-un-configure-.patch
 Patch72: 0001-Work-around-for-gcc-bug-https-gcc.gnu.org-bugzilla-s.patch
 
-# https://patchwork.kernel.org/patch/11743769/
-Patch100: mmc-sdhci-iproc-Enable-eMMC-DDR-3.3V-support-for-bcm2711.patch
-
-# https://patchwork.kernel.org/patch/11745283/
-Patch101: brcmfmac-BCM4329-Fixes-and-improvement.patch
-
 # https://patchwork.kernel.org/patch/11796255/
-Patch102: arm64-dts-rockchip-disable-USB-type-c-DisplayPort.patch
+Patch100: arm64-dts-rockchip-disable-USB-type-c-DisplayPort.patch
 
 # Tegra fixes
-Patch105: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
-Patch106: arm64-tegra-Use-valid-PWM-period-for-VDD_GPU-on-Tegra210.patch
-# https://www.spinics.net/lists/linux-tegra/msg53605.html
-Patch108: iommu-tegra-smmu-Fix-TLB-line-for-Tegra210.patch
+Patch101: 0001-PCI-Add-MCFG-quirks-for-Tegra194-host-controllers.patch
 
 # A patch to fix some undocumented things broke a bunch of Allwinner networks due to wrong assumptions
-Patch124: 0001-update-phy-on-pine64-a64-devices.patch
-# https://patchwork.kernel.org/project/linux-arm-kernel/patch/20201025140144.28693-1-ats@offog.org/
-Patch126: ARM-dts-sun7i-pcduino3-nano-enable-RGMII-RX-TX-delay-on-PHY.patch
+Patch102: 0001-update-phy-on-pine64-a64-devices.patch
 
-# rhbz 1897038
-Patch132: bluetooth-fix-LL-privacy-BLE-device-fails-to-connect.patch
+# OMAP Pandaboard fix
+Patch103: arm-pandaboard-fix-add-bluetooth.patch
+
+Patch105: 0001-ALSA-hda-via-Fix-runtime-PM-for-Clevo-W35xSS.patch
+
+# Nouveau mDP detection fix
+Patch107: 0001-drm-nouveau-kms-handle-mDP-connectors.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -1536,6 +1530,8 @@ if [ ! -d kernel-%{kversion}%{?dist}/vanilla-%{vanillaversion} ]; then
 
   fi
 
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/" vanilla-%{kversion}/Makefile
+
 %if "%{kversion}" != "%{vanillaversion}"
 
   for sharedir in $sharedirs ; do
@@ -1558,12 +1554,19 @@ cp %{SOURCE12} .
 # Update vanilla to the latest upstream.
 # (non-released_kernel case only)
 %if 0%{?rcrev}
+%if "%{?stablelibre}" != "%{?rcrevlibre}"
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?rcrevlibre: }%{?rcrevgnux}/" Makefile
+%endif
     xzcat %{SOURCE5000} | patch -p1 -F1 -s
 %if 0%{?gitrev}
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION = -rc%{rcrev}%{?gitrevgnux}/" Makefile
     xzcat %{SOURCE5001} | patch -p1 -F1 -s
 %endif
 %else
 # pre-{base_sublevel+1}-rc1 case
+%if "%{?stablelibre}" != "%{?gitrevlibre}"
+    perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?gitrevlibre: }%{?gitrevgnux}/" Makefile
+%endif
 %if 0%{?gitrev}
     xzcat %{SOURCE5000} | patch -p1 -F1 -s
 %endif
@@ -1643,7 +1646,7 @@ pathfix.py -i "%{__python3} %{py3_shbang_opts}" -p -n \
 	tools/perf/scripts/python/stat-cpi.py \
 	tools/perf/scripts/python/sched-migration.py \
 	Documentation \
-	scripts/gen_compile_commands.py
+	scripts/clang-tools
 
 # only deal with configs if we are going to build for the arch
 %ifnarch %nobuildarches
@@ -3064,6 +3067,14 @@ fi
 #
 #
 %changelog
+* Tue Jan 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.6-gnu.
+
+* Mon Jan 11 06:51:13 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.6-200
+- Linux v5.10.6 rebase
+- Fix bluetooth controller initialization (rhbz 1898495)
+- Fix CVE-2020-36158 (rhbz 1913348 1913349)
+
 * Tue Dec 22 2020 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.9.16-gnu.
 
