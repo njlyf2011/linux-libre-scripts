@@ -132,7 +132,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 7
+%define stable_update 8
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3050,6 +3050,12 @@ fi
 #
 #
 %changelog
+* Tue Jan 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.8-gnu.
+
+* Sun Jan 17 13:09:34 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.8-100
+- Linux v5.10.8
+
 * Wed Jan 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.7-gnu.
 
