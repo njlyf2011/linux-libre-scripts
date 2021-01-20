@@ -98,7 +98,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.10%{?stablegnux}
+%define stablelibre -5.10%{?stablegnux}
 #define rcrevlibre  -5.10%{?rcrevgnux}
 #define gitrevlibre -5.10%{?gitrevgnux}
 
@@ -132,7 +132,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 8
+%define stable_update 9
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -890,6 +890,9 @@ Patch102: 0001-update-phy-on-pine64-a64-devices.patch
 
 # OMAP Pandaboard fix
 Patch103: arm-pandaboard-fix-add-bluetooth.patch
+
+# Fix for USB on some newer RPi4 / firmware combinations
+Patch104: 0001-brcm-rpi4-fix-usb-numeration.patch
 
 # Nouveau mDP detection fix
 Patch107: 0001-drm-nouveau-kms-handle-mDP-connectors.patch
@@ -3050,6 +3053,12 @@ fi
 #
 #
 %changelog
+* Wed Jan 20 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.9-gnu.
+
+* Tue Jan 19 15:00:34 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.9-100
+- Linux v5.10.9
+
 * Tue Jan 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.8-gnu.
 
