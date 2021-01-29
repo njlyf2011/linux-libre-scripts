@@ -137,7 +137,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 10
+%define stable_update 11
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -909,6 +909,12 @@ Patch104: 0001-brcm-rpi4-fix-usb-numeration.patch
 
 # Nouveau mDP detection fix
 Patch107: 0001-drm-nouveau-kms-handle-mDP-connectors.patch
+
+# rhbz 1918778
+Patch108: media-pwc-fix-the-urb-buffer-allocation.patch
+
+#rhbz 1918486
+Patch109: hid-wacom-correct-null-dereference-on-aes-pen-proximity.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3067,6 +3073,14 @@ fi
 #
 #
 %changelog
+* Thu Jan 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.11-gnu.
+
+* Wed Jan 27 08:07:48 CST 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.11-200
+- Linux v5.10.11
+- Fix URB buffer allocation of pwc driver (rhbz 1918778)
+- Fix wacom touchscreens (rhbz 1918486)
+
 * Sun Jan 24 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.10-gnu.
 
