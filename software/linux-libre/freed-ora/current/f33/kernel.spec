@@ -137,7 +137,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 11
+%define stable_update 12
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -912,9 +912,6 @@ Patch107: 0001-drm-nouveau-kms-handle-mDP-connectors.patch
 
 # rhbz 1918778
 Patch108: media-pwc-fix-the-urb-buffer-allocation.patch
-
-#rhbz 1918486
-Patch109: hid-wacom-correct-null-dereference-on-aes-pen-proximity.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3073,6 +3070,12 @@ fi
 #
 #
 %changelog
+* Mon Feb  1 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.12-gnu.
+
+* Mon Feb 01 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.12-200
+- Linux v5.10.12
+
 * Thu Jan 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.11-gnu.
 
