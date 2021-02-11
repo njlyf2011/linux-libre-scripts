@@ -137,7 +137,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 14
+%define stable_update 15
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -915,6 +915,8 @@ Patch107: 0001-drm-nouveau-kms-handle-mDP-connectors.patch
 
 # rhbz 1918778
 Patch108: media-pwc-fix-the-urb-buffer-allocation.patch
+
+Patch109: 0001-Revert-drm-amd-display-Update-NV1x-SR-latency-values.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3073,6 +3075,14 @@ fi
 #
 #
 %changelog
+* Thu Feb 11 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.15-gnu.
+
+* Wed Feb 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.15-200
+- Linux v5.10.15
+- Fixes CVE-2021-20194 (rhbz 1912683 1926781)
+- Fixes rhbz 1916674
+
 * Sun Feb  7 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.14-gnu.
 
