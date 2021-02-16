@@ -1,3 +1,18 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/d56aab49af72b2e0e682cc70c0f19269f784607a
+ d56aab49af72b2e0e682cc70c0f19269f784607a Bluetooth: L2CAP: Try harder to accept device not knowing options
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/06219afd635737bfee1a7c676258e66448f133e2
+ 06219afd635737bfee1a7c676258e66448f133e2 ALSA: hda: intel-dsp-config: Add SND_INTEL_BYT_PREFER_SOF Kconfig option
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/035ea4b6c436e53b4c9e388bc65c965f310e216c
+ 035ea4b6c436e53b4c9e388bc65c965f310e216c redhat: remove remaining references of CONFIG_RH_DISABLE_DEPRECATED
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/e187313e5f0086538fefe0925ef84480f99616d8
+ e187313e5f0086538fefe0925ef84480f99616d8 gcc-plugins: fix gcc 11 indigestion with plugins...
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/0c84b348e33ab9d7df5c3c5acc7fbc07fd96fafc
+ 0c84b348e33ab9d7df5c3c5acc7fbc07fd96fafc Fix up bad merge with efi: generalize efi_get_secureboot
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/364788093bdf437c33753d327136c363be8f756c
  364788093bdf437c33753d327136c363be8f756c Fix up a merge issue with rxe.c
 

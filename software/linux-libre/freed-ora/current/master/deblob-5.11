@@ -1,6 +1,6 @@
 #! /bin/sh
 
-#    Copyright (C) 2008-2020 Alexandre Oliva <lxoliva@fsfla.org>
+#    Copyright (C) 2008-2021 Alexandre Oliva <lxoliva@fsfla.org>
 #    Copyright (C) 2008 Jeff Moe
 #    Copyright (C) 2009 Rubén Rodríguez <ruben@gnu.org>
 #
@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.10 extra=
+kver=5.11 extra=
 
 case $1 in
 --force)
@@ -730,6 +730,12 @@ clean_blob drivers/crypto/qat/qat_c62x/adf_drv.c
 clean_kconfig drivers/crypto/qat/Kconfig CRYPTO_DEV_QAT_C62X
 clean_mk CONFIG_CRYPTO_DEV_QAT_C62X drivers/crypto/qat/Makefile
 
+announce CRYPTO_DEV_QAT_4XXX - "Support for Intel(R) QAT_4XXX"
+clean_blob drivers/crypto/qat/qat_4xxx/adf_4xxx_hw_data.h
+clean_blob drivers/crypto/qat/qat_4xxx/adf_drv.c
+clean_kconfig drivers/crypto/qat/Kconfig CRYPTO_DEV_QAT_4XXX
+clean_mk CONFIG_CRYPTO_DEV_QAT_4XXX drivers/crypto/qat/Makefile
+
 announce AMDTEE - "AMD's Trusted Execution Environment (TEE)"
 reject_firmware drivers/tee/amdtee/core.c
 clean_blob drivers/tee/amdtee/core.c
@@ -862,6 +868,12 @@ announce DRM_I915_GVT - "Enable Intel GVT-g graphics virtualization host support
 reject_firmware drivers/gpu/drm/i915/gvt/firmware.c
 clean_kconfig drivers/gpu/drm/i915/Kconfig DRM_I915_GVT
 clean_mk CONFIG_DRM_I915_GVT drivers/gpu/drm/i915/Makefile
+
+announce DRM_LONTIUM_LT9611UXC - "Lontium LT9611UXC DSI/HDMI bridge"
+reject_firmware drivers/gpu/drm/bridge/lontium-lt9611uxc.c
+clean_blob drivers/gpu/drm/bridge/lontium-lt9611uxc.c
+clean_kconfig drivers/gpu/drm/bridge/Kconfig DRM_LONTIUM_LT9611UXC
+clean_mk CONFIG_DRM_LONTIUM_LT9611UXC drivers/gpu/drm/bridge/Makefile
 
 announce DRM_NOUVEAU - "Nouveau (nVidia) cards"
 reject_firmware_nowarn drivers/gpu/drm/nouveau/nvkm/core/firmware.c
@@ -1458,6 +1470,12 @@ clean_blob drivers/media/pci/bt8xx/bttv-cards.c
 clean_blob Documentation/admin-guide/media/bttv.rst
 clean_kconfig drivers/media/pci/bt8xx/Kconfig VIDEO_BT848
 clean_mk CONFIG_VIDEO_BT848 drivers/media/pci/bt8xx/Makefile
+
+announce VIDEO_CCS - "MIPI CCS/SMIA++/SMIA sensor support"
+reject_firmware drivers/media/i2c/ccs/ccs-core.c
+clean_blob drivers/media/i2c/ccs/ccs-core.c
+clean_kconfig drivers/media/i2c/ccs/Kconfig VIDEO_CCS
+clean_mk CONFIG_VIDEO_CCS drivers/media/i2c/ccs/Makefile
 
 announce VIDEO_CODA - "Chips&Media Coda multi-standard codec IP"
 reject_firmware drivers/media/platform/coda/coda-common.c
@@ -2274,8 +2292,14 @@ announce ATH11K - "Qualcomm Technologies 802.11ax chipset support"
 reject_firmware_nowarn drivers/net/wireless/ath/ath11k/core.c
 clean_blob drivers/net/wireless/ath/ath11k/hw.h
 clean_blob drivers/net/wireless/ath/ath11k/core.c
+clean_blob Documentation/devicetree/bindings/net/wireless/qcom,ath11k.yaml
 clean_kconfig drivers/net/wireless/ath/ath11k/Kconfig ATH11K
 clean_mk CONFIG_ATH11K drivers/net/wireless/ath/ath11k/Makefile
+
+announce ATH11K_PCI - "Atheros ath11k PCI support"
+clean_blob drivers/net/wireless/ath/ath11k/pci.c
+clean_kconfig drivers/net/wireless/ath/ath11k/Kconfig ATH11K_PCI
+clean_mk CONFIG_ATH11K_PCI drivers/net/wireless/ath/ath11k/Makefile
 
 announce WIL6210 - "Wilocity 60g WiFi card wil6210 support"
 reject_firmware drivers/net/wireless/ath/wil6210/fw_inc.c
@@ -2720,11 +2744,11 @@ clean_mk CONFIG_TI_ST drivers/misc/ti-st/Makefile
 # wimax
 
 announce WIMAX_I2400M - "Intel Wireless WiMAX Connection 2400"
-reject_firmware drivers/net/wimax/i2400m/fw.c
-clean_blob drivers/net/wimax/i2400m/usb.c
-clean_blob Documentation/admin-guide/wimax/i2400m.rst
-clean_kconfig drivers/net/wimax/i2400m/Kconfig WIMAX_I2400M
-clean_mk CONFIG_WIMAX_I2400M drivers/net/wimax/i2400m/Makefile
+reject_firmware drivers/staging/wimax/i2400m/fw.c
+clean_blob drivers/staging/wimax/i2400m/usb.c
+clean_blob drivers/staging/wimax/Documentation/i2400m.rst
+clean_kconfig drivers/staging/wimax/i2400m/Kconfig WIMAX_I2400M
+clean_mk CONFIG_WIMAX_I2400M drivers/staging/wimax/i2400m/Makefile
 
 # infiniband
 
@@ -3230,8 +3254,8 @@ clean_mk CONFIG_MTK_SCP drivers/remoteproc/Makefile
 
 announce WKUP_M3_RPROC - "AMx3xx Wakeup M3 remoteproc support"
 clean_blob Documentation/devicetree/bindings/remoteproc/wkup_m3_rproc.txt
-clean_blob arch/arm/boot/dts/am33xx.dtsi
-clean_blob arch/arm/boot/dts/am4372.dtsi
+clean_blob arch/arm/boot/dts/am33xx-l4.dtsi
+clean_blob arch/arm/boot/dts/am437x-l4.dtsi
 clean_kconfig drivers/remoteproc/Kconfig WKUP_M3_RPROC
 clean_mk CONFIG_WKUP_M3_RPROC drivers/remoteproc/Makefile
 
@@ -3292,6 +3316,7 @@ clean_mk CONFIG_PTP_1588_CLOCK_IDTCM drivers/ptp/Makefile
 
 announce PTP_1588_CLOCK_IDT82P33 - "IDT 82P33xxx PTP clock"
 reject_firmware drivers/ptp/ptp_idt82p33.c
+clean_blob drivers/ptp/ptp_idt82p33.c
 clean_blob drivers/ptp/ptp_idt82p33.h
 clean_kconfig drivers/ptp/Kconfig PTP_1588_CLOCK_IDT82P33
 clean_mk CONFIG_PTP_1588_CLOCK_IDT82P33 drivers/ptp/Makefile
@@ -3520,6 +3545,12 @@ clean_blob Documentation/devicetree/bindings/sound/fsl,easrc.yaml
 clean_kconfig sound/soc/fsl/Kconfig SND_SOC_FSL_EASRC
 clean_mk CONFIG_SND_SOC_FSL_EASRC sound/soc/fsl/Makefile
 
+announce SND_SOC_FSL_XCVR - "NXP Audio Transceiver (XCVR) module support"
+reject_firmware sound/soc/fsl/fsl_xcvr.c
+clean_blob sound/soc/fsl/fsl_xcvr.c
+clean_kconfig sound/soc/fsl/Kconfig SND_SOC_FSL_XCVR
+clean_mk CONFIG_SND_SOC_FSL_XCVR sound/soc/fsl/Makefile
+
 announce SND_SOC_MAX98390 - "Maxim Integrated MAX98390 Speaker Amplifier"
 reject_firmware sound/soc/codecs/max98390.c
 clean_blob sound/soc/codecs/max98390.c
@@ -3684,13 +3715,15 @@ reject_firmware drivers/i2c/i2c-slave-eeprom.c
 clean_kconfig drivers/i2c/Kconfig I2C_SLAVE_EEPROM
 clean_mk CONFIG_I2C_SLAVE_EEPROM drivers/i2c/Makefile
 
-# I couldn't find any uses of mhi_register_controller, that should
-# fill in the required fw_image field of mhi_controller.  Let me know
-# if you find any uses in which the firmware is Free Software.
 announce MHI_BUS - "Modem Host Interface (MHI) bus"
 reject_firmware drivers/bus/mhi/core/boot.c
 clean_kconfig drivers/bus/mhi/Kconfig MHI_BUS
 clean_mk CONFIG_MHI_BUS drivers/bus/mhi/core/Makefile
+
+announce MHI_BUS_PCI_GENERIC - "MHI PCI controller driver"
+clean_blob drivers/bus/mhi/pci_generic.c
+clean_kconfig drivers/bus/mhi/Kconfig MHI_BUS_PCI_GENERIC
+clean_mk CONFIG_MHI_BUS_PCI_GENERIC drivers/bus/mhi/Makefile
 
 # Greybus
 
@@ -3721,6 +3754,8 @@ clean_blob arch/arm64/boot/dts/qcom/sdm845-db845c.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-mtp.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-xiaomi-beryllium.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm850-lenovo-yoga-c630.dts
+clean_blob arch/arm64/boot/dts/qcom/sm8150-hdk.dts
+clean_blob arch/arm64/boot/dts/qcom/sm8150-mtp.dts
 clean_blob Documentation/devicetree/bindings/display/msm/gpu.txt
 clean_blob arch/arm64/boot/dts/qcom/sm8250-mtp.dts
 clean_kconfig arch/arm/mach-qcom/Kconfig ARCH_QCOM
