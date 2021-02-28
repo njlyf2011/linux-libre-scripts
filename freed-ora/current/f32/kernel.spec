@@ -132,7 +132,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 18
+%define stable_update 19
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -902,8 +902,8 @@ Patch107: 0001-drm-nouveau-kms-handle-mDP-connectors.patch
 
 Patch109: 0001-Revert-drm-amd-display-Update-NV1x-SR-latency-values.patch
 
-# rhbz 1916104 (patch from bluetooth-next)
-Patch110: bluetooth-btusb-qca-fix.patch
+# rhbz 1925346
+Patch111: i915-fixes.patch
 
 # END OF PATCH DEFINITIONS
 
@@ -3061,6 +3061,15 @@ fi
 #
 #
 %changelog
+* Sat Feb 27 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.19-gnu.
+
+* Fri Feb 26 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.19-100
+- Linux v5.10.19
+
+* Thu Feb 25 2021 Justin M. Forbes <jforbes@fedoraproject.org>
+- Some i915 fixes for 5.10 (rhbz 1925346)
+
 * Thu Feb 25 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.18-gnu.
 
