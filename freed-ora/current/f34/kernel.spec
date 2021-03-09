@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.3
+%define rpmversion 5.11.4
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2843,14 +2843,17 @@ fi
 #
 #
 %changelog
-* Fri Mar  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 5.11.3-gnu.
+* Mon Mar  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.4-gnu.
 
-* Thu Mar 04 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.3-300]
+* Sun Mar 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.4-6]
 - PCI: Add MCFG quirks for Tegra194 host controllers (Vidya Sagar)
 - Revert "PCI: Add MCFG quirks for Tegra194 host controllers" (Peter Robinson)
 - forgot to push this one earlier (Justin M. Forbes)
 - Reference the patch as version.patchlevel to more easily see diffs between stable releases (Justin M. Forbes)
+
+* Fri Mar  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.3-gnu.
 
 * Thu Mar 04 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.3-5]
 - arm64: dts: rockchip: disable USB type-c DisplayPort (Jian-Hong Pan)
