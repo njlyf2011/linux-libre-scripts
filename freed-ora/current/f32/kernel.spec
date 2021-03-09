@@ -132,7 +132,7 @@ Summary: The Linux kernel
 %if 0%{?released_kernel}
 
 # Do we have a -stable update to apply?
-%define stable_update 20
+%define stable_update 21
 # Set rpm version accordingly
 %if 0%{?stable_update}
 %define stablerev %{stable_update}
@@ -3053,6 +3053,12 @@ fi
 #
 #
 %changelog
+* Mon Mar  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.10.21-gnu.
+
+* Sun Mar 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> - 5.10.21-100
+- Linux v5.10.21
+
 * Fri Mar  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.10.20-gnu.
 
