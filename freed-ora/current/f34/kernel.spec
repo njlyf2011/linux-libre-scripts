@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.4
+%define rpmversion 5.11.5
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2843,6 +2843,12 @@ fi
 #
 #
 %changelog
+* Thu Mar 11 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.5-gnu.
+
+* Tue Mar 09 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.5-7]
+- Turn on SND_SOC_INTEL_SOUNDWIRE_SOF_MACH for Fedora again (Justin M. Forbes)
+
 * Mon Mar  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.4-gnu.
 
