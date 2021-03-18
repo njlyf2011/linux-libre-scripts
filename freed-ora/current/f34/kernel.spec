@@ -62,7 +62,7 @@ Summary: The Linux kernel
 # For rawhide and/or a kernel built from an rc or git snapshot,
 # released_kernel should be 0.
 # For a stable, released kernel, released_kernel should be 1.
-%global released_kernel 0
+%global released_kernel 1
 
 %global distro_build 300
 
@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.6
+%define rpmversion 5.11.7
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -119,7 +119,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 # To be inserted between "patch" and "-4.".
-#define stablelibre -5.11%{?stablegnux}
+%define stablelibre -5.11%{?stablegnux}
 #define rcrevlibre  -5.11%{?rcrevgnux}
 #define gitrevlibre -5.11%{?gitrevgnux}
 
@@ -635,12 +635,6 @@ BuildRequires: xmlto
 BuildRequires: asciidoc
 %endif
 
-# Because this is the kernel, it's hard to get a single upstream URL
-# to represent the base without needing to do a bunch of patching. This
-# tarball is generated from a src-git tree. If you want to see the
-# exact git commit you can run
-#
-# xzcat -qq ${TARBALL} | git get-tar-commit-id
 Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
@@ -793,6 +787,8 @@ Source3001: kernel-local
 Source3003: Patchlist.changelog
 
 Source4000: README.rst
+
+Source5000: patch%{?stablelibre}-%{rpmversion}%{basegnu}.xz
 
 ## Patches needed for building this package
 
@@ -1123,6 +1119,7 @@ Provides: kernel%{?1:-%{1}}-modules-internal-%{_target_cpu} = %{version}-%{relea
 Provides: kernel%{?1:-%{1}}-modules-internal-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel%{?1:-%{1}}-modules-internal = %{version}-%{release}%{?1:+%{1}}\
 Provides: installonlypkg(kernel-module)\
+Provides: installonlypkg(kernel-libre-module)\
 Provides: kernel%{?1:-%{1}}-modules-internal-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel%{?1:-%{1}}-modules-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
@@ -1146,8 +1143,8 @@ Provides: kernel%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-%{_target_cpu} = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra = %{version}-%{release}%{?1:+%{1}}\
-Provides: installonlypkg(kernel-module)\
-Provides: installonlypkg(kernel-libre-module)\
+Provides: installonlypkg(kernel-module-extra)\
+Provides: installonlypkg(kernel-libre-module-extra)\
 Provides: kernel%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Provides: kernel-libre%{?1:-%{1}}-modules-extra-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
 Requires: kernel-libre-uname-r = %{KVERREL}%{?variant}%{?1:+%{1}}\
@@ -1333,6 +1330,8 @@ mv linux-%{kversion} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
+
+xzcat %{SOURCE5000} | patch -p1 -F1 -s
 
 $RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
 ApplyOptionalPatch freedo.patch
@@ -2548,10 +2547,12 @@ fi\
 #
 %define kernel_variant_posttrans() \
 %{expand:%%posttrans %{?1:%{1}-}core}\
+%if 0%{!?fedora:1}\
 if [ -x %{_sbindir}/weak-modules ]\
 then\
     %{_sbindir}/weak-modules --add-kernel %{KVERREL}%{?1:+%{1}} || exit $?\
 fi\
+%endif\
 /bin/kernel-install add %{KVERREL}%{?1:+%{1}} /lib/modules/%{KVERREL}%{?1:+%{1}}/vmlinuz || exit $?\
 %{nil}
 
@@ -2843,6 +2844,25 @@ fi
 #
 #
 %changelog
+* Wed Mar 17 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.7-gnu.
+- Apply stable patchset; earlier 5.11.*-gnu rpms did NOT have them.
+
+* Wed Mar 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.7-300]
+- This is a released kernel branch (Justin M. Forbes)
+
+* Wed Mar 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.7-9]
+- Disable weak-modules again rhbz 1828455 (Justin M. Forbes)
+- More config updates for gcc-plugin turn off (Justin M. Forbes)
+- fedora: the PCH_CAN driver is x86-32 only (Peter Robinson)
+- common: disable legacy CAN device support (Peter Robinson)
+- common: Enable Microchip MCP251x/MCP251xFD CAN controllers (Peter Robinson)
+- common: Bosch MCAN support for Intel Elkhart Lake (Peter Robinson)
+- common: enable CAN_PEAK_PCIEFD PCI-E driver (Peter Robinson)
+- common: disable CAN_PEAK_PCIEC PCAN-ExpressCard (Peter Robinson)
+- common: enable common CAN layer 2 protocols (Peter Robinson)
+- ark: disable CAN_LEDS option (Peter Robinson)
+
 * Fri Mar 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.6-gnu.
 
