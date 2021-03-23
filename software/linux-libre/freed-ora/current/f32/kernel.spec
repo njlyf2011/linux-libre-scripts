@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.7
+%define rpmversion 5.11.8
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2843,11 +2843,14 @@ fi
 #
 #
 %changelog
+* Mon Mar 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.8-gnu.
+
+* Sun Mar 21 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.8-10]
+- This is a released kernel branch (Justin M. Forbes)
+
 * Wed Mar 17 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.7-gnu.
-
-* Wed Mar 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.7-100]
-- This is a released kernel branch (Justin M. Forbes)
 
 * Wed Mar 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.7-9]
 - Disable weak-modules again rhbz 1828455 (Justin M. Forbes)
