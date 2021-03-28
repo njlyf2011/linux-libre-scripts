@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.9
+%define rpmversion 5.11.10
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2843,6 +2843,15 @@ fi
 #
 #
 %changelog
+* Sat Mar 27 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.10-gnu.
+
+* Thu Mar 25 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.10-12]
+- drm/i915/tgl/psr: Disable PSR on Tigerlake for now (Lyude Paul)
+- Fedora: Turn off the SND_INTEL_BYT_PREFER_SOF option (Hans de Goede)
+- ASoC: intel: atom: Stop advertising non working S24LE support (Hans de Goede)
+- fix up RHEL config (Justin M. Forbes)
+
 * Thu Mar 25 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.9-gnu.
 
