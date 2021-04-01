@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.10
+%define rpmversion 5.11.11
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2843,6 +2843,18 @@ fi
 #
 #
 %changelog
+* Wed Mar 31 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.11-gnu.
+
+* Tue Mar 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.11-100]
+- Set CONFIG_XEN_MEMORY_HOTPLUG_LIMIT as required by 5.11.11 (Justin M. Forbes)
+
+* Tue Mar 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.11-13]
+- drm/i915: Disable LTTPR support when the DPCD rev < 1.4 (Imre Deak)
+- drm/i915/dp: Prevent setting the LTTPR LT mode if no LTTPRs are detected (Imre Deak)
+- drm/i915/ilk-glk: Fix link training on links with LTTPRs (Imre Deak)
+- redhat/mod-blacklist.sh: Fix floppy blacklisting (Hans de Goede)
+
 * Sat Mar 27 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.10-gnu.
 
