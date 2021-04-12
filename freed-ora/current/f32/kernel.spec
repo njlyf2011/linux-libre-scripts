@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.11
+%define rpmversion 5.11.12
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -1332,7 +1332,9 @@ cp -a %{SOURCE1} .
 
 xzcat %{SOURCE5000} | patch -p1 -F1 -s
 
-$RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
+$RPM_SOURCE_DIR/deblob-check %{patches} |
+    sed '/ within$/d' |
+    xargs -r $RPM_SOURCE_DIR/deblob-check -i linux-x.y || exit 1
 ApplyOptionalPatch freedo.patch
 
 %if !%{nopatches}
@@ -2843,11 +2845,18 @@ fi
 #
 #
 %changelog
+* Sat Apr 10 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.12-gnu.
+
+* Wed Apr 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.12-14]
+- Backport of SOF audio hang fix for X1 Carbon 9 (Mark Pearson)
+- drm/amdgpu: check alignment on CPU page for bo map (Xℹ Ruoyao)
+- drm/amdgpu: Set a suitable dev_info.gart_page_size (Huacai Chen)
+- drm/amdgpu: fix offset calculation in amdgpu_vm_bo_clear_mappings() (Nirmoy Das)
+- Set CONFIG_XEN_MEMORY_HOTPLUG_LIMIT as required by 5.11.11 (Justin M. Forbes)
+
 * Wed Mar 31 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.11-gnu.
-
-* Tue Mar 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.11-100]
-- Set CONFIG_XEN_MEMORY_HOTPLUG_LIMIT as required by 5.11.11 (Justin M. Forbes)
 
 * Tue Mar 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.11-13]
 - drm/i915: Disable LTTPR support when the DPCD rev < 1.4 (Imre Deak)
