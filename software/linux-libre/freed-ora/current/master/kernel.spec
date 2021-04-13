@@ -66,7 +66,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 0.rc6.184
+%global distro_build 0.rc7.189
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -107,7 +107,7 @@ Summary: The Linux kernel
 %endif
 
 %define rpmversion 5.12.0
-%define pkgrelease 0.rc6.184
+%define pkgrelease 0.rc7.189
 
 # This is needed to do merge window version magic
 %define patchlevel 12
@@ -120,7 +120,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 %define prevkver 5.11
-%define rcrev -rc6
+%define rcrev -rc7
 
 # To be inserted between "patch" and "-4.".
 %define stablelibre -%{prevkver}%{?stablegnux}
@@ -154,7 +154,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc6.184%{?buildid}%{?dist}
+%define specrelease 0.rc7.189%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -2877,6 +2877,25 @@ fi
 #
 #
 %changelog
+* Mon Apr 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12-rc7-gnu.
+
+* Mon Apr 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.0-0.rc7.189]
+- Limit CONFIG_USB_CDNS_SUPPORT to x86_64 and arm in Fedora (David Ward)
+
+* Sat Apr 10 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc6.20210410gitd4961772226d.187]
+- Fedora: Enable CHARGER_GPIO on aarch64 too (Peter Robinson)
+- Fedora config updates (Justin M. Forbes)
+- wireguard: mark as Tech Preview (Hangbin Liu) [1613522]
+- configs: enable CONFIG_WIREGUARD in ARK (Hangbin Liu) [1613522]
+- Remove duplicate configs acroos fedora, ark and common (Don Zickus)
+- Combine duplicate configs across ark and fedora into common (Don Zickus)
+
+* Wed Apr 07 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc6.20210407git2d743660786e.185]
+- common/ark: cleanup and unify the parport configs (Peter Robinson)
+- iommu/vt-d: enable INTEL_IDXD_SVM for both fedora and rhel (Jerry Snitselaar)
+- REDHAT: coresight: etm4x: Disable coresight on HPE Apollo 70 (Jeremy Linton)
+
 * Mon Apr  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12-rc6-gnu.
 
