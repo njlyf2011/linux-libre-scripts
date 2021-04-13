@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.12
+%define rpmversion 5.11.13
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2845,6 +2845,19 @@ fi
 #
 #
 %changelog
+* Mon Apr 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.13-gnu.
+
+* Sat Apr 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.13-100]
+- Add CONFIG_NVIDIA_CARMEL_CNP_ERRATUM to RHEL configs too (Justin M. Forbes)
+- Add config for CONFIG_NVIDIA_CARMEL_CNP_ERRATUM (Justin M. Forbes)
+
+* Sat Apr 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.13-15]
+- Re-enable PSR2 on Tigerlake with new workarounds from Intel (Lyude Paul)
+- Fedora: Enable CHARGER_GPIO on aarch64 too (Peter Robinson)
+- Fix build with patch for CVE-2021-30178 (Justin M. Forbes)
+- KVM: x86: hyper-v: Fix Hyper-V context null-ptr-deref (Wanpeng Li)
+
 * Sat Apr 10 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.12-gnu.
 
