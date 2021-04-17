@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.14
+%define rpmversion 5.11.15
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2845,6 +2845,12 @@ fi
 #
 #
 %changelog
+* Sat Apr 17 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.15-gnu.
+
+* Fri Apr 16 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.15-0]
+- Turn on CONFIG_VDPA_SIM_NET (rhbz 1942343) (Justin M. Forbes)
+
 * Fri Apr 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.14-gnu.
 
