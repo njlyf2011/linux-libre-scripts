@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.13
+%define rpmversion 5.11.14
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2848,12 +2848,18 @@ fi
 #
 #
 %changelog
-* Mon Apr 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 5.11.13-gnu.
+* Fri Apr 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.14-gnu.
 
-* Sat Apr 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.13-300]
+* Wed Apr 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.14-0]
+- Quick hack to reset release to 0 (Justin M. Forbes)
+- Add clarity to rebase notes since that change was backed out (Justin M. Forbes)
+- drm/i915/gen11+: Only load DRAM information from pcode (José Roberto de Souza)
 - Add CONFIG_NVIDIA_CARMEL_CNP_ERRATUM to RHEL configs too (Justin M. Forbes)
 - Add config for CONFIG_NVIDIA_CARMEL_CNP_ERRATUM (Justin M. Forbes)
+
+* Mon Apr 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.13-gnu.
 
 * Sat Apr 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.13-15]
 - Re-enable PSR2 on Tigerlake with new workarounds from Intel (Lyude Paul)
