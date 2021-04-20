@@ -66,7 +66,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 0.rc7.189
+%global distro_build 0.rc8.191
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -107,7 +107,7 @@ Summary: The Linux kernel
 %endif
 
 %define rpmversion 5.12.0
-%define pkgrelease 0.rc7.189
+%define pkgrelease 0.rc8.191
 
 # This is needed to do merge window version magic
 %define patchlevel 12
@@ -120,7 +120,7 @@ Summary: The Linux kernel
 %define basegnu -gnu%{?librev}
 
 %define prevkver 5.11
-%define rcrev -rc7
+%define rcrev -rc8
 
 # To be inserted between "patch" and "-4.".
 %define stablelibre -%{prevkver}%{?stablegnux}
@@ -154,7 +154,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc7.189%{?buildid}%{?dist}
+%define specrelease 0.rc8.191%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -273,6 +273,8 @@ Summary: The Linux kernel
 
 %if %{with toolchain_clang}
 %global make_opts %{make_opts} HOSTCC=clang CC=clang
+# clang does not support the -fdump-ipa-clones option
+%global with_ipaclones 0
 %endif
 
 # turn off debug kernel and kabichk for gcov builds
@@ -2877,11 +2879,34 @@ fi
 #
 #
 %changelog
+* Mon Apr 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12-rc8-gnu.
+
+* Mon Apr 19 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc8.191]
+- filter-modules.sh.fedora: clean up "netprots" (Paul Bolle)
+- filter-modules.sh.fedora: clean up "scsidrvs" (Paul Bolle)
+- filter-*.sh.fedora: clean up "ethdrvs" (Paul Bolle)
+- filter-*.sh.fedora: clean up "driverdirs" (Paul Bolle)
+- filter-*.sh.fedora: remove incorrect entries (Paul Bolle)
+- filter-*.sh.fedora: clean up "singlemods" (Paul Bolle)
+- filter-modules.sh.fedora: drop unused list "iiodrvs" (Paul Bolle)
+
+* Fri Apr 16 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc7.20210416git7e25f40eab52.190]
+- Update mod-internal to fix depmod issue (Nico Pache)
+- Turn on CONFIG_VDPA_SIM_NET (rhbz 1942343) (Justin M. Forbes)
+- New configs in drivers/power (Fedora Kernel Team)
+- Turn on CONFIG_NOUVEAU_DEBUG_PUSH for debug configs (Justin M. Forbes)
+- Turn off KFENCE sampling by default for Fedora (Justin M. Forbes)
+- Fedora config updates round 2 (Justin M. Forbes)
+- New configs in drivers/soc (Jeremy Cline)
+- filter-modules.sh: Fix copy/paste error 'input' (Paul Bolle)
+- Update module filtering for 5.12 kernels (Justin M. Forbes)
+- Fix genlog.py to ensure that comments retain "%%" characters. (Mark Mielke)
+- New configs in drivers/leds (Fedora Kernel Team)
+- Limit CONFIG_USB_CDNS_SUPPORT to x86_64 and arm in Fedora (David Ward)
+
 * Mon Apr 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12-rc7-gnu.
-
-* Mon Apr 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.0-0.rc7.189]
-- Limit CONFIG_USB_CDNS_SUPPORT to x86_64 and arm in Fedora (David Ward)
 
 * Sat Apr 10 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc6.20210410gitd4961772226d.187]
 - Fedora: Enable CHARGER_GPIO on aarch64 too (Peter Robinson)
