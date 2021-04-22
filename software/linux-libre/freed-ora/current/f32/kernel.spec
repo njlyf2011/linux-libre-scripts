@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.15
+%define rpmversion 5.11.16
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2845,6 +2845,12 @@ fi
 #
 #
 %changelog
+* Wed Apr 21 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.16-gnu.
+
+* Wed Apr 21 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.16-0]
+- Turn off ADI_AXI_ADC and AD9467 which now require CONFIG_OF (Justin M. Forbes)
+
 * Sat Apr 17 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.15-gnu.
 
