@@ -66,7 +66,7 @@ Summary: The Linux kernel
 # For a stable, released kernel, released_kernel should be 1.
 %global released_kernel 0
 
-%global distro_build 0.rc8.191
+%global distro_build 198
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -107,7 +107,7 @@ Summary: The Linux kernel
 %endif
 
 %define rpmversion 5.12.0
-%define pkgrelease 0.rc8.191
+%define pkgrelease 198
 
 # This is needed to do merge window version magic
 %define patchlevel 12
@@ -119,13 +119,13 @@ Summary: The Linux kernel
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
 
-%define prevkver 5.11
-%define rcrev -rc8
+#define prevkver 5.11
+#define rcrev -rc8
 
 # To be inserted between "patch" and "-4.".
-%define stablelibre -%{prevkver}%{?stablegnux}
-%define rcrevlibre  -%{prevkver}%{?rcrevgnux}
-#define gitrevlibre -%{prevkver}%{?gitrevgnux}
+#define stablelibre -%{kversion}%{?stablegnux}
+#define rcrevlibre  -%{kversion}%{?rcrevgnux}
+#define gitrevlibre -%{kversion}%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -154,7 +154,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc8.191%{?buildid}%{?dist}
+%define specrelease 198%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -663,14 +663,14 @@ BuildRequires: clang
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{prevkver}%{basegnu}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{kversion}%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
 
 # For documentation purposes only.
 Source4: deblob-check
 Source5: deblob-%{kversion}
-Source6: deblob-%{prevkver}
+# Source6: deblob-%{prevkver}
 
 # Name of the packaged file containing signing key
 %ifarch ppc64le
@@ -816,7 +816,7 @@ Source3003: Patchlist.changelog
 
 Source4000: README.rst
 
-Source5000: patch%{?rcrevlibre}-%{kversion}%{?rcrev}%{basegnu}.xz
+# Source5000: patch%{?rcrevlibre}-%{kversion}%{?rcrev}%{basegnu}.xz
 # Source5000: patch%{?rcrevlibre}-%{rpmversion}%{basegnu}.xz
 
 ## Patches needed for building this package
@@ -1359,13 +1359,15 @@ ApplyOptionalPatch()
 }
 
 %setup -q -n kernel-%{kversion} -c
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/" linux-%{prevkver}/Makefile
-mv linux-%{prevkver} linux-%{KVERREL}
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/" linux-%{kversion}/Makefile
+mv linux-%{kversion} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
 
+%if 0%{?SOURCE5000}
 xzcat %{SOURCE5000} | patch -p1 -F1 -s
+%endif
 
 $RPM_SOURCE_DIR/deblob-check %{patches} || exit 1
 ApplyOptionalPatch freedo.patch
@@ -2879,6 +2881,25 @@ fi
 #
 #
 %changelog
+* Tue Apr 27 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12-gnu.
+
+* Mon Apr 26 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-198]
+- mod-extra.list.fedora: remove 72 unused modules (Paul Bolle)
+
+* Mon Apr 26 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-197]
+- Create ark-latest branch last for CI scripts (Don Zickus)
+
+* Wed Apr 21 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc8.20210421git7af08140979a.193]
+- Replace /usr/libexec/platform-python with /usr/bin/python3 (David Ward)
+
+* Tue Apr 20 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.12.0-0.rc8.20210420git7af08140979a.192]
+- Turn off ADI_AXI_ADC and AD9467 which now require CONFIG_OF (Justin M. Forbes)
+- Export ark infrastructure files (Don Zickus)
+- docs: Update docs to reflect newer workflow. (Don Zickus)
+- Use upstream/master for merge-base with fallback to master (Don Zickus)
+- Fedora: Turn off the SND_INTEL_BYT_PREFER_SOF option (Hans de Goede)
+
 * Mon Apr 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12-rc8-gnu.
 
