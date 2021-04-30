@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.16
+%define rpmversion 5.11.17
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2845,6 +2845,12 @@ fi
 #
 #
 %changelog
+* Thu Apr 29 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.17-gnu.
+
+* Wed Apr 28 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.17-0]
+- Fedora: ARMv7: build for 16 CPUs. (Peter Robinson)
+
 * Wed Apr 21 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.16-gnu.
 
