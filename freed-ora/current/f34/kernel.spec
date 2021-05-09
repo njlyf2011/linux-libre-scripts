@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.18
+%define rpmversion 5.11.19
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2848,11 +2848,16 @@ fi
 #
 #
 %changelog
+* Sat May  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.19-gnu.
+
+* Fri May 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.19-0]
+- Fedora-5.12: Make amd_pinctrl module builtin (Hans de Goede)
+- ALSA: hda/realtek: Fix silent headphone output on ASUS UX430UA (Takashi Iwai)
+- nitro_enclaves: Fix stale file descriptors on failed usercopy (Mathias Krause)
+
 * Tue May  4 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.18-gnu.
-
-* Mon May 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.18-300]
-- nitro_enclaves: Fix stale file descriptors on failed usercopy (Mathias Krause)
 
 * Mon May 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.18-0]
 - Enable mtdram for fedora (rhbz 1955916) (Justin M. Forbes)
