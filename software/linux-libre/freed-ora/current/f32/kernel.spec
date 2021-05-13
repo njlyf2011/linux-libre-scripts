@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.19
+%define rpmversion 5.11.20
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2845,6 +2845,16 @@ fi
 #
 #
 %changelog
+* Wed May 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.20-gnu.
+
+* Wed May 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.20-0]
+- io_uring: truncate lengths larger than MAX_RW_COUNT on provide buffers (Thadeu Lima de Souza Cascardo)
+- bpf: Prevent writable memory-mapping of read-only ringbuf pages (Andrii Nakryiko)
+- bpf, ringbuf: Deny reserve of buffers larger than ringbuf (Thadeu Lima de Souza Cascardo)
+- bpf: Fix alu32 const subreg bound tracking on bitwise operations (Daniel Borkmann)
+- net/nfc: fix use-after-free llcp_sock_bind/connect (Or Cohen)
+
 * Sat May  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.19-gnu.
 
