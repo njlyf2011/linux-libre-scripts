@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.20
+%define rpmversion 5.11.21
 %define stableversion 5.11
 %define pkgrelease 300
 
@@ -2848,6 +2848,12 @@ fi
 #
 #
 %changelog
+* Sat May 15 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.21-gnu.
+
+* Fri May 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.21-0]
+- can: isotp: prevent race between isotp_bind() and isotp_setsockopt() (Norbert Slusarek)
+
 * Wed May 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.20-gnu.
 
