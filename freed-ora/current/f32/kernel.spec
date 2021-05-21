@@ -104,7 +104,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.11.21
+%define rpmversion 5.11.22
 %define stableversion 5.11
 %define pkgrelease 100
 
@@ -2845,6 +2845,12 @@ fi
 #
 #
 %changelog
+* Thu May 20 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.11.22-gnu.
+
+* Wed May 19 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.11.22-0]
+- Fedora 33 and 34 are being rebased to 5.12 (Justin M. Forbes)
+
 * Sat May 15 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.11.21-gnu.
 
