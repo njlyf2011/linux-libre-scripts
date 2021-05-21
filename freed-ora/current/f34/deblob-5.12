@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.11 extra=
+kver=5.12 extra=
 
 case $1 in
 --force)
@@ -184,7 +184,7 @@ reject_firmware () {
   #$1 = file $2 = pre sed pattern
   filetest $1 || return 0
   clean_sed "$2"'
-s,\(^\|[^>.0-9a-zA-Z_$]\)\(request\(_ihex\|_partial\)\?_firmware\|firmware_request_platform\)\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject_firmware\4\5,g
+s,\(^\|[^>.0-9a-zA-Z_$]\)\(request\(_ihex\|\(_partial\)\)\?_firmware\|firmware_request_platform\)\(_nowait\|_direct\|_into_buf\)\?\($\|[^-.0-9a-zA-Z_$),; ]\),\1reject\4_firmware\5\6,g
 ' "$1" 'disabled non-Free firmware-loading machinery'
 }
 
@@ -387,6 +387,12 @@ What is GNU Linux-libre?\
   contribution to the entire system, so its mascot deserves more\
   promotion.  See our web page for their images.\
   http://linux-libre.fsfla.org/\
+\
+  If you are the author of an awesome program and want to join us in\
+  writing Free (libre) Software, please consider making it an official\
+  GNU program and become a GNU Maintainer.  You can find instructions\
+  on how to do so at https://www.gnu.org/help/evaluation.  We look\
+  forward to hacking with you! :)\
 
 ' Documentation/admin-guide/README.rst 'added blurb about GNU Linux-libre'
 
@@ -706,6 +712,12 @@ reject_firmware drivers/crypto/marvell/octeontx/otx_cptpf_ucode.c
 clean_blob drivers/crypto/marvell/octeontx/otx_cptpf_ucode.h
 clean_kconfig drivers/crypto/marvell/Kconfig CRYPTO_DEV_OCTEONTX_CPT
 clean_mk CONFIG_CRYPTO_DEV_OCTEONTX_CPT drivers/crypto/marvell/octeontx/Makefile
+
+announce CRYPTO_DEV_OCTEONTX2_CPT - "Marvell OcteonTX2 CPT driver"
+reject_firmware drivers/crypto/marvell/octeontx2/otx2_cptpf_ucode.c
+clean_blob drivers/crypto/marvell/octeontx2/otx2_cptpf_ucode.c
+clean_kconfig drivers/crypto/marvell/Kconfig CRYPTO_DEV_OCTEONTX2_CPT
+clean_mk CONFIG_CRYPTO_DEV_OCTEONTX2_CPT drivers/crypto/marvell/octeontx2/Makefile
 
 announce CRYPTO_DEV_QAT_DH895xCC - "Support for Intel(R) DH895xCC"
 clean_blob drivers/crypto/qat/qat_dh895xcc/adf_dh895xcc_hw_data.h
@@ -1294,6 +1306,13 @@ clean_blob drivers/media/dvb-frontends/m88ds3103_priv.h
 clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_M88DS3103
 clean_mk CONFIG_DVB_M88DS3103 drivers/media/dvb-frontends/Makefile
 
+announce DVB_MXL692 - "MaxLinear MXL692 based"
+reject_firmware drivers/media/dvb-frontends/mxl692.c
+clean_blob drivers/media/dvb-frontends/mxl692.c
+clean_blob drivers/media/dvb-frontends/mxl692.h
+clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_MXL692
+clean_mk CONFIG_DVB_MXL692 drivers/media/dvb-frontends/Makefile
+
 announce DVB_NXT200X - "NxtWave Communications NXT2002/NXT2004 based"
 undefault_firmware 'NXT200[24]' drivers/media/dvb-frontends/nxt200x.c
 reject_firmware drivers/media/dvb-frontends/nxt200x.c
@@ -1452,10 +1471,10 @@ clean_mk CONFIG_DVB_TTUSB_DEC drivers/media/usb/ttusb-dec/Makefile
 # video
 
 announce VIDEO_ALLEGRO_DVT - "Allegro DVT Video IP Core"
-reject_firmware drivers/staging/media/allegro-dvt/allegro-core.c
-clean_blob drivers/staging/media/allegro-dvt/allegro-core.c
-clean_kconfig drivers/staging/media/allegro-dvt/Kconfig VIDEO_ALLEGRO_DVT
-clean_mk CONFIG_VIDEO_ALLEGRO_DVT drivers/staging/media/allegro-dvt/Makefile
+reject_firmware drivers/media/platform/allegro-dvt/allegro-core.c
+clean_blob drivers/media/platform/allegro-dvt/allegro-core.c
+clean_kconfig drivers/media/platform/Kconfig VIDEO_ALLEGRO_DVT
+clean_mk CONFIG_VIDEO_ALLEGRO_DVT drivers/media/platform/allegro-dvt/Makefile
 
 announce VIDEO_ATOMISP - "Intel Atom Image Signal Processor Driver"
 reject_firmware drivers/staging/media/atomisp/pci/atomisp_v4l2.c
@@ -1758,6 +1777,7 @@ announce ICE - "Intel(R) Ethernet Connection E800 Series Support"
 reject_firmware_nowarn drivers/net/ethernet/intel/ice/ice_main.c
 reject_firmware drivers/net/ethernet/intel/ice/ice_main.c
 clean_blob drivers/net/ethernet/intel/ice/ice_main.c
+clean_blob Documentation/networking/device_drivers/ethernet/intel/ice.rst
 clean_kconfig drivers/net/ethernet/intel/Kconfig ICE
 clean_mk CONFIG_ICE drivers/net/ethernet/intel/Makefile
 
@@ -2205,6 +2225,13 @@ clean_blob drivers/net/wireless/mediatek/mt76/mt7915/mt7915.h
 clean_blob drivers/net/wireless/mediatek/mt76/mt7915/pci.c
 clean_kconfig drivers/net/wireless/mediatek/mt76/mt7915/Kconfig MT7915E
 clean_mk CONFIG_MT7915E drivers/net/wireless/mediatek/mt76/mt7915/Makefile
+
+announce MT7921E - "MediaTek MT7921E (PCIe) support"
+reject_firmware drivers/net/wireless/mediatek/mt76/mt7921/mcu.c
+clean_blob drivers/net/wireless/mediatek/mt76/mt7921/mt7921.h
+clean_blob drivers/net/wireless/mediatek/mt76/mt7921/pci.c
+clean_kconfig drivers/net/wireless/mediatek/mt76/mt7921/Kconfig MT7921E
+clean_mk CONFIG_MT7921E drivers/net/wireless/mediatek/mt76/mt7921/Makefile
 
 announce MWIFIEX - "Marvell WiFi-Ex Driver"
 clean_blob drivers/net/wireless/marvell/mwifiex/README
@@ -3223,6 +3250,12 @@ clean_mk CONFIG_UCSI_CCG drivers/usb/typec/ucsi/Makefile
 # Programmable #
 ################
 
+announce BCM_VK - "Support for Broadcom VK Accelerators"
+reject_firmware drivers/misc/bcm-vk/bcm_vk_dev.c
+clean_blob drivers/misc/bcm-vk/bcm_vk_dev.c
+clean_kconfig drivers/misc/bcm-vk/Kconfig BCM_VK
+clean_mk CONFIG_BCM_VK drivers/misc/bcm-vk/Makefile
+
 announce HABANA_AI - "HabanaAI accelerators (habanalabs)"
 reject_firmware drivers/misc/habanalabs/common/firmware_if.c
 reject_firmware drivers/misc/habanalabs/gaudi/gaudi.c
@@ -3758,6 +3791,8 @@ clean_blob arch/arm64/boot/dts/qcom/sm8150-hdk.dts
 clean_blob arch/arm64/boot/dts/qcom/sm8150-mtp.dts
 clean_blob Documentation/devicetree/bindings/display/msm/gpu.txt
 clean_blob arch/arm64/boot/dts/qcom/sm8250-mtp.dts
+clean_blob arch/arm64/boot/dts/qcom/qrb5165-rb5.dts
+clean_blob arch/arm64/boot/dts/qcom/sdm845-oneplus-common.dtsi
 clean_kconfig arch/arm/mach-qcom/Kconfig ARCH_QCOM
 clean_mk CONFIG_ARCH_QCOM arch/arm64/boot/dts/qcom/Makefile
 
