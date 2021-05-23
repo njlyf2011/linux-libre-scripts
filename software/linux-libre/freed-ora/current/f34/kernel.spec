@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.5
+%define rpmversion 5.12.6
 %define stableversion 5.12
 %define pkgrelease 300
 
@@ -2875,6 +2875,12 @@ fi
 #
 #
 %changelog
+* Sat May 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.6-gnu.
+
+* Sat May 22 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.6-0]
+- bus: mhi: core: Download AMSS image from appropriate function (Bhaumik Bhatt)
+
 * Thu May 20 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.5-gnu.
 
