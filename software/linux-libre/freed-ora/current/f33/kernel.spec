@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.6
+%define rpmversion 5.12.7
 %define stableversion 5.12
 %define pkgrelease 200
 
@@ -2873,6 +2873,13 @@ fi
 #
 #
 %changelog
+* Fri May 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.7-gnu.
+
+* Wed May 26 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.7-0]
+- Fix up merge issue resulting in dual entries for ALC295_FIXUP_ASUS_DACS (Justin M. Forbes)
+- powerpc/64s/syscall: Fix ptrace syscall info with scv syscalls (Nicholas Piggin)
+
 * Sat May 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.6-gnu.
 
