@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.7
+%define rpmversion 5.12.8
 %define stableversion 5.12
 %define pkgrelease 200
 
@@ -2873,6 +2873,9 @@ fi
 #
 #
 %changelog
+* Fri May 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.8-gnu.
+
 * Fri May 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.7-gnu.
 
