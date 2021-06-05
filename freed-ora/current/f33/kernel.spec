@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.8
+%define rpmversion 5.12.9
 %define stableversion 5.12
 %define pkgrelease 200
 
@@ -2873,6 +2873,12 @@ fi
 #
 #
 %changelog
+* Fri Jun  4 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.9-gnu.
+
+* Thu Jun 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.9-0]
+- selinux: Allow context mounts for unpriviliged overlayfs (Vivek Goyal)
+
 * Fri May 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.8-gnu.
 
