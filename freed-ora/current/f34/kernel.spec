@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.9
+%define rpmversion 5.12.10
 %define stableversion 5.12
 %define pkgrelease 300
 
@@ -2875,6 +2875,13 @@ fi
 #
 #
 %changelog
+* Sun Jun 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.10-gnu.
+
+* Thu Jun 10 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.10-0]
+- Bluetooth: use correct lock to prevent UAF of hdev object (Lin Ma)
+- nfc: fix NULL ptr dereference in llcp_sock_getname() after failed connect (Krzysztof Kozlowski)
+
 * Fri Jun  4 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.9-gnu.
 
