@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.10
+%define rpmversion 5.12.11
 %define stableversion 5.12
 %define pkgrelease 300
 
@@ -2875,6 +2875,12 @@ fi
 #
 #
 %changelog
+* Fri Jun 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.11-gnu.
+
+* Wed Jun 16 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.11-0]
+- Bluetooth: btqca: Don't modify firmware contents in-place (Connor Abbott)
+
 * Sun Jun 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.10-gnu.
 
