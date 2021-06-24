@@ -1,3 +1,54 @@
+https://gitlab.com/cki-project/kernel-ark/-/commit/4c05f35129d76245d35c07d65c95571b8c30c02e
+ 4c05f35129d76245d35c07d65c95571b8c30c02e bpf, selftests: Disable tests that need clang13
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/f8f4e3ac32315185f07d22251a6ba9d82e4b8e84
+ f8f4e3ac32315185f07d22251a6ba9d82e4b8e84 PCI: rockchip: Register IRQs just before pci_host_probe()
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/1cadd9dc5a163eb58fc1c7a801a6bfaeb89f197c
+ 1cadd9dc5a163eb58fc1c7a801a6bfaeb89f197c arm64: dts: rockchip: Update PCI host bridge window to 32-bit address memory
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/7526d4b295786a611864afff7913a79a49a2cb71
+ 7526d4b295786a611864afff7913a79a49a2cb71 PCI: of: Refactor the check for non-prefetchable 32-bit window
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/70bc1635669324f4e61cf13d597977832d6895c6
+ 70bc1635669324f4e61cf13d597977832d6895c6 PCI: of: Relax the condition for warning about non-prefetchable memory aperture size
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9c7a186ec0defb0bf55187f21de45ace5252ba59
+ 9c7a186ec0defb0bf55187f21de45ace5252ba59 PCI: of: Clear 64-bit flag for non-prefetchable memory below 4GB
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/9ecb01bae94e7379d2da1b5e375241ea3b40ff3b
+ 9ecb01bae94e7379d2da1b5e375241ea3b40ff3b bpf: Fix unprivileged_bpf_disabled setup
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/47290c39b2f08588fb5aaf15b867cf9daaecaeb9
+ 47290c39b2f08588fb5aaf15b867cf9daaecaeb9 RHEL: disable io_uring support
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/217f590d1ac59c7253497adb15c8a81d59b8be95
+ 217f590d1ac59c7253497adb15c8a81d59b8be95 nvme: nvme_mpath_init remove multipath check
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3b0b403f2c1261ea8e4ab576e5a44664a7abd12c
+ 3b0b403f2c1261ea8e4ab576e5a44664a7abd12c mm/cma: mark CMA on x86_64 tech preview and print RHEL-specific infos
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/42fcca9ea8f8acd6f561e9589f92462246e572ff
+ 42fcca9ea8f8acd6f561e9589f92462246e572ff Revert "nvme: multipath: Change default of kernel NVMe multipath to be disabled"
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/043900845a208ff1fd0ba71ad9c0f4da17c59243
+ 043900845a208ff1fd0ba71ad9c0f4da17c59243 team: mark team driver as deprecated
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/81cf9b7d49bb0a3786746e73d3090d97cefe301e
+ 81cf9b7d49bb0a3786746e73d3090d97cefe301e nvme: multipath: Change default of kernel NVMe multipath to be disabled
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/fb1e1b5878182056becb07f4970e037619a1a0de
+ fb1e1b5878182056becb07f4970e037619a1a0de nvme: decouple basic ANA log page re-read support from native multipathing
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/bbea40fc46cf77b2a44adc23311e11dd3eb32a43
+ bbea40fc46cf77b2a44adc23311e11dd3eb32a43 nvme: allow local retry and proper failover for REQ_FAILFAST_TRANSPORT
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/3a09b8f23044400af91ac282646645719a6d5dd2
+ 3a09b8f23044400af91ac282646645719a6d5dd2 wireguard: disable in FIPS mode
+
+https://gitlab.com/cki-project/kernel-ark/-/commit/fdcb96689d55e37b76a424887ef1619550192c69
+ fdcb96689d55e37b76a424887ef1619550192c69 nvme: Return BLK_STS_TARGET if the DNR bit is set
+
 https://gitlab.com/cki-project/kernel-ark/-/commit/b410e179ae9057e517589bb4f5825e758e2c52c1
  b410e179ae9057e517589bb4f5825e758e2c52c1 wireguard: mark as Tech Preview
 
