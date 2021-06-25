@@ -1030,19 +1030,19 @@ This package provides debug information for package kernel-tools.
 
 %if %{with_bpftool}
 
-%package -n bpftool
+%package -n bpftool-libre
 Summary: Inspection and simple manipulation of eBPF programs and maps
 License: GPLv2
-%description -n bpftool
+%description -n bpftool-libre
 This package contains the bpftool, which allows inspection and simple
 manipulation of eBPF programs and maps.
 
-%package -n bpftool-debuginfo
+%package -n bpftool-libre-debuginfo
 Summary: Debug information for package bpftool
 Group: Development/Debug
 Requires: %{name}-debuginfo-common-%{_target_cpu} = %{version}-%{release}
 AutoReqProv: no
-%description -n bpftool-debuginfo
+%description -n bpftool-libre-debuginfo
 This package provides debug information for the bpftool package.
 
 %{expand:%%global _find_debuginfo_opts %{?_find_debuginfo_opts} -p '.*%%{_sbindir}/bpftool(\.debug)?|XXX' -o bpftool-debuginfo.list}
@@ -1055,7 +1055,7 @@ This package provides debug information for the bpftool package.
 %package selftests-internal
 Summary: Kernel samples and selftests
 License: GPLv2
-Requires: binutils, bpftool, iproute-tc, nmap-ncat, python3
+Requires: binutils, bpftool-libre, iproute-tc, nmap-ncat, python3
 %description selftests-internal
 Kernel sample programs and selftests.
 
@@ -2841,7 +2841,7 @@ fi
 %endif
 
 %if %{with_bpftool}
-%files -n bpftool
+%files -n bpftool-libre
 %{_sbindir}/bpftool
 %{_sysconfdir}/bash_completion.d/bpftool
 %{_mandir}/man8/bpftool-cgroup.8.gz
@@ -2858,7 +2858,7 @@ fi
 %{_mandir}/man8/bpftool-struct_ops.8.gz
 
 %if %{with_debuginfo}
-%files -f bpftool-debuginfo.list -n bpftool-debuginfo
+%files -f bpftool-debuginfo.list -n bpftool-libre-debuginfo
 %defattr(-,root,root)
 %endif
 %endif
