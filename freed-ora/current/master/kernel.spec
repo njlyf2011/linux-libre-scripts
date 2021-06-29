@@ -71,9 +71,9 @@ Summary: The Linux kernel
 # Set debugbuildsenabled to 0 to not build a separate debug kernel, but
 #  to build the base kernel using the debug configuration. (Specifying
 #  the --with-release option overrides this setting.)
-%define debugbuildsenabled 0
+%define debugbuildsenabled 1
 
-%global distro_build 0.rc7.20210623git0c18f29aae7c.53
+%global distro_build 58
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -117,7 +117,7 @@ Summary: The Linux kernel
 %define kversion 5.13
 
 %define rpmversion 5.13.0
-%define pkgrelease 0.rc7.20210623git0c18f29aae7c.53
+%define pkgrelease 58
 
 # This is needed to do merge window version magic
 %define patchlevel 13
@@ -129,13 +129,21 @@ Summary: The Linux kernel
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
 
-%define prevkver 5.12
-%define rcrev -rc7
+# Define prevkver and rcrev for rc.  For .0 final, comment them out, as well as
+# the non-rc Source5000, and don't forget to reenable it for .1!
+#define prevkver 5.13
+#define rcrev
 
-# To be inserted between "patch" and "-4.".
-%define stablelibre -%{kversion}%{?stablegnux}
-%define rcrevlibre  -%{prevkver}%{?rcrevgnux}
-#define gitrevlibre -%{kversion}%{?gitrevgnux}
+%if 0%{?prevkver:1}
+%define ktarvers %{prevkver}
+%else
+%define ktarvers %{kversion}
+%endif
+
+# To be inserted between "patch" and "-5.".
+#define stablelibre -%{ktarsion}%{?stablegnux}
+%define rcrevlibre  -%{ktarvers}%{?rcrevgnux}
+#define gitrevlibre -%{ktarvers}%{?gitrevgnux}
 
 %if 0%{?stablelibre:1}
 %define stablegnu -gnu%{?librev}
@@ -164,7 +172,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc7.20210623git0c18f29aae7c.53%{?buildid}%{?dist}
+%define specrelease 58%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -683,14 +691,16 @@ BuildRequires: clang
 # exact git commit you can run
 #
 # xzcat -qq ${TARBALL} | git get-tar-commit-id
-Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{prevkver}%{basegnu}.tar.xz
+Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{ktarvers}%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
 
 # For documentation purposes only.
 Source4: deblob-check
 Source5: deblob-%{kversion}
+%if 0%{?prevkver:1}
 Source6: deblob-%{prevkver}
+%endif
 
 # Name of the packaged file containing signing key
 %ifarch ppc64le
@@ -749,7 +759,7 @@ Source13: redhatsecureboot003.cer
 
 Source22: mod-extra.list.rhel
 Source16: mod-extra.list.fedora
-Source17: mod-blacklist.sh
+Source17: mod-denylist.sh
 Source18: mod-sign.sh
 Source79: parallel_xz.sh
 
@@ -837,8 +847,11 @@ Source3003: Patchlist.changelog
 Source4000: README.rst
 Source4001: rpminspect.yaml
 
+%if 0%{?rcrev:1}
 Source5000: patch%{?rcrevlibre}-%{kversion}%{?rcrev}%{basegnu}.xz
-#Source5000: patch%{?rcrevlibre}-%{rpmversion}%{basegnu}.xz
+%else
+#Source5000: patch%{?stablelibre}-%{rpmversion}%{basegnu}.xz
+%endif
 
 ## Patches needed for building this package
 
@@ -1391,9 +1404,9 @@ ApplyOptionalPatch()
   fi
 }
 
-%setup -q -n kernel-%{prevkver} -c
-perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/" linux-%{prevkver}/Makefile
-mv linux-%{prevkver} linux-%{KVERREL}
+%setup -q -n kernel-%{ktarvers} -c
+perl -p -i -e "s/^EXTRAVERSION.*/EXTRAVERSION =%{?stablelibre: }%{?stablegnux}/" linux-%{ktarvers}/Makefile
+mv linux-%{ktarvers} linux-%{KVERREL}
 
 cd linux-%{KVERREL}
 cp -a %{SOURCE1} .
@@ -2970,6 +2983,21 @@ fi
 #
 #
 %changelog
+* Mon Jun 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13-gnu.
+
+* Mon Jun 28 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.0-58]
+- Revert "PCI: of: Relax the condition for warning about non-prefetchable memory aperture size" (Herton R. Krzesinski)
+- Revert "PCI: of: Refactor the check for non-prefetchable 32-bit window" (Herton R. Krzesinski)
+- Fedora 5.13 config updates (Justin M. Forbes)
+
+* Mon Jun 28 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.13.0-58]
+- More Fedora config updates for 5.13 (Justin M. Forbes)
+
+* Fri Jun 25 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.13.0-0.rc7.20210625git44db63d1ad8d.55]
+- redhat/configs: Enable needed drivers for BlueField SoC on aarch64 (Alaa Hleihel) [1858592 1858594 1858596]
+- redhat: Rename mod-blacklist.sh to mod-denylist.sh (Prarit Bhargava)
+
 * Thu Jun 24 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13-rc7-gnu.
 
