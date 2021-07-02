@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.13
+%define rpmversion 5.12.14
 %define stableversion 5.12
 %define pkgrelease 200
 
@@ -2873,6 +2873,13 @@ fi
 #
 #
 %changelog
+* Fri Jul  2 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.14-gnu.
+
+* Wed Jun 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.14-0]
+- Add CONFIG_SYSTEM_REVOCATION_LIST backported config option for 5.12.14 (Justin M. Forbes)
+- can: bcm: delay release of struct bcm_op after synchronize_rcu (Thadeu Lima de Souza Cascardo)
+
 * Thu Jun 24 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.13-gnu.
 
