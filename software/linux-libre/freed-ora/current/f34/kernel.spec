@@ -106,7 +106,7 @@ Summary: The Linux kernel
 %define primary_target rhel
 %endif
 
-%define rpmversion 5.12.17
+%define rpmversion 5.12.18
 %define stableversion 5.12
 %define pkgrelease 300
 
@@ -2875,6 +2875,16 @@ fi
 #
 #
 %changelog
+* Tue Jul 20 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.12.18-gnu.
+
+* Mon Jul 19 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.18-300]
+- kernel-5.12.18-0 (Justin M. Forbes)
+- Don't tag a release as [redhat] (Justin M. Forbes)
+
+* Mon Jul 19 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.12.18-0]
+- Don't tag a release as [redhat] (Justin M. Forbes)
+
 * Thu Jul 15 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.12.17-gnu.
 
