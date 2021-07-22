@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.12 extra=
+kver=5.13 extra=
 
 case $1 in
 --force)
@@ -758,18 +758,6 @@ clean_mk CONFIG_AMDTEE drivers/tee/amdtee/Makefile
 # tty #
 ########
 
-announce CYCLADES - "Cyclades async mux support"
-reject_firmware drivers/tty/cyclades.c
-clean_blob drivers/tty/cyclades.c
-clean_kconfig drivers/tty/Kconfig CYCLADES
-clean_mk CONFIG_CYCLADES drivers/tty/Makefile
-
-announce ISI - "Multi-Tech multiport card support"
-reject_firmware drivers/tty/isicom.c
-clean_blob drivers/tty/isicom.c
-clean_kconfig drivers/tty/Kconfig ISI
-clean_mk CONFIG_ISI drivers/tty/Makefile
-
 announce MOXA_INTELLIO - "Moxa Intellio support"
 reject_firmware drivers/tty/moxa.c
 clean_blob drivers/tty/moxa.c
@@ -809,6 +797,7 @@ reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v11_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v11_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/psp_v12_0.c
 clean_blob drivers/gpu/drm/amd/amdgpu/psp_v12_0.c
+clean_blob drivers/gpu/drm/amd/amdgpu/psp_v13_0.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
 clean_blob drivers/gpu/drm/amd/amdgpu/sdma_v2_4.c
 reject_firmware drivers/gpu/drm/amd/amdgpu/sdma_v3_0.c
@@ -828,6 +817,8 @@ clean_blob drivers/gpu/drm/amd/amdgpu/amdgpu_psp.c
 clean_blob drivers/gpu/drm/amd/pm/powerplay/smumgr/smumgr.c
 reject_firmware drivers/gpu/drm/amd/pm/swsmu/smu11/smu_v11_0.c
 clean_blob drivers/gpu/drm/amd/pm/swsmu/smu11/smu_v11_0.c
+reject_firmware drivers/gpu/drm/amd/pm/swsmu/smu13/smu_v13_0.c
+clean_blob drivers/gpu/drm/amd/pm/swsmu/smu13/smu_v13_0.c
 reject_firmware drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
 clean_blob drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
 clean_kconfig drivers/gpu/drm/Kconfig DRM_AMDGPU
@@ -2713,6 +2704,7 @@ clean_kconfig drivers/bluetooth/Kconfig BT_HCIBT3C
 clean_mk CONFIG_BT_HCIBT3C drivers/bluetooth/Makefile
 
 announce BT_HCIBTUSB - "HCI USB driver"
+reject_firmware_nowarn drivers/bluetooth/btusb.c
 reject_firmware drivers/bluetooth/btusb.c
 clean_blob drivers/bluetooth/btusb.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIBTUSB
@@ -2767,15 +2759,6 @@ reject_firmware drivers/misc/ti-st/st_kim.c
 clean_blob drivers/misc/ti-st/st_kim.c
 clean_kconfig drivers/misc/ti-st/Kconfig TI_ST
 clean_mk CONFIG_TI_ST drivers/misc/ti-st/Makefile
-
-# wimax
-
-announce WIMAX_I2400M - "Intel Wireless WiMAX Connection 2400"
-reject_firmware drivers/staging/wimax/i2400m/fw.c
-clean_blob drivers/staging/wimax/i2400m/usb.c
-clean_blob drivers/staging/wimax/Documentation/i2400m.rst
-clean_kconfig drivers/staging/wimax/i2400m/Kconfig WIMAX_I2400M
-clean_mk CONFIG_WIMAX_I2400M drivers/staging/wimax/i2400m/Makefile
 
 # infiniband
 
@@ -2992,34 +2975,34 @@ clean_kconfig drivers/hid/intel-ish-hid/Kconfig INTEL_ISH_FIRMWARE_DOWNLOADER
 clean_mk CONFIG_INTEL_ISH_FIRMWARE_DOWNLOADER drivers/hid/intel-ish-hid/Makefile
 
 announce COMEDI - "Data acquisition support (comedi)"
-maybe_reject_firmware drivers/staging/comedi/drivers.c
-clean_kconfig drivers/staging/comedi/Kconfig COMEDI
-clean_mk CONFIG_COMEDI drivers/staging/comedi/Makefile
+maybe_reject_firmware drivers/comedi/drivers.c
+clean_kconfig drivers/comedi/Kconfig COMEDI
+clean_mk CONFIG_COMEDI drivers/comedi/Makefile
 
 announce COMEDI_DAQBOARD2000 - "IOtech DAQboard/2000 support"
-clean_blob drivers/staging/comedi/drivers/daqboard2000.c
-clean_kconfig drivers/staging/comedi/Kconfig COMEDI_DAQBOARD2000
-clean_mk CONFIG_COMEDI_DAQBOARD2000 drivers/staging/comedi/drivers/Makefile
+clean_blob drivers/comedi/drivers/daqboard2000.c
+clean_kconfig drivers/comedi/Kconfig COMEDI_DAQBOARD2000
+clean_mk CONFIG_COMEDI_DAQBOARD2000 drivers/comedi/drivers/Makefile
 
 announce COMEDI_JR3_PCI - "JR3/PCI force sensor board support"
-clean_blob drivers/staging/comedi/drivers/jr3_pci.c
-clean_kconfig drivers/staging/comedi/Kconfig COMEDI_JR3_PCI
-clean_mk CONFIG_COMEDI_JR3_PCI drivers/staging/comedi/drivers/Makefile
+clean_blob drivers/comedi/drivers/jr3_pci.c
+clean_kconfig drivers/comedi/Kconfig COMEDI_JR3_PCI
+clean_mk CONFIG_COMEDI_JR3_PCI drivers/comedi/drivers/Makefile
 
 announce COMEDI_ME_DAQ - "Meilhaus ME-2000i, ME-2600i, ME-3000vm1 support"
-clean_blob drivers/staging/comedi/drivers/me_daq.c
-clean_kconfig drivers/staging/comedi/Kconfig COMEDI_ME_DAQ
-clean_mk CONFIG_COMEDI_ME_DAQ drivers/staging/comedi/drivers/Makefile
+clean_blob drivers/comedi/drivers/me_daq.c
+clean_kconfig drivers/comedi/Kconfig COMEDI_ME_DAQ
+clean_mk CONFIG_COMEDI_ME_DAQ drivers/comedi/drivers/Makefile
 
 announce COMEDI_ME4000 - "Meilhaus ME-4000 support"
-clean_blob drivers/staging/comedi/drivers/me4000.c
-clean_kconfig drivers/staging/comedi/Kconfig COMEDI_ME4000
-clean_mk CONFIG_COMEDI_ME4000 drivers/staging/comedi/drivers/Makefile
+clean_blob drivers/comedi/drivers/me4000.c
+clean_kconfig drivers/comedi/Kconfig COMEDI_ME4000
+clean_mk CONFIG_COMEDI_ME4000 drivers/comedi/drivers/Makefile
 
 announce COMEDI_NI_PCIDIO - "NI PCI-DIO32HS, PCI-6533, PCI-6534 support"
-clean_blob drivers/staging/comedi/drivers/ni_pcidio.c
-clean_kconfig drivers/staging/comedi/Kconfig COMEDI_NI_PCIDIO
-clean_mk CONFIG_COMEDI_NI_PCIDIO drivers/staging/comedi/drivers/Makefile
+clean_blob drivers/comedi/drivers/ni_pcidio.c
+clean_kconfig drivers/comedi/Kconfig COMEDI_NI_PCIDIO
+clean_mk CONFIG_COMEDI_NI_PCIDIO drivers/comedi/drivers/Makefile
 
 # There are blob names, but no apparent request or filesystem load
 # mechanism.  Why are the blob names there, then?
@@ -3315,6 +3298,8 @@ clean_mk CONFIG_QCOM_Q6V5_WCSS drivers/remoteproc/Makefile
 
 announce QCOM_WCNSS_PIL - "Qualcomm WCNSS Peripherial Image Loader"
 clean_blob drivers/remoteproc/qcom_wcnss.c
+clean_blob Documentation/devicetree/bindings/remoteproc/qcom,wcnss-pil.txt
+clean_blob Documentation/devicetree/bindings/soc/qcom/qcom,wcnss.txt
 clean_kconfig drivers/remoteproc/Kconfig QCOM_WCNSS_PIL
 clean_mk CONFIG_QCOM_WCNSS_PIL drivers/remoteproc/Makefile
 
@@ -3793,6 +3778,8 @@ clean_blob Documentation/devicetree/bindings/display/msm/gpu.txt
 clean_blob arch/arm64/boot/dts/qcom/sm8250-mtp.dts
 clean_blob arch/arm64/boot/dts/qcom/qrb5165-rb5.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-oneplus-common.dtsi
+clean_blob arch/arm64/boot/dts/qcom/sm8350-hdk.dts
+clean_blob arch/arm64/boot/dts/qcom/sm8350-mtp.dts
 clean_kconfig arch/arm/mach-qcom/Kconfig ARCH_QCOM
 clean_mk CONFIG_ARCH_QCOM arch/arm64/boot/dts/qcom/Makefile
 
@@ -3824,6 +3811,7 @@ clean_mk CONFIG_BRCMSTB_DPFE drivers/memory/Makefile
 announce ARCH_MEDIATEK - "MediaTek SoC Support"
 clean_blob arch/arm64/boot/dts/mediatek/mt8183-kukui.dtsi
 clean_blob arch/arm64/boot/dts/mediatek/mt8183-kukui-krane.dtsi
+clean_blob arch/arm64/boot/dts/mediatek/mt8183-kukui-kakadu.dtsi
 clean_kconfig arch/arm/mach-mediatek/Kconfig ARCH_MEDIATEK
 clean_mk CONFIG_ARCH_MEDIATEK arch/arm64/boot/dts/mediatek/Makefile
 
