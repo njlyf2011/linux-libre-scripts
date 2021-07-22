@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.3
+%define rpmversion 5.13.4
 %define stableversion 5.13
 %define pkgrelease 100
 
@@ -2972,6 +2972,20 @@ fi
 #
 %changelog
 * Thu Jul 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.4-gnu.
+
+* Tue Jul 20 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.4-100]
+- RHEL configs need this too (Justin M. Forbes)
+- kernel-5.13.4-0 (Justin M. Forbes)
+- Config update for 5.13.4 (Justin M. Forbes)
+- kernel-5.13.3-0 (Justin M. Forbes)
+- Don't tag a release as [redhat] (Justin M. Forbes)
+- platform/x86: amd-pmc: Fix missing unlock on error in amd_pmc_send_cmd() (Yang Yingliang)
+
+* Tue Jul 20 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.4-0]
+- Config update for 5.13.4 (Justin M. Forbes)
+
+* Tue Jul 20 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Jul 22
 - GNU Linux-libre 5.13.3-gnu.
 
 * Mon Jul 19 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.3-100]
