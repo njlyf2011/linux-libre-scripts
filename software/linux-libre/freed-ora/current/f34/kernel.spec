@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.4
+%define rpmversion 5.13.5
 %define stableversion 5.13
 %define pkgrelease 200
 
@@ -840,7 +840,6 @@ Patch0: freedo.patch
 
 %if !%{nopatches}
 Patch1: patch-%{stableversion}-redhat.patch
-Patch2: usb-renesas-xhci-fix-handling-of-unknown-rom-state.patch
 %endif
 
 # empty final patch to facilitate testing of kernel patches
@@ -1413,7 +1412,6 @@ ApplyOptionalPatch freedo.patch
 %if !%{nopatches}
 
 ApplyOptionalPatch patch-%{stableversion}-redhat.patch
-ApplyOptionalPatch usb-renesas-xhci-fix-handling-of-unknown-rom-state.patch
 %endif
 
 ApplyOptionalPatch linux-kernel-test.patch
@@ -2976,6 +2974,24 @@ fi
 #
 #
 %changelog
+* Mon Jul 26 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.5-gnu.
+
+* Sun Jul 25 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.5-200]
+- kernel-5.13.5-0 (Justin M. Forbes)
+- iwlwifi Add support for ax201 in Samsung Galaxy Book Flex2 Alpha (Justin M. Forbes)
+- Revert "usb: renesas-xhci: Fix handling of unknown ROM state" (Justin M. Forbes)
+- RHEL configs need this too (Justin M. Forbes)
+- kernel-5.13.4-0 (Justin M. Forbes)
+- Config update for 5.13.4 (Justin M. Forbes)
+- kernel-5.13.3-0 (Justin M. Forbes)
+- Don't tag a release as [redhat] (Justin M. Forbes)
+- platform/x86: amd-pmc: Fix missing unlock on error in amd_pmc_send_cmd() (Yang Yingliang)
+
+* Sun Jul 25 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.5-0]
+- iwlwifi Add support for ax201 in Samsung Galaxy Book Flex2 Alpha (Justin M. Forbes)
+- Revert "usb: renesas-xhci: Fix handling of unknown ROM state" (Justin M. Forbes)
+
 * Thu Jul 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.4-gnu.
 
