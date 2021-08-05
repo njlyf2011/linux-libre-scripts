@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.7
+%define rpmversion 5.13.8
 %define stableversion 5.13
 %define pkgrelease 200
 
@@ -2974,6 +2974,15 @@ fi
 #
 #
 %changelog
+* Thu Aug  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.8-gnu.
+
+* Wed Aug 04 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.8-200]
+- Re-enable sermouse for x86 (rhbz 1974002) (Justin M. Forbes)
+- Revert CRYPTO_ECDH and CRYPTO_ECDA from builtin to module to fix fips (Justin M. Forbes)
+- drm/rockchip: remove existing generic drivers to take over the device (Javier Martinez Canillas)
+- powerpc/pseries: Fix regression while building external modules (Srikar Dronamraju)
+
 * Sun Aug  1 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.7-gnu.
 
