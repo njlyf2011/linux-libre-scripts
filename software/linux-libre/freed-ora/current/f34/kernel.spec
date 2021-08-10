@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.8
+%define rpmversion 5.13.9
 %define stableversion 5.13
 %define pkgrelease 200
 
@@ -2974,6 +2974,14 @@ fi
 #
 #
 %changelog
+* Mon Aug  9 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.9-gnu.
+
+* Sun Aug 08 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.9-200]
+- kernel-5.13.9-0 (Justin M. Forbes)
+- drm/i915/dp: Use max params for older panels (Kai-Heng Feng)
+- pinctrl: tigerlake: Fix GPIO mapping for newer version of software (Andy Shevchenko)
+
 * Thu Aug  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.8-gnu.
 
@@ -2982,6 +2990,17 @@ fi
 - Revert CRYPTO_ECDH and CRYPTO_ECDA from builtin to module to fix fips (Justin M. Forbes)
 - drm/rockchip: remove existing generic drivers to take over the device (Javier Martinez Canillas)
 - powerpc/pseries: Fix regression while building external modules (Srikar Dronamraju)
+- kernel-5.13.7-0 (Justin M. Forbes)
+- kernel-5.13.6-0 (Justin M. Forbes)
+- kernel-5.13.5-0 (Justin M. Forbes)
+- iwlwifi Add support for ax201 in Samsung Galaxy Book Flex2 Alpha (Justin M. Forbes)
+- Revert "usb: renesas-xhci: Fix handling of unknown ROM state" (Justin M. Forbes)
+- RHEL configs need this too (Justin M. Forbes)
+- kernel-5.13.4-0 (Justin M. Forbes)
+- Config update for 5.13.4 (Justin M. Forbes)
+- kernel-5.13.3-0 (Justin M. Forbes)
+- Don't tag a release as [redhat] (Justin M. Forbes)
+- platform/x86: amd-pmc: Fix missing unlock on error in amd_pmc_send_cmd() (Yang Yingliang)
 
 * Sun Aug  1 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.7-gnu.
