@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.9
+%define rpmversion 5.13.10
 %define stableversion 5.13
 %define pkgrelease 100
 
@@ -2969,6 +2969,18 @@ fi
 #
 #
 %changelog
+* Thu Aug 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.10-gnu.
+
+* Thu Aug 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.10-100]
+- bpf: Fix integer overflow involving bucket_size (Tatsuhiko Yasumatsu)
+- kernel-5.13.10-0 (Justin M. Forbes)
+- Fix up backport of Dell XPS 9710 quirk (Justin M. Forbes)
+- ASoC: Intel: sof_sdw_max98373: remove useless inits (Pierre-Louis Bossart)
+- ASoC: Intel: update sof_pcm512x quirks (Pierre-Louis Bossart)
+- ASoC: SOF: Intel: Use DMI string to search for adl_mx98373_rt5682 variant (jairaj arava)
+- ASoC: Intel: sof_sdw: add quirk for Dell XPS 9710 (Pierre-Louis Bossart)
+
 * Mon Aug  9 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.9-gnu.
 
