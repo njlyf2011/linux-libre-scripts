@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.10
+%define rpmversion 5.13.11
 %define stableversion 5.13
 %define pkgrelease 100
 
@@ -2969,10 +2969,16 @@ fi
 #
 #
 %changelog
+* Tue Aug 17 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.11-gnu.
+
+* Tue Aug 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.11-100]
+- kernel-5.13.11-0 (Justin M. Forbes)
+
 * Thu Aug 12 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.10-gnu.
 
-* Thu Aug 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.10-100]
+* Thu Aug 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.10-0]
 - bpf: Fix integer overflow involving bucket_size (Tatsuhiko Yasumatsu)
 - kernel-5.13.10-0 (Justin M. Forbes)
 - Fix up backport of Dell XPS 9710 quirk (Justin M. Forbes)
