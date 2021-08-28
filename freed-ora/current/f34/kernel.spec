@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.12
+%define rpmversion 5.13.13
 %define stableversion 5.13
 %define pkgrelease 200
 
@@ -2974,6 +2974,12 @@ fi
 #
 #
 %changelog
+* Sat Aug 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.13-gnu.
+
+* Thu Aug 26 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.13-200]
+- kernel-5.13.13-0 (Justin M. Forbes)
+
 * Thu Aug 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.12-gnu.
 
