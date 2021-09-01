@@ -80,7 +80,7 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 0.rc7.54
+%global distro_build 60
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -124,7 +124,8 @@ Summary: The Linux kernel
 %define kversion 5.14
 
 %define rpmversion 5.14.0
-%define pkgrelease 0.rc7.54
+%define patchversion 5.14
+%define pkgrelease 60
 
 # This is needed to do merge window version magic
 %define patchlevel 14
@@ -138,8 +139,8 @@ Summary: The Linux kernel
 
 # Define prevkver and rcrev for rc.  For .0 final, comment them out, as well as
 # the non-rc Source5000, and don't forget to reenable it for .1!
-%define prevkver 5.13
-%define rcrev -rc7
+#define prevkver 5.14
+#define rcrev
 
 %if 0%{?prevkver:1}
 %define ktarvers %{prevkver}
@@ -179,7 +180,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc7.54%{?buildid}%{?dist}
+%define specrelease 60%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -745,21 +746,26 @@ Source9: x509.genkey.fedora
 %if %{?released_kernel}
 
 Source10: redhatsecurebootca5.cer
-Source11: redhatsecureboot501.cer
-Source12: secureboot_s390.cer
-Source13: secureboot_ppc.cer
+Source11: redhatsecurebootca1.cer
+Source12: redhatsecureboot501.cer
+Source13: redhatsecureboot301.cer
+Source14: secureboot_s390.cer
+Source15: secureboot_ppc.cer
 
-%define secureboot_ca_0 %{SOURCE10}
+%define secureboot_ca_1 %{SOURCE10}
+%define secureboot_ca_0 %{SOURCE11}
 %ifarch x86_64 aarch64
-%define secureboot_key_0 %{SOURCE11}
-%define pesign_name_0 redhatsecureboot501
+%define secureboot_key_1 %{SOURCE12}
+%define pesign_name_1 redhatsecureboot501
+%define secureboot_key_0 %{SOURCE13}
+%define pesign_name_0 redhatsecureboot301
 %endif
 %ifarch s390x
-%define secureboot_key_0 %{SOURCE12}
+%define secureboot_key_0 %{SOURCE14}
 %define pesign_name_0 redhatsecureboot302
 %endif
 %ifarch ppc64le
-%define secureboot_key_0 %{SOURCE13}
+%define secureboot_key_0 %{SOURCE15}
 %define pesign_name_0 redhatsecureboot303
 %endif
 
@@ -767,11 +773,16 @@ Source13: secureboot_ppc.cer
 %else
 
 Source10: redhatsecurebootca4.cer
-Source11: redhatsecureboot401.cer
+Source11: redhatsecurebootca2.cer
+Source12: redhatsecureboot401.cer
+Source13: redhatsecureboot003.cer
 
-%define secureboot_ca_0 %{SOURCE10}
-%define secureboot_key_0 %{SOURCE11}
-%define pesign_name_0 redhatsecureboot401
+%define secureboot_ca_1 %{SOURCE10}
+%define secureboot_ca_0 %{SOURCE11}
+%define secureboot_key_1 %{SOURCE12}
+%define pesign_name_1 redhatsecureboot401
+%define secureboot_key_0 %{SOURCE13}
+%define pesign_name_0 redhatsecureboot003
 
 # released_kernel
 %endif
@@ -879,7 +890,7 @@ Source5000: patch%{?rcrevlibre}-%{kversion}%{?rcrev}%{basegnu}.xz
 Patch0: freedo.patch
 
 %if !%{nopatches}
-Patch1: patch-%{rpmversion}-redhat.patch
+Patch1: patch-%{patchversion}-redhat.patch
 %endif
 
 # empty final patch to facilitate testing of kernel patches
@@ -1456,7 +1467,7 @@ ApplyOptionalPatch freedo.patch
 
 %if !%{nopatches}
 
-ApplyOptionalPatch patch-%{rpmversion}-redhat.patch
+ApplyOptionalPatch patch-%{patchversion}-redhat.patch
 %endif
 
 ApplyOptionalPatch linux-kernel-test.patch
@@ -1721,7 +1732,9 @@ BuildKernel() {
     fi
 
     %ifarch x86_64 aarch64
-    %pesign -s -i $SignImage -o vmlinuz.signed -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i $SignImage -o vmlinuz.tmp -a %{secureboot_ca_0} -c %{secureboot_key_0} -n %{pesign_name_0}
+    %pesign -s -i vmlinuz.tmp -o vmlinuz.signed -a %{secureboot_ca_1} -c %{secureboot_key_1} -n %{pesign_name_1}
+    rm vmlinuz.tmp
     %endif
     %ifarch s390x ppc64le
     if [ -x /usr/bin/rpm-sign ]; then
@@ -2186,7 +2199,13 @@ BuildKernel() {
 
     # Red Hat UEFI Secure Boot CA cert, which can be used to authenticate the kernel
     mkdir -p $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer
-    install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %ifarch x86_64 aarch64
+       install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20200609.cer
+       install -m 0644 %{secureboot_ca_1} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca-20140212.cer
+       ln -s kernel-signing-ca-20200609.cer $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %else
+       install -m 0644 %{secureboot_ca_0} $RPM_BUILD_ROOT%{_datadir}/doc/kernel-keys/$KernelVer/kernel-signing-ca.cer
+    %endif
     %ifarch s390x ppc64le
     if [ $DoModules -eq 1 ]; then
 	if [ -x /usr/bin/rpm-sign ]; then
@@ -2513,6 +2532,12 @@ rm -rf %{buildroot}/usr/lib/perf/include
 # perf man pages (note: implicit rpm magic compresses them later)
 mkdir -p %{buildroot}/%{_mandir}/man1
 %{perf_make} DESTDIR=$RPM_BUILD_ROOT install-man
+
+# remove any tracevent files, eg. its plugins still gets built and installed,
+# even if we build against system's libtracevent during perf build (by setting
+# LIBTRACEEVENT_DYNAMIC=1 above in perf_make macro). Those files should already
+# ship with libtraceevent package.
+rm -rf %{buildroot}%{_libdir}/traceevent
 %endif
 
 %if %{with_tools}
@@ -2828,7 +2853,6 @@ fi
 %files -n perf
 %{_bindir}/perf
 %{_libdir}/libperf-jvmti.so
-%exclude %{_libdir}/traceevent
 %dir %{_libexecdir}/perf-core
 %{_libexecdir}/perf-core/*
 %{_datadir}/perf-core/*
@@ -3035,6 +3059,41 @@ fi
 #
 #
 %changelog
+* Wed Sep  1 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14-gnu.
+
+* Mon Aug 30 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14-60]
+- arm64: use common CONFIG_MAX_ZONEORDER for arm kernel (Mark Salter)
+
+* Sat Aug 28 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14-0.rc7.20210828git64b4fc45bea6.58]
+- Create Makefile.variables for a single point of configuration change (Justin M. Forbes)
+
+* Fri Aug 27 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc7.20210827git77dd11439b86.57]
+- rpmspec: drop traceevent files instead of just excluding them from files list (Herton R. Krzesinski) [1967640]
+- Revert "redhat/configs: Enable genet and brcmfmac wlan" (Íñigo Huguet)
+- redhat/config: Enablement of CONFIG_PAPR_SCM for PowerPC (Gustavo Walbon) [1962936]
+
+* Thu Aug 26 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc7.20210826git73f3af7b4611.56]
+- Attempt to fix Intel PMT code (David Arcari)
+
+* Wed Aug 25 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc7.20210825git6e764bcd1cf7.55]
+- CI: Enable realtime branch testing (Veronika Kabatova)
+- CI: Enable realtime checks for c9s and RHEL9 (Veronika Kabatova)
+- [fs] dax: mark tech preview (Bill O'Donnell)
+- ark: wireless: enable all rtw88 pcie wirless variants (Peter Robinson)
+- wireless: rtw88: move debug options to common/debug (Peter Robinson)
+- fedora: minor PTP clock driver cleanups (Peter Robinson)
+- common: x86: enable VMware PTP support on ark (Peter Robinson)
+
+* Tue Aug 24 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc7.20210824gitd5ae8d7f85b7.54]
+- arm64: dts: rockchip: Disable CDN DP on Pinebook Pro (Matthias Brugger)
+- arm64: dts: rockchip: Setup USB typec port as datarole on (Dan Johansen)
+- Revert "IB/rxe: Mark Soft-RoCE Transport driver as tech-preview" (Herton R. Krzesinski)
+- redhat/configs: Enable genet and brcmfmac wlan (Jeremy Linton) [1992902]
+- [scsi] megaraid_sas: re-add certain pci-ids (Tomas Henzl)
+- xfs: drop experimental warnings for bigtime and inobtcount (Bill O'Donnell) [1995321]
+- Disable liquidio driver on ark/rhel (Herton R. Krzesinski) [1993393]
+
 * Mon Aug 23 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14-rc7-gnu.
 
