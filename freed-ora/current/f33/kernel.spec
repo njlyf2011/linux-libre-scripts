@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.13
+%define rpmversion 5.13.14
 %define stableversion 5.13
 %define pkgrelease 100
 
@@ -125,7 +125,7 @@ Summary: The Linux kernel
 
 # librev starts empty, then 1, etc, as the linux-libre tarball
 # changes.  This is only used to determine which tarball to use.
-#define librev
+%define librev 1
 
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
@@ -2969,6 +2969,12 @@ fi
 #
 #
 %changelog
+* Sun Sep  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.14-gnu1.
+
+* Fri Sep 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.14-100]
+- kernel-5.13.14-0 (Justin M. Forbes)
+
 * Sat Aug 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.13-gnu.
 
