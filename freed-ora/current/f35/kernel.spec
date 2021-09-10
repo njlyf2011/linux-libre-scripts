@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.1
+%define rpmversion 5.14.2
 %define patchversion 5.14
 %define pkgrelease 300
 
@@ -3059,6 +3059,12 @@ fi
 #
 #
 %changelog
+* Thu Sep  9 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.2-gnu.
+
+* Wed Sep 08 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.2-0]
+- Revert "team: mark team driver as deprecated" (Justin M. Forbes)
+
 * Sun Sep  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.1-gnu.
 
@@ -3088,17 +3094,6 @@ fi
 - arm64: dts: rockchip: Setup USB typec port as datarole on (Dan Johansen)
 - xfs: drop experimental warnings for bigtime and inobtcount (Bill O'Donnell) [1995321]
 - Disable liquidio driver on ark/rhel (Herton R. Krzesinski) [1993393]
-<<<<<<< HEAD
-
-* Mon Aug 23 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 5.14-rc7-gnu.
-
-* Mon Aug 23 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc7.54]
-- redhat: drop certificates that were deprecated after GRUB's BootHole flaw (Herton R. Krzesinski) [1994849]
-
-* Sat Aug 21 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc6.20210821gitfa54d366a6e4.51]
-=======
->>>>>>> 657252c44d87b9d3d4fa61ce0dd0338b5fc35e6c
 - More Fedora config updates (Justin M. Forbes)
 - Fedora config updates for 5.14 (Justin M. Forbes)
 - CI: Rename ARK CI pipeline type (Veronika Kabatova)
@@ -3114,19 +3109,6 @@ fi
 - crypto: rng - Override drivers/char/random in FIPS mode (Herbert Xu)
 - random: Add hook to override device reads and getrandom(2) (Herbert Xu)
 - redhat/configs: Disable Soft-RoCE driver (Kamal Heib)
-<<<<<<< HEAD
-- filter-modules.sh: add more sound modules to filter (Jaroslav Kysela)
-- redhat/configs: sound configuration cleanups and updates (Jaroslav Kysela)
-
-* Mon Aug 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
-- GNU Linux-libre 5.14-rc6-gnu.
-
-* Fri Aug 13 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc5.20210813gitf8e6dfc64f61.45]
-- update filters for Fedora (Justin M. Forbes)
-
-* Tue Aug 10 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14.0-0.rc5.20210810git9a73fa375d58.42]
-=======
->>>>>>> 657252c44d87b9d3d4fa61ce0dd0338b5fc35e6c
 - redhat/configs/evaluate_configs: Update help output (Prarit Bhargava)
 - redhat/configs: Double MAX_LOCKDEP_CHAINS (Justin M. Forbes)
 - fedora: configs: Fix WM5102 Kconfig (Hans de Goede)
