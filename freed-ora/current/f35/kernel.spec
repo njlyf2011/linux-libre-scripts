@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.2
+%define rpmversion 5.14.3
 %define patchversion 5.14
 %define pkgrelease 300
 
@@ -715,12 +715,6 @@ BuildRequires: llvm
 BuildRequires: lld
 %endif
 
-# Because this is the kernel, it's hard to get a single upstream URL
-# to represent the base without needing to do a bunch of patching. This
-# tarball is generated from a src-git tree. If you want to see the
-# exact git commit you can run
-#
-# xzcat -qq ${TARBALL} | git get-tar-commit-id
 Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{ktarvers}%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
@@ -3059,10 +3053,16 @@ fi
 #
 #
 %changelog
+* Mon Sep 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.3-gnu.
+
+* Sun Sep 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.3-300]
+- Linux v5.14.3
+
 * Thu Sep  9 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.2-gnu.
 
-* Wed Sep 08 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.2-0]
+* Wed Sep 08 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.2-300]
 - Revert "team: mark team driver as deprecated" (Justin M. Forbes)
 
 * Sun Sep  5 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
