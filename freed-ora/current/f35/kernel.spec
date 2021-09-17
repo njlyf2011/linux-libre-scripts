@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.4
+%define rpmversion 5.14.5
 %define patchversion 5.14
 %define pkgrelease 300
 
@@ -3053,6 +3053,11 @@ fi
 #
 #
 %changelog
+* Thu Sep 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.5-gnu.
+
+* Thu Sep 16 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.5-0]
+
 * Wed Sep 15 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.4-gnu.
 
@@ -3079,9 +3084,6 @@ fi
 
 * Wed Sep  1 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14-gnu.
-
-* Mon Aug 30 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.14-60]
-- arm64: use common CONFIG_MAX_ZONEORDER for arm kernel (Mark Salter)
 
 * Mon Aug 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14-0]
 - iwlwifi Add support for ax201 in Samsung Galaxy Book Flex2 Alpha (Justin M. Forbes)
