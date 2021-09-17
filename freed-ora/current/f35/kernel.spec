@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.3
+%define rpmversion 5.14.4
 %define patchversion 5.14
 %define pkgrelease 300
 
@@ -596,7 +596,7 @@ Release: %{pkg_release}
 # DO NOT CHANGE THE 'ExclusiveArch' LINE TO TEMPORARILY EXCLUDE AN ARCHITECTURE BUILD.
 # SET %%nobuildarches (ABOVE) INSTEAD
 %if 0%{?fedora}
-ExclusiveArch: x86_64 s390x %{arm} aarch64 ppc64le
+ExclusiveArch: noarch x86_64 s390x %{arm} aarch64 ppc64le
 %else
 ExclusiveArch: noarch i386 i686 x86_64 s390x %{arm} aarch64 ppc64le
 %endif
@@ -3053,6 +3053,12 @@ fi
 #
 #
 %changelog
+* Wed Sep 15 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.4-gnu.
+
+* Wed Sep 15 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.4-300]
+- Build kernel-doc for Fedora (Justin M. Forbes)
+
 * Mon Sep 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.3-gnu.
 
