@@ -116,7 +116,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.13
 
-%define rpmversion 5.13.18
+%define rpmversion 5.13.19
 %define stableversion 5.13
 %define pkgrelease 200
 
@@ -2974,6 +2974,13 @@ fi
 #
 #
 %changelog
+* Sun Sep 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.13.19-gnu1.
+
+* Sat Sep 18 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.13.19-200]
+- kernel-5.13.19-0 (Justin M. Forbes)
+- drm/i915/display/psr: Disable DC3CO when the PSR2 is used (Gwan-gyeong Mun)
+
 * Thu Sep 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.13.18-gnu1.
 
