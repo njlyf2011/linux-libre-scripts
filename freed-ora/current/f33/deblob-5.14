@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.13 extra=1
+kver=5.14 extra=
 
 case $1 in
 --force)
@@ -896,8 +896,8 @@ clean_kconfig drivers/gpu/drm/bridge/cadence/Kconfig DRM_CDNS_MHDP8546
 clean_mk CONFIG_DRM_CDNS_MHDP8546 drivers/gpu/drm/bridge/cadence/Makefile
 
 announce DRM_I915 - "Intel 8xx/9xx/G3x/G4x/HD Graphics"
-reject_firmware drivers/gpu/drm/i915/display/intel_csr.c
-clean_blob drivers/gpu/drm/i915/display/intel_csr.c
+reject_firmware drivers/gpu/drm/i915/display/intel_dmc.c
+clean_blob drivers/gpu/drm/i915/display/intel_dmc.c
 reject_firmware drivers/gpu/drm/i915/display/intel_opregion.c
 reject_firmware drivers/gpu/drm/i915/gt/uc/intel_uc_fw.c
 clean_blob drivers/gpu/drm/i915/gt/uc/intel_uc_fw.c
@@ -1376,10 +1376,10 @@ clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_SI2168
 clean_mk CONFIG_DVB_SI2168 drivers/media/dvb-frontends/Makefile
 
 announce DVB_SP8870 - "Spase sp8870"
-undefault_firmware 'SP8870' drivers/media/dvb-frontends/sp8870.c
-clean_blob drivers/media/dvb-frontends/sp8870.c
-clean_kconfig drivers/media/dvb-frontends/Kconfig DVB_SP8870
-clean_mk CONFIG_DVB_SP8870 drivers/media/dvb-frontends/Makefile
+undefault_firmware 'SP8870' drivers/staging/media/av7110/sp8870.c
+clean_blob drivers/staging/media/av7110/sp8870.c
+clean_kconfig drivers/staging/media/av7110/Kconfig DVB_SP8870
+clean_mk CONFIG_DVB_SP8870 drivers/staging/media/av7110/Makefile
 
 announce DVB_SP887X - "Spase sp887x based"
 undefault_firmware 'SP887X' drivers/media/dvb-frontends/sp887x.c
@@ -1417,10 +1417,10 @@ clean_kconfig drivers/media/usb/as102/Kconfig DVB_AS102
 clean_mk CONFIG_DVB_AS102 drivers/media/usb/as102/Makefile
 
 announce DVB_AV7110 - "AV7110 cards"
-reject_firmware drivers/media/pci/ttpci/av7110.c
-clean_blob drivers/media/pci/ttpci/av7110.c
-clean_kconfig drivers/media/pci/ttpci/Kconfig DVB_AV7110
-clean_mk CONFIG_DVB_AV7110 drivers/media/pci/ttpci/Makefile
+reject_firmware drivers/staging/media/av7110/av7110.c
+clean_blob drivers/staging/media/av7110/av7110.c
+clean_kconfig drivers/staging/media/av7110/Kconfig DVB_AV7110
+clean_mk CONFIG_DVB_AV7110 drivers/staging/media/av7110/Makefile
 
 announce DVB_BUDGET - "Budget cards"
 reject_firmware drivers/media/pci/ttpci/budget.c
@@ -2495,7 +2495,6 @@ clean_mk CONFIG_RTL8188EE drivers/net/wireless/realtek/rtlwifi/rtl8188ee/Makefil
 announce R8188EU - "Realtek RTL8188EU Wireless LAN NIC driver"
 reject_firmware drivers/staging/rtl8188eu/hal/fw.c
 clean_blob drivers/staging/rtl8188eu/hal/fw.c
-clean_blob drivers/staging/rtl8188eu/include/rtl8188e_hal.h
 clean_blob drivers/staging/rtl8188eu/os_dep/os_intfs.c
 clean_kconfig drivers/staging/rtl8188eu/Kconfig R8188EU
 clean_mk CONFIG_R8188EU drivers/staging/rtl8188eu/Makefile
@@ -2787,7 +2786,7 @@ clean_mk CONFIG_BT_MTKUART drivers/bluetooth/Makefile
 announce BT_QCA - "Bluetooh support for Qualcomm/Atheros devices"
 reject_firmware drivers/bluetooth/btqca.c
 clean_blob drivers/bluetooth/btqca.c
-clean_blob Documentation/devicetree/bindings/net/qualcomm-bluetooth.txt
+clean_blob Documentation/devicetree/bindings/net/qualcomm-bluetooth.yaml
 clean_kconfig drivers/bluetooth/Kconfig BT_QCA
 clean_mk CONFIG_BT_QCA drivers/bluetooth/Makefile
 
@@ -3114,6 +3113,17 @@ clean_blob drivers/scsi/csiostor/csio_init.c
 clean_kconfig drivers/scsi/csiostor/Kconfig SCSI_CHELSIO_FCOE
 clean_mk CONFIG_SCSI_CHELSIO_FCOE drivers/scsi/csiostor/Makefile
 
+announce SCSI_EFCT - "Emulex Fibre Channel Target"
+# The firmware name is built out of Vital Product Data read from the
+# adapter.  The firmware is definitely code, and I couldn't find
+# evidence it is Free, so I'm disabling it.  It's not clear whether
+# this is the hardware or the software inducing to the installation of
+# non-Free firmware.
+reject_firmware drivers/scsi/elx/efct/efct_driver.c
+clean_blob drivers/scsi/elx/efct/efct_driver.c
+clean_kconfig drivers/scsi/elx/Kconfig SCSI_EFCT
+clean_mk CONFIG_SCSI_EFCT drivers/scsi/elx/Makefile
+
 announce SCSI_LPFC - "Emulex LightPulse Fibre Channel Support"
 # The firmware name is built out of Vital Product Data read from the
 # adapter.  The firmware is definitely code, and I couldn't find
@@ -3172,11 +3182,7 @@ clean_mk CONFIG_USB_UEAGLEATM drivers/usb/atm/Makefile
 # host
 
 announce USB_XHCI_PCI_RENESAS - "Support for additional Renesas xHCI controller with firwmare"
-if grep -q 'firmware_request_nowarn' drivers/usb/host/xhci-pci-renesas.c; then
-  reject_firmware_nowarn drivers/usb/host/xhci-pci-renesas.c
-else
-  reject_firmware drivers/usb/host/xhci-pci-renesas.c
-fi
+reject_firmware_nowarn drivers/usb/host/xhci-pci-renesas.c
 clean_kconfig drivers/usb/host/Kconfig USB_XHCI_PCI_RENESAS
 clean_mk CONFIG_USB_XHCI_PCI_RENESAS drivers/usb/host/Makefile
 
@@ -3824,6 +3830,7 @@ clean_blob arch/arm64/boot/dts/qcom/sdm845-mtp.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-xiaomi-beryllium.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm850-lenovo-yoga-c630.dts
 clean_blob arch/arm64/boot/dts/qcom/sm8150-hdk.dts
+clean_blob arch/arm64/boot/dts/qcom/sm8150-microsoft-surface-duo.dts
 clean_blob arch/arm64/boot/dts/qcom/sm8150-mtp.dts
 clean_blob Documentation/devicetree/bindings/display/msm/gpu.txt
 clean_blob arch/arm64/boot/dts/qcom/sm8250-mtp.dts
