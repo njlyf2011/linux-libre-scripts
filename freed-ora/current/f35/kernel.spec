@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.7
+%define rpmversion 5.14.8
 %define patchversion 5.14
 %define pkgrelease 300
 
@@ -3053,6 +3053,12 @@ fi
 #
 #
 %changelog
+* Tue Sep 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.8-gnu.
+
+* Mon Sep 27 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.8-0]
+- thermal/drivers/int340x: Do not set a wrong tcc offset on resume (Antoine Tenart)
+
 * Thu Sep 23 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.7-gnu.
 
