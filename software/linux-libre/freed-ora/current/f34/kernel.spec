@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.8
+%define rpmversion 5.14.9
 %define patchversion 5.14
 %define pkgrelease 200
 
@@ -3046,6 +3046,12 @@ fi
 #
 #
 %changelog
+* Thu Sep 30 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.9-gnu.
+
+* Thu Sep 30 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.9-0]
+- Revert "block, bfq: honor already-setup queue merges" (Jens Axboe)
+
 * Tue Sep 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.8-gnu.
 
