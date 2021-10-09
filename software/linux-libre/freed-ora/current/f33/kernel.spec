@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.9
+%define rpmversion 5.14.10
 %define patchversion 5.14
 %define pkgrelease 100
 
@@ -3041,6 +3041,15 @@ fi
 #
 #
 %changelog
+* Fri Oct  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.10-gnu.
+
+* Thu Oct 07 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.10-0]
+- Revert "net: stmmac: dwmac-rk: fix unbalanced pm_runtime_enable warnings" (Peter Robinson)
+- e100e: Fix packet loss issues seen on Intel network controller (Mark Pearson)
+- bpf: Fix integer overflow in prealloc_elems_and_freelist() (Tatsuhiko Yasumatsu)
+- Revert "acpi: prefer booting with ACPI over DTS" (Justin M. Forbes)
+
 * Thu Sep 30 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.9-gnu.
 
