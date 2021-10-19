@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.12
+%define rpmversion 5.14.13
 %define patchversion 5.14
 %define pkgrelease 100
 
@@ -3041,6 +3041,12 @@ fi
 #
 #
 %changelog
+* Mon Oct 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.13-gnu.
+
+* Sun Oct 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.13-0]
+- ASoC: Intel: sof_sdw: add quirk for Dell XPS 9710 (Pierre-Louis Bossart)
+
 * Thu Oct 14 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.12-gnu.
 
