@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.13
+%define rpmversion 5.14.14
 %define patchversion 5.14
 %define pkgrelease 100
 
@@ -3041,6 +3041,16 @@ fi
 #
 #
 %changelog
+* Fri Oct 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.14-gnu.
+
+* Wed Oct 20 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.14-0]
+- autofs: fix wait name hash calculation in autofs_wait() (Ian Kent)
+- Fix up quirk to match upstream (Justin M. Forbes)
+- Re-enable CONFIG_RDMA_RXE for Fedora (Justin M. Forbes)
+- Fix up backport of Dell XPS 9710 quirk (Justin M. Forbes)
+- Fix changelog missing entries (Justin M. Forbes)
+
 * Mon Oct 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.13-gnu.
 
