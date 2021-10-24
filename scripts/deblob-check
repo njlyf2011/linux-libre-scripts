@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2021-10-09
+# deblob-check version 2021-10-23
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -6281,6 +6281,31 @@ set_except () {
 
     # New in 5.14.11, 5.10.72.
     blobname '\(silead[/]\)\?gsl1680-chuwi-hi\(10plus\|book\)\.fw' drivers/platform/x86/touchscreen_dmi.c
+
+    # New in 5.15-rc.
+    blobname 'achc\.bin' 'Documentation/ABI/testing/sysfs-driver-ge-achc\|drivers/misc/gehc-achc\.c'
+    blobname 'qcom[/]sdm845[/]oneplus6[/]ipa_fws\.mbn' arch/arm64/boot/dts/qcom/sdm845-oneplus-common.dtsi
+    defsnc 'static[ ]__amode31_data[ ]u32[ ]__ctl_duald_amode31\[32\][ ]__aligned[(]128[)][ ]=' arch/s390/kernel/setup.c
+    defsnc '[\t]umc_v6_7_channel_idx_tbl_\(second\|first\)\[UMC_V6_7_UMC_INSTANCE_NUM\]\[UMC_V6_7_CHANNEL_INSTANCE_NUM\][ ]=' drivers/gpu/drm/amd/amdgpu/umc_v6_7.c
+    defsnc 'static[ ]const[ ]struct[ ]reg_sequence[ ]ej030na_init_sequence\[\][ ]=' drivers/gpu/drm/panel/panel-innolux-ej030na.c
+    defsnc '[\t]static[ ]const[ ]int[ ]voltages\[\][ ]=' drivers/hid/hid-logitech-hidpp.c
+    defsnc 'static[ ]const[ ]struct[ ]imx335_reg[ ]mode_2592x1940_regs\[\][ ]=' drivers/media/i2c/imx335.c
+    defsnc 'static[ ]const[ ]struct[ ]imx412_reg[ ]mode_4056x3040_regs\[\][ ]=' drivers/media/i2c/imx412.c
+    defsnc 'static[ ]const[ ]struct[ ]ov9282_reg[ ]mode_1280x720_regs\[\][ ]=' drivers/media/i2c/ov9282.c
+    defsnc 'static[ ]const[ ]u8[ ]channel_all\[59\][ ]=' drivers/net/wireless/realtek/rtlwifi/rtl8192de/phy.c
+    defsnc 'static[ ]const[ ]struct[ ]ab8500_v_to_cap[ ]cap_tbl\(_[ab]_thermistor\)\?\[\][ ]=' drivers/power/supply/ab8500_bmdata.c
+    blobname 'rtlwifi\([/]\|[\\][\\]\)rtl8188eufw\.bin' drivers/staging/r8188eu/hal/rtl8188e_hal_init.c
+    defsnc 'static[ ]char[ ]NEGOTIATE_GSS_HEADER\[AUTH_GSS_LENGTH\][ ]=' fs/ksmbd/auth.c
+    defsnc 'const[ ]u8[ ]s_default_security\[\][ ]__aligned[(]8[)][ ]=' fs/ntfs3/fsntfs.c
+    accept '[ ]*[*][ ][ ][ ]1[ ]0[ ]9[ ]8[ ]7[ ]6[ ]5[ ]4[ ]3[ ]2[ ]1[ ]0[ ]9[ ]8[ ]7[ ]6[ ]5[ ]4[ ]3[ ]2[ ]1[ ]0[ ]9[ ]8[ ]7[ ]6[ ]5[ ]4[ ]3[ ]2[ ]1[ ]0' fs/ntfs3/ntfs.h
+    defsnc 'static[ ]const[ ]u32[ ]__cacheline_aligned[ ]ck\[32\][ ]=' lib/crypto/sm4.c
+    defsnc 'static[ ]const[ ]u8[ ]__cacheline_aligned[ ]sbox\[256\][ ]=' lib/crypto/sm4.c
+    defsnc 'static[ ]const[ ]char[ ]large_mask\[\][ ]__initconst[ ]=' lib/test_bitmap.c
+    defsnc 'static[ ]const[ ]struct[ ]cs8409_i2c_param[ ]dolphin_c[01]_init_reg_seq\[\][ ]=' sound/pci/hda/patch_cs8409-tables.c
+    defsnc 'const[ ]__u8[ ]nci_rf_activate_ntf\[\][ ]=' tools/testing/selftests/nci/nci_dev.c
+    blobname 'brcmfmac43\(430b0\|752\)-sdio' drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+    # Catch other names likely to appear in BRCMF_FW*_DEF strings in these files.
+    blobna 'brcmfmac43[^";) \t\n]*\(-sdio\|-pcie\)\?' drivers/net/wireless/broadcom/brcm80211/brcmfmac/'\(sdio\|pcie\|usb\)\.c'
 
     ;;
 
