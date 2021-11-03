@@ -1,3 +1,8 @@
+# Define prevkver and rcrev for rc.  For .0 final, comment them out, as well as
+# the non-rc Source5000, and don't forget to reenable it for .1!
+#define prevkver 5.15
+#define rcrev -rc7
+
 # All Global changes to build and install go here.
 # Per the below section about __spec_install_pre, any rpm
 # environment changes that affect %%install need to go
@@ -85,7 +90,7 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 0.rc7.53
+%global distro_build 60
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -130,7 +135,7 @@ Summary: The Linux kernel
 
 %define rpmversion 5.15.0
 %define patchversion 5.15
-%define pkgrelease 0.rc7.53
+%define pkgrelease 60
 
 # This is needed to do merge window version magic
 %define patchlevel 15
@@ -141,11 +146,6 @@ Summary: The Linux kernel
 
 %define baselibre -libre
 %define basegnu -gnu%{?librev}
-
-# Define prevkver and rcrev for rc.  For .0 final, comment them out, as well as
-# the non-rc Source5000, and don't forget to reenable it for .1!
-%define prevkver 5.14
-%define rcrev -rc7
 
 %if 0%{?prevkver:1}
 %define ktarvers %{prevkver}
@@ -185,7 +185,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 0.rc7.53%{?buildid}%{?dist}
+%define specrelease 60%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -725,12 +725,6 @@ BuildRequires: llvm
 BuildRequires: lld
 %endif
 
-# Because this is the kernel, it's hard to get a single upstream URL
-# to represent the base without needing to do a bunch of patching. This
-# tarball is generated from a src-git tree. If you want to see the
-# exact git commit you can run
-#
-# xzcat -qq ${TARBALL} | git get-tar-commit-id
 Source0: http://linux-libre.fsfla.org/pub/linux-libre/freed-ora/src/linux%{?baselibre}-%{ktarvers}%{basegnu}.tar.xz
 
 Source1: Makefile.rhelver
@@ -852,6 +846,7 @@ Source72: filter-s390x.sh.fedora
 Source73: filter-modules.sh.fedora
 %endif
 
+Source75: partial-kgcov-snip.config
 Source80: generate_all_configs.sh
 Source81: process_configs.sh
 
@@ -1539,15 +1534,13 @@ for i in %{all_arch_configs}
 do
   mv $i $i.tmp
   ./merge.pl %{SOURCE3001} $i.tmp > $i
-  rm $i.tmp
-done
-%endif
-
-# enable GCOV kernel config options if gcov is on
 %if %{with_gcov}
-for i in *.config
-do
-  sed -i 's/# CONFIG_GCOV_KERNEL is not set/CONFIG_GCOV_KERNEL=y\nCONFIG_GCOV_PROFILE_ALL=y\n/' $i
+  echo "Merging with gcov options"
+  cat %{SOURCE75}
+  mv $i $i.tmp
+  ./merge.pl %{SOURCE75} $i.tmp > $i
+%endif
+  rm $i.tmp
 done
 %endif
 
@@ -2976,7 +2969,7 @@ fi
 %endif
 
 %if %{with_gcov}
-%ifarch x86_64 s390x ppc64le aarch64
+%ifnarch %nobuildarches noarch
 %files gcov
 %{_builddir}
 %endif
@@ -3074,6 +3067,28 @@ fi
 #
 #
 %changelog
+* Wed Nov  4 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15-gnu.
+
+* Mon Nov 01 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-60]
+- Fedora configs for 5.15 (Justin M. Forbes)
+
+* Mon Nov 01 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.15-60]
+- redhat/kernel.spec.template: don't hardcode gcov arches (Jan Stancek)
+- redhat/configs: create a separate config for gcov options (Jan Stancek)
+
+* Fri Oct 29 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.15-0.rc7.20211029gitf25a5481af12.56]
+- redhat/configs/evaluate_configs: walk cfgvariants line by line (Jan Stancek)
+- redhat/configs/evaluate_configs: insert EMPTY tags at correct place (Jan Stancek)
+- redhat: make dist-srpm-gcov add to BUILDOPTS (Jan Stancek)
+
+* Thu Oct 28 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.15-0.rc7.20211028git1fc596a56b33.55]
+- Build CONFIG_SPI_PXA2XX as a module on x86 (Justin M. Forbes)
+- redhat/configs: enable CONFIG_BCMGENET as module (Joel Savitz)
+
+* Wed Oct 27 2021 Fedora Kernel Team <kernel-team@fedoraproject.org> [5.15-0.rc7.20211027gitd25f27432f80.54]
+- Fedora config updates (Justin M. Forbes)
+
 * Wed Oct 27 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15-rc7-gnu.
 
