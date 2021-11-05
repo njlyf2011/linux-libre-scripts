@@ -80,7 +80,7 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 200
+%global distro_build 201
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -125,7 +125,7 @@ Summary: The Linux kernel
 
 %define rpmversion 5.14.16
 %define patchversion 5.14
-%define pkgrelease 200
+%define pkgrelease 201
 
 # This is needed to do merge window version magic
 %define patchlevel 14
@@ -169,7 +169,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 200%{?buildid}%{?dist}
+%define specrelease 201%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -3046,7 +3046,12 @@ fi
 #
 #
 %changelog
-* Thu Nov  4 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+* Wed Nov 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.16-1]
+- Update release for usb fix rebuild (Justin M. Forbes)
+- Revert "xhci: Set HCD flag to defer primary roothub registration" (Justin M. Forbes)
+- Revert "usb: core: hcd: Add support for deferring roothub registration" (Justin M. Forbes)
+
+* Wed Nov  3 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre Thu Nov  4
 - GNU Linux-libre 5.14.16-gnu.
 
 * Tue Nov 02 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.16-0]
