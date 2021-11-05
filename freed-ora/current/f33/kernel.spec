@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.15
+%define rpmversion 5.14.16
 %define patchversion 5.14
 %define pkgrelease 100
 
@@ -3041,6 +3041,12 @@ fi
 #
 #
 %changelog
+* Thu Nov  4 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.16-gnu.
+
+* Tue Nov 02 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.16-0]
+- Changelog entry for 5.14.15 (Justin M. Forbes)
+
 * Thu Oct 28 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.15-gnu.
 
