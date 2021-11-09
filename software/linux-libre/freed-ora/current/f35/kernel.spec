@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.16
+%define rpmversion 5.14.17
 %define patchversion 5.14
 %define pkgrelease 301
 
@@ -3053,6 +3053,13 @@ fi
 #
 #
 %changelog
+* Mon Nov  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.17-gnu.
+
+* Mon Nov 08 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.17-1]
+- btrfs: fix memory ordering between normal and ordered work functions (Nikolay Borisov)
+- Turn on COMMON_CLK_AXG_AUDIO for Fedora rhbz 2020481 (Justin M. Forbes)
+
 * Wed Nov 03 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.16-1]
 - Update release for usb fix rebuild (Justin M. Forbes)
 - Revert "xhci: Set HCD flag to defer primary roothub registration" (Justin M. Forbes)
