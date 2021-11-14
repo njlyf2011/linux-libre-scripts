@@ -80,7 +80,7 @@ Summary: The Linux kernel
 #  the --with-release option overrides this setting.)
 %define debugbuildsenabled 1
 
-%global distro_build 301
+%global distro_build 300
 
 %if 0%{?fedora}
 %define secure_boot_arch x86_64
@@ -123,9 +123,9 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.17
+%define rpmversion 5.14.18
 %define patchversion 5.14
-%define pkgrelease 301
+%define pkgrelease 300
 
 # This is needed to do merge window version magic
 %define patchlevel 14
@@ -180,7 +180,7 @@ Summary: The Linux kernel
 %define libres .gnu%{?librev}
 
 # allow pkg_release to have configurable %%{?dist} tag
-%define specrelease 301%{?buildid}%{?dist}
+%define specrelease 300%{?buildid}%{?dist}
 
 %define pkg_release %{specrelease}%{?libres}
 
@@ -3053,6 +3053,13 @@ fi
 #
 #
 %changelog
+* Sat Nov 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.18-gnu.
+
+* Fri Nov 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.18-1]
+- usb: xhci: tegra: Check padctrl interrupt presence in device tree (Dmitry Osipenko)
+- Input: i8042 - Add quirk for Fujitsu Lifebook T725 (Takashi Iwai)
+
 * Mon Nov  8 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.17-gnu.
 
