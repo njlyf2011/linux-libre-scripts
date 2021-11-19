@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.19
+%define rpmversion 5.14.20
 %define patchversion 5.14
 %define pkgrelease 200
 
@@ -3046,6 +3046,12 @@ fi
 #
 #
 %changelog
+* Fri Nov 19 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.20-gnu.
+
+* Thu Nov 18 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.20-1]
+- Drop F33 from release_targets as pushes are already disabled in dist-git (Justin M. Forbes)
+
 * Thu Nov 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.19-gnu.
 
