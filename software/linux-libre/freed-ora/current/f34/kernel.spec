@@ -123,7 +123,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.14
 
-%define rpmversion 5.14.18
+%define rpmversion 5.14.19
 %define patchversion 5.14
 %define pkgrelease 200
 
@@ -3046,6 +3046,13 @@ fi
 #
 #
 %changelog
+* Thu Nov 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.14.19-gnu.
+
+* Wed Nov 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.14.19-1]
+- platform/x86: thinkpad_acpi: Add support for dual fan control (Jimmy Wang)
+- Fedora: Enable MediaTek bluetooth pieces (Peter Robinson)
+
 * Sat Nov 13 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.14.18-gnu.
 
