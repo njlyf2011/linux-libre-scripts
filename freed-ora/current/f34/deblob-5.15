@@ -48,7 +48,7 @@
 
 # For each kver release, start extra with an empty string, then count
 # from 1 if changes are needed that require rebuilding the tarball.
-kver=5.14 extra=
+kver=5.15 extra=
 
 case $1 in
 --force)
@@ -416,9 +416,12 @@ clean_sed '
 s,git://git\..*torvalds/linux\.git,/*(DEBLOBBED)*/,
 ' scripts/package/mkdebian 'upstream development repo'
 
-clean_sed '
-s,Name: kernel,&-libre,
-' scripts/package/mkspec 'package name'
+# The tarball name and its expansion do not include -libre.
+# We could change KERNELPATH and keep this, but what else would break?
+# Enabling this would require the other commented-out mkspec bits below.
+# clean_sed '
+# s,Name: kernel,&-libre,
+# ' scripts/package/mkspec 'package name'
 
 clean_sed '
 s,The Linux,The GNU Linux-libre,
@@ -432,17 +435,33 @@ clean_sed '
 s,https\?://www\.kernel\.org,https://linux-libre.fsfla.org,
 ' scripts/package/mkspec 'home page'
 
+# clean_sed '
+# s,\(%description\) -n kernel-,\1 ,
+# ' scripts/package/mkspec '-libre subpackages'
+
+# clean_sed '
+# /Provides: kernel-/{p;s,kernel-,&libre-,;}
+# ' scripts/package/mkspec '-libre provides'
+
+# As with rpms, we leave the package name as kernel.
 clean_sed '
-s,\(%description\) -n kernel-,\1 ,
-' scripts/package/mkspec '-libre subpackages'
+s,The upstream Linux kernel,The GNU Linux-libre kernel,
+' scripts/package/snapcraft.template 'description'
 
 clean_sed '
-/Provides: kernel-/{p;s,kernel-,&libre-,;}
-' scripts/package/mkspec '-libre provides'
+s,Linux kernel,GNU Linux-libre,
+' scripts/package/snapcraft.template 'summary'
 
 clean_sed '
 s,linux-upstream,linux-libre,
 ' scripts/Makefile.package 'libre, not upstream'
+
+# We replace several blob name s[n]printf format strings
+# with "/*(DEBLOBBED)*/", counting on extra args to be ignored.
+# These are warned about, but -Werror turns them into errors.
+clean_sed '
+s, -Werror$, -Werror -Wno-error=format-extra-args -Wno-error=comment -Wno-error=unused-function -Wno-error=unused-variable,
+' Makefile 'avoid compile failures at /*(DEBLOBBED)*/ warnings'
 
 # Add reject_firmware and maybe_reject_firmware
 grep -q _LINUX_LIBRE_FIRMWARE_H include/linux/firmware.h ||
@@ -457,7 +476,7 @@ clean_sed '$i\
 static inline int\
 is_nonfree_firmware(const char *name)\
 {\
-  return strstr(name, NONFREE_FIRMWARE) != 0;\
+	return strstr(name, NONFREE_FIRMWARE) != 0;\
 }\
 \
 static inline int\
@@ -473,6 +492,7 @@ firmware_reject_nowarn(const struct firmware **fw,\
 {\
 	const struct firmware *xfw = NULL;\
 	int retval, retval0 = -ENOENT;\
+	if (fw) *fw = xfw;\
 	retval = firmware_request_nowarn(&xfw, NONFREE_FIRMWARE, device);\
 	if (!retval) {\
 		release_firmware(xfw);\
@@ -507,6 +527,7 @@ reject_firmware_direct(const struct firmware **fw,\
 {\
 	const struct firmware *xfw = NULL;\
 	int retval, retval0;\
+	if (fw) *fw = xfw;\
 	retval0 = report_missing_free_firmware(dev_name(device), NULL);\
 	retval = request_firmware_direct(&xfw, NONFREE_FIRMWARE, device);\
 	if (!retval) {\
@@ -547,6 +568,7 @@ reject_firmware_into_buf(const struct firmware **firmware_p, const char *name,\
 {\
 	const struct firmware *xfw = NULL;\
 	int retval, retval0;\
+	if (firmware_p) *firmware_p = xfw;\
 	retval0 = report_missing_free_firmware(dev_name(device), NULL);\
 	retval = request_firmware_into_buf(&xfw, NONFREE_FIRMWARE, device, buf, size);\
 	if (!retval) {\
@@ -570,6 +592,7 @@ reject_partial_firmware_into_buf(const struct firmware **firmware_p, const char 
 {\
 	const struct firmware *xfw = NULL;\
 	int retval, retval0;\
+	if (firmware_p) *firmware_p = xfw;\
 	retval0 = report_missing_free_firmware(dev_name(device), NULL);\
 	retval = request_partial_firmware_into_buf(&xfw, NONFREE_FIRMWARE, device, buf, size, offset);\
 	if (!retval) {\
@@ -963,6 +986,7 @@ clean_mk CONFIG_DRM_MGA drivers/gpu/drm/Makefile
 announce DRM_MSM - "MSM DRM"
 reject_firmware drivers/gpu/drm/msm/adreno/adreno_gpu.c
 clean_blob drivers/gpu/drm/msm/adreno/adreno_device.c
+clean_blob drivers/gpu/drm/msm/adreno/a6xx_gpu.c
 clean_kconfig drivers/gpu/drm/msm/Kconfig DRM_MSM
 clean_mk CONFIG_DRM_MSM drivers/gpu/drm/msm/Makefile
 
@@ -2412,12 +2436,6 @@ clean_blob drivers/net/wireless/intersil/p54/p54usb.h
 clean_kconfig drivers/net/wireless/intersil/p54/Kconfig P54_USB
 clean_mk CONFIG_P54_USB drivers/net/wireless/intersil/p54/Makefile
 
-announce PRISM54 - "Intersil Prism GT/Duette/Indigo PCI/Cardbus"
-reject_firmware drivers/net/wireless/intersil/prism54/islpci_dev.c
-clean_blob drivers/net/wireless/intersil/prism54/islpci_dev.c
-clean_kconfig drivers/net/wireless/intersil/Kconfig PRISM54
-clean_mk CONFIG_PRISM54 drivers/net/wireless/intersil/prism54/Makefile
-
 announce QTNFMAC_PCIE - "Quantenna QSR1000/QSR2000/QSR10g PCIe support"
 reject_firmware drivers/net/wireless/quantenna/qtnfmac/pcie/pearl_pcie.c
 reject_firmware drivers/net/wireless/quantenna/qtnfmac/pcie/topaz_pcie.c
@@ -2493,11 +2511,11 @@ clean_kconfig drivers/net/wireless/realtek/rtlwifi/Kconfig RTL8188EE
 clean_mk CONFIG_RTL8188EE drivers/net/wireless/realtek/rtlwifi/rtl8188ee/Makefile
 
 announce R8188EU - "Realtek RTL8188EU Wireless LAN NIC driver"
-reject_firmware drivers/staging/rtl8188eu/hal/fw.c
-clean_blob drivers/staging/rtl8188eu/hal/fw.c
-clean_blob drivers/staging/rtl8188eu/os_dep/os_intfs.c
-clean_kconfig drivers/staging/rtl8188eu/Kconfig R8188EU
-clean_mk CONFIG_R8188EU drivers/staging/rtl8188eu/Makefile
+reject_firmware drivers/staging/r8188eu/hal/rtl8188e_hal_init.c
+clean_blob drivers/staging/r8188eu/hal/rtl8188e_hal_init.c
+clean_blob drivers/staging/r8188eu/include/rtl8188e_hal.h
+clean_kconfig drivers/staging/r8188eu/Kconfig R8188EU
+clean_mk CONFIG_R8188EU drivers/staging/r8188eu/Makefile
 
 announce RTL8192CE - "Realtek RTL8192CE/RTL8188CE Wireless Network Adapter"
 reject_firmware drivers/net/wireless/realtek/rtlwifi/rtl8192ce/sw.c
@@ -2746,13 +2764,13 @@ clean_kconfig drivers/bluetooth/Kconfig BT_HCIBT3C
 clean_mk CONFIG_BT_HCIBT3C drivers/bluetooth/Makefile
 
 announce BT_HCIBTUSB - "HCI USB driver"
-reject_firmware_nowarn drivers/bluetooth/btusb.c
 reject_firmware drivers/bluetooth/btusb.c
 clean_blob drivers/bluetooth/btusb.c
 clean_kconfig drivers/bluetooth/Kconfig BT_HCIBTUSB
 clean_mk CONFIG_BT_HCIBTUSB drivers/bluetooth/Makefile
 
 announce BT_INTEL - "Bluetooth support for Intel devices"
+reject_firmware_nowarn drivers/bluetooth/btintel.c
 reject_firmware drivers/bluetooth/btintel.c
 clean_blob drivers/bluetooth/btintel.c
 clean_kconfig drivers/bluetooth/Kconfig BT_INTEL
@@ -3293,6 +3311,13 @@ clean_blob drivers/misc/bcm-vk/bcm_vk_dev.c
 clean_kconfig drivers/misc/bcm-vk/Kconfig BCM_VK
 clean_mk CONFIG_BCM_VK drivers/misc/bcm-vk/Makefile
 
+announce GEHC_ACHC - "GEHC ACHC support"
+reject_firmware drivers/misc/gehc-achc.c
+clean_blob drivers/misc/gehc-achc.c
+clean_blob Documentation/ABI/testing/sysfs-driver-ge-achc
+clean_kconfig drivers/misc/Kconfig GEHC_ACHC
+clean_mk CONFIG_GEHC_ACHC drivers/misc/Makefile
+
 announce HABANA_AI - "HabanaAI accelerators (habanalabs)"
 reject_firmware drivers/misc/habanalabs/common/firmware_if.c
 reject_firmware drivers/misc/habanalabs/gaudi/gaudi.c
@@ -3825,6 +3850,7 @@ announce ARCH_QCOM - "Qualcomm Support"
 clean_blob arch/arm64/boot/dts/qcom/msm8998-lenovo-miix-630.dts
 clean_blob arch/arm64/boot/dts/qcom/sc7180-trogdor.dtsi
 clean_blob arch/arm64/boot/dts/qcom/sc7180-trogdor-lte-sku.dtsi
+clean_blob arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile.dtsi
 clean_blob arch/arm64/boot/dts/qcom/sdm845-db845c.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-mtp.dts
 clean_blob arch/arm64/boot/dts/qcom/sdm845-xiaomi-beryllium.dts
@@ -3885,6 +3911,15 @@ clean_sed s,usb8388,whatever,g drivers/base/firmware_loader/Kconfig 'removed blo
 
 if $errors; then
   echo errors above were ignored because of --force >&2
+else
+  echo cleaning up has completed successfully, without verification >&2
+  # Verification is largely manual, comparing the changes with
+  # those of a previous known (presumed) good version, e.g.
+  # git merge the previous known good version onto the current base
+  # version, and then git diff with this cleaned-up version.
+  # Creating a tarball of this version, named linux-*.*.tar,
+  # and running deblob-check on it may also help catch cleaning-up
+  # errors: .../deblob-check --use-awk -B linux-*.*.tar.
 fi
 
 exit 0
