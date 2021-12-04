@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.5
+%define rpmversion 5.15.6
 %define patchversion 5.15
 %define pkgrelease 200
 
@@ -3067,6 +3067,14 @@ fi
 #
 #
 %changelog
+* Fri Dec  3 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.6-gnu.
+
+* Wed Dec 01 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+- Revert "drm/i915: Implement Wa_1508744258" (Justin M. Forbes)
+- Revert "Revert "fuse: fix page stealing"" (Justin M. Forbes)
+- scsi: sd: Fix sd_do_mode_sense() buffer length handling (Damien Le Moal)
+
 * Fri Nov 26 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.5-gnu.
 
