@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.7
+%define rpmversion 5.15.8
 %define patchversion 5.15
 %define pkgrelease 200
 
@@ -3067,6 +3067,12 @@ fi
 #
 #
 %changelog
+* Thu Dec 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.8-gnu.
+
+* Tue Dec 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+- Enable CONFIG_VFIO_NOIOMMU for Fedora (Justin M. Forbes)
+
 * Thu Dec  9 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.7-gnu.
 
