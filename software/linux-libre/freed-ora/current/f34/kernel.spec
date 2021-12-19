@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.8
+%define rpmversion 5.15.10
 %define patchversion 5.15
 %define pkgrelease 100
 
@@ -3060,6 +3060,13 @@ fi
 #
 #
 %changelog
+* Sat Dec 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.10-gnu.
+
+* Fri Dec 17 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.10-0]
+- Changelog fixes for stable (Justin M. Forbes)
+- platform/x86: thinkpad_acpi: Add lid_logo_dot to the list of safe LEDs (Hans de Goede)
+
 * Thu Dec 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.8-gnu.
 
