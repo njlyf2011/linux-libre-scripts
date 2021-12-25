@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.10
+%define rpmversion 5.15.11
 %define patchversion 5.15
 %define pkgrelease 200
 
@@ -3067,6 +3067,12 @@ fi
 #
 #
 %changelog
+* Fri Dec 24 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.11-gnu.
+
+* Wed Dec 22 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.11-0]
+- Fix up Changelog (Justin M. Forbes)
+
 * Sat Dec 18 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.10-gnu.
 
@@ -3077,16 +3083,19 @@ fi
 * Thu Dec 16 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.8-gnu.
 
-* Tue Dec 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+* Tue Dec 14 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.8-0]
 - Enable CONFIG_VFIO_NOIOMMU for Fedora (Justin M. Forbes)
 
 * Thu Dec  9 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.7-gnu.
 
+* Wed Dec 08 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.7-0]
+- Linux v5.15.7
+
 * Fri Dec  3 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.6-gnu.
 
-* Wed Dec 01 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+* Wed Dec 01 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.6-0]
 - Revert "drm/i915: Implement Wa_1508744258" (Justin M. Forbes)
 - Revert "Revert "fuse: fix page stealing"" (Justin M. Forbes)
 - scsi: sd: Fix sd_do_mode_sense() buffer length handling (Damien Le Moal)
@@ -3094,22 +3103,22 @@ fi
 * Fri Nov 26 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.5-gnu.
 
-* Thu Nov 25 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+* Thu Nov 25 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.5-0]
 - Revert "fuse: fix page stealing" (Justin M. Forbes)
 
 * Mon Nov 22 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.4-gnu.
 
-* Mon Nov 22 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+* Mon Nov 22 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.4-0]
 - mwifiex_usb: Fix skb_over_panic in mwifiex_usb_recv (Zekun Shen)
 - atlantic: Fix OOB read and write in hw_atl_utils_fw_rpc_wait (Zekun Shen)
 - Add cifs to module filters (Justin M. Forbes)
 
-* Thu Nov 18 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+* Thu Nov 18 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.3-0]
 - Enable CIFS_SMB_DIRECT for Fedora (Justin M. Forbes)
 - Fedora: rockchip: move the GPIO module back to builtin (Peter Robinson)
 
-* Fri Nov 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15-0]
+* Fri Nov 12 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.2-0]
 - usb: xhci: tegra: Check padctrl interrupt presence in device tree (Dmitry Osipenko)
 - Fedora: Enable MediaTek bluetooth pieces (Peter Robinson)
 - x86/PCI/ACPI: Replace printk calls with pr_info/pr_warn calls (Hans de Goede)
