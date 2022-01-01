@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.11
+%define rpmversion 5.15.12
 %define patchversion 5.15
 %define pkgrelease 200
 
@@ -3067,6 +3067,12 @@ fi
 #
 #
 %changelog
+* Fri Dec 31 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.12-gnu.
+
+* Wed Dec 29 2021 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.12-0]
+- iwlwifi: mvm: Increase the scan timeout guard to 30 seconds (Ilan Peer)
+
 * Fri Dec 24 2021 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.11-gnu.
 
