@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.14
+%define rpmversion 5.15.15
 %define patchversion 5.15
 %define pkgrelease 100
 
@@ -3060,6 +3060,14 @@ fi
 #
 #
 %changelog
+* Mon Jan 17 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.15-gnu.
+
+* Sun Jan 16 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.15-0]
+- netfilter: nat: force port remap to prevent shadowing well-known ports (Florian Westphal)
+- netfilter: conntrack: tag conntracks picked up in local out hook (Florian Westphal)
+- configs/fedora: Enable CONFIG_NFC_PN532_UART for use PN532 NFC module (Ziqian SUN (Zamir))
+
 * Fri Jan 14 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.14-gnu.
 
