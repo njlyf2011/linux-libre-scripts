@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.16
+%define rpmversion 5.15.17
 %define patchversion 5.15
 %define pkgrelease 200
 
@@ -3067,6 +3067,12 @@ fi
 #
 #
 %changelog
+* Fri Jan 28 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.17-gnu.
+
+* Thu Jan 27 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.17-0]
+- Revert "PCI/MSI: Mask MSI-X vectors only on success" (Justin M. Forbes)
+
 * Fri Jan 21 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.16-gnu.
 
