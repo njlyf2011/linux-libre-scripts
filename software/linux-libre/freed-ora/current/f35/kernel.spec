@@ -128,7 +128,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.15
 
-%define rpmversion 5.15.17
+%define rpmversion 5.15.18
 %define patchversion 5.15
 %define pkgrelease 200
 
@@ -3067,6 +3067,12 @@ fi
 #
 #
 %changelog
+* Sun Jan 30 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.15.18-gnu.
+
+* Sat Jan 29 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.15.18-0]
+- Linux v5.15.18 (Justin M. Forbes)
+
 * Fri Jan 28 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.15.17-gnu.
 
