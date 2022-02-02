@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# deblob-check version 2021-10-23
+# deblob-check version 2021-12-20
 # Inspired in gNewSense's find-firmware script.
 # Written by Alexandre Oliva <lxoliva@fsfla.org>
 
@@ -1266,7 +1266,7 @@ set_except () {
 
     blobname 'dabusb[/]\(firmware\.fw\|bitstream\.bin\)' drivers/media/video/dabusb.c
 
-    blob 'static[ ]u32[ ]tigon2\?Fw\(Text\|Rodata\|Data\)\[[(]MAX_\(TEXT\|RODATA\|DATA\)_LEN[/]4[)][ ][+][ ]1\][ ]__\(dev\)\?initdata[ ]=[ ][{][^}]*[}][;]\([\n]static[ ]u32[ ]tigon2\?Fw\(Text\|Rodata\|Data\)\[[(]MAX_\(TEXT\|RODATA\|DATA\)_LEN[/]4[)][ ][+][ ]1\][ ]__\(dev\)\?initdata[ ]=[ ][{][^}]*[}][;]\)*' drivers/net/acenic_firwmare.h
+    blob 'static[ ]u32[ ]tigon2\?Fw\(Text\|Rodata\|Data\)\[[(]MAX_\(TEXT\|RODATA\|DATA\)_LEN[/]4[)][ ][+][ ]1\][ ]__\(dev\)\?initdata[ ]=[ ][{][^}]*[}][;]\([\n]static[ ]u32[ ]tigon2\?Fw\(Text\|Rodata\|Data\)\[[(]MAX_\(TEXT\|RODATA\|DATA\)_LEN[/]4[)][ ][+][ ]1\][ ]__\(dev\)\?initdata[ ]=[ ][{][^}]*[}][;]\)*' drivers/net/acenic_firmware.h
     blob '#define[ ]tigon2\?Fw[^ ]*\(Addr\|Len\)[ ]0x[^\n]*\([\n]#define[ ]tigon2\?Fw[^ ]*\(Addr\|Len\)[ ]0x[^\n]*\)\+' drivers/net/acenic_firmware.h
     blob '\([/][*][^*]*\([*]\+[^/*][^*]*\)*[*]*Do[ ]not[ ]try[ ]to[ ]clear[^*]*\([*]\+[^/*][^*]*\)*[*]\+[/][\n][	]\)\?ace_clear[^;]*[;][\n]\([^}]*[{][^}]*ace_copy[^}]*tigon2\?Fw[^}]*[}]\)*[\n]\+[	]return[ ]0[;][\n][}]' drivers/net/acenic.c
     blob 'if[ ][(]\(ACE_IS_TIGON_I[(]ap[)]\|ap->version[ ]==[ ]2\)[)][\n][	][	]writel[(]tigon2\?FwStartAddr,[ ][&]regs->Pc[)][;]\([\n][	]if[ ][(]\(ACE_IS_TIGON_I[(]ap[)]\|ap->version[ ]==[ ]2\)[)][\n][	][	]writel[(]tigon2\?FwStartAddr,[ ][&]regs->Pc[)][;]\)*' drivers/net/acenic.c
@@ -1419,7 +1419,7 @@ set_except () {
 
     # This driver enables the user to update the non-Free BIOS, but it
     # only issues a firmware request if specifically told to.  It
-    # doesn't require any non-Free firwmare to function, and it
+    # doesn't require any non-Free firmware to function, and it
     # doesn't actually recommend users to perform updates, so I'm
     # leaving it in.
     accept '[	][	][	]req_firm_rc[ ]=[ ]request_firmware_nowait[(][^;]*,[ ]["]dell_rbu["],' drivers/firmware/dell_rbu.c
@@ -1553,7 +1553,7 @@ set_except () {
     blobname '930-fpga\.bin' drivers/usb/atm/ueagle-atm.c
     blobname 'CMV[x9ae][yip]\.bin\(\.v2\)\?' drivers/usb/atm/ueagle-atm.c
 
-    blobname 'isight\.fw' drivers/usb/misc/isight_firwmare.c
+    blobname 'isight\.fw' drivers/usb/misc/isight_firmware.c
 
     blobname '\(i1480-\(pre-phy\|usb\|phy\)\|ptc\)-0\.0\.bin' drivers/uwb/i1480/dfu/usb.c
 
@@ -1663,7 +1663,7 @@ set_except () {
     blobna 'The[ ]hcwamc\.rbf[ ]firmware[ ]file[^*]*\([*]\+[^/*][^*]*\)*[*]\+[/]' drivers/media/video/bt8xx/bttv-cards.c
 
     blobname 'v4l-cx23418-dig\.fw' drivers/media/video/cx18/cx18-av-firmware.c
-    blobname 'v4l-cx23418-[ac]pu\.fw' drivers/media/video/cx18/cx18-firwmare.c
+    blobname 'v4l-cx23418-[ac]pu\.fw' drivers/media/video/cx18/cx18-firmware.c
 
     blobname 'v4l-cx23885-enc\.fw' 'drivers/media/video/cx23\(1xx\|885\)/cx23885-417.c'
 
@@ -1671,7 +1671,7 @@ set_except () {
 
     blobname 'v4l-cx2341x-\(enc\|dec\)\.fw' include/media/cr2341x.h
 
-    blobname 'v4l-cx2341x-init\.mpg' drivers/media/video/ivtv/ivtv-firwmare.c
+    blobname 'v4l-cx2341x-init\.mpg' drivers/media/video/ivtv/ivtv-firmware.c
 
     blobname 'v4l-pvrusb2-\(2[49]\|73\)xxx-01\.fw' drivers/media/video/pvrusb2/pvrusb2-devattr.c
 
@@ -3928,7 +3928,7 @@ set_except () {
     accept '[\t]rc[ ]=[ ]mwl8k_request_firmware[(]' drivers/net/wireless/mwl8k.c
     accept 'static[ ]int[ ]p54spi_request_firmware[(]' drivers/net/wireless/p54/p54spi.c
     accept '[\t]ret[ ]=[ ]p54spi_request_firmware[(]' drivers/net/wireless/p54/p54spi.c
-    accept 'static[ ]int[ ]rt2x00lib_request_firmware[(]' drivers/net/wireless/rt2x00/rt2x00firwmare.c
+    accept 'static[ ]int[ ]rt2x00lib_request_firmware[(]' drivers/net/wireless/rt2x00/rt2x00firmware.c
     accept '[\t][\t]retval[ ]=[ ]rt2x00lib_request_firmware[(]' drivers/net/wireless/rt2x00/rt2x00firmware.c
     accept '[\t][\t]*wl1271_error[(]["]request_firmware_nowait[ ]failed' drivers/net/wireless/ti/wlcore/main.c
     accept '[\t][\t]nfc_err[(][&]drv->pdev->dev[,][ ]["]request_firmware[ ]failed' drivers/nfc/nfcwilink.c
@@ -5879,7 +5879,7 @@ set_except () {
     blobname 'microchip[/]mscc_vsc8574_revb_int8051_29e8.bin' drivers/net/phy/mscc/mscc.h
     # This driver enables the user to update the non-Free BIOS, but it
     # only issues a firmware request if specifically told to.  It
-    # doesn't require any non-Free firwmare to function, and it
+    # doesn't require any non-Free firmware to function, and it
     # doesn't actually recommend users to perform updates, so I'm
     # leaving it in.
     accept '[\t]*pr_err[(]["]request_firmware_nowait[ ]failed' drivers/platform/x86/dell_rbu.c
@@ -6306,6 +6306,94 @@ set_except () {
     blobname 'brcmfmac43\(430b0\|752\)-sdio' drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
     # Catch other names likely to appear in BRCMF_FW*_DEF strings in these files.
     blobna 'brcmfmac43[^";) \t\n]*\(-sdio\|-pcie\)\?' drivers/net/wireless/broadcom/brcm80211/brcmfmac/'\(sdio\|pcie\|usb\)\.c'
+
+    # New in 5.15.3-gnu and 5.14.19-gnu.
+    blobna '[/][*][ ]linux-firmware\.git[ ]hash[ ][0-9a-f]*[ ][*][/]' drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+
+    # New in 5.15.3-gnu.
+    defsnc 'static[ ]const[ ]u32[ ]____cacheline_aligned[ ]ck\[32\][ ]=' lib/crypto/sm4.c
+    defsnc 'static[ ]const[ ]u8[ ]____cacheline_aligned[ ]sbox\[256\][ ]=' lib/crypto/sm4.c
+
+    # New in 5.16-rc.
+    blobname 'imx[/]dsp[/]hifi4\.bin' Documentation/devicetree/bindings/dsp/fsl,dsp.yaml
+    accept '[ ]*\[[ ]\(0x[1248]0*[ \n,]*\)*\]' Documentation/devicetree/bindings/leds/register-bit-led.yaml
+    accept '[ ]*\[0[,][ ]\(\(1[6789]\|2[012]\)[02468]0[, \n]*\)*\]' Documentation/devicetree/bindings/net/dsa/nxp,sja1105.yaml
+    blobname 'qcom[/]apq8016[/]\(\(mba\|modem\|wcnss\)\.mbn\|WCNSS_qcom_wlan_nv_sbc\.bin\)' arch/arm64/boot/dts/qcom/apq8016-sbc.dts
+    blobname 'qcom[/]msm8996[/]gemini[/]\(adsp\|a530_zap\|venus\)\.mbn' arch/arm64/boot/dts/qcom/msm8996-xiaomi-gemini.dts
+    blobname 'qcom[/]msm8996[/]scorpio[/]\(adsp\|a530_zap\|venus\)\.mbn' arch/arm64/boot/dts/qcom/msm8996-xiaomi-scorpio.dts
+    blobname 'qcom[/]sa8155p[/][ac]dsp\.mdt' arch/arm64/boot/dts/qcom/sa8155p-adp.dts
+    accept '[ ][*][ ]firmware_request_builtin\(_buf\)\?[(][)][ ]-[ ]load[ ]builtin[ ]firmware' drivers/base/firmware_loader/builtin/main.c
+    accept 'bool[ ]firmware_request_builtin[(]' drivers/base/firmware_loader/builtin/main.c
+    accept 'EXPORT_SYMBOL_NS_GPL[(]firmware_request_builtin[,]' drivers/base/firmware_loader/builtin/main.c
+    accept '[ ][*][\t]callers[ ]such[ ]as[ ]request_firmware_into_buf[(]' drivers/base/firmware_loader/builtin/main.c
+    accept '[ ][*][\t]request_partial_firmware_into_buf[(]' drivers/base/firmware_loader/builtin/main.c
+    accept 'bool[ ]firmware_request_builtin_buf[(][^)]*[)][\n][{][\n][\t]if[ ][(]!firmware_request_builtin[(]' drivers/base/firmware_loader/builtin/main.c
+    accept '\(static[ ]inline[ ]\)\?bool[ ]firmware_request_builtin_buf[(]' drivers/base/firmware_loader/firmware.h
+    accept '[\t]if[ ][(]firmware_request_builtin_buf[(][^)]*[)][)][ ][{][\n][\t][\t]dev_dbg[(]device[,][ ]["]using[ ]built-in[ ]' drivers/base/firmware_loader/main.c
+    accept '[\t]if[ ][(]firmware_request_builtin[(][^)]*[)][)][\n][\t][\t]return[ ]0[;][\n][\n][\t]fw_priv[ ]=[ ]lookup_fw_priv[(]' drivers/base/firmware_loader/main.c
+    accept '[\t]retval[ ]=[ ]firmware_request_builtin[(][&]xfw[,][ ]NONFREE_FIRMWARE[)]' include/linux/firmware.h
+    blobname 'amdgpu[/]ip_discovery\.bin' drivers/gpu/drm/amd/amdgpu/amdgpu_discovery.c
+    defsc 'static[ ]const[ ]u16[ ]amdgpu_unsupported_pciidlist\[\][ ]=' drivers/gpu/drm/amd/amdgpu/amdgpu_drv.c
+    defsnc '[\t]mipi_dbi_command[(]dbi[,][ ]S6D27A1_PANELCTL[,]' drivers/gpu/drm/panel/panel-samsung-s6d27a1.c
+    defsc 'static[ ]const[ ]struct[ ]joycon_rumble_freq_data[ ]joycon_rumble_frequencies\[\][ ]=' drivers/hid/hid-nintendo.c
+    defsc 'static[ ]const[ ]struct[ ]joycon_rumble_amp_data[ ]joycon_rumble_amplitudes\[\][ ]=' drivers/hid/hid-nintendo.c
+    blobname 'goodix[/]%s' drivers/input/touchscreen/goodix_fwupload.c
+    blobname 'ilitek[/]ili251x.bin' drivers/input/touchscreen/ili210x.c
+    # These register initializers cover large contiguous regions.
+    # ~180b and ~512b respectively.  It's not inconceivable that they
+    # contain some code, but it doesn't quite feel like code to me, so
+    # I'm tentatively leaving it in.
+    defsc 'static[ ]const[ ]struct[ ]hi846_reg[ ]hi846_init_[24]lane\[\][ ]' drivers/media/i2c/hi846.c
+    defsnc 'static[ ]const[ ]struct[ ]ov13b10_reg[ ]mipi_data_rate_1120mbps\[\][ ]=' drivers/media/i2c/ov13b10.c
+    defsnc 'static[ ]const[ ]struct[ ]ov13b10_reg[ ]mode_\(4208x3120\|4160x\(3120\|2340\)\|2104x1560\|2080x1170\)_regs\[\][ ]=' drivers/media/i2c/ov13b10.c
+    defsnc 'static[ ]const[ ]unsigned[ ]char[ ]jpeg_image_red\[\][ ]=' drivers/media/platform/imx-jpeg/mxc-jpeg.c
+    blobname 'qcom[/]venus-4\.4[/]venus\.mdt' drivers/media/platform/qcom/venus/core.c
+    blobname 'qcom[/]vpu-2\.0[/]venus\.mbn' drivers/media/platform/qcom/venus/core.c
+    defsnc 'static[ ]const[ ]struct[ ]rtl8365mb_jam_tbl_entry[ ]rtl8365mb_init_jam_8365mb_vc\[\][ ]=' drivers/net/dsa/rtl8365mb.c
+    defsc 'static[ ]const[ ]u8[ ]dummy_\(vlan_\)\?\(tcp\|udp\)_ipv6_packet\[\][ ]=' drivers/net/ethernet/intel/ice/ice_switch.c
+    blobname 'cal-%s-%s\.bin' drivers/net/wireless/ath/ath11k/qmi.c
+    blobna '[/][*][ ]cal-<bus>-<id>\.bin[ ][*][/]' drivers/net/wireless/ath/ath11k/qmi.c
+    accept '[\t]*return[ ]1[;][ ][/][*][ ]not[ ]present[,][ ]try[ ]firmware_request[ ]' drivers/net/wireless/ath/ath9k/ath9k_pci_owl_loader.c
+    defsnc '[\t]static[ ]const[ ]u8[ ]chan_list_6ghz\[\][ ]=' drivers/net/wireless/mediatek/mt76/mt76_connac_mcu.c
+    blobname 'mediatek[/]WIFI_\(RAM_CODE_MT7922_1\|MT7922_patch_mcu_1_1_hdr\)\.bin' drivers/net/wireless/mediatek/mt76/mt7921/mt7921.h
+    defsnc 'static[ ]const[ ]struct[ ]rtw89_reg2_def[ ][ ]*rtw8852a_pmac_ht20_mcs7_tbl\[\][ ]=' drivers/net/wireless/realtek/rtw89/rtw8852a.c
+    blobname 'rtw89[/]rtw8852a_fw\.bin' drivers/net/wireless/realtek/rtw89/rtw8852a.c
+    defsnc 'static[ ]const[ ]struct[ ]rtw89_reg2_def[ ]rtw89_8852a_phy_\(bb\|radio[ab]\|nctl\)_regs\[\][ ]=' drivers/net/wireless/realtek/rtw89/rtw8852a_table.c
+    defsnc 'static[ ]const[ ]struct[ ]rtw89_txpwr_byrate_cfg[ ]rtw89_8852a_txpwr_byrate\[\][ ]=' drivers/net/wireless/realtek/rtw89/rtw8852a_table.c
+    defsnc 'static[ ]const[ ]u8[ ]_txpwr_track_delta_swingidx_5g[ba]_[np]\[\]\[DELTA_SWINGIDX_SIZE\][ ]=' drivers/net/wireless/realtek/rtw89/rtw8852a_table.c
+    # This names various coredump section names that resemble file
+    # names, such as eeprom.bin, bootcore_trace.bin, AFAICT extracted
+    # from the modem.
+    defsnc 'static[ ]struct[ ]iosm_coredump_file_info[ ]list\[IOSM_NOF_CD_REGION\][ ]=' drivers/net/wwan/iosm/iosm_ipc_devlink.c
+    defsnc 'static[ ]const[ ]struct[ ]msm_gpio_wakeirq_map[ ]sm6350_pdc_map\[\]' drivers/pinctrl/qcom/pinctrl-sm6350.c
+    defsnc 'static[ ]const[ ]char[ ]*[*][ ]const[ ]omen_thermal_profile_boards\[\][ ]=' drivers/platform/x86/hp-wmi.c
+    defsnc 'static[ ]const[ ]int[ ]mlxplat_modular_channels\[\][ ]=' drivers/platform/x86/mlx-platform.c
+    blobname 'gsl3680-viglen-connect-10\.fw' drivers/platform/x86/touchscreen_dmi.c
+    accept '\(static[ ]inline[ ]\)\?bool[ ]firmware_request_builtin[(]' include/linux/firmware.h
+    accept '#define[ ]_MAP_0_32_ASCII_SEG14_NON_PRINTABLE[\t]*[\\][\n][\t]\(0[,]\)*' include/uapi/linux/map_to_14segment.h
+    defsnc '[\t]struct[ ]some_bytes[ ]\(control\|middle\|three\|five\|overlap\(_expected\)\?\|complete\|after\|startat\)[ ]=' lib/memcpy_kunit.c
+    defsnc '[ \t]*static[ ]const[ ]\(unsigned\|U32\)[ ]DeBruijnClz\[32\][ ]=' lib/zstd/common/'\(bitstream\)zstd_internal\)\.h'
+    defsnc 'static[ ]const[ ]unsigned[ ]BIT_mask\[\][ ]=' lib/zstd/common/bitstream.h
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]U32[ ]LL_bits\[MaxLL[+]1\][ ]=' lib/zstd/common/zstd_internal.h
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]S16[ ]LL_defaultNorm\[MaxLL[+]1\][ ]=' lib/zstd/common/zstd_internal.h
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]U32[ ]ML_bits\[MaxML[+]1\][ ]=' lib/zstd/common/zstd_internal.h
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]S16[ ]ML_defaultNorm\[MaxML[+]1\][ ]=' lib/zstd/common/zstd_internal.h
+    defsnc '[ \t]*static[ ]const[ ]BYTE[ ]LL_Code\[64\][ ]=' lib/zstd/compress/zstd_compress_internal.h
+    defsnc '[ \t]*static[ ]const[ ]BYTE[ ]ML_Code\[128\][ ]=' lib/zstd/compress/zstd_compress_internal.h
+    defsnc '[ \t]*static[ ]const[ ]int[ ]DeBruijnBytePos\[\(64\|32\)\][ ]=' lib/zstd/common/zstd_compress_internal.h
+    defsnc '[ \t]*static[ ]unsigned[ ]const[ ]kInverseProbabilityLog256\[256\][ ]=' lib/zstd/common/zstd_compress_sequences.c
+    defsnc 'static[ ]U64[ ]ZSTD_ldm_gearTab\[256\][ ]=' lib/zstd/compress/zstd_ldm_geartab.h
+    defsc 'static[ ]const[ ]ZSTD_seqSymbol[ ]\(LL\|OF\|ML\)_defaultDTable\[[^]]*\][ ]=' lib/zstd/decompress/zstd_decompress_block.c
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]U32[ ]LL_base\[MaxLL[+]1\][ ]=' lib/zstd/common/zstd_decompress_internal.h
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]U32[ ]OF_\(base\|bits\)\[MaxOff[+]1\][ ]=' lib/zstd/common/zstd_decompress_internal.h
+    defsnc 'static[ ]UNUSED_ATTR[ ]const[ ]U32[ ]ML_base\[MaxML[+]1\][ ]=' lib/zstd/common/zstd_decompress_internal.h
+    defsnc 'static[ ]const[ ]struct[ ]cs35l41_pll_sysclk_config[ ]cs35l41_pll_sysclk\[\][ ]=' sound/soc/codecs/cs35l41.c
+    defsnc 'static[ ]const[ ]struct[ ]cs35l41_fs_mon_config[ ]cs35l41_fs_mon\[\][ ]=' sound/soc/codecs/cs35l41.c
+    defsnc 'static[ ]const[ ]struct[ ]reg_default[ ]rt5682s_reg\[\][ ]=' sound/soc/codecs/rt5682s.c
+    accept 'static[ ]int[ ]wm_adsp_request_firmware_files\?[(]' sound/soc/codecs/wm_adsp.c
+    accept '[\t]*\(ret[ ]=[ ]\)\?wm_adsp_request_firmware_files\?[(]' sound/soc/codecs/wm_adsp.c
+    blobname 'qcom[/]%s[/]%s-tplg\.bin' sound/soc/qcom/qdsp6/topology.c
+    blobname '%s-%s-%s\.%s' sound/soc/codecs/wm_adsp.c
 
     ;;
 
@@ -7750,7 +7838,7 @@ check () {
 
   # Match $1 as a blob anywhere.  $2 is just for documentation purposes.
   blobname () {
-    badx "$1"
+    badx "$1" $2
   }
 
   # Match $1 in $2 as a blob.  The expectation is a match in the
