@@ -130,7 +130,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.16
 
-%define rpmversion 5.16.5
+%define rpmversion 5.16.7
 %define patchversion 5.16
 %define pkgrelease 100
 
@@ -3085,6 +3085,19 @@ fi
 #
 #
 %changelog
+* Sun Feb  6 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.16.7-gnu.
+
+* Sun Feb 06 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.7-100]
+- Fix up Changelog for 5.16.7 (Justin M. Forbes)
+
+* Sun Feb 06 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.7-0]
+- Linux v5.16.7
+
+* Sat Feb 05 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.6-0]
+- Revert "ath11k: add support for WCN6855 hw2.1" (Justin M. Forbes)
+- Changelog updates for rebase (Justin M. Forbes)
+
 * Tue Feb  1 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.16.5-gnu.
 
