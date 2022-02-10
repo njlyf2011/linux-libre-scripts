@@ -130,7 +130,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.16
 
-%define rpmversion 5.16.7
+%define rpmversion 5.16.8
 %define patchversion 5.16
 %define pkgrelease 100
 
@@ -3085,6 +3085,15 @@ fi
 #
 #
 %changelog
+* Wed Feb  9 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.16.8-gnu.
+
+* Tue Feb 08 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.8-100]
+- v5.16.8 rebase
+- drm/i915/psr: Disable PSR2 selective fetch for all TGL steps (Lyude Paul)
+- Set a value for CONFIG_FRAMEBUFFER_CONSOLE_LEGACY_ACCELERATION coming in with 5.16.8 (Justin M. Forbes)
+- ata: libata-core: Fix ata_dev_config_cpr() (Damien Le Moal)
+
 * Sun Feb  6 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.16.7-gnu.
 
