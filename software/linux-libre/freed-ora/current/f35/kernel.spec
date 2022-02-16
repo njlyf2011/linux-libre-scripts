@@ -130,7 +130,7 @@ Summary: The Linux kernel
 # The kernel tarball/base version
 %define kversion 5.16
 
-%define rpmversion 5.16.8
+%define rpmversion 5.16.9
 %define patchversion 5.16
 %define pkgrelease 200
 
@@ -3081,13 +3081,19 @@ fi
 #
 #
 %changelog
+* Mon Feb 14 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
+- GNU Linux-libre 5.16.9-gnu.
+
+* Fri Feb 11 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.9-0]
+- tipc: improve size validations for received domain records (Jon Maloy)
+
 * Wed Feb  9 2022 Alexandre Oliva <lxoliva@fsfla.org> -libre
 - GNU Linux-libre 5.16.8-gnu.
 
-* Tue Feb 08 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.8-200]
-- v5.16.8 rebase
+* Tue Feb 08 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.8-0]
 - drm/i915/psr: Disable PSR2 selective fetch for all TGL steps (Lyude Paul)
 - Set a value for CONFIG_FRAMEBUFFER_CONSOLE_LEGACY_ACCELERATION coming in with 5.16.8 (Justin M. Forbes)
+- ath11k: add support for WCN6855 hw2.1 (Baochen Qiang)
 - ata: libata-core: Fix ata_dev_config_cpr() (Damien Le Moal)
 
 * Sun Feb 06 2022 Justin M. Forbes <jforbes@fedoraproject.org> [5.16.7-200]
